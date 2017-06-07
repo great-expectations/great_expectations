@@ -96,9 +96,19 @@ class PandasDataSet(DataSet, pd.DataFrame):
                 return True, exceptions
 
             percent_matching = float(matches.sum())/len(not_null_values)
-            return (percent_matching >= mostly), exceptions
+            return {
+                "success" : percent_matching >= mostly,
+                "result" : {
+                    "exception_list" : exceptions
+                }
+            }
         else:
-            return matches.all(), exceptions
+            return {
+                "success" : matches.all(),
+                "result" : {
+                    "exception_list" : exceptions
+                }
+            }
 
     @DataSet.column_expectation
     def expect_column_values_to_be_in_set(self, col, values_set, mostly=None, suppress_exceptions=False):
@@ -124,15 +134,25 @@ class PandasDataSet(DataSet, pd.DataFrame):
 
             percent_in_set = 1 - (float(len(exceptions_list)) / len(not_null_values))
             if suppress_exceptions:
-                return percent_in_set > mostly, None
+                return percent_in_set > mostly
             else:
-                return percent_in_set > mostly, exceptions_list
+                return {
+                    "success" : percent_in_set > mostly,
+                    "result" : {
+                        "exception_list" : exceptions_list
+                    }
+                }
 
         else:
             if suppress_exceptions:
-                return (len(exceptions_set) == 0), None
+                return (len(exceptions_set) == 0)
             else:
-                return (len(exceptions_set) == 0), exceptions_list
+                return {
+                    "success" : (len(exceptions_set) == 0),
+                    "result" : {
+                        "exception_list" : exceptions_list
+                    }
+                }
 
     @DataSet.column_expectation
     def expect_values_to_be_equal_across_columns(self, col, regex, mostly=None, suppress_exceptions=False):

@@ -12,6 +12,8 @@
 
 """
 
+import inspect
+
 import pandas as pd
 import numpy as np
 
@@ -116,23 +118,22 @@ class DataSet(object):
             }
 
             #Append the expectation to the table config.
-            #!!! Add logic to remove duplicate expectations (unless overridden)
-            # self.append_expectation(expectation_config)
             self.append_expectation(expectation_config)
 
             #Finally, execute the expectation method itself
-            pass_expectation, exceptions_list = func(self, column, *args, **kwargs)
+            # pass_expectation, exceptions_list = func(self, column, *args, **kwargs)
 
-            if verbose:
-                if not pass_expectation:
-                    if exceptions_list == None:
-                        print 'Sorry,', method_name, 'does not return an exceptions_list.'
-                    else:
-                        print
-                        print len(exceptions_list)*1./self.shape[0], '% exceptions, including:'
-                        print exceptions_list[:20]
+            # if verbose:
+            #     if not pass_expectation:
+            #         if exceptions_list == None:
+            #             print 'Sorry,', method_name, 'does not return an exceptions_list.'
+            #         else:
+            #             print
+            #             print len(exceptions_list)*1./self.shape[0], '% exceptions, including:'
+            #             print exceptions_list[:20]
 
-            return pass_expectation, exceptions_list
+            # return pass_expectation, exceptions_list
+            return func(self, column, *args, **kwargs)
 
         return wrapper
 
