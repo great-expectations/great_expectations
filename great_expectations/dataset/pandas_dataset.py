@@ -12,6 +12,20 @@ class PandasDataSet(DataSet, pd.DataFrame):
     ### Expectation methods ###
 
     @DataSet.column_expectation
+    def expect_column_to_exist(self, col, suppress_exceptions=False):
+        """
+        Expect the specified column to exist in the data set.
+        """
+
+        if suppress_exceptions:
+            col in self
+        else:
+            return {
+                "success" : col in self,
+                "result" : {}
+            }
+
+    @DataSet.column_expectation
     def expect_column_values_to_be_unique(self, col, mostly=None, suppress_exceptions=False):
         """
         Expect each not_null value in this column to be unique.

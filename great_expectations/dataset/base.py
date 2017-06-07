@@ -31,23 +31,23 @@ class DataSet(object):
             #!!! Should validate the incoming config with jsonschema here
 
             # Copy the original so that we don't overwrite it by accident
-            self._expectation_config = copy.deepcopy(config)
+            self._expectations_config = copy.deepcopy(config)
 
         else:
-            self._expectation_config = DotDict({
+            self._expectations_config = DotDict({
                 "dataset_name" : None,
                 "expectations" : []
             })
 
             for col in self.columns:
-                self._expectation_config.expectations.append({
+                self._expectations_config.expectations.append({
                     "expectation_type" : "expect_column_to_exist",
                     "kwargs" : {
                         "column" : col
                     }
                 })
 
-        self._expectation_config.dataset_name = name
+        self._expectations_config.dataset_name = name
 
     def append_expectation(self, expectation_config):
         expectation_type = expectation_config['expectation_type']
@@ -56,12 +56,12 @@ class DataSet(object):
         #!!! This is good default behavior, but
         #!!!    it needs to be documented, and
         #!!!    we need to provide syntax to override it.
-        self._expectation_config.expectations = filter(
+        self._expectations_config.expectations = filter(
             lambda exp: exp['expectation_type'] != expectation_type,
-            self._expectation_config.expectations 
+            self._expectations_config.expectations 
         )
 
-        self._expectation_config.expectations.append(expectation_config)
+        self._expectations_config.expectations.append(expectation_config)
 
     @staticmethod
     def expectation(func):
@@ -102,16 +102,11 @@ class DataSet(object):
             #Fetch argument names
             method_arg_names = inspect.getargspec(func)[0][2:]
 
-            if 'verbose' in kwargs:
-                verbose = kwargs['verbose']
-                del kwargs['verbose']
-            else:
-                verbose = False
-
             #Construct the expectation_config object
             expectation_config = {
                 "expectation_type" : method_name,
                 "kwargs" : dict(
+                    "column" : column,
                     zip(method_arg_names, args)+\
                     kwargs.items()
                 )
@@ -120,28 +115,21 @@ class DataSet(object):
             #Append the expectation to the table config.
             self.append_expectation(expectation_config)
 
-            #Finally, execute the expectation method itself
-            # pass_expectation, exceptions_list = func(self, column, *args, **kwargs)
-
-            # if verbose:
-            #     if not pass_expectation:
-            #         if exceptions_list == None:
-            #             print 'Sorry,', method_name, 'does not return an exceptions_list.'
-            #         else:
-            #             print
-            #             print len(exceptions_list)*1./self.shape[0], '% exceptions, including:'
-            #             print exceptions_list[:20]
-
-            # return pass_expectation, exceptions_list
+            #Now execute the expectation method itself
             return func(self, column, *args, **kwargs)
 
         return wrapper
 
-    def get_config(self):
-        raise NotImplementedError
+    def get_expectations_config(self):
+        return self._expectations_config
 
-    def save_expectations(self):
-        raise NotImplementedError
+    def save_expectations_config(self, filepath=None):
+        if filepath==None:
+            #!!! Fetch the proper filepath from the project config
+            pass
+
+        expectation_config_str = json.dumps(self.get_expectations_config, indent=2)
+        file(filepath, 'w').write(expectation_config_str)
 
     def validate(self):
         raise NotImplementedError
