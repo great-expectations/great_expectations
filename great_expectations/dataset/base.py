@@ -1,3 +1,4 @@
+import json
 import inspect
 
 import pandas as pd
@@ -89,14 +90,14 @@ class DataSet(object):
             method_arg_names = inspect.getargspec(func)[0][2:]
 
             #Construct the expectation_config object
-            expectation_config = {
+            expectation_config = DotDict({
                 "expectation_type" : method_name,
-                "kwargs" : DotDict(
+                "kwargs" : dict(
                     zip(method_arg_names, args)+\
                     kwargs.items()
                 )
-            }
-            expectation_config.kwargs.column = column
+            })
+            expectation_config['kwargs']['column'] = column
 
             #Append the expectation to the table config.
             self.append_expectation(expectation_config)
