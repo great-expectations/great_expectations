@@ -1,17 +1,3 @@
-"""
-
-{
-    "dataset_name" : "",
-    "expectations" : [{
-        "expectation_type" : "",
-        "kwargs" : {
-            ...
-        }
-    }]
-}
-
-"""
-
 import inspect
 
 import pandas as pd
@@ -105,12 +91,12 @@ class DataSet(object):
             #Construct the expectation_config object
             expectation_config = {
                 "expectation_type" : method_name,
-                "kwargs" : dict(
-                    "column" : column,
+                "kwargs" : DotDict(
                     zip(method_arg_names, args)+\
                     kwargs.items()
                 )
             }
+            expectation_config.kwargs.column = column
 
             #Append the expectation to the table config.
             self.append_expectation(expectation_config)
