@@ -76,6 +76,7 @@ class DataSet(object):
             #Finally, execute the expectation method itself
             return func(self, *args, **kwargs)
 
+        wrapper.__doc__ = func.__doc__
         return wrapper
 
 
