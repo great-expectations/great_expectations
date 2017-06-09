@@ -105,6 +105,7 @@ class DataSet(object):
             #Now execute the expectation method itself
             return func(self, column, *args, **kwargs)
 
+        wrapper.__doc__ = func.__doc__
         return wrapper
 
     def get_expectations_config(self):

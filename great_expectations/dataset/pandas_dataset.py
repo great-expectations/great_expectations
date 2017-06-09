@@ -13,8 +13,15 @@ class PandasDataSet(DataSet, pd.DataFrame):
 
     @DataSet.column_expectation
     def expect_column_to_exist(self, col, suppress_exceptions=False):
-        """
-        Expect the specified column to exist in the data set.
+        """Expect the specified column to exist in the data set.
+
+        Args:
+            col: The column name
+            suppress_exceptions: Only return a boolean success value, not a dictionary with other results.
+
+        Returns:
+            By default: a dict containing "success" and "result" (an empty dictionary)
+            On suppress_exceptions=True: a boolean success value only
         """
 
         if suppress_exceptions:
