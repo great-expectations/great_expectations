@@ -389,3 +389,41 @@ class PandasDataSet(DataSet, pd.DataFrame):
 
         return result.all(),exceptions
 
+    @DataSet.column_expectation
+    def expect_table_row_count_to_be_between(self):
+        raise NotImplementedError("Expectation is not yet implemented")
+
+    @DataSet.column_expectation
+    def expect_table_row_count_to_equal(self):
+        raise NotImplementedError("Expectation is not yet implemented")
+
+    @DataSet.column_expectation
+    def expect_column_value_lengths_to_be_between(self):
+        raise NotImplementedError("Expectation is not yet implemented")
+
+    @DataSet.column_expectation
+    def expect_column_values_to_match_regex_list(self):
+        raise NotImplementedError("Expectation is not yet implemented")
+
+    @DataSet.column_expectation
+    def expect_column_values_to_be_dateutil_parseable(self):
+        raise NotImplementedError("Expectation is not yet implemented")
+
+    @DataSet.column_expectation
+    def expect_column_values_to_be_valid_json(self):
+        raise NotImplementedError("Expectation is not yet implemented")
+
+    @DataSet.column_expectation
+    def expect_column_stdev_to_be_between(self):
+        raise NotImplementedError("Expectation is not yet implemented")
+
+    @DataSet.column_expectation
+    def expect_two_column_values_to_be_subsets(self):
+        raise NotImplementedError("Expectation is not yet implemented")
+
+    @DataSet.column_expectation
+    def expect_two_column_values_to_be_many_to_one(self):
+        raise NotImplementedError("Expectation is not yet implemented")
+
+
+

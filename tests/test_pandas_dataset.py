@@ -476,6 +476,32 @@ def test_expect_column_value_lengths_to_be_less_than_or_equal_to():
     assert D.expect_column_value_lengths_to_be_less_than_or_equal_to('n',0)==(True, [])
 
 
+def test_expect_table_row_count_to_be_between(self):
+    pass
+
+def test_expect_table_row_count_to_equal(self):
+    pass
+
+def test_expect_column_value_lengths_to_be_between(self):
+    pass
+
+def test_expect_column_values_to_match_regex_list(self):
+    pass
+
+def test_expect_column_values_to_be_dateutil_parseable(self):
+    pass
+
+def test_expect_column_values_to_be_valid_json(self):
+    pass
+
+def test_expect_column_stdev_to_be_between(self):
+    pass
+
+def test_expect_two_column_values_to_be_subsets(self):
+    pass
+
+def test_expect_two_column_values_to_be_many_to_one(self):
+    pass
 
 
 
