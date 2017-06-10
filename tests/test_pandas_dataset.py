@@ -18,21 +18,19 @@ def test_expect_column_values_to_be_in_set():
         'z' : ['hello', 'jello', 'mello'],
     })
 
-    test_inputs = {
-                   1: ('x',[1,2,4]),
-                   2: ('x',[4,2]),
-                   3: ('y',[]),
-                   4: ('z',['hello', 'jello', 'mello']),
-                   5: ('z',['hello'])
-                   }
+    tests = [{'input':('x',[1,2,4]), 'result':{'success':True,'exception_list':[]}}]
+    #1: ('x',[1,2,4]),
+    #2: ('x',[4,2]),
+    #3: ('y',[]),
+    #4: ('z',['hello', 'jello', 'mello']),
+    #5: ('z',['hello'])
 
-    test_outputs = {
-                    1: {'success': True, 'exception_list':[]},
-                    2: {'success': False, 'exception_list':[1]},
-                    3: {'success': False, 'exception_list':[1,2,5]},
-                    4: {'success': True, 'exception_list':[]},
-                    5: {'success': False, 'exception_list':['jello','mello']}
-                    }
+    # 1: {'success': True, 'exception_list':[]},
+    # 2: {'success': False, 'exception_list':[1]},
+    # 3: {'success': False, 'exception_list':[1,2,5]},
+    # 4: {'success': True, 'exception_list':[]},
+    # 5: {'success': False, 'exception_list':['jello','mello']}
+    # }
 
     for i in test_inputs.keys():
         col,vals = test_inputs[i]
@@ -476,32 +474,32 @@ def test_expect_column_value_lengths_to_be_less_than_or_equal_to():
     assert D.expect_column_value_lengths_to_be_less_than_or_equal_to('n',0)==(True, [])
 
 
-def test_expect_table_row_count_to_be_between(self):
-    pass
-
-def test_expect_table_row_count_to_equal(self):
-    pass
-
-def test_expect_column_value_lengths_to_be_between(self):
-    pass
-
-def test_expect_column_values_to_match_regex_list(self):
-    pass
-
-def test_expect_column_values_to_be_dateutil_parseable(self):
-    pass
-
-def test_expect_column_values_to_be_valid_json(self):
-    pass
-
-def test_expect_column_stdev_to_be_between(self):
-    pass
-
-def test_expect_two_column_values_to_be_subsets(self):
-    pass
-
-def test_expect_two_column_values_to_be_many_to_one(self):
-    pass
+#def test_expect_table_row_count_to_be_between(self):
+#    pass
+#
+#def test_expect_table_row_count_to_equal(self):
+#    pass
+#
+#def test_expect_column_value_lengths_to_be_between(self):
+#    pass
+#
+#def test_expect_column_values_to_match_regex_list(self):
+#    pass
+#
+#def test_expect_column_values_to_be_dateutil_parseable(self):
+#    pass
+#
+#def test_expect_column_values_to_be_valid_json(self):
+#    pass
+#
+#def test_expect_column_stdev_to_be_between(self):
+#    pass
+#
+#def test_expect_two_column_values_to_be_subsets(self):
+#    pass
+#
+#def test_expect_two_column_values_to_be_many_to_one(self):
+#    pass
 
 
 
