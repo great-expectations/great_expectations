@@ -50,7 +50,8 @@ class PandasDataSet(DataSet, pd.DataFrame):
 
         if len(not_null_values) == 0:
             # print 'Warning: All values are null'
-            return (True, [])
+            return {'success':True,
+                    'result':{'exception_list':[]}}
 
         if suppress_exceptions:
             exceptions = None
@@ -114,7 +115,8 @@ class PandasDataSet(DataSet, pd.DataFrame):
 
         if len(not_null_values) == 0:
             # print 'Warning: All values are null'
-            return (True, [])
+            return {'success':True,
+                    'result':{'exception_list':[]}}
 
         matches = not_null_values.map(lambda x: re.findall(regex, str(x)) != [])
 
@@ -159,7 +161,8 @@ class PandasDataSet(DataSet, pd.DataFrame):
 
         if len(not_null_values) == 0:
             # print 'Warning: All values are null'
-            return (True, [])
+            return {'success':True,
+                    'result':{'exception_list':[]}}
 
         exceptions_set = list(unique_values - unique_values_set)
         exceptions_list = list(not_null_values[not_null_values.map(lambda x: x in exceptions_set)])
@@ -301,7 +304,8 @@ class PandasDataSet(DataSet, pd.DataFrame):
 
         if len(not_null_values) == 0:
             # print 'Warning: All values are null'
-            return (True, [])
+            return {'success':True,
+                    'result':{'exception_list':[]}}
 
         matches = not_null_values.map(lambda x: re.findall(regex, str(x)) != [])
         does_not_match = not_null_values.map(lambda x: re.findall(regex, str(x)) == [])
@@ -601,7 +605,7 @@ class PandasDataSet(DataSet, pd.DataFrame):
 
 
     @DataSet.column_expectation
-    def expect_two_column_values_to_be_many_to_one(self):
+    def expect_two_column_values_to_be_many_to_one(self,col1,col2,mostly=None,suppress_exceptions=False):
         """
         docstring
         """
@@ -609,10 +613,32 @@ class PandasDataSet(DataSet, pd.DataFrame):
 
 
     @DataSet.column_expectation
-    def expect_column_values_to_match_regex_list(self):
+    def expect_column_values_to_match_regex_list(self,col,regex_list,mostly=None,suppress_exceptions=False):
         """
+        NOT STABLE
         docstring
+        define test function first
         """
-        raise NotImplementedError("Expectation is not yet implemented")
+        outcome = list()
+        exceptions = dict()
+        for r in regex_list:
+            out = expect_column_values_to_match_regex(col,r,mostly,suppress_exceptions)
+            outcome.append(out['success'])
+            exceptions[r] = out['result']['exception_list']
+
+        if suppress_exceptions:
+            exceptions = None
+
+        if mostly:
+            if len(outcome) == 0:
+                return {'success':True,
+                        'result':{'exception_list':exceptions}}
+
+            percent_true = float(sum(outcome))/len(outcome)
+            return {'success':(percent_true >= mostly),
+                    'result':{'exception_list':exceptions}}
+        else:
+            return {'success':outcome.all(),
+                    'result':{'exception_list':exceptions}}
 
 
