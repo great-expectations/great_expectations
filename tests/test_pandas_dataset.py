@@ -469,12 +469,22 @@ def test_expect_column_values_to_not_be_in_set():
 #    assert D.expect_column_value_lengths_to_be_less_than_or_equal_to('n',0)==(True, [])
 
 
-#def test_expect_table_row_count_to_be_between():
-#    pass
+def test_expect_table_row_count_to_be_between():
+    D = ge.dataset.PandasDataSet({'c1':[4,5,6,7],'c2':['a','b','c','d'],'c3':[None,None,None,None]})
+
+    out1 = D.expect_table_row_count_to_be_between(3,5)
+    assert out1['success']==True
+    assert out1['result']['true_row_count']==4
 
 
-#def test_expect_table_row_count_to_equal():
-#    pass
+def test_expect_table_row_count_to_equal():
+    D = ge.dataset.PandasDataSet({'c1':[4,5,6,7],'c2':['a','b','c','d'],'c3':[None,None,None,None]})
+
+    out1 = D.expect_table_row_count_to_equal(4)
+    assert out1['success']==True
+    assert out1['result']['true_row_count']==4
+
+
 
 
 def test_expect_column_value_lengths_to_be_between():
@@ -491,8 +501,8 @@ def test_expect_column_value_lengths_to_be_between():
 
 
 
-#def test_expect_column_values_to_match_regex_list():
-#    pass
+def test_expect_column_values_to_match_regex_list():
+    pass
 
 
 def test_expect_column_values_to_be_dateutil_parseable():
@@ -515,16 +525,29 @@ def test_expect_column_values_to_be_valid_json():
     assert out['success'] == True
 
 
-#def test_expect_column_stdev_to_be_between():
-#    pass
+def test_expect_column_stdev_to_be_between():
+    D = ge.dataset.PandasDataSet({'randn':np.random.randn(100)})
+    out1 = D.expect_column_stdev_to_be_between('randn',.5,1.5)
+    out2 = D.expect_column_stdev_to_be_between('randn',2,3)
+    assert out1['success'] == True
+    assert out2['success'] == False
 
 
-#def test_expect_two_column_values_to_be_subsets():
-#    pass
+def test_expect_two_column_values_to_be_subsets():
+    A = [0,1,2,3,4,3,2,1,0]
+    B = [2,3,4,5,6,5,4,3,2]
+    C = [0,1,2,3,4,5,6,7,8]
+    D = ge.dataset.PandasDataSet({'A':A,'B':B,'C':C})
+    out1 = D.expect_two_column_values_to_be_subsets('A','C')
+    out2 = D.expect_two_column_values_to_be_subsets('A','B',mostly=.5)
+
+    assert out1['success'] == True
+    assert out2['success'] == True
+    assert out2['result']['not_in_subset'] == set([0,1,5,6])
 
 
-#def test_expect_two_column_values_to_be_many_to_one():
-#    pass
+def test_expect_two_column_values_to_be_many_to_one():
+    pass
 
 
 

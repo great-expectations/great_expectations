@@ -356,27 +356,27 @@ class PandasDataSet(DataSet, pd.DataFrame):
         """
         NOT STABLE
         docstring
-        From the test file, it's unclear how to implement this function
         """
-        dtype_dict = {np.dtype("float64"):"double precision",np.dtype("O"):"text",np.dtype("bool"):"boolean",np.dtype("int64"):"integer"}
-        not_null = self[col].notnull()
-        not_null_values = self[not_null][col]
-        result = not_null_values.map(lambda x: type(x) == dtype)
+        raise NotImplementedError("This method is under development.")
+        #dtype_dict = {np.dtype("float64"):"double precision",np.dtype("O"):"text",np.dtype("bool"):"boolean",np.dtype("int64"):"integer"}
+        #not_null = self[col].notnull()
+        #not_null_values = self[not_null][col]
+        #result = not_null_values.map(lambda x: type(x) == dtype)
 
-        if suppress_exceptions:
-            exceptions = None
-        else:
-            exceptions = not_null_values[~result]
+        #if suppress_exceptions:
+        #    exceptions = None
+        #else:
+        #    exceptions = not_null_values[~result]
 
-        if mostly:
-            # prevent division by zero error
-            if len(not_null_values) == 0:
-                return True,exceptions
+        #if mostly:
+        #    # prevent division by zero error
+        #    if len(not_null_values) == 0:
+        #        return True,exceptions
 
-            percent_true = float(result.sum())/len(not_null_values)
-            return (percent_true >= mostly),exceptions
-        else:
-            return result.all(),exceptions
+        #    percent_true = float(result.sum())/len(not_null_values)
+        #    return (percent_true >= mostly),exceptions
+        #else:
+        #    return result.all(),exceptions
 
     @DataSet.column_expectation
     def expect_column_values_to_not_be_in_set(self,col,S,mostly=None,suppress_exceptions=False):
@@ -406,6 +406,7 @@ class PandasDataSet(DataSet, pd.DataFrame):
             return {'success':(~result).all(),
                     'result':{'exception_list':exceptions}}
 
+
     @DataSet.column_expectation
     def expect_column_values_to_be_equal_across_columns(self,col1,col2,suppress_exceptions=False):
         """
@@ -421,13 +422,43 @@ class PandasDataSet(DataSet, pd.DataFrame):
         return {'success':result.all(),
                 'result':{'exception_list':exceptions}}
 
-    @DataSet.column_expectation
-    def expect_table_row_count_to_be_between(self):
-        raise NotImplementedError("Expectation is not yet implemented")
 
     @DataSet.column_expectation
-    def expect_table_row_count_to_equal(self):
-        raise NotImplementedError("Expectation is not yet implemented")
+    def expect_table_row_count_to_be_between(self,M,N,suppress_exceptions=False):
+        """
+        docstring
+        should we count null values?
+        """
+        outcome = False
+        if self.shape[0] >= M and self.shape[0] <= N:
+            outcome = True
+
+        if suppress_exceptions:
+            exceptions = None
+        else:
+            exceptions = self.shape[0]
+
+        return {'success':outcome,
+                'result':{'true_row_count':exceptions}}
+
+
+    @DataSet.column_expectation
+    def expect_table_row_count_to_equal(self,N,suppress_exceptions=False):
+        """
+        docstring
+        """
+        outcome = False
+        if self.shape[0] == N:
+            outcome = True
+
+        if suppress_exceptions:
+            exceptions = None
+        else:
+            exceptions = self.shape[0]
+
+        return {'success':outcome,
+                'result':{'true_row_count':self.shape[0]}}
+
 
     @DataSet.column_expectation
     def expect_column_value_lengths_to_be_between(self,col,M=None,N=None,mostly=None,suppress_exceptions=False):
@@ -464,9 +495,6 @@ class PandasDataSet(DataSet, pd.DataFrame):
             return {'success' : outcome.all(),
                     'result' : {'exception_list' : exceptions}}
 
-    @DataSet.column_expectation
-    def expect_column_values_to_match_regex_list(self):
-        raise NotImplementedError("Expectation is not yet implemented")
 
     @DataSet.column_expectation
     def expect_column_values_to_be_dateutil_parseable(self,col,mostly=None,suppress_exceptions=False):
@@ -529,16 +557,62 @@ class PandasDataSet(DataSet, pd.DataFrame):
 
 
     @DataSet.column_expectation
-    def expect_column_stdev_to_be_between(self):
-        raise NotImplementedError("Expectation is not yet implemented")
+    def expect_column_stdev_to_be_between(self,col,M,N,suppress_exceptions=False):
+        """
+        docstring
+        """
+        outcome = False
+        if self[col].std() >= M and self[col].std() <= N:
+            outcome = True
+
+        if suppress_exceptions:
+            exceptions = None
+        else:
+            exceptions = self[col].std()
+
+        return {'success':outcome,
+                'result':{'true_stdev':exceptions}}
+
 
     @DataSet.column_expectation
-    def expect_two_column_values_to_be_subsets(self):
-        raise NotImplementedError("Expectation is not yet implemented")
+    def expect_two_column_values_to_be_subsets(self,col1,col2,mostly=None,suppress_exceptions=False):
+        """
+        docstring
+        """
+        C1 = set(self[col1])
+        C2 = set(self[col2])
+
+        outcome = False
+        if C1.issubset(C2) or C2.issubset(C1):
+            outcome = True
+
+        if suppress_exceptions:
+            exceptions = None
+        else:
+            exceptions = C1.union(C2) - C1.intersection(C2)
+
+        if mostly:
+            subset_proportion = 1 - float(len(C1.intersection(C2)))/len(C1.union(C2))
+            return {'success':(subset_proportion >= mostly),
+                    'result':{'not_in_subset':exceptions}}
+        else:
+            return {'success':outcome,
+                    'result':{'not_in_subset':exceptions}}
+
 
     @DataSet.column_expectation
     def expect_two_column_values_to_be_many_to_one(self):
+        """
+        docstring
+        """
         raise NotImplementedError("Expectation is not yet implemented")
 
+
+    @DataSet.column_expectation
+    def expect_column_values_to_match_regex_list(self):
+        """
+        docstring
+        """
+        raise NotImplementedError("Expectation is not yet implemented")
 
 
