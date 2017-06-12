@@ -117,7 +117,7 @@ class DataSet(object):
             #!!! Fetch the proper filepath from the project config
             pass
 
-        expectation_config_str = json.dumps(self.get_expectations_config, indent=2)
+        expectation_config_str = json.dumps(self.get_expectations_config(), indent=2)
         file(filepath, 'w').write(expectation_config_str)
 
     def validate(self):
