@@ -123,3 +123,219 @@ class DataSet(object):
     def validate(self):
         raise NotImplementedError
 
+
+    ##### Table shape expectations #####
+
+    def expect_column_to_exist(self, column, suppress_exceptions=False):
+        """Expect the specified column to exist in the data set.
+
+        Args:
+            column: The column name
+            suppress_exceptions: Only return a boolean success value, not a dictionary with other results.
+
+        Returns:
+            By default: a dict containing "success" and "result" (an empty dictionary)
+            On suppress_exceptions=True: a boolean success value only
+        """
+        raise NotImplementedError
+
+    def expect_table_row_count_to_be_between(self, min_value, max_value,suppress_exceptions=False):
+        """
+        docstring
+        should we count null values?
+        """
+        raise NotImplementedError
+
+    def expect_table_row_count_to_equal(self, value, suppress_exceptions=False):
+        """
+        docstring
+        """
+        raise NotImplementedError
+
+    ##### Missing values, unique values, and types #####
+
+    def expect_column_values_to_be_unique(self, column, mostly=None, suppress_exceptions=False):
+        """
+        Expect each not_null value in this column to be unique.
+
+        Display multiple duplicated items.
+        ['2','2','2'] will return `['2','2']` for the exceptions_list.
+
+        !!! Prevent division-by-zero errors in the `mostly` logic
+        """
+        raise NotImplementedError
+
+    def expect_column_values_to_not_be_null(self, column, mostly=None, suppress_exceptions=False):
+        """
+        Expect values in this column to not be null.
+
+        Instead of reinventing our own system for handling missing data, we use pandas.Series.isnull
+        and notnull to define "null."
+        See the pandas documentation for details.
+
+        Note: When returning the list of exceptions, replace np.nan with None.
+
+        !!! Prevent division-by-zero errors in the `mostly` logic
+        """
+        raise NotImplementedError
+
+    def expect_column_values_to_be_null(self, column, mostly=None, suppress_exceptions=False):
+        """
+        docstring
+        """
+        raise NotImplementedError
+
+    def expect_column_values_to_be_of_type(self, column, dtype, mostly=None, suppress_exceptions=False):
+        """
+        NOT STABLE
+        docstring
+        """
+        raise NotImplementedError
+
+    ##### Sets and ranges #####
+
+    def expect_column_values_to_be_in_set(self, column, values_set, mostly=None, suppress_exceptions=False):
+        """
+        !!! Prevent division-by-zero errors in the `mostly` logic
+        """
+        raise NotImplementedError
+
+    def expect_column_values_to_not_be_in_set(self, column, values_set, mostly=None, suppress_exceptions=False):
+        """
+        docstring
+        """
+        raise NotImplementedError
+
+    def expect_column_values_to_be_between(self, column, min_value, max_value, mostly=None, suppress_exceptions=False):
+        """
+        docstring
+        """
+        raise NotImplementedError
+
+    ##### String matching #####
+
+    def expect_column_value_lengths_to_be_between(self, column, min_value, max_value, mostly=None, suppress_exceptions=False):
+        """
+        docstring
+        """
+        raise NotImplementedError
+
+    def expect_column_values_to_match_regex(self, column, regex, mostly=None, suppress_exceptions=False):
+        """
+        docstring
+        """
+        raise NotImplementedError
+
+    def expect_column_values_to_not_match_regex(self, column, regex, mostly=None, suppress_exceptions=False):
+        """
+        docstring
+        """
+        raise NotImplementedError
+
+    def expect_column_values_to_match_regex_list(self, column, regex_list, mostly=None, suppress_exceptions=False):
+        """
+        NOT STABLE
+        docstring
+        define test function first
+        """
+        raise NotImplementedError
+
+    ##### Datetime and JSON parsing #####
+
+    def expect_column_values_to_match_strftime_format(self, column, format, mostly=None, suppress_exceptions=False):
+        """
+        Expect values in this column to match the user-provided datetime format.
+        WARNING: Note that strftime formats are not universally portable across implementations.
+        For example, the %z directive may not be implemented before python 3.2.
+
+        Args:
+            col: The column name
+            format: The format string against which values should be validated
+            mostly (float): The proportion of values that must match the condition for success to be true.
+            suppress_exceptions: Only return a boolean success value, not a dictionary with other results.
+
+        Returns:
+            By default: a dict containing "success" and "result" (an empty dictionary)
+            On suppress_exceptions=True: a boolean success value only
+        """
+        raise NotImplementedError
+
+    def expect_column_values_to_be_dateutil_parseable(self, column, mostly=None, suppress_exceptions=False):
+        """
+        docstring
+        """
+        raise NotImplementedError
+
+    def expect_column_values_to_be_valid_json(self, column, suppress_exceptions=False):
+        """
+        docstring
+        """
+        raise NotImplementedError
+
+    def expect_column_values_to_match_json_schema(self, column, json_schema, suppress_exceptions=False):
+        """
+        docstring
+        """
+        raise NotImplementedError
+
+    ##### Aggregate functions #####
+
+    def expect_column_mean_to_be_between(self, column, min_value, max_value):
+        """
+        docstring
+        """
+        raise NotImplementedError
+
+    def expect_column_median_to_be_between(self, column, min_value, max_value):
+        """
+        docstring
+        """
+        raise NotImplementedError
+
+    def expect_column_stdev_to_be_between(self, column, min_value, max_value, suppress_exceptions=False):
+        """
+        docstring
+        """
+        raise NotImplementedError
+
+    # def expect_column_numerical_distribution_to_be(self, column, min_value, max_value, suppress_exceptions=False):
+    # def expect_column_frequency_distribution_to_be():
+
+    ##### Column pairs #####
+
+    # def expect_two_column_values_to_be_equal():
+
+    def expect_two_column_values_to_be_subsets(self, column_1, column_2, mostly=None, suppress_exceptions=False):
+        """
+        docstring
+        """
+        raise NotImplementedError
+
+    def expect_two_column_values_to_be_many_to_one(self, column_1, column_2, mostly=None, suppress_exceptions=False):
+        """
+        docstring
+        """
+        raise NotImplementedError
+
+    # def expect_two_column_crosstabs_to_be
+
+    #!!! Deprecated
+    # def expect_values_to_be_equal_across_columns(self, column, regex, mostly=None, suppress_exceptions=False):
+    #     """
+    #     """
+    #     raise NotImplementedError
+
+    #!!! Deprecated
+    # def expect_column_values_to_be_equal_across_columns(self, column_1, column_2, suppress_exceptions=False):
+    #     """
+    #     docstring
+    #     """
+    #     raise NotImplementedError
+
+    ##### Multicolumn relations #####
+
+    # def expect_multicolumn_values_to_be_unique
+
+
+
+
