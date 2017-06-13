@@ -1,5 +1,6 @@
 import json
 import inspect
+import copy
 
 import pandas as pd
 import numpy as np
@@ -18,7 +19,7 @@ class DataSet(object):
             #!!! Should validate the incoming config with jsonschema here
 
             # Copy the original so that we don't overwrite it by accident
-            self._expectations_config = copy.deepcopy(config)
+            self._expectations_config = DotDict(copy.deepcopy(config))
 
         else:
             self._expectations_config = DotDict({
@@ -121,7 +122,12 @@ class DataSet(object):
         file(filepath, 'w').write(expectation_config_str)
 
     def validate(self):
-        raise NotImplementedError
+        results = []
+        for expectation in self.get_expectations_config()['expectations']:
+            print expectation
+            expectation_method = getattr(self, expectation['expectation_type'])
+            result = expectation_method(**expectation['kwargs'])
+            print result
 
 
     ##### Table shape expectations #####
