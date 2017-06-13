@@ -19,11 +19,11 @@ def test_expect_column_values_to_be_in_set():
     })
 
     tests = [
-            {'input':('x',[1,2,4]), 'success':True,'result':{'exception_list':[]}},
-            {'input':('x',[4,2]), 'success':False, 'result':{'exception_list':[1]}},
-    {'input':('y',[]), 'success':False, 'result':{'exception_list':[1,2,5]}},
-            {'input':('z',['hello','jello','mello']), 'success':True, 'result':{'exception_list':[]}},
-            {'input':('z',['hello']), 'success':False, 'result':{'exception_list':['jello','mello']}}
+            {'input':('x': [1,2,4]), 'output':{'success':True, 'exception_list':[]}},
+            {'input':('x', [4,2]), 'output':{'success':False, 'exception_list':[1]}},
+            {'input':('y', []), 'success':False, 'result':{'exception_list':[1,2,5]}},
+            {'input':('z', ['hello','jello','mello']), 'success':True, 'result':{'exception_list':[]}},
+            {'input':('z', ['hello']), 'success':False, 'result':{'exception_list':['jello','mello']}}
             ]
 
     for t in tests:
