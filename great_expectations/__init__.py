@@ -1,7 +1,7 @@
 import pandas as pd
 
 
-from util import *
+from .util import *
 import dataset
 
 from pkg_resources import get_distribution
@@ -25,6 +25,12 @@ def read_csv(filename, dataset_config=None, *args, **kwargs):
     df.initialize_expectations(dataset_config)
 
     return df
-    
+
+def df(df, dataset_config=None, *args, **kwargs):
+    df.__class__ = dataset.pandas_dataset.PandasDataSet
+    df.initialize_expectations(dataset_config)
+
+    return df
+
 def expect(data_source_str, expectation):
     raise NotImplementedError
