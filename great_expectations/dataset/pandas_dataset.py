@@ -152,6 +152,7 @@ class PandasDataSet(DataSet, pd.DataFrame):
         """
         Expect values in this column to match the user-provided datetime format.
         WARNING: Note that strftime formats are not universally portable across implementations.
+        For example, the %z directive may not be implemented before python 3.2.
 
         Args:
             col: The column name
@@ -163,14 +164,23 @@ class PandasDataSet(DataSet, pd.DataFrame):
             By default: a dict containing "success" and "result" (an empty dictionary)
             On suppress_exceptions=True: a boolean success value only
         """
-        # TODO: Separately validate the user-provided format in some way?
+
+        if (not (col in self)):
+            raise LookupError("The specified column does not exist.")
+
+        # Below is a simple validation that the provided format can both format and parse a datetime object.
+        # %D is an example of a format that can format but not parse, e.g.
+        try:
+            datetime.strptime(datetime.strftime(datetime.now(), format), format)
+        except ValueError as e:
+            raise ValueError("Unable to use provided format. " + e.message)
 
         def is_parseable_by_format(val):
             try:
-                datetime.strptime(val, format)
+                # Note explicit cast of val to str type
+                datetime.strptime(str(val), format)
                 return True
             except ValueError as e:
-                print(e.message)
                 return False
 
         ## TODO: Should null values be considered exceptions?
@@ -699,5 +709,3 @@ class PandasDataSet(DataSet, pd.DataFrame):
         else:
             return {'success':outcome.all(),
                     'result':{'exception_list':exceptions}}
-
-
