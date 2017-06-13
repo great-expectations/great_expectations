@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import re
 from dateutil.parser import parser
+from datetime import datetime
 import json
 
 from base import DataSet
@@ -59,7 +60,7 @@ class PandasDataSet(DataSet, pd.DataFrame):
             exceptions = None
         else:
             exceptions = list(not_null_values[not_null_values.duplicated()])
-        
+
         if mostly:
             percent_unique = 1 - float(len(unique_not_null_values))/len(not_null_values)
             return {
@@ -76,7 +77,7 @@ class PandasDataSet(DataSet, pd.DataFrame):
     def expect_column_values_to_not_be_null(self, col, mostly=None, suppress_exceptions=False):
         """
         Expect values in this column to not be null.
-        
+
         Instead of reinventing our own system for handling missing data, we use pandas.Series.isnull
         and notnull to define "null."
         See the pandas documentation for details.
@@ -139,6 +140,64 @@ class PandasDataSet(DataSet, pd.DataFrame):
         else:
             return {
                 "success" : matches.all(),
+                "result" : {
+                    "exception_list" : exceptions
+                }
+            }
+
+    @DataSet.column_expectation
+    def expect_column_values_to_match_strftime_format(self, col, format, mostly=None, suppress_exceptions=False):
+        """
+        Expect values in this column to match the user-provided datetime format.
+        WARNING: Note that strftime formats are not universally portable across implementations.
+
+        Args:
+            col: The column name
+            format: The format string against which values should be validated
+            mostly (float): The proportion of values that must match the condition for success to be true.
+            suppress_exceptions: Only return a boolean success value, not a dictionary with other results.
+
+        Returns:
+            By default: a dict containing "success" and "result" (an empty dictionary)
+            On suppress_exceptions=True: a boolean success value only
+        """
+        # TODO: Separately validate the user-provided format in some way?
+
+        def is_parseable_by_format(val):
+            try:
+                datetime.strptime(val, format)
+                return True
+            except ValueError as e:
+                print(e.message)
+                return False
+
+        ## TODO: Should null values be considered exceptions?
+        not_null = self[col].notnull()
+        not_null_values = self[not_null][col]
+
+        properly_formatted = not_null_values.map(is_parseable_by_format)
+
+        if suppress_exceptions:
+            exceptions = None
+        else:
+            exceptions = list(not_null_values[properly_formatted==False])
+
+        if mostly:
+            #Prevent division-by-zero errors
+            if len(not_null_values) == 0:
+                return {'success':True,
+                        'result':{'exception_list':exceptions}}
+
+            percent_properly_formatted = float(sum(properly_formatted))/len(not_null_values)
+            return {
+                "success" : percent_properly_formatted >= mostly,
+                "result" : {
+                    "exception_list" : exceptions
+                }
+            }
+        else:
+            return {
+                "success" : sum(properly_formatted) == len(not_null_values),
                 "result" : {
                     "exception_list" : exceptions
                 }
@@ -332,7 +391,7 @@ class PandasDataSet(DataSet, pd.DataFrame):
         not_null = self[col].notnull()
         not_null_values = self[not_null][col]
         result = (not_null_values >= M) & (not_null_values <= N)
- 
+
         if suppress_exceptions:
             exceptions = None
         else:
@@ -539,6 +598,3 @@ class PandasDataSet(DataSet, pd.DataFrame):
     @DataSet.column_expectation
     def expect_two_column_values_to_be_many_to_one(self):
         raise NotImplementedError("Expectation is not yet implemented")
-
-
-
