@@ -298,7 +298,7 @@ class PandasDataSet(DataSet, pd.DataFrame):
             }
 
     @DataSet.column_expectation
-    def expect_column_value_lengths_to_be_less_than_or_equal_to(self,column,N,suppress_exceptions=False):
+    def expect_column_value_lengths_to_be_less_than_or_equal_to(self, column, length, suppress_exceptions=False):
         """
         DEPRECATED: see expect_column_value_lengths_to_be_between
         col: the name of the column
@@ -314,10 +314,10 @@ class PandasDataSet(DataSet, pd.DataFrame):
         dtype = self[column].dtype
         # case that dtype is a numpy int or a float
         if dtype in set([np.dtype('float64'), np.dtype('int64'), int, float]):
-            result = not_null_values < N
+            result = not_null_values < length
         else:
             try:
-                result = not_null_values.map(lambda x: len(str(x)) <= N)
+                result = not_null_values.map(lambda x: len(str(x)) <= length)
             except:
                 raise TypeError("PandasDataSet.expect_column_value_lengths_to_be_less_than_or_equal_to cannot handle columns with dtype %s" % str(dtype), )
 
@@ -332,7 +332,7 @@ class PandasDataSet(DataSet, pd.DataFrame):
         }
 
     @DataSet.column_expectation
-    def expect_column_mean_to_be_between(self,column,M,N):
+    def expect_column_mean_to_be_between(self, column, min_value, max_value):
         """
         docstring
         """
@@ -340,7 +340,7 @@ class PandasDataSet(DataSet, pd.DataFrame):
         not_null = self[column].notnull()
         not_null_values = self[not_null][column]
         try:
-            result = (not_null_values.mean() >= M) and (not_null_values.mean() <= N)
+            result = (not_null_values.mean() >= min_value) and (not_null_values.mean() <= max_value)
             return {
                 'success' : result,
                 'exception_list' : not_null_values.mean()
@@ -352,7 +352,7 @@ class PandasDataSet(DataSet, pd.DataFrame):
             }
 
     @DataSet.column_expectation
-    def expect_column_values_to_be_null(self,column,mostly=None,suppress_exceptions=False):
+    def expect_column_values_to_be_null(self, column, mostly=None, suppress_exceptions=False):
         """
         docstring
         """
@@ -380,7 +380,7 @@ class PandasDataSet(DataSet, pd.DataFrame):
             }
 
     @DataSet.column_expectation
-    def expect_column_values_to_not_match_regex(self,column,regex,mostly=None,suppress_exceptions=False):
+    def expect_column_values_to_not_match_regex(self, column, regex, mostly=None, suppress_exceptions=False):
         """
         docstring
         """
@@ -422,13 +422,13 @@ class PandasDataSet(DataSet, pd.DataFrame):
             }
 
     @DataSet.column_expectation
-    def expect_column_values_to_be_between(self,column,M,N,mostly=None,suppress_exceptions=False):
+    def expect_column_values_to_be_between(self, column, min_value, max_value, mostly=None, suppress_exceptions=False):
         """
         docstring
         """
         not_null = self[column].notnull()
         not_null_values = self[not_null][column]
-        result = (not_null_values >= M) & (not_null_values <= N)
+        result = (not_null_values >= min_value) & (not_null_values <= max_value)
 
         if suppress_exceptions:
             exceptions = None
@@ -456,7 +456,7 @@ class PandasDataSet(DataSet, pd.DataFrame):
             }
 
     @DataSet.column_expectation
-    def expect_column_values_to_be_of_type(self,column,dtype,mostly=None,suppress_exceptions=False):
+    def expect_column_values_to_be_of_type(self, column, dtype, mostly=None, suppress_exceptions=False):
         """
         NOT STABLE
         docstring
@@ -483,13 +483,13 @@ class PandasDataSet(DataSet, pd.DataFrame):
         #    return result.all(),exceptions
 
     @DataSet.column_expectation
-    def expect_column_values_to_not_be_in_set(self,column,S,mostly=None,suppress_exceptions=False):
+    def expect_column_values_to_not_be_in_set(self, column, values_set, mostly=None, suppress_exceptions=False):
         """
         docstring
         """
         not_null = self[column].notnull()
         not_null_values = self[not_null][column]
-        result = not_null_values.isin(S)
+        result = not_null_values.isin(values_set)
 
         if suppress_exceptions:
             exceptions = None
@@ -518,31 +518,31 @@ class PandasDataSet(DataSet, pd.DataFrame):
 
 
     @DataSet.column_expectation
-    def expect_column_values_to_be_equal_across_columns(self,col1,col2,suppress_exceptions=False):
+    def expect_column_values_to_be_equal_across_columns(self, column_1, column_2, suppress_exceptions=False):
         """
         docstring
         """
-        result = self[col1] == self[col2]
+        result = self[column_1] == self[column_2]
 
         if suppress_exceptions:
             exceptions = None
         else:
-            exceptions = self[[col1,col2]][~result]
+            exceptions = self[[column_1, column_2]][~result]
 
         return {
-            'success':result.all(),
-            'exception_list':exceptions
+            'success': result.all(),
+            'exception_list': exceptions
         }
 
 
     @DataSet.column_expectation
-    def expect_table_row_count_to_be_between(self,M,N,suppress_exceptions=False):
+    def expect_table_row_count_to_be_between(self, min_value, max_value,suppress_exceptions=False):
         """
         docstring
         should we count null values?
         """
         outcome = False
-        if self.shape[0] >= M and self.shape[0] <= N:
+        if self.shape[0] >= min_value and self.shape[0] <= max_value:
             outcome = True
 
         if suppress_exceptions:
@@ -557,12 +557,12 @@ class PandasDataSet(DataSet, pd.DataFrame):
 
 
     @DataSet.column_expectation
-    def expect_table_row_count_to_equal(self,N,suppress_exceptions=False):
+    def expect_table_row_count_to_equal(self, value, suppress_exceptions=False):
         """
         docstring
         """
         outcome = False
-        if self.shape[0] == N:
+        if self.shape[0] == value:
             outcome = True
 
         if suppress_exceptions:
@@ -577,7 +577,7 @@ class PandasDataSet(DataSet, pd.DataFrame):
 
 
     @DataSet.column_expectation
-    def expect_column_value_lengths_to_be_between(self,column,M=None,N=None,mostly=None,suppress_exceptions=False):
+    def expect_column_value_lengths_to_be_between(self, column, min_value, max_value, mostly=None, suppress_exceptions=False):
         """
         docstring
         """
@@ -585,14 +585,17 @@ class PandasDataSet(DataSet, pd.DataFrame):
         not_null_values = self[column][not_null]
         not_null_value_lengths = not_null_values.map(lambda x: len(x))
 
-        if M != None and N != None:
-            outcome = (not_null_value_lengths >= M) & (not_null_value_lengths <= N)
-        elif M == None:
-            outcome = not_null_value_lengths < N
-        elif N == None:
-            outcome = not_null_value_lengths > M
+        if min_value != None and max_value != None:
+            outcome = (not_null_value_lengths >= min_value) & (not_null_value_lengths <= max_value)
+
+        elif min_value == None:
+            outcome = not_null_value_lengths < max_value
+
+        elif max_value == None:
+            outcome = not_null_value_lengths > min_value
+
         else:
-            raise ValueError("Undefined interval: M and N are None")
+            raise ValueError("Undefined interval: min_value and max_value are both None")
 
         if suppress_exceptions:
             exceptions = None
@@ -622,7 +625,7 @@ class PandasDataSet(DataSet, pd.DataFrame):
 
 
     @DataSet.column_expectation
-    def expect_column_values_to_be_dateutil_parseable(self,column,mostly=None,suppress_exceptions=False):
+    def expect_column_values_to_be_dateutil_parseable(self, column, mostly=None, suppress_exceptions=False):
         """
         docstring
         """
@@ -665,7 +668,7 @@ class PandasDataSet(DataSet, pd.DataFrame):
 
 
     @DataSet.column_expectation
-    def expect_column_values_to_be_valid_json(self,column,suppress_exceptions=False):
+    def expect_column_values_to_be_valid_json(self, column, suppress_exceptions=False):
         """
         docstring
         """
@@ -692,12 +695,12 @@ class PandasDataSet(DataSet, pd.DataFrame):
 
 
     @DataSet.column_expectation
-    def expect_column_stdev_to_be_between(self,column,M,N,suppress_exceptions=False):
+    def expect_column_stdev_to_be_between(self, column, min_value, max_value, suppress_exceptions=False):
         """
         docstring
         """
         outcome = False
-        if self[column].std() >= M and self[column].std() <= N:
+        if self[column].std() >= min_value and self[column].std() <= max_value:
             outcome = True
 
         if suppress_exceptions:
@@ -712,12 +715,12 @@ class PandasDataSet(DataSet, pd.DataFrame):
 
 
     @DataSet.column_expectation
-    def expect_two_column_values_to_be_subsets(self,col1,col2,mostly=None,suppress_exceptions=False):
+    def expect_two_column_values_to_be_subsets(self, column_1, column_2, mostly=None, suppress_exceptions=False):
         """
         docstring
         """
-        C1 = set(self[col1])
-        C2 = set(self[col2])
+        C1 = set(self[column_1])
+        C2 = set(self[column_2])
 
         outcome = False
         if C1.issubset(C2) or C2.issubset(C1):
@@ -742,7 +745,7 @@ class PandasDataSet(DataSet, pd.DataFrame):
 
 
     @DataSet.column_expectation
-    def expect_two_column_values_to_be_many_to_one(self,col1,col2,mostly=None,suppress_exceptions=False):
+    def expect_two_column_values_to_be_many_to_one(self, column_1, column_2, mostly=None, suppress_exceptions=False):
         """
         docstring
         """
@@ -750,7 +753,7 @@ class PandasDataSet(DataSet, pd.DataFrame):
 
 
     @DataSet.column_expectation
-    def expect_column_values_to_match_regex_list(self,column,regex_list,mostly=None,suppress_exceptions=False):
+    def expect_column_values_to_match_regex_list(self, column, regex_list, mostly=None, suppress_exceptions=False):
         """
         NOT STABLE
         docstring

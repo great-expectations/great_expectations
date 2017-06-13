@@ -495,13 +495,13 @@ def test_expect_column_value_lengths_to_be_between():
     s1 = ['smart','silly','sassy','slimy','sexy']
     s2 = ['cool','calm','collected','casual','creepy']
     D = ge.dataset.PandasDataSet({'s1':s1,'s2':s2})
-    out1 = D.expect_column_value_lengths_to_be_between('s1',M=3,N=5)
-    out2 = D.expect_column_value_lengths_to_be_between('s2',M=4,N=6)
-    out3 = D.expect_column_value_lengths_to_be_between('s2',N=10)
-    assert out1['success'] == True
-    assert out2['success'] == False
-    assert len(out2['exception_list']) == 1
-    assert out3['success'] == True
+    out1 = D.expect_column_value_lengths_to_be_between('s1', min_value=3, max_value=5)
+    out2 = D.expect_column_value_lengths_to_be_between('s2', min_value=4, max_value=6)
+    out3 = D.expect_column_value_lengths_to_be_between('s2', min_value=None, max_value=10)
+    assert_equal( out1['success'], True)
+    assert_equal( out2['success'], False)
+    assert_equal( len(out2['exception_list']), 1)
+    assert_equal( out3['success'], True)
 
 
 
