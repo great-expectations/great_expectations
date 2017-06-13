@@ -63,27 +63,28 @@ def test_expect_column_values_to_be_in_set():
 
     # assert 0
 
-def test_expect_column_values_to_be_equal_across_columns():
-    """
-    Cases Tested:
-        Column values in x and y are equal
-        Column values in x and z are not equal
-        Column values in a and z are not equal
-    """
+#!!! Deprecated
+# def test_expect_column_values_to_be_equal_across_columns():
+#     """
+#     Cases Tested:
+#         Column values in x and y are equal
+#         Column values in x and z are not equal
+#         Column values in a and z are not equal
+#     """
 
-    D = ge.dataset.PandasDataSet({
-        'x' : [2, 5, 8],
-        'y' : [2, 5, 8],
-        'z' : [2, 5, 6],
-        'a' : [1, 2, 3],
-    })
+#     D = ge.dataset.PandasDataSet({
+#         'x' : [2, 5, 8],
+#         'y' : [2, 5, 8],
+#         'z' : [2, 5, 6],
+#         'a' : [1, 2, 3],
+#     })
 
-    #Test True case for col x==y
-    assert D.expect_column_values_to_be_equal_across_columns('x', 'y', suppress_exceptions=True)=={'success':True,'exception_list':None}
-    #Test one value False case for col x==z
-    assert D.expect_column_values_to_be_equal_across_columns('x', 'z', suppress_exceptions=True)=={'success':False,'exception_list':None}
-    #Test True 
-    assert D.expect_column_values_to_be_equal_across_columns('a', 'z', suppress_exceptions=True)=={'success':False,'exception_list':None}
+#     #Test True case for col x==y
+#     assert D.expect_column_values_to_be_equal_across_columns('x', 'y', suppress_exceptions=True)=={'success':True,'exception_list':None}
+#     #Test one value False case for col x==z
+#     assert D.expect_column_values_to_be_equal_across_columns('x', 'z', suppress_exceptions=True)=={'success':False,'exception_list':None}
+#     #Test True 
+#     assert D.expect_column_values_to_be_equal_across_columns('a', 'z', suppress_exceptions=True)=={'success':False,'exception_list':None}
 
 
 def test_expect_column_values_to_be_unique():

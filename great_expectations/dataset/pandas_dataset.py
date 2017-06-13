@@ -260,42 +260,43 @@ class PandasDataSet(DataSet, pd.DataFrame):
                     "exception_list" : exceptions_list
                 }
 
-    @DataSet.column_expectation
-    def expect_values_to_be_equal_across_columns(self, column, regex, mostly=None, suppress_exceptions=False):
-        """
-        """
-        not_null = self[column].notnull()
-        not_null_values = self[not_null][column]
+    #!!! Deprecated
+    # @DataSet.column_expectation
+    # def expect_values_to_be_equal_across_columns(self, column, regex, mostly=None, suppress_exceptions=False):
+    #     """
+    #     """
+    #     not_null = self[column].notnull()
+    #     not_null_values = self[not_null][column]
 
-        if len(not_null_values) == 0:
-            # print 'Warning: All values are null'
-            return (True, [])
+    #     if len(not_null_values) == 0:
+    #         # print 'Warning: All values are null'
+    #         return (True, [])
 
-        matches = not_null_values.map(lambda x: re.findall(regex, str(x)) != [])
+    #     matches = not_null_values.map(lambda x: re.findall(regex, str(x)) != [])
 
-        if suppress_exceptions:
-            exceptions = None
-        else:
-            exceptions = list(not_null_values[matches==False])
+    #     if suppress_exceptions:
+    #         exceptions = None
+    #     else:
+    #         exceptions = list(not_null_values[matches==False])
 
-        if mostly:
-            #Prevent division-by-zero errors
-            if len(not_null_values) == 0:
-                return {
-                    'success' : True,
-                    'exception_list' : exceptions
-                }
+    #     if mostly:
+    #         #Prevent division-by-zero errors
+    #         if len(not_null_values) == 0:
+    #             return {
+    #                 'success' : True,
+    #                 'exception_list' : exceptions
+    #             }
 
-            percent_matching = float(matches.sum())/len(not_null_values)
-            return {
-                'success' : (percent_matching >= mostly),
-                'exception_list' : exceptions
-            }
-        else:
-            return {
-                'success' : matches.all(),
-                'exception_list' : exceptions
-            }
+    #         percent_matching = float(matches.sum())/len(not_null_values)
+    #         return {
+    #             'success' : (percent_matching >= mostly),
+    #             'exception_list' : exceptions
+    #         }
+    #     else:
+    #         return {
+    #             'success' : matches.all(),
+    #             'exception_list' : exceptions
+    #         }
 
     @DataSet.column_expectation
     def expect_column_value_lengths_to_be_less_than_or_equal_to(self, column, length, suppress_exceptions=False):
@@ -517,22 +518,23 @@ class PandasDataSet(DataSet, pd.DataFrame):
             }
 
 
-    @DataSet.column_expectation
-    def expect_column_values_to_be_equal_across_columns(self, column_1, column_2, suppress_exceptions=False):
-        """
-        docstring
-        """
-        result = self[column_1] == self[column_2]
+    #!!! Deprecated
+    # @DataSet.column_expectation
+    # def expect_column_values_to_be_equal_across_columns(self, column_1, column_2, suppress_exceptions=False):
+    #     """
+    #     docstring
+    #     """
+    #     result = self[column_1] == self[column_2]
 
-        if suppress_exceptions:
-            exceptions = None
-        else:
-            exceptions = self[[column_1, column_2]][~result]
+    #     if suppress_exceptions:
+    #         exceptions = None
+    #     else:
+    #         exceptions = self[[column_1, column_2]][~result]
 
-        return {
-            'success': result.all(),
-            'exception_list': exceptions
-        }
+    #     return {
+    #         'success': result.all(),
+    #         'exception_list': exceptions
+    #     }
 
 
     @DataSet.column_expectation
