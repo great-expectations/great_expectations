@@ -9,7 +9,7 @@ import great_expectations as ge
 def test_expect_column_values_to_be_in_set():
     """
     Cases Tested:
-        
+
     """
 
     D = ge.dataset.PandasDataSet({
@@ -82,7 +82,7 @@ def test_expect_column_values_to_be_equal_across_columns():
     assert D.expect_column_values_to_be_equal_across_columns('x', 'y', suppress_exceptions=True)=={'success':True,'result':{'exception_list':None}}
     #Test one value False case for col x==z
     assert D.expect_column_values_to_be_equal_across_columns('x', 'z', suppress_exceptions=True)=={'success':False,'result':{'exception_list':None}}
-    #Test True 
+    #Test True
     assert D.expect_column_values_to_be_equal_across_columns('a', 'z', suppress_exceptions=True)=={'success':False,'result':{'exception_list':None}}
 
 
@@ -108,7 +108,7 @@ def test_expect_column_values_to_be_unique():
 #    assert D.expect_column_values_to_be_unique('b') == (True, [])
 #    #Column int values are equal - 1 and '2'
 #    assert D.expect_column_values_to_be_unique('c') == (False, [1])
-#  
+#
 #    #!!! Different data types are never equal
 #    #Column int value and string value are equal - 1 and '1'
 #    assert D.expect_column_values_to_be_unique('d') == (True, [])
@@ -209,7 +209,7 @@ def test_expect_column_values_to_be_null():
 #
 #    # Test suppress_exceptions
 #    assert D.expect_column_values_to_be_null('x', suppress_exceptions = True)==(False, None)
-#  
+#
 #    # Test mostly
 #    assert D.expect_column_values_to_be_null('x', mostly = .2, suppress_exceptions = True)==(True, None)
 #    assert D.expect_column_values_to_be_null('x', mostly = .8, suppress_exceptions = True)==(False, None)
@@ -313,6 +313,38 @@ def test_expect_column_values_to_match_regex():
 #    assert D2.expect_column_values_to_match_regex('c', '^a', suppress_exceptions=True) == (True, [])
 #    assert D2.expect_column_values_to_match_regex('c', '^a', mostly=.5, suppress_exceptions=True) == (True, [])
 
+def test_expect_column_values_match_strftime_format():
+    """
+    Cases Tested:
+
+
+    !!! TODO: Add tests for input types and raised exceptions
+
+    """
+
+    D = ge.dataset.PandasDataSet({
+        'x' : [1,2,4],
+        'us_dates' : ['4/30/2017','4/30/2017','7/4/1776'],
+        'us_dates_type_error' : ['4/30/2017','4/30/2017', 5],
+        'almost_iso8601' : ['1977-05-25T00:00:00', '1980-05-21T13:47:59', '2017-06-12T23:57:59'],
+        'almost_iso8601_val_error' : ['1977-05-55T00:00:00', '1980-05-21T13:47:59', '2017-06-12T23:57:59']
+    })
+
+    tests = [
+            {'input':('us_dates','%m/%d/%Y'), 'kwargs':{'mostly': None}, 'success':True, 'result':{'exception_list':[]}},
+            {'input':('us_dates_type_error','%m/%d/%Y'), 'kwargs':{'mostly': 0.5}, 'success':True, 'result':{'exception_list':[5]}},
+            {'input':('us_dates_type_error','%m/%d/%Y'), 'kwargs':{'mostly': None}, 'success':False,'result':{'exception_list':[5]}},
+            {'input':('almost_iso8601','%Y-%m-%dT%H:%M:%S'), 'kwargs':{'mostly': None}, 'success':True,'result':{'exception_list':[]}},
+            {'input':('almost_iso8601_val_error','%Y-%m-%dT%H:%M:%S'), 'kwargs':{'mostly': None}, 'success':False,'result':{'exception_list':['1977-05-55T00:00:00']}}
+            ]
+
+    for t in tests:
+        out = D.expect_column_values_to_match_strftime_format(*t['input'],**t['kwargs'])
+        #out = D.expect_column_values_to_match_strftime_format(*t['input'])
+        assert out['success'] == t['success']
+        assert out['result'] == t['result']
+
+
 
 def test_expect_column_values_to_not_match_regex():
     #!!! Need to test mostly and suppress_exceptions
@@ -342,7 +374,7 @@ def test_expect_column_values_to_not_match_regex():
 
 def test_expect_column_values_to_be_between():
     """
-      
+
     """
 
     D = ge.dataset.PandasDataSet({
@@ -415,7 +447,7 @@ def test_expect_column_values_to_not_be_in_set():
 #def test_expect_column_values_to_be_of_type():
 #    """
 #    Cases Tested:
-#      
+#
 #    """
 #
 #    D = ge.dataset.PandasDataSet({
@@ -454,7 +486,7 @@ def test_expect_column_values_to_not_be_in_set():
 #def test_expect_column_value_lengths_to_be_less_than_or_equal_to():
 #    """
 #    Cases Tested:
-#      
+#
 #    """
 #
 #    D = ge.dataset.PandasDataSet({
@@ -548,7 +580,3 @@ def test_expect_two_column_values_to_be_subsets():
 
 def test_expect_two_column_values_to_be_many_to_one():
     pass
-
-
-
-
