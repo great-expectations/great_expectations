@@ -34,3 +34,6 @@ def df(df, dataset_config=None, *args, **kwargs):
 
 def expect(data_source_str, expectation):
     raise NotImplementedError
+
+def validate(data_set, expectation_config):
+    pass
