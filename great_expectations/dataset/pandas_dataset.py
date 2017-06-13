@@ -100,12 +100,15 @@ class PandasDataSet(DataSet, pd.DataFrame):
         if mostly:
             percent_not_null = 1 - float(null_count)/len(self[column])
             return {
-                    'success' : (percent_not_null >= mostly),
-                    'result' : {'exception_list' : exceptions}
-                    }
+                'success' : (percent_not_null >= mostly),
+                'exception_list' : exceptions
+            }
         else:
-            return {'success' : not_null.all(),
-                    'result' : {'exception_list' : exceptions}}
+            return {
+                'success' : not_null.all(),
+                'exception_list' : exceptions
+            }
+
 
     @DataSet.column_expectation
     def expect_column_values_to_match_regex(self, column, regex, mostly=None, suppress_exceptions=False):
@@ -117,8 +120,10 @@ class PandasDataSet(DataSet, pd.DataFrame):
 
         if len(not_null_values) == 0:
             # print 'Warning: All values are null'
-            return {'success':True,
-                    'result':{'exception_list':[]}}
+            return {
+                'success':True,
+                'exception_list':[]
+            }
 
         matches = not_null_values.map(lambda x: re.findall(regex, str(x)) != [])
 
@@ -130,22 +135,20 @@ class PandasDataSet(DataSet, pd.DataFrame):
         if mostly:
             #Prevent division-by-zero errors
             if len(not_null_values) == 0:
-                return {'success':True,
-                        'result':{'exception_list':exceptions}}
+                return {
+                    'success':True,
+                    'exception_list':exceptions
+                }
 
             percent_matching = float(matches.sum())/len(not_null_values)
             return {
                 "success" : percent_matching >= mostly,
-                "result" : {
-                    "exception_list" : exceptions
-                }
+                "exception_list" : exceptions
             }
         else:
             return {
                 "success" : matches.all(),
-                "result" : {
-                    "exception_list" : exceptions
-                }
+                "exception_list" : exceptions
             }
 
     @DataSet.column_expectation
@@ -198,22 +201,20 @@ class PandasDataSet(DataSet, pd.DataFrame):
         if mostly:
             #Prevent division-by-zero errors
             if len(not_null_values) == 0:
-                return {'success':True,
-                        'result':{'exception_list':exceptions}}
+                return {
+                    'success':True,
+                    'exception_list':exceptions
+                }
 
             percent_properly_formatted = float(sum(properly_formatted))/len(not_null_values)
             return {
                 "success" : percent_properly_formatted >= mostly,
-                "result" : {
-                    "exception_list" : exceptions
-                }
+                "exception_list" : exceptions
             }
         else:
             return {
                 "success" : sum(properly_formatted) == len(not_null_values),
-                "result" : {
-                    "exception_list" : exceptions
-                }
+                "exception_list" : exceptions
             }
 
     @DataSet.column_expectation
@@ -231,8 +232,10 @@ class PandasDataSet(DataSet, pd.DataFrame):
 
         if len(not_null_values) == 0:
             # print 'Warning: All values are null'
-            return {'success':True,
-                    'result':{'exception_list':[]}}
+            return {
+                'success':True,
+                'exception_list':[]
+            }
 
         exceptions_set = list(unique_values - unique_values_set)
         exceptions_list = list(not_null_values[not_null_values.map(lambda x: x in exceptions_set)])
@@ -245,9 +248,7 @@ class PandasDataSet(DataSet, pd.DataFrame):
             else:
                 return {
                     "success" : percent_in_set > mostly,
-                    "result" : {
-                        "exception_list" : exceptions_list
-                    }
+                    "exception_list" : exceptions_list
                 }
 
         else:
@@ -256,9 +257,7 @@ class PandasDataSet(DataSet, pd.DataFrame):
             else:
                 return {
                     "success" : (len(exceptions_set) == 0),
-                    "result" : {
-                        "exception_list" : exceptions_list
-                    }
+                    "exception_list" : exceptions_list
                 }
 
     @DataSet.column_expectation
@@ -282,15 +281,21 @@ class PandasDataSet(DataSet, pd.DataFrame):
         if mostly:
             #Prevent division-by-zero errors
             if len(not_null_values) == 0:
-                return {'success' : True,
-                        'result' : {'exception_list' : exceptions}}
+                return {
+                    'success' : True,
+                    'exception_list' : exceptions
+                }
 
             percent_matching = float(matches.sum())/len(not_null_values)
-            return {'success' : (percent_matching >= mostly),
-                    'result' : {'exception_list' : exceptions}}
+            return {
+                'success' : (percent_matching >= mostly),
+                'exception_list' : exceptions
+            }
         else:
-            return {'success' : matches.all(),
-                    'result' : {'exception_list' : exceptions}}
+            return {
+                'success' : matches.all(),
+                'exception_list' : exceptions
+            }
 
     @DataSet.column_expectation
     def expect_column_value_lengths_to_be_less_than_or_equal_to(self,column,N,suppress_exceptions=False):
@@ -321,8 +326,10 @@ class PandasDataSet(DataSet, pd.DataFrame):
         else:
             exceptions = list(not_null_values[result==False])
 
-        return {'success' : result.all(),
-                'result' : {'exception_list' : exceptions}}
+        return {
+            'success' : result.all(),
+            'exception_list' : exceptions
+        }
 
     @DataSet.column_expectation
     def expect_column_mean_to_be_between(self,column,M,N):
@@ -334,11 +341,15 @@ class PandasDataSet(DataSet, pd.DataFrame):
         not_null_values = self[not_null][column]
         try:
             result = (not_null_values.mean() >= M) and (not_null_values.mean() <= N)
-            return {'success' : result,
-                    'result' : {'exception_list' : not_null_values.mean()}}
+            return {
+                'success' : result,
+                'exception_list' : not_null_values.mean()
+            }
         except:
-            return {'success' : False,
-                    'result' : {'exception_list' : None}}
+            return {
+                'success' : False,
+                'exception_list' : None
+            }
 
     @DataSet.column_expectation
     def expect_column_values_to_be_null(self,column,mostly=None,suppress_exceptions=False):
@@ -358,11 +369,15 @@ class PandasDataSet(DataSet, pd.DataFrame):
         if mostly:
             #Prevent division-by-zero errors
             percent_matching = float(null.sum())/len(self[column])
-            return {'success':(percent_matching >= mostly),
-                    'result':{'exception_list':exceptions}}
+            return {
+                'success':(percent_matching >= mostly),
+                'exception_list':exceptions
+            }
         else:
-            return {'success':null.all(),
-                    'result':{'exception_list':exceptions}}
+            return {
+                'success':null.all(),
+                'exception_list':exceptions
+            }
 
     @DataSet.column_expectation
     def expect_column_values_to_not_match_regex(self,column,regex,mostly=None,suppress_exceptions=False):
@@ -374,8 +389,10 @@ class PandasDataSet(DataSet, pd.DataFrame):
 
         if len(not_null_values) == 0:
             # print 'Warning: All values are null'
-            return {'success':True,
-                    'result':{'exception_list':[]}}
+            return {
+                'success':True,
+                'exception_list':[]
+            }
 
         matches = not_null_values.map(lambda x: re.findall(regex, str(x)) != [])
         does_not_match = not_null_values.map(lambda x: re.findall(regex, str(x)) == [])
@@ -388,15 +405,21 @@ class PandasDataSet(DataSet, pd.DataFrame):
         if mostly:
             #Prevent division-by-zero errors
             if len(not_null_values) == 0:
-                return {'success':True,
-                        'result':{'exception_list':exceptions}}
+                return {
+                    'success':True,
+                    'exception_list':exceptions
+                }
 
             percent_matching = float(does_not_match.sum())/len(not_null_values)
-            return {'success':(percent_matching >= mostly),
-                    'result':{'exception_list':exceptions}}
+            return {
+                'success':(percent_matching >= mostly),
+                'exception_list':exceptions
+            }
         else:
-            return {'success':does_not_match.all(),
-                    'result':{'exception_list':exceptions}}
+            return {
+                'success':does_not_match.all(),
+                'exception_list':exceptions
+            }
 
     @DataSet.column_expectation
     def expect_column_values_to_be_between(self,column,M,N,mostly=None,suppress_exceptions=False):
@@ -415,15 +438,22 @@ class PandasDataSet(DataSet, pd.DataFrame):
         if mostly:
             #Prevent division-by-zero errors
             if len(not_null_values) == 0:
-                return {'success':True,
-                        'result':{'exception_list':exceptions}}
+                return {
+                    'success':True,
+                    'exception_list':exceptions
+                }
 
             percent_true = float(result.sum())/len(not_null_values)
-            return {'success':(percent_true >= mostly),
-                    'result':{'exception_list':exceptions}}
+            return {
+                'success':(percent_true >= mostly),
+                'exception_list':exceptions
+            }
+        
         else:
-            return {'success':result.all(),
-                    'result':{'exception_list':exceptions}}
+            return {
+                'success':result.all(),
+                'exception_list':exceptions
+            }
 
     @DataSet.column_expectation
     def expect_column_values_to_be_of_type(self,column,dtype,mostly=None,suppress_exceptions=False):
@@ -469,15 +499,22 @@ class PandasDataSet(DataSet, pd.DataFrame):
         if mostly:
             # prevent division by zero
             if len(not_null_values) == 0:
-                return {'success':True,
-                        'result':{'exception_list':exceptions}}
+                return {
+                    'success':True,
+                    'exception_list':exceptions
+                }
 
             percent_not_in_set = 1 - (float(result.sum())/len(not_null_values))
-            return {'success':(percent_not_in_set >= mostly),
-                    'result':{'exception_list':exceptions}}
+            return {
+                'success':(percent_not_in_set >= mostly),
+                'exception_list':exceptions
+            }
+
         else:
-            return {'success':(~result).all(),
-                    'result':{'exception_list':exceptions}}
+            return {
+                'success':(~result).all(),
+                'exception_list':exceptions
+            }
 
 
     @DataSet.column_expectation
@@ -492,8 +529,10 @@ class PandasDataSet(DataSet, pd.DataFrame):
         else:
             exceptions = self[[col1,col2]][~result]
 
-        return {'success':result.all(),
-                'result':{'exception_list':exceptions}}
+        return {
+            'success':result.all(),
+            'exception_list':exceptions
+        }
 
 
     @DataSet.column_expectation
@@ -511,8 +550,10 @@ class PandasDataSet(DataSet, pd.DataFrame):
         else:
             exceptions = self.shape[0]
 
-        return {'success':outcome,
-                'result':{'true_row_count':exceptions}}
+        return {
+            'success':outcome,
+            'true_row_count':exceptions
+        }
 
 
     @DataSet.column_expectation
@@ -529,8 +570,10 @@ class PandasDataSet(DataSet, pd.DataFrame):
         else:
             exceptions = self.shape[0]
 
-        return {'success':outcome,
-                'result':{'true_row_count':self.shape[0]}}
+        return {
+            'success':outcome,
+            'true_row_count':self.shape[0]
+        }
 
 
     @DataSet.column_expectation
@@ -559,14 +602,23 @@ class PandasDataSet(DataSet, pd.DataFrame):
         if mostly:
             # prevent divide by zero error
             if len(not_null_values) == 0:
-                return {'success' : True,
-                        'result' : {'exception_list' : exceptions}}
+                return {
+                    'success' : True,
+                    'exception_list' : exceptions
+                }
+
             percent_true = float(sum(outcome))/len(outcome)
-            return {'success' : (percent_true >= mostly),
-                    'result' : {'exception_list' : exceptions}}
+            
+            return {
+                'success' : (percent_true >= mostly),
+                'exception_list' : exceptions
+            }
+
         else:
-            return {'success' : outcome.all(),
-                    'result' : {'exception_list' : exceptions}}
+            return {
+                'success' : outcome.all(),
+                'exception_list' : exceptions
+            }
 
 
     @DataSet.column_expectation
@@ -593,15 +645,23 @@ class PandasDataSet(DataSet, pd.DataFrame):
         if mostly:
             # prevent divide by zero error
             if len(not_null_values) == 0:
-                return {'success' : True,
-                        'result' : {'exception_list' : exceptions}}
+                return {
+                    'success' : True,
+                    'exception_list' : exceptions
+                }
 
             percent_true = float(sum(outcome))/len(outcome)
-            return {'success' : (percent_true >= mostly),
-                    'result' : {'exception_list' : exceptions}}
+            
+            return {
+                'success' : (percent_true >= mostly),
+                'exception_list' : exceptions
+            }
+
         else:
-            return {'success' : outcome.all(),
-                    'result' : {'exception_list' : exceptions}}
+            return {
+                'success' : outcome.all(),
+                'exception_list' : exceptions
+            }
 
 
     @DataSet.column_expectation
@@ -625,8 +685,10 @@ class PandasDataSet(DataSet, pd.DataFrame):
         else:
             exceptions = not_null_values[~outcome]
 
-        return {'success' : outcome.all(),
-                'result' : {'exception_list' : exceptions}}
+        return {
+            'success' : outcome.all(),
+            'exception_list' : exceptions
+        }
 
 
     @DataSet.column_expectation
@@ -643,8 +705,10 @@ class PandasDataSet(DataSet, pd.DataFrame):
         else:
             exceptions = self[column].std()
 
-        return {'success':outcome,
-                'result':{'true_stdev':exceptions}}
+        return {
+            'success':outcome,
+            'true_stdev':exceptions
+        }
 
 
     @DataSet.column_expectation
@@ -666,11 +730,15 @@ class PandasDataSet(DataSet, pd.DataFrame):
 
         if mostly:
             subset_proportion = 1 - float(len(C1.intersection(C2)))/len(C1.union(C2))
-            return {'success':(subset_proportion >= mostly),
-                    'result':{'not_in_subset':exceptions}}
+            return {
+                'success':(subset_proportion >= mostly),
+                'not_in_subset':exceptions
+            }
         else:
-            return {'success':outcome,
-                    'result':{'not_in_subset':exceptions}}
+            return {
+                'success':outcome,
+                'not_in_subset':exceptions
+            }
 
 
     @DataSet.column_expectation
@@ -700,12 +768,18 @@ class PandasDataSet(DataSet, pd.DataFrame):
 
         if mostly:
             if len(outcome) == 0:
-                return {'success':True,
-                        'result':{'exception_list':exceptions}}
+                return {
+                    'success':True,
+                    'exception_list':exceptions
+                }
 
             percent_true = float(sum(outcome))/len(outcome)
-            return {'success':(percent_true >= mostly),
-                    'result':{'exception_list':exceptions}}
+            return {
+                'success':(percent_true >= mostly),
+                'exception_list':exceptions
+            }
         else:
-            return {'success':outcome.all(),
-                    'result':{'exception_list':exceptions}}
+            return {
+                'success':outcome.all(),
+                'exception_list':exceptions
+            }
