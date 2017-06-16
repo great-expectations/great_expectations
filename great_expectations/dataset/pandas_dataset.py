@@ -155,8 +155,8 @@ class PandasDataSet(DataSet, pd.DataFrame):
         For example, the %z directive may not be implemented before python 3.2.
 
         Args:
-            col: The column name
-            format: The format string against which values should be validated
+            col (string): The column name
+            format (string): The format string against which values should be validated
             mostly (float): The proportion of values that must match the condition for success to be true.
             suppress_exceptions: Only return a boolean success value, not a dictionary with other results.
 
@@ -164,6 +164,7 @@ class PandasDataSet(DataSet, pd.DataFrame):
             By default: a dict containing "success" and "result" (an empty dictionary)
             On suppress_exceptions=True: a boolean success value only
         """
+
 
         if (not (col in self)):
             raise LookupError("The specified column does not exist.")
