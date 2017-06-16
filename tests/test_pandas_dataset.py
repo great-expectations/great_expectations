@@ -83,7 +83,7 @@ def test_expect_column_values_to_be_in_set():
 #     assert D.expect_column_values_to_be_equal_across_columns('x', 'y', suppress_exceptions=True)=={'success':True,'exception_list':None}
 #     #Test one value False case for col x==z
 #     assert D.expect_column_values_to_be_equal_across_columns('x', 'z', suppress_exceptions=True)=={'success':False,'exception_list':None}
-#     #Test True 
+#     #Test True
 #     assert D.expect_column_values_to_be_equal_across_columns('a', 'z', suppress_exceptions=True)=={'success':False,'exception_list':None}
 
 
@@ -335,18 +335,17 @@ def test_expect_column_values_match_strftime_format():
     })
 
     tests = [
-            {'input':('us_dates','%m/%d/%Y'), 'kwargs':{'mostly': None}, 'success':True, 'result':{'exception_list':[]}},
-            {'input':('us_dates_type_error','%m/%d/%Y'), 'kwargs':{'mostly': 0.5}, 'success':True, 'result':{'exception_list':[5]}},
-            {'input':('us_dates_type_error','%m/%d/%Y'), 'kwargs':{'mostly': None}, 'success':False,'result':{'exception_list':[5]}},
-            {'input':('almost_iso8601','%Y-%m-%dT%H:%M:%S'), 'kwargs':{'mostly': None}, 'success':True,'result':{'exception_list':[]}},
-            {'input':('almost_iso8601_val_error','%Y-%m-%dT%H:%M:%S'), 'kwargs':{'mostly': None}, 'success':False,'result':{'exception_list':['1977-05-55T00:00:00']}}
+            {'input':('us_dates','%m/%d/%Y'), 'kwargs':{'mostly': None}, 'success':True, 'exception_list':[]},
+            {'input':('us_dates_type_error','%m/%d/%Y'), 'kwargs':{'mostly': 0.5}, 'success':True, 'exception_list':[5]},
+            {'input':('us_dates_type_error','%m/%d/%Y'), 'kwargs':{'mostly': None}, 'success':False,'exception_list':[5]},
+            {'input':('almost_iso8601','%Y-%m-%dT%H:%M:%S'), 'kwargs':{'mostly': None}, 'success':True,'exception_list':[]},
+            {'input':('almost_iso8601_val_error','%Y-%m-%dT%H:%M:%S'), 'kwargs':{'mostly': None}, 'success':False,'exception_list':['1977-05-55T00:00:00']}
             ]
 
     for t in tests:
         out = D.expect_column_values_to_match_strftime_format(*t['input'],**t['kwargs'])
-        #out = D.expect_column_values_to_match_strftime_format(*t['input'])
         assert out['success'] == t['success']
-        assert out['result'] == t['result']
+        assert out['exception_list'] == t['exception_list']
 
 
 
