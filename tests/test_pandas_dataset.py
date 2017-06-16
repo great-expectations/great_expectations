@@ -19,17 +19,17 @@ def test_expect_column_values_to_be_in_set():
     })
 
     tests = [
-            {'input':('x',[1,2,4]), 'success':True,'result':{'exception_list':[]}},
-            {'input':('x',[4,2]), 'success':False, 'result':{'exception_list':[1]}},
-    {'input':('y',[]), 'success':False, 'result':{'exception_list':[1,2,5]}},
-            {'input':('z',['hello','jello','mello']), 'success':True, 'result':{'exception_list':[]}},
-            {'input':('z',['hello']), 'success':False, 'result':{'exception_list':['jello','mello']}}
-            ]
+        {'input':('x', [1,2,4]), 'output':{'success':True, 'exception_list':[]}},
+        {'input':('x', [4,2]), 'output':{'success':False, 'exception_list':[1]}},
+        {'input':('y', []), 'output':{'success':False, 'exception_list':[1,2,5]}},
+        {'input':('z', ['hello','jello','mello']), 'output': {'success':True, 'exception_list':[]}},
+        {'input':('z', ['hello']), 'output': {'success':False, 'exception_list':['jello','mello']}}
+    ]
 
     for t in tests:
         out = D.expect_column_values_to_be_in_set(*t['input'])
-        assert out['success']==t['success']
-        assert out['result']==t['result']
+        assert out==t['output']
+        # assert out['result']==t['output']['exception_list']
     #assert D.expect_column_values_to_be_in_set('x',[1,2,4])==(True, [])
     #assert D.expect_column_values_to_be_in_set('x',[4,2])==(False, [1])
     #assert D.expect_column_values_to_be_in_set('y',[])==(False, [1,2,5])
@@ -63,27 +63,28 @@ def test_expect_column_values_to_be_in_set():
 
     # assert 0
 
-def test_expect_column_values_to_be_equal_across_columns():
-    """
-    Cases Tested:
-        Column values in x and y are equal
-        Column values in x and z are not equal
-        Column values in a and z are not equal
-    """
+#!!! Deprecated
+# def test_expect_column_values_to_be_equal_across_columns():
+#     """
+#     Cases Tested:
+#         Column values in x and y are equal
+#         Column values in x and z are not equal
+#         Column values in a and z are not equal
+#     """
 
-    D = ge.dataset.PandasDataSet({
-        'x' : [2, 5, 8],
-        'y' : [2, 5, 8],
-        'z' : [2, 5, 6],
-        'a' : [1, 2, 3],
-    })
+#     D = ge.dataset.PandasDataSet({
+#         'x' : [2, 5, 8],
+#         'y' : [2, 5, 8],
+#         'z' : [2, 5, 6],
+#         'a' : [1, 2, 3],
+#     })
 
-    #Test True case for col x==y
-    assert D.expect_column_values_to_be_equal_across_columns('x', 'y', suppress_exceptions=True)=={'success':True,'result':{'exception_list':None}}
-    #Test one value False case for col x==z
-    assert D.expect_column_values_to_be_equal_across_columns('x', 'z', suppress_exceptions=True)=={'success':False,'result':{'exception_list':None}}
-    #Test True
-    assert D.expect_column_values_to_be_equal_across_columns('a', 'z', suppress_exceptions=True)=={'success':False,'result':{'exception_list':None}}
+#     #Test True case for col x==y
+#     assert D.expect_column_values_to_be_equal_across_columns('x', 'y', suppress_exceptions=True)=={'success':True,'exception_list':None}
+#     #Test one value False case for col x==z
+#     assert D.expect_column_values_to_be_equal_across_columns('x', 'z', suppress_exceptions=True)=={'success':False,'exception_list':None}
+#     #Test True 
+#     assert D.expect_column_values_to_be_equal_across_columns('a', 'z', suppress_exceptions=True)=={'success':False,'exception_list':None}
 
 
 def test_expect_column_values_to_be_unique():
@@ -103,7 +104,7 @@ def test_expect_column_values_to_be_unique():
     })
 
     #Column string values are equal - 2 and 2
-    assert D.expect_column_values_to_be_unique('a') == {'success':False, 'result':{'exception_list':['2']}}
+    assert D.expect_column_values_to_be_unique('a') == {'success':False, 'exception_list':['2']}
     #Column values are not equal - 1 and '2'
 #    assert D.expect_column_values_to_be_unique('b') == (True, [])
 #    #Column int values are equal - 1 and '2'
@@ -162,7 +163,10 @@ def test_expect_column_values_to_not_be_null():
         'b' : [1, 2, 3, 4, 5, 6, 7, 8, 9, None],
     })
 
-    assert D.expect_column_values_to_not_be_null('x')=={'success':False, 'result':{'exception_list':[None]}}
+    assert_equal(
+        D.expect_column_values_to_not_be_null('x'),
+        {'success':False, 'exception_list':[None]}
+    )
 #    assert D.expect_column_values_to_not_be_null('y')==(False, [None])
 #    assert D.expect_column_values_to_not_be_null('n')==(False, [None, None])
 #    assert D.expect_column_values_to_not_be_null('z')==(True, [])
@@ -202,7 +206,7 @@ def test_expect_column_values_to_be_null():
 
     # Test on np.an and None
     # Test exceptions (not_null values) show up properly
-    assert D.expect_column_values_to_be_null('x')=={'success':False, 'result':{'exception_list':[2,2]}}
+    assert D.expect_column_values_to_be_null('x')=={'success':False, 'exception_list':[2,2]}
 #    assert D.expect_column_values_to_be_null('y')==(False, [2,2])
 #    assert D.expect_column_values_to_be_null('z')==(False, [2,5,7])
 #    assert D.expect_column_values_to_be_null('a')==(True, [])
@@ -283,7 +287,7 @@ def test_expect_column_values_to_match_regex():
 
     #!!! Why do these tests have verbose=True?
     #['aa', 'ab', 'ac', 'a1', None]
-    assert D.expect_column_values_to_match_regex('x', '^a')=={'success':True,'result':{'exception_list':[]}}
+    assert D.expect_column_values_to_match_regex('x', '^a')=={'success':True,'exception_list':[]}
 #    assert D.expect_column_values_to_match_regex('x', 'aa', verbose=True)==(False,['ab', 'ac', 'a1'])
 #    assert D.expect_column_values_to_match_regex('x', 'a[a-z]', verbose=True)==(False,['a1'])
 #
@@ -355,7 +359,7 @@ def test_expect_column_values_to_not_match_regex():
         'z' : [None, None, None, None, None, None, None]
     })
 
-    assert D.expect_column_values_to_not_match_regex('x', '^a') == {'success':False,'result':{'exception_list':['aa', 'ab', 'ac', 'a1']}}
+    assert D.expect_column_values_to_not_match_regex('x', '^a') == {'success':False, 'exception_list':['aa', 'ab', 'ac', 'a1']}
 #    assert D.expect_column_values_to_not_match_regex('x', '^b') == (True, [])
 #
 #    assert D.expect_column_values_to_not_match_regex('y', '^z') == (False, ['zxxxx'])
@@ -383,7 +387,10 @@ def test_expect_column_values_to_be_between():
         'z' : [1, 2, 3, 4, 5, None, None, None, None, None],
     })
 
-    assert D.expect_column_values_to_be_between('x', 1, 10) == {'success':True,'result':{'exception_list':[]}}
+    assert_equal(
+        D.expect_column_values_to_be_between('x', 1, 10),
+        {'success':True, 'exception_list':[]}
+    )
 #    assert D.expect_column_values_to_be_between('x', 0, 20) == (True, [])
 #    assert D.expect_column_values_to_be_between('x', 1, 9) == (False, [10])
 #    assert D.expect_column_values_to_be_between('x', 3, 10) == (False, [1, 2])
@@ -422,7 +429,7 @@ def test_expect_column_values_to_not_be_in_set():
         'n' : [None,None,2],
     })
 
-    assert D.expect_column_values_to_not_be_in_set('x',[1,2])=={'success':False,'result':{'exception_list':[1,2]}}
+    assert D.expect_column_values_to_not_be_in_set('x',[1,2])=={'success':False, 'exception_list':[1,2]}
 #    assert D.expect_column_values_to_not_be_in_set('x',[5,6])==(True, [])
 #    assert D.expect_column_values_to_not_be_in_set('z',['hello', 'jello'])==(False, ['hello', 'jello'])
 #    assert D.expect_column_values_to_not_be_in_set('z',[])==(True, [])
@@ -506,7 +513,7 @@ def test_expect_table_row_count_to_be_between():
 
     out1 = D.expect_table_row_count_to_be_between(3,5)
     assert out1['success']==True
-    assert out1['result']['true_row_count']==4
+    assert out1['true_row_count']==4
 
 
 def test_expect_table_row_count_to_equal():
@@ -514,22 +521,20 @@ def test_expect_table_row_count_to_equal():
 
     out1 = D.expect_table_row_count_to_equal(4)
     assert out1['success']==True
-    assert out1['result']['true_row_count']==4
-
-
+    assert out1['true_row_count']==4
 
 
 def test_expect_column_value_lengths_to_be_between():
     s1 = ['smart','silly','sassy','slimy','sexy']
     s2 = ['cool','calm','collected','casual','creepy']
     D = ge.dataset.PandasDataSet({'s1':s1,'s2':s2})
-    out1 = D.expect_column_value_lengths_to_be_between('s1',M=3,N=5)
-    out2 = D.expect_column_value_lengths_to_be_between('s2',M=4,N=6)
-    out3 = D.expect_column_value_lengths_to_be_between('s2',N=10)
-    assert out1['success'] == True
-    assert out2['success'] == False
-    assert len(out2['result']['exception_list']) == 1
-    assert out3['success'] == True
+    out1 = D.expect_column_value_lengths_to_be_between('s1', min_value=3, max_value=5)
+    out2 = D.expect_column_value_lengths_to_be_between('s2', min_value=4, max_value=6)
+    out3 = D.expect_column_value_lengths_to_be_between('s2', min_value=None, max_value=10)
+    assert_equal( out1['success'], True)
+    assert_equal( out2['success'], False)
+    assert_equal( len(out2['exception_list']), 1)
+    assert_equal( out3['success'], True)
 
 
 
@@ -544,9 +549,9 @@ def test_expect_column_values_to_be_dateutil_parseable():
     out = D.expect_column_values_to_be_dateutil_parseable('dates')
     out2 = D.expect_column_values_to_be_dateutil_parseable('other')
     assert out['success'] == True
-    assert len(out['result']['exception_list']) == 0
+    assert len(out['exception_list']) == 0
     assert out2['success'] == False
-    assert len(out2['result']['exception_list']) == 3
+    assert len(out2['exception_list']) == 3
 
 
 def test_expect_column_values_to_be_valid_json():
@@ -575,7 +580,7 @@ def test_expect_two_column_values_to_be_subsets():
 
     assert out1['success'] == True
     assert out2['success'] == True
-    assert out2['result']['not_in_subset'] == set([0,1,5,6])
+    assert out2['not_in_subset'] == set([0,1,5,6])
 
 
 def test_expect_two_column_values_to_be_many_to_one():

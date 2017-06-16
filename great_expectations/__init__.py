@@ -19,10 +19,10 @@ def connect_to_datasource():
 def connect_to_dataset():
     raise NotImplementedError
 
-def read_csv(filename, dataset_config=None, *args, **kwargs):
+def read_csv(filename, expectations_config=None, *args, **kwargs):
     df = pd.read_csv(filename, *args, **kwargs)
     df.__class__ = dataset.pandas_dataset.PandasDataSet
-    df.initialize_expectations(dataset_config)
+    df.initialize_expectations(expectations_config)
 
     return df
 
