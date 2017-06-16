@@ -5,7 +5,7 @@ from dateutil.parser import parser
 from datetime import datetime
 import json
 
-from base import DataSet
+from .base import DataSet
 
 class PandasDataSet(DataSet, pd.DataFrame):
 
@@ -449,7 +449,7 @@ class PandasDataSet(DataSet, pd.DataFrame):
                 'success':(percent_true >= mostly),
                 'exception_list':exceptions
             }
-        
+
         else:
             return {
                 'success':result.all(),
@@ -613,7 +613,7 @@ class PandasDataSet(DataSet, pd.DataFrame):
                 }
 
             percent_true = float(sum(outcome))/len(outcome)
-            
+
             return {
                 'success' : (percent_true >= mostly),
                 'exception_list' : exceptions
@@ -656,7 +656,7 @@ class PandasDataSet(DataSet, pd.DataFrame):
                 }
 
             percent_true = float(sum(outcome))/len(outcome)
-            
+
             return {
                 'success' : (percent_true >= mostly),
                 'exception_list' : exceptions

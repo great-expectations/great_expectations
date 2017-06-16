@@ -1,3 +1,6 @@
+## Run these tests with:
+## python -m unittest tests.test_pandas_dataset_unittest
+
 import json
 import inspect
 import copy
@@ -5,7 +8,7 @@ import copy
 import pandas as pd
 import numpy as np
 
-from util import DotDict
+from .util import DotDict
 
 class DataSet(object):
 
@@ -44,10 +47,15 @@ class DataSet(object):
         #!!! This is good default behavior, but
         #!!!    it needs to be documented, and
         #!!!    we need to provide syntax to override it.
-        self._expectations_config.expectations = filter(
-            lambda exp: exp['expectation_type'] != expectation_type,
-            self._expectations_config.expectations 
-        )
+        #self._expectations_config.expectations = filter(
+        #    lambda exp: exp['expectation_type'] != expectation_type,
+        #    self._expectations_config.expectations
+        #)
+
+        ## Changed to use list comprehension for python 3 support
+        self._expectations_config.expecations = [
+            exp for exp in self._expectations_config.expectations if lambda exp: exp['expectation_type'] != expectation_type
+        ]
 
         self._expectations_config.expectations.append(expectation_config)
 
@@ -91,13 +99,16 @@ class DataSet(object):
             #Fetch argument names
             method_arg_names = inspect.getargspec(func)[0][2:]
 
+            # Combine all arguments into a single new "kwargs"
+            all_args = dict(zip(method_arg_names, args))
+            all_args.update(kwargs)
+
             #Construct the expectation_config object
             expectation_config = DotDict({
                 "expectation_type" : method_name,
-                "kwargs" : dict(
-                    zip(method_arg_names, args)+\
-                    kwargs.items()
-                )
+                ## Changed to support python 3, but note that there may be ambiguity here.
+                ## TODO: ensure this is the intended logic
+                "kwargs" : all_args
             })
             expectation_config['kwargs']['column'] = column
 
@@ -124,10 +135,10 @@ class DataSet(object):
     def validate(self):
         results = []
         for expectation in self.get_expectations_config()['expectations']:
-            print expectation
+            print(expectation)
             expectation_method = getattr(self, expectation['expectation_type'])
             result = expectation_method(**expectation['kwargs'])
-            print result
+            print(result)
 
 
     ##### Table shape expectations #####
@@ -341,7 +352,3 @@ class DataSet(object):
     ##### Multicolumn relations #####
 
     # def expect_multicolumn_values_to_be_unique
-
-
-
-
