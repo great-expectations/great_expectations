@@ -1,8 +1,11 @@
 import pandas as pd
 import numpy as np
+import scipy
 import re
 from dateutil.parser import parser
 from datetime import datetime
+import pickle
+import base64
 import json
 
 from .base import DataSet
@@ -351,6 +354,59 @@ class PandasDataSet(DataSet, pd.DataFrame):
                 'success' : False,
                 'exception_list' : None
             }
+
+    @DataSet.column_expectation
+    def expect_column_numerical_distribution_to_be(self, column, kde, p=0.05, suppress_exceptions=False):
+        """
+        Expect the values in this column to match the density of the provided scipy.stats kde estimate.
+        WARNING: This expectation, as currently implemented, will effectively store the column as part
+        of the expectation.
+
+        Args:
+            col (string): The column name
+            kde: A kernel density estimate built which we expect to match the distribution of data provided.
+            p (float) = 0.05: The p-value threshold below which this expectation will return false.
+            suppress_exceptions: Only return a boolean success value, not a dictionary with other results.
+
+        Returns:
+            By default: a dict containing "success" and "exception_list" (the pvalue from the Kolmogorov-Smirnov Test)
+            On suppress_exceptions=True: a boolean success value only
+        """
+
+        if (not (column in self)):
+            return {'success': False, 'exception_list': 'The specified column does not exist.'}
+
+        #if mostly:
+        #    return {'success': False, 'exception_list': 'Mostly is not compatibible with aggregate expectations.'}
+
+        # Ensure we have a real KDE object
+        kde = pickle.loads(base64.b64decode(kde))
+        if (type(kde) != scipy.stats.kde.gaussian_kde):
+            return {'success': False, 'exception_list': 'The kde object must be a scipy.stats.kde.gaussian_kde estimate.'}
+
+
+        ##TODO: Currently we are doing no checking on size (which is dangerous)....tests will not be
+        ## reliable with small samples
+
+        ##TODO: Consider reimplementing on back of scikit, which would allow for for a
+
+        ## TODO: Should null values be considered exceptions?
+        not_null = self[column].notnull()
+        not_null_values = self[not_null][column]
+
+        estimated_cdf = lambda partition: np.array([kde.integrate_box_1d(-np.inf, x) for x in partition])
+        test_result = scipy.stats.kstest(not_null_values, estimated_cdf)
+
+        if suppress_exceptions:
+            return {
+                "success" : test_result.pvalue > p,
+            }
+        else:
+            return {
+                "success" : test_result.pvalue > p,
+                "exception_list" : test_result.pvalue,
+            }
+
 
     @DataSet.column_expectation
     def expect_column_values_to_be_null(self, column, mostly=None, suppress_exceptions=False):

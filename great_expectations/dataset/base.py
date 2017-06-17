@@ -315,7 +315,22 @@ class DataSet(object):
         """
         raise NotImplementedError
 
-    # def expect_column_numerical_distribution_to_be(self, column, min_value, max_value, suppress_exceptions=False):
+    def expect_column_numerical_distribution_to_be(self, column, kde, p=0.05, suppress_exceptions=False):
+        """
+        Expect the values in this column to match the density of the provided scipy.stats kde estimate.
+
+        Args:
+            col (string): The column name
+            kde: A kernel density estimate built which we expect to match the distribution of data provided.
+            p (float) = 0.05: The p-value threshold below which this expectation will return false.
+            suppress_exceptions: Only return a boolean success value, not a dictionary with other results.
+
+        Returns:
+            By default: a dict containing "success" and "exception_list" (the pvalue from the Kolmogorov-Smirnov Test)
+            On suppress_exceptions=True: a boolean success value only
+        """
+        raise NotImplementedError
+
     # def expect_column_frequency_distribution_to_be():
 
     ##### Column pairs #####
