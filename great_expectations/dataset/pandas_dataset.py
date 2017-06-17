@@ -356,7 +356,7 @@ class PandasDataSet(DataSet, pd.DataFrame):
             }
 
     @DataSet.column_expectation
-    def expect_column_numerical_distribution_to_be(self, column, kde, p=0.05, suppress_exceptions=False):
+    def expect_column_numerical_distribution_to_be_kde(self, column, kde, p=0.05, suppress_exceptions=False):
         """
         Expect the values in this column to match the density of the provided scipy.stats kde estimate.
         WARNING: This expectation, as currently implemented, will effectively store the column as part
@@ -388,7 +388,7 @@ class PandasDataSet(DataSet, pd.DataFrame):
         ##TODO: Currently we are doing no checking on size (which is dangerous)....tests will not be
         ## reliable with small samples
 
-        ##TODO: Consider reimplementing on back of scikit, which would allow for for a
+        ##TODO: Consider reimplementing on back of scikit, which would allow for a nearest-neighbors-based kde estimate (perhaps more efficient for large datasets)
 
         ## TODO: Should null values be considered exceptions?
         not_null = self[column].notnull()
@@ -396,6 +396,51 @@ class PandasDataSet(DataSet, pd.DataFrame):
 
         estimated_cdf = lambda partition: np.array([kde.integrate_box_1d(-np.inf, x) for x in partition])
         test_result = scipy.stats.kstest(not_null_values, estimated_cdf)
+
+        if suppress_exceptions:
+            return {
+                "success" : test_result.pvalue > p,
+            }
+        else:
+            return {
+                "success" : test_result.pvalue > p,
+                "exception_list" : test_result.pvalue,
+            }
+
+    @DataSet.column_expectation
+    def expect_column_numerical_distribution_to_be(self, column, data, p=0.05, suppress_exceptions=False):
+        """
+        Expect the values in this column to match the density of the provided scipy.stats kde estimate.
+        WARNING: This expectation, as currently implemented, will effectively store the column as part
+        of the expectation.
+
+        Args:
+            col (string): The column name
+            kde: A kernel density estimate built which we expect to match the distribution of data provided.
+            p (float) = 0.05: The p-value threshold below which this expectation will return false.
+            suppress_exceptions: Only return a boolean success value, not a dictionary with other results.
+
+        Returns:
+            By default: a dict containing "success" and "exception_list" (the pvalue from the Kolmogorov-Smirnov Test)
+            On suppress_exceptions=True: a boolean success value only
+        """
+
+        if (not (column in self)):
+            return {'success': False, 'exception_list': 'The specified column does not exist.'}
+
+        #if mostly:
+        #    return {'success': False, 'exception_list': 'Mostly is not compatibible with aggregate expectations.'}
+
+        ##TODO: Currently we are doing no checking on size (which is dangerous)....tests will not be
+        ## reliable with small samples
+
+        ##TODO: Consider reimplementing on back of scikit, which would allow for a nearest-neighbors-based kde estimate (perhaps more efficient for large datasets)
+
+        ## TODO: Should null values be considered exceptions?
+        not_null = self[column].notnull()
+        not_null_values = self[not_null][column]
+
+        test_result = scipy.stats.ks_2samp(not_null_values, data)
 
         if suppress_exceptions:
             return {
