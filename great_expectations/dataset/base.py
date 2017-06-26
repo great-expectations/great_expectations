@@ -287,6 +287,9 @@ class DataSet(object):
             column (str): The column name.
             values_set (set-like): The set of objects or unique data points corresponding to the column.
 
+        Keyword Args:
+            mostly=None: Return "success": True if the percentage of values in values_set is greater than or equal to mostly (a float between 0 and 1).
+
         Returns:
             dict:
                 {
@@ -308,7 +311,7 @@ class DataSet(object):
             values_set (list): The set of objects or unique data points that should not correspond to the column.
 
         Keyword Args:
-            mostly=None: Return "success": True if the percentage of values not in the set is greater than or equal to mostly (a float between 0 and 1).
+            mostly=None: Return "success": True if the percentage of values not in values_set is greater than or equal to mostly (a float between 0 and 1).
 
         Returns:
             dict:
@@ -332,7 +335,7 @@ class DataSet(object):
             max_value (int): The maximum value for a column entry.
 
         Keyword Args:
-            mostly=None: Return "success": True if the percentage of values is greater than or equal to mostly (a float between 0 and 1).
+            mostly=None: Return "success": True if the percentage of values between min_value and max_value is greater than or equal to mostly (a float between 0 and 1).
 
         Returns:
             dict:
@@ -358,7 +361,7 @@ class DataSet(object):
             max_value (int): The maximum value for a column entry length.
 
         Keyword Args:
-            mostly=None: Return "success": True if the percentage of value lengths is greater than or equal to mostly (a float between 0 and 1).
+            mostly=None: Return "success": True if the percentage of value lengths between min_value and max_value is greater than or equal to mostly (a float between 0 and 1).
 
         Returns:
             dict:
@@ -400,8 +403,6 @@ class DataSet(object):
     def expect_column_values_to_not_match_regex(self, column, regex, mostly=None, suppress_exceptions=False):
         """Expect column entries to be strings that do NOT match a given regular expression.
 
-        Q: Emphasize the not?
-
         Args:
             column (str): The column name.
             regex (str): The regular expression that the column entry should NOT match.
@@ -423,16 +424,15 @@ class DataSet(object):
         """
         raise NotImplementedError
 
-    def expect_column_values_to_match_regex_list(self, column, regex_list, required_match, mostly=None, suppress_exceptions=False):
+    def expect_column_values_to_match_regex_list(self, column, regex_list, required_match="any", mostly=None, suppress_exceptions=False):
         """Expect the column entries to be strings that match at least one of a list of regular expressions.
-
-        Q: Is it sufficient for the column value to match at least one regex in the list?
 
         Args:
             column (str): The column name.
             regex_list (list): The list of regular expressions in which the column entries should match according to required_match.
 
         Keyword Args:
+            required_match="any": Use "any" if the value should match at least one regular expression in the list. Use "all" if it should match each regular expression in the list.
             mostly=None: Return "success": True if the percentage of matches is greater than or equal to mostly (a float between 0 and 1).
 
         Returns:
@@ -462,6 +462,7 @@ class DataSet(object):
             strftime_format (str): The datetime format that the column entries should match.
 
         Keyword Args:
+            mostly=None: Return "success": True if the percentage of matches is greater than or equal to mostly (a float between 0 and 1).
 
         Returns:
             dict:
@@ -480,6 +481,7 @@ class DataSet(object):
             column (str): The column name.
 
         Keyword Args:
+            mostly=None: Return "success": True if the percentage of parseable values is greater than or equal to mostly (a float between 0 and 1).
 
         Returns:
             dict:
@@ -513,13 +515,9 @@ class DataSet(object):
     def expect_column_values_to_match_json_schema(self, column, json_schema, suppress_exceptions=False):
         """Expect column entries to be JSON objects with a given JSON schema.
 
-        Q: What kind of data type is the json_schema variable?
-
         Args:
             column (str): The column name.
             json_schema (JSON object): The JSON schema that each column entry should resemble.
-
-        Keyword Args:
 
         Returns:
             dict:
@@ -548,7 +546,7 @@ class DataSet(object):
             dict:
                 {
                     "success": (bool) True if the column passed the expectation,
-                    "exceptions_list": (list) the values that did not pass the expectation
+                    "true_mean": (float) the column mean
                 }
 
         """
@@ -566,7 +564,7 @@ class DataSet(object):
             dict:
                 {
                     "success": (bool) True if the column passed the expectation,
-                    "exceptions_list": (list) the values that did not pass the expectation
+                    "true_median": (float) the column median
                 }
 
         """
@@ -584,7 +582,7 @@ class DataSet(object):
             dict:
                 {
                     "success": (bool) True if the column passed the expectation,
-                    "exceptions_list": (list) the values that did not pass the expectation
+                    "true_stdev": (float) the true standard deviation
                 }
 
         """
@@ -600,14 +598,14 @@ class DataSet(object):
     def expect_two_column_values_to_be_subsets(self, column_1, column_2, mostly=None, suppress_exceptions=False):
         """Given two columns, expect one column to have entries such that the entries are a subset of the other column's entries.
 
-        Q: Should the subset come first or second? Does it matter?
-        column 1 is subset of column 2
+        The values in column_1 should be a subset of column_2.
 
         Args:
             column_1 (str): The first column name to compare entries.
             column_2 (str): The second column name to compare entries.
 
         Keyword Args:
+            mostly=None: Return "success": True if the percentage of values that form a subset is greater than or equal to mostly (a float between 0 and 1).
 
         Returns:
             dict:
@@ -622,15 +620,14 @@ class DataSet(object):
     def expect_two_column_values_to_be_many_to_one(self, column_1, column_2, mostly=None, suppress_exceptions=False):
         """Given two columns, expect one column to map multiple entries to a single entry of the other column.
 
-        Q: What is a use case? Multiple values per entry corresponding to one value in another column as in gps coords to a name?
-        tables mapping to keys
-        column1 should be many column 2 should be one
+        The column_1 argument should be the column corresponding to many while column_2 should correspond to one.
 
         Args:
             column_1 (str): the column with multiple values per entry
             column_2 (str): the column with one value per entry
 
         Keyword Args:
+            mostly=None: Return "success": True if the percentage of values that are many-to-one is greater than or equal to mostly (a float between 0 and 1).
 
         Returns:
             dict:
