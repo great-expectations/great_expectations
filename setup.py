@@ -23,3 +23,5 @@ config = {
     ],
     'name': 'great_expectations'
 }
+
+setup(**config)
