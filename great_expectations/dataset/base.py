@@ -138,14 +138,13 @@ class DataSet(object):
         Args:
             column (str): The column name.
 
-        Keyword Args:
-            suppress_exceptions=False: Return the boolean of "success" instead of the entire dictionary.
-
         Returns:
-            result (bool)
+            dict:
+                {
+                    "success": (bool) True if the column passed the expectation,
+                    "exceptions_list": (list) the values that did not pass the expectation
+                }
             
-            If suppress_exceptions=True, return the boolean value in "success" instead of dict.
-
         """
         raise NotImplementedError
 
@@ -156,13 +155,12 @@ class DataSet(object):
             min_value (int): the minimum number of rows.
             max_value (int): the maximum number of rows.
 
-        Keyword Args:
-            suppress_exceptions=False: Return the boolean of "success" instead of the entire dictionary.
-
         Returns:
-            result (bool)
-
-            If suppress_exceptions=True, return the boolean value in "success" instead of dict.
+            dict:
+                {
+                    "success": (bool) True if the column passed the expectation,
+                    "exceptions_list": (list) the values that did not pass the expectation
+                }
 
         See Also:
             expect_table_row_count_to_equal
@@ -176,13 +174,12 @@ class DataSet(object):
         Args:
 	    value (int): The value that should equal the number of rows.
 
-        Keyword Args:
-            suppress_exceptions=False: Return the boolean of "success" instead of the entire dictionary.
-
         Returns:
-	    result (bool)
-
-            If suppress_exceptions=True, return the boolean value in "success" instead of dict.
+            dict:
+                {
+                    "success": (bool) True if the column passed the expectation,
+                    "exceptions_list": (list) the values that did not pass the expectation
+                }
 
         See Also:
             expect_table_row_count_to_be_between
@@ -200,17 +197,16 @@ class DataSet(object):
 
         Keyword Args:
             mostly=None: Return "success": True if the percentage of unique values is greater than or equal to mostly (a float between 0 and 1).
-            suppress_exceptions=False: Return the boolean of "success" instead of the entire dictionary.
 
         Returns:
-	    result (bool)
-            
-            If suppress_exceptions=True then the method returns the boolean value in "success" instead of dict.
-
+            dict:
+                {
+                    "success": (bool) True if the column passed the expectation,
+                    "exceptions_list": (list) the values that did not pass the expectation
+                }
+           
         Examples:
-	    Display multiple duplicated items.
-	    ['2','2','2'] will return `['2','2']` for the exceptions_list.
-
+	    Display multiple duplicated items. For example, ['2','2','2'] will return `['2','2']` for the exceptions_list.
 
         """
         raise NotImplementedError
@@ -223,13 +219,17 @@ class DataSet(object):
 
         Keyword Args:
             mostly=None: Return "success": True if the percentage of not null values is greater than or equal to mostly (a float between 0 and 1).
-            suppress_exceptions (bool): Return the boolean of "success" instead of the entire dictionary.
 
         Returns:
-	    result (bool)
-            
-            If suppress_exceptions=True then return the boolean value in "success" instead of dict.
+            dict:
+                {
+                    "success": (bool) True if the column passed the expectation,
+                    "exceptions_list": (list) the values that did not pass the expectation
+                }
 
+        See Also:
+            expect_column_values_to_be_null
+            
         """
         raise NotImplementedError
 
@@ -241,30 +241,40 @@ class DataSet(object):
 
         Keyword Args:
             mostly=None: Return "success": True if the percentage of null values is greater than or equal to mostly (a float between 0 and 1).
-            suppress_exceptions=False: Return the boolean of "success" instead of the entire dictionary.
 
         Returns:
-            result (bool)
-            
-            If suppress_exceptions=True then return the boolean value in "success" instead of dict.
+            dict:
+                {
+                    "success": (bool) True if the column passed the expectation,
+                    "exceptions_list": (list) the values that did not pass the expectation
+                }
 
+        See Also:
+            expect_column_values_to_not_be_null
+            
         """
         raise NotImplementedError
 
-    def expect_column_values_to_be_of_type(self, column, dtype, mostly=None, suppress_exceptions=False):
+    def expect_column_values_to_be_of_type(self, column, type_, target_datasource, mostly=None, suppress_exceptions=False):
         """Expect each column entry to be a specified data type.
-
-        Q: Will dtype be a string or a __type__ attribute?
 
         Args:
             column (str): The column name.
-            dtype (str): The data type that each column should have as entries.
+            type_ (str): A string representing the data type that each column should have as entries.
+                For example, "double integer" refers to an integer with double precision.
+            target_datasource (str): The data source that specifies the implementation in the type_ parameter.
+                For example, options include "pandas", "sql", or "spark".
+
+        Keyword Args:
+            mostly=None: Return "success": True if the percentage of values of type_ is greater than or equal to mostly (a float between 0 and 1).
 
         Returns:
-            result (bool)
-            
-            If suppress_exceptions=True then return the boolean value in "success" instead of dict.
-
+            dict:
+                {
+                    "success": (bool) True if the column passed the expectation,
+                    "exceptions_list": (list) the values that did not pass the expectation
+                }
+           
         """
         raise NotImplementedError
 
@@ -278,12 +288,15 @@ class DataSet(object):
             values_set (set-like): The set of objects or unique data points corresponding to the column.
 
         Returns:
-            result (bool)
+            dict:
+                {
+                    "success": (bool) True if the column passed the expectation,
+                    "exceptions_list": (list) the values that did not pass the expectation
+                }
+
+        See Also:
+            expect_column_values_to_not_be_in_set
             
-            If suppress_exceptions=True then return the boolean value in "success" instead of dict.
-
-        !!! Prevent division-by-zero errors in the `mostly` logic
-
         """
         raise NotImplementedError
 
@@ -295,12 +308,18 @@ class DataSet(object):
             values_set (list): The set of objects or unique data points that should not correspond to the column.
 
         Keyword Args:
+            mostly=None: Return "success": True if the percentage of values not in the set is greater than or equal to mostly (a float between 0 and 1).
 
         Returns:
-            result (bool)
-            
-            If suppress_exceptions=True then return the boolean value in "success" instead of dict.
+            dict:
+                {
+                    "success": (bool) True if the column passed the expectation,
+                    "exceptions_list": (list) the values that did not pass the expectation
+                }
 
+        See Also:
+            expect_column_values_to_not_be_in_set
+            
         """
         raise NotImplementedError
 
@@ -313,12 +332,18 @@ class DataSet(object):
             max_value (int): The maximum value for a column entry.
 
         Keyword Args:
+            mostly=None: Return "success": True if the percentage of values is greater than or equal to mostly (a float between 0 and 1).
 
         Returns:
-            result (bool)
-            
-            If suppress_exceptions=True then return the boolean value in "success" instead of dict.
+            dict:
+                {
+                    "success": (bool) True if the column passed the expectation,
+                    "exceptions_list": (list) the values that did not pass the expectation
+                }
 
+        See Also:
+            expect_column_value_lengths_to_be_between
+            
         """
         raise NotImplementedError
 
@@ -333,12 +358,18 @@ class DataSet(object):
             max_value (int): The maximum value for a column entry length.
 
         Keyword Args:
+            mostly=None: Return "success": True if the percentage of value lengths is greater than or equal to mostly (a float between 0 and 1).
 
         Returns:
-            result (bool)
-            
-            If suppress_exceptions=True then return the boolean value in "success" instead of dict.
+            dict:
+                {
+                    "success": (bool) True if the column passed the expectation,
+                    "exceptions_list": (list) the values that did not pass the expectation
+                }
 
+        See Also:
+            expect_column_values_to_be_between
+            
         """
         raise NotImplementedError
 
@@ -350,17 +381,24 @@ class DataSet(object):
             regex (str): The regular expression that the column entry should match.
 
         Keyword Args:
+            mostly=None: Return "success": True if the percentage of matches is greater than or equal to mostly (a float between 0 and 1).
 
         Returns:
-            result (bool)
-            
-            If suppress_exceptions=True then return the boolean value in "success" instead of dict.
+            dict:
+                {
+                    "success": (bool) True if the column passed the expectation,
+                    "exceptions_list": (list) the values that did not pass the expectation
+                }
+
+        See Also:
+            expect_column_values_to_not_match_regex
+            expect_column_values_to_match_regex_list
 
         """
         raise NotImplementedError
 
     def expect_column_values_to_not_match_regex(self, column, regex, mostly=None, suppress_exceptions=False):
-        """Expect column entries to be strings that do not match a given regular expression.
+        """Expect column entries to be strings that do NOT match a given regular expression.
 
         Q: Emphasize the not?
 
@@ -369,30 +407,44 @@ class DataSet(object):
             regex (str): The regular expression that the column entry should NOT match.
 
         Keyword Args:
+            mostly=None: Return "success": True if the percentage of NOT matches is greater than or equal to mostly (a float between 0 and 1).
 
         Returns:
-            result (bool)
-            
-            If suppress_exceptions=True then return the boolean value in "success" instead of dict.
+            dict:
+                {
+                    "success": (bool) True if the column passed the expectation,
+                    "exceptions_list": (list) the values that did not pass the expectation
+                }
+
+        See Also:
+            expect_column_values_to_match_regex
+            expect_column_values_to_match_regex_list
 
         """
         raise NotImplementedError
 
-    def expect_column_values_to_match_regex_list(self, column, regex_list, mostly=None, suppress_exceptions=False):
+    def expect_column_values_to_match_regex_list(self, column, regex_list, required_match, mostly=None, suppress_exceptions=False):
         """Expect the column entries to be strings that match at least one of a list of regular expressions.
 
         Q: Is it sufficient for the column value to match at least one regex in the list?
 
         Args:
             column (str): The column name.
-            regex_list (list): The list of regular expressions in which the column entries should match at least one.
+            regex_list (list): The list of regular expressions in which the column entries should match according to required_match.
 
         Keyword Args:
+            mostly=None: Return "success": True if the percentage of matches is greater than or equal to mostly (a float between 0 and 1).
 
         Returns:
-            result (bool)
-            
-            If suppress_exceptions=True then return the boolean value in "success" instead of dict.
+            dict:
+                {
+                    "success": (bool) True if the column passed the expectation,
+                    "exceptions_list": (list) the values that did not pass the expectation
+                }
+
+        See Also:
+            expect_column_values_to_match_regex
+            expect_column_values_to_not_match_regex
 
         """
         raise NotImplementedError
@@ -402,26 +454,21 @@ class DataSet(object):
     def expect_column_values_to_match_strftime_format(self, column, strftime_format, mostly=None, suppress_exceptions=False):
         """Expect column entries to be strings representing a date or time with a given format.
 
+        WARNING: Note that strftime formats are not universally portable across implementations.
+        For example, the %z directive may not be implemented before Python 3.2.
+
         Args:
             column (str): The column name.
-            strftime_format (str): The time format that the column entries should match.
+            strftime_format (str): The datetime format that the column entries should match.
 
         Keyword Args:
 
         Returns:
-            result (bool)
-            
-            If suppress_exceptions=True then return the boolean value in "success" instead of dict.
-
-        Expect values in this column to match the user-provided datetime format.
-        WARNING: Note that strftime formats are not universally portable across implementations.
-        For example, the %z directive may not be implemented before python 3.2.
-
-        Args:
-            col: The column name
-            format: The format string against which values should be validated
-            mostly (float): The proportion of values that must match the condition for success to be true.
-            suppress_exceptions: Only return a boolean success value, not a dictionary with other results.
+            dict:
+                {
+                    "success": (bool) True if the column passed the expectation,
+                    "exceptions_list": (list) the values that did not pass the expectation
+                }
 
         """
         raise NotImplementedError
@@ -435,9 +482,11 @@ class DataSet(object):
         Keyword Args:
 
         Returns:
-            result (bool)
-            
-            If suppress_exceptions=True then return the boolean value in "success" instead of dict.
+            dict:
+                {
+                    "success": (bool) True if the column passed the expectation,
+                    "exceptions_list": (list) the values that did not pass the expectation
+                }
 
         """
         raise NotImplementedError
@@ -448,12 +497,15 @@ class DataSet(object):
         Args:
             column (str): The column name.
 
-        Keyword Args:
-
         Returns:
-            result (bool)
-            
-            If suppress_exceptions=True then return the boolean value in "success" instead of dict.
+            dict:
+                {
+                    "success": (bool) True if the column passed the expectation,
+                    "exceptions_list": (list) the values that did not pass the expectation
+                }
+
+        See Also:
+            expect_column_values_to_match_json_schema
 
         """
         raise NotImplementedError
@@ -465,15 +517,20 @@ class DataSet(object):
 
         Args:
             column (str): The column name.
-            json_schema (): The JSON schema that each column entry should resemble.
+            json_schema (JSON object): The JSON schema that each column entry should resemble.
 
         Keyword Args:
 
         Returns:
-            result (bool)
-            
-            If suppress_exceptions=True then return the boolean value in "success" instead of dict.
+            dict:
+                {
+                    "success": (bool) True if the column passed the expectation,
+                    "exceptions_list": (list) the values that did not pass the expectation
+                }
 
+        See Also:
+            expect_column_values_to_be_valid_json
+            
         """
         raise NotImplementedError
 
@@ -488,9 +545,11 @@ class DataSet(object):
             max_value (int): The maximum value for the column mean.
 
         Returns:
-            result (bool)
-            
-            If suppress_exceptions=True then return the boolean value in "success" instead of dict.
+            dict:
+                {
+                    "success": (bool) True if the column passed the expectation,
+                    "exceptions_list": (list) the values that did not pass the expectation
+                }
 
         """
         raise NotImplementedError
@@ -504,9 +563,11 @@ class DataSet(object):
             max_value (int): The maximum value for the column median.
 
         Returns:
-            result (bool)
-            
-            If suppress_exceptions=True then return the boolean value in "success" instead of dict.
+            dict:
+                {
+                    "success": (bool) True if the column passed the expectation,
+                    "exceptions_list": (list) the values that did not pass the expectation
+                }
 
         """
         raise NotImplementedError
@@ -519,12 +580,12 @@ class DataSet(object):
             min_value (int): The minimum value for the column standard deviation.
             max_value (int): The maximum value for the column standard deviation.
 
-        Keyword Args:
-
         Returns:
-            result (bool)
-            
-            If suppress_exceptions=True then return the boolean value in "success" instead of dict.
+            dict:
+                {
+                    "success": (bool) True if the column passed the expectation,
+                    "exceptions_list": (list) the values that did not pass the expectation
+                }
 
         """
         raise NotImplementedError
@@ -540,6 +601,7 @@ class DataSet(object):
         """Given two columns, expect one column to have entries such that the entries are a subset of the other column's entries.
 
         Q: Should the subset come first or second? Does it matter?
+        column 1 is subset of column 2
 
         Args:
             column_1 (str): The first column name to compare entries.
@@ -548,9 +610,11 @@ class DataSet(object):
         Keyword Args:
 
         Returns:
-            result (bool)
-            
-            If suppress_exceptions=True then return the boolean value in "success" instead of dict.
+            dict:
+                {
+                    "success": (bool) True if the column passed the expectation,
+                    "exceptions_list": (list) the values that did not pass the expectation
+                }
 
         """
         raise NotImplementedError
@@ -559,6 +623,8 @@ class DataSet(object):
         """Given two columns, expect one column to map multiple entries to a single entry of the other column.
 
         Q: What is a use case? Multiple values per entry corresponding to one value in another column as in gps coords to a name?
+        tables mapping to keys
+        column1 should be many column 2 should be one
 
         Args:
             column_1 (str): the column with multiple values per entry
@@ -567,9 +633,11 @@ class DataSet(object):
         Keyword Args:
 
         Returns:
-            result (bool)
-            
-            If suppress_exceptions=True then return the boolean value in "success" instead of dict.
+            dict:
+                {
+                    "success": (bool) True if the column passed the expectation,
+                    "exceptions_list": (list) the values that did not pass the expectation
+                }
 
         """
         raise NotImplementedError
