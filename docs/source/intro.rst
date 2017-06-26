@@ -14,7 +14,7 @@ What is Great Expectations?
 
 Great Expectations is a python framework for bringing data pipelines and products under test.
 
-Software developers have long known that automated testing is essential for managing complex codebases. Using the concept of :ref:`pipeline_testing`, Great Expectations brings the same discipline, confidence, and acceleration to data science and engineering teams.
+Software developers have long known that automated testing is essential for managing complex codebases. Great Expectations brings the same discipline, confidence, and acceleration to data science and engineering teams.
 
 
 Why would I use Great Expectations?
