@@ -4,31 +4,17 @@
    contain the root `toctree` directive.
 
 Welcome the documentation for Great Expectations!
-==============================================
-
-
-Overview
-------------------
+==============================================================================
 
 .. toctree::
    :maxdepth: 2
 
    intro
-   getting_started
    expectations
    validation
    workflow_advantages
-
-Details
-------------------
-
-.. toctree::
-   :maxdepth: 2
-
    glossary
-   pipeline_testing
-   under_the_hood
-
+   
 Indices and tables
 ------------------
 

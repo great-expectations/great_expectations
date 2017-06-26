@@ -1,4 +1,6 @@
+.. _pipeline_testing:
+
 ============
-Pipeline Testing
+Pipeline testing
 ============
 
