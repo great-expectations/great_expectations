@@ -344,12 +344,12 @@ class PandasDataSet(DataSet, pd.DataFrame):
             result = (not_null_values.mean() >= min_value) and (not_null_values.mean() <= max_value)
             return {
                 'success' : result,
-                'exception_list' : not_null_values.mean()
+                'true_mean' : not_null_values.mean()
             }
         except:
             return {
                 'success' : False,
-                'exception_list' : None
+                'true_mean' : None
             }
 
     @DataSet.column_expectation

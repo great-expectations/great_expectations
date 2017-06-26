@@ -68,7 +68,7 @@ def test_custom_class():
 
 	script_path = os.path.dirname(os.path.realpath(__file__))
 	df = ge.read_csv(
-		script_path+'/examples/titanic.csv',
+		script_path+'/examples/Titanic.csv',
 	    dataset_class=CustomPandasDataSet
 	)
 
