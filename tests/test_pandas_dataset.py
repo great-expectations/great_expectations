@@ -264,12 +264,12 @@ def test_expect_column_values_to_match_regex():
     #!!! Why do these tests have verbose=True?
     #['aa', 'ab', 'ac', 'a1', None]
     assert D.expect_column_values_to_match_regex('x', '^a')=={'success':True, 'exception_list':[]}
-    assert D.expect_column_values_to_match_regex('x', 'aa', verbose=True)=={'success':False, 'exception_list':['ab', 'ac', 'a1']}
-    assert D.expect_column_values_to_match_regex('x', 'a[a-z]', verbose=True)=={'success':False, 'exception_list':['a1']}
+    assert D.expect_column_values_to_match_regex('x', 'aa')=={'success':False, 'exception_list':['ab', 'ac', 'a1']}
+    assert D.expect_column_values_to_match_regex('x', 'a[a-z]')=={'success':False, 'exception_list':['a1']}
 
     #['aa', 'ab', 'ac', 'ba', 'ca']
-    assert D.expect_column_values_to_match_regex('y', '[abc]{2}', verbose=True)=={'success':True, 'exception_list':[]}
-    assert D.expect_column_values_to_match_regex('y', '[z]', verbose=True)=={'success':False, 'exception_list':['aa', 'ab', 'ac', 'ba', 'ca']}
+    assert D.expect_column_values_to_match_regex('y', '[abc]{2}')=={'success':True, 'exception_list':[]}
+    assert D.expect_column_values_to_match_regex('y', '[z]')=={'success':False, 'exception_list':['aa', 'ab', 'ac', 'ba', 'ca']}
 
 
     assert D.expect_column_values_to_match_regex('y', '[abc]{2}', suppress_exceptions=True) == {'success':True, 'exception_list':None}
