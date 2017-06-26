@@ -142,7 +142,7 @@ class DataSet(object):
             suppress_exceptions=False: Return the boolean of "success" instead of the entire dictionary.
 
         Returns:
-	    dict: "success": (bool)
+            result (bool)
             
             If suppress_exceptions=True, return the boolean value in "success" instead of dict.
 
@@ -153,14 +153,14 @@ class DataSet(object):
         """Expect the number of rows in a data set to be between two values.
 
         Args:
-            min_value (int)
-            max_value (int)
+            min_value (int): the minimum number of rows.
+            max_value (int): the maximum number of rows.
 
         Keyword Args:
             suppress_exceptions=False: Return the boolean of "success" instead of the entire dictionary.
 
         Returns:
-	    dict: "success": (bool), "true_row_count": (int) the number of rows in the table
+            result (bool)
 
             If suppress_exceptions=True, return the boolean value in "success" instead of dict.
 
@@ -180,7 +180,7 @@ class DataSet(object):
             suppress_exceptions=False: Return the boolean of "success" instead of the entire dictionary.
 
         Returns:
-	    dict: "success": (bool), "true_row_count": (int) the number of rows in the table
+	    result (bool)
 
             If suppress_exceptions=True, return the boolean value in "success" instead of dict.
 
@@ -203,7 +203,7 @@ class DataSet(object):
             suppress_exceptions=False: Return the boolean of "success" instead of the entire dictionary.
 
         Returns:
-	    dict: "success": (bool), "exception_list": (list) the values that have duplicates
+	    result (bool)
             
             If suppress_exceptions=True then the method returns the boolean value in "success" instead of dict.
 
@@ -226,7 +226,7 @@ class DataSet(object):
             suppress_exceptions (bool): Return the boolean of "success" instead of the entire dictionary.
 
         Returns:
-	    dict: "success": (bool), "exception_list": (list)
+	    result (bool)
             
             If suppress_exceptions=True then return the boolean value in "success" instead of dict.
 
@@ -244,7 +244,7 @@ class DataSet(object):
             suppress_exceptions=False: Return the boolean of "success" instead of the entire dictionary.
 
         Returns:
-            dict: "success":(bool), "result":(dict) an empty dictionary
+            result (bool)
             
             If suppress_exceptions=True then return the boolean value in "success" instead of dict.
 
@@ -254,14 +254,14 @@ class DataSet(object):
     def expect_column_values_to_be_of_type(self, column, dtype, mostly=None, suppress_exceptions=False):
         """Expect each column entry to be a specified data type.
 
+        Q: Will dtype be a string or a __type__ attribute?
+
         Args:
-            column (str):
-            dtype (str):
-            mostly (float): optional
-            suppress_exceptions (bool): optional
+            column (str): The column name.
+            dtype (str): The data type that each column should have as entries.
 
         Returns:
-            dict: "success":(bool), "result":(dict) an empty dictionary
+            result (bool)
             
             If suppress_exceptions=True then return the boolean value in "success" instead of dict.
 
@@ -274,13 +274,11 @@ class DataSet(object):
         """Expect each entry in a column to be in a given set.
 
         Args:
-            column (str):
-            values_set (set-like):
-            mostly (float): optional
-            suppress_exceptions (bool): optional
+            column (str): The column name.
+            values_set (set-like): The set of objects or unique data points corresponding to the column.
 
         Returns:
-            dict: "success":(bool), "result":(dict) an empty dictionary
+            result (bool)
             
             If suppress_exceptions=True then return the boolean value in "success" instead of dict.
 
@@ -293,12 +291,13 @@ class DataSet(object):
         """Expect column entries to not be in the set.
 
         Args:
-            column (str):
-            values_set (list):
-            suppress_exceptions (bool): optional
+            column (str): The column name.
+            values_set (list): The set of objects or unique data points that should not correspond to the column.
+
+        Keyword Args:
 
         Returns:
-            dict: "success":(bool), "result":(dict) an empty dictionary
+            result (bool)
             
             If suppress_exceptions=True then return the boolean value in "success" instead of dict.
 
@@ -306,17 +305,17 @@ class DataSet(object):
         raise NotImplementedError
 
     def expect_column_values_to_be_between(self, column, min_value, max_value, mostly=None, suppress_exceptions=False):
-        """Expect
+        """Expect column entries to be a number between a minimum value and a maximum value.
 
         Args:
-            column (str):
-            min_value (int):
-            max_value (int):
-            mostly (float): optional
-            suppress_exceptions (bool): optional
+            column (str): The column name.
+            min_value (int): The minimum value for a column entry.
+            max_value (int): The maximum value for a column entry.
+
+        Keyword Args:
 
         Returns:
-            dict: "success":(bool), "result":(dict) an empty dictionary
+            result (bool)
             
             If suppress_exceptions=True then return the boolean value in "success" instead of dict.
 
@@ -326,17 +325,17 @@ class DataSet(object):
     ##### String matching #####
 
     def expect_column_value_lengths_to_be_between(self, column, min_value, max_value, mostly=None, suppress_exceptions=False):
-        """Expect
+        """Expect column entries to have a measurable length which lies between a minimum value and a maximum value.
 
         Args:
-            column (str):
-            min_value (int):
-            max_value (int):
-            mostly (float):
-            suppress_exceptions (bool):
+            column (str): The column name.
+            min_value (int): The minimum value for a column entry length.
+            max_value (int): The maximum value for a column entry length.
+
+        Keyword Args:
 
         Returns:
-            dict: "success":(bool), "result":(dict) an empty dictionary
+            result (bool)
             
             If suppress_exceptions=True then return the boolean value in "success" instead of dict.
 
@@ -344,16 +343,16 @@ class DataSet(object):
         raise NotImplementedError
 
     def expect_column_values_to_match_regex(self, column, regex, mostly=None, suppress_exceptions=False):
-        """Expect
+        """Expect column entries to be strings that match a given regular expression.
 
         Args:
-            column (str):
-            regex (str):
-            mostly (float): optional
-            suppress_exceptions (bool): optional
+            column (str): The column name.
+            regex (str): The regular expression that the column entry should match.
+
+        Keyword Args:
 
         Returns:
-            dict: "success":(bool), "result":(dict) an empty dictionary
+            result (bool)
             
             If suppress_exceptions=True then return the boolean value in "success" instead of dict.
 
@@ -361,16 +360,18 @@ class DataSet(object):
         raise NotImplementedError
 
     def expect_column_values_to_not_match_regex(self, column, regex, mostly=None, suppress_exceptions=False):
-        """Expect
+        """Expect column entries to be strings that do not match a given regular expression.
+
+        Q: Emphasize the not?
 
         Args:
-            column (str):
-            regex (str):
-            mostly (float): optional
-            suppress_exceptions (bool): optional
+            column (str): The column name.
+            regex (str): The regular expression that the column entry should NOT match.
+
+        Keyword Args:
 
         Returns:
-            dict: "success":(bool), "result":(dict) an empty dictionary
+            result (bool)
             
             If suppress_exceptions=True then return the boolean value in "success" instead of dict.
 
@@ -378,16 +379,18 @@ class DataSet(object):
         raise NotImplementedError
 
     def expect_column_values_to_match_regex_list(self, column, regex_list, mostly=None, suppress_exceptions=False):
-        """Expect
+        """Expect the column entries to be strings that match at least one of a list of regular expressions.
+
+        Q: Is it sufficient for the column value to match at least one regex in the list?
 
         Args:
-            column (str):
-            regex_list (list):
-            mostly (float): optional
-            suppress_exceptions (bool): optional
+            column (str): The column name.
+            regex_list (list): The list of regular expressions in which the column entries should match at least one.
+
+        Keyword Args:
 
         Returns:
-            dict: "success":(bool), "result":(dict) an empty dictionary
+            result (bool)
             
             If suppress_exceptions=True then return the boolean value in "success" instead of dict.
 
@@ -397,16 +400,16 @@ class DataSet(object):
     ##### Datetime and JSON parsing #####
 
     def expect_column_values_to_match_strftime_format(self, column, strftime_format, mostly=None, suppress_exceptions=False):
-        """Expect
+        """Expect column entries to be strings representing a date or time with a given format.
 
         Args:
-            column (str):
-            strftime_format (str):
-            mostly (float): optional
-            suppress_exceptions (bool): optional
+            column (str): The column name.
+            strftime_format (str): The time format that the column entries should match.
+
+        Keyword Args:
 
         Returns:
-            dict: "success":(bool), "result":(dict) an empty dictionary
+            result (bool)
             
             If suppress_exceptions=True then return the boolean value in "success" instead of dict.
 
@@ -424,15 +427,15 @@ class DataSet(object):
         raise NotImplementedError
 
     def expect_column_values_to_be_dateutil_parseable(self, column, mostly=None, suppress_exceptions=False):
-        """Expect
+        """Expect column entries to be interpretable as a dateutil object.
 
         Args:
-            column (str):
-            mostly (float): optional
-            suppress_exceptions (bool): optional
+            column (str): The column name.
+
+        Keyword Args:
 
         Returns:
-            dict: "success":(bool), "result":(dict) an empty dictionary
+            result (bool)
             
             If suppress_exceptions=True then return the boolean value in "success" instead of dict.
 
@@ -440,14 +443,15 @@ class DataSet(object):
         raise NotImplementedError
 
     def expect_column_values_to_be_valid_json(self, column, suppress_exceptions=False):
-        """Expect
+        """Expect column entries to be data written in JavaScript Object Notation.
 
         Args:
-            column (str):
-            suppress_exceptions (bool): optional
+            column (str): The column name.
+
+        Keyword Args:
 
         Returns:
-            dict: "success":(bool), "result":(dict) an empty dictionary
+            result (bool)
             
             If suppress_exceptions=True then return the boolean value in "success" instead of dict.
 
@@ -455,15 +459,18 @@ class DataSet(object):
         raise NotImplementedError
 
     def expect_column_values_to_match_json_schema(self, column, json_schema, suppress_exceptions=False):
-        """Expect
+        """Expect column entries to be JSON objects with a given JSON schema.
+
+        Q: What kind of data type is the json_schema variable?
 
         Args:
-            column (str):
-            json_schema ():
-            suppress_exceptions (bool): optional
+            column (str): The column name.
+            json_schema (): The JSON schema that each column entry should resemble.
+
+        Keyword Args:
 
         Returns:
-            dict: "success":(bool), "result":(dict) an empty dictionary
+            result (bool)
             
             If suppress_exceptions=True then return the boolean value in "success" instead of dict.
 
@@ -473,15 +480,15 @@ class DataSet(object):
     ##### Aggregate functions #####
 
     def expect_column_mean_to_be_between(self, column, min_value, max_value):
-        """Expect
+        """Expect the column mean to be between a minimum value and a maximum value.
 
         Args:
-            column (str):
-            min_value (int):
-            max_value (int):
+            column (str): The column name.
+            min_value (int): The minimum value for the column mean.
+            max_value (int): The maximum value for the column mean.
 
         Returns:
-            dict: "success":(bool), "result":(dict) an empty dictionary
+            result (bool)
             
             If suppress_exceptions=True then return the boolean value in "success" instead of dict.
 
@@ -489,15 +496,15 @@ class DataSet(object):
         raise NotImplementedError
 
     def expect_column_median_to_be_between(self, column, min_value, max_value):
-        """Expect
+        """Expect the column median to be between a minimum value and a maximum value.
 
         Args:
-            column (str):
-            min_value (int):
-            max_value (int):
+            column (str): The column name.
+            min_value (int): The minimum value for the column median.
+            max_value (int): The maximum value for the column median.
 
         Returns:
-            dict: "success":(bool), "result":(dict) an empty dictionary
+            result (bool)
             
             If suppress_exceptions=True then return the boolean value in "success" instead of dict.
 
@@ -505,16 +512,17 @@ class DataSet(object):
         raise NotImplementedError
 
     def expect_column_stdev_to_be_between(self, column, min_value, max_value, suppress_exceptions=False):
-        """Expect
+        """Expect the column standard deviation to be between a minimum value and a maximum value.
 
         Args:
-            column (str):
-            min_value (int):
-            max_value (int):
-            suppress_exceptions (bool): optional
+            column (str): The column name.
+            min_value (int): The minimum value for the column standard deviation.
+            max_value (int): The maximum value for the column standard deviation.
+
+        Keyword Args:
 
         Returns:
-            dict: "success":(bool), "result":(dict) an empty dictionary
+            result (bool)
             
             If suppress_exceptions=True then return the boolean value in "success" instead of dict.
 
@@ -529,16 +537,18 @@ class DataSet(object):
     # def expect_two_column_values_to_be_equal():
 
     def expect_two_column_values_to_be_subsets(self, column_1, column_2, mostly=None, suppress_exceptions=False):
-        """Expect
+        """Given two columns, expect one column to have entries such that the entries are a subset of the other column's entries.
+
+        Q: Should the subset come first or second? Does it matter?
 
         Args:
-            column_1 (str):
-            column_2 (str):
-            mostly (float): optional
-            suppress_exceptions (bool): optional
+            column_1 (str): The first column name to compare entries.
+            column_2 (str): The second column name to compare entries.
+
+        Keyword Args:
 
         Returns:
-            dict: "success":(bool), "result":(dict) an empty dictionary
+            result (bool)
             
             If suppress_exceptions=True then return the boolean value in "success" instead of dict.
 
@@ -546,16 +556,18 @@ class DataSet(object):
         raise NotImplementedError
 
     def expect_two_column_values_to_be_many_to_one(self, column_1, column_2, mostly=None, suppress_exceptions=False):
-        """Expect
+        """Given two columns, expect one column to map multiple entries to a single entry of the other column.
+
+        Q: What is a use case? Multiple values per entry corresponding to one value in another column as in gps coords to a name?
 
         Args:
-            column_1 (str):
-            column_2 (str):
-            mostly (float): optional
-            suppress_exceptions (bool): optional
+            column_1 (str): the column with multiple values per entry
+            column_2 (str): the column with one value per entry
+
+        Keyword Args:
 
         Returns:
-            dict: "success":(bool), "result":(dict) an empty dictionary
+            result (bool)
             
             If suppress_exceptions=True then return the boolean value in "success" instead of dict.
 
