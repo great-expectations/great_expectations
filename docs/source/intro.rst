@@ -34,6 +34,12 @@ See :ref:`workflow_advantages` to learn more about how Great Expectations speeds
 Getting started
 --------------------------------------------------------------------------------
 
+...is easy. Just clone the repository and install using pip.
+
+.. code-block:: bash
+
+    $ git clone https://github.com/abegong/great_expectations.git
+    $ pip install great_expectations/
 
 .. _`pipeline testing`: irc://freenode.net
 .. _`workflow advantages`: http://github.com/example/crawler/issues
