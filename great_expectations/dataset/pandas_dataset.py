@@ -656,7 +656,7 @@ class PandasDataSet(DataSet, pd.DataFrame):
             }
 
 
-    @Dataset.column_expectation
+    @DataSet.column_expectation
     def expect_column_median_to_be_between(self):
         raise NotImplementedError("Under Development")
 

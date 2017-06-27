@@ -17,7 +17,10 @@ config = {
     'author_email': 'abegong@gmail.com',
     'version': '0.0.1',
     'install_requires': required,
-    'packages': ['great_expectations'],
+    'packages': [
+        'great_expectations',
+        'great_expectations.dataset',
+    ],
     'scripts': [
         'bin/great_expectations',
     ],
