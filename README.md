@@ -1,10 +1,9 @@
-great_expectations
+Great Expectations
 ================================================================================
 
+*Always know what to expect from your data.*
 
-Always know what to expect from your data.
 
---------------------------------------------------------------------------------
 
 What is great_expectations?
 --------------------------------------------------------------------------------
