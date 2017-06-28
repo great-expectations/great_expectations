@@ -7,18 +7,78 @@ from nose.tools import *
 import great_expectations as ge
 
 
+"""
+    # Data for testing
+    D = ge.dataset.PandasDataSet({
+        'c1' : [],
+        'c2' : [],
+        'c3' : []
+    })
+    
+    
+    # Tests
+    T = [
+            {
+                'in':[],
+                'kwargs':{},
+                'out':{
+                    'success':, 
+                    'true_row_count':
+                    }},
+            {
+                'in':[], 
+                'kwargs':{},
+                'out':{
+                    'success':, 
+                    'true_row_count':
+                    }}
+    ]
+"""
+
+
 def test_expect_table_row_count_to_be_between():
 
+    # Data for testing
     D = ge.dataset.PandasDataSet({
         'c1' : [4,5,6,7],
         'c2' : ['a','b','c','d'],
         'c3' : [None,None,None,None]
     })
 
-    assert D.expect_table_row_count_to_be_between(3,5)=={'success':True, 'true_row_count':4}
-    assert D.expect_table_row_count_to_be_between(0,1)=={'success':False, 'true_row_count':4}
-    assert D.expect_table_row_count_to_be_between(4,4)=={'success':True, 'true_row_count':4}
-    assert D.expect_table_row_count_to_be_between(1,0)=={'success':False, 'true_row_count':4}
+    # Tests
+    T = [
+            {
+                'in':[3,5],
+                'kwargs':{},
+                'out':{
+                    'success':True, 
+                    'true_row_count':4
+                    }},
+            {
+                'in':[0,1],
+                'kwargs':{},
+                'out':{
+                    'success':False,
+                    'true_row_count':4
+                    }},
+            {
+                'in':[4,4],
+                'kwargs':{},
+                'out':{
+                    'success':True,
+                    'true_row_count':4
+                    }},
+            {
+                'in':[1,0],
+                'kwargs':{},
+                'out':{
+                    'success':False,
+                    'true_row_count':4
+                    }}
+    ]
+
+    for t in T:
+        assert D.expect_table_row_count_to_be_between(*t['in'], **t['kwargs'])==t['out']
 
 
 def test_expect_table_row_count_to_equal():
@@ -29,19 +89,43 @@ def test_expect_table_row_count_to_equal():
         'c3':[None,None,None,None]
     })
 
-    assert D.expect_table_row_count_to_equal(4)=={'success':True, 'true_row_count':4}
-    assert D.expect_table_row_count_to_equal(5)=={'success':False, 'true_row_count':4}
-    assert D.expect_table_row_count_to_equal(3)=={'success':False, 'true_row_count':4}
-    assert D.expect_table_row_count_to_equal(0)=={'success':False, 'true_row_count':4}
+    # Tests
+    T = [
+            {
+                'in':[4],
+                'kwargs':{},
+                'out':{
+                    'success':True,
+                    'true_row_count':4
+                    }},
+            {
+                'in':[5],
+                'kwargs':{},
+                'out':{
+                    'success':False,
+                    'true_row_count':4
+                    }},
+            {
+                'in':[3],
+                'kwargs':{},
+                'out':{
+                    'success':False,
+                    'true_row_count':4
+                    }},
+            {
+                'in':[0],
+                'kwargs':{},
+                'out':{
+                    'success':False,
+                    'true_row_count':4
+                    }}
+    ]
+
+    for t in T:
+        assert D.expect_table_row_count_to_equal(*t['in'])==t['out']
 
 
 def test_expect_column_values_to_be_unique():
-    """
-    Cases Tested:
-        Different data types are not equal
-        Different values are not equal
-        None and np.nan values trigger True
-    """
 
     D = ge.dataset.PandasDataSet({
         'a' : ['2', '2'],
@@ -51,23 +135,62 @@ def test_expect_column_values_to_be_unique():
         'n' : [None, np.nan]
     })
 
-    #Column string values are equal - 2 and 2
-    assert D.expect_column_values_to_be_unique('a') == {'success':False, 'exception_list':['2']}
-    #Column values are not equal - 1 and '2'
-    assert D.expect_column_values_to_be_unique('b') == {'success':True, 'exception_list':[]}
-    #Column int values are equal - 1 and '2'
-    assert D.expect_column_values_to_be_unique('c') == {'success':False, 'exception_list':[1]}
+    # Tests for D
+    T = [
+            {
+                'in':['a'],
+                'kwargs':{},
+                'out':{
+                    'success':False,
+                    'exception_list':['2']
+                    }},
+            {                
+                'in':['b'], 
+                'kwargs':{}, 
+                'out':{
+                    'success':True, 
+                    'exception_list':[]
+                    }},
+            {                
+                'in':['c'], 
+                'kwargs':{}, 
+                'out':{
+                    'success':False, 
+                    'exception_list':[1]
+                    }},
+            {                
+                'in':['d'], 
+                'kwargs':{}, 
+                'out':{
+                    'success':True, 
+                    'exception_list':[]
+                    }},
+            {                
+                'in':['n'], 
+                'kwargs':{}, 
+                'out':{
+                    'success':True, 
+                    'exception_list':[]
+                    }},
+            {                
+                'in':['n'], 
+                'kwargs':{'suppress_exceptions':True}, 
+                'out':{
+                    'success':True, 
+                    'exception_list':[]
+                    }},
+            {                
+                'in':['a'], 
+                'kwargs':{'suppress_exceptions':True}, 
+                'out':{
+                    'success':False, 
+                    'exception_list':None
+                    }}
+    ]
 
-    #!!! Different data types are never equal
-    #Column int value and string value are equal - 1 and '1'
-    assert D.expect_column_values_to_be_unique('d') == {'success':True, 'exception_list':[]}
+    for t in T:
+        assert D.expect_column_values_to_be_unique(*t['in'], **t['kwargs']) == t['out']
 
-    #np.nan and None pass
-    assert D.expect_column_values_to_be_unique('n') == {'success':True, 'exception_list':[]}
-
-    # Test suppress_exceptions
-    assert D.expect_column_values_to_be_unique('n',suppress_exceptions = True) == {'success':True, 'exception_list':[]}
-    assert D.expect_column_values_to_be_unique('a',suppress_exceptions = True) == {'success':False, 'exception_list':None}
 
     df = ge.dataset.PandasDataSet({
         'a' : ['2', '2', '2', '2'],
@@ -75,19 +198,55 @@ def test_expect_column_values_to_be_unique():
         'n' : [None, None, np.nan, None],
     })
 
-    #Column string values are equal - 2 and 2
-    assert df.expect_column_values_to_be_unique('a') == {'success':False, 'exception_list':['2','2','2']}
+    # Tests for df
+    T = [
+            {
+                'in':['a'], 
+                'kwargs':{},
+                'out':{
+                    'success':False, 
+                    'exception_list':['2','2','2']
+                    }},
+            {
+                'in':['b'], 
+                'kwargs':{'mostly':.25}, 
+                'out':{
+                    'success':True, 
+                    'exception_list':['2']
+                    }},
+            {
+                'in':['b'], 
+                'kwargs':{'mostly':.75}, 
+                'out':{
+                    'success':False, 
+                    'exception_list':['2']
+                    }},
+            {
+                'in':['a'], 
+                'kwargs':{'mostly':1}, 
+                'out':{
+                    'success':False, 
+                    'exception_list':['2','2','2']
+                    }},
+            {
+                'in':['n'], 
+                'kwargs':{'mostly':.2}, 
+                'out':{
+                    'success':True, 
+                    'exception_list':[]
+                    }},
+            {
+                'in':['a'], 
+                'kwargs':{'suppress_exceptions':True}, 
+                'out':{
+                    'success':False, 
+                    'exception_list':None
+                    }}
+    ]
 
-    # Test mostly
-    # !!! Really important to remember that this is mostly for NOT-NULL values.
-    # !!! Tricky because you have to keep that in your mind if your column has many nulls
-    assert df.expect_column_values_to_be_unique('b', mostly=.25)=={'success':True, 'exception_list':['2']}
-    assert df.expect_column_values_to_be_unique('b', mostly=.75)=={'success':False, 'exception_list':['2']}
-    assert df.expect_column_values_to_be_unique('a', mostly=1)=={'success':False, 'exception_list':['2','2','2']}
-    assert df.expect_column_values_to_be_unique('n', mostly=.2)=={'success':True, 'exception_list':[]}
+    for t in T:
+        assert df.expect_column_values_to_be_unique(*t['in'], **t['kwargs']) == t['out']
 
-    # Test suppress_exceptions once more
-    assert df.expect_column_values_to_be_unique('a',suppress_exceptions = True) == {'success':False, 'exception_list':None}
 
 
 def test_expect_column_values_to_not_be_null():
@@ -106,6 +265,56 @@ def test_expect_column_values_to_not_be_null():
         'z' : [2, 5],
     })
 
+    T = [
+            {
+                'in':['y'],
+                'kwargs':{},
+                'out':{
+                    'success':False, 
+                    'exception_list':[None]
+                    }},
+            {
+                'in':['n'], 
+                'kwargs':{},
+                'out':{
+                    'success':False, 
+                    'exception_list':[None, None]
+                    }},
+            {
+                'in':['z'], 
+                'kwargs':{},
+                'out':{
+                    'success':True, 
+                    'exception_list':[]
+                    }},
+            {
+                'in':['x'], 
+                'kwargs':{'suppress_exceptions':True},
+                'out':{
+                    'success':False, 
+                    'exception_list':None
+                    }},
+            {
+                'in':['n'], 
+                'kwargs':{'suppress_exceptions':True},
+                'out':{
+                    'success':False, 
+                    'exception_list':None
+                    }},
+            {
+                'in':['z'], 
+                'kwargs':{'suppress_exceptions':True},
+                'out':{
+                    'success':True, 
+                    'exception_list':None
+                    }}
+    ]
+
+
+    for t in T:
+        assert D.expect_column_values_to_not_be_null(*t['in'], **t['kwargs'])==t['out']
+
+
     D2 = ge.dataset.PandasDataSet({
         'a' : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
         'b' : [1, 2, 3, 4, 5, 6, 7, 8, 9, None],
@@ -115,23 +324,68 @@ def test_expect_column_values_to_not_be_null():
         D.expect_column_values_to_not_be_null('x'),
         {'success':False, 'exception_list':[None]}
     )
-    assert D.expect_column_values_to_not_be_null('y')=={'success':False, 'exception_list':[None]}
-    assert D.expect_column_values_to_not_be_null('n')=={'success':False, 'exception_list':[None, None]}
-    assert D.expect_column_values_to_not_be_null('z')=={'success':True, 'exception_list':[]}
 
-    assert D.expect_column_values_to_not_be_null('x', suppress_exceptions=True)=={'success':False, 'exception_list':None}
-    assert D.expect_column_values_to_not_be_null('n', suppress_exceptions=True)=={'success':False, 'exception_list':None}
-    assert D.expect_column_values_to_not_be_null('z', suppress_exceptions=True)=={'success':True, 'exception_list':None}
+    T = [
+            {
+                'in':['a'], 
+                'kwargs':{},
+                'out':{
+                    'success':True, 
+                    'exception_list':[]
+                    }},
+            {
+                'in':['a'], 
+                'kwargs':{'mostly':.90},
+                'out':{
+                    'success':True, 
+                    'exception_list':[]
+                    }},
+            {
+                'in':['b'], 
+                'kwargs':{},
+                'out':{
+                    'success':False, 
+                    'exception_list':[None]
+                    }},
+            {
+                'in':['b'], 
+                'kwargs':{'mostly':.95},
+                'out':{
+                    'success':False, 
+                    'exception_list':[None]
+                    }},
+            {
+                'in':['b'], 
+                'kwargs':{'mostly':.90},
+                'out':{
+                    'success':True, 
+                    'exception_list':[None]
+                    }},
+            {
+                'in':['b'], 
+                'kwargs':{'suppress_exceptions':True},
+                'out':{
+                    'success':False,
+                    'exception_list':None
+                    }},
+            {
+                'in':['b'], 
+                'kwargs':{'mostly':.95, 'suppress_exceptions':True},
+                'out':{
+                    'success':False, 
+                    'exception_list':None
+                    }},
+            {
+                'in':['b'], 
+                'kwargs':{'mostly':.90, 'suppress_exceptions':True},
+                'out':{
+                    'success':True, 
+                    'exception_list':None
+                    }}
+    ]
 
-    assert D2.expect_column_values_to_not_be_null('a')=={'success':True, 'exception_list':[]}
-    assert D2.expect_column_values_to_not_be_null('a', mostly=.90)=={'success':True, 'exception_list':[]}
-    assert D2.expect_column_values_to_not_be_null('b')=={'success':False, 'exception_list':[None]}
-    assert D2.expect_column_values_to_not_be_null('b', mostly=.95)=={'success':False, 'exception_list':[None]}
-    assert D2.expect_column_values_to_not_be_null('b', mostly=.90)=={'success':True, 'exception_list':[None]}
-
-    assert D2.expect_column_values_to_not_be_null('b', suppress_exceptions=True)=={'success':False, 'exception_list':None}
-    assert D2.expect_column_values_to_not_be_null('b', mostly=.95, suppress_exceptions=True)=={'success':False, 'exception_list':None}
-    assert D2.expect_column_values_to_not_be_null('b', mostly=.90, suppress_exceptions=True)=={'success':True, 'exception_list':None}
+    for t in T:
+        assert D2.expect_column_values_to_not_be_null(*t['in'], **t['kwargs'])==t['out']
 
 
 def test_expect_column_values_to_be_null():
