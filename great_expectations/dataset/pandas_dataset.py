@@ -18,15 +18,7 @@ class PandasDataSet(DataSet, pd.DataFrame):
 
     @DataSet.column_expectation
     def expect_column_to_exist(self, column, suppress_exceptions=False):
-        """Expect the specified column to exist in the data set.
-
-        Args:
-            column: The column name
-            suppress_exceptions: Only return a boolean success value, not a dictionary with other results.
-
-        Returns:
-            By default: a dict containing "success" and "result" (an empty dictionary)
-            On suppress_exceptions=True: a boolean success value only
+        """
         """
 
         if suppress_exceptions:
@@ -40,8 +32,6 @@ class PandasDataSet(DataSet, pd.DataFrame):
     @DataSet.column_expectation
     def expect_table_row_count_to_be_between(self, min_value, max_value,suppress_exceptions=False):
         """
-        docstring
-        should we count null values?
         """
         outcome = False
         if self.shape[0] >= min_value and self.shape[0] <= max_value:
@@ -61,7 +51,6 @@ class PandasDataSet(DataSet, pd.DataFrame):
     @DataSet.column_expectation
     def expect_table_row_count_to_equal(self, value, suppress_exceptions=False):
         """
-        docstring
         """
         outcome = False
         if self.shape[0] == value:
@@ -81,12 +70,6 @@ class PandasDataSet(DataSet, pd.DataFrame):
     @DataSet.column_expectation
     def expect_column_values_to_be_unique(self, column, mostly=None, suppress_exceptions=False):
         """
-        Expect each not_null value in this column to be unique.
-
-        Display multiple duplicated items.
-        ['2','2','2'] will return `['2','2']` for the exceptions_list.
-
-        !!! Prevent division-by-zero errors in the `mostly` logic
         """
         not_null = self[column].notnull()
         not_null_values = self[not_null][column]
@@ -123,15 +106,6 @@ class PandasDataSet(DataSet, pd.DataFrame):
     @DataSet.column_expectation
     def expect_column_values_to_not_be_null(self, column, mostly=None, suppress_exceptions=False):
         """
-        Expect values in this column to not be null.
-
-        Instead of reinventing our own system for handling missing data, we use pandas.Series.isnull
-        and notnull to define "null."
-        See the pandas documentation for details.
-
-        Note: When returning the list of exceptions, replace np.nan with None.
-
-        !!! Prevent division-by-zero errors in the `mostly` logic
         """
 
         not_null = self[column].notnull()
@@ -158,7 +132,6 @@ class PandasDataSet(DataSet, pd.DataFrame):
     @DataSet.column_expectation
     def expect_column_values_to_be_null(self, column, mostly=None, suppress_exceptions=False):
         """
-        docstring
         """
         null = self[column].isnull()
         not_null = self[column].notnull()
@@ -187,8 +160,6 @@ class PandasDataSet(DataSet, pd.DataFrame):
     @DataSet.column_expectation
     def expect_column_values_to_be_of_type(self, column, dtype, mostly=None, suppress_exceptions=False):
         """
-        NOT STABLE
-        docstring
         """
         raise NotImplementedError("This method is under development.")
         #dtype_dict = {np.dtype("float64"):"double precision",np.dtype("O"):"text",np.dtype("bool"):"boolean",np.dtype("int64"):"integer"}
@@ -215,7 +186,6 @@ class PandasDataSet(DataSet, pd.DataFrame):
     @DataSet.column_expectation
     def expect_column_values_to_be_in_set(self, column, values_set, mostly=None, suppress_exceptions=False):
         """
-        !!! Prevent division-by-zero errors in the `mostly` logic
         """
         not_null = self[column].notnull()
         not_null_values = self[not_null][column]
@@ -259,7 +229,6 @@ class PandasDataSet(DataSet, pd.DataFrame):
     @DataSet.column_expectation
     def expect_column_values_to_not_be_in_set(self, column, values_set, mostly=None, suppress_exceptions=False):
         """
-        docstring
         """
         not_null = self[column].notnull()
         not_null_values = self[not_null][column]
@@ -294,7 +263,6 @@ class PandasDataSet(DataSet, pd.DataFrame):
     @DataSet.column_expectation
     def expect_column_values_to_be_between(self, column, min_value, max_value, mostly=None, suppress_exceptions=False):
         """
-        docstring
         """
         not_null = self[column].notnull()
         not_null_values = self[not_null][column]
@@ -329,7 +297,6 @@ class PandasDataSet(DataSet, pd.DataFrame):
     @DataSet.column_expectation
     def expect_column_value_lengths_to_be_between(self, column, min_value, max_value, mostly=None, suppress_exceptions=False):
         """
-        docstring
         """
         not_null = self[column].notnull()
         not_null_values = self[column][not_null]
@@ -377,7 +344,6 @@ class PandasDataSet(DataSet, pd.DataFrame):
     @DataSet.column_expectation
     def expect_column_values_to_match_regex(self, column, regex, mostly=None, suppress_exceptions=False):
         """
-        docstring
         """
         not_null = self[column].notnull()
         not_null_values = self[not_null][column]
@@ -419,7 +385,6 @@ class PandasDataSet(DataSet, pd.DataFrame):
     @DataSet.column_expectation
     def expect_column_values_to_not_match_regex(self, column, regex, mostly=None, suppress_exceptions=False):
         """
-        docstring
         """
         not_null = self[column].notnull()
         not_null_values = self[not_null][column]
@@ -462,9 +427,6 @@ class PandasDataSet(DataSet, pd.DataFrame):
     @DataSet.column_expectation
     def expect_column_values_to_match_regex_list(self, column, regex_list, mostly=None, suppress_exceptions=False):
         """
-        NOT STABLE
-        docstring
-        define test function first
         """
         outcome = list()
         exceptions = dict()
@@ -498,19 +460,6 @@ class PandasDataSet(DataSet, pd.DataFrame):
     @DataSet.column_expectation
     def expect_column_values_to_match_strftime_format(self, column, format, mostly=None, suppress_exceptions=False):
         """
-        Expect values in this column to match the user-provided datetime format.
-        WARNING: Note that strftime formats are not universally portable across implementations.
-        For example, the %z directive may not be implemented before python 3.2.
-
-        Args:
-            col (string): The column name
-            format (string): The format string against which values should be validated
-            mostly (float): The proportion of values that must match the condition for success to be true.
-            suppress_exceptions: Only return a boolean success value, not a dictionary with other results.
-
-        Returns:
-            By default: a dict containing "success" and "result" (an empty dictionary)
-            On suppress_exceptions=True: a boolean success value only
         """
 
         if (not (column in self)):
@@ -565,7 +514,6 @@ class PandasDataSet(DataSet, pd.DataFrame):
     @DataSet.column_expectation
     def expect_column_values_to_be_dateutil_parseable(self, column, mostly=None, suppress_exceptions=False):
         """
-        docstring
         """
         def is_parseable(val):
             try:
@@ -608,7 +556,6 @@ class PandasDataSet(DataSet, pd.DataFrame):
     @DataSet.column_expectation
     def expect_column_values_to_be_valid_json(self, column, suppress_exceptions=False):
         """
-        docstring
         """
         def is_json(val):
             try:
@@ -635,7 +582,6 @@ class PandasDataSet(DataSet, pd.DataFrame):
     @DataSet.column_expectation
     def expect_column_mean_to_be_between(self, column, min_value, max_value):
         """
-        docstring
         """
         dtype = self[column].dtype
         not_null = self[column].notnull()
@@ -656,7 +602,6 @@ class PandasDataSet(DataSet, pd.DataFrame):
     @DataSet.column_expectation
     def expect_column_stdev_to_be_between(self, column, min_value, max_value, suppress_exceptions=False):
         """
-        docstring
         """
         outcome = False
         if self[column].std() >= min_value and self[column].std() <= max_value:
@@ -676,7 +621,6 @@ class PandasDataSet(DataSet, pd.DataFrame):
     @DataSet.column_expectation
     def expect_two_column_values_to_be_subsets(self, column_1, column_2, mostly=None, suppress_exceptions=False):
         """
-        docstring
         """
         C1 = set(self[column_1])
         C2 = set(self[column_2])
@@ -706,102 +650,8 @@ class PandasDataSet(DataSet, pd.DataFrame):
     @DataSet.column_expectation
     def expect_two_column_values_to_be_many_to_one(self, column_1, column_2, mostly=None, suppress_exceptions=False):
         """
-        docstring
         """
         raise NotImplementedError("Expectation is not yet implemented")
 
-
-
-    #!!! DEPRECATED
-    #@DataSet.column_expectation
-    #def expect_column_value_lengths_to_be_less_than_or_equal_to(self, column, length, suppress_exceptions=False):
-    #    """
-    #    DEPRECATED: see expect_column_value_lengths_to_be_between
-    #    col: the name of the column
-    #    N: (int) the value to compare with the column values
-
-    #    Should this compare the number of digits in an integer or float or just compare directly to N?
-    #    """
-    #    not_null = self[column].notnull()
-    #    not_null_values = self[not_null][column]
-
-    #    #result = not_null_values.map(lambda x: len(str(x)) <= N)
-
-    #    dtype = self[column].dtype
-    #    # case that dtype is a numpy int or a float
-    #    if dtype in set([np.dtype('float64'), np.dtype('int64'), int, float]):
-    #        result = not_null_values < length
-    #    else:
-    #        try:
-    #            result = not_null_values.map(lambda x: len(str(x)) <= length)
-    #        except:
-    #            raise TypeError("PandasDataSet.expect_column_value_lengths_to_be_less_than_or_equal_to cannot handle columns with dtype %s" % str(dtype), )
-
-    #    if suppress_exceptions:
-    #        exceptions = None
-    #    else:
-    #        exceptions = list(not_null_values[result==False])
-
-    #    return {
-    #        'success' : result.all(),
-    #        'exception_list' : exceptions
-    #    }
-
-    #!!! Deprecated
-    # @DataSet.column_expectation
-    # def expect_values_to_be_equal_across_columns(self, column, regex, mostly=None, suppress_exceptions=False):
-    #     """
-    #     """
-    #     not_null = self[column].notnull()
-    #     not_null_values = self[not_null][column]
-
-    #     if len(not_null_values) == 0:
-    #         # print 'Warning: All values are null'
-    #         return (True, [])
-
-    #     matches = not_null_values.map(lambda x: re.findall(regex, str(x)) != [])
-
-    #     if suppress_exceptions:
-    #         exceptions = None
-    #     else:
-    #         exceptions = list(not_null_values[matches==False])
-
-    #     if mostly:
-    #         #Prevent division-by-zero errors
-    #         if len(not_null_values) == 0:
-    #             return {
-    #                 'success' : True,
-    #                 'exception_list' : exceptions
-    #             }
-
-    #         percent_matching = float(matches.sum())/len(not_null_values)
-    #         return {
-    #             'success' : (percent_matching >= mostly),
-    #             'exception_list' : exceptions
-    #         }
-    #     else:
-    #         return {
-    #             'success' : matches.all(),
-    #             'exception_list' : exceptions
-    #         }
-
-
-    #!!! Deprecated
-    # @DataSet.column_expectation
-    # def expect_column_values_to_be_equal_across_columns(self, column_1, column_2, suppress_exceptions=False):
-    #     """
-    #     docstring
-    #     """
-    #     result = self[column_1] == self[column_2]
-
-    #     if suppress_exceptions:
-    #         exceptions = None
-    #     else:
-    #         exceptions = self[[column_1, column_2]][~result]
-
-    #     return {
-    #         'success': result.all(),
-    #         'exception_list': exceptions
-    #     }
 
 

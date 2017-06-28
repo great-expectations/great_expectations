@@ -193,8 +193,6 @@ class DataSet(object):
 
     def expect_column_values_to_be_of_type(self, column, dtype, mostly=None, suppress_exceptions=False):
         """
-        NOT STABLE
-        docstring
         """
         raise NotImplementedError
 

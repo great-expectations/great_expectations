@@ -8,17 +8,19 @@ import great_expectations as ge
 
 
 def test_expect_table_row_count_to_be_between():
-    D = ge.dataset.PandasDataSet({'c1':[4,5,6,7],'c2':['a','b','c','d'],'c3':[None,None,None,None]})
 
+    D = ge.dataset.PandasDataSet({'c1':[4,5,6,7],'c2':['a','b','c','d'],'c3':[None,None,None,None]})
     out1 = D.expect_table_row_count_to_be_between(3,5)
+
     assert out1['success']==True
     assert out1['true_row_count']==4
 
 
 def test_expect_table_row_count_to_equal():
-    D = ge.dataset.PandasDataSet({'c1':[4,5,6,7],'c2':['a','b','c','d'],'c3':[None,None,None,None]})
 
+    D = ge.dataset.PandasDataSet({'c1':[4,5,6,7],'c2':['a','b','c','d'],'c3':[None,None,None,None]})
     out1 = D.expect_table_row_count_to_equal(4)
+
     assert out1['success']==True
     assert out1['true_row_count']==4
 
@@ -156,23 +158,23 @@ def test_expect_column_values_to_be_null():
     assert D.expect_column_values_to_be_null('a', mostly = .5, suppress_exceptions = True)=={'success':True, 'exception_list':None}
 
 
-#def test_expect_column_values_to_be_of_type():
-#    """
-#    Cases Tested:
-#
-#    """
-#
-#    D = ge.dataset.PandasDataSet({
-#        'x' : [1,2,4],
-#        'y' : [1.0,2.2,5.3],
-#        'z' : ['hello', 'jello', 'mello'],
-#        'n' : [None, np.nan, None],
-#        'b' : [False, True, False],
-#        's' : ['hello', 'jello', 1],
-#        's1' : ['hello', 2.0, 1],
-#    })
-#
-#    assert D.expect_column_values_to_be_of_type('x','double precision')=={'success':True, [])
+def test_expect_column_values_to_be_of_type():
+    """
+    Cases Tested:
+
+    """
+
+    D = ge.dataset.PandasDataSet({
+        'x' : [1,2,4],
+        'y' : [1.0,2.2,5.3],
+        'z' : ['hello', 'jello', 'mello'],
+        'n' : [None, np.nan, None],
+        'b' : [False, True, False],
+        's' : ['hello', 'jello', 1],
+        's1' : ['hello', 2.0, 1],
+    })
+
+    assert D.expect_column_values_to_be_of_type('x','double precision')=={'success':True, 'exception_list':[]}
 #    assert D.expect_column_values_to_be_of_type('x','text')=={'success':False, [1,2,4])
 #    assert D.expect_column_values_to_be_of_type('y','double precision')=={'success':True, [])
 #    assert D.expect_column_values_to_be_of_type('y','boolean')=={'success':False, [1.0,2.2,5.3])
@@ -533,48 +535,5 @@ def test_expect_two_column_values_to_be_subsets():
 def test_expect_two_column_values_to_be_many_to_one():
     pass
 
-
-
-#!!! Deprecated
-# def test_expect_column_values_to_be_equal_across_columns():
-#     """
-#     Cases Tested:
-#         Column values in x and y are equal
-#         Column values in x and z are not equal
-#         Column values in a and z are not equal
-#     """
-
-#     D = ge.dataset.PandasDataSet({
-#         'x' : [2, 5, 8],
-#         'y' : [2, 5, 8],
-#         'z' : [2, 5, 6],
-#         'a' : [1, 2, 3],
-#     })
-
-#     #Test True case for col x==y
-#     assert D.expect_column_values_to_be_equal_across_columns('x', 'y', suppress_exceptions=True)=={'success':True,'exception_list':None}
-#     #Test one value False case for col x==z
-#     assert D.expect_column_values_to_be_equal_across_columns('x', 'z', suppress_exceptions=True)=={'success':False,'exception_list':None}
-#     #Test True
-#     assert D.expect_column_values_to_be_equal_across_columns('a', 'z', suppress_exceptions=True)=={'success':False,'exception_list':None}
-
-
-### DEPRECATED: see test_expect_column_value_lengths_to_be_between
-#def test_expect_column_value_lengths_to_be_less_than_or_equal_to():
-#    """
-#    Cases Tested:
-#
-#    """
-#
-#    D = ge.dataset.PandasDataSet({
-#        'x' : [1,2,4],
-#        'y' : ['three','four','five'],
-#        'n' : [None,np.nan,None],
-#    })
-#
-#    assert D.expect_column_value_lengths_to_be_less_than_or_equal_to('x',6)=={'success':True, [])
-#    assert D.expect_column_value_lengths_to_be_less_than_or_equal_to('y',2)=={'success':False, ['three','four','five'])
-#    assert D.expect_column_value_lengths_to_be_less_than_or_equal_to('y',6)=={'success':True, [])
-#    assert D.expect_column_value_lengths_to_be_less_than_or_equal_to('n',0)=={'success':True, [])
 
 
