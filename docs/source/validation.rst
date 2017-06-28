@@ -8,9 +8,14 @@ Once you've constructed Expectations, you can use them to validate new data.
 
 .. code-block:: bash
 
+    >> import json
     >> import great_expectations as ge
-    >> users_table = ge.connect_to_table('our_postgres_db', 'users')
-    >> users_table.validate()
+    >> my_expectations_config = json.load(file("my_titanic_expectations.json"))
+    >> my_df = ge.read_csv(
+        "./tests/examples/titanic.csv",
+        expectations_config=my_expectations_config
+    )
+    >> my_df.validate()
     user_id    expect_column_values_to_be_unique : True, []
 
 

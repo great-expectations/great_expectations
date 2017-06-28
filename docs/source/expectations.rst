@@ -14,62 +14,58 @@ Great Expectations's connect-and-expect API makes it easy to declare Expectation
 .. code-block:: bash
 
     >> import great_expectations as ge
-    >> ge.list_sources()
-    ['our_postgres_db', 'last_minute_inventory.xlsx',]
+    >> my_df = ge.read_csv("./tests/examples/titanic.csv")
 
-    >> our_postgres_db = ge.connect_source('our_postgres_db')
-    >> our_postgres_db.list_tables()
-    ['users', 'inventory', 'discoveries']
+    >> my_df.expect_column_values_to_be_in_set("Sex", ["male", "female"])
+    {'exception_list': [], 'success': True}
 
-
-    >> # Connect to a specific Table
-    >> users_table = our_postgres_db.users
-    >>
-    >> # Create a new Expectation
-    >> users_table.user_id.expect_column_values_to_be_unique()
-    >>
-    >> # Save the Expectation to great_expectations/my_postgres_users_table.json
-    >> users_table.save_expectations()
-    ```
 
 
 Instant feedback
 ------------------------------------------------------------------------------
 
-When you invoke an Expectation method from a notebook or console, it will immediately return a dictionary containing the result and information about any execptions
+When you invoke an Expectation method from a notebook or console, it will immediately return a dictionary containing the result and a list of exceptions.
 
 For example:
 
 .. code-block:: bash
 
-    >> users_table.user_id.list()
-    [3,5,4,6,9,7,8,0,2,10,11,12,13,14,15,1,16,17,18,19,20,21,26,27,28,29,22,23,24,25]
+    >> print my_df.PClass.value_counts()
+    3rd    711
+    1st    322
+    2nd    279
+    *        1
+    Name: PClass, dtype: int64
 
-    >> users_table.user_id.expect_column_values_to_be_unique()
-    {
-        "success" : True,
-        "exception_list" : []
-    }
-
+    >> my_df.expect_column_values_to_be_in_set("PClass", ["1st", "2nd", "3rd"])
+    {'exception_list': ['*'], 'success': False}
 
 Another example:
 
 .. code-block:: bash
 
-    >> discoveries_table.discoverer_first_name.expect_column_values_to_be_in_set(['Edison', 'Bell'])
+    >> my_df.expect_column_values_to_match_regex("Name", '^[A-Za-z\, \(\)\']+$')
     {
-        "success" : False,
-        "exception_list" : ["Curie", "Curie"]
+        'exception_list': [
+            'Bjornstrm-Steffansson, Mr Mauritz Hakan',
+            'Brown, Mrs James Joseph (Margaret Molly" Tobin)"',
+            'Frolicher-Stehli, Mr Maxmillian',
+            'Frolicher-Stehli, Mrs Maxmillian (Margaretha Emerentia Stehli)',
+            'Lindeberg-Lind, Mr Erik Gustaf',
+            'Roebling, Mr Washington Augustus 2nd',
+            'Rothes, the Countess of (Noel Lucy Martha Dyer-Edwardes)',
+            'Simonius-Blumer, Col Alfons',
+            'Thorne, Mr George (alias of: Mr George Rosenshine)',
+            'Downton (?Douton), Mr William James',
+            'Aijo-Nirva, Mr Isak',
+            'Johannesen-Bratthammer, Mr Bernt',
+            'Larsson-Rondberg, Mr Edvard',
+            'Nicola-Yarred, Miss Jamila',
+            'Nicola-Yarred, Master Elias',
+            'Thomas, Mr John (? 1st/2nd class)'
+        ],
+        'success': False
     }
-
-    >> discoveries_table.discoverer_first_name.expect_column_values_to_be_in_set([
-        'Edison', 'Bell', 'Curie'
-       ])
-    {
-        "success" : True,
-        "exception_list" : []
-    }
-
 
 This instant feedback helps you zero in on exceptions very quickly, taking a lot of the pain and guesswork out of early data exploration.
 
@@ -91,6 +87,6 @@ This is how you always know what to expect from your data.
 
 .. code-block:: bash
 
-    >> our_postgres_db.save_expectations()
+    >> my_df.save_expectations_config("my_titanic_expectations.json")
 
 

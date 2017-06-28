@@ -7,11 +7,12 @@ Custom expectations
 It's common to want to extend Great Expectations with application- or domain-specific Expectations. For example:
 
 .. code-block:: bash
+
     expect_column_text_to_be_in_english
-    expect_column_value_to_be_valid_diagnosis_code
+    expect_column_value_to_be_valid_medical_diagnosis_code
     expect_column_value_to_be_be_unicode_encodable
 
-These Expectations aren't included in the default set, but could be extremely useful for many applications.
+These Expectations aren't included in the default set, but could be very useful for specific applications.
 
 Fear not! Great Expectations is designed for customization and extensibility.
 
@@ -22,9 +23,9 @@ The easy way
 
 1. Create a subclass from the DataSet class of your choice
 2. Define custom functions containing your business logic
-3. Use the @column_expectation and @elementwise_expectation decorators to turn them into full
+3. Use the `@column_expectation` and `@elementwise_expectation` decorators to turn them into full Expectations
 
-Note: following Great Expectations :ref:`naming_conventions` is highly reccommended, but not strictly required. If you want to confuse yourself with bad names, the package won't stop you--but it will raise a warning.
+Note: following Great Expectations :ref:`naming_conventions` is highly reccommended, but not strictly required. If you want to confuse yourself with bad names, the package won't stop you. (It *will* raise a warning.)
 
 .. code-block:: bash
 
@@ -40,11 +41,11 @@ Note: following Great Expectations :ref:`naming_conventions` is highly reccommen
         def expect_column_values_to_equal_3(self, element):
             return element == 3
 
-@column_expectation decorates a custom function, wrapping it with all the business logic required to turn it into a fully-fledged Expectation. This spares you the hassle of defining logic to handle required arguments like `mostly` and `output_format`. Your custom function can focus exclusively on the business logic of passing or failing the expectation.
+`@column_expectation` decorates a custom function, wrapping it with all the business logic required to turn it into a fully-fledged Expectation. This spares you the hassle of defining logic to handle required arguments like `mostly` and `output_format`. Your custom function can focus exclusively on the business logic of passing or failing the expectation.
 
-To work with these decorators, your custom function must accept two arguments: `self` and `series`. When your function is called, `series` will contain all the non-null values in the given column. It must return a series of boolean values in the same order, with the same index.
+To work with these decorators, your custom function must accept two arguments: `self` and `series`. When your function is called, `series` will contain all the non-null values in the given column. Your function must return a series of boolean values in the same order, with the same index.
 
-@elementwise_expectation works the same way, but it accepts a single element and returns a single boolean value, rather than a whole series.
+`@elementwise_expectation` works the same way, but it accepts a single element and returns a single boolean value, rather than a whole series.
 
 
 The hard way
@@ -52,9 +53,9 @@ The hard way
 
 1. Create a subclass from the DataSet class of your choice
 2. Write the whole expectation yourself
-3. Decorate it with the @expectation decorator
+3. Decorate it with the `@expectation` decorator
 
-This is more complicated, since you have to handle all the logic of additional parameters and output formats. Pay special attention to proper formatting of :ref:`result_objects`. Malformed result objects can break Great Expectations in subtle and unanticipated wasys.
+This is more complicated, since you have to handle all the logic of additional parameters and output formats. Pay special attention to proper formatting of :ref:`output_format`. Malformed result objects can break Great Expectations in subtle and unanticipated wasys.
 
 .. code-block:: bash
 
@@ -93,9 +94,9 @@ This is more complicated, since you have to handle all the logic of additional p
 Using custom expectations
 --------------------------------------------------------------------------------
 
-Let's suppose you've defined `CustomPandasDataSet` in a module called `custom_dataset.py`. You can instantiate a dataset with your custom expectations simply by adding `dataset_class=CustomPandasDataSet` in `ge.read_csv`.
+Let's suppose you've defined `CustomPandasDataSet` in a module called `custom_dataset.py`. You can instantiate a DataSet with your custom expectations simply by adding `dataset_class=CustomPandasDataSet` in `ge.read_csv`.
 
-Once you do this, all the functionality of your new expectation will be available for use.
+Once you do this, all the functionality of your new expectations will be available for uses.
 
 .. code-block:: bash
 
@@ -109,4 +110,15 @@ Once you do this, all the functionality of your new expectation will be availabl
         "success": False,
         "exception_list": [2,2,2,2,2,2,2,2]
     }
+
+A similar approach works for the command-line tool.
+
+.. code-block:: bash
+
+    >> great_expectations validate \
+        my_data_file.csv \
+        my_expectations.json \
+        dataset_class=custom_dataset.CustomPandasDataSet
+
+
 
