@@ -131,7 +131,9 @@ class DataSet(object):
                 dict(expectation.items() + result.items())
             )
 
-        return results
+        return {
+            "results" : results
+        }
 
 
     ##### Table shape expectations #####

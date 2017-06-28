@@ -16,22 +16,69 @@ Once you've constructed Expectations, you can use them to validate new data.
         expectations_config=my_expectations_config
     )
     >> my_df.validate()
-    user_id    expect_column_values_to_be_unique : True, []
-
+    {
+      "results" : [
+        {
+          "expectation_type": "expect_column_to_exist", 
+          "success": True, 
+          "kwargs": {
+            "column": "Unnamed: 0"
+          }
+        }, 
+        ...
+        {
+          "exception_list": 30.397989417989415, 
+          "expectation_type": "expect_column_mean_to_be_between", 
+          "success": True, 
+          "kwargs": {
+            "column": "Age", 
+            "max_value": 40, 
+            "min_value": 20
+          }
+        }, 
+        {
+          "exception_list": [], 
+          "expectation_type": "expect_column_values_to_be_between", 
+          "success": True, 
+          "kwargs": {
+            "column": "Age", 
+            "max_value": 80, 
+            "min_value": 0
+          }
+        }, 
+        {
+          "exception_list": [
+            "Downton (?Douton), Mr William James", 
+            "Jacobsohn Mr Samuel", 
+            "Seman Master Betros"
+          ], 
+          "expectation_type": "expect_column_values_to_match_regex", 
+          "success": True, 
+          "kwargs": {
+            "regex": "[A-Z][a-z]+(?: \\([A-Z][a-z]+\\))?, ", 
+            "column": "Name", 
+            "mostly": 0.95
+          }
+        }, 
+        {
+          "exception_list": [
+            "*"
+          ], 
+          "expectation_type": "expect_column_values_to_be_in_set", 
+          "success": False, 
+          "kwargs": {
+            "column": "PClass", 
+            "values_set": [
+              "1st", 
+              "2nd", 
+              "3rd"
+            ]
+          }
+        }
+      ]
+    }
 
 Calling great_expectations's validation method generates a JSON-formatted report describing the outcome of all expectations.
-
-.. code-block:: bash
-
-    >> discoveries_table = ge.connect_to_table('our_postgres_db', 'discoveries')
-    >> discoveries_table.validate()
-    {
-        "expectation_type" : "expect_column_values_to_be_in_set",
-        "column" : "discoverer_first_name",
-        "values" : ["Edison", "Bell"],
-        "success" : false,
-        "exception_list" : ["Curie", "Curie"]
-    }
 
 Command-line validation
 ------------------------------------------------------------------------------
@@ -40,28 +87,68 @@ This is especially powerful when combined with great_expectations's command line
 
 .. code-block:: bash
 
-    $ great_expectations validate our_postgres_db.users
-
-
-.. Comment
-    You can validate a single Table:
-
-    .. code-block:: bash
-
-        $ great_expectations validate our_postgres_db.users
-
-    \...or a whole Data Source...
-
-    .. code-block:: bash
-
-        $ great_expectations validate our_postgres_db
-
-    \...or the entire project.
-
-    .. code-block:: bash
-
-        $ great_expectations validate
-
+    $ validate tests/examples/titanic.csv tests/examples/titanic_expectations.json
+    {
+      "results" : [
+        {
+          "expectation_type": "expect_column_to_exist", 
+          "success": True, 
+          "kwargs": {
+            "column": "Unnamed: 0"
+          }
+        }, 
+        ...
+        {
+          "exception_list": 30.397989417989415, 
+          "expectation_type": "expect_column_mean_to_be_between", 
+          "success": True, 
+          "kwargs": {
+            "column": "Age", 
+            "max_value": 40, 
+            "min_value": 20
+          }
+        }, 
+        {
+          "exception_list": [], 
+          "expectation_type": "expect_column_values_to_be_between", 
+          "success": True, 
+          "kwargs": {
+            "column": "Age", 
+            "max_value": 80, 
+            "min_value": 0
+          }
+        }, 
+        {
+          "exception_list": [
+            "Downton (?Douton), Mr William James", 
+            "Jacobsohn Mr Samuel", 
+            "Seman Master Betros"
+          ], 
+          "expectation_type": "expect_column_values_to_match_regex", 
+          "success": True, 
+          "kwargs": {
+            "regex": "[A-Z][a-z]+(?: \\([A-Z][a-z]+\\))?, ", 
+            "column": "Name", 
+            "mostly": 0.95
+          }
+        }, 
+        {
+          "exception_list": [
+            "*"
+          ], 
+          "expectation_type": "expect_column_values_to_be_in_set", 
+          "success": False, 
+          "kwargs": {
+            "column": "PClass", 
+            "values_set": [
+              "1st", 
+              "2nd", 
+              "3rd"
+            ]
+          }
+        }
+      ]
+    }
 
 Deployment patterns
 ------------------------------------------------------------------------------

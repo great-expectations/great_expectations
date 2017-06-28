@@ -95,104 +95,106 @@ def test_validate():
     results = my_df.validate()
     assert_equal(
         results,
-        [
-          {
-            "expectation_type": "expect_column_to_exist", 
-            "success": True, 
-            "kwargs": {
-              "column": "Unnamed: 0"
-            }
-          }, 
-          {
-            "expectation_type": "expect_column_to_exist", 
-            "success": True, 
-            "kwargs": {
-              "column": "Name"
-            }
-          }, 
-          {
-            "expectation_type": "expect_column_to_exist", 
-            "success": True, 
-            "kwargs": {
-              "column": "PClass"
-            }
-          }, 
-          {
-            "expectation_type": "expect_column_to_exist", 
-            "success": True, 
-            "kwargs": {
-              "column": "Age"
-            }
-          }, 
-          {
-            "expectation_type": "expect_column_to_exist", 
-            "success": True, 
-            "kwargs": {
-              "column": "Sex"
-            }
-          }, 
-          {
-            "expectation_type": "expect_column_to_exist", 
-            "success": True, 
-            "kwargs": {
-              "column": "Survived"
-            }
-          }, 
-          {
-            "expectation_type": "expect_column_to_exist", 
-            "success": True, 
-            "kwargs": {
-              "column": "SexCode"
-            }
-          }, 
-          {
-            "exception_list": 30.397989417989415, 
-            "expectation_type": "expect_column_mean_to_be_between", 
-            "success": True, 
-            "kwargs": {
-              "column": "Age", 
-              "max_value": 40, 
-              "min_value": 20
-            }
-          }, 
-          {
-            "exception_list": [], 
-            "expectation_type": "expect_column_values_to_be_between", 
-            "success": True, 
-            "kwargs": {
-              "column": "Age", 
-              "max_value": 80, 
-              "min_value": 0
-            }
-          }, 
-          {
-            "exception_list": [
-              "Downton (?Douton), Mr William James", 
-              "Jacobsohn Mr Samuel", 
-              "Seman Master Betros"
-            ], 
-            "expectation_type": "expect_column_values_to_match_regex", 
-            "success": True, 
-            "kwargs": {
-              "regex": "[A-Z][a-z]+(?: \\([A-Z][a-z]+\\))?, ", 
-              "column": "Name", 
-              "mostly": 0.95
-            }
-          }, 
-          {
-            "exception_list": [
-              "*"
-            ], 
-            "expectation_type": "expect_column_values_to_be_in_set", 
-            "success": False, 
-            "kwargs": {
-              "column": "PClass", 
-              "values_set": [
-                "1st", 
-                "2nd", 
-                "3rd"
-              ]
-            }
-          }
-        ]
+        {
+          "results" : [
+              {
+                "expectation_type": "expect_column_to_exist", 
+                "success": True, 
+                "kwargs": {
+                  "column": "Unnamed: 0"
+                }
+              }, 
+              {
+                "expectation_type": "expect_column_to_exist", 
+                "success": True, 
+                "kwargs": {
+                  "column": "Name"
+                }
+              }, 
+              {
+                "expectation_type": "expect_column_to_exist", 
+                "success": True, 
+                "kwargs": {
+                  "column": "PClass"
+                }
+              }, 
+              {
+                "expectation_type": "expect_column_to_exist", 
+                "success": True, 
+                "kwargs": {
+                  "column": "Age"
+                }
+              }, 
+              {
+                "expectation_type": "expect_column_to_exist", 
+                "success": True, 
+                "kwargs": {
+                  "column": "Sex"
+                }
+              }, 
+              {
+                "expectation_type": "expect_column_to_exist", 
+                "success": True, 
+                "kwargs": {
+                  "column": "Survived"
+                }
+              }, 
+              {
+                "expectation_type": "expect_column_to_exist", 
+                "success": True, 
+                "kwargs": {
+                  "column": "SexCode"
+                }
+              }, 
+              {
+                "exception_list": 30.397989417989415, 
+                "expectation_type": "expect_column_mean_to_be_between", 
+                "success": True, 
+                "kwargs": {
+                  "column": "Age", 
+                  "max_value": 40, 
+                  "min_value": 20
+                }
+              }, 
+              {
+                "exception_list": [], 
+                "expectation_type": "expect_column_values_to_be_between", 
+                "success": True, 
+                "kwargs": {
+                  "column": "Age", 
+                  "max_value": 80, 
+                  "min_value": 0
+                }
+              }, 
+              {
+                "exception_list": [
+                  "Downton (?Douton), Mr William James", 
+                  "Jacobsohn Mr Samuel", 
+                  "Seman Master Betros"
+                ], 
+                "expectation_type": "expect_column_values_to_match_regex", 
+                "success": True, 
+                "kwargs": {
+                  "regex": "[A-Z][a-z]+(?: \\([A-Z][a-z]+\\))?, ", 
+                  "column": "Name", 
+                  "mostly": 0.95
+                }
+              }, 
+              {
+                "exception_list": [
+                  "*"
+                ], 
+                "expectation_type": "expect_column_values_to_be_in_set", 
+                "success": False, 
+                "kwargs": {
+                  "column": "PClass", 
+                  "values_set": [
+                    "1st", 
+                    "2nd", 
+                    "3rd"
+                  ]
+                }
+              }
+            ]
+        }
     )

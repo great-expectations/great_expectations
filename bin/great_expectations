@@ -20,7 +20,8 @@ def initialize():
 def validate(data_set, expectations_config_file):
 	expectations_config = json.load(file(expectations_config_file))
 	df = ge.read_csv(data_set, expectations_config=expectations_config)
-	df.validate()
+	result = df.validate()
+	print json.dumps(result, indent=2)
 
 argh.dispatch_commands([
 	initialize,
