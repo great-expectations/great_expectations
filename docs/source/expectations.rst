@@ -4,7 +4,7 @@
 Expectations
 ================================================================================
 
-Expectations are the workhorse abstraction in Great Expectations. Like assertions in traditional python unit tests, Expectations provide a flexible, declarative language for describing expected behavior. Unlike traditional unit tests, Great Expectations applies Expectations to data instead of code. (We find that this makes intuitive sense to many data scientists and engineers. See :ref:`pipeline_testing` for a more detailed explanation.
+Expectations are the workhorse abstraction in Great Expectations. Like assertions in traditional python unit tests, Expectations provide a flexible, declarative language for describing expected behavior. Unlike traditional unit tests, Great Expectations applies Expectations to data instead of code.
 
 Connect-and-expect
 ------------------------------------------------------------------------------
@@ -73,7 +73,7 @@ Another example:
 
 This instant feedback helps you zero in on exceptions very quickly, taking a lot of the pain and guesswork out of early data exploration.
 
-Great Expectations's Expectations have been developed by a broad cross-section of data scientists and engineers. Check out the :ref:`glossary`; it covers all kinds of practical use cases:
+Great Expectations's library of Expectations has been developed by a broad cross-section of data scientists and engineers. Check out the :ref:`glossary`; it covers all kinds of practical use cases:
 
 * Foreign key verification and row-based accounting for ETL
 * Form validation and regex pattern-matching for names, URLs, dates, addresses, etc.
@@ -85,7 +85,7 @@ Great Expectations's Expectations have been developed by a broad cross-section o
 Saving Expectations
 ------------------------------------------------------------------------------
 
-At the end of your exploration, call `save_expectations` to store all Expectations from your session to your pipeline test files. (See :ref:`under_the_hood` for a more detailed explanation of how this all works.)
+At the end of your exploration, call `save_expectations` to store all Expectations from your session to your pipeline test files.
 
 This is how you always know what to expect from your data.
 

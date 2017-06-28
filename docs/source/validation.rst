@@ -31,23 +31,31 @@ Calling great_expectations's validation method generates a JSON-formatted report
 Command-line validation
 ------------------------------------------------------------------------------
 
-This is especially powerful when combined with great_expectations's command line tool, which lets you validate in a one-line bash script. You can validate a single Table:
+This is especially powerful when combined with great_expectations's command line tool, which lets you validate in a one-line bash script.
 
 .. code-block:: bash
 
     $ great_expectations validate our_postgres_db.users
 
-\...or a whole Data Source...
 
-.. code-block:: bash
+.. Comment
+    You can validate a single Table:
 
-    $ great_expectations validate our_postgres_db
+    .. code-block:: bash
 
-\...or the entire project.
+        $ great_expectations validate our_postgres_db.users
 
-.. code-block:: bash
+    \...or a whole Data Source...
 
-    $ great_expectations validate
+    .. code-block:: bash
+
+        $ great_expectations validate our_postgres_db
+
+    \...or the entire project.
+
+    .. code-block:: bash
+
+        $ great_expectations validate
 
 
 Deployment patterns

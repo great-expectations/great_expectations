@@ -10,7 +10,7 @@ In the meantime, data pipelines often become deep stacks of unverified assumptio
 
 It's not unusual to see data teams grind to a halt for weeks (or even months!) to pay down accumulated pipeline debt. This work is never fun---after all, it's just data cleaning: no new products shipped; no new insights kindled. Even worse, it's re-cleaning old data that you thought you'd already dealt with. In our experience, servicing pipeline debt is one of the biggest productivity and morale killers on data teams.
 
-We strongly believe that most of this pain is avoidable. We built great_expectations to make it very, very simple to
+We strongly believe that most of this pain is avoidable. We built Great Expectations to make it very, very simple to
 
 1. set up your testing framework early,
 2. capture those early learnings while they're still fresh, and

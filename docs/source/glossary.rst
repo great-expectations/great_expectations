@@ -6,9 +6,9 @@ Glossary of Expectations
 
 Table shape
 --------------------------------------------------------------------------------
-* expect_table_to_have_column
-* expect_table_row_count_to_be_between
-* expect_two_table_row_counts_to_be_equal
+* :func:`expect_table_to_have_column <great_expectations.dataset.base.DataSet.expect_table_to_have_column>`
+* :func:`expect_table_row_count_to_be_between <great_expectations.dataset.base.DataSet.expect_table_row_count_to_be_between>`
+* :func:`expect_two_table_row_counts_to_be_equal <great_expectations.dataset.base.DataSet.expect_two_table_row_counts_to_be_equal>`
 
 Missing values, unique values, and types
 --------------------------------------------------------------------------------
@@ -38,19 +38,18 @@ String matching
 
 .. code-block:: bash
 
-	leading_whitespace :     `^[ \t\r\n]`
-	trailing_whitespace :    `[ \t\r\n]$`
-	date :                   `[1-2][0-9]{3}[-][0-1][0-9][-][0-3][0-9]`
-	phone_number :           `[0-9]{9}`
-	state :                  `[A-Z][A-Z]`
-	five_digit_zip_code :    `[0-9]{5}`
-	nine_digit_zip_code :    `[0-9]{9}`
-	name_suffix :            `(JR|III|II|SR|Jr|Sr)$`
-	name_like :              `^[A-Z][a-z]+$`
-	number_like :            `^\d+$`
-	address_like :           `^(P ?O Box)|(\d+[ABCDE]? (S|W|N|E|NW|SW|NE|SE)? ?([A-Z][a-z]+|\d+rd|\d+th))`
-	email :                  `^[A-Za-z0-9\\._\\-]*@[A-Za-z0-9\\-]*\\.(com|COM|NET|net|ORG|org|EDU|edu|GOV|gov)$`
-
+	leading_whitespace :     ^[ \t\r\n]
+	trailing_whitespace :    [ \t\r\n]$
+	date :                   [1-2][0-9]{3}[-][0-1][0-9][-][0-3][0-9]
+	phone_number :           [0-9]{10}
+	state :                  [A-Z][A-Z]
+	five_digit_zip_code :    [0-9]{5}
+	nine_digit_zip_code :    [0-9]{9}
+	name_suffix :            (JR|Jr|SR|Sr|II|III|IV)$
+	name_like :              ^[A-Z][a-z]+$
+	number_like :            ^\d+$
+	email_like :             (^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)
+	address_like :           \s*([0-9]*)\s((NW|SW|SE|NE|S|N|E|W))?(.*)((NW|SW|SE|NE|S|N|E|W))?((#|APT|BSMT|BLDG|DEPT|FL|FRNT|HNGR|KEY|LBBY|LOT|LOWR|OFC|PH|PIER|REAR|RM|SIDE|SLIP|SPC|STOP|STE|TRLR|UNIT|UPPR|\,)[^,]*)(\,)([\s\w]*)\n
 
 Datetime and JSON parsing
 --------------------------------------------------------------------------------

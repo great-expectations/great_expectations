@@ -12,14 +12,10 @@ class PandasDataSet(DataSet, pd.DataFrame):
     def __init__(self, *args, **kwargs):
         super(PandasDataSet, self).__init__(*args, **kwargs)
 
-
     ### Expectation methods ###
-
 
     @DataSet.column_expectation
     def expect_column_to_exist(self, column, suppress_exceptions=False):
-        """
-        """
 
         if suppress_exceptions:
             column in self
@@ -31,8 +27,7 @@ class PandasDataSet(DataSet, pd.DataFrame):
 
     @DataSet.column_expectation
     def expect_table_row_count_to_be_between(self, min_value, max_value,suppress_exceptions=False):
-        """
-        """
+
         outcome = False
         if self.shape[0] >= min_value and self.shape[0] <= max_value:
             outcome = True
@@ -50,8 +45,7 @@ class PandasDataSet(DataSet, pd.DataFrame):
 
     @DataSet.column_expectation
     def expect_table_row_count_to_equal(self, value, suppress_exceptions=False):
-        """
-        """
+
         outcome = False
         if self.shape[0] == value:
             outcome = True
@@ -69,8 +63,7 @@ class PandasDataSet(DataSet, pd.DataFrame):
 
     @DataSet.column_expectation
     def expect_column_values_to_be_unique(self, column, mostly=None, suppress_exceptions=False):
-        """
-        """
+
         not_null = self[column].notnull()
         not_null_values = self[not_null][column]
         unique_not_null_values = set(not_null_values)
@@ -105,8 +98,6 @@ class PandasDataSet(DataSet, pd.DataFrame):
 
     @DataSet.column_expectation
     def expect_column_values_to_not_be_null(self, column, mostly=None, suppress_exceptions=False):
-        """
-        """
 
         not_null = self[column].notnull()
         null_count = (not_null==False).sum()
@@ -131,8 +122,7 @@ class PandasDataSet(DataSet, pd.DataFrame):
 
     @DataSet.column_expectation
     def expect_column_values_to_be_null(self, column, mostly=None, suppress_exceptions=False):
-        """
-        """
+
         null = self[column].isnull()
         not_null = self[column].notnull()
         null_values = self[null][column]
@@ -159,8 +149,7 @@ class PandasDataSet(DataSet, pd.DataFrame):
 
     @DataSet.column_expectation
     def expect_column_values_to_be_of_type(self, column, dtype, mostly=None, suppress_exceptions=False):
-        """
-        """
+
         raise NotImplementedError("This method is under development.")
         #dtype_dict = {np.dtype("float64"):"double precision",np.dtype("O"):"text",np.dtype("bool"):"boolean",np.dtype("int64"):"integer"}
         #not_null = self[col].notnull()
@@ -185,8 +174,7 @@ class PandasDataSet(DataSet, pd.DataFrame):
 
     @DataSet.column_expectation
     def expect_column_values_to_be_in_set(self, column, values_set, mostly=None, suppress_exceptions=False):
-        """
-        """
+
         not_null = self[column].notnull()
         not_null_values = self[not_null][column]
 
@@ -228,8 +216,7 @@ class PandasDataSet(DataSet, pd.DataFrame):
 
     @DataSet.column_expectation
     def expect_column_values_to_not_be_in_set(self, column, values_set, mostly=None, suppress_exceptions=False):
-        """
-        """
+
         not_null = self[column].notnull()
         not_null_values = self[not_null][column]
         result = not_null_values.isin(values_set)
@@ -262,8 +249,7 @@ class PandasDataSet(DataSet, pd.DataFrame):
 
     @DataSet.column_expectation
     def expect_column_values_to_be_between(self, column, min_value, max_value, mostly=None, suppress_exceptions=False):
-        """
-        """
+
         not_null = self[column].notnull()
         not_null_values = self[not_null][column]
         result = (not_null_values >= min_value) & (not_null_values <= max_value)
@@ -296,8 +282,7 @@ class PandasDataSet(DataSet, pd.DataFrame):
 
     @DataSet.column_expectation
     def expect_column_value_lengths_to_be_between(self, column, min_value, max_value, mostly=None, suppress_exceptions=False):
-        """
-        """
+
         not_null = self[column].notnull()
         not_null_values = self[column][not_null]
         not_null_value_lengths = not_null_values.map(lambda x: len(x))
@@ -343,8 +328,7 @@ class PandasDataSet(DataSet, pd.DataFrame):
 
     @DataSet.column_expectation
     def expect_column_values_to_match_regex(self, column, regex, mostly=None, suppress_exceptions=False):
-        """
-        """
+
         not_null = self[column].notnull()
         not_null_values = self[not_null][column]
 
@@ -384,8 +368,7 @@ class PandasDataSet(DataSet, pd.DataFrame):
 
     @DataSet.column_expectation
     def expect_column_values_to_not_match_regex(self, column, regex, mostly=None, suppress_exceptions=False):
-        """
-        """
+
         not_null = self[column].notnull()
         not_null_values = self[not_null][column]
 
@@ -426,8 +409,7 @@ class PandasDataSet(DataSet, pd.DataFrame):
 
     @DataSet.column_expectation
     def expect_column_values_to_match_regex_list(self, column, regex_list, mostly=None, suppress_exceptions=False):
-        """
-        """
+
         outcome = list()
         exceptions = dict()
         for r in regex_list:
@@ -459,8 +441,6 @@ class PandasDataSet(DataSet, pd.DataFrame):
 
     @DataSet.column_expectation
     def expect_column_values_to_match_strftime_format(self, column, format, mostly=None, suppress_exceptions=False):
-        """
-        """
 
         if (not (column in self)):
             raise LookupError("The specified column does not exist.")
@@ -513,8 +493,7 @@ class PandasDataSet(DataSet, pd.DataFrame):
 
     @DataSet.column_expectation
     def expect_column_values_to_be_dateutil_parseable(self, column, mostly=None, suppress_exceptions=False):
-        """
-        """
+
         def is_parseable(val):
             try:
                 parser().parse(val)
@@ -555,8 +534,7 @@ class PandasDataSet(DataSet, pd.DataFrame):
 
     @DataSet.column_expectation
     def expect_column_values_to_be_valid_json(self, column, suppress_exceptions=False):
-        """
-        """
+
         def is_json(val):
             try:
                 json.loads(str(val))
@@ -580,9 +558,13 @@ class PandasDataSet(DataSet, pd.DataFrame):
 
 
     @DataSet.column_expectation
+    def expect_column_values_to_match_json_schema(self):
+        raise NotImplementedError("Under development")
+
+
+    @DataSet.column_expectation
     def expect_column_mean_to_be_between(self, column, min_value, max_value):
-        """
-        """
+
         dtype = self[column].dtype
         not_null = self[column].notnull()
         not_null_values = self[not_null][column]
@@ -590,19 +572,23 @@ class PandasDataSet(DataSet, pd.DataFrame):
             result = (not_null_values.mean() >= min_value) and (not_null_values.mean() <= max_value)
             return {
                 'success' : result,
-                'true_mean' : not_null_values.mean()
+                'exception_list' : not_null_values.mean()
             }
         except:
             return {
                 'success' : False,
-                'true_mean' : None
+                'exception_list' : None
             }
 
 
     @DataSet.column_expectation
+    def expect_column_median_to_be_between(self):
+        raise NotImplementedError("Under Development")
+
+
+    @DataSet.column_expectation
     def expect_column_stdev_to_be_between(self, column, min_value, max_value, suppress_exceptions=False):
-        """
-        """
+
         outcome = False
         if self[column].std() >= min_value and self[column].std() <= max_value:
             outcome = True
@@ -620,8 +606,7 @@ class PandasDataSet(DataSet, pd.DataFrame):
 
     @DataSet.column_expectation
     def expect_two_column_values_to_be_subsets(self, column_1, column_2, mostly=None, suppress_exceptions=False):
-        """
-        """
+
         C1 = set(self[column_1])
         C2 = set(self[column_2])
 
@@ -649,9 +634,6 @@ class PandasDataSet(DataSet, pd.DataFrame):
 
     @DataSet.column_expectation
     def expect_two_column_values_to_be_many_to_one(self, column_1, column_2, mostly=None, suppress_exceptions=False):
-        """
-        """
         raise NotImplementedError("Expectation is not yet implemented")
-
 
 
