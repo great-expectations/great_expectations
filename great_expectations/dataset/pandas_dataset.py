@@ -319,7 +319,7 @@ class PandasDataSet(DataSet, pd.DataFrame):
         
         else:
             return {
-                'success':result.all(),
+                'success': bool(result.all()),
                 'exception_list':exceptions
             }
 
@@ -398,7 +398,7 @@ class PandasDataSet(DataSet, pd.DataFrame):
             #Prevent division-by-zero errors
             if len(not_null_values) == 0:
                 return {
-                    'success':True,
+                    'success': True,
                     'exception_list':exceptions
                 }
 
@@ -409,7 +409,7 @@ class PandasDataSet(DataSet, pd.DataFrame):
             }
         else:
             return {
-                "success" : matches.all(),
+                "success" : bool(matches.all()),
                 "exception_list" : exceptions
             }
 
@@ -598,7 +598,7 @@ class PandasDataSet(DataSet, pd.DataFrame):
 
         else:
             return {
-                'success' : outcome.all(),
+                'success' : bool(outcome.all()),
                 'exception_list' : exceptions
             }
 
@@ -646,7 +646,7 @@ class PandasDataSet(DataSet, pd.DataFrame):
         try:
             result = (not_null_values.mean() >= min_value) and (not_null_values.mean() <= max_value)
             return {
-                'success' : result,
+                'success' : bool(result),
                 'exception_list' : not_null_values.mean()
             }
         except:
