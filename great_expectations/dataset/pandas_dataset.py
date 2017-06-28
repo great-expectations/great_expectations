@@ -1,11 +1,11 @@
 import pandas as pd
 import numpy as np
 import re
-from dateutil.parser import parser
+from dateutil.parser import parse
 from datetime import datetime
 import json
 
-from base import DataSet
+from .base import DataSet
 
 class PandasDataSet(DataSet, pd.DataFrame):
 
@@ -496,7 +496,7 @@ class PandasDataSet(DataSet, pd.DataFrame):
 
         def is_parseable(val):
             try:
-                parser().parse(val)
+                parse(val)
                 return True
             except:
                 return False
@@ -508,7 +508,7 @@ class PandasDataSet(DataSet, pd.DataFrame):
         if suppress_exceptions:
             exceptions = None
         else:
-            exceptions = not_null_values[~outcome]
+            exceptions = list(not_null_values[~outcome])
 
         if mostly:
             # prevent divide by zero error
@@ -572,12 +572,12 @@ class PandasDataSet(DataSet, pd.DataFrame):
             result = (not_null_values.mean() >= min_value) and (not_null_values.mean() <= max_value)
             return {
                 'success' : result,
-                'exception_list' : not_null_values.mean()
+                'true_mean' : not_null_values.mean()
             }
         except:
             return {
                 'success' : False,
-                'exception_list' : None
+                'true_mean' : None
             }
 
 

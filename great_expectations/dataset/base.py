@@ -5,7 +5,7 @@ import copy
 import pandas as pd
 import numpy as np
 
-from util import DotDict
+from .util import DotDict
 
 class DataSet(object):
 
@@ -124,10 +124,10 @@ class DataSet(object):
     def validate(self):
         results = []
         for expectation in self.get_expectations_config()['expectations']:
-            print expectation
+            print(expectation)
             expectation_method = getattr(self, expectation['expectation_type'])
             result = expectation_method(**expectation['kwargs'])
-            print result
+            print(result)
 
 
     ##### Table shape expectations #####

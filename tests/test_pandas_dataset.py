@@ -9,20 +9,30 @@ import great_expectations as ge
 
 def test_expect_table_row_count_to_be_between():
 
-    D = ge.dataset.PandasDataSet({'c1':[4,5,6,7],'c2':['a','b','c','d'],'c3':[None,None,None,None]})
-    out1 = D.expect_table_row_count_to_be_between(3,5)
+    D = ge.dataset.PandasDataSet({
+        'c1' : [4,5,6,7],
+        'c2' : ['a','b','c','d'],
+        'c3' : [None,None,None,None]
+    })
 
-    assert out1['success']==True
-    assert out1['true_row_count']==4
+    assert D.expect_table_row_count_to_be_between(3,5)=={'success':True, 'true_row_count':4}
+    assert D.expect_table_row_count_to_be_between(0,1)=={'success':False, 'true_row_count':4}
+    assert D.expect_table_row_count_to_be_between(4,4)=={'success':True, 'true_row_count':4}
+    assert D.expect_table_row_count_to_be_between(1,0)=={'success':False, 'true_row_count':4}
 
 
 def test_expect_table_row_count_to_equal():
 
-    D = ge.dataset.PandasDataSet({'c1':[4,5,6,7],'c2':['a','b','c','d'],'c3':[None,None,None,None]})
-    out1 = D.expect_table_row_count_to_equal(4)
+    D = ge.dataset.PandasDataSet({
+        'c1':[4,5,6,7],
+        'c2':['a','b','c','d'],
+        'c3':[None,None,None,None]
+    })
 
-    assert out1['success']==True
-    assert out1['true_row_count']==4
+    assert D.expect_table_row_count_to_equal(4)=={'success':True, 'true_row_count':4}
+    assert D.expect_table_row_count_to_equal(5)=={'success':False, 'true_row_count':4}
+    assert D.expect_table_row_count_to_equal(3)=={'success':False, 'true_row_count':4}
+    assert D.expect_table_row_count_to_equal(0)=={'success':False, 'true_row_count':4}
 
 
 def test_expect_column_values_to_be_unique():
@@ -158,23 +168,23 @@ def test_expect_column_values_to_be_null():
     assert D.expect_column_values_to_be_null('a', mostly = .5, suppress_exceptions = True)=={'success':True, 'exception_list':None}
 
 
-def test_expect_column_values_to_be_of_type():
-    """
-    Cases Tested:
-
-    """
-
-    D = ge.dataset.PandasDataSet({
-        'x' : [1,2,4],
-        'y' : [1.0,2.2,5.3],
-        'z' : ['hello', 'jello', 'mello'],
-        'n' : [None, np.nan, None],
-        'b' : [False, True, False],
-        's' : ['hello', 'jello', 1],
-        's1' : ['hello', 2.0, 1],
-    })
-
-    assert D.expect_column_values_to_be_of_type('x','double precision')=={'success':True, 'exception_list':[]}
+#def test_expect_column_values_to_be_of_type():
+#    """
+#    Cases Tested:
+#
+#    """
+#
+#    D = ge.dataset.PandasDataSet({
+#        'x' : [1,2,4],
+#        'y' : [1.0,2.2,5.3],
+#        'z' : ['hello', 'jello', 'mello'],
+#        'n' : [None, np.nan, None],
+#        'b' : [False, True, False],
+#        's' : ['hello', 'jello', 1],
+#        's1' : ['hello', 2.0, 1],
+#    })
+#
+#    assert D.expect_column_values_to_be_of_type('x','double precision')=={'success':True, 'exception_list':[]}
 #    assert D.expect_column_values_to_be_of_type('x','text')=={'success':False, [1,2,4])
 #    assert D.expect_column_values_to_be_of_type('y','double precision')=={'success':True, [])
 #    assert D.expect_column_values_to_be_of_type('y','boolean')=={'success':False, [1.0,2.2,5.3])
@@ -447,15 +457,13 @@ def test_expect_column_values_match_strftime_format():
 
 
 def test_expect_column_values_to_be_dateutil_parseable():
+
     dates = ['03/06/09','23 April 1973','January 9, 2016']
-    other = ['197234567','covfefe',25]
+    other = ['9/8/2012','covfefe',25]
     D = ge.dataset.PandasDataSet({'dates':dates, 'other':other})
-    out = D.expect_column_values_to_be_dateutil_parseable('dates')
-    out2 = D.expect_column_values_to_be_dateutil_parseable('other')
-    assert out['success'] == True
-    assert len(out['exception_list']) == 0
-    assert out2['success'] == False
-    assert len(out2['exception_list']) == 3
+
+    assert D.expect_column_values_to_be_dateutil_parseable('dates')=={'success':True, 'exception_list':[]}
+    assert D.expect_column_values_to_be_dateutil_parseable('other')=={'success':False, 'exception_list':['covfefe',25]}
 
 
 def test_expect_column_values_to_be_valid_json():
@@ -512,11 +520,15 @@ def test_expect_column_mean_to_be_between():
 
 
 def test_expect_column_stdev_to_be_between():
-    D = ge.dataset.PandasDataSet({'randn':np.random.randn(100)})
-    out1 = D.expect_column_stdev_to_be_between('randn',.5,1.5)
-    out2 = D.expect_column_stdev_to_be_between('randn',2,3)
-    assert out1['success'] == True
-    assert out2['success'] == False
+    D = ge.dataset.PandasDataSet({
+        'standard normal' : [-2,-1.5,-1,-.7,-.5,-.3,-.2,-.1,-.07,-.05,-.03,-.01,0,.01,.03,.05,.07,.1,.2,.3,.5,.7,1,1.5,2],
+        'normal' : [1,2,2,3,3,3,4,4,4,4,5,5,5,5,5,6,6,6,6,7,7,7,8,8,9]
+    })
+
+    assert D.expect_column_stdev_to_be_between('standard normal',.5,1.5)=={'success':True, 'true_stdev':D['standard normal'].std()}
+    assert D.expect_column_stdev_to_be_between('standard normal',2,3)=={'success':False, 'true_stdev':D['standard normal'].std()}
+    assert D.expect_column_stdev_to_be_between('normal',2,3)=={'success':True, 'true_stdev':D['normal'].std()}
+    assert D.expect_column_stdev_to_be_between('normal',0,1)=={'success':False, 'true_stdev':D['normal'].std()}
 
 
 def test_expect_two_column_values_to_be_subsets():
@@ -534,6 +546,5 @@ def test_expect_two_column_values_to_be_subsets():
 
 def test_expect_two_column_values_to_be_many_to_one():
     pass
-
 
 
