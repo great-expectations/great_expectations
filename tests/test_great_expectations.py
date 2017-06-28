@@ -156,14 +156,51 @@ def test_custom_class_2():
 
     #     return outer_wrapper
 
+    # def column_expectation(func):
+
+    #     @expectation
+    #     def inner_wrapper(self, column, mostly=None, suppress_expectations=False):
+    #         notnull = self[column].notnull()
+            
+    #         success = func(self, self[column][notnull])
+    #         exceptions = list(self[column][notnull][success==False])
+
+    #         if mostly:
+    #             #Prevent division-by-zero errors
+    #             if notnull.sum() == 0:
+    #                 return {
+    #                     'success':True,
+    #                     'exception_list':exceptions
+    #                 }
+
+    #             percent_success = float(success.sum())/notnull.sum()
+    #             return {
+    #                 "success" : percent_success >= mostly,
+    #                 "exception_list" : exceptions
+    #             }
+
+    #         else:
+    #             return {
+    #                 "success" : len(exceptions) == 0,
+    #                 "exception_list" : exceptions
+    #             }
+
+    #     return inner_wrapper
+
+
     def column_expectation(func):
 
         @expectation
         def inner_wrapper(self, column, mostly=None, suppress_expectations=False):
-            notnull = self[column].notnull()
+            null_indexes = self._get_null_indexes(column)
+
+            nonnull_values = self._get_nonnull_values(column, null_indexes)
+            nonnull_count = self._get_null_count(null_indexes)
             
-            success = func(self, self[column][notnull])
-            exceptions = list(self[column][notnull][success==False])
+            successful_indexes = func(self, nonnull_values)
+            success_count = self._get_success_count(successful_indexes)
+
+            exceptions = list(self._get_exceptions(column, successful_indexes))
 
             if mostly:
                 #Prevent division-by-zero errors
@@ -173,7 +210,7 @@ def test_custom_class_2():
                         'exception_list':exceptions
                     }
 
-                percent_success = float(success.sum())/notnull.sum()
+                percent_success = float(success_count)/notnull_count
                 return {
                     "success" : percent_success >= mostly,
                     "exception_list" : exceptions
@@ -187,7 +224,7 @@ def test_custom_class_2():
 
         return inner_wrapper
 
-    def elementwise_column_expectation(func):
+    def elementwise_expectation(func):
 
         @expectation
         def inner_wrapper(self, column, mostly=None, suppress_expectations=False):
@@ -250,7 +287,7 @@ def test_custom_class_2():
         def expect_column_values_to_equal_2(self, series):
             return series.map(lambda x: x==2)
 
-        @elementwise_column_expectation
+        @elementwise_expectation
         def expect_column_values_to_equal_3(self, element):
             return element == 3
 

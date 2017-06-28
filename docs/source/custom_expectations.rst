@@ -1,0 +1,112 @@
+.. _custom_expectations:
+
+==============================================================================
+Custom expectations
+==============================================================================
+
+It's common to want to extend Great Expectations with application- or domain-specific Expectations. For example:
+
+.. code-block:: bash
+    expect_column_text_to_be_in_english
+    expect_column_value_to_be_valid_diagnosis_code
+    expect_column_value_to_be_be_unicode_encodable
+
+These Expectations aren't included in the default set, but could be extremely useful for many applications.
+
+Fear not! Great Expectations is designed for customization and extensibility.
+
+Side note: in future versions, Great Expectations will probably grow to include additional Expectations. If you have an Expectation that could be universally useful, please make the case on the Great Expectations issue tracker.
+
+The easy way
+--------------------------------------------------------------------------------
+
+1. Create a subclass from the DataSet class of your choice
+2. Define custom functions containing your business logic
+3. Use the @column_expectation and @elementwise_expectation decorators to turn them into full
+
+Note: following Great Expectations :ref:`naming_conventions` is highly reccommended, but not strictly required. If you want to confuse yourself with bad names, the package won't stop you--but it will raise a warning.
+
+.. code-block:: bash
+
+    from great_expectations.dataset import PandasDataSet, column_expectation, elementwise_expectation
+
+    class CustomPandasDataSet(ge.dataset.PandasDataSet):
+
+        @column_expectation
+        def expect_column_values_to_equal_2(self, series):
+            return series.map(lambda x: x==2)
+
+        @elementwise_expectation
+        def expect_column_values_to_equal_3(self, element):
+            return element == 3
+
+@column_expectation decorates a custom function, wrapping it with all the business logic required to turn it into a fully-fledged Expectation. This spares you the hassle of defining logic to handle required arguments like `mostly` and `output_format`. Your custom function can focus exclusively on the business logic of passing or failing the expectation.
+
+To work with these decorators, your custom function must accept two arguments: `self` and `series`. When your function is called, `series` will contain all the non-null values in the given column. It must return a series of boolean values in the same order, with the same index.
+
+@elementwise_expectation works the same way, but it accepts a single element and returns a single boolean value, rather than a whole series.
+
+
+The hard way
+--------------------------------------------------------------------------------
+
+1. Create a subclass from the DataSet class of your choice
+2. Write the whole expectation yourself
+3. Decorate it with the @expectation decorator
+
+This is more complicated, since you have to handle all the logic of additional parameters and output formats. Pay special attention to proper formatting of :ref:`result_objects`. Malformed result objects can break Great Expectations in subtle and unanticipated wasys.
+
+.. code-block:: bash
+
+    from great_expectations.dataset import PandasDataSet, expectation
+
+    class CustomPandasDataSet(ge.dataset.PandasDataSet):
+
+        @expectation
+        def expect_column_values_to_equal_1(self, column, mostly=None, suppress_expectations=False):
+            notnull = self[column].notnull()
+            
+            result = self[column][notnull] == 1
+            exceptions = list(self[column][notnull][result==False])
+            
+            if mostly:
+                #Prevent division-by-zero errors
+                if len(not_null_values) == 0:
+                    return {
+                        'success':True,
+                        'exception_list':exceptions
+                    }
+
+                percent_properly_formatted = float(sum(properly_formatted))/len(not_null_values)
+                return {
+                    "success" : percent_properly_formatted >= mostly,
+                    "exception_list" : exceptions
+                }
+            else:
+                return {
+                    "success" : len(exceptions) == 0,
+                    "exception_list" : exceptions
+                }
+
+
+
+Using custom expectations
+--------------------------------------------------------------------------------
+
+Let's suppose you've defined `CustomPandasDataSet` in a module called `custom_dataset.py`. You can instantiate a dataset with your custom expectations simply by adding `dataset_class=CustomPandasDataSet` in `ge.read_csv`.
+
+Once you do this, all the functionality of your new expectation will be available for use.
+
+.. code-block:: bash
+
+    >> import great_expectations as ge
+    >> from custom_dataset import CustomPandasDataSet
+
+    >> my_df = ge.read_csv("my_data_file.csv", dataset_class=CustomPandasDataSet)
+
+    >> my_df.expect_column_values_to_equal_1("all_twos")
+    {
+        "success": False,
+        "exception_list": [2,2,2,2,2,2,2,2]
+    }
+

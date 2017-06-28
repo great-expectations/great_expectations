@@ -14,6 +14,16 @@ Welcome to Great Expectations!
    validation
    workflow_advantages
    glossary
+
+Advanced
+------------------
+
+.. toctree::
+   :maxdepth: 2
+
+   custom_expectations
+   output_format
+   naming_conventions
    
 Indices and tables
 ------------------
