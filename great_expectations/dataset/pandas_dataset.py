@@ -147,53 +147,53 @@ class PandasDataSet(DataSet, pd.DataFrame):
             }
 
 
-    @DataSet.column_expectation
-    def expect_column_values_to_be_of_type(self, column, type_, target_datasource, mostly=None, suppress_exceptions=False):
-
-        python_avro_types = {
-                "null":None, 
-                "boolean":bool, 
-                "int":int, 
-                "long":int, 
-                "float":float, 
-                "double":float, 
-                "bytes":bytes, 
-                "string":str
-                }
-
-        numpy_avro_types = {
-                "null":np.nan, 
-                "boolean":np.bool_, 
-                "int":np.int64, 
-                "long":np.longdouble, 
-                "float":np.float_, 
-                "double":np.longdouble, 
-                "bytes":np.bytes_, 
-                "string":np.string_
-                }
-
-        datasource = {"python":python_avro_types, "numpy":numpy_avro_types}
-
-        user_type = datasource[target_datasource][type_]
-
-        not_null = self[column].notnull()
-        not_null_values = self[not_null][column]
-        result = not_null_values.map(lambda x: type(x) == user_type)
-
-        if suppress_exceptions:
-            exceptions = None
-        else:
-            exceptions = not_null_values[~result]
-
-        if mostly:
-            # prevent division by zero error
-            if len(not_null_values) == 0:
-                return True,exceptions
-
-            percent_true = float(result.sum())/len(not_null_values)
-            return (percent_true >= mostly),exceptions
-        else:
-            return result.all(),exceptions
+#    @DataSet.column_expectation
+#    def expect_column_values_to_be_of_type(self, column, type_, target_datasource, mostly=None, suppress_exceptions=False):
+#
+#        python_avro_types = {
+#                "null":None, 
+#                "boolean":bool, 
+#                "int":int, 
+#                "long":int, 
+#                "float":float, 
+#                "double":float, 
+#                "bytes":bytes, 
+#                "string":str
+#                }
+#
+#        numpy_avro_types = {
+#                "null":np.nan, 
+#                "boolean":np.bool_, 
+#                "int":np.int64, 
+#                "long":np.longdouble, 
+#                "float":np.float_, 
+#                "double":np.longdouble, 
+#                "bytes":np.bytes_, 
+#                "string":np.string_
+#                }
+#
+#        datasource = {"python":python_avro_types, "numpy":numpy_avro_types}
+#
+#        user_type = datasource[target_datasource][type_]
+#
+#        not_null = self[column].notnull()
+#        not_null_values = self[not_null][column]
+#        result = not_null_values.map(lambda x: type(x) == user_type)
+#
+#        if suppress_exceptions:
+#            exceptions = None
+#        else:
+#            exceptions = not_null_values[~result]
+#
+#        if mostly:
+#            # prevent division by zero error
+#            if len(not_null_values) == 0:
+#                return True,exceptions
+#
+#            percent_true = float(result.sum())/len(not_null_values)
+#            return (percent_true >= mostly),exceptions
+#        else:
+#            return result.all(),exceptions
 
 
     @DataSet.column_expectation
