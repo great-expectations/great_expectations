@@ -154,7 +154,7 @@ class PandasDataSet(DataSet, pd.DataFrame):
                 "null":None, 
                 "boolean":bool, 
                 "int":int, 
-                "long":long, 
+                "long":int, 
                 "float":float, 
                 "double":float, 
                 "bytes":bytes, 
@@ -276,7 +276,14 @@ class PandasDataSet(DataSet, pd.DataFrame):
 
         not_null = self[column].notnull()
         not_null_values = self[not_null][column]
-        result = (not_null_values >= min_value) & (not_null_values <= max_value)
+
+        def is_between(val):
+            try:
+                return val >= min_value and val <= max_value
+            except:
+                return False
+            
+        result = not_null_values.map(is_between)
 
         if suppress_exceptions:
             exceptions = None

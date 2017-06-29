@@ -44,10 +44,10 @@ class DataSet(object):
         #!!! This is good default behavior, but
         #!!!    it needs to be documented, and
         #!!!    we need to provide syntax to override it.
-        self._expectations_config.expectations = filter(
+        self._expectations_config.expectations = [f for f in filter(
             lambda exp: exp['expectation_type'] != expectation_type,
             self._expectations_config.expectations 
-        )
+        )]
 
         self._expectations_config.expectations.append(expectation_config)
 
@@ -95,8 +95,8 @@ class DataSet(object):
             expectation_config = DotDict({
                 "expectation_type" : method_name,
                 "kwargs" : dict(
-                    zip(method_arg_names, args)+\
-                    kwargs.items()
+                    [z for z in zip(method_arg_names, args)]+\
+                    list(kwargs.items())
                 )
             })
             expectation_config['kwargs']['column'] = column
