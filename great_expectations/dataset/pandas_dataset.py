@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-import scipy
+from scipy import stats
 import re
 from dateutil.parser import parser
 from datetime import datetime
@@ -381,7 +381,7 @@ class PandasDataSet(DataSet, pd.DataFrame):
 
         # Ensure we have a real KDE object
         kde = pickle.loads(base64.b64decode(kde))
-        if (type(kde) != scipy.stats.kde.gaussian_kde):
+        if (type(kde) != stats.kde.gaussian_kde):
             return {'success': False, 'exception_list': 'The kde object must be a scipy.stats.kde.gaussian_kde estimate.'}
 
 
@@ -395,7 +395,7 @@ class PandasDataSet(DataSet, pd.DataFrame):
         not_null_values = self[not_null][column]
 
         estimated_cdf = lambda partition: np.array([kde.integrate_box_1d(-np.inf, x) for x in partition])
-        test_result = scipy.stats.kstest(not_null_values, estimated_cdf)
+        test_result = stats.kstest(not_null_values, estimated_cdf)
 
         if suppress_exceptions:
             return {
@@ -440,7 +440,7 @@ class PandasDataSet(DataSet, pd.DataFrame):
         not_null = self[column].notnull()
         not_null_values = self[not_null][column]
 
-        test_result = scipy.stats.ks_2samp(not_null_values, data)
+        test_result = stats.ks_2samp(not_null_values, data)
 
         if suppress_exceptions:
             return {
