@@ -147,29 +147,34 @@ class PandasDataSet(DataSet, pd.DataFrame):
             }
 
 
-    @DataSet.column_expectation
-    def expect_column_values_to_be_of_type(self, column, dtype, mostly=None, suppress_exceptions=False):
-
-        raise NotImplementedError("This method is under development.")
-        #dtype_dict = {np.dtype("float64"):"double precision",np.dtype("O"):"text",np.dtype("bool"):"boolean",np.dtype("int64"):"integer"}
-        #not_null = self[col].notnull()
-        #not_null_values = self[not_null][col]
-        #result = not_null_values.map(lambda x: type(x) == dtype)
-
-        #if suppress_exceptions:
-        #    exceptions = None
-        #else:
-        #    exceptions = not_null_values[~result]
-
-        #if mostly:
-        #    # prevent division by zero error
-        #    if len(not_null_values) == 0:
-        #        return True,exceptions
-
-        #    percent_true = float(result.sum())/len(not_null_values)
-        #    return (percent_true >= mostly),exceptions
-        #else:
-        #    return result.all(),exceptions
+#    @DataSet.column_expectation
+#    def expect_column_values_to_be_of_type(self, column, type_, target_datasource, mostly=None, suppress_exceptions=False):
+#
+#        schema = [
+#                {
+#                    "name":"double precision",
+#                    "type":"float"
+#                    }
+#        ]
+#        dtype_dict = {np.dtype("float64"):"double precision",np.dtype("O"):"text",np.dtype("bool"):"boolean",np.dtype("int64"):"integer"}
+#        not_null = self[col].notnull()
+#        not_null_values = self[not_null][col]
+#        result = not_null_values.map(lambda x: type(x) == dtype)
+#
+#        if suppress_exceptions:
+#            exceptions = None
+#        else:
+#            exceptions = not_null_values[~result]
+#
+#        if mostly:
+#            # prevent division by zero error
+#            if len(not_null_values) == 0:
+#                return True,exceptions
+#
+#            percent_true = float(result.sum())/len(not_null_values)
+#            return (percent_true >= mostly),exceptions
+#        else:
+#            return result.all(),exceptions
 
 
     @DataSet.column_expectation
