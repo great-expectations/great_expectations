@@ -422,40 +422,25 @@ def test_expect_column_values_to_be_null():
     assert D.expect_column_values_to_be_null('a', mostly = .5, suppress_exceptions = True)=={'success':True, 'exception_list':None}
 
 
-#def test_expect_column_values_to_be_of_type():
-#    """
-#    Cases Tested:
-#
-#    """
-#
-#    D = ge.dataset.PandasDataSet({
-#        'x' : [1,2,4],
-#        'y' : [1.0,2.2,5.3],
-#        'z' : ['hello', 'jello', 'mello'],
-#        'n' : [None, np.nan, None],
-#        'b' : [False, True, False],
-#        's' : ['hello', 'jello', 1],
-#        's1' : ['hello', 2.0, 1],
-#    })
-#
-#    assert D.expect_column_values_to_be_of_type('x','double precision')=={'success':True, 'exception_list':[]}
-#    assert D.expect_column_values_to_be_of_type('x','text')=={'success':False, [1,2,4])
-#    assert D.expect_column_values_to_be_of_type('y','double precision')=={'success':True, [])
-#    assert D.expect_column_values_to_be_of_type('y','boolean')=={'success':False, [1.0,2.2,5.3])
-#    assert D.expect_column_values_to_be_of_type('z','text')=={'success':True, [])
-#    assert D.expect_column_values_to_be_of_type('b','boolean')=={'success':True, [])
-#    assert D.expect_column_values_to_be_of_type('b','boolean')=={'success':True, [])
-#    assert D.expect_column_values_to_be_of_type('n','boolean')=={'success':True, [])
-#    assert D.expect_column_values_to_be_of_type('n','text')=={'success':True, [])
-#    assert D.expect_column_values_to_be_of_type('n','double precision')=={'success':True, [])
-#    assert D.expect_column_values_to_be_of_type('n','double precision')=={'success':True, [])
-#
-#    assert D.expect_column_values_to_be_of_type('x','crazy type you\'ve never heard of')=={'success':True, [])
-#    # Test suppress_exceptions and mostly
-#    assert D.expect_column_values_to_be_of_type('s','text', suppress_exceptions=True, mostly=.4)=={'success':True, 'exception_list':None)
-#    assert D.expect_column_values_to_be_of_type('s','text', suppress_exceptions=False, mostly=.4)=={'success':True, [1])
-#    assert D.expect_column_values_to_be_of_type('s1','text', suppress_exceptions=False, mostly=.2)=={'success':True, [2.0 ,1])
-#    assert D.expect_column_values_to_be_of_type('s1','double precision', suppress_exceptions=False, mostly=.2)=={'success':True, ['hello'])
+def test_expect_column_values_to_be_of_type():
+
+    D = ge.dataset.PandasDataSet({
+        'x' : [1,2,4],
+        'y' : [1.0,2.2,5.3],
+        'z' : ['hello', 'jello', 'mello'],
+        'n' : [None, np.nan, None],
+        'b' : [False, True, False],
+        's' : ['hello', 'jello', 1],
+        's1' : ['hello', 2.0, 1],
+    })
+
+    print(D.expect_column_values_to_be_of_type('x','int','numpy')) #=={'success':True, 'exception_list':[]}
+    #assert D.expect_column_values_to_be_of_type('x','string','numpy')=={'success':False, 'exception_list':[1,2,4]}
+    #assert D.expect_column_values_to_be_of_type('y','float','numpy')=={'success':True, 'exception_list':[]}
+    #assert D.expect_column_values_to_be_of_type('y','float','python')=={'success':False, 'exception_list':[1.0,2.2,5.3]}
+    #assert D.expect_column_values_to_be_of_type('z','string','numpy')=={'success':True, 'exception_list':[]}
+    #assert D.expect_column_values_to_be_of_type('b','boolean','numpy')=={'success':True, 'exception_list':[]}
+    #assert D.expect_column_values_to_be_of_type('n','null','numpy')=={'success':True, 'exception_list':[]}
 
 
 def test_expect_column_values_to_be_in_set():
@@ -802,3 +787,5 @@ def test_expect_two_column_values_to_be_many_to_one():
     pass
 
 
+if __name__=="__main__":
+    print(test_expect_column_values_to_be_of_type())

@@ -240,7 +240,7 @@ class DataSet(object):
             type_ (str): A string representing the data type that each column should have as entries.
                 For example, "double integer" refers to an integer with double precision.
             target_datasource (str): The data source that specifies the implementation in the type_ parameter.
-                For example, options include "pandas", "sql", or "spark".
+                For example, options include "numpy", "sql", or "spark".
         Keyword Args:
             mostly=None: Return "success": True if the percentage of values of type_ is greater than or equal to mostly (a float between 0 and 1).
         Returns:
