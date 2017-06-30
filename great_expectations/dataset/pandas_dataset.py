@@ -407,8 +407,31 @@ class PandasDataSet(DataSet, pd.DataFrame):
                 "exception_list" : test_result.pvalue,
             }
 
+
     @DataSet.column_expectation
-    def expect_column_numerical_distribution_to_be(self, column, data, p=0.05, suppress_exceptions=False):
+    def expect_column_numerical_distribution_to_be(self, column, partition, cdf_vals, sample_size=0, p=0.05, suppress_exceptions=False):
+        not_null = self[column].notnull()
+        not_null_values = self[not_null][column]
+        if (sample_size == 0):
+            test_sample = np.random.choice(not_null_values, size=len(partition), replace=False)
+        else:
+            test_sample = np.random.choice(not_null_values, size=sample_size, replace=False)
+
+        estimated_cdf = lambda x: np.interp(x, partition, cdf_vals)
+        test_result = stats.kstest(test_sample, estimated_cdf)
+
+        if suppress_exceptions:
+            return {
+                "success" : test_result.pvalue > p,
+            }
+        else:
+            return {
+                "success" : test_result.pvalue > p,
+                "exception_list" : test_result.pvalue,
+            }
+
+    @DataSet.column_expectation
+    def expect_column_numerical_distribution_to_be_old(self, column, data, p=0.05, suppress_exceptions=False):
         """
         Expect the values in this column to match the density of the provided scipy.stats kde estimate.
         WARNING: This expectation, as currently implemented, will effectively store the column as part
@@ -439,6 +462,7 @@ class PandasDataSet(DataSet, pd.DataFrame):
         ## TODO: Should null values be considered exceptions?
         not_null = self[column].notnull()
         not_null_values = self[not_null][column]
+
 
         test_result = stats.ks_2samp(not_null_values, data)
 

@@ -8,7 +8,7 @@ import copy
 import pandas as pd
 import numpy as np
 
-from .util import DotDict
+from .util import DotDict, ensure_json_serializable
 
 class DataSet(object):
 
@@ -103,6 +103,8 @@ class DataSet(object):
             all_args = dict(zip(method_arg_names, args))
             all_args.update(kwargs)
 
+            all_args = ensure_json_serializable(all_args)
+
             #Construct the expectation_config object
             expectation_config = DotDict({
                 "expectation_type" : method_name,
@@ -130,7 +132,7 @@ class DataSet(object):
             pass
 
         expectation_config_str = json.dumps(self.get_expectations_config(), indent=2)
-        file(filepath, 'w').write(expectation_config_str)
+        open(filepath, 'w').write(expectation_config_str)
 
     def validate(self):
         results = []
