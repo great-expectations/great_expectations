@@ -124,10 +124,16 @@ class DataSet(object):
     def validate(self):
         results = []
         for expectation in self.get_expectations_config()['expectations']:
-            print(expectation)
             expectation_method = getattr(self, expectation['expectation_type'])
             result = expectation_method(**expectation['kwargs'])
-            print(result)
+
+            results.append(
+                dict(expectation.items() + result.items())
+            )
+
+        return {
+            "results" : results
+        }
 
 
     ##### Table shape expectations #####
