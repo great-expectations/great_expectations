@@ -2,6 +2,7 @@
 
 import numpy as np
 from scipy import stats
+import pandas as pd
 
 
 class DotDict(dict):
@@ -25,14 +26,14 @@ def ensure_json_serializable(test_dict):
         elif test_dict[key] is None:
             continue
 
-        elif isinstance(test_dict[key], np.ndarray):
+        elif isinstance(test_dict[key], (np.ndarray, pd.Index)):
             test_dict[key] = test_dict[key].tolist()
 
         elif isinstance(test_dict[key], dict):
             test_dict[key] = ensure_json_serializable(test_dict[key])
 
         else:
-            raise TypeError('The argument type provided for ' + key + ' cannot be serialized.')
+            raise TypeError(key + ' is type ' + type(test_dict[key]).__name__ + ' which cannot be serialized.')
 
     return test_dict
 
@@ -43,3 +44,22 @@ def kde_compress_data(data):
     #return np.stack((partition,density))
     cdf_vals = [kde.integrate_box_1d(-np.inf, x) for x in partition]
     return (partition, cdf_vals)
+
+
+def empirical_cdf(partition, data):
+    return [np.sum(data < x) / len(data) for x in partition]
+
+def naive_partition(data, n):
+    if n > 1:
+        return np.arange(start=np.min(data), stop=np.max(data), step=(np.max(data) - np.min(data)) / n )
+    return np.min(data)
+
+def ntile_partition(data, n):
+    if n > 1:
+        return np.percentile(data, np.arange(start=0, stop=100, step=100/n))
+    return np.min(data)
+
+
+def categorical_model(data):
+    s = pd.Series(data).value_counts()
+    return (s.index, s.values)

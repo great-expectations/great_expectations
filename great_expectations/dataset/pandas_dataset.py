@@ -409,6 +409,30 @@ class PandasDataSet(DataSet, pd.DataFrame):
 
 
     @DataSet.column_expectation
+    def expect_column_frequency_distribution_to_be(self, column, vals, expected_frequencies, p=0.05, suppress_exceptions=False):
+        if (len(vals) != len(expected_frequencies)):
+            return {
+                "success": False,
+                "error": "Vals and expected frequencies do not match."
+            }
+
+        expected_series = pd.Series(expected_frequencies, index=vals, name='expected')
+        observed_frequencies = self[column].value_counts()
+        # Join along the indicies to ensure we have values
+        test_df = pd.concat([expected_series, observed_frequencies], axis = 1).fillna(0)
+        test_result = stats.chisquare(test_df[column], test_df['expected'])
+
+        if suppress_exceptions:
+            return {
+                "success" : test_result.pvalue > p,
+            }
+        else:
+            return {
+                "success" : test_result.pvalue > p,
+                "exception_list" : test_result.pvalue,
+            }
+
+    @DataSet.column_expectation
     def expect_column_numerical_distribution_to_be(self, column, partition, cdf_vals, sample_size=0, p=0.05, suppress_exceptions=False):
         not_null = self[column].notnull()
         not_null_values = self[not_null][column]

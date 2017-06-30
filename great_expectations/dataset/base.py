@@ -10,6 +10,8 @@ import numpy as np
 
 from .util import DotDict, ensure_json_serializable
 
+from functools import wraps
+
 class DataSet(object):
 
     def __init__(self, *args, **kwargs):
@@ -317,7 +319,12 @@ class DataSet(object):
         """
         raise NotImplementedError
 
-    def expect_column_numerical_distribution_to_be(self, column, kde, p=0.05, suppress_exceptions=False):
+    @wraps
+    def expect_column_frequency_distribution_to_be(self, column, vals, expected_frequencies, p=0.05, suppress_exceptions=False):
+        raise NotImplementedError
+
+    @wraps
+    def expect_column_numerical_distribution_to_be(self, column, partition, cdf_vals, sample_size=0, p=0.05, suppress_exceptions=False):
         """
         Expect the values in this column to match the density of the provided scipy.stats kde estimate.
 
