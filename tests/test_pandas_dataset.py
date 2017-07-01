@@ -23,25 +23,54 @@ class TestStringMethods(unittest.TestCase):
                 {
                     'in':[3,5],
                     'kwargs':{},
-                    'out':{'success':True, 'true_row_count':4}},
+                    'out':{'success':True, 'true_value':4}},
                 {
                     'in':[0,1],
                     'kwargs':{},
-                    'out':{'success':False, 'true_row_count':4}},
+                    'out':{'success':False, 'true_value':4}},
                 {
                     'in':[4,4],
                     'kwargs':{},
-                    'out':{'success':True, 'true_row_count':4}},
+                    'out':{'success':True, 'true_value':4}},
                 {
                     'in':[1,0],
                     'kwargs':{},
-                    'out':{'success':False, 'true_row_count':4}}
+                    'out':{'success':False, 'true_value':4}}
         ]
     
         for t in T:
             out = D.expect_table_row_count_to_be_between(*t['in'], **t['kwargs'])
             self.assertEqual(out, t['out'])
-    
+
+        D = ge.dataset.PandasDataSet({
+            'c1':[1,None,3,None,5],
+            'c2':[None,4,5,None,None],
+            'c3':[None,None,None,None,None]
+        })
+
+        T = [
+                {
+                    'in':[5,6],
+                    'kwargs':{},
+                    'out':{'success':True, 'true_value':5}},
+                {
+                    'in':[2,4],
+                    'kwargs':{},
+                    'out':{'success':False, 'true_value':5}},
+                {
+                    'in':[5,5],
+                    'kwargs':{},
+                    'out':{'success':True, 'true_value':5}},
+                {
+                    'in':[2,1],
+                    'kwargs':{},
+                    'out':{'success':False, 'true_value':5}}
+        ]
+
+        for t in T:
+            out = D.expect_table_row_count_to_be_between(*t['in'], **t['kwargs'])
+            self.assertEqual(out, t['out'])
+   
     
     def test_expect_table_row_count_to_equal(self):
     
@@ -56,21 +85,42 @@ class TestStringMethods(unittest.TestCase):
                 {
                     'in':[4],
                     'kwargs':{},
-                    'out':{'success':True, 'true_row_count':4}},
+                    'out':{'success':True, 'true_value':4}},
                 {
                     'in':[5],
                     'kwargs':{},
-                    'out':{'success':False, 'true_row_count':4}},
+                    'out':{'success':False, 'true_value':4}},
                 {
                     'in':[3],
                     'kwargs':{},
-                    'out':{'success':False, 'true_row_count':4}},
+                    'out':{'success':False, 'true_value':4}},
                 {
                     'in':[0],
                     'kwargs':{},
-                    'out':{'success':False, 'true_row_count':4}}
+                    'out':{'success':False, 'true_value':4}}
         ]
     
+        for t in T:
+            out = D.expect_table_row_count_to_equal(*t['in'], **t['kwargs'])
+            self.assertEqual(out, t['out'])
+
+        D = ge.dataset.PandasDataSet({
+            'c1':[1,None,3,None,5],
+            'c2':[None,4,5,None,None],
+            'c3':[None,None,None,None,None]
+        })
+
+        T = [
+                {
+                    'in':[5],
+                    'kwargs':{},
+                    'out':{'success':True, 'true_value':5}},
+                {
+                    'in':[3],
+                    'kwargs':{},
+                    'out':{'success':False, 'true_value':5}}
+        ]
+
         for t in T:
             out = D.expect_table_row_count_to_equal(*t['in'], **t['kwargs'])
             self.assertEqual(out, t['out'])
@@ -320,25 +370,56 @@ class TestStringMethods(unittest.TestCase):
             self.assertEqual(out, t['out'])
 
     
-    #def test_expect_column_values_to_be_of_type(self):
-    #
-    #    D = ge.dataset.PandasDataSet({
-    #        'x' : [1,2,4],
-    #        'y' : [1.0,2.2,5.3],
-    #        'z' : ['hello', 'jello', 'mello'],
-    #        'n' : [None, np.nan, None],
-    #        'b' : [False, True, False],
-    #        's' : ['hello', 'jello', 1],
-    #        's1' : ['hello', 2.0, 1],
-    #    })
-    #
-    #    assert D.expect_column_values_to_be_of_type('x','int','python')=={'success':True, 'exception_list':[]}
-        #assert D.expect_column_values_to_be_of_type('x','string','numpy')=={'success':False, 'exception_list':[1,2,4]}
-        #assert D.expect_column_values_to_be_of_type('y','float','numpy')=={'success':True, 'exception_list':[]}
-        #assert D.expect_column_values_to_be_of_type('y','float','python')=={'success':False, 'exception_list':[1.0,2.2,5.3]}
-        #assert D.expect_column_values_to_be_of_type('z','string','numpy')=={'success':True, 'exception_list':[]}
-        #assert D.expect_column_values_to_be_of_type('b','boolean','numpy')=={'success':True, 'exception_list':[]}
-        #assert D.expect_column_values_to_be_of_type('n','null','numpy')=={'success':True, 'exception_list':[]}
+    def test_expect_column_values_to_be_of_type(self):
+    
+        D = ge.dataset.PandasDataSet({
+            'x' : [1,2,4],
+            'y' : [1.0,2.2,5.3],
+            'z' : ['hello', 'jello', 'mello'],
+            'n' : [None, np.nan, None],
+            'b' : [False, True, False],
+            's' : ['hello', 'jello', 1],
+            's1' : ['hello', 2.0, 1],
+        })
+
+        T = [
+                {
+                    'in':['x','int','python'], 
+                    'kwargs':{}, 
+                    'out':{'success':True, 'exception_list':[]}},
+                {
+                    'in':['x','string','numpy'], 
+                    'kwargs':{}, 
+                    'out':{'success':False, 'exception_list':[1,2,4]}},
+                {
+                    'in':['y','float','python'], 
+                    'kwargs':{}, 
+                    'out':{'success':True, 'exception_list':[]}},
+                {
+                    'in':['y','float','numpy'], 
+                    'kwargs':{}, 
+                    'out':{'success':False, 'exception_list':[1.0,2.2,5.3]}},
+                {
+                    'in':['z','string','python'], 
+                    'kwargs':{}, 
+                    'out':{'success':True, 'exception_list':[]}},
+                {
+                    'in':['b','boolean','python'], 
+                    'kwargs':{}, 
+                    'out':{'success':True, 'exception_list':[]}}
+                #{
+                #    'in':['n','null','python'], 
+                #    'kwargs':{}, 
+                #    'out':{'success':False, 'exception_list':[np.nan]}},
+                #{
+                #    'in':['n','null','python'],
+                #    'kwargs':{'mostly':.5},
+                #    'out':{'success':True, 'exception_list':[np.nan]}}
+        ]
+
+        for t in T:
+            out = D.expect_column_values_to_be_of_type(*t['in'], **t['kwargs'])
+            self.assertEqual(out, t['out'])
     
     
     def test_expect_column_values_to_be_in_set(self):
@@ -810,7 +891,7 @@ class TestStringMethods(unittest.TestCase):
  
     
     def test_expect_column_values_to_match_regex_list(self):
-        pass
+        self.assertRaises(NotImplementedError)
     
     
     def test_expect_column_values_to_match_strftime_format(self):
@@ -861,19 +942,28 @@ class TestStringMethods(unittest.TestCase):
     def test_expect_column_values_to_be_dateutil_parseable(self):
     
         D = ge.dataset.PandasDataSet({
-            'dates':['03/06/09','23 April 1973','January 9, 2016'], 
-            'other':['9/8/2012','covfefe',25]
+            'c1':['03/06/09','23 April 1973','January 9, 2016'], 
+            'c2':['9/8/2012','covfefe',25],
+            'c3':['Jared','June 1, 2013','July 18, 1976']
         })
 
         T = [
                 {
-                    'in':['dates'],
+                    'in':['c1'],
                     'kwargs':{},
                     'out':{'success':True, 'exception_list':[]}},
                 {
-                    'in':['other'],
+                    'in':['c2'],
                     'kwargs':{},
-                    'out':{'success':False, 'exception_list':['covfefe', 25]}}
+                    'out':{'success':False, 'exception_list':['covfefe', 25]}},
+                {
+                    'in':['c3'],
+                    'kwargs':{},
+                    'out':{'success':False, 'exception_list':['Jared']}},
+                {
+                    'in':['c3'],
+                    'kwargs':{'mostly':.5},
+                    'out':{'success':True, 'exception_list':['Jared']}}
         ]
     
         for t in T:
@@ -884,15 +974,36 @@ class TestStringMethods(unittest.TestCase):
     def test_expect_column_values_to_be_valid_json(self):
         d1 = json.dumps({'i':[1,2,3],'j':35,'k':{'x':'five','y':5,'z':'101'}})
         d2 = json.dumps({'i':1,'j':2,'k':[3,4,5]})
+        d3 = json.dumps({'i':'a', 'j':'b', 'k':'c'})
+        d4 = json.dumps({'i':[4,5], 'j':[6,7], 'k':[8,9], 'l':{4:'x', 5:'y', 6:'z'}})
         D = ge.dataset.PandasDataSet({
-            'json_col':[d1,d2]
+            'json_col':[d1,d2,d3,d4],
+            'not_json':[4,5,6,7],
+            'py_dict':[{'a':1, 'out':1},{'b':2, 'out':4},{'c':3, 'out':9},{'d':4, 'out':16}],
+            'most':[d1,d2,d3,'d4']
         })
 
         T = [
                 {
                     'in':['json_col'],
                     'kwargs':{},
-                    'out':{'success':True, 'exception_list':[]}}
+                    'out':{'success':True, 'exception_list':[]}},
+                {
+                    'in':['not_json'],
+                    'kwargs':{},
+                    'out':{'success':False, 'exception_list':[4,5,6,7]}},
+                {
+                    'in':['py_dict'],
+                    'kwargs':{},
+                    'out':{'success':False, 'exception_list':[{'a':1, 'out':1},{'b':2, 'out':4},{'c':3, 'out':9},{'d':4, 'out':16}]}},
+                {
+                    'in':['most'],
+                    'kwargs':{},
+                    'out':{'success':False, 'exception_list':['d4']}},
+                {
+                    'in':['most'],
+                    'kwargs':{'mostly':.75},
+                    'out':{'success':True, 'exception_list':['d4']}}
         ]
     
         for t in T:
@@ -922,31 +1033,31 @@ class TestStringMethods(unittest.TestCase):
                 {
                     'in':['x', 2, 5], 
                     'kwargs':{}, 
-                    'out':{'success':True, 'true_mean':3.5}},
+                    'out':{'success':True, 'true_value':3.5}},
                 {
                     'in':['x', 1, 2], 
                     'kwargs':{}, 
-                    'out':{'success':False, 'true_mean':3.5}},
+                    'out':{'success':False, 'true_value':3.5}},
                 {
                     'in':['y', 5, 5], 
                     'kwargs':{}, 
-                    'out':{'success':True, 'true_mean':5}},
+                    'out':{'success':True, 'true_value':5}},
                 {
                     'in':['y', 4, 4], 
                     'kwargs':{}, 
-                    'out':{'success':False, 'true_mean':5}},
+                    'out':{'success':False, 'true_value':5}},
                 {
                     'in':['z', 5, 5], 
                     'kwargs':{}, 
-                    'out':{'success':True, 'true_mean':5}},
+                    'out':{'success':True, 'true_value':5}},
                 {
                     'in':['z', 13, 14], 
                     'kwargs':{}, 
-                    'out':{'success':False, 'true_mean':5}},
+                    'out':{'success':False, 'true_value':5}},
                 {
                     'in':['n', 0, 0], 
                     'kwargs':{}, 
-                    'out':{'success':True, 'true_mean':0.0}}
+                    'out':{'success':True, 'true_value':0.0}}
         ]
     
         typedf = ge.dataset.PandasDataSet({
@@ -964,15 +1075,15 @@ class TestStringMethods(unittest.TestCase):
                 {
                     'in':['s', 0, 0],
                     'kwargs':{},
-                    'out':{'success':False, 'true_mean':None}},
+                    'out':{'success':False, 'true_value':None}},
                 {
                     'in':['b', 0, 1],
                     'kwargs':{},
-                    'out':{'success':True, 'true_mean':0.5}},
+                    'out':{'success':True, 'true_value':0.5}},
                 {
                     'in':['x', 0, 1],
                     'kwargs':{},
-                    'out':{'success':True, 'true_mean':0.5}}
+                    'out':{'success':True, 'true_value':0.5}}
         ]
 
         for t in T:
@@ -992,19 +1103,19 @@ class TestStringMethods(unittest.TestCase):
                 {
                     'in':['dist1',.5,1.5], 
                     'kwargs':{}, 
-                    'out':{'success':True, 'true_stdev':D['dist1'].std()}},
+                    'out':{'success':True, 'true_value':D['dist1'].std()}},
                 {
                     'in':['dist1',2,3], 
                     'kwargs':{}, 
-                    'out':{'success':False, 'true_stdev':D['dist1'].std()}},
+                    'out':{'success':False, 'true_value':D['dist1'].std()}},
                 {
                     'in':['dist2',2,3], 
                     'kwargs':{}, 
-                    'out':{'success':False, 'true_stdev':1.0}},
+                    'out':{'success':False, 'true_value':1.0}},
                 {
                     'in':['dist2',0,1], 
                     'kwargs':{}, 
-                    'out':{'success':True, 'true_stdev':1.0}}
+                    'out':{'success':True, 'true_value':1.0}}
         ]
 
         for t in T:
@@ -1041,7 +1152,7 @@ class TestStringMethods(unittest.TestCase):
     
     
     def test_expect_two_column_values_to_be_many_to_one(self):
-        pass
+        self.assertRaises(NotImplementedError)
     
     
 
