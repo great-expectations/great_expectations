@@ -169,6 +169,7 @@ def test_validate():
     )
 
     results = my_df.validate()
+    print json.dumps(results, indent=2)
     assert_equal(
         results,
         {
@@ -223,7 +224,7 @@ def test_validate():
                 }
               },
               {
-                "exception_list": 30.397989417989415,
+                "true_value": 30.397989417989415,
                 "expectation_type": "expect_column_mean_to_be_between",
                 "success": True,
                 "kwargs": {
@@ -272,5 +273,5 @@ def test_validate():
                 }
               }
             ]
-        }
+        },
     )
