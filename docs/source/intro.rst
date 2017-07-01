@@ -1,11 +1,15 @@
-Great Expectations
+.. _intro:
+
 ================================================================================
+Introduction
+================================================================================
+
 
 *Always know what to expect from your data.*
 
+--------------------------------------------------------------------------------
 
-
-What is great_expectations?
+What is Great Expectations?
 --------------------------------------------------------------------------------
 
 Great Expectations is a python framework for bringing data pipelines and products under test.
@@ -16,7 +20,7 @@ Software developers have long known that automated testing is essential for mana
 Why would I use Great Expectations?
 --------------------------------------------------------------------------------
 
-To get more done with data, faster. Teams use great_expectations to
+To get more done with data, faster. Teams use Great Expectations to
 
 * Save time during data cleaning and munging.
 * Accelerate ETL and data normalization.
@@ -25,4 +29,18 @@ To get more done with data, faster. Teams use great_expectations to
 * Simplify debugging data pipelines if (when) they break.
 
 
-Visit [the Great Expectations documentation](http://great-expectations.readthedocs.io/en/latest/) for more info.
+See :ref:`workflow_advantages` to learn more about how Great Expectations speeds up data teams.
+
+Getting started
+--------------------------------------------------------------------------------
+
+...is easy. Just clone the repository and install using pip.
+
+.. code-block:: bash
+
+    $ git clone https://github.com/abegong/great_expectations.git
+    $ pip install great_expectations/
+
+.. _`pipeline testing`: irc://freenode.net
+.. _`workflow advantages`: http://github.com/example/crawler/issues
+
