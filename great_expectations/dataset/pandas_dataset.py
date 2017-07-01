@@ -316,19 +316,25 @@ class PandasDataSet(DataSet, pd.DataFrame):
 
         not_null = self[column].notnull()
         not_null_values = self[column][not_null]
-        not_null_value_lengths = not_null_values.map(lambda x: len(x))
 
-        if min_value != None and max_value != None:
-            outcome = (not_null_value_lengths >= min_value) & (not_null_value_lengths <= max_value)
+        def length_is_between(val):
 
-        elif min_value == None:
-            outcome = not_null_value_lengths < max_value
+            if min_value != None and max_value != None:
+                try:
+                    return len(val) >= min_value and len(val) <= max_value
+                except:
+                    return False
+    
+            elif min_value == None and max_value != None:
+                return len(val) <= max_value
+    
+            elif min_value != None and max_value == None:
+                return len(val) >= min_value
+    
+            else:
+                raise ValueError("Undefined interval: min_value and max_value are both None")
 
-        elif max_value == None:
-            outcome = not_null_value_lengths > min_value
-
-        else:
-            raise ValueError("Undefined interval: min_value and max_value are both None")
+        outcome = not_null_values.map(length_is_between)
 
         if suppress_exceptions:
             exceptions = None
@@ -580,7 +586,7 @@ class PandasDataSet(DataSet, pd.DataFrame):
         if suppress_exceptions:
             exceptions = None
         else:
-            exceptions = not_null_values[~outcome]
+            exceptions = list(not_null_values[~outcome])
 
         return {
             'success' : outcome.all(),
@@ -654,12 +660,12 @@ class PandasDataSet(DataSet, pd.DataFrame):
             subset_proportion = 1 - float(len(C1.intersection(C2)))/len(C1.union(C2))
             return {
                 'success':(subset_proportion >= mostly),
-                'not_in_subset':exceptions
+                'exceptions_list':exceptions
             }
         else:
             return {
                 'success':outcome,
-                'not_in_subset':exceptions
+                'exceptions_list':exceptions
             }
 
 
