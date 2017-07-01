@@ -163,8 +163,8 @@ class DataSet(object):
     def expect_table_row_count_to_be_between(self, min_value, max_value, suppress_exceptions=False):
         """Expect the number of rows in a data set to be between two values.
         Args:
-            min_value (int): the minimum number of rows.
-            max_value (int): the maximum number of rows.
+            min_value (int or None): the minimum number of rows.
+            max_value (int or None): the maximum number of rows.
         Returns:
             dict:
                 {
@@ -311,8 +311,8 @@ class DataSet(object):
         """Expect column entries to be a number between a minimum value and a maximum value.
         Args:
             column (str): The column name.
-            min_value (int): The minimum value for a column entry.
-            max_value (int): The maximum value for a column entry.
+            min_value (int or None): The minimum value for a column entry.
+            max_value (int or None): The maximum value for a column entry.
         Keyword Args:
             mostly=None: Return "success": True if the percentage of values between min_value and max_value is greater than or equal to mostly (a float between 0 and 1).
         Returns:
@@ -333,8 +333,8 @@ class DataSet(object):
         """Expect column entries to have a measurable length which lies between a minimum value and a maximum value.
         Args:
             column (str): The column name.
-            min_value (int): The minimum value for a column entry length.
-            max_value (int): The maximum value for a column entry length.
+            min_value (int or None): The minimum value for a column entry length.
+            max_value (int or None): The maximum value for a column entry length.
         Keyword Args:
             mostly=None: Return "success": True if the percentage of value lengths between min_value and max_value is greater than or equal to mostly (a float between 0 and 1).
         Returns:
@@ -480,8 +480,8 @@ class DataSet(object):
         """Expect the column mean to be between a minimum value and a maximum value.
         Args:
             column (str): The column name.
-            min_value (int): The minimum value for the column mean.
-            max_value (int): The maximum value for the column mean.
+            min_value (int or None): The minimum value for the column mean.
+            max_value (int or None): The maximum value for the column mean.
         Returns:
             dict:
                 {
@@ -495,8 +495,8 @@ class DataSet(object):
         """Expect the column median to be between a minimum value and a maximum value.
         Args:
             column (str): The column name.
-            min_value (int): The minimum value for the column median.
-            max_value (int): The maximum value for the column median.
+            min_value (int or None): The minimum value for the column median.
+            max_value (int or None): The maximum value for the column median.
         Returns:
             dict:
                 {
@@ -510,8 +510,8 @@ class DataSet(object):
         """Expect the column standard deviation to be between a minimum value and a maximum value.
         Args:
             column (str): The column name.
-            min_value (int): The minimum value for the column standard deviation.
-            max_value (int): The maximum value for the column standard deviation.
+            min_value (int or None): The minimum value for the column standard deviation.
+            max_value (int or None): The maximum value for the column standard deviation.
         Returns:
             dict:
                 {
