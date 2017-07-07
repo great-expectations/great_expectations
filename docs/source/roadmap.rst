@@ -1,7 +1,9 @@
-== Roadmap
+Roadmap
+=======
 As of July 2017
 
-=== Short-term Items
+Short-term Items
+----------------
 * Build demos and example code
   * Identify large public datasets to use as examples
   * Lots of validation for distributional expectations
@@ -13,15 +15,18 @@ As of July 2017
   * Elaborate on helper functions for distributional expectations
 * Improved testing and documentation for non-interactive API
 
-=== 0.2
+0.2
+---
 * Custom Expectations
 * Better Decorators
 * Improve Distributional Expectations
 
-=== 0.3
+0.3
+---
 * TBD
 
-=== Beyond
+Beyond
+------
 * Support non-tabular datasources and generic datasources API
 * Database constraint/schema <-> expectation api
 * Support streaming datasets
