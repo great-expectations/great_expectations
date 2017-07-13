@@ -33,19 +33,29 @@ Note: following Great Expectations :ref:`naming_conventions` is highly reccommen
 
     class CustomPandasDataSet(ge.dataset.PandasDataSet):
 
-        @column_expectation
+        @column_map_expectation
         def expect_column_values_to_equal_2(self, series):
             return series.map(lambda x: x==2)
 
-        @elementwise_expectation
+        @column_elementwise_expectation
         def expect_column_values_to_equal_3(self, element):
             return element == 3
 
-`@column_expectation` decorates a custom function, wrapping it with all the business logic required to turn it into a fully-fledged Expectation. This spares you the hassle of defining logic to handle required arguments like `mostly` and `output_format`. Your custom function can focus exclusively on the business logic of passing or failing the expectation.
+        @column_aggregate_expectation
+        def expect_column_mode_to_equal_0(self, series):
+            mode = series.mode[0]
+            return {
+                "success" : mode == 0,
+                "true_value" : mode
+            }
+
+`@column_map_expectation` decorates a custom function, wrapping it with all the business logic required to turn it into a fully-fledged Expectation. This spares you the hassle of defining logic to handle required arguments like `mostly` and `output_format`. Your custom function can focus exclusively on the business logic of passing or failing the expectation.
 
 To work with these decorators, your custom function must accept two arguments: `self` and `series`. When your function is called, `series` will contain all the non-null values in the given column. Your function must return a series of boolean values in the same order, with the same index.
 
-`@elementwise_expectation` works the same way, but it accepts a single element and returns a single boolean value, rather than a whole series.
+`@column_elementwise_expectation` works the same way, but it accepts a single element and returns a single boolean value, rather than whole series.
+
+`@column_aggregate_expectation` accepts `self` and `series`. It must return a dictionary containing a boolean `success` value, and a `true_value` argument.
 
 
 The hard way
@@ -89,6 +99,22 @@ This is more complicated, since you have to handle all the logic of additional p
                     "exception_list" : exceptions
                 }
 
+The quick way
+--------------------------------------------------------------------------------
+
+For rapid prototyping, you can use the following syntax to quickly iterate on the logic for expectations.
+
+.. code-block:: bash
+
+    >> dataset.test_column_map_function(my_map_function, column='my_column')
+
+    >> dataset.test_column_elementwise_function(my_element_function, column='my_column')
+
+    >> dataset.test_column_aggregate_function(my_map_function, column='my_column')
+
+    >> dataset.test_column_aggregate_function(my_map_function, column='my_column')
+
+These functions will return output just like regular expectations. However, they will NOT save a copy of the expectation to the config.
 
 
 Using custom expectations
