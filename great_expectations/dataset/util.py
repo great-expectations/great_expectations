@@ -27,6 +27,7 @@ def ensure_json_serializable(test_dict):
             continue
 
         elif isinstance(test_dict[key], (np.ndarray, pd.Index)):
+            #TODO: Evaluate risk of precision loss in this call and weigh options for performance
             test_dict[key] = test_dict[key].tolist()
 
         elif isinstance(test_dict[key], dict):

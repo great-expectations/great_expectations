@@ -65,11 +65,19 @@ class DataSet(object):
             #Fetch argument names
             method_arg_names = inspect.getargspec(func)[0][1:]
 
+            # Combine all arguments into a single new "kwargs"
+            all_args = dict(zip(method_arg_names, args))
+            all_args.update(kwargs)
+
+            all_args = ensure_json_serializable(all_args)
+
             #Construct the expectation_config object
-            expectation_config = dict(
-                zip(method_arg_names, args)+\
-                kwargs.items()
-            )
+            expectation_config = DotDict({
+                "expectation_type" : method_name,
+                ## Changed to support python 3, but note that there may be ambiguity here.
+                ## TODO: ensure this is the intended logic
+                "kwargs" : all_args
+            })
 
             #Add the expectation_method key
             expectation_config['expectation_type'] = method_name
@@ -78,7 +86,7 @@ class DataSet(object):
             self.append_expectation(expectation_config)
 
             #Finally, execute the expectation method itself
-            return func(self, *args, **kwargs)
+            return func(self, **all_args)
 
         wrapper.__doc__ = func.__doc__
         return wrapper
@@ -113,7 +121,7 @@ class DataSet(object):
             self.append_expectation(expectation_config)
 
             #Now execute the expectation method itself
-            return func(self, column, *args, **kwargs)
+            return func(self, **all_args)
 
         wrapper.__doc__ = func.__doc__
         return wrapper
