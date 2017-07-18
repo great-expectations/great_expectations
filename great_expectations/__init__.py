@@ -2,7 +2,7 @@ import pandas as pd
 
 
 from .util import *
-import dataset
+from great_expectations import dataset
 
 from pkg_resources import get_distribution
 try:

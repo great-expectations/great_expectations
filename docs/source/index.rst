@@ -21,8 +21,8 @@ Advanced
 .. toctree::
    :maxdepth: 2
 
-   custom_expectations
    output_format
+   custom_expectations
    naming_conventions
    
 Indices and tables

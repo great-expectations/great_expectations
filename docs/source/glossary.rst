@@ -6,33 +6,33 @@ Glossary of Expectations
 
 Table shape
 --------------------------------------------------------------------------------
-* :func:`expect_table_to_have_column <great_expectations.dataset.base.DataSet.expect_table_to_have_column>`
+
+* :func:`expect_column_to_exist <great_expectations.dataset.base.DataSet.expect_column_to_exist>`
 * :func:`expect_table_row_count_to_be_between <great_expectations.dataset.base.DataSet.expect_table_row_count_to_be_between>`
-* :func:`expect_two_table_row_counts_to_be_equal <great_expectations.dataset.base.DataSet.expect_two_table_row_counts_to_be_equal>`
+* :func:`expect_table_row_count_to_equal <great_expectations.dataset.base.DataSet.expect_table_row_count_to_equal>`
 
 Missing values, unique values, and types
 --------------------------------------------------------------------------------
 
-* expect_column_values_to_be_unique
-* expect_column_values_to_not_be_null
-* expect_column_values_to_be_null
-* expect_column_values_to_be_of_type
+* :func:`expect_column_values_to_be_unique <great_expectations.dataset.base.DataSet.expect_column_values_to_be_unique>`
+* :func:`expect_column_values_to_not_be_null <great_expectations.dataset.base.DataSet.expect_column_values_to_not_be_null>`
+* :func:`expect_column_values_to_be_null <great_expectations.dataset.base.DataSet.expect_column_values_to_be_null>`
+* :func:`expect_column_values_to_be_of_type <great_expectations.dataset.base.DataSet.expect_column_values_to_be_of_type>`
 
 Sets and ranges
 --------------------------------------------------------------------------------
 
-* expect_column_values_to_be_in_set
-* expect_column_values_to_not_be_in_set
-* expect_column_values_to_be_between
+* :func:`expect_column_values_to_be_in_set <great_expectations.dataset.base.DataSet.expect_column_values_to_be_in_set>`
+* :func:`expect_column_values_to_not_be_in_set <great_expectations.dataset.base.DataSet.expect_column_values_to_not_be_in_set>`
+* :func:`expect_column_values_to_be_between <great_expectations.dataset.base.DataSet.expect_column_values_to_be_between>`
 
 String matching
 --------------------------------------------------------------------------------
 
-* expect_column_value_lengths_to_be_between
-* expect_column_values_to_match_regex
-* expect_column_values_to_not_match_regex
-* expect_column_values_to_match_regex_list
-
+* :func:`expect_column_value_lengths_to_be_between <great_expectations.dataset.base.DataSet.expect_column_value_lengths_to_be_between>`
+* :func:`expect_column_values_to_match_regex <great_expectations.dataset.base.DataSet.expect_column_values_to_match_regex>`
+* :func:`expect_column_values_to_not_match_regex <great_expectations.dataset.base.DataSet.expect_column_values_to_not_match_regex>`
+* :func:`expect_column_values_to_match_regex_list <great_expectations.dataset.base.DataSet.expect_column_values_to_match_regex_list>`
 
 *Named Regex Patterns*
 
@@ -53,30 +53,16 @@ String matching
 
 Datetime and JSON parsing
 --------------------------------------------------------------------------------
-* expect_column_values_to_match_strftime_format
-* expect_column_values_to_be_dateutil_parseable
-* expect_column_values_to_be_valid_json
-* expect_column_values_to_match_json_schema
-
+* :func:`expect_column_values_to_match_strftime_format <great_expectations.dataset.base.DataSet.expect_column_values_to_match_strftime_format>`
+* :func:`expect_column_values_to_be_dateutil_parseable <great_expectations.dataset.base.DataSet.expect_column_values_to_be_dateutil_parseable>`
+* :func:`expect_column_values_to_be_valid_json <great_expectations.dataset.base.DataSet.expect_column_values_to_be_valid_json>`
+* :func:`expect_column_values_to_match_json_schema <great_expectations.dataset.base.DataSet.expect_column_values_to_match_json_schema>`
 
 Aggregate functions
 --------------------------------------------------------------------------------
-* expect_column_mean_to_be_between
-* expect_column_median_to_be_between
-* expect_column_stdev_to_be_between
-* expect_column_numerical_distribution_to_be
-* expect_column_frequency_distribution_to_be
-
-
-Column pairs
---------------------------------------------------------------------------------
-* expect_two_column_values_to_be_equal
-* expect_two_column_values_to_be_subsets
-* expect_two_column_values_to_be_many_to_one
-* expect_two_column_crosstabs_to_be
-
-
-Multicolumns relations
---------------------------------------------------------------------------------
-* expect_multicolumn_values_to_be_unique
+* :func:`expect_column_mean_to_be_between <great_expectations.dataset.base.DataSet.expect_column_mean_to_be_between>`
+* :func:`expect_column_median_to_be_between <great_expectations.dataset.base.DataSet.expect_column_median_to_be_between>`
+* :func:`expect_column_stdev_to_be_between <great_expectations.dataset.base.DataSet.expect_column_stdev_to_be_between>`
+* :func:`expect_column_numerical_distribution_to_be <great_expectations.dataset.base.DataSet.expect_column_numerical_distribution_to_be>`
+* :func:`expect_column_frequency_distribution_to_be <great_expectations.dataset.base.DataSet.expect_column_frequency_distribution_to_be>`
 

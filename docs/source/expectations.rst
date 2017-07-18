@@ -16,7 +16,10 @@ Great Expectations's connect-and-expect API makes it easy to declare Expectation
     >> import great_expectations as ge
     >> my_df = ge.read_csv("./tests/examples/titanic.csv")
 
-    >> my_df.expect_column_values_to_be_in_set("Sex", ["male", "female"])
+    >> my_df.expect_column_values_to_be_in_set(
+        "Sex",
+        ["male", "female"]
+    )
     {'exception_list': [], 'success': True}
 
 
@@ -37,14 +40,20 @@ For example:
     *        1
     Name: PClass, dtype: int64
 
-    >> my_df.expect_column_values_to_be_in_set("PClass", ["1st", "2nd", "3rd"])
+    >> my_df.expect_column_values_to_be_in_set(
+        "PClass",
+        ["1st", "2nd", "3rd"]
+    )
     {'exception_list': ['*'], 'success': False}
 
 Another example:
 
 .. code-block:: bash
 
-    >> my_df.expect_column_values_to_match_regex("Name", '^[A-Za-z\, \(\)\']+$')
+    >> my_df.expect_column_values_to_match_regex(
+        "Name",
+        "^[A-Za-z\, \(\)\']+$"
+    )
     {
         'exception_list': [
             'Bjornstrm-Steffansson, Mr Mauritz Hakan',

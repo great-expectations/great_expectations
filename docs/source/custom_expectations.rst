@@ -16,14 +16,14 @@ These Expectations aren't included in the default set, but could be very useful 
 
 Fear not! Great Expectations is designed for customization and extensibility.
 
-Side note: in future versions, Great Expectations will probably grow to include additional Expectations. If you have an Expectation that could be universally useful, please make the case on the Great Expectations issue tracker.
+Side note: in future versions, Great Expectations will probably grow to include additional Expectations. If you have an Expectation that could be universally useful, please make the case on the `Great Expectations issue tracker on github <https://github.com/abegong/great_expectations/issues>`_.
 
 The easy way
 --------------------------------------------------------------------------------
 
 1. Create a subclass from the DataSet class of your choice
 2. Define custom functions containing your business logic
-3. Use the `@column_expectation` and `@elementwise_expectation` decorators to turn them into full Expectations
+3. Use the `@column_map_expectation` and `@column_aggregate_expectation` decorators to turn them into full Expectations
 
 Note: following Great Expectations :ref:`naming_conventions` is highly reccommended, but not strictly required. If you want to confuse yourself with bad names, the package won't stop you. (It *will* raise a warning.)
 
@@ -37,10 +37,6 @@ Note: following Great Expectations :ref:`naming_conventions` is highly reccommen
         def expect_column_values_to_equal_2(self, series):
             return series.map(lambda x: x==2)
 
-        @column_elementwise_expectation
-        def expect_column_values_to_equal_3(self, element):
-            return element == 3
-
         @column_aggregate_expectation
         def expect_column_mode_to_equal_0(self, series):
             mode = series.mode[0]
@@ -52,8 +48,6 @@ Note: following Great Expectations :ref:`naming_conventions` is highly reccommen
 `@column_map_expectation` decorates a custom function, wrapping it with all the business logic required to turn it into a fully-fledged Expectation. This spares you the hassle of defining logic to handle required arguments like `mostly` and `output_format`. Your custom function can focus exclusively on the business logic of passing or failing the expectation.
 
 To work with these decorators, your custom function must accept two arguments: `self` and `series`. When your function is called, `series` will contain all the non-null values in the given column. Your function must return a series of boolean values in the same order, with the same index.
-
-`@column_elementwise_expectation` works the same way, but it accepts a single element and returns a single boolean value, rather than whole series.
 
 `@column_aggregate_expectation` accepts `self` and `series`. It must return a dictionary containing a boolean `success` value, and a `true_value` argument.
 
