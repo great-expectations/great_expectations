@@ -1132,37 +1132,5 @@ class TestStringMethods(unittest.TestCase):
 
 
 
-    def test_expect_two_column_values_to_be_subsets(self):
-        A = [0,1,2,3,4,3,2,1,0]
-        B = [2,3,4,5,6,5,4,3,2]
-        C = [0,1,2,3,4,5,6,7,8]
-        D = ge.dataset.PandasDataSet({
-            'A':A,
-            'B':B,
-            'C':C
-        })
-
-        T = [
-                {
-                    'in':['A', 'C'],
-                    'kwargs':{},
-                    'out':{'success':True, 'exceptions_list':{5,6,7,8}}},
-                {
-                    'in':['A', 'B'],
-                    'kwargs':{'mostly':.5},
-                    'out':{'success':True, 'exceptions_list':{0,1,5,6}}}
-        ]
-
-        for t in T:
-            out = D.expect_two_column_values_to_be_subsets(*t['in'], **t['kwargs'])
-            self.assertEqual(out, t['out'])
-
-
-
-    def test_expect_two_column_values_to_be_many_to_one(self):
-        self.assertRaises(NotImplementedError)
-
-
-
 if __name__ == "__main__":
     unittest.main()

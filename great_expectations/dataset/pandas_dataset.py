@@ -26,7 +26,7 @@ class PandasDataSet(DataSet, pd.DataFrame):
             }
 
 
-    @DataSet.column_expectation
+    @DataSet.expectation
     def expect_table_row_count_to_be_between(self, min_value, max_value,suppress_exceptions=False):
 
         outcome = False
@@ -44,7 +44,7 @@ class PandasDataSet(DataSet, pd.DataFrame):
         }
 
 
-    @DataSet.column_expectation
+    @DataSet.expectation
     def expect_table_row_count_to_equal(self, value, suppress_exceptions=False):
 
         outcome = False
@@ -708,36 +708,3 @@ class PandasDataSet(DataSet, pd.DataFrame):
             'success':outcome,
             'true_value':exceptions
         }
-
-
-    @DataSet.column_expectation
-    def expect_two_column_values_to_be_subsets(self, column_1, column_2, mostly=None, suppress_exceptions=False):
-
-        C1 = set(self[column_1])
-        C2 = set(self[column_2])
-
-        outcome = False
-        if C1.issubset(C2) or C2.issubset(C1):
-            outcome = True
-
-        if suppress_exceptions:
-            exceptions = None
-        else:
-            exceptions = C1.union(C2) - C1.intersection(C2)
-
-        if mostly:
-            subset_proportion = 1 - float(len(C1.intersection(C2)))/len(C1.union(C2))
-            return {
-                'success':(subset_proportion >= mostly),
-                'exceptions_list':exceptions
-            }
-        else:
-            return {
-                'success':outcome,
-                'exceptions_list':exceptions
-            }
-
-
-    @DataSet.column_expectation
-    def expect_two_column_values_to_be_many_to_one(self, column_1, column_2, mostly=None, suppress_exceptions=False):
-        raise NotImplementedError("Expectation is not yet implemented")
