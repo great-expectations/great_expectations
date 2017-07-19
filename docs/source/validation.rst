@@ -16,6 +16,7 @@ Once you've constructed Expectations, you can use them to validate new data.
         expectations_config=my_expectations_config
     )
     >> my_df.validate()
+
     {
       "results" : [
         {
