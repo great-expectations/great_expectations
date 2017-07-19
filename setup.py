@@ -15,7 +15,7 @@ config = {
     'url': 'https://github.com/abegong/great_expectations',
     'download_url': '...',
     'author_email': 'abegong@gmail.com',
-    'version': '0.0.1',
+    'version': '0.1.1',
     'install_requires': required,
     'packages': [
         'great_expectations',
