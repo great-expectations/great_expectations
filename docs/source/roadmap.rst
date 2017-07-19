@@ -10,7 +10,6 @@ Short-term Items
 * Review and approve design documents for better decorators and custom expectations
 * Improvements to distributional expectations
   * Unit tests for distributional expectations
-  * Convert all unit tests to the new framework
   * Better docs for distributional expectations
   * Elaborate on helper functions for distributional expectations
 * Improved testing and documentation for non-interactive API
