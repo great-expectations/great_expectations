@@ -7,7 +7,7 @@ from datetime import datetime
 import json
 
 from .base import DataSet
-from .util import weights, is_valid_partition_object
+from .util import is_valid_partition_object
 
 class PandasDataSet(DataSet, pd.DataFrame):
 
@@ -382,7 +382,9 @@ class PandasDataSet(DataSet, pd.DataFrame):
         not_null_values = self[not_null][column]
 
         # Discretize the partition_object into a set of probable events
-        pk = weights(partition_object['partition'], not_null_values)
+        #pk = weights(partition_object['partition'], not_null_values)
+        hist, bin_edges = np.histogram(not_null_values, partition_object['partition'], density=False)
+        pk = hist / (1.* len(not_null_values))
         kl_divergence = stats.entropy(pk, partition_object['weights'])
 
         if suppress_exceptions:

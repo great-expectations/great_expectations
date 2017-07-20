@@ -50,33 +50,23 @@ def is_valid_partition_object(partition_object):
         return False
     return True
 
-def cumulative_densities(partition, data):
-    """Convenience method for evaluating cumulative densities given a partition and dataset.
-    """
-    return [1. * np.sum(data < x) / (1. * len(data)) for x in partition]
 
-def weights(partition, data):
-    """Convenience method for evaluating partition densities given a partition and dataset.
-    """
-    cumulative = cumulative_densities(partition, data)
-    return np.diff(cumulative)
-    #return [cumulative[k+1] - cumulative[k] for k in range(len(partition)-1)]
-
-def even_partition(data, n):
-    """Convenience method for creating an even partition of a provided data sample.
-    """
-    return np.linspace(start=np.min(data), stop=np.max(data), num = (n+1))
-
-def ntile_partition(data, n):
-    """Convenience method for creating a percentile-based partition of a provided data sample.
-    """
-    return np.percentile(data, np.linspace(start=0, stop=100, num = (n+1)))
-
-def categorical_partition(data):
-    """Convenience method for creating densities from categorical data.
+def categorical_partition_data(data):
+    """Convenience method for creating weights from categorical data.
+    Args:
+        data (list-like): The data from which to construct the estimate.
+    Returns:
+        dict:
+            {
+                "partition": (list) The categorical values present in the data
+                "weights": (list) The weights of the values in the partition.
+            }
     """
     s = pd.Series(data).value_counts()
-    return (s.index, (s.values / 1. * len(data)))
+    return {
+        "partition": s.index,
+        "weights":  (s.values / 1. * len(data))
+    }
 
 def kde_smooth_data(data):
     """Convenience method for building a partition and weights using a gaussian Kernel Density Estimate and default bandwidth.
@@ -96,11 +86,11 @@ def kde_smooth_data(data):
     densities = weights(partition, data)
     return { "partition": partition, "weights": densities }
 
-def partition_data(data, bins='auto', n_bins='10'):
+def partition_data(data, bins='auto', n_bins=10):
     """Convenience method for building a partition and weights using simple options.
     Args:
         data (list-like): The data from which to construct the estimate.
-        bins (string): One of 'even' (for evenly spaced bins), 'ntile' (for percentile-spaced bins), or 'auto' (for automatically spaced bins)
+        bins (string): One of 'uniform' (for uniformly spaced bins), 'ntile' (for percentile-spaced bins), or 'auto' (for automatically spaced bins)
         n_bins (int): Ignored if bins is auto.
     Returns:
         dict:
@@ -109,15 +99,18 @@ def partition_data(data, bins='auto', n_bins='10'):
                 "weights": (list) The densities of the bins implied by the partition.
             }
     """
-    if bins == 'even':
-        partition = even_partition(data, n_bins)
+    if bins == 'uniform':
+        bins = np.linspace(start=np.min(data), stop=np.max(data), num = n_bins+1)
     elif bins =='ntile':
-        partition = ntile_partition(data, n_bins)
-    elif bins == 'auto':
-        hist, bin_edges = np.histogram(data, bins='auto', density=False)
-        return { "partition": bin_edges, "weights": hist / (1.*len(data)) }
+        bins = np.percentile(data, np.linspace(start=0, stop=100, num = n_bins+1))
+    elif bins != 'auto':
+        raise ValueError("Invalid parameter for bins argument")
 
+    hist, bin_edges = np.histogram(data, bins, density=False)
+
+    #TODO: Evaluate numpy deprecation of np.histogram's normed option to ensure we're okay with the numerical issues here.
+    # Probably we're having bigger problems through serialization.
     return {
-      "partition": partition,
-      "weights": weights(partition, data)
+        "partition": bin_edges,
+        "weights": hist / (1.*len(data))
     }
