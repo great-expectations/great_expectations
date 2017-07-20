@@ -43,7 +43,7 @@ Distributional Expectations Core Tests
 --------------------------------------------------------------------------------
 Distributional expectations rely on three tests for their work. The expect_column_numerical_distribution_to_be expectation uses the Kolmogorov-Smirnov (KS) test, which compares the actual and expected cumulative densities of the data, and applies a simple rule of thumb based on the size of the partition to calibrate the pvalue.
 
-Alternately, it may be preferable to use a more robust measure such as Kullback-Leibler (KL) divergence. However, you must provide a threshold for the relative entropy to use that test. The KL divergence can be used through the expect_column_kl_divergence_to_be expectation.
+Alternately, it may be preferable to use a measure such as Kullback-Leibler (KL) divergence. However, you must provide a threshold for the relative entropy to use that test, and the test is not symmetric, which can make it difficult to differentiate certain distributions. The KL divergence can be used through the expect_column_kl_divergence_to_be expectation.
 
 Finally, for categorical data, the expect_column_frequency_distribution_to_be expectation uses the Chi-Squared test.
 
