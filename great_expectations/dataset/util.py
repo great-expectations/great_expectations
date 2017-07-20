@@ -38,29 +38,86 @@ def ensure_json_serializable(test_dict):
 
     return test_dict
 
-def kde_compress_data(data):
-    kde = stats.kde.gaussian_kde(data)
-    partition = np.arange(start=np.min(data), stop= np.max(data), step=kde.covariance_factor())
-    #density = kde.evaluate(partition)
-    #return np.stack((partition,density))
-    cdf_vals = [kde.integrate_box_1d(-np.inf, x) for x in partition]
-    return (partition, cdf_vals)
+def is_valid_partition_object(partition_object):
+    """Convenience method for determing whether a given partition object is a valid weighted partition of the real number line.
+    """
+    if ("partition" not in partition_object) or ("weights" not in partition_object):
+        return False
+    if (len(partition_object['partition']) != (len(partition_object['weights']) + 1)):
+        return False
+    # TODO: Evaluate desired tolerance for weights
+    if (abs(np.sum(partition_object['weights']) - 1) > 1e-10):
+        return False
+    return True
 
+def cumulative_densities(partition, data):
+    """Convenience method for evaluating cumulative densities given a partition and dataset.
+    """
+    return [1. * np.sum(data < x) / (1. * len(data)) for x in partition]
 
-def empirical_cdf(partition, data):
-    return [np.sum(data < x) / len(data) for x in partition]
+def weights(partition, data):
+    """Convenience method for evaluating partition densities given a partition and dataset.
+    """
+    cumulative = cumulative_densities(partition, data)
+    return np.diff(cumulative)
+    #return [cumulative[k+1] - cumulative[k] for k in range(len(partition)-1)]
 
-def naive_partition(data, n):
-    if n > 1:
-        return np.arange(start=np.min(data), stop=np.max(data), step=(np.max(data) - np.min(data)) / n )
-    return np.min(data)
+def even_partition(data, n):
+    """Convenience method for creating an even partition of a provided data sample.
+    """
+    return np.linspace(start=np.min(data), stop=np.max(data), num = (n+1))
 
 def ntile_partition(data, n):
-    if n > 1:
-        return np.percentile(data, np.arange(start=0, stop=100, step=100/n))
-    return np.min(data)
+    """Convenience method for creating a percentile-based partition of a provided data sample.
+    """
+    return np.percentile(data, np.linspace(start=0, stop=100, num = (n+1)))
 
-
-def categorical_model(data):
+def categorical_partition(data):
+    """Convenience method for creating densities from categorical data.
+    """
     s = pd.Series(data).value_counts()
-    return (s.index, s.values)
+    return (s.index, (s.values / 1. * len(data)))
+
+def kde_smooth_data(data):
+    """Convenience method for building a partition and weights using a gaussian Kernel Density Estimate and default bandwidth.
+    Args:
+        data (list-like): The data from which to construct the estimate.
+    Returns:
+        dict:
+            {
+                "partition": (list) The edges of the partial partition of reals implied by the data and covariance_factor,
+                "weights": (list) The densities of the bins implied by the partition.
+            }
+    """
+    kde = stats.kde.gaussian_kde(data)
+    partition = np.linspace(start = np.min(data) - (kde.covariance_factor() / 2),
+                            stop = np.max(data) + (kde.covariance_factor() / 2),
+                            num = ((np.max(data) - np.min(data)) / kde.covariance_factor()) + 1 )
+    densities = weights(partition, data)
+    return { "partition": partition, "weights": densities }
+
+def partition_data(data, bins='auto', n_bins='10'):
+    """Convenience method for building a partition and weights using simple options.
+    Args:
+        data (list-like): The data from which to construct the estimate.
+        bins (string): One of 'even' (for evenly spaced bins), 'ntile' (for percentile-spaced bins), or 'auto' (for automatically spaced bins)
+        n_bins (int): Ignored if bins is auto.
+    Returns:
+        dict:
+            {
+                "partition": (list) The edges of the partial partition of reals implied by the data and covariance_factor,
+                "weights": (list) The densities of the bins implied by the partition.
+            }
+    """
+    if bins == 'even':
+        partition = even_partition(data, n_bins)
+    elif bins =='ntile':
+        partition = ntile_partition(data, n_bins)
+    elif bins == 'auto':
+        hist, bin_edges = np.histogram(data, bins='auto', density=False)
+        return { "partition": bin_edges, "weights": hist / (1.*len(data)) }
+
+    return {
+      "partition": partition,
+      "weights": weights(partition, data)
+    }

@@ -8,8 +8,6 @@ import numpy as np
 
 from .util import DotDict, ensure_json_serializable
 
-
-
 class DataSet(object):
 
     def __init__(self, *args, **kwargs):
@@ -529,17 +527,16 @@ class DataSet(object):
         """
         raise NotImplementedError
 
-    @wraps
-    def expect_column_frequency_distribution_to_be(self, column, vals, expected_frequencies, p=0.05, suppress_exceptions=False):
+    def expect_column_frequency_distribution_to_be(self, column, partition_object, p=0.05, suppress_exceptions=False):
         """
         Expect the values in this column to match the distribution of the specified categorical vals and their expected_frequencies. \
 
         Args:
             column (str): The column name
             vals (list): A list of categorical values.
-            expected_frequencies (list): A list of values that correspond to the provided categorical values. \
-                Frequencies should not be normalized, which makes this test sensitive to sample size differences \
-                between the expected_frequencies and the column at the time of validating the expectation.
+            partition_object (dict): A dictionary containing partition (categorical values) and associated weights.
+                - partition (list): A list of values that correspond to the provided categorical values.
+                - weights (list): A list of weights. They should sum to one. The test will scale the expected frequencies by the weights and size of the new sample.
             p (float) = 0.05: The p-value threshold for the Chai Squareed test.\
                 For values below the specified threshold the expectation will return false, rejecting the null hypothesis that the distributions are the same.
             suppress_exceptions: Only return a boolean success value, not a dictionary with other results.
@@ -547,22 +544,21 @@ class DataSet(object):
         Returns:
             {
                 "success": (bool) True if the column passed the expectation,
-                "exceptions_list": (list) the true pvalue of the ChaiSquared test
+                "true_value": (float) the true pvalue of the ChiSquared test
             }
         """
         raise NotImplementedError
 
-    @wraps
-    def expect_column_numerical_distribution_to_be(self, column, partition, cdf_vals, sample_size=0, p=0.05, suppress_exceptions=False):
+    def expect_column_numerical_distribution_to_be(self, column, partition_object, sample_size=0, p=0.05, suppress_exceptions=False):
         """
         Expect the values in this column to match the distribution implied by the specified partition and cdf_vals. \
         The implied CDF is constructed as a linear interpolation of the provided cdf_vals.
 
         Args:
             column (str): The column name
-            partition (list): A list of values that partition the real numbers.
-            cdf_vals (list): A list of values that correspond to an empricical \
-                expected cumulative density function for the provided partition
+            partition_object (dict): A dictionary containing partition (bin edges) and associated weights.
+                - partition (list): A list of values that correspond to the endpoints of an implied partition on the real number line.
+                - weights (list): A list of weights. They should sum to one.
             sample_size (int) = 0: The number of samples from column to use in comparing\
                 to the provided CDF. If zero, defaults to the number of elements in the partition.
                 Setting the sample size too large will cause the KS test to be very sensitive to
@@ -574,66 +570,28 @@ class DataSet(object):
         Returns:
             {
                 "success": (bool) True if the column passed the expectation,
-                "exceptions_list": (list) the true pvalue of the KS test
+                "true_value": (float) the true pvalue of the KS test
             }
         """
         raise NotImplementedError
 
-    # def expect_column_frequency_distribution_to_be():
+    def expect_column_kl_divergence_to_be(self, column, partition_object, threshold=0.1, suppress_exceptions=False):
+        """
+        Expect the values in this column to have lower Kulback-Leibler divergence (relative entropy) with the distriution provided in partition_object of less than the provided threshold.
 
-    ##### Column pairs #####
-
-    # def expect_two_column_values_to_be_equal():
-
-    def expect_two_column_values_to_be_subsets(self, column_1, column_2, mostly=None, suppress_exceptions=False):
-        """Given two columns, expect one column to have entries such that the entries are a subset of the other column's entries.
-        The values in column_1 should be a subset of column_2.
         Args:
-            column_1 (str): The first column name to compare entries.
-            column_2 (str): The second column name to compare entries.
-        Keyword Args:
-            mostly=None: Return "success": True if the percentage of values that form a subset is greater than or equal to mostly (a float between 0 and 1).
+            column (str): The column name
+            partition_object (dict): A dictionary containing partition (bin edges) and associated weights.
+                - partition (list): A list of values that correspond to the endpoints of an implied partition on the real number line.
+                - weights (list): A list of weights. They should sum to one.
+            threshold (float) = 0.1: The threshold of relative entropy.\
+                For values above the specified threshold the expectation will return false.
+            suppress_exceptions: Only return a boolean success value, not a dictionary with other results.
+
         Returns:
-            dict:
-                {
-                    "success": (bool) True if the column passed the expectation,
-                    "exceptions_list": (list) the values that did not pass the expectation
-                }
+            {
+                "success": (bool) True if the column passed the expectation,
+                "true_value": (float) the true value of the KL divergence
+            }
         """
         raise NotImplementedError
-
-    def expect_two_column_values_to_be_many_to_one(self, column_1, column_2, mostly=None, suppress_exceptions=False):
-        """Given two columns, expect one column to map multiple entries to a single entry of the other column.
-        The column_1 argument should be the column corresponding to many while column_2 should correspond to one.
-        Args:
-            column_1 (str): the column with multiple values per entry
-            column_2 (str): the column with one value per entry
-        Keyword Args:
-            mostly=None: Return "success": True if the percentage of values that are many-to-one is greater than or equal to mostly (a float between 0 and 1).
-        Returns:
-            dict:
-                {
-                    "success": (bool) True if the column passed the expectation,
-                    "exceptions_list": (list) the values that did not pass the expectation
-                }
-        """
-        raise NotImplementedError
-
-    # def expect_two_column_crosstabs_to_be
-
-    #!!! Deprecated
-    # def expect_values_to_be_equal_across_columns(self, column, regex, mostly=None, suppress_exceptions=False):
-    #     """
-    #     """
-    #     raise NotImplementedError
-
-    #!!! Deprecated
-    # def expect_column_values_to_be_equal_across_columns(self, column_1, column_2, suppress_exceptions=False):
-    #     """
-    #     docstring
-    #     """
-    #     raise NotImplementedError
-
-    ##### Multicolumn relations #####
-
-    # def expect_multicolumn_values_to_be_unique
