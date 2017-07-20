@@ -139,55 +139,55 @@ class TestDistributionalExpectations(unittest.TestCase):
                 {
                     'args': ['norm_0_1', self.auto_partition_norm_0_1],
                     'kwargs':{"threshold": 0.1},
-                    'out':{'success':True, 'true_value': "NOTTESTED"}
+                    'out':{'success':True, 'true_value': 0.0013326972943566281}
                 },
                 {
                     'args': ['norm_0_1', self.uniform_partition_norm_0_1],
                     'kwargs':{"threshold": 0.1},
-                    'out':{'success':True, 'true_value': "NOTTESTED"}
+                    'out':{'success':True, 'true_value': 0.0013326972943566281}
                 },
                 {
                     'args': ['norm_0_1', self.ntile_partition_norm_0_1],
                     'kwargs':{"threshold": 0.1},
-                    'out':{'success':True, 'true_value': "NOTTESTED"}
+                    'out':{'success':True, 'true_value': 0.00047210715733547086}
                 },
                 {
                     'args': ['norm_0_1', self.kde_smooth_partition_norm_0_1],
                     'kwargs':{"threshold": 0.1},
-                    'out':{'success':True, 'true_value': "NOTTESTED"}
+                    'out':{'success':True, 'true_value': 0.039351496030977519}
                 },
                 {
                     'args': ['norm_1_1', self.auto_partition_norm_0_1],
                     'kwargs':{"threshold": 0.1},
-                    'out':{'success':False, 'true_value': "NOTTESTED"}
+                    'out':{'success':False, 'true_value': 0.56801971244750626}
                 },
                 {
                     'args': ['norm_1_1', self.uniform_partition_norm_0_1],
                     'kwargs':{"threshold": 0.1},
-                    'out':{'success':False, 'true_value': "NOTTESTED"}
+                    'out':{'success':False, 'true_value': 0.56801971244750626}
                 },
                 {
                     'args': ['norm_1_1', self.ntile_partition_norm_0_1],
                     'kwargs':{"threshold": 0.1},
-                    'out':{'success':False, 'true_value': "NOTTESTED"}
+                    'out':{'success':False, 'true_value': 0.59398892510202805}
                 },
                 {
                     'args': ['norm_1_1', self.kde_smooth_partition_norm_0_1],
                     'kwargs':{"threshold": 0.1},
-                    'out':{'success':False, 'true_value': "NOTTESTED"}
+                    'out':{'success':False, 'true_value': 0.52740442919069253}
                 },
                 {
                     'args': ['bimodal', self.auto_partition_bimodal],
                     'kwargs':{"threshold": 0.1},
-                    'out':{'success':True, 'true_value': "NOTTESTED"}
-                }
-                #TODO: Evaluate these tests and thresholds to understand performance
+                    'out':{'success':True, 'true_value': 0.00023525468906568868}
+                },
+                # TODO: Consider changes that would allow us to detect this case
                 # },
                 # {
                 #     'args': ['bimodal', self.kde_smooth_partition_bimodal],
                 #     'kwargs':{"threshold": 0.1},
                 #     'out':{'success':True, 'true_value': "NOTTESTED"}
-                # },
+                # }
                 # {
                 #     'args': ['bimodal', self.auto_partition_norm_0_1],
                 #     'kwargs':{"threshold": 0.1},
@@ -201,7 +201,6 @@ class TestDistributionalExpectations(unittest.TestCase):
         ]
         for t in T:
             out = self.D.expect_column_kl_divergence_to_be(*t['args'], **t['kwargs'])
-            #print(out)
             self.assertEqual(out['success'],t['out']['success'])
 
 if __name__ == "__main__":
