@@ -80,14 +80,26 @@ def kde_smooth_data(data):
             }
     """
     kde = stats.kde.gaussian_kde(data)
-    partition = np.linspace(start = np.min(data) - (kde.covariance_factor() / 2),
+    evaluation_partition = np.linspace(start = np.min(data) - (kde.covariance_factor() / 2),
                             stop = np.max(data) + (kde.covariance_factor() / 2),
                             num = ((np.max(data) - np.min(data)) / kde.covariance_factor()) + 1 )
-    densities = weights(partition, data)
-    return { "partition": partition, "weights": densities }
+    cdf_vals = [kde.integrate_box_1d(-np.inf, x) for x in evaluation_partition]
+    evaluation_weights = np.diff(cdf_vals)
+    #evaluation_weights = [cdf_vals[k+1] - cdf_vals[k] for k in range(len(evaluation_partition)-1)]
+
+    # We need to account for weight outside the explicit partition at this point since we have smoothed.
+    # Following is basically a crude rule of thumb for what should be -inf and inf as real endpoints.
+    lower_bound = np.min(data) - (1.5 * kde.covariance_factor())
+    upper_bound = np.max(data) + (1.5 * kde.covariance_factor())
+    partition = [ lower_bound ] + evaluation_partition.tolist() + [ upper_bound ]
+    weights = [ cdf_vals[0] ] + evaluation_weights.tolist() + [1 - cdf_vals[-1]]
+    return {
+        "partition": partition,
+        "weights": weights
+    }
 
 def partition_data(data, bins='auto', n_bins=10):
-    """Convenience method for building a partition and weights using simple options.
+    """Convenience method for building a partition and weights using simple options. Basically a wrapper for np.histogram, which can provide additional functionality.
     Args:
         data (list-like): The data from which to construct the estimate.
         bins (string): One of 'uniform' (for uniformly spaced bins), 'ntile' (for percentile-spaced bins), or 'auto' (for automatically spaced bins)
@@ -114,3 +126,19 @@ def partition_data(data, bins='auto', n_bins=10):
         "partition": bin_edges,
         "weights": hist / (1.*len(data))
     }
+
+def remove_empty_intervals(partition_object):
+    partition_object['weights'] = np.array(partition_object['weights'])
+    partition_object['partition'] = np.array(partition_object['partition'])
+    for k in range(len(partition_object['weights'])):
+        if (partition_object['weights'][k] == 0):
+
+            #del(partition_object['weights'][k])
+            partition_object['weights'] = np.delete(partition_object['weights'],k)
+            if ( (k + 1) < len(partition_object['weights'])):
+                interval = partition_object['partition'][k+1] - partition_object['partition'][k]
+                partition_object['partition'][k+1] = partition_object['partition'][k+1] - (interval / 2)
+            #del(partition_object['partition'][k])
+            partition_object['partition'] =np.delete(partition_object['partition'],k)
+            return remove_empty_intervals(partition_object)
+    return partition_object
