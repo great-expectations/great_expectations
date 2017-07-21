@@ -44,7 +44,8 @@ def is_valid_partition_object(partition_object):
     if ("partition" not in partition_object) or ("weights" not in partition_object):
         return False
     if (len(partition_object['partition']) != (len(partition_object['weights']) + 1)):
-        return False
+        if (len(partition_object['partition']) != len(partition_object['weights'])):
+            return False
     # TODO: Evaluate desired tolerance for weights
     if (abs(np.sum(partition_object['weights']) - 1) > 1e-10):
         return False
