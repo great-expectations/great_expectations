@@ -36,6 +36,12 @@ class DataSet(object):
                     }
                 })
 
+        self.default_expectation_args = {
+            "include_kwargs" : False,
+            "catch_exceptions" : False,
+            "output_format" : 'BASIC',
+        }
+
         self._expectations_config.dataset_name = name
 
     def append_expectation(self, expectation_config):
@@ -53,7 +59,8 @@ class DataSet(object):
         self._expectations_config.expectations.append(expectation_config)
 
 
-    def expectation(func):
+    @classmethod
+    def expectation(cls, func):
 
         def wrapper(self, *args, **kwargs):
 
@@ -89,41 +96,53 @@ class DataSet(object):
         wrapper.__doc__ = func.__doc__
         return wrapper
 
-    def column_map_expectation(func):
+    @classmethod
+    def column_map_expectation(cls, func):
 
-        @expectation
-        def inner_wrapper(self, column, mostly=None, suppress_expectations=False):
-            null_indexes = self._get_null_indexes(column)
+        @cls.expectation
+        def inner_wrapper(self, column, mostly=None, include_kwargs=None, catch_exceptions=None, output_format=None):
+            for var in ["include_kwargs", "catch_exceptions", "output_format"]:
+                if locals.get(var) == None:
+                    locals.set(var, self.default_expectation_args[var])
 
-            nonnull_values = self._get_nonnull_values(column, null_indexes)
-            nonnull_count = self._get_null_count(null_indexes)
+            series = self[column]
+            null_indexes = series.isnull()
+
+            nonnull_values = series[null_indexes==False]
+            nonnull_count = (null_indexes==False).sum()
             
             successful_indexes = func(self, nonnull_values)
-            success_count = self._get_success_count(successful_indexes)
+            success_count = successful_indexes.sum()
 
-            exceptions = list(self._get_exceptions(column, successful_indexes))
+            exception_list = list(series[(successful_indexes==False)&(null_indexes==False)])
 
-            if mostly:
-                #Prevent division-by-zero errors
-                if notnull.sum() == 0:
-                    return {
-                        'success':True,
-                        'exception_list':exceptions
-                    }
+            if nonnull_count > 0:
+                percent_success = float(success_count)/nonnull_count
 
-                percent_success = float(success_count)/notnull_count
-                return {
-                    "success" : percent_success >= mostly,
-                    "exception_list" : exceptions
-                }
+                if mostly:
+                    success = percent_success >= mostly
+
+                else:
+                    success = len(exception_list) == 0
 
             else:
-                return {
-                    "success" : len(exceptions) == 0,
-                    "exception_list" : exceptions
+                success = True
+                percent_success = None
+
+            print nonnull_count, success_count, percent_success, success
+
+            if output_format=="BASIC":
+                return_obj = {
+                    "success" : success,
+                    "exception_list" : exception_list,
                 }
+            elif output_format=="BOOLEAN_ONLY":
+                return_obj = success
+
+            return return_obj
 
         return inner_wrapper
+
 
     def column_aggregate_expectation(func):
 
