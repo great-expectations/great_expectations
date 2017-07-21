@@ -322,13 +322,13 @@ class PandasDataSet(DataSet, pd.DataFrame):
 
     @DataSet.column_expectation
     def expect_column_frequency_distribution_to_be(self, column, partition_object, p=0.05, suppress_exceptions=False):
-        if (len(partition_object['partition']) != len(partition_object['weights'])):
+        if not is_valid_partition_object(partition_object):
             return {
                 "success": False,
-                "error": "Categories and weights do not match."
+                "error": "Invalid partition_object"
             }
 
-        expected_series = pd.Series(partition_object['weights'] * (1.*len(self[column])), index=partition_object['partition'], name='expected')
+        expected_series = pd.Series(partition_object['weights'], index=partition_object['partition'], name='expected') * len(self[column])
         observed_frequencies = self[column].value_counts()
         # Join along the indicies to ensure we have values
         test_df = pd.concat([expected_series, observed_frequencies], axis = 1).fillna(0)
@@ -381,11 +381,15 @@ class PandasDataSet(DataSet, pd.DataFrame):
         not_null = self[column].notnull()
         not_null_values = self[not_null][column]
 
-        # Discretize the partition_object into a set of probable events
-        #pk = weights(partition_object['partition'], not_null_values)
-        partition_object = remove_empty_intervals(partition_object)
-        hist, bin_edges = np.histogram(not_null_values, partition_object['partition'], density=False)
-        pk = hist / (1.* len(not_null_values))
+        # If the data expected to be discrete, build a series
+        if (len(partition_object['weights']) == len(partition_object['partition'])):
+            observed_frequencies = not_null_values.value_counts()
+            pk = observed_frequencies / len(not_null_values)
+        else:
+            partition_object = remove_empty_intervals(partition_object)
+            hist, bin_edges = np.histogram(not_null_values, partition_object['partition'], density=False)
+            pk = hist / (1.* len(not_null_values))
+
         kl_divergence = stats.entropy(pk, partition_object['weights'])
 
         if suppress_exceptions:
