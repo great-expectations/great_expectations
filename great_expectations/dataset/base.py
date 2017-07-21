@@ -162,34 +162,34 @@ class DataSet(object):
 
         return inner_wrapper
 
-    # @staticmethod
-    # def expectation(func):
+    @staticmethod
+    def expectation(func):
 
-    #     def wrapper(self, *args, **kwargs):
+        def wrapper(self, *args, **kwargs):
 
-    #         #Get the name of the method
-    #         method_name = func.__name__
+            #Get the name of the method
+            method_name = func.__name__
 
-    #         #Fetch argument names
-    #         method_arg_names = inspect.getargspec(func)[0][1:]
+            #Fetch argument names
+            method_arg_names = inspect.getargspec(func)[0][1:]
 
-    #         #Construct the expectation_config object
-    #         expectation_config = dict(
-    #             zip(method_arg_names, args)+\
-    #             kwargs.items()
-    #         )
+            #Construct the expectation_config object
+            expectation_config = dict(
+                zip(method_arg_names, args)+\
+                kwargs.items()
+            )
 
-    #         #Add the expectation_method key
-    #         expectation_config['expectation_type'] = method_name
+            #Add the expectation_method key
+            expectation_config['expectation_type'] = method_name
 
-    #         #Append the expectation to the config.
-    #         self.append_expectation(expectation_config)
+            #Append the expectation to the config.
+            self.append_expectation(expectation_config)
 
-    #         #Finally, execute the expectation method itself
-    #         return func(self, *args, **kwargs)
+            #Finally, execute the expectation method itself
+            return func(self, *args, **kwargs)
 
-    #     wrapper.__doc__ = func.__doc__
-    #     return wrapper
+        wrapper.__doc__ = func.__doc__
+        return wrapper
 
 
     @staticmethod
