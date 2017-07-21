@@ -54,7 +54,7 @@ class DataSet(object):
 
         self._expectations_config.expectations.append(expectation_config)
 
-    @staticmethod
+
     def expectation(func):
 
         def wrapper(self, *args, **kwargs):
@@ -83,9 +83,116 @@ class DataSet(object):
         wrapper.__doc__ = func.__doc__
         return wrapper
 
+    def column_map_expectation(func):
+
+        @expectation
+        def inner_wrapper(self, column, mostly=None, suppress_expectations=False):
+            null_indexes = self._get_null_indexes(column)
+
+            nonnull_values = self._get_nonnull_values(column, null_indexes)
+            nonnull_count = self._get_null_count(null_indexes)
+            
+            successful_indexes = func(self, nonnull_values)
+            success_count = self._get_success_count(successful_indexes)
+
+            exceptions = list(self._get_exceptions(column, successful_indexes))
+
+            if mostly:
+                #Prevent division-by-zero errors
+                if notnull.sum() == 0:
+                    return {
+                        'success':True,
+                        'exception_list':exceptions
+                    }
+
+                percent_success = float(success_count)/notnull_count
+                return {
+                    "success" : percent_success >= mostly,
+                    "exception_list" : exceptions
+                }
+
+            else:
+                return {
+                    "success" : len(exceptions) == 0,
+                    "exception_list" : exceptions
+                }
+
+        return inner_wrapper
+
+    def column_aggregate_expectation(func):
+
+        @expectation
+        def inner_wrapper(self, column, mostly=None, suppress_expectations=False):
+            pass
+
+    def column_elementwise_expectation(func):
+
+        @expectation
+        def inner_wrapper(self, column, mostly=None, suppress_expectations=False):
+            notnull = self[column].notnull()
+            
+            success = self[column][notnull].map(lambda x: func(self,x))
+            exceptions = list(self[column][notnull][success==False])
+
+            if mostly:
+                #Prevent division-by-zero errors
+                if notnull.sum() == 0:
+                    return {
+                        'success':True,
+                        'exception_list':exceptions
+                    }
+
+                percent_success = float(success.sum())/notnull.sum()
+                return {
+                    "success" : percent_success >= mostly,
+                    "exception_list" : exceptions
+                }
+
+            else:
+                return {
+                    "success" : len(exceptions) == 0,
+                    "exception_list" : exceptions
+                }
+
+        return inner_wrapper
+
+    # @staticmethod
+    # def expectation(func):
+
+    #     def wrapper(self, *args, **kwargs):
+
+    #         #Get the name of the method
+    #         method_name = func.__name__
+
+    #         #Fetch argument names
+    #         method_arg_names = inspect.getargspec(func)[0][1:]
+
+    #         #Construct the expectation_config object
+    #         expectation_config = dict(
+    #             zip(method_arg_names, args)+\
+    #             kwargs.items()
+    #         )
+
+    #         #Add the expectation_method key
+    #         expectation_config['expectation_type'] = method_name
+
+    #         #Append the expectation to the config.
+    #         self.append_expectation(expectation_config)
+
+    #         #Finally, execute the expectation method itself
+    #         return func(self, *args, **kwargs)
+
+    #     wrapper.__doc__ = func.__doc__
+    #     return wrapper
+
 
     @staticmethod
     def column_expectation(func):
+        """
+        !!! This method is deprecated.
+        !!! It's still in use as a legacy method within PandasDataset, but that's temporary.
+        !!! @column_expectations will be fully phased out before the v0.2 release.
+        """
 
         def wrapper(self, column, *args, **kwargs):
             #Get the name of the method
