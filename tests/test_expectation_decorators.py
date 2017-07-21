@@ -56,6 +56,14 @@ class TestExpectationDecorators(unittest.TestCase):
         )
 
         self.assertEqual(
+            df.expect_column_value_to_be_odd("mostly_odd", mostly=.6),
+            {
+                'exception_list': [2, 4],
+                'success': True
+            }
+        )
+
+        self.assertEqual(
             df.expect_column_value_to_be_odd("mostly_odd", output_format="BOOLEAN_ONLY"),
             False
         )
