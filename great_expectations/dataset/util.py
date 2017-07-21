@@ -65,7 +65,7 @@ def categorical_partition_data(data):
     s = pd.Series(data).value_counts()
     return {
         "partition": s.index,
-        "weights":  (s.values / 1. * len(data))
+        "weights":  s.values / (1. * len(data))
     }
 
 def kde_smooth_data(data):

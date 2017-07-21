@@ -328,7 +328,7 @@ class PandasDataSet(DataSet, pd.DataFrame):
                 "error": "Categories and weights do not match."
             }
 
-        expected_series = pd.Series(partition_object['weights'] * (1.*len(self[column])), index=partition_object['partition'], name='expected')
+        expected_series = pd.Series(partition_object['weights'], index=partition_object['partition'], name='expected') * len(self[column])
         observed_frequencies = self[column].value_counts()
         # Join along the indicies to ensure we have values
         test_df = pd.concat([expected_series, observed_frequencies], axis = 1).fillna(0)
