@@ -7,6 +7,7 @@ from datetime import datetime
 import json
 
 from .base import DataSet
+from .util import is_valid_partition_object, remove_empty_intervals
 
 class PandasDataSet(DataSet, pd.DataFrame):
 
@@ -26,7 +27,7 @@ class PandasDataSet(DataSet, pd.DataFrame):
             }
 
 
-    @DataSet.column_expectation
+    @DataSet.expectation
     def expect_table_row_count_to_be_between(self, min_value, max_value,suppress_exceptions=False):
 
         outcome = False
@@ -44,7 +45,7 @@ class PandasDataSet(DataSet, pd.DataFrame):
         }
 
 
-    @DataSet.column_expectation
+    @DataSet.expectation
     def expect_table_row_count_to_equal(self, value, suppress_exceptions=False):
 
         outcome = False
@@ -320,14 +321,14 @@ class PandasDataSet(DataSet, pd.DataFrame):
             }
 
     @DataSet.column_expectation
-    def expect_column_frequency_distribution_to_be(self, column, vals, expected_frequencies, p=0.05, suppress_exceptions=False):
-        if (len(vals) != len(expected_frequencies)):
+    def expect_column_frequency_distribution_to_be(self, column, partition_object, p=0.05, suppress_exceptions=False):
+        if not is_valid_partition_object(partition_object):
             return {
                 "success": False,
-                "error": "Vals and expected frequencies do not match."
+                "error": "Invalid partition_object"
             }
 
-        expected_series = pd.Series(expected_frequencies, index=vals, name='expected')
+        expected_series = pd.Series(partition_object['weights'], index=partition_object['partition'], name='expected') * len(self[column])
         observed_frequencies = self[column].value_counts()
         # Join along the indicies to ensure we have values
         test_df = pd.concat([expected_series, observed_frequencies], axis = 1).fillna(0)
@@ -340,19 +341,24 @@ class PandasDataSet(DataSet, pd.DataFrame):
         else:
             return {
                 "success" : test_result.pvalue > p,
-                "exception_list" : test_result.pvalue,
+                "true_value" : test_result.pvalue,
             }
 
     @DataSet.column_expectation
-    def expect_column_numerical_distribution_to_be(self, column, partition, cdf_vals, sample_size=0, p=0.05, suppress_exceptions=False):
+    def expect_column_numerical_distribution_to_be(self, column, partition_object, sample_size=0, p=0.05, suppress_exceptions=False):
+        if not is_valid_partition_object(partition_object):
+            return {
+                "success": False,
+                "error": "Invalid partition_object"
+            }
         not_null = self[column].notnull()
         not_null_values = self[not_null][column]
         if (sample_size == 0):
-            test_sample = np.random.choice(not_null_values, size=len(partition), replace=False)
+            test_sample = np.random.choice(not_null_values, size=len(partition_object['partition']), replace=False)
         else:
             test_sample = np.random.choice(not_null_values, size=sample_size, replace=False)
 
-        estimated_cdf = lambda x: np.interp(x, partition, cdf_vals)
+        estimated_cdf = lambda x: np.interp(x, partition_object['partition'], np.append(np.array([0]), np.cumsum(partition_object['weights'])))
         test_result = stats.kstest(test_sample, estimated_cdf)
 
         if suppress_exceptions:
@@ -362,9 +368,39 @@ class PandasDataSet(DataSet, pd.DataFrame):
         else:
             return {
                 "success" : test_result.pvalue > p,
-                "exception_list" : test_result.pvalue,
+                "true_value" : test_result.pvalue,
             }
 
+    @DataSet.column_expectation
+    def expect_column_kl_divergence_to_be(self, column, partition_object, threshold=0.1, suppress_exceptions=False):
+        if not is_valid_partition_object(partition_object):
+            return {
+                "success": False,
+                "error": "Invalid partition_object"
+            }
+        not_null = self[column].notnull()
+        not_null_values = self[not_null][column]
+
+        # If the data expected to be discrete, build a series
+        if (len(partition_object['weights']) == len(partition_object['partition'])):
+            observed_frequencies = not_null_values.value_counts()
+            pk = observed_frequencies / len(not_null_values)
+        else:
+            partition_object = remove_empty_intervals(partition_object)
+            hist, bin_edges = np.histogram(not_null_values, partition_object['partition'], density=False)
+            pk = hist / (1.* len(not_null_values))
+
+        kl_divergence = stats.entropy(pk, partition_object['weights'])
+
+        if suppress_exceptions:
+            return {
+                "success" : kl_divergence <= threshold,
+            }
+        else:
+            return {
+                "success" : kl_divergence <= threshold,
+                "true_value" : kl_divergence
+            }
 
 
     def expect_column_value_lengths_to_be_between(self, column, min_value, max_value, mostly=None, suppress_exceptions=False):
@@ -708,36 +744,3 @@ class PandasDataSet(DataSet, pd.DataFrame):
             'success':outcome,
             'true_value':exceptions
         }
-
-
-    @DataSet.column_expectation
-    def expect_two_column_values_to_be_subsets(self, column_1, column_2, mostly=None, suppress_exceptions=False):
-
-        C1 = set(self[column_1])
-        C2 = set(self[column_2])
-
-        outcome = False
-        if C1.issubset(C2) or C2.issubset(C1):
-            outcome = True
-
-        if suppress_exceptions:
-            exceptions = None
-        else:
-            exceptions = C1.union(C2) - C1.intersection(C2)
-
-        if mostly:
-            subset_proportion = 1 - float(len(C1.intersection(C2)))/len(C1.union(C2))
-            return {
-                'success':(subset_proportion >= mostly),
-                'exceptions_list':exceptions
-            }
-        else:
-            return {
-                'success':outcome,
-                'exceptions_list':exceptions
-            }
-
-
-    @DataSet.column_expectation
-    def expect_two_column_values_to_be_many_to_one(self, column_1, column_2, mostly=None, suppress_exceptions=False):
-        raise NotImplementedError("Expectation is not yet implemented")
