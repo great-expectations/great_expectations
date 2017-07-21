@@ -40,7 +40,7 @@ def isprime(n):
 
 class CustomPandasDataSet(ge.dataset.PandasDataSet):
 
-    @ge.dataset.DataSet.column_expectation
+    @ge.dataset.DataSet.old_column_expectation
     def expect_column_values_to_be_prime(self, column, mostly=None, suppress_expectations=False):
         notnull = self[column].notnull()
 

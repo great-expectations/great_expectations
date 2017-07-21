@@ -163,7 +163,12 @@ class DataSet(object):
         return inner_wrapper
 
     @staticmethod
-    def expectation(func):
+    def old_expectation(func):
+        """
+        !!! This method is deprecated.
+        !!! It's still in use as a legacy method within PandasDataset, but that's temporary.
+        !!! @column_expectations will be fully phased out before the v0.2 release.
+        """
 
         def wrapper(self, *args, **kwargs):
 
@@ -193,7 +198,7 @@ class DataSet(object):
 
 
     @staticmethod
-    def column_expectation(func):
+    def old_column_expectation(func):
         """
         !!! This method is deprecated.
         !!! It's still in use as a legacy method within PandasDataset, but that's temporary.
