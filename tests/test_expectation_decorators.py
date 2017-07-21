@@ -43,6 +43,7 @@ class TestExpectationDecorators(unittest.TestCase):
             df.expect_column_value_to_be_odd("all_odd"),
             {
                 'exception_list': [],
+                'exception_index_list': [],
                 'success': True
             }
         )
@@ -51,6 +52,7 @@ class TestExpectationDecorators(unittest.TestCase):
             df.expect_column_value_to_be_odd("mostly_odd"),
             {
                 'exception_list': [2, 4],
+                'exception_index_list': [5, 6],
                 'success': False
             }
         )
@@ -59,6 +61,7 @@ class TestExpectationDecorators(unittest.TestCase):
             df.expect_column_value_to_be_odd("mostly_odd", mostly=.6),
             {
                 'exception_list': [2, 4],
+                'exception_index_list': [5, 6],
                 'success': True
             }
         )
@@ -84,10 +87,7 @@ class TestExpectationDecorators(unittest.TestCase):
         # )
 
 
-    def test_column_map_expectation_decorator(self):
-
-        #!!! Skipping!!!
-        return 
+    def test_column_aggregate_expectation_decorator(self):
 
         # Create a new CustomPandasDataSet to 
         # (1) Prove that custom subclassing works, AND
@@ -96,8 +96,7 @@ class TestExpectationDecorators(unittest.TestCase):
 
             @PandasDataSet.column_aggregate_expectation
             def expect_column_median_to_be_odd(self, series):
-                return series.median() % 2
-
+                return series.median() % 2, series.median()
 
         df = CustomPandasDataSet({
             'all_odd' : [1,3,5,7,9],
@@ -111,27 +110,42 @@ class TestExpectationDecorators(unittest.TestCase):
         self.assertEqual(
             df.expect_column_median_to_be_odd("all_odd"),
             {
-                'exception_list': [],
+                'true_value': 5,
                 'success': True
             }
         )
 
         self.assertEqual(
-            df.expect_column_median_to_be_odd("mostly_odd"),
+            df.expect_column_median_to_be_odd("all_even"),
             {
-                'exception_list': [2, 4],
+                'true_value': 6,
                 'success': False
             }
         )
 
-        # self.assertEqual(
-        #     df.expect_column_value_to_be_odd("all_odd"),
-        #     {
-        #         'exception_list': [],
-        #         'success': True
-        #     }
-        # )
+        self.assertEqual(
+            df.expect_column_median_to_be_odd("all_even", output_format="SUMMARY"),
+            {
+                'true_value': 6,
+                'success': False
+            }
+        )
 
+        self.assertEqual(
+            df.expect_column_median_to_be_odd("all_even", output_format="BOOLEAN_ONLY"),
+            False
+        )
 
+        df.default_expectation_args["output_format"] = "BOOLEAN_ONLY"
+        self.assertEqual(
+            df.expect_column_median_to_be_odd("all_even"),
+            False
+        )
 
-
+        self.assertEqual(
+            df.expect_column_median_to_be_odd("all_even", output_format="BASIC"),
+            {
+                'true_value': 6,
+                'success': False
+            }
+        )

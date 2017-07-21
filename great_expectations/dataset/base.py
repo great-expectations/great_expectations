@@ -101,9 +101,15 @@ class DataSet(object):
 
         @cls.expectation
         def inner_wrapper(self, column, mostly=None, include_kwargs=None, catch_exceptions=None, output_format=None):
-            for var in ["include_kwargs", "catch_exceptions", "output_format"]:
-                if locals.get(var) == None:
-                    locals.set(var, self.default_expectation_args[var])
+            if include_kwargs == None:
+                include_kwargs = self.default_expectation_args["include_kwargs"]
+
+            if catch_exceptions == None:
+                catch_exceptions = self.default_expectation_args["catch_exceptions"]
+
+            if output_format == None:
+                output_format = self.default_expectation_args["output_format"]
+
 
             series = self[column]
             null_indexes = series.isnull()
@@ -115,6 +121,7 @@ class DataSet(object):
             success_count = successful_indexes.sum()
 
             exception_list = list(series[(successful_indexes==False)&(null_indexes==False)])
+            exception_index_list = list(series[(successful_indexes==False)&(null_indexes==False)].index)
 
             if nonnull_count > 0:
                 percent_success = float(success_count)/nonnull_count
@@ -129,26 +136,66 @@ class DataSet(object):
                 success = True
                 percent_success = None
 
-            print nonnull_count, success_count, percent_success, success
+            # print nonnull_count, success_count, percent_success, success
 
-            if output_format=="BASIC":
+            if output_format=="BOOLEAN_ONLY":
+                return_obj = success
+
+            elif output_format=="BASIC":
+                return_obj = {
+                    "success" : success,
+                    "exception_list" : exception_list,
+                    "exception_index_list": exception_index_list,
+                }
+
+            else:
+                print ("Warning: Unknown output_format %s. Defaulting to BASIC." % (output_format,))
                 return_obj = {
                     "success" : success,
                     "exception_list" : exception_list,
                 }
-            elif output_format=="BOOLEAN_ONLY":
-                return_obj = success
 
             return return_obj
 
         return inner_wrapper
 
 
-    def column_aggregate_expectation(func):
+    @classmethod
+    def column_aggregate_expectation(cls, func):
 
-        @expectation
-        def inner_wrapper(self, column, mostly=None, suppress_expectations=False):
-            pass
+        @cls.expectation
+        def inner_wrapper(self, column, include_kwargs=None, catch_exceptions=None, output_format=None):
+            if include_kwargs == None:
+                include_kwargs = self.default_expectation_args["include_kwargs"]
+
+            if catch_exceptions == None:
+                catch_exceptions = self.default_expectation_args["catch_exceptions"]
+
+            if output_format == None:
+                output_format = self.default_expectation_args["output_format"]
+
+
+            series = self[column]
+            null_indexes = series.isnull()
+
+            nonnull_values = series[null_indexes==False]
+            nonnull_count = (null_indexes==False).sum()
+            
+            success, true_value = func(self, nonnull_values)
+            success = bool(success)
+
+            if output_format in ["BASIC", "SUMMARY"]:
+                return_obj = {
+                    "success" : success,
+                    "true_value" : true_value,
+                }
+
+            elif output_format=="BOOLEAN_ONLY":
+                return_obj = success
+
+            return return_obj
+
+        return inner_wrapper
 
     def column_elementwise_expectation(func):
 
