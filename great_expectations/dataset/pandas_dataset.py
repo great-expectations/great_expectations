@@ -5,6 +5,8 @@ import re
 from dateutil.parser import parse
 from datetime import datetime
 import json
+from functools import wraps
+
 
 from .base import DataSet
 from .util import is_valid_partition_object, remove_empty_intervals
@@ -13,6 +15,103 @@ class PandasDataSet(DataSet, pd.DataFrame):
 
     def __init__(self, *args, **kwargs):
         super(PandasDataSet, self).__init__(*args, **kwargs)
+
+    @classmethod
+    def column_map_expectation(cls, func):
+
+        @cls.expectation
+        @wraps(func)
+        def inner_wrapper(self, column, mostly=None, output_format=None):
+
+            if output_format == None:
+                output_format = self.default_expectation_args["output_format"]
+
+            series = self[column]
+            null_indexes = series.isnull()
+
+            nonnull_values = series[null_indexes==False]
+            nonnull_count = (null_indexes==False).sum()
+            
+            successful_indexes = func(self, nonnull_values)
+            success_count = successful_indexes.sum()
+
+            exception_list = list(series[(successful_indexes==False)&(null_indexes==False)])
+            exception_index_list = list(series[(successful_indexes==False)&(null_indexes==False)].index)
+
+            if nonnull_count > 0:
+                percent_success = float(success_count)/nonnull_count
+
+                if mostly:
+                    success = percent_success >= mostly
+
+                else:
+                    success = len(exception_list) == 0
+
+            else:
+                success = True
+                percent_success = None
+
+            # print nonnull_count, success_count, percent_success, success
+
+            if output_format=="BOOLEAN_ONLY":
+                return_obj = success
+
+            elif output_format=="BASIC":
+                return_obj = {
+                    "success" : success,
+                    "exception_list" : exception_list,
+                    "exception_index_list": exception_index_list,
+                }
+
+            else:
+                print ("Warning: Unknown output_format %s. Defaulting to BASIC." % (output_format,))
+                return_obj = {
+                    "success" : success,
+                    "exception_list" : exception_list,
+                }
+
+            return return_obj
+
+        inner_wrapper.__name__ = func.__name__
+        inner_wrapper.__doc__ = func.__doc__
+        return inner_wrapper
+
+
+    @classmethod
+    def column_aggregate_expectation(cls, func):
+
+        @cls.expectation
+        @wraps(func)
+        def inner_wrapper(self, column, output_format=None):
+
+            series = self[column]
+            null_indexes = series.isnull()
+
+            nonnull_values = series[null_indexes==False]
+            nonnull_count = (null_indexes==False).sum()
+            
+            success, true_value = func(self, nonnull_values)
+            success = bool(success)
+
+            if output_format in ["BASIC", "SUMMARY"]:
+                return_obj = {
+                    "success" : success,
+                    "true_value" : true_value,
+                }
+
+            elif output_format=="BOOLEAN_ONLY":
+                return_obj = success
+
+            else:
+                print ("Warning: Unknown output_format %s. Defaulting to BASIC." % (output_format,))
+                return_obj = {
+                    "success" : success,
+                    "true_value" : true_value,
+                }
+
+            return return_obj
+
+        return inner_wrapper
 
     ### Expectation methods ###
 
