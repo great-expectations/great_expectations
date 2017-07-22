@@ -26,7 +26,7 @@ class TestUtilMethods(unittest.TestCase):
     def test_partition_helpers(self):
         #TODO Make a meaningful test
         self.assertEqual(1,1)
-        
+
     def test_ensure_json_serializable(self):
         # TODO: Make a meaningful test
         self.assertEqual(1,1)

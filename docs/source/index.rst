@@ -11,6 +11,7 @@ Welcome to Great Expectations!
 
    intro
    expectations
+   distributional_expectations
    validation
    workflow_advantages
    glossary
@@ -24,7 +25,7 @@ Advanced
    output_format
    custom_expectations
    naming_conventions
-   
+
 Indices and tables
 ------------------
 

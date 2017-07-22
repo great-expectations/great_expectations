@@ -66,3 +66,10 @@ Aggregate functions
 * :func:`expect_column_numerical_distribution_to_be <great_expectations.dataset.base.DataSet.expect_column_numerical_distribution_to_be>`
 * :func:`expect_column_frequency_distribution_to_be <great_expectations.dataset.base.DataSet.expect_column_frequency_distribution_to_be>`
 
+Distributional functions
+--------------------------------------------------------------------------------
+* :func:`expect_column_numerical_distribution_to_be` <great_expectations.dataset.base.DataSet.expect_column_numerical_distribution_to_be>`
+* :func:`expect_column_frequency_distribution_to_be` <great_expectations.dataset.base.DataSet.expect_column_frequency_distribution_to_be>`
+* :func:`expect_column_kl_divergence_to_be` <great_expectations.dataset.base.DataSet.expect_column_kl_divergence_to_be>`
+
+*Distributional function helpers*

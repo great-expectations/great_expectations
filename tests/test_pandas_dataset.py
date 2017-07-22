@@ -7,7 +7,7 @@ import numpy as np
 import great_expectations as ge
 
 
-class TestStringMethods(unittest.TestCase):
+class TestPandasDataset(unittest.TestCase):
 
     def test_expect_table_row_count_to_be_between(self):
 
@@ -685,15 +685,6 @@ class TestStringMethods(unittest.TestCase):
         for t in T:
             out = D.expect_column_values_to_be_between(*t['in'], **t['kwargs'])
             self.assertEqual(out, t['out'])
-
-    def test_expect_column_frequency_distribution_to_be(self):
-        #TODO: Build meaningful tests
-        self.assertEqual(1,1)
-
-
-    def test_expect_column_numerical_distribution_to_be(self):
-        #TODO: Build meaningful tests
-        self.assertEqual(1,1)
 
     def test_expect_column_value_lengths_to_be_between(self):
         D = ge.dataset.PandasDataSet({
