@@ -119,11 +119,9 @@ class TestExpectationDecorators(unittest.TestCase):
                 'exception_list': [2, 4],
                 'exception_index_list': [5, 6],
                 'success': False,
-                'expectation_config' : {
-                    'expectation_type' : 'expect_column_values_to_be_odd',
-                    'kwargs' : {
-                        'column' : 'mostly_odd'
-                    }
+                'expectation_type' : 'expect_column_values_to_be_odd',
+                'expectation_kwargs' : {
+                    'column' : 'mostly_odd'
                 }
             }
         )

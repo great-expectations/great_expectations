@@ -15,62 +15,6 @@ class DataSet(object):
         super(DataSet, self).__init__(*args, **kwargs)
         self.initialize_expectations()
 
-    def initialize_expectations(self, config=None, name=None):
-
-        if config != None:
-            #!!! Should validate the incoming config with jsonschema here
-
-            # Copy the original so that we don't overwrite it by accident
-            self._expectations_config = DotDict(copy.deepcopy(config))
-
-        else:
-            self._expectations_config = DotDict({
-                "dataset_name" : None,
-                "expectations" : []
-            })
-
-            for col in self.columns:
-                self._expectations_config.expectations.append({
-                    "expectation_type" : "expect_column_to_exist",
-                    "kwargs" : {
-                        "column" : col
-                    }
-                })
-
-        self.default_expectation_args = {
-            "include_config" : False,
-            "catch_exceptions" : False,
-            "output_format" : 'BASIC',
-        }
-
-        self._expectations_config.dataset_name = name
-
-    def append_expectation(self, expectation_config):
-        expectation_type = expectation_config['expectation_type']
-
-        #Drop existing expectations with the same expectation_type.
-        #For column_expectations, append_expectation should only replace expectations
-        # where the expectation_type AND the column match
-        #!!! This is good default behavior, but
-        #!!!    it needs to be documented, and
-        #!!!    we need to provide syntax to override it.
-        print expectation_config
-
-        if 'column' in expectation_config['kwargs']:
-            column  = expectation_config['kwargs']['column']
-
-            self._expectations_config.expectations = [f for f in filter(
-                lambda exp: (exp['expectation_type'] != expectation_type) | (exp['kwargs']['column'] != column),
-                self._expectations_config.expectations
-            )]
-        else:
-            self._expectations_config.expectations = [f for f in filter(
-                lambda exp: exp['expectation_type'] != expectation_type,
-                self._expectations_config.expectations
-            )]
-
-        self._expectations_config.expectations.append(expectation_config)
-
 
     @classmethod
     def expectation(cls, func):
@@ -152,7 +96,10 @@ class DataSet(object):
                 if include_config:
                     #!!! Not sure the deepcopy is strictly necessary.
                     #!!! This issue applies to our DocDict: https://github.com/aparo/pyes/issues/114
-                    return_obj["expectation_config"] = copy.deepcopy(dict(expectation_config))
+                    # return_obj["expectation_type"] = copy.deepcopy(dict(expectation_config))
+                    
+                    return_obj["expectation_type"] = expectation_config["expectation_type"]
+                    return_obj["expectation_kwargs"] = copy.deepcopy(dict(expectation_config["kwargs"]))
 
                 if catch_exceptions:
                     return_obj["raised_exception"] = raised_exception
@@ -287,6 +234,70 @@ class DataSet(object):
 
         wrapper.__doc__ = func.__doc__
         return wrapper
+
+    def initialize_expectations(self, config=None, name=None):
+
+        if config != None:
+            #!!! Should validate the incoming config with jsonschema here
+
+            # Copy the original so that we don't overwrite it by accident
+            self._expectations_config = DotDict(copy.deepcopy(config))
+
+        else:
+            self._expectations_config = DotDict({
+                "dataset_name" : None,
+                "expectations" : []
+            })
+
+            for col in self.columns:
+                self._expectations_config.expectations.append({
+                    "expectation_type" : "expect_column_to_exist",
+                    "kwargs" : {
+                        "column" : col
+                    }
+                })
+
+        self.default_expectation_args = {
+            "include_config" : False,
+            "catch_exceptions" : False,
+            "output_format" : 'BASIC',
+        }
+
+        self._expectations_config.dataset_name = name
+
+    def append_expectation(self, expectation_config):
+        expectation_type = expectation_config['expectation_type']
+
+        #Drop existing expectations with the same expectation_type.
+        #For column_expectations, append_expectation should only replace expectations
+        # where the expectation_type AND the column match
+        #!!! This is good default behavior, but
+        #!!!    it needs to be documented, and
+        #!!!    we need to provide syntax to override it.
+        print expectation_config
+
+        if 'column' in expectation_config['kwargs']:
+            column  = expectation_config['kwargs']['column']
+
+            self._expectations_config.expectations = [f for f in filter(
+                lambda exp: (exp['expectation_type'] != expectation_type) | (exp['kwargs']['column'] != column),
+                self._expectations_config.expectations
+            )]
+        else:
+            self._expectations_config.expectations = [f for f in filter(
+                lambda exp: exp['expectation_type'] != expectation_type,
+                self._expectations_config.expectations
+            )]
+
+        self._expectations_config.expectations.append(expectation_config)
+
+    def get_default_expectation_arguments(self):
+        return self.default_expectation_args
+
+    def set_default_expectation_argument(self, argument, value):
+        #!!! Maybe add a validation check here?
+
+        self.default_expectation_args[argument] = value
 
     def get_expectations_config(self):
         return self._expectations_config

@@ -16,22 +16,21 @@ It isn't possible to fully satisfy all these criteria all the time. Here's how G
 `output_format`
 ------------------------------------------------------------------------------
 
-All Expectations accept an `output_format` parameter. Out of the box, `output_format` can take 3 values: `boolean`, `basic`, and `summary`. That said, the API allows you to define new formats that mix, match, extend this initial set.
+All Expectations accept an `output_format` parameter. Out of the box, `output_format` can take 3 values: `BOOLEAN_ONLY`, `BASIC`, and `SUMMARY`. That said, the API allows you to define new formats that mix, match, extend this initial set.
 
 .. code-block:: bash
 
-    >> import ge.result_output_formats as gerof
     >> expect_column_values_to_match_regex(
         "my_column",
         "[A-Z][a-z]+",
-        output_format=gerof.boolean
+        output_format="BOOLEAN_ONLY"
     )
     False
 
     >> expect_column_values_to_match_regex(
         "my_column",
         "[A-Z][a-z]+",
-        output_format=gerof.basic
+        output_format="BASIC"
     )
     {
         "result": False,
@@ -42,7 +41,7 @@ All Expectations accept an `output_format` parameter. Out of the box, `output_fo
     >> expect_column_values_to_match_regex(
         "my_column",
         "[A-Z][a-z]+",
-        output_format=gerof.summary
+        output_format="SUMMARY"
     )
     {
         "result": False,
@@ -55,22 +54,12 @@ All Expectations accept an `output_format` parameter. Out of the box, `output_fo
     }
 
 
-The out-of-the-box default is `output_format=basic`. This default behavior can be overridden at the DataSet level:
-
-.. code-block:: bash
-
-    my_dataset.set_default_expectation_output_format(gerof.summary)
-
-In validation mode, it can be overridden using the `output_format` flag:
-
-.. code-block:: bash
-
-    great_expectations my_dataset.csv my_expectations.json --output_format=summary
+The out-of-the-box default is `output_format=BASIC`.
 
 Note: accepting a single parameter for `output_format` should make the library of formats relatively easy to extend in the future.
 
 
-Behavior for `basic` result objects
+Behavior for `BASIC` result objects
 ------------------------------------------------------------------------------
 ...depends on the expectation. Great Expectations has native support for three types of Expectations: `column_map_expectation`, `column_aggregate_expectation`, and a base type `expectation`.
 
@@ -137,7 +126,7 @@ For example:
     }
 
 
-Behavior for `summary` result objects
+Behavior for `SUMMARY` result objects
 ------------------------------------------------------------------------------
 
 ... Generate a summary of common exception values. For `column_map_expectations`, the standard format is:
@@ -157,10 +146,10 @@ Behavior for `summary` result objects
 For `column_aggregate_expectations`, `summary` output is the same as `basic` output.
 
 
-`include_kwargs`
+`include_config`
 ------------------------------------------------------------------------------
 
-In addition, all Expectations accept a boolean `include_kwargs` parameter. If true, then the expectation config itself is returned as part of the result object
+In addition, all Expectations accept a boolean `include_config` parameter. If true, then the expectation config itself is returned as part of the result object
 
 .. code-block:: bash
 
@@ -168,7 +157,7 @@ In addition, all Expectations accept a boolean `include_kwargs` parameter. If tr
         "my_column",
         "[A-Z][a-z]+",
         output_format=gerof.summary,
-        include_kwargs=True
+        include_config=True
     )
     {
         "result": False,
@@ -186,10 +175,7 @@ In addition, all Expectations accept a boolean `include_kwargs` parameter. If tr
 `catch_exceptions`
 ------------------------------------------------------------------------------
 
-
-<<<THIS SECTION IS CURRENTLY BROKEN. MOST THINKING NEEDED.>>>
-
-All Expectations accept a boolean `catch_exceptions` parameter. If true, the expectation will not fail if it encounters an error. Instead, it will return False and (in `basic` and `summary` modes) an informative error message
+All Expectations accept a boolean `catch_exceptions` parameter. If true, execution will not fail if the Expectation encounters an error. Instead, it will return False and (in `BASIC` and `SUMMARY` modes) an informative error message
 
 .. code-block:: bash
 
@@ -199,44 +185,21 @@ All Expectations accept a boolean `catch_exceptions` parameter. If true, the exp
         "exception_traceback": "..."
     }
 
-`catch_errors` is on by default in command-line validation mode, and off by default in exploration mode.
+`catch_exceptions` is on by default in command-line validation mode, and off by default in exploration mode.
 
 
-...
+DataSet defaults
+------------------------------------------------------------------------------
 
-...
-
-continue to execute and return a best-effort...
-
-For `column_map_expectations`, each error is treated as an exception. Errors are treated as 
+This default behavior for `output_format`, `include_config`, `catch_exceptions` can be overridden at the DataSet level:
 
 .. code-block:: bash
 
+    my_dataset.set_default_expectation_argument("output_format", "SUMMARY")
 
-    # column_map_expectation in basic mode with catch_errors=True
+In validation mode, they can be overridden using flags:
 
-    {
-        "result": False,
-        "exception_list": [-1,None,-5,None]
-        "exception_index_list": [1,10,15,24],
-        "error_index_list": [10, 24]
-    }
+.. code-block:: bash
 
-    # column_map_expectation in summary mode with catch_errors=True
-
-    {
-        "result": False,
-        "exception_list"
-        "error_index_list": [1001, 2405],
-        }
-    }
-
-    # column_aggregate_expectation with catch_errors=True
-
-    {
-        "result": False,
-        "exception_list"
-        "error_index_list": [1001, 2405],
-        }
-    }
+    great_expectations my_dataset.csv my_expectations.json --output_format=BOOLEAN_ONLY --catch_exceptions=False --include_config=True
 
