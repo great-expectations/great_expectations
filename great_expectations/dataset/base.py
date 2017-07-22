@@ -2,6 +2,7 @@ import json
 import inspect
 import copy
 from functools import wraps
+import traceback
 
 import pandas as pd
 import numpy as np
@@ -62,6 +63,7 @@ class DataSet(object):
     @classmethod
     def expectation(cls, func):
 
+        @wraps(func)
         def wrapper(self, *args, **kwargs):
 
             #Get the name of the method
@@ -110,34 +112,57 @@ class DataSet(object):
             #Append the expectation to the config.
             self.append_expectation(expectation_config)
 
+            raised_exception = False
+            exception_traceback = None
+
             #Finally, execute the expectation method itself
-            return_obj = func(self, output_format=output_format, **all_args)
+            try:
+                return_obj = func(self, output_format=output_format, **all_args)
+
+            except Exception, err:
+                if catch_exceptions:
+                    raised_exception = True
+                    exception_traceback = traceback.format_exc()
+
+                    if output_format != "BOOLEAN_ONLY":
+                        return_obj = {
+                            "success" : False,
+                            "exception_list": None,
+                            "exception_index_list": None,
+                        }
+                    else:
+                        return_obj = False
+
+                else:
+                    raise(err)
             
-            if include_config:
-                #!!! Not sure the deepcopy is strictly necessary.
-                #!!! This issue applies to our DocDict: https://github.com/aparo/pyes/issues/114
-                return_obj["expectation_config"] = copy.deepcopy(dict(expectation_config))
+            if output_format != 'BOOLEAN_ONLY':
+                if include_config:
+                    #!!! Not sure the deepcopy is strictly necessary.
+                    #!!! This issue applies to our DocDict: https://github.com/aparo/pyes/issues/114
+                    return_obj["expectation_config"] = copy.deepcopy(dict(expectation_config))
+
+                if catch_exceptions:
+                    return_obj["raised_exception"] = raised_exception
+                    return_obj["exception_traceback"] = exception_traceback
+
+            # print json.dumps(return_obj, indent=2)
 
             return return_obj
 
-        wrapper.__name__ = func.__name__
-        wrapper.__doc__ = func.__doc__
+        # wrapper.__name__ = func.__name__
+        # wrapper.__doc__ = func.__doc__
         return wrapper
 
     @classmethod
     def column_map_expectation(cls, func):
 
         @cls.expectation
-        def inner_wrapper(self, column, mostly=None, output_format=None):#include_kwargs=None, catch_exceptions=None, output_format=None):
-            # if include_kwargs == None:
-            #     include_kwargs = self.default_expectation_args["include_kwargs"]
-
-            # if catch_exceptions == None:
-            #     catch_exceptions = self.default_expectation_args["catch_exceptions"]
+        @wraps(func)
+        def inner_wrapper(self, column, mostly=None, output_format=None):
 
             if output_format == None:
                 output_format = self.default_expectation_args["output_format"]
-
 
             series = self[column]
             null_indexes = series.isnull()
@@ -185,12 +210,6 @@ class DataSet(object):
 
             return return_obj
 
-            # return {
-            #     "return_obj" : return_obj,
-            #     "include_kwargs" : include_kwargs,
-            #     "catch_exceptions" : catch_exceptions,
-            # }
-
         inner_wrapper.__name__ = func.__name__
         return inner_wrapper
 
@@ -199,16 +218,8 @@ class DataSet(object):
     def column_aggregate_expectation(cls, func):
 
         @cls.expectation
-        def inner_wrapper(self, column, output_format=None):#include_kwargs=None, catch_exceptions=None, output_format=None):
-            # if include_kwargs == None:
-            #     include_kwargs = self.default_expectation_args["include_kwargs"]
-
-            # if catch_exceptions == None:
-            #     catch_exceptions = self.default_expectation_args["catch_exceptions"]
-
-            # if output_format == None:
-            #     output_format = self.default_expectation_args["output_format"]
-
+        @wraps(func)
+        def inner_wrapper(self, column, output_format=None):
 
             series = self[column]
             null_indexes = series.isnull()
@@ -237,44 +248,38 @@ class DataSet(object):
 
             return return_obj
 
-            # return{
-            #     "return_obj" : return_obj,
-            #     "include_kwargs" : include_kwargs,
-            #     "catch_exceptions" : catch_exceptions,
-            # }
-
         return inner_wrapper
 
-    def column_elementwise_expectation(func):
+    # def column_elementwise_expectation(func):
 
-        @expectation
-        def inner_wrapper(self, column, mostly=None, suppress_expectations=False):
-            notnull = self[column].notnull()
+    #     @expectation
+    #     def inner_wrapper(self, column, mostly=None, suppress_expectations=False):
+    #         notnull = self[column].notnull()
             
-            success = self[column][notnull].map(lambda x: func(self,x))
-            exceptions = list(self[column][notnull][success==False])
+    #         success = self[column][notnull].map(lambda x: func(self,x))
+    #         exceptions = list(self[column][notnull][success==False])
 
-            if mostly:
-                #Prevent division-by-zero errors
-                if notnull.sum() == 0:
-                    return {
-                        'success':True,
-                        'exception_list':exceptions
-                    }
+    #         if mostly:
+    #             #Prevent division-by-zero errors
+    #             if notnull.sum() == 0:
+    #                 return {
+    #                     'success':True,
+    #                     'exception_list':exceptions
+    #                 }
 
-                percent_success = float(success.sum())/notnull.sum()
-                return {
-                    "success" : percent_success >= mostly,
-                    "exception_list" : exceptions
-                }
+    #             percent_success = float(success.sum())/notnull.sum()
+    #             return {
+    #                 "success" : percent_success >= mostly,
+    #                 "exception_list" : exceptions
+    #             }
 
-            else:
-                return {
-                    "success" : len(exceptions) == 0,
-                    "exception_list" : exceptions
-                }
+    #         else:
+    #             return {
+    #                 "success" : len(exceptions) == 0,
+    #                 "exception_list" : exceptions
+    #             }
 
-        return inner_wrapper
+    #     return inner_wrapper
 
     @staticmethod
     def old_expectation(func):

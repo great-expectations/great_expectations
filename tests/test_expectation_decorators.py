@@ -26,8 +26,12 @@ class TestExpectationDecorators(unittest.TestCase):
         class CustomPandasDataSet(PandasDataSet):
 
             @PandasDataSet.column_map_expectation
-            def expect_column_value_to_be_odd(self, series):
+            def expect_column_values_to_be_odd(self, series):
                 return series.map(lambda x: x % 2 )
+
+            @PandasDataSet.column_map_expectation
+            def expectation_that_crashes_on_sixes(self, series):
+                return series.map(lambda x: (x-6)/0 != "duck")
 
 
         df = CustomPandasDataSet({
@@ -40,7 +44,7 @@ class TestExpectationDecorators(unittest.TestCase):
         })
 
         self.assertEqual(
-            df.expect_column_value_to_be_odd("all_odd"),
+            df.expect_column_values_to_be_odd("all_odd"),
             {
                 'exception_list': [],
                 'exception_index_list': [],
@@ -49,7 +53,7 @@ class TestExpectationDecorators(unittest.TestCase):
         )
 
         self.assertEqual(
-            df.expect_column_value_to_be_odd("all_missing"),
+            df.expect_column_values_to_be_odd("all_missing"),
             {
                 'exception_list': [],
                 'exception_index_list': [],
@@ -58,7 +62,7 @@ class TestExpectationDecorators(unittest.TestCase):
         )
 
         self.assertEqual(
-            df.expect_column_value_to_be_odd("odd_missing"),
+            df.expect_column_values_to_be_odd("odd_missing"),
             {
                 'exception_list': [],
                 'exception_index_list': [],
@@ -67,7 +71,7 @@ class TestExpectationDecorators(unittest.TestCase):
         )
 
         self.assertEqual(
-            df.expect_column_value_to_be_odd("mixed_missing"),
+            df.expect_column_values_to_be_odd("mixed_missing"),
             {
                 'exception_list': [2,4],
                 'exception_index_list': [5,6],
@@ -76,7 +80,7 @@ class TestExpectationDecorators(unittest.TestCase):
         )
 
         self.assertEqual(
-            df.expect_column_value_to_be_odd("mostly_odd"),
+            df.expect_column_values_to_be_odd("mostly_odd"),
             {
                 'exception_list': [2, 4],
                 'exception_index_list': [5, 6],
@@ -85,7 +89,7 @@ class TestExpectationDecorators(unittest.TestCase):
         )
 
         self.assertEqual(
-            df.expect_column_value_to_be_odd("mostly_odd", mostly=.6),
+            df.expect_column_values_to_be_odd("mostly_odd", mostly=.6),
             {
                 'exception_list': [2, 4],
                 'exception_index_list': [5, 6],
@@ -94,14 +98,14 @@ class TestExpectationDecorators(unittest.TestCase):
         )
 
         self.assertEqual(
-            df.expect_column_value_to_be_odd("mostly_odd", output_format="BOOLEAN_ONLY"),
+            df.expect_column_values_to_be_odd("mostly_odd", output_format="BOOLEAN_ONLY"),
             False
         )
 
         df.default_expectation_args["output_format"] = "BOOLEAN_ONLY"
 
         self.assertEqual(
-            df.expect_column_value_to_be_odd("mostly_odd"),
+            df.expect_column_values_to_be_odd("mostly_odd"),
             False
         )
 
@@ -110,13 +114,13 @@ class TestExpectationDecorators(unittest.TestCase):
         # df.expect_column_value_to_be_odd("mostly_odd", include_config=True)
 
         self.assertEqual(
-            df.expect_column_value_to_be_odd("mostly_odd", include_config=True),
+            df.expect_column_values_to_be_odd("mostly_odd", include_config=True),
             {
                 'exception_list': [2, 4],
                 'exception_index_list': [5, 6],
                 'success': False,
                 'expectation_config' : {
-                    'expectation_type' : 'expect_column_value_to_be_odd',
+                    'expectation_type' : 'expect_column_values_to_be_odd',
                     'kwargs' : {
                         'column' : 'mostly_odd'
                     }
@@ -195,3 +199,108 @@ class TestExpectationDecorators(unittest.TestCase):
                 'success': False
             }
         )
+
+    def test_expectation_decorator_catch_exceptions(self):
+
+        class CustomPandasDataSet(PandasDataSet):
+
+            @PandasDataSet.column_map_expectation
+            def expect_column_values_to_be_odd(self, series):
+                return series.map(lambda x: x % 2 )
+
+            @PandasDataSet.column_map_expectation
+            def expectation_that_crashes_on_sixes(self, series):
+                return series.map(lambda x: 1/(x-6) != "duck")
+
+
+        df = CustomPandasDataSet({
+            'all_odd' : [1,3,5,5,5,7,9,9,9,11],
+            'mostly_odd' : [1,3,5,7,9,2,4,1,3,5],
+            'all_even' : [2,4,4,6,6,6,8,8,8,8],
+            'odd_missing' : [1,3,5,None,None,None,None,1,3,None],
+            'mixed_missing' : [1,3,5,None,None,2,4,1,3,None],
+            'all_missing' : [None,None,None,None,None,None,None,None,None,None,],
+        })
+
+        self.assertEqual(
+            df.expectation_that_crashes_on_sixes("all_odd"),
+            {
+                'exception_list': [],
+                'exception_index_list': [],
+                'success': True
+            }
+        )
+
+        self.assertEqual(
+            df.expectation_that_crashes_on_sixes("all_odd", catch_exceptions=False),
+            {
+                'success': True,
+                'exception_list': [],
+                'exception_index_list': [],
+            }
+        )
+
+        self.assertEqual(
+            df.expectation_that_crashes_on_sixes("all_odd", catch_exceptions=True),
+            {
+                'success': True,
+                'exception_list': [],
+                'exception_index_list': [],
+                'raised_exception': False,
+                'exception_traceback': None,
+            }
+        )
+
+        with self.assertRaises(ZeroDivisionError):
+            df.expectation_that_crashes_on_sixes("all_even", catch_exceptions=False)
+
+        result_obj = df.expectation_that_crashes_on_sixes("all_even", catch_exceptions=True)
+        comparison_obj = {
+            'exception_list': None,
+            'exception_index_list': None,
+            'success': False,
+            'raised_exception': True,
+        }
+
+        self.assertEqual(
+            set(result_obj.keys()),
+            set(comparison_obj.keys()+['exception_traceback']),
+        )
+
+        for k,v in comparison_obj.items():
+            self.assertEqual(result_obj[k], v)
+
+        self.assertEqual(
+            result_obj["exception_traceback"].split('\n')[-1],
+            "",
+        )
+
+        self.assertEqual(
+            result_obj["exception_traceback"].split('\n')[-2],
+            "ZeroDivisionError: integer division or modulo by zero",
+        )
+
+        self.assertEqual(
+            result_obj["exception_traceback"].split('\n')[-3],
+            "    return series.map(lambda x: 1/(x-6) != \"duck\")",
+        )
+
+
+        self.assertEqual(
+            df.expectation_that_crashes_on_sixes("all_odd", output_format="BOOLEAN_ONLY", catch_exceptions=True),
+            True
+        )
+
+        self.assertEqual(
+            df.expectation_that_crashes_on_sixes("all_even", output_format="BOOLEAN_ONLY", catch_exceptions=True),
+            False
+        )
+
+        # with self.assertRaises(ZeroDivisionError):
+        #     df.expectation_that_crashes_on_sixes("all_even", catch_exceptions=False)
+
+
+
+
+
+
