@@ -49,6 +49,33 @@ class TestExpectationDecorators(unittest.TestCase):
         )
 
         self.assertEqual(
+            df.expect_column_value_to_be_odd("all_missing"),
+            {
+                'exception_list': [],
+                'exception_index_list': [],
+                'success': True
+            }
+        )
+
+        self.assertEqual(
+            df.expect_column_value_to_be_odd("odd_missing"),
+            {
+                'exception_list': [],
+                'exception_index_list': [],
+                'success': True
+            }
+        )
+
+        self.assertEqual(
+            df.expect_column_value_to_be_odd("mixed_missing"),
+            {
+                'exception_list': [2,4],
+                'exception_index_list': [5,6],
+                'success': False
+            }
+        )
+
+        self.assertEqual(
             df.expect_column_value_to_be_odd("mostly_odd"),
             {
                 'exception_list': [2, 4],
@@ -76,6 +103,25 @@ class TestExpectationDecorators(unittest.TestCase):
         self.assertEqual(
             df.expect_column_value_to_be_odd("mostly_odd"),
             False
+        )
+
+        df.default_expectation_args["output_format"] = "BASIC"
+
+        # df.expect_column_value_to_be_odd("mostly_odd", include_config=True)
+
+        self.assertEqual(
+            df.expect_column_value_to_be_odd("mostly_odd", include_config=True),
+            {
+                'exception_list': [2, 4],
+                'exception_index_list': [5, 6],
+                'success': False,
+                'expectation_config' : {
+                    'expectation_type' : 'expect_column_value_to_be_odd',
+                    'kwargs' : {
+                        'column' : 'mostly_odd'
+                    }
+                }
+            }
         )
 
         # self.assertEqual(

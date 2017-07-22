@@ -37,7 +37,7 @@ class DataSet(object):
                 })
 
         self.default_expectation_args = {
-            "include_kwargs" : False,
+            "include_config" : False,
             "catch_exceptions" : False,
             "output_format" : 'BASIC',
         }
@@ -74,6 +74,26 @@ class DataSet(object):
             all_args = dict(zip(method_arg_names, args))
             all_args.update(kwargs)
 
+            #Unpack display parameters; remove them from all_args if appropriate
+            if "include_config" in kwargs:
+                include_config = kwargs["include_config"]
+                del all_args["include_config"]
+            else:
+                include_config = self.default_expectation_args["include_config"]
+
+            if "catch_exceptions" in kwargs:
+                catch_exceptions = kwargs["catch_exceptions"]
+                del all_args["catch_exceptions"]
+            else:
+                catch_exceptions = self.default_expectation_args["catch_exceptions"]
+
+            if "output_format" in kwargs:
+                output_format = kwargs["output_format"]
+                del all_args["output_format"]
+            else:
+                output_format = self.default_expectation_args["output_format"]
+
+
             all_args = ensure_json_serializable(all_args)
 
             #Construct the expectation_config object
@@ -91,8 +111,16 @@ class DataSet(object):
             self.append_expectation(expectation_config)
 
             #Finally, execute the expectation method itself
-            return func(self, **all_args)
+            return_obj = func(self, output_format=output_format, **all_args)
+            
+            if include_config:
+                #!!! Not sure the deepcopy is strictly necessary.
+                #!!! This issue applies to our DocDict: https://github.com/aparo/pyes/issues/114
+                return_obj["expectation_config"] = copy.deepcopy(dict(expectation_config))
 
+            return return_obj
+
+        wrapper.__name__ = func.__name__
         wrapper.__doc__ = func.__doc__
         return wrapper
 
@@ -100,12 +128,12 @@ class DataSet(object):
     def column_map_expectation(cls, func):
 
         @cls.expectation
-        def inner_wrapper(self, column, mostly=None, include_kwargs=None, catch_exceptions=None, output_format=None):
-            if include_kwargs == None:
-                include_kwargs = self.default_expectation_args["include_kwargs"]
+        def inner_wrapper(self, column, mostly=None, output_format=None):#include_kwargs=None, catch_exceptions=None, output_format=None):
+            # if include_kwargs == None:
+            #     include_kwargs = self.default_expectation_args["include_kwargs"]
 
-            if catch_exceptions == None:
-                catch_exceptions = self.default_expectation_args["catch_exceptions"]
+            # if catch_exceptions == None:
+            #     catch_exceptions = self.default_expectation_args["catch_exceptions"]
 
             if output_format == None:
                 output_format = self.default_expectation_args["output_format"]
@@ -157,6 +185,13 @@ class DataSet(object):
 
             return return_obj
 
+            # return {
+            #     "return_obj" : return_obj,
+            #     "include_kwargs" : include_kwargs,
+            #     "catch_exceptions" : catch_exceptions,
+            # }
+
+        inner_wrapper.__name__ = func.__name__
         return inner_wrapper
 
 
@@ -164,15 +199,15 @@ class DataSet(object):
     def column_aggregate_expectation(cls, func):
 
         @cls.expectation
-        def inner_wrapper(self, column, include_kwargs=None, catch_exceptions=None, output_format=None):
-            if include_kwargs == None:
-                include_kwargs = self.default_expectation_args["include_kwargs"]
+        def inner_wrapper(self, column, output_format=None):#include_kwargs=None, catch_exceptions=None, output_format=None):
+            # if include_kwargs == None:
+            #     include_kwargs = self.default_expectation_args["include_kwargs"]
 
-            if catch_exceptions == None:
-                catch_exceptions = self.default_expectation_args["catch_exceptions"]
+            # if catch_exceptions == None:
+            #     catch_exceptions = self.default_expectation_args["catch_exceptions"]
 
-            if output_format == None:
-                output_format = self.default_expectation_args["output_format"]
+            # if output_format == None:
+            #     output_format = self.default_expectation_args["output_format"]
 
 
             series = self[column]
@@ -193,7 +228,20 @@ class DataSet(object):
             elif output_format=="BOOLEAN_ONLY":
                 return_obj = success
 
+            else:
+                print ("Warning: Unknown output_format %s. Defaulting to BASIC." % (output_format,))
+                return_obj = {
+                    "success" : success,
+                    "true_value" : true_value,
+                }
+
             return return_obj
+
+            # return{
+            #     "return_obj" : return_obj,
+            #     "include_kwargs" : include_kwargs,
+            #     "catch_exceptions" : catch_exceptions,
+            # }
 
         return inner_wrapper
 
