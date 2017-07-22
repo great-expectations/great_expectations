@@ -662,11 +662,46 @@ class DataSet(object):
             column (str): The column name.
             min_value (int or None): The minimum value for the column standard deviation.
             max_value (int or None): The maximum value for the column standard deviation.
+
         Returns:
             dict:
                 {
                     "success": (bool) True if the column passed the expectation,
                     "true_stdev": (float) the true standard deviation
+                }
+        """
+        raise NotImplementedError
+
+    def expect_column_unique_value_count_to_be_between(self, column, min_value, max_value, output_format=None):
+        """Expect the number of unique values to be between a minimum value and a maximum value.
+
+        Args:
+            column (str): The column name.
+            min_value (int or None): The minimum number of unique values. If None, then there is no minimium expected value.
+            max_value (int or None): The maximum number of unique values. If None, then there is no maximum expected value.
+
+        Returns:
+            dict:
+                {
+                    "success": (bool) True if the column passed the expectation,
+                    "true_value": (float) the column mean
+                }
+        """
+        raise NotImplementedError
+
+    def expect_column_proportion_of_unique_values_to_be_between(self, column, min_value, max_value, output_format=None):
+        """Expect the proportion of unique values to be between a minimum value and a maximum value.
+
+        Args:
+            column (str): The column name.
+            min_value (float or None): The minimum proportion of unique values. (Proportions are on the range 0 to 1)
+            max_value (float or None): The maximum proportion of unique values. (Proportions are on the range 0 to 1)
+
+        Returns:
+            dict:
+                {
+                    "success": (bool) True if the column passed the expectation,
+                    "true_value": (float) the proportion of unique values
                 }
         """
         raise NotImplementedError

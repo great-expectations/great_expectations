@@ -1122,6 +1122,88 @@ class TestPandasDataset(unittest.TestCase):
             self.assertEqual(out, t['out'])
 
 
+    def test_expect_column_unique_value_count_to_be_between(self):
+
+        D = ge.dataset.PandasDataSet({
+            'dist1' : [1,2,3,4,5,6,7,8],
+            'dist2' : [1,2,3,4,5,None,None,None],
+            'dist3' : [2,2,2,2,5,6,7,8],
+            'dist4' : [1,1,1,1,None,None,None,None]
+        })
+
+        T = [
+                {
+                    'in':{
+                        'column': 'dist1',
+                        'min_value': 0,
+                        'max_value': 10
+                    },
+                    'kwargs':{},
+                    'out':{'success':True, 'true_value':8}
+                },{
+                    'in':{
+                        "column" : 'dist2',
+                        "min_value" : None,
+                        "max_value" : None
+                    },
+                    'kwargs':{},
+                    'out':{'success':True, 'true_value':5}
+                },{
+                    'in':{
+                        "column": 'dist3',
+                        "min_value": None,
+                        "max_value": 5
+                    },
+                    'kwargs':{},
+                    'out':{'success':True, 'true_value':5}
+                },{
+                    'in':{
+                        "column": 'dist4',
+                        "min_value": 2,
+                        "max_value": None
+                    },
+                    'kwargs':{},
+                    'out':{'success':False, 'true_value':1}
+                }
+        ]
+
+        for t in T:
+            print t['in'], t['out']
+            out = D.expect_column_unique_value_count_to_be_between(**t['in'])
+            self.assertEqual(out, t['out'])
+
+    def test_expect_column_unique_proportion_to_be_between(self):
+
+        D = ge.dataset.PandasDataSet({
+            'dist1' : [1,1,3],
+            'dist2' : [-1,0,1]
+        })
+
+        T = [
+                {
+                    'in':['dist1',.5,1.5],
+                    'kwargs':{},
+                    'out':{'success':True, 'true_value':D['dist1'].std()}},
+                {
+                    'in':['dist1',2,3],
+                    'kwargs':{},
+                    'out':{'success':False, 'true_value':D['dist1'].std()}},
+                {
+                    'in':['dist2',2,3],
+                    'kwargs':{},
+                    'out':{'success':False, 'true_value':1.0}},
+                {
+                    'in':['dist2',0,1],
+                    'kwargs':{},
+                    'out':{'success':True, 'true_value':1.0}}
+        ]
+
+        for t in T:
+            out = D.expect_column_stdev_to_be_between(*t['in'], **t['kwargs'])
+            self.assertEqual(out, t['out'])
+
+
+
 
 if __name__ == "__main__":
     unittest.main()

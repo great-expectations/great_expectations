@@ -11,17 +11,17 @@ from functools import wraps
 from .base import DataSet
 from .util import is_valid_partition_object, remove_empty_intervals
 
-class PandasDataSet(DataSet, pd.DataFrame):
+class MetaPandasDataSet(DataSet):
 
     def __init__(self, *args, **kwargs):
-        super(PandasDataSet, self).__init__(*args, **kwargs)
+        super(MetaPandasDataSet, self).__init__(*args, **kwargs)
 
     @classmethod
     def column_map_expectation(cls, func):
 
         @cls.expectation
         @wraps(func)
-        def inner_wrapper(self, column, mostly=None, output_format=None):
+        def inner_wrapper(self, column, mostly=None, output_format=None, *args, **kwargs):
 
             if output_format == None:
                 output_format = self.default_expectation_args["output_format"]
@@ -32,7 +32,7 @@ class PandasDataSet(DataSet, pd.DataFrame):
             nonnull_values = series[null_indexes==False]
             nonnull_count = (null_indexes==False).sum()
             
-            successful_indexes = func(self, nonnull_values)
+            successful_indexes = func(self, nonnull_values, *args, **kwargs)
             success_count = successful_indexes.sum()
 
             exception_list = list(series[(successful_indexes==False)&(null_indexes==False)])
@@ -82,7 +82,7 @@ class PandasDataSet(DataSet, pd.DataFrame):
 
         @cls.expectation
         @wraps(func)
-        def inner_wrapper(self, column, output_format=None):
+        def inner_wrapper(self, column, output_format=None, *args, **kwargs):
 
             series = self[column]
             null_indexes = series.isnull()
@@ -90,7 +90,7 @@ class PandasDataSet(DataSet, pd.DataFrame):
             nonnull_values = series[null_indexes==False]
             nonnull_count = (null_indexes==False).sum()
             
-            success, true_value = func(self, nonnull_values)
+            success, true_value = func(self, nonnull_values, *args, **kwargs)
             success = bool(success)
 
             if output_format in ["BASIC", "SUMMARY"]:
@@ -112,6 +112,11 @@ class PandasDataSet(DataSet, pd.DataFrame):
             return return_obj
 
         return inner_wrapper
+
+class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
+
+    def __init__(self, *args, **kwargs):
+        super(PandasDataSet, self).__init__(*args, **kwargs)
 
     ### Expectation methods ###
 
@@ -418,94 +423,6 @@ class PandasDataSet(DataSet, pd.DataFrame):
                 'success': bool(result.all()),
                 'exception_list':exceptions
             }
-
-    @DataSet.old_column_expectation
-    def expect_column_frequency_distribution_to_be(self, column, partition_object, p=0.05, suppress_exceptions=False):
-        if not is_valid_partition_object(partition_object):
-            return {
-                "success": False,
-                "error": "Invalid partition_object"
-            }
-
-        expected_series = pd.Series(partition_object['weights'], index=partition_object['partition'], name='expected') * len(self[column])
-        observed_frequencies = self[column].value_counts()
-        # Join along the indicies to ensure we have values
-        test_df = pd.concat([expected_series, observed_frequencies], axis = 1).fillna(0)
-        test_result = stats.chisquare(test_df[column], test_df['expected'])
-
-        if suppress_exceptions:
-            return {
-                "success" : test_result.pvalue > p,
-            }
-        else:
-            return {
-                "success" : test_result.pvalue > p,
-                "true_value" : test_result.pvalue,
-            }
-
-    @DataSet.old_column_expectation
-    def expect_column_numerical_distribution_to_be(self, column, partition_object, sample_size=0, p=0.05, suppress_exceptions=False):
-        if not is_valid_partition_object(partition_object):
-            return {
-                "success": False,
-                "error": "Invalid partition_object"
-            }
-        not_null = self[column].notnull()
-        not_null_values = self[not_null][column]
-        if (sample_size == 0):
-            test_sample = np.random.choice(not_null_values, size=len(partition_object['weights']), replace=False)
-        else:
-            test_sample = np.random.choice(not_null_values, size=sample_size, replace=False)
-
-        estimated_cdf = lambda x: np.interp(x, partition_object['partition'], np.append(np.array([0]), np.cumsum(partition_object['weights'])))
-        test_result = stats.kstest(test_sample, estimated_cdf)
-
-        if suppress_exceptions:
-            return {
-                "success" : test_result.pvalue > p,
-            }
-        else:
-            return {
-                "success" : test_result.pvalue > p,
-                "true_value" : test_result.pvalue,
-            }
-
-    @DataSet.old_column_expectation
-    def expect_column_kl_divergence_to_be(self, column, partition_object, threshold, suppress_exceptions=False):
-        if not is_valid_partition_object(partition_object):
-            # return {
-            #     "success": False,
-            #     "error": "Invalid partition_object"
-            # }
-            raise ValueError("Invalid partition_object")
-
-        if not (isinstance(threshold, float) and (threshold >= 0)):
-            raise ValueError("Threshold must be a float greater than zero.")
-
-        not_null = self[column].notnull()
-        not_null_values = self[not_null][column]
-
-        # If the data expected to be discrete, build a series
-        if (len(partition_object['weights']) == len(partition_object['partition'])):
-            observed_frequencies = not_null_values.value_counts()
-            pk = observed_frequencies / len(not_null_values)
-        else:
-            partition_object = remove_empty_intervals(partition_object)
-            hist, bin_edges = np.histogram(not_null_values, partition_object['partition'], density=False)
-            pk = hist / (1.* len(not_null_values))
-
-        kl_divergence = stats.entropy(pk, partition_object['weights'])
-
-        if suppress_exceptions:
-            return {
-                "success" : kl_divergence <= threshold,
-            }
-        else:
-            return {
-                "success" : kl_divergence <= threshold,
-                "true_value" : kl_divergence
-            }
-
 
     @DataSet.old_column_expectation
     def expect_column_value_lengths_to_be_between(self, column, min_value, max_value, mostly=None, suppress_exceptions=False):
@@ -849,3 +766,113 @@ class PandasDataSet(DataSet, pd.DataFrame):
             'success':outcome,
             'true_value':exceptions
         }
+
+    @MetaPandasDataSet.column_aggregate_expectation
+    def expect_column_unique_value_count_to_be_between(self, series, min_value=None, max_value=None, output_format=None):
+        unique_value_count = series.value_counts().shape[0]
+
+        print min_value, unique_value_count, max_value
+
+        return (
+            ((min_value <= unique_value_count) | (min_value == None)) and
+            ((unique_value_count <= max_value) | (max_value ==None))
+        ), unique_value_count
+
+    @MetaPandasDataSet.column_aggregate_expectation
+    def expect_column_proportion_of_unique_values_to_be_between(self, series, min_value=None, max_value=None, output_format=None):
+        unique_value_count = series.value_counts().shape[0]
+        denominator = series.notnull().sum()
+
+        if denominator > 0:
+            proportion_unique = unique_value_count/denominator
+        else:
+            proportion_unique = None
+
+        return (min_value <= proportion_unique <= max_value), proportion_unique
+
+    @DataSet.old_column_expectation
+    def expect_column_frequency_distribution_to_be(self, column, partition_object, p=0.05, suppress_exceptions=False):
+        if not is_valid_partition_object(partition_object):
+            return {
+                "success": False,
+                "error": "Invalid partition_object"
+            }
+
+        expected_series = pd.Series(partition_object['weights'], index=partition_object['partition'], name='expected') * len(self[column])
+        observed_frequencies = self[column].value_counts()
+        # Join along the indicies to ensure we have values
+        test_df = pd.concat([expected_series, observed_frequencies], axis = 1).fillna(0)
+        test_result = stats.chisquare(test_df[column], test_df['expected'])
+
+        if suppress_exceptions:
+            return {
+                "success" : test_result.pvalue > p,
+            }
+        else:
+            return {
+                "success" : test_result.pvalue > p,
+                "true_value" : test_result.pvalue,
+            }
+
+    @DataSet.old_column_expectation
+    def expect_column_numerical_distribution_to_be(self, column, partition_object, sample_size=0, p=0.05, suppress_exceptions=False):
+        if not is_valid_partition_object(partition_object):
+            return {
+                "success": False,
+                "error": "Invalid partition_object"
+            }
+        not_null = self[column].notnull()
+        not_null_values = self[not_null][column]
+        if (sample_size == 0):
+            test_sample = np.random.choice(not_null_values, size=len(partition_object['weights']), replace=False)
+        else:
+            test_sample = np.random.choice(not_null_values, size=sample_size, replace=False)
+
+        estimated_cdf = lambda x: np.interp(x, partition_object['partition'], np.append(np.array([0]), np.cumsum(partition_object['weights'])))
+        test_result = stats.kstest(test_sample, estimated_cdf)
+
+        if suppress_exceptions:
+            return {
+                "success" : test_result.pvalue > p,
+            }
+        else:
+            return {
+                "success" : test_result.pvalue > p,
+                "true_value" : test_result.pvalue,
+            }
+
+    @DataSet.old_column_expectation
+    def expect_column_kl_divergence_to_be(self, column, partition_object, threshold, suppress_exceptions=False):
+        if not is_valid_partition_object(partition_object):
+            # return {
+            #     "success": False,
+            #     "error": "Invalid partition_object"
+            # }
+            raise ValueError("Invalid partition_object")
+
+        if not (isinstance(threshold, float) and (threshold >= 0)):
+            raise ValueError("Threshold must be a float greater than zero.")
+
+        not_null = self[column].notnull()
+        not_null_values = self[not_null][column]
+
+        # If the data expected to be discrete, build a series
+        if (len(partition_object['weights']) == len(partition_object['partition'])):
+            observed_frequencies = not_null_values.value_counts()
+            pk = observed_frequencies / len(not_null_values)
+        else:
+            partition_object = remove_empty_intervals(partition_object)
+            hist, bin_edges = np.histogram(not_null_values, partition_object['partition'], density=False)
+            pk = hist / (1.* len(not_null_values))
+
+        kl_divergence = stats.entropy(pk, partition_object['weights'])
+
+        if suppress_exceptions:
+            return {
+                "success" : kl_divergence <= threshold,
+            }
+        else:
+            return {
+                "success" : kl_divergence <= threshold,
+                "true_value" : kl_divergence
+            }
