@@ -49,13 +49,25 @@ class DataSet(object):
         expectation_type = expectation_config['expectation_type']
 
         #Drop existing expectations with the same expectation_type.
+        #For column_expectations, append_expectation should only replace expectations
+        # where the expectation_type AND the column match
         #!!! This is good default behavior, but
         #!!!    it needs to be documented, and
         #!!!    we need to provide syntax to override it.
-        self._expectations_config.expectations = [f for f in filter(
-            lambda exp: exp['expectation_type'] != expectation_type,
-            self._expectations_config.expectations
-        )]
+        print expectation_config
+
+        if 'column' in expectation_config['kwargs']:
+            column  = expectation_config['kwargs']['column']
+
+            self._expectations_config.expectations = [f for f in filter(
+                lambda exp: (exp['expectation_type'] != expectation_type) | (exp['kwargs']['column'] != column),
+                self._expectations_config.expectations
+            )]
+        else:
+            self._expectations_config.expectations = [f for f in filter(
+                lambda exp: exp['expectation_type'] != expectation_type,
+                self._expectations_config.expectations
+            )]
 
         self._expectations_config.expectations.append(expectation_config)
 
@@ -211,10 +223,18 @@ class DataSet(object):
             method_arg_names = inspect.getargspec(func)[0][1:]
 
             #Construct the expectation_config object
-            expectation_config = dict(
-                zip(method_arg_names, args)+\
-                kwargs.items()
-            )
+            # expectation_config = dict(
+            #     zip(method_arg_names, args)+\
+            #     kwargs.items()
+            # )
+            expectation_config = DotDict({
+                "expectation_type" : method_name,
+                ## Changed to support python 3, but note that there may be ambiguity here.
+                ## TODO: ensure this is the intended logic
+                "kwargs" : dict(
+                    zip(method_arg_names, args)+kwargs.items()
+                )
+            })
 
             #Add the expectation_method key
             expectation_config['expectation_type'] = method_name

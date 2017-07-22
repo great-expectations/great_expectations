@@ -104,3 +104,23 @@ class TestValidation(unittest.TestCase):
         self.maxDiff = None
         #!!! This needs to be converted to unicode, I think
         self.assertEqual(results, expected_results)
+
+
+class TestRepeatedAppendExpectation(unittest.TestCase):
+    def test_validate(self):
+        my_expectations_config = json.load(file("./tests/examples/titanic_expectations.json"))
+        my_df = ge.read_csv("./tests/examples/titanic.csv")
+
+        self.assertEqual(
+            len(my_df.get_expectations_config()['expectations']),
+            7
+        )
+
+        #For column_expectations, append_expectation should only replace expectations where the expetation_type AND the column match
+        my_df.expect_column_to_exist("PClass")
+        self.assertEqual(
+            len(my_df.get_expectations_config()['expectations']),
+            7
+        )
+
+
