@@ -96,10 +96,10 @@ class TestValidation(unittest.TestCase):
         )
 
         results = my_df.validate()
-        print json.dumps(results, indent=2)
+        # print json.dumps(results, indent=2)
 
         expected_results = json.load(file('./tests/examples/expected_results_20170721.json'))
-        print json.dumps(expected_results, indent=2)
+        # print json.dumps(expected_results, indent=2)
 
         self.maxDiff = None
         #!!! This needs to be converted to unicode, I think

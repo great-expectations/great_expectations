@@ -274,7 +274,6 @@ class DataSet(object):
         #!!! This is good default behavior, but
         #!!!    it needs to be documented, and
         #!!!    we need to provide syntax to override it.
-        print expectation_config
 
         if 'column' in expectation_config['kwargs']:
             column  = expectation_config['kwargs']['column']

@@ -135,6 +135,7 @@ Behavior for `SUMMARY` result objects
 
     {
         "success" : false,
+        "missing_count" : 0,
         "exception_count" : 3,
         "exception_counts": {
             "aaaaA" : 2,

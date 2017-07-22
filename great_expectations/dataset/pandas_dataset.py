@@ -63,6 +63,44 @@ class MetaPandasDataSet(DataSet):
                     "exception_index_list": exception_index_list,
                 }
 
+            elif output_format=="SUMMARY":
+                element_count = int(len(series))
+                missing_count = int(null_indexes.sum())
+                exception_count = len(exception_list)
+
+                exception_value_series = pd.Series(exception_list).value_counts()
+                exception_counts = dict(zip(
+                    list(exception_value_series.index),
+                    list(exception_value_series.values),
+                ))
+
+                if element_count > 0:
+                    missing_percent = float(missing_count) / element_count
+
+                    if nonnull_count > 0:
+                        exception_percent = float(exception_count) / element_count
+                        exception_percent_nonmissing = float(exception_count) / nonnull_count
+
+                else:
+                    missing_percent = None
+                    nonmissing_count = None
+                    exception_percent = None
+                    exception_percent_nonmissing = None
+
+
+                return_obj = {
+                    "success" : success,
+                    "exception_list" : exception_list,
+                    "exception_index_list": exception_index_list,
+                    "element_count" : element_count,
+                    "missing_count" : missing_count,
+                    "missing_percent" : missing_percent,
+                    "exception_count" : exception_count,
+                    "exception_percent": exception_percent,
+                    "exception_percent_nonmissing": exception_percent_nonmissing,
+                    "exception_counts": exception_counts,
+                }
+
             else:
                 print ("Warning: Unknown output_format %s. Defaulting to BASIC." % (output_format,))
                 return_obj = {
@@ -384,45 +422,50 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
                 'exception_list':exceptions
             }
 
+    @MetaPandasDataSet.column_map_expectation
+    def expect_column_values_to_be_between(self, series, min_value=None, max_value=None):
+        return series.map(
+            lambda x: ((min_value <= x) | (min_value == None)) and ((x <= max_value) | (max_value ==None))
+        )
 
-    @DataSet.old_column_expectation
-    def expect_column_values_to_be_between(self, column, min_value, max_value, mostly=None, suppress_exceptions=False):
+    # @DataSet.old_column_expectation
+    # def expect_column_values_to_be_between(self, column, min_value, max_value, mostly=None, suppress_exceptions=False):
 
-        not_null = self[column].notnull()
-        not_null_values = self[not_null][column]
+    #     not_null = self[column].notnull()
+    #     not_null_values = self[not_null][column]
 
-        def is_between(val):
-            try:
-                return val >= min_value and val <= max_value
-            except:
-                return False
+    #     def is_between(val):
+    #         try:
+    #             return val >= min_value and val <= max_value
+    #         except:
+    #             return False
 
-        result = not_null_values.map(is_between)
+    #     result = not_null_values.map(is_between)
 
-        if suppress_exceptions:
-            exceptions = None
-        else:
-            exceptions = list(not_null_values[result==False])
+    #     if suppress_exceptions:
+    #         exceptions = None
+    #     else:
+    #         exceptions = list(not_null_values[result==False])
 
-        if mostly:
-            #Prevent division-by-zero errors
-            if len(not_null_values) == 0:
-                return {
-                    'success':True,
-                    'exception_list':exceptions
-                }
+    #     if mostly:
+    #         #Prevent division-by-zero errors
+    #         if len(not_null_values) == 0:
+    #             return {
+    #                 'success':True,
+    #                 'exception_list':exceptions
+    #             }
 
-            percent_true = float(result.sum())/len(not_null_values)
-            return {
-                'success':(percent_true >= mostly),
-                'exception_list':exceptions
-            }
+    #         percent_true = float(result.sum())/len(not_null_values)
+    #         return {
+    #             'success':(percent_true >= mostly),
+    #             'exception_list':exceptions
+    #         }
 
-        else:
-            return {
-                'success': bool(result.all()),
-                'exception_list':exceptions
-            }
+    #     else:
+    #         return {
+    #             'success': bool(result.all()),
+    #             'exception_list':exceptions
+    #         }
 
     @DataSet.old_column_expectation
     def expect_column_value_lengths_to_be_between(self, column, min_value, max_value, mostly=None, suppress_exceptions=False):
@@ -770,8 +813,6 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
     @MetaPandasDataSet.column_aggregate_expectation
     def expect_column_unique_value_count_to_be_between(self, series, min_value=None, max_value=None, output_format=None):
         unique_value_count = series.value_counts().shape[0]
-
-        print min_value, unique_value_count, max_value
 
         return (
             ((min_value <= unique_value_count) | (min_value == None)) and

@@ -61,6 +61,7 @@
     }, 
     {
       "exception_list": [], 
+      "exception_index_list": [], 
       "expectation_type": "expect_column_values_to_be_between", 
       "success": true, 
       "kwargs": {

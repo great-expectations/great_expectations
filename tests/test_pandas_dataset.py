@@ -611,79 +611,11 @@ class TestPandasDataset(unittest.TestCase):
             'z' : [1, 2, 3, 4, 5, None, None, None, None, None],
         })
 
-        T = [
-                {
-                    'in':['x', 1, 10],
-                    'kwargs':{},
-                    'out':{'success':True, 'exception_list':[]}},
-                {
-                    'in':['x', 0, 20],
-                    'kwargs':{},
-                    'out':{'success':True, 'exception_list':[]}},
-                {
-                    'in':['x', 1, 9],
-                    'kwargs':{},
-                    'out':{'success':False, 'exception_list':[10]}},
-                {
-                    'in':['x', 3, 10],
-                    'kwargs':{},
-                    'out':{'success':False, 'exception_list':[1, 2]}},
-                {
-                    'in':['x', 1, 10],
-                    'kwargs':{'suppress_exceptions':True},
-                    'out':{'success':True, 'exception_list':None}},
-                {
-                    'in':['x', 0, 20],
-                    'kwargs':{'suppress_exceptions':True},
-                    'out':{'success':True, 'exception_list':None}},
-                {
-                    'in':['x', 1, 9],
-                    'kwargs':{'suppress_exceptions':True},
-                    'out':{'success':False, 'exception_list':None}},
-                {
-                    'in':['x', 3, 10],
-                    'kwargs':{'suppress_exceptions':True},
-                    'out':{'success':False, 'exception_list':None}},
-                {
-                    'in':['x', 1, 10],
-                    'kwargs':{'mostly':.9},
-                    'out':{'success':True, 'exception_list':[]}},
-                {
-                    'in':['x', 0, 20],
-                    'kwargs':{'mostly':.9},
-                    'out':{'success':True, 'exception_list':[]}},
-                {
-                    'in':['x', 1, 9],
-                    'kwargs':{'mostly':.9},
-                    'out':{'success':True, 'exception_list':[10]}},
-                {
-                    'in':['x', 3, 10],
-                    'kwargs':{'mostly':.9},
-                    'out':{'success':False, 'exception_list':[1, 2]}},
-                {
-                    'in':['y', 1, 10],
-                    'kwargs':{'mostly':.95},
-                    'out':{'success':False, 'exception_list':["abc"]}},
-                {
-                    'in':['y', 1, 10],
-                    'kwargs':{'mostly':.9},
-                    'out':{'success':True, 'exception_list':["abc"]}},
-                {
-                    'in':['y', 1, 10],
-                    'kwargs':{'mostly':.8},
-                    'out':{'success':True, 'exception_list':["abc"]}},
-                {
-                    'in':['z', 1, 4],
-                    'kwargs':{'mostly':.9},
-                    'out':{'success':False, 'exception_list':[5]}},
-                {
-                    'in':['z', 1, 4],
-                    'kwargs':{'mostly':.8},
-                    'out':{'success':True, 'exception_list':[5]}}
-        ]
+        T = json.load(file("./tests/test_sets/expect_column_values_to_be_between_test_set_ADJ.json"))
+        # print json.dumps(T, indent=2)
 
         for t in T:
-            out = D.expect_column_values_to_be_between(*t['in'], **t['kwargs'])
+            out = D.expect_column_values_to_be_between(**t['in'])#, **t['kwargs'])
             self.assertEqual(out, t['out'])
 
     def test_expect_column_value_lengths_to_be_between(self):
@@ -1168,7 +1100,7 @@ class TestPandasDataset(unittest.TestCase):
         ]
 
         for t in T:
-            print t['in'], t['out']
+            # print t['in'], t['out']
             out = D.expect_column_unique_value_count_to_be_between(**t['in'])
             self.assertEqual(out, t['out'])
 
@@ -1202,6 +1134,31 @@ class TestPandasDataset(unittest.TestCase):
             out = D.expect_column_stdev_to_be_between(*t['in'], **t['kwargs'])
             self.assertEqual(out, t['out'])
 
+    def test_expectation_decorator_summary_mode(self):
+
+        df = ge.dataset.PandasDataSet({
+            'x' : [1,2,3,4,5,6,7,7,None,None],
+        })
+
+        self.maxDiff = None
+        self.assertEqual(
+            df.expect_column_values_to_be_between('x', min_value=1, max_value=5, output_format="SUMMARY"),
+            {
+                "success" : False,
+                "exception_list" : [6.0,7.0,7.0],
+                "exception_index_list": [5,6,7],
+                "element_count" : 10,
+                "missing_count" : 2,
+                "missing_percent" : .2,
+                "exception_count" : 3,
+                "exception_counts": {
+                    6.0 : 1,
+                    7.0 : 2,
+                },
+                "exception_percent": 0.3,
+                "exception_percent_nonmissing": 0.375,
+            }
+        )
 
 
 
