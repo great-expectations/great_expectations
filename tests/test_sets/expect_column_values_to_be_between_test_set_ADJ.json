@@ -1,0 +1,231 @@
+[{
+    "out": {
+      "exception_list": [],
+      "exception_index_list": [],
+      "success": true
+    },
+    "in": {
+      "column": "x",
+      "max_value": 10,
+      "min_value": 1
+    }
+  },
+  {
+    "out": {
+      "exception_list": [],
+      "exception_index_list": [],
+      "success": true
+    },
+    "in": {
+      "column": "x",
+      "max_value": 20,
+      "min_value": 0
+    }
+  },
+  {
+    "out": {
+      "exception_list": [
+        10
+      ],
+      "exception_index_list": [9],
+      "success": false
+    },
+    "in": {
+      "column": "x",
+      "max_value": 9,
+      "min_value": 1
+    }
+  },
+  {
+    "out": {
+      "exception_list": [
+        1,
+        2
+      ],
+      "exception_index_list": [0, 1],
+      "success": false
+    },
+    "in": {
+      "column": "x",
+      "max_value": 10,
+      "min_value": 3
+    }
+  },
+  {
+    "out": true,
+    "in": {
+      "column": "x",
+      "max_value": 10,
+      "min_value": 1,
+      "output_format": "BOOLEAN_ONLY"
+    }
+  },
+  {
+    "out": true,
+    "in": {
+      "column": "x",
+      "max_value": 20,
+      "min_value": 0,
+      "output_format": "BOOLEAN_ONLY"
+    }
+  },
+  {
+    "out": false,
+    "in": {
+      "column": "x",
+      "max_value": 9,
+      "min_value": 1,
+      "output_format": "BOOLEAN_ONLY"
+    }
+  },
+  {
+    "out": false,
+    "in": {
+      "column": "x",
+      "max_value": 10,
+      "min_value": 3,
+      "output_format": "BOOLEAN_ONLY"
+    }
+  },
+  {
+    "out": {
+      "exception_list": [],
+      "exception_index_list": [],
+      "success": true
+    },
+    "in": {
+      "column": "x",
+      "max_value": 10,
+      "min_value": 1,
+      "mostly": 0.9
+    }
+  },
+  {
+    "out": {
+      "exception_list": [],
+      "exception_index_list": [],
+      "success": true
+    },
+    "in": {
+      "column": "x",
+      "max_value": 20,
+      "min_value": 0,
+      "mostly": 0.9
+    }
+  },
+  {
+    "out": {
+      "exception_list": [
+        10
+      ],
+      "exception_index_list": [
+        9
+      ],
+      "success": true
+    },
+    "in": {
+      "column": "x",
+      "max_value": 9,
+      "min_value": 1,
+      "mostly": 0.9
+    }
+  },
+  {
+    "out": {
+      "exception_list": [
+        1,
+        2
+      ],
+      "exception_index_list": [
+        0,
+        1
+      ],
+      "success": false
+    },
+    "in": {
+      "column": "x",
+      "max_value": 10,
+      "min_value": 3,
+      "mostly": 0.9
+    }
+  },
+  {
+    "out": {
+      "exception_list": [
+        "abc"
+      ],
+      "exception_index_list": [9],
+      "success": false
+    },
+    "in": {
+      "column": "y",
+      "max_value": 10,
+      "min_value": 1,
+      "mostly": 0.95
+    }
+  },
+  {
+    "out": {
+      "exception_list": [
+        "abc"
+      ],
+      "exception_index_list": [9],
+      "success": true
+    },
+    "in": {
+      "column": "y",
+      "max_value": 10,
+      "min_value": 1,
+      "mostly": 0.9
+    }
+  },
+  {
+    "out": {
+      "exception_list": [
+        "abc"
+      ],
+      "exception_index_list": [9],
+      "success": true
+    },
+    "in": {
+      "column": "y",
+      "max_value": 10,
+      "min_value": 1,
+      "mostly": 0.8
+    }
+  },
+  {
+    "out": {
+      "exception_list": [
+        5
+      ],
+      "exception_index_list": [
+        4
+      ],
+      "success": false
+    },
+    "in": {
+      "column": "z",
+      "max_value": 4,
+      "min_value": 1,
+      "mostly": 0.9
+    }
+  },
+  {
+    "out": {
+      "exception_list": [
+        5
+      ],
+      "exception_index_list": [
+        4
+      ],
+      "success": true
+    },
+    "in": {
+      "column": "z",
+      "max_value": 4,
+      "min_value": 1,
+      "mostly": 0.8
+    }
+  }
+]

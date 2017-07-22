@@ -1,0 +1,252 @@
+[
+  {
+    "kwargs": {}, 
+    "out": {
+      "exception_list": [], 
+      "success": true
+    }, 
+    "in": [
+      "x", 
+      1, 
+      10
+    ]
+  }, 
+  {
+    "kwargs": {}, 
+    "out": {
+      "exception_list": [], 
+      "success": true
+    }, 
+    "in": [
+      "x", 
+      0, 
+      20
+    ]
+  }, 
+  {
+    "kwargs": {}, 
+    "out": {
+      "exception_list": [
+        10
+      ], 
+      "success": false
+    }, 
+    "in": [
+      "x", 
+      1, 
+      9
+    ]
+  }, 
+  {
+    "kwargs": {}, 
+    "out": {
+      "exception_list": [
+        1, 
+        2
+      ], 
+      "success": false
+    }, 
+    "in": [
+      "x", 
+      3, 
+      10
+    ]
+  }, 
+  {
+    "kwargs": {
+      "suppress_exceptions": true
+    }, 
+    "out": {
+      "exception_list": null, 
+      "success": true
+    }, 
+    "in": [
+      "x", 
+      1, 
+      10
+    ]
+  }, 
+  {
+    "kwargs": {
+      "suppress_exceptions": true
+    }, 
+    "out": {
+      "exception_list": null, 
+      "success": true
+    }, 
+    "in": [
+      "x", 
+      0, 
+      20
+    ]
+  }, 
+  {
+    "kwargs": {
+      "suppress_exceptions": true
+    }, 
+    "out": {
+      "exception_list": null, 
+      "success": false
+    }, 
+    "in": [
+      "x", 
+      1, 
+      9
+    ]
+  }, 
+  {
+    "kwargs": {
+      "suppress_exceptions": true
+    }, 
+    "out": {
+      "exception_list": null, 
+      "success": false
+    }, 
+    "in": [
+      "x", 
+      3, 
+      10
+    ]
+  }, 
+  {
+    "kwargs": {
+      "mostly": 0.9
+    }, 
+    "out": {
+      "exception_list": [], 
+      "success": true
+    }, 
+    "in": [
+      "x", 
+      1, 
+      10
+    ]
+  }, 
+  {
+    "kwargs": {
+      "mostly": 0.9
+    }, 
+    "out": {
+      "exception_list": [], 
+      "success": true
+    }, 
+    "in": [
+      "x", 
+      0, 
+      20
+    ]
+  }, 
+  {
+    "kwargs": {
+      "mostly": 0.9
+    }, 
+    "out": {
+      "exception_list": [
+        10
+      ], 
+      "success": true
+    }, 
+    "in": [
+      "x", 
+      1, 
+      9
+    ]
+  }, 
+  {
+    "kwargs": {
+      "mostly": 0.9
+    }, 
+    "out": {
+      "exception_list": [
+        1, 
+        2
+      ], 
+      "success": false
+    }, 
+    "in": [
+      "x", 
+      3, 
+      10
+    ]
+  }, 
+  {
+    "kwargs": {
+      "mostly": 0.95
+    }, 
+    "out": {
+      "exception_list": [
+        "abc"
+      ], 
+      "success": false
+    }, 
+    "in": [
+      "y", 
+      1, 
+      10
+    ]
+  }, 
+  {
+    "kwargs": {
+      "mostly": 0.9
+    }, 
+    "out": {
+      "exception_list": [
+        "abc"
+      ], 
+      "success": true
+    }, 
+    "in": [
+      "y", 
+      1, 
+      10
+    ]
+  }, 
+  {
+    "kwargs": {
+      "mostly": 0.8
+    }, 
+    "out": {
+      "exception_list": [
+        "abc"
+      ], 
+      "success": true
+    }, 
+    "in": [
+      "y", 
+      1, 
+      10
+    ]
+  }, 
+  {
+    "kwargs": {
+      "mostly": 0.9
+    }, 
+    "out": {
+      "exception_list": [
+        5
+      ], 
+      "success": false
+    }, 
+    "in": [
+      "z", 
+      1, 
+      4
+    ]
+  }, 
+  {
+    "kwargs": {
+      "mostly": 0.8
+    }, 
+    "out": {
+      "exception_list": [
+        5
+      ], 
+      "success": true
+    }, 
+    "in": [
+      "z", 
+      1, 
+      4
+    ]
+  }
+]
