@@ -371,7 +371,7 @@ class PandasDataSet(DataSet, pd.DataFrame):
                 "true_value" : test_result.pvalue,
             }
 
-    @DataSet.column_expectation
+    @DataSet.old_column_expectation
     def expect_column_kl_divergence_to_be(self, column, partition_object, threshold, suppress_exceptions=False):
         if not is_valid_partition_object(partition_object):
             # return {
