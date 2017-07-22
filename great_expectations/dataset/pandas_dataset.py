@@ -354,7 +354,7 @@ class PandasDataSet(DataSet, pd.DataFrame):
         not_null = self[column].notnull()
         not_null_values = self[not_null][column]
         if (sample_size == 0):
-            test_sample = np.random.choice(not_null_values, size=len(partition_object['partition']), replace=False)
+            test_sample = np.random.choice(not_null_values, size=len(partition_object['weights']), replace=False)
         else:
             test_sample = np.random.choice(not_null_values, size=sample_size, replace=False)
 
@@ -372,12 +372,17 @@ class PandasDataSet(DataSet, pd.DataFrame):
             }
 
     @DataSet.column_expectation
-    def expect_column_kl_divergence_to_be(self, column, partition_object, threshold=0.1, suppress_exceptions=False):
+    def expect_column_kl_divergence_to_be(self, column, partition_object, threshold, suppress_exceptions=False):
         if not is_valid_partition_object(partition_object):
-            return {
-                "success": False,
-                "error": "Invalid partition_object"
-            }
+            # return {
+            #     "success": False,
+            #     "error": "Invalid partition_object"
+            # }
+            raise ValueError("Invalid partition_object")
+
+        if not (isinstance(threshold, float) and (threshold >= 0)):
+            raise ValueError("Threshold must be a float greater than zero.")
+
         not_null = self[column].notnull()
         not_null_values = self[not_null][column]
 
