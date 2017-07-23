@@ -31,7 +31,7 @@ class MetaPandasDataSet(DataSet):
 
             nonnull_values = series[null_indexes==False]
             nonnull_count = (null_indexes==False).sum()
-            
+
             successful_indexes = func(self, nonnull_values, *args, **kwargs)
             success_count = successful_indexes.sum()
 
@@ -127,7 +127,7 @@ class MetaPandasDataSet(DataSet):
 
             nonnull_values = series[null_indexes==False]
             nonnull_count = (null_indexes==False).sum()
-            
+
             success, true_value = func(self, nonnull_values, *args, **kwargs)
             success = bool(success)
 
@@ -856,7 +856,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
             }
 
     @DataSet.old_column_expectation
-    def expect_column_numerical_distribution_to_be(self, column, partition_object, sample_size=0, p=0.05, suppress_exceptions=False):
+    def expect_column_numerical_distribution_to_be(self, column, partition_object, bootsrap_samples=0, p=0.05, suppress_exceptions=False):
         if not is_valid_partition_object(partition_object):
             return {
                 "success": False,
@@ -864,22 +864,29 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
             }
         not_null = self[column].notnull()
         not_null_values = self[not_null][column]
-        if (sample_size == 0):
-            test_sample = np.random.choice(not_null_values, size=len(partition_object['weights']), replace=False)
-        else:
-            test_sample = np.random.choice(not_null_values, size=sample_size, replace=False)
 
         estimated_cdf = lambda x: np.interp(x, partition_object['partition'], np.append(np.array([0]), np.cumsum(partition_object['weights'])))
-        test_result = stats.kstest(test_sample, estimated_cdf)
+
+        if (bootsrap_samples == 0):
+            #bootsrap_samples = min(1000, int (len(not_null_values) / len(partition_object['weights'])))
+            bootsrap_samples = 1000
+
+        results = [ stats.kstest(
+                        np.random.choice(not_null_values, size=len(partition_object['weights']), replace=True),
+                        estimated_cdf).pvalue
+                    for k in range(bootsrap_samples)
+                  ]
+
+        test_result = np.mean(results)
 
         if suppress_exceptions:
             return {
-                "success" : test_result.pvalue > p,
+                "success" : test_result > p,
             }
         else:
             return {
-                "success" : test_result.pvalue > p,
-                "true_value" : test_result.pvalue,
+                "success" : test_result > p,
+                "true_value" : test_result
             }
 
     @DataSet.old_column_expectation
@@ -900,7 +907,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         # If the data expected to be discrete, build a series
         if (len(partition_object['weights']) == len(partition_object['partition'])):
             observed_frequencies = not_null_values.value_counts()
-            pk = observed_frequencies / len(not_null_values)
+            pk = observed_frequencies / (1.* len(not_null_values))
         else:
             partition_object = remove_empty_intervals(partition_object)
             hist, bin_edges = np.histogram(not_null_values, partition_object['partition'], density=False)

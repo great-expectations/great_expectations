@@ -56,11 +56,12 @@ Distributional Expectations Core Tests
 --------------------------------------------------------------------------------
 Distributional expectations rely on three tests for their work.
 
-For continuous data, the expect_column_numerical_distribution_to_be expectation uses the Kolmogorov-Smirnov (KS) test, which compares the actual and expected cumulative densities of the data. Because of the partition_object's piecewise uniform approximation of the expected distribution, the test will be overly sensitive to differences when used with a sample of data of much larger than the size of the partition. The expectation consequently has a default rule of thumb to test using a subsample from the tested column of the same size as the partition. Because the test is generally run using a subsample of the data in the tested column, it may also be advisable to use a bootstrapping method around the expectation to improve the detection probability of divergence from the expected distribution.
+Kullback-Leibler (KL) divergence is available as an expectation for both categorical and continuous data (continuous data will be discretized according to the provided partition prior to computing divergence). Unlike KS and Chi-Squared tests which can use a pvalue, you must provide a threshold for the relative entropy to use KL divergence. Further, KL divergence is not symmetric, which can make it difficult to differentiate certain distributions.
+
+For continuous data, the expect_column_numerical_distribution_to_be expectation uses the Kolmogorov-Smirnov (KS) test, which compares the actual and expected cumulative densities of the data. Because of the partition_object's piecewise uniform approximation of the expected distribution, the test would be overly sensitive to differences when used with a sample of data of much larger than the size of the partition. The expectation consequently uses a bootstrapping method to sample the provided data into samples of the same size as the partition and uses the mean of the resulting pvalues as the final test's pvalue.
 
 For categorical data, the expect_column_frequency_distribution_to_be expectation uses the Chi-Squared test. The provided weights are scaled to the size of the data in the tested column at the time of the test.
 
-Finally, Kullback-Leibler (KL) divergence is available as an expectation for both categorical and continuous data (because the data will be discretizes into the partition interval prior to computing divergence). Unlike KS and Chi-Squared tests which can use a pvalue, you must provide a threshold for the relative entropy to use KL divergence. Further, KL divergence is not symmetric, which can make it difficult to differentiate certain distributions. The partition passed to the expectation becomes the baseline in the relative entropy calculation.
 
 Distributional Expectations Alternatives
 --------------------------------------------------------------------------------
