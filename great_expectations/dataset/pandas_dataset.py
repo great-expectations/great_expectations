@@ -205,89 +205,116 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         }
 
 
-    @DataSet.old_column_expectation
-    def expect_column_values_to_be_unique(self, column, mostly=None, suppress_exceptions=False):
+    @MetaPandasDataSet.column_map_expectation
+    def expect_column_values_to_be_unique(self, series):
+        return series.map(lambda x: x in set(series))
 
-        not_null = self[column].notnull()
-        not_null_values = self[not_null][column]
-        unique_not_null_values = set(not_null_values)
+    #@DataSet.old_column_expectation
+    #def expect_column_values_to_be_unique(self, column, mostly=None, suppress_exceptions=False):
 
-        if len(not_null_values) == 0:
-            # print 'Warning: All values are null'
-            return {
-                'success': True,
-                'exception_list':[]
-            }
+    #    not_null = self[column].notnull()
+    #    not_null_values = self[not_null][column]
+    #    unique_not_null_values = set(not_null_values)
 
-        if suppress_exceptions:
-            exceptions = None
-        elif list(not_null_values.duplicated()) == []:
-            # If all values are null .duplicated returns no boolean values
-            exceptions = None
-        else:
-            exceptions = list(not_null_values[not_null_values.duplicated()])
+    #    if len(not_null_values) == 0:
+    #        # print 'Warning: All values are null'
+    #        return {
+    #            'success': True,
+    #            'exception_list':[]
+    #        }
 
-        if mostly:
-            percent_unique = 1 - float(len(unique_not_null_values))/len(not_null_values)
-            return {
-                'success' : (percent_unique >= mostly),
-                'exception_list' : exceptions
-            }
-        else:
-            return {
-                'success' : (len(unique_not_null_values) == len(not_null_values)),
-                'exception_list' : exceptions
-            }
+    #    if suppress_exceptions:
+    #        exceptions = None
+    #    elif list(not_null_values.duplicated()) == []:
+    #        # If all values are null .duplicated returns no boolean values
+    #        exceptions = None
+    #    else:
+    #        exceptions = list(not_null_values[not_null_values.duplicated()])
 
+    #    if mostly:
+    #        percent_unique = 1 - float(len(unique_not_null_values))/len(not_null_values)
+    #        return {
+    #            'success' : (percent_unique >= mostly),
+    #            'exception_list' : exceptions
+    #        }
+    #    else:
+    #        return {
+    #            'success' : (len(unique_not_null_values) == len(not_null_values)),
+    #            'exception_list' : exceptions
+    #        }
 
-    @DataSet.old_column_expectation
-    def expect_column_values_to_not_be_null(self, column, mostly=None, suppress_exceptions=False):
+    @MetaPandasDataSet.column_map_expectation
+    def expect_column_values_to_not_be_null(self, series):
+        def is_not_null(val):
+            #!!! This depends on the definition of null. Should we include np.nan in the definition of null?
+            #TODO Should this functionality be included/excluded from expect_column_values_to_be_of_type?
+            if val == None:
+                return True
+            else:
+                return False
 
-        not_null = self[column].notnull()
-        null_count = (not_null==False).sum()
+        return series.map(is_not_null)
 
-        if suppress_exceptions:
-            exceptions = None
-        else:
-            exceptions = [None for i in range(null_count)]
+    #@DataSet.old_column_expectation
+    #def expect_column_values_to_not_be_null(self, column, mostly=None, suppress_exceptions=False):
 
-        if mostly:
-            percent_not_null = 1 - float(null_count)/len(self[column])
-            return {
-                'success' : (percent_not_null >= mostly),
-                'exception_list' : exceptions
-            }
-        else:
-            return {
-                'success' : not_null.all(),
-                'exception_list' : exceptions
-            }
+    #    not_null = self[column].notnull()
+    #    null_count = (not_null==False).sum()
 
-    @DataSet.old_column_expectation
-    def expect_column_values_to_be_null(self, column, mostly=None, suppress_exceptions=False):
+    #    if suppress_exceptions:
+    #        exceptions = None
+    #    else:
+    #        exceptions = [None for i in range(null_count)]
 
-        null = self[column].isnull()
-        not_null = self[column].notnull()
-        null_values = self[null][column]
-        not_null_values = self[not_null][column]
+    #    if mostly:
+    #        percent_not_null = 1 - float(null_count)/len(self[column])
+    #        return {
+    #            'success' : (percent_not_null >= mostly),
+    #            'exception_list' : exceptions
+    #        }
+    #    else:
+    #        return {
+    #            'success' : not_null.all(),
+    #            'exception_list' : exceptions
+    #        }
 
-        if suppress_exceptions:
-            exceptions = None
-        else:
-            exceptions = list(not_null_values)
+    @MetaPandasDataSet.column_map_expectation
+    def expect_column_values_to_be_null(self, series):
+        #!!! This depends on the definition of null.
+        #TODO Include/exclude this functionality from the of_type expectations
+        def is_null(val):
+            if val == None:
+                return True
+            else:
+                return False
 
-        if mostly:
-            #Prevent division-by-zero errors
-            percent_matching = float(null.sum())/len(self[column])
-            return {
-                'success':(percent_matching >= mostly),
-                'exception_list':exceptions
-            }
-        else:
-            return {
-                'success':null.all(),
-                'exception_list':exceptions
-            }
+        return series.map(is_null)
+
+    #@DataSet.old_column_expectation
+    #def expect_column_values_to_be_null(self, column, mostly=None, suppress_exceptions=False):
+
+    #    null = self[column].isnull()
+    #    not_null = self[column].notnull()
+    #    null_values = self[null][column]
+    #    not_null_values = self[not_null][column]
+
+    #    if suppress_exceptions:
+    #        exceptions = None
+    #    else:
+    #        exceptions = list(not_null_values)
+
+    #    if mostly:
+    #        #Prevent division-by-zero errors
+    #        percent_matching = float(null.sum())/len(self[column])
+    #        return {
+    #            'success':(percent_matching >= mostly),
+    #            'exception_list':exceptions
+    #        }
+    #    else:
+    #        return {
+    #            'success':null.all(),
+    #            'exception_list':exceptions
+    #        }
 
 
     @MetaPandasDataSet.column_map_expectation
@@ -413,79 +440,99 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
     #         }
 
 
-    @DataSet.old_column_expectation
-    def expect_column_values_to_be_in_set(self, column, values_set, mostly=None, suppress_exceptions=False):
-
-        not_null = self[column].notnull()
-        not_null_values = self[not_null][column]
-
-        #Convert to set, if passed a list
-        unique_values_set = set(values_set)
-
-        unique_values = set(not_null_values.unique())
-
-        if len(not_null_values) == 0:
-            # print 'Warning: All values are null'
-            return {
-                'success':True,
-                'exception_list':[]
-            }
-
-        exceptions_set = list(unique_values - unique_values_set)
-        exceptions_list = list(not_null_values[not_null_values.map(lambda x: x in exceptions_set)])
-
-        if mostly:
-
-            percent_in_set = 1 - (float(len(exceptions_list)) / len(not_null_values))
-            if suppress_exceptions:
-                return percent_in_set > mostly
+    @MetaPandasDataSet.column_map_expectation
+    def expect_column_values_to_be_in_set(self, series, value_set=None):
+        def in_set(val):
+            if val in value_set:
+                return True
             else:
-                return {
-                    "success" : percent_in_set > mostly,
-                    "exception_list" : exceptions_list
-                }
+                return False
 
-        else:
-            if suppress_exceptions:
-                return (len(exceptions_set) == 0)
+        return series.map(in_set)
+
+
+    #@DataSet.old_column_expectation
+    #def expect_column_values_to_be_in_set(self, column, values_set, mostly=None, suppress_exceptions=False):
+
+    #    not_null = self[column].notnull()
+    #    not_null_values = self[not_null][column]
+
+    #    #Convert to set, if passed a list
+    #    unique_values_set = set(values_set)
+
+    #    unique_values = set(not_null_values.unique())
+
+    #    if len(not_null_values) == 0:
+    #        # print 'Warning: All values are null'
+    #        return {
+    #            'success':True,
+    #            'exception_list':[]
+    #        }
+
+    #    exceptions_set = list(unique_values - unique_values_set)
+    #    exceptions_list = list(not_null_values[not_null_values.map(lambda x: x in exceptions_set)])
+
+    #    if mostly:
+
+    #        percent_in_set = 1 - (float(len(exceptions_list)) / len(not_null_values))
+    #        if suppress_exceptions:
+    #            return percent_in_set > mostly
+    #        else:
+    #            return {
+    #                "success" : percent_in_set > mostly,
+    #                "exception_list" : exceptions_list
+    #            }
+
+    #    else:
+    #        if suppress_exceptions:
+    #            return (len(exceptions_set) == 0)
+    #        else:
+    #            return {
+    #                "success" : (len(exceptions_set) == 0),
+    #                "exception_list" : exceptions_list
+    #            }
+
+    @MetaPandasDataSet.column_map_expectation
+    def expect_column_values_to_not_be_in_set(self, series, value_set=None):
+        def not_in_set(val):
+            if val in value_set:
+                return False
             else:
-                return {
-                    "success" : (len(exceptions_set) == 0),
-                    "exception_list" : exceptions_list
-                }
+                return True
+        
+        return series.map(not_in_set)
 
+    #@DataSet.old_column_expectation
+    #def expect_column_values_to_not_be_in_set(self, column, values_set, mostly=None, suppress_exceptions=False):
 
-    @DataSet.old_column_expectation
-    def expect_column_values_to_not_be_in_set(self, column, values_set, mostly=None, suppress_exceptions=False):
+    #    not_null = self[column].notnull()
+    #    not_null_values = self[not_null][column]
+    #    result = not_null_values.isin(values_set)
 
-        not_null = self[column].notnull()
-        not_null_values = self[not_null][column]
-        result = not_null_values.isin(values_set)
+    #    if suppress_exceptions:
+    #        exceptions = None
+    #    else:
+    #        exceptions = list(not_null_values[result])
 
-        if suppress_exceptions:
-            exceptions = None
-        else:
-            exceptions = list(not_null_values[result])
+    #    if mostly:
+    #        # prevent division by zero
+    #        if len(not_null_values) == 0:
+    #            return {
+    #                'success':True,
+    #                'exception_list':exceptions
+    #            }
 
-        if mostly:
-            # prevent division by zero
-            if len(not_null_values) == 0:
-                return {
-                    'success':True,
-                    'exception_list':exceptions
-                }
+    #        percent_not_in_set = 1 - (float(result.sum())/len(not_null_values))
+    #        return {
+    #            'success':(percent_not_in_set >= mostly),
+    #            'exception_list':exceptions
+    #        }
 
-            percent_not_in_set = 1 - (float(result.sum())/len(not_null_values))
-            return {
-                'success':(percent_not_in_set >= mostly),
-                'exception_list':exceptions
-            }
-
-        else:
-            return {
-                'success':(~result).all(),
-                'exception_list':exceptions
-            }
+    #    else:
+    #        return {
+    #            'success':(~result).all(),
+    #            'exception_list':exceptions
+    #        }
 
     @MetaPandasDataSet.column_map_expectation
     def expect_column_values_to_be_between(self, series, min_value=None, max_value=None):
@@ -531,6 +578,29 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
     #             'success': bool(result.all()),
     #             'exception_list':exceptions
     #         }
+
+    @MetaPandasDataSet.column_map_expectation
+    def expect_column_value_lengths_to_be_between(self, series, min_value=None, max_value=None):
+        #TODO should the mapping function raise the error or should the decorator?
+        def length_is_between(val):
+
+            if min_value != None and max_value != None:
+                try:
+                    return len(val) >= min_value and len(val) <= max_value
+                except:
+                    return False
+
+            elif min_value == None and max_value != None:
+                return len(val) <= max_value
+
+            elif min_value != None and max_value == None:
+                return len(val) >= min_value
+
+            else:
+                raise ValueError("Undefined interval: min_value and max_value are both None")
+
+        return series.map(length_is_between)
+
 
     @DataSet.old_column_expectation
     def expect_column_value_lengths_to_be_between(self, column, min_value, max_value, mostly=None, suppress_exceptions=False):
@@ -805,10 +875,8 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
     #             'exception_list' : exceptions
     #         }
 
-
-    @DataSet.old_column_expectation
-    def expect_column_values_to_be_valid_json(self, column, mostly=None, suppress_exceptions=False):
-
+    @MetaPandasDataSet.column_map_expectation
+    def expect_column_values_to_be_json_parseable(self, series):
         def is_json(val):
             try:
                 json.loads(val)
@@ -816,33 +884,47 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
             except:
                 return False
 
-        not_null = self[column].notnull()
-        not_null_values = self[column][not_null]
-        outcome = not_null_values.map(is_json)
+        return series.map(is_json)
 
-        if suppress_exceptions:
-            exceptions = None
-        else:
-            exceptions = list(not_null_values[~outcome])
 
-        if mostly:
-            if len(not_null_values) == 0:
-                return {
-                    'success' : True,
-                    'exception_list' : exceptions
-                }
 
-            percent_true = float(sum(outcome))/len(outcome)
+    #@DataSet.old_column_expectation
+    #def expect_column_values_to_be_valid_json(self, column, mostly=None, suppress_exceptions=False):
 
-            return {
-                'success' : (percent_true >= mostly),
-                'exception_list' : exceptions
-            }
+    #    def is_json(val):
+    #        try:
+    #            json.loads(val)
+    #            return True
+    #        except:
+    #            return False
 
-        return {
-            'success' : outcome.all(),
-            'exception_list' : exceptions
-        }
+    #    not_null = self[column].notnull()
+    #    not_null_values = self[column][not_null]
+    #    outcome = not_null_values.map(is_json)
+
+    #    if suppress_exceptions:
+    #        exceptions = None
+    #    else:
+    #        exceptions = list(not_null_values[~outcome])
+
+    #    if mostly:
+    #        if len(not_null_values) == 0:
+    #            return {
+    #                'success' : True,
+    #                'exception_list' : exceptions
+    #            }
+
+    #        percent_true = float(sum(outcome))/len(outcome)
+
+    #        return {
+    #            'success' : (percent_true >= mostly),
+    #            'exception_list' : exceptions
+    #        }
+
+    #    return {
+    #        'success' : outcome.all(),
+    #        'exception_list' : exceptions
+    #    }
 
 
     @DataSet.old_column_expectation
