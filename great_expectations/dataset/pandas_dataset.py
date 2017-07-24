@@ -290,8 +290,8 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
             }
 
 
-    @DataSet.old_column_expectation
-    def expect_column_values_to_be_of_type(self, column, type_, target_datasource, mostly=None, suppress_exceptions=False):
+    @MetaPandasDataSet.column_map_expectation
+    def expect_column_values_to_be_of_type(self, series, type_, target_datasource="numpy"):
 
         python_avro_types = {
                 "null":type(None),
@@ -317,35 +317,100 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
         datasource = {"python":python_avro_types, "numpy":numpy_avro_types}
 
-        user_type = datasource[target_datasource][type_]
+        target_type = datasource[target_datasource][type_]
+        result = series.map(lambda x: type(x) == target_type)
 
-        not_null = self[column].notnull()
-        not_null_values = self[not_null][column]
-        result = not_null_values.map(lambda x: type(x) == user_type)
+        return result
 
-        if suppress_exceptions:
-            exceptions = None
-        else:
-            exceptions = list(not_null_values[~result])
+    @MetaPandasDataSet.column_map_expectation
+    def expect_column_values_to_be_in_type_list(self, series, type_list, target_datasource="numpy"):
 
-        if mostly:
-            # prevent division by zero error
-            if len(not_null_values) == 0:
-                return {
-                    'success':True,
-                    'exception_list':exceptions
+        python_avro_types = {
+                "null":type(None),
+                "boolean":bool,
+                "int":int,
+                "long":int,
+                "float":float,
+                "double":float,
+                "bytes":bytes,
+                "string":str
                 }
 
-            percent_true = float(result.sum())/len(not_null_values)
-            return {
-                'success':(percent_true >= mostly),
-                'exception_list':exceptions
-            }
-        else:
-            return {
-                'success':result.all(),
-                'exception_list':exceptions
-            }
+        numpy_avro_types = {
+                "null":np.nan,
+                "boolean":np.bool_,
+                "int":np.int64,
+                "long":np.longdouble,
+                "float":np.float_,
+                "double":np.longdouble,
+                "bytes":np.bytes_,
+                "string":np.string_
+                }
+
+        datasource = {"python":python_avro_types, "numpy":numpy_avro_types}
+
+        target_type_list = [datasource[target_datasource][t] for t in type_]
+        result = series.map(lambda x: type(x) in target_type_list)
+
+        return result
+
+
+    # @DataSet.old_column_expectation
+    # def expect_column_values_to_be_of_type(self, column, type_, target_datasource, mostly=None, suppress_exceptions=False):
+
+    #     python_avro_types = {
+    #             "null":type(None),
+    #             "boolean":bool,
+    #             "int":int,
+    #             "long":int,
+    #             "float":float,
+    #             "double":float,
+    #             "bytes":bytes,
+    #             "string":str
+    #             }
+
+    #     numpy_avro_types = {
+    #             "null":np.nan,
+    #             "boolean":np.bool_,
+    #             "int":np.int64,
+    #             "long":np.longdouble,
+    #             "float":np.float_,
+    #             "double":np.longdouble,
+    #             "bytes":np.bytes_,
+    #             "string":np.string_
+    #             }
+
+    #     datasource = {"python":python_avro_types, "numpy":numpy_avro_types}
+
+    #     user_type = datasource[target_datasource][type_]
+
+    #     not_null = self[column].notnull()
+    #     not_null_values = self[not_null][column]
+    #     result = not_null_values.map(lambda x: type(x) == user_type)
+
+    #     if suppress_exceptions:
+    #         exceptions = None
+    #     else:
+    #         exceptions = list(not_null_values[~result])
+
+    #     if mostly:
+    #         # prevent division by zero error
+    #         if len(not_null_values) == 0:
+    #             return {
+    #                 'success':True,
+    #                 'exception_list':exceptions
+    #             }
+
+    #         percent_true = float(result.sum())/len(not_null_values)
+    #         return {
+    #             'success':(percent_true >= mostly),
+    #             'exception_list':exceptions
+    #         }
+    #     else:
+    #         return {
+    #             'success':result.all(),
+    #             'exception_list':exceptions
+    #         }
 
 
     @DataSet.old_column_expectation
@@ -518,45 +583,51 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
                 'exception_list' : exceptions
             }
 
+    @MetaPandasDataSet.column_map_expectation
+    def expect_column_values_to_match_regex(self, series, regex):
+        return series.map(
+            lambda x: re.findall(regex, str(x)) != []
+        )
 
-    @DataSet.old_column_expectation
-    def expect_column_values_to_match_regex(self, column, regex, mostly=None, suppress_exceptions=False):
 
-        not_null = self[column].notnull()
-        not_null_values = self[not_null][column]
+    # @DataSet.old_column_expectation
+    # def expect_column_values_to_match_regex(self, column, regex, mostly=None, suppress_exceptions=False):
 
-        if len(not_null_values) == 0:
-            # print 'Warning: All values are null'
-            return {
-                'success':True,
-                'exception_list':[]
-            }
+    #     not_null = self[column].notnull()
+    #     not_null_values = self[not_null][column]
 
-        matches = not_null_values.map(lambda x: re.findall(regex, str(x)) != [])
+    #     if len(not_null_values) == 0:
+    #         # print 'Warning: All values are null'
+    #         return {
+    #             'success':True,
+    #             'exception_list':[]
+    #         }
 
-        if suppress_exceptions:
-            exceptions = None
-        else:
-            exceptions = list(not_null_values[matches==False])
+    #     matches = not_null_values.map(lambda x: re.findall(regex, str(x)) != [])
 
-        if mostly:
-            #Prevent division-by-zero errors
-            if len(not_null_values) == 0:
-                return {
-                    'success': True,
-                    'exception_list':exceptions
-                }
+    #     if suppress_exceptions:
+    #         exceptions = None
+    #     else:
+    #         exceptions = list(not_null_values[matches==False])
 
-            percent_matching = float(matches.sum())/len(not_null_values)
-            return {
-                "success" : percent_matching >= mostly,
-                "exception_list" : exceptions
-            }
-        else:
-            return {
-                "success" : bool(matches.all()),
-                "exception_list" : exceptions
-            }
+    #     if mostly:
+    #         #Prevent division-by-zero errors
+    #         if len(not_null_values) == 0:
+    #             return {
+    #                 'success': True,
+    #                 'exception_list':exceptions
+    #             }
+
+    #         percent_matching = float(matches.sum())/len(not_null_values)
+    #         return {
+    #             "success" : percent_matching >= mostly,
+    #             "exception_list" : exceptions
+    #         }
+    #     else:
+    #         return {
+    #             "success" : bool(matches.all()),
+    #             "exception_list" : exceptions
+    #         }
 
 
     @DataSet.old_column_expectation
@@ -683,10 +754,8 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
                 "exception_list" : exceptions
             }
 
-
-    @DataSet.old_column_expectation
-    def expect_column_values_to_be_dateutil_parseable(self, column, mostly=None, suppress_exceptions=False):
-
+    @MetaPandasDataSet.column_map_expectation
+    def expect_column_values_to_be_dateutil_parseable(self, series):
         def is_parseable(val):
             try:
                 parse(val)
@@ -694,35 +763,47 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
             except:
                 return False
 
-        not_null = self[column].notnull()
-        not_null_values = self[column][not_null]
-        outcome = not_null_values.map(is_parseable)
+        return series.map(is_parseable)
 
-        if suppress_exceptions:
-            exceptions = None
-        else:
-            exceptions = list(not_null_values[~outcome])
+    # @DataSet.old_column_expectation
+    # def expect_column_values_to_be_dateutil_parseable(self, column, mostly=None, suppress_exceptions=False):
 
-        if mostly:
-            # prevent divide by zero error
-            if len(not_null_values) == 0:
-                return {
-                    'success' : True,
-                    'exception_list' : exceptions
-                }
+    #     def is_parseable(val):
+    #         try:
+    #             parse(val)
+    #             return True
+    #         except:
+    #             return False
 
-            percent_true = float(sum(outcome))/len(outcome)
+    #     not_null = self[column].notnull()
+    #     not_null_values = self[column][not_null]
+    #     outcome = not_null_values.map(is_parseable)
 
-            return {
-                'success' : (percent_true >= mostly),
-                'exception_list' : exceptions
-            }
+    #     if suppress_exceptions:
+    #         exceptions = None
+    #     else:
+    #         exceptions = list(not_null_values[~outcome])
 
-        else:
-            return {
-                'success' : bool(outcome.all()),
-                'exception_list' : exceptions
-            }
+    #     if mostly:
+    #         # prevent divide by zero error
+    #         if len(not_null_values) == 0:
+    #             return {
+    #                 'success' : True,
+    #                 'exception_list' : exceptions
+    #             }
+
+    #         percent_true = float(sum(outcome))/len(outcome)
+
+    #         return {
+    #             'success' : (percent_true >= mostly),
+    #             'exception_list' : exceptions
+    #         }
+
+    #     else:
+    #         return {
+    #             'success' : bool(outcome.all()),
+    #             'exception_list' : exceptions
+    #         }
 
 
     @DataSet.old_column_expectation
