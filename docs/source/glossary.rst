@@ -53,6 +53,7 @@ String matching
 
 Datetime and JSON parsing
 --------------------------------------------------------------------------------
+
 * :func:`expect_column_values_to_match_strftime_format <great_expectations.dataset.base.DataSet.expect_column_values_to_match_strftime_format>`
 * :func:`expect_column_values_to_be_dateutil_parseable <great_expectations.dataset.base.DataSet.expect_column_values_to_be_dateutil_parseable>`
 * :func:`expect_column_values_to_be_valid_json <great_expectations.dataset.base.DataSet.expect_column_values_to_be_valid_json>`
@@ -60,18 +61,26 @@ Datetime and JSON parsing
 
 Aggregate functions
 --------------------------------------------------------------------------------
+
 * :func:`expect_column_mean_to_be_between <great_expectations.dataset.base.DataSet.expect_column_mean_to_be_between>`
 * :func:`expect_column_median_to_be_between <great_expectations.dataset.base.DataSet.expect_column_median_to_be_between>`
 * :func:`expect_column_stdev_to_be_between <great_expectations.dataset.base.DataSet.expect_column_stdev_to_be_between>`
 * :func:`expect_column_unique_value_count_to_be_between <great_expectations.dataset.base.DataSet.expect_column_unique_value_count_to_be_between>`
 * :func:`expect_column_proportion_of_unique_values_to_be_between <great_expectations.dataset.base.DataSet.expect_column_proportion_of_unique_values_to_be_between>`
-.. * :func:`expect_column_numerical_distribution_to_be <great_expectations.dataset.base.DataSet.expect_column_numerical_distribution_to_be>`
-.. * :func:`expect_column_frequency_distribution_to_be <great_expectations.dataset.base.DataSet.expect_column_frequency_distribution_to_be>`
+
 
 Distributional functions
 --------------------------------------------------------------------------------
+
 * :func:`expect_column_numerical_distribution_to_be <great_expectations.dataset.base.DataSet.expect_column_numerical_distribution_to_be>`
 * :func:`expect_column_frequency_distribution_to_be <great_expectations.dataset.base.DataSet.expect_column_frequency_distribution_to_be>`
 * :func:`expect_column_kl_divergence_to_be <great_expectations.dataset.base.DataSet.expect_column_kl_divergence_to_be>`
 
-*Distributional function helpers*
+
+Distributional function helpers
+--------------------------------------------------------------------------------
+
+* :func:`categorical_partition_data <great_expectations.dataset.util.categorical_partition_data>`
+* :func:`kde_smooth_data <great_expectations.dataset.util.kde_smooth_data>`
+* :func:`partition_data <great_expectations.dataset.util.partition_data>`
+* :func:`is_valid_partition_object <great_expectations.dataset.util.is_valid_partition_object>`
