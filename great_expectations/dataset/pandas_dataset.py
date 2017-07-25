@@ -207,7 +207,8 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
     @MetaPandasDataSet.column_map_expectation
     def expect_column_values_to_be_unique(self, series):
-        return series.map(lambda x: x in set(series))
+        uniques = series.unique()
+        return series.map(lambda x: x in uniques)
 
     #@DataSet.old_column_expectation
     #def expect_column_values_to_be_unique(self, column, mostly=None, suppress_exceptions=False):
@@ -245,15 +246,16 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
     @MetaPandasDataSet.column_map_expectation
     def expect_column_values_to_not_be_null(self, series):
-        def is_not_null(val):
-            #!!! This depends on the definition of null. Should we include np.nan in the definition of null?
-            #TODO Should this functionality be included/excluded from expect_column_values_to_be_of_type?
-            if val == None:
-                return True
-            else:
-                return False
+        return series.notnull()
+        # def is_not_null(val):
+        #     #!!! This depends on the definition of null. Should we include np.nan in the definition of null?
+        #     #TODO Should this functionality be included/excluded from expect_column_values_to_be_of_type?
+        #     if val == None:
+        #         return True
+        #     else:
+        #         return False
 
-        return series.map(is_not_null)
+        # return series.map(is_not_null)
 
     #@DataSet.old_column_expectation
     #def expect_column_values_to_not_be_null(self, column, mostly=None, suppress_exceptions=False):
@@ -280,15 +282,16 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
     @MetaPandasDataSet.column_map_expectation
     def expect_column_values_to_be_null(self, series):
+        return series.isnull()
         #!!! This depends on the definition of null.
         #TODO Include/exclude this functionality from the of_type expectations
-        def is_null(val):
-            if val == None:
-                return True
-            else:
-                return False
+        # def is_null(val):
+        #     if val == None:
+        #         return True
+        #     else:
+        #         return False
 
-        return series.map(is_null)
+        # return series.map(is_null)
 
     #@DataSet.old_column_expectation
     #def expect_column_values_to_be_null(self, column, mostly=None, suppress_exceptions=False):
@@ -442,13 +445,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
     @MetaPandasDataSet.column_map_expectation
     def expect_column_values_to_be_in_set(self, series, value_set=None):
-        def in_set(val):
-            if val in value_set:
-                return True
-            else:
-                return False
-
-        return series.map(in_set)
+        return series.map(lambda x: x in value_set)
 
 
     #@DataSet.old_column_expectation
@@ -494,13 +491,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
     @MetaPandasDataSet.column_map_expectation
     def expect_column_values_to_not_be_in_set(self, series, value_set=None):
-        def not_in_set(val):
-            if val in value_set:
-                return False
-            else:
-                return True
-        
-        return series.map(not_in_set)
+        return series.map(lambda x: x not in value_set)
 
     #@DataSet.old_column_expectation
     #def expect_column_values_to_not_be_in_set(self, column, values_set, mostly=None, suppress_exceptions=False):
@@ -601,57 +592,60 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
         return series.map(length_is_between)
 
+    @MetaPandasDataSet.column_map_expectation
+    def expect_column_value_lengths_to_equal(self, series, value):
+        return series.map(lambda x : len(x) == value)
 
-    @DataSet.old_column_expectation
-    def expect_column_value_lengths_to_be_between(self, column, min_value, max_value, mostly=None, suppress_exceptions=False):
+    # @DataSet.old_column_expectation
+    # def expect_column_value_lengths_to_be_between(self, column, min_value, max_value, mostly=None, suppress_exceptions=False):
 
-        not_null = self[column].notnull()
-        not_null_values = self[column][not_null]
+    #     not_null = self[column].notnull()
+    #     not_null_values = self[column][not_null]
 
-        def length_is_between(val):
+    #     def length_is_between(val):
 
-            if min_value != None and max_value != None:
-                try:
-                    return len(val) >= min_value and len(val) <= max_value
-                except:
-                    return False
+    #         if min_value != None and max_value != None:
+    #             try:
+    #                 return len(val) >= min_value and len(val) <= max_value
+    #             except:
+    #                 return False
 
-            elif min_value == None and max_value != None:
-                return len(val) <= max_value
+    #         elif min_value == None and max_value != None:
+    #             return len(val) <= max_value
 
-            elif min_value != None and max_value == None:
-                return len(val) >= min_value
+    #         elif min_value != None and max_value == None:
+    #             return len(val) >= min_value
 
-            else:
-                raise ValueError("Undefined interval: min_value and max_value are both None")
+    #         else:
+    #             raise ValueError("Undefined interval: min_value and max_value are both None")
 
-        outcome = not_null_values.map(length_is_between)
+    #     outcome = not_null_values.map(length_is_between)
 
-        if suppress_exceptions:
-            exceptions = None
-        else:
-            exceptions = list(not_null_values[~outcome])
+    #     if suppress_exceptions:
+    #         exceptions = None
+    #     else:
+    #         exceptions = list(not_null_values[~outcome])
 
-        if mostly:
-            # prevent divide by zero error
-            if len(not_null_values) == 0:
-                return {
-                    'success' : True,
-                    'exception_list' : exceptions
-                }
+    #     if mostly:
+    #         # prevent divide by zero error
+    #         if len(not_null_values) == 0:
+    #             return {
+    #                 'success' : True,
+    #                 'exception_list' : exceptions
+    #             }
 
-            percent_true = float(sum(outcome))/len(outcome)
+    #         percent_true = float(sum(outcome))/len(outcome)
 
-            return {
-                'success' : (percent_true >= mostly),
-                'exception_list' : exceptions
-            }
+    #         return {
+    #             'success' : (percent_true >= mostly),
+    #             'exception_list' : exceptions
+    #         }
 
-        else:
-            return {
-                'success' : outcome.all(),
-                'exception_list' : exceptions
-            }
+    #     else:
+    #         return {
+    #             'success' : outcome.all(),
+    #             'exception_list' : exceptions
+    #         }
 
     @MetaPandasDataSet.column_map_expectation
     def expect_column_values_to_match_regex(self, series, regex):
@@ -700,45 +694,50 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
     #         }
 
 
-    @DataSet.old_column_expectation
-    def expect_column_values_to_not_match_regex(self, column, regex, mostly=None, suppress_exceptions=False):
 
-        not_null = self[column].notnull()
-        not_null_values = self[not_null][column]
+    @MetaPandasDataSet.column_map_expectation
+    def expect_column_values_to_not_match_regex(self, column, regex):
+        return series.map(lambda x: re.findall(regex, str(x)) == [])
 
-        if len(not_null_values) == 0:
-            # print 'Warning: All values are null'
-            return {
-                'success':True,
-                'exception_list':[]
-            }
+    # @DataSet.old_column_expectation
+    # def expect_column_values_to_not_match_regex(self, column, regex, mostly=None, suppress_exceptions=False):
 
-        matches = not_null_values.map(lambda x: re.findall(regex, str(x)) != [])
-        does_not_match = not_null_values.map(lambda x: re.findall(regex, str(x)) == [])
+    #     not_null = self[column].notnull()
+    #     not_null_values = self[not_null][column]
 
-        if suppress_exceptions:
-            exceptions = None
-        else:
-            exceptions = list(not_null_values[matches==True])
+    #     if len(not_null_values) == 0:
+    #         # print 'Warning: All values are null'
+    #         return {
+    #             'success':True,
+    #             'exception_list':[]
+    #         }
 
-        if mostly:
-            #Prevent division-by-zero errors
-            if len(not_null_values) == 0:
-                return {
-                    'success':True,
-                    'exception_list':exceptions
-                }
+    #     matches = not_null_values.map(lambda x: re.findall(regex, str(x)) != [])
+    #     does_not_match = not_null_values.map(lambda x: re.findall(regex, str(x)) == [])
 
-            percent_matching = float(does_not_match.sum())/len(not_null_values)
-            return {
-                'success':(percent_matching >= mostly),
-                'exception_list':exceptions
-            }
-        else:
-            return {
-                'success':does_not_match.all(),
-                'exception_list':exceptions
-            }
+    #     if suppress_exceptions:
+    #         exceptions = None
+    #     else:
+    #         exceptions = list(not_null_values[matches==True])
+
+    #     if mostly:
+    #         #Prevent division-by-zero errors
+    #         if len(not_null_values) == 0:
+    #             return {
+    #                 'success':True,
+    #                 'exception_list':exceptions
+    #             }
+
+    #         percent_matching = float(does_not_match.sum())/len(not_null_values)
+    #         return {
+    #             'success':(percent_matching >= mostly),
+    #             'exception_list':exceptions
+    #         }
+    #     else:
+    #         return {
+    #             'success':does_not_match.all(),
+    #             'exception_list':exceptions
+    #         }
 
 
     @DataSet.old_column_expectation

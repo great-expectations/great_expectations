@@ -309,11 +309,16 @@ class DataSet(object):
         expectation_config_str = json.dumps(self.get_expectations_config(), indent=2)
         open(filepath, 'w').write(expectation_config_str)
 
-    def validate(self):
+    def validate(self, catch_exceptions=True, output_format=None, include_config=None):
         results = []
         for expectation in self.get_expectations_config()['expectations']:
             expectation_method = getattr(self, expectation['expectation_type'])
-            result = expectation_method(**expectation['kwargs'])
+            result = expectation_method(
+                catch_exceptions=catch_exceptions,
+                output_format=output_format,
+                include_config=include_config,
+                **expectation['kwargs'],
+            )
 
             results.append(
                 dict(expectation.items() + result.items())
