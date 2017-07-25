@@ -317,7 +317,7 @@ class DataSet(object):
                 catch_exceptions=catch_exceptions,
                 output_format=output_format,
                 include_config=include_config,
-                **expectation['kwargs'],
+                **expectation['kwargs']
             )
 
             results.append(
