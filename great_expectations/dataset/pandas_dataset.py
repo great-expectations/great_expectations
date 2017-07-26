@@ -208,7 +208,6 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
     @MetaPandasDataSet.column_map_expectation
     def expect_column_values_to_be_unique(self, series):
         dupes = set(series[series.duplicated()])
-        print dupes
         return series.map(lambda x: x not in dupes)
 
     #@DataSet.old_column_expectation
