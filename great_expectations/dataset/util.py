@@ -19,7 +19,7 @@ def ensure_json_serializable(test_dict):
     # TODO: ensure in-place iteration like this is okay
     for key in test_dict:
         ## TODO: Brittle if non python3 (unicode, long type?)
-        if isinstance(test_dict[key], (list, tuple, str, unicode, int, float, bool)):
+        if isinstance(test_dict[key], (list, tuple, str, int, float, bool)):
             # No problem to encode json
             continue
 

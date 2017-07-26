@@ -10,7 +10,7 @@
 # from nose.tools import *
 import unittest
 import great_expectations as ge
-reload(ge)
+#reload(ge)
 # from great_expectations.dataset import PandasDataSet
 PandasDataSet = ge.dataset.PandasDataSet
 
@@ -262,7 +262,7 @@ class TestExpectationDecorators(unittest.TestCase):
 
         self.assertEqual(
             set(result_obj.keys()),
-            set(comparison_obj.keys()+['exception_traceback']),
+            set(list(comparison_obj.keys())+['exception_traceback']),
         )
 
         for k,v in comparison_obj.items():
@@ -297,3 +297,5 @@ class TestExpectationDecorators(unittest.TestCase):
         # with self.assertRaises(ZeroDivisionError):
         #     df.expectation_that_crashes_on_sixes("all_even", catch_exceptions=False)
 
+if __name__ == "__main__":
+    unittest.main()

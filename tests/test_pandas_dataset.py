@@ -611,8 +611,9 @@ class TestPandasDataset(unittest.TestCase):
             'z' : [1, 2, 3, 4, 5, None, None, None, None, None],
         })
 
-        T = json.load(file("./tests/test_sets/expect_column_values_to_be_between_test_set_ADJ.json"))
-        # print json.dumps(T, indent=2)
+        with open("./tests/test_sets/expect_column_values_to_be_between_test_set_ADJ.json") as f:
+            T = json.load(f)
+            # print json.dumps(T, indent=2)
 
         for t in T:
             out = D.expect_column_values_to_be_between(**t['in'])#, **t['kwargs'])

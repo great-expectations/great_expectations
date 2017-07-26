@@ -489,9 +489,24 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
     @MetaPandasDataSet.column_map_expectation
     def expect_column_values_to_be_between(self, series, min_value=None, max_value=None):
-        return series.map(
-            lambda x: ((min_value <= x) | (min_value == None)) and ((x <= max_value) | (max_value ==None))
-        )
+
+        if min_value != None and max_value != None:
+            return series.map(
+                lambda x: (min_value <= x) and (x <= max_value)
+            )
+
+        elif min_value == None and max_value != None:
+            return series.map(
+                lambda x: (x <= max_value)
+            )
+
+        elif min_value != None and max_value == None:
+            return series.map(
+                lambda x: (min_value <= x)
+            )
+
+        else:
+            raise ValueError("min_value and max_value cannot both be None")
 
     # @DataSet.old_column_expectation
     # def expect_column_values_to_be_between(self, column, min_value, max_value, mostly=None, suppress_exceptions=False):
@@ -895,10 +910,20 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
     def expect_column_unique_value_count_to_be_between(self, series, min_value=None, max_value=None, output_format=None):
         unique_value_count = series.value_counts().shape[0]
 
-        return (
-            ((min_value <= unique_value_count) | (min_value == None)) and
-            ((unique_value_count <= max_value) | (max_value ==None))
-        ), unique_value_count
+        if min_value != None and max_value != None:
+            return (
+                (min_value <= unique_value_count) and
+                (unique_value_count <= max_value)
+            ), unique_value_count
+            
+        elif min_value == None and max_value != None:
+            return (x <= max_value), unique_value_count
+
+        elif min_value != None and max_value == None:
+            return (min_value <= x), unique_value_count
+
+        else:
+            raise ValueError("min_value and max_value cannot both be None")
 
     @MetaPandasDataSet.column_aggregate_expectation
     def expect_column_proportion_of_unique_values_to_be_between(self, series, min_value=None, max_value=None, output_format=None):
