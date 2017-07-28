@@ -882,19 +882,19 @@ class TestPandasDataset(unittest.TestCase):
                 {
                     'in':['c1'],
                     'kwargs':{},
-                    'out':{'success':True, 'exception_list':[]}},
+                    'out':{'success':True, 'exception_list':[], 'exception_index_list': []}},
                 {
                     'in':['c2'],
                     'kwargs':{},
-                    'out':{'success':False, 'exception_list':['covfefe', 25]}},
+                    'out':{'success':False, 'exception_list':['covfefe', 25], 'exception_index_list': [1, 2]}},
                 {
                     'in':['c3'],
                     'kwargs':{},
-                    'out':{'success':False, 'exception_list':['Jared']}},
+                    'out':{'success':False, 'exception_list':['Jared'], 'exception_index_list': [0]}},
                 {
                     'in':['c3'],
                     'kwargs':{'mostly':.5},
-                    'out':{'success':True, 'exception_list':['Jared']}}
+                    'out':{'success':True, 'exception_list':['Jared'], 'exception_index_list': [0]}}
         ]
 
         for t in T:
