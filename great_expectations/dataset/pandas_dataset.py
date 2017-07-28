@@ -901,12 +901,12 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         ), unique_value_count
 
     @MetaPandasDataSet.column_aggregate_expectation
-    def expect_column_proportion_of_unique_values_to_be_between(self, series, min_value=None, max_value=None, output_format=None):
+    def expect_column_proportion_of_unique_values_to_be_between(self, series, min_value=0, max_value=1, output_format=None):
         unique_value_count = series.value_counts().shape[0]
-        denominator = series.notnull().sum()
+        total_value_count = series.notnull().sum()
 
         if denominator > 0:
-            proportion_unique = unique_value_count/denominator
+            proportion_unique = (1. * unique_value_count) / total_value_count
         else:
             proportion_unique = None
 
