@@ -1147,16 +1147,18 @@ class TestPandasDataset(unittest.TestCase):
                 "success" : False,
                 "exception_list" : [6.0,7.0,7.0],
                 "exception_index_list": [5,6,7],
-                "element_count" : 10,
-                "missing_count" : 2,
-                "missing_percent" : .2,
-                "exception_count" : 3,
-                "exception_counts": {
-                    6.0 : 1,
-                    7.0 : 2,
-                },
-                "exception_percent": 0.3,
-                "exception_percent_nonmissing": 0.375,
+                "summary_obj" : {
+                    "element_count" : 10,
+                    "missing_count" : 2,
+                    "missing_percent" : .2,
+                    "exception_count" : 3,
+                    "exception_counts": {
+                        6.0 : 1,
+                        7.0 : 2,
+                    },
+                    "exception_percent": 0.3,
+                    "exception_percent_nonmissing": 0.375,                
+                }
             }
         )
 

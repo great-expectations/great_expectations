@@ -92,13 +92,15 @@ class MetaPandasDataSet(DataSet):
                     "success" : success,
                     "exception_list" : exception_list,
                     "exception_index_list": exception_index_list,
-                    "element_count" : element_count,
-                    "missing_count" : missing_count,
-                    "missing_percent" : missing_percent,
-                    "exception_count" : exception_count,
-                    "exception_percent": exception_percent,
-                    "exception_percent_nonmissing": exception_percent_nonmissing,
-                    "exception_counts": exception_counts,
+                    "summary_obj" : {
+                        "element_count" : element_count,
+                        "missing_count" : missing_count,
+                        "missing_percent" : missing_percent,
+                        "exception_count" : exception_count,
+                        "exception_percent": exception_percent,
+                        "exception_percent_nonmissing": exception_percent_nonmissing,
+                        "exception_counts": exception_counts,                    
+                    }
                 }
 
             else:
@@ -128,13 +130,25 @@ class MetaPandasDataSet(DataSet):
             nonnull_values = series[null_indexes==False]
             nonnull_count = (null_indexes==False).sum()
 
-            success, true_value = func(self, nonnull_values, *args, **kwargs)
-            success = bool(success)
+            result_obj = func(self, nonnull_values, *args, **kwargs)
+            
+            #!!! This would be the right place to validate result_obj
+            #!!! It should contain:
+            #!!!    success: bool
+            #!!!    true_value: int or float
+            #!!!    summary_obj: json-serializable dict
 
-            if output_format in ["BASIC", "SUMMARY"]:
+            if output_format == "BASIC":
                 return_obj = {
-                    "success" : success,
+                    "success" : bool(result_obj["success"]),
                     "true_value" : true_value,
+                }
+
+            elif output_format == "SUMMARY":
+                return_obj = {
+                    "success" : bool(result_obj["success"]),
+                    "true_value" : true_value,
+                    "summary_obj" : result_obj["summary_obj"]
                 }
 
             elif output_format=="BOOLEAN_ONLY":
@@ -976,10 +990,14 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
     def expect_column_unique_value_count_to_be_between(self, series, min_value=None, max_value=None, output_format=None):
         unique_value_count = series.value_counts().shape[0]
 
-        return (
-            ((min_value <= unique_value_count) | (min_value == None)) and
-            ((unique_value_count <= max_value) | (max_value ==None))
-        ), unique_value_count
+        return {
+            "result" : (
+                ((min_value <= unique_value_count) | (min_value == None)) and
+                ((unique_value_count <= max_value) | (max_value ==None))
+            ),
+            "true_value" : unique_value_count,
+            "summary_obj" : {}
+        }
 
     @MetaPandasDataSet.column_aggregate_expectation
     def expect_column_proportion_of_unique_values_to_be_between(self, series, min_value=None, max_value=None, output_format=None):
@@ -991,8 +1009,15 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         else:
             proportion_unique = None
 
-        return (min_value <= proportion_unique <= max_value), proportion_unique
-
+        return {
+            "result" : (
+                ((min_value <= proportion_unique) | (min_value == None)) and
+                ((proportion_unique <= max_value) | (max_value ==None))
+            ),
+            "true_value" : proportion_unique,
+            "summary_obj" : {}
+        }
+        
     @DataSet.old_column_expectation
     def expect_column_frequency_distribution_to_be(self, column, partition_object, p=0.05, suppress_exceptions=False):
         if not is_valid_partition_object(partition_object):
