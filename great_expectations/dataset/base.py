@@ -91,13 +91,13 @@ class DataSet(object):
 
                 else:
                     raise(err)
-            
+
             if output_format != 'BOOLEAN_ONLY':
                 if include_config:
                     #!!! Not sure the deepcopy is strictly necessary.
                     #!!! This issue applies to our DocDict: https://github.com/aparo/pyes/issues/114
                     # return_obj["expectation_type"] = copy.deepcopy(dict(expectation_config))
-                    
+
                     return_obj["expectation_type"] = expectation_config["expectation_type"]
                     return_obj["expectation_kwargs"] = copy.deepcopy(dict(expectation_config["kwargs"]))
 
@@ -127,7 +127,7 @@ class DataSet(object):
     #     @expectation
     #     def inner_wrapper(self, column, mostly=None, suppress_expectations=False):
     #         notnull = self[column].notnull()
-            
+
     #         success = self[column][notnull].map(lambda x: func(self,x))
     #         exceptions = list(self[column][notnull][success==False])
 

@@ -384,29 +384,23 @@ class TestPandasDataset(unittest.TestCase):
 
         T = [
                 {
-                    'in':['x','int','python'],
-                    'kwargs':{},
-                    'out':{'success':True, 'exception_list':[]}},
+                    'in':{"column":"x","type_":"int","target_datasource":"python"},
+                    'out':{'success':True, 'exception_list':[], 'exception_index_list':[]}},
                 {
-                    'in':['x','string','numpy'],
-                    'kwargs':{},
-                    'out':{'success':False, 'exception_list':[1,2,4]}},
+                    'in':{"column":"x","type_":"string","target_datasource":"numpy"},
+                    'out':{'success':False, 'exception_list':[1,2,4], 'exception_index_list':[0,1,2]}},
                 {
-                    'in':['y','float','python'],
-                    'kwargs':{},
-                    'out':{'success':True, 'exception_list':[]}},
+                    'in':{"column":"y","type_":"float","target_datasource":"python"},
+                    'out':{'success':True, 'exception_list':[], 'exception_index_list':[]}},
                 {
-                    'in':['y','float','numpy'],
-                    'kwargs':{},
-                    'out':{'success':False, 'exception_list':[1.0,2.2,5.3]}},
+                    'in':{"column":"y","type_":"float","target_datasource":"numpy"},
+                    'out':{'success':False, 'exception_list':[1.0,2.2,5.3], 'exception_index_list':[0,1,2]}},
                 {
-                    'in':['z','string','python'],
-                    'kwargs':{},
-                    'out':{'success':True, 'exception_list':[]}},
+                    'in':{"column":"z","type_":"string","target_datasource":"python"},
+                    'out':{'success':True, 'exception_list':[], 'exception_index_list':[]}},
                 {
-                    'in':['b','boolean','python'],
-                    'kwargs':{},
-                    'out':{'success':True, 'exception_list':[]}}
+                    'in':{"column":"b","type_":"boolean","target_datasource":"python"},
+                    'out':{'success':True, 'exception_list':[], 'exception_index_list':[]}}
                 #{
                 #    'in':['n','null','python'],
                 #    'kwargs':{},
@@ -418,7 +412,7 @@ class TestPandasDataset(unittest.TestCase):
         ]
 
         for t in T:
-            out = D.expect_column_values_to_be_of_type(*t['in'], **t['kwargs'])
+            out = D.expect_column_values_to_be_of_type(**t['in'])
             self.assertEqual(out, t['out'])
 
 
@@ -673,96 +667,117 @@ class TestPandasDataset(unittest.TestCase):
         })
         T = [
                 {
-                    'in':['x', '^a'],
-                    'kwargs':{},
-                    'out':{'success':True, 'exception_list':[]}},
+                    'in':{'column':'x', 'regex':'^a'},
+                    # 'in':['x', '^a'],
+                    # 'kwargs':{},
+                    'out':{'success':True, 'exception_list':[], 'exception_index_list':[]}},
                 {
-                    'in':['x', 'aa'],
-                    'kwargs':{},
-                    'out':{'success':False, 'exception_list':['ab', 'ac', 'a1']}},
+                    'in':{'column':'x', 'regex':'aa'},
+                    # 'in':['x', 'aa'],
+                    # 'kwargs':{},
+                    'out':{'success':False, 'exception_list':['ab', 'ac', 'a1'], 'exception_index_list':[1,2,3]}},
                 {
-                    'in':['x', 'a[a-z]'],
-                    'kwargs':{},
-                    'out':{'success':False, 'exception_list':['a1']}},
+                    'in':{'column':'x', 'regex':'a[a-z]'},
+                    # 'in':['x', 'a[a-z]'],
+                    # 'kwargs':{},
+                    'out':{'success':False, 'exception_list':['a1'], 'exception_index_list':[3]}},
                 {
-                    'in':['y', '[abc]{2}'],
-                    'kwargs':{},
-                    'out':{'success':True, 'exception_list':[]}},
+                    'in':{'column':'y', 'regex':'[abc]{2}'},
+                    # 'in':['y', '[abc]{2}'],
+                    # 'kwargs':{},
+                    'out':{'success':True, 'exception_list':[], 'exception_index_list':[]}},
                 {
-                    'in':['y', '[z]'],
-                    'kwargs':{},
-                    'out':{'success':False, 'exception_list':['aa', 'ab', 'ac', 'ba', 'ca']}},
-                {
-                    'in':['y', '[abc]{2}'],
-                    'kwargs':{'suppress_exceptions':True},
-                    'out':{'success':True, 'exception_list':None}},
-                {
-                    'in':['y', '[z]'],
-                    'kwargs':{'suppress_exceptions':True},
-                    'out':{'success':False, 'exception_list':None}}
+                    'in':{'column':'y', 'regex':'[z]'},
+                    # 'in':['y', '[z]'],
+                    # 'kwargs':{},
+                    'out':{'success':False, 'exception_list':['aa', 'ab', 'ac', 'ba', 'ca'], 'exception_index_list':[0,1,2,3,4]}},
+                # {
+                #     'in':{'column':'y', 'regex':'[abc]{2}'},
+                #     'in':['y', '[abc]{2}'],
+                #     'kwargs':{'suppress_exceptions':True},
+                #     'out':{'success':True, 'exception_list':None}},
+                # {
+                #     'in':{'column':'y', 'regex':'[z]'},
+                #     'in':['y', '[z]'],
+                #     'kwargs':{'suppress_exceptions':True},
+                #     'out':{'success':False, 'exception_list':None}}
         ]
 
         for t in T:
-            out = D.expect_column_values_to_match_regex(*t['in'], **t['kwargs'])
+            out = D.expect_column_values_to_match_regex(**t['in'])#, **t['kwargs'])
             self.assertEqual(out, t['out'])
 
             T = [
                     {
-                        'in':['a', '^a'],
-                        'kwargs':{'mostly':.9},
-                        'out':{'success':False, 'exception_list':['bee']}},
+                        'in':{'column':'a', 'regex':'^a', 'mostly':.9},
+                        # 'in':['a', '^a'],
+                        # 'kwargs':{'mostly':.9},
+                        'out':{'success':False, 'exception_list':['bee'], 'exception_index_list':[4]}},
                     {
-                        'in':['a', '^a'],
-                        'kwargs':{'mostly':.8},
-                        'out':{'success':True, 'exception_list':['bee']}},
+                        'in':{'column':'a', 'regex':'^a', 'mostly':.8},
+                        # 'in':['a', '^a'],
+                        # 'kwargs':{'mostly':.8},
+                        'out':{'success':True, 'exception_list':['bee'], 'exception_index_list':[4]}},
                     {
-                        'in':['a', '^a'],
-                        'kwargs':{'mostly':.7},
-                        'out':{'success':True, 'exception_list':['bee']}},
+                        'in':{'column':'a', 'regex':'^a', 'mostly':.7},
+                        # 'in':['a', '^a'],
+                        # 'kwargs':{'mostly':.7},
+                        'out':{'success':True, 'exception_list':['bee'], 'exception_index_list':[4]}},
                     {
-                        'in':['b', '^a'],
-                        'kwargs':{'mostly':.9},
-                        'out':{'success':False, 'exception_list':['bdd']}},
+                        'in':{'column':'b', 'regex':'^a', 'mostly':.9},
+                        # 'in':['b', '^a'],
+                        # 'kwargs':{'mostly':.9},
+                        'out':{'success':False, 'exception_list':['bdd'], 'exception_index_list':[3]}},
                     {
-                        'in':['b', '^a'],
-                        'kwargs':{'mostly':.75},
-                        'out':{'success':True, 'exception_list':['bdd']}},
+                        'in':{'column':'b', 'regex':'^a', 'mostly':.75},
+                        # 'in':['b', '^a'],
+                        # 'kwargs':{'mostly':.75},
+                        'out':{'success':True, 'exception_list':['bdd'], 'exception_index_list':[3]}},
                     {
-                        'in':['b', '^a'],
-                        'kwargs':{'mostly':.5},
-                        'out':{'success':True, 'exception_list':['bdd']}},
+                        'in':{'column':'b', 'regex':'^a', 'mostly':.5},
+                        # 'in':['b', '^a'],
+                        # 'kwargs':{'mostly':.5},
+                        'out':{'success':True, 'exception_list':['bdd'], 'exception_index_list':[3]}},
+                    # {
+                    #     'in':{'column':'b', 'regex':'^a', 'mostly':.9},
+                    #     # 'in':['b', '^a'],
+                    #     # 'kwargs':{'mostly':.9, 'suppress_exceptions':True},
+                    #     'out':{'success':False, 'exception_list':None}},
+                    # {
+                    #     'in':{'column':'b', 'regex':'^a', 'mostly':.75},
+                    #     'in':['b', '^a'],
+                    #     'kwargs':{'mostly':.75, 'suppress_exceptions':True},
+                    #     'out':{'success':True, 'exception_list':None}},
+                    # {
+                    #     'in':{'column':'y', 'regex':'[z]', 'mostly':.9},
+                    #     'in':['b', '^a'],
+                    #     'kwargs':{'mostly':.5, 'suppress_exceptions':True},
+                    #     'out':{'success':True, 'exception_list':None}},
                     {
-                        'in':['b', '^a'],
-                        'kwargs':{'mostly':.9, 'suppress_exceptions':True},
-                        'out':{'success':False, 'exception_list':None}},
+                        'in':{'column':'c', 'regex':'^a'},
+                        # 'in':['c', '^a'],
+                        # 'kwargs':{},
+                        'out':{'success':True, 'exception_list':[], 'exception_index_list':[]}},
                     {
-                        'in':['b', '^a'],
-                        'kwargs':{'mostly':.75, 'suppress_exceptions':True},
-                        'out':{'success':True, 'exception_list':None}},
-                    {
-                        'in':['b', '^a'],
-                        'kwargs':{'mostly':.5, 'suppress_exceptions':True},
-                        'out':{'success':True, 'exception_list':None}},
-                    {
-                        'in':['c', '^a'],
-                        'kwargs':{},
-                        'out':{'success':True, 'exception_list':[]}},
-                    {
-                        'in':['c', '^a'],
-                        'kwargs':{'mostly':.5},
-                        'out':{'success':True, 'exception_list':[]}},
-                    {
-                        'in':['c', '^a'],
-                        'kwargs':{'suppress_exceptions':True},
-                        'out':{'success':True, 'exception_list':[]}},
-                    {
-                        'in':['c', '^a'],
-                        'kwargs':{'mostly':.5, 'suppress_exceptions':True},
-                        'out':{'success':True, 'exception_list':[]}}
+                        'in':{'column':'c', 'regex':'^a', 'mostly':.5},
+                        # 'in':['c', '^a'],
+                        # 'kwargs':{'mostly':.5},
+                        'out':{'success':True, 'exception_list':[], 'exception_index_list':[]}},
+                    # {
+                    #     'in':{'column':'c', 'regex':'^a', 'mostly':.9},
+                    #     'in':['c', '^a'],
+                    #     'kwargs':{'suppress_exceptions':True},
+                    #     'out':{'success':True, 'exception_list':[]}},
+                    # {
+                    #     'in':{'column':'y', 'regex':'[z]', 'mostly':.9},
+                    #     'in':['c', '^a'],
+                    #     'kwargs':{'mostly':.5, 'suppress_exceptions':True},
+                    #     'out':{'success':True, 'exception_list':[]}}
         ]
 
         for t in T:
-            out = D2.expect_column_values_to_match_regex(*t['in'], **t['kwargs'])
+            print t
+            out = D2.expect_column_values_to_match_regex(**t['in'])#, **t['kwargs'])
             self.assertEqual(out, t['out'])
 
 
@@ -883,19 +898,19 @@ class TestPandasDataset(unittest.TestCase):
                 {
                     'in':['c1'],
                     'kwargs':{},
-                    'out':{'success':True, 'exception_list':[]}},
+                    'out':{'success':True, 'exception_list':[], 'exception_index_list': []}},
                 {
                     'in':['c2'],
                     'kwargs':{},
-                    'out':{'success':False, 'exception_list':['covfefe', 25]}},
+                    'out':{'success':False, 'exception_list':['covfefe', 25], 'exception_index_list': [1, 2]}},
                 {
                     'in':['c3'],
                     'kwargs':{},
-                    'out':{'success':False, 'exception_list':['Jared']}},
+                    'out':{'success':False, 'exception_list':['Jared'], 'exception_index_list': [0]}},
                 {
                     'in':['c3'],
                     'kwargs':{'mostly':.5},
-                    'out':{'success':True, 'exception_list':['Jared']}}
+                    'out':{'success':True, 'exception_list':['Jared'], 'exception_index_list': [0]}}
         ]
 
         for t in T:
