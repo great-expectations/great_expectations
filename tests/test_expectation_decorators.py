@@ -275,7 +275,7 @@ class TestExpectationDecorators(unittest.TestCase):
 
         self.assertEqual(
             result_obj["exception_traceback"].split('\n')[-2],
-            "ZeroDivisionError: integer division or modulo by zero",
+            "ZeroDivisionError: division by zero",
         )
 
         self.assertEqual(

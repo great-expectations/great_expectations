@@ -34,7 +34,14 @@ def ensure_json_serializable(test_dict):
             test_dict[key] = ensure_json_serializable(test_dict[key])
 
         else:
-            raise TypeError(key + ' is type ' + type(test_dict[key]).__name__ + ' which cannot be serialized.')
+            try:
+                # In Python 2, unicode and long should still be valid.
+                # This will break in Python 3 and throw the exception instead.
+                if isinstance(test_dict[key], (long, unicode)):
+                    # No problem to encode json
+                    continue
+            except:
+                raise TypeError(key + ' is type ' + type(test_dict[key]).__name__ + ' which cannot be serialized.')
 
     return test_dict
 

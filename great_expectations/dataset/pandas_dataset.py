@@ -490,23 +490,24 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
     @MetaPandasDataSet.column_map_expectation
     def expect_column_values_to_be_between(self, series, min_value=None, max_value=None):
 
-        if min_value != None and max_value != None:
-            return series.map(
-                lambda x: (min_value <= x) and (x <= max_value)
-            )
+        def is_between(val):
+            # TODO Might be worth explicitly defining comparisons between types (for example, between strings and ints).
+            if type(val) == str:
+                raise TypeError("cannot compare type 'str'")
 
-        elif min_value == None and max_value != None:
-            return series.map(
-                lambda x: (x <= max_value)
-            )
+            if min_value != None and max_value != None:
+                return (min_value <= val) and (val <= max_value)
 
-        elif min_value != None and max_value == None:
-            return series.map(
-                lambda x: (min_value <= x)
-            )
+            elif min_value == None and max_value != None:
+                return (val <= max_value)
 
-        else:
-            raise ValueError("min_value and max_value cannot both be None")
+            elif min_value != None and max_value == None:
+                return (min_value <= val)
+
+            else:
+                raise ValueError("min_value and max_value cannot both be None")
+
+        return series.map(is_between)
 
     # @DataSet.old_column_expectation
     # def expect_column_values_to_be_between(self, column, min_value, max_value, mostly=None, suppress_exceptions=False):
@@ -917,10 +918,10 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
             ), unique_value_count
             
         elif min_value == None and max_value != None:
-            return (x <= max_value), unique_value_count
+            return (unique_value_count <= max_value), unique_value_count
 
         elif min_value != None and max_value == None:
-            return (min_value <= x), unique_value_count
+            return (min_value <= unique_value_count), unique_value_count
 
         else:
             raise ValueError("min_value and max_value cannot both be None")

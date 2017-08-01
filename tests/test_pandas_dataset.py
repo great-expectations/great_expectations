@@ -776,7 +776,7 @@ class TestPandasDataset(unittest.TestCase):
         ]
 
         for t in T:
-            print t
+            print(t)
             out = D2.expect_column_values_to_match_regex(**t['in'])#, **t['kwargs'])
             self.assertEqual(out, t['out'])
 
@@ -1117,8 +1117,14 @@ class TestPandasDataset(unittest.TestCase):
 
         for t in T:
             # print t['in'], t['out']
-            out = D.expect_column_unique_value_count_to_be_between(**t['in'])
-            self.assertEqual(out, t['out'])
+            if t['in']['min_value'] == None and t['in']['max_value'] == None:
+                with self.assertRaises(Exception) as e:
+                    D.expect_column_unique_value_count_to_be_between(**t['in'])
+                self.assertTrue('min_value and max_value cannot both be None', str(e.exception))
+
+            else:
+                out = D.expect_column_unique_value_count_to_be_between(**t['in'])
+                self.assertEqual(out, t['out'])
 
     def test_expect_column_unique_proportion_to_be_between(self):
 
