@@ -4,10 +4,10 @@
 # import numpy as np
 # import random
 # import os
-# import sys
 # import inspect
 
 # from nose.tools import *
+import sys
 import unittest
 import great_expectations as ge
 #reload(ge)
@@ -273,10 +273,17 @@ class TestExpectationDecorators(unittest.TestCase):
             "",
         )
 
-        self.assertEqual(
-            result_obj["exception_traceback"].split('\n')[-2],
-            "ZeroDivisionError: division by zero",
-        )
+        if sys.version_info[0] == 3:
+            self.assertEqual(
+                result_obj["exception_traceback"].split('\n')[-2],
+                "ZeroDivisionError: division by zero",
+            )
+
+        else:
+            self.assertEqual(
+                result_obj["exception_traceback"].split('\n')[-2],
+                "ZeroDivisionError: integer division or modulo by zero",
+            )
 
         self.assertEqual(
             result_obj["exception_traceback"].split('\n')[-3],
