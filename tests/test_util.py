@@ -63,7 +63,7 @@ class TestUtilMethods(unittest.TestCase):
 
     def test_partition_data_norm_0_1(self):
         test_partition = ge.dataset.util.partition_data(self.D.norm_0_1)
-        for key, val in self.auto_partition_norm_0_1.iteritems():
+        for key, val in self.auto_partition_norm_0_1.items():
             self.assertEqual(len(val), len(test_partition[key]))
             for k in range(len(val)):
                 # NOTE ARBITRARY "CLOSE PARAMETER"
@@ -71,7 +71,7 @@ class TestUtilMethods(unittest.TestCase):
 
     def test_partition_data_bimodal(self):
         test_partition = ge.dataset.util.partition_data(self.D.bimodal)
-        for key, val in self.auto_partition_bimodal.iteritems():
+        for key, val in self.auto_partition_bimodal.items():
             self.assertEqual(len(val), len(test_partition[key]))
             for k in range(len(val)):
                 # NOTE ARBITRARY "CLOSE PARAMETER"
@@ -79,7 +79,7 @@ class TestUtilMethods(unittest.TestCase):
 
     def test_kde_smooth_data_norm_0_1(self):
         test_partition = ge.dataset.util.kde_smooth_data(self.D.norm_0_1)
-        for key, val in self.kde_smooth_partition_norm_0_1.iteritems():
+        for key, val in self.kde_smooth_partition_norm_0_1.items():
             self.assertEqual(len(val), len(test_partition[key]))
             for k in range(len(val)):
                 # NOTE ARBITRARY "CLOSE PARAMETER"
@@ -87,7 +87,7 @@ class TestUtilMethods(unittest.TestCase):
 
     def test_kde_smooth_data_bimodal(self):
         test_partition = ge.dataset.util.kde_smooth_data(self.D.bimodal)
-        for key, val in self.kde_smooth_partition_bimodal.iteritems():
+        for key, val in self.kde_smooth_partition_bimodal.items():
             self.assertEqual(len(val), len(test_partition[key]))
             for k in range(len(val)):
                 # NOTE ARBITRARY "CLOSE PARAMETER"
@@ -120,3 +120,6 @@ class TestUtilMethods(unittest.TestCase):
     def test_ensure_json_serializable(self):
         # TODO: Make a meaningful test
         self.assertEqual(1,1)
+
+if __name__ == "__main__":
+    unittest.main()

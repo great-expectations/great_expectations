@@ -4,13 +4,13 @@
 # import numpy as np
 # import random
 # import os
-# import sys
 # import inspect
 
 # from nose.tools import *
+import sys
 import unittest
 import great_expectations as ge
-reload(ge)
+#reload(ge)
 # from great_expectations.dataset import PandasDataSet
 PandasDataSet = ge.dataset.PandasDataSet
 
@@ -262,7 +262,7 @@ class TestExpectationDecorators(unittest.TestCase):
 
         self.assertEqual(
             set(result_obj.keys()),
-            set(comparison_obj.keys()+['exception_traceback']),
+            set(list(comparison_obj.keys())+['exception_traceback']),
         )
 
         for k,v in comparison_obj.items():
@@ -273,10 +273,17 @@ class TestExpectationDecorators(unittest.TestCase):
             "",
         )
 
-        self.assertEqual(
-            result_obj["exception_traceback"].split('\n')[-2],
-            "ZeroDivisionError: integer division or modulo by zero",
-        )
+        if sys.version_info[0] == 3:
+            self.assertEqual(
+                result_obj["exception_traceback"].split('\n')[-2],
+                "ZeroDivisionError: division by zero",
+            )
+
+        else:
+            self.assertEqual(
+                result_obj["exception_traceback"].split('\n')[-2],
+                "ZeroDivisionError: integer division or modulo by zero",
+            )
 
         self.assertEqual(
             result_obj["exception_traceback"].split('\n')[-3],
@@ -297,3 +304,5 @@ class TestExpectationDecorators(unittest.TestCase):
         # with self.assertRaises(ZeroDivisionError):
         #     df.expectation_that_crashes_on_sixes("all_even", catch_exceptions=False)
 
+if __name__ == "__main__":
+    unittest.main()

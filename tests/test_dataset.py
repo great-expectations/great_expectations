@@ -84,3 +84,6 @@ class TestDataset(unittest.TestCase):
                 "output_format" : 'SUMMARY',
             }
         )
+
+if __name__ == "__main__":
+    unittest.main()
