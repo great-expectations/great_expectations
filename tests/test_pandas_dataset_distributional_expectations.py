@@ -72,8 +72,8 @@ class TestDistributionalExpectations(unittest.TestCase):
         ]
         for t in T:
             out = self.D.expect_column_frequency_distribution_to_be(*t['args'], **t['kwargs'])
-            self.assertEqual(out['success'],t['out']['success'])
-            self.assertEqual(out['true_value'], t['out']['true_value'])
+            self.assertTrue(np.allclose(out['success'], t['out']['success']))
+            self.assertTrue(np.allclose(out['true_value'], t['out']['true_value']))
 
     def test_expect_column_kl_divergence_to_be_discrete(self):
         T = [
@@ -90,8 +90,8 @@ class TestDistributionalExpectations(unittest.TestCase):
         ]
         for t in T:
             out = self.D.expect_column_kl_divergence_to_be(*t['args'], **t['kwargs'])
-            self.assertEqual(out['success'],t['out']['success'])
-            self.assertEqual(out['true_value'], t['out']['true_value'])
+            self.assertTrue(np.allclose(out['success'], t['out']['success']))
+            self.assertTrue(np.allclose(out['true_value'], t['out']['true_value']))
 
     def test_expect_column_numerical_distribution_to_be(self):
         T = [
@@ -163,7 +163,7 @@ class TestDistributionalExpectations(unittest.TestCase):
             # Assert that there are fewer incorrect results than twice p value
             #self.assertLess(results.count(not t['out']['success']) / trials, 2. * t['kwargs']['p'])
             out = self.D.expect_column_numerical_distribution_to_be(*t['args'], **t['kwargs'])
-            self.assertEqual(out['success'], t['out']['success'])
+            self.assertTrue(np.allclose(out['success'], t['out']['success']))
 
     def test_expect_column_kl_divergence_to_be_continuous(self):
         T = [
@@ -244,7 +244,7 @@ class TestDistributionalExpectations(unittest.TestCase):
         ]
         for t in T:
             out = self.D.expect_column_kl_divergence_to_be(*t['args'], **t['kwargs'])
-            self.assertEqual(out['success'],t['out']['success'])
+            self.assertTrue(np.allclose(out['success'],t['out']['success']))
 
 if __name__ == "__main__":
     unittest.main()

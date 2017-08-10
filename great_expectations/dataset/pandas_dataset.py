@@ -541,9 +541,31 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
     @MetaPandasDataSet.column_map_expectation
     def expect_column_values_to_be_between(self, series, min_value=None, max_value=None):
-        return series.map(
-            lambda x: ((min_value <= x) | (min_value == None)) and ((x <= max_value) | (max_value ==None))
-        )
+
+        def is_between(val):
+            # TODO Might be worth explicitly defining comparisons between types (for example, between strings and ints).
+            # Ensure types can be compared since some types in Python 3 cannot be logically compared.
+            if type(val) == None:
+                return False
+            else:
+                try:
+
+                    if min_value != None and max_value != None:
+                        return (min_value <= val) and (val <= max_value)
+
+                    elif min_value == None and max_value != None:
+                        return (val <= max_value)
+
+                    elif min_value != None and max_value == None:
+                        return (min_value <= val)
+
+                    else:
+                        raise ValueError("min_value and max_value cannot both be None")
+                except:
+                    return False
+
+        return series.map(is_between)
+
 
     # @DataSet.old_column_expectation
     # def expect_column_values_to_be_between(self, column, min_value, max_value, mostly=None, suppress_exceptions=False):
@@ -998,6 +1020,21 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
             "true_value" : unique_value_count,
             "summary_obj" : {}
         }
+
+        # if min_value != None and max_value != None:
+        #     return (
+        #         (min_value <= unique_value_count) and
+        #         (unique_value_count <= max_value)
+        #     ), unique_value_count
+            
+        # elif min_value == None and max_value != None:
+        #     return (unique_value_count <= max_value), unique_value_count
+
+        # elif min_value != None and max_value == None:
+        #     return (min_value <= unique_value_count), unique_value_count
+
+        # else:
+        #     raise ValueError("min_value and max_value cannot both be None")
 
     @MetaPandasDataSet.column_aggregate_expectation
     def expect_column_proportion_of_unique_values_to_be_between(self, series, min_value=0, max_value=1, output_format=None):

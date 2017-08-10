@@ -179,7 +179,7 @@ class DataSet(object):
                 ## Changed to support python 3, but note that there may be ambiguity here.
                 ## TODO: ensure this is the intended logic
                 "kwargs" : dict(
-                    zip(method_arg_names, args)+kwargs.items()
+                    list(zip(method_arg_names, args))+list(kwargs.items())
                 )
             })
 
@@ -321,7 +321,7 @@ class DataSet(object):
             )
 
             results.append(
-                dict(expectation.items() + result.items())
+                dict(list(expectation.items()) + list(result.items()))
             )
 
         return {

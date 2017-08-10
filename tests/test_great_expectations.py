@@ -89,17 +89,21 @@ class TestCustomClass(unittest.TestCase):
 
 class TestValidation(unittest.TestCase):
     def test_validate(self):
-        my_expectations_config = json.load(file("./tests/examples/titanic_expectations.json"))
+
+        with open("./tests/examples/titanic_expectations.json") as f:
+            my_expectations_config = json.load(f)
+
         my_df = ge.read_csv(
-            "./tests/examples/titanic.csv",
+            "./tests/examples/Titanic.csv",
             expectations_config=my_expectations_config
         )
 
         results = my_df.validate()
         # print json.dumps(results, indent=2)
 
-        expected_results = json.load(file('./tests/examples/expected_results_20170721.json'))
-        # print json.dumps(expected_results, indent=2)
+        with open('./tests/examples/expected_results_20170721.json') as f:
+            expected_results = json.load(f)
+            # print json.dumps(expected_results, indent=2)
 
         self.maxDiff = None
         #!!! This needs to be converted to unicode, I think
@@ -108,8 +112,11 @@ class TestValidation(unittest.TestCase):
 
 class TestRepeatedAppendExpectation(unittest.TestCase):
     def test_validate(self):
-        my_expectations_config = json.load(file("./tests/examples/titanic_expectations.json"))
-        my_df = ge.read_csv("./tests/examples/titanic.csv")
+
+        with open("./tests/examples/titanic_expectations.json") as f:
+            my_expectations_config = json.load(f)
+
+        my_df = ge.read_csv("./tests/examples/Titanic.csv")
 
         self.assertEqual(
             len(my_df.get_expectations_config()['expectations']),
@@ -124,3 +131,5 @@ class TestRepeatedAppendExpectation(unittest.TestCase):
         )
 
 
+if __name__ == "__main__":
+    unittest.main()
