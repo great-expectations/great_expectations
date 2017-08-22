@@ -775,7 +775,7 @@ class TestPandasDataset(unittest.TestCase):
         ]
 
         for t in T:
-            print t
+            print(t)
             out = D2.expect_column_values_to_match_regex(**t['in'])#, **t['kwargs'])
             self.assertEqual(out, t['out'])
 

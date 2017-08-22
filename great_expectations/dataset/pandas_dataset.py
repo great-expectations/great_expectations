@@ -786,56 +786,61 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
             }
 
 
-    @DataSet.old_column_expectation
-    def expect_column_values_to_match_strftime_format(self, column, format, mostly=None, suppress_exceptions=False):
+    @MetaPandasDataset.column_map_expectation
+    def expect_column_values_to_match_strftime_format(self, series, format):
 
-        if (not (column in self)):
-            raise LookupError("The specified column does not exist.")
+        def matches_format(val):
+            return None
 
-        # Below is a simple validation that the provided format can both format and parse a datetime object.
-        # %D is an example of a format that can format but not parse, e.g.
-        try:
-            datetime.strptime(datetime.strftime(datetime.now(), format), format)
-        except ValueError as e:
-            raise ValueError("Unable to use provided format. " + e.message)
+        return series.map(matches_format)
 
-        def is_parseable_by_format(val):
-            try:
-                # Note explicit cast of val to str type
-                datetime.strptime(str(val), format)
-                return True
-            except ValueError as e:
-                return False
+        #if (not (column in self)):
+        #    raise LookupError("The specified column does not exist.")
 
-        ## TODO: Should null values be considered exceptions?
-        not_null = self[column].notnull()
-        not_null_values = self[not_null][column]
+        ## Below is a simple validation that the provided format can both format and parse a datetime object.
+        ## %D is an example of a format that can format but not parse, e.g.
+        #try:
+        #    datetime.strptime(datetime.strftime(datetime.now(), format), format)
+        #except ValueError as e:
+        #    raise ValueError("Unable to use provided format. " + e.message)
 
-        properly_formatted = not_null_values.map(is_parseable_by_format)
+        #def is_parseable_by_format(val):
+        #    try:
+        #        # Note explicit cast of val to str type
+        #        datetime.strptime(str(val), format)
+        #        return True
+        #    except ValueError as e:
+        #        return False
 
-        if suppress_exceptions:
-            exceptions = None
-        else:
-            exceptions = list(not_null_values[properly_formatted==False])
+        ### TODO: Should null values be considered exceptions?
+        #not_null = self[column].notnull()
+        #not_null_values = self[not_null][column]
 
-        if mostly:
-            #Prevent division-by-zero errors
-            if len(not_null_values) == 0:
-                return {
-                    'success':True,
-                    'exception_list':exceptions
-                }
+        #properly_formatted = not_null_values.map(is_parseable_by_format)
 
-            percent_properly_formatted = float(sum(properly_formatted))/len(not_null_values)
-            return {
-                "success" : percent_properly_formatted >= mostly,
-                "exception_list" : exceptions
-            }
-        else:
-            return {
-                "success" : sum(properly_formatted) == len(not_null_values),
-                "exception_list" : exceptions
-            }
+        #if suppress_exceptions:
+        #    exceptions = None
+        #else:
+        #    exceptions = list(not_null_values[properly_formatted==False])
+
+        #if mostly:
+        #    #Prevent division-by-zero errors
+        #    if len(not_null_values) == 0:
+        #        return {
+        #            'success':True,
+        #            'exception_list':exceptions
+        #        }
+
+        #    percent_properly_formatted = float(sum(properly_formatted))/len(not_null_values)
+        #    return {
+        #        "success" : percent_properly_formatted >= mostly,
+        #        "exception_list" : exceptions
+        #    }
+        #else:
+        #    return {
+        #        "success" : sum(properly_formatted) == len(not_null_values),
+        #        "exception_list" : exceptions
+        #    }
 
     @MetaPandasDataSet.column_map_expectation
     def expect_column_values_to_be_dateutil_parseable(self, series):
@@ -945,46 +950,80 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         raise NotImplementedError("Under development")
 
 
-    @DataSet.old_column_expectation
-    def expect_column_mean_to_be_between(self, column, min_value, max_value):
+    @MetaPandasDataset.column_aggregate_expectation
+    def expect_column_mean_to_be_between(self, series, min_value, max_value):
 
-        dtype = self[column].dtype
-        not_null = self[column].notnull()
-        not_null_values = self[not_null][column]
-        try:
-            result = (not_null_values.mean() >= min_value) and (not_null_values.mean() <= max_value)
-            return {
-                'success' : bool(result),
-                'true_value' : not_null_values.mean()
-            }
-        except:
-            return {
-                'success' : False,
-                'true_value' : None
-            }
-
-
-    @DataSet.old_column_expectation
-    def expect_column_median_to_be_between(self):
-        raise NotImplementedError("Under Development")
-
-
-    @DataSet.old_column_expectation
-    def expect_column_stdev_to_be_between(self, column, min_value, max_value, suppress_exceptions=False):
-
-        outcome = False
-        if self[column].std() >= min_value and self[column].std() <= max_value:
-            outcome = True
-
-        if suppress_exceptions:
-            exceptions = None
-        else:
-            exceptions = self[column].std()
+        #!!! Does not raise an error if both min_value and max_value are None.
+        column_mean = series.mean()
 
         return {
-            'success':outcome,
-            'true_value':exceptions
+            "result" : (
+                ((min_value <= column_mean) | (min_value == None)) and
+                ((column_mean <= max_value) | (max_value == None))
+            ),
+            "true_value" : column_mean,
+            "summary_obj" : {}
         }
+
+        #dtype = self[column].dtype
+        #not_null = self[column].notnull()
+        #not_null_values = self[not_null][column]
+        #try:
+        #    result = (not_null_values.mean() >= min_value) and (not_null_values.mean() <= max_value)
+        #    return {
+        #        'success' : bool(result),
+        #        'true_value' : not_null_values.mean()
+        #    }
+        #except:
+        #    return {
+        #        'success' : False,
+        #        'true_value' : None
+        #    }
+
+
+    @MetaPandasDataset.column_aggregate_expectation
+    def expect_column_median_to_be_between(self, series, min_value, max_value):
+
+        column_median = series.median()
+
+        return {
+            "result" : (
+                ((min_value <= column_median) | (min_value == None)) and
+                ((column_median <= max_value) | (max_value == None))
+            ),
+            "true_value" : column_median,
+            "summary_obj" : {}
+        }
+
+
+    @MetaPandasDataset.column_aggregate_expectation
+    def expect_column_stdev_to_be_between(self, series, min_value, max_value):
+
+        column_stdev = series.std()
+
+        return {
+            "result" : (
+                ((min_value <= column_stdev) | (min_value == None)) and
+                ((column_stdev <= max_value) | (max_value == None))
+            ),
+            "true_value" : column_stdev,
+            "summary_obj" : {}
+        }
+
+
+        #outcome = False
+        #if self[column].std() >= min_value and self[column].std() <= max_value:
+        #    outcome = True
+
+        #if suppress_exceptions:
+        #    exceptions = None
+        #else:
+        #    exceptions = self[column].std()
+
+        #return {
+        #    'success':outcome,
+        #    'true_value':exceptions
+        #}
 
     @MetaPandasDataSet.column_aggregate_expectation
     def expect_column_unique_value_count_to_be_between(self, series, min_value=None, max_value=None, output_format=None):
