@@ -1035,7 +1035,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         observed_frequencies = series.value_counts()
         # Join along the indicies to ensure we have values
         test_df = pd.concat([expected_series, observed_frequencies], axis = 1).fillna(0)
-        test_result = stats.chisquare(test_df[series.name], test_df['expected'])
+        test_result = stats.chisquare(test_df[series.name], test_df['expected'])[1]
 
         result_obj = {
                 "success" : test_result > p,
