@@ -84,7 +84,7 @@ class DataSet(object):
                         return_obj = {
                             "success" : False,
                             "exception_list": None,
-                            "exception_index_list": None,
+                            "exception_index_list": None
                         }
                     else:
                         return_obj = False

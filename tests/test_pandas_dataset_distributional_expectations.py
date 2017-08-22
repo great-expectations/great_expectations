@@ -57,11 +57,14 @@ class TestDistributionalExpectations(unittest.TestCase):
         'weights': [ 0.33333333,  0.33333333,  0.33333333]
     }
 
-    def test_expect_column_frequency_distribution_to_be(self):
+    def test_expect_column_chisquare_test_p_value_greater_than(self):
         T = [
                 {
-                    'args': ['categorical_fixed', self.categorical_partition],
-                    'kwargs': {'p': 0.05},
+                    'args': ['categorical_fixed'],
+                    'kwargs': {
+                        'partition_object': self.categorical_partition,
+                        'p': 0.05
+                        },
                     'out': {'success': True, 'true_value': 1.}
                 },
                 {
