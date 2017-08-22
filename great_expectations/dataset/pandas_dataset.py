@@ -1017,7 +1017,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
             "true_value" : proportion_unique,
             "summary_obj" : {}
         }
-        
+
     @DataSet.old_column_expectation
     def expect_column_frequency_distribution_to_be(self, column, partition_object, p=0.05, suppress_exceptions=False):
         if not is_valid_partition_object(partition_object):
@@ -1042,15 +1042,17 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
                 "true_value" : test_result.pvalue,
             }
 
-    @DataSet.old_column_expectation
-    def expect_column_numerical_distribution_to_be(self, column, partition_object, bootsrap_samples=0, p=0.05, suppress_exceptions=False):
+    @MetaPandasDataSet.column_aggregate_expectation
+    def expect_column_bootstrapped_ks_test_p_value_greater_than(self, series, partition_object=None, bootsrap_samples=0, p=0.05):
         if not is_valid_partition_object(partition_object):
             return {
                 "success": False,
-                "error": "Invalid partition_object"
+                "true_value": None,
+                "summary_obj":
+                    {
+                        "error": "Invalid partition_object"
+                    }
             }
-        not_null = self[column].notnull()
-        not_null_values = self[not_null][column]
 
         estimated_cdf = lambda x: np.interp(x, partition_object['partition'], np.append(np.array([0]), np.cumsum(partition_object['weights'])))
 
@@ -1059,22 +1061,23 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
             bootsrap_samples = 1000
 
         results = [ stats.kstest(
-                        np.random.choice(not_null_values, size=len(partition_object['weights']), replace=True),
+                        np.random.choice(series, size=len(partition_object['weights']), replace=True),
                         estimated_cdf).pvalue
                     for k in range(bootsrap_samples)
                   ]
 
         test_result = np.mean(results)
 
-        if suppress_exceptions:
-            return {
+        result_obj = {
                 "success" : test_result > p,
+                "true_value": test_result,
+                "summary_obj": {
+                    "bootsrap_samples": bootsrap_samples
+                }
             }
-        else:
-            return {
-                "success" : test_result > p,
-                "true_value" : test_result
-            }
+
+        return result_obj
+
 
     @DataSet.old_column_expectation
     def expect_column_kl_divergence_to_be(self, column, partition_object, threshold, suppress_exceptions=False):
