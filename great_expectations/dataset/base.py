@@ -741,7 +741,7 @@ class DataSet(object):
         """
         raise NotImplementedError
 
-    def expect_column_frequency_distribution_to_be(self, column, partition_object, p=0.05, suppress_exceptions=False):
+    def expect_column_chisquare_test_p_value_greater_than(self, series, partition_object=None, p=0.05):
         """
         Expect the values in this column to match the distribution of the specified categorical vals and their expected_frequencies. \
 

@@ -68,13 +68,13 @@ Kullback-Leibler (KL) divergence is available as an expectation for both categor
 * :func:`expect_column_kl_divergence_to_be <great_expectations.dataset.base.DataSet.expect_column_kl_divergence_to_be>`
 
 
-For continuous data, the expect_column_numerical_distribution_to_be expectation uses the Kolmogorov-Smirnov (KS) test, which compares the actual and expected cumulative densities of the data. Because of the partition_object's piecewise uniform approximation of the expected distribution, the test would be overly sensitive to differences when used with a sample of data of much larger than the size of the partition. The expectation consequently uses a bootstrapping method to sample the provided data into samples of the same size as the partition and uses the mean of the resulting pvalues as the final test's pvalue.
+For continuous data, the expect_column_bootstrapped_ks_test_p_value_greater_than expectation uses the Kolmogorov-Smirnov (KS) test, which compares the actual and expected cumulative densities of the data. Because of the partition_object's piecewise uniform approximation of the expected distribution, the test would be overly sensitive to differences when used with a sample of data of much larger than the size of the partition. The expectation consequently uses a bootstrapping method to sample the provided data into samples of the same size as the partition and uses the mean of the resulting pvalues as the final test's pvalue.
 
-* :func:`expect_column_numerical_distribution_to_be <great_expectations.dataset.base.DataSet.expect_column_numerical_distribution_to_be>`
+* :func:`expect_column_bootstrapped_ks_test_p_value_greater_than <great_expectations.dataset.base.DataSet.expect_column_bootstrapped_ks_test_p_value_greater_than>`
 
-For categorical data, the expect_column_frequency_distribution_to_be expectation uses the Chi-Squared test. The provided weights are scaled to the size of the data in the tested column at the time of the test.
+For categorical data, the expect_column_chisquare_test_p_value_greater_than expectation uses the Chi-Squared test. The provided weights are scaled to the size of the data in the tested column at the time of the test.
 
-* :func:`expect_column_frequency_distribution_to_be <great_expectations.dataset.base.DataSet.expect_column_frequency_distribution_to_be>`
+* :func:`expect_column_chisquare_test_p_value_greater_than <great_expectations.dataset.base.DataSet.expect_column_chisquare_test_p_value_greater_than>`
 
 
 
