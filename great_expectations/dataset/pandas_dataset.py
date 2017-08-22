@@ -1018,41 +1018,45 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
             "summary_obj" : {}
         }
 
-    @DataSet.old_column_expectation
-    def expect_column_frequency_distribution_to_be(self, column, partition_object, p=0.05, suppress_exceptions=False):
+    @MetaPandasDataSet.column_aggregate_expectation
+    def expect_column_chisquare_test_p_value_greater_than(self, series, partition_object=None, p=0.05):
         if not is_valid_partition_object(partition_object):
-            return {
-                "success": False,
-                "error": "Invalid partition_object"
-            }
+            # return {
+            #     "success": False,
+            #     "true_value": None,
+            #     "summary_obj":
+            #         {
+            #             "error": "Invalid partition_object"
+            #         }
+            # }
+            raise ValueError("Invalid partition object.")
 
-        expected_series = pd.Series(partition_object['weights'], index=partition_object['partition'], name='expected') * len(self[column])
-        observed_frequencies = self[column].value_counts()
+        expected_series = pd.Series(partition_object['weights'], index=partition_object['partition'], name='expected') * len(series)
+        observed_frequencies = series.value_counts()
         # Join along the indicies to ensure we have values
         test_df = pd.concat([expected_series, observed_frequencies], axis = 1).fillna(0)
-        test_result = stats.chisquare(test_df[column], test_df['expected'])
+        test_result = stats.chisquare(test_df[series.name], test_df['expected'])
 
-        if suppress_exceptions:
-            return {
-                "success" : test_result.pvalue > p,
+        result_obj = {
+                "success" : test_result > p,
+                "true_value": test_result,
+                "summary_obj": {}
             }
-        else:
-            return {
-                "success" : test_result.pvalue > p,
-                "true_value" : test_result.pvalue,
-            }
+
+        return result_obj
 
     @MetaPandasDataSet.column_aggregate_expectation
     def expect_column_bootstrapped_ks_test_p_value_greater_than(self, series, partition_object=None, bootsrap_samples=0, p=0.05):
         if not is_valid_partition_object(partition_object):
-            return {
-                "success": False,
-                "true_value": None,
-                "summary_obj":
-                    {
-                        "error": "Invalid partition_object"
-                    }
-            }
+            # return {
+            #     "success": False,
+            #     "true_value": None,
+            #     "summary_obj":
+            #         {
+            #             "error": "Invalid partition_object"
+            #         }
+            # }
+            raise ValueError("Invalid partition object.")
 
         estimated_cdf = lambda x: np.interp(x, partition_object['partition'], np.append(np.array([0]), np.cumsum(partition_object['weights'])))
 
@@ -1079,38 +1083,46 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         return result_obj
 
 
-    @DataSet.old_column_expectation
-    def expect_column_kl_divergence_to_be(self, column, partition_object, threshold, suppress_exceptions=False):
+    @MetaPandasDataSet.column_aggregate_expectation
+    def expect_column_kl_divergence_to_be(self, series, partition_object=None, threshold=None):
         if not is_valid_partition_object(partition_object):
             # return {
             #     "success": False,
-            #     "error": "Invalid partition_object"
+            #     "true_value": None,
+            #     "summary_obj":
+            #         {
+            #             "error": "Invalid partition_object"
+            #         }
             # }
-            raise ValueError("Invalid partition_object")
+            raise ValueError("Invalid partition object.")
 
         if not (isinstance(threshold, float) and (threshold >= 0)):
-            raise ValueError("Threshold must be a float greater than zero.")
+            # return {
+            #     "success": False,
+            #     "true_value": None,
+            #     "summary_obj":
+            #         {
+            #             "error": "Threshold must be specified, between "
+            #         }
+            # }
+            raise ValueError("Threshold must be specified, greater than or equal to zero.")
 
-        not_null = self[column].notnull()
-        not_null_values = self[not_null][column]
 
         # If the data expected to be discrete, build a series
         if (len(partition_object['weights']) == len(partition_object['partition'])):
-            observed_frequencies = not_null_values.value_counts()
-            pk = observed_frequencies / (1.* len(not_null_values))
+            observed_frequencies = series.value_counts()
+            pk = observed_frequencies / (1.* len(series))
         else:
             partition_object = remove_empty_intervals(partition_object)
-            hist, bin_edges = np.histogram(not_null_values, partition_object['partition'], density=False)
-            pk = hist / (1.* len(not_null_values))
+            hist, bin_edges = np.histogram(series, partition_object['partition'], density=False)
+            pk = hist / (1.* len(series))
 
         kl_divergence = stats.entropy(pk, partition_object['weights'])
 
-        if suppress_exceptions:
-            return {
+        result_obj = {
                 "success" : kl_divergence <= threshold,
+                "true_value" : kl_divergence,
+                "summary_obj": {}
             }
-        else:
-            return {
-                "success" : kl_divergence <= threshold,
-                "true_value" : kl_divergence
-            }
+
+        return result_obj
