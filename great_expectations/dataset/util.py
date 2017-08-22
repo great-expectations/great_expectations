@@ -90,7 +90,7 @@ def kde_smooth_data(data):
     kde = stats.kde.gaussian_kde(data)
     evaluation_partition = np.linspace(start = np.min(data) - (kde.covariance_factor() / 2),
                             stop = np.max(data) + (kde.covariance_factor() / 2),
-                            num = ((np.max(data) - np.min(data)) / kde.covariance_factor()) + 1 )
+                            num = np.floor(((np.max(data) - np.min(data)) / kde.covariance_factor()) + 1 ).astype(int))
     cdf_vals = [kde.integrate_box_1d(-np.inf, x) for x in evaluation_partition]
     evaluation_weights = np.diff(cdf_vals)
     #evaluation_weights = [cdf_vals[k+1] - cdf_vals[k] for k in range(len(evaluation_partition)-1)]
