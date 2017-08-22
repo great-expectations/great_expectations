@@ -99,7 +99,7 @@ class MetaPandasDataSet(DataSet):
                         "exception_count" : exception_count,
                         "exception_percent": exception_percent,
                         "exception_percent_nonmissing": exception_percent_nonmissing,
-                        "exception_counts": exception_counts,                    
+                        "exception_counts": exception_counts,
                     }
                 }
 
@@ -131,7 +131,7 @@ class MetaPandasDataSet(DataSet):
             nonnull_count = (null_indexes==False).sum()
 
             result_obj = func(self, nonnull_values, *args, **kwargs)
-            
+
             #!!! This would be the right place to validate result_obj
             #!!! It should contain:
             #!!!    success: bool
@@ -141,24 +141,24 @@ class MetaPandasDataSet(DataSet):
             if output_format == "BASIC":
                 return_obj = {
                     "success" : bool(result_obj["success"]),
-                    "true_value" : true_value,
+                    "true_value" : result_obj["true_value"],
                 }
 
             elif output_format == "SUMMARY":
                 return_obj = {
                     "success" : bool(result_obj["success"]),
-                    "true_value" : true_value,
+                    "true_value" : result_obj["true_value"],
                     "summary_obj" : result_obj["summary_obj"]
                 }
 
             elif output_format=="BOOLEAN_ONLY":
-                return_obj = success
+                return_obj = bool(result_obj["success"])
 
             else:
                 print ("Warning: Unknown output_format %s. Defaulting to BASIC." % (output_format,))
                 return_obj = {
-                    "success" : success,
-                    "true_value" : true_value,
+                    "success" : bool(result_obj["success"]),
+                    "true_value" : result_obj["true_value"],
                 }
 
             return return_obj
