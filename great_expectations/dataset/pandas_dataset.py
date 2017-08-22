@@ -786,7 +786,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
             }
 
 
-    @MetaPandasDataset.column_map_expectation
+    @MetaPandasDataSet.column_map_expectation
     def expect_column_values_to_match_strftime_format(self, series, format):
 
         def matches_format(val):
@@ -950,7 +950,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         raise NotImplementedError("Under development")
 
 
-    @MetaPandasDataset.column_aggregate_expectation
+    @MetaPandasDataSet.column_aggregate_expectation
     def expect_column_mean_to_be_between(self, series, min_value, max_value):
 
         #!!! Does not raise an error if both min_value and max_value are None.
@@ -981,7 +981,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         #    }
 
 
-    @MetaPandasDataset.column_aggregate_expectation
+    @MetaPandasDataSet.column_aggregate_expectation
     def expect_column_median_to_be_between(self, series, min_value, max_value):
 
         column_median = series.median()
@@ -996,7 +996,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         }
 
 
-    @MetaPandasDataset.column_aggregate_expectation
+    @MetaPandasDataSet.column_aggregate_expectation
     def expect_column_stdev_to_be_between(self, series, min_value, max_value):
 
         column_stdev = series.std()
