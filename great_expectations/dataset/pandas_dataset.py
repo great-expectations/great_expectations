@@ -546,7 +546,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         return result_obj
 
     @MetaPandasDataSet.column_aggregate_expectation
-    def expect_column_bootstrapped_ks_test_p_value_greater_than(self, series, partition_object=None, bootsrap_samples=0, p=0.05):
+    def expect_column_bootstrapped_ks_test_p_value_greater_than(self, series, partition_object=None, bootstrap_samples=0, p=0.05):
         if not is_valid_partition_object(partition_object):
             raise ValueError("Invalid partition object.")
 
@@ -576,7 +576,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
 
     @MetaPandasDataSet.column_aggregate_expectation
-    def expect_column_kl_divergence_to_be(self, series, partition_object=None, threshold=None):
+    def expect_column_kl_divergence_less_than(self, series, partition_object=None, threshold=None):
         if not is_valid_partition_object(partition_object):
             raise ValueError("Invalid partition object.")
 

@@ -65,7 +65,7 @@ Distributional expectations rely on three tests for their work.
 
 Kullback-Leibler (KL) divergence is available as an expectation for both categorical and continuous data (continuous data will be discretized according to the provided partition prior to computing divergence). Unlike KS and Chi-Squared tests which can use a pvalue, you must provide a threshold for the relative entropy to use KL divergence. Further, KL divergence is not symmetric, which can make it difficult to differentiate certain distributions.
 
-* :func:`expect_column_kl_divergence_to_be <great_expectations.dataset.base.DataSet.expect_column_kl_divergence_to_be>`
+* :func:`expect_column_kl_divergence_less_than <great_expectations.dataset.base.DataSet.expect_column_kl_divergence_less_than>`
 
 
 For continuous data, the expect_column_bootstrapped_ks_test_p_value_greater_than expectation uses the Kolmogorov-Smirnov (KS) test, which compares the actual and expected cumulative densities of the data. Because of the partition_object's piecewise uniform approximation of the expected distribution, the test would be overly sensitive to differences when used with a sample of data of much larger than the size of the partition. The expectation consequently uses a bootstrapping method to sample the provided data into samples of the same size as the partition and uses the mean of the resulting pvalues as the final test's pvalue.

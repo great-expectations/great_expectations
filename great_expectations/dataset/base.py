@@ -763,7 +763,7 @@ class DataSet(object):
         """
         raise NotImplementedError
 
-    def expect_column_bootstrapped_ks_test_p_value_greater_than(self, series, partition_object=None, bootsrap_samples=0, p=0.05):
+    def expect_column_bootstrapped_ks_test_p_value_greater_than(self, series, partition_object=None, bootstrap_samples=0, p=0.05):
         """
         Expect the values in this column to match the distribution implied by the specified partition and cdf_vals. \
         The implied CDF is constructed as a linear interpolation of the provided cdf_vals.
@@ -789,7 +789,7 @@ class DataSet(object):
         """
         raise NotImplementedError
 
-    def expect_column_kl_divergence_to_be(self, column, partition_object, threshold=0.1, suppress_exceptions=False):
+    def expect_column_kl_divergence_less_than(self, column, partition_object=None, threshold=None):
         """
         Expect the values in this column to have lower Kulback-Leibler divergence (relative entropy) with the distriution provided in partition_object of less than the provided threshold.
 

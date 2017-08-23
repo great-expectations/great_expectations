@@ -130,6 +130,8 @@ def partition_data(data, bins='auto', n_bins=10):
 
     #TODO: Evaluate numpy deprecation of np.histogram's normed option to ensure we're okay with the numerical issues here.
     # Probably we're having bigger problems through serialization.
+
+    #TODO: Consider proper weighting if data includes null values
     return {
         "partition": bin_edges,
         "weights": hist / (1.*len(data))
