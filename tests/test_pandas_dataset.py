@@ -605,8 +605,9 @@ class TestPandasDataset(unittest.TestCase):
             'z' : [1, 2, 3, 4, 5, None, None, None, None, None],
         })
 
-        T = json.load(file("./tests/test_sets/expect_column_values_to_be_between_test_set_ADJ.json"))
-        # print json.dumps(T, indent=2)
+        with open("./tests/test_sets/expect_column_values_to_be_between_test_set_ADJ.json") as f:
+            T = json.load(f)
+            # print json.dumps(T, indent=2)
 
         for t in T:
             out = D.expect_column_values_to_be_between(**t['in'])#, **t['kwargs'])
@@ -1116,8 +1117,14 @@ class TestPandasDataset(unittest.TestCase):
 
         for t in T:
             # print t['in'], t['out']
-            out = D.expect_column_unique_value_count_to_be_between(**t['in'])
-            self.assertEqual(out, t['out'])
+            if t['in']['min_value'] == None and t['in']['max_value'] == None:
+                with self.assertRaises(Exception) as e:
+                    D.expect_column_unique_value_count_to_be_between(**t['in'])
+                self.assertTrue('min_value and max_value cannot both be None', str(e.exception))
+
+            else:
+                out = D.expect_column_unique_value_count_to_be_between(**t['in'])
+                self.assertEqual(out, t['out'])
 
     def test_expect_column_unique_proportion_to_be_between(self):
 

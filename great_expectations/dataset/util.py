@@ -19,7 +19,7 @@ def ensure_json_serializable(test_dict):
     # TODO: ensure in-place iteration like this is okay
     for key in test_dict:
         ## TODO: Brittle if non python3 (unicode, long type?)
-        if isinstance(test_dict[key], (list, tuple, str, unicode, int, float, bool)):
+        if isinstance(test_dict[key], (list, tuple, str, int, float, bool)):
             # No problem to encode json
             continue
 
@@ -34,7 +34,14 @@ def ensure_json_serializable(test_dict):
             test_dict[key] = ensure_json_serializable(test_dict[key])
 
         else:
-            raise TypeError(key + ' is type ' + type(test_dict[key]).__name__ + ' which cannot be serialized.')
+            try:
+                # In Python 2, unicode and long should still be valid.
+                # This will break in Python 3 and throw the exception instead.
+                if isinstance(test_dict[key], (long, unicode)):
+                    # No problem to encode json
+                    continue
+            except:
+                raise TypeError(key + ' is type ' + type(test_dict[key]).__name__ + ' which cannot be serialized.')
 
     return test_dict
 
@@ -83,7 +90,7 @@ def kde_smooth_data(data):
     kde = stats.kde.gaussian_kde(data)
     evaluation_partition = np.linspace(start = np.min(data) - (kde.covariance_factor() / 2),
                             stop = np.max(data) + (kde.covariance_factor() / 2),
-                            num = ((np.max(data) - np.min(data)) / kde.covariance_factor()) + 1 )
+                            num = np.floor(((np.max(data) - np.min(data)) / kde.covariance_factor()) + 1 ).astype(int))
     cdf_vals = [kde.integrate_box_1d(-np.inf, x) for x in evaluation_partition]
     evaluation_weights = np.diff(cdf_vals)
     #evaluation_weights = [cdf_vals[k+1] - cdf_vals[k] for k in range(len(evaluation_partition)-1)]

@@ -80,6 +80,9 @@ class TestDistributionalExpectations(unittest.TestCase):
             out = self.D.expect_column_chisquare_test_p_value_greater_than(*t['args'], **t['kwargs'])
             self.assertEqual(out['success'],t['out']['success'])
             self.assertEqual(out['true_value'], t['out']['true_value'])
+            #out = self.D.expect_column_frequency_distribution_to_be(*t['args'], **t['kwargs'])
+            #self.assertTrue(np.allclose(out['success'], t['out']['success']))
+            #self.assertTrue(np.allclose(out['true_value'], t['out']['true_value']))
 
     def test_expect_column_kl_divergence_to_be_discrete(self):
         T = [
@@ -102,8 +105,8 @@ class TestDistributionalExpectations(unittest.TestCase):
         ]
         for t in T:
             out = self.D.expect_column_kl_divergence_to_be(*t['args'], **t['kwargs'])
-            self.assertEqual(out['success'],t['out']['success'])
-            self.assertEqual(out['true_value'], t['out']['true_value'])
+            self.assertTrue(np.allclose(out['success'], t['out']['success']))
+            self.assertTrue(np.allclose(out['true_value'], t['out']['true_value']))
 
     def test_expect_column_bootrapped_ks_test_p_value_greater_than(self):
         T = [
@@ -256,7 +259,7 @@ class TestDistributionalExpectations(unittest.TestCase):
         ]
         for t in T:
             out = self.D.expect_column_kl_divergence_to_be(*t['args'], **t['kwargs'])
-            self.assertEqual(out['success'],t['out']['success'])
+            self.assertTrue(np.allclose(out['success'],t['out']['success']))
 
 if __name__ == "__main__":
     unittest.main()
