@@ -57,34 +57,46 @@ class TestDistributionalExpectations(unittest.TestCase):
         'weights': [ 0.33333333,  0.33333333,  0.33333333]
     }
 
-    def test_expect_column_frequency_distribution_to_be(self):
+    def test_expect_column_chisquare_test_p_value_greater_than(self):
         T = [
                 {
-                    'args': ['categorical_fixed', self.categorical_partition],
-                    'kwargs': {'p': 0.05},
+                    'args': ['categorical_fixed'],
+                    'kwargs': {
+                        'partition_object': self.categorical_partition,
+                        'p': 0.05
+                        },
                     'out': {'success': True, 'true_value': 1.}
                 },
                 {
-                    'args': ['categorical_fixed', self.categorical_partition_alternate],
-                    'kwargs': {'p': 0.05},
+                    'args': ['categorical_fixed'],
+                    'kwargs': {
+                        'partition_object': self.categorical_partition_alternate,
+                        'p': 0.05
+                    },
                     'out': {'success': False, 'true_value': 5.9032936302303462e-06}
                 }
         ]
         for t in T:
-            out = self.D.expect_column_frequency_distribution_to_be(*t['args'], **t['kwargs'])
+            out = self.D.expect_column_chisquare_test_p_value_greater_than(*t['args'], **t['kwargs'])
             self.assertEqual(out['success'],t['out']['success'])
             self.assertEqual(out['true_value'], t['out']['true_value'])
 
     def test_expect_column_kl_divergence_to_be_discrete(self):
         T = [
                 {
-                    'args': ['categorical_fixed', self.categorical_partition],
-                    'kwargs': {'threshold': 0.1},
+                    'args': ['categorical_fixed'],
+                    'kwargs': {
+                        'partition_object': self.categorical_partition,
+                        'threshold': 0.1
+                        },
                     'out': {'success': True, 'true_value': 0.}
                 },
                 {
-                    'args': ['categorical_fixed', self.categorical_partition_alternate],
-                    'kwargs': {'threshold': 0.1},
+                    'args': ['categorical_fixed'],
+                    'kwargs': {
+                        'partition_object': self.categorical_partition_alternate,
+                        'threshold': 0.1
+                        },
                     'out': {'success': False, 'true_value': 0.12599700286677529}
                 }
         ]
@@ -93,66 +105,66 @@ class TestDistributionalExpectations(unittest.TestCase):
             self.assertEqual(out['success'],t['out']['success'])
             self.assertEqual(out['true_value'], t['out']['true_value'])
 
-    def test_expect_column_numerical_distribution_to_be(self):
+    def test_expect_column_bootrapped_ks_test_p_value_greater_than(self):
         T = [
                 {
-                    'args': ['norm_0_1', self.auto_partition_norm_0_1],
-                    'kwargs':{"p": 0.05},
+                    'args': ['norm_0_1'],
+                    'kwargs':{'partition_object': self.auto_partition_norm_0_1, "p": 0.05},
                     'out':{'success':True, 'true_value': "RANDOMIZED"}
                 },
                 {
-                    'args': ['norm_0_1', self.uniform_partition_norm_0_1],
-                    'kwargs':{"p":0.05},
+                    'args': ['norm_0_1'],
+                    'kwargs':{'partition_object': self.uniform_partition_norm_0_1, "p": 0.05},
                     'out':{'success':True, 'true_value': "RANDOMIZED"}
                 },
                 {
-                    'args': ['norm_0_1', self.ntile_partition_norm_0_1],
-                    'kwargs':{"p":0.05},
+                    'args': ['norm_0_1'],
+                    'kwargs':{'partition_object': self.ntile_partition_norm_0_1, "p": 0.05},
                     'out':{'success':True, 'true_value': "RANDOMIZED"}
                 },
                 {
-                    'args': ['norm_0_1', self.kde_smooth_partition_norm_0_1],
-                    'kwargs':{"p":0.05},
+                    'args': ['norm_0_1'],
+                    'kwargs':{'partition_object': self.kde_smooth_partition_norm_0_1, "p": 0.05},
                     'out':{'success':True, 'true_value': "RANDOMIZED"}
                 },
                 {
-                    'args': ['norm_1_1', self.auto_partition_norm_0_1],
-                    'kwargs':{"p":0.05},
+                    'args': ['norm_1_1'],
+                    'kwargs':{'partition_object': self.auto_partition_norm_0_1, "p": 0.05},
                     'out':{'success':False, 'true_value': "RANDOMIZED"}
                 },
                 {
-                    'args': ['norm_1_1', self.uniform_partition_norm_0_1],
-                    'kwargs':{"p":0.05},
+                    'args': ['norm_1_1'],
+                    'kwargs':{'partition_object': self.uniform_partition_norm_0_1, "p": 0.05},
                     'out':{'success':False, 'true_value': "RANDOMIZED"}
                 },
                 {
-                    'args': ['norm_1_1', self.ntile_partition_norm_0_1],
-                    'kwargs':{"p":0.05},
+                    'args': ['norm_1_1'],
+                    'kwargs':{'partition_object': self.ntile_partition_norm_0_1, "p": 0.05},
                     'out':{'success':False, 'true_value': "RANDOMIZED"}
                 },
                 {
-                    'args': ['norm_1_1', self.kde_smooth_partition_norm_0_1],
-                    'kwargs':{"p":0.05},
+                    'args': ['norm_1_1'],
+                    'kwargs':{'partition_object': self.kde_smooth_partition_norm_0_1, "p": 0.05},
                     'out':{'success':False, 'true_value': "RANDOMIZED"}
                 },
                 {
-                    'args': ['bimodal', self.auto_partition_bimodal],
-                    'kwargs':{"p":0.05},
+                    'args': ['bimodal'],
+                    'kwargs':{'partition_object': self.auto_partition_bimodal, "p": 0.05},
                     'out':{'success':True, 'true_value': "RANDOMIZED"}
                 },
                 {
-                    'args': ['bimodal', self.kde_smooth_partition_bimodal],
-                    'kwargs':{"p":0.05},
+                    'args': ['bimodal'],
+                    'kwargs':{'partition_object': self.kde_smooth_partition_bimodal, "p": 0.05},
                     'out':{'success':True, 'true_value': "RANDOMIZED"}
                 },
                 {
-                    'args': ['bimodal', self.auto_partition_norm_0_1],
-                    'kwargs':{"p":0.05},
+                    'args': ['bimodal'],
+                    'kwargs':{'partition_object': self.auto_partition_norm_0_1, "p": 0.05},
                     'out':{'success':False, 'true_value': "RANDOMIZED"}
                 },
                 {
-                    'args': ['bimodal', self.uniform_partition_norm_0_1],
-                    'kwargs':{"p":0.05},
+                    'args': ['bimodal'],
+                    'kwargs':{'partition_object': self.uniform_partition_norm_0_1, "p": 0.05},
                     'out':{'success':False, 'true_value': "RANDOMIZED"}
                 }
             ]
@@ -162,7 +174,7 @@ class TestDistributionalExpectations(unittest.TestCase):
             #results = [ self.D.expect_column_numerical_distribution_to_be(*t['args'], **t['kwargs'])['success'] for x in range(trials) ]
             # Assert that there are fewer incorrect results than twice p value
             #self.assertLess(results.count(not t['out']['success']) / trials, 2. * t['kwargs']['p'])
-            out = self.D.expect_column_numerical_distribution_to_be(*t['args'], **t['kwargs'])
+            out = self.D.expect_column_bootstrapped_ks_test_p_value_greater_than(*t['args'], **t['kwargs'])
             self.assertEqual(out['success'], t['out']['success'])
 
     def test_expect_column_kl_divergence_to_be_continuous(self):
@@ -180,48 +192,48 @@ class TestDistributionalExpectations(unittest.TestCase):
 # {'true_value': 0.027543614241485374, 'success': True}
 # {'true_value': 0.027543614241485374, 'success': True}
                 {
-                    'args': ['norm_0_1', self.auto_partition_norm_0_1],
-                    'kwargs':{"threshold": 0.1},
+                    'args': ['norm_0_1'],
+                    'kwargs':{"partition_object": self.auto_partition_norm_0_1, "threshold": 0.1},
                     'out':{'success':True, 'true_value': 0.0013326972943566281}
                 },
                 {
-                    'args': ['norm_0_1', self.uniform_partition_norm_0_1],
-                    'kwargs':{"threshold": 0.1},
+                    'args': ['norm_0_1'],
+                    'kwargs':{"partition_object": self.uniform_partition_norm_0_1, "threshold": 0.1},
                     'out':{'success':True, 'true_value': 0.0013326972943566281}
                 },
                 {
-                    'args': ['norm_0_1', self.ntile_partition_norm_0_1],
-                    'kwargs':{"threshold": 0.1},
+                    'args': ['norm_0_1'],
+                    'kwargs':{"partition_object": self.ntile_partition_norm_0_1, "threshold": 0.1},
                     'out':{'success':True, 'true_value': 0.00047210715733547086}
                 },
                 {
-                    'args': ['norm_0_1', self.kde_smooth_partition_norm_0_1],
-                    'kwargs':{"threshold": 0.1},
+                    'args': ['norm_0_1'],
+                    'kwargs':{"partition_object": self.kde_smooth_partition_norm_0_1, "threshold": 0.1},
                     'out':{'success':True, 'true_value': 0.039351496030977519}
                 },
                 {
-                    'args': ['norm_1_1', self.auto_partition_norm_0_1],
-                    'kwargs':{"threshold": 0.1},
+                    'args': ['norm_1_1'],
+                    'kwargs':{"partition_object": self.auto_partition_norm_0_1, "threshold": 0.1},
                     'out':{'success':False, 'true_value': 0.56801971244750626}
                 },
                 {
-                    'args': ['norm_1_1', self.uniform_partition_norm_0_1],
-                    'kwargs':{"threshold": 0.1},
+                    'args': ['norm_1_1'],
+                    'kwargs':{"partition_object": self.uniform_partition_norm_0_1, "threshold": 0.1},
                     'out':{'success':False, 'true_value': 0.56801971244750626}
                 },
                 {
-                    'args': ['norm_1_1', self.ntile_partition_norm_0_1],
-                    'kwargs':{"threshold": 0.1},
+                    'args': ['norm_1_1'],
+                    'kwargs':{"partition_object": self.ntile_partition_norm_0_1, "threshold": 0.1},
                     'out':{'success':False, 'true_value': 0.59398892510202805}
                 },
                 {
-                    'args': ['norm_1_1', self.kde_smooth_partition_norm_0_1],
-                    'kwargs':{"threshold": 0.1},
+                    'args': ['norm_1_1'],
+                    'kwargs':{"partition_object": self.kde_smooth_partition_norm_0_1, "threshold": 0.1},
                     'out':{'success':False, 'true_value': 0.52740442919069253}
                 },
                 {
-                    'args': ['bimodal', self.auto_partition_bimodal],
-                    'kwargs':{"threshold": 0.1},
+                    'args': ['bimodal'],
+                    'kwargs':{"partition_object": self.auto_partition_bimodal, "threshold": 0.1},
                     'out':{'success':True, 'true_value': 0.00023525468906568868}
                 },
                 # TODO: Consider changes that would allow us to detect this case
