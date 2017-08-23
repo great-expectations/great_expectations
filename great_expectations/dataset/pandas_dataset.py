@@ -789,6 +789,8 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
     @MetaPandasDataSet.column_map_expectation
     def expect_column_values_to_match_strftime_format(self, series, strftime_format):
 
+        raise NotImplementedError
+
         #def matches_format(val):
         #    return None
 
