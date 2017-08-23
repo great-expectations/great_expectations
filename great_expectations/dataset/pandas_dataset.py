@@ -529,14 +529,6 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
     @MetaPandasDataSet.column_aggregate_expectation
     def expect_column_chisquare_test_p_value_greater_than(self, series, partition_object=None, p=0.05):
         if not is_valid_partition_object(partition_object):
-            # return {
-            #     "success": False,
-            #     "true_value": None,
-            #     "summary_obj":
-            #         {
-            #             "error": "Invalid partition_object"
-            #         }
-            # }
             raise ValueError("Invalid partition object.")
 
         expected_series = pd.Series(partition_object['weights'], index=partition_object['partition'], name='expected') * len(series)
@@ -556,14 +548,6 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
     @MetaPandasDataSet.column_aggregate_expectation
     def expect_column_bootstrapped_ks_test_p_value_greater_than(self, series, partition_object=None, bootsrap_samples=0, p=0.05):
         if not is_valid_partition_object(partition_object):
-            # return {
-            #     "success": False,
-            #     "true_value": None,
-            #     "summary_obj":
-            #         {
-            #             "error": "Invalid partition_object"
-            #         }
-            # }
             raise ValueError("Invalid partition object.")
 
         estimated_cdf = lambda x: np.interp(x, partition_object['partition'], np.append(np.array([0]), np.cumsum(partition_object['weights'])))
@@ -594,25 +578,9 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
     @MetaPandasDataSet.column_aggregate_expectation
     def expect_column_kl_divergence_to_be(self, series, partition_object=None, threshold=None):
         if not is_valid_partition_object(partition_object):
-            # return {
-            #     "success": False,
-            #     "true_value": None,
-            #     "summary_obj":
-            #         {
-            #             "error": "Invalid partition_object"
-            #         }
-            # }
             raise ValueError("Invalid partition object.")
 
         if not (isinstance(threshold, float) and (threshold >= 0)):
-            # return {
-            #     "success": False,
-            #     "true_value": None,
-            #     "summary_obj":
-            #         {
-            #             "error": "Threshold must be specified, between "
-            #         }
-            # }
             raise ValueError("Threshold must be specified, greater than or equal to zero.")
 
 
