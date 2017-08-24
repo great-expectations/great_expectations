@@ -751,7 +751,6 @@ class TestPandasDataset(unittest.TestCase):
             'y' : [5.0, 5],
             'z' : [0, 10],
             'n' : [0, None],
-            's' : ['s', np.nan],
             'b' : [True, False],
         })
 
@@ -802,9 +801,12 @@ class TestPandasDataset(unittest.TestCase):
                     'out':{'success':True, 'true_value':0.5}}
         ]
 
-        for t in T:
+        for t in T[1:]:
             out = typedf.expect_column_mean_to_be_between(**t['in'])
             self.assertEqual(out, t['out'])
+
+        with self.assertRaises(TypeError):
+            typedf.expect_column_mean_to_be_between(T[0]['in'])
 
 
 
