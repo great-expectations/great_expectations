@@ -453,7 +453,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         column_mean = series.mean()
 
         return {
-            "result" : (
+            "success" : (
                 ((min_value <= column_mean) | (min_value == None)) and
                 ((column_mean <= max_value) | (max_value == None))
             ),
@@ -469,7 +469,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         column_median = series.median()
 
         return {
-            "result" : (
+            "success" : (
                 ((min_value <= column_median) | (min_value == None)) and
                 ((column_median <= max_value) | (max_value == None))
             ),
@@ -485,7 +485,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         column_stdev = series.std()
 
         return {
-            "result" : (
+            "success" : (
                 ((min_value <= column_stdev) | (min_value == None)) and
                 ((column_stdev <= max_value) | (max_value == None))
             ),
@@ -499,7 +499,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         unique_value_count = series.value_counts().shape[0]
 
         return {
-            "result" : (
+            "success" : (
                 ((min_value <= unique_value_count) | (min_value == None)) and
                 ((unique_value_count <= max_value) | (max_value ==None))
             ),
@@ -518,7 +518,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
             proportion_unique = None
 
         return {
-            "result" : (
+            "success" : (
                 ((min_value <= proportion_unique) | (min_value == None)) and
                 ((proportion_unique <= max_value) | (max_value ==None))
             ),
