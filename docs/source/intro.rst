@@ -27,6 +27,7 @@ To get more done with data, faster. Teams use Great Expectations to
 * Streamline analyst-to-engineer handoffs.
 * Monitor data quality in production data pipelines and data products.
 * Simplify debugging data pipelines if (when) they break.
+* Codify assumptions used to build models when sharing with distributed teams or other analysts.
 
 
 See :ref:`workflow_advantages` to learn more about how Great Expectations speeds up data teams.
