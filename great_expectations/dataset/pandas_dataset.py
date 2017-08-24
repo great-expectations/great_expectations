@@ -57,6 +57,18 @@ class MetaPandasDataSet(DataSet):
                 return_obj = success
 
             elif output_format=="BASIC":
+                exception_count = len(exception_list)
+
+                return_obj = {
+                    "success" : success,
+                    "summary_obj" : {
+                        "exception_list" : exception_list[:20],
+                        "exception_count" : exception_count,
+                        "exception_percent" : float(exception_count) / nonnull_count,
+                    }
+                }
+
+            elif output_format=="COMPLETE":
                 return_obj = {
                     "success" : success,
                     "exception_list" : exception_list,
