@@ -495,7 +495,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
 
     @MetaPandasDataSet.column_aggregate_expectation
-    def expect_column_unique_value_count_to_be_between(self, series, min_value=None, max_value=None, output_format=None):
+    def expect_column_unique_value_count_to_be_between(self, series, min_value=None, max_value=None):
         unique_value_count = series.value_counts().shape[0]
 
         return {
@@ -508,7 +508,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         }
 
     @MetaPandasDataSet.column_aggregate_expectation
-    def expect_column_proportion_of_unique_values_to_be_between(self, series, min_value=0, max_value=1, output_format=None):
+    def expect_column_proportion_of_unique_values_to_be_between(self, series, min_value=0, max_value=1):
         unique_value_count = series.value_counts().shape[0]
         total_value_count = series.notnull().sum()
 
