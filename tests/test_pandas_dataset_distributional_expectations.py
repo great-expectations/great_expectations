@@ -84,7 +84,7 @@ class TestDistributionalExpectations(unittest.TestCase):
             #self.assertTrue(np.allclose(out['success'], t['out']['success']))
             #self.assertTrue(np.allclose(out['true_value'], t['out']['true_value']))
 
-    def test_expect_column_kl_divergence_to_be_discrete(self):
+    def test_expect_column_kl_divergence_less_than_discrete(self):
         T = [
                 {
                     'args': ['categorical_fixed'],
@@ -104,7 +104,7 @@ class TestDistributionalExpectations(unittest.TestCase):
                 }
         ]
         for t in T:
-            out = self.D.expect_column_kl_divergence_to_be(*t['args'], **t['kwargs'])
+            out = self.D.expect_column_kl_divergence_less_than(*t['args'], **t['kwargs'])
             self.assertTrue(np.allclose(out['success'], t['out']['success']))
             self.assertTrue(np.allclose(out['true_value'], t['out']['true_value']))
 
@@ -180,7 +180,7 @@ class TestDistributionalExpectations(unittest.TestCase):
             out = self.D.expect_column_bootstrapped_ks_test_p_value_greater_than(*t['args'], **t['kwargs'])
             self.assertEqual(out['success'], t['out']['success'])
 
-    def test_expect_column_kl_divergence_to_be_continuous(self):
+    def test_expect_column_kl_divergence_less_than_continuous(self):
         T = [
 # {'true_value': 0.0013326972943566281, 'success': True}
 # {'true_value': 0.0013326972943566281, 'success': True}
@@ -258,7 +258,7 @@ class TestDistributionalExpectations(unittest.TestCase):
                 # }
         ]
         for t in T:
-            out = self.D.expect_column_kl_divergence_to_be(*t['args'], **t['kwargs'])
+            out = self.D.expect_column_kl_divergence_less_than(*t['args'], **t['kwargs'])
             self.assertTrue(np.allclose(out['success'],t['out']['success']))
 
 if __name__ == "__main__":

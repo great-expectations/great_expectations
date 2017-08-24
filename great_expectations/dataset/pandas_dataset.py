@@ -453,7 +453,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         column_mean = series.mean()
 
         return {
-            "result" : (
+            "success" : (
                 ((min_value <= column_mean) | (min_value == None)) and
                 ((column_mean <= max_value) | (max_value == None))
             ),
@@ -469,7 +469,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         column_median = series.median()
 
         return {
-            "result" : (
+            "success" : (
                 ((min_value <= column_median) | (min_value == None)) and
                 ((column_median <= max_value) | (max_value == None))
             ),
@@ -485,7 +485,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         column_stdev = series.std()
 
         return {
-            "result" : (
+            "success" : (
                 ((min_value <= column_stdev) | (min_value == None)) and
                 ((column_stdev <= max_value) | (max_value == None))
             ),
@@ -495,11 +495,11 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
 
     @MetaPandasDataSet.column_aggregate_expectation
-    def expect_column_unique_value_count_to_be_between(self, series, min_value=None, max_value=None, output_format=None):
+    def expect_column_unique_value_count_to_be_between(self, series, min_value=None, max_value=None):
         unique_value_count = series.value_counts().shape[0]
 
         return {
-            "result" : (
+            "success" : (
                 ((min_value <= unique_value_count) | (min_value == None)) and
                 ((unique_value_count <= max_value) | (max_value ==None))
             ),
@@ -508,7 +508,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         }
 
     @MetaPandasDataSet.column_aggregate_expectation
-    def expect_column_proportion_of_unique_values_to_be_between(self, series, min_value=0, max_value=1, output_format=None):
+    def expect_column_proportion_of_unique_values_to_be_between(self, series, min_value=0, max_value=1):
         unique_value_count = series.value_counts().shape[0]
         total_value_count = series.notnull().sum()
 
@@ -518,7 +518,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
             proportion_unique = None
 
         return {
-            "result" : (
+            "success" : (
                 ((min_value <= proportion_unique) | (min_value == None)) and
                 ((proportion_unique <= max_value) | (max_value ==None))
             ),
@@ -529,14 +529,6 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
     @MetaPandasDataSet.column_aggregate_expectation
     def expect_column_chisquare_test_p_value_greater_than(self, series, partition_object=None, p=0.05):
         if not is_valid_partition_object(partition_object):
-            # return {
-            #     "success": False,
-            #     "true_value": None,
-            #     "summary_obj":
-            #         {
-            #             "error": "Invalid partition_object"
-            #         }
-            # }
             raise ValueError("Invalid partition object.")
 
         expected_series = pd.Series(partition_object['weights'], index=partition_object['partition'], name='expected') * len(series)
@@ -554,16 +546,8 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         return result_obj
 
     @MetaPandasDataSet.column_aggregate_expectation
-    def expect_column_bootstrapped_ks_test_p_value_greater_than(self, series, partition_object=None, bootsrap_samples=0, p=0.05):
+    def expect_column_bootstrapped_ks_test_p_value_greater_than(self, series, partition_object=None, bootstrap_samples=0, p=0.05):
         if not is_valid_partition_object(partition_object):
-            # return {
-            #     "success": False,
-            #     "true_value": None,
-            #     "summary_obj":
-            #         {
-            #             "error": "Invalid partition_object"
-            #         }
-            # }
             raise ValueError("Invalid partition object.")
 
         estimated_cdf = lambda x: np.interp(x, partition_object['partition'], np.append(np.array([0]), np.cumsum(partition_object['weights'])))
@@ -592,27 +576,11 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
 
     @MetaPandasDataSet.column_aggregate_expectation
-    def expect_column_kl_divergence_to_be(self, series, partition_object=None, threshold=None):
+    def expect_column_kl_divergence_less_than(self, series, partition_object=None, threshold=None):
         if not is_valid_partition_object(partition_object):
-            # return {
-            #     "success": False,
-            #     "true_value": None,
-            #     "summary_obj":
-            #         {
-            #             "error": "Invalid partition_object"
-            #         }
-            # }
             raise ValueError("Invalid partition object.")
 
         if not (isinstance(threshold, float) and (threshold >= 0)):
-            # return {
-            #     "success": False,
-            #     "true_value": None,
-            #     "summary_obj":
-            #         {
-            #             "error": "Threshold must be specified, between "
-            #         }
-            # }
             raise ValueError("Threshold must be specified, greater than or equal to zero.")
 
 
