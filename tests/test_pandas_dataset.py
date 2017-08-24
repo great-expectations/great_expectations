@@ -697,7 +697,7 @@ class TestPandasDataset(unittest.TestCase):
             self.assertEqual(out, t['out'])
 
 
-    def test_expect_column_values_to_be_valid_json(self):
+    def test_expect_column_values_to_be_json_parseable(self):
         d1 = json.dumps({'i':[1,2,3],'j':35,'k':{'x':'five','y':5,'z':'101'}})
         d2 = json.dumps({'i':1,'j':2,'k':[3,4,5]})
         d3 = json.dumps({'i':'a', 'j':'b', 'k':'c'})
@@ -711,29 +711,24 @@ class TestPandasDataset(unittest.TestCase):
 
         T = [
                 {
-                    'in':['json_col'],
-                    'kwargs':{},
+                    'in':{'column':'json_col'},
                     'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}},
                 {
-                    'in':['not_json'],
-                    'kwargs':{},
+                    'in':{'column':'not_json'},
                     'out':{'success':False, 'exception_index_list':[0,1,2,3], 'exception_list':[4,5,6,7]}},
                 {
-                    'in':['py_dict'],
-                    'kwargs':{},
+                    'in':{'column':'py_dict'},
                     'out':{'success':False, 'exception_index_list':[0,1,2,3], 'exception_list':[{'a':1, 'out':1},{'b':2, 'out':4},{'c':3, 'out':9},{'d':4, 'out':16}]}},
                 {
-                    'in':['most'],
-                    'kwargs':{},
+                    'in':{'column':'most'},
                     'out':{'success':False, 'exception_index_list':[3], 'exception_list':['d4']}},
                 {
-                    'in':['most'],
-                    'kwargs':{'mostly':.75},
+                    'in':{'column':'most', 'mostly':.75},
                     'out':{'success':True, 'exception_index_list':[3], 'exception_list':['d4']}}
         ]
 
         for t in T:
-            out = D.expect_column_values_to_be_valid_json(*t['in'], **t['kwargs'])
+            out = D.expect_column_values_to_be_json_parseable(**t['in'])
             self.assertEqual(out, t['out'])
 
 
