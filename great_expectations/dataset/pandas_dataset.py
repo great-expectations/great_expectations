@@ -240,12 +240,12 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
     @MetaPandasDataSet.column_map_expectation
     def expect_column_values_to_not_be_null(self, series):
-        return series.notnull()
+        return series.map(pd.notnull)
 
 
     @MetaPandasDataSet.column_map_expectation
     def expect_column_values_to_be_null(self, series):
-        return series.isnull()
+        return series.map(pd.isnull)
 
 
     @MetaPandasDataSet.column_map_expectation
@@ -389,7 +389,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
 
     @MetaPandasDataSet.column_map_expectation
-    def expect_column_values_to_not_match_regex(self, column, regex):
+    def expect_column_values_to_not_match_regex(self, series, regex):
         return series.map(lambda x: re.findall(regex, str(x)) == [])
 
 
