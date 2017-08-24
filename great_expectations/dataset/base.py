@@ -328,7 +328,6 @@ class DataSet(object):
             "results" : results
         }
 
-
     ##### Table shape expectations #####
 
     def expect_column_to_exist(self, column, suppress_exceptions=False):
