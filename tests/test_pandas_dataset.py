@@ -140,36 +140,26 @@ class TestPandasDataset(unittest.TestCase):
         T = [
                 {
                     'in':['a'],
-                    'kwargs':{},
-                    'out':{'success':False, 'exception_list':['2']}},
+                    'out':{'success':False, 'exception_index_list':[0,1], 'exception_list':['2','2']}},
                 {
                     'in':['b'],
-                    'kwargs':{},
-                    'out':{'success':True, 'exception_list':[]}},
+                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}},
                 {
                     'in':['c'],
-                    'kwargs':{},
-                    'out':{'success':False, 'exception_list':[1]}},
+                    'out':{'success':False, 'exception_index_list':[0,1], 'exception_list':[1,1]}},
                 {
                     'in':['d'],
-                    'kwargs':{},
-                    'out':{'success':True, 'exception_list':[]}},
+                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}},
                 {
                     'in':['n'],
-                    'kwargs':{},
-                    'out':{'success':True, 'exception_list':[]}},
+                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}},
                 {
                     'in':['n'],
-                    'kwargs':{'suppress_exceptions':True},
-                    'out':{'success':True, 'exception_list':[]}},
-                {
-                    'in':['a'],
-                    'kwargs':{'suppress_exceptions':True},
-                    'out':{'success':False, 'exception_list':None}}
+                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}}
         ]
 
         for t in T:
-            out = D.expect_column_values_to_be_unique(*t['in'], **t['kwargs'])
+            out = D.expect_column_values_to_be_unique(*t['in'])
             self.assertEqual(out, t['out'])
 
 
@@ -184,27 +174,23 @@ class TestPandasDataset(unittest.TestCase):
                 {
                     'in':['a'],
                     'kwargs':{},
-                    'out':{'success':False, 'exception_list':['2','2','2']}},
+                    'out':{'success':False, 'exception_index_list':[0,1,2,3], 'exception_list':['2','2','2','2']}},
                 {
                     'in':['b'],
                     'kwargs':{'mostly':.25},
-                    'out':{'success':True, 'exception_list':['2']}},
+                    'out':{'success':True, 'exception_index_list':[1,2], 'exception_list':['2','2']}},
                 {
                     'in':['b'],
                     'kwargs':{'mostly':.75},
-                    'out':{'success':False, 'exception_list':['2']}},
+                    'out':{'success':False, 'exception_index_list':[1,2], 'exception_list':['2','2']}},
                 {
                     'in':['a'],
                     'kwargs':{'mostly':1},
-                    'out':{'success':False, 'exception_list':['2','2','2']}},
+                    'out':{'success':False, 'exception_index_list':[0,1,2,3], 'exception_list':['2','2','2','2']}},
                 {
                     'in':['n'],
                     'kwargs':{'mostly':.2},
-                    'out':{'success':True, 'exception_list':[]}},
-                {
-                    'in':['a'],
-                    'kwargs':{'suppress_exceptions':True},
-                    'out':{'success':False, 'exception_list':None}}
+                    'out':{'success':True, 'exception_index_list':[0,1,3], 'exception_list':[None,None,None]}}
         ]
 
         for t in T:
@@ -232,33 +218,21 @@ class TestPandasDataset(unittest.TestCase):
         T = [
                 {
                     'in':['y'],
-                    'kwargs':{},
-                    'out':{'success':False, 'exception_list':[None]}},
+                    'out':{'success':False, 'exception_index_list':[1], 'exception_list':[np.nan]}},
                 {
                     'in':['n'],
-                    'kwargs':{},
-                    'out':{'success':False, 'exception_list':[None, None]}},
-                {
-                    'in':['z'],
-                    'kwargs':{},
-                    'out':{'success':True, 'exception_list':[]}},
+                    'out':{'success':False, 'exception_index_list':[0,1], 'exception_list':[None, np.nan]}},
                 {
                     'in':['x'],
-                    'kwargs':{'suppress_exceptions':True},
-                    'out':{'success':False, 'exception_list':None}},
-                {
-                    'in':['n'],
-                    'kwargs':{'suppress_exceptions':True},
-                    'out':{'success':False, 'exception_list':None}},
+                    'out':{'success':False, 'exception_index_list':[1], 'exception_list':[None]}},
                 {
                     'in':['z'],
-                    'kwargs':{'suppress_exceptions':True},
-                    'out':{'success':True, 'exception_list':None}}
+                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}}
         ]
 
 
         for t in T:
-            out = D.expect_column_values_to_not_be_null(*t['in'], **t['kwargs'])
+            out = D.expect_column_values_to_not_be_null(*t['in'])
             self.assertEqual(out, t['out'])
 
 
@@ -276,35 +250,23 @@ class TestPandasDataset(unittest.TestCase):
                 {
                     'in':['a'],
                     'kwargs':{},
-                    'out':{'success':True, 'exception_list':[]}},
+                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}},
                 {
                     'in':['a'],
                     'kwargs':{'mostly':.90},
-                    'out':{'success':True, 'exception_list':[]}},
+                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}},
                 {
                     'in':['b'],
                     'kwargs':{},
-                    'out':{'success':False, 'exception_list':[None]}},
+                    'out':{'success':False, 'exception_index_list':[9], 'exception_list':[None]}},
                 {
                     'in':['b'],
                     'kwargs':{'mostly':.95},
-                    'out':{'success':False, 'exception_list':[None]}},
+                    'out':{'success':False, 'exception_index_list':[9], 'exception_list':[None]}},
                 {
                     'in':['b'],
                     'kwargs':{'mostly':.90},
-                    'out':{'success':True, 'exception_list':[None]}},
-                {
-                    'in':['b'],
-                    'kwargs':{'suppress_exceptions':True},
-                    'out':{'success':False, 'exception_list':None}},
-                {
-                    'in':['b'],
-                    'kwargs':{'mostly':.95, 'suppress_exceptions':True},
-                    'out':{'success':False, 'exception_list':None}},
-                {
-                    'in':['b'],
-                    'kwargs':{'mostly':.90, 'suppress_exceptions':True},
-                    'out':{'success':True, 'exception_list':None}}
+                    'out':{'success':True, 'exception_index_list':[9], 'exception_list':[None]}}
         ]
 
         for t in T:
@@ -333,36 +295,32 @@ class TestPandasDataset(unittest.TestCase):
                 {
                     'in':['x'],
                     'kwargs':{},
-                    'out':{'success':False, 'exception_list':[2,2]}},
+                    'out':{'success':False, 'exception_index_list':[0,2], 'exception_list':[2,2]}},
                 {
                     'in':['y'],
                     'kwargs':{},
-                    'out':{'success':False, 'exception_list':[2,2]}},
+                    'out':{'success':False, 'exception_index_list':[0,2], 'exception_list':[2,2]}},
                 {
                     'in':['z'],
                     'kwargs':{},
-                    'out':{'success':False, 'exception_list':[2,5,7]}},
+                    'out':{'success':False, 'exception_index_list':[0,1,2], 'exception_list':[2,5,7]}},
                 {
                     'in':['a'],
                     'kwargs':{},
-                    'out':{'success':True, 'exception_list':[]}},
+                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}},
                 {
                     'in':['x'],
-                    'kwargs':{'suppress_exceptions':True},
-                    'out':{'success':False, 'exception_list':None}},
+                    'kwargs':{'mostly':.2},
+                    'out':{'success':True, 'exception_index_list':[0,2], 'exception_list':[2,2]}},
                 {
                     'in':['x'],
-                    'kwargs':{'mostly':.2, 'suppress_exceptions':True},
-                    'out':{'success':True, 'exception_list':None}},
-                {
-                    'in':['x'],
-                    'kwargs':{'mostly':.8, 'suppress_exceptions':True},
-                    'out':{'success':False, 'exception_list':None}
+                    'kwargs':{'mostly':.8},
+                    'out':{'success':False, 'exception_index_list':[0,2], 'exception_list':[2,2]}
                     },
                 {
                     'in':['a'],
-                    'kwargs':{'mostly':.5, 'suppress_exceptions':True},
-                    'out':{'success':True, 'exception_list':None}}
+                    'kwargs':{'mostly':.5},
+                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}}
         ]
 
         for t in T:
@@ -431,49 +389,23 @@ class TestPandasDataset(unittest.TestCase):
         T = [
                 {
                     'in':['x', [1,2,4]],
-                    'kwargs':{},
-                    'out':{'success':True, 'exception_list':[]}},
+                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}},
                 {
                     'in':['x', [4,2]],
-                    'kwargs':{},
-                    'out':{'success':False, 'exception_list':[1]}},
+                    'out':{'success':False, 'exception_index_list':[0], 'exception_list':[1]}},
                 {
                     'in':['y', []],
-                    'kwargs':{},
-                    'out':{'success':False, 'exception_list':[1,2,5]}},
+                    'out':{'success':False, 'exception_index_list':[0,1,2], 'exception_list':[1,2,5]}},
                 {
                     'in':['z', ['hello','jello','mello']],
-                    'kwargs':{},
-                    'out': {'success':True, 'exception_list':[]}},
+                    'out': {'success':True, 'exception_index_list':[], 'exception_list':[]}},
                 {
                     'in':['z', ['hello']],
-                    'kwargs':{},
-                    'out': {'success':False, 'exception_list':['jello','mello']}},
-                {
-                    'in':['x', [1,2,4]],
-                    'kwargs':{},
-                    'out':{'success':True, 'exception_list':[]}},
-                {
-                    'in':['x', [4,2]],
-                    'kwargs':{},
-                    'out':{'success':False, 'exception_list':[1]}},
-                {
-                    'in':['y', []],
-                    'kwargs':{},
-                    'out':{'success':False, 'exception_list':[1,2,5]}},
-                {
-                    'in':['z', ['hello', 'jello', 'mello']],
-                    'kwargs':{},
-                    'out':{'success':True, 'exception_list':[]}},
-                {
-                    'in':['z', ['hello']],
-                    'kwargs':{},
-                    'out':{'success':False, 'exception_list':['jello', 'mello']}}
-
+                    'out': {'success':False, 'exception_index_list':[1,2], 'exception_list':['jello','mello']}}
         ]
 
         for t in T:
-            out = D.expect_column_values_to_be_in_set(*t['in'], **t['kwargs'])
+            out = D.expect_column_values_to_be_in_set(*t['in'])
             self.assertEqual(out,t['out'])
 
 
@@ -484,45 +416,33 @@ class TestPandasDataset(unittest.TestCase):
 
         T = [
                 {
-                    'in':['x',[1,2]],
+                    'in':['x',[1,2,None]],
                     'kwargs':{},
-                    'out':{'success':True, 'exception_list':[]}},
+                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}},
                 {
                     'in':['x',[1]],
                     'kwargs':{},
-                    'out':{'success':False, 'exception_list':[2]}},
+                    'out':{'success':False, 'exception_index_list':[2,3], 'exception_list':[2,None]}},
                 {
-                    'in':['x',[2]],
-                    'kwargs':{},
-                    'out':{'success':False, 'exception_list':[1, 1]}},
-                {
-                    'in':['x',[1]],
+                    'in':['x',[1, None]],
                     'kwargs':{'mostly':.66},
-                    'out':{'success':True, 'exception_list':[2]}},
-                {
-                    'in':['x',[1]],
-                    'kwargs':{'mostly':.33},
-                    'out':{'success':True, 'exception_list':[2]}},
+                    'out':{'success':True, 'exception_index_list':[2], 'exception_list':[2]}},
                 {
                     'in':['x',[2]],
                     'kwargs':{'mostly':.66},
-                    'out':{'success':False, 'exception_list':[1,1]}},
+                    'out':{'success':False, 'exception_index_list':[0,1,3], 'exception_list':[1,1,None]}},
                 {
-                    'in':['x',[2]],
-                    'kwargs':{'mostly':.9},
-                    'out':{'success':False, 'exception_list':[1,1]}},
-                {
-                    'in':['y',[2]],
+                    'in':['y',[2, None]],
                     'kwargs':{},
-                    'out':{'success':True, 'exception_list':[]}},
+                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}},
                 {
                     'in':['y',[]],
                     'kwargs':{},
-                    'out':{'success':True, 'exception_list':[]}},
+                    'out':{'success':False, 'exception_index_list':[0,1,2,3], 'exception_list':[None, None, None, None]}},
                 {
                     'in':['y',[2]],
                     'kwargs':{'mostly':.5},
-                    'out':{'success':True, 'exception_list':[]}}
+                    'out':{'success':False, 'exception_index_list':[0,1,2,3], 'exception_list':[None, None, None, None]}}
         ]
 
         for t in T:
@@ -539,7 +459,6 @@ class TestPandasDataset(unittest.TestCase):
 
         D = ge.dataset.PandasDataSet({
             'x' : [1,2,4],
-            'y' : [1,2,5],
             'z' : ['hello', 'jello', 'mello'],
             'a' : [1,1,2],
             'n' : [None,None,2],
@@ -549,43 +468,39 @@ class TestPandasDataset(unittest.TestCase):
                 {
                     'in':['x',[1,2]],
                     'kwargs':{},
-                    'out':{'success':False, 'exception_list':[1,2]}},
+                    'out':{'success':False, 'exception_index_list':[0,1], 'exception_list':[1,2]}},
                 {
                     'in':['x',[5,6]],
                     'kwargs':{},
-                    'out':{'success':True, 'exception_list':[]}},
+                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}},
                 {
                     'in':['z',['hello', 'jello']],
                     'kwargs':{},
-                    'out':{'success':False, 'exception_list':['hello', 'jello']}},
+                    'out':{'success':False, 'exception_index_list':[0,1], 'exception_list':['hello', 'jello']}},
                 {
                     'in':['z',[]],
                     'kwargs':{},
-                    'out':{'success':True, 'exception_list':[]}},
+                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}},
                 {
                     'in':['a', [1]],
                     'kwargs':{},
-                    'out':{'success':False, 'exception_list':[1, 1]}},
+                    'out':{'success':False, 'exception_index_list':[0,1], 'exception_list':[1, 1]}},
                 {
                     'in':['n', [2]],
                     'kwargs':{},
-                    'out':{'success':False, 'exception_list':[2]}},
+                    'out':{'success':False, 'exception_index_list':[2], 'exception_list':[2]}},
                 {
                     'in':['n', []],
                     'kwargs':{},
-                    'out':{'success':True, 'exception_list':[]}},
-                {
-                    'in':['n', [2]],
-                    'kwargs':{'suppress_exceptions':True},
-                    'out':{'success':False, 'exception_list':None}},
+                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}},
                 {
                     'in':['a', [1]],
-                    'kwargs':{'mostly':.2, 'suppress_exceptions':True},
-                    'out':{'success':True, 'exception_list':None}},
+                    'kwargs':{'mostly':.1},
+                    'out':{'success':True, 'exception_index_list':[0,1], 'exception_list':[1, 1]}},
                 {
                     'in':['n', [2]],
-                    'kwargs':{'mostly':1},
-                    'out':{'success':False, 'exception_list':[2]}}
+                    'kwargs':{'mostly':.9},
+                    'out':{'success':False, 'exception_index_list':[2], 'exception_list':[2]}}
         ]
 
         for t in T:
@@ -622,28 +537,17 @@ class TestPandasDataset(unittest.TestCase):
         T = [
                 {
                     'in':['s1', 3, 5],
-                    'kwargs':{},
-                    'out':{'success':True, 'exception_list':[]}},
+                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}},
                 {
                     'in':['s2', 4, 6],
-                    'kwargs':{},
-                    'out':{'success':False, 'exception_list':['collected']}},
+                    'out':{'success':False, 'exception_index_list':[2], 'exception_list':['collected']}},
                 {
                     'in':['s2', None, 10],
-                    'kwargs':{},
-                    'out':{'success':True, 'exception_list':[]}}
+                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}}
         ]
 
-        #out1 = D.expect_column_value_lengths_to_be_between('s1', min_value=3, max_value=5)
-        #out2 = D.expect_column_value_lengths_to_be_between('s2', min_value=4, max_value=6)
-        #out3 = D.expect_column_value_lengths_to_be_between('s2', min_value=None, max_value=10)
-        #assert_equal( out1['success'], True)
-        #assert_equal( out2['success'], False)
-        #assert_equal( len(out2['exception_list']), 1)
-        #assert_equal( out3['success'], True)
-
         for t in T:
-            out = D.expect_column_value_lengths_to_be_between(*t['in'], **t['kwargs'])
+            out = D.expect_column_value_lengths_to_be_between(*t['in'])
             self.assertEqual(out, t['out'])
 
 
@@ -668,116 +572,54 @@ class TestPandasDataset(unittest.TestCase):
         T = [
                 {
                     'in':{'column':'x', 'regex':'^a'},
-                    # 'in':['x', '^a'],
-                    # 'kwargs':{},
                     'out':{'success':True, 'exception_list':[], 'exception_index_list':[]}},
                 {
                     'in':{'column':'x', 'regex':'aa'},
-                    # 'in':['x', 'aa'],
-                    # 'kwargs':{},
                     'out':{'success':False, 'exception_list':['ab', 'ac', 'a1'], 'exception_index_list':[1,2,3]}},
                 {
                     'in':{'column':'x', 'regex':'a[a-z]'},
-                    # 'in':['x', 'a[a-z]'],
-                    # 'kwargs':{},
                     'out':{'success':False, 'exception_list':['a1'], 'exception_index_list':[3]}},
                 {
                     'in':{'column':'y', 'regex':'[abc]{2}'},
-                    # 'in':['y', '[abc]{2}'],
-                    # 'kwargs':{},
                     'out':{'success':True, 'exception_list':[], 'exception_index_list':[]}},
                 {
                     'in':{'column':'y', 'regex':'[z]'},
-                    # 'in':['y', '[z]'],
-                    # 'kwargs':{},
-                    'out':{'success':False, 'exception_list':['aa', 'ab', 'ac', 'ba', 'ca'], 'exception_index_list':[0,1,2,3,4]}},
-                # {
-                #     'in':{'column':'y', 'regex':'[abc]{2}'},
-                #     'in':['y', '[abc]{2}'],
-                #     'kwargs':{'suppress_exceptions':True},
-                #     'out':{'success':True, 'exception_list':None}},
-                # {
-                #     'in':{'column':'y', 'regex':'[z]'},
-                #     'in':['y', '[z]'],
-                #     'kwargs':{'suppress_exceptions':True},
-                #     'out':{'success':False, 'exception_list':None}}
+                    'out':{'success':False, 'exception_list':['aa', 'ab', 'ac', 'ba', 'ca'], 'exception_index_list':[0,1,2,3,4]}}
         ]
 
         for t in T:
-            out = D.expect_column_values_to_match_regex(**t['in'])#, **t['kwargs'])
+            out = D.expect_column_values_to_match_regex(**t['in'])
             self.assertEqual(out, t['out'])
 
             T = [
                     {
                         'in':{'column':'a', 'regex':'^a', 'mostly':.9},
-                        # 'in':['a', '^a'],
-                        # 'kwargs':{'mostly':.9},
                         'out':{'success':False, 'exception_list':['bee'], 'exception_index_list':[4]}},
                     {
                         'in':{'column':'a', 'regex':'^a', 'mostly':.8},
-                        # 'in':['a', '^a'],
-                        # 'kwargs':{'mostly':.8},
                         'out':{'success':True, 'exception_list':['bee'], 'exception_index_list':[4]}},
                     {
                         'in':{'column':'a', 'regex':'^a', 'mostly':.7},
-                        # 'in':['a', '^a'],
-                        # 'kwargs':{'mostly':.7},
                         'out':{'success':True, 'exception_list':['bee'], 'exception_index_list':[4]}},
                     {
                         'in':{'column':'b', 'regex':'^a', 'mostly':.9},
-                        # 'in':['b', '^a'],
-                        # 'kwargs':{'mostly':.9},
                         'out':{'success':False, 'exception_list':['bdd'], 'exception_index_list':[3]}},
                     {
                         'in':{'column':'b', 'regex':'^a', 'mostly':.75},
-                        # 'in':['b', '^a'],
-                        # 'kwargs':{'mostly':.75},
                         'out':{'success':True, 'exception_list':['bdd'], 'exception_index_list':[3]}},
                     {
                         'in':{'column':'b', 'regex':'^a', 'mostly':.5},
-                        # 'in':['b', '^a'],
-                        # 'kwargs':{'mostly':.5},
                         'out':{'success':True, 'exception_list':['bdd'], 'exception_index_list':[3]}},
-                    # {
-                    #     'in':{'column':'b', 'regex':'^a', 'mostly':.9},
-                    #     # 'in':['b', '^a'],
-                    #     # 'kwargs':{'mostly':.9, 'suppress_exceptions':True},
-                    #     'out':{'success':False, 'exception_list':None}},
-                    # {
-                    #     'in':{'column':'b', 'regex':'^a', 'mostly':.75},
-                    #     'in':['b', '^a'],
-                    #     'kwargs':{'mostly':.75, 'suppress_exceptions':True},
-                    #     'out':{'success':True, 'exception_list':None}},
-                    # {
-                    #     'in':{'column':'y', 'regex':'[z]', 'mostly':.9},
-                    #     'in':['b', '^a'],
-                    #     'kwargs':{'mostly':.5, 'suppress_exceptions':True},
-                    #     'out':{'success':True, 'exception_list':None}},
                     {
                         'in':{'column':'c', 'regex':'^a'},
-                        # 'in':['c', '^a'],
-                        # 'kwargs':{},
                         'out':{'success':True, 'exception_list':[], 'exception_index_list':[]}},
                     {
                         'in':{'column':'c', 'regex':'^a', 'mostly':.5},
-                        # 'in':['c', '^a'],
-                        # 'kwargs':{'mostly':.5},
-                        'out':{'success':True, 'exception_list':[], 'exception_index_list':[]}},
-                    # {
-                    #     'in':{'column':'c', 'regex':'^a', 'mostly':.9},
-                    #     'in':['c', '^a'],
-                    #     'kwargs':{'suppress_exceptions':True},
-                    #     'out':{'success':True, 'exception_list':[]}},
-                    # {
-                    #     'in':{'column':'y', 'regex':'[z]', 'mostly':.9},
-                    #     'in':['c', '^a'],
-                    #     'kwargs':{'mostly':.5, 'suppress_exceptions':True},
-                    #     'out':{'success':True, 'exception_list':[]}}
+                        'out':{'success':True, 'exception_list':[], 'exception_index_list':[]}}
         ]
 
         for t in T:
-            print(t)
-            out = D2.expect_column_values_to_match_regex(**t['in'])#, **t['kwargs'])
+            out = D2.expect_column_values_to_match_regex(**t['in'])
             self.assertEqual(out, t['out'])
 
 
@@ -794,46 +636,20 @@ class TestPandasDataset(unittest.TestCase):
         T = [
                 {
                     'in':['x', '^a'],
-                    'kwargs':{},
-                    'out':{'success':False, 'exception_list':['aa', 'ab', 'ac', 'a1']}},
+                    'out':{'success':False, 'exception_index_list':[0,1,2,3], 'exception_list':['aa', 'ab', 'ac', 'a1']}},
                 {
                     'in':['x', '^b'],
-                    'kwargs':{},
-                    'out':{'success':True, 'exception_list':[]}},
+                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}},
                 {
                     'in':['y', '^z'],
-                    'kwargs':{},
-                    'out':{'success':False, 'exception_list':['zxxxx']}},
-                {
-                    'in':['y', '^z'],
-                    'kwargs':{'mostly':.5},
-                    'out':{'success':True, 'exception_list':['zxxxx']}},
+                    'out':{'success':False, 'exception_index_list':[6], 'exception_list':['zxxxx']}},
                 {
                     'in':['x', '^a'],
-                    'kwargs':{'suppress_exceptions':True},
-                    'out':{'success':False, 'exception_list':None}},
-                {
-                    'in':['x', '^b'],
-                    'kwargs':{'suppress_exceptions':True},
-                    'out':{'success':True, 'exception_list':None}},
-                {
-                    'in':['y', '^z'],
-                    'kwargs':{'suppress_exceptions':True},
-                    'out':{'success':False, 'exception_list':None}},
-                {
-                    'in':['y', '^z'],
-                    'kwargs':{'mostly':.5, 'suppress_exceptions':True},
-                    'out':{'success':True, 'exception_list':None}}
+                    'out':{'success':False, 'exception_index_list':[], 'exception_list':[]}}
         ]
 
-        # Why are these here?
-        #assert D.expect_column_values_to_match_regex('z', '^a') == {'success':True, 'exception_list':[]}
-        #assert D.expect_column_values_to_match_regex('z', '^a', mostly=.5) == {'success':True, 'exception_list':[]}
-        #assert D.expect_column_values_to_match_regex('z', '^a', suppress_exceptions=True) == {'success':True, 'exception_list':[]}
-        #assert D.expect_column_values_to_match_regex('z', '^a', mostly=.5, suppress_exceptions=True) == {'success':True, 'exception_list':[]}
-
         for t in T:
-            out = D.expect_column_values_to_not_match_regex(*t['in'], **t['kwargs'])
+            out = D.expect_column_values_to_not_match_regex(*t['in'])
             self.assertEqual(out, t['out'])
 
 
@@ -862,23 +678,23 @@ class TestPandasDataset(unittest.TestCase):
                 {
                     'in':['us_dates','%m/%d/%Y'],
                     'kwargs':{},
-                    'out':{'success':True, 'exception_list':[]}},
+                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}},
                 {
                     'in':['us_dates_type_error','%m/%d/%Y'],
                     'kwargs':{'mostly': 0.5},
-                    'out':{'success':True, 'exception_list':[5]}},
+                    'out':{'success':True, 'exception_index_list':[2], 'exception_list':[5]}},
                 {
                     'in':['us_dates_type_error','%m/%d/%Y'],
                     'kwargs':{},
-                    'out':{'success':False,'exception_list':[5]}},
+                    'out':{'success':False,'exception_index_list':[2], 'exception_list':[5]}},
                 {
                     'in':['almost_iso8601','%Y-%m-%dT%H:%M:%S'],
                     'kwargs':{},
-                    'out':{'success':True,'exception_list':[]}},
+                    'out':{'success':True,'exception_index_list':[], 'exception_list':[]}},
                 {
                     'in':['almost_iso8601_val_error','%Y-%m-%dT%H:%M:%S'],
                     'kwargs':{},
-                    'out':{'success':False,'exception_list':['1977-05-55T00:00:00']}}
+                    'out':{'success':False,'exception_index_list':[0], 'exception_list':['1977-05-55T00:00:00']}}
         ]
 
         for t in T:
@@ -934,23 +750,23 @@ class TestPandasDataset(unittest.TestCase):
                 {
                     'in':['json_col'],
                     'kwargs':{},
-                    'out':{'success':True, 'exception_list':[]}},
+                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}},
                 {
                     'in':['not_json'],
                     'kwargs':{},
-                    'out':{'success':False, 'exception_list':[4,5,6,7]}},
+                    'out':{'success':False, 'exception_index_list':[0,1,2,3], 'exception_list':[4,5,6,7]}},
                 {
                     'in':['py_dict'],
                     'kwargs':{},
-                    'out':{'success':False, 'exception_list':[{'a':1, 'out':1},{'b':2, 'out':4},{'c':3, 'out':9},{'d':4, 'out':16}]}},
+                    'out':{'success':False, 'exception_index_list':[0,1,2,3], 'exception_list':[{'a':1, 'out':1},{'b':2, 'out':4},{'c':3, 'out':9},{'d':4, 'out':16}]}},
                 {
                     'in':['most'],
                     'kwargs':{},
-                    'out':{'success':False, 'exception_list':['d4']}},
+                    'out':{'success':False, 'exception_index_list':[3], 'exception_list':['d4']}},
                 {
                     'in':['most'],
                     'kwargs':{'mostly':.75},
-                    'out':{'success':True, 'exception_list':['d4']}}
+                    'out':{'success':True, 'exception_index_list':[3], 'exception_list':['d4']}}
         ]
 
         for t in T:
@@ -979,33 +795,31 @@ class TestPandasDataset(unittest.TestCase):
         T = [
                 {
                     'in':['x', 2, 5],
-                    'kwargs':{},
                     'out':{'success':True, 'true_value':3.5}},
                 {
                     'in':['x', 1, 2],
-                    'kwargs':{},
                     'out':{'success':False, 'true_value':3.5}},
                 {
                     'in':['y', 5, 5],
-                    'kwargs':{},
                     'out':{'success':True, 'true_value':5}},
                 {
                     'in':['y', 4, 4],
-                    'kwargs':{},
                     'out':{'success':False, 'true_value':5}},
                 {
                     'in':['z', 5, 5],
-                    'kwargs':{},
                     'out':{'success':True, 'true_value':5}},
                 {
                     'in':['z', 13, 14],
-                    'kwargs':{},
                     'out':{'success':False, 'true_value':5}},
                 {
                     'in':['n', 0, 0],
-                    'kwargs':{},
                     'out':{'success':True, 'true_value':0.0}}
         ]
+
+        for t in T:
+            out = D.expect_column_mean_to_be_between(*t['in'])
+            self.assertEqual(out, t['out'])
+
 
         typedf = ge.dataset.PandasDataSet({
             's' : ['s', np.nan, None, None],
@@ -1013,28 +827,20 @@ class TestPandasDataset(unittest.TestCase):
             'x' : [True, None, False, None],
         })
 
-
-        for t in T:
-            out = D.expect_column_mean_to_be_between(*t['in'], **t['kwargs'])
-            self.assertEqual(out, t['out'])
-
         T = [
                 {
                     'in':['s', 0, 0],
-                    'kwargs':{},
                     'out':{'success':False, 'true_value':None}},
                 {
                     'in':['b', 0, 1],
-                    'kwargs':{},
                     'out':{'success':True, 'true_value':0.5}},
                 {
                     'in':['x', 0, 1],
-                    'kwargs':{},
                     'out':{'success':True, 'true_value':0.5}}
         ]
 
         for t in T:
-            out = typedf.expect_column_mean_to_be_between(*t['in'], **t['kwargs'])
+            out = typedf.expect_column_mean_to_be_between(*t['in'])
             self.assertEqual(out, t['out'])
 
 
@@ -1049,24 +855,20 @@ class TestPandasDataset(unittest.TestCase):
         T = [
                 {
                     'in':['dist1',.5,1.5],
-                    'kwargs':{},
                     'out':{'success':True, 'true_value':D['dist1'].std()}},
                 {
                     'in':['dist1',2,3],
-                    'kwargs':{},
                     'out':{'success':False, 'true_value':D['dist1'].std()}},
                 {
                     'in':['dist2',2,3],
-                    'kwargs':{},
                     'out':{'success':False, 'true_value':1.0}},
                 {
                     'in':['dist2',0,1],
-                    'kwargs':{},
                     'out':{'success':True, 'true_value':1.0}}
         ]
 
         for t in T:
-            out = D.expect_column_stdev_to_be_between(*t['in'], **t['kwargs'])
+            out = D.expect_column_stdev_to_be_between(*t['in'])
             self.assertEqual(out, t['out'])
 
 
@@ -1116,15 +918,8 @@ class TestPandasDataset(unittest.TestCase):
         ]
 
         for t in T:
-            # print t['in'], t['out']
-            if t['in']['min_value'] == None and t['in']['max_value'] == None:
-                with self.assertRaises(Exception) as e:
-                    D.expect_column_unique_value_count_to_be_between(**t['in'])
-                self.assertTrue('min_value and max_value cannot both be None', str(e.exception))
-
-            else:
-                out = D.expect_column_unique_value_count_to_be_between(**t['in'])
-                self.assertEqual(out, t['out'])
+            out = D.expect_column_unique_value_count_to_be_between(**t['in'])
+            self.assertEqual(out, t['out'])
 
     def test_expect_column_unique_proportion_to_be_between(self):
 
@@ -1136,24 +931,20 @@ class TestPandasDataset(unittest.TestCase):
         T = [
                 {
                     'in':['dist1',.5,1.5],
-                    'kwargs':{},
                     'out':{'success':True, 'true_value':D['dist1'].std()}},
                 {
                     'in':['dist1',2,3],
-                    'kwargs':{},
                     'out':{'success':False, 'true_value':D['dist1'].std()}},
                 {
                     'in':['dist2',2,3],
-                    'kwargs':{},
                     'out':{'success':False, 'true_value':1.0}},
                 {
                     'in':['dist2',0,1],
-                    'kwargs':{},
                     'out':{'success':True, 'true_value':1.0}}
         ]
 
         for t in T:
-            out = D.expect_column_stdev_to_be_between(*t['in'], **t['kwargs'])
+            out = D.expect_column_stdev_to_be_between(*t['in'])
             self.assertEqual(out, t['out'])
 
     def test_expectation_decorator_summary_mode(self):
