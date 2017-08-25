@@ -222,10 +222,16 @@ class TestPandasDataset(unittest.TestCase):
         T = [
                 {
                     'in':{'column':'y'},
-                    'out':{'success':False, 'exception_index_list':[1], 'exception_list':[np.nan]}},
+                    'out':{'success':False, 'exception_index_list':[1], 'exception_list':[None]}},
                 {
                     'in':{'column':'n'},
-                    'out':{'success':False, 'exception_index_list':[0,1], 'exception_list':[None, np.nan]}},
+                    'out':{'success':False, 'exception_index_list':[0,1], 'exception_list':[None, None]}},
+                # {
+                #     'in':{'column':'y'},
+                #     'out':{'success':False, 'exception_index_list':[1], 'exception_list':[np.nan]}},
+                # {
+                #     'in':{'column':'n'},
+                #     'out':{'success':False, 'exception_index_list':[0,1], 'exception_list':[None, np.nan]}},
                 {
                     'in':{'column':'x'},
                     'out':{'success':False, 'exception_index_list':[1], 'exception_list':[None]}},

@@ -277,11 +277,12 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         boolean_mapped_success_values = boolean_mapped_null_values==False
         success_count = boolean_mapped_success_values.sum()
 
-        exception_list = list(series[(boolean_mapped_success_values==False)])
+        exception_list = [None for i in list(series[(boolean_mapped_success_values==False)])]
         exception_index_list = list(series[(boolean_mapped_success_values==False)].index)
         exception_count = len(exception_list)
 
-        success, percent_success = self.calc_map_expectation_success(success_count, nonnull_count, exception_count, mostly)
+        # Pass element_count instead of nonnull_count, because that's the right denominator for this expectation
+        success, percent_success = self.calc_map_expectation_success(success_count, element_count, exception_count, mostly)
 
         return_obj = self.format_column_map_output(
             output_format, success,
@@ -313,7 +314,8 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         exception_index_list = list(series[(boolean_mapped_success_values==False)].index)
         exception_count = len(exception_list)
 
-        success, percent_success = self.calc_map_expectation_success(success_count, nonnull_count, exception_count, mostly)
+        # Pass element_count instead of nonnull_count, because that's the right denominator for this expectation
+        success, percent_success = self.calc_map_expectation_success(success_count, element_count, exception_count, mostly)
 
         return_obj = self.format_column_map_output(
             output_format, success,
@@ -601,11 +603,8 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         unique_value_count = series.value_counts().shape[0]
         total_value_count = int(len(series))#.notnull().sum()
 
-        print unique_value_count, total_value_count
-
         if total_value_count > 0:
             proportion_unique = float(unique_value_count) / total_value_count
-            print proportion_unique
         else:
             proportion_unique = None
 
@@ -644,14 +643,14 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
         estimated_cdf = lambda x: np.interp(x, partition_object['partition'], np.append(np.array([0]), np.cumsum(partition_object['weights'])))
 
-        if (bootsrap_samples == 0):
+        if (bootstrap_samples == 0):
             #bootsrap_samples = min(1000, int (len(not_null_values) / len(partition_object['weights'])))
-            bootsrap_samples = 1000
+            bootstrap_samples = 1000
 
         results = [ stats.kstest(
                         np.random.choice(series, size=len(partition_object['weights']), replace=True),
                         estimated_cdf).pvalue
-                    for k in range(bootsrap_samples)
+                    for k in range(bootstrap_samples)
                   ]
 
         test_result = np.mean(results)
@@ -660,7 +659,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
                 "success" : test_result > p,
                 "true_value": test_result,
                 "summary_obj": {
-                    "bootsrap_samples": bootsrap_samples
+                    "bootsrap_samples": bootstrap_samples
                 }
             }
 
