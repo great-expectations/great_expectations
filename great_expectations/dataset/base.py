@@ -12,7 +12,7 @@ from .util import DotDict, ensure_json_serializable
 class DataSet(object):
 
     def __init__(self, *args, **kwargs):
-        super(DataSet, self).__init__()
+        super(DataSet, self).__init__(*args, **kwargs)
         self.initialize_expectations()
 
     @classmethod
