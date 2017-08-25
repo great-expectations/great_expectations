@@ -139,27 +139,24 @@ class TestPandasDataset(unittest.TestCase):
         # Tests for D
         T = [
                 {
-                    'in':['a'],
+                    'in':{'column':'a'},
                     'out':{'success':False, 'exception_index_list':[0,1], 'exception_list':['2','2']}},
                 {
-                    'in':['b'],
+                    'in':{'column':'b'},
                     'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}},
                 {
-                    'in':['c'],
+                    'in':{'column':'c'},
                     'out':{'success':False, 'exception_index_list':[0,1], 'exception_list':[1,1]}},
                 {
-                    'in':['d'],
+                    'in':{'column':'d'},
                     'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}},
                 {
-                    'in':['n'],
-                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}},
-                {
-                    'in':['n'],
+                    'in':{'column':'n'},
                     'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}}
         ]
 
         for t in T:
-            out = D.expect_column_values_to_be_unique(*t['in'])
+            out = D.expect_column_values_to_be_unique(**t['in'])
             self.assertEqual(out, t['out'])
 
 
@@ -190,7 +187,7 @@ class TestPandasDataset(unittest.TestCase):
                 {
                     'in':['n'],
                     'kwargs':{'mostly':.2},
-                    'out':{'success':True, 'exception_index_list':[0,1,3], 'exception_list':[None,None,None]}}
+                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}}
         ]
 
         for t in T:
@@ -217,22 +214,22 @@ class TestPandasDataset(unittest.TestCase):
 
         T = [
                 {
-                    'in':['y'],
+                    'in':{'column':'y'},
                     'out':{'success':False, 'exception_index_list':[1], 'exception_list':[np.nan]}},
                 {
-                    'in':['n'],
+                    'in':{'column':'n'},
                     'out':{'success':False, 'exception_index_list':[0,1], 'exception_list':[None, np.nan]}},
                 {
-                    'in':['x'],
+                    'in':{'column':'x'},
                     'out':{'success':False, 'exception_index_list':[1], 'exception_list':[None]}},
                 {
-                    'in':['z'],
+                    'in':{'column':'z'},
                     'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}}
         ]
 
 
         for t in T:
-            out = D.expect_column_values_to_not_be_null(*t['in'])
+            out = D.expect_column_values_to_not_be_null(**t['in'])
             self.assertEqual(out, t['out'])
 
 
@@ -293,38 +290,31 @@ class TestPandasDataset(unittest.TestCase):
 
         T = [
                 {
-                    'in':['x'],
-                    'kwargs':{},
+                    'in':{'column':'x'},
                     'out':{'success':False, 'exception_index_list':[0,2], 'exception_list':[2,2]}},
                 {
-                    'in':['y'],
-                    'kwargs':{},
+                    'in':{'column':'y'},
                     'out':{'success':False, 'exception_index_list':[0,2], 'exception_list':[2,2]}},
                 {
-                    'in':['z'],
-                    'kwargs':{},
+                    'in':{'column':'z'},
                     'out':{'success':False, 'exception_index_list':[0,1,2], 'exception_list':[2,5,7]}},
                 {
-                    'in':['a'],
-                    'kwargs':{},
+                    'in':{'column':'a'},
                     'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}},
                 {
-                    'in':['x'],
-                    'kwargs':{'mostly':.2},
+                    'in':{'column':'x', 'mostly':.2},
                     'out':{'success':True, 'exception_index_list':[0,2], 'exception_list':[2,2]}},
                 {
-                    'in':['x'],
-                    'kwargs':{'mostly':.8},
+                    'in':{'column':'x', 'mostly':.8},
                     'out':{'success':False, 'exception_index_list':[0,2], 'exception_list':[2,2]}
                     },
                 {
-                    'in':['a'],
-                    'kwargs':{'mostly':.5},
+                    'in':{'column':'a', 'mostly':.5},
                     'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}}
         ]
 
         for t in T:
-            out = D.expect_column_values_to_be_null(*t['in'], **t['kwargs'])
+            out = D.expect_column_values_to_be_null(**t['in'])
             self.assertEqual(out, t['out'])
 
 
@@ -388,24 +378,24 @@ class TestPandasDataset(unittest.TestCase):
 
         T = [
                 {
-                    'in':['x', [1,2,4]],
+                    'in':{'column':'x', 'value_set':[1,2,4]},
                     'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}},
                 {
-                    'in':['x', [4,2]],
+                    'in':{'column':'x', 'value_set':[4,2]},
                     'out':{'success':False, 'exception_index_list':[0], 'exception_list':[1]}},
                 {
-                    'in':['y', []],
+                    'in':{'column':'y', 'value_set':[]},
                     'out':{'success':False, 'exception_index_list':[0,1,2], 'exception_list':[1,2,5]}},
                 {
-                    'in':['z', ['hello','jello','mello']],
+                    'in':{'column':'z', 'value_set':['hello','jello','mello']},
                     'out': {'success':True, 'exception_index_list':[], 'exception_list':[]}},
                 {
-                    'in':['z', ['hello']],
+                    'in':{'column':'z', 'value_set':['hello']},
                     'out': {'success':False, 'exception_index_list':[1,2], 'exception_list':['jello','mello']}}
         ]
 
         for t in T:
-            out = D.expect_column_values_to_be_in_set(*t['in'])
+            out = D.expect_column_values_to_be_in_set(**t['in'])
             self.assertEqual(out,t['out'])
 
 
@@ -416,37 +406,27 @@ class TestPandasDataset(unittest.TestCase):
 
         T = [
                 {
-                    'in':['x',[1,2,None]],
-                    'kwargs':{},
+                    'in':{'column':'x', 'value_set':[1,2]},
                     'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}},
                 {
-                    'in':['x',[1]],
-                    'kwargs':{},
-                    'out':{'success':False, 'exception_index_list':[2,3], 'exception_list':[2,None]}},
+                    'in':{'column':'x', 'value_set':[1]},
+                    'out':{'success':False, 'exception_index_list':[2], 'exception_list':[2]}},
                 {
-                    'in':['x',[1, None]],
-                    'kwargs':{'mostly':.66},
+                    'in':{'column':'x', 'value_set':[1], 'mostly':.66},
                     'out':{'success':True, 'exception_index_list':[2], 'exception_list':[2]}},
                 {
-                    'in':['x',[2]],
-                    'kwargs':{'mostly':.66},
-                    'out':{'success':False, 'exception_index_list':[0,1,3], 'exception_list':[1,1,None]}},
+                    'in':{'column':'x', 'value_set':[2], 'mostly':.66},
+                    'out':{'success':False, 'exception_index_list':[0,1], 'exception_list':[1,1]}},
                 {
-                    'in':['y',[2, None]],
-                    'kwargs':{},
+                    'in':{'column':'y', 'value_set':[]},
                     'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}},
                 {
-                    'in':['y',[]],
-                    'kwargs':{},
-                    'out':{'success':False, 'exception_index_list':[0,1,2,3], 'exception_list':[None, None, None, None]}},
-                {
-                    'in':['y',[2]],
-                    'kwargs':{'mostly':.5},
-                    'out':{'success':False, 'exception_index_list':[0,1,2,3], 'exception_list':[None, None, None, None]}}
+                    'in':{'column':'y', 'value_set':[2], 'mostly':.5},
+                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}}
         ]
 
         for t in T:
-            out = D2.expect_column_values_to_be_in_set(*t['in'], **t['kwargs'])
+            out = D2.expect_column_values_to_be_in_set(**t['in'])
             self.assertEqual(out, t['out'])
 
 
@@ -466,45 +446,36 @@ class TestPandasDataset(unittest.TestCase):
 
         T = [
                 {
-                    'in':['x',[1,2]],
-                    'kwargs':{},
+                    'in':{'column':'x', 'value_set':[1,2]},
                     'out':{'success':False, 'exception_index_list':[0,1], 'exception_list':[1,2]}},
                 {
-                    'in':['x',[5,6]],
-                    'kwargs':{},
+                    'in':{'column':'x','value_set':[5,6]},
                     'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}},
                 {
-                    'in':['z',['hello', 'jello']],
-                    'kwargs':{},
+                    'in':{'column':'z','value_set':['hello', 'jello']},
                     'out':{'success':False, 'exception_index_list':[0,1], 'exception_list':['hello', 'jello']}},
                 {
-                    'in':['z',[]],
-                    'kwargs':{},
+                    'in':{'column':'z','value_set':[]},
                     'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}},
                 {
-                    'in':['a', [1]],
-                    'kwargs':{},
+                    'in':{'column':'a', 'value_set':[1]},
                     'out':{'success':False, 'exception_index_list':[0,1], 'exception_list':[1, 1]}},
                 {
-                    'in':['n', [2]],
-                    'kwargs':{},
+                    'in':{'column':'n', 'value_set':[2]},
                     'out':{'success':False, 'exception_index_list':[2], 'exception_list':[2]}},
                 {
-                    'in':['n', []],
-                    'kwargs':{},
+                    'in':{'column':'n', 'value_set':[]},
                     'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}},
                 {
-                    'in':['a', [1]],
-                    'kwargs':{'mostly':.1},
+                    'in':{'column':'a', 'value_set':[1], 'mostly':.1},
                     'out':{'success':True, 'exception_index_list':[0,1], 'exception_list':[1, 1]}},
                 {
-                    'in':['n', [2]],
-                    'kwargs':{'mostly':.9},
+                    'in':{'column':'n', 'value_set':[2], 'mostly':.9},
                     'out':{'success':False, 'exception_index_list':[2], 'exception_list':[2]}}
         ]
 
         for t in T:
-            out = D.expect_column_values_to_not_be_in_set(*t['in'], **t['kwargs'])
+            out = D.expect_column_values_to_not_be_in_set(**t['in'])
             self.assertEqual(out, t['out'])
 
 
@@ -536,18 +507,18 @@ class TestPandasDataset(unittest.TestCase):
 
         T = [
                 {
-                    'in':['s1', 3, 5],
+                    'in':{'column':'s1', 'min_value':3, 'max_value':5},
                     'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}},
                 {
-                    'in':['s2', 4, 6],
+                    'in':{'column':'s2', 'min_value':4, 'max_value':6},
                     'out':{'success':False, 'exception_index_list':[2], 'exception_list':['collected']}},
                 {
-                    'in':['s2', None, 10],
+                    'in':{'column':'s2', 'min_value':None, 'max_value':10},
                     'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}}
         ]
 
         for t in T:
-            out = D.expect_column_value_lengths_to_be_between(*t['in'])
+            out = D.expect_column_value_lengths_to_be_between(**t['in'])
             self.assertEqual(out, t['out'])
 
 
@@ -635,21 +606,18 @@ class TestPandasDataset(unittest.TestCase):
 
         T = [
                 {
-                    'in':['x', '^a'],
+                    'in':{'column':'x', 'regex':'^a'},
                     'out':{'success':False, 'exception_index_list':[0,1,2,3], 'exception_list':['aa', 'ab', 'ac', 'a1']}},
                 {
-                    'in':['x', '^b'],
+                    'in':{'column':'x', 'regex':'^b'},
                     'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}},
                 {
-                    'in':['y', '^z'],
-                    'out':{'success':False, 'exception_index_list':[6], 'exception_list':['zxxxx']}},
-                {
-                    'in':['x', '^a'],
-                    'out':{'success':False, 'exception_index_list':[], 'exception_list':[]}}
+                    'in':{'column':'y', 'regex':'^z'},
+                    'out':{'success':False, 'exception_index_list':[6], 'exception_list':['zxxxx']}}
         ]
 
         for t in T:
-            out = D.expect_column_values_to_not_match_regex(*t['in'])
+            out = D.expect_column_values_to_not_match_regex(**t['in'])
             self.assertEqual(out, t['out'])
 
 
@@ -676,29 +644,24 @@ class TestPandasDataset(unittest.TestCase):
 
         T = [
                 {
-                    'in':['us_dates','%m/%d/%Y'],
-                    'kwargs':{},
+                    'in':{'column':'us_dates', 'strftime_format':'%m/%d/%Y'},
                     'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}},
                 {
-                    'in':['us_dates_type_error','%m/%d/%Y'],
-                    'kwargs':{'mostly': 0.5},
+                    'in':{'column':'us_dates_type_error','strftime_format':'%m/%d/%Y', 'mostly': 0.5},
                     'out':{'success':True, 'exception_index_list':[2], 'exception_list':[5]}},
                 {
-                    'in':['us_dates_type_error','%m/%d/%Y'],
-                    'kwargs':{},
+                    'in':{'column':'us_dates_type_error','strftime_format':'%m/%d/%Y'},
                     'out':{'success':False,'exception_index_list':[2], 'exception_list':[5]}},
                 {
-                    'in':['almost_iso8601','%Y-%m-%dT%H:%M:%S'],
-                    'kwargs':{},
+                    'in':{'column':'almost_iso8601','strftime_format':'%Y-%m-%dT%H:%M:%S'},
                     'out':{'success':True,'exception_index_list':[], 'exception_list':[]}},
                 {
-                    'in':['almost_iso8601_val_error','%Y-%m-%dT%H:%M:%S'],
-                    'kwargs':{},
+                    'in':{'column':'almost_iso8601_val_error','strftime_format':'%Y-%m-%dT%H:%M:%S'},
                     'out':{'success':False,'exception_index_list':[0], 'exception_list':['1977-05-55T00:00:00']}}
         ]
 
         for t in T:
-            out = D.expect_column_values_to_match_strftime_format(*t['in'], **t['kwargs'])
+            out = D.expect_column_values_to_match_strftime_format(**t['in'])
             self.assertEqual(out, t['out'])
 
 
@@ -734,7 +697,7 @@ class TestPandasDataset(unittest.TestCase):
             self.assertEqual(out, t['out'])
 
 
-    def test_expect_column_values_to_be_valid_json(self):
+    def test_expect_column_values_to_be_json_parseable(self):
         d1 = json.dumps({'i':[1,2,3],'j':35,'k':{'x':'five','y':5,'z':'101'}})
         d2 = json.dumps({'i':1,'j':2,'k':[3,4,5]})
         d3 = json.dumps({'i':'a', 'j':'b', 'k':'c'})
@@ -748,29 +711,24 @@ class TestPandasDataset(unittest.TestCase):
 
         T = [
                 {
-                    'in':['json_col'],
-                    'kwargs':{},
+                    'in':{'column':'json_col'},
                     'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}},
                 {
-                    'in':['not_json'],
-                    'kwargs':{},
+                    'in':{'column':'not_json'},
                     'out':{'success':False, 'exception_index_list':[0,1,2,3], 'exception_list':[4,5,6,7]}},
                 {
-                    'in':['py_dict'],
-                    'kwargs':{},
+                    'in':{'column':'py_dict'},
                     'out':{'success':False, 'exception_index_list':[0,1,2,3], 'exception_list':[{'a':1, 'out':1},{'b':2, 'out':4},{'c':3, 'out':9},{'d':4, 'out':16}]}},
                 {
-                    'in':['most'],
-                    'kwargs':{},
+                    'in':{'column':'most'},
                     'out':{'success':False, 'exception_index_list':[3], 'exception_list':['d4']}},
                 {
-                    'in':['most'],
-                    'kwargs':{'mostly':.75},
+                    'in':{'column':'most', 'mostly':.75},
                     'out':{'success':True, 'exception_index_list':[3], 'exception_list':['d4']}}
         ]
 
         for t in T:
-            out = D.expect_column_values_to_be_valid_json(*t['in'], **t['kwargs'])
+            out = D.expect_column_values_to_be_json_parseable(**t['in'])
             self.assertEqual(out, t['out'])
 
 
@@ -788,36 +746,35 @@ class TestPandasDataset(unittest.TestCase):
             'y' : [5.0, 5],
             'z' : [0, 10],
             'n' : [0, None],
-            's' : ['s', np.nan],
             'b' : [True, False],
         })
 
         T = [
                 {
-                    'in':['x', 2, 5],
+                    'in':{'column':'x', 'min_value':2, 'max_value':5},
                     'out':{'success':True, 'true_value':3.5}},
                 {
-                    'in':['x', 1, 2],
+                    'in':{'column':'x', 'min_value':1, 'max_value':2},
                     'out':{'success':False, 'true_value':3.5}},
                 {
-                    'in':['y', 5, 5],
+                    'in':{'column':'y', 'min_value':5, 'max_value':5},
                     'out':{'success':True, 'true_value':5}},
                 {
-                    'in':['y', 4, 4],
+                    'in':{'column':'y', 'min_value':4, 'max_value':4},
                     'out':{'success':False, 'true_value':5}},
                 {
-                    'in':['z', 5, 5],
+                    'in':{'column':'z', 'min_value':5, 'max_value':5},
                     'out':{'success':True, 'true_value':5}},
                 {
-                    'in':['z', 13, 14],
+                    'in':{'column':'z', 'min_value':13, 'max_value':14},
                     'out':{'success':False, 'true_value':5}},
                 {
-                    'in':['n', 0, 0],
+                    'in':{'column':'n', 'min_value':0, 'max_value':0},
                     'out':{'success':True, 'true_value':0.0}}
         ]
 
         for t in T:
-            out = D.expect_column_mean_to_be_between(*t['in'])
+            out = D.expect_column_mean_to_be_between(**t['in'])
             self.assertEqual(out, t['out'])
 
 
@@ -829,19 +786,22 @@ class TestPandasDataset(unittest.TestCase):
 
         T = [
                 {
-                    'in':['s', 0, 0],
+                    'in':{'column':'s', 'min_value':0, 'max_value':0},
                     'out':{'success':False, 'true_value':None}},
                 {
-                    'in':['b', 0, 1],
+                    'in':{'column':'b', 'min_value':0, 'max_value':1},
                     'out':{'success':True, 'true_value':0.5}},
                 {
-                    'in':['x', 0, 1],
+                    'in':{'column':'x', 'min_value':0, 'max_value':1},
                     'out':{'success':True, 'true_value':0.5}}
         ]
 
-        for t in T:
-            out = typedf.expect_column_mean_to_be_between(*t['in'])
+        for t in T[1:]:
+            out = typedf.expect_column_mean_to_be_between(**t['in'])
             self.assertEqual(out, t['out'])
+
+        with self.assertRaises(TypeError):
+            typedf.expect_column_mean_to_be_between(T[0]['in'])
 
 
 
@@ -854,21 +814,21 @@ class TestPandasDataset(unittest.TestCase):
 
         T = [
                 {
-                    'in':['dist1',.5,1.5],
+                    'in':{'column':'dist1', 'min_value':.5, 'max_value':1.5},
                     'out':{'success':True, 'true_value':D['dist1'].std()}},
                 {
-                    'in':['dist1',2,3],
+                    'in':{'column':'dist1', 'min_value':2, 'max_value':3},
                     'out':{'success':False, 'true_value':D['dist1'].std()}},
                 {
-                    'in':['dist2',2,3],
+                    'in':{'column':'dist2', 'min_value':2, 'max_value':3},
                     'out':{'success':False, 'true_value':1.0}},
                 {
-                    'in':['dist2',0,1],
+                    'in':{'column':'dist2', 'min_value':0, 'max_value':1},
                     'out':{'success':True, 'true_value':1.0}}
         ]
 
         for t in T:
-            out = D.expect_column_stdev_to_be_between(*t['in'])
+            out = D.expect_column_stdev_to_be_between(**t['in'])
             self.assertEqual(out, t['out'])
 
 
@@ -930,21 +890,21 @@ class TestPandasDataset(unittest.TestCase):
 
         T = [
                 {
-                    'in':['dist1',.5,1.5],
+                    'in':{'column':'dist1', 'min_value':.5, 'max_value':1.5},
                     'out':{'success':True, 'true_value':D['dist1'].std()}},
                 {
-                    'in':['dist1',2,3],
+                    'in':{'column':'dist1', 'min_value':2, 'max_value':3},
                     'out':{'success':False, 'true_value':D['dist1'].std()}},
                 {
-                    'in':['dist2',2,3],
+                    'in':{'column':'dist2', 'min_value':2, 'max_value':3},
                     'out':{'success':False, 'true_value':1.0}},
                 {
-                    'in':['dist2',0,1],
+                    'in':{'column':'dist2', 'min_value':0, 'max_value':1},
                     'out':{'success':True, 'true_value':1.0}}
         ]
 
         for t in T:
-            out = D.expect_column_stdev_to_be_between(*t['in'])
+            out = D.expect_column_unique_proportion_to_be_between(**t['in'])
             self.assertEqual(out, t['out'])
 
     def test_expectation_decorator_summary_mode(self):
