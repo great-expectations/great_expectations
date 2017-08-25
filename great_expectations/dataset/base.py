@@ -227,9 +227,105 @@ class DataSet(object):
             "results" : results
         }
 
+
+    ##### Output generation #####
+
+    def format_column_map_output(self,
+        output_format, success,
+        element_count,
+        nonnull_values, nonnull_count,
+        boolean_mapped_success_values, success_count,
+        exception_list, exception_index_list
+    ):
+        if output_format=="BOOLEAN_ONLY":
+            return_obj = success
+
+        elif output_format=="BASIC":
+            exception_count = len(exception_list)
+
+            return_obj = {
+                "success": success,
+                "summary_obj": {
+                    "partial_exception_list": exception_list[:20],
+                    "exception_count": exception_count,
+                    "exception_percent": float(exception_count) / nonnull_count,
+                }
+            }
+
+        elif output_format == "COMPLETE":
+            return_obj = {
+                "success": success,
+                "exception_list": exception_list,
+                "exception_index_list": exception_index_list,
+            }
+
+        elif output_format == "SUMMARY":
+            # element_count = int(len(series))
+            missing_count = element_count-int(len(nonnull_values))#int(null_indexes.sum())
+            exception_count = len(exception_list)
+
+            exception_value_series = pd.Series(exception_list).value_counts()
+            exception_counts = dict(zip(
+                list(exception_value_series.index),
+                list(exception_value_series.values),
+            ))
+
+            if element_count > 0:
+                missing_percent = float(missing_count) / element_count
+
+                if nonnull_count > 0:
+                    exception_percent = float(exception_count) / element_count
+                    exception_percent_nonmissing = float(exception_count) / nonnull_count
+
+            else:
+                missing_percent = None
+                nonmissing_count = None
+                exception_percent = None
+                exception_percent_nonmissing = None
+
+
+            return_obj = {
+                "success" : success,
+                "exception_list" : exception_list,
+                "exception_index_list": exception_index_list,
+                "summary_obj" : {
+                    "element_count" : element_count,
+                    "missing_count" : missing_count,
+                    "missing_percent" : missing_percent,
+                    "exception_count" : exception_count,
+                    "exception_percent": exception_percent,
+                    "exception_percent_nonmissing": exception_percent_nonmissing,
+                    "exception_counts": exception_counts,
+                }
+            }
+
+        else:
+            print ("Warning: Unknown output_format %s. Defaulting to BASIC." % (output_format,))
+            return_obj = {
+                "success" : success,
+                "exception_list" : exception_list,
+            }
+
+        return return_obj
+
+    def calc_map_expectation_success(self, success_count, nonnull_count, exception_count, mostly):
+        if nonnull_count > 0:
+            percent_success = float(success_count)/nonnull_count
+
+            if mostly:
+                success = percent_success >= mostly
+
+            else:
+                success = exception_count == 0
+
+        else:
+            success = True
+            percent_success = None
+
+        return success, percent_success
     ##### Table shape expectations #####
 
-    def expect_column_to_exist(self, column, suppress_exceptions=False):
+    def expect_column_to_exist(self, column):
         """Expect the specified column to exist in the data set.
         Args:
             column (str): The column name.
@@ -243,7 +339,7 @@ class DataSet(object):
         """
         raise NotImplementedError
 
-    def expect_table_row_count_to_be_between(self, min_value, max_value, suppress_exceptions=False):
+    def expect_table_row_count_to_be_between(self, min_value, max_value):
         """Expect the number of rows in a data set to be between two values.
         Args:
             min_value (int or None): the minimum number of rows.
