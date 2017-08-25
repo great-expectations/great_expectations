@@ -43,7 +43,9 @@ class DataSet(object):
 
                 if "output_format" in kwargs:
                     output_format = kwargs["output_format"]
-                    del all_args["output_format"]
+                    # This intends to get the signature of the inner wrapper, if there is one.
+                    if "output_format" not in inspect.getargspec(func):
+                        del all_args["output_format"]
                 else:
                     output_format = self.default_expectation_args["output_format"]
 
@@ -69,7 +71,7 @@ class DataSet(object):
 
                 #Finally, execute the expectation method itself
                 try:
-                    return_obj = func(self, output_format=output_format, **all_args)
+                    return_obj = func(self, **all_args)
 
                 except Exception as err:
                     if catch_exceptions:
