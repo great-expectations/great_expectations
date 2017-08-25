@@ -43,12 +43,15 @@ class DataSet(object):
 
                 if "output_format" in kwargs:
                     output_format = kwargs["output_format"]
-                    # This intends to get the signature of the inner wrapper, if there is one.
-                    if "output_format" not in inspect.getargspec(func):
-                        del all_args["output_format"]
                 else:
                     output_format = self.default_expectation_args["output_format"]
 
+                # This intends to get the signature of the inner wrapper, if there is one.
+                if "output_format" in inspect.getargspec(func)[0][1:]:
+                    all_args["output_format"] = output_format
+                else:
+                    if "output_format" in all_args:
+                        del all_args["output_format"]
 
                 all_args = ensure_json_serializable(all_args)
 

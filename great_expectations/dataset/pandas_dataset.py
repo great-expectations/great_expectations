@@ -23,7 +23,7 @@ class MetaPandasDataSet(DataSet):
         @wraps(func)
         def inner_wrapper(self, column, mostly=None, output_format=None, *args, **kwargs):
 
-            if output_format == None:
+            if output_format is None:
                 output_format = self.default_expectation_args["output_format"]
 
             series = self[column]
@@ -122,17 +122,16 @@ class MetaPandasDataSet(DataSet):
 
         @cls.expectation(inspect.getargspec(func)[0][1:])
         @wraps(func)
-        def inner_wrapper(self, column, *args, **kwargs):
-            try:
-                output_format = kwargs.pop('output_format')
-            except KeyError:
-                output_format = None
+        def inner_wrapper(self, column, output_format = None, *args, **kwargs):
+
+            if output_format is None:
+                output_format = self.default_expectation_args["output_format"]
 
             series = self[column]
             null_indexes = series.isnull()
 
-            nonnull_values = series[null_indexes==False]
-            nonnull_count = (null_indexes==False).sum()
+            nonnull_values = series[null_indexes == False]
+            nonnull_count = (null_indexes == False).sum()
 
             result_obj = func(self, nonnull_values, *args, **kwargs)
 
@@ -198,35 +197,25 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
                 "success": False
             }
 
-    @DataSet.old_expectation
-    def expect_table_row_count_to_be_between(self, min_value, max_value,suppress_exceptions=False):
+    @DataSet.expectation(['min_value', 'max_value'])
+    def expect_table_row_count_to_be_between(self, min_value, max_value):
 
         outcome = False
         if self.shape[0] >= min_value and self.shape[0] <= max_value:
             outcome = True
 
-        if suppress_exceptions:
-            exceptions = None
-        else:
-            exceptions = self.shape[0]
-
         return {
             'success':outcome,
-            'true_value':exceptions
+            'true_value': self.shape[0]
         }
 
 
-    @DataSet.old_expectation
-    def expect_table_row_count_to_equal(self, value, suppress_exceptions=False):
+    @DataSet.expectation(['value'])
+    def expect_table_row_count_to_equal(self, value):
 
         outcome = False
         if self.shape[0] == value:
             outcome = True
-
-        if suppress_exceptions:
-            exceptions = None
-        else:
-            exceptions = self.shape[0]
 
         return {
             'success':outcome,
