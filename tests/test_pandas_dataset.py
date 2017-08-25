@@ -924,10 +924,10 @@ class TestPandasDataset(unittest.TestCase):
         T = [
                 {
                     'in':{'column':'dist1', 'min_value':.5, 'max_value':1.5},
-                    'out':{'success':True, 'true_value':.6666666}},
+                    'out':{'success':True, 'true_value':0.6666666666666666}},
                 {
                     'in':{'column':'dist1', 'min_value':2, 'max_value':3},
-                    'out':{'success':False, 'true_value':.6666666}},
+                    'out':{'success':False, 'true_value':0.6666666666666666}},
                 {
                     'in':{'column':'dist2', 'min_value':2, 'max_value':3},
                     'out':{'success':False, 'true_value':1.0}},
