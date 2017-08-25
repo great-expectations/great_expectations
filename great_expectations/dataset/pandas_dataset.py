@@ -19,7 +19,7 @@ class MetaPandasDataSet(DataSet):
     @classmethod
     def column_map_expectation(cls, func):
 
-        @cls.expectation
+        @cls.expectation(inspect.getargspec(func)[0][1:])
         @wraps(func)
         def inner_wrapper(self, column, mostly=None, output_format=None, *args, **kwargs):
 
