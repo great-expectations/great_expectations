@@ -76,10 +76,8 @@ class DataSet(object):
 
                 #Construct the expectation_config object
                 expectation_config = DotDict({
-                    "expectation_type" : method_name,
-                    ## Changed to support python 3, but note that there may be ambiguity here.
-                    ## TODO: ensure this is the intended logic
-                    "kwargs" : all_args
+                    "expectation_type": method_name,
+                    "kwargs": all_args
                 })
 
                 #Add the expectation_method key
