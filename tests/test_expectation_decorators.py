@@ -276,8 +276,6 @@ class TestExpectationDecorators(unittest.TestCase):
 
         result_obj = df.expectation_that_crashes_on_sixes("all_even", catch_exceptions=True)
         comparison_obj = {
-            'exception_list': None,
-            'exception_index_list': None,
             'success': False,
             'raised_exception': True,
         }
