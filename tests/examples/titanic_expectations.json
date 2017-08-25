@@ -3,12 +3,6 @@
     {
       "expectation_type": "expect_column_to_exist", 
       "kwargs": {
-        "column": "Unnamed: 0"
-      }
-    }, 
-    {
-      "expectation_type": "expect_column_to_exist", 
-      "kwargs": {
         "column": "Name"
       }
     }, 
@@ -70,7 +64,7 @@
       "expectation_type": "expect_column_values_to_be_in_set", 
       "kwargs": {
         "column": "PClass", 
-        "values_set": [
+        "value_set": [
           "1st", 
           "2nd", 
           "3rd"
