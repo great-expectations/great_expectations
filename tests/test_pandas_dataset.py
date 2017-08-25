@@ -907,7 +907,7 @@ class TestPandasDataset(unittest.TestCase):
             out = D.expect_column_unique_value_count_to_be_between(**t['in'])
             self.assertEqual(out, t['out'])
 
-    def test_expect_column_unique_proportion_to_be_between(self):
+    def test_expect_column_proportion_of_unique_values_to_be_between(self):
 
         D = ge.dataset.PandasDataSet({
             'dist1' : [1,1,3],
@@ -918,10 +918,10 @@ class TestPandasDataset(unittest.TestCase):
         T = [
                 {
                     'in':{'column':'dist1', 'min_value':.5, 'max_value':1.5},
-                    'out':{'success':True, 'true_value':D['dist1'].std()}},
+                    'out':{'success':True, 'true_value':.6666666}},
                 {
                     'in':{'column':'dist1', 'min_value':2, 'max_value':3},
-                    'out':{'success':False, 'true_value':D['dist1'].std()}},
+                    'out':{'success':False, 'true_value':.6666666}},
                 {
                     'in':{'column':'dist2', 'min_value':2, 'max_value':3},
                     'out':{'success':False, 'true_value':1.0}},
@@ -931,7 +931,7 @@ class TestPandasDataset(unittest.TestCase):
         ]
 
         for t in T:
-            out = D.expect_column_unique_proportion_to_be_between(**t['in'])
+            out = D.expect_column_proportion_of_unique_values_to_be_between(**t['in'])
             self.assertEqual(out, t['out'])
 
     def test_expectation_decorator_summary_mode(self):

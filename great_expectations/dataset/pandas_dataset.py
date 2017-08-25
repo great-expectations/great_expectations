@@ -41,20 +41,6 @@ class MetaPandasDataSet(DataSet):
             exception_count = len(exception_list)
 
             success, percent_success = self.calc_map_expectation_success(success_count, nonnull_count, exception_count, mostly)
-            # if nonnull_count > 0:
-            #     percent_success = float(success_count)/nonnull_count
-
-            #     if mostly:
-            #         success = percent_success >= mostly
-
-            #     else:
-            #         success = len(exception_list) == 0
-
-            # else:
-            #     success = True
-            #     percent_success = None
-
-            # print nonnull_count, success_count, percent_success, success
 
             return_obj = self.format_column_map_output(
                 output_format, success,
@@ -65,77 +51,6 @@ class MetaPandasDataSet(DataSet):
             )
 
             return return_obj
-
-            # if output_format=="BOOLEAN_ONLY":
-            #     return_obj = success
-
-            # elif output_format=="BASIC":
-            #     exception_count = len(exception_list)
-
-            #     return_obj = {
-            #         "success" : success,
-            #         "summary_obj" : {
-            #             "exception_list" : exception_list[:20],
-            #             "exception_count" : exception_count,
-            #             "exception_percent" : float(exception_count) / nonnull_count,
-            #         }
-            #     }
-
-            # elif output_format=="COMPLETE":
-            #     return_obj = {
-            #         "success" : success,
-            #         "exception_list" : exception_list,
-            #         "exception_index_list": exception_index_list,
-            #     }
-
-            # elif output_format=="SUMMARY":
-            #     element_count = int(len(series))
-            #     missing_count = int(null_indexes.sum())
-            #     exception_count = len(exception_list)
-
-            #     exception_value_series = pd.Series(exception_list).value_counts()
-            #     exception_counts = dict(zip(
-            #         list(exception_value_series.index),
-            #         list(exception_value_series.values),
-            #     ))
-
-            #     if element_count > 0:
-            #         missing_percent = float(missing_count) / element_count
-
-            #         if nonnull_count > 0:
-            #             exception_percent = float(exception_count) / element_count
-            #             exception_percent_nonmissing = float(exception_count) / nonnull_count
-
-            #     else:
-            #         missing_percent = None
-            #         nonmissing_count = None
-            #         exception_percent = None
-            #         exception_percent_nonmissing = None
-
-
-            #     return_obj = {
-            #         "success" : success,
-            #         "exception_list" : exception_list,
-            #         "exception_index_list": exception_index_list,
-            #         "summary_obj" : {
-            #             "element_count" : element_count,
-            #             "missing_count" : missing_count,
-            #             "missing_percent" : missing_percent,
-            #             "exception_count" : exception_count,
-            #             "exception_percent": exception_percent,
-            #             "exception_percent_nonmissing": exception_percent_nonmissing,
-            #             "exception_counts": exception_counts,
-            #         }
-            #     }
-
-            # else:
-            #     print ("Warning: Unknown output_format %s. Defaulting to BASIC." % (output_format,))
-            #     return_obj = {
-            #         "success" : success,
-            #         "exception_list" : exception_list,
-            #     }
-
-            # return return_obj
 
         inner_wrapper.__name__ = func.__name__
         inner_wrapper.__doc__ = func.__doc__
@@ -347,15 +262,6 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         return series.map(lambda x: x not in dupes)
 
 
-    # @MetaPandasDataSet.column_map_expectation
-    # def expect_column_values_to_not_be_null(self, series):
-    #     return series.map(pd.notnull)
-
-
-    # @MetaPandasDataSet.column_map_expectation
-    # def expect_column_values_to_be_null(self, series):
-    #     return series.map(pd.isnull)
-
     @DataSet.expectation
     def expect_column_values_to_not_be_null(self, column, mostly=None, output_format=None):
         if output_format == None:
@@ -368,7 +274,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         nonnull_values = series[boolean_mapped_null_values==False]
         nonnull_count = (boolean_mapped_null_values==False).sum()
 
-        boolean_mapped_success_values = boolean_mapped_null_values==False#func(self, nonnull_values, *args, **kwargs)
+        boolean_mapped_success_values = boolean_mapped_null_values==False
         success_count = boolean_mapped_success_values.sum()
 
         exception_list = list(series[(boolean_mapped_success_values==False)])
@@ -693,10 +599,13 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
     @MetaPandasDataSet.column_aggregate_expectation
     def expect_column_proportion_of_unique_values_to_be_between(self, series, min_value=0, max_value=1):
         unique_value_count = series.value_counts().shape[0]
-        total_value_count = series.notnull().sum()
+        total_value_count = int(len(series))#.notnull().sum()
 
-        if denominator > 0:
-            proportion_unique = (1. * unique_value_count) / total_value_count
+        print unique_value_count, total_value_count
+
+        if total_value_count > 0:
+            proportion_unique = float(unique_value_count) / total_value_count
+            print proportion_unique
         else:
             proportion_unique = None
 
