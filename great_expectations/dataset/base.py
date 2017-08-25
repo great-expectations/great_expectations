@@ -229,7 +229,6 @@ class DataSet(object):
 
 
     ##### Output generation #####
-
     def format_column_map_output(self,
         output_format, success,
         element_count,
@@ -237,10 +236,10 @@ class DataSet(object):
         boolean_mapped_success_values, success_count,
         exception_list, exception_index_list
     ):
-        if output_format=="BOOLEAN_ONLY":
+        if output_format == "BOOLEAN_ONLY":
             return_obj = success
 
-        elif output_format=="BASIC":
+        elif output_format == "BASIC":
             exception_count = len(exception_list)
 
             return_obj = {
@@ -283,16 +282,15 @@ class DataSet(object):
                 exception_percent = None
                 exception_percent_nonmissing = None
 
-
             return_obj = {
-                "success" : success,
-                "exception_list" : exception_list,
+                "success": success,
+                "exception_list": exception_list,
                 "exception_index_list": exception_index_list,
-                "summary_obj" : {
-                    "element_count" : element_count,
-                    "missing_count" : missing_count,
-                    "missing_percent" : missing_percent,
-                    "exception_count" : exception_count,
+                "summary_obj": {
+                    "element_count": element_count,
+                    "missing_count": missing_count,
+                    "missing_percent": missing_percent,
+                    "exception_count": exception_count,
                     "exception_percent": exception_percent,
                     "exception_percent_nonmissing": exception_percent_nonmissing,
                     "exception_counts": exception_counts,
@@ -323,6 +321,7 @@ class DataSet(object):
             percent_success = None
 
         return success, percent_success
+
     ##### Table shape expectations #####
 
     def expect_column_to_exist(self, column):
