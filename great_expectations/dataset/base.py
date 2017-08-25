@@ -72,25 +72,26 @@ class DataSet(object):
             exception_traceback = None
 
             #Finally, execute the expectation method itself
-            try:
-                return_obj = func(self, output_format=output_format, **all_args)
+            return_obj = func(self, output_format=output_format, **all_args)
+            # try:
+            #     return_obj = func(self, output_format=output_format, **all_args)
 
-            except Exception as err:
-                if catch_exceptions:
-                    raised_exception = True
-                    exception_traceback = traceback.format_exc()
+            # except Exception as err:
+            #     if catch_exceptions:
+            #         raised_exception = True
+            #         exception_traceback = traceback.format_exc()
 
-                    if output_format != "BOOLEAN_ONLY":
-                        return_obj = {
-                            "success" : False,
-                            "exception_list": None,
-                            "exception_index_list": None
-                        }
-                    else:
-                        return_obj = False
+            #         if output_format != "BOOLEAN_ONLY":
+            #             return_obj = {
+            #                 "success" : False,
+            #                 "exception_list": None,
+            #                 "exception_index_list": None
+            #             }
+            #         else:
+            #             return_obj = False
 
-                else:
-                    raise(err)
+            #     else:
+            #         raise(err)
 
             if output_format != 'BOOLEAN_ONLY':
                 if include_config:

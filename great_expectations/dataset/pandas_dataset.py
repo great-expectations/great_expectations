@@ -29,6 +29,7 @@ class MetaPandasDataSet(DataSet):
             series = self[column]
             null_indexes = series.isnull()
 
+            element_count = int(len(series))
             nonnull_values = series[null_indexes==False]
             nonnull_count = (null_indexes==False).sum()
 
@@ -57,6 +58,7 @@ class MetaPandasDataSet(DataSet):
 
             return_obj = self.format_column_map_output(
                 output_format, success,
+                element_count,
                 nonnull_values, nonnull_count,
                 successful_indexes, success_count,
                 exception_list, exception_index_list
@@ -192,6 +194,7 @@ class MetaPandasDataSet(DataSet):
 
     def format_column_map_output(self,
         output_format, success,
+        element_count,
         nonnull_values, nonnull_count,
         successful_indexes, success_count,
         exception_list, exception_index_list
@@ -219,8 +222,8 @@ class MetaPandasDataSet(DataSet):
             }
 
         elif output_format=="SUMMARY":
-            element_count = int(len(series))
-            missing_count = int(null_indexes.sum())
+            # element_count = int(len(series))
+            missing_count = element_count-int(len(nonnull_values))#int(null_indexes.sum())
             exception_count = len(exception_list)
 
             exception_value_series = pd.Series(exception_list).value_counts()
@@ -344,43 +347,45 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         return series.map(lambda x: x not in dupes)
 
 
-    @MetaPandasDataSet.column_map_expectation
-    def expect_column_values_to_not_be_null(self, series):
-        return series.map(pd.notnull)
+    # @MetaPandasDataSet.column_map_expectation
+    # def expect_column_values_to_not_be_null(self, series):
+    #     return series.map(pd.notnull)
 
 
     # @MetaPandasDataSet.column_map_expectation
     # def expect_column_values_to_be_null(self, series):
     #     return series.map(pd.isnull)
 
-    # @DataSet.expectation
-    # def expect_column_values_to_not_be_null(self, column, mostly=None, output_format=None):
-    #     if output_format == None:
-    #         output_format = self.default_expectation_args["output_format"]
+    @DataSet.expectation
+    def expect_column_values_to_not_be_null(self, column, mostly=None, output_format=None):
+        if output_format == None:
+            output_format = self.default_expectation_args["output_format"]
 
-    #     series = self[column]
-    #     null_indexes = series.isnull()
+        series = self[column]
+        null_indexes = series.isnull()
 
-    #     nonnull_values = series[null_indexes==False]
-    #     nonnull_count = (null_indexes==False).sum()
+        element_count = int(len(series))
+        nonnull_values = series[null_indexes==False]
+        nonnull_count = (null_indexes==False).sum()
 
-    #     successful_indexes = nonnull_values#func(self, nonnull_values, *args, **kwargs)
-    #     success_count = successful_indexes.sum()
+        successful_indexes = nonnull_values#func(self, nonnull_values, *args, **kwargs)
+        success_count = successful_indexes.sum()
 
-    #     exception_list = list(series[(successful_indexes==False)])
-    #     exception_index_list = list(series[(successful_indexes==False)].index)
-    #     exception_count = len(exception_list)
+        exception_list = list(series[(successful_indexes==False)])
+        exception_index_list = list(series[(successful_indexes==False)].index)
+        exception_count = len(exception_list)
 
-    #     success, percent_success = self.calc_map_expectation_success(success_count, nonnull_count, exception_count, mostly)
+        success, percent_success = self.calc_map_expectation_success(success_count, nonnull_count, exception_count, mostly)
 
-    #     return_obj = self.format_column_map_output(
-    #         output_format, success,
-    #         nonnull_values, nonnull_count,
-    #         successful_indexes, success_count,
-    #         exception_list, exception_index_list
-    #     )
+        return_obj = self.format_column_map_output(
+            output_format, success,
+            element_count,
+            nonnull_values, nonnull_count,
+            successful_indexes, success_count,
+            exception_list, exception_index_list
+        )
 
-    #     return return_obj
+        return return_obj
 
 
     @MetaPandasDataSet.column_map_expectation
