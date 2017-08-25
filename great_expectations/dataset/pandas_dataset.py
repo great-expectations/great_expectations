@@ -87,7 +87,7 @@ class MetaPandasDataSet(DataSet):
                     "true_value" : result_obj["true_value"],
                 }
 
-            elif (output_format == "SUMMARY") or (output_format == "COMPLETE"):
+            elif (output_format == "SUMMARY"):
                 return_obj = {
                     "success" : bool(result_obj["success"]),
                     "true_value" : result_obj["true_value"],
