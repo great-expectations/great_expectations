@@ -163,7 +163,7 @@ class MetaPandasDataSet(DataSet):
             #!!!    true_value: int or float
             #!!!    summary_obj: json-serializable dict
 
-            if output_format == "BASIC":
+            if output_format in ["BASIC", "COMPLETE"]:
                 return_obj = {
                     "success" : bool(result_obj["success"]),
                     "true_value" : result_obj["true_value"],
