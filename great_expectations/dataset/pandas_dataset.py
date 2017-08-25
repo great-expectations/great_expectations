@@ -556,14 +556,14 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
         estimated_cdf = lambda x: np.interp(x, partition_object['partition'], np.append(np.array([0]), np.cumsum(partition_object['weights'])))
 
-        if (bootsrap_samples == 0):
-            #bootsrap_samples = min(1000, int (len(not_null_values) / len(partition_object['weights'])))
-            bootsrap_samples = 1000
+        if (bootstrap_samples == 0):
+            #bootstrap_samples = min(1000, int (len(not_null_values) / len(partition_object['weights'])))
+            bootstrap_samples = 1000
 
         results = [ stats.kstest(
                         np.random.choice(column, size=len(partition_object['weights']), replace=True),
                         estimated_cdf).pvalue
-                    for k in range(bootsrap_samples)
+                    for k in range(bootstrap_samples)
                   ]
 
         test_result = np.mean(results)
@@ -572,7 +572,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
                 "success" : test_result > p,
                 "true_value": test_result,
                 "summary_obj": {
-                    "bootsrap_samples": bootsrap_samples
+                    "bootstrap_samples": bootstrap_samples
                 }
             }
 
