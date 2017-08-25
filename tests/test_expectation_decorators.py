@@ -113,8 +113,8 @@ class TestExpectationDecorators(unittest.TestCase):
 
         df.default_expectation_args["output_format"] = "BASIC"
 
-        import json
-        print json.dumps(df.expect_column_values_to_be_odd("mostly_odd", include_config=True), indent=2)
+        # import json
+        # print json.dumps(df.expect_column_values_to_be_odd("mostly_odd", include_config=True), indent=2)
 
         self.assertEqual(
             df.expect_column_values_to_be_odd("mostly_odd", include_config=True),
