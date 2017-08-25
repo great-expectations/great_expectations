@@ -17,102 +17,102 @@ class DataSet(object):
 
 
     @classmethod
-    def expectation(cls, func):
+    def expectation(cls, method_arg_names):
+        def outer_wrapper(func):
+            def wrapper(self, *args, **kwargs):
 
-        @wraps(func)
-        def wrapper(self, *args, **kwargs):
+                #Get the name of the method
+                method_name = func.__name__
 
-            #Get the name of the method
-            method_name = func.__name__
+                # Combine all arguments into a single new "kwargs"
+                all_args = dict(zip(method_arg_names, args))
+                all_args.update(kwargs)
 
-            #Fetch argument names
-            method_arg_names = inspect.getargspec(func)[0][1:]
+                #Unpack display parameters; remove them from all_args if appropriate
+                if "include_config" in kwargs:
+                    include_config = kwargs["include_config"]
+                    del all_args["include_config"]
+                else:
+                    include_config = self.default_expectation_args["include_config"]
 
-            # Combine all arguments into a single new "kwargs"
-            all_args = dict(zip(method_arg_names, args))
-            all_args.update(kwargs)
+                if "catch_exceptions" in kwargs:
+                    catch_exceptions = kwargs["catch_exceptions"]
+                    del all_args["catch_exceptions"]
+                else:
+                    catch_exceptions = self.default_expectation_args["catch_exceptions"]
 
-            #Unpack display parameters; remove them from all_args if appropriate
-            if "include_config" in kwargs:
-                include_config = kwargs["include_config"]
-                del all_args["include_config"]
-            else:
-                include_config = self.default_expectation_args["include_config"]
+                if "output_format" in kwargs:
+                    output_format = kwargs["output_format"]
+                else:
+                    output_format = self.default_expectation_args["output_format"]
 
-            if "catch_exceptions" in kwargs:
-                catch_exceptions = kwargs["catch_exceptions"]
-                del all_args["catch_exceptions"]
-            else:
-                catch_exceptions = self.default_expectation_args["catch_exceptions"]
+                # This intends to get the signature of the inner wrapper, if there is one.
+                if "output_format" in inspect.getargspec(func)[0][1:]:
+                    all_args["output_format"] = output_format
+                else:
+                    if "output_format" in all_args:
+                        del all_args["output_format"]
 
-            if "output_format" in kwargs:
-                output_format = kwargs["output_format"]
-                del all_args["output_format"]
-            else:
-                output_format = self.default_expectation_args["output_format"]
+                all_args = ensure_json_serializable(all_args)
 
+                #Construct the expectation_config object
+                expectation_config = DotDict({
+                    "expectation_type" : method_name,
+                    ## Changed to support python 3, but note that there may be ambiguity here.
+                    ## TODO: ensure this is the intended logic
+                    "kwargs" : all_args
+                })
 
-            all_args = ensure_json_serializable(all_args)
+                #Add the expectation_method key
+                expectation_config['expectation_type'] = method_name
 
-            #Construct the expectation_config object
-            expectation_config = DotDict({
-                "expectation_type" : method_name,
-                ## Changed to support python 3, but note that there may be ambiguity here.
-                ## TODO: ensure this is the intended logic
-                "kwargs" : all_args
-            })
+                #Append the expectation to the config.
+                self.append_expectation(expectation_config)
 
-            #Add the expectation_method key
-            expectation_config['expectation_type'] = method_name
+                raised_exception = False
+                exception_traceback = None
 
-            #Append the expectation to the config.
-            self.append_expectation(expectation_config)
+                #Finally, execute the expectation method itself
+                try:
+                    return_obj = func(self, **all_args)
 
-            raised_exception = False
-            exception_traceback = None
+                except Exception as err:
+                    if catch_exceptions:
+                        raised_exception = True
+                        exception_traceback = traceback.format_exc()
 
-            #Finally, execute the expectation method itself
-            return_obj = func(self, output_format=output_format, **all_args)
-            # try:
-            #     return_obj = func(self, output_format=output_format, **all_args)
+                        if output_format != "BOOLEAN_ONLY":
+                            return_obj = {
+                                "success" : False,
+                                "exception_list": None,
+                                "exception_index_list": None
+                            }
+                        else:
+                            return_obj = False
+                    else:
+                        raise(err)
 
-            # except Exception as err:
-            #     if catch_exceptions:
-            #         raised_exception = True
-            #         exception_traceback = traceback.format_exc()
+                if output_format != 'BOOLEAN_ONLY':
+                    if include_config:
+                        #!!! Not sure the deepcopy is strictly necessary.
+                        #!!! This issue applies to our DocDict: https://github.com/aparo/pyes/issues/114
+                        # return_obj["expectation_type"] = copy.deepcopy(dict(expectation_config))
+                        return_obj["expectation_type"] = expectation_config["expectation_type"]
+                        return_obj["expectation_kwargs"] = copy.deepcopy(dict(expectation_config["kwargs"]))
 
-            #         if output_format != "BOOLEAN_ONLY":
-            #             return_obj = {
-            #                 "success" : False,
-            #                 "exception_list": None,
-            #                 "exception_index_list": None
-            #             }
-            #         else:
-            #             return_obj = False
+                    if catch_exceptions:
+                        return_obj["raised_exception"] = raised_exception
+                        return_obj["exception_traceback"] = exception_traceback
 
-            #     else:
-            #         raise(err)
+                    # print json.dumps(return_obj, indent=2)
 
-            if output_format != 'BOOLEAN_ONLY':
-                if include_config:
-                    #!!! Not sure the deepcopy is strictly necessary.
-                    #!!! This issue applies to our DocDict: https://github.com/aparo/pyes/issues/114
-                    # return_obj["expectation_type"] = copy.deepcopy(dict(expectation_config))
+                return return_obj
 
-                    return_obj["expectation_type"] = expectation_config["expectation_type"]
-                    return_obj["expectation_kwargs"] = copy.deepcopy(dict(expectation_config["kwargs"]))
+            # wrapper.__name__ = func.__name__
+            wrapper.__doc__ = func.__doc__
+            return wrapper
 
-                if catch_exceptions:
-                    return_obj["raised_exception"] = raised_exception
-                    return_obj["exception_traceback"] = exception_traceback
-
-            # print json.dumps(return_obj, indent=2)
-
-            return return_obj
-
-        # wrapper.__name__ = func.__name__
-        wrapper.__doc__ = func.__doc__
-        return wrapper
+        return outer_wrapper
 
     @classmethod
     def column_map_expectation(cls, func):

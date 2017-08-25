@@ -690,7 +690,6 @@ class TestPandasDataset(unittest.TestCase):
             out = D.expect_column_values_to_match_strftime_format(**t['in'])
             self.assertEqual(out, t['out'])
 
-
     def test_expect_column_values_to_be_dateutil_parseable(self):
 
         D = ge.dataset.PandasDataSet({
@@ -722,7 +721,6 @@ class TestPandasDataset(unittest.TestCase):
         for t in T:
             out = D.expect_column_values_to_be_dateutil_parseable(*t['in'], **t['kwargs'])
             self.assertEqual(out, t['out'])
-
 
     def test_expect_column_values_to_be_json_parseable(self):
         d1 = json.dumps({'i':[1,2,3],'j':35,'k':{'x':'five','y':5,'z':'101'}})
@@ -776,7 +774,7 @@ class TestPandasDataset(unittest.TestCase):
             'n' : [0, None],
             'b' : [True, False],
         })
-        D.set_default_expectation_argument("output_format", "COMPLETE")
+        D.set_default_expectation_argument("output_format", "BASIC")
 
         T = [
                 {
@@ -812,7 +810,7 @@ class TestPandasDataset(unittest.TestCase):
             'b' : [True, False, False, True],
             'x' : [True, None, False, None],
         })
-        typedf.set_default_expectation_argument("output_format", "COMPLETE")
+        typedf.set_default_expectation_argument("output_format", "BASIC")
 
         T = [
                 {
@@ -846,16 +844,16 @@ class TestPandasDataset(unittest.TestCase):
         T = [
                 {
                     'in':{'column':'dist1', 'min_value':.5, 'max_value':1.5},
-                    'out':{'success':True, 'true_value':D['dist1'].std()}},
+                    'out':{'success':True, 'true_value':D['dist1'].std(), "summary_obj": {}}},
                 {
                     'in':{'column':'dist1', 'min_value':2, 'max_value':3},
-                    'out':{'success':False, 'true_value':D['dist1'].std()}},
+                    'out':{'success':False, 'true_value':D['dist1'].std(), "summary_obj": {}}},
                 {
                     'in':{'column':'dist2', 'min_value':2, 'max_value':3},
-                    'out':{'success':False, 'true_value':1.0}},
+                    'out':{'success':False, 'true_value':1.0, "summary_obj": {}}},
                 {
                     'in':{'column':'dist2', 'min_value':0, 'max_value':1},
-                    'out':{'success':True, 'true_value':1.0}}
+                    'out':{'success':True, 'true_value':1.0, "summary_obj": {}}}
         ]
 
         for t in T:
@@ -881,7 +879,7 @@ class TestPandasDataset(unittest.TestCase):
                         'max_value': 10
                     },
                     'kwargs':{},
-                    'out':{'success':True, 'true_value':8}
+                    'out':{'success':True, 'true_value': 8, 'summary_obj': {}}
                 },{
                     'in':{
                         "column" : 'dist2',
@@ -889,7 +887,7 @@ class TestPandasDataset(unittest.TestCase):
                         "max_value" : None
                     },
                     'kwargs':{},
-                    'out':{'success':True, 'true_value':5}
+                    'out':{'success':True, 'true_value': 5, 'summary_obj': {}}
                 },{
                     'in':{
                         "column": 'dist3',
@@ -897,7 +895,7 @@ class TestPandasDataset(unittest.TestCase):
                         "max_value": 5
                     },
                     'kwargs':{},
-                    'out':{'success':True, 'true_value':5}
+                    'out':{'success':True, 'true_value': 5, 'summary_obj': {}}
                 },{
                     'in':{
                         "column": 'dist4',
@@ -905,7 +903,7 @@ class TestPandasDataset(unittest.TestCase):
                         "max_value": None
                     },
                     'kwargs':{},
-                    'out':{'success':False, 'true_value':1}
+                    'out':{'success':False, 'true_value': 1, 'summary_obj': {}}
                 }
         ]
 
@@ -924,16 +922,16 @@ class TestPandasDataset(unittest.TestCase):
         T = [
                 {
                     'in':{'column':'dist1', 'min_value':.5, 'max_value':1.5},
-                    'out':{'success':True, 'true_value':0.6666666666666666}},
+                    'out':{'success':True, 'true_value': 2./3, 'summary_obj': {}}},
                 {
                     'in':{'column':'dist1', 'min_value':2, 'max_value':3},
-                    'out':{'success':False, 'true_value':0.6666666666666666}},
+                    'out':{'success':False, 'true_value': 2./3, 'summary_obj': {}}},
                 {
                     'in':{'column':'dist2', 'min_value':2, 'max_value':3},
-                    'out':{'success':False, 'true_value':1.0}},
+                    'out':{'success':False, 'true_value':1.0, 'summary_obj': {}}},
                 {
                     'in':{'column':'dist2', 'min_value':0, 'max_value':1},
-                    'out':{'success':True, 'true_value':1.0}}
+                    'out':{'success':True, 'true_value':1.0, 'summary_obj': {}}}
         ]
 
         for t in T:
@@ -964,7 +962,7 @@ class TestPandasDataset(unittest.TestCase):
                         7.0 : 2,
                     },
                     "exception_percent": 0.3,
-                    "exception_percent_nonmissing": 0.375,                
+                    "exception_percent_nonmissing": 0.375,
                 }
             }
         )
