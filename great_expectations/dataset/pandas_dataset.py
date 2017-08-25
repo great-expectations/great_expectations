@@ -177,16 +177,26 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
     ### Expectation methods ###
 
-    @DataSet.old_column_expectation
-    def expect_column_to_exist(self, column, suppress_exceptions=False):
+    # @DataSet.old_column_expectation
+    # def expect_column_to_exist(self, column, suppress_exceptions=False):
+    #
+    #     if suppress_exceptions:
+    #         column in self
+    #     else:
+    #         return {
+    #             "success" : column in self
+    #         }
 
-        if suppress_exceptions:
-            column in self
+    @DataSet.expectation(['column'])
+    def expect_column_to_exist(self, column):
+        if column in self:
+            return {
+                "success" : True
+            }
         else:
             return {
-                "success" : column in self
+                "success": False
             }
-
 
     @DataSet.old_expectation
     def expect_table_row_count_to_be_between(self, min_value, max_value,suppress_exceptions=False):
@@ -225,19 +235,19 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
 
     @MetaPandasDataSet.column_map_expectation
-    def expect_column_values_to_be_unique(self, series):
-        dupes = set(series[series.duplicated()])
-        return series.map(lambda x: x not in dupes)
+    def expect_column_values_to_be_unique(self, column):
+        dupes = set(column[column.duplicated()])
+        return column.map(lambda x: x not in dupes)
 
 
     @MetaPandasDataSet.column_map_expectation
-    def expect_column_values_to_not_be_null(self, series):
-        return series.map(pd.notnull)
+    def expect_column_values_to_not_be_null(self, column):
+        return column.map(pd.notnull)
 
 
     @MetaPandasDataSet.column_map_expectation
-    def expect_column_values_to_be_null(self, series):
-        return series.map(pd.isnull)
+    def expect_column_values_to_be_null(self, column):
+        return column.map(pd.isnull)
 
 
     @MetaPandasDataSet.column_map_expectation
