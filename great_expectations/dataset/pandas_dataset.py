@@ -172,7 +172,7 @@ class MetaPandasDataSet(DataSet):
                     "true_value" : result_obj["true_value"],
                 }
 
-            elif output_format == "SUMMARY":
+            elif (output_format == "SUMMARY") or (output_format == "COMPLETE"):
                 return_obj = {
                     "success" : bool(result_obj["success"]),
                     "true_value" : result_obj["true_value"],
@@ -209,22 +209,22 @@ class MetaPandasDataSet(DataSet):
             exception_count = len(exception_list)
 
             return_obj = {
-                "success" : success,
-                "summary_obj" : {
-                    "partial_exception_list" : exception_list[:20],
-                    "exception_count" : exception_count,
-                    "exception_percent" : float(exception_count) / nonnull_count,
+                "success": success,
+                "summary_obj": {
+                    "partial_exception_list": exception_list[:20],
+                    "exception_count": exception_count,
+                    "exception_percent": float(exception_count) / nonnull_count,
                 }
             }
 
-        elif output_format=="COMPLETE":
+        elif output_format == "COMPLETE":
             return_obj = {
-                "success" : success,
-                "exception_list" : exception_list,
+                "success": success,
+                "exception_list": exception_list,
                 "exception_index_list": exception_index_list,
             }
 
-        elif output_format=="SUMMARY":
+        elif output_format == "SUMMARY":
             # element_count = int(len(series))
             missing_count = element_count-int(len(nonnull_values))#int(null_indexes.sum())
             exception_count = len(exception_list)
@@ -614,12 +614,12 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         column_mean = column.mean()
 
         return {
-            "success" : (
-                ((min_value <= column_mean) | (min_value == None)) and
-                ((column_mean <= max_value) | (max_value == None))
+            "success": (
+                ((min_value <= column_mean) or (min_value is None)) and
+                ((column_mean <= max_value) or (max_value is None))
             ),
-            "true_value" : column_mean,
-            "summary_obj" : {}
+            "true_value": column_mean,
+            "summary_obj": {}
         }
 
     @MetaPandasDataSet.column_aggregate_expectation
@@ -629,12 +629,12 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         column_median = column.median()
 
         return {
-            "success" : (
-                ((min_value <= column_median) | (min_value == None)) and
-                ((column_median <= max_value) | (max_value == None))
+            "success": (
+                ((min_value <= column_median) or (min_value or None)) and
+                ((column_median <= max_value) or (max_value or None))
             ),
-            "true_value" : column_median,
-            "summary_obj" : {}
+            "true_value": column_median,
+            "summary_obj": {}
         }
 
     @MetaPandasDataSet.column_aggregate_expectation
@@ -644,12 +644,12 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         column_stdev = column.std()
 
         return {
-            "success" : (
-                ((min_value <= column_stdev) | (min_value == None)) and
-                ((column_stdev <= max_value) | (max_value == None))
+            "success": (
+                ((min_value <= column_stdev) or (min_value is None)) and
+                ((column_stdev <= max_value) or (max_value is None))
             ),
-            "true_value" : column_stdev,
-            "summary_obj" : {}
+            "true_value": column_stdev,
+            "summary_obj": {}
         }
 
     @MetaPandasDataSet.column_aggregate_expectation
@@ -658,11 +658,11 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
         return {
             "success" : (
-                ((min_value <= unique_value_count) | (min_value == None)) and
-                ((unique_value_count <= max_value) | (max_value ==None))
+                ((min_value <= unique_value_count) or (min_value is None)) and
+                ((unique_value_count <= max_value) or (max_value is None))
             ),
-            "true_value" : unique_value_count,
-            "summary_obj" : {}
+            "true_value": unique_value_count,
+            "summary_obj": {}
         }
 
     @MetaPandasDataSet.column_aggregate_expectation
@@ -670,18 +670,18 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         unique_value_count = column.value_counts().shape[0]
         total_value_count = column.notnull().sum()
 
-        if denominator > 0:
+        if total_value_count > 0:
             proportion_unique = (1. * unique_value_count) / total_value_count
         else:
             proportion_unique = None
 
         return {
-            "success" : (
-                ((min_value <= proportion_unique) | (min_value == None)) and
-                ((proportion_unique <= max_value) | (max_value ==None))
+            "success": (
+                ((min_value <= proportion_unique) or (min_value is None)) and
+                ((proportion_unique <= max_value) or (max_value is None))
             ),
-            "true_value" : proportion_unique,
-            "summary_obj" : {}
+            "true_value": proportion_unique,
+            "summary_obj": {}
         }
 
     @MetaPandasDataSet.column_aggregate_expectation
@@ -696,7 +696,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         test_result = stats.chisquare(test_df[column.name], test_df['expected'])[1]
 
         result_obj = {
-                "success" : test_result > p,
+                "success": test_result > p,
                 "true_value": test_result,
                 "summary_obj": {}
             }
@@ -752,8 +752,8 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         kl_divergence = stats.entropy(pk, partition_object['weights'])
 
         result_obj = {
-                "success" : kl_divergence <= threshold,
-                "true_value" : kl_divergence,
+                "success": kl_divergence <= threshold,
+                "true_value": kl_divergence,
                 "summary_obj": {}
             }
 
