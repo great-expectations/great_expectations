@@ -12,12 +12,32 @@ from .util import DotDict, ensure_json_serializable
 class DataSet(object):
 
     def __init__(self, *args, **kwargs):
-        super(DataSet, self).__init__(*args, **kwargs)
+        super(DataSet, self).__init__()
         self.initialize_expectations()
 
     @classmethod
     def expectation(cls, method_arg_names):
+        """
+        The core expectation decorator, this method takes a single parameter which it uses to build and save the
+        expectation config to the DataSet object. The parameter defines an ordered list of the positional arguments to
+        be used by the method implementing the expectation.
+
+        Note that intermediate decorators that call the core @expectation decorator will most likely need to pass their
+        decorated methods' signature up to the expectation decorator. For example, the MetaPandasDataSet column_map_expectation
+        decorator relies on the DataSet expectation decorator, but will pass through the signature from the implementing method.
+
+        When decorated with @expectation, a method will:
+            1. Build and update the expectation config.
+            2. Handle the "include_config" boolean parameter, which allows a caller to retrieve the generated
+                configuration immediately after running the expectation.
+            3. Handle the "catch_excpetions" parameter, which allows a caller to catch any exception and report an
+                aggregate trace, useful for validation.
+            4. Handle the "output_format" parameter, and pass it down to the implementing method if its signature expects it.
+                By handing down the output_format, methods implementing expectations can optionally provide additional output formats
+                specific to the use cases that they handle.
+        """
         def outer_wrapper(func):
+            @wraps(func)
             def wrapper(self, *args, **kwargs):
 
                 #Get the name of the method
@@ -82,9 +102,7 @@ class DataSet(object):
 
                         if output_format != "BOOLEAN_ONLY":
                             return_obj = {
-                                "success" : False,
-                                "exception_list": None,
-                                "exception_index_list": None
+                                "success": False
                             }
                         else:
                             return_obj = False
@@ -93,9 +111,6 @@ class DataSet(object):
 
                 if output_format != 'BOOLEAN_ONLY':
                     if include_config:
-                        #!!! Not sure the deepcopy is strictly necessary.
-                        #!!! This issue applies to our DocDict: https://github.com/aparo/pyes/issues/114
-                        # return_obj["expectation_type"] = copy.deepcopy(dict(expectation_config))
                         return_obj["expectation_type"] = expectation_config["expectation_type"]
                         return_obj["expectation_kwargs"] = copy.deepcopy(dict(expectation_config["kwargs"]))
 
@@ -108,7 +123,7 @@ class DataSet(object):
                 return return_obj
 
             # wrapper.__name__ = func.__name__
-            wrapper.__doc__ = func.__doc__
+            # wrapper.__doc__ = func.__doc__
             return wrapper
 
         return outer_wrapper
@@ -648,7 +663,7 @@ class DataSet(object):
         """
         raise NotImplementedError
 
-    def expect_column_bootstrapped_ks_test_p_value_greater_than(self, series, partition_object=None, bootstrap_samples=0, p=0.05):
+    def expect_column_bootstrapped_ks_test_p_value_greater_than(self, series, partition_object=None, p=0.05, bootstrap_samples=0):
         """
         Expect the values in this column to match the distribution implied by the specified partition and cdf_vals. \
         The implied CDF is constructed as a linear interpolation of the provided cdf_vals.
@@ -658,14 +673,10 @@ class DataSet(object):
             partition_object (dict): A dictionary containing partition (bin edges) and associated weights.
                 - partition (list): A list of values that correspond to the endpoints of an implied partition on the real number line.
                 - weights (list): A list of weights. They should sum to one.
-            sample_size (int) = 0: The number of samples from column to use in comparing\
-                to the provided CDF. If zero, defaults to the number of elements in the partition.
-                Setting the sample size too large will cause the KS test to be very sensitive to
-                even small deviations from the provided distribution.
             p (float) = 0.05: The p-value threshold for the Kolmogorov-Smirnov test.\
                 For values below the specified threshold the expectation will return false, rejecting the null hypothesis that the distributions are the same.
-            suppress_exceptions: Only return a boolean success value, not a dictionary with other results.
-
+            bootstrap_samples (int) = 0: The number of bootstrapping rounds to use in building the estimated pvalue. \
+                If zero, chooses a default number of rounds (currently 1000, but may be altered based on size of dataset).
         Returns:
             {
                 "success": (bool) True if the column passed the expectation,
