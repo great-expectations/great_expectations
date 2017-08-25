@@ -79,8 +79,10 @@ class TestValidation(unittest.TestCase):
             "./tests/examples/Titanic.csv",
             expectations_config=my_expectations_config
         )
+        my_df.set_default_expectation_argument("output_format", "COMPLETE")
+        my_df.set_default_expectation_argument("output_format", "COMPLETE")
 
-        results = my_df.validate()
+        results = my_df.validate(catch_exceptions=False)
         # print json.dumps(results, indent=2)
 
         with open('./tests/examples/expected_results_20170721.json') as f:
@@ -89,7 +91,14 @@ class TestValidation(unittest.TestCase):
 
         self.maxDiff = None
         #!!! This needs to be converted to unicode, I think
-        self.assertEqual(results, expected_results)
+
+        # print json.dumps(results, indent=2)
+        # print '-'*80
+        # print json.dumps(expected_results, indent=2)
+        self.assertEqual(
+            json.loads(json.dumps(results)),
+            json.loads(json.dumps(expected_results))
+        )
 
 
 class TestRepeatedAppendExpectation(unittest.TestCase):
