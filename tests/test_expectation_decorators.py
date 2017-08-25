@@ -26,12 +26,12 @@ class TestExpectationDecorators(unittest.TestCase):
         class CustomPandasDataSet(PandasDataSet):
 
             @PandasDataSet.column_map_expectation
-            def expect_column_values_to_be_odd(self, series):
-                return series.map(lambda x: x % 2 )
+            def expect_column_values_to_be_odd(self, column):
+                return column.map(lambda x: x % 2 )
 
             @PandasDataSet.column_map_expectation
-            def expectation_that_crashes_on_sixes(self, series):
-                return series.map(lambda x: (x-6)/0 != "duck")
+            def expectation_that_crashes_on_sixes(self, column):
+                return column.map(lambda x: (x-6)/0 != "duck")
 
 
         df = CustomPandasDataSet({
@@ -143,8 +143,8 @@ class TestExpectationDecorators(unittest.TestCase):
         class CustomPandasDataSet(PandasDataSet):
 
             @PandasDataSet.column_aggregate_expectation
-            def expect_column_median_to_be_odd(self, series):
-                return series.median() % 2, series.median()
+            def expect_column_median_to_be_odd(self, column):
+                return {"success": column.median() % 2, "true_value": column.median(), "summary_obj": None}
 
         df = CustomPandasDataSet({
             'all_odd' : [1,3,5,7,9],
@@ -175,7 +175,8 @@ class TestExpectationDecorators(unittest.TestCase):
             df.expect_column_median_to_be_odd("all_even", output_format="SUMMARY"),
             {
                 'true_value': 6,
-                'success': False
+                'success': False,
+                'summary_obj': None
             }
         )
 
@@ -203,12 +204,12 @@ class TestExpectationDecorators(unittest.TestCase):
         class CustomPandasDataSet(PandasDataSet):
 
             @PandasDataSet.column_map_expectation
-            def expect_column_values_to_be_odd(self, series):
-                return series.map(lambda x: x % 2 )
+            def expect_column_values_to_be_odd(self, column):
+                return column.map(lambda x: x % 2 )
 
             @PandasDataSet.column_map_expectation
-            def expectation_that_crashes_on_sixes(self, series):
-                return series.map(lambda x: 1/(x-6) != "duck")
+            def expectation_that_crashes_on_sixes(self, column):
+                return column.map(lambda x: 1/(x-6) != "duck")
 
 
         df = CustomPandasDataSet({
@@ -287,7 +288,7 @@ class TestExpectationDecorators(unittest.TestCase):
 
         self.assertEqual(
             result_obj["exception_traceback"].split('\n')[-3],
-            "    return series.map(lambda x: 1/(x-6) != \"duck\")",
+            "    return column.map(lambda x: 1/(x-6) != \"duck\")",
         )
 
 
