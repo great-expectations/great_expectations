@@ -17,9 +17,7 @@ class DataSet(object):
 
 
     @classmethod
-    def expectation(cls, method_arg_names=None):
-        if method_arg_names is None:
-            method_arg_names = inspect.getargspec(func)
+    def expectation(cls, method_arg_names):
         def outer_wrapper(func):
             def wrapper(self, *args, **kwargs):
 
