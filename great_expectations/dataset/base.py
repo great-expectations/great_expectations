@@ -89,7 +89,6 @@ class DataSet(object):
                             }
                         else:
                             return_obj = False
-
                     else:
                         raise(err)
 
@@ -98,7 +97,6 @@ class DataSet(object):
                         #!!! Not sure the deepcopy is strictly necessary.
                         #!!! This issue applies to our DocDict: https://github.com/aparo/pyes/issues/114
                         # return_obj["expectation_type"] = copy.deepcopy(dict(expectation_config))
-
                         return_obj["expectation_type"] = expectation_config["expectation_type"]
                         return_obj["expectation_kwargs"] = copy.deepcopy(dict(expectation_config["kwargs"]))
 
@@ -330,7 +328,6 @@ class DataSet(object):
         return {
             "results" : results
         }
-
 
     ##### Table shape expectations #####
 
