@@ -15,7 +15,6 @@ class DataSet(object):
         super(DataSet, self).__init__(*args, **kwargs)
         self.initialize_expectations()
 
-
     @classmethod
     def expectation(cls, method_arg_names):
         def outer_wrapper(func):
@@ -121,120 +120,6 @@ class DataSet(object):
     @classmethod
     def column_aggregate_expectation(cls, func):
         raise NotImplementedError
-
-
-    # def column_elementwise_expectation(func):
-
-    #     @expectation
-    #     def inner_wrapper(self, column, mostly=None, suppress_expectations=False):
-    #         notnull = self[column].notnull()
-
-    #         success = self[column][notnull].map(lambda x: func(self,x))
-    #         exceptions = list(self[column][notnull][success==False])
-
-    #         if mostly:
-    #             #Prevent division-by-zero errors
-    #             if notnull.sum() == 0:
-    #                 return {
-    #                     'success':True,
-    #                     'exception_list':exceptions
-    #                 }
-
-    #             percent_success = float(success.sum())/notnull.sum()
-    #             return {
-    #                 "success" : percent_success >= mostly,
-    #                 "exception_list" : exceptions
-    #             }
-
-    #         else:
-    #             return {
-    #                 "success" : len(exceptions) == 0,
-    #                 "exception_list" : exceptions
-    #             }
-
-    #     return inner_wrapper
-
-    @staticmethod
-    def old_expectation(func):
-        """
-        !!! This method is deprecated.
-        !!! It's still in use as a legacy method within PandasDataset, but that's temporary.
-        !!! @column_expectations will be fully phased out before the v0.2 release.
-        """
-
-        def wrapper(self, *args, **kwargs):
-
-            #Get the name of the method
-            method_name = func.__name__
-
-            #Fetch argument names
-            method_arg_names = inspect.getargspec(func)[0][1:]
-
-            #Construct the expectation_config object
-            # expectation_config = dict(
-            #     zip(method_arg_names, args)+\
-            #     kwargs.items()
-            # )
-            expectation_config = DotDict({
-                "expectation_type" : method_name,
-                ## Changed to support python 3, but note that there may be ambiguity here.
-                ## TODO: ensure this is the intended logic
-                "kwargs" : dict(
-                    list(zip(method_arg_names, args))+list(kwargs.items())
-                )
-            })
-
-            #Add the expectation_method key
-            expectation_config['expectation_type'] = method_name
-
-            #Append the expectation to the config.
-            self.append_expectation(expectation_config)
-
-            #Finally, execute the expectation method itself
-            return func(self, *args, **kwargs)
-
-        wrapper.__doc__ = func.__doc__
-        return wrapper
-
-
-    @staticmethod
-    def old_column_expectation(func):
-        """
-        !!! This method is deprecated.
-        !!! It's still in use as a legacy method within PandasDataset, but that's temporary.
-        !!! @column_expectations will be fully phased out before the v0.2 release.
-        """
-
-        def wrapper(self, column, *args, **kwargs):
-            #Get the name of the method
-            method_name = func.__name__
-
-            #Fetch argument names
-            method_arg_names = inspect.getargspec(func)[0][2:]
-
-            # Combine all arguments into a single new "kwargs"
-            all_args = dict(zip(method_arg_names, args))
-            all_args.update(kwargs)
-
-            all_args = ensure_json_serializable(all_args)
-
-            #Construct the expectation_config object
-            expectation_config = DotDict({
-                "expectation_type" : method_name,
-                ## Changed to support python 3, but note that there may be ambiguity here.
-                ## TODO: ensure this is the intended logic
-                "kwargs" : all_args
-            })
-            expectation_config['kwargs']['column'] = column
-
-            #Append the expectation to the table config.
-            self.append_expectation(expectation_config)
-
-            #Now execute the expectation method itself
-            return func(self, **all_args)
-
-        wrapper.__doc__ = func.__doc__
-        return wrapper
 
     def initialize_expectations(self, config=None, name=None):
 

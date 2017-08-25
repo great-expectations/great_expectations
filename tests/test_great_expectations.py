@@ -7,6 +7,7 @@ import os
 import sys
 
 import great_expectations as ge
+from great_expectations.dataset import PandasDataSet, MetaPandasDataSet
 
 import unittest
 
@@ -38,33 +39,12 @@ def isprime(n):
     return True
 
 
-class CustomPandasDataSet(ge.dataset.PandasDataSet):
+class CustomPandasDataSet(PandasDataSet):
 
-    @ge.dataset.DataSet.old_column_expectation
-    def expect_column_values_to_be_prime(self, column, mostly=None, suppress_expectations=False):
-        notnull = self[column].notnull()
+    @MetaPandasDataSet.column_map_expectation
+    def expect_column_values_to_be_prime(self, column):
+        return column.map(isprime)
 
-        result = self[column][notnull].map(isprime)
-        exceptions = list(self[column][notnull][result==False])
-
-        if mostly:
-            #Prevent division-by-zero errors
-            if len(not_null_values) == 0:
-                return {
-                    'success':True,
-                    'exception_list':exceptions
-                }
-
-            percent_properly_formatted = float(sum(properly_formatted))/len(not_null_values)
-            return {
-                "success" : percent_properly_formatted >= mostly,
-                "exception_list" : exceptions
-            }
-        else:
-            return {
-                "success" : len(exceptions) == 0,
-                "exception_list" : exceptions
-            }
 
 class TestCustomClass(unittest.TestCase):
 
@@ -86,6 +66,7 @@ class TestCustomClass(unittest.TestCase):
             df.expect_column_values_to_be_prime("primes"),
             {'exception_list': [], 'success': True}
         )
+
 
 class TestValidation(unittest.TestCase):
     def test_validate(self):

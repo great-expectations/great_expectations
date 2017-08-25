@@ -11,6 +11,7 @@ import inspect
 from .base import DataSet
 from .util import is_valid_partition_object, remove_empty_intervals
 
+
 class MetaPandasDataSet(DataSet):
 
     def __init__(self, *args, **kwargs):
@@ -212,16 +213,6 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
     ### Expectation methods ###
 
-    # @DataSet.old_column_expectation
-    # def expect_column_to_exist(self, column, suppress_exceptions=False):
-    #
-    #     if suppress_exceptions:
-    #         column in self
-    #     else:
-    #         return {
-    #             "success" : column in self
-    #         }
-
     @DataSet.expectation(['column'])
     def expect_column_to_exist(self, column):
         if column in self:
@@ -361,7 +352,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         return result
 
     @MetaPandasDataSet.column_map_expectation
-    def expect_column_values_to_be_in_type_list(self, column, type_list, target_datasource="numpy"):
+    def expect_column_values_to_be_in_type_list(self, column, type_, target_datasource="numpy"):
 
         python_avro_types = {
                 "null":type(None),
