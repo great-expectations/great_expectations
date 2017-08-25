@@ -446,8 +446,8 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
         return {
             "success": (
-                ((min_value <= column_mean) or (min_value is None)) and
-                ((column_mean <= max_value) or (max_value is None))
+                ((min_value is None) or (min_value <= column_mean)) and
+                ((max_value is None) or (column_mean <= max_value))
             ),
             "true_value": column_mean,
             "summary_obj": {}
@@ -461,8 +461,8 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
         return {
             "success": (
-                ((min_value <= column_median) or (min_value or None)) and
-                ((column_median <= max_value) or (max_value or None))
+                ((min_value or None) or (min_value <= column_median)) and
+                ((max_value or None) or (column_median <= max_value))
             ),
             "true_value": column_median,
             "summary_obj": {}
@@ -476,8 +476,8 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
         return {
             "success": (
-                ((min_value <= column_stdev) or (min_value is None)) and
-                ((column_stdev <= max_value) or (max_value is None))
+                ((min_value is None) or (min_value <= column_stdev)) and
+                ((max_value is None) or (column_stdev <= max_value))
             ),
             "true_value": column_stdev,
             "summary_obj": {}
@@ -489,8 +489,8 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
         return {
             "success" : (
-                ((min_value <= unique_value_count) or (min_value is None)) and
-                ((unique_value_count <= max_value) or (max_value is None))
+                ((min_value is None) or (min_value <= unique_value_count)) and
+                ((max_value is None) or (unique_value_count <= max_value))
             ),
             "true_value": unique_value_count,
             "summary_obj": {}
@@ -508,8 +508,8 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
         return {
             "success": (
-                ((min_value <= proportion_unique) or (min_value is None)) and
-                ((proportion_unique <= max_value) or (max_value is None))
+                ((min_value is None) or (min_value <= proportion_unique)) and
+                ((max_value is None) or (proportion_unique <= max_value))
             ),
             "true_value": proportion_unique,
             "summary_obj": {}

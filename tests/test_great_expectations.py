@@ -1,15 +1,13 @@
 import json
-import hashlib
-import datetime
-import numpy as np
-import random
 import os
-import sys
+import random
+import unittest
+
+import numpy as np
 
 import great_expectations as ge
 from great_expectations.dataset import PandasDataSet, MetaPandasDataSet
 
-import unittest
 
 ## Taken from the following stackoverflow: https://stackoverflow.com/questions/23549419/assert-that-two-dictionaries-are-almost-equal
 def assertDeepAlmostEqual(test_case, expected, actual, *args, **kwargs):
