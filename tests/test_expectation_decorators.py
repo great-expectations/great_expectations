@@ -13,6 +13,7 @@ import great_expectations as ge
 #reload(ge)
 # from great_expectations.dataset import PandasDataSet
 PandasDataSet = ge.dataset.PandasDataSet
+MetaPandasDataSet = ge.dataset.MetaPandasDataSet
 
 # from ge.decorators import expectation, column_map_expectation, column_aggregate_expectation
 
@@ -25,11 +26,11 @@ class TestExpectationDecorators(unittest.TestCase):
         # (2) Test expectation business logic without dependencies on any other functions.
         class CustomPandasDataSet(PandasDataSet):
 
-            @PandasDataSet.column_map_expectation
+            @MetaPandasDataSet.column_map_expectation
             def expect_column_values_to_be_odd(self, column):
                 return column.map(lambda x: x % 2 )
 
-            @PandasDataSet.column_map_expectation
+            @MetaPandasDataSet.column_map_expectation
             def expectation_that_crashes_on_sixes(self, column):
                 return column.map(lambda x: (x-6)/0 != "duck")
 
@@ -42,6 +43,7 @@ class TestExpectationDecorators(unittest.TestCase):
             'mixed_missing' : [1,3,5,None,None,2,4,1,3,None],
             'all_missing' : [None,None,None,None,None,None,None,None,None,None,],
         })
+        df.set_default_expectation_argument("output_format", "COMPLETE")
 
         self.assertEqual(
             df.expect_column_values_to_be_odd("all_odd"),
@@ -111,19 +113,36 @@ class TestExpectationDecorators(unittest.TestCase):
 
         df.default_expectation_args["output_format"] = "BASIC"
 
-        # df.expect_column_value_to_be_odd("mostly_odd", include_config=True)
+        # import json
+        # print json.dumps(df.expect_column_values_to_be_odd("mostly_odd", include_config=True), indent=2)
 
         self.assertEqual(
             df.expect_column_values_to_be_odd("mostly_odd", include_config=True),
             {
-                'exception_list': [2, 4],
-                'exception_index_list': [5, 6],
-                'success': False,
-                'expectation_type' : 'expect_column_values_to_be_odd',
-                'expectation_kwargs' : {
-                    'column' : 'mostly_odd'
-                }
+                "expectation_kwargs": {
+                    "column": "mostly_odd", 
+                    "output_format": "BASIC"
+                }, 
+                "summary_obj": {
+                    "exception_percent": 0.2, 
+                    "partial_exception_list": [
+                        2, 
+                        4
+                    ], 
+                    "exception_count": 2
+                }, 
+                "success": False, 
+                "expectation_type": "expect_column_values_to_be_odd"
             }
+            # {
+            #     'exception_list': [2, 4],
+            #     'exception_index_list': [5, 6],
+            #     'success': False,
+            #     'expectation_type' : 'expect_column_values_to_be_odd',
+            #     'expectation_kwargs' : {
+            #         'column' : 'mostly_odd'
+            #     }
+            # }
         )
 
         # self.assertEqual(
@@ -154,6 +173,7 @@ class TestExpectationDecorators(unittest.TestCase):
             'mixed_missing_2' : [1,3,None,None,6],
             'all_missing' : [None,None,None,None,None,],
         })
+        df.set_default_expectation_argument("output_format", "COMPLETE")
 
         self.assertEqual(
             df.expect_column_median_to_be_odd("all_odd"),
@@ -220,6 +240,7 @@ class TestExpectationDecorators(unittest.TestCase):
             'mixed_missing' : [1,3,5,None,None,2,4,1,3,None],
             'all_missing' : [None,None,None,None,None,None,None,None,None,None,],
         })
+        df.set_default_expectation_argument("output_format", "COMPLETE")
 
         self.assertEqual(
             df.expectation_that_crashes_on_sixes("all_odd"),
