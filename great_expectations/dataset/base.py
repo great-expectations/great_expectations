@@ -311,10 +311,10 @@ class DataSet(object):
             percent_success = float(success_count)/nonnull_count
 
             if mostly:
-                success = percent_success >= mostly
+                success = bool(percent_success >= mostly)
 
             else:
-                success = exception_count == 0
+                success = bool(exception_count == 0)
 
         else:
             success = True

@@ -590,31 +590,31 @@ class TestPandasDataset(unittest.TestCase):
             out = D.expect_column_values_to_match_regex(**t['in'])
             self.assertEqual(out, t['out'])
 
-            T = [
-                    {
-                        'in':{'column':'a', 'regex':'^a', 'mostly':.9},
-                        'out':{'success':False, 'exception_list':['bee'], 'exception_index_list':[4]}},
-                    {
-                        'in':{'column':'a', 'regex':'^a', 'mostly':.8},
-                        'out':{'success':True, 'exception_list':['bee'], 'exception_index_list':[4]}},
-                    {
-                        'in':{'column':'a', 'regex':'^a', 'mostly':.7},
-                        'out':{'success':True, 'exception_list':['bee'], 'exception_index_list':[4]}},
-                    {
-                        'in':{'column':'b', 'regex':'^a', 'mostly':.9},
-                        'out':{'success':False, 'exception_list':['bdd'], 'exception_index_list':[3]}},
-                    {
-                        'in':{'column':'b', 'regex':'^a', 'mostly':.75},
-                        'out':{'success':True, 'exception_list':['bdd'], 'exception_index_list':[3]}},
-                    {
-                        'in':{'column':'b', 'regex':'^a', 'mostly':.5},
-                        'out':{'success':True, 'exception_list':['bdd'], 'exception_index_list':[3]}},
-                    {
-                        'in':{'column':'c', 'regex':'^a'},
-                        'out':{'success':True, 'exception_list':[], 'exception_index_list':[]}},
-                    {
-                        'in':{'column':'c', 'regex':'^a', 'mostly':.5},
-                        'out':{'success':True, 'exception_list':[], 'exception_index_list':[]}}
+        T = [
+                {
+                    'in':{'column':'a', 'regex':'^a', 'mostly':.9},
+                    'out':{'success':False, 'exception_list':['bee'], 'exception_index_list':[4]}},
+                {
+                    'in':{'column':'a', 'regex':'^a', 'mostly':.8},
+                    'out':{'success':True, 'exception_list':['bee'], 'exception_index_list':[4]}},
+                {
+                    'in':{'column':'a', 'regex':'^a', 'mostly':.7},
+                    'out':{'success':True, 'exception_list':['bee'], 'exception_index_list':[4]}},
+                {
+                    'in':{'column':'b', 'regex':'^a', 'mostly':.9},
+                    'out':{'success':False, 'exception_list':['bdd'], 'exception_index_list':[3]}},
+                {
+                    'in':{'column':'b', 'regex':'^a', 'mostly':.75},
+                    'out':{'success':True, 'exception_list':['bdd'], 'exception_index_list':[3]}},
+                {
+                    'in':{'column':'b', 'regex':'^a', 'mostly':.5},
+                    'out':{'success':True, 'exception_list':['bdd'], 'exception_index_list':[3]}},
+                {
+                    'in':{'column':'c', 'regex':'^a'},
+                    'out':{'success':True, 'exception_list':[], 'exception_index_list':[]}},
+                {
+                    'in':{'column':'c', 'regex':'^a', 'mostly':.5},
+                    'out':{'success':True, 'exception_list':[], 'exception_index_list':[]}}
         ]
 
         for t in T:

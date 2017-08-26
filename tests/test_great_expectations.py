@@ -33,7 +33,7 @@ def assertDeepAlmostEqual(test_case, expected, actual, *args, **kwargs):
             test_case.assertAlmostEqual(expected, actual, *args, **kwargs)
         elif isinstance(expected, (list, tuple, np.ndarray)):
             test_case.assertEqual(len(expected), len(actual))
-            for index in xrange(len(expected)):
+            for index in range(len(expected)):
                 v1, v2 = expected[index], actual[index]
                 assertDeepAlmostEqual(test_case, v1, v2,
                                       __trace=repr(index), *args, **kwargs)
@@ -120,7 +120,6 @@ class TestValidation(unittest.TestCase):
             expectations_config=my_expectations_config
         )
         my_df.set_default_expectation_argument("output_format", "COMPLETE")
-        my_df.set_default_expectation_argument("output_format", "COMPLETE")
 
         results = my_df.validate(catch_exceptions=False)
         # print json.dumps(results, indent=2)
@@ -140,9 +139,15 @@ class TestValidation(unittest.TestCase):
         #     json.loads(json.dumps(expected_results))
         # )
         assertDeepAlmostEqual(self,
-                              json.loads(json.dumps(results)),
-                              json.loads(json.dumps(expected_results))
+                              results,
+                              expected_results
                               )
+
+        #Now, change the results and ensure they are no longer equal
+        results[0] = {}
+        self.assertNotEqual(results,
+                            expected_results
+                            )
 
 
 class TestRepeatedAppendExpectation(unittest.TestCase):
