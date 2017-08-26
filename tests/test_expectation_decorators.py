@@ -296,13 +296,18 @@ class TestExpectationDecorators(unittest.TestCase):
         if sys.version_info[0] == 3:
             self.assertEqual(
                 result_obj["exception_traceback"].split('\n')[-2],
-                "ZeroDivisionError: division by zero",
+                "ZeroDivisionError: division by zero"
             )
 
         else:
+            ## This can fail depending on the architecture, because the error may also be "long division or modulo by zero"
+            #self.assertEqual(
+            #    result_obj["exception_traceback"].split('\n')[-2],
+            #    "ZeroDivisionError: integer division or modulo by zero"
+            #)
             self.assertEqual(
-                result_obj["exception_traceback"].split('\n')[-2],
-                "ZeroDivisionError: integer division or modulo by zero",
+                result_obj["exception_traceback"].split('\n')[-2].split(':')[0],
+                "ZeroDivisionError"
             )
 
         self.assertEqual(
