@@ -107,7 +107,7 @@ def kde_smooth_data(data):
     }
 
 def partition_data(data, bins='auto', n_bins=10):
-    """Convenience method for building a partition and weights using simple options. Basically a wrapper for np.histogram, which can provide additional functionality.
+    """Convenience method for building a partition and weights using simple options.
     Args:
         data (list-like): The data from which to construct the estimate.
         bins (string): One of 'uniform' (for uniformly spaced bins), 'ntile' (for percentile-spaced bins), or 'auto' (for automatically spaced bins)
@@ -115,7 +115,7 @@ def partition_data(data, bins='auto', n_bins=10):
     Returns:
         dict:
             {
-                "partition": (list) The edges of the partial partition of reals implied by the data and covariance_factor,
+                "partition": (list) The endpoints of the partial partition of reals,
                 "weights": (list) The densities of the bins implied by the partition.
             }
     """
