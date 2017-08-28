@@ -148,6 +148,8 @@ class DataSet(object):
                 "expectations" : []
             })
 
+            #!!! This is specific to pandas.DataFame, so should live in that subclass
+            #!!! ...or not at all, if we decide this is too much autoinspection.
             for col in self.columns:
                 self._expectations_config.expectations.append({
                     "expectation_type" : "expect_column_to_exist",
