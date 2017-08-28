@@ -171,12 +171,7 @@ class TestDistributionalExpectations(unittest.TestCase):
                     'out':{'success':False, 'true_value': "RANDOMIZED"}
                 }
             ]
-        #trials = 30
         for t in T:
-            # Evaluate the expectation a given number of times
-            #results = [ self.D.expect_column_numerical_distribution_to_be(*t['args'], **t['kwargs'])['success'] for x in range(trials) ]
-            # Assert that there are fewer incorrect results than twice p value
-            #self.assertLess(results.count(not t['out']['success']) / trials, 2. * t['kwargs']['p'])
             out = self.D.expect_column_bootstrapped_ks_test_p_value_greater_than(*t['args'], **t['kwargs'])
             self.assertEqual(out['success'], t['out']['success'])
 

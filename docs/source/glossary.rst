@@ -72,15 +72,15 @@ Aggregate functions
 Distributional functions
 --------------------------------------------------------------------------------
 
-* :func:`expect_column_numerical_distribution_to_be <great_expectations.dataset.base.DataSet.expect_column_numerical_distribution_to_be>`
-* :func:`expect_column_frequency_distribution_to_be <great_expectations.dataset.base.DataSet.expect_column_frequency_distribution_to_be>`
-* :func:`expect_column_kl_divergence_to_be <great_expectations.dataset.base.DataSet.expect_column_kl_divergence_to_be>`
+* :func:`expect_column_kl_divergence_less_than <great_expectations.dataset.base.DataSet.expect_column_kl_divergence_less_than>`
+* :func:`expect_column_bootstrapped_ks_test_p_value_greater_than <great_expectations.dataset.base.DataSet.expect_column_bootstrapped_ks_test_p_value_greater_than>`
+* :func:`expect_column_chisquare_test_p_value_greater_than <great_expectations.dataset.base.DataSet.expect_column_chisquare_test_p_value_greater_than>`
 
 
 Distributional function helpers
 --------------------------------------------------------------------------------
 
+* :func:`partition_data <great_expectations.dataset.util.partition_data>`
 * :func:`categorical_partition_data <great_expectations.dataset.util.categorical_partition_data>`
 * :func:`kde_smooth_data <great_expectations.dataset.util.kde_smooth_data>`
-* :func:`partition_data <great_expectations.dataset.util.partition_data>`
 * :func:`is_valid_partition_object <great_expectations.dataset.util.is_valid_partition_object>`
