@@ -196,7 +196,7 @@ class TestExpectationDecorators(unittest.TestCase):
             {
                 'true_value': 6,
                 'success': False,
-                'summary_obj': None
+                'summary_obj': {'element_count': 5, 'missing_count': 0, 'missing_percent': 0}
             }
         )
 
