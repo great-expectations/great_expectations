@@ -17,7 +17,7 @@ The design is motivated by the following assumptions:
 * While it should be possible to easily extend the framework with more rigorous statistical tests, great expectations should provide simple, reasonable defaults. Care should be taken in cases where robust statistical guarantees are expected.
 
 
-Distributional Expectations Core' Datatypes
+Distributional Expectations' Core Datatypes
 --------------------------------------------------------------------------------
 
 Distributional expectations currently focus exclusively on unidimensional (columnar) data. The core constructs of a great expectations distributional expectation are the partition and associated weights.
