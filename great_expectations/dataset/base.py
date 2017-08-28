@@ -208,14 +208,20 @@ class DataSet(object):
         expectation_config_str = json.dumps(self.get_expectations_config(), indent=2)
         open(filepath, 'w').write(expectation_config_str)
 
-    def validate(self, catch_exceptions=True, output_format=None, include_config=None):
+    def validate(self, expectations_config=None, catch_exceptions=True, output_format=None, include_config=None):
         results = []
-        for expectation in self.get_expectations_config()['expectations']:
+
+        if expectations_config is None:
+            expectations_config = self.get_expectations_config()
+
+        for expectation in expectations_config['expectations']:
             expectation_method = getattr(self, expectation['expectation_type'])
+            if output_format is not None:
+                expectation['kwargs'].update({"output_format": output_format})
+            if include_config is not None:
+                expectation['kwargs'].update({"include_config": include_config})
             result = expectation_method(
                 catch_exceptions=catch_exceptions,
-                output_format=output_format,
-                include_config=include_config,
                 **expectation['kwargs']
             )
 
