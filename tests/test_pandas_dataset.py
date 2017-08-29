@@ -285,6 +285,30 @@ class TestPandasDataset(unittest.TestCase):
             self.assertEqual(out, t['out'])
 
 
+        D3 = ge.dataset.PandasDataSet({
+            'a' : [None, None, None, None],
+        })
+        D3.set_default_expectation_argument("output_format", "COMPLETE")
+
+        T = [
+                {
+                    'in':['a'],
+                    'kwargs':{},
+                    'out':{'success':False, 'exception_index_list':[0,1,2,3], 'exception_list':[None,None,None,None]}
+                },
+                {
+                    'in':['a'],
+                    'kwargs':{"mostly":.95},
+                    'out':{'success':False, 'exception_index_list':[0,1,2,3], 'exception_list':[None,None,None,None]}
+                },
+        ]
+
+        for t in T:
+            out = D3.expect_column_values_to_not_be_null(*t['in'], **t['kwargs'])
+            # out = D3.expect_column_values_to_be_null(*t['in'], **t['kwargs'])
+            self.assertEqual(out, t['out'])
+
+
     def test_expect_column_values_to_be_null(self):
         """
         !!! All values must be either None and np.nan to be True
@@ -330,6 +354,41 @@ class TestPandasDataset(unittest.TestCase):
 
         for t in T:
             out = D.expect_column_values_to_be_null(**t['in'])
+            self.assertEqual(out, t['out'])
+
+
+        D3 = ge.dataset.PandasDataSet({
+            'a' : [None, None, None, None],
+            'b' : [np.nan, np.nan, np.nan, np.nan],
+        })
+        D3.set_default_expectation_argument("output_format", "COMPLETE")
+
+        T = [
+                {
+                    'in':['a'],
+                    'kwargs':{},
+                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}
+                },
+                {
+                    'in':['a'],
+                    'kwargs':{"mostly":.95},
+                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}
+                },
+                {
+                    'in':['b'],
+                    'kwargs':{},
+                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}
+                },
+                {
+                    'in':['b'],
+                    'kwargs':{"mostly":.95},
+                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}
+                },
+        ]
+
+        for t in T:
+            # out = D3.expect_column_values_to_not_be_null(*t['in'], **t['kwargs'])
+            out = D3.expect_column_values_to_be_null(*t['in'], **t['kwargs'])
             self.assertEqual(out, t['out'])
 
 
