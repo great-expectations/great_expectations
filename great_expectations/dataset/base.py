@@ -177,10 +177,10 @@ class DataSet(object):
         #!!!    we need to provide syntax to override it.
 
         if 'column' in expectation_config['kwargs']:
-            column  = expectation_config['kwargs']['column']
+            column = expectation_config['kwargs']['column']
 
             self._expectations_config.expectations = [f for f in filter(
-                lambda exp: (exp['expectation_type'] != expectation_type) | (exp['kwargs']['column'] != column),
+                lambda exp: (exp['expectation_type'] != expectation_type) or ('column' in exp['kwargs'] and exp['kwargs']['column'] != column),
                 self._expectations_config.expectations
             )]
         else:
