@@ -6,7 +6,8 @@ import json
 #!!! This is a hack to allow testing of this CLT without
 #!!! re-installing great_expectations every time there's an edit
 import sys
-import os 
+import os
+import os.path
 dir_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(dir_path+'/..')
 
@@ -35,7 +36,16 @@ def validate(data_set, expectations_config_file, **kwargs):
 
 	expectations_config = json.load(file(expectations_config_file))
 
-	df = ge.read_csv(data_set, expectations_config=expectations_config)
+	if kwargs["custom_dataset_module"]:
+		sys.path.insert(0, os.path.dirname(kwargs["custom_dataset_module"]))
+		module_name = os.path.basename(kwargs["custom_dataset_module"]).split('.')[0]
+		custom_module = __import__(module_name)
+		dataset_class = getattr(custom_module, kwargs["custom_dataset_class"])
+
+	else:
+		dataset_class = ge.dataset.PandasDataSet
+
+	df = ge.read_csv(data_set, expectations_config=expectations_config, dataset_class=dataset_class)
 
 	result = df.validate(
 		output_format=kwargs["output_format"],
