@@ -321,15 +321,15 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
 
     @MetaPandasDataSet.column_map_expectation
-    def expect_column_values_to_be_in_set(self, column, value_set=None):
+    def expect_column_values_to_be_in_set(self, column, value_set):
         return column.map(lambda x: x in value_set)
 
     @MetaPandasDataSet.column_map_expectation
-    def expect_column_values_to_not_be_in_set(self, column, value_set=None):
+    def expect_column_values_to_not_be_in_set(self, column, value_set):
         return column.map(lambda x: x not in value_set)
 
     @MetaPandasDataSet.column_map_expectation
-    def expect_column_values_to_be_between(self, column, min_value=None, max_value=None):
+    def expect_column_values_to_be_between(self, column, min_value, max_value):
 
         def is_between(val):
             # TODO Might be worth explicitly defining comparisons between types (for example, between strings and ints).

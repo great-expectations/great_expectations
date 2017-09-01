@@ -474,6 +474,10 @@ class TestPandasDataset(unittest.TestCase):
             out = D.expect_column_values_to_be_in_set(*t['in'])
             self.assertEqual(out,t['out'])
 
+        self.assertRaises(
+            TypeError,
+            D.expect_column_values_to_be_in_set, 'x', None
+        )
 
         D2 = ge.dataset.PandasDataSet({
             'x' : [1,1,2,None],
@@ -604,8 +608,6 @@ class TestPandasDataset(unittest.TestCase):
         for t in T:
             out = D.expect_column_value_lengths_to_be_between(**t['in'])
             self.assertEqual(out, t['out'])
-
-
 
     def test_expect_column_values_to_match_regex(self):
         """
