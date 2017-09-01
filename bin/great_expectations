@@ -17,8 +17,8 @@ def initialize():
 
 @argh.arg('data_set')
 @argh.arg('expectations_config_file')
-@argh.arg('--only_show_failures', '-f', default=False)
 @argh.arg('--output_format', '-o', default="BASIC")
+@argh.arg('--only_return_failures', '-f', default=False)
 @argh.arg('--custom_dataset_module', '-m', default=None)
 @argh.arg('--custom_dataset_class', '-c', default=None)
 def validate(data_set, expectations_config_file, **kwargs):
@@ -27,15 +27,9 @@ def validate(data_set, expectations_config_file, **kwargs):
 	df = ge.read_csv(data_set, expectations_config=expectations_config)
 
 	result = df.validate(
-		output_format=kwargs["output_format"]
+		output_format=kwargs["output_format"],
+		only_return_failures=kwargs["only_return_failures"],
 	)
-
-	if kwargs["only_show_failures"]:
-		abbrev_results = []
-		for exp in result["results"]:
-			if exp["success"]==False:
-				abbrev_results.append(exp)
-		result["results"] = abbrev_results
 
 	print(json.dumps(result, indent=2))
 

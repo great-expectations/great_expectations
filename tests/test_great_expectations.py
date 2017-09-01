@@ -149,6 +149,13 @@ class TestValidation(unittest.TestCase):
                             expected_results
                             )
 
+        assertDeepAlmostEqual(
+            self,
+            my_df.validate(only_return_failures=True),
+            {"results": [{"exception_traceback": None, "expectation_type": "expect_column_values_to_be_in_set", "success": False, "exception_list": ["*"], "raised_exception": False, "kwargs": {"column": "PClass", "output_format": "COMPLETE", "value_set": ["1st", "2nd", "3rd"]}, "exception_index_list": [456]}]}
+        )
+
+
 
 class TestRepeatedAppendExpectation(unittest.TestCase):
     def test_validate(self):

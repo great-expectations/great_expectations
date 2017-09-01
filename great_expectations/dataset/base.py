@@ -210,7 +210,7 @@ class DataSet(object):
         expectation_config_str = json.dumps(self.get_expectations_config(), indent=2)
         open(filepath, 'w').write(expectation_config_str)
 
-    def validate(self, expectations_config=None, catch_exceptions=True, output_format=None, include_config=None):
+    def validate(self, expectations_config=None, catch_exceptions=True, output_format=None, include_config=None, only_return_failures=False):
         results = []
 
         if expectations_config is None:
@@ -227,9 +227,21 @@ class DataSet(object):
                 **expectation['kwargs']
             )
 
-            results.append(
-                dict(list(expectation.items()) + list(result.items()))
-            )
+            if output_format != "BOOLEAN_ONLY":
+                results.append(
+                    dict(list(expectation.items()) + list(result.items()))
+                )
+            else:
+                results.append(
+                    dict(list(expectation.items()) + [("success", result)])
+                )
+
+        if only_return_failures:
+            abbrev_results = []
+            for exp in results:
+                if exp["success"]==False:
+                    abbrev_results.append(exp)
+            results = abbrev_results
 
         return {
             "results" : results
