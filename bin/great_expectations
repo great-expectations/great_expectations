@@ -18,16 +18,29 @@ def initialize():
 @argh.arg('data_set')
 @argh.arg('expectations_config_file')
 @argh.arg('--output_format', '-o', default="BASIC")
+@argh.arg('--catch_exceptions', '-e', default=True)
+@argh.arg('--include_config', '-n', default=None)
 @argh.arg('--only_return_failures', '-f', default=False)
 @argh.arg('--custom_dataset_module', '-m', default=None)
 @argh.arg('--custom_dataset_class', '-c', default=None)
 def validate(data_set, expectations_config_file, **kwargs):
+
+	if kwargs["include_config"]:
+		if kwargs["include_config"] == "True":
+			kwargs["include_config"] = True
+		elif kwargs["include_config"] == "False":
+			kwargs["include_config"] = False
+		else:
+			raise ValueError("includ_config expects None, True, or False. Got "+kwargs["include_config"]+" instead.")
+
 	expectations_config = json.load(file(expectations_config_file))
 
 	df = ge.read_csv(data_set, expectations_config=expectations_config)
 
 	result = df.validate(
 		output_format=kwargs["output_format"],
+		catch_exceptions=kwargs["catch_exceptions"],
+		include_config=kwargs["include_config"],
 		only_return_failures=kwargs["only_return_failures"],
 	)
 

@@ -108,6 +108,7 @@ class DataSet(object):
                         raise(err)
 
                 if output_format != 'BOOLEAN_ONLY':
+                    
                     if include_config:
                         return_obj["expectation_type"] = expectation_config["expectation_type"]
                         return_obj["expectation_kwargs"] = copy.deepcopy(dict(expectation_config["kwargs"]))
@@ -218,10 +219,13 @@ class DataSet(object):
 
         for expectation in expectations_config['expectations']:
             expectation_method = getattr(self, expectation['expectation_type'])
+
             if output_format is not None:
                 expectation['kwargs'].update({"output_format": output_format})
+            
             if include_config is not None:
                 expectation['kwargs'].update({"include_config": include_config})
+
             result = expectation_method(
                 catch_exceptions=catch_exceptions,
                 **expectation['kwargs']
