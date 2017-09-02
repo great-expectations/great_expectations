@@ -750,7 +750,7 @@ class DataSet(object):
         """
         raise NotImplementedError
 
-    def expect_column_proportion_of_unique_values_to_be_between(self, column, min_value, max_value, output_format=None):
+    def expect_column_proportion_of_unique_values_to_be_between(self, column, min_value=0, max_value=1):
         """Expect the proportion of unique values to be between a minimum value and a maximum value.
 
         Args:

@@ -510,9 +510,9 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         }
 
     @MetaPandasDataSet.column_aggregate_expectation
-    def expect_column_proportion_of_unique_values_to_be_between(self, series, min_value=0, max_value=1):
-        unique_value_count = series.value_counts().shape[0]
-        total_value_count = int(len(series))#.notnull().sum()
+    def expect_column_proportion_of_unique_values_to_be_between(self, column, min_value=0, max_value=1):
+        unique_value_count = column.value_counts().shape[0]
+        total_value_count = int(len(column))#.notnull().sum()
 
         if total_value_count > 0:
             proportion_unique = float(unique_value_count) / total_value_count
