@@ -83,9 +83,6 @@ class DataSet(object):
                 #Add the expectation_method key
                 expectation_config['expectation_type'] = method_name
 
-                #Append the expectation to the config.
-                self.append_expectation(expectation_config)
-
                 raised_exception = False
                 exception_traceback = None
 
@@ -107,6 +104,9 @@ class DataSet(object):
                     else:
                         raise(err)
 
+                #Append the expectation to the config.
+                self.append_expectation(expectation_config)
+
                 if output_format != 'BOOLEAN_ONLY':
                     
                     if include_config:
@@ -116,8 +116,6 @@ class DataSet(object):
                     if catch_exceptions:
                         return_obj["raised_exception"] = raised_exception
                         return_obj["exception_traceback"] = exception_traceback
-
-                    # print json.dumps(return_obj, indent=2)
 
                 return return_obj
 
