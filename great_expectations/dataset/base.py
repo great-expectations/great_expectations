@@ -134,7 +134,6 @@ class DataSet(object):
         raise NotImplementedError
 
     def initialize_expectations(self, config=None, name=None):
-
         if config != None:
             #!!! Should validate the incoming config with jsonschema here
 
@@ -143,27 +142,15 @@ class DataSet(object):
 
         else:
             self._expectations_config = DotDict({
-                "dataset_name" : None,
+                "dataset_name" : name,
                 "expectations" : []
             })
-
-            #!!! This is specific to pandas.DataFame, so should live in that subclass
-            #!!! ...or not at all, if we decide this is too much autoinspection.
-            for col in self.columns:
-                self._expectations_config.expectations.append({
-                    "expectation_type" : "expect_column_to_exist",
-                    "kwargs" : {
-                        "column" : col
-                    }
-                })
 
         self.default_expectation_args = {
             "include_config" : False,
             "catch_exceptions" : False,
             "output_format" : 'BASIC',
         }
-
-        self._expectations_config.dataset_name = name
 
     def append_expectation(self, expectation_config):
         expectation_type = expectation_config['expectation_type']

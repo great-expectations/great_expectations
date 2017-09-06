@@ -18,6 +18,7 @@ class MetaPandasDataSet(DataSet):
     def __init__(self, *args, **kwargs):
         super(MetaPandasDataSet, self).__init__(*args, **kwargs)
 
+
     @classmethod
     def column_map_expectation(cls, func):
         """
@@ -147,9 +148,20 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
     def __init__(self, *args, **kwargs):
         super(PandasDataSet, self).__init__(*args, **kwargs)
+        self.add_default_expectations()
+
+    def add_default_expectations(self):
+        ## Default behavior for PandasDataSet is to explicitly include expectations that every column present
+        ## upon initialization exists.
+        for col in self.columns:
+            self.append_expectation({
+                "expectation_type": "expect_column_to_exist",
+                "kwargs": {
+                    "column": col
+                }
+            })
 
     ### Expectation methods ###
-
     @DataSet.expectation(['column'])
     def expect_column_to_exist(self, column):
         if column in self:
