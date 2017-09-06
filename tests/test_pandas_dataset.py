@@ -973,8 +973,11 @@ class TestPandasDataset(unittest.TestCase):
         ]
 
         for t in T:
-            out = D.expect_column_unique_value_count_to_be_between(**t['in'])
-            self.assertEqual(out, t['out'])
+            try:
+                out = D.expect_column_unique_value_count_to_be_between(**t['in'])
+                self.assertEqual(out, t['out'])
+            except ValueError as err:
+                self.assertEqual(str(err), "min_value and max_value cannot both be None")
 
     def test_expect_column_proportion_of_unique_values_to_be_between(self):
 

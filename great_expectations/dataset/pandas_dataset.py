@@ -174,30 +174,39 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
             }
 
     @DataSet.expectation(['min_value', 'max_value'])
-    def expect_table_row_count_to_be_between(self, min_value, max_value):
+    def expect_table_row_count_to_be_between(self, min_value=0, max_value=None):
+        # Assert that min_value and max_value are integers
+        if min_value is not None and not float(min_value).is_integer():
+            raise ValueError("min_value and max_value must be integers")
 
-        outcome = False
-        if self.shape[0] >= min_value and self.shape[0] <= max_value:
+        if max_value is not None and not float(max_value).is_integer():
+            raise ValueError("min_value and max_value must be integers")
+
+        if min_value <= self.shape[0] <= max_value:
             outcome = True
+        else:
+            outcome = False
 
         return {
             'success':outcome,
             'true_value': self.shape[0]
         }
 
-
     @DataSet.expectation(['value'])
-    def expect_table_row_count_to_equal(self, value):
+    def expect_table_row_count_to_equal(self, value=None):
 
-        outcome = False
+        if value is not None and not float(value).is_integer():
+            raise ValueError("value must be an integer")
+
         if self.shape[0] == value:
             outcome = True
+        else:
+            outcome = False
 
         return {
             'success':outcome,
             'true_value':self.shape[0]
         }
-
 
     @MetaPandasDataSet.column_map_expectation
     def expect_column_values_to_be_unique(self, column):
@@ -206,7 +215,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
     @DataSet.expectation(['column', 'mostly', 'output_format'])
     def expect_column_values_to_not_be_null(self, column, mostly=None, output_format=None):
-        if output_format == None:
+        if output_format is None:
             output_format = self.default_expectation_args["output_format"]
 
         series = self[column]
@@ -238,7 +247,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
     @DataSet.expectation(['column', 'mostly', 'output_format'])
     def expect_column_values_to_be_null(self, column, mostly=None, output_format=None):
-        if output_format == None:
+        if output_format is None:
             output_format = self.default_expectation_args["output_format"]
 
         series = self[column]
@@ -341,7 +350,10 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         return column.map(lambda x: x not in value_set)
 
     @MetaPandasDataSet.column_map_expectation
-    def expect_column_values_to_be_between(self, column, min_value, max_value):
+    def expect_column_values_to_be_between(self, column, min_value=None, max_value=None):
+
+        if min_value is None and max_value is None:
+            raise ValueError("min_value and max_value cannot both be None")
 
         def is_between(val):
             # TODO Might be worth explicitly defining comparisons between types (for example, between strings and ints).
@@ -361,7 +373,8 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
                         return (min_value <= val)
 
                     else:
-                        raise ValueError("min_value and max_value cannot both be None")
+                        return False
+
                 except:
                     return False
 
@@ -369,23 +382,33 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
     @MetaPandasDataSet.column_map_expectation
     def expect_column_value_lengths_to_be_between(self, column, min_value=None, max_value=None):
-        #TODO should the mapping function raise the error or should the decorator?
+
+        if min_value is None and max_value is None:
+            raise ValueError("min_value and max_value cannot both be None")
+
+        # Assert that min_value and max_value are integers
+        if min_value is not None and not float(min_value).is_integer():
+            raise ValueError("min_value and max_value must be integers")
+
+        if max_value is not None and not float(max_value).is_integer():
+            raise ValueError("min_value and max_value must be integers")
+
         def length_is_between(val):
 
-            if min_value != None and max_value != None:
-                try:
+            try:
+                if min_value != None and max_value != None:
                     return len(val) >= min_value and len(val) <= max_value
-                except:
+
+                elif min_value == None and max_value != None:
+                    return len(val) <= max_value
+
+                elif min_value != None and max_value == None:
+                    return len(val) >= min_value
+
+                else:
                     return False
-
-            elif min_value == None and max_value != None:
-                return len(val) <= max_value
-
-            elif min_value != None and max_value == None:
-                return len(val) >= min_value
-
-            else:
-                raise ValueError("Undefined interval: min_value and max_value are both None")
+            except:
+                return False
 
         return column.map(length_is_between)
 
@@ -464,9 +487,11 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         raise NotImplementedError("Under development")
 
     @MetaPandasDataSet.column_aggregate_expectation
-    def expect_column_mean_to_be_between(self, column, min_value, max_value):
+    def expect_column_mean_to_be_between(self, column, min_value=None, max_value=None):
 
-        #!!! Does not raise an error if both min_value and max_value are None.
+        if min_value is None and max_value is None:
+            raise ValueError("min_value and max_value cannot both be None")
+
         column_mean = column.mean()
 
         return {
@@ -479,9 +504,11 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         }
 
     @MetaPandasDataSet.column_aggregate_expectation
-    def expect_column_median_to_be_between(self, column, min_value, max_value):
+    def expect_column_median_to_be_between(self, column, min_value=None, max_value=None):
 
-        #!!! Does not raise an error if both min_value and max_value are None.
+        if min_value is None and max_value is None:
+            raise ValueError("min_value and max_value cannot both be None")
+
         column_median = column.median()
 
         return {
@@ -494,9 +521,11 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         }
 
     @MetaPandasDataSet.column_aggregate_expectation
-    def expect_column_stdev_to_be_between(self, column, min_value, max_value):
+    def expect_column_stdev_to_be_between(self, column, min_value=None, max_value=None):
 
-        #!!! Does not raise an error if both min_value and max_value are None.
+        if min_value is None and max_value is None:
+            raise ValueError("min_value and max_value cannot both be None")
+
         column_stdev = column.std()
 
         return {
@@ -510,6 +539,10 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
     @MetaPandasDataSet.column_aggregate_expectation
     def expect_column_unique_value_count_to_be_between(self, column, min_value=None, max_value=None):
+
+        if min_value is None and max_value is None:
+            raise ValueError("min_value and max_value cannot both be None")
+
         unique_value_count = column.value_counts().shape[0]
 
         return {
