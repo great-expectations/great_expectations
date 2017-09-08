@@ -5,12 +5,11 @@ os:
 python:
   - "2.6"
   - "2.7"
-  - "3.2"
-  - "3.3"
   - "3.4"
   - "3.5"
   - "3.6"
 install:
+  - pip install --only-binary=numpy,scipy numpy scipy
   - pip install -r requirements.txt
 script:
   - python -m unittest tests
