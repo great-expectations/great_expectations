@@ -49,7 +49,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'great_expectations'
-copyright = u'2017, Abe Gong, Derek Miller, James Campbell'
+copyright = u'2017, The Great Expectations Team'
 author = u'Abe Gong, Derek Miller, James Campbell'
 
 # The version info for the project you're documenting, acts as replacement for
