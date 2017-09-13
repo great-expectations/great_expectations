@@ -28,6 +28,7 @@ For continuous data:
 * Partition weights define the probability of the associated interval. Note that this effectively applies a "piecewise uniform" distribution to the data for the purpose of statistical tests.
 
 Example continuous partition object:
+
 .. code-block:: python
   {
     "partition": [ 0, 1, 2, 10],
@@ -40,6 +41,7 @@ For discrete/categorical data:
 * Partition weights define the probability of the associated categorical value.
 
 Example discrete partition object:
+
 .. code-block:: python
   {
     "partition": [ "cat", "dog", "fish"],
