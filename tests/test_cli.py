@@ -9,6 +9,7 @@ import os
 import subprocess
 
 import great_expectations as ge
+from .util import assertDeepAlmostEqual
 
 def get_system_command_result(command_str):
     p = subprocess.Popen(
@@ -44,7 +45,7 @@ class TestCLI(unittest.TestCase):
 
         command_str = 'python '+filepath+'/../bin/great_expectations validate '+filepath+'/examples/Titanic.csv '+filepath+'/examples/titanic_expectations.json'
         # print get_system_command_result(command_str)
-        self.assertEqual(
+        assertDeepAlmostEqual(self,
             json.loads(get_system_command_result(command_str)["output"]),
             {
               "results": [
