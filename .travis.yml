@@ -1,11 +1,10 @@
 language: python
 os:
   - linux
-  - osx
+#  - osx
 python:
-  - "2.6"
   - "2.7"
-  - "3.4"
+# - "3.4"
   - "3.5"
   - "3.6"
 install:
