@@ -34,7 +34,7 @@ def validate(data_set, expectations_config_file, **kwargs):
 		else:
 			raise ValueError("includ_config expects None, True, or False. Got "+kwargs["include_config"]+" instead.")
 
-	expectations_config = json.load(file(expectations_config_file))
+	expectations_config = json.load(open(expectations_config_file))
 
 	if kwargs["custom_dataset_module"]:
 		sys.path.insert(0, os.path.dirname(kwargs["custom_dataset_module"]))
