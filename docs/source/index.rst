@@ -6,8 +6,6 @@
 Welcome to Great Expectations!
 ==============================================================================
 
-(Note: Some v0.2 docs are out of date. They will be fixed by 9/16/2017.)
-
 .. toctree::
    :maxdepth: 2
 
