@@ -280,11 +280,11 @@ class DataSet(object):
             missing_count = element_count-int(len(nonnull_values))#int(null_indexes.sum())
             exception_count = len(exception_list)
 
-            exception_value_series = pd.Series(exception_list).value_counts()
+            exception_value_series = pd.Series(exception_list).value_counts().iloc[:20]
             partial_exception_counts = dict(zip(
                 list(exception_value_series.index),
                 list(exception_value_series.values),
-            )[:20])
+            ))
 
             if element_count > 0:
                 missing_percent = float(missing_count) / element_count
