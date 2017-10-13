@@ -9,6 +9,7 @@ import numpy as np
 
 from .util import DotDict, ensure_json_serializable
 
+
 class DataSet(object):
 
     def __init__(self, *args, **kwargs):
@@ -342,7 +343,7 @@ class DataSet(object):
 
     ##### Table shape expectations #####
 
-    def expect_column_to_exist(self, column):
+    def expect_column_to_exist(self, column, output_format=None, include_config=False, catch_exceptions=None):
         """Expect the specified column to exist in the data set.
         Args:
             column (str): The column name.
@@ -356,7 +357,7 @@ class DataSet(object):
         """
         raise NotImplementedError
 
-    def expect_table_row_count_to_be_between(self, min_value, max_value):
+    def expect_table_row_count_to_be_between(self, min_value=0, max_value=None, output_format=None, include_config=False, catch_exceptions=None):
         """Expect the number of rows in a data set to be between two values.
         Args:
             min_value (int or None): the minimum number of rows.
@@ -372,7 +373,7 @@ class DataSet(object):
         """
         raise NotImplementedError
 
-    def expect_table_row_count_to_equal(self, value, suppress_exceptions=False):
+    def expect_table_row_count_to_equal(self, value=None, output_format=None, include_config=False, catch_exceptions=None):
         """Expect the number of rows to be equal to a value.
         Args:
 	    value (int): The value that should equal the number of rows.
@@ -389,7 +390,7 @@ class DataSet(object):
 
     ##### Missing values, unique values, and types #####
 
-    def expect_column_values_to_be_unique(self, column, mostly=None, suppress_exceptions=False):
+    def expect_column_values_to_be_unique(self, column, mostly=None, output_format=None, include_config=False, catch_exceptions=None):
         """Expect each nonempty column entry to be unique (no duplicates).
         Args:
             column (str): The column name.
@@ -407,7 +408,7 @@ class DataSet(object):
         """
         raise NotImplementedError
 
-    def expect_column_values_to_not_be_null(self, column, mostly=None, suppress_exceptions=False):
+    def expect_column_values_to_not_be_null(self, column, mostly=None, output_format=None, include_config=False, catch_exceptions=None):
         """Expect each column entry to be nonempty.
         Args:
             column (str): The column name.
@@ -425,7 +426,7 @@ class DataSet(object):
         """
         raise NotImplementedError
 
-    def expect_column_values_to_be_null(self, column, mostly=None, suppress_exceptions=False):
+    def expect_column_values_to_be_null(self, column, mostly=None, output_format=None, include_config=False, catch_exceptions=None):
         """Expect the column entries to be empty.
         Args:
             column (str): The column name.
@@ -443,7 +444,7 @@ class DataSet(object):
         """
         raise NotImplementedError
 
-    def expect_column_values_to_be_of_type(self, column, type_, target_datasource, mostly=None, suppress_exceptions=False):
+    def expect_column_values_to_be_of_type(self, column, type_, target_datasource, mostly=None, output_format=None, include_config=False, catch_exceptions=None):
         """Expect each column entry to be a specified data type.
         Args:
             column (str): The column name.
@@ -465,7 +466,7 @@ class DataSet(object):
 
     ##### Sets and ranges #####
 
-    def expect_column_values_to_be_in_set(self, column, values_set, mostly=None, suppress_exceptions=False):
+    def expect_column_values_to_be_in_set(self, column, values_set, mostly=None, output_format=None, include_config=False, catch_exceptions=None):
         """Expect each entry in a column to be in a given set.
         Args:
             column (str): The column name.
@@ -484,7 +485,7 @@ class DataSet(object):
         """
         raise NotImplementedError
 
-    def expect_column_values_to_not_be_in_set(self, column, values_set, mostly=None, suppress_exceptions=False):
+    def expect_column_values_to_not_be_in_set(self, column, values_set, mostly=None, output_format=None, include_config=False, catch_exceptions=None):
         """Expect column entries to not be in the set.
         Args:
             column (str): The column name.
@@ -503,7 +504,7 @@ class DataSet(object):
         """
         raise NotImplementedError
 
-    def expect_column_values_to_be_between(self, column, min_value, max_value, mostly=None, suppress_exceptions=False):
+    def expect_column_values_to_be_between(self, column, min_value=None, max_value=None, mostly=None, output_format=None, include_config=False, catch_exceptions=None):
         """Expect column entries to be a number between a minimum value and a maximum value.
         Args:
             column (str): The column name.
@@ -525,7 +526,7 @@ class DataSet(object):
 
     ##### String matching #####
 
-    def expect_column_value_lengths_to_be_between(self, column, min_value, max_value, mostly=None, suppress_exceptions=False):
+    def expect_column_value_lengths_to_be_between(self, column, min_value=None, max_value=None, mostly=None, output_format=None, include_config=False, catch_exceptions=None):
         """Expect column entries to have a measurable length which lies between a minimum value and a maximum value.
         Args:
             column (str): The column name.
@@ -545,7 +546,7 @@ class DataSet(object):
         """
         raise NotImplementedError
 
-    def expect_column_values_to_match_regex(self, column, regex, mostly=None, suppress_exceptions=False):
+    def expect_column_values_to_match_regex(self, column, regex, mostly=None, output_format=None, include_config=False, catch_exceptions=None):
         """Expect column entries to be strings that match a given regular expression.
         Args:
             column (str): The column name.
@@ -564,7 +565,7 @@ class DataSet(object):
         """
         raise NotImplementedError
 
-    def expect_column_values_to_not_match_regex(self, column, regex, mostly=None, suppress_exceptions=False):
+    def expect_column_values_to_not_match_regex(self, column, regex, mostly=None, output_format=None, include_config=False, catch_exceptions=None):
         """Expect column entries to be strings that do NOT match a given regular expression.
         Args:
             column (str): The column name.
@@ -583,7 +584,7 @@ class DataSet(object):
         """
         raise NotImplementedError
 
-    def expect_column_values_to_match_regex_list(self, column, regex_list, required_match="any", mostly=None, suppress_exceptions=False):
+    def expect_column_values_to_match_regex_list(self, column, regex_list, required_match="any", mostly=None, output_format=None, include_config=False, catch_exceptions=None):
         """Expect the column entries to be strings that match at least one of a list of regular expressions.
         Args:
             column (str): The column name.
@@ -605,7 +606,7 @@ class DataSet(object):
 
     ##### Datetime and JSON parsing #####
 
-    def expect_column_values_to_match_strftime_format(self, column, strftime_format, mostly=None, suppress_exceptions=False):
+    def expect_column_values_to_match_strftime_format(self, column, strftime_format, mostly=None, output_format=None, include_config=False, catch_exceptions=None):
         """Expect column entries to be strings representing a date or time with a given format.
         WARNING: Note that strftime formats are not universally portable across implementations.
         For example, the %z directive may not be implemented before Python 3.2.
@@ -623,7 +624,7 @@ class DataSet(object):
         """
         raise NotImplementedError
 
-    def expect_column_values_to_be_dateutil_parseable(self, column, mostly=None, suppress_exceptions=False):
+    def expect_column_values_to_be_dateutil_parseable(self, column, mostly=None, output_format=None, include_config=False, catch_exceptions=None):
         """Expect column entries to be interpretable as a dateutil object.
         Args:
             column (str): The column name.
@@ -638,7 +639,7 @@ class DataSet(object):
         """
         raise NotImplementedError
 
-    def expect_column_values_to_be_valid_json(self, column, suppress_exceptions=False):
+    def expect_column_values_to_be_valid_json(self, column, output_format=None, include_config=False, catch_exceptions=None):
         """Expect column entries to be data written in JavaScript Object Notation.
         Args:
             column (str): The column name.
@@ -653,7 +654,7 @@ class DataSet(object):
         """
         raise NotImplementedError
 
-    def expect_column_values_to_match_json_schema(self, column, json_schema, suppress_exceptions=False):
+    def expect_column_values_to_match_json_schema(self, column, json_schema, output_format=None, include_config=False, catch_exceptions=None):
         """Expect column entries to be JSON objects with a given JSON schema.
         Args:
             column (str): The column name.
@@ -672,7 +673,7 @@ class DataSet(object):
 
     ##### Aggregate functions #####
 
-    def expect_column_mean_to_be_between(self, column, min_value, max_value):
+    def expect_column_mean_to_be_between(self, column, min_value=None, max_value=None, output_format=None, include_config=False, catch_exceptions=None):
         """Expect the column mean to be between a minimum value and a maximum value.
         Args:
             column (str): The column name.
@@ -687,7 +688,7 @@ class DataSet(object):
         """
         raise NotImplementedError
 
-    def expect_column_median_to_be_between(self, column, min_value, max_value):
+    def expect_column_median_to_be_between(self, column, min_value=None, max_value=None, output_format=None, include_config=False, catch_exceptions=None):
         """Expect the column median to be between a minimum value and a maximum value.
         Args:
             column (str): The column name.
@@ -702,7 +703,7 @@ class DataSet(object):
         """
         raise NotImplementedError
 
-    def expect_column_stdev_to_be_between(self, column, min_value, max_value, suppress_exceptions=False):
+    def expect_column_stdev_to_be_between(self, column, min_value=None, max_value=None, output_format=None, include_config=False, catch_exceptions=None):
         """Expect the column standard deviation to be between a minimum value and a maximum value.
         Args:
             column (str): The column name.
@@ -718,7 +719,7 @@ class DataSet(object):
         """
         raise NotImplementedError
 
-    def expect_column_unique_value_count_to_be_between(self, column, min_value, max_value, output_format=None):
+    def expect_column_unique_value_count_to_be_between(self, column, min_value=None, max_value=None, output_format=None, include_config=False, catch_exceptions=None):
         """Expect the number of unique values to be between a minimum value and a maximum value.
 
         Args:
@@ -735,7 +736,7 @@ class DataSet(object):
         """
         raise NotImplementedError
 
-    def expect_column_proportion_of_unique_values_to_be_between(self, column, min_value=0, max_value=1):
+    def expect_column_proportion_of_unique_values_to_be_between(self, column, min_value=0, max_value=1, output_format=None, include_config=False, catch_exceptions=None):
         """Expect the proportion of unique values to be between a minimum value and a maximum value.
 
         Args:
@@ -752,7 +753,7 @@ class DataSet(object):
         """
         raise NotImplementedError
 
-    def expect_column_chisquare_test_p_value_greater_than(self, series, partition_object=None, p=0.05):
+    def expect_column_chisquare_test_p_value_greater_than(self, column, partition_object=None, p=0.05, output_format=None, include_config=False, catch_exceptions=None):
         """
         Expect the values in this column to match the distribution of the specified categorical vals and their expected_frequencies. \
 
@@ -774,7 +775,7 @@ class DataSet(object):
         """
         raise NotImplementedError
 
-    def expect_column_bootstrapped_ks_test_p_value_greater_than(self, series, partition_object=None, p=0.05, bootstrap_samples=0):
+    def expect_column_bootstrapped_ks_test_p_value_greater_than(self, column, partition_object=None, p=0.05, bootstrap_samples=0, output_format=None, include_config=False, catch_exceptions=None):
         """
         Expect the values in this column to match the distribution implied by the specified partition and cdf_vals. \
         The implied CDF is constructed as a linear interpolation of the provided cdf_vals.
@@ -796,7 +797,7 @@ class DataSet(object):
         """
         raise NotImplementedError
 
-    def expect_column_kl_divergence_less_than(self, column, partition_object=None, threshold=None):
+    def expect_column_kl_divergence_less_than(self, column, partition_object=None, threshold=None, output_format=None, include_config=False, catch_exceptions=None):
         """
         Expect the values in this column to have lower Kulback-Leibler divergence (relative entropy) with the distriution provided in partition_object of less than the provided threshold.
 
