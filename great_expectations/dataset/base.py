@@ -639,7 +639,7 @@ class DataSet(object):
         """
         raise NotImplementedError
 
-    def expect_column_values_to_be_valid_json(self, column, output_format=None, include_config=False, catch_exceptions=None):
+    def expect_column_values_to_be_json_parseable(self, column, output_format=None, include_config=False, catch_exceptions=None):
         """Expect column entries to be data written in JavaScript Object Notation.
         Args:
             column (str): The column name.

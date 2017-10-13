@@ -488,7 +488,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
     @DocInherit
     @MetaPandasDataSet.column_map_expectation
-    def expect_column_values_to_be_valid_json(self, column, output_format=None, include_config=False, catch_exceptions=None):
+    def expect_column_values_to_be_json_parseable(self, column, output_format=None, include_config=False, catch_exceptions=None):
         def is_json(val):
             try:
                 json.loads(val)
