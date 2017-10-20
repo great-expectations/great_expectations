@@ -69,6 +69,60 @@ class MetaPandasDataSet(DataSet):
         inner_wrapper.__doc__ = func.__doc__
         return inner_wrapper
 
+    @classmethod
+    def column_pair_map_expectation(cls, func):
+        """
+        The column_pair_map_expectation decorator handles boilerplate issues surrounding the common pattern of evaluating
+        truthiness of some condition on a per row basis across a pair of columns.
+
+        NOTE: The MetaPandasDataSet implementation replaces the "column" parameter supplied by the user with a pandas Series
+        object containing the actual column from the relevant pandas dataframe. This simplifies the implementing expectation
+        logic while preserving the standard DataSet signature and expected behavior.
+
+        Further, the column_map_expectation provides a unique set of output_format options and handles the optional "mostly" parameter.
+        """
+
+        @cls.expectation(inspect.getargspec(func)[0][1:])
+        @wraps(func)
+        def inner_wrapper(self, column_A, column_B, mostly=None, output_format=None, *args, **kwargs):
+
+            if output_format is None:
+                output_format = self.default_expectation_args["output_format"]
+
+            series_A = self[column_A]
+            series_B = self[column_B]
+
+            boolean_mapped_null_values = series_A.isnull() | series_B.isnull()
+
+            #These next two rows assume that series_A and _B are the same length
+            element_count = int(len(series_A)) 
+            nonnull_count = (boolean_mapped_null_values_A==False).sum()
+            
+            nonnull_values_A = series_A[boolean_mapped_null_values==False]
+            nonnull_values_B = series_B[boolean_mapped_null_values==False]
+
+            boolean_mapped_success_values = func(self, nonnull_values_A, nonnull_values_B, *args, **kwargs)
+            success_count = boolean_mapped_success_values.sum()
+
+            exception_list = list(series[(boolean_mapped_success_values==False)&(boolean_mapped_null_values==False)])
+            exception_index_list = list(series[(boolean_mapped_success_values==False)&(boolean_mapped_null_values==False)].index)
+            exception_count = len(exception_list)
+
+            success, percent_success = self.calc_map_expectation_success(success_count, nonnull_count, exception_count, mostly)
+
+            return_obj = self.format_column_map_output(
+                output_format, success,
+                element_count,
+                nonnull_values, nonnull_count,
+                boolean_mapped_success_values, success_count,
+                exception_list, exception_index_list
+            )
+
+            return return_obj
+
+        inner_wrapper.__name__ = func.__name__
+        inner_wrapper.__doc__ = func.__doc__
+        return inner_wrapper
 
     @classmethod
     def column_aggregate_expectation(cls, func):
@@ -685,3 +739,11 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
             }
 
         return result_obj
+
+
+    @DocInherit
+    @MetaPandasDataSet.column_pair_map_expectation
+    def expect_column_pair_values_to_be_equal(self, column_A, column_B, output_format=None, include_config=False, catch_exceptions=None):
+        return column_A == column_B
+
+
