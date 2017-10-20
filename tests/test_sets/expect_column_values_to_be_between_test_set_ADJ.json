@@ -243,7 +243,8 @@
     "in": {
       "column": "ts",
       "max_value": "Dec 31 2000",
-      "min_value": "Jan 01 2000"
+      "min_value": "Jan 01 2000",
+      "parse_strings_as_datetimes" : true
     }
   }
 ]

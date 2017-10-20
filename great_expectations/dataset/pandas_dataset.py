@@ -359,9 +359,22 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
     @DocInherit
     @MetaPandasDataSet.column_map_expectation
-    def expect_column_values_to_be_between(self, column, min_value=None, max_value=None, mostly=None, output_format=None, include_config=False, catch_exceptions=None):
+    def expect_column_values_to_be_between(self, column, min_value=None, max_value=None, mostly=None, output_format=None, include_config=False, catch_exceptions=None, parse_strings_as_datetimes=None):
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
+
+        if parse_strings_as_datetimes:
+            if min_value:
+                min_value = parse(min_value)
+
+            if max_value:
+                max_value = parse(max_value)
+
+            temp_column = column.map(parse)
+            print temp_column
+
+        else:
+            temp_column = column
 
         def is_between(val):
             # TODO Might be worth explicitly defining comparisons between types (for example, between strings and ints).
@@ -386,7 +399,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
                 except:
                     return False
 
-        return column.map(is_between)
+        return temp_column.map(is_between)
 
     @DocInherit
     @MetaPandasDataSet.column_map_expectation

@@ -590,6 +590,8 @@ class TestPandasDataset(unittest.TestCase):
         })
         D.set_default_expectation_argument("output_format", "COMPLETE")
 
+        self.maxDiff = None
+
         with open("./tests/test_sets/expect_column_values_to_be_between_test_set_ADJ.json") as f:
             T = json.load(f)
             # print json.dumps(T, indent=2)
