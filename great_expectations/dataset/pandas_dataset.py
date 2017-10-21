@@ -95,8 +95,8 @@ class MetaPandasDataSet(DataSet):
             nonnull_values_A = series_A[boolean_mapped_null_values==False]
             nonnull_values_B = series_B[boolean_mapped_null_values==False]
             nonnull_values = [value_pair for value_pair in zip(
-                list(series_A),
-                list(series_B)
+                list(nonnull_values_A),
+                list(nonnull_values_B)
             )]
 
             boolean_mapped_success_values = func(self, nonnull_values_A, nonnull_values_B, *args, **kwargs)

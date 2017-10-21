@@ -1105,7 +1105,6 @@ class TestPandasDataset(unittest.TestCase):
 
         for t in T["tests"]:
             out = D.expect_column_pair_values_to_be_equal(**t['in'])
-            print json.dumps(out, indent=2)
             out = json.loads(json.dumps(out))
             self.assertEqual(out, t['out'])
 
