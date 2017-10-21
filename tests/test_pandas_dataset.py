@@ -1018,19 +1018,19 @@ class TestPandasDataset(unittest.TestCase):
             df.expect_column_values_to_be_between('x', min_value=1, max_value=5, output_format="SUMMARY"),
             {
                 "success" : False,
-                "exception_list" : [6.0,7.0,7.0],
-                "exception_index_list": [5,6,7],
                 "summary_obj" : {
                     "element_count" : 10,
                     "missing_count" : 2,
                     "missing_percent" : .2,
                     "exception_count" : 3,
-                    "exception_counts": {
+                    "partial_exception_counts": {
                         6.0 : 1,
                         7.0 : 2,
                     },
                     "exception_percent": 0.3,
                     "exception_percent_nonmissing": 0.375,
+                    "partial_exception_list" : [6.0,7.0,7.0],
+                    "partial_exception_index_list": [5,6,7],
                 }
             }
         )

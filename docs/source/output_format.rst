@@ -16,26 +16,44 @@ It isn't possible to fully satisfy all these criteria all the time. Here's how G
 `output_format`
 ------------------------------------------------------------------------------
 
-All Expectations accept an `output_format` parameter. Out of the box, `output_format` can take 3 values: `BOOLEAN_ONLY`, `BASIC`, and `SUMMARY`. That said, the API allows you to define new formats that mix, match, extend this initial set.
+All Expectations accept an `output_format` parameter. Great Expectations defins four values for `output_format`: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, and `SUMMARY`. The API also allows you to define new formats that mix, match, extend this initial set.
 
 .. code-block:: bash
 
-    >> expect_column_values_to_match_regex(
-        "my_column",
-        "[A-Z][a-z]+",
+    >> print list(my_df.my_var)
+    ['A', 'B', 'B', 'C', 'C', 'C', 'D', 'D', 'D', 'D', 'E', 'E', 'E', 'E', 'E', 'F', 'F', 'F', 'F', 'F', 'F', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'H', 'H', 'H', 'H', 'H', 'H', 'H', 'H']
+
+    >> my_df.expect_column_values_to_be_in_set(
+        "my_var",
+        ["B", "C", "D", "F", "G", "H"],
         output_format="BOOLEAN_ONLY"
     )
     False
 
-    >> expect_column_values_to_match_regex(
-        "my_column",
-        "[A-Z][a-z]+",
+    >> my_df.expect_column_values_to_be_in_set(
+        "my_var",
+        ["B", "C", "D", "F", "G", "H"],
         output_format="BASIC"
     )
     {
-        "result": False,
-        "exception_list": ["aaaaA", "aaaaA", "bbbbB"],
-        "exception_index_list": [2, 6, 7]
+        'success': False,
+        'summary_obj': {
+            'exception_count': 6,
+            'exception_percent': 0.16666666666666666,
+            'exception_percent_nonmissing': 0.16666666666666666,
+            'partial_exception_list': ['A', 'E', 'E', 'E', 'E', 'E']
+        }
+    }
+
+    >> my_df.expect_column_values_to_be_in_set(
+        "my_var",
+        ["B", "C", "D", "F", "G", "H"],
+        output_format="COMPLETE"
+    )
+    {
+        'exception_index_list': [0, 10, 11, 12, 13, 14],
+        'exception_list': ['A', 'E', 'E', 'E', 'E', 'E'],
+        'success': False
     }
 
     >> expect_column_values_to_match_regex(
@@ -44,20 +62,42 @@ All Expectations accept an `output_format` parameter. Out of the box, `output_fo
         output_format="SUMMARY"
     )
     {
-        "result": False,
-        "exception_counts": {
-            "aaaaA" : 2,
-            "bbbbB": 1
-        },
-        "exception_percent": 0.3
-        "exception_count": 3
+        'success': False,
+        'summary_obj': {
+            'element_count': 36,
+            'exception_count': 6,
+            'exception_percent': 0.16666666666666666,
+            'exception_percent_nonmissing': 0.16666666666666666,
+            'missing_count': 0,
+            'missing_percent': 0.0,
+            'partial_exception_counts': {'A': 1, 'E': 5},
+            'partial_exception_index_list': [0, 10, 11, 12, 13, 14],
+            'partial_exception_list': ['A', 'E', 'E', 'E', 'E', 'E']
+        }
     }
-
 
 The out-of-the-box default is `output_format=BASIC`.
 
 Note: accepting a single parameter for `output_format` should make the library of formats relatively easy to extend in the future.
 
+
+Behavior for `BOOLEAN_ONLY` result objects
+------------------------------------------------------------------------------
+...is simple: if the expectation is satisfied, it returns True. Otherwise it returns False.
+
+    >> my_df.expect_column_values_to_be_in_set(
+        "possible_benefactors",
+        ["Joe Gargery", "Mrs. Gargery", "Mr. Pumblechook", "Ms. Havisham", "Mr. Jaggers"]
+        output_format="BOOLEAN_ONLY"
+    )
+    False
+
+    >> my_df.expect_column_values_to_be_in_set(
+        "possible_benefactors",
+        ["Joe Gargery", "Mrs. Gargery", "Mr. Pumblechook", "Ms. Havisham", "Mr. Jaggers", "Mr. Magwitch"]
+        output_format="BOOLEAN_ONLY"
+    )
+    False
 
 Behavior for `BASIC` result objects
 ------------------------------------------------------------------------------
@@ -69,8 +109,8 @@ Behavior for `BASIC` result objects
 
     {
         "success" : Boolean,
-        "exception_list" : [A list of values that violate the expectation]
-        "exception_index_list" : [A list of the indexes of those values]
+        "partial_exception_list" : [A list of up to 20 values that violate the expectation]
+        "partial_exception_index_list" : [A list of the indexes of those values]
     }
 
 
@@ -116,7 +156,7 @@ For example:
     expect_column_stdev_to_be_between
     {
         "success" : false
-        "true_value" : 3
+        "true_value" : 3.04
     }
 
     expect_column_most_common_value_to_be
@@ -129,22 +169,41 @@ For example:
 Behavior for `SUMMARY` result objects
 ------------------------------------------------------------------------------
 
-... Generate a summary of common exception values. For `column_map_expectations`, the standard format is:
+`SUMMARY` provides a `summary_obj` with values usef of common exception values. For `column_map_expectations`, the standard format is:
 
 .. code-block:: bash
 
     {
-        "success" : false,
-        "missing_count" : 0,
-        "exception_count" : 3,
-        "exception_counts": {
-            "aaaaA" : 2,
-            "bbbbB": 1
-        },
-        "exception_percent": 0.3
+        'success': False,
+        'summary_obj': {
+            'element_count': 36,
+            'exception_count': 6,
+            'exception_percent': 0.16666666666666666,
+            'exception_percent_nonmissing': 0.16666666666666666,
+            'missing_count': 0,
+            'missing_percent': 0.0,
+            'partial_exception_counts': {'A': 1, 'E': 5},
+            'partial_exception_index_list': [0, 10, 11, 12, 13, 14],
+            'partial_exception_list': ['A', 'E', 'E', 'E', 'E', 'E']
+        }
     }
-    
-For `column_aggregate_expectations`, `summary` output is the same as `basic` output.
+
+
+
+For `column_aggregate_expectations`, `SUMMARY` output is the same as `BASIC` output, plus a `summary_obj`.
+
+.. code-block:: bash
+
+    {
+        'success': False,
+        'true_value': 3.04,
+        'summary_obj': {
+            'element_count': 77,
+            'missing_count': 7,
+            'missing_percent': 0.1,
+        }
+    }
+
 
 
 `include_config`
@@ -154,23 +213,23 @@ In addition, all Expectations accept a boolean `include_config` parameter. If tr
 
 .. code-block:: bash
 
-    >> expect_column_values_to_match_regex(
-        "my_column",
-        "[A-Z][a-z]+",
-        output_format=gerof.summary,
-        include_config=True
+    >> expect_column_values_to_be_in_set(
+        "my_var",
+        ['B', 'C', 'D', 'F', 'G', 'H'],
+        output_format="COMPLETE",
+        include_config=True,
     )
+
     {
-        "result": False,
-        "exception_counts": {
-            "aaaaA" : 2,
-            "bbbbB": 1
+        'exception_index_list': [0, 10, 11, 12, 13, 14],
+        'exception_list': ['A', 'E', 'E', 'E', 'E', 'E'],
+        'expectation_type': 'expect_column_values_to_be_in_set',
+        'expectation_kwargs': {
+            'column': 'my_var',
+            'output_format': 'COMPLETE',
+            'value_set': ['B', 'C', 'D', 'F', 'G', 'H']
         },
-        "exception_percent": 0.3,
-        "expectation_type" : "expect_column_values_to_match_regex",
-        "expectation_kwargs" : {
-            "regex" : "[A-Z][a-z]+"]
-        }
+        'success': False
     }
 
 `catch_exceptions`

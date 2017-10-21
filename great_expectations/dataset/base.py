@@ -30,7 +30,7 @@ class DataSet(object):
             1. Build and update the expectation config.
             2. Handle the "include_config" boolean parameter, which allows a caller to retrieve the generated
                 configuration immediately after running the expectation.
-            3. Handle the "catch_excpetions" parameter, which allows a caller to catch any exception and report an
+            3. Handle the "catch_exceptions" parameter, which allows a caller to catch any exception and report an
                 aggregate trace, useful for validation.
             4. Handle the "output_format" parameter, and pass it down to the implementing method if its signature expects it.
                 By handing down the output_format, methods implementing expectations can optionally provide additional output formats
@@ -281,8 +281,8 @@ class DataSet(object):
             missing_count = element_count-int(len(nonnull_values))#int(null_indexes.sum())
             exception_count = len(exception_list)
 
-            exception_value_series = pd.Series(exception_list).value_counts()
-            exception_counts = dict(zip(
+            exception_value_series = pd.Series(exception_list).value_counts().iloc[:20]
+            partial_exception_counts = dict(zip(
                 list(exception_value_series.index),
                 list(exception_value_series.values),
             ))
@@ -302,8 +302,6 @@ class DataSet(object):
 
             return_obj = {
                 "success": success,
-                "exception_list": exception_list,
-                "exception_index_list": exception_index_list,
                 "summary_obj": {
                     "element_count": element_count,
                     "missing_count": missing_count,
@@ -311,7 +309,9 @@ class DataSet(object):
                     "exception_count": exception_count,
                     "exception_percent": exception_percent,
                     "exception_percent_nonmissing": exception_percent_nonmissing,
-                    "exception_counts": exception_counts,
+                    "partial_exception_counts": partial_exception_counts,
+                    "partial_exception_list": exception_list[:20],
+                    "partial_exception_index_list": exception_index_list[:20],
                 }
             }
 
