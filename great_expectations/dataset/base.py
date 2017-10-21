@@ -4,8 +4,9 @@ import copy
 from functools import wraps
 import traceback
 
-import pandas as pd
+# import pandas as pd
 import numpy as np
+from collections import Counter
 
 from .util import DotDict, ensure_json_serializable
 
@@ -283,11 +284,16 @@ class DataSet(object):
             exception_count = len(exception_list)
 
             #FIXME This shouldn't use pandas.
-            exception_value_series = pd.Series(exception_list).value_counts().iloc[:20]
-            partial_exception_counts = dict(zip(
-                list(exception_value_series.index),
-                list(exception_value_series.values),
-            ))
+            # exception_value_series = pd.Series(exception_list).value_counts().iloc[:20]
+            # partial_exception_counts = dict(zip(
+            #     list(exception_value_series.index),
+            #     list(exception_value_series.values),
+            # ))
+            partial_exception_counts = [{
+                    "value" : k,
+                    "count" : v
+                } for k,v in Counter(exception_list).most_common(20)
+            ]
 
             if element_count > 0:
                 missing_percent = float(missing_count) / element_count

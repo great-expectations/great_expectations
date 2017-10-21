@@ -94,7 +94,7 @@ class MetaPandasDataSet(DataSet):
             
             nonnull_values_A = series_A[boolean_mapped_null_values==False]
             nonnull_values_B = series_B[boolean_mapped_null_values==False]
-            nonnull_values = [list(value_pair) for value_pair in zip(
+            nonnull_values = [value_pair for value_pair in zip(
                 list(series_A),
                 list(series_B)
             )]
@@ -102,7 +102,7 @@ class MetaPandasDataSet(DataSet):
             boolean_mapped_success_values = func(self, nonnull_values_A, nonnull_values_B, *args, **kwargs)
             success_count = boolean_mapped_success_values.sum()
 
-            exception_list = [list(value_pair) for value_pair in zip(
+            exception_list = [value_pair for value_pair in zip(
                 list(series_A[(boolean_mapped_success_values==False)&(boolean_mapped_null_values==False)]),
                 list(series_B[(boolean_mapped_success_values==False)&(boolean_mapped_null_values==False)])
             )]
