@@ -74,12 +74,6 @@ class MetaPandasDataSet(DataSet):
         """
         The column_pair_map_expectation decorator handles boilerplate issues surrounding the common pattern of evaluating
         truthiness of some condition on a per row basis across a pair of columns.
-
-        NOTE: The MetaPandasDataSet implementation replaces the "column" parameter supplied by the user with a pandas Series
-        object containing the actual column from the relevant pandas dataframe. This simplifies the implementing expectation
-        logic while preserving the standard DataSet signature and expected behavior.
-
-        Further, the column_map_expectation provides a unique set of output_format options and handles the optional "mostly" parameter.
         """
 
         @cls.expectation(inspect.getargspec(func)[0][1:])

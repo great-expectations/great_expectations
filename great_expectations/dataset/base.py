@@ -88,11 +88,11 @@ class DataSet(object):
                 exception_traceback = None
 
                 #Finally, execute the expectation method itself
-                try:
-                    return_obj = func(self, **all_args)
+                if catch_exceptions:
+                    try:
+                        return_obj = func(self, **all_args)
 
-                except Exception as err:
-                    if catch_exceptions:
+                    except Exception as err:
                         raised_exception = True
                         exception_traceback = traceback.format_exc()
 
@@ -102,8 +102,8 @@ class DataSet(object):
                             }
                         else:
                             return_obj = False
-                    else:
-                        raise(err)
+                else:
+                    return_obj = func(self, **all_args)
 
                 #Append the expectation to the config.
                 self.append_expectation(expectation_config)
@@ -282,6 +282,7 @@ class DataSet(object):
             missing_count = element_count-int(len(nonnull_values))#int(null_indexes.sum())
             exception_count = len(exception_list)
 
+            #FIXME This shouldn't use pandas.
             exception_value_series = pd.Series(exception_list).value_counts()
             exception_counts = dict(zip(
                 list(exception_value_series.index),
