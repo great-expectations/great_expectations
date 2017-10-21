@@ -20,7 +20,15 @@ Great Expectations's connect-and-expect API makes it easy to declare Expectation
         "Sex",
         ["male", "female"]
     )
-    {'exception_list': [], 'success': True}
+    {
+        'success': True,
+        'summary_obj': {
+            'exception_count': 0,
+            'exception_percent': 0.0,
+            'exception_percent_nonmissing': 0.0,
+            'partial_exception_list': []
+        }
+    }
 
 
 
@@ -44,7 +52,15 @@ For example:
         "PClass",
         ["1st", "2nd", "3rd"]
     )
-    {'exception_list': ['*'], 'success': False}
+    {
+        'success': False,
+        'summary_obj': {
+            'exception_count': 1,
+            'exception_percent': 0.0007616146230007616,
+            'exception_percent_nonmissing': 0.0007616146230007616,
+            'partial_exception_list': ['*']
+        }
+    }
 
 Another example:
 
@@ -55,26 +71,32 @@ Another example:
         "^[A-Za-z\, \(\)\']+$"
     )
     {
-        'exception_list': [
-            'Bjornstrm-Steffansson, Mr Mauritz Hakan',
-            'Brown, Mrs James Joseph (Margaret Molly" Tobin)"',
-            'Frolicher-Stehli, Mr Maxmillian',
-            'Frolicher-Stehli, Mrs Maxmillian (Margaretha Emerentia Stehli)',
-            'Lindeberg-Lind, Mr Erik Gustaf',
-            'Roebling, Mr Washington Augustus 2nd',
-            'Rothes, the Countess of (Noel Lucy Martha Dyer-Edwardes)',
-            'Simonius-Blumer, Col Alfons',
-            'Thorne, Mr George (alias of: Mr George Rosenshine)',
-            'Downton (?Douton), Mr William James',
-            'Aijo-Nirva, Mr Isak',
-            'Johannesen-Bratthammer, Mr Bernt',
-            'Larsson-Rondberg, Mr Edvard',
-            'Nicola-Yarred, Miss Jamila',
-            'Nicola-Yarred, Master Elias',
-            'Thomas, Mr John (? 1st/2nd class)'
-        ],
-        'success': False
-    }
+        'success': False,
+        'summary_obj': {
+            'exception_count': 16,
+            'exception_percent': 0.012185833968012186,
+            'exception_percent_nonmissing': 0.012185833968012186,
+            'partial_exception_list': [
+                'Bjornstrm-Steffansson, Mr Mauritz Hakan',
+                'Brown, Mrs James Joseph (Margaret Molly" Tobin)"',
+                'Frolicher-Stehli, Mr Maxmillian',
+                'Frolicher-Stehli, Mrs Maxmillian (Margaretha Emerentia Stehli)',
+                'Lindeberg-Lind, Mr Erik Gustaf',
+                'Roebling, Mr Washington Augustus 2nd',
+                'Rothes, the Countess of (Noel Lucy Martha Dyer-Edwardes)',
+                'Simonius-Blumer, Col Alfons',
+                'Thorne, Mr George (alias of: Mr George Rosenshine)',
+                'Downton (?Douton), Mr William James',
+                'Aijo-Nirva, Mr Isak',
+                'Johannesen-Bratthammer, Mr Bernt',
+                'Larsson-Rondberg, Mr Edvard',
+                'Nicola-Yarred, Miss Jamila',
+                'Nicola-Yarred, Master Elias',
+                'Thomas, Mr John (? 1st/2nd class)'
+            ]
+        }
+   }
+
 
 This instant feedback helps you zero in on exceptions very quickly, taking a lot of the pain and guesswork out of early data exploration.
 
