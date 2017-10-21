@@ -94,18 +94,21 @@ class MetaPandasDataSet(DataSet):
 
             boolean_mapped_null_values = series_A.isnull() | series_B.isnull()
 
-            #These next two rows assume that series_A and _B are the same length
+            #This next row assumes that series_A and _B are the same length
             element_count = int(len(series_A)) 
-            nonnull_count = (boolean_mapped_null_values_A==False).sum()
+            nonnull_count = (boolean_mapped_null_values==False).sum()
             
             nonnull_values_A = series_A[boolean_mapped_null_values==False]
             nonnull_values_B = series_B[boolean_mapped_null_values==False]
+            #FIXME Need to make this a list of pairs
+            nonnull_values = None
 
             boolean_mapped_success_values = func(self, nonnull_values_A, nonnull_values_B, *args, **kwargs)
             success_count = boolean_mapped_success_values.sum()
 
-            exception_list = list(series[(boolean_mapped_success_values==False)&(boolean_mapped_null_values==False)])
-            exception_index_list = list(series[(boolean_mapped_success_values==False)&(boolean_mapped_null_values==False)].index)
+            #FIXME Need to add series_B to this list
+            exception_list = list(series_A[(boolean_mapped_success_values==False)&(boolean_mapped_null_values==False)])
+            exception_index_list = list(series_A[(boolean_mapped_success_values==False)&(boolean_mapped_null_values==False)].index)
             exception_count = len(exception_list)
 
             success, percent_success = self.calc_map_expectation_success(success_count, nonnull_count, exception_count, mostly)
