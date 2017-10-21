@@ -93,7 +93,7 @@
       "success": false, 
       "kwargs": {
         "column": "PClass", 
-        "value_set": [
+        "values_set": [
           "1st", 
           "2nd", 
           "3rd"

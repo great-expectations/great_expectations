@@ -487,22 +487,22 @@ class TestPandasDataset(unittest.TestCase):
 
         T = [
                 {
-                    'in':{'column':'x', 'value_set':[1,2]},
+                    'in':{'column':'x', 'values_set':[1,2]},
                     'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}},
                 {
-                    'in':{'column':'x', 'value_set':[1]},
+                    'in':{'column':'x', 'values_set':[1]},
                     'out':{'success':False, 'exception_index_list':[2], 'exception_list':[2]}},
                 {
-                    'in':{'column':'x', 'value_set':[1], 'mostly':.66},
+                    'in':{'column':'x', 'values_set':[1], 'mostly':.66},
                     'out':{'success':True, 'exception_index_list':[2], 'exception_list':[2]}},
                 {
-                    'in':{'column':'x', 'value_set':[2], 'mostly':.66},
+                    'in':{'column':'x', 'values_set':[2], 'mostly':.66},
                     'out':{'success':False, 'exception_index_list':[0,1], 'exception_list':[1,1]}},
                 {
-                    'in':{'column':'y', 'value_set':[]},
+                    'in':{'column':'y', 'values_set':[]},
                     'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}},
                 {
-                    'in':{'column':'y', 'value_set':[2], 'mostly':.5},
+                    'in':{'column':'y', 'values_set':[2], 'mostly':.5},
                     'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}}
         ]
 

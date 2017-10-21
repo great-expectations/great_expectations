@@ -171,7 +171,7 @@ class TestCLI(unittest.TestCase):
                   "kwargs": {
                     "column": "PClass", 
                     "output_format": "BASIC", 
-                    "value_set": [
+                    "values_set": [
                       "1st", 
                       "2nd", 
                       "3rd"
