@@ -826,19 +826,9 @@ class DataSet(object):
         Expect the values in this column to have lower Kulback-Leibler divergence (relative entropy) with the distriution provided in partition_object of less than the provided threshold.
 
         Args:
-            column (str): The column name
-            partition_object (dict): A dictionary containing partition (bin edges) and associated weights.
-                - partition (list): A list of values that correspond to the endpoints of an implied partition on the real number line.
-                - weights (list): A list of weights. They should sum to one.
-            threshold (float) = 0.1: The threshold of relative entropy.\
-                For values above the specified threshold the expectation will return false.
-            suppress_exceptions: Only return a boolean success value, not a dictionary with other results.
+            column_A (str): The first column name
+            column_B (str): The second column name
 
-        Returns:
-            {
-                "success": (bool) True if the column passed the expectation,
-                "true_value": (float) the true value of the KL divergence
-            }
         """
         raise NotImplementedError
 

@@ -1084,18 +1084,21 @@ class TestPandasDataset(unittest.TestCase):
         )
 
 
-    def expect_column_pair_values_to_be_equal(self):
+    def test_expect_column_pair_values_to_be_equal(self):
         """
 
         """
+
         with open("./tests/test_sets/expect_column_pair_values_to_be_equal_test_set.json") as f:
             T = json.load(f)
 
-        ge.dataset.PandasDataSet(T["dataset"])
+        D = ge.dataset.PandasDataSet(T["dataset"])
         D.set_default_expectation_argument("output_format", "COMPLETE")
 
+        self.maxDiff = None
+
         for t in T["tests"]:
-            out = D.expect_column_values_to_be_between(**t['in'])
+            out = D.expect_column_pair_values_to_be_equal(**t['in'])
             self.assertEqual(out, t['out'])
 
 
