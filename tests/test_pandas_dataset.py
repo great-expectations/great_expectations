@@ -9,6 +9,23 @@ import great_expectations as ge
 
 class TestPandasDataset(unittest.TestCase):
 
+    def run_encapsulated_test(self, expectation, filename):
+        with open(filename) as f:
+            T = json.load(f)
+
+        D = ge.dataset.PandasDataSet(T["dataset"])
+        D.set_default_expectation_argument("output_format", "COMPLETE")
+
+        self.maxDiff = None
+
+        for t in T["tests"]:
+            expectation = getattr(D, expectation)
+            out = expectation(**t['in'])
+            out = json.loads(json.dumps(out))
+            self.assertEqual(out, t['out'])
+
+
+
     def test_expect_table_row_count_to_be_between(self):
 
         # Data for testing
@@ -1108,6 +1125,14 @@ class TestPandasDataset(unittest.TestCase):
             out = json.loads(json.dumps(out))
             self.assertEqual(out, t['out'])
 
+    def test_expect_column_pair_values_to_be_greater_than(self):
+        """
+
+        """
+        self.run_encapsulated_test(
+            "expect_column_pair_values_to_be_greater_than",
+            "./tests/test_sets/expect_column_pair_values_to_be_greater_than_test_set.json",
+        )
 
 if __name__ == "__main__":
     unittest.main()

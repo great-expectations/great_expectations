@@ -747,4 +747,18 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
     def expect_column_pair_values_to_be_equal(self, column_A, column_B, output_format=None, include_config=False, catch_exceptions=None):
         return column_A == column_B
 
+    @DocInherit
+    @MetaPandasDataSet.column_pair_map_expectation
+    def expect_column_pair_values_to_be_greater_than(self, column_A, column_B, or_equal=None, output_format=None, include_config=False, catch_exceptions=None):
+        if or_equal:
+            return column_A >= column_B
+        else:
+            return column_A > column_B
 
+    @DocInherit
+    @MetaPandasDataSet.column_pair_map_expectation
+    def expect_column_pair_values_to_be_in_set(self, column_A, column_B, value_pairs_set, output_format=None, include_config=False, catch_exceptions=None):
+        pass
+
+
+        
