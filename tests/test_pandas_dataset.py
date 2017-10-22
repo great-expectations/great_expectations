@@ -1131,5 +1131,11 @@ class TestPandasDataset(unittest.TestCase):
             "./tests/test_sets/expect_column_pair_values_to_be_greater_than_test_set.json",
         )
 
+    def test_expect_column_pair_values_to_be_in_set(self):
+        self.run_encapsulated_test(
+            "expect_column_pair_values_to_be_in_set",
+            "./tests/test_sets/expect_column_pair_values_to_be_in_set_test_set.json",
+        )
+
 if __name__ == "__main__":
     unittest.main()

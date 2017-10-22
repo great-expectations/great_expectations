@@ -758,7 +758,8 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
     @DocInherit
     @MetaPandasDataSet.column_pair_map_expectation
     def expect_column_pair_values_to_be_in_set(self, column_A, column_B, value_pairs_set, output_format=None, include_config=False, catch_exceptions=None):
-        pass
+        temp_df = pd.DataFrame({"A": column_A, "B": column_B})
+        value_pair_df = pd.DataFrame(value_pairs_set, columns=["A", "B"])
+        return temp_df.isin(value_pair_df).all(axis=1)
 
 
-        

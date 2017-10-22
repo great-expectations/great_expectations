@@ -850,3 +850,15 @@ class DataSet(object):
 
         """
         raise NotImplementedError
+
+
+    def expect_column_pair_values_to_be_in_set(self, column_A, column_B, value_pairs_set, output_format=None, include_config=False, catch_exceptions=None):
+        """
+        Expect the values in this column to have lower Kulback-Leibler divergence (relative entropy) with the distriution provided in partition_object of less than the provided threshold.
+
+        Args:
+            column_A (str): The first column name
+            column_B (str): The second column name
+            value_pairs_set (list of lists): All the valid pairs to be matched
+        """
+        raise NotImplementedError

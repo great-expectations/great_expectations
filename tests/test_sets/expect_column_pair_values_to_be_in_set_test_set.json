@@ -1,0 +1,42 @@
+{
+  "dataset" : {
+    "w" : [2, 3, 4, 5, 6, 7, 8, 9, 10, null],
+    "x" : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    "y" : [1, 2, 3, 4, 5, 6, 7, 8, 9, "abc"],
+    "z" : [1, 2, 3, 4, 5, null, null, null, null, null]
+  },
+  "tests" : [{
+    "in": {
+      "column_A": "x",
+      "column_B": "z",
+      "value_pairs_set": [[1,1], [2,2], [3,3], [4,4], [5,5]]
+    },
+    "out": {
+      "exception_list": [],
+      "exception_index_list": [],
+      "success": true
+    }
+  },{
+    "in": {
+      "column_A": "x",
+      "column_B": "z",
+      "value_pairs_set": [[1,1], [2,2], [3,3], [4,4]]
+    },
+    "out" : {
+      "exception_list": [[5, 5]],
+      "exception_index_list": [4],
+      "success": false
+    }
+  }, {
+    "in": {
+      "column_A": "w",
+      "column_B": "z",
+      "value_pairs_set": [[1,1], [2,2], [3,3], [4,4]]
+    },
+    "out" : {
+      "exception_list": [[2, 1], [3, 2], [4, 3], [5, 4], [6, 5]],
+      "exception_index_list": [0,1,2,3,4],
+      "success": false
+    }
+  }]
+}
