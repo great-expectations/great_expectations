@@ -9,7 +9,7 @@ import great_expectations as ge
 
 class TestPandasDataset(unittest.TestCase):
 
-    def run_encapsulated_test(self, expectation, filename):
+    def run_encapsulated_test(self, expectation_name, filename):
         with open(filename) as f:
             T = json.load(f)
 
@@ -19,7 +19,7 @@ class TestPandasDataset(unittest.TestCase):
         self.maxDiff = None
 
         for t in T["tests"]:
-            expectation = getattr(D, expectation)
+            expectation = getattr(D, expectation_name)
             out = expectation(**t['in'])
             out = json.loads(json.dumps(out))
             self.assertEqual(out, t['out'])
@@ -1126,9 +1126,6 @@ class TestPandasDataset(unittest.TestCase):
             self.assertEqual(out, t['out'])
 
     def test_expect_column_pair_values_to_be_greater_than(self):
-        """
-
-        """
         self.run_encapsulated_test(
             "expect_column_pair_values_to_be_greater_than",
             "./tests/test_sets/expect_column_pair_values_to_be_greater_than_test_set.json",

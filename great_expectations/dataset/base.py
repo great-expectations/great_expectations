@@ -839,3 +839,14 @@ class DataSet(object):
         """
         raise NotImplementedError
 
+    def expect_column_pair_values_to_be_greater_than(self, column_A, column_B, or_equal=None, output_format=None, include_config=False, catch_exceptions=None):
+        """
+        Expect the values in this column to have lower Kulback-Leibler divergence (relative entropy) with the distriution provided in partition_object of less than the provided threshold.
+
+        Args:
+            column_A (str): The first column name
+            column_B (str): The second column name
+            or_equal (boolean or None): If True, then values can be equal, not strictly greater
+
+        """
+        raise NotImplementedError
