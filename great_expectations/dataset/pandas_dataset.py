@@ -501,6 +501,19 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
     @DocInherit
     @MetaPandasDataSet.column_map_expectation
     def expect_column_values_to_match_json_schema(self, column, json_schema, output_format=None, include_config=False, catch_exceptions=None):
+        def matches_json_schema(val):
+            try:
+                val_json = json.loads(val)
+                return jsonschema.validate(val_json, json_schema)
+            except:
+                return False
+
+        return column.map(matches_json_schema)
+
+
+    @DocInherit
+    @MetaPandasDataSet.column_map_expectation
+    def expect_column_values_to_match_json_schema(self, column, json_schema, output_format=None, include_config=False, catch_exceptions=None):
         raise NotImplementedError("Under development")
 
     @DocInherit
