@@ -1117,12 +1117,12 @@ class TestPandasDataset(unittest.TestCase):
         T = [
                 {
                     'in':{"column":"x","value_set":[1]},
+                    'out':{"success":False, "true_value":[1,2]},
+                },{
+                    'in':{"column":"x", "value_set":[1], "ties_okay":True},
                     'out':{"success":True, "true_value":[1,2]},
                 },{
-                    'in':{"column":"x", "value_set":[1]},
-                    'out':{"success":True, "true_value":[1,2]},
-                },{
-                    'in':{"column":"x","value_set":3},
+                    'in':{"column":"x","value_set":[3]},
                     'out':{"success":False, "true_value":[1,2]},
                 },{
                     'in':{"column":"y","value_set":["jello", "hello"]},
