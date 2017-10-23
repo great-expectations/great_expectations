@@ -438,6 +438,51 @@ class TestPandasDataset(unittest.TestCase):
             out = D.expect_column_values_to_be_of_type(**t['in'])
             self.assertEqual(out, t['out'])
 
+    def test_expect_column_values_to_be_in_type_list(self):
+
+        D = ge.dataset.PandasDataSet({
+            'x' : [1,2,4],
+            'y' : [1.0,2.2,5.3],
+            'z' : ['hello', 'jello', 'mello'],
+            'n' : [None, np.nan, None],
+            'b' : [False, True, False],
+            's' : ['hello', 'jello', 1],
+            's1' : ['hello', 2.0, 1],
+        })
+        D.set_default_expectation_argument("output_format", "COMPLETE")
+
+        T = [
+                {
+                    'in':{"column":"x","type_list":["int"],"target_datasource":"python"},
+                    'out':{'success':True, 'exception_list':[], 'exception_index_list':[]}},
+                {
+                    'in':{"column":"x","type_list":["string"],"target_datasource":"numpy"},
+                    'out':{'success':False, 'exception_list':[1,2,4], 'exception_index_list':[0,1,2]}},
+                {
+                    'in':{"column":"y","type_list":["float"],"target_datasource":"python"},
+                    'out':{'success':True, 'exception_list':[], 'exception_index_list':[]}},
+                {
+                    'in':{"column":"y","type_list":["float"],"target_datasource":"numpy"},
+                    'out':{'success':False, 'exception_list':[1.0,2.2,5.3], 'exception_index_list':[0,1,2]}},
+                {
+                    'in':{"column":"z","type_list":["string"],"target_datasource":"python"},
+                    'out':{'success':True, 'exception_list':[], 'exception_index_list':[]}},
+                {
+                    'in':{"column":"b","type_list":["boolean"],"target_datasource":"python"},
+                    'out':{'success':True, 'exception_list':[], 'exception_index_list':[]}},
+                {
+                   'in':{"column":"s", "type_list":["string", "int"], "target_datasource":"python"},
+                   'out':{'success':True, 'exception_list':[], 'exception_index_list':[]}},
+                #{
+                #    'in':['n','null','python'],
+                #    'kwargs':{'mostly':.5},
+                #    'out':{'success':True, 'exception_list':[np.nan]}}
+        ]
+
+        for t in T:
+            out = D.expect_column_values_to_be_in_type_list(**t['in'])
+            self.assertEqual(out, t['out'])
+
 
     def test_expect_column_values_to_be_in_set(self):
         """
