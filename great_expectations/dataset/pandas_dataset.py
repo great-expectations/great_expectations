@@ -594,6 +594,44 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
     @DocInherit
     @MetaPandasDataSet.column_aggregate_expectation
+    def expect_column_most_common_value_to_be(self, column, value, ties_okay=None, output_format=None, include_config=False, catch_exceptions=None):
+
+        mode_list = list(column.mode().values)
+
+        if ties_okay:
+            success = value in mode_list
+        else:
+            if len(mode_list) > 1:
+                success = False
+            else:
+                success = value == mode_list[0]
+
+        return {
+            "success" : success,
+            "true_value": mode_list,
+            "summary_obj": {},
+        }
+
+    @DocInherit
+    @MetaPandasDataSet.column_aggregate_expectation
+    def expect_column_most_common_value_to_be_in_set(self, column, value_set, output_format=None, include_config=False, catch_exceptions=None):
+
+        if min_value is None and max_value is None:
+            raise ValueError("min_value and max_value cannot both be None")
+
+        unique_value_count = column.value_counts().shape[0]
+
+        return {
+            "success" : (
+                ((min_value is None) or (min_value <= unique_value_count)) and
+                ((max_value is None) or (unique_value_count <= max_value))
+            ),
+            "true_value": unique_value_count,
+            "summary_obj": {}
+        }
+
+    @DocInherit
+    @MetaPandasDataSet.column_aggregate_expectation
     def expect_column_proportion_of_unique_values_to_be_between(self, column, min_value=0, max_value=1, output_format=None, include_config=False, catch_exceptions=None):
         unique_value_count = column.value_counts().shape[0]
         total_value_count = int(len(column))#.notnull().sum()
