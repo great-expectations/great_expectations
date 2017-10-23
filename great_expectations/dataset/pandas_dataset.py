@@ -505,12 +505,11 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         def matches_json_schema(val):
             try:
                 val_json = json.loads(val)
-                print jsonschema.validate(val_json, json_schema)
+                jsonschema.validate(val_json, json_schema)
                 #jsonschema.validate raises an error if validation fails.
                 #So if we make it this far, we know that the validation succeeded.
                 return True
             except:
-                print val, json_schema
                 return False
 
         return column.map(matches_json_schema)
