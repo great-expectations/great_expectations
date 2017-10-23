@@ -822,6 +822,21 @@ class TestPandasDataset(unittest.TestCase):
             out = D.expect_column_values_to_be_json_parseable(**t['in'])
             self.assertEqual(out, t['out'])
 
+    def test_expect_column_values_to_match_json_schema(self):
+
+        with open("./tests/test_sets/expect_column_values_to_match_json_schema_test_set.json") as f:
+            J = json.load(f)
+            D = ge.dataset.PandasDataSet(J["dataset"])
+            D.set_default_expectation_argument("output_format", "COMPLETE")
+            T = J["tests"]
+
+            self.maxDiff = None
+
+        for t in T:
+            out = D.expect_column_values_to_match_json_schema(**t['in'])#, **t['kwargs'])
+            self.assertEqual(out, t['out'])
+
+
 
     def test_expect_column_mean_to_be_between(self):
         """

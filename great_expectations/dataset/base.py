@@ -376,7 +376,7 @@ class DataSet(object):
     def expect_table_row_count_to_equal(self, value=None, output_format=None, include_config=False, catch_exceptions=None):
         """Expect the number of rows to be equal to a value.
         Args:
-	    value (int): The value that should equal the number of rows.
+	        value (int): The value that should equal the number of rows.
         Returns:
             dict:
                 {
@@ -666,8 +666,9 @@ class DataSet(object):
                     "exceptions_list": (list) the values that did not pass the expectation
                 }
         See Also:
-            expect_column_values_to_be_valid_json
+            expect_column_values_to_be_json_parseable
 
+            The JSON-schema docs at: http://json-schema.org/
         """
         raise NotImplementedError
 

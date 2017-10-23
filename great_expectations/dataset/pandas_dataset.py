@@ -3,6 +3,7 @@ import json
 import re
 from datetime import datetime
 from functools import wraps
+import jsonschema
 
 import numpy as np
 import pandas as pd
@@ -504,17 +505,21 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         def matches_json_schema(val):
             try:
                 val_json = json.loads(val)
-                return jsonschema.validate(val_json, json_schema)
+                print jsonschema.validate(val_json, json_schema)
+                #jsonschema.validate raises an error if validation fails.
+                #So if we make it this far, we know that the validation succeeded.
+                return True
             except:
+                print val, json_schema
                 return False
 
         return column.map(matches_json_schema)
 
 
-    @DocInherit
-    @MetaPandasDataSet.column_map_expectation
-    def expect_column_values_to_match_json_schema(self, column, json_schema, output_format=None, include_config=False, catch_exceptions=None):
-        raise NotImplementedError("Under development")
+    # @DocInherit
+    # @MetaPandasDataSet.column_map_expectation
+    # def expect_column_values_to_match_json_schema(self, column, json_schema, output_format=None, include_config=False, catch_exceptions=None):
+    #     raise NotImplementedError("Under development")
 
     @DocInherit
     @MetaPandasDataSet.column_aggregate_expectation
