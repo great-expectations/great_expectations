@@ -441,13 +441,23 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
     @DocInherit
     @MetaPandasDataSet.column_map_expectation
-    def expect_column_values_to_match_regex_list(self, column, regex_list, required_match="any", mostly=None, output_format=None, include_config=False, catch_exceptions=None):
+    def expect_column_values_to_match_regex_list(self, column, regex_list, match_on="any", mostly=None, output_format=None, include_config=False, catch_exceptions=None):
 
-        def match_in_list(val):
-            if any(re.match(regex, str(val)) for regex in regex_list):
-                return True
-            else:
-                return False
+        if match_on=="any":
+        
+            def match_in_list(val):
+                if any(re.match(regex, str(val)) for regex in regex_list):
+                    return True
+                else:
+                    return False
+        
+        elif match_on=="all":
+
+            def match_in_list(val):
+                if all(re.match(regex, str(val)) for regex in regex_list):
+                    return True
+                else:
+                    return False
 
         return column.map(match_in_list)
 

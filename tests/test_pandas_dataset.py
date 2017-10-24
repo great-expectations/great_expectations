@@ -757,7 +757,17 @@ class TestPandasDataset(unittest.TestCase):
 
 
     def test_expect_column_values_to_match_regex_list(self):
-        self.assertRaises(NotImplementedError)
+        with open("./tests/test_sets/expect_column_values_to_match_regex_list_test_set.json") as f:
+            J = json.load(f)
+            D = ge.dataset.PandasDataSet(J["dataset"])
+            D.set_default_expectation_argument("output_format", "COMPLETE")
+            T = J["tests"]
+
+            self.maxDiff = None
+
+        for t in T:
+            out = D.expect_column_values_to_match_regex_list(**t['in'])
+            self.assertEqual(out, t['out'])
 
 
     def test_expect_column_values_to_match_strftime_format(self):

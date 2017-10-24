@@ -604,13 +604,13 @@ class DataSet(object):
         """
         raise NotImplementedError
 
-    def expect_column_values_to_match_regex_list(self, column, regex_list, required_match="any", mostly=None, output_format=None, include_config=False, catch_exceptions=None):
+    def expect_column_values_to_match_regex_list(self, column, regex_list, match_on="any", mostly=None, output_format=None, include_config=False, catch_exceptions=None):
         """Expect the column entries to be strings that match at least one of a list of regular expressions.
         Args:
             column (str): The column name.
-            regex_list (list): The list of regular expressions in which the column entries should match according to required_match.
+            regex_list (list): The list of regular expressions in which the column entries should match according to match_on.
         Keyword Args:
-            required_match="any": Use "any" if the value should match at least one regular expression in the list. Use "all" if it should match each regular expression in the list.
+            match_on="any": Use "any" if the value should match at least one regular expression in the list. Use "all" if it should match each regular expression in the list.
             mostly=None: Return "success": True if the percentage of matches is greater than or equal to mostly (a float between 0 and 1).
         Returns:
             dict:
