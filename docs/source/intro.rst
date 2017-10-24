@@ -39,7 +39,7 @@ Getting started
 
 .. code-block:: bash
 
-    $ git clone https://github.com/abegong/great_expectations.git
+    $ git clone https://github.com/great-expectations/great_expectations.git
     $ pip install great_expectations/
 
 .. _`pipeline testing`: irc://freenode.net
