@@ -634,7 +634,9 @@ class TestPandasDataset(unittest.TestCase):
     def test_expect_column_value_lengths_to_be_between(self):
         D = ge.dataset.PandasDataSet({
             's1':['smart','silly','sassy','slimy','sexy'],
-            's2':['cool','calm','collected','casual','creepy']
+            's2':['cool','calm','collected','casual','creepy'],
+            's3':['cool','calm','collected','casual',None],
+            's4':[1,2,3,4,5]
         })
         D.set_default_expectation_argument("output_format", "COMPLETE")
 
@@ -647,12 +649,19 @@ class TestPandasDataset(unittest.TestCase):
                     'out':{'success':False, 'exception_index_list':[2], 'exception_list':['collected']}},
                 {
                     'in':{'column':'s2', 'min_value':None, 'max_value':10},
+                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}},
+                {
+                    'in':{'column':'s3', 'min_value':None, 'max_value':10},
                     'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}}
         ]
 
         for t in T:
             out = D.expect_column_value_lengths_to_be_between(**t['in'])
             self.assertEqual(out, t['out'])
+
+        with self.assertRaises(TypeError):
+            D.expect_column_value_lengths_to_be_between(**{'column':'s4', 'min_value':None, 'max_value':10})
+
 
     def test_expect_column_values_to_match_regex(self):
         """

@@ -404,20 +404,16 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
             raise ValueError("min_value and max_value must be integers")
 
         def length_is_between(val):
+            if min_value != None and max_value != None:
+                return len(val) >= min_value and len(val) <= max_value
 
-            try:
-                if min_value != None and max_value != None:
-                    return len(val) >= min_value and len(val) <= max_value
+            elif min_value == None and max_value != None:
+                return len(val) <= max_value
 
-                elif min_value == None and max_value != None:
-                    return len(val) <= max_value
+            elif min_value != None and max_value == None:
+                return len(val) >= min_value
 
-                elif min_value != None and max_value == None:
-                    return len(val) >= min_value
-
-                else:
-                    return False
-            except:
+            else:
                 return False
 
         return column.map(length_is_between)
