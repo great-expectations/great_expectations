@@ -25,7 +25,7 @@ The easy way
 2. Define custom functions containing your business logic
 3. Use the `@column_map_expectation` and `@column_aggregate_expectation` decorators to turn them into full Expectations
 
-Note: following Great Expectations :ref:`naming_conventions` is highly reccommended, but not strictly required. If you want to confuse yourself with bad names, the package won't stop you. (It *will* raise a warning.)
+Note: following Great Expectations :ref:`naming_conventions` is highly recommended, but not strictly required. If you want to confuse yourself with bad names, the package won't stop you.
 
 .. code-block:: bash
 
@@ -42,7 +42,8 @@ Note: following Great Expectations :ref:`naming_conventions` is highly reccommen
             mode = series.mode[0]
             return {
                 "success" : mode == 0,
-                "true_value" : mode
+                "true_value" : mode,
+                "summary_obj" : {}
             }
 
 `@column_map_expectation` decorates a custom function, wrapping it with all the business logic required to turn it into a fully-fledged Expectation. This spares you the hassle of defining logic to handle required arguments like `mostly` and `output_format`. Your custom function can focus exclusively on the business logic of passing or failing the expectation.
@@ -59,7 +60,7 @@ The hard way
 2. Write the whole expectation yourself
 3. Decorate it with the `@expectation` decorator
 
-This is more complicated, since you have to handle all the logic of additional parameters and output formats. Pay special attention to proper formatting of :ref:`output_format`. Malformed result objects can break Great Expectations in subtle and unanticipated wasys.
+This is more complicated, since you have to handle all the logic of additional parameters and output formats. Pay special attention to proper formatting of :ref:`output_format`. Malformed result objects can break Great Expectations in subtle and unanticipated ways.
 
 .. code-block:: bash
 
@@ -100,13 +101,11 @@ For rapid prototyping, you can use the following syntax to quickly iterate on th
 
 .. code-block:: bash
 
-    >> dataset.test_column_map_function(my_map_function, column='my_column')
-
-    >> dataset.test_column_elementwise_function(my_element_function, column='my_column')
-
-    >> dataset.test_column_aggregate_function(my_map_function, column='my_column')
-
-    >> dataset.test_column_aggregate_function(my_map_function, column='my_column')
+    >> dataset.test_expectation_function(my_func)
+    
+    >> dataset.test_column_map_expectation_function(my_map_func, column='my_column')
+    
+    >> dataset.test_column_aggregate_expectation_function(my_agg_func, column='my_column')
 
 These functions will return output just like regular expectations. However, they will NOT save a copy of the expectation to the config.
 

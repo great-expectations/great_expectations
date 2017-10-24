@@ -31,7 +31,7 @@ class DataSet(object):
             1. Build and update the expectation config.
             2. Handle the "include_config" boolean parameter, which allows a caller to retrieve the generated
                 configuration immediately after running the expectation.
-            3. Handle the "catch_excpetions" parameter, which allows a caller to catch any exception and report an
+            3. Handle the "catch_exceptions" parameter, which allows a caller to catch any exception and report an
                 aggregate trace, useful for validation.
             4. Handle the "output_format" parameter, and pass it down to the implementing method if its signature expects it.
                 By handing down the output_format, methods implementing expectations can optionally provide additional output formats
@@ -282,8 +282,8 @@ class DataSet(object):
             missing_count = element_count-int(len(nonnull_values))#int(null_indexes.sum())
             exception_count = len(exception_list)
 
-            exception_value_series = pd.Series(exception_list).value_counts()
-            exception_counts = dict(zip(
+            exception_value_series = pd.Series(exception_list).value_counts().iloc[:20]
+            partial_exception_counts = dict(zip(
                 list(exception_value_series.index),
                 list(exception_value_series.values),
             ))
@@ -303,8 +303,6 @@ class DataSet(object):
 
             return_obj = {
                 "success": success,
-                "exception_list": exception_list,
-                "exception_index_list": exception_index_list,
                 "summary_obj": {
                     "element_count": element_count,
                     "missing_count": missing_count,
@@ -312,7 +310,9 @@ class DataSet(object):
                     "exception_count": exception_count,
                     "exception_percent": exception_percent,
                     "exception_percent_nonmissing": exception_percent_nonmissing,
-                    "exception_counts": exception_counts,
+                    "partial_exception_counts": partial_exception_counts,
+                    "partial_exception_list": exception_list[:20],
+                    "partial_exception_index_list": exception_index_list[:20],
                 }
             }
 
@@ -376,7 +376,7 @@ class DataSet(object):
     def expect_table_row_count_to_equal(self, value=None, output_format=None, include_config=False, catch_exceptions=None):
         """Expect the number of rows to be equal to a value.
         Args:
-	    value (int): The value that should equal the number of rows.
+	        value (int): The value that should equal the number of rows.
         Returns:
             dict:
                 {
@@ -449,6 +449,26 @@ class DataSet(object):
         Args:
             column (str): The column name.
             type_ (str): A string representing the data type that each column should have as entries.
+                For example, "double integer" refers to an integer with double precision.
+            target_datasource (str): The data source that specifies the implementation in the type_ parameter.
+                For example, options include "numpy", "sql", or "spark".
+        Keyword Args:
+            mostly=None: Return "success": True if the percentage of values of type_ is greater than or equal to mostly (a float between 0 and 1).
+        Returns:
+            dict:
+                {
+                    "success": (bool) True if the column passed the expectation,
+                    "exceptions_list": (list) the values that did not pass the expectation
+                }
+
+        """
+        raise NotImplementedError
+
+    def expect_column_values_to_be_in_type_list(self, column, type_list, target_datasource="numpy", mostly=None, output_format=None, include_config=False, catch_exceptions=None):
+        """Expect each column entry to be a specified data type.
+        Args:
+            column (str): The column name.
+            type_list (list of str): A list of strings representing the data type that each column should have as entries.
                 For example, "double integer" refers to an integer with double precision.
             target_datasource (str): The data source that specifies the implementation in the type_ parameter.
                 For example, options include "numpy", "sql", or "spark".
@@ -584,13 +604,13 @@ class DataSet(object):
         """
         raise NotImplementedError
 
-    def expect_column_values_to_match_regex_list(self, column, regex_list, required_match="any", mostly=None, output_format=None, include_config=False, catch_exceptions=None):
+    def expect_column_values_to_match_regex_list(self, column, regex_list, match_on="any", mostly=None, output_format=None, include_config=False, catch_exceptions=None):
         """Expect the column entries to be strings that match at least one of a list of regular expressions.
         Args:
             column (str): The column name.
-            regex_list (list): The list of regular expressions in which the column entries should match according to required_match.
+            regex_list (list): The list of regular expressions in which the column entries should match according to match_on.
         Keyword Args:
-            required_match="any": Use "any" if the value should match at least one regular expression in the list. Use "all" if it should match each regular expression in the list.
+            match_on="any": Use "any" if the value should match at least one regular expression in the list. Use "all" if it should match each regular expression in the list.
             mostly=None: Return "success": True if the percentage of matches is greater than or equal to mostly (a float between 0 and 1).
         Returns:
             dict:
@@ -666,8 +686,9 @@ class DataSet(object):
                     "exceptions_list": (list) the values that did not pass the expectation
                 }
         See Also:
-            expect_column_values_to_be_valid_json
+            expect_column_values_to_be_json_parseable
 
+            The JSON-schema docs at: http://json-schema.org/
         """
         raise NotImplementedError
 
@@ -753,6 +774,42 @@ class DataSet(object):
         """
         raise NotImplementedError
 
+    def expect_column_most_common_value_to_be(self, column, value, ties_okay=None, output_format=None, include_config=False, catch_exceptions=None):
+        """Expect the most common value to be equal to `value`
+
+        Args:
+            column (str): The column name.
+            value  (any): The value
+            ties_okay (boolean or None): If True, then the expectation will succeed if other values are as common (but not more common) than the selected value
+
+        Returns:
+            dict:
+                {
+                    "success": (bool) True if the column passed the expectation,
+                    "true_value": (float) the proportion of unique values
+                }
+        """
+        raise NotImplementedError
+
+    def expect_column_most_common_value_to_be_in_set(self, column, value_set, ties_okay=None, output_format=None, include_config=False, catch_exceptions=None):
+        """Expect the most common value to be within the designated value set
+
+        Args:
+            column (str): The column name.
+            value_set (list): The lis of designated values
+            ties_okay (boolean or None): If True, then the expectation will succeed if other values are as common (but not more common) than the selected value
+
+        Returns:
+            dict:
+                {
+                    "success": (bool) True if the column passed the expectation,
+                    "true_value": (float) the proportion of unique values
+                }
+        """
+        raise NotImplementedError
+
+
+    ### Distributional expectations
     def expect_column_chisquare_test_p_value_greater_than(self, column, partition_object=None, p=0.05, output_format=None, include_config=False, catch_exceptions=None):
         """
         Expect the values in this column to match the distribution of the specified categorical vals and their expected_frequencies. \
