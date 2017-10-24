@@ -49,7 +49,7 @@ class TestCustomClass(unittest.TestCase):
     def test_custom_class(self):
         script_path = os.path.dirname(os.path.realpath(__file__))
         df = ge.read_csv(
-            script_path+'/examples/Titanic.csv',
+            script_path+'/../examples/data/raw/Titanic.csv',
             dataset_class=CustomPandasDataSet
         )
         df.set_default_expectation_argument("output_format", "COMPLETE")
@@ -69,12 +69,13 @@ class TestCustomClass(unittest.TestCase):
 
 class TestValidation(unittest.TestCase):
     def test_validate(self):
+        script_path = os.path.dirname(os.path.realpath(__file__))
 
-        with open("./tests/examples/titanic_expectations.json") as f:
+        with open(script_path+"/../examples/data/configs/titanic_expectations.json") as f:
             my_expectations_config = json.load(f)
 
         my_df = ge.read_csv(
-            "./tests/examples/Titanic.csv",
+            script_path+"/../examples/data/raw/Titanic.csv",
             expectations_config=my_expectations_config
         )
         my_df.set_default_expectation_argument("output_format", "COMPLETE")
@@ -82,7 +83,7 @@ class TestValidation(unittest.TestCase):
         results = my_df.validate(catch_exceptions=False)
         # print json.dumps(results, indent=2)
 
-        with open('./tests/examples/expected_results_20170721.json') as f:
+        with open(script_path+'/../examples/data/results/expected_results_20170721.json') as f:
             expected_results = json.load(f)
             # print json.dumps(expected_results, indent=2)
 
@@ -117,11 +118,12 @@ class TestValidation(unittest.TestCase):
 
 class TestRepeatedAppendExpectation(unittest.TestCase):
     def test_validate(self):
+        script_path = os.path.dirname(os.path.realpath(__file__))
 
-        with open("./tests/examples/titanic_expectations.json") as f:
+        with open(script_path+"/../examples/data/configs/titanic_expectations.json") as f:
             my_expectations_config = json.load(f)
 
-        my_df = ge.read_csv("./tests/examples/Titanic.csv")
+        my_df = ge.read_csv(script_path+"/../examples/data/raw/Titanic.csv")
 
         self.assertEqual(
             len(my_df.get_expectations_config()['expectations']),
