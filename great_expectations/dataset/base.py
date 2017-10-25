@@ -671,6 +671,24 @@ class DataSet(object):
         """
         raise NotImplementedError
 
+    def expect_column_values_to_be_increasing(self, column, strictly=None, output_format=None, include_config=False, catch_exceptions=None):
+        """Expect column values to be increasing. (Only works for numeric data.)
+        Args:
+            column (str): The column name.
+            strictly (Boolean or None): If True, values must be strictly greater than previous values
+        Returns:
+            dict:
+                {
+                    "success": (bool) True if the column passed the expectation,
+                    "exceptions_list": (list) the values that did not pass the expectation
+                }
+        See Also:
+            expect_column_values_to_be_valid_json
+
+        """
+        raise NotImplementedError
+
+
     ##### Aggregate functions #####
 
     def expect_column_mean_to_be_between(self, column, min_value=None, max_value=None, output_format=None, include_config=False, catch_exceptions=None):

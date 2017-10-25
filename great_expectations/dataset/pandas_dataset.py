@@ -504,6 +504,18 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         raise NotImplementedError("Under development")
 
     @DocInherit
+    @MetaPandasDataSet.column_map_expectation
+    def expect_column_values_to_be_increasing(self, column, strictly=None, output_format=None, include_config=False, catch_exceptions=None):
+        col_diff = column.diff()
+        #The first element is null, so it gets a bye and is always treated as True
+        col_diff[0] = True
+        
+        if strictly:
+            return col_diff > 0
+        else:
+            return col_diff >= 0
+
+    @DocInherit
     @MetaPandasDataSet.column_aggregate_expectation
     def expect_column_mean_to_be_between(self, column, min_value=None, max_value=None, output_format=None, include_config=False, catch_exceptions=None):
 
