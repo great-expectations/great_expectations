@@ -1021,6 +1021,22 @@ class TestPandasDataset(unittest.TestCase):
             out = D.expect_column_values_to_be_increasing(**t['in'])#, **t['kwargs'])
             self.assertEqual(out, t['out'])
 
+    def test_expect_column_values_to_be_decreasing(self):
+
+        with open("./tests/test_sets/expect_column_values_to_be_decreasing_test_set.json") as f:
+            J = json.load(f)
+            D = ge.dataset.PandasDataSet(J["dataset"])
+            D.set_default_expectation_argument("output_format", "COMPLETE")
+            T = J["tests"]
+
+            self.maxDiff = None
+
+        for t in T:
+            print t['in']
+            out = D.expect_column_values_to_be_decreasing(**t['in'])
+            print out
+            print t['out']
+            self.assertEqual(out, t['out'])
 
 
 

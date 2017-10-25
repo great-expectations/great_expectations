@@ -688,6 +688,22 @@ class DataSet(object):
         """
         raise NotImplementedError
 
+    def expect_column_values_to_be_decreasing(self, column, strictly=None, output_format=None, include_config=False, catch_exceptions=None):
+        """Expect column values to be decreasing. (Only works for numeric data.)
+        Args:
+            column (str): The column name.
+            strictly (Boolean or None): If True, values must be strictly less than than previous values
+        Returns:
+            dict:
+                {
+                    "success": (bool) True if the column passed the expectation,
+                    "exceptions_list": (list) the values that did not pass the expectation
+                }
+        See Also:
+            expect_column_values_to_be_valid_json
+
+        """
+        raise NotImplementedError
 
     ##### Aggregate functions #####
 
