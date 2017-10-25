@@ -477,10 +477,6 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
         return column.map(is_parseable_by_format)
 
-        #TODO Add the following to the decorator as a preliminary check.
-        #if (not (column in self)):
-        #    raise LookupError("The specified column does not exist.")
-
     @DocInherit
     @MetaPandasDataSet.column_map_expectation
     def expect_column_values_to_be_dateutil_parseable(self, column, mostly=None, output_format=None, include_config=False, catch_exceptions=None):
