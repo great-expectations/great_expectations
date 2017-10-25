@@ -1,0 +1,335 @@
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import pandas as pd\n",
+    "import great_expectations as ge\n",
+    "\n",
+    "from bokeh.plotting import figure, output_notebook, show\n",
+    "from bokeh.layouts import gridplot\n",
+    "output_notebook()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": [
+    "import numpy as np\n",
+    "from scipy import stats"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": [
+    "def generateData(size):\n",
+    "    w = 0.3\n",
+    "    df = pd.DataFrame()\n",
+    "    df['norm_0_1'] = stats.norm(loc = 0, scale = 1).rvs(size = size)\n",
+    "    df['norm_0_1_b'] = stats.norm(loc = 0, scale = 1).rvs(size = size)\n",
+    "    df['norm_1_1'] = stats.norm(loc = 1, scale = 1).rvs(size = size)\n",
+    "    df['norm_10_1'] = stats.norm(loc = 10, scale = 1).rvs(size = size)\n",
+    "    df['bimodal'] = np.concatenate((df['norm_0_1'][0:int(size/2)],df['norm_10_1'][int(size/2):]))\n",
+    "    return df"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": [
+    "df_1000 = generateData(1000)\n",
+    "df_100 = generateData(100)\n",
+    "df_10000 = generateData(10000)\n",
+    "df_1000000 = generateData(1000000)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": [
+    "unreasonably_clean_data = ge.df(df_10000)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Remember that this is not a statistical test!\n",
+    "\n",
+    "We are simply making expectations about the *sample* of data that we have in front of us."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "unreasonably_clean_data.expect_column_mean_to_be_between('norm_0_1', -0.1, 0.1)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "p1 = figure(title='norm_0_1')\n",
+    "hist, edges = np.histogram(unreasonably_clean_data['norm_0_1'], density=True, bins=20)\n",
+    "p1.quad(top=hist, bottom=0, left=edges[:-1], right=edges[1:],\n",
+    "        fill_color=\"#036564\", line_color=\"#033649\")\n",
+    "p1.xaxis.axis_label = 'x'\n",
+    "p1.yaxis.axis_label = 'Pr(x)'\n",
+    "\n",
+    "p2 = figure(title='norm_1_1')\n",
+    "hist, edges = np.histogram(unreasonably_clean_data['norm_1_1'], density=True, bins=20)\n",
+    "p2.quad(top=hist, bottom=0, left=edges[:-1], right=edges[1:],\n",
+    "        fill_color=\"#036564\", line_color=\"#033649\")\n",
+    "p2.xaxis.axis_label = 'x'\n",
+    "p2.yaxis.axis_label = 'Pr(x)'\n",
+    "\n",
+    "p3 = figure(title='bimodal')\n",
+    "hist, edges = np.histogram(unreasonably_clean_data['bimodal'], density=True, bins=20)\n",
+    "p3.quad(top=hist, bottom=0, left=edges[:-1], right=edges[1:],\n",
+    "        fill_color=\"#036564\", line_color=\"#033649\")\n",
+    "p3.xaxis.axis_label = 'x'\n",
+    "p3.yaxis.axis_label = 'Pr(x)'\n",
+    "\n",
+    "show(gridplot(p1, p2, p3, ncols=2, plot_width=400))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Now, we *are* going to include statistical tests, but we're going to try to make lots of simplifying assumptions since we are oriented around ease of use.\n",
+    "### First, a sanity check:\n",
+    "\n",
+    "Kolmogorov–Smirnov test should not reject null of same distribution for our $N(0,1)$ samples, and the 2-sample test *should* reject null for our $N(1,1)$ and $N(10,1)$ samples."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Next, let's make a simple nonparametric model of our data\n",
+    "\n",
+    "Our basic plan: build a kernel density estimate, evaluate it, and compare with new samples.\n",
+    "\n",
+    "We will use all defaults: the gaussian kernel and scott's rule for bandwidth."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": [
+    "partition = ge.dataset.util.kde_smooth_data(unreasonably_clean_data['bimodal'])\n",
+    "partition_pure = ge.dataset.util.partition_data(unreasonably_clean_data['bimodal'])"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Now, let's inspect the estimate."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": [
+    "# Generate an empirical cdf for the given data\n",
+    "def empirical_cdf(partition, data):\n",
+    "    return [1.*np.sum(data < x) / len(data) for x in partition]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "cdf_vals = np.cumsum(partition['weights'])\n",
+    "\n",
+    "cdf = figure(title = \"cdf\")\n",
+    "cdf.line(partition['partition'][1:], cdf_vals, line_width = 2, line_alpha = 0.8, legend = \"Estimated CDF\")\n",
+    "cdf.line(partition['partition'], empirical_cdf(partition['partition'], unreasonably_clean_data['bimodal']), line_width = 2, line_alpha = 0.8, color='red', legend=\"Empirical CDF\")\n",
+    "cdf.line(partition['partition'], empirical_cdf(partition['partition'], np.random.choice(unreasonably_clean_data['bimodal'], size=len(partition['partition']), replace=True)), line_width = 2, line_alpha = 0.8, color='green', legend=\"Sampled Empirical CDF\")\n",
+    "cdf.legend.location = \"bottom_right\"\n",
+    "show(cdf)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "unreasonably_clean_data.expect_column_bootstrapped_ks_test_p_value_greater_than('bimodal', partition_object=partition)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "unreasonably_clean_data.expect_column_bootstrapped_ks_test_p_value_greater_than('bimodal', partition_object=partition_pure)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": [
+    "unreasonably_clean_data.save_expectations_config('test_config.json')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Now consider categorical data"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": [
+    "values = ['cat', 'dog', 'fish', 'turtle', 'none']\n",
+    "\n",
+    "def build_cat_data(values, frequencies):\n",
+    "    lists = [[val] * times for val, times in zip(values, frequencies) ]\n",
+    "    return [item for sublist in lists for item in sublist]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": [
+    "cat_vals = stats.multinomial.rvs(1000, [0.1, 0.3, 0.2, 0.18, 0.22], size=2)\n",
+    "diff_cat_vals = stats.multinomial.rvs(1000, [0.2, 0.3, 0.2, 0.13, 0.18], size=1)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "stats.chisquare(cat_vals[0], cat_vals[1])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "df1 = pd.DataFrame(build_cat_data(values, cat_vals[0]), columns=['animals'])\n",
+    "partition = ge.dataset.util.categorical_partition_data(df1['animals'])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": [
+    "df = pd.DataFrame()\n",
+    "df['animals'] = build_cat_data(values, cat_vals[1])\n",
+    "df['moreanimals'] = build_cat_data(values, diff_cat_vals[0])\n",
+    "categorical_sample_data = ge.df(df)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "categorical_sample_data.expect_column_chisquare_test_p_value_greater_than('animals', partition_object=partition)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "categorical_sample_data.expect_column_chisquare_test_p_value_greater_than('moreanimals', partition_object=partition)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 2",
+   "language": "python",
+   "name": "python2"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 2
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython2",
+   "version": "2.7.13"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 1
+}
