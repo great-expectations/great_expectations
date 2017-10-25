@@ -1124,10 +1124,7 @@ class TestPandasDataset(unittest.TestCase):
             self.maxDiff = None
 
         for t in T:
-            print t['in']
             out = D.expect_column_values_to_be_decreasing(**t['in'])
-            print out
-            print t['out']
             self.assertEqual(out, t['out'])
 
 
