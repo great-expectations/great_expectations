@@ -3,7 +3,8 @@
     "w" : [1, 2, 3, 4, 5, 5, 4, 3, 2, 1],
     "x" : [2, 3, 4, 5, 6, 7, 8, 9, 10, null],
     "y" : [1, 1, 1, 2, 2, 2, 3, 3, 3, 4],
-    "z" : ["a", "b", "c", "d", "e", null, null, null, null, null]
+    "z" : ["a", "b", "c", "d", "e", null, null, null, null, null],
+    "zz" : ["1/1/2016", "1/2/2016", "2/2/2016", "2/2/2016", "3/1/2016", null, null, null, null, null]
   },
   "tests" : [{
     "in": {
@@ -41,6 +42,16 @@
       "exception_list": [4,3,2,1],
       "exception_index_list": [6,7,8,9],
       "success": false
+    }
+  },{
+    "in": {
+      "column": "zz",
+      "parse_strings_as_datetimes": true
+    },
+    "out": {
+      "exception_list": [],
+      "exception_index_list": [],
+      "success": true
     }
   }]
 }

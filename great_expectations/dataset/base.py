@@ -693,11 +693,12 @@ class DataSet(object):
         """
         raise NotImplementedError
 
-    def expect_column_values_to_be_increasing(self, column, strictly=None, output_format=None, include_config=False, catch_exceptions=None):
+    def expect_column_values_to_be_increasing(self, column, strictly=None, parse_strings_as_datetimes=None, output_format=None, include_config=False, catch_exceptions=None):
         """Expect column values to be increasing. (Only works for numeric data.)
         Args:
             column (str): The column name.
             strictly (Boolean or None): If True, values must be strictly greater than previous values
+            parse_strings_as_datetimes (boolean or None) : If True, all non-null column values to datetimes before making comparisons
         Returns:
             dict:
                 {
@@ -710,11 +711,12 @@ class DataSet(object):
         """
         raise NotImplementedError
 
-    def expect_column_values_to_be_decreasing(self, column, strictly=None, output_format=None, include_config=False, catch_exceptions=None):
+    def expect_column_values_to_be_decreasing(self, column, strictly=None, parse_strings_as_datetimes=None, output_format=None, include_config=False, catch_exceptions=None):
         """Expect column values to be decreasing. (Only works for numeric data.)
         Args:
             column (str): The column name.
             strictly (Boolean or None): If True, values must be strictly less than than previous values
+            parse_strings_as_datetimes (boolean or None) : If True, all non-null column values to datetimes before making comparisons
         Returns:
             dict:
                 {

@@ -536,29 +536,55 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
     @DocInherit
     @MetaPandasDataSet.column_map_expectation
-    def expect_column_values_to_be_increasing(self, column, strictly=None, output_format=None, include_config=False, catch_exceptions=None):
-        col_diff = column.diff()
-        #The first element is null, so it gets a bye and is always treated as True
-        col_diff[col_diff.isnull()] = 1
-        
-        if strictly:
-            return col_diff > 0
+    def expect_column_values_to_be_increasing(self, column, strictly=None, parse_strings_as_datetimes=None, output_format=None, include_config=False, catch_exceptions=None):
+        if parse_strings_as_datetimes:
+            temp_column = column.map(parse)
+
+            col_diff = temp_column.diff()
+
+            #The first element is null, so it gets a bye and is always treated as True
+            col_diff[col_diff.isnull()] = 1
+
+            if strictly:
+                return col_diff > pd.Timedelta(0)
+            else:
+                return col_diff >= pd.Timedelta(0)
+
         else:
-            return col_diff >= 0
+            col_diff = column.diff()
+            #The first element is null, so it gets a bye and is always treated as True
+            col_diff[col_diff.isnull()] = 1
+        
+            if strictly:
+                return col_diff > 0
+            else:
+                return col_diff >= 0
 
     @DocInherit
     @MetaPandasDataSet.column_map_expectation
-    def expect_column_values_to_be_decreasing(self, column, strictly=None, output_format=None, include_config=False, catch_exceptions=None):
-        col_diff = column.diff()
-        #The first element is null, so it gets a bye and is always treated as True
-        col_diff[col_diff.isnull()] = -1
+    def expect_column_values_to_be_decreasing(self, column, strictly=None, parse_strings_as_datetimes=None, output_format=None, include_config=False, catch_exceptions=None):
+        if parse_strings_as_datetimes:
+            temp_column = column.map(parse)
 
-        print col_diff
-        
-        if strictly:
-            return col_diff < 0
+            col_diff = temp_column.diff()
+
+            #The first element is null, so it gets a bye and is always treated as True
+            col_diff[col_diff.isnull()] = -1
+
+            if strictly:
+                return col_diff < pd.Timedelta(0)
+            else:
+                return col_diff <= pd.Timedelta(0)
+
         else:
-            return col_diff <= 0
+            col_diff = column.diff()
+            #The first element is null, so it gets a bye and is always treated as True
+            col_diff[col_diff.isnull()] = -1
+
+            if strictly:
+                return col_diff < 0
+            else:
+                return col_diff <= 0
 
 
     @DocInherit
