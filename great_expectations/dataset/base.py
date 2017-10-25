@@ -524,12 +524,13 @@ class DataSet(object):
         """
         raise NotImplementedError
 
-    def expect_column_values_to_be_between(self, column, min_value=None, max_value=None, mostly=None, output_format=None, include_config=False, catch_exceptions=None):
+    def expect_column_values_to_be_between(self, column, min_value=None, max_value=None, parse_strings_as_datetimes=None, mostly=None, output_format=None, include_config=False, catch_exceptions=None):
         """Expect column entries to be a number between a minimum value and a maximum value.
         Args:
             column (str): The column name.
             min_value (int or None): The minimum value for a column entry.
             max_value (int or None): The maximum value for a column entry.
+            parse_strings_as_datetimes (boolean or None) : If True, parse min_value, max_values, and all non-null column values to datetimes before making comparisons.
         Keyword Args:
             mostly=None: Return "success": True if the percentage of values between min_value and max_value is greater than or equal to mostly (a float between 0 and 1).
         Returns:

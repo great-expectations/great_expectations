@@ -620,8 +620,22 @@ class TestPandasDataset(unittest.TestCase):
             'x' : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
             'y' : [1, 2, 3, 4, 5, 6, 7, 8, 9, "abc"],
             'z' : [1, 2, 3, 4, 5, None, None, None, None, None],
+            'ts' : [
+                'Jan 01 1870 12:00:01',
+                'Dec 31 1999 12:00:01',
+                'Jan 01 2000 12:00:01',
+                'Feb 01 2000 12:00:01',
+                'Mar 01 2000 12:00:01',
+                'Apr 01 2000 12:00:01',
+                'May 01 2000 12:00:01',
+                'Jun 01 2000 12:00:01',
+                None,
+                'Jan 01 2001 12:00:01',
+            ],
         })
         D.set_default_expectation_argument("output_format", "COMPLETE")
+
+        self.maxDiff = None
 
         with open("./tests/test_sets/expect_column_values_to_be_between_test_set_ADJ.json") as f:
             T = json.load(f)

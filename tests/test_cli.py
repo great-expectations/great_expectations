@@ -44,10 +44,16 @@ class TestCLI(unittest.TestCase):
         #     {'output': '', 'errors': 'usage: great_expectations validate [-h] [--output_format OUTPUT_FORMAT]\n                                   [--catch_exceptions]\n                                   [--include_config INCLUDE_CONFIG]\n                                   [--only_return_failures]\n                                   [--custom_dataset_module CUSTOM_DATASET_MODULE]\n                                   [--custom_dataset_class CUSTOM_DATASET_CLASS]\n                                   data_set expectations_config_file\ngreat_expectations validate: error: too few arguments\n'}
         # )
 
-        command_str = 'python '+filepath+'/../bin/great_expectations validate '+filepath+'/examples/Titanic.csv '+filepath+'/examples/titanic_expectations.json'
-        #print(get_system_command_result(command_str))
+        command_str = 'python '+filepath+'/../bin/great_expectations validate '+filepath+'/test_sets/Titanic.csv '+filepath+'/test_sets/titanic_expectations.json'
+        try:
+          result = get_system_command_result(command_str)["output"]
+          json_result = json.loads(result)
+        except ValueError as ve:
+          print(ve)
+          json_result = {}
+
         assertDeepAlmostEqual(self,
-            json.loads(get_system_command_result(command_str)["output"]),
+            json_result,
             {
               "results": [
                 {
@@ -221,12 +227,21 @@ class TestCLI(unittest.TestCase):
         #     get_system_command_result(command_str)["output"],
         #     "{\n  \"results\": [\n    {\n      \"summary_obj\": {\n        \"exception_percent\": 0.0007616146230007616, \n        \"partial_exception_list\": [\n          \"*\"\n        ], \n        \"exception_percent_nonmissing\": 0.0007616146230007616, \n        \"exception_count\": 1\n      }, \n      \"expectation_type\": \"expect_column_values_to_be_in_set\", \n      \"success\": false, \n      \"kwargs\": {\n        \"column\": \"PClass\", \n        \"output_format\": \"BASIC\", \n        \"value_set\": [\n          \"1st\", \n          \"2nd\", \n          \"3rd\"\n        ]\n      }\n    }\n  ]\n}\n"
         # )
+        #print(filepath)
 
-        command_str = 'python '+filepath+'/../bin/great_expectations validate '+filepath+'/examples/Titanic.csv '+filepath+'/examples/titanic_custom_expectations.json -f -m=tests/examples/custom_dataset.py -c=CustomPandasDataSet'
-        # print get_system_command_result(command_str)
-        # print get_system_command_result(command_str)
+        command_str = 'python ' + filepath + '/../bin/great_expectations validate ' \
+                      + filepath + '/test_sets/Titanic.csv '\
+                      + filepath + '/test_sets/titanic_custom_expectations.json -f -m='\
+                      + filepath + '/test_fixtures/custom_dataset.py -c=CustomPandasDataSet'
+        try:
+          result = get_system_command_result(command_str)["output"]
+          json_result = json.loads(result)
+        except ValueError as ve:
+          print(ve)
+          json_result = {}
+
         self.assertEqual(
-            json.loads(get_system_command_result(command_str)["output"]),
+            json_result,
             {
               "results": [
                 {
