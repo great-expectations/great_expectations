@@ -504,7 +504,7 @@ class DataSet(object):
         """
         raise NotImplementedError
 
-    def expect_column_values_to_be_between(self, column, min_value=None, max_value=None, mostly=None, parse_strings_as_datetimes=None, output_format=None, include_config=False, catch_exceptions=None):
+    def expect_column_values_to_be_between(self, column, min_value=None, max_value=None, parse_strings_as_datetimes=None, mostly=None, output_format=None, include_config=False, catch_exceptions=None):
         """Expect column entries to be a number between a minimum value and a maximum value.
         Args:
             column (str): The column name.
