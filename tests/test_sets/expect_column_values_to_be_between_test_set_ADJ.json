@@ -227,5 +227,24 @@
       "min_value": 1,
       "mostly": 0.8
     }
+  },
+  {
+    "out": {
+      "exception_list": [
+        "Jan 01 1870 12:00:01",
+        "Dec 31 1999 12:00:01",
+        "Jan 01 2001 12:00:01"
+      ],
+      "exception_index_list": [
+        0, 1, 9
+      ],
+      "success": false
+    },
+    "in": {
+      "column": "ts",
+      "max_value": "Dec 31 2000",
+      "min_value": "Jan 01 2000",
+      "parse_strings_as_datetimes" : true
+    }
   }
 ]
