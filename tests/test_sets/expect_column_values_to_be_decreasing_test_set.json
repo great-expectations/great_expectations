@@ -1,0 +1,46 @@
+{
+  "dataset" : {
+    "w" : [1, 2, 3, 7, 6, 5, 4, 3, 2, 1],
+    "x" : [null, null, 10, 9, 8, 7, null, 6, 5, 4],
+    "y" : [1, 1, 1, 2, 2, 2, 3, 3, 3, 4]
+  },
+  "tests" : [{
+    "in": {
+      "column": "w",
+      "mostly": 0.6
+    },
+    "out": {
+      "exception_list": [2,3,7],
+      "exception_index_list": [1,2,3],
+      "success": true
+    }
+  },{
+    "in": {
+      "column": "y"
+    },
+    "out": {
+      "exception_list": [2,3,4],
+      "exception_index_list": [3,6,9],
+      "success": false
+    }
+  },{
+    "in": {
+      "column": "y",
+      "strictly": true
+    },
+    "out": {
+      "exception_list": [1,1,2,2,2,3,3,3,4],
+      "exception_index_list": [1,2,3,4,5,6,7,8,9],
+      "success": false
+    }
+  },{
+    "in": {
+      "column": "x"
+    },
+    "out": {
+      "exception_list": [],
+      "exception_index_list": [],
+      "success": true
+    }
+  }]
+}
