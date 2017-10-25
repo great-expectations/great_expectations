@@ -438,6 +438,51 @@ class TestPandasDataset(unittest.TestCase):
             out = D.expect_column_values_to_be_of_type(**t['in'])
             self.assertEqual(out, t['out'])
 
+    def test_expect_column_values_to_be_in_type_list(self):
+
+        D = ge.dataset.PandasDataSet({
+            'x' : [1,2,4],
+            'y' : [1.0,2.2,5.3],
+            'z' : ['hello', 'jello', 'mello'],
+            'n' : [None, np.nan, None],
+            'b' : [False, True, False],
+            's' : ['hello', 'jello', 1],
+            's1' : ['hello', 2.0, 1],
+        })
+        D.set_default_expectation_argument("output_format", "COMPLETE")
+
+        T = [
+                {
+                    'in':{"column":"x","type_list":["int"],"target_datasource":"python"},
+                    'out':{'success':True, 'exception_list':[], 'exception_index_list':[]}},
+                {
+                    'in':{"column":"x","type_list":["string"],"target_datasource":"numpy"},
+                    'out':{'success':False, 'exception_list':[1,2,4], 'exception_index_list':[0,1,2]}},
+                {
+                    'in':{"column":"y","type_list":["float"],"target_datasource":"python"},
+                    'out':{'success':True, 'exception_list':[], 'exception_index_list':[]}},
+                {
+                    'in':{"column":"y","type_list":["float"],"target_datasource":"numpy"},
+                    'out':{'success':False, 'exception_list':[1.0,2.2,5.3], 'exception_index_list':[0,1,2]}},
+                {
+                    'in':{"column":"z","type_list":["string"],"target_datasource":"python"},
+                    'out':{'success':True, 'exception_list':[], 'exception_index_list':[]}},
+                {
+                    'in':{"column":"b","type_list":["boolean"],"target_datasource":"python"},
+                    'out':{'success':True, 'exception_list':[], 'exception_index_list':[]}},
+                {
+                   'in':{"column":"s", "type_list":["string", "int"], "target_datasource":"python"},
+                   'out':{'success':True, 'exception_list':[], 'exception_index_list':[]}},
+                #{
+                #    'in':['n','null','python'],
+                #    'kwargs':{'mostly':.5},
+                #    'out':{'success':True, 'exception_list':[np.nan]}}
+        ]
+
+        for t in T:
+            out = D.expect_column_values_to_be_in_type_list(**t['in'])
+            self.assertEqual(out, t['out'])
+
 
     def test_expect_column_values_to_be_in_set(self):
         """
@@ -589,7 +634,9 @@ class TestPandasDataset(unittest.TestCase):
     def test_expect_column_value_lengths_to_be_between(self):
         D = ge.dataset.PandasDataSet({
             's1':['smart','silly','sassy','slimy','sexy'],
-            's2':['cool','calm','collected','casual','creepy']
+            's2':['cool','calm','collected','casual','creepy'],
+            's3':['cool','calm','collected','casual',None],
+            's4':[1,2,3,4,5]
         })
         D.set_default_expectation_argument("output_format", "COMPLETE")
 
@@ -602,12 +649,19 @@ class TestPandasDataset(unittest.TestCase):
                     'out':{'success':False, 'exception_index_list':[2], 'exception_list':['collected']}},
                 {
                     'in':{'column':'s2', 'min_value':None, 'max_value':10},
+                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}},
+                {
+                    'in':{'column':'s3', 'min_value':None, 'max_value':10},
                     'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}}
         ]
 
         for t in T:
             out = D.expect_column_value_lengths_to_be_between(**t['in'])
             self.assertEqual(out, t['out'])
+
+        with self.assertRaises(TypeError):
+            D.expect_column_value_lengths_to_be_between(**{'column':'s4', 'min_value':None, 'max_value':10})
+
 
     def test_expect_column_values_to_match_regex(self):
         """
@@ -712,7 +766,17 @@ class TestPandasDataset(unittest.TestCase):
 
 
     def test_expect_column_values_to_match_regex_list(self):
-        self.assertRaises(NotImplementedError)
+        with open("./tests/test_sets/expect_column_values_to_match_regex_list_test_set.json") as f:
+            J = json.load(f)
+            D = ge.dataset.PandasDataSet(J["dataset"])
+            D.set_default_expectation_argument("output_format", "COMPLETE")
+            T = J["tests"]
+
+            self.maxDiff = None
+
+        for t in T:
+            out = D.expect_column_values_to_match_regex_list(**t['in'])
+            self.assertEqual(out, t['out'])
 
 
     def test_expect_column_values_to_match_strftime_format(self):
@@ -821,6 +885,21 @@ class TestPandasDataset(unittest.TestCase):
         for t in T:
             out = D.expect_column_values_to_be_json_parseable(**t['in'])
             self.assertEqual(out, t['out'])
+
+    def test_expect_column_values_to_match_json_schema(self):
+
+        with open("./tests/test_sets/expect_column_values_to_match_json_schema_test_set.json") as f:
+            J = json.load(f)
+            D = ge.dataset.PandasDataSet(J["dataset"])
+            D.set_default_expectation_argument("output_format", "COMPLETE")
+            T = J["tests"]
+
+            self.maxDiff = None
+
+        for t in T:
+            out = D.expect_column_values_to_match_json_schema(**t['in'])#, **t['kwargs'])
+            self.assertEqual(out, t['out'])
+
 
 
     def test_expect_column_mean_to_be_between(self):
@@ -1006,7 +1085,6 @@ class TestPandasDataset(unittest.TestCase):
             out = D.expect_column_proportion_of_unique_values_to_be_between(**t['in'])
             self.assertEqual(out, t['out'])
 
-
     def test_expect_column_values_to_be_increasing(self):
 
         with open("./tests/test_sets/expect_column_values_to_be_increasing_test_set.json") as f:
@@ -1039,6 +1117,80 @@ class TestPandasDataset(unittest.TestCase):
             self.assertEqual(out, t['out'])
 
 
+    def test_expect_column_most_common_value_to_be(self):
+
+        D = ge.dataset.PandasDataSet({
+            'x' : [1,1,2,2,3,None, None, None, None, None],
+            'y' : ['hello', 'jello', 'mello', 'hello', 'jello', 'mello', 'hello', 'jello', 'mello', 'jello'],
+            'z' : [1,2,2,3,3,3,4,4,4,4],
+        })
+        D.set_default_expectation_argument("output_format", "COMPLETE")
+
+        T = [
+                {
+                    'in':{"column":"x","value":1},
+                    'out':{"success":False, "true_value":[1,2]},
+                },{
+                    'in':{"column":"x", "value":1, "ties_okay":True},
+                    'out':{"success":True, "true_value":[1,2]},
+                },{
+                    'in':{"column":"x","value":3},
+                    'out':{"success":False, "true_value":[1,2]},
+                },{
+                    'in':{"column":"x","value":3, "ties_okay":True},
+                    'out':{"success":False, "true_value":[1,2]},
+                },{
+                    'in':{"column":"y","value":"jello"},
+                    'out':{'success':True, "true_value":["jello"]},
+                },{
+                    'in':{"column":"y","value":"hello"},
+                    'out':{'success':False, "true_value":["jello"]},
+                },{
+                    'in':{"column":"z","value":4},
+                    'out':{'success':True, "true_value":[4]},
+                }
+        ]
+
+        for t in T:
+            out = D.expect_column_most_common_value_to_be(**t['in'])
+            self.assertEqual(out, t['out'])
+
+
+    def test_expect_column_most_common_value_to_be_in_set(self):
+
+        D = ge.dataset.PandasDataSet({
+            'x' : [1,1,2,2,3,None, None, None, None, None],
+            'y' : ['hello', 'jello', 'mello', 'hello', 'jello', 'mello', 'hello', 'jello', 'mello', 'jello'],
+            'z' : [1,2,2,3,3,3,4,4,4,4],
+        })
+        D.set_default_expectation_argument("output_format", "COMPLETE")
+
+        T = [
+                {
+                    'in':{"column":"x","value_set":[1]},
+                    'out':{"success":False, "true_value":[1,2]},
+                },{
+                    'in':{"column":"x", "value_set":[1], "ties_okay":True},
+                    'out':{"success":True, "true_value":[1,2]},
+                },{
+                    'in':{"column":"x","value_set":[3]},
+                    'out':{"success":False, "true_value":[1,2]},
+                },{
+                    'in':{"column":"y","value_set":["jello", "hello"]},
+                    'out':{'success':True, "true_value":["jello"]},
+                },{
+                    'in':{"column":"y","value_set":["hello", "mello"]},
+                    'out':{'success':False, "true_value":["jello"]},
+                },{
+                    'in':{"column":"z","value_set":[4]},
+                    'out':{'success':True, "true_value":[4]},
+                }
+        ]
+
+
+        for t in T:
+            out = D.expect_column_most_common_value_to_be_in_set(**t['in'])
+            self.assertEqual(out, t['out'])
 
 
     def test_expectation_decorator_summary_mode(self):
@@ -1053,19 +1205,19 @@ class TestPandasDataset(unittest.TestCase):
             df.expect_column_values_to_be_between('x', min_value=1, max_value=5, output_format="SUMMARY"),
             {
                 "success" : False,
-                "exception_list" : [6.0,7.0,7.0],
-                "exception_index_list": [5,6,7],
                 "summary_obj" : {
                     "element_count" : 10,
                     "missing_count" : 2,
                     "missing_percent" : .2,
                     "exception_count" : 3,
-                    "exception_counts": {
+                    "partial_exception_counts": {
                         6.0 : 1,
                         7.0 : 2,
                     },
                     "exception_percent": 0.3,
                     "exception_percent_nonmissing": 0.375,
+                    "partial_exception_list" : [6.0,7.0,7.0],
+                    "partial_exception_index_list": [5,6,7],
                 }
             }
         )

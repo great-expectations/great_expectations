@@ -3,6 +3,7 @@ import json
 import re
 from datetime import datetime
 from functools import wraps
+import jsonschema
 
 import numpy as np
 import pandas as pd
@@ -316,7 +317,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
     @DocInherit
     @MetaPandasDataSet.column_map_expectation
-    def expect_column_values_to_be_in_type_list(self, column, type_, target_datasource="numpy"):
+    def expect_column_values_to_be_in_type_list(self, column, type_list, target_datasource="numpy"):
 
         python_avro_types = {
                 "null":type(None),
@@ -342,7 +343,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
         datasource = {"python":python_avro_types, "numpy":numpy_avro_types}
 
-        target_type_list = [datasource[target_datasource][t] for t in type_]
+        target_type_list = [datasource[target_datasource][t] for t in type_list]
         result = column.map(lambda x: type(x) in target_type_list)
 
         return result
@@ -403,20 +404,16 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
             raise ValueError("min_value and max_value must be integers")
 
         def length_is_between(val):
+            if min_value != None and max_value != None:
+                return len(val) >= min_value and len(val) <= max_value
 
-            try:
-                if min_value != None and max_value != None:
-                    return len(val) >= min_value and len(val) <= max_value
+            elif min_value == None and max_value != None:
+                return len(val) <= max_value
 
-                elif min_value == None and max_value != None:
-                    return len(val) <= max_value
+            elif min_value != None and max_value == None:
+                return len(val) >= min_value
 
-                elif min_value != None and max_value == None:
-                    return len(val) >= min_value
-
-                else:
-                    return False
-            except:
+            else:
                 return False
 
         return column.map(length_is_between)
@@ -440,13 +437,23 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
     @DocInherit
     @MetaPandasDataSet.column_map_expectation
-    def expect_column_values_to_match_regex_list(self, column, regex_list, required_match="any", mostly=None, output_format=None, include_config=False, catch_exceptions=None):
+    def expect_column_values_to_match_regex_list(self, column, regex_list, match_on="any", mostly=None, output_format=None, include_config=False, catch_exceptions=None):
 
-        def match_in_list(val):
-            if any(re.match(regex, str(val)) for regex in regex_list):
-                return True
-            else:
-                return False
+        if match_on=="any":
+        
+            def match_in_list(val):
+                if any(re.match(regex, str(val)) for regex in regex_list):
+                    return True
+                else:
+                    return False
+        
+        elif match_on=="all":
+
+            def match_in_list(val):
+                if all(re.match(regex, str(val)) for regex in regex_list):
+                    return True
+                else:
+                    return False
 
         return column.map(match_in_list)
 
@@ -501,7 +508,23 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
     @DocInherit
     @MetaPandasDataSet.column_map_expectation
     def expect_column_values_to_match_json_schema(self, column, json_schema, output_format=None, include_config=False, catch_exceptions=None):
-        raise NotImplementedError("Under development")
+        def matches_json_schema(val):
+            try:
+                val_json = json.loads(val)
+                jsonschema.validate(val_json, json_schema)
+                #jsonschema.validate raises an error if validation fails.
+                #So if we make it this far, we know that the validation succeeded.
+                return True
+            except:
+                return False
+
+        return column.map(matches_json_schema)
+
+
+    # @DocInherit
+    # @MetaPandasDataSet.column_map_expectation
+    # def expect_column_values_to_match_json_schema(self, column, json_schema, output_format=None, include_config=False, catch_exceptions=None):
+    #     raise NotImplementedError("Under development")
 
     @DocInherit
     @MetaPandasDataSet.column_map_expectation
@@ -600,6 +623,47 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
             ),
             "true_value": unique_value_count,
             "summary_obj": {}
+        }
+
+    @DocInherit
+    @MetaPandasDataSet.column_aggregate_expectation
+    def expect_column_most_common_value_to_be(self, column, value, ties_okay=None, output_format=None, include_config=False, catch_exceptions=None):
+
+        mode_list = list(column.mode().values)
+
+        if ties_okay:
+            success = value in mode_list
+        else:
+            if len(mode_list) > 1:
+                success = False
+            else:
+                success = value == mode_list[0]
+
+        return {
+            "success" : success,
+            "true_value": mode_list,
+            "summary_obj": {},
+        }
+
+    @DocInherit
+    @MetaPandasDataSet.column_aggregate_expectation
+    def expect_column_most_common_value_to_be_in_set(self, column, value_set, ties_okay=None, output_format=None, include_config=False, catch_exceptions=None):
+
+        mode_list = list(column.mode().values)
+        intersection_count = len(set(value_set).intersection(mode_list))
+
+        if ties_okay:
+            success = intersection_count>0
+        else:
+            if len(mode_list) > 1:
+                success = False
+            else:
+                success = intersection_count==1
+
+        return {
+            "success" : success,
+            "true_value": mode_list,
+            "summary_obj": {},
         }
 
     @DocInherit
