@@ -371,7 +371,6 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
                 max_value = parse(max_value)
 
             temp_column = column.map(parse)
-            print temp_column
 
         else:
             temp_column = column
