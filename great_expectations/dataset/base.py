@@ -186,15 +186,48 @@ class DataSet(object):
 
         self.default_expectation_args[argument] = value
 
-    def get_expectations_config(self):
-        return self._expectations_config
+    def get_expectations_config(self, keep_false=False, keep_output_format=False, suppress_warnings=False):
+        print json.dumps(self._expectations_config)
+        
+        config = copy.deepcopy(dict(self._expectations_config))
+        expectations = config["expectations"]
 
-    def save_expectations_config(self, filepath=None):
+        if not keep_output_format:
+            for expectation in expectations:
+                if "output_format" in expectation["kwargs"]:
+                    print (
+                        "Warning: Dropping output format %s in expectation %s. \nTo keep output formats, set keep_output_format to True." % (
+                            expectation["kwargs"]["output_format"],
+                            json.dumps(expectation)
+                        )
+                    )
+                    del expectation["kwargs"]["output_format"]
+                    
+
+        # if not keep_false:
+        #     new_expectations = []
+
+        #     for expectation in expectations:
+        #         if expectation["success"] == True:
+        #             new_expectations.append(expectation)
+        #         else:
+        #             if not suppress_warnings:
+        #                 print (
+        #                     "Warning: Expectation with success=False was not exported. To export it, set keep_false to True or make sure that success=True before exporting.\n%s" %
+        #                     json.dumps(expectation),
+        #                 )
+        #     expectations = new_expectations
+
+        config["expectation"] = expectations
+        return config
+
+    def save_expectations_config(self, filepath=None, keep_false=False, keep_output_format=False, suppress_warnings=False):
         if filepath==None:
             #!!! Fetch the proper filepath from the project config
             pass
 
-        expectation_config_str = json.dumps(self.get_expectations_config(), indent=2)
+        expectations_config = self.get_expectations_config(keep_false, keep_output_format)
+        expectation_config_str = json.dumps(expectations_config, indent=2)
         open(filepath, 'w').write(expectation_config_str)
 
     def validate(self, expectations_config=None, catch_exceptions=True, output_format=None, include_config=None, only_return_failures=False):
