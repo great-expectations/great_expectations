@@ -189,7 +189,8 @@ class DataSet(object):
     def get_expectations_config(self, keep_false=False, keep_output_format=False, suppress_warnings=False):
         print (json.dumps(self._expectations_config))
         
-        config = copy.deepcopy(dict(self._expectations_config))
+        config = dict(self._expectations_config)
+        config = copy.deepcopy(config)
         expectations = config["expectations"]
 
         if not keep_output_format:
