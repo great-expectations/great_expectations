@@ -187,7 +187,7 @@ class DataSet(object):
         self.default_expectation_args[argument] = value
 
     def get_expectations_config(self, keep_false=False, keep_output_format=False, suppress_warnings=False):
-        print json.dumps(self._expectations_config)
+        print (json.dumps(self._expectations_config))
         
         config = copy.deepcopy(dict(self._expectations_config))
         expectations = config["expectations"]
