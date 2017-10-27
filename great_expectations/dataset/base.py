@@ -279,7 +279,12 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         results = []
 
         if expectations_config is None:
-            expectations_config = self.get_expectations_config()
+            expectations_config = self.get_expectations_config(
+                discard_failed_expectations=False,
+                discard_output_format_kwargs=False,
+                discard_include_configs_kwargs=False,
+                discard_catch_exceptions_kwargs=False,
+            )
 
         for expectation in expectations_config['expectations']:
             expectation_method = getattr(self, expectation['expectation_type'])
