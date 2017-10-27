@@ -109,7 +109,7 @@ class TestValidation(unittest.TestCase):
 
 
         validation_results = my_df.validate(only_return_failures=True)
-        print json.dumps(validation_results, indent=2)
+        # print json.dumps(validation_results, indent=2)
         assertDeepAlmostEqual(
             self,
             validation_results,
