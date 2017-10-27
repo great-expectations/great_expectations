@@ -212,10 +212,14 @@ class DataSet(object):
             new_expectations = []
 
             for expectation in expectations:
-                if expectation["success"] == True:
-                    new_expectations.append(expectation)
-                else:
+                #Note: This is conservative logic.
+                #Instead of retaining expectations IFF success==True, it discard expectations IFF success==False.
+                #In cases where expectation["success"] is missing or None, expectations are *retained*.
+                #Such a case could occur if expectations were loaded from a config file and never run.
+                if "success" in expectation and expectation["success"] == False:
                     discards["failed_expectations"] += 1
+                else:
+                    new_expectations.append(expectation)
             expectations = new_expectations
 
         for expectation in expectations:
@@ -247,7 +251,7 @@ WARNING: get_expectations_config discarded
      1 catch_exceptions kwargs
 If you wish to change this behavior, please set discard_failed_expectations, discard_output_format_kwargs, discard_include_configs_kwargs, and discard_catch_exceptions_kwargs appropirately.
             """
-            if any(discard_failed_expectations, discard_output_format_kwargs, discard_include_configs_kwargs, discard_catch_exceptions_kwargs):
+            if any([discard_failed_expectations, discard_output_format_kwargs, discard_include_configs_kwargs, discard_catch_exceptions_kwargs]):
                 print ("WARNING: get_expectations_config discarded")
                 if discard_failed_expectations:
                     print ("\t%d failing expectations" % discards["failed_expectations"])
@@ -255,7 +259,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                     print ("\t%d output_format kwargs" % discards["output_format"])
                 if discard_include_configs_kwargs:
                     print ("\t%d include_configs kwargs" % discards["include_configs"])
-                if discard_catch_exceptions:
+                if discard_catch_exceptions_kwargs:
                     print ("\t%d catch_exceptions kwargs" % discards["catch_exceptions"])
                 print ("If you wish to change this behavior, please set discard_failed_expectations, discard_output_format_kwargs, discard_include_configs_kwargs, and discard_catch_exceptions_kwargs appropirately.")
                     
