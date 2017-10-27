@@ -6,6 +6,7 @@ import traceback
 
 import pandas as pd
 import numpy as np
+from collections import defaultdict
 
 from .util import DotDict, ensure_json_serializable
 
@@ -105,6 +106,12 @@ class DataSet(object):
                     else:
                         raise(err)
 
+                #Add a "success" object to the config
+                if output_format == "BOOLEAN_ONLY":
+                    expectation_config["success"] = return_obj
+                else:
+                    expectation_config["success"] = return_obj["success"]
+
                 #Append the expectation to the config.
                 self.append_expectation(expectation_config)
 
@@ -186,39 +193,72 @@ class DataSet(object):
 
         self.default_expectation_args[argument] = value
 
-    def get_expectations_config(self, keep_false=False, keep_output_format=False, suppress_warnings=False):
+    def get_expectations_config(self,
+        discard_failed_expectations=True,
+        discard_output_format_kwargs=True,
+        discard_include_configs_kwargs=True,
+        discard_catch_exceptions_kwargs=True,
+        suppress_warnings=False
+    ):
         print (json.dumps(self._expectations_config))
         
         config = dict(self._expectations_config)
         config = copy.deepcopy(config)
         expectations = config["expectations"]
 
-        if not keep_output_format:
+        discards = defaultdict(int)
+
+        if discard_failed_expectations:
+            new_expectations = []
+
             for expectation in expectations:
+                if expectation["success"] == True:
+                    new_expectations.append(expectation)
+                else:
+                    discards["failed_expectations"] += 1
+            expectations = new_expectations
+
+        for expectation in expectations:
+            if "success" in expectation:
+                del expectation["success"]
+
+            if discard_output_format_kwargs:
                 if "output_format" in expectation["kwargs"]:
-                    print (
-                        "Warning: Dropping output format %s in expectation %s. \nTo keep output formats, set keep_output_format to True." % (
-                            expectation["kwargs"]["output_format"],
-                            json.dumps(expectation)
-                        )
-                    )
                     del expectation["kwargs"]["output_format"]
+                    discards["output_format"] += 1
+
+            if discard_include_configs_kwargs:
+                if "include_configs" in expectation["kwargs"]:
+                    del expectation["kwargs"]["include_configs"]
+                    discards["include_configs"] += 1
+
+            if discard_catch_exceptions_kwargs:
+                if "catch_exceptions" in expectation["kwargs"]:
+                    del expectation["kwargs"]["catch_exceptions"]
+                    discards["catch_exceptions"] += 1
+
+
+        if not suppress_warnings:
+            """
+WARNING: get_expectations_config discarded
+    12 failing expectations
+    44 output_format kwargs
+     0 include_config kwargs
+     1 catch_exceptions kwargs
+If you wish to change this behavior, please set discard_failed_expectations, discard_output_format_kwargs, discard_include_configs_kwargs, and discard_catch_exceptions_kwargs appropirately.
+            """
+            if any(discard_failed_expectations, discard_output_format_kwargs, discard_include_configs_kwargs, discard_catch_exceptions_kwargs):
+                print ("WARNING: get_expectations_config discarded")
+                if discard_failed_expectations:
+                    print ("\t%d failing expectations" % discards["failed_expectations"])
+                if discard_output_format_kwargs:
+                    print ("\t%d output_format kwargs" % discards["output_format"])
+                if discard_include_configs_kwargs:
+                    print ("\t%d include_configs kwargs" % discards["include_configs"])
+                if discard_catch_exceptions:
+                    print ("\t%d catch_exceptions kwargs" % discards["catch_exceptions"])
+                print ("If you wish to change this behavior, please set discard_failed_expectations, discard_output_format_kwargs, discard_include_configs_kwargs, and discard_catch_exceptions_kwargs appropirately.")
                     
-
-        # if not keep_false:
-        #     new_expectations = []
-
-        #     for expectation in expectations:
-        #         if expectation["success"] == True:
-        #             new_expectations.append(expectation)
-        #         else:
-        #             if not suppress_warnings:
-        #                 print (
-        #                     "Warning: Expectation with success=False was not exported. To export it, set keep_false to True or make sure that success=True before exporting.\n%s" %
-        #                     json.dumps(expectation),
-        #                 )
-        #     expectations = new_expectations
-
         config["expectation"] = expectations
         return config
 
