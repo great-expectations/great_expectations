@@ -263,7 +263,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                     print ("\t%d catch_exceptions kwargs" % discards["catch_exceptions"])
                 print ("If you wish to change this behavior, please set discard_failed_expectations, discard_output_format_kwargs, discard_include_configs_kwargs, and discard_catch_exceptions_kwargs appropirately.")
                     
-        config["expectation"] = expectations
+        config["expectations"] = expectations
         return config
 
     def save_expectations_config(self, filepath=None, keep_false=False, keep_output_format=False, suppress_warnings=False):

@@ -37,6 +37,7 @@ class TestDataset(unittest.TestCase):
             }
         )
 
+        self.maxDiff = None
         self.assertEqual(
             D.get_expectations_config(),
             {
