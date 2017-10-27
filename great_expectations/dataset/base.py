@@ -108,9 +108,9 @@ class DataSet(object):
 
                 #Add a "success" object to the config
                 if output_format == "BOOLEAN_ONLY":
-                    expectation_config["success"] = return_obj
+                    expectation_config["success_on_last_run"] = return_obj
                 else:
-                    expectation_config["success"] = return_obj["success"]
+                    expectation_config["success_on_last_run"] = return_obj["success"]
 
                 #Append the expectation to the config.
                 self.append_expectation(expectation_config)
@@ -216,15 +216,16 @@ class DataSet(object):
                 #Instead of retaining expectations IFF success==True, it discard expectations IFF success==False.
                 #In cases where expectation["success"] is missing or None, expectations are *retained*.
                 #Such a case could occur if expectations were loaded from a config file and never run.
-                if "success" in expectation and expectation["success"] == False:
+                if "success_on_last_run" in expectation and expectation["success_on_last_run"] == False:
                     discards["failed_expectations"] += 1
                 else:
                     new_expectations.append(expectation)
+                    
             expectations = new_expectations
 
         for expectation in expectations:
-            if "success" in expectation:
-                del expectation["success"]
+            if "success_on_last_run" in expectation:
+                del expectation["success_on_last_run"]
 
             if discard_output_format_kwargs:
                 if "output_format" in expectation["kwargs"]:
