@@ -199,9 +199,7 @@ class DataSet(object):
         discard_include_configs_kwargs=True,
         discard_catch_exceptions_kwargs=True,
         suppress_warnings=False
-    ):
-        print (json.dumps(self._expectations_config))
-        
+    ):        
         config = dict(self._expectations_config)
         config = copy.deepcopy(config)
         expectations = config["expectations"]
