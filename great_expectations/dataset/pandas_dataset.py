@@ -379,25 +379,34 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         def is_between(val):
             # TODO Might be worth explicitly defining comparisons between types (for example, between strings and ints).
             # Ensure types can be compared since some types in Python 3 cannot be logically compared.
+            # print type(val), type(min_value), type(max_value)
+
+            print type(val), type(min_value), type(max_value)
+
             if type(val) == None:
                 return False
             else:
-                try:
+                # try:
+                if min_value != None and max_value != None:
+                    if type(val)==str and (type(min_value)!=str or type(max_value)!=str):
+                        raise TypeError("Column values are of type str, but min_value and/or max_value are not.")
 
-                    if min_value != None and max_value != None:
-                        return (min_value <= val) and (val <= max_value)
+                    # assert type(val) == type(min_value) == type(max_value)
+                    return (min_value <= val) and (val <= max_value)
 
-                    elif min_value == None and max_value != None:
-                        return (val <= max_value)
+                elif min_value == None and max_value != None:
+                    assert type(val) == type(max_value)
+                    return (val <= max_value)
 
-                    elif min_value != None and max_value == None:
-                        return (min_value <= val)
+                elif min_value != None and max_value == None:
+                    assert type(val) == type(min_value)
+                    return (min_value <= val)
 
-                    else:
-                        return False
-
-                except:
+                else:
                     return False
+
+                # except:
+                    # return False
 
         return temp_column.map(is_between)
 

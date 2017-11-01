@@ -632,6 +632,8 @@ class TestPandasDataset(unittest.TestCase):
                 None,
                 'Jan 01 2001 12:00:01',
             ],
+            "alpha": list('abcdefghij'),
+            "numeric": ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'],
         })
         D.set_default_expectation_argument("output_format", "COMPLETE")
 
@@ -643,6 +645,9 @@ class TestPandasDataset(unittest.TestCase):
 
         for t in T:
             out = D.expect_column_values_to_be_between(**t['in'])#, **t['kwargs'])
+            print '-'*80
+            print(json.dumps(t['in'], indent=2))
+            print(json.dumps(out, indent=2))
             self.assertEqual(out, t['out'])
 
     def test_expect_column_value_lengths_to_be_between(self):
@@ -1183,6 +1188,9 @@ class TestPandasDataset(unittest.TestCase):
             'x' : [1,2,3,4,5,6,7,7,None,None],
         })
         df.set_default_expectation_argument("output_format", "COMPLETE")
+
+        print '&'*80
+        print json.dumps(df.expect_column_values_to_be_between('x', min_value=1, max_value=5, output_format="SUMMARY"), indent=2)
 
         self.maxDiff = None
         self.assertEqual(
