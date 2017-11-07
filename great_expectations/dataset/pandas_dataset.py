@@ -4,6 +4,7 @@ import re
 from datetime import datetime
 from functools import wraps
 import jsonschema
+import copy
 
 import numpy as np
 import pandas as pd
@@ -730,12 +731,14 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         if (len(partition_object['weights']) == len(partition_object['partition'])):
             observed_frequencies = column.value_counts()
             pk = observed_frequencies / (1.* len(column))
+            nonzero_weighted_partition = partition_object
         else:
-            partition_object = remove_empty_intervals(partition_object)
-            hist, bin_edges = np.histogram(column, partition_object['partition'], density=False)
+            nonzero_weighted_partition = copy.deepcopy(partition_object)
+            nonzero_weighted_partition = remove_empty_intervals(nonzero_weighted_partition)
+            hist, bin_edges = np.histogram(column, nonzero_weighted_partition['partition'], density=False)
             pk = hist / (1.* len(column))
 
-        kl_divergence = stats.entropy(pk, partition_object['weights'])
+        kl_divergence = stats.entropy(pk, nonzero_weighted_partition['weights'])
 
         result_obj = {
                 "success": kl_divergence <= threshold,

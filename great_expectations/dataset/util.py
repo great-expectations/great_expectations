@@ -1,8 +1,9 @@
-#!! This is a second copy of this file. Inelegant.
+# Utility methods for dealing with DataSet objects
 
 import numpy as np
 from scipy import stats
 import pandas as pd
+import warnings
 
 from functools import wraps
 
@@ -83,7 +84,6 @@ def ensure_json_serializable(test_dict):
     # Validate that all aruguments are of approved types, coerce if it's easy, else exception
     # TODO: ensure in-place iteration like this is okay
     for key in test_dict:
-        ## TODO: Brittle if non python3 (unicode, long type?)
         if isinstance(test_dict[key], (list, tuple, str, int, float, bool)):
             # No problem to encode json
             continue
@@ -164,14 +164,20 @@ def kde_smooth_data(data):
     # Following is basically a crude rule of thumb for what should be -inf and inf as real endpoints.
     lower_bound = np.min(data) - (1.5 * kde.covariance_factor())
     upper_bound = np.max(data) + (1.5 * kde.covariance_factor())
-    partition = [ lower_bound ] + evaluation_partition.tolist() + [ upper_bound ]
-    weights = [ cdf_vals[0] ] + evaluation_weights.tolist() + [1 - cdf_vals[-1]]
+    partition = [ -np.inf, lower_bound ] + evaluation_partition.tolist() + [ upper_bound, np.inf ]
+    weights = [ 0, cdf_vals[0] ] + evaluation_weights.tolist() + [1 - cdf_vals[-1], 0]
     return {
         "partition": partition,
         "weights": weights
     }
 
 def partition_data(data, bins='auto', n_bins=10):
+    warnings.warn("partition_data is deprecated and will be removed. Use either continuous_partition_data or \
+                    categorical_partition_data instead.", DeprecationWarning)
+    return continuous_partition_data(data, bins, n_bins)
+
+
+def continuous_partition_data(data, bins='auto', n_bins=10):
     """Convenience method for building a partition and weights using simple options.
     Args:
         data (list-like): The data from which to construct the estimate.
@@ -193,10 +199,11 @@ def partition_data(data, bins='auto', n_bins=10):
 
     hist, bin_edges = np.histogram(data, bins, density=False)
 
-    #TODO: Evaluate numpy deprecation of np.histogram's normed option to ensure we're okay with the numerical issues here.
-    # Probably we're having bigger problems through serialization.
+    bin_edges = np.insert(bin_edges, 0, -np.inf)
+    bin_edges = np.insert(bin_edges, len(bin_edges), np.inf)
+    hist = np.insert(hist, 0, 0)
+    hist = np.insert(hist, len(hist), 0)
 
-    #TODO: Consider proper weighting if data includes null values
     return {
         "partition": bin_edges,
         "weights": hist / (1.*len(data))
