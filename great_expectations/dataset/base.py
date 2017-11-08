@@ -291,14 +291,15 @@ class DataSet(object):
 
             if element_count > 0:
                 missing_percent = float(missing_count) / element_count
+                exception_percent = float(exception_count) / element_count
 
                 if nonnull_count > 0:
-                    exception_percent = float(exception_count) / element_count
                     exception_percent_nonmissing = float(exception_count) / nonnull_count
+                else:
+                    exception_percent_nonmissing: None
 
             else:
                 missing_percent = None
-                nonmissing_count = None
                 exception_percent = None
                 exception_percent_nonmissing = None
 
