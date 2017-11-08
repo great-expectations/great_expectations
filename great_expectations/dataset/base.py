@@ -824,7 +824,6 @@ class DataSet(object):
                 - weights (list): A list of weights. They should sum to one. The test will scale the expected frequencies by the weights and size of the new sample.
             p (float) = 0.05: The p-value threshold for the Chai Squareed test.\
                 For values below the specified threshold the expectation will return false, rejecting the null hypothesis that the distributions are the same.
-            suppress_exceptions: Only return a boolean success value, not a dictionary with other results.
 
         Returns:
             {
