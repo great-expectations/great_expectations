@@ -265,12 +265,26 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         config["expectations"] = expectations
         return config
 
-    def save_expectations_config(self, filepath=None, keep_false=False, keep_output_format=False, suppress_warnings=False):
+    def save_expectations_config(
+        self,
+        filepath=None,
+        discard_failed_expectations=True,
+        discard_output_format_kwargs=True,
+        discard_include_configs_kwargs=True,
+        discard_catch_exceptions_kwargs=True,
+        suppress_warnings=False
+    ):
         if filepath==None:
-            #!!! Fetch the proper filepath from the project config
+            #FIXME: Fetch the proper filepath from the project config
             pass
 
-        expectations_config = self.get_expectations_config(keep_false, keep_output_format)
+        expectations_config = self.get_expectations_config(
+            discard_failed_expectations,
+            discard_output_format_kwargs,
+            discard_include_configs_kwargs,
+            discard_catch_exceptions_kwargs,
+            suppress_warnings
+        )
         expectation_config_str = json.dumps(expectations_config, indent=2)
         open(filepath, 'w').write(expectation_config_str)
 
