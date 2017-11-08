@@ -24,7 +24,7 @@ Advanced
 
    output_format
    custom_expectations
-   naming_conventions
+   conventions
 
 Indices and tables
 ------------------
