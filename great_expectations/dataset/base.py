@@ -819,7 +819,6 @@ class DataSet(object):
 
         Args:
             column (str): The column name
-            vals (list): A list of categorical values.
             partition_object (dict): A dictionary containing partition (categorical values) and associated weights.
                 - partition (list): A list of values that correspond to the provided categorical values.
                 - weights (list): A list of weights. They should sum to one. The test will scale the expected frequencies by the weights and size of the new sample.
