@@ -74,11 +74,12 @@ class DataSet(object):
                         del all_args["output_format"]
 
                 all_args = ensure_json_serializable(all_args)
+                expectation_args = copy.deepcopy(all_args)
 
                 #Construct the expectation_config object
                 expectation_config = DotDict({
                     "expectation_type": method_name,
-                    "kwargs": all_args
+                    "kwargs": expectation_args
                 })
 
                 #Add the expectation_method key
@@ -89,7 +90,7 @@ class DataSet(object):
 
                 #Finally, execute the expectation method itself
                 try:
-                    return_obj = func(self, **all_args)
+                    return_obj = func(self, **expectation_args)
 
                 except Exception as err:
                     if catch_exceptions:
