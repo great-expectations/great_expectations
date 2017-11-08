@@ -39,7 +39,7 @@ def validate(data_set, expectations_config_file, **kwargs):
 	if kwargs["custom_dataset_module"]:
 		sys.path.insert(0, os.path.dirname(kwargs["custom_dataset_module"]))
 		module_name = os.path.basename(kwargs["custom_dataset_module"]).split('.')[0]
-		custom_module = __import__(module_name.decode('utf-8'))
+		custom_module = __import__(module_name)
 		dataset_class = getattr(custom_module, kwargs["custom_dataset_class"])
 
 	else:
