@@ -296,7 +296,7 @@ class DataSet(object):
                 if nonnull_count > 0:
                     exception_percent_nonmissing = float(exception_count) / nonnull_count
                 else:
-                    exception_percent_nonmissing: None
+                    exception_percent_nonmissing = None
 
             else:
                 missing_percent = None
