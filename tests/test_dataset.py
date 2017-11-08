@@ -86,5 +86,169 @@ class TestDataset(unittest.TestCase):
             }
         )
 
+    def test_get_expectation_config(self):
+        df = ge.dataset.PandasDataSet({
+            'x' : [1,2,4],
+            'y' : [1,2,5],
+            'z' : ['hello', 'jello', 'mello'],
+        })
+        df.expect_column_values_to_be_in_set('x', [1,2,4])
+        df.expect_column_values_to_be_in_set('y', [1,2,4])
+        df.expect_column_values_to_match_regex('z', 'ello')
+
+        self.assertEqual(
+            df.get_expectations_config(),
+            {
+              "expectations": [
+                {
+                  "expectation_type": "expect_column_to_exist", 
+                  "kwargs": {
+                    "column": "x"
+                  }
+                }, 
+                {
+                  "expectation_type": "expect_column_to_exist", 
+                  "kwargs": {
+                    "column": "y"
+                  }
+                }, 
+                {
+                  "expectation_type": "expect_column_to_exist", 
+                  "kwargs": {
+                    "column": "z"
+                  }
+                }, 
+                {
+                  "expectation_type": "expect_column_values_to_be_in_set", 
+                  "kwargs": {
+                    "column": "x", 
+                    "values_set": [
+                      1, 
+                      2, 
+                      4
+                    ]
+                  }
+                }, 
+                {
+                  "expectation_type": "expect_column_values_to_match_regex", 
+                  "kwargs": {
+                    "column": "z", 
+                    "regex": "ello"
+                  }
+                }
+              ], 
+              "dataset_name": None
+            }
+        )
+
+        self.assertEqual(
+            df.get_expectations_config(
+                discard_failed_expectations=False
+            ),
+            {
+              "expectations": [
+                {
+                  "expectation_type": "expect_column_to_exist", 
+                  "kwargs": {
+                    "column": "x"
+                  }
+                }, 
+                {
+                  "expectation_type": "expect_column_to_exist", 
+                  "kwargs": {
+                    "column": "y"
+                  }
+                }, 
+                {
+                  "expectation_type": "expect_column_to_exist", 
+                  "kwargs": {
+                    "column": "z"
+                  }
+                }, 
+                {
+                  "expectation_type": "expect_column_values_to_be_in_set", 
+                  "kwargs": {
+                    "column": "x", 
+                    "values_set": [
+                      1, 
+                      2, 
+                      4
+                    ]
+                  }
+                }, 
+                {
+                  "expectation_type": "expect_column_values_to_be_in_set", 
+                  "kwargs": {
+                    "column": "y", 
+                    "values_set": [
+                      1, 
+                      2, 
+                      4
+                    ]
+                  }
+                }, 
+                {
+                  "expectation_type": "expect_column_values_to_match_regex", 
+                  "kwargs": {
+                    "column": "z", 
+                    "regex": "ello"
+                  }
+                }
+              ], 
+              "dataset_name": None
+            }
+        )
+
+        self.assertEqual(
+            df.get_expectations_config(
+                discard_output_format_kwargs=False,
+                discard_include_configs_kwargs=False,
+                discard_catch_exceptions_kwargs=False,
+            ),
+            {
+              "expectations": [
+                {
+                  "expectation_type": "expect_column_to_exist", 
+                  "kwargs": {
+                    "column": "x"
+                  }
+                }, 
+                {
+                  "expectation_type": "expect_column_to_exist", 
+                  "kwargs": {
+                    "column": "y"
+                  }
+                }, 
+                {
+                  "expectation_type": "expect_column_to_exist", 
+                  "kwargs": {
+                    "column": "z"
+                  }
+                }, 
+                {
+                  "expectation_type": "expect_column_values_to_be_in_set", 
+                  "kwargs": {
+                    "column": "x", 
+                    "values_set": [
+                      1, 
+                      2, 
+                      4
+                    ], 
+                    "output_format": "BASIC"
+                  }
+                }, 
+                {
+                  "expectation_type": "expect_column_values_to_match_regex", 
+                  "kwargs": {
+                    "column": "z", 
+                    "regex": "ello", 
+                    "output_format": "BASIC"
+                  }
+                }
+              ], 
+              "dataset_name": None
+            }
+        )
+
 if __name__ == "__main__":
     unittest.main()
