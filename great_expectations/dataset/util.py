@@ -123,6 +123,12 @@ def is_valid_partition_object(partition_object):
         return False
     return True
 
+def is_valid_categorical_partition_object(partition_object):
+    return is_valid_partition_object(partition_object) and (len(partition_object['partition']) != len(partition_object['weights']))
+
+def is_valid_continuous_partition_object(partition_object):
+    return is_valid_partition_object(partition_object) and (len(partition_object['partition']) != (len(partition_object['weights']) + 1))
+
 
 def categorical_partition_data(data):
     """Convenience method for creating weights from categorical data.
