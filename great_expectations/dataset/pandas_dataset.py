@@ -532,6 +532,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
     @DocInherit
     @MetaPandasDataSet.column_map_expectation
     def expect_column_values_to_be_json_parseable(self, column,
+                                                  mostly=None,
                                                   output_format=None, include_config=False, catch_exceptions=None, meta=None):
         def is_json(val):
             try:
@@ -545,6 +546,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
     @DocInherit
     @MetaPandasDataSet.column_map_expectation
     def expect_column_values_to_match_json_schema(self, column, json_schema,
+                                                  mostly=None,
                                                   output_format=None, include_config=False, catch_exceptions=None, meta=None):
         def matches_json_schema(val):
             try:
