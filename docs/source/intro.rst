@@ -35,11 +35,17 @@ See :ref:`workflow_advantages` to learn more about how Great Expectations speeds
 Getting started
 --------------------------------------------------------------------------------
 
-...is easy. Just clone the repository and install using pip.
+...is easy. Just use pip install:
 
 .. code-block:: bash
 
-    $ git clone https://github.com/abegong/great_expectations.git
+    $ pip install great_expecatations
+
+You can also clone the repository, which includes examples of using great_expectations.
+
+.. code-block:: bash
+
+    $ git clone https://github.com/great-expectations/great_expectations.git
     $ pip install great_expectations/
 
 Since Great Expectation is under active development, the `develop` branch is often a few days ahead of the latest production release. If you want to work from the latest commit on `develop`, we recommend you install by branch name or hash.
@@ -48,14 +54,4 @@ branch-name:
 
 .. code-block:: bash
 
-	$ pip install git+git://github.com/abegong/great_expectations.git@develop
-
-hash (use the specific hash of the commit you want):
-
-.. code-block:: bash
-
-	$ pip install git+git://github.com/abegong/great_expectations.git@29f87309e916816ab509f906a8c2ede710bf0ee5	
-
-
-.. _`pipeline testing`: irc://freenode.net
-.. _`workflow advantages`: http://github.com/example/crawler/issues
+	$ pip install git+git://github.com/great-expectations/great_expectations.git@develop
