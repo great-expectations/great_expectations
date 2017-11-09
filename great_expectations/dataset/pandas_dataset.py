@@ -12,7 +12,9 @@ from dateutil.parser import parse
 from scipy import stats
 
 from .base import DataSet
-from .util import DocInherit, is_valid_partition_object, remove_empty_intervals
+from .util import DocInherit, \
+        is_valid_partition_object, is_valid_categorical_partition_object, is_valid_continuous_partition_object, \
+        remove_empty_intervals
 
 
 class MetaPandasDataSet(DataSet):
@@ -671,8 +673,8 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
     @DocInherit
     @MetaPandasDataSet.column_aggregate_expectation
     def expect_column_chisquare_test_p_value_greater_than(self, column, partition_object=None, p=0.05, output_format=None, include_config=False, catch_exceptions=None):
-        if not is_valid_partition_object(partition_object):
-            raise ValueError("Invalid partition object.")
+        if not is_valid_categorical_partition_object(partition_object):
+            raise ValueError("Invalid categorical partition object.")
 
         expected_column = pd.Series(partition_object['weights'], index=partition_object['partition'], name='expected') * len(column)
         observed_frequencies = column.value_counts()
@@ -691,8 +693,8 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
     @DocInherit
     @MetaPandasDataSet.column_aggregate_expectation
     def expect_column_bootstrapped_ks_test_p_value_greater_than(self, column, partition_object=None, p=0.05, bootstrap_samples=0, output_format=None, include_config=False, catch_exceptions=None):
-        if not is_valid_partition_object(partition_object):
-            raise ValueError("Invalid partition object.")
+        if not is_valid_continuous_partition_object(partition_object):
+            raise ValueError("Invalid continuous partition object.")
 
         estimated_cdf = lambda x: np.interp(x, partition_object['partition'], np.append(np.array([0]), np.cumsum(partition_object['weights'])))
 
