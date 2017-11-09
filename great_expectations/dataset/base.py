@@ -599,6 +599,16 @@ class DataSet(object):
         """
         raise NotImplementedError
 
+    def expect_column_value_lengths_to_equal(self, column, value,
+                                             mostly=None,
+                                             output_format=None, include_config=False, catch_exceptions=None, meta=None):
+        """Expect column entries to have a measurable length which is equal to the provided value.
+
+        :param column (str): The column name.
+        :param value (int): The expected value of the column length.
+        :return: Column map expectation return object in accordance with output_format
+        """
+
     def expect_column_values_to_match_regex(self, column, regex,
                                             mostly=None,
                                             output_format=None, include_config=False, catch_exceptions=None, meta=None):
