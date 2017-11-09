@@ -708,7 +708,8 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
                     for k in range(bootstrap_samples)
                   ]
 
-        test_result = np.mean(results)
+        ## Using nanmean since having extended partitions from -inf to +inf
+        test_result = np.nanmean(results)
 
         result_obj = {
                 "success" : test_result > p,
