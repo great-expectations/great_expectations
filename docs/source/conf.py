@@ -50,7 +50,7 @@ master_doc = 'index'
 # General information about the project.
 project = u'great_expectations'
 copyright = u'2017, The Great Expectations Team'
-author = u'Abe Gong, Derek Miller, James Campbell'
+author = u'The Great Expectations Team'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -130,7 +130,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     (master_doc, 'great_expectations.tex', u'great\\_expectations Documentation',
-     u'Abe Gong, Derek Miller, James Campbell', 'manual'),
+     u'The Great Expectations Team', 'manual'),
 ]
 
 
