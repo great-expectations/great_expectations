@@ -455,6 +455,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
     @DocInherit
     @MetaPandasDataSet.column_map_expectation
     def expect_column_value_lengths_to_equal(self, column, value,
+                                             mostly=None,
                                              output_format=None, include_config=False, catch_exceptions=None, meta=None):
         return column.map(lambda x : len(x) == value)
 
