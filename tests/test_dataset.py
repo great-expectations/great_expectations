@@ -151,11 +151,12 @@ class TestDataset(unittest.TestCase):
         )
 
         df.save_expectations_config(directory_name+'/temp1.json')
+        temp_file = open(directory_name+'/temp1.json')
         self.assertEqual(
-            json.load(open(directory_name+'/temp1.json')),
+            json.load(temp_file),
             output_config,
         )
-
+        temp_file.close()
 
         ### Second test set ###
 
@@ -223,10 +224,12 @@ class TestDataset(unittest.TestCase):
           directory_name+'/temp2.json',
           discard_failed_expectations=False
         )
+        temp_file = open(directory_name+'/temp2.json')
         self.assertEqual(
-            json.load(open(directory_name+'/temp2.json')),
+            json.load(temp_file),
             output_config,
         )
+        temp_file.close()
 
         ### Third test set ###
 
@@ -289,10 +292,12 @@ class TestDataset(unittest.TestCase):
           discard_include_configs_kwargs=False,
           discard_catch_exceptions_kwargs=False,
         )
+        temp_file = open(directory_name+'/temp3.json')
         self.assertEqual(
-            json.load(open(directory_name+'/temp3.json')),
+            json.load(temp_file),
             output_config,
         )
+        temp_file.close()
 
         # Clean up the output directory
         shutil.rmtree(directory_name)
