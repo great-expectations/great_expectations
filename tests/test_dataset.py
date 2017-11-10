@@ -152,7 +152,7 @@ class TestDataset(unittest.TestCase):
 
         df.save_expectations_config(directory_name+'/temp1.json')
         self.assertEqual(
-            json.load(file(directory_name+'/temp1.json')),
+            json.load(open(directory_name+'/temp1.json')),
             output_config,
         )
 
@@ -224,7 +224,7 @@ class TestDataset(unittest.TestCase):
           discard_failed_expectations=False
         )
         self.assertEqual(
-            json.load(file(directory_name+'/temp2.json')),
+            json.load(open(directory_name+'/temp2.json')),
             output_config,
         )
 
@@ -290,7 +290,7 @@ class TestDataset(unittest.TestCase):
           discard_catch_exceptions_kwargs=False,
         )
         self.assertEqual(
-            json.load(file(directory_name+'/temp3.json')),
+            json.load(open(directory_name+'/temp3.json')),
             output_config,
         )
 
