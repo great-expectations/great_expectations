@@ -326,6 +326,7 @@ class DataSet(object):
         return return_obj
 
     def calc_map_expectation_success(self, success_count, nonnull_count, exception_count, mostly):
+        #FIXME: exception_count is a redundant parameter
         if nonnull_count > 0:
             percent_success = float(success_count)/nonnull_count
 
