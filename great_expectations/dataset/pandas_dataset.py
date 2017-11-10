@@ -93,9 +93,10 @@ class MetaPandasDataSet(DataSet):
             series = self[column]
             null_indexes = series.isnull()
 
+            element_count = int(len(series))
             nonnull_values = series[null_indexes == False]
             nonnull_count = (null_indexes == False).sum()
-            null_count = nonnull_count - len(series)
+            null_count = element_count - nonnull_count
 
             result_obj = func(self, nonnull_values, *args, **kwargs)
 
@@ -112,18 +113,17 @@ class MetaPandasDataSet(DataSet):
                 }
 
             elif (output_format == "SUMMARY"):
+                new_summary_obj = {
+                    "element_count": element_count,
+                    "missing_count": null_count,
+                    "missing_percent": null_count*1.0 / element_count if element_count > 0 else None
+                }
+
                 if "summary_obj" in result_obj and result_obj["summary_obj"] is not None:
-                    result_obj["summary_obj"].update({
-                        "element_count": nonnull_count,
-                        "missing_count": null_count,
-                        "missing_percent": nonnull_count / null_count if null_count > 0 else 0
-                    })
+                    result_obj["summary_obj"].update(new_summary_obj)
                 else:
-                    result_obj["summary_obj"] = {
-                        "element_count": nonnull_count,
-                        "missing_count": null_count,
-                        "missing_percent": nonnull_count / null_count if null_count > 0 else 0
-                    }
+                    result_obj["summary_obj"] = new_summary_obj
+
                 return_obj = {
                     "success" : bool(result_obj["success"]),
                     "true_value" : result_obj["true_value"],
