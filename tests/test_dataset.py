@@ -183,7 +183,6 @@ class TestDataset(unittest.TestCase):
             df.calc_map_expectation_success(
                 success_count=10,
                 nonnull_count=10,
-                exception_count=0,
                 mostly=None
             ),
             (True, 1.0)
@@ -193,7 +192,6 @@ class TestDataset(unittest.TestCase):
             df.calc_map_expectation_success(
                 success_count=90,
                 nonnull_count=100,
-                exception_count=0,
                 mostly=.9
             ),
             (True, .9)
@@ -203,7 +201,6 @@ class TestDataset(unittest.TestCase):
             df.calc_map_expectation_success(
                 success_count=90,
                 nonnull_count=100,
-                exception_count=0,
                 mostly=.8
             ),
             (True, .9)
@@ -213,7 +210,6 @@ class TestDataset(unittest.TestCase):
             df.calc_map_expectation_success(
                 success_count=80,
                 nonnull_count=100,
-                exception_count=0,
                 mostly=.9
             ),
             (False, .8)
@@ -223,7 +219,6 @@ class TestDataset(unittest.TestCase):
             df.calc_map_expectation_success(
                 success_count=0,
                 nonnull_count=0,
-                exception_count=0,
                 mostly=None
             ),
             (True, None)
@@ -233,7 +228,6 @@ class TestDataset(unittest.TestCase):
             df.calc_map_expectation_success(
                 success_count=0,
                 nonnull_count=100,
-                exception_count=100,
                 mostly=None
             ),
             (False, 0.0)
