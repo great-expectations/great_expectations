@@ -48,13 +48,13 @@ branch-name:
 
 .. code-block:: bash
 
-	$ pip install git+git://github.com/abegong/great_expectations.git@develop
+    $ pip install git+git://github.com/abegong/great_expectations.git@develop
 
 hash (use the specific hash of the commit you want):
 
 .. code-block:: bash
 
-	$ pip install git+git://github.com/abegong/great_expectations.git@29f87309e916816ab509f906a8c2ede710bf0ee5	
+    $ pip install git+git://github.com/abegong/great_expectations.git@29f87309e916816ab509f906a8c2ede710bf0ee5
 
 
 .. _`pipeline testing`: irc://freenode.net
