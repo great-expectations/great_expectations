@@ -291,14 +291,15 @@ class DataSet(object):
 
             if element_count > 0:
                 missing_percent = float(missing_count) / element_count
+                exception_percent = float(exception_count) / element_count
 
                 if nonnull_count > 0:
-                    exception_percent = float(exception_count) / element_count
                     exception_percent_nonmissing = float(exception_count) / nonnull_count
+                else:
+                    exception_percent_nonmissing = None
 
             else:
                 missing_percent = None
-                nonmissing_count = None
                 exception_percent = None
                 exception_percent_nonmissing = None
 
@@ -818,13 +819,11 @@ class DataSet(object):
 
         Args:
             column (str): The column name
-            vals (list): A list of categorical values.
             partition_object (dict): A dictionary containing partition (categorical values) and associated weights.
                 - partition (list): A list of values that correspond to the provided categorical values.
                 - weights (list): A list of weights. They should sum to one. The test will scale the expected frequencies by the weights and size of the new sample.
             p (float) = 0.05: The p-value threshold for the Chai Squareed test.\
                 For values below the specified threshold the expectation will return false, rejecting the null hypothesis that the distributions are the same.
-            suppress_exceptions: Only return a boolean success value, not a dictionary with other results.
 
         Returns:
             {
