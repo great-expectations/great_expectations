@@ -1,3 +1,4 @@
+import pandas as pd
 import great_expectations as ge
 
 import unittest
