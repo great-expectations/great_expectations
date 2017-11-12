@@ -4,7 +4,9 @@
     "x" : [2, 3, 4, 5, 6, 7, 8, 9, 10, null],
     "y" : [1, 1, 1, 2, 2, 2, 3, 3, 3, 4],
     "z" : ["a", "b", "c", "d", "e", null, null, null, null, null],
-    "zz" : ["1/1/2016", "1/2/2016", "2/2/2016", "2/2/2016", "3/1/2016", null, null, null, null, null]
+    "zz" : ["1/1/2016", "1/2/2016", "2/2/2016", "2/2/2016", "3/1/2016", null, null, null, null, null],
+    "a" : [null, 0, null, null, 1, null, null, 2, null, null],
+    "b" : [null, 0, null, null, 2, null, null, 1, null, null]
   },
   "tests" : [{
     "in": {
@@ -52,6 +54,24 @@
       "exception_list": [],
       "exception_index_list": [],
       "success": true
+    }
+  },{
+    "in": {
+      "column": "a"
+    },
+    "out": {
+      "exception_list": [],
+      "exception_index_list": [],
+      "success": true
+    }
+  },{
+    "in": {
+      "column": "b"
+    },
+    "out": {
+      "exception_list": [1],
+      "exception_index_list": [7],
+      "success": false
     }
   }]
 }

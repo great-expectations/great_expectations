@@ -706,7 +706,7 @@ class DataSet(object):
                     "exceptions_list": (list) the values that did not pass the expectation
                 }
         See Also:
-            expect_column_values_to_be_valid_json
+            expect_column_values_to_be_decreasing
 
         """
         raise NotImplementedError
@@ -724,7 +724,7 @@ class DataSet(object):
                     "exceptions_list": (list) the values that did not pass the expectation
                 }
         See Also:
-            expect_column_values_to_be_valid_json
+            expect_column_values_to_be_increasing
 
         """
         raise NotImplementedError
