@@ -1100,7 +1100,7 @@ class TestPandasDataset(unittest.TestCase):
             self.assertEqual(out, t['out'])
 
     def test_expect_column_values_to_be_increasing(self):
-
+        print("=== test_expect_column_values_to_be_increasing ===")
         with open("./tests/test_sets/expect_column_values_to_be_increasing_test_set.json") as f:
             J = json.load(f)
             D = ge.dataset.PandasDataSet(J["dataset"])
@@ -1115,7 +1115,7 @@ class TestPandasDataset(unittest.TestCase):
             self.assertEqual(out, t['out'])
 
     def test_expect_column_values_to_be_decreasing(self):
-
+        print("=== test_expect_column_values_to_be_decreasing ===")
         with open("./tests/test_sets/expect_column_values_to_be_decreasing_test_set.json") as f:
             J = json.load(f)
             D = ge.dataset.PandasDataSet(J["dataset"])
