@@ -317,7 +317,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
     @DocInherit
     @MetaPandasDataSet.column_map_expectation
-    def expect_column_values_to_be_in_type_list(self, column, type_list, target_datasource="numpy"):
+    def expect_column_values_to_be_in_type_list(self, column, type_list, target_datasource="numpy", mostly=None, output_format=None, include_config=False, catch_exceptions=None):
 
         python_avro_types = {
                 "null":type(None),
