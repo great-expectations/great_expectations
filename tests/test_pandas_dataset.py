@@ -1110,6 +1110,7 @@ class TestPandasDataset(unittest.TestCase):
             self.maxDiff = None
 
         for t in T:
+            print(t)
             out = D.expect_column_values_to_be_increasing(**t['in'])#, **t['kwargs'])
             self.assertEqual(out, t['out'])
 
@@ -1124,6 +1125,7 @@ class TestPandasDataset(unittest.TestCase):
             self.maxDiff = None
 
         for t in T:
+            print(t)
             out = D.expect_column_values_to_be_decreasing(**t['in'])
             self.assertEqual(out, t['out'])
 
