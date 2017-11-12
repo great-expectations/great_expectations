@@ -1,6 +1,6 @@
 import json
 J = json.load(file('tests/test_sets/expect_column_values_to_be_between_test_set.json'))
-J
+
 for j in J:
     print(j)
 for j in J:
