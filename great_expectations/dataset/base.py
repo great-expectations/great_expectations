@@ -75,11 +75,12 @@ class DataSet(object):
                         del all_args["output_format"]
 
                 all_args = ensure_json_serializable(all_args)
+                expectation_args = copy.deepcopy(all_args)
 
                 #Construct the expectation_config object
                 expectation_config = DotDict({
                     "expectation_type": method_name,
-                    "kwargs": all_args
+                    "kwargs": expectation_args
                 })
 
                 #Add the expectation_method key
@@ -90,7 +91,7 @@ class DataSet(object):
 
                 #Finally, execute the expectation method itself
                 try:
-                    return_obj = func(self, **all_args)
+                    return_obj = func(self, **expectation_args)
 
                 except Exception as err:
                     if catch_exceptions:
@@ -386,14 +387,15 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
             if element_count > 0:
                 missing_percent = float(missing_count) / element_count
+                exception_percent = float(exception_count) / element_count
 
                 if nonnull_count > 0:
-                    exception_percent = float(exception_count) / element_count
                     exception_percent_nonmissing = float(exception_count) / nonnull_count
+                else:
+                    exception_percent_nonmissing = None
 
             else:
                 missing_percent = None
-                nonmissing_count = None
                 exception_percent = None
                 exception_percent_nonmissing = None
 
@@ -421,7 +423,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         return return_obj
 
-    def calc_map_expectation_success(self, success_count, nonnull_count, exception_count, mostly):
+    def calc_map_expectation_success(self, success_count, nonnull_count, mostly):
         if nonnull_count > 0:
             percent_success = float(success_count)/nonnull_count
 
@@ -429,7 +431,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                 success = bool(percent_success >= mostly)
 
             else:
-                success = bool(exception_count == 0)
+                success = bool(nonnull_count-success_count == 0)
 
         else:
             success = True
@@ -913,13 +915,11 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         Args:
             column (str): The column name
-            vals (list): A list of categorical values.
             partition_object (dict): A dictionary containing partition (categorical values) and associated weights.
                 - partition (list): A list of values that correspond to the provided categorical values.
                 - weights (list): A list of weights. They should sum to one. The test will scale the expected frequencies by the weights and size of the new sample.
             p (float) = 0.05: The p-value threshold for the Chai Squareed test.\
                 For values below the specified threshold the expectation will return false, rejecting the null hypothesis that the distributions are the same.
-            suppress_exceptions: Only return a boolean success value, not a dictionary with other results.
 
         Returns:
             {
