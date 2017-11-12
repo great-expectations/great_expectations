@@ -47,16 +47,6 @@
     }
   },{
     "in": {
-      "column": "zz",
-      "parse_strings_as_datetimes": true
-    },
-    "out": {
-      "exception_list": [],
-      "exception_index_list": [],
-      "success": true
-    }
-  },{
-    "in": {
       "column": "a"
     },
     "out": {
