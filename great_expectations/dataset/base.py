@@ -327,7 +327,7 @@ class DataSet(object):
 
         return return_obj
 
-    def calc_map_expectation_success(self, success_count, nonnull_count, exception_count, mostly):
+    def calc_map_expectation_success(self, success_count, nonnull_count, mostly):
         if nonnull_count > 0:
             percent_success = float(success_count)/nonnull_count
 
@@ -335,7 +335,7 @@ class DataSet(object):
                 success = bool(percent_success >= mostly)
 
             else:
-                success = bool(exception_count == 0)
+                success = bool(nonnull_count-success_count == 0)
 
         else:
             success = True
