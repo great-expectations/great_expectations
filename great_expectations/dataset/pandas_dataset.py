@@ -54,7 +54,7 @@ class MetaPandasDataSet(DataSet):
             exception_index_list = list(series[(boolean_mapped_success_values==False)&(boolean_mapped_null_values==False)].index)
             exception_count = len(exception_list)
 
-            success, percent_success = self.calc_map_expectation_success(success_count, nonnull_count, exception_count, mostly)
+            success, percent_success = self.calc_map_expectation_success(success_count, nonnull_count, mostly)
 
             return_obj = self.format_column_map_output(
                 output_format, success,
@@ -93,9 +93,10 @@ class MetaPandasDataSet(DataSet):
             series = self[column]
             null_indexes = series.isnull()
 
+            element_count = int(len(series))
             nonnull_values = series[null_indexes == False]
             nonnull_count = (null_indexes == False).sum()
-            null_count = nonnull_count - len(series)
+            null_count = element_count - nonnull_count
 
             result_obj = func(self, nonnull_values, *args, **kwargs)
 
@@ -112,18 +113,17 @@ class MetaPandasDataSet(DataSet):
                 }
 
             elif (output_format == "SUMMARY"):
+                new_summary_obj = {
+                    "element_count": element_count,
+                    "missing_count": null_count,
+                    "missing_percent": null_count*1.0 / element_count if element_count > 0 else None
+                }
+
                 if "summary_obj" in result_obj and result_obj["summary_obj"] is not None:
-                    result_obj["summary_obj"].update({
-                        "element_count": nonnull_count,
-                        "missing_count": null_count,
-                        "missing_percent": nonnull_count / null_count if null_count > 0 else 0
-                    })
+                    result_obj["summary_obj"].update(new_summary_obj)
                 else:
-                    result_obj["summary_obj"] = {
-                        "element_count": nonnull_count,
-                        "missing_count": null_count,
-                        "missing_percent": nonnull_count / null_count if null_count > 0 else 0
-                    }
+                    result_obj["summary_obj"] = new_summary_obj
+
                 return_obj = {
                     "success" : bool(result_obj["success"]),
                     "true_value" : result_obj["true_value"],
@@ -238,7 +238,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         exception_count = len(exception_list)
 
         # Pass element_count instead of nonnull_count, because that's the right denominator for this expectation
-        success, percent_success = self.calc_map_expectation_success(success_count, element_count, exception_count, mostly)
+        success, percent_success = self.calc_map_expectation_success(success_count, element_count, mostly)
 
         return_obj = self.format_column_map_output(
             output_format, success,
@@ -271,7 +271,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         exception_count = len(exception_list)
 
         # Pass element_count instead of nonnull_count, because that's the right denominator for this expectation
-        success, percent_success = self.calc_map_expectation_success(success_count, element_count, exception_count, mostly)
+        success, percent_success = self.calc_map_expectation_success(success_count, element_count, mostly)
 
         return_obj = self.format_column_map_output(
             output_format, success,
@@ -317,7 +317,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
     @DocInherit
     @MetaPandasDataSet.column_map_expectation
-    def expect_column_values_to_be_in_type_list(self, column, type_list, target_datasource="numpy"):
+    def expect_column_values_to_be_in_type_list(self, column, type_list, target_datasource="numpy", mostly=None, output_format=None, include_config=False, catch_exceptions=None):
 
         python_avro_types = {
                 "null":type(None),

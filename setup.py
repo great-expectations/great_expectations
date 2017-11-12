@@ -3,8 +3,6 @@ try:
 except ImportError:
     from distutils.core import setup
 
-from pip.req import parse_requirements
-
 #Parse requirements.txt
 with open('requirements.txt') as f:
     required = f.read().splitlines()
