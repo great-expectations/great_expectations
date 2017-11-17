@@ -13,9 +13,7 @@ from scipy import stats
 
 from .base import DataSet
 from .util import DocInherit, \
-        is_valid_partition_object, is_valid_categorical_partition_object, is_valid_continuous_partition_object, \
-        remove_empty_intervals
-
+        is_valid_partition_object, is_valid_categorical_partition_object, is_valid_continuous_partition_object
 
 class MetaPandasDataSet(DataSet):
 
@@ -696,20 +694,29 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         if not is_valid_continuous_partition_object(partition_object):
             raise ValueError("Invalid continuous partition object.")
 
-        estimated_cdf = lambda x: np.interp(x, partition_object['partition'], np.append(np.array([0]), np.cumsum(partition_object['weights'])))
+        ## Because we allow paritions to cover the real line, but we have to decide how to allcate weight at the tails,
+        ## choose the actual zero and 1 points for the estimated_cdf from the data that are about to be evaluated.
+        evaluation_partition = copy.deepcopy(partition_object)
+        if evaluation_partition['partition'][0] == -np.inf:
+            if evaluation_partition['partition'][1]
+            evaluation_partition['partition'][0] = min(np.min(column), evaluation_partition['partition'][1])
+
+        if evaluation_partition['partition'][-1] == np.inf:
+            evaluation_partition['partition'][-1] = max(np.max(column), evaluation_partition['partition'][-2])
+
+        estimated_cdf = lambda x: np.interp(x, evaluation_partition['partition'], np.append(np.array([0]), np.cumsum(evaluation_partition['weights'])))
 
         if (bootstrap_samples == 0):
             #bootstrap_samples = min(1000, int (len(not_null_values) / len(partition_object['weights'])))
             bootstrap_samples = 1000
 
         results = [ stats.kstest(
-                        np.random.choice(column, size=len(partition_object['weights']), replace=True),
+                        np.random.choice(column, size=len(evaluation_partition['weights']), replace=True),
                         estimated_cdf)[1]
                     for k in range(bootstrap_samples)
                   ]
 
-        ## Using nanmean since having extended partitions from -inf to +inf
-        test_result = np.nanmean(results)
+        test_result = np.mean(results)
 
         result_obj = {
                 "success" : test_result > p,
@@ -727,21 +734,22 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         if not is_valid_partition_object(partition_object):
             raise ValueError("Invalid partition object.")
 
-        if not (isinstance(threshold, float) and (threshold >= 0)):
+        if not (isinstance(threshold, (int, float)) and (threshold >= 0)):
             raise ValueError("Threshold must be specified, greater than or equal to zero.")
 
         # If the data expected to be discrete, build a column
         if (len(partition_object['weights']) == len(partition_object['partition'])):
             observed_frequencies = column.value_counts()
             pk = observed_frequencies / (1.* len(column))
-            nonzero_weighted_partition = partition_object
         else:
-            nonzero_weighted_partition = copy.deepcopy(partition_object)
-            nonzero_weighted_partition = remove_empty_intervals(nonzero_weighted_partition)
-            hist, bin_edges = np.histogram(column, nonzero_weighted_partition['partition'], density=False)
+
+            ## NOTE:
+            # Any data that is equal to the upper bound of an original bin will be moved to the new bin because
+            # We need to either adjust the top bin up a tiny bit or do something else
+            hist, bin_edges = np.histogram(column, partition_object['partition'], density=False)
             pk = hist / (1.* len(column))
 
-        kl_divergence = stats.entropy(pk, nonzero_weighted_partition['weights'])
+        kl_divergence = stats.entropy(pk, partition_object['weights'])
 
         result_obj = {
                 "success": kl_divergence <= threshold,
