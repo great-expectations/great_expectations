@@ -403,6 +403,58 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
     @DocInherit
     @MetaPandasDataSet.column_map_expectation
+    def expect_column_values_to_be_increasing(self, column, strictly=None, parse_strings_as_datetimes=None, output_format=None, include_config=False, catch_exceptions=None):
+        if parse_strings_as_datetimes:
+            temp_column = column.map(parse)
+
+            col_diff = temp_column.diff()
+
+            #The first element is null, so it gets a bye and is always treated as True
+            col_diff[0] = pd.Timedelta(1)
+
+            if strictly:
+                return col_diff > pd.Timedelta(0)
+            else:
+                return col_diff >= pd.Timedelta(0)
+
+        else:
+            col_diff = column.diff()
+            #The first element is null, so it gets a bye and is always treated as True
+            col_diff[col_diff.isnull()] = 1
+        
+            if strictly:
+                return col_diff > 0
+            else:
+                return col_diff >= 0
+
+    @DocInherit
+    @MetaPandasDataSet.column_map_expectation
+    def expect_column_values_to_be_decreasing(self, column, strictly=None, parse_strings_as_datetimes=None, output_format=None, include_config=False, catch_exceptions=None):
+        if parse_strings_as_datetimes:
+            temp_column = column.map(parse)
+
+            col_diff = temp_column.diff()
+
+            #The first element is null, so it gets a bye and is always treated as True
+            col_diff[0] = pd.Timedelta(-1)
+
+            if strictly:
+                return col_diff < pd.Timedelta(0)
+            else:
+                return col_diff <= pd.Timedelta(0)
+
+        else:
+            col_diff = column.diff()
+            #The first element is null, so it gets a bye and is always treated as True
+            col_diff[col_diff.isnull()] = -1
+
+            if strictly:
+                return col_diff < 0
+            else:
+                return col_diff <= 0
+
+    @DocInherit
+    @MetaPandasDataSet.column_map_expectation
     def expect_column_value_lengths_to_be_between(self, column, min_value=None, max_value=None, mostly=None, output_format=None, include_config=False, catch_exceptions=None):
 
         if min_value is None and max_value is None:
@@ -528,11 +580,6 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
         return column.map(matches_json_schema)
 
-
-    # @DocInherit
-    # @MetaPandasDataSet.column_map_expectation
-    # def expect_column_values_to_match_json_schema(self, column, json_schema, output_format=None, include_config=False, catch_exceptions=None):
-    #     raise NotImplementedError("Under development")
 
     @DocInherit
     @MetaPandasDataSet.column_aggregate_expectation
