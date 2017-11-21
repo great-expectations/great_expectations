@@ -643,6 +643,43 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         """
         raise NotImplementedError
 
+    def expect_column_values_to_be_increasing(self, column, strictly=None, parse_strings_as_datetimes=None, output_format=None, include_config=False, catch_exceptions=None):
+        """Expect column values to be increasing. (Only works for numeric data.)
+        Args:
+            column (str): The column name.
+            strictly (Boolean or None): If True, values must be strictly greater than previous values
+            parse_strings_as_datetimes (boolean or None) : If True, all non-null column values to datetimes before making comparisons
+        Returns:
+            dict:
+                {
+                    "success": (bool) True if the column passed the expectation,
+                    "exceptions_list": (list) the values that did not pass the expectation
+                }
+        See Also:
+            expect_column_values_to_be_decreasing
+
+        """
+        raise NotImplementedError
+
+    def expect_column_values_to_be_decreasing(self, column, strictly=None, parse_strings_as_datetimes=None, output_format=None, include_config=False, catch_exceptions=None):
+        """Expect column values to be decreasing. (Only works for numeric data.)
+        Args:
+            column (str): The column name.
+            strictly (Boolean or None): If True, values must be strictly less than than previous values
+            parse_strings_as_datetimes (boolean or None) : If True, all non-null column values to datetimes before making comparisons
+        Returns:
+            dict:
+                {
+                    "success": (bool) True if the column passed the expectation,
+                    "exceptions_list": (list) the values that did not pass the expectation
+                }
+        See Also:
+            expect_column_values_to_be_increasing
+
+        """
+        raise NotImplementedError
+
+
     ##### String matching #####
 
     def expect_column_value_lengths_to_be_between(self, column, min_value=None, max_value=None, mostly=None, output_format=None, include_config=False, catch_exceptions=None):
