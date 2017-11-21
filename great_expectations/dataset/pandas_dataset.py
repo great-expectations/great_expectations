@@ -410,7 +410,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
             col_diff = temp_column.diff()
 
             #The first element is null, so it gets a bye and is always treated as True
-            col_diff[col_diff.isnull()] = pd.Timedelta(1)
+            col_diff[0] = pd.Timedelta(1)
 
             if strictly:
                 return col_diff > pd.Timedelta(0)
@@ -436,7 +436,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
             col_diff = temp_column.diff()
 
             #The first element is null, so it gets a bye and is always treated as True
-            col_diff[col_diff.isnull()] = pd.Timedelta(-1)
+            col_diff[0] = pd.Timedelta(-1)
 
             if strictly:
                 return col_diff < pd.Timedelta(0)
