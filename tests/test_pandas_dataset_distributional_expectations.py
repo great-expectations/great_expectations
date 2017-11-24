@@ -38,6 +38,23 @@ class TestDistributionalExpectations(unittest.TestCase):
             self.assertEqual(out['true_value'], t['out']['true_value'])
 
 
+    def test_expect_column_chisquare_test_p_value_greater_than_new_categorical_val(self):
+        categorical_list = (['A'] * 25) + (['B'] * 25) + (['C'] * 25) + (['D'] * 25)
+        df = ge.dataset.PandasDataSet({'categorical': categorical_list})
+
+        out = df.expect_column_chisquare_test_p_value_greater_than('categorical', self.test_partitions['categorical_fixed_alternate'])
+        self.assertEqual(out['success'], False)
+
+        out = df.expect_column_chisquare_test_p_value_greater_than('categorical', self.test_partitions['categorical_fixed_alternate'], tail_weight_holdout=0.25)
+        self.assertEqual(out['success'], True)
+
+    def test_expect_column_chisquare_test_p_value_greater_than_missing_categorical_val(self):
+        categorical_list = (['A'] * 61) + (['B'] * 39)
+        df = ge.dataset.PandasDataSet({'categorical': categorical_list})
+        out = df.expect_column_chisquare_test_p_value_greater_than('categorical', self.test_partitions['categorical_fixed'])
+        self.assertEqual(out['success'], False)
+
+
     def test_expect_column_kl_divergence_less_than_discrete(self):
         T = [
                 {
@@ -256,6 +273,27 @@ class TestDistributionalExpectations(unittest.TestCase):
                     print(out)
                 self.assertTrue(np.allclose(out['true_value'],t['out']['true_value']))
             self.assertEqual(out['success'],t['out']['success'])
+
+    def test_expect_column_kl_divergence_less_than_bad_parameters(self):
+        with self.assertRaises(ValueError):
+            self.D.expect_column_kl_divergence_less_than('norm_0_1', {}, threshold=0.1)
+        with self.assertRaises(ValueError):
+            self.D.expect_column_kl_divergence_less_than('norm_0_1', self.test_partitions['norm_0_1_auto'])
+        with self.assertRaises(ValueError):
+            self.D.expect_column_kl_divergence_less_than('norm_0_1', self.test_partitions['norm_0_1_auto'], threshold=0.1, tail_weight_holdout=2)
+        with self.assertRaises(ValueError):
+            self.D.expect_column_kl_divergence_less_than('categorical_fixed', self.test_partitions['categorical_fixed'], threshold=0.1, internal_weight_holdout=0.01)
+
+    def test_expect_column_bootstrapped_ks_test_p_value_greater_than_bad_parameters(self):
+        with self.assertRaises(ValueError):
+            self.D.expect_column_bootstrapped_ks_test_p_value_greater_than('norm_0_1', self.test_partitions['categorical_fixed'])
+        test_partition = ge.dataset.util.kde_partition_data(self.D['norm_0_1'], estimate_tails=False)
+        with self.assertRaises(ValueError):
+            self.D.expect_column_bootstrapped_ks_test_p_value_greater_than('norm_0_1', test_partition)
+
+    def test_expect_column_chisquare_test_p_value_greater_than_bad_parameters(self):
+        with self.assertRaises(ValueError):
+            self.D.expect_column_chisquare_test_p_value_greater_than('categorical_fixed', self.test_partitions['norm_0_1_auto'])
 
 if __name__ == "__main__":
     unittest.main()
