@@ -6,17 +6,25 @@ from scipy import stats
 import pandas as pd
 import warnings
 import sys
+import copy
 
 from functools import wraps
 
 class DotDict(dict):
     """dot.notation access to dictionary attributes"""
+
     def __getattr__(self, attr):
         return self.get(attr)
+
     __setattr__= dict.__setitem__
     __delattr__= dict.__delitem__
+
     def __dir__(self):
         return self.keys()
+
+    #Cargo-cultishly copied from: https://github.com/spindlelabs/pyes/commit/d2076b385c38d6d00cebfe0df7b0d1ba8df934bc
+    def __deepcopy__(self, memo):
+        return DotDict([(copy.deepcopy(k, memo), copy.deepcopy(v, memo)) for k, v in self.items()])
 
 
 class DocInherit(object):
