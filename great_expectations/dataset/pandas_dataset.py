@@ -54,7 +54,7 @@ class MetaPandasDataSet(DataSet):
             exception_index_list = list(series[(boolean_mapped_success_values==False)&(boolean_mapped_null_values==False)].index)
             exception_count = len(exception_list)
 
-            success, percent_success = self.calc_map_expectation_success(success_count, nonnull_count, exception_count, mostly)
+            success, percent_success = self.calc_map_expectation_success(success_count, nonnull_count, mostly)
 
             return_obj = self.format_column_map_output(
                 output_format, success,
@@ -93,9 +93,10 @@ class MetaPandasDataSet(DataSet):
             series = self[column]
             null_indexes = series.isnull()
 
+            element_count = int(len(series))
             nonnull_values = series[null_indexes == False]
             nonnull_count = (null_indexes == False).sum()
-            null_count = nonnull_count - len(series)
+            null_count = element_count - nonnull_count
 
             result_obj = func(self, nonnull_values, *args, **kwargs)
 
@@ -112,18 +113,17 @@ class MetaPandasDataSet(DataSet):
                 }
 
             elif (output_format == "SUMMARY"):
+                new_summary_obj = {
+                    "element_count": element_count,
+                    "missing_count": null_count,
+                    "missing_percent": null_count*1.0 / element_count if element_count > 0 else None
+                }
+
                 if "summary_obj" in result_obj and result_obj["summary_obj"] is not None:
-                    result_obj["summary_obj"].update({
-                        "element_count": nonnull_count,
-                        "missing_count": null_count,
-                        "missing_percent": nonnull_count / null_count if null_count > 0 else 0
-                    })
+                    result_obj["summary_obj"].update(new_summary_obj)
                 else:
-                    result_obj["summary_obj"] = {
-                        "element_count": nonnull_count,
-                        "missing_count": null_count,
-                        "missing_percent": nonnull_count / null_count if null_count > 0 else 0
-                    }
+                    result_obj["summary_obj"] = new_summary_obj
+
                 return_obj = {
                     "success" : bool(result_obj["success"]),
                     "true_value" : result_obj["true_value"],
@@ -245,7 +245,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         exception_count = len(exception_list)
 
         # Pass element_count instead of nonnull_count, because that's the right denominator for this expectation
-        success, percent_success = self.calc_map_expectation_success(success_count, element_count, exception_count, mostly)
+        success, percent_success = self.calc_map_expectation_success(success_count, element_count, mostly)
 
         return_obj = self.format_column_map_output(
             output_format, success,
@@ -280,7 +280,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         exception_count = len(exception_list)
 
         # Pass element_count instead of nonnull_count, because that's the right denominator for this expectation
-        success, percent_success = self.calc_map_expectation_success(success_count, element_count, exception_count, mostly)
+        success, percent_success = self.calc_map_expectation_success(success_count, element_count, mostly)
 
         return_obj = self.format_column_map_output(
             output_format, success,
@@ -423,6 +423,62 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
     @DocInherit
     @MetaPandasDataSet.column_map_expectation
+    def expect_column_values_to_be_increasing(self, column, strictly=None, parse_strings_as_datetimes=None,
+                                              mostly=None,
+                                              output_format=None, include_config=False, catch_exceptions=None, meta=None):
+        if parse_strings_as_datetimes:
+            temp_column = column.map(parse)
+
+            col_diff = temp_column.diff()
+
+            #The first element is null, so it gets a bye and is always treated as True
+            col_diff[0] = pd.Timedelta(1)
+
+            if strictly:
+                return col_diff > pd.Timedelta(0)
+            else:
+                return col_diff >= pd.Timedelta(0)
+
+        else:
+            col_diff = column.diff()
+            #The first element is null, so it gets a bye and is always treated as True
+            col_diff[col_diff.isnull()] = 1
+
+            if strictly:
+                return col_diff > 0
+            else:
+                return col_diff >= 0
+
+    @DocInherit
+    @MetaPandasDataSet.column_map_expectation
+    def expect_column_values_to_be_decreasing(self, column, strictly=None, parse_strings_as_datetimes=None,
+                                              mostly=None,
+                                              output_format=None, include_config=False, catch_exceptions=None, meta=None):
+        if parse_strings_as_datetimes:
+            temp_column = column.map(parse)
+
+            col_diff = temp_column.diff()
+
+            #The first element is null, so it gets a bye and is always treated as True
+            col_diff[0] = pd.Timedelta(-1)
+
+            if strictly:
+                return col_diff < pd.Timedelta(0)
+            else:
+                return col_diff <= pd.Timedelta(0)
+
+        else:
+            col_diff = column.diff()
+            #The first element is null, so it gets a bye and is always treated as True
+            col_diff[col_diff.isnull()] = -1
+
+            if strictly:
+                return col_diff < 0
+            else:
+                return col_diff <= 0
+
+    @DocInherit
+    @MetaPandasDataSet.column_map_expectation
     def expect_column_value_lengths_to_be_between(self, column, min_value=None, max_value=None,
                                                   mostly=None,
                                                   output_format=None, include_config=False, catch_exceptions=None, meta=None):
@@ -461,28 +517,34 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
     @DocInherit
     @MetaPandasDataSet.column_map_expectation
-    def expect_column_values_to_match_regex(self, column, regex, mostly=None, output_format=None, include_config=False, catch_exceptions=None):
+    def expect_column_values_to_match_regex(self, column, regex,
+                                            mostly=None,
+                                            output_format=None, include_config=False, catch_exceptions=None, meta=None):
         return column.map(
             lambda x: re.findall(regex, str(x)) != []
         )
 
     @DocInherit
     @MetaPandasDataSet.column_map_expectation
-    def expect_column_values_to_not_match_regex(self, column, regex, mostly=None, output_format=None, include_config=False, catch_exceptions=None):
+    def expect_column_values_to_not_match_regex(self, column, regex,
+                                                mostly=None,
+                                                output_format=None, include_config=False, catch_exceptions=None, meta=None):
         return column.map(lambda x: re.findall(regex, str(x)) == [])
 
     @DocInherit
     @MetaPandasDataSet.column_map_expectation
-    def expect_column_values_to_match_regex_list(self, column, regex_list, match_on="any", mostly=None, output_format=None, include_config=False, catch_exceptions=None):
+    def expect_column_values_to_match_regex_list(self, column, regex_list, match_on="any",
+                                                 mostly=None,
+                                                 output_format=None, include_config=False, catch_exceptions=None, meta=None):
 
         if match_on=="any":
-        
+
             def match_in_list(val):
                 if any(re.match(regex, str(val)) for regex in regex_list):
                     return True
                 else:
                     return False
-        
+
         elif match_on=="all":
 
             def match_in_list(val):
@@ -561,11 +623,6 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
         return column.map(matches_json_schema)
 
-
-    # @DocInherit
-    # @MetaPandasDataSet.column_map_expectation
-    # def expect_column_values_to_match_json_schema(self, column, json_schema, output_format=None, include_config=False, catch_exceptions=None):
-    #     raise NotImplementedError("Under development")
 
     @DocInherit
     @MetaPandasDataSet.column_aggregate_expectation

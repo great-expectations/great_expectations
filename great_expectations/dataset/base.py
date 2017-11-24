@@ -6,6 +6,7 @@ import traceback
 
 import pandas as pd
 import numpy as np
+from collections import defaultdict
 
 from .util import DotDict, ensure_json_serializable
 
@@ -116,6 +117,12 @@ class DataSet(object):
                     else:
                         raise(err)
 
+                #Add a "success" object to the config
+                if output_format == "BOOLEAN_ONLY":
+                    expectation_config["success_on_last_run"] = return_obj
+                else:
+                    expectation_config["success_on_last_run"] = return_obj["success"]
+
                 #Append the expectation to the config.
                 self.append_expectation(expectation_config)
 
@@ -197,22 +204,111 @@ class DataSet(object):
 
         self.default_expectation_args[argument] = value
 
-    def get_expectations_config(self):
-        return self._expectations_config
+    def get_expectations_config(self,
+        discard_failed_expectations=True,
+        discard_output_format_kwargs=True,
+        discard_include_configs_kwargs=True,
+        discard_catch_exceptions_kwargs=True,
+        suppress_warnings=False
+    ):        
+        config = dict(self._expectations_config)
+        config = copy.deepcopy(config)
+        expectations = config["expectations"]
 
-    def save_expectations_config(self, filepath=None):
+        discards = defaultdict(int)
+
+        if discard_failed_expectations:
+            new_expectations = []
+
+            for expectation in expectations:
+                #Note: This is conservative logic.
+                #Instead of retaining expectations IFF success==True, it discard expectations IFF success==False.
+                #In cases where expectation["success"] is missing or None, expectations are *retained*.
+                #Such a case could occur if expectations were loaded from a config file and never run.
+                if "success_on_last_run" in expectation and expectation["success_on_last_run"] == False:
+                    discards["failed_expectations"] += 1
+                else:
+                    new_expectations.append(expectation)
+                    
+            expectations = new_expectations
+
+        for expectation in expectations:
+            if "success_on_last_run" in expectation:
+                del expectation["success_on_last_run"]
+
+            if discard_output_format_kwargs:
+                if "output_format" in expectation["kwargs"]:
+                    del expectation["kwargs"]["output_format"]
+                    discards["output_format"] += 1
+
+            if discard_include_configs_kwargs:
+                if "include_configs" in expectation["kwargs"]:
+                    del expectation["kwargs"]["include_configs"]
+                    discards["include_configs"] += 1
+
+            if discard_catch_exceptions_kwargs:
+                if "catch_exceptions" in expectation["kwargs"]:
+                    del expectation["kwargs"]["catch_exceptions"]
+                    discards["catch_exceptions"] += 1
+
+
+        if not suppress_warnings:
+            """
+WARNING: get_expectations_config discarded
+    12 failing expectations
+    44 output_format kwargs
+     0 include_config kwargs
+     1 catch_exceptions kwargs
+If you wish to change this behavior, please set discard_failed_expectations, discard_output_format_kwargs, discard_include_configs_kwargs, and discard_catch_exceptions_kwargs appropirately.
+            """
+            if any([discard_failed_expectations, discard_output_format_kwargs, discard_include_configs_kwargs, discard_catch_exceptions_kwargs]):
+                print ("WARNING: get_expectations_config discarded")
+                if discard_failed_expectations:
+                    print ("\t%d failing expectations" % discards["failed_expectations"])
+                if discard_output_format_kwargs:
+                    print ("\t%d output_format kwargs" % discards["output_format"])
+                if discard_include_configs_kwargs:
+                    print ("\t%d include_configs kwargs" % discards["include_configs"])
+                if discard_catch_exceptions_kwargs:
+                    print ("\t%d catch_exceptions kwargs" % discards["catch_exceptions"])
+                print ("If you wish to change this behavior, please set discard_failed_expectations, discard_output_format_kwargs, discard_include_configs_kwargs, and discard_catch_exceptions_kwargs appropirately.")
+                    
+        config["expectations"] = expectations
+        return config
+
+    def save_expectations_config(
+        self,
+        filepath=None,
+        discard_failed_expectations=True,
+        discard_output_format_kwargs=True,
+        discard_include_configs_kwargs=True,
+        discard_catch_exceptions_kwargs=True,
+        suppress_warnings=False
+    ):
         if filepath==None:
-            #!!! Fetch the proper filepath from the project config
+            #FIXME: Fetch the proper filepath from the project config
             pass
 
-        expectation_config_str = json.dumps(self.get_expectations_config(), indent=2)
+        expectations_config = self.get_expectations_config(
+            discard_failed_expectations,
+            discard_output_format_kwargs,
+            discard_include_configs_kwargs,
+            discard_catch_exceptions_kwargs,
+            suppress_warnings
+        )
+        expectation_config_str = json.dumps(expectations_config, indent=2)
         open(filepath, 'w').write(expectation_config_str)
 
     def validate(self, expectations_config=None, catch_exceptions=True, output_format=None, include_config=None, only_return_failures=False):
         results = []
 
         if expectations_config is None:
-            expectations_config = self.get_expectations_config()
+            expectations_config = self.get_expectations_config(
+                discard_failed_expectations=False,
+                discard_output_format_kwargs=False,
+                discard_include_configs_kwargs=False,
+                discard_catch_exceptions_kwargs=False,
+            )
 
         for expectation in expectations_config['expectations']:
             expectation_method = getattr(self, expectation['expectation_type'])
@@ -301,14 +397,15 @@ class DataSet(object):
 
             if element_count > 0:
                 missing_percent = float(missing_count) / element_count
+                exception_percent = float(exception_count) / element_count
 
                 if nonnull_count > 0:
-                    exception_percent = float(exception_count) / element_count
                     exception_percent_nonmissing = float(exception_count) / nonnull_count
+                else:
+                    exception_percent_nonmissing = None
 
             else:
                 missing_percent = None
-                nonmissing_count = None
                 exception_percent = None
                 exception_percent_nonmissing = None
 
@@ -336,7 +433,7 @@ class DataSet(object):
 
         return return_obj
 
-    def calc_map_expectation_success(self, success_count, nonnull_count, exception_count, mostly):
+    def calc_map_expectation_success(self, success_count, nonnull_count, mostly):
         if nonnull_count > 0:
             percent_success = float(success_count)/nonnull_count
 
@@ -344,7 +441,7 @@ class DataSet(object):
                 success = bool(percent_success >= mostly)
 
             else:
-                success = bool(exception_count == 0)
+                success = bool(nonnull_count-success_count == 0)
 
         else:
             success = True
@@ -574,6 +671,47 @@ class DataSet(object):
 
         """
         raise NotImplementedError
+
+    def expect_column_values_to_be_increasing(self, column, strictly=None, parse_strings_as_datetimes=None,
+                                              mostly=None,
+                                              output_format=None, include_config=False, catch_exceptions=None, meta=None):
+        """Expect column values to be increasing. (Only works for numeric data.)
+        Args:
+            column (str): The column name.
+            strictly (Boolean or None): If True, values must be strictly greater than previous values
+            parse_strings_as_datetimes (boolean or None) : If True, all non-null column values to datetimes before making comparisons
+        Returns:
+            dict:
+                {
+                    "success": (bool) True if the column passed the expectation,
+                    "exceptions_list": (list) the values that did not pass the expectation
+                }
+        See Also:
+            expect_column_values_to_be_decreasing
+
+        """
+        raise NotImplementedError
+
+    def expect_column_values_to_be_decreasing(self, column, strictly=None, parse_strings_as_datetimes=None,
+                                              mostly=None,
+                                              output_format=None, include_config=False, catch_exceptions=None, meta=None):
+        """Expect column values to be decreasing. (Only works for numeric data.)
+        Args:
+            column (str): The column name.
+            strictly (Boolean or None): If True, values must be strictly less than than previous values
+            parse_strings_as_datetimes (boolean or None) : If True, all non-null column values to datetimes before making comparisons
+        Returns:
+            dict:
+                {
+                    "success": (bool) True if the column passed the expectation,
+                    "exceptions_list": (list) the values that did not pass the expectation
+                }
+        See Also:
+            expect_column_values_to_be_increasing
+
+        """
+        raise NotImplementedError
+
 
     ##### String matching #####
 
@@ -881,13 +1019,11 @@ class DataSet(object):
 
         Args:
             column (str): The column name
-            vals (list): A list of categorical values.
             partition_object (dict): A dictionary containing partition (categorical values) and associated weights.
                 - partition (list): A list of values that correspond to the provided categorical values.
                 - weights (list): A list of weights. They should sum to one. The test will scale the expected frequencies by the weights and size of the new sample.
             p (float) = 0.05: The p-value threshold for the Chai Squareed test.\
                 For values below the specified threshold the expectation will return false, rejecting the null hypothesis that the distributions are the same.
-            suppress_exceptions: Only return a boolean success value, not a dictionary with other results.
 
         Returns:
             {
