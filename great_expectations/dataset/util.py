@@ -124,15 +124,14 @@ def ensure_json_serializable(test_dict):
     return test_dict
 
 def is_valid_partition_object(partition_object):
-    """Convenience method for determing whether a given partition object is a valid weighted partition of the real number line.
+    """Convenience method for determining whether a given partition object is a valid weighted partition of the real number line.
     """
     if (partition_object is None) or ("partition" not in partition_object) or ("weights" not in partition_object):
         return False
     if (len(partition_object['partition']) != (len(partition_object['weights']) + 1)):
         if (len(partition_object['partition']) != len(partition_object['weights'])):
             return False
-    # TODO: Evaluate desired tolerance for weights
-    if (abs(np.sum(partition_object['weights']) - 1) > 1e-4):
+    if not np.allclose(np.sum(partition_object['weights']), 1):
         return False
     return True
 
@@ -141,8 +140,7 @@ def is_valid_categorical_partition_object(partition_object):
 
 def is_valid_continuous_partition_object(partition_object):
     if is_valid_partition_object(partition_object) and (len(partition_object['partition']) == (len(partition_object['weights']) + 1)):
-        if partition_object['partition'][0] == -np.inf and partition_object['partition'][-1] == np.inf:
-            return True
+        return True
     return False
 
 
@@ -158,20 +156,18 @@ def categorical_partition_data(data):
             }
     """
     s = pd.Series(data).value_counts()
-    weights = s.values / (1. * len(data))
+    weights = s.values / len(data)
     return {
         "partition": s.index.tolist(),
-        "weights":  weights.tolist()
+        "weights":  weights
     }
 
-def kde_partition_data(data, internal_weight_holdout=1e-5, tail_weight_holdout=1e-5):
+
+def kde_partition_data(data, estimate_tails=True):
     """Convenience method for building a partition and weights using a gaussian Kernel Density Estimate and default bandwidth.
 
-    Note that unlike continuous_partition_data, kde_smooth_data defaults to holding out internal weight.
-
     :param data (list-like): The data from which to construct the estimate
-    :param internal_weight_holdout: the amount of weight to split uniformly and add to any partitions whose weight is zero in the source data
-    :param tail_weight_holdout: the amount of weight to split uniformly and add to the tails of the histogram (the area between -Infinity and the data's min value and between the data's max value and Infinity)
+    :param estimate_tails (bool): Whether to estimate the tails of the distribution to keep the partition object finite
     :return: A new partition_object:
         dict:
             {
@@ -179,35 +175,22 @@ def kde_partition_data(data, internal_weight_holdout=1e-5, tail_weight_holdout=1
                 "weights": (list) The densities of the bins implied by the partition.
             }
     """
-    if internal_weight_holdout < 0 or internal_weight_holdout > 1:
-        raise ValueError("Internal weight holdout must be between zero and one")
-
-    if tail_weight_holdout < 0 or tail_weight_holdout > 1:
-        raise ValueError("Tail weight holdout must be between zero and one")
-
     kde = stats.kde.gaussian_kde(data)
-    evaluation_partition = np.linspace(start = np.min(data) - (kde.covariance_factor() / 2),
-                            stop = np.max(data) + (kde.covariance_factor() / 2),
-                            num = np.floor(((np.max(data) - np.min(data)) / kde.covariance_factor()) + 1 ).astype(int))
+    evaluation_partition = np.linspace(start=np.min(data) - (kde.covariance_factor() / 2),
+                                       stop=np.max(data) + (kde.covariance_factor() / 2),
+                                       num=np.floor(((np.max(data) - np.min(data)) / kde.covariance_factor()) + 1 ).astype(int))
     cdf_vals = [kde.integrate_box_1d(-np.inf, x) for x in evaluation_partition]
     evaluation_weights = np.diff(cdf_vals)
 
-    # We need to account for weight outside the explicit partition at this point since we have smoothed.
-    # No longer use lower_bound and upper_bound because of extending the interval from -np.inf to np.inf
-    # lower_bound = np.min(data) - (1.5 * kde.covariance_factor())
-    # upper_bound = np.max(data) + (1.5 * kde.covariance_factor())
-    partition = [ -np.inf ] + evaluation_partition.tolist() + [ np.inf ]
-
-    if internal_weight_holdout > 0:
-        internal_zero_count = len(evaluation_weights) - np.count_nonzero(evaluation_weights)
-        weights = [(internal_weight_holdout / (1. * internal_zero_count)) if weight == 0
-                        else (weight * (1. - (internal_weight_holdout + tail_weight_holdout)))
-                        for weight in evaluation_weights.tolist()]
+    if estimate_tails:
+        partition = np.concatenate(([np.min(data) - (1.5 * kde.covariance_factor())],
+                                    evaluation_partition,
+                                    [np.max(data) + (1.5 * kde.covariance_factor())]))
     else:
-        weights = [(weight * (1. - (internal_weight_holdout + tail_weight_holdout)))
-                    for weight in evaluation_weights.tolist()]
+        partition = np.concatenate(([-np.inf], evaluation_partition, [np.inf]))
 
-    weights = [ (tail_weight_holdout / 2.) + cdf_vals[0] ] + weights + [1 - cdf_vals[-1] + (tail_weight_holdout / 2.)]
+
+    weights = np.concatenate(([cdf_vals[0]], evaluation_weights, [1 - cdf_vals[-1]]))
 
     return {
         "partition": partition,
@@ -220,14 +203,12 @@ def partition_data(data, bins='auto', n_bins=10):
     return continuous_partition_data(data, bins, n_bins)
 
 
-def continuous_partition_data(data, bins='auto', n_bins=10, internal_weight_holdout=0.0, tail_weight_holdout=1e-5):
+def continuous_partition_data(data, bins='auto', n_bins=10):
     """Convenience method for building a partition object on continuous data
 
     :param data (list-like): The data from which to construct the estimate.
     :param bins (string): One of 'uniform' (for uniformly spaced bins), 'ntile' (for percentile-spaced bins), or 'auto' (for automatically spaced bins)
     :param n_bins (int): Ignored if bins is auto.
-    :param internal_weight_holdout: the amount of weight to split uniformly and add to any partitions whose weight is zero in the source data
-    :param tail_weight_holdout: the amount of weight to split uniformly and add to the tails of the histogram (the area between -Infinity and the data's min value and between the data's max value and Infinity)
     :return: A new partition_object:
         dict:
             {
@@ -242,39 +223,9 @@ def continuous_partition_data(data, bins='auto', n_bins=10, internal_weight_hold
     elif bins != 'auto':
         raise ValueError("Invalid parameter for bins argument")
 
-    if internal_weight_holdout < 0 or internal_weight_holdout > 1:
-        raise ValueError("Internal weight holdout must be between zero and one")
-
-    if tail_weight_holdout < 0 or tail_weight_holdout > 1:
-        raise ValueError("Tail weight holdout must be between zero and one")
-
     hist, bin_edges = np.histogram(data, bins, density=False)
-
-    ## When np.histogram constructs its bins, it uses closed lower bounds and open upper bounds for all bins
-    ## EXCEPT the largest bin, which is closed for both its lower and upper bound.
-
-    ## Since we are about to add an additional bin to the top, we want to ensure that any values
-    ## EXACTLY equal to the max value in the dataset used to construct the bins are still in the second-to-largest bin
-
-    bin_edges[-1] = bin_edges[-1] + 1e-15
-    bin_edges = [ -np.inf ] + bin_edges.tolist() + [ np.inf ]
-
-    # Apply internal weight holdout to any zero-weight partitions, if applicable
-    data_size = 1. * len(data)
-
-    if internal_weight_holdout > 0:
-        internal_zero_count = len(hist) - np.count_nonzero(hist)
-        weights = [(internal_weight_holdout / (1. * internal_zero_count)) if count == 0
-                        else (count * (1. - (internal_weight_holdout + tail_weight_holdout))) / data_size
-                        for count in hist.tolist()]
-    else:
-        weights = [(count * (1. - (internal_weight_holdout + tail_weight_holdout))) / data_size
-                    for count in hist.tolist()]
-
-    # Apply tail weight holdout
-    weights = [ tail_weight_holdout / 2. ] + weights + [ tail_weight_holdout / 2. ]
 
     return {
         "partition": bin_edges,
-        "weights": weights
+        "weights": hist / len(data)
     }

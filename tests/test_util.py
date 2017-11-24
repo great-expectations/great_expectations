@@ -25,64 +25,51 @@ class TestUtilMethods(unittest.TestCase):
         self.assertNotEqual(D.x[0],D.z[0])
 
     def test_continuous_partition_data_error(self):
-        # Internal weight holdout
-        # tail_weight_holdout
-        self.assertTrue(False)
+        with self.assertRaises(ValueError):
+            test_partition = ge.dataset.util.continuous_partition_data(self.D['norm_0_1'], bins=-1)
+            self.assertFalse(ge.dataset.util.is_valid_continuous_partition_object(test_partition))
+            test_partition = ge.dataset.util.continuous_partition_data(self.D['norm_0_1'], n_bins=-1)
+            self.assertFalse(ge.dataset.util.is_valid_continuous_partition_object(test_partition))
 
     def test_partition_data_norm_0_1(self):
         test_partition = ge.dataset.util.continuous_partition_data(self.D.norm_0_1)
-        for key, val in self.test_partitions['norm_0_1_auto_tail_holdout'].items():
+        for key, val in self.test_partitions['norm_0_1_auto'].items():
             self.assertEqual(len(val), len(test_partition[key]))
-            for k in range(len(val)):
-                # NOTE ARBITRARY "CLOSE PARAMETER"
-                if val[k] == np.inf or val[k] == -np.inf:
-                    self.assertEqual(val[k], test_partition[key][k])
-                else:
-                    self.assertLess(abs(val[k] - test_partition[key][k]), 1e-8)
+            self.assertTrue(np.allclose(test_partition[key], val))
+
 
     def test_partition_data_bimodal(self):
         test_partition = ge.dataset.util.continuous_partition_data(self.D.bimodal)
-        for key, val in self.test_partitions['bimodal_auto_tail_holdout'].items():
+        for key, val in self.test_partitions['bimodal_auto'].items():
             self.assertEqual(len(val), len(test_partition[key]))
-            for k in range(len(val)):
-                # NOTE ARBITRARY "CLOSE PARAMETER"
-                if val[k] == np.inf or val[k] == -np.inf:
-                    self.assertEqual(val[k], test_partition[key][k])
-                else:
-                    self.assertLess(abs(val[k] - test_partition[key][k]), 1e-8)
+            self.assertTrue(np.allclose(test_partition[key], val))
+
 
     def test_kde_partition_data_norm_0_1(self):
         test_partition = ge.dataset.util.kde_partition_data(self.D.norm_0_1)
-        for key, val in self.test_partitions['norm_0_1_kde_both_holdout'].items():
+        for key, val in self.test_partitions['norm_0_1_kde'].items():
             self.assertEqual(len(val), len(test_partition[key]))
-            for k in range(len(val)):
-                # NOTE ARBITRARY "CLOSE PARAMETER"
-                if val[k] == np.inf or val[k] == -np.inf:
-                    self.assertEqual(val[k], test_partition[key][k])
-                else:
-                    self.assertLess(abs(val[k] - test_partition[key][k]), 1e-8)
+            self.assertTrue(np.allclose(test_partition[key], val))
+
 
     def test_kde_partition_data_bimodal(self):
-        test_partition = ge.dataset.util.kde_partition_data(self.D.bimodal, internal_weight_holdout=0.)
-        for key, val in self.test_partitions['bimodal_kde_tail_holdout'].items():
+        test_partition = ge.dataset.util.kde_partition_data(self.D.bimodal)
+        for key, val in self.test_partitions['bimodal_kde'].items():
             self.assertEqual(len(val), len(test_partition[key]))
-            for k in range(len(val)):
-                # NOTE ARBITRARY "CLOSE PARAMETER"
-                if val[k] == np.inf or val[k] == -np.inf:
-                    self.assertEqual(val[k], test_partition[key][k])
-                else:
-                    self.assertLess(abs(val[k] - test_partition[key][k]), 1e-8)
+            self.assertTrue(np.allclose(test_partition[key], val))
+
                     
     def test_categorical_data_fixed(self):
         test_partition = ge.dataset.util.categorical_partition_data(self.D.categorical_fixed)
         for k in self.test_partitions['categorical_fixed']['partition']:
+            # Iterate over each categorical value and check that the weights equal those computed originally.
             self.assertEqual(
                 self.test_partitions['categorical_fixed']['weights'][self.test_partitions['categorical_fixed']['partition'].index(k)],
                 test_partition['weights'][test_partition['partition'].index(k)])
 
     def test_is_valid_partition_object_simple(self):
         self.assertTrue(ge.dataset.util.is_valid_continuous_partition_object(ge.dataset.util.continuous_partition_data(self.D['norm_0_1'])))
-        self.assertTrue(ge.dataset.util.is_valid_continuous_partition_object(ge.dataset.util.continuous_partition_data(self.D['bimodal'],internal_weight_holdout=0., tail_weight_holdout=0.)))
+        self.assertTrue(ge.dataset.util.is_valid_continuous_partition_object(ge.dataset.util.continuous_partition_data(self.D['bimodal'])))
         self.assertTrue(ge.dataset.util.is_valid_continuous_partition_object(ge.dataset.util.continuous_partition_data(self.D['norm_0_1'], bins='auto')))
         self.assertTrue(ge.dataset.util.is_valid_continuous_partition_object(ge.dataset.util.continuous_partition_data(self.D['norm_0_1'], bins='uniform', n_bins=10)))
 
