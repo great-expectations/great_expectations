@@ -1,9 +1,11 @@
 # Utility methods for dealing with DataSet objects
 
+from __future__ import division
 import numpy as np
 from scipy import stats
 import pandas as pd
 import warnings
+import sys
 
 from functools import wraps
 
@@ -81,8 +83,13 @@ class DocInherit(object):
 
 
 def ensure_json_serializable(test_dict):
+    """
+    Helper function to convert a dict object to one that is serializable
+
+    :param test_dict: the dictionary to attempt to convert to be serializable to json.
+    :return: None. test_dict is converted in place
+    """
     # Validate that all aruguments are of approved types, coerce if it's easy, else exception
-    # TODO: ensure in-place iteration like this is okay
     for key in test_dict:
         if isinstance(test_dict[key], (list, tuple, str, int, float, bool)):
             # No problem to encode json
@@ -92,8 +99,14 @@ def ensure_json_serializable(test_dict):
             continue
 
         elif isinstance(test_dict[key], (np.ndarray, pd.Index)):
-            #TODO: Evaluate risk of precision loss in this call and weigh options for performance
-            test_dict[key] = test_dict[key].tolist()
+            #test_dict[key] = test_dict[key].tolist()
+            ## If we have an array or index, convert it first to a list--causing coercion to float--and then round
+            ## to the number of digits for which the string representation will equal the float representation
+            test_dict[key] = map(
+                lambda x: round(x, sys.float_info.dig),
+                test_dict[key].tolist()
+            )
+
 
         elif isinstance(test_dict[key], dict):
             test_dict[key] = ensure_json_serializable(test_dict[key])
