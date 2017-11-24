@@ -80,7 +80,9 @@ Distributional functions
 Distributional function helpers
 --------------------------------------------------------------------------------
 
-* :func:`partition_data <great_expectations.dataset.util.partition_data>`
+* :func:`continuous_partition_data <great_expectations.dataset.util.partition_data>`
 * :func:`categorical_partition_data <great_expectations.dataset.util.categorical_partition_data>`
-* :func:`kde_smooth_data <great_expectations.dataset.util.kde_smooth_data>`
+* :func:`kde_partition_data <great_expectations.dataset.util.kde_smooth_data>`
 * :func:`is_valid_partition_object <great_expectations.dataset.util.is_valid_partition_object>`
+* :func:`is_valid_continuous_partition_object <great_expectations.dataset.util.is_valid_partition_object>`
+* :func:`is_valid_categorical_partition_object <great_expectations.dataset.util.is_valid_partition_object>`
