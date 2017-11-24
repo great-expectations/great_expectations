@@ -731,13 +731,13 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         na_counts = test_df.isnull().sum()
 
         ## Handle NaN: if we expected something that's not there, it's just not there.
-        test_df[column.name].fillna(0)
+        test_df[column.name] = test_df[column.name].fillna(0)
         ## Handle NaN: if something's there that was not expected, substitute the relevant value for tail_weight_holdout
         if na_counts['expected'] > 0:
             # Scale existing expected values
             test_df['expected'] = test_df['expected'] * (1 - tail_weight_holdout)
             # Fill NAs with holdout.
-            test_df['expected'].fillna(tail_weight_holdout / na_counts['expected'])
+            test_df['expected'] = test_df['expected'].fillna(len(column) * (tail_weight_holdout / na_counts['expected']))
 
         test_result = stats.chisquare(test_df[column.name], test_df['expected'])[1]
 
