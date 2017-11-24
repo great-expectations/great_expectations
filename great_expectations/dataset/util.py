@@ -110,10 +110,7 @@ def ensure_json_serializable(test_dict):
             #test_dict[key] = test_dict[key].tolist()
             ## If we have an array or index, convert it first to a list--causing coercion to float--and then round
             ## to the number of digits for which the string representation will equal the float representation
-            test_dict[key] = map(
-                lambda x: round(x, sys.float_info.dig),
-                test_dict[key].tolist()
-            )
+            test_dict[key] = [round(x, sys.float_info.dig) for x in test_dict[key].tolist()]
 
 
         elif isinstance(test_dict[key], dict):
