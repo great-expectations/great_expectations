@@ -103,3 +103,5 @@ ENV/
 
 # vim backup files
 *~
+
+.DS_Store
