@@ -1,18 +1,21 @@
-#!! This is a second copy of this file. Inelegant.
+# Utility methods for dealing with DataSet objects
 
+from __future__ import division
 import numpy as np
 from scipy import stats
 import pandas as pd
+import warnings
+import sys
 import copy
 
 from functools import wraps
 
 class DotDict(dict):
     """dot.notation access to dictionary attributes"""
-    
+
     def __getattr__(self, attr):
         return self.get(attr)
-    
+
     __setattr__= dict.__setitem__
     __delattr__= dict.__delitem__
 
@@ -88,10 +91,14 @@ class DocInherit(object):
 
 
 def ensure_json_serializable(test_dict):
+    """
+    Helper function to convert a dict object to one that is serializable
+
+    :param test_dict: the dictionary to attempt to convert to be serializable to json.
+    :return: None. test_dict is converted in place
+    """
     # Validate that all aruguments are of approved types, coerce if it's easy, else exception
-    # TODO: ensure in-place iteration like this is okay
     for key in test_dict:
-        ## TODO: Brittle if non python3 (unicode, long type?)
         if isinstance(test_dict[key], (list, tuple, str, int, float, bool)):
             # No problem to encode json
             continue
@@ -100,8 +107,11 @@ def ensure_json_serializable(test_dict):
             continue
 
         elif isinstance(test_dict[key], (np.ndarray, pd.Index)):
-            #TODO: Evaluate risk of precision loss in this call and weigh options for performance
-            test_dict[key] = test_dict[key].tolist()
+            #test_dict[key] = test_dict[key].tolist()
+            ## If we have an array or index, convert it first to a list--causing coercion to float--and then round
+            ## to the number of digits for which the string representation will equal the float representation
+            test_dict[key] = [round(x, sys.float_info.dig) for x in test_dict[key].tolist()]
+
 
         elif isinstance(test_dict[key], dict):
             test_dict[key] = ensure_json_serializable(test_dict[key])
@@ -119,17 +129,24 @@ def ensure_json_serializable(test_dict):
     return test_dict
 
 def is_valid_partition_object(partition_object):
-    """Convenience method for determing whether a given partition object is a valid weighted partition of the real number line.
+    """Convenience method for determining whether a given partition object is a valid weighted partition of the real number line.
     """
     if (partition_object is None) or ("partition" not in partition_object) or ("weights" not in partition_object):
         return False
     if (len(partition_object['partition']) != (len(partition_object['weights']) + 1)):
         if (len(partition_object['partition']) != len(partition_object['weights'])):
             return False
-    # TODO: Evaluate desired tolerance for weights
-    if (abs(np.sum(partition_object['weights']) - 1) > 1e-6):
+    if not np.allclose(np.sum(partition_object['weights']), 1):
         return False
     return True
+
+def is_valid_categorical_partition_object(partition_object):
+    return is_valid_partition_object(partition_object) and (len(partition_object['partition']) == len(partition_object['weights']))
+
+def is_valid_continuous_partition_object(partition_object):
+    if is_valid_partition_object(partition_object) and (len(partition_object['partition']) == (len(partition_object['weights']) + 1)):
+        return True
+    return False
 
 
 def categorical_partition_data(data):
@@ -144,48 +161,60 @@ def categorical_partition_data(data):
             }
     """
     s = pd.Series(data).value_counts()
+    weights = s.values / len(data)
     return {
-        "partition": s.index,
-        "weights":  s.values / (1. * len(data))
+        "partition": s.index.tolist(),
+        "weights":  weights
     }
 
-def kde_smooth_data(data):
+
+def kde_partition_data(data, estimate_tails=True):
     """Convenience method for building a partition and weights using a gaussian Kernel Density Estimate and default bandwidth.
-    Args:
-        data (list-like): The data from which to construct the estimate.
-    Returns:
+
+    :param data (list-like): The data from which to construct the estimate
+    :param estimate_tails (bool): Whether to estimate the tails of the distribution to keep the partition object finite
+    :return: A new partition_object:
         dict:
             {
-                "partition": (list) The edges of the partial partition of reals implied by the data and covariance_factor,
+                "partition": (list) The endpoints of the partial partition of reals,
                 "weights": (list) The densities of the bins implied by the partition.
             }
     """
     kde = stats.kde.gaussian_kde(data)
-    evaluation_partition = np.linspace(start = np.min(data) - (kde.covariance_factor() / 2),
-                            stop = np.max(data) + (kde.covariance_factor() / 2),
-                            num = np.floor(((np.max(data) - np.min(data)) / kde.covariance_factor()) + 1 ).astype(int))
+    evaluation_partition = np.linspace(start=np.min(data) - (kde.covariance_factor() / 2),
+                                       stop=np.max(data) + (kde.covariance_factor() / 2),
+                                       num=np.floor(((np.max(data) - np.min(data)) / kde.covariance_factor()) + 1 ).astype(int))
     cdf_vals = [kde.integrate_box_1d(-np.inf, x) for x in evaluation_partition]
     evaluation_weights = np.diff(cdf_vals)
-    #evaluation_weights = [cdf_vals[k+1] - cdf_vals[k] for k in range(len(evaluation_partition)-1)]
 
-    # We need to account for weight outside the explicit partition at this point since we have smoothed.
-    # Following is basically a crude rule of thumb for what should be -inf and inf as real endpoints.
-    lower_bound = np.min(data) - (1.5 * kde.covariance_factor())
-    upper_bound = np.max(data) + (1.5 * kde.covariance_factor())
-    partition = [ lower_bound ] + evaluation_partition.tolist() + [ upper_bound ]
-    weights = [ cdf_vals[0] ] + evaluation_weights.tolist() + [1 - cdf_vals[-1]]
+    if estimate_tails:
+        partition = np.concatenate(([np.min(data) - (1.5 * kde.covariance_factor())],
+                                    evaluation_partition,
+                                    [np.max(data) + (1.5 * kde.covariance_factor())]))
+    else:
+        partition = np.concatenate(([-np.inf], evaluation_partition, [np.inf]))
+
+
+    weights = np.concatenate(([cdf_vals[0]], evaluation_weights, [1 - cdf_vals[-1]]))
+
     return {
         "partition": partition,
         "weights": weights
     }
 
 def partition_data(data, bins='auto', n_bins=10):
-    """Convenience method for building a partition and weights using simple options.
-    Args:
-        data (list-like): The data from which to construct the estimate.
-        bins (string): One of 'uniform' (for uniformly spaced bins), 'ntile' (for percentile-spaced bins), or 'auto' (for automatically spaced bins)
-        n_bins (int): Ignored if bins is auto.
-    Returns:
+    warnings.warn("partition_data is deprecated and will be removed. Use either continuous_partition_data or \
+                    categorical_partition_data instead.", DeprecationWarning)
+    return continuous_partition_data(data, bins, n_bins)
+
+
+def continuous_partition_data(data, bins='auto', n_bins=10):
+    """Convenience method for building a partition object on continuous data
+
+    :param data (list-like): The data from which to construct the estimate.
+    :param bins (string): One of 'uniform' (for uniformly spaced bins), 'ntile' (for percentile-spaced bins), or 'auto' (for automatically spaced bins)
+    :param n_bins (int): Ignored if bins is auto.
+    :return: A new partition_object:
         dict:
             {
                 "partition": (list) The endpoints of the partial partition of reals,
@@ -201,27 +230,7 @@ def partition_data(data, bins='auto', n_bins=10):
 
     hist, bin_edges = np.histogram(data, bins, density=False)
 
-    #TODO: Evaluate numpy deprecation of np.histogram's normed option to ensure we're okay with the numerical issues here.
-    # Probably we're having bigger problems through serialization.
-
-    #TODO: Consider proper weighting if data includes null values
     return {
         "partition": bin_edges,
-        "weights": hist / (1.*len(data))
+        "weights": hist / len(data)
     }
-
-def remove_empty_intervals(partition_object):
-    partition_object['weights'] = np.array(partition_object['weights'])
-    partition_object['partition'] = np.array(partition_object['partition'])
-    for k in range(len(partition_object['weights'])):
-        if (partition_object['weights'][k] == 0):
-
-            #del(partition_object['weights'][k])
-            partition_object['weights'] = np.delete(partition_object['weights'],k)
-            if ( (k + 1) < len(partition_object['weights'])):
-                interval = partition_object['partition'][k+1] - partition_object['partition'][k]
-                partition_object['partition'][k+1] = partition_object['partition'][k+1] - (interval / 2)
-            #del(partition_object['partition'][k])
-            partition_object['partition'] =np.delete(partition_object['partition'],k)
-            return remove_empty_intervals(partition_object)
-    return partition_object
