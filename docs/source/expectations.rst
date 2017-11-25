@@ -100,7 +100,10 @@ Another example:
 
 This instant feedback helps you zero in on exceptions very quickly, taking a lot of the pain and guesswork out of early data exploration.
 
-Great Expectations's library of Expectations has been developed by a broad cross-section of data scientists and engineers. Check out the :ref:`glossary`; it covers all kinds of practical use cases:
+Capture More About Your Data
+------------------------------------------------------------------------------
+
+Build expectations as you conduct exploratory data analysis to ensure insights about data processes and pipelines remain part of your team's knowldege. Great Expectations's library of Expectations has been developed by a broad cross-section of data scientists and engineers. Check out the :ref:`glossary`; it covers all kinds of practical use cases:
 
 * Foreign key verification and row-based accounting for ETL
 * Form validation and regex pattern-matching for names, URLs, dates, addresses, etc.
@@ -108,6 +111,21 @@ Great Expectations's library of Expectations has been developed by a broad cross
 * Crosstabs
 * Distributions for statistical modeling. 
 * etc.
+
+You can also add notes or even structured metadta to expectations to describe the intent of an expectation or anything else relevant for understanding it:
+
+.. code-block:: bash
+    >> my_df.expect_column_values_to_match_regex(
+        "Name",
+        "^[A-Za-z\, \(\)\']+$",
+        meta_notes = "A simple experimental regex for name matching."
+    )
+
+    >> my_df.expect_column_values_to_match_regex(
+        "Name",
+        "^[A-Za-z\, \(\)\']+$",
+        meta = { "notes": "A simple experimental regex for name matching.", "source": "http://great-expectations.readthedocs.io/en/latest/glossary.html" })
+
 
 Saving Expectations
 ------------------------------------------------------------------------------
