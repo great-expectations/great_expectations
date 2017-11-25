@@ -18,6 +18,7 @@ Missing values, unique values, and types
 * :func:`expect_column_values_to_not_be_null <great_expectations.dataset.base.DataSet.expect_column_values_to_not_be_null>`
 * :func:`expect_column_values_to_be_null <great_expectations.dataset.base.DataSet.expect_column_values_to_be_null>`
 * :func:`expect_column_values_to_be_of_type <great_expectations.dataset.base.DataSet.expect_column_values_to_be_of_type>`
+* :func:`expect_column_values_to_be_in_type_list <great_expectations.dataset.base.DataSet.expect_column_values_to_be_in_type_list>`
 
 Sets and ranges
 --------------------------------------------------------------------------------
@@ -25,6 +26,9 @@ Sets and ranges
 * :func:`expect_column_values_to_be_in_set <great_expectations.dataset.base.DataSet.expect_column_values_to_be_in_set>`
 * :func:`expect_column_values_to_not_be_in_set <great_expectations.dataset.base.DataSet.expect_column_values_to_not_be_in_set>`
 * :func:`expect_column_values_to_be_between <great_expectations.dataset.base.DataSet.expect_column_values_to_be_between>`
+* :func:`expect_column_values_to_be_increasing <great_expectations.dataset.base.DataSet.expect_column_values_to_be_increasing>`
+* :func:`expect_column_values_to_be_decreasing <great_expectations.dataset.base.DataSet.expect_column_values_to_be_decreasing>`
+
 
 String matching
 --------------------------------------------------------------------------------
@@ -56,7 +60,7 @@ Datetime and JSON parsing
 
 * :func:`expect_column_values_to_match_strftime_format <great_expectations.dataset.base.DataSet.expect_column_values_to_match_strftime_format>`
 * :func:`expect_column_values_to_be_dateutil_parseable <great_expectations.dataset.base.DataSet.expect_column_values_to_be_dateutil_parseable>`
-* :func:`expect_column_values_to_be_valid_json <great_expectations.dataset.base.DataSet.expect_column_values_to_be_valid_json>`
+* :func:`expect_column_values_to_be_json_parseable <great_expectations.dataset.base.DataSet.expect_column_values_to_be_json_parseable>`
 * :func:`expect_column_values_to_match_json_schema <great_expectations.dataset.base.DataSet.expect_column_values_to_match_json_schema>`
 
 Aggregate functions
@@ -67,6 +71,8 @@ Aggregate functions
 * :func:`expect_column_stdev_to_be_between <great_expectations.dataset.base.DataSet.expect_column_stdev_to_be_between>`
 * :func:`expect_column_unique_value_count_to_be_between <great_expectations.dataset.base.DataSet.expect_column_unique_value_count_to_be_between>`
 * :func:`expect_column_proportion_of_unique_values_to_be_between <great_expectations.dataset.base.DataSet.expect_column_proportion_of_unique_values_to_be_between>`
+* :func:`expect_column_most_common_value_to_be <great_expectations.dataset.base.DataSet.expect_column_most_common_value_to_be>`
+* :func:`expect_column_most_common_value_to_be_in_set <great_expectations.dataset.base.DataSet.expect_column_most_common_value_to_be_in_set>`
 
 
 Distributional functions
@@ -80,7 +86,9 @@ Distributional functions
 Distributional function helpers
 --------------------------------------------------------------------------------
 
-* :func:`partition_data <great_expectations.dataset.util.partition_data>`
+* :func:`continuous_partition_data <great_expectations.dataset.util.partition_data>`
 * :func:`categorical_partition_data <great_expectations.dataset.util.categorical_partition_data>`
-* :func:`kde_smooth_data <great_expectations.dataset.util.kde_smooth_data>`
+* :func:`kde_partition_data <great_expectations.dataset.util.kde_smooth_data>`
 * :func:`is_valid_partition_object <great_expectations.dataset.util.is_valid_partition_object>`
+* :func:`is_valid_continuous_partition_object <great_expectations.dataset.util.is_valid_partition_object>`
+* :func:`is_valid_categorical_partition_object <great_expectations.dataset.util.is_valid_partition_object>`
