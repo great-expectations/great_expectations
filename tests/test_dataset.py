@@ -446,5 +446,41 @@ class TestDataset(unittest.TestCase):
             (False, 0.0)
         )
 
+    def test_test_expectation_function(self):
+        pass
+
+    def test_test_column_map_expectation_function(self):
+        D = ge.dataset.PandasDataSet({
+            'x' : [1,3,5,7,9],
+            'y' : [1,2,5,7,9],
+        })
+        def is_odd(x):
+            return x % 2 == 1
+
+        print D.test_column_map_expectation_function(is_odd, column='x', output_format="BOOLEAN_ONLY")
+        self.assertEqual(
+            D.test_column_map_expectation_function(is_odd, column='x', output_format="BOOLEAN_ONLY"),
+            True
+        )
+        self.assertEqual(
+            D.test_column_map_expectation_function(is_odd, column='x', output_format="BOOLEAN_ONLY", mostly=.7),
+            True
+        )
+
+        # self.assertEqual(
+        #     D.test_column_map_expectation_function(is_odd, column='x', output_format="SUMMARY"),
+        #     {
+        #         "expectation_type": "is_odd",
+        #         "kwargs" : {
+        #             "column": "x"
+        #         }
+        #     }
+        # )
+        
+
+    def test_test_column_aggregate_expectation_function(self):
+        pass
+
+
 if __name__ == "__main__":
     unittest.main()
