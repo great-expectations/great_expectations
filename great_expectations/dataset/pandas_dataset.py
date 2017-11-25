@@ -849,7 +849,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
             raise ValueError("tail_weight_holdout must be between zero and one.")
 
         if (not isinstance(internal_weight_holdout, (int, float))) or (internal_weight_holdout < 0) or (internal_weight_holdout > 1):
-            raise ValueError("tail_weight_holdout must be between zero and one.")
+            raise ValueError("internal_weight_holdout must be between zero and one.")
 
         evaluation_partition = {
             'partition': np.array(partition_object['partition']),
