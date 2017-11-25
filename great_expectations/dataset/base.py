@@ -127,7 +127,7 @@ class DataSet(object):
                 self.append_expectation(expectation_config)
 
                 if output_format != 'BOOLEAN_ONLY':
-                    
+
                     if include_config:
                         return_obj["expectation_type"] = expectation_config["expectation_type"]
                         return_obj["expectation_kwargs"] = copy.deepcopy(dict(expectation_config["kwargs"]))
@@ -210,7 +210,7 @@ class DataSet(object):
         discard_include_configs_kwargs=True,
         discard_catch_exceptions_kwargs=True,
         suppress_warnings=False
-    ):        
+    ):
         config = dict(self._expectations_config)
         config = copy.deepcopy(config)
         expectations = config["expectations"]
@@ -229,7 +229,7 @@ class DataSet(object):
                     discards["failed_expectations"] += 1
                 else:
                     new_expectations.append(expectation)
-                    
+
             expectations = new_expectations
 
         for expectation in expectations:
@@ -272,7 +272,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                 if discard_catch_exceptions_kwargs:
                     print ("\t%d catch_exceptions kwargs" % discards["catch_exceptions"])
                 print ("If you wish to change this behavior, please set discard_failed_expectations, discard_output_format_kwargs, discard_include_configs_kwargs, and discard_catch_exceptions_kwargs appropirately.")
-                    
+
         config["expectations"] = expectations
         return config
 
@@ -315,7 +315,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
             if output_format is not None:
                 expectation['kwargs'].update({"output_format": output_format})
-            
+
             if include_config is not None:
                 expectation['kwargs'].update({"include_config": include_config})
 
@@ -1012,18 +1012,17 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
 
     ### Distributional expectations
-    def expect_column_chisquare_test_p_value_greater_than(self, column, partition_object=None, p=0.05,
+    def expect_column_chisquare_test_p_value_greater_than(self, column, partition_object=None, p=0.05, tail_weight_holdout=0,
                                                           output_format=None, include_config=False, catch_exceptions=None, meta=None):
         """
         Expect the values in this column to match the distribution of the specified categorical vals and their expected_frequencies. \
 
         Args:
-            column (str): The column name
-            partition_object (dict): A dictionary containing partition (categorical values) and associated weights.
-                - partition (list): A list of values that correspond to the provided categorical values.
-                - weights (list): A list of weights. They should sum to one. The test will scale the expected frequencies by the weights and size of the new sample.
-            p (float) = 0.05: The p-value threshold for the Chai Squareed test.\
+            :param column (str): The column name
+            :param partition_object (dict): A dictionary containing partition (categorical values) and associated weights.
+            :param p (float) = 0.05: The p-value threshold for the Chi-Squared test.\
                 For values below the specified threshold the expectation will return false, rejecting the null hypothesis that the distributions are the same.
+            :param tail_weight_holdout: the amount of weight to split uniformly and add to the tails of the histogram (the area between -Infinity and the data's min value and between the data's max value and Infinity)
 
         Returns:
             {
@@ -1056,25 +1055,17 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         """
         raise NotImplementedError
 
-    def expect_column_kl_divergence_less_than(self, column, partition_object=None, threshold=None,
+    def expect_column_kl_divergence_less_than(self, column, partition_object=None, threshold=None, tail_weight_holdout=0, internal_weight_holdout=0,
                                               output_format=None, include_config=False, catch_exceptions=None, meta=None):
+        """Expect the values in this column to have lower Kulback-Leibler divergence (relative entropy) with the
+        distribution provided in partition_object of less than the provided threshold.
 
-        """
-        Expect the values in this column to have lower Kulback-Leibler divergence (relative entropy) with the distriution provided in partition_object of less than the provided threshold.
+        :param column: the column to which to apply the expectation
+        :param partition_object: the partition_object with which to compare the data in column
+        :param threshold: the threshold below which the test should be considered to have passed
+        :param internal_weight_holdout: the amount of weight to split uniformly among zero-weighted partition elements in a given partition.
+        :param tail_weight_holdout: the amount of weight to split uniformly and add to the tails of the histogram (the area between -Infinity and the data's min value and between the data's max value and Infinity)
 
-        Args:
-            column (str): The column name
-            partition_object (dict): A dictionary containing partition (bin edges) and associated weights.
-                - partition (list): A list of values that correspond to the endpoints of an implied partition on the real number line.
-                - weights (list): A list of weights. They should sum to one.
-            threshold (float) = 0.1: The threshold of relative entropy.\
-                For values above the specified threshold the expectation will return false.
-            suppress_exceptions: Only return a boolean success value, not a dictionary with other results.
-
-        Returns:
-            {
-                "success": (bool) True if the column passed the expectation,
-                "true_value": (float) the true value of the KL divergence
-            }
+        :return: result_object consistent with the specified output_format
         """
         raise NotImplementedError
