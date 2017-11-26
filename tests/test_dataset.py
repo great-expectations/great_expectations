@@ -4,6 +4,7 @@ import shutil
 import inspect
 
 import pandas as pd
+import great_expectations as ge
 
 import unittest
 
@@ -450,46 +451,30 @@ class TestDataset(unittest.TestCase):
         pass
 
     def test_test_column_map_expectation_function(self):
-        import great_expectations as ge
-        # reload(ge)
 
         D = ge.dataset.PandasDataSet({
             'x' : [1,3,5,7,9],
             'y' : [1,2,None,7,9],
         })
-        def is_odd(column, mostly=None, output_format=None, include_config=False, catch_exceptions=None):
-            frame = inspect.currentframe()
-            args, _, _, values = inspect.getargvalues(frame)
-            print 'function name "%s"' % inspect.getframeinfo(frame)[2]
-            for i in args:
-                print "    %s = %s" % (i, values[i])
-
-            print '^'*80
-            print column
+        def is_odd(self, column, mostly=None, output_format=None, include_config=False, catch_exceptions=None):
             return column % 2 == 1
 
-        print D.expect_column_to_exist('x')
-        print '-'*80
-        print D.test_column_map_expectation_function(is_odd, column='x')
+        self.assertEqual(
+            D.test_column_map_expectation_function(is_odd, column='x'),
+            {'summary_obj': {'exception_percent': 0.0, 'partial_exception_list': [], 'exception_percent_nonmissing': 0.0, 'exception_count': 0}, 'success': True}
+        )
         self.assertEqual(
             D.test_column_map_expectation_function(is_odd, column='x', output_format="BOOLEAN_ONLY"),
             True
         )
         self.assertEqual(
-            D.test_column_map_expectation_function(is_odd, column='x', output_format="BOOLEAN_ONLY", mostly=.7),
-            True
+            D.test_column_map_expectation_function(is_odd, column='y', output_format="BOOLEAN_ONLY"),
+            False
         )
-
-        # self.assertEqual(
-        #     D.test_column_map_expectation_function(is_odd, column='x', output_format="SUMMARY"),
-        #     {
-        #         "expectation_type": "is_odd",
-        #         "kwargs" : {
-        #             "column": "x"
-        #         }
-        #     }
-        # )
-        
+        self.assertEqual(
+            D.test_column_map_expectation_function(is_odd, column='y', output_format="BOOLEAN_ONLY", mostly=.7),
+            True
+        )        
 
     def test_test_column_aggregate_expectation_function(self):
         pass

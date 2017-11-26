@@ -445,34 +445,8 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         pass
 
     def test_column_map_expectation_function(self, function, **kwargs):
-        print 'A'*80
-        print function
-        print inspect.getargspec(function)
-
         new_function = self.column_map_expectation( function )
-        
-        # frame = inspect.currentframe()
-        # args, _, _, values = inspect.getargvalues(frame)
-        # print 'function name "%s"' % inspect.getframeinfo(frame)[2]
-        # for i in args:
-        #     print "    %s = %s" % (i, values[i])
-
-        print 'B'*80
-        print function
-        print inspect.getargspec(function)
-        
-        print 'C'*80
-        print new_function
-        print inspect.getargspec(new_function)
-        
-        print kwargs
-        return new_function(self, column='x')
-
-        # column = kwargs["column"]
-        # del kwargs["column"]
-        # return new_function(self, column=column, **kwargs)
-
-        # return self.column_map_expectation( function )(self, **kwargs)
+        return new_function(self, **kwargs)
 
     def test_column_aggregate_expectation_function(self, function, **kwargs):
         pass
