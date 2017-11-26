@@ -444,12 +444,13 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
     def test_expectation_function(self, function, **kwargs):
         pass
 
-    def test_column_map_expectation_function(self, function, **kwargs):
+    def test_column_map_expectation_function(self, function, *args, **kwargs):
         new_function = self.column_map_expectation( function )
-        return new_function(self, **kwargs)
+        return new_function(self, *args, **kwargs)
 
-    def test_column_aggregate_expectation_function(self, function, **kwargs):
-        pass
+    def test_column_aggregate_expectation_function(self, function, *args, **kwargs):
+        new_function = self.column_aggregate_expectation( function )
+        return new_function(self, *args, **kwargs)
 
     ##### Table shape expectations #####
 
