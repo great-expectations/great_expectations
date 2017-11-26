@@ -33,6 +33,10 @@ class MetaPandasDataSet(DataSet):
         Further, the column_map_expectation provides a unique set of output_format options and handles the optional "mostly" parameter.
         """
 
+        print 'D'*80
+        print func
+        print inspect.getargspec(func)
+
         @cls.expectation(inspect.getargspec(func)[0][1:])
         @wraps(func)
         def inner_wrapper(self, column, mostly=None, output_format=None, *args, **kwargs):
@@ -66,8 +70,17 @@ class MetaPandasDataSet(DataSet):
 
             return return_obj
 
+        print 'E'*80
+        print inner_wrapper
+        print inspect.getargspec(inner_wrapper)
+
         inner_wrapper.__name__ = func.__name__
         inner_wrapper.__doc__ = func.__doc__
+
+        print 'F'*80
+        print inner_wrapper
+        print inspect.getargspec(inner_wrapper)
+
         return inner_wrapper
 
 

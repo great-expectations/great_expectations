@@ -8,7 +8,7 @@ import pandas as pd
 import numpy as np
 from collections import defaultdict
 
-from .util import DotDict, ensure_json_serializable
+from .util import DotDict, ensure_json_serializable, DocInherit
 
 
 class DataSet(object):
@@ -438,6 +438,44 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             percent_success = None
 
         return success, percent_success
+
+    ##### Iterative testing for custom expectations #####
+
+    def test_expectation_function(self, function, **kwargs):
+        pass
+
+    def test_column_map_expectation_function(self, function, **kwargs):
+        print 'A'*80
+        print function
+        print inspect.getargspec(function)
+
+        new_function = self.column_map_expectation( function )
+        
+        # frame = inspect.currentframe()
+        # args, _, _, values = inspect.getargvalues(frame)
+        # print 'function name "%s"' % inspect.getframeinfo(frame)[2]
+        # for i in args:
+        #     print "    %s = %s" % (i, values[i])
+
+        print 'B'*80
+        print function
+        print inspect.getargspec(function)
+        
+        print 'C'*80
+        print new_function
+        print inspect.getargspec(new_function)
+        
+        print kwargs
+        return new_function(self, column='x')
+
+        # column = kwargs["column"]
+        # del kwargs["column"]
+        # return new_function(self, column=column, **kwargs)
+
+        # return self.column_map_expectation( function )(self, **kwargs)
+
+    def test_column_aggregate_expectation_function(self, function, **kwargs):
+        pass
 
     ##### Table shape expectations #####
 
