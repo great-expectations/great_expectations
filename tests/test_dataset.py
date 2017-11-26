@@ -511,6 +511,7 @@ class TestDataset(unittest.TestCase):
         with self.assertRaises(Exception) as context:
             my_df.remove_expectation("expect_column_to_exist", "x", {"column": "y"}, dry_run=True)
 
+        #FIXME: I don't understand why this test fails.
         # print context.exception
         # print 'Conflicting column names in remove_expectation' in context.exception
         # self.assertTrue('Conflicting column names in remove_expectation:' in context.exception)
@@ -536,6 +537,53 @@ class TestDataset(unittest.TestCase):
               }
             }]
         )
+
+        self.assertEqual(
+            len(my_df._expectations_config.expectations),
+            8
+        )
+
+        self.assertEqual(
+            my_df.remove_expectation("expect_column_to_exist", "x"),
+            {
+              "expectation_type": "expect_column_to_exist", 
+              "kwargs": {
+                "column": "x"
+              }
+            }
+        )
+        self.assertEqual(
+            len(my_df._expectations_config.expectations),
+            7
+        )
+
+        self.assertEqual(
+            my_df.remove_expectation(column="x", remove_multiple_matches=True),
+            [{
+              "expectation_type": "expect_column_values_to_be_of_type", 
+              "kwargs": {
+                "column": "x",
+                "type_": "int",
+                "target_datasource": "python",
+              }
+            },{
+              "expectation_type": "expect_column_values_to_be_increasing", 
+              "kwargs": {
+                "column": "x"
+              }
+            }]
+        )
+        self.assertEqual(
+            len(my_df._expectations_config.expectations),
+            5
+        )
+
+        my_df.remove_expectation(column="z", remove_multiple_matches=True),
+        self.assertEqual(
+            len(my_df._expectations_config.expectations),
+            2
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
