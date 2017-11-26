@@ -584,6 +584,23 @@ class TestDataset(unittest.TestCase):
             2
         )
 
+        self.assertEqual(
+            my_df.get_expectations_config(discard_failed_expectations=False),
+            {
+                'expectations': [
+                    {
+                        'expectation_type': 'expect_column_to_exist',
+                        'kwargs': {'column': 'y'}
+                    },
+                    {
+                        'expectation_type': 'expect_column_values_to_be_of_type',
+                        'kwargs': {'column': 'y', 'type_': 'int', 'target_datasource': 'python'}
+                    }
+                ],
+                'dataset_name': None
+            }
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
