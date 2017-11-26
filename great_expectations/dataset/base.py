@@ -255,15 +255,21 @@ class DataSet(object):
             if not remove_multiple_matches:
                 raise ValueError('Multiple expectations matched arguments. No expectations removed.')
             else:
-                return [
-                    self._copy_and_clean_up_expectation(
-                        self._expectations_config.expectations[i],
-                        discard_output_format_kwargs,
-                        discard_include_configs_kwargs,
-                        discard_catch_exceptions_kwargs,
+                rval = []
+                for i in match_indexes:
+                    rval.append(
+                        self._copy_and_clean_up_expectation(
+                            self._expectations_config.expectations[i],
+                            discard_output_format_kwargs,
+                            discard_include_configs_kwargs,
+                            discard_catch_exceptions_kwargs,
+                        )
                     )
-                    for i in match_indexes
-                ]
+
+                if not dry_run:
+                    self._expectations_config.expectations = [i for j, i in enumerate(self._expectations_config.expectations) if j not in match_indexes]
+
+                return rval
 
         else: #Exactly one match
             expectation = self._copy_and_clean_up_expectation(
@@ -272,6 +278,9 @@ class DataSet(object):
                 discard_include_configs_kwargs,
                 discard_catch_exceptions_kwargs,
             )
+
+            if not dry_run:
+                del self._expectations_config.expectations[match_indexes[0]]
 
             if remove_multiple_matches:
                 return [expectation]
