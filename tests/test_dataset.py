@@ -458,8 +458,13 @@ class TestDataset(unittest.TestCase):
         my_df.expect_column_values_to_be_increasing('x')
         my_df.expect_column_values_to_match_regex('z', 'ello')
 
+        with self.assertRaises(Exception) as context:
+            my_df.remove_expectation("expect_column_to_exist", "w", dry_run=True),
+
+        self.assertTrue('No matching expectation found.' in context.exception)
+
         self.assertEqual(
-            my_df.remove_expectation("expect_column_to_exist", "x", dry_run=True),
+            my_df.remove_expectation("expect_column_to_exist", "x", expectation_kwargs={}, dry_run=True),
             {
               "expectation_type": "expect_column_to_exist", 
               "kwargs": {
@@ -469,7 +474,7 @@ class TestDataset(unittest.TestCase):
         )
 
         self.assertEqual(
-            my_df.remove_expectation("expect_column_to_exist", {"column": "y"}, dry_run=True),
+            my_df.remove_expectation("expect_column_to_exist", expectation_kwargs={"column": "y"}, dry_run=True),
             {
               "expectation_type": "expect_column_to_exist", 
               "kwargs": {
@@ -484,7 +489,7 @@ class TestDataset(unittest.TestCase):
         self.assertTrue('Multiple expectations matched arguments. No expectations removed.' in context.exception)
 
         self.assertEqual(
-            my_df.remove_expectation("expect_column_to_exist", remove_multiple_expectations=True, dry_run=True),
+            my_df.remove_expectation("expect_column_to_exist", remove_multiple_matches=True, dry_run=True),
             [{
               "expectation_type": "expect_column_to_exist", 
               "kwargs": {
@@ -506,10 +511,12 @@ class TestDataset(unittest.TestCase):
         with self.assertRaises(Exception) as context:
             my_df.remove_expectation("expect_column_to_exist", "x", {"column": "y"}, dry_run=True)
 
-        self.assertTrue('Multiple expectations matched arguments. No expectations removed.' in context.exception)
+        # print context.exception
+        # print 'Conflicting column names in remove_expectation' in context.exception
+        # self.assertTrue('Conflicting column names in remove_expectation:' in context.exception)
 
         self.assertEqual(
-            my_df.remove_expectation(column="x", remove_multiple_expectations=True, dry_run=True),
+            my_df.remove_expectation(column="x", remove_multiple_matches=True, dry_run=True),
             [{
               "expectation_type": "expect_column_to_exist", 
               "kwargs": {
@@ -520,7 +527,7 @@ class TestDataset(unittest.TestCase):
               "kwargs": {
                 "column": "x",
                 "type_": "int",
-                "target_datasource": "python"
+                "target_datasource": "python",
               }
             },{
               "expectation_type": "expect_column_values_to_be_increasing", 
