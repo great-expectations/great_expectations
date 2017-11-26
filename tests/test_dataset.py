@@ -482,31 +482,28 @@ class TestDataset(unittest.TestCase):
             'y' : [1,2,None,7,9],
         })
         def expect_second_value_to_be(self, column, value, mostly=None, output_format=None, include_config=False, catch_exceptions=None):
-            print column
-            print column.ix[0]
-            print column.ix[1]
             return {
                 "success": column.ix[1] == value,
                 "true_value": column.ix[1],
                 "summary_obj": {}
             }
 
-        print D.test_column_aggregate_expectation_function(expect_second_value_to_be, column='x', value=2)
-        print D.test_column_aggregate_expectation_function(expect_second_value_to_be, column='y', value=2)
+        # print D.test_column_aggregate_expectation_function(expect_second_value_to_be, column='x', value=2)
+        # print D.test_column_aggregate_expectation_function(expect_second_value_to_be, column='y', value=2)
         self.assertEqual(
-            D.test_column_aggregate_expectation_function(expect_second_value_to_be, column='x'),
-            {'summary_obj': {'exception_percent': 0.0, 'partial_exception_list': [], 'exception_percent_nonmissing': 0.0, 'exception_count': 0}, 'success': True}
+            D.test_column_aggregate_expectation_function(expect_second_value_to_be, 'x', 2),
+            {'true_value': 3.0, 'success': False}
         )
         self.assertEqual(
-            D.test_column_aggregate_expectation_function(expect_second_value_to_be, 'x', 3, output_format="BOOLEAN_ONLY"),
-            True
+            D.test_column_aggregate_expectation_function(expect_second_value_to_be, column='x', value=3),
+            {'true_value': 3.0, 'success': True}
         )
         self.assertEqual(
-            D.test_column_aggregate_expectation_function(expect_second_value_to_be, 'y', 3, output_format="BOOLEAN_ONLY"),
+            D.test_column_aggregate_expectation_function(expect_second_value_to_be, 'y', value=3, output_format="BOOLEAN_ONLY"),
             False
         )
         self.assertEqual(
-            D.test_column_aggregate_expectation_function(expect_second_value_to_be, 'y', 2, output_format="BOOLEAN_ONLY", mostly=.7),
+            D.test_column_aggregate_expectation_function(expect_second_value_to_be, 'y', 2, output_format="BOOLEAN_ONLY"),
             True
         )        
 
