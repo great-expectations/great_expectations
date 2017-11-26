@@ -186,6 +186,9 @@ class DataSet(object):
 
         self._expectations_config.expectations.append(expectation_config)
 
+    def remove_expectation(self, expectation_type, column=None, expectation_kwargs={}, remove_multiple_matches=False, dry_run=False):
+        return NotImplementedError
+
     def get_default_expectation_arguments(self):
         return self.default_expectation_args
 

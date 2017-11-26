@@ -446,5 +446,104 @@ class TestDataset(unittest.TestCase):
             (False, 0.0)
         )
 
+    def test_remove_expectation(self):
+        my_df = ge.dataset.PandasDataSet({
+            'x' : [1,2,3,4,5,6,7,8,9,10],
+            'y' : [1,2,None,4,None,6,7,8,9,None],
+            'z' : ['cello', 'hello', 'jello', 'bellow', 'fellow', 'mellow', 'wellow', 'xello', 'yellow', 'zello'],
+        })
+        my_df.expect_column_values_to_be_of_type('x', 'int', 'python')
+        my_df.expect_column_values_to_be_of_type('y', 'int', 'python')
+        my_df.expect_column_values_to_be_of_type('z', 'int', 'python')
+        my_df.expect_column_values_to_match_regex('z', 'ello')
+
+
+        # {
+        #   "expectation_type": "expect_column_to_exist", 
+        #   "kwargs": {
+        #     "column": "y"
+        #   }
+        # }, 
+        # {
+        #   "expectation_type": "expect_column_to_exist", 
+        #   "kwargs": {
+        #     "column": "z"
+        #   }
+        # }, 
+        # {
+        #   "expectation_type": "expect_column_values_to_be_of_type", 
+        #   "kwargs": {
+        #     "column": "x", 
+        #     "type_": "int", 
+        #     "target_datasource": "python"
+        #   }
+        # }, 
+        # {
+        #   "expectation_type": "expect_column_values_to_be_of_type", 
+        #   "kwargs": {
+        #     "column": "y", 
+        #     "type_": "int", 
+        #     "target_datasource": "python"
+        #   }
+        # }, 
+        # {
+        #   "expectation_type": "expect_column_values_to_be_of_type", 
+        #   "kwargs": {
+        #     "column": "z", 
+        #     "type_": "int", 
+        #     "target_datasource": "python"
+        #   }
+        # }, 
+        # {
+        #   "expectation_type": "expect_column_values_to_match_regex", 
+        #   "kwargs": {
+        #     "column": "z", 
+        #     "regex": "ello"
+        #   }
+        # }
+
+        self.assertEqual(
+            my_df.remove_expectation("expect_column_to_exist", "x", dry_run=True),
+            {
+              "expectation_type": "expect_column_to_exist", 
+              "kwargs": {
+                "column": "x"
+              }
+            }
+        )
+
+        self.assertEqual(
+            my_df.remove_expectation("expect_column_to_exist", "x", dry_run=True),
+            {
+              "expectation_type": "expect_column_to_exist", 
+              "kwargs": {
+                "column": "x"
+              }
+            }
+        )
+        
+#        => Removes expect_column_to_exist where column="Unnamed:0" (a single expectation)
+
+        # my_df.remove_expectation("expect_column_to_exist", {"column": "Unnamed:0"})
+        # => Removes expect_column_to_exist where column="Unnamed:0" (a single expectation)
+
+        # my_df.remove_expectation("expect_column_to_exist", {"column": "Unnamed:0"})
+        # => Throws a warning: "multiple expectations matched arguments. No expectations removed."
+
+        # my_df.remove_expectation("expect_column_to_exist", remove_multiple_expectations=True)
+        # => Removes all expect_column_to_exist expectations
+
+        # my_df.remove_expectation("expect_column_to_exist", "my_other_column", {"column": "Unnamed:0"})
+        # => Raises an error 'Conflicting column names in remove_expectation: my_other_column and "Unnamed:0"'
+
+        # my_df.remove_expectation("expect_column_values_to_be_between", "my_column", {"mostly": .95})
+        # => Removes expect_column_values_to_be_between with column=my_column and mostly=.95 (a single expectation). If mostly!=.95 then this removes nothing.
+
+        # my_df.remove_expectation("expect_column_values_to_be_between", {"mostly": .95}, remove_multiple_expectations=True)
+
+        # print json.dumps(df.get_expectations_config(discard_failed_expectations=False), indent=2)
+        # assert 0
+
+
 if __name__ == "__main__":
     unittest.main()
