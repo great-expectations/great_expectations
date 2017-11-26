@@ -455,53 +455,9 @@ class TestDataset(unittest.TestCase):
         my_df.expect_column_values_to_be_of_type('x', 'int', 'python')
         my_df.expect_column_values_to_be_of_type('y', 'int', 'python')
         my_df.expect_column_values_to_be_of_type('z', 'int', 'python')
+        my_df.expect_column_values_to_be_increasing('x')
         my_df.expect_column_values_to_match_regex('z', 'ello')
 
-
-        # {
-        #   "expectation_type": "expect_column_to_exist", 
-        #   "kwargs": {
-        #     "column": "y"
-        #   }
-        # }, 
-        # {
-        #   "expectation_type": "expect_column_to_exist", 
-        #   "kwargs": {
-        #     "column": "z"
-        #   }
-        # }, 
-        # {
-        #   "expectation_type": "expect_column_values_to_be_of_type", 
-        #   "kwargs": {
-        #     "column": "x", 
-        #     "type_": "int", 
-        #     "target_datasource": "python"
-        #   }
-        # }, 
-        # {
-        #   "expectation_type": "expect_column_values_to_be_of_type", 
-        #   "kwargs": {
-        #     "column": "y", 
-        #     "type_": "int", 
-        #     "target_datasource": "python"
-        #   }
-        # }, 
-        # {
-        #   "expectation_type": "expect_column_values_to_be_of_type", 
-        #   "kwargs": {
-        #     "column": "z", 
-        #     "type_": "int", 
-        #     "target_datasource": "python"
-        #   }
-        # }, 
-        # {
-        #   "expectation_type": "expect_column_values_to_match_regex", 
-        #   "kwargs": {
-        #     "column": "z", 
-        #     "regex": "ello"
-        #   }
-        # }
-
         self.assertEqual(
             my_df.remove_expectation("expect_column_to_exist", "x", dry_run=True),
             {
@@ -513,37 +469,66 @@ class TestDataset(unittest.TestCase):
         )
 
         self.assertEqual(
-            my_df.remove_expectation("expect_column_to_exist", "x", dry_run=True),
+            my_df.remove_expectation("expect_column_to_exist", {"column": "y"}, dry_run=True),
             {
+              "expectation_type": "expect_column_to_exist", 
+              "kwargs": {
+                "column": "y"
+              }
+            }
+        )
+
+        with self.assertRaises(Exception) as context:
+            my_df.remove_expectation("expect_column_to_exist", dry_run=True)
+
+        self.assertTrue('Multiple expectations matched arguments. No expectations removed.' in context.exception)
+
+        self.assertEqual(
+            my_df.remove_expectation("expect_column_to_exist", remove_multiple_expectations=True, dry_run=True),
+            [{
               "expectation_type": "expect_column_to_exist", 
               "kwargs": {
                 "column": "x"
               }
-            }
+            },{
+              "expectation_type": "expect_column_to_exist", 
+              "kwargs": {
+                "column": "y"
+              }
+            },{
+              "expectation_type": "expect_column_to_exist", 
+              "kwargs": {
+                "column": "z"
+              }
+            }]
         )
         
-#        => Removes expect_column_to_exist where column="Unnamed:0" (a single expectation)
+        with self.assertRaises(Exception) as context:
+            my_df.remove_expectation("expect_column_to_exist", "x", {"column": "y"}, dry_run=True)
 
-        # my_df.remove_expectation("expect_column_to_exist", {"column": "Unnamed:0"})
-        # => Removes expect_column_to_exist where column="Unnamed:0" (a single expectation)
+        self.assertTrue('Multiple expectations matched arguments. No expectations removed.' in context.exception)
 
-        # my_df.remove_expectation("expect_column_to_exist", {"column": "Unnamed:0"})
-        # => Throws a warning: "multiple expectations matched arguments. No expectations removed."
-
-        # my_df.remove_expectation("expect_column_to_exist", remove_multiple_expectations=True)
-        # => Removes all expect_column_to_exist expectations
-
-        # my_df.remove_expectation("expect_column_to_exist", "my_other_column", {"column": "Unnamed:0"})
-        # => Raises an error 'Conflicting column names in remove_expectation: my_other_column and "Unnamed:0"'
-
-        # my_df.remove_expectation("expect_column_values_to_be_between", "my_column", {"mostly": .95})
-        # => Removes expect_column_values_to_be_between with column=my_column and mostly=.95 (a single expectation). If mostly!=.95 then this removes nothing.
-
-        # my_df.remove_expectation("expect_column_values_to_be_between", {"mostly": .95}, remove_multiple_expectations=True)
-
-        # print json.dumps(df.get_expectations_config(discard_failed_expectations=False), indent=2)
-        # assert 0
-
+        self.assertEqual(
+            my_df.remove_expectation(column="x", remove_multiple_expectations=True, dry_run=True),
+            [{
+              "expectation_type": "expect_column_to_exist", 
+              "kwargs": {
+                "column": "x"
+              }
+            },{
+              "expectation_type": "expect_column_values_to_be_of_type", 
+              "kwargs": {
+                "column": "x",
+                "type_": "int",
+                "target_datasource": "python"
+              }
+            },{
+              "expectation_type": "expect_column_values_to_be_increasing", 
+              "kwargs": {
+                "column": "x"
+              }
+            }]
+        )
 
 if __name__ == "__main__":
     unittest.main()
