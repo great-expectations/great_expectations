@@ -448,7 +448,28 @@ class TestDataset(unittest.TestCase):
         )
 
     def test_test_expectation_function(self):
-        pass
+        D = ge.dataset.PandasDataSet({
+            'x' : [1,3,5,7,9],
+            'y' : [1,2,None,7,9],
+        })
+        D2 = ge.dataset.PandasDataSet({
+            'x' : [1,3,5,6,9],
+            'y' : [1,2,None,6,9],
+        })
+        def expect_dataframe_to_contain_7(self):
+            return {
+                "success": (self==7).sum().sum() > 0
+            }
+        
+        self.assertEqual(
+            D.test_expectation_function(expect_dataframe_to_contain_7),
+            {'success': True}
+        )
+        self.assertEqual(
+            D2.test_expectation_function(expect_dataframe_to_contain_7),
+            {'success': False}
+        )
+
 
     def test_test_column_map_expectation_function(self):
 
@@ -488,8 +509,6 @@ class TestDataset(unittest.TestCase):
                 "summary_obj": {}
             }
 
-        # print D.test_column_aggregate_expectation_function(expect_second_value_to_be, column='x', value=2)
-        # print D.test_column_aggregate_expectation_function(expect_second_value_to_be, column='y', value=2)
         self.assertEqual(
             D.test_column_aggregate_expectation_function(expect_second_value_to_be, 'x', 2),
             {'true_value': 3.0, 'success': False}
