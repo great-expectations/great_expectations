@@ -186,8 +186,97 @@ class DataSet(object):
 
         self._expectations_config.expectations.append(expectation_config)
 
-    def remove_expectation(self, expectation_type, column=None, expectation_kwargs={}, remove_multiple_matches=False, dry_run=False):
-        return NotImplementedError
+    def _copy_and_clean_up_expectation(self,
+        expectation,
+        discard_output_format_kwargs=True,
+        discard_include_configs_kwargs=True,
+        discard_catch_exceptions_kwargs=True,
+    ):
+        new_expectation = copy.deepcopy(expectation)
+
+        if "success_on_last_run" in new_expectation:
+            del new_expectation["success_on_last_run"]
+
+        if discard_output_format_kwargs:
+            if "output_format" in new_expectation["kwargs"]:
+                del new_expectation["kwargs"]["output_format"]
+                # discards["output_format"] += 1
+
+        if discard_include_configs_kwargs:
+            if "include_configs" in new_expectation["kwargs"]:
+                del new_expectation["kwargs"]["include_configs"]
+                # discards["include_configs"] += 1
+
+        if discard_catch_exceptions_kwargs:
+            if "catch_exceptions" in new_expectation["kwargs"]:
+                del new_expectation["kwargs"]["catch_exceptions"]
+                # discards["catch_exceptions"] += 1
+
+        return new_expectation
+
+    def remove_expectation(self,
+        expectation_type=None,
+        column=None,
+        expectation_kwargs=None,
+        remove_multiple_matches=False,
+        dry_run=False,
+        discard_output_format_kwargs=True,
+        discard_include_configs_kwargs=True,
+        discard_catch_exceptions_kwargs=True,
+    ):
+        if expectation_kwargs == None:
+            expectation_kwargs = {}
+
+        if "column" in expectation_kwargs and column != None and column != expectation_kwargs["column"]:
+            raise ValueError("Conflicting column names in remove_expectation: %s and %s" % (column, expectation_kwargs["column"]))
+
+        if column != None:
+            expectation_kwargs["column"] = column
+
+        match_indexes = []
+        for i, exp in enumerate(self._expectations_config.expectations):
+            if expectation_type == None or (expectation_type == exp['expectation_type']):
+                # if column == None or ('column' not in exp['kwargs']) or (exp['kwargs']['column'] == column) or (exp['kwargs']['column']==:
+                match = True
+                
+                for k,v in expectation_kwargs.items():
+                    if k in exp['kwargs'] and exp['kwargs'][k] == v:
+                        continue
+                    else:
+                        match = False
+
+                if match:
+                    match_indexes.append(i)
+
+        if len(match_indexes) == 0:
+            raise ValueError('No matching expectation found.')
+
+        elif len(match_indexes) > 1:
+            if not remove_multiple_matches:
+                raise ValueError('Multiple expectations matched arguments. No expectations removed.')
+            else:
+                return [
+                    self._copy_and_clean_up_expectation(
+                        self._expectations_config.expectations[i],
+                        discard_output_format_kwargs,
+                        discard_include_configs_kwargs,
+                        discard_catch_exceptions_kwargs,
+                    )
+                    for i in match_indexes
+                ]
+
+        else: #Exactly one match
+            expectation = self._copy_and_clean_up_expectation(
+                self._expectations_config.expectations[match_indexes[0]],
+                discard_output_format_kwargs,
+                discard_include_configs_kwargs,
+                discard_catch_exceptions_kwargs,
+            )
+
+            if remove_multiple_matches:
+                return [expectation]
+            else:
+                return expectation
 
     def get_default_expectation_arguments(self):
         return self.default_expectation_args
@@ -226,6 +315,7 @@ class DataSet(object):
             expectations = new_expectations
 
         for expectation in expectations:
+            #FIXME: Factor this out into a new function. The logic is duplicated in remove_expectation, which calls _copy_and_clean_up_expectation
             if "success_on_last_run" in expectation:
                 del expectation["success_on_last_run"]
 
