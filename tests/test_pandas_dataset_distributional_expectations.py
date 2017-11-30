@@ -262,6 +262,32 @@ class TestDistributionalExpectations(unittest.TestCase):
                               "tail_weight_holdout": 0.01,
                               "internal_weight_holdout": 0.01},
                     'out':{'success':False, 'true_value': "NOTTESTED"}
+                },
+                {
+                    'args': ['bimodal'],
+                    'kwargs': {"partition_object": self.test_partitions['norm_0_1_uniform'],
+                               "threshold": 0.1,
+                               "tail_weight_holdout": 0.01,
+                               "internal_weight_holdout": 0.01,
+                               "output_format": "SUMMARY"},
+                    'out': {'success': False, 'true_value': "NOTTESTED",
+                            'summary_obj': {
+                                'observed_partition': {
+                                    'partition': [-2.54405827, -2.04850215, -1.55294603, -1.0573899, -0.56183378,
+                                                        -0.06627766, 0.42927846, 0.92483458, 1.4203907, 1.91594682,
+                                                        2.41150294],
+                                    'weights': [0., 0., 0.01, 0.04, 0.11, 0.08, 0.06, 0.15, 0.01,
+                                                      0.01, 0.01, 0.52]
+                                },
+                                'test_partition': {
+                                    'partition': [-2.54405827, -2.04850215, -1.55294603, -1.0573899, -0.56183378,
+                                                        -0.06627766, 0.42927846, 0.92483458, 1.4203907, 1.91594682,
+                                                        2.41150294],
+                                    'weights': [0.005, 0.0196, 0.01, 0.0882, 0.1764, 0.1764, 0.2058,
+                                                      0.147, 0.0784, 0.0784, 0.0098, 0.005]
+                                }
+                            }
+                    }
                 }
         ]
         for t in T:
@@ -272,6 +298,9 @@ class TestDistributionalExpectations(unittest.TestCase):
                     print(t)
                     print(out)
                 self.assertTrue(np.allclose(out['true_value'],t['out']['true_value']))
+            if 'output_format' in t['kwargs'] and t['kwargs']['output_format'] == 'SUMMARY':
+                self.assertTrue(np.allclose(out['summary_obj']['observed_partition']['partition'],t['out']['summary_obj']['observed_partition']['partition']))
+
             self.assertEqual(out['success'],t['out']['success'])
 
     def test_expect_column_kl_divergence_less_than_bad_parameters(self):
