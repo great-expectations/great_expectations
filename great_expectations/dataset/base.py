@@ -323,6 +323,19 @@ class DataSet(object):
         discard_catch_exceptions_kwargs=True,
         suppress_warnings=False
     ):        
+        """Returns _expectation_config as a JSON object, and perform some cleaning along the way.
+        Args:
+            discard_failed_expectations=True     : Only include expectations with success_on_last_run=True in the exported config.
+            discard_output_format_kwargs=True    : In returned expectation objects, suppress the `output_format` parameter.
+            discard_include_configs_kwargs=True  : In returned expectation objects, suppress the `include_configs` parameter.
+            discard_catch_exceptions_kwargs=True : In returned expectation objects, suppress the `catch_exceptions` parameter.
+        
+        Returns:
+            An expectation config.
+
+        Note:
+            get_expectations_config does not affect the underlying config at all. The returned config is a copy of _expectations_config, not the original object.
+        """
         config = dict(self._expectations_config)
         config = copy.deepcopy(config)
         expectations = config["expectations"]
