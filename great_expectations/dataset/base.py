@@ -442,14 +442,44 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
     ##### Iterative testing for custom expectations #####
 
     def test_expectation_function(self, function, *args, **kwargs):
+        """Test a generic expectation function
+        Args:
+            function (func): The function to be tested. (Must be a valid expectation function.)
+            *args          : Positional arguments to be passed the the function
+            **kwargs       : Keyword arguments to be passed the the function
+        
+        Returns:
+            A JSON-serializable expectation result object.
+        """
+
         new_function = self.expectation(inspect.getargspec(function)[0][1:])(function)
         return new_function(self, *args, **kwargs)
 
     def test_column_map_expectation_function(self, function, *args, **kwargs):
+        """Test a column map expectation function
+        Args:
+            function (func): The function to be tested. (Must be a valid expectation function.)
+            *args          : Positional arguments to be passed the the function
+            **kwargs       : Keyword arguments to be passed the the function
+        
+        Returns:
+            A JSON-serializable expectation result object.
+        """
+
         new_function = self.column_map_expectation( function )
         return new_function(self, *args, **kwargs)
 
     def test_column_aggregate_expectation_function(self, function, *args, **kwargs):
+        """Test a column aggregate expectation function
+        Args:
+            function (func): The function to be tested. (Must be a valid expectation function.)
+            *args          : Positional arguments to be passed the the function
+            **kwargs       : Keyword arguments to be passed the the function
+        
+        Returns:
+            A JSON-serializable expectation result object.
+        """
+
         new_function = self.column_aggregate_expectation( function )
         return new_function(self, *args, **kwargs)
 
