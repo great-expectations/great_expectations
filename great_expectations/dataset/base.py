@@ -450,6 +450,10 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         
         Returns:
             A JSON-serializable expectation result object.
+
+        Notes:
+            This function is a thin layer to allow quick testing of new expectation functions, without having to define custom classes, etc.
+            To use developed expectations from the command-line tool, you'll still need to define custom classes, etc.
         """
 
         new_function = self.expectation(inspect.getargspec(function)[0][1:])(function)
@@ -464,6 +468,10 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         
         Returns:
             A JSON-serializable expectation result object.
+
+        Notes:
+            This function is a thin layer to allow quick testing of new expectation functions, without having to define custom classes, etc.
+            To use developed expectations from the command-line tool, you'll still need to define custom classes, etc.
         """
 
         new_function = self.column_map_expectation( function )
@@ -478,6 +486,10 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         
         Returns:
             A JSON-serializable expectation result object.
+
+        Notes:
+            This function is a thin layer to allow quick testing of new expectation functions, without having to define custom classes, etc.
+            To use developed expectations from the command-line tool, you'll still need to define custom classes, etc.
         """
 
         new_function = self.column_aggregate_expectation( function )
