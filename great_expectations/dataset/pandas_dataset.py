@@ -770,7 +770,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
     @MetaPandasDataSet.column_aggregate_expectation
     def expect_column_chisquare_test_p_value_greater_than(self, column, partition_object=None, p=0.05, tail_weight_holdout=0,
                                                           output_format=None, include_config=False, catch_exceptions=None, meta=None):
-        if not is_valid_partition_object(partition_object):
+        if not is_valid_categorical_partition_object(partition_object):
             raise ValueError("Invalid partition object.")
 
         observed_frequencies = column.value_counts()
@@ -795,7 +795,16 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         result_obj = {
                 "success": test_result > p,
                 "true_value": test_result,
-                "summary_obj": {}
+                "summary_obj": {
+                    "observed_partition": {
+                        "partition": test_df.index.tolist(),
+                        "weights": test_df[column.name].tolist()
+                    },
+                    "test_partition": {
+                        "partition": test_df.index.tolist(),
+                        "weights": test_df['expected'].tolist()
+                    }
+                }
             }
 
         return result_obj
@@ -810,8 +819,10 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         if (partition_object['partition'][0] == -np.inf) or (partition_object['partition'][-1] == np.inf):
             raise ValueError("Partition endpoints must be finite.")
 
+        test_cdf = np.append(np.array([0]), np.cumsum(partition_object['weights']))
+
         def estimated_cdf(x):
-            return np.interp(x, partition_object['partition'], np.append(np.array([0]), np.cumsum(partition_object['weights'])))
+            return np.interp(x, partition_object['partition'], test_cdf)
 
         if (bootstrap_samples == 0):
             #bootstrap_samples = min(1000, int (len(not_null_values) / len(partition_object['weights'])))
@@ -828,7 +839,15 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
                 "success" : test_result > p,
                 "true_value": test_result,
                 "summary_obj": {
-                    "bootstrap_samples": bootstrap_samples
+                    "bootstrap_samples": bootstrap_samples,
+                    "observed_cdf": {
+                        "partition": partition_object['partition'],
+                        "cdf_vals": [estimated_cdf(x) for x in partition_object['partition']]
+                    },
+                    "test_cdf": {
+                        "partition": partition_object['partition'],
+                        "cdf_vals": np.append(np.array([0]), np.cumsum(partition_object['weights'])).tolist()
+                    }
                 }
             }
 
@@ -909,7 +928,16 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         result_obj = {
                 "success": kl_divergence <= threshold,
                 "true_value": kl_divergence,
-                "summary_obj": {}
+                "summary_obj": {
+                    "observed_partition": {
+                        "partition": evaluation_partition['partition'].tolist(),
+                        "weights": pk.tolist()
+                    },
+                    "test_partition": {
+                        "partition": evaluation_partition['partition'].tolist(),
+                        "weights": qk.tolist()
+                    }
+                }
             }
 
         return result_obj

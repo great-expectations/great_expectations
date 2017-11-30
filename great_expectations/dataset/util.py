@@ -128,20 +128,22 @@ def ensure_json_serializable(test_dict):
 
     return test_dict
 
+
 def is_valid_partition_object(partition_object):
     """Convenience method for determining whether a given partition object is a valid weighted partition of the real number line.
     """
     if (partition_object is None) or ("partition" not in partition_object) or ("weights" not in partition_object):
         return False
-    if (len(partition_object['partition']) != (len(partition_object['weights']) + 1)):
-        if (len(partition_object['partition']) != len(partition_object['weights'])):
-            return False
+    if len(partition_object['partition']) != (len(partition_object['weights']) + 1) and len(partition_object['partition']) != len(partition_object['weights']):
+        return False
     if not np.allclose(np.sum(partition_object['weights']), 1):
         return False
     return True
 
+
 def is_valid_categorical_partition_object(partition_object):
     return is_valid_partition_object(partition_object) and (len(partition_object['partition']) == len(partition_object['weights']))
+
 
 def is_valid_continuous_partition_object(partition_object):
     if is_valid_partition_object(partition_object) and (len(partition_object['partition']) == (len(partition_object['weights']) + 1)):
