@@ -811,7 +811,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
     @DocInherit
     @MetaPandasDataSet.column_aggregate_expectation
-    def expect_column_bootstrapped_ks_test_p_value_greater_than(self, column, partition_object=None, p=0.05, bootstrap_samples=0,
+    def expect_column_bootstrapped_ks_test_p_value_greater_than(self, column, partition_object=None, p=0.05, bootstrap_samples=0, bootstrap_sample_size=None,
                                                                 output_format=None, include_config=False, catch_exceptions=None, meta=None):
         if not is_valid_continuous_partition_object(partition_object):
             raise ValueError("Invalid continuous partition object.")
@@ -824,22 +824,31 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         def estimated_cdf(x):
             return np.interp(x, partition_object['partition'], test_cdf)
 
-        if (bootstrap_samples == 0):
-            #bootstrap_samples = min(1000, int (len(not_null_values) / len(partition_object['weights'])))
+        if bootstrap_samples == 0:
             bootstrap_samples = 1000
 
+        if bootstrap_sample_size == None:
+            ## Sampling too many (or not bootstrapping) will make the test too sensitive to the fact that we've
+            ## compressed via a partition.
+
+            ## Sampling too few elements will make the test insensitive to significant differences, especially
+            ## for nonoverlapping ranges.
+            bootstrap_sample_size = len(partition_object['weights']) * 2
+
         results = [stats.kstest(
-                        np.random.choice(column, size=len(partition_object['weights']), replace=True),
+                        np.random.choice(column, size=bootstrap_sample_size, replace=True),
                         estimated_cdf)[1]
                    for k in range(bootstrap_samples)]
 
-        test_result = np.mean(results)
+        # Ref: https://blogs.sas.com/content/iml/2011/11/02/how-to-compute-p-values-for-a-bootstrap-distribution.html
+        test_result = (1 + sum(x >= p for x in results)) / (bootstrap_samples + 1)
 
         result_obj = {
                 "success" : test_result > p,
                 "true_value": test_result,
                 "summary_obj": {
                     "bootstrap_samples": bootstrap_samples,
+                    "bootstrap_sample_size": bootstrap_sample_size,
                     "observed_cdf": {
                         "partition": partition_object['partition'],
                         "cdf_vals": [estimated_cdf(x) for x in partition_object['partition']]

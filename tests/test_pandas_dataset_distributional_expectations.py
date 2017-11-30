@@ -124,22 +124,22 @@ class TestDistributionalExpectations(unittest.TestCase):
                     'out':{'success':True, 'true_value': "RANDOMIZED"}
                 },
                 {
-                    'args': ['norm_10_1'],
+                    'args': ['norm_1_1'],
                     'kwargs':{'partition_object': self.test_partitions['norm_0_1_auto'], "p": 0.05},
                     'out':{'success':False, 'true_value': "RANDOMIZED"}
                 },
                 {
-                    'args': ['norm_10_1'],
+                    'args': ['norm_1_1'],
                     'kwargs':{'partition_object': self.test_partitions['norm_0_1_uniform'], "p": 0.05},
                     'out':{'success':False, 'true_value': "RANDOMIZED"}
                 },
                 {
-                    'args': ['norm_10_1'],
+                    'args': ['norm_1_1'],
                     'kwargs':{'partition_object': self.test_partitions['norm_0_1_ntile'], "p": 0.05},
                     'out':{'success':False, 'true_value': "RANDOMIZED"}
                 },
                 {
-                    'args': ['norm_10_1'],
+                    'args': ['norm_1_1'],
                     'kwargs':{'partition_object': self.test_partitions['norm_0_1_kde'], "p": 0.05},
                     'out':{'success':False, 'true_value': "RANDOMIZED"}
                 },
@@ -155,7 +155,8 @@ class TestDistributionalExpectations(unittest.TestCase):
                 },
                 {
                     'args': ['bimodal'],
-                    'kwargs':{'partition_object': self.test_partitions['norm_0_1_auto'], "p": 0.05},
+                    'kwargs':{'partition_object': self.test_partitions['norm_0_1_auto'], "p": 0.05,
+                              'output_format': 'SUMMARY', 'include_config': True},
                     'out':{'success':False, 'true_value': "RANDOMIZED"}
                 },
                 {
