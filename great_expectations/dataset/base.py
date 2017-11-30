@@ -67,6 +67,16 @@ class DataSet(object):
                 else:
                     output_format = self.default_expectation_args["output_format"]
 
+                if "meta" in kwargs:
+                    meta = kwargs["meta"]
+                    del all_args["meta"]
+                else:
+                    meta = None
+
+                if "meta_notes" in kwargs:
+                    meta = { "notes": kwargs["meta_notes"] }
+                    del all_args["meta_notes"]
+
                 # This intends to get the signature of the inner wrapper, if there is one.
                 if "output_format" in inspect.getargspec(func)[0][1:]:
                     all_args["output_format"] = output_format
@@ -83,8 +93,8 @@ class DataSet(object):
                     "kwargs": expectation_args
                 })
 
-                #Add the expectation_method key
-                expectation_config['expectation_type'] = method_name
+                if meta is not None:
+                    expectation_config["meta"] = meta
 
                 raised_exception = False
                 exception_traceback = None
@@ -117,7 +127,7 @@ class DataSet(object):
                 self.append_expectation(expectation_config)
 
                 if output_format != 'BOOLEAN_ONLY':
-                    
+
                     if include_config:
                         return_obj["expectation_type"] = expectation_config["expectation_type"]
                         return_obj["expectation_kwargs"] = copy.deepcopy(dict(expectation_config["kwargs"]))
@@ -354,7 +364,7 @@ class DataSet(object):
                     discards["failed_expectations"] += 1
                 else:
                     new_expectations.append(expectation)
-                    
+
             expectations = new_expectations
 
         for expectation in expectations:
@@ -398,7 +408,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                 if discard_catch_exceptions_kwargs:
                     print ("\t%d catch_exceptions kwargs" % discards["catch_exceptions"])
                 print ("If you wish to change this behavior, please set discard_failed_expectations, discard_output_format_kwargs, discard_include_configs_kwargs, and discard_catch_exceptions_kwargs appropirately.")
-                    
+
         config["expectations"] = expectations
         return config
 
@@ -441,7 +451,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
             if output_format is not None:
                 expectation['kwargs'].update({"output_format": output_format})
-            
+
             if include_config is not None:
                 expectation['kwargs'].update({"include_config": include_config})
 
@@ -577,7 +587,8 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
     ##### Table shape expectations #####
 
-    def expect_column_to_exist(self, column, output_format=None, include_config=False, catch_exceptions=None):
+    def expect_column_to_exist(self, column,
+                               output_format=None, include_config=False, catch_exceptions=None, meta=None):
         """Expect the specified column to exist in the data set.
         Args:
             column (str): The column name.
@@ -591,7 +602,8 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         """
         raise NotImplementedError
 
-    def expect_table_row_count_to_be_between(self, min_value=0, max_value=None, output_format=None, include_config=False, catch_exceptions=None):
+    def expect_table_row_count_to_be_between(self, min_value=0, max_value=None,
+                                             output_format=None, include_config=False, catch_exceptions=None, meta=None):
         """Expect the number of rows in a data set to be between two values.
         Args:
             min_value (int or None): the minimum number of rows.
@@ -607,7 +619,8 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         """
         raise NotImplementedError
 
-    def expect_table_row_count_to_equal(self, value=None, output_format=None, include_config=False, catch_exceptions=None):
+    def expect_table_row_count_to_equal(self, value=None,
+                                        output_format=None, include_config=False, catch_exceptions=None, meta=None):
         """Expect the number of rows to be equal to a value.
         Args:
 	        value (int): The value that should equal the number of rows.
@@ -624,7 +637,9 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
     ##### Missing values, unique values, and types #####
 
-    def expect_column_values_to_be_unique(self, column, mostly=None, output_format=None, include_config=False, catch_exceptions=None):
+    def expect_column_values_to_be_unique(self, column,
+                                          mostly=None,
+                                          output_format=None, include_config=False, catch_exceptions=None, meta=None):
         """Expect each nonempty column entry to be unique (no duplicates).
         Args:
             column (str): The column name.
@@ -642,7 +657,9 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         """
         raise NotImplementedError
 
-    def expect_column_values_to_not_be_null(self, column, mostly=None, output_format=None, include_config=False, catch_exceptions=None):
+    def expect_column_values_to_not_be_null(self, column,
+                                            mostly=None,
+                                            output_format=None, include_config=False, catch_exceptions=None, meta=None):
         """Expect each column entry to be nonempty.
         Args:
             column (str): The column name.
@@ -660,7 +677,9 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         """
         raise NotImplementedError
 
-    def expect_column_values_to_be_null(self, column, mostly=None, output_format=None, include_config=False, catch_exceptions=None):
+    def expect_column_values_to_be_null(self, column,
+                                        mostly=None,
+                                        output_format=None, include_config=False, catch_exceptions=None, meta=None):
         """Expect the column entries to be empty.
         Args:
             column (str): The column name.
@@ -678,7 +697,9 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         """
         raise NotImplementedError
 
-    def expect_column_values_to_be_of_type(self, column, type_, target_datasource, mostly=None, output_format=None, include_config=False, catch_exceptions=None):
+    def expect_column_values_to_be_of_type(self, column, type_, target_datasource="numpy",
+                                           mostly=None,
+                                           output_format=None, include_config=False, catch_exceptions=None, meta=None):
         """Expect each column entry to be a specified data type.
         Args:
             column (str): The column name.
@@ -698,7 +719,9 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         """
         raise NotImplementedError
 
-    def expect_column_values_to_be_in_type_list(self, column, type_list, target_datasource="numpy", mostly=None, output_format=None, include_config=False, catch_exceptions=None):
+    def expect_column_values_to_be_in_type_list(self, column, type_list, target_datasource="numpy",
+                                                mostly=None,
+                                                output_format=None, include_config=False, catch_exceptions=None, meta=None):
         """Expect each column entry to be a specified data type.
         Args:
             column (str): The column name.
@@ -720,7 +743,9 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
     ##### Sets and ranges #####
 
-    def expect_column_values_to_be_in_set(self, column, values_set, mostly=None, output_format=None, include_config=False, catch_exceptions=None):
+    def expect_column_values_to_be_in_set(self, column, values_set,
+                                          mostly=None,
+                                          output_format=None, include_config=False, catch_exceptions=None, meta=None):
         """Expect each entry in a column to be in a given set.
         Args:
             column (str): The column name.
@@ -739,7 +764,9 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         """
         raise NotImplementedError
 
-    def expect_column_values_to_not_be_in_set(self, column, values_set, mostly=None, output_format=None, include_config=False, catch_exceptions=None):
+    def expect_column_values_to_not_be_in_set(self, column, values_set,
+                                              mostly=None,
+                                              output_format=None, include_config=False, catch_exceptions=None, meta=None):
         """Expect column entries to not be in the set.
         Args:
             column (str): The column name.
@@ -758,7 +785,9 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         """
         raise NotImplementedError
 
-    def expect_column_values_to_be_between(self, column, min_value=None, max_value=None, parse_strings_as_datetimes=None, mostly=None, output_format=None, include_config=False, catch_exceptions=None):
+    def expect_column_values_to_be_between(self, column, min_value=None, max_value=None, parse_strings_as_datetimes=None,
+                                           mostly=None,
+                                           output_format=None, include_config=False, catch_exceptions=None, meta=None):
         """Expect column entries to be a number between a minimum value and a maximum value.
         Args:
             column (str): The column name.
@@ -779,7 +808,9 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         """
         raise NotImplementedError
 
-    def expect_column_values_to_be_increasing(self, column, strictly=None, parse_strings_as_datetimes=None, output_format=None, include_config=False, catch_exceptions=None):
+    def expect_column_values_to_be_increasing(self, column, strictly=None, parse_strings_as_datetimes=None,
+                                              mostly=None,
+                                              output_format=None, include_config=False, catch_exceptions=None, meta=None):
         """Expect column values to be increasing. (Only works for numeric data.)
         Args:
             column (str): The column name.
@@ -797,7 +828,9 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         """
         raise NotImplementedError
 
-    def expect_column_values_to_be_decreasing(self, column, strictly=None, parse_strings_as_datetimes=None, output_format=None, include_config=False, catch_exceptions=None):
+    def expect_column_values_to_be_decreasing(self, column, strictly=None, parse_strings_as_datetimes=None,
+                                              mostly=None,
+                                              output_format=None, include_config=False, catch_exceptions=None, meta=None):
         """Expect column values to be decreasing. (Only works for numeric data.)
         Args:
             column (str): The column name.
@@ -818,7 +851,9 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
     ##### String matching #####
 
-    def expect_column_value_lengths_to_be_between(self, column, min_value=None, max_value=None, mostly=None, output_format=None, include_config=False, catch_exceptions=None):
+    def expect_column_value_lengths_to_be_between(self, column, min_value=None, max_value=None,
+                                                  mostly=None,
+                                                  output_format=None, include_config=False, catch_exceptions=None, meta=None):
         """Expect column entries to have a measurable length which lies between a minimum value and a maximum value.
         Args:
             column (str): The column name.
@@ -838,7 +873,19 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         """
         raise NotImplementedError
 
-    def expect_column_values_to_match_regex(self, column, regex, mostly=None, output_format=None, include_config=False, catch_exceptions=None):
+    def expect_column_value_lengths_to_equal(self, column, value,
+                                             mostly=None,
+                                             output_format=None, include_config=False, catch_exceptions=None, meta=None):
+        """Expect column entries to have a measurable length which is equal to the provided value.
+
+        :param column (str): The column name.
+        :param value (int): The expected value of the column length.
+        :return: Column map expectation return object in accordance with output_format
+        """
+
+    def expect_column_values_to_match_regex(self, column, regex,
+                                            mostly=None,
+                                            output_format=None, include_config=False, catch_exceptions=None, meta=None):
         """Expect column entries to be strings that match a given regular expression.
         Args:
             column (str): The column name.
@@ -857,7 +904,9 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         """
         raise NotImplementedError
 
-    def expect_column_values_to_not_match_regex(self, column, regex, mostly=None, output_format=None, include_config=False, catch_exceptions=None):
+    def expect_column_values_to_not_match_regex(self, column, regex,
+                                                mostly=None,
+                                                output_format=None, include_config=False, catch_exceptions=None, meta=None):
         """Expect column entries to be strings that do NOT match a given regular expression.
         Args:
             column (str): The column name.
@@ -876,7 +925,9 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         """
         raise NotImplementedError
 
-    def expect_column_values_to_match_regex_list(self, column, regex_list, match_on="any", mostly=None, output_format=None, include_config=False, catch_exceptions=None):
+    def expect_column_values_to_match_regex_list(self, column, regex_list, match_on="any",
+                                                 mostly=None,
+                                                 output_format=None, include_config=False, catch_exceptions=None, meta=None):
         """Expect the column entries to be strings that match at least one of a list of regular expressions.
         Args:
             column (str): The column name.
@@ -898,7 +949,9 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
     ##### Datetime and JSON parsing #####
 
-    def expect_column_values_to_match_strftime_format(self, column, strftime_format, mostly=None, output_format=None, include_config=False, catch_exceptions=None):
+    def expect_column_values_to_match_strftime_format(self, column, strftime_format,
+                                                      mostly=None,
+                                                      output_format=None, include_config=False, catch_exceptions=None, meta=None):
         """Expect column entries to be strings representing a date or time with a given format.
         WARNING: Note that strftime formats are not universally portable across implementations.
         For example, the %z directive may not be implemented before Python 3.2.
@@ -916,7 +969,9 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         """
         raise NotImplementedError
 
-    def expect_column_values_to_be_dateutil_parseable(self, column, mostly=None, output_format=None, include_config=False, catch_exceptions=None):
+    def expect_column_values_to_be_dateutil_parseable(self, column,
+                                                      mostly=None,
+                                                      output_format=None, include_config=False, catch_exceptions=None, meta=None):
         """Expect column entries to be interpretable as a dateutil object.
         Args:
             column (str): The column name.
@@ -931,7 +986,9 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         """
         raise NotImplementedError
 
-    def expect_column_values_to_be_json_parseable(self, column, output_format=None, include_config=False, catch_exceptions=None):
+    def expect_column_values_to_be_json_parseable(self, column,
+                                                  mostly=None,
+                                                  output_format=None, include_config=False, catch_exceptions=None, meta=None):
         """Expect column entries to be data written in JavaScript Object Notation.
         Args:
             column (str): The column name.
@@ -946,7 +1003,9 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         """
         raise NotImplementedError
 
-    def expect_column_values_to_match_json_schema(self, column, json_schema, output_format=None, include_config=False, catch_exceptions=None):
+    def expect_column_values_to_match_json_schema(self, column, json_schema,
+                                                  mostly=None,
+                                                  output_format=None, include_config=False, catch_exceptions=None, meta=None):
         """Expect column entries to be JSON objects with a given JSON schema.
         Args:
             column (str): The column name.
@@ -966,7 +1025,8 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
     ##### Aggregate functions #####
 
-    def expect_column_mean_to_be_between(self, column, min_value=None, max_value=None, output_format=None, include_config=False, catch_exceptions=None):
+    def expect_column_mean_to_be_between(self, column, min_value=None, max_value=None,
+                                         output_format=None, include_config=False, catch_exceptions=None, meta=None):
         """Expect the column mean to be between a minimum value and a maximum value.
         Args:
             column (str): The column name.
@@ -981,7 +1041,8 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         """
         raise NotImplementedError
 
-    def expect_column_median_to_be_between(self, column, min_value=None, max_value=None, output_format=None, include_config=False, catch_exceptions=None):
+    def expect_column_median_to_be_between(self, column, min_value=None, max_value=None,
+                                           output_format=None, include_config=False, catch_exceptions=None, meta=None):
         """Expect the column median to be between a minimum value and a maximum value.
         Args:
             column (str): The column name.
@@ -996,7 +1057,8 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         """
         raise NotImplementedError
 
-    def expect_column_stdev_to_be_between(self, column, min_value=None, max_value=None, output_format=None, include_config=False, catch_exceptions=None):
+    def expect_column_stdev_to_be_between(self, column, min_value=None, max_value=None,
+                                          output_format=None, include_config=False, catch_exceptions=None, meta=None):
         """Expect the column standard deviation to be between a minimum value and a maximum value.
         Args:
             column (str): The column name.
@@ -1012,7 +1074,8 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         """
         raise NotImplementedError
 
-    def expect_column_unique_value_count_to_be_between(self, column, min_value=None, max_value=None, output_format=None, include_config=False, catch_exceptions=None):
+    def expect_column_unique_value_count_to_be_between(self, column, min_value=None, max_value=None,
+                                                       output_format=None, include_config=False, catch_exceptions=None, meta=None):
         """Expect the number of unique values to be between a minimum value and a maximum value.
 
         Args:
@@ -1029,7 +1092,8 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         """
         raise NotImplementedError
 
-    def expect_column_proportion_of_unique_values_to_be_between(self, column, min_value=0, max_value=1, output_format=None, include_config=False, catch_exceptions=None):
+    def expect_column_proportion_of_unique_values_to_be_between(self, column, min_value=0, max_value=1,
+                                                                output_format=None, include_config=False, catch_exceptions=None, meta=None):
         """Expect the proportion of unique values to be between a minimum value and a maximum value.
 
         Args:
@@ -1046,7 +1110,8 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         """
         raise NotImplementedError
 
-    def expect_column_most_common_value_to_be(self, column, value, ties_okay=None, output_format=None, include_config=False, catch_exceptions=None):
+    def expect_column_most_common_value_to_be(self, column, value, ties_okay=None,
+                                              output_format=None, include_config=False, catch_exceptions=None, meta=None):
         """Expect the most common value to be equal to `value`
 
         Args:
@@ -1063,7 +1128,8 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         """
         raise NotImplementedError
 
-    def expect_column_most_common_value_to_be_in_set(self, column, value_set, ties_okay=None, output_format=None, include_config=False, catch_exceptions=None):
+    def expect_column_most_common_value_to_be_in_set(self, column, value_set, ties_okay=None,
+                                                     output_format=None, include_config=False, catch_exceptions=None, meta=None):
         """Expect the most common value to be within the designated value set
 
         Args:
@@ -1082,17 +1148,17 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
 
     ### Distributional expectations
-    def expect_column_chisquare_test_p_value_greater_than(self, column, partition_object=None, p=0.05, output_format=None, include_config=False, catch_exceptions=None):
+    def expect_column_chisquare_test_p_value_greater_than(self, column, partition_object=None, p=0.05, tail_weight_holdout=0,
+                                                          output_format=None, include_config=False, catch_exceptions=None, meta=None):
         """
         Expect the values in this column to match the distribution of the specified categorical vals and their expected_frequencies. \
 
         Args:
-            column (str): The column name
-            partition_object (dict): A dictionary containing partition (categorical values) and associated weights.
-                - partition (list): A list of values that correspond to the provided categorical values.
-                - weights (list): A list of weights. They should sum to one. The test will scale the expected frequencies by the weights and size of the new sample.
-            p (float) = 0.05: The p-value threshold for the Chai Squareed test.\
+            :param column (str): The column name
+            :param partition_object (dict): A dictionary containing partition (categorical values) and associated weights.
+            :param p (float) = 0.05: The p-value threshold for the Chi-Squared test.\
                 For values below the specified threshold the expectation will return false, rejecting the null hypothesis that the distributions are the same.
+            :param tail_weight_holdout: the amount of weight to split uniformly and add to the tails of the histogram (the area between -Infinity and the data's min value and between the data's max value and Infinity)
 
         Returns:
             {
@@ -1102,7 +1168,8 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         """
         raise NotImplementedError
 
-    def expect_column_bootstrapped_ks_test_p_value_greater_than(self, column, partition_object=None, p=0.05, bootstrap_samples=0, output_format=None, include_config=False, catch_exceptions=None):
+    def expect_column_bootstrapped_ks_test_p_value_greater_than(self, column, partition_object=None, p=0.05, bootstrap_samples=0,
+                                                                output_format=None, include_config=False, catch_exceptions=None, meta=None):
         """
         Expect the values in this column to match the distribution implied by the specified partition and cdf_vals. \
         The implied CDF is constructed as a linear interpolation of the provided cdf_vals.
@@ -1124,23 +1191,17 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         """
         raise NotImplementedError
 
-    def expect_column_kl_divergence_less_than(self, column, partition_object=None, threshold=None, output_format=None, include_config=False, catch_exceptions=None):
-        """
-        Expect the values in this column to have lower Kulback-Leibler divergence (relative entropy) with the distriution provided in partition_object of less than the provided threshold.
+    def expect_column_kl_divergence_less_than(self, column, partition_object=None, threshold=None, tail_weight_holdout=0, internal_weight_holdout=0,
+                                              output_format=None, include_config=False, catch_exceptions=None, meta=None):
+        """Expect the values in this column to have lower Kulback-Leibler divergence (relative entropy) with the
+        distribution provided in partition_object of less than the provided threshold.
 
-        Args:
-            column (str): The column name
-            partition_object (dict): A dictionary containing partition (bin edges) and associated weights.
-                - partition (list): A list of values that correspond to the endpoints of an implied partition on the real number line.
-                - weights (list): A list of weights. They should sum to one.
-            threshold (float) = 0.1: The threshold of relative entropy.\
-                For values above the specified threshold the expectation will return false.
-            suppress_exceptions: Only return a boolean success value, not a dictionary with other results.
+        :param column: the column to which to apply the expectation
+        :param partition_object: the partition_object with which to compare the data in column
+        :param threshold: the threshold below which the test should be considered to have passed
+        :param internal_weight_holdout: the amount of weight to split uniformly among zero-weighted partition elements in a given partition.
+        :param tail_weight_holdout: the amount of weight to split uniformly and add to the tails of the histogram (the area between -Infinity and the data's min value and between the data's max value and Infinity)
 
-        Returns:
-            {
-                "success": (bool) True if the column passed the expectation,
-                "true_value": (float) the true value of the KL divergence
-            }
+        :return: result_object consistent with the specified output_format
         """
         raise NotImplementedError
