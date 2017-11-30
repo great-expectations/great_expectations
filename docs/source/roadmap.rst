@@ -1,13 +1,6 @@
 Roadmap
 =======
-Updated September 2017
-
-Short-term Items (Prioritized)
-----------------
-* Validation and command-line tool improvements
-* Documentation Improvement
-* Code Housekeeping Issues
-* Build/Deployment Housekeeping Issues
+Updated November 2017
 
 v0.3 and beyond
 ---------------
