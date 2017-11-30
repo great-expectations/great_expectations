@@ -1032,7 +1032,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         """
         raise NotImplementedError
 
-    def expect_column_bootstrapped_ks_test_p_value_greater_than(self, column, partition_object=None, p=0.05, bootstrap_samples=0,
+    def expect_column_bootstrapped_ks_test_p_value_greater_than(self, column, partition_object=None, p=0.05, bootstrap_samples=0, bootstrap_sample_size=0,
                                                                 output_format=None, include_config=False, catch_exceptions=None, meta=None):
         """
         Expect the values in this column to match the distribution implied by the specified partition and cdf_vals. \
@@ -1046,7 +1046,9 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             p (float) = 0.05: The p-value threshold for the Kolmogorov-Smirnov test.\
                 For values below the specified threshold the expectation will return false, rejecting the null hypothesis that the distributions are the same.
             bootstrap_samples (int) = 0: The number of bootstrapping rounds to use in building the estimated pvalue. \
-                If zero, chooses a default number of rounds (currently 1000, but may be altered based on size of dataset).
+                If zero, chooses a default number of rounds (1000).
+            bootstrap_sample_size (int) = None: The number of samples to use in each bootstrapping test. A larger sample size will increase the specificity of the test.
+                If zero, chooses based on a heuristic from the size of the partition object (2 * len(partition_object['weights'])).
         Returns:
             {
                 "success": (bool) True if the column passed the expectation,
