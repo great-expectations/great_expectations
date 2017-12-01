@@ -1,6 +1,7 @@
 import json
 import tempfile
 import shutil
+import inspect
 
 import pandas as pd
 import great_expectations as ge
@@ -732,6 +733,85 @@ class TestDataset(unittest.TestCase):
                 ],
                 'dataset_name': None
             }
+        )
+
+    def test_test_expectation_function(self):
+        D = ge.dataset.PandasDataSet({
+            'x' : [1,3,5,7,9],
+            'y' : [1,2,None,7,9],
+        })
+        D2 = ge.dataset.PandasDataSet({
+            'x' : [1,3,5,6,9],
+            'y' : [1,2,None,6,9],
+        })
+        def expect_dataframe_to_contain_7(self):
+            return {
+                "success": (self==7).sum().sum() > 0
+            }
+        
+        self.assertEqual(
+            D.test_expectation_function(expect_dataframe_to_contain_7),
+            {'success': True}
+        )
+        self.assertEqual(
+            D2.test_expectation_function(expect_dataframe_to_contain_7),
+            {'success': False}
+        )
+
+
+    def test_test_column_map_expectation_function(self):
+
+        D = ge.dataset.PandasDataSet({
+            'x' : [1,3,5,7,9],
+            'y' : [1,2,None,7,9],
+        })
+        def is_odd(self, column, mostly=None, output_format=None, include_config=False, catch_exceptions=None, meta=None):
+            return column % 2 == 1
+
+        self.assertEqual(
+            D.test_column_map_expectation_function(is_odd, column='x'),
+            {'summary_obj': {'exception_percent': 0.0, 'partial_exception_list': [], 'exception_percent_nonmissing': 0.0, 'exception_count': 0}, 'success': True}
+        )
+        self.assertEqual(
+            D.test_column_map_expectation_function(is_odd, 'x', output_format="BOOLEAN_ONLY"),
+            True
+        )
+        self.assertEqual(
+            D.test_column_map_expectation_function(is_odd, column='y', output_format="BOOLEAN_ONLY"),
+            False
+        )
+        self.assertEqual(
+            D.test_column_map_expectation_function(is_odd, column='y', output_format="BOOLEAN_ONLY", mostly=.7),
+            True
+        )        
+
+    def test_test_column_aggregate_expectation_function(self):
+        D = ge.dataset.PandasDataSet({
+            'x' : [1,3,5,7,9],
+            'y' : [1,2,None,7,9],
+        })
+        def expect_second_value_to_be(self, column, value, output_format=None, include_config=False, catch_exceptions=None, meta=None):
+            return {
+                "success": column.ix[1] == value,
+                "true_value": column.ix[1],
+                "summary_obj": {}
+            }
+
+        self.assertEqual(
+            D.test_column_aggregate_expectation_function(expect_second_value_to_be, 'x', 2),
+            {'true_value': 3.0, 'success': False}
+        )
+        self.assertEqual(
+            D.test_column_aggregate_expectation_function(expect_second_value_to_be, column='x', value=3),
+            {'true_value': 3.0, 'success': True}
+        )
+        self.assertEqual(
+            D.test_column_aggregate_expectation_function(expect_second_value_to_be, 'y', value=3, output_format="BOOLEAN_ONLY"),
+            False
+        )
+        self.assertEqual(
+            D.test_column_aggregate_expectation_function(expect_second_value_to_be, 'y', 2, output_format="BOOLEAN_ONLY"),
+            True
         )
 
 
