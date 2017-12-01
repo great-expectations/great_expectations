@@ -224,15 +224,36 @@ class DataSet(object):
 
         return new_expectation
 
+    def find_expectations(self,
+        expectation_type=None,
+        column=None,
+        expectation_kwargs=None,
+        discard_output_format_kwargs=True,
+        discard_include_configs_kwargs=True,
+        discard_catch_exceptions_kwargs=True,
+    ):
+        """Find matching expectations within _expectation_config.
+        Args:
+            expectation_type=None                : The name of the expectation type to be matched.
+            column=None                          : The name of the column to be matched.
+            expectation_kwargs=None              : A dictionary of kwargs to match against.
+            discard_output_format_kwargs=True    : In returned expectation object(s), suppress the `output_format` parameter.
+            discard_include_configs_kwargs=True  : In returned expectation object(s), suppress the `include_configs` parameter.
+            discard_catch_exceptions_kwargs=True : In returned expectation object(s), suppress the `catch_exceptions` parameter.
+        
+        Returns:
+            A list of matching expectation objects.
+            If there are no matches, the list will be empty.
+        """
+        return NotImplementedError
+
+
     def remove_expectation(self,
         expectation_type=None,
         column=None,
         expectation_kwargs=None,
         remove_multiple_matches=False,
         dry_run=False,
-        discard_output_format_kwargs=True,
-        discard_include_configs_kwargs=True,
-        discard_catch_exceptions_kwargs=True,
     ):
         """Remove matching expectation(s) from _expectation_config.
         Args:
@@ -240,20 +261,17 @@ class DataSet(object):
             column=None                          : The name of the column to be matched.
             expectation_kwargs=None              : A dictionary of kwargs to match against.
             remove_multiple_matches=False        : Match multiple expectations
-            dry_run=False                        : Return matching expectation(s) without removing
-            discard_output_format_kwargs=True    : In returned expectation object(s), suppress the `output_format` parameter.
-            discard_include_configs_kwargs=True  : In returned expectation object(s), suppress the `include_configs` parameter.
-            discard_catch_exceptions_kwargs=True : In returned expectation object(s), suppress the `catch_exceptions` parameter.
+            dry_run=False                        : Return a list of matching expectations without removing
         
         Returns:
-            The removed expectation. (This is a copy, not the original object.)
-            If remove_multiple_matches=True, then a list of removed expectations.
-            If dry_run=True, then the expectation(s) that *would be* removed.
+            None, unless dry_run=True.
+            If dry_run=True and remove_multiple_matches=False then return the expectation that *would be* removed.
+            If dry_run=True and remove_multiple_matches=True then return a list of expectations that *would be* removed.
 
         Note:
             If remove_expectation doesn't find any matches, it raises a ValueError.
             If remove_expectation finds more than one matches and remove_multiple_matches!=True, it raises a ValueError.
-            discard_output_format_kwargs, discard_include_configs_kwargs, and discard_catch_exceptions_kwargs don't affect which expectations are removed. They only affect how expectations are displayed when they're returned.
+            If dry_run=True, then `remove_expectation` acts as a thin layer to find_expectations, with the default values for discard_output_format_kwargs, discard_include_configs_kwargs, and discard_catch_exceptions_kwargs
         """
         if expectation_kwargs == None:
             expectation_kwargs = {}
