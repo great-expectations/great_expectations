@@ -224,6 +224,26 @@ class DataSet(object):
 
         return new_expectation
 
+    def _copy_and_clean_up_expectations_from_indexes(
+        self,
+        match_indexes,
+        discard_output_format_kwargs=True,
+        discard_include_configs_kwargs=True,
+        discard_catch_exceptions_kwargs=True,
+    ):
+        rval = []
+        for i in match_indexes:
+            rval.append(
+                self._copy_and_clean_up_expectation(
+                    self._expectations_config.expectations[i],
+                    discard_output_format_kwargs,
+                    discard_include_configs_kwargs,
+                    discard_catch_exceptions_kwargs,
+                )
+            )
+
+        return rval
+
     def find_expectation_indexes(self,
         expectation_type=None,
         column=None,
@@ -265,26 +285,6 @@ class DataSet(object):
 
         return match_indexes
 
-    def _copy_and_clean_up_expectations_from_indexes(
-        self,
-        match_indexes,
-        discard_output_format_kwargs=True,
-        discard_include_configs_kwargs=True,
-        discard_catch_exceptions_kwargs=True,
-    ):
-        rval = []
-        for i in match_indexes:
-            rval.append(
-                self._copy_and_clean_up_expectation(
-                    self._expectations_config.expectations[i],
-                    discard_output_format_kwargs,
-                    discard_include_configs_kwargs,
-                    discard_catch_exceptions_kwargs,
-                )
-            )
-
-        return rval
-
     def find_expectations(self,
         expectation_type=None,
         column=None,
@@ -313,8 +313,12 @@ class DataSet(object):
             expectation_kwargs,
         )
 
-        return self._copy_and_clean_up_expectations_from_indexes(match_indexes)
-
+        return self._copy_and_clean_up_expectations_from_indexes(
+            match_indexes,
+            discard_output_format_kwargs,
+            discard_include_configs_kwargs,
+            discard_catch_exceptions_kwargs,
+        )
 
     def remove_expectation(self,
         expectation_type=None,
@@ -342,7 +346,11 @@ class DataSet(object):
             If dry_run=True, then `remove_expectation` acts as a thin layer to find_expectations, with the default values for discard_output_format_kwargs, discard_include_configs_kwargs, and discard_catch_exceptions_kwargs
         """
 
-        matched_expectations
+        match_indexes = self.find_expectation_indexes(
+            expectation_type,
+            column,
+            expectation_kwargs,
+        )
 
         if len(match_indexes) == 0:
             raise ValueError('No matching expectation found.')
@@ -351,37 +359,25 @@ class DataSet(object):
             if not remove_multiple_matches:
                 raise ValueError('Multiple expectations matched arguments. No expectations removed.')
             else:
-                rval = []
-                for i in match_indexes:
-                    rval.append(
-                        self._copy_and_clean_up_expectation(
-                            self._expectations_config.expectations[i],
-                            discard_output_format_kwargs,
-                            discard_include_configs_kwargs,
-                            discard_catch_exceptions_kwargs,
-                        )
-                    )
 
                 if not dry_run:
                     self._expectations_config.expectations = [i for j, i in enumerate(self._expectations_config.expectations) if j not in match_indexes]
-
-                return rval
+                else:
+                    return self._copy_and_clean_up_expectations_from_indexes(match_indexes)
 
         else: #Exactly one match
             expectation = self._copy_and_clean_up_expectation(
-                self._expectations_config.expectations[match_indexes[0]],
-                discard_output_format_kwargs,
-                discard_include_configs_kwargs,
-                discard_catch_exceptions_kwargs,
+                self._expectations_config.expectations[match_indexes[0]]
             )
 
             if not dry_run:
                 del self._expectations_config.expectations[match_indexes[0]]
 
-            if remove_multiple_matches:
-                return [expectation]
             else:
-                return expectation
+                if remove_multiple_matches:
+                    return [expectation]
+                else:
+                    return expectation
 
     def get_default_expectation_arguments(self):
         return self.default_expectation_args
