@@ -880,9 +880,7 @@ class TestPandasDataset(unittest.TestCase):
         ]
 
         for t in T:
-            print t
             out = D.expect_column_values_to_be_dateutil_parseable(**t['in'])
-            print out
             if 'out' in t:
                 self.assertEqual(out, t['out'])
             elif 'error' in t:
