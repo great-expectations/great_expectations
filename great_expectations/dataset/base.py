@@ -224,25 +224,19 @@ class DataSet(object):
 
         return new_expectation
 
-    def find_expectations(self,
+    def find_expectation_indexes(self,
         expectation_type=None,
         column=None,
-        expectation_kwargs=None,
-        discard_output_format_kwargs=True,
-        discard_include_configs_kwargs=True,
-        discard_catch_exceptions_kwargs=True,
+        expectation_kwargs=None
     ):
         """Find matching expectations within _expectation_config.
         Args:
             expectation_type=None                : The name of the expectation type to be matched.
             column=None                          : The name of the column to be matched.
             expectation_kwargs=None              : A dictionary of kwargs to match against.
-            discard_output_format_kwargs=True    : In returned expectation object(s), suppress the `output_format` parameter.
-            discard_include_configs_kwargs=True  : In returned expectation object(s), suppress the `include_configs` parameter.
-            discard_catch_exceptions_kwargs=True : In returned expectation object(s), suppress the `catch_exceptions` parameter.
         
         Returns:
-            A list of matching expectation objects.
+            A list of indexes for matching expectation objects.
             If there are no matches, the list will be empty.
         """
         if expectation_kwargs == None:
@@ -269,6 +263,15 @@ class DataSet(object):
                 if match:
                     match_indexes.append(i)
 
+        return match_indexes
+
+    def _copy_and_clean_up_expectations_from_indexes(
+        self,
+        match_indexes,
+        discard_output_format_kwargs=True,
+        discard_include_configs_kwargs=True,
+        discard_catch_exceptions_kwargs=True,
+    ):
         rval = []
         for i in match_indexes:
             rval.append(
@@ -281,6 +284,36 @@ class DataSet(object):
             )
 
         return rval
+
+    def find_expectations(self,
+        expectation_type=None,
+        column=None,
+        expectation_kwargs=None,
+        discard_output_format_kwargs=True,
+        discard_include_configs_kwargs=True,
+        discard_catch_exceptions_kwargs=True,
+    ):
+        """Find matching expectations within _expectation_config.
+        Args:
+            expectation_type=None                : The name of the expectation type to be matched.
+            column=None                          : The name of the column to be matched.
+            expectation_kwargs=None              : A dictionary of kwargs to match against.
+            discard_output_format_kwargs=True    : In returned expectation object(s), suppress the `output_format` parameter.
+            discard_include_configs_kwargs=True  : In returned expectation object(s), suppress the `include_configs` parameter.
+            discard_catch_exceptions_kwargs=True : In returned expectation object(s), suppress the `catch_exceptions` parameter.
+        
+        Returns:
+            A list of matching expectation objects.
+            If there are no matches, the list will be empty.
+        """
+
+        match_indexes = self.find_expectation_indexes(
+            expectation_type,
+            column,
+            expectation_kwargs,
+        )
+
+        return self._copy_and_clean_up_expectations_from_indexes(match_indexes)
 
 
     def remove_expectation(self,
@@ -308,6 +341,8 @@ class DataSet(object):
             If remove_expectation finds more than one matches and remove_multiple_matches!=True, it raises a ValueError.
             If dry_run=True, then `remove_expectation` acts as a thin layer to find_expectations, with the default values for discard_output_format_kwargs, discard_include_configs_kwargs, and discard_catch_exceptions_kwargs
         """
+
+        matched_expectations
 
         if len(match_indexes) == 0:
             raise ValueError('No matching expectation found.')
