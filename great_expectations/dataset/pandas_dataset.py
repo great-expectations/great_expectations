@@ -70,6 +70,7 @@ class MetaPandasDataSet(DataSet):
 
         inner_wrapper.__name__ = func.__name__
         inner_wrapper.__doc__ = func.__doc__
+
         return inner_wrapper
 
 
