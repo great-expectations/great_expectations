@@ -679,12 +679,7 @@ class TestDataset(unittest.TestCase):
 
         self.assertEqual(
             my_df.remove_expectation("expect_column_to_exist", "x"),
-            {
-              "expectation_type": "expect_column_to_exist", 
-              "kwargs": {
-                "column": "x"
-              }
-            }
+            None
         )
         self.assertEqual(
             len(my_df._expectations_config.expectations),
@@ -693,19 +688,7 @@ class TestDataset(unittest.TestCase):
 
         self.assertEqual(
             my_df.remove_expectation(column="x", remove_multiple_matches=True),
-            [{
-              "expectation_type": "expect_column_values_to_be_of_type", 
-              "kwargs": {
-                "column": "x",
-                "type_": "int",
-                "target_datasource": "python",
-              }
-            },{
-              "expectation_type": "expect_column_values_to_be_increasing", 
-              "kwargs": {
-                "column": "x"
-              }
-            }]
+            None
         )
         self.assertEqual(
             len(my_df._expectations_config.expectations),
