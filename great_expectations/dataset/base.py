@@ -245,7 +245,42 @@ class DataSet(object):
             A list of matching expectation objects.
             If there are no matches, the list will be empty.
         """
-        return NotImplementedError
+        if expectation_kwargs == None:
+            expectation_kwargs = {}
+
+        if "column" in expectation_kwargs and column != None and column != expectation_kwargs["column"]:
+            raise ValueError("Conflicting column names in remove_expectation: %s and %s" % (column, expectation_kwargs["column"]))
+
+        if column != None:
+            expectation_kwargs["column"] = column
+
+        match_indexes = []
+        for i, exp in enumerate(self._expectations_config.expectations):
+            if expectation_type == None or (expectation_type == exp['expectation_type']):
+                # if column == None or ('column' not in exp['kwargs']) or (exp['kwargs']['column'] == column) or (exp['kwargs']['column']==:
+                match = True
+                
+                for k,v in expectation_kwargs.items():
+                    if k in exp['kwargs'] and exp['kwargs'][k] == v:
+                        continue
+                    else:
+                        match = False
+
+                if match:
+                    match_indexes.append(i)
+
+        rval = []
+        for i in match_indexes:
+            rval.append(
+                self._copy_and_clean_up_expectation(
+                    self._expectations_config.expectations[i],
+                    discard_output_format_kwargs,
+                    discard_include_configs_kwargs,
+                    discard_catch_exceptions_kwargs,
+                )
+            )
+
+        return rval
 
 
     def remove_expectation(self,
@@ -273,29 +308,6 @@ class DataSet(object):
             If remove_expectation finds more than one matches and remove_multiple_matches!=True, it raises a ValueError.
             If dry_run=True, then `remove_expectation` acts as a thin layer to find_expectations, with the default values for discard_output_format_kwargs, discard_include_configs_kwargs, and discard_catch_exceptions_kwargs
         """
-        if expectation_kwargs == None:
-            expectation_kwargs = {}
-
-        if "column" in expectation_kwargs and column != None and column != expectation_kwargs["column"]:
-            raise ValueError("Conflicting column names in remove_expectation: %s and %s" % (column, expectation_kwargs["column"]))
-
-        if column != None:
-            expectation_kwargs["column"] = column
-
-        match_indexes = []
-        for i, exp in enumerate(self._expectations_config.expectations):
-            if expectation_type == None or (expectation_type == exp['expectation_type']):
-                # if column == None or ('column' not in exp['kwargs']) or (exp['kwargs']['column'] == column) or (exp['kwargs']['column']==:
-                match = True
-                
-                for k,v in expectation_kwargs.items():
-                    if k in exp['kwargs'] and exp['kwargs'][k] == v:
-                        continue
-                    else:
-                        match = False
-
-                if match:
-                    match_indexes.append(i)
 
         if len(match_indexes) == 0:
             raise ValueError('No matching expectation found.')

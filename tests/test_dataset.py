@@ -509,22 +509,22 @@ class TestDataset(unittest.TestCase):
 
         self.assertEqual(
             my_df.find_expectations("expect_column_to_exist", "x", expectation_kwargs={}),
-            {
+            [{
               "expectation_type": "expect_column_to_exist", 
               "kwargs": {
                 "column": "x"
               }
-            }
+            }]
         )
 
         self.assertEqual(
             my_df.find_expectations("expect_column_to_exist", expectation_kwargs={"column": "y"}),
-            {
+            [{
               "expectation_type": "expect_column_to_exist", 
               "kwargs": {
                 "column": "y"
               }
-            }
+            }]
         )
 
         self.assertEqual(
