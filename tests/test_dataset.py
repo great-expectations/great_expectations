@@ -502,7 +502,7 @@ class TestDataset(unittest.TestCase):
             'x' : [1,3,5,7,9],
             'y' : [1,2,None,7,9],
         })
-        def expect_second_value_to_be(self, column, value, output_format=None, include_config=False, catch_exceptions=None):
+        def expect_second_value_to_be(self, column, value, output_format=None, include_config=False, catch_exceptions=None, meta=None):
             return {
                 "success": column.ix[1] == value,
                 "true_value": column.ix[1],
