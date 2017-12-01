@@ -834,7 +834,7 @@ class TestPandasDataset(unittest.TestCase):
                     'in':{'column':'already_datetime','strftime_format':'%Y-%m-%d', 'catch_exceptions':True},
                     # 'out':{'success':False,'exception_index_list':[0], 'exception_list':['1977-05-55T00:00:00']},
                     'error':{
-                        'traceback_substring' : 'TypeError'
+                        'traceback_substring' : 'TypeError: Values passed to expect_column_values_to_match_strftime_format must be of type string.'
                     },
                 }
         ]
@@ -845,39 +845,50 @@ class TestPandasDataset(unittest.TestCase):
                 self.assertEqual(out, t['out'])
             elif 'error' in t:
                 self.assertEqual(out['raised_exception'], True)
-                self.assertEqual(t['error']['traceback_substring'] in out['exception_traceback'], True)
+                self.assertIn(t['error']['traceback_substring'], out['exception_traceback'])
 
     def test_expect_column_values_to_be_dateutil_parseable(self):
 
         D = ge.dataset.PandasDataSet({
             'c1':['03/06/09','23 April 1973','January 9, 2016'],
             'c2':['9/8/2012','covfefe',25],
-            'c3':['Jared','June 1, 2013','July 18, 1976']
+            'c3':['Jared','June 1, 2013','July 18, 1976'],
+            'already_datetime' : [datetime.datetime(2015,1,1), datetime.datetime(2016,1,1), datetime.datetime(2017,1,1)],
         })
         D.set_default_expectation_argument("output_format", "COMPLETE")
 
         T = [
                 {
-                    'in':['c1'],
-                    'kwargs':{},
+                    'in':{'column': 'c1'},
                     'out':{'success':True, 'exception_list':[], 'exception_index_list': []}},
                 {
-                    'in':['c2'],
-                    'kwargs':{},
-                    'out':{'success':False, 'exception_list':['covfefe', 25], 'exception_index_list': [1, 2]}},
+                    'in':{"column":'c2', "catch_exceptions":True},
+                    # 'out':{'success':False, 'exception_list':['covfefe', 25], 'exception_index_list': [1, 2]}},
+                    'error':{ 'traceback_substring' : 'TypeError: Values passed to expect_column_values_to_be_dateutil_parseable must be of type string' },
+                },
                 {
-                    'in':['c3'],
-                    'kwargs':{},
+                    'in':{"column":'c3'},
                     'out':{'success':False, 'exception_list':['Jared'], 'exception_index_list': [0]}},
                 {
-                    'in':['c3'],
-                    'kwargs':{'mostly':.5},
-                    'out':{'success':True, 'exception_list':['Jared'], 'exception_index_list': [0]}}
+                    'in':{'column': 'c3', 'mostly':.5},
+                    'out':{'success':True, 'exception_list':['Jared'], 'exception_index_list': [0]}
+                },
+                {
+                    'in':{'column':'already_datetime', 'catch_exceptions':True},
+                    'error':{ 'traceback_substring' : 'TypeError: Values passed to expect_column_values_to_be_dateutil_parseable must be of type string' },
+                }
         ]
 
         for t in T:
-            out = D.expect_column_values_to_be_dateutil_parseable(*t['in'], **t['kwargs'])
-            self.assertEqual(out, t['out'])
+            print t
+            out = D.expect_column_values_to_be_dateutil_parseable(**t['in'])
+            print out
+            if 'out' in t:
+                self.assertEqual(out, t['out'])
+            elif 'error' in t:
+                self.assertEqual(out['raised_exception'], True)
+                self.assertIn(t['error']['traceback_substring'], out['exception_traceback'])
+
 
     def test_expect_column_values_to_be_json_parseable(self):
         d1 = json.dumps({'i':[1,2,3],'j':35,'k':{'x':'five','y':5,'z':'101'}})

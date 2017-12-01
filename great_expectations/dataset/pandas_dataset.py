@@ -537,7 +537,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
                 datetime.strptime(val, strftime_format)
                 return True
             except TypeError as e:
-                raise TypeError("Values must be of type string")
+                raise TypeError("Values passed to expect_column_values_to_match_strftime_format must be of type string.\nIf you want to validate a column of dates or timestamps, please call the expectation before converting from string format.")
 
             except ValueError as e:
                 return False
@@ -550,9 +550,13 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
     def expect_column_values_to_be_dateutil_parseable(self, column, mostly=None, output_format=None, include_config=False, catch_exceptions=None):
         def is_parseable(val):
             try:
+                if type(val) != str:
+                    raise TypeError("Values passed to expect_column_values_to_be_dateutil_parseable must be of type string.\nIf you want to validate a column of dates or timestamps, please call the expectation before converting from string format.")
+
                 parse(val)
                 return True
-            except:
+
+            except ValueError:
                 return False
 
         return column.map(is_parseable)
