@@ -614,38 +614,22 @@ class TestPandasDataset(unittest.TestCase):
 
         """
 
-        D = ge.dataset.PandasDataSet({
-            'x' : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-            'y' : [1, 2, 3, 4, 5, 6, 7, 8, 9, "abc"],
-            'z' : [1, 2, 3, 4, 5, None, None, None, None, None],
-            'ts' : [
-                'Jan 01 1870 12:00:01',
-                'Dec 31 1999 12:00:01',
-                'Jan 01 2000 12:00:01',
-                'Feb 01 2000 12:00:01',
-                'Mar 01 2000 12:00:01',
-                'Apr 01 2000 12:00:01',
-                'May 01 2000 12:00:01',
-                'Jun 01 2000 12:00:01',
-                None,
-                'Jan 01 2001 12:00:01',
-            ],
-            "alpha": list('abcdefghij'),
-            "numeric": ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'],
-        })
+        with open("./tests/test_sets/expect_column_values_to_be_between_test_set_ADJ.json") as f:
+            fixture = json.load(f)
+
+        dataset = fixture["dataset"]
+        tests = fixture["tests"]
+
+        D = ge.dataset.PandasDataSet(dataset)
         D.set_default_expectation_argument("output_format", "COMPLETE")
 
         self.maxDiff = None
 
-        with open("./tests/test_sets/expect_column_values_to_be_between_test_set_ADJ.json") as f:
-            T = json.load(f)
-            # print json.dumps(T, indent=2)
-
-        for t in T:
+        for t in tests:
             out = D.expect_column_values_to_be_between(**t['in'])#, **t['kwargs'])
 
             # print '-'*80
-            # print(json.dumps(t['in'], indent=2))
+            print(json.dumps(t['in'], indent=2))
             # print(json.dumps(out, indent=2))
 
             if 'out' in t:

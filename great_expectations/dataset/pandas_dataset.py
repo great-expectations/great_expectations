@@ -384,27 +384,30 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
             if type(val) == None:
                 return False
             else:
-                # try:
                 if min_value != None and max_value != None:
-                    if type(val)==str and (type(min_value)!=str or type(max_value)!=str):
-                        raise TypeError("Column values are of type str, but min_value and/or max_value are not.")
+                    # if type(val)==str and (type(min_value)!=str or type(max_value)!=str):
+                    #     raise TypeError("Column values are of type str, but min_value and/or max_value are not.")
 
-                    # assert type(val) == type(min_value) == type(max_value)
-                    return (min_value <= val) and (val <= max_value)
+                    if type(val) == type(min_value) == type(max_value):
+                        return (min_value <= val) and (val <= max_value)
+                    else:
+                        raise TypeError("Column values, min_value, and max_value must either be None or of the same type.")
 
                 elif min_value == None and max_value != None:
-                    assert type(val) == type(max_value)
-                    return (val <= max_value)
+                    if type(val) == type(max_value):
+                        return (val <= max_value)
+                    else:
+                        raise TypeError("Column values, min_value, and max_value must either be None or of the same type.")
 
                 elif min_value != None and max_value == None:
-                    assert type(val) == type(min_value)
-                    return (min_value <= val)
+                    if type(val) == type(min_value):
+                        return (min_value <= val)
+                    else:
+                        raise TypeError("Column values, min_value, and max_value must either be None or of the same type.")
 
                 else:
                     return False
 
-                # except:
-                    # return False
 
         return temp_column.map(is_between)
 
