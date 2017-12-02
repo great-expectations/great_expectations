@@ -1,7 +1,5 @@
 import unittest
 import json
-import hashlib
-import datetime
 import numpy as np
 
 import great_expectations as ge
@@ -1116,6 +1114,37 @@ class TestPandasDataset(unittest.TestCase):
             out = D.expect_column_proportion_of_unique_values_to_be_between(**t['in'])
             self.assertEqual(out, t['out'])
 
+    def test_expect_column_values_to_be_increasing(self):
+        print("=== test_expect_column_values_to_be_increasing ===")
+        with open("./tests/test_sets/expect_column_values_to_be_increasing_test_set.json") as f:
+            J = json.load(f)
+            D = ge.dataset.PandasDataSet(J["dataset"])
+            D.set_default_expectation_argument("output_format", "COMPLETE")
+            T = J["tests"]
+
+            self.maxDiff = None
+
+        for t in T:
+            print(t)
+            out = D.expect_column_values_to_be_increasing(**t['in'])#, **t['kwargs'])
+            self.assertEqual(out, t['out'])
+
+    def test_expect_column_values_to_be_decreasing(self):
+        print("=== test_expect_column_values_to_be_decreasing ===")
+        with open("./tests/test_sets/expect_column_values_to_be_decreasing_test_set.json") as f:
+            J = json.load(f)
+            D = ge.dataset.PandasDataSet(J["dataset"])
+            D.set_default_expectation_argument("output_format", "COMPLETE")
+            T = J["tests"]
+
+            self.maxDiff = None
+
+        for t in T:
+            print(t)
+            out = D.expect_column_values_to_be_decreasing(**t['in'])
+            self.assertEqual(out, t['out'])
+
+
     def test_expect_column_most_common_value_to_be(self):
 
         D = ge.dataset.PandasDataSet({
@@ -1192,8 +1221,6 @@ class TestPandasDataset(unittest.TestCase):
             self.assertEqual(out, t['out'])
 
 
-    #####
-
     def test_expectation_decorator_summary_mode(self):
 
         df = ge.dataset.PandasDataSet({
@@ -1226,6 +1253,19 @@ class TestPandasDataset(unittest.TestCase):
                     "partial_exception_list" : [6.0,7.0,7.0],
                     "partial_exception_index_list": [5,6,7],
                 }
+            }
+        )
+
+        self.assertEqual(
+            df.expect_column_mean_to_be_between("x", 3, 7, output_format="SUMMARY"),
+            {
+                'success': True,
+                'true_value': 4.375,
+                'summary_obj': {
+                    'element_count': 10,
+                    'missing_count': 2,
+                    'missing_percent': .2
+                },
             }
         )
 
