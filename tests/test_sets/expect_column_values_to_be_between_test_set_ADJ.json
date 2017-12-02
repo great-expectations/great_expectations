@@ -150,49 +150,41 @@
     }
   },
   {
-    "out": {
-      "exception_traceback": "Traceback (most recent call last):\n  File \"/Users/abe/Documents/superconductive/tools/great_expectations/great_expectations/dataset/base.py\", line 92, in wrapper\n    return_obj = func(self, **all_args)\n  File \"/Users/abe/Documents/superconductive/tools/great_expectations/great_expectations/dataset/pandas_dataset.py\", line 50, in inner_wrapper\n    boolean_mapped_success_values = func(self, nonnull_values, *args, **kwargs)\n  File \"/Users/abe/Documents/superconductive/tools/great_expectations/great_expectations/dataset/pandas_dataset.py\", line 411, in expect_column_values_to_be_between\n    return temp_column.map(is_between)\n  File \"/Users/abe/anaconda2/lib/python2.7/site-packages/pandas/core/series.py\", line 2158, in map\n    new_values = map_f(values, arg)\n  File \"pandas/_libs/src/inference.pyx\", line 1574, in pandas._libs.lib.map_infer (pandas/_libs/lib.c:66645)\n  File \"/Users/abe/Documents/superconductive/tools/great_expectations/great_expectations/dataset/pandas_dataset.py\", line 392, in is_between\n    raise TypeError(\"Column values are of type str, but min_value and/or max_value are not.\")\nTypeError: Column values are of type str, but min_value and/or max_value are not.\n", 
-      "raised_exception": true, 
-      "success": false
-    },
     "in": {
       "column": "y",
       "max_value": 10,
       "min_value": 1,
       "mostly": 0.95,
       "catch_exceptions": true
+    },
+    "error":{
+      "traceback_substring" : "TypeError: Column values are of type str, but min_value and/or max_value are not."
     }
   },
   {
-    "out": {
-      "exception_list": [
-        "abc"
-      ],
-      "exception_index_list": [9],
-      "success": true
-    },
     "in": {
       "column": "y",
       "max_value": 10,
       "min_value": 1,
-      "mostly": 0.9
+      "mostly": 0.9,
+      "catch_exceptions": true
+    },
+    "error":{
+      "traceback_substring" : "TypeError: Column values are of type str, but min_value and/or max_value are not."
     }
   },
   {
-    "out": {
-      "exception_list": [
-        "abc"
-      ],
-      "exception_index_list": [9],
-      "success": true
-    },
     "in": {
       "column": "y",
       "max_value": 10,
       "min_value": 1,
-      "mostly": 0.8
+      "mostly": 0.8,
+      "catch_exceptions": true
+    },
+    "error":{
+      "traceback_substring" : "TypeError: Column values are of type str, but min_value and/or max_value are not."
     }
-  },
+   },
   {
     "out": {
       "exception_list": [
@@ -247,20 +239,14 @@
     }
   },
   {
-    "out": {
-      "exception_list": [
-        "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"
-      ],
-      "exception_index_list": [
-        0, 1, 2, 3, 4, 5, 6, 7, 8, 9
-      ],
-      "success": false
-    },
     "in": {
       "column": "numeric",
       "max_value": 0,
       "min_value": 10,
       "catch_exceptions": true
+    },
+    "error":{
+      "traceback_substring" : "TypeError: Column values are of type str, but min_value and/or max_value are not."
     }
   }
 ]

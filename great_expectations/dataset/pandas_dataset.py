@@ -381,8 +381,6 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
             # Ensure types can be compared since some types in Python 3 cannot be logically compared.
             # print type(val), type(min_value), type(max_value)
 
-            print type(val), type(min_value), type(max_value)
-
             if type(val) == None:
                 return False
             else:

@@ -643,10 +643,17 @@ class TestPandasDataset(unittest.TestCase):
 
         for t in T:
             out = D.expect_column_values_to_be_between(**t['in'])#, **t['kwargs'])
+
             print '-'*80
             print(json.dumps(t['in'], indent=2))
             print(json.dumps(out, indent=2))
-            self.assertEqual(out, t['out'])
+
+            if 'out' in t:
+                self.assertEqual(out, t['out'])
+
+            if 'error' in t:
+                self.assertEqual(out['raised_exception'], True)
+                self.assertIn(t['error']['traceback_substring'], out['exception_traceback'])
 
     def test_expect_column_value_lengths_to_be_between(self):
         D = ge.dataset.PandasDataSet({
