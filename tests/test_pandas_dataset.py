@@ -1223,8 +1223,8 @@ class TestPandasDataset(unittest.TestCase):
         })
         df.set_default_expectation_argument("output_format", "COMPLETE")
 
-        print '&'*80
-        print json.dumps(df.expect_column_values_to_be_between('x', min_value=1, max_value=5, output_format="SUMMARY"), indent=2)
+        # print '&'*80
+        # print json.dumps(df.expect_column_values_to_be_between('x', min_value=1, max_value=5, output_format="SUMMARY"), indent=2)
 
         self.maxDiff = None
         self.assertEqual(
