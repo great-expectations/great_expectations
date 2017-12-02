@@ -626,7 +626,7 @@ class TestPandasDataset(unittest.TestCase):
         self.maxDiff = None
 
         for t in tests:
-            out = D.expect_column_values_to_be_between(**t['in'])#, **t['kwargs'])
+            out = D.expect_column_values_to_be_between(**t['in'])
 
             # print '-'*80
             print(json.dumps(t['in'], indent=2))
