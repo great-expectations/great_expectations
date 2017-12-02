@@ -49,7 +49,9 @@ class TestCLI(unittest.TestCase):
           result = get_system_command_result(command_str)["output"]
           json_result = json.loads(result)
         except ValueError as ve:
-          print("!"*80)
+          print ("=== Result ==================================================")
+          print (result)
+          print ("=== Error ===================================================")
           print(ve)
           print(result)
           json_result = {}

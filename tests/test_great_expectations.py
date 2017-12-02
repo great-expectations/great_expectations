@@ -107,9 +107,12 @@ class TestValidation(unittest.TestCase):
                             expected_results
                             )
 
+
+        validation_results = my_df.validate(only_return_failures=True)
+        # print json.dumps(validation_results, indent=2)
         assertDeepAlmostEqual(
             self,
-            my_df.validate(only_return_failures=True),
+            validation_results,
             {"results": [{"exception_traceback": None, "expectation_type": "expect_column_values_to_be_in_set", "success": False, "exception_list": ["*"], "raised_exception": False, "kwargs": {"column": "PClass", "output_format": "COMPLETE", "values_set": ["1st", "2nd", "3rd"]}, "exception_index_list": [456]}]}
         )
 
