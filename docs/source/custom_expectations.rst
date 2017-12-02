@@ -16,7 +16,7 @@ These Expectations aren't included in the default set, but could be very useful 
 
 Fear not! Great Expectations is designed for customization and extensibility.
 
-Side note: in future versions, Great Expectations will probably grow to include additional Expectations. If you have an Expectation that could be universally useful, please make the case on the `Great Expectations issue tracker on github <https://github.com/abegong/great_expectations/issues>`_.
+Side note: in future versions, Great Expectations will probably grow to include additional Expectations. If you have an Expectation that could be universally useful, please make the case on the `Great Expectations issue tracker on github <https://github.com/great-expectations/great_expectations/issues>`_.
 
 The easy way
 --------------------------------------------------------------------------------
