@@ -13,7 +13,6 @@ from scipy import stats
 from .base import DataSet
 from .util import DocInherit, is_valid_partition_object, remove_empty_intervals
 
-
 class MetaPandasDataSet(DataSet):
 
     def __init__(self, *args, **kwargs):
