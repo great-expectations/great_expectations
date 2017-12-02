@@ -379,32 +379,29 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         def is_between(val):
             # TODO Might be worth explicitly defining comparisons between types (for example, between strings and ints).
             # Ensure types can be compared since some types in Python 3 cannot be logically compared.
-            
-            # print type(val), type(min_value), type(max_value)
+
+            print type(val), type(min_value), type(max_value)
 
             if type(val) == None:
                 return False
             else:
                 if min_value != None and max_value != None:
-                    # if type(val)==str and (type(min_value)!=str or type(max_value)!=str):
-                    #     raise TypeError("Column values are of type str, but min_value and/or max_value are not.")
-
-                    if type(val) == type(min_value) == type(max_value):
-                        return (min_value <= val) and (val <= max_value)
-                    else:
+                    if type(val) in [str, unicode] and (type(min_value) not in [str, unicode] or type(max_value) not in [str, unicode]):
                         raise TypeError("Column values, min_value, and max_value must either be None or of the same type.")
+                    else:
+                        return (min_value <= val) and (val <= max_value)
 
                 elif min_value == None and max_value != None:
-                    if type(val) == type(max_value):
-                        return (val <= max_value)
-                    else:
+                    if type(val) in [str, unicode] and (type(max_value) not in [str, unicode]):
                         raise TypeError("Column values, min_value, and max_value must either be None or of the same type.")
+                    else:
+                        return (val <= max_value)
 
                 elif min_value != None and max_value == None:
-                    if type(val) == type(min_value):
-                        return (min_value <= val)
-                    else:
+                    if type(val) in [str, unicode] and (type(min_value) not in [str, unicode]):
                         raise TypeError("Column values, min_value, and max_value must either be None or of the same type.")
+                    else:
+                        return (min_value <= val)
 
                 else:
                     return False
