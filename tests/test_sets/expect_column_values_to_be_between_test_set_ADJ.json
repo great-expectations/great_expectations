@@ -1,252 +1,274 @@
-[{
-    "out": {
-      "exception_list": [],
-      "exception_index_list": [],
-      "success": true
+{
+  "dataset" : {
+    "x" : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    "y" : [1, 2, 3, 4, 5, 6, 7, 8, 9, "abc"],
+    "z" : [1, 2, 3, 4, 5, null, null, null, null, null],
+    "ts" : [
+      "Jan 01 1870 12:00:01",
+      "Dec 31 1999 12:00:01",
+      "Jan 01 2000 12:00:01",
+      "Feb 01 2000 12:00:01",
+      "Mar 01 2000 12:00:01",
+      "Apr 01 2000 12:00:01",
+      "May 01 2000 12:00:01",
+      "Jun 01 2000 12:00:01",
+      null,
+      "Jan 01 2001 12:00:01"
+    ],
+    "alpha": ["a","b","c","d","e","f","g","h","i","j"],
+    "numeric": ["1","2","3","4","5","6","7","8","9","10"]
+  },
+  "tests": [
+    {
+      "out": {
+        "exception_list": [],
+        "exception_index_list": [],
+        "success": true
+      },
+      "in": {
+        "column": "x",
+        "max_value": 10,
+        "min_value": 1
+      }
     },
-    "in": {
-      "column": "x",
-      "max_value": 10,
-      "min_value": 1
-    }
-  },
-  {
-    "out": {
-      "exception_list": [],
-      "exception_index_list": [],
-      "success": true
+    {
+      "out": {
+        "exception_list": [],
+        "exception_index_list": [],
+        "success": true
+      },
+      "in": {
+        "column": "x",
+        "max_value": 20,
+        "min_value": 0
+      }
     },
-    "in": {
-      "column": "x",
-      "max_value": 20,
-      "min_value": 0
-    }
-  },
-  {
-    "out": {
-      "exception_list": [
-        10
-      ],
-      "exception_index_list": [9],
-      "success": false
+    {
+      "out": {
+        "exception_list": [
+          10
+        ],
+        "exception_index_list": [9],
+        "success": false
+      },
+      "in": {
+        "column": "x",
+        "max_value": 9,
+        "min_value": 1
+      }
     },
-    "in": {
-      "column": "x",
-      "max_value": 9,
-      "min_value": 1
-    }
-  },
-  {
-    "out": {
-      "exception_list": [
-        1,
-        2
-      ],
-      "exception_index_list": [0, 1],
-      "success": false
+    {
+      "out": {
+        "exception_list": [
+          1,
+          2
+        ],
+        "exception_index_list": [0, 1],
+        "success": false
+      },
+      "in": {
+        "column": "x",
+        "max_value": 10,
+        "min_value": 3
+      }
     },
-    "in": {
-      "column": "x",
-      "max_value": 10,
-      "min_value": 3
-    }
-  },
-  {
-    "out": true,
-    "in": {
-      "column": "x",
-      "max_value": 10,
-      "min_value": 1,
-      "output_format": "BOOLEAN_ONLY"
-    }
-  },
-  {
-    "out": true,
-    "in": {
-      "column": "x",
-      "max_value": 20,
-      "min_value": 0,
-      "output_format": "BOOLEAN_ONLY"
-    }
-  },
-  {
-    "out": false,
-    "in": {
-      "column": "x",
-      "max_value": 9,
-      "min_value": 1,
-      "output_format": "BOOLEAN_ONLY"
-    }
-  },
-  {
-    "out": false,
-    "in": {
-      "column": "x",
-      "max_value": 10,
-      "min_value": 3,
-      "output_format": "BOOLEAN_ONLY"
-    }
-  },
-  {
-    "out": {
-      "exception_list": [],
-      "exception_index_list": [],
-      "success": true
+    {
+      "out": true,
+      "in": {
+        "column": "x",
+        "max_value": 10,
+        "min_value": 1,
+        "output_format": "BOOLEAN_ONLY"
+      }
     },
-    "in": {
-      "column": "x",
-      "max_value": 10,
-      "min_value": 1,
-      "mostly": 0.9
-    }
-  },
-  {
-    "out": {
-      "exception_list": [],
-      "exception_index_list": [],
-      "success": true
+    {
+      "out": true,
+      "in": {
+        "column": "x",
+        "max_value": 20,
+        "min_value": 0,
+        "output_format": "BOOLEAN_ONLY"
+      }
     },
-    "in": {
-      "column": "x",
-      "max_value": 20,
-      "min_value": 0,
-      "mostly": 0.9
-    }
-  },
-  {
-    "out": {
-      "exception_list": [
-        10
-      ],
-      "exception_index_list": [
-        9
-      ],
-      "success": true
+    {
+      "out": false,
+      "in": {
+        "column": "x",
+        "max_value": 9,
+        "min_value": 1,
+        "output_format": "BOOLEAN_ONLY"
+      }
     },
-    "in": {
-      "column": "x",
-      "max_value": 9,
-      "min_value": 1,
-      "mostly": 0.9
-    }
-  },
-  {
-    "out": {
-      "exception_list": [
-        1,
-        2
-      ],
-      "exception_index_list": [
-        0,
-        1
-      ],
-      "success": false
+    {
+      "out": false,
+      "in": {
+        "column": "x",
+        "max_value": 10,
+        "min_value": 3,
+        "output_format": "BOOLEAN_ONLY"
+      }
     },
-    "in": {
-      "column": "x",
-      "max_value": 10,
-      "min_value": 3,
-      "mostly": 0.9
-    }
-  },
-  {
-    "in": {
-      "column": "y",
-      "max_value": 10,
-      "min_value": 1,
-      "mostly": 0.95,
-      "catch_exceptions": true
+    {
+      "out": {
+        "exception_list": [],
+        "exception_index_list": [],
+        "success": true
+      },
+      "in": {
+        "column": "x",
+        "max_value": 10,
+        "min_value": 1,
+        "mostly": 0.9
+      }
     },
-    "error":{
-      "traceback_substring" : "TypeError: Column values are of type str, but min_value and/or max_value are not."
-    }
-  },
-  {
-    "in": {
-      "column": "y",
-      "max_value": 10,
-      "min_value": 1,
-      "mostly": 0.9,
-      "catch_exceptions": true
+    {
+      "out": {
+        "exception_list": [],
+        "exception_index_list": [],
+        "success": true
+      },
+      "in": {
+        "column": "x",
+        "max_value": 20,
+        "min_value": 0,
+        "mostly": 0.9
+      }
     },
-    "error":{
-      "traceback_substring" : "TypeError: Column values are of type str, but min_value and/or max_value are not."
-    }
-  },
-  {
-    "in": {
-      "column": "y",
-      "max_value": 10,
-      "min_value": 1,
-      "mostly": 0.8,
-      "catch_exceptions": true
+    {
+      "out": {
+        "exception_list": [
+          10
+        ],
+        "exception_index_list": [
+          9
+        ],
+        "success": true
+      },
+      "in": {
+        "column": "x",
+        "max_value": 9,
+        "min_value": 1,
+        "mostly": 0.9
+      }
     },
-    "error":{
-      "traceback_substring" : "TypeError: Column values are of type str, but min_value and/or max_value are not."
-    }
-   },
-  {
-    "out": {
-      "exception_list": [
-        5
-      ],
-      "exception_index_list": [
-        4
-      ],
-      "success": false
+    {
+      "out": {
+        "exception_list": [
+          1,
+          2
+        ],
+        "exception_index_list": [
+          0,
+          1
+        ],
+        "success": false
+      },
+      "in": {
+        "column": "x",
+        "max_value": 10,
+        "min_value": 3,
+        "mostly": 0.9
+      }
     },
-    "in": {
-      "column": "z",
-      "max_value": 4,
-      "min_value": 1,
-      "mostly": 0.9
-    }
-  },
-  {
-    "out": {
-      "exception_list": [
-        5
-      ],
-      "exception_index_list": [
-        4
-      ],
-      "success": true
+    {
+      "in": {
+        "column": "y",
+        "max_value": 10,
+        "min_value": 1,
+        "mostly": 0.95,
+        "catch_exceptions": true
+      },
+      "error":{
+        "traceback_substring" : "TypeError: Column values, min_value, and max_value must either be None or of the same type."
+      }
     },
-    "in": {
-      "column": "z",
-      "max_value": 4,
-      "min_value": 1,
-      "mostly": 0.8
-    }
-  },
-  {
-    "out": {
-      "exception_list": [
-        "Jan 01 1870 12:00:01",
-        "Dec 31 1999 12:00:01",
-        "Jan 01 2001 12:00:01"
-      ],
-      "exception_index_list": [
-        0, 1, 9
-      ],
-      "success": false
+    {
+      "in": {
+        "column": "y",
+        "max_value": 10,
+        "min_value": 1,
+        "mostly": 0.9,
+        "catch_exceptions": true
+      },
+      "error":{
+        "traceback_substring" : "TypeError: Column values, min_value, and max_value must either be None or of the same type."
+      }
     },
-    "in": {
-      "column": "ts",
-      "max_value": "Dec 31 2000",
-      "min_value": "Jan 01 2000",
-      "parse_strings_as_datetimes" : true
-    }
-  },
-  {
-    "in": {
-      "column": "numeric",
-      "max_value": 0,
-      "min_value": 10,
-      "catch_exceptions": true
+    {
+      "in": {
+        "column": "y",
+        "max_value": 10,
+        "min_value": 1,
+        "mostly": 0.8,
+        "catch_exceptions": true
+      },
+      "error":{
+        "traceback_substring" : "TypeError: Column values, min_value, and max_value must either be None or of the same type."
+      }
+     },
+    {
+      "out": {
+        "exception_list": [
+          5
+        ],
+        "exception_index_list": [
+          4
+        ],
+        "success": false
+      },
+      "in": {
+        "column": "z",
+        "max_value": 4,
+        "min_value": 1,
+        "mostly": 0.9
+      }
     },
-    "error":{
-      "traceback_substring" : "TypeError: Column values are of type str, but min_value and/or max_value are not."
+    {
+      "out": {
+        "exception_list": [
+          5
+        ],
+        "exception_index_list": [
+          4
+        ],
+        "success": true
+      },
+      "in": {
+        "column": "z",
+        "max_value": 4,
+        "min_value": 1,
+        "mostly": 0.8
+      }
+    },
+    {
+      "out": {
+        "exception_list": [
+          "Jan 01 1870 12:00:01",
+          "Dec 31 1999 12:00:01",
+          "Jan 01 2001 12:00:01"
+        ],
+        "exception_index_list": [
+          0, 1, 9
+        ],
+        "success": false
+      },
+      "in": {
+        "column": "ts",
+        "max_value": "Dec 31 2000",
+        "min_value": "Jan 01 2000",
+        "parse_strings_as_datetimes" : true
+      }
+    },
+    {
+      "in": {
+        "column": "numeric",
+        "max_value": 0,
+        "min_value": 10,
+        "catch_exceptions": true
+      },
+      "error":{
+        "traceback_substring" : "TypeError: Column values, min_value, and max_value must either be None or of the same type."
+      }
     }
-  }
-]
+  ]
+}
