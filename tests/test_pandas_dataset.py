@@ -629,7 +629,7 @@ class TestPandasDataset(unittest.TestCase):
             out = D.expect_column_values_to_be_between(**t['in'])
 
             # print '-'*80
-            print(json.dumps(t['in'], indent=2))
+            print(t)
             # print(json.dumps(out, indent=2))
 
             if 'out' in t:
