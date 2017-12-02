@@ -53,7 +53,6 @@ class TestCLI(unittest.TestCase):
           print (result)
           print ("=== Error ===================================================")
           print(ve)
-          print(result)
           json_result = {}
 
         # print("^"*80)
@@ -137,9 +136,9 @@ class TestCLI(unittest.TestCase):
                     "min_value": 20
                   }, 
                   "summary_obj": {
-                    "element_count": 756, 
-                    "missing_percent": 0, 
-                    "missing_count": -557
+                    "element_count": 1313, 
+                    "missing_percent": 0.4242193450114242, 
+                    "missing_count": 557
                   }
                 }, 
                 {
