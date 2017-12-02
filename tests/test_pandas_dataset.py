@@ -644,9 +644,9 @@ class TestPandasDataset(unittest.TestCase):
         for t in T:
             out = D.expect_column_values_to_be_between(**t['in'])#, **t['kwargs'])
 
-            print '-'*80
-            print(json.dumps(t['in'], indent=2))
-            print(json.dumps(out, indent=2))
+            # print '-'*80
+            # print(json.dumps(t['in'], indent=2))
+            # print(json.dumps(out, indent=2))
 
             if 'out' in t:
                 self.assertEqual(out, t['out'])
