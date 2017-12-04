@@ -768,14 +768,14 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
     @DocInherit
     @MetaPandasDataSet.column_aggregate_expectation
-    def expect_column_chisquare_test_p_value_greater_than(self, column, partition_object=None, p=0.05, tail_weight_holdout=0,
-                                                          output_format=None, include_config=False, catch_exceptions=None, meta=None):
+    def expect_column_chisquare_test_p_value_to_be_greater_than(self, column, partition_object=None, p=0.05, tail_weight_holdout=0,
+                                                                output_format=None, include_config=False, catch_exceptions=None, meta=None):
         if not is_valid_categorical_partition_object(partition_object):
             raise ValueError("Invalid partition object.")
 
         observed_frequencies = column.value_counts()
         # Convert to Series object to allow joining on index values
-        expected_column = pd.Series(partition_object['weights'], index=partition_object['partition'], name='expected') * len(column)
+        expected_column = pd.Series(partition_object['weights'], index=partition_object['values'], name='expected') * len(column)
         # Join along the indices to allow proper comparison of both types of possible missing values
         test_df = pd.concat([expected_column, observed_frequencies], axis = 1)
 
@@ -800,7 +800,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
                         "partition": test_df.index.tolist(),
                         "weights": test_df[column.name].tolist()
                     },
-                    "test_partition": {
+                    "expected_partition": {
                         "partition": test_df.index.tolist(),
                         "weights": test_df['expected'].tolist()
                     }
@@ -811,28 +811,28 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
     @DocInherit
     @MetaPandasDataSet.column_aggregate_expectation
-    def expect_column_bootstrapped_ks_test_p_value_greater_than(self, column, partition_object=None, p=0.05, bootstrap_samples=0, bootstrap_sample_size=None,
-                                                                output_format=None, include_config=False, catch_exceptions=None, meta=None):
+    def expect_column_bootstrapped_ks_test_p_value_to_be_greater_than(self, column, partition_object=None, p=0.05, bootstrap_samples=None, bootstrap_sample_size=None,
+                                                                      output_format=None, include_config=False, catch_exceptions=None, meta=None):
         if not is_valid_continuous_partition_object(partition_object):
             raise ValueError("Invalid continuous partition object.")
 
-        if (partition_object['partition'][0] == -np.inf) or (partition_object['partition'][-1] == np.inf):
+        if (partition_object['bins'][0] == -np.inf) or (partition_object['bins'][-1] == np.inf):
             raise ValueError("Partition endpoints must be finite.")
 
         test_cdf = np.append(np.array([0]), np.cumsum(partition_object['weights']))
 
         def estimated_cdf(x):
-            return np.interp(x, partition_object['partition'], test_cdf)
+            return np.interp(x, partition_object['bins'], test_cdf)
 
-        if bootstrap_samples == 0:
+        if bootstrap_samples is None:
             bootstrap_samples = 1000
 
-        if bootstrap_sample_size == None:
-            ## Sampling too many (or not bootstrapping) will make the test too sensitive to the fact that we've
-            ## compressed via a partition.
+        if bootstrap_sample_size is None:
+            # Sampling too many elements (or not bootstrapping) will make the test too sensitive to the fact that we've
+            # compressed via a partition.
 
-            ## Sampling too few elements will make the test insensitive to significant differences, especially
-            ## for nonoverlapping ranges.
+            # Sampling too few elements will make the test insensitive to significant differences, especially
+            # for nonoverlapping ranges.
             bootstrap_sample_size = len(partition_object['weights']) * 2
 
         results = [stats.kstest(
@@ -840,7 +840,6 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
                         estimated_cdf)[1]
                    for k in range(bootstrap_samples)]
 
-        # Ref: https://blogs.sas.com/content/iml/2011/11/02/how-to-compute-p-values-for-a-bootstrap-distribution.html
         test_result = (1 + sum(x >= p for x in results)) / (bootstrap_samples + 1)
 
         result_obj = {
@@ -850,12 +849,12 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
                     "bootstrap_samples": bootstrap_samples,
                     "bootstrap_sample_size": bootstrap_sample_size,
                     "observed_cdf": {
-                        "partition": partition_object['partition'],
-                        "cdf_vals": [estimated_cdf(x) for x in partition_object['partition']]
+                        "bins": partition_object['bins'],
+                        "cdf_values": [estimated_cdf(x) for x in partition_object['bins']]
                     },
-                    "test_cdf": {
-                        "partition": partition_object['partition'],
-                        "cdf_vals": np.append(np.array([0]), np.cumsum(partition_object['weights'])).tolist()
+                    "expected_cdf": {
+                        "bins": partition_object['bins'],
+                        "cdf_values": np.append(np.array([0]), np.cumsum(partition_object['weights'])).tolist()
                     }
                 }
             }
@@ -864,9 +863,9 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
     @DocInherit
     @MetaPandasDataSet.column_aggregate_expectation
-    def expect_column_kl_divergence_less_than(self, column, partition_object=None, threshold=None,
-                                              tail_weight_holdout=0, internal_weight_holdout=0,
-                                              output_format=None, include_config=False, catch_exceptions=None, meta=None):
+    def expect_column_kl_divergence_to_be_less_than(self, column, partition_object=None, threshold=None,
+                                                    tail_weight_holdout=0, internal_weight_holdout=0,
+                                                    output_format=None, include_config=False, catch_exceptions=None, meta=None):
         if not is_valid_partition_object(partition_object):
             raise ValueError("Invalid partition object.")
 
@@ -879,19 +878,14 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         if (not isinstance(internal_weight_holdout, (int, float))) or (internal_weight_holdout < 0) or (internal_weight_holdout > 1):
             raise ValueError("internal_weight_holdout must be between zero and one.")
 
-        evaluation_partition = {
-            'partition': np.array(partition_object['partition']),
-            'weights': np.array(partition_object['weights'])
-        }
-
-        if (len(evaluation_partition['weights']) == len(evaluation_partition['partition'])):
-            ## Data are expected to be discrete, use value_counts
-            observed_weights = column.value_counts() / len(column)
-            expected_weights = pd.Series(evaluation_partition['weights'], index=evaluation_partition['partition'], name='expected')
-            test_df = pd.concat([expected_weights, observed_weights], axis=1)
-
+        if is_valid_categorical_partition_object(partition_object):
             if internal_weight_holdout > 0:
                 raise ValueError("Internal weight holdout cannot be used for discrete data.")
+
+            # Data are expected to be discrete, use value_counts
+            observed_weights = column.value_counts() / len(column)
+            expected_weights = pd.Series(partition_object['weights'], index=partition_object['values'], name='expected')
+            test_df = pd.concat([expected_weights, observed_weights], axis=1)
 
             na_counts = test_df.isnull().sum()
 
@@ -906,47 +900,65 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
             else:
                 qk = test_df['expected']
 
+            kl_divergence = stats.entropy(pk, qk)
+
+            result_obj = {
+                "success": kl_divergence <= threshold,
+                "true_value": kl_divergence,
+                "summary_obj": {
+                    "observed_partition": {
+                        "bins": test_df.index.tolist(),
+                        "weights": pk.tolist()
+                    },
+                    "expected_partition": {
+                        "partition": test_df.index.tolist(),
+                        "weights": qk.tolist()
+                    }
+                }
+            }
+
         else:
-            # Compute observed frequencies against the distribution as given:
-            hist, bin_edges = np.histogram(column, evaluation_partition['partition'], density=False)
+            # Data are expected to be continuous; discretize first
+            hist, bin_edges = np.histogram(column, partition_object['bins'], density=False)
 
             # Add in the frequencies observed above or below the provided partition:
-            below_partition = len(np.where(column < np.min(evaluation_partition['partition']))[0])
-            above_partition = len(np.where(column > np.max(evaluation_partition['partition']))[0])
+            below_partition = len(np.where(column < np.min(partition_object['bins']))[0])
+            above_partition = len(np.where(column > np.max(partition_object['bins']))[0])
 
             evaluation_counts = np.concatenate(([below_partition], hist, [above_partition]))
             pk = evaluation_counts / len(column)
 
             # Compute baseline probabilities
             # Rescale given partition based on holdout values:
-            evaluation_partition['weights'] = evaluation_partition['weights'] * (1 - tail_weight_holdout - internal_weight_holdout)
+            expected_weights = np.array(partition_object['weights']) * (1 - tail_weight_holdout - internal_weight_holdout)
 
             # Assign internal weight holdout values if applicable
             if internal_weight_holdout > 0:
-                zero_count = len(evaluation_partition['weights']) - np.count_nonzero(evaluation_partition['weights'])
-                for index, value in enumerate(evaluation_partition['weights']):
-                    if value == 0:
-                        evaluation_partition['weights'][index] = internal_weight_holdout / zero_count
+                zero_count = len(expected_weights) - np.count_nonzero(expected_weights)
+                if zero_count > 0:
+                    for index, value in enumerate(expected_weights):
+                        if value == 0:
+                            expected_weights[index] = internal_weight_holdout / zero_count
 
             qk = np.concatenate(([tail_weight_holdout / 2],
-                                 evaluation_partition['weights'],
+                                 expected_weights,
                                  [tail_weight_holdout / 2]))
 
-        kl_divergence = stats.entropy(pk, qk)
+            kl_divergence = stats.entropy(pk, qk)
 
-        result_obj = {
-                "success": kl_divergence <= threshold,
-                "true_value": kl_divergence,
-                "summary_obj": {
-                    "observed_partition": {
-                        "partition": evaluation_partition['partition'].tolist(),
-                        "weights": pk.tolist()
-                    },
-                    "test_partition": {
-                        "partition": evaluation_partition['partition'].tolist(),
-                        "weights": qk.tolist()
+            result_obj = {
+                    "success": kl_divergence <= threshold,
+                    "true_value": kl_divergence,
+                    "summary_obj": {
+                        "observed_partition": {
+                            "bins": [-np.inf] + partition_object['bins'] + [np.inf],
+                            "weights": pk.tolist()
+                        },
+                        "expected_partition": {
+                            "partition": [-np.inf] + partition_object['bins'] + [np.inf],
+                            "weights": qk.tolist()
+                        }
                     }
                 }
-            }
 
         return result_obj
