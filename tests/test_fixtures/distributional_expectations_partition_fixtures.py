@@ -16,11 +16,11 @@ The partitions should be built from distributional_expectations_data_base.csv. T
 """
 
 def generate_new_data():
-    norm_0_1 = stats.norm.rvs(0, 1, 100)
-    norm_1_1 = stats.norm.rvs(1, 1, 100)
-    norm_10_1 = stats.norm.rvs(10, 1, 100)
-    bimodal = np.concatenate((norm_0_1[:50], norm_10_1[50:]))
-    categorical_fixed = (['A'] * 54) + (['B'] * 32) + (['C'] * 14)
+    norm_0_1 = stats.norm.rvs(0, 1, 1000)
+    norm_1_1 = stats.norm.rvs(1, 1, 1000)
+    norm_10_1 = stats.norm.rvs(10, 1, 1000)
+    bimodal = np.concatenate((norm_0_1[:500], norm_10_1[500:]))
+    categorical_fixed = (['A'] * 540) + (['B'] * 320) + (['C'] * 140)
 
     return pd.DataFrame( {
         'norm_0_1': norm_0_1,
@@ -50,7 +50,7 @@ def generate_new_partitions(df):
     test_partitions['categorical_fixed'] = partition_object
     alt_partition = ge.dataset.util.categorical_partition_data(df['categorical_fixed'])
     # overwrite weights with uniform weights to give a testing dataset
-    alt_partition['weights'] = [1./len(alt_partition['partition'])] * len(alt_partition['partition'])
+    alt_partition['weights'] = [1./len(alt_partition['values'])] * len(alt_partition['values'])
     test_partitions['categorical_fixed_alternate'] = alt_partition
 
     return test_partitions

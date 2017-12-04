@@ -1012,55 +1012,66 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
 
     ### Distributional expectations
-    def expect_column_chisquare_test_p_value_greater_than(self, column, partition_object=None, p=0.05, tail_weight_holdout=0,
-                                                          output_format=None, include_config=False, catch_exceptions=None, meta=None):
-        """
-        Expect the values in this column to match the distribution of the specified categorical vals and their expected_frequencies. \
-
-        Args:
-            :param column (str): The column name
-            :param partition_object (dict): A dictionary containing partition (categorical values) and associated weights.
-            :param p (float) = 0.05: The p-value threshold for the Chi-Squared test.\
-                For values below the specified threshold the expectation will return false, rejecting the null hypothesis that the distributions are the same.
-            :param tail_weight_holdout: the amount of weight to split uniformly and add to the tails of the histogram (the area between -Infinity and the data's min value and between the data's max value and Infinity)
-
-        Returns:
-            {
-                "success": (bool) True if the column passed the expectation,
-                "true_value": (float) the true pvalue of the ChiSquared test
-            }
-        """
-        raise NotImplementedError
-
-    def expect_column_bootstrapped_ks_test_p_value_greater_than(self, column, partition_object=None, p=0.05, bootstrap_samples=0, bootstrap_sample_size=0,
+    def expect_column_chisquare_test_p_value_to_be_greater_than(self, column, partition_object=None, p=0.05, tail_weight_holdout=0,
                                                                 output_format=None, include_config=False, catch_exceptions=None, meta=None):
         """
-        Expect the values in this column to match the distribution implied by the specified partition and cdf_vals. \
-        The implied CDF is constructed as a linear interpolation of the provided cdf_vals.
+        Expect the values in this column to match the distribution of the specified categorical values and their expected weights. \
+        The expected distribution is calculated by scaling the weights according to the size of values in the test data.
 
-        Args:
-            column (str): The column name
-            partition_object (dict): A dictionary containing partition (bin edges) and associated weights.
-                - partition (list): A list of values that correspond to the endpoints of an implied partition on the real number line.
-                - weights (list): A list of weights. They should sum to one.
-            p (float) = 0.05: The p-value threshold for the Kolmogorov-Smirnov test.\
-                For values below the specified threshold the expectation will return false, rejecting the null hypothesis that the distributions are the same.
-            bootstrap_samples (int) = 0: The number of bootstrapping rounds to use in building the estimated pvalue. \
-                If zero, chooses a default number of rounds (1000).
-            bootstrap_sample_size (int) = None: The number of samples to use in each bootstrapping test. A larger sample size will increase the specificity of the test.
-                If zero, chooses based on a heuristic from the size of the partition object (2 * len(partition_object['weights'])).
-        Returns:
-            {
-                "success": (bool) True if the column passed the expectation,
-                "true_value": (float) the true pvalue of the KS test
+        :param column (str): The column name
+        :param partition_object (dict): A dictionary containing partition (categorical values) and associated weights.
+        :param p (float) = 0.05: The p-value threshold for the Chi-Squared test.\
+            For values below the specified threshold the expectation will return false, rejecting the null hypothesis that the distributions are the same.
+        :param tail_weight_holdout: the amount of weight to split uniformly and add to the tails of the histogram (the area between -Infinity and the data's min value and between the data's max value and Infinity)
+
+        :return: result_obj including:
+        result_obj including:
+            "success": (Boolean) True if the column passed the expectation
+            "true_value": (float) The true KL divergence (relative entropy)
+            "summary_obj": {
+                "observed_partition": The partition observed in the data
+                "expected_partition": The partition against which the data were compared, after applying specified holdouts.
             }
         """
         raise NotImplementedError
 
-    def expect_column_kl_divergence_less_than(self, column, partition_object=None, threshold=None, tail_weight_holdout=0, internal_weight_holdout=0,
-                                              output_format=None, include_config=False, catch_exceptions=None, meta=None):
-        """Expect the values in this column to have lower Kulback-Leibler divergence (relative entropy) with the
-        distribution provided in partition_object of less than the provided threshold.
+    def expect_column_bootstrapped_ks_test_p_value_to_be_greater_than(self, column, partition_object=None, p=0.05, bootstrap_samples=None, bootstrap_sample_size=None,
+                                                                      output_format=None, include_config=False, catch_exceptions=None, meta=None):
+        """Expect the values in this column to match the distribution implied by the specified partition. \
+        The expected CDF is constructed as a linear interpolation between the bins, using the provided weights.
+
+        :param column: The column name to test
+        :param partition_object: The expected partition object.
+        :param p: The p-value threshold for the Kolmogorov-Smirnov test.\
+            For values below the specified threshold the expectation will return false, rejecting the null hypothesis that the distributions are the same.
+        :param bootstrap_samples: The number of times to bootstrap. If None, defaults to 1000.
+        :param bootstrap_sample_size: The number of samples per bootstrap. If None, defaults to 2 * len(partition_object['weights'])\
+            A larger sample will increase the specificity of the test.
+
+        :return: result_obj including:
+            "success": (Boolean) True if the column passed the expectation
+            "true_value": (float) The true p-value of the KS test
+            "summary_obj": {
+                "bootstrap_samples": The number of bootstrap samples used
+                "bootstrap_sample_size": The number of samples taken from the column in each bootstrap sample
+                "observed_cdf": The cumulative density function observed in the data
+                "expected_cdf": The cumulative density function expected based on the partition object
+            }
+        """
+        raise NotImplementedError
+
+    def expect_column_kl_divergence_to_be_less_than(self, column, partition_object=None, threshold=None, tail_weight_holdout=0, internal_weight_holdout=0,
+                                                    output_format=None, include_config=False, catch_exceptions=None, meta=None):
+        """Expect the Kulback-Leibler divergence (relative entropy) of the specified column and the partition object to be lower than the provided threshold.
+        If the partition_object is categorical, this expectation will expect the values in column to also be categorical.
+            * If the column includes values that are not present in the partition, the tail_weight_holdout will be equally split among those values, providing a mechanism to weaken the strictness of the expectation (otherwise, relative entropy would immediately go to infinity).
+            * If the partition includes values that are not present in the column, the test will simply include zero weight for that value.
+        If the partition_object is continuous, this expectation will discretize the values in the column according to the bins specified in the partition_object, and apply the test to the resulting distribution.
+            * The internal_weight_holdout and tail_weight_holdout parameters provide a mechanism to weaken the expectation, since an expected weight of zero would drive relative entropy to be infinite if any data are observed in that interval.
+            * If internal_weight_holdout is specified, that value will be distributed equally among any intervals with weight zero in the partition_object.
+            * If tail_weight_holdout is specified, that value will be appended to the tails of the bins ((-Infinity, min(bins)) and (max(bins), Infinity).
+
+        When the column includes values that do not
 
         :param column: the column to which to apply the expectation
         :param partition_object: the partition_object with which to compare the data in column
@@ -1068,6 +1079,13 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         :param internal_weight_holdout: the amount of weight to split uniformly among zero-weighted partition elements in a given partition.
         :param tail_weight_holdout: the amount of weight to split uniformly and add to the tails of the histogram (the area between -Infinity and the data's min value and between the data's max value and Infinity)
 
-        :return: result_object consistent with the specified output_format
+        :return: result_obj including:
+        result_obj including:
+            "success": (Boolean) True if the column passed the expectation
+            "true_value": (float) The true KL divergence (relative entropy)
+            "summary_obj": {
+                "observed_partition": The partition observed in the data
+                "expected_partition": The partition against which the data were compared, after applying specified holdouts.
+            }
         """
         raise NotImplementedError
