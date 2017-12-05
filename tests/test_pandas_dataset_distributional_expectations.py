@@ -386,10 +386,17 @@ class TestDistributionalExpectations(unittest.TestCase):
         self.assertDictEqual(out['summary_obj']['observed_partition'], summary_observed_partition)
         self.assertDictEqual(out['summary_obj']['expected_partition'], summary_expected_partition)
 
-        self.assertEqual(
-            json.dumps(test_df.get_expectations_config()['expectations']),
-            '[{"expectation_type": "expect_column_to_exist", "kwargs": {"column": "x"}}, {"expectation_type": "expect_column_kl_divergence_to_be_less_than", "kwargs": {"column": "x", "partition_object": {"weights": [0.1, 0.2, 0.4, 0.2, 0.1], "bins": [-Infinity, 0, 1, 2, 3, Infinity]}, "threshold": 0.5}}]'
-        )
+        # Confirm serialization of resulting expectations config
+        expectation_config = test_df.get_expectations_config()
+        found_expectation = False
+        for expectation in expectation_config['expectations']:
+            if 'expectation_type' in expectation and expectation['expectation_type'] == 'expect_column_kl_divergence_to_be_less_than':
+                self.assertEqual(
+                    json.dumps(expectation['kwargs']['partition_object']['bins']),
+                    '[-Infinity, 0, 1, 2, 3, Infinity]'
+                )
+                found_expectation = True
+        self.assertTrue(found_expectation)
 
     def test_expect_column_kl_divergence_to_be_less_than_continuous(self):
         T = [
