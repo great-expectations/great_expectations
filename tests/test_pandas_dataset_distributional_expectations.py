@@ -40,14 +40,14 @@ class TestDistributionalExpectations(unittest.TestCase):
                     'out': {'success': False, 'true_value': 5.1397782097623862e-53,
                             'summary_obj': {
                                 'observed_partition': {
-                                    'partition': [u'A', u'B', u'C'],
+                                    'values': [u'A', u'B', u'C'],
                                     'weights': [540, 320, 140]
                                 },
                                 'missing_percent': 0.0,
                                 'element_count': 1000,
                                 'missing_count': 0,
                                 'expected_partition': {
-                                    'partition': [u'A', u'B', u'C'],
+                                    'values': [u'A', u'B', u'C'],
                                     'weights': [333.3333333333333, 333.3333333333333, 333.3333333333333]
                                 }
                             }

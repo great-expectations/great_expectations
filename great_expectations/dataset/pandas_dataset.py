@@ -797,11 +797,11 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
                 "true_value": test_result,
                 "summary_obj": {
                     "observed_partition": {
-                        "partition": test_df.index.tolist(),
+                        "values": test_df.index.tolist(),
                         "weights": test_df[column.name].tolist()
                     },
                     "expected_partition": {
-                        "partition": test_df.index.tolist(),
+                        "values": test_df.index.tolist(),
                         "weights": test_df['expected'].tolist()
                     }
                 }
