@@ -257,6 +257,115 @@ class TestDistributionalExpectations(unittest.TestCase):
                 self.assertTrue(np.allclose(out['summary_obj']['expected_partition']['bins'],t['out']['summary_obj']['expected_partition']['bins']))
                 self.assertTrue(np.allclose(out['summary_obj']['expected_partition']['weights'],t['out']['summary_obj']['expected_partition']['weights']))
 
+    def test_expect_column_bootstrapped_ks_test_p_value_to_be_greater_than_expanded_partitions(self):
+        # Extend observed above and below expected
+        out = self.D.expect_column_bootstrapped_ks_test_p_value_to_be_greater_than('norm_0_1', {'bins': np.linspace(-1, 1, 11), 'weights': [0.1] * 10},
+                                                                                   output_format='SUMMARY')
+        self.assertTrue(out['summary_obj']['observed_cdf']['x'][0] < -1)
+        self.assertTrue(out['summary_obj']['observed_cdf']['x'][-1] > 1)
+        # Extend observed below expected
+        out = self.D.expect_column_bootstrapped_ks_test_p_value_to_be_greater_than('norm_0_1',
+                                                                                   {'bins': np.linspace(-10, 1, 11), 'weights': [0.1] * 10},
+                                                                                   output_format='SUMMARY')
+        self.assertTrue(out['summary_obj']['observed_cdf']['x'][0] == -10)
+        self.assertTrue(out['summary_obj']['observed_cdf']['x'][-1] > 1)
+        # Extend observed above expected
+        out = self.D.expect_column_bootstrapped_ks_test_p_value_to_be_greater_than('norm_0_1',
+                                                                                   {'bins': np.linspace(-1, 10, 11), 'weights': [0.1] * 10},
+                                                                                   output_format='SUMMARY')
+        self.assertTrue(out['summary_obj']['observed_cdf']['x'][0] < -1)
+        self.assertTrue(out['summary_obj']['observed_cdf']['x'][-1] == 10)
+        # Extend expected above and below observed
+        out = self.D.expect_column_bootstrapped_ks_test_p_value_to_be_greater_than('norm_0_1',
+                                                                                   {'bins': np.linspace(-10, 10, 11), 'weights': [0.1] * 10},
+                                                                                   output_format='SUMMARY')
+        self.assertTrue(out['summary_obj']['observed_cdf']['x'][0] == -10)
+        self.assertTrue(out['summary_obj']['observed_cdf']['x'][-1] == 10)
+
+    def test_expect_column_bootstrapped_ks_test_p_value_to_be_greater_than_bad_partition(self):
+        with self.assertRaises(ValueError):
+            self.D.expect_column_bootstrapped_ks_test_p_value_to_be_greater_than('norm_0_1', {'bins': [-np.inf, 0, 1, 2, 3], 'weights': [0.25, 0.25, 0.25, 0.25]})
+
+    def test_expect_column_kl_divergence_to_be_less_than_continuous_infinite_partition(self):
+        # Manually build a partition extending to -Inf and Inf
+        test_partition = self.test_partitions['norm_0_1_auto']
+        test_partition['bins'] = [-np.inf] + test_partition['bins'] + [np.inf]
+        scaled_weights = np.array(test_partition['weights']) * (1-0.01)
+        test_partition['weights'] = [0.005] + scaled_weights.tolist() + [0.005]
+        out = self.D.expect_column_kl_divergence_to_be_less_than('norm_0_1', test_partition, 0.5, internal_weight_holdout=0.01)
+        self.assertTrue(out['success'])
+
+        # This should fail: tails have internal weight zero, which is highly unlikely.
+        out = self.D.expect_column_kl_divergence_to_be_less_than('norm_0_1', test_partition, 0.5)
+        self.assertFalse(out['success'])
+
+        # Build one-sided to infinity test partitions
+        test_partition = {
+            'bins': [-np.inf, 0, 1, 2, 3],
+            'weights': [0.25, 0.25, 0.25, 0.25]
+        }
+        summary_expected_partition = {
+            'bins': [-np.inf, 0, 1, 2, 3, np.inf],
+            'weights': [0.25, 0.25, 0.25, 0.25, 0]
+        }
+        summary_observed_partition = {
+            'bins': [-np.inf, 0, 1, 2, 3, np.inf],
+            'weights': [0.25, 0.25, 0.25, 0.25, 0]
+        }
+        test_df = ge.dataset.PandasDataSet(
+            {'x': [-0.5, 0.5, 1.5, 2.5]})
+        # This should succeed: our data match the partition
+        out = test_df.expect_column_kl_divergence_to_be_less_than('x', test_partition, 0.5, output_format='SUMMARY')
+        self.assertTrue(out['success'])
+        self.assertDictEqual(out['summary_obj']['observed_partition'], summary_observed_partition)
+        self.assertDictEqual(out['summary_obj']['expected_partition'], summary_expected_partition)
+
+        # Build one-sided to infinity test partitions
+        test_partition = {
+            'bins': [0, 1, 2, 3, np.inf],
+            'weights': [0.25, 0.25, 0.25, 0.25]
+        }
+        summary_expected_partition = {
+            'bins': [-np.inf, 0, 1, 2, 3, np.inf],
+            'weights': [0, 0.25, 0.25, 0.25, 0.25]
+        }
+        summary_observed_partition = {
+            'bins': [-np.inf, 0, 1, 2, 3, np.inf],
+            'weights': [0.2, 0.2, 0.2, 0.2, 0.2]
+        }
+        test_df = ge.dataset.PandasDataSet(
+            {'x': [-0.5, 0.5, 1.5, 2.5, 3.5]})
+        out = test_df.expect_column_kl_divergence_to_be_less_than('x', test_partition, 0.5, output_format='SUMMARY')
+        # This should fail: we expect zero weight less than 0
+        self.assertFalse(out['success'])
+        self.assertDictEqual(out['summary_obj']['observed_partition'], summary_observed_partition)
+        self.assertDictEqual(out['summary_obj']['expected_partition'], summary_expected_partition)
+
+        # Build two-sided to infinity test partition
+        test_partition = {
+            'bins': [-np.inf, 0, 1, 2, 3, np.inf],
+            'weights': [0.1, 0.2, 0.4, 0.2, 0.1]
+        }
+        summary_expected_partition = {
+            'bins': [-np.inf, 0, 1, 2, 3, np.inf],
+            'weights': [0.1, 0.2, 0.4, 0.2, 0.1]
+        }
+        summary_observed_partition = {
+            'bins': [-np.inf, 0, 1, 2, 3, np.inf],
+            'weights': [0.1, 0.2, 0.4, 0.2, 0.1]
+        }
+        test_df = ge.dataset.PandasDataSet(
+            {'x': [-0.5, 0.5, 0.5, 1.5, 1.5, 1.5, 1.5, 2.5, 2.5, 3.5]})
+        # This should succeed: our data match the partition
+        out = test_df.expect_column_kl_divergence_to_be_less_than('x', test_partition, 0.5, output_format='SUMMARY')
+        self.assertTrue(out['success'])
+        self.assertDictEqual(out['summary_obj']['observed_partition'], summary_observed_partition)
+        self.assertDictEqual(out['summary_obj']['expected_partition'], summary_expected_partition)
+
+        # Tail weight holdout is not defined for partitions already extending to infinity:
+        with self.assertRaises(ValueError):
+            test_df.expect_column_kl_divergence_to_be_less_than('x', test_partition, 0.5, tail_weight_holdout=0.01)
+
     def test_expect_column_kl_divergence_to_be_less_than_continuous(self):
         T = [
                 {
@@ -399,7 +508,10 @@ class TestDistributionalExpectations(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.D.expect_column_kl_divergence_to_be_less_than('norm_0_1', self.test_partitions['norm_0_1_auto'], threshold=0.1, tail_weight_holdout=2)
         with self.assertRaises(ValueError):
+            self.D.expect_column_kl_divergence_to_be_less_than('norm_0_1', self.test_partitions['norm_0_1_auto'], threshold=0.1, internal_weight_holdout=2)
+        with self.assertRaises(ValueError):
             self.D.expect_column_kl_divergence_to_be_less_than('categorical_fixed', self.test_partitions['categorical_fixed'], threshold=0.1, internal_weight_holdout=0.01)
+
 
     def test_expect_column_bootstrapped_ks_test_p_value_to_be_greater_than_bad_parameters(self):
         with self.assertRaises(ValueError):
