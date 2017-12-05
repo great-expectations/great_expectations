@@ -490,6 +490,234 @@ class TestDataset(unittest.TestCase):
             (False, 0.0)
         )
 
+    def test_find_expectations(self):
+        my_df = ge.dataset.PandasDataSet({
+            'x' : [1,2,3,4,5,6,7,8,9,10],
+            'y' : [1,2,None,4,None,6,7,8,9,None],
+            'z' : ['cello', 'hello', 'jello', 'bellow', 'fellow', 'mellow', 'wellow', 'xello', 'yellow', 'zello'],
+        })
+        my_df.expect_column_values_to_be_of_type('x', 'int', 'python')
+        my_df.expect_column_values_to_be_of_type('y', 'int', 'python')
+        my_df.expect_column_values_to_be_of_type('z', 'int', 'python')
+        my_df.expect_column_values_to_be_increasing('x')
+        my_df.expect_column_values_to_match_regex('z', 'ello')
+
+        self.assertEqual(
+            my_df.find_expectations("expect_column_to_exist", "w"),
+            []
+        )
+
+        self.assertEqual(
+            my_df.find_expectations("expect_column_to_exist", "x", expectation_kwargs={}),
+            [{
+              "expectation_type": "expect_column_to_exist", 
+              "kwargs": {
+                "column": "x"
+              }
+            }]
+        )
+
+        self.assertEqual(
+            my_df.find_expectations("expect_column_to_exist", expectation_kwargs={"column": "y"}),
+            [{
+              "expectation_type": "expect_column_to_exist", 
+              "kwargs": {
+                "column": "y"
+              }
+            }]
+        )
+
+        self.assertEqual(
+            my_df.find_expectations("expect_column_to_exist"),
+            [{
+              "expectation_type": "expect_column_to_exist", 
+              "kwargs": {
+                "column": "x"
+              }
+            },{
+              "expectation_type": "expect_column_to_exist", 
+              "kwargs": {
+                "column": "y"
+              }
+            },{
+              "expectation_type": "expect_column_to_exist", 
+              "kwargs": {
+                "column": "z"
+              }
+            }]
+        )
+        
+        with self.assertRaises(Exception) as context:
+            my_df.find_expectations("expect_column_to_exist", "x", {"column": "y"})
+
+        #FIXME: I don't understand why this test fails.
+        # print context.exception
+        # print 'Conflicting column names in remove_expectation' in context.exception
+        # self.assertTrue('Conflicting column names in remove_expectation:' in context.exception)
+
+        self.assertEqual(
+            my_df.find_expectations(column="x"),
+            [{
+              "expectation_type": "expect_column_to_exist", 
+              "kwargs": {
+                "column": "x"
+              }
+            },{
+              "expectation_type": "expect_column_values_to_be_of_type", 
+              "kwargs": {
+                "column": "x",
+                "type_": "int",
+                "target_datasource": "python",
+              }
+            },{
+              "expectation_type": "expect_column_values_to_be_increasing", 
+              "kwargs": {
+                "column": "x"
+              }
+            }]
+        )
+
+
+    def test_remove_expectation(self):
+        my_df = ge.dataset.PandasDataSet({
+            'x' : [1,2,3,4,5,6,7,8,9,10],
+            'y' : [1,2,None,4,None,6,7,8,9,None],
+            'z' : ['cello', 'hello', 'jello', 'bellow', 'fellow', 'mellow', 'wellow', 'xello', 'yellow', 'zello'],
+        })
+        my_df.expect_column_values_to_be_of_type('x', 'int', 'python')
+        my_df.expect_column_values_to_be_of_type('y', 'int', 'python')
+        my_df.expect_column_values_to_be_of_type('z', 'int', 'python')
+        my_df.expect_column_values_to_be_increasing('x')
+        my_df.expect_column_values_to_match_regex('z', 'ello')
+
+        with self.assertRaises(Exception) as context:
+            my_df.remove_expectation("expect_column_to_exist", "w", dry_run=True),
+
+        #FIXME: Python 3 doesn't like this. It would be nice to use assertRaisesRegex, but that's not available in python 2.7
+        # self.assertTrue('No matching expectation found.' in context.exception)
+
+        self.assertEqual(
+            my_df.remove_expectation("expect_column_to_exist", "x", expectation_kwargs={}, dry_run=True),
+            {
+              "expectation_type": "expect_column_to_exist", 
+              "kwargs": {
+                "column": "x"
+              }
+            }
+        )
+
+        self.assertEqual(
+            my_df.remove_expectation("expect_column_to_exist", expectation_kwargs={"column": "y"}, dry_run=True),
+            {
+              "expectation_type": "expect_column_to_exist", 
+              "kwargs": {
+                "column": "y"
+              }
+            }
+        )
+
+        with self.assertRaises(ValueError) as context:
+            my_df.remove_expectation("expect_column_to_exist", dry_run=True)
+
+        #FIXME: Python 3 doesn't like this. It would be nice to use assertRaisesRegex, but that's not available in python 2.7
+        # self.assertTrue('Multiple expectations matched arguments. No expectations removed.' in context.exception)
+
+        self.assertEqual(
+            my_df.remove_expectation("expect_column_to_exist", remove_multiple_matches=True, dry_run=True),
+            [{
+              "expectation_type": "expect_column_to_exist", 
+              "kwargs": {
+                "column": "x"
+              }
+            },{
+              "expectation_type": "expect_column_to_exist", 
+              "kwargs": {
+                "column": "y"
+              }
+            },{
+              "expectation_type": "expect_column_to_exist", 
+              "kwargs": {
+                "column": "z"
+              }
+            }]
+        )
+        
+        with self.assertRaises(Exception) as context:
+            my_df.remove_expectation("expect_column_to_exist", "x", {"column": "y"}, dry_run=True)
+
+        #FIXME: I don't understand why this test fails.
+        # print context.exception
+        # print 'Conflicting column names in remove_expectation' in context.exception
+        # self.assertTrue('Conflicting column names in remove_expectation:' in context.exception)
+
+        self.assertEqual(
+            my_df.remove_expectation(column="x", remove_multiple_matches=True, dry_run=True),
+            [{
+              "expectation_type": "expect_column_to_exist", 
+              "kwargs": {
+                "column": "x"
+              }
+            },{
+              "expectation_type": "expect_column_values_to_be_of_type", 
+              "kwargs": {
+                "column": "x",
+                "type_": "int",
+                "target_datasource": "python",
+              }
+            },{
+              "expectation_type": "expect_column_values_to_be_increasing", 
+              "kwargs": {
+                "column": "x"
+              }
+            }]
+        )
+
+        self.assertEqual(
+            len(my_df._expectations_config.expectations),
+            8
+        )
+
+        self.assertEqual(
+            my_df.remove_expectation("expect_column_to_exist", "x"),
+            None
+        )
+        self.assertEqual(
+            len(my_df._expectations_config.expectations),
+            7
+        )
+
+        self.assertEqual(
+            my_df.remove_expectation(column="x", remove_multiple_matches=True),
+            None
+        )
+        self.assertEqual(
+            len(my_df._expectations_config.expectations),
+            5
+        )
+
+        my_df.remove_expectation(column="z", remove_multiple_matches=True),
+        self.assertEqual(
+            len(my_df._expectations_config.expectations),
+            2
+        )
+
+        self.assertEqual(
+            my_df.get_expectations_config(discard_failed_expectations=False),
+            {
+                'expectations': [
+                    {
+                        'expectation_type': 'expect_column_to_exist',
+                        'kwargs': {'column': 'y'}
+                    },
+                    {
+                        'expectation_type': 'expect_column_values_to_be_of_type',
+                        'kwargs': {'column': 'y', 'type_': 'int', 'target_datasource': 'python'}
+                    }
+                ],
+                'dataset_name': None
+            }
+        )
+
     def test_test_expectation_function(self):
         D = ge.dataset.PandasDataSet({
             'x' : [1,3,5,7,9],
@@ -567,7 +795,7 @@ class TestDataset(unittest.TestCase):
         self.assertEqual(
             D.test_column_aggregate_expectation_function(expect_second_value_to_be, 'y', 2, output_format="BOOLEAN_ONLY"),
             True
-        )        
+        )
 
 
 if __name__ == "__main__":

@@ -196,6 +196,189 @@ class DataSet(object):
 
         self._expectations_config.expectations.append(expectation_config)
 
+    def _copy_and_clean_up_expectation(self,
+        expectation,
+        discard_output_format_kwargs=True,
+        discard_include_configs_kwargs=True,
+        discard_catch_exceptions_kwargs=True,
+    ):
+        new_expectation = copy.deepcopy(expectation)
+
+        if "success_on_last_run" in new_expectation:
+            del new_expectation["success_on_last_run"]
+
+        if discard_output_format_kwargs:
+            if "output_format" in new_expectation["kwargs"]:
+                del new_expectation["kwargs"]["output_format"]
+                # discards["output_format"] += 1
+
+        if discard_include_configs_kwargs:
+            if "include_configs" in new_expectation["kwargs"]:
+                del new_expectation["kwargs"]["include_configs"]
+                # discards["include_configs"] += 1
+
+        if discard_catch_exceptions_kwargs:
+            if "catch_exceptions" in new_expectation["kwargs"]:
+                del new_expectation["kwargs"]["catch_exceptions"]
+                # discards["catch_exceptions"] += 1
+
+        return new_expectation
+
+    def _copy_and_clean_up_expectations_from_indexes(
+        self,
+        match_indexes,
+        discard_output_format_kwargs=True,
+        discard_include_configs_kwargs=True,
+        discard_catch_exceptions_kwargs=True,
+    ):
+        rval = []
+        for i in match_indexes:
+            rval.append(
+                self._copy_and_clean_up_expectation(
+                    self._expectations_config.expectations[i],
+                    discard_output_format_kwargs,
+                    discard_include_configs_kwargs,
+                    discard_catch_exceptions_kwargs,
+                )
+            )
+
+        return rval
+
+    def find_expectation_indexes(self,
+        expectation_type=None,
+        column=None,
+        expectation_kwargs=None
+    ):
+        """Find matching expectations within _expectation_config.
+        Args:
+            expectation_type=None                : The name of the expectation type to be matched.
+            column=None                          : The name of the column to be matched.
+            expectation_kwargs=None              : A dictionary of kwargs to match against.
+        
+        Returns:
+            A list of indexes for matching expectation objects.
+            If there are no matches, the list will be empty.
+        """
+        if expectation_kwargs == None:
+            expectation_kwargs = {}
+
+        if "column" in expectation_kwargs and column != None and column != expectation_kwargs["column"]:
+            raise ValueError("Conflicting column names in remove_expectation: %s and %s" % (column, expectation_kwargs["column"]))
+
+        if column != None:
+            expectation_kwargs["column"] = column
+
+        match_indexes = []
+        for i, exp in enumerate(self._expectations_config.expectations):
+            if expectation_type == None or (expectation_type == exp['expectation_type']):
+                # if column == None or ('column' not in exp['kwargs']) or (exp['kwargs']['column'] == column) or (exp['kwargs']['column']==:
+                match = True
+                
+                for k,v in expectation_kwargs.items():
+                    if k in exp['kwargs'] and exp['kwargs'][k] == v:
+                        continue
+                    else:
+                        match = False
+
+                if match:
+                    match_indexes.append(i)
+
+        return match_indexes
+
+    def find_expectations(self,
+        expectation_type=None,
+        column=None,
+        expectation_kwargs=None,
+        discard_output_format_kwargs=True,
+        discard_include_configs_kwargs=True,
+        discard_catch_exceptions_kwargs=True,
+    ):
+        """Find matching expectations within _expectation_config.
+        Args:
+            expectation_type=None                : The name of the expectation type to be matched.
+            column=None                          : The name of the column to be matched.
+            expectation_kwargs=None              : A dictionary of kwargs to match against.
+            discard_output_format_kwargs=True    : In returned expectation object(s), suppress the `output_format` parameter.
+            discard_include_configs_kwargs=True  : In returned expectation object(s), suppress the `include_configs` parameter.
+            discard_catch_exceptions_kwargs=True : In returned expectation object(s), suppress the `catch_exceptions` parameter.
+        
+        Returns:
+            A list of matching expectation objects.
+            If there are no matches, the list will be empty.
+        """
+
+        match_indexes = self.find_expectation_indexes(
+            expectation_type,
+            column,
+            expectation_kwargs,
+        )
+
+        return self._copy_and_clean_up_expectations_from_indexes(
+            match_indexes,
+            discard_output_format_kwargs,
+            discard_include_configs_kwargs,
+            discard_catch_exceptions_kwargs,
+        )
+
+    def remove_expectation(self,
+        expectation_type=None,
+        column=None,
+        expectation_kwargs=None,
+        remove_multiple_matches=False,
+        dry_run=False,
+    ):
+        """Remove matching expectation(s) from _expectation_config.
+        Args:
+            expectation_type=None                : The name of the expectation type to be matched.
+            column=None                          : The name of the column to be matched.
+            expectation_kwargs=None              : A dictionary of kwargs to match against.
+            remove_multiple_matches=False        : Match multiple expectations
+            dry_run=False                        : Return a list of matching expectations without removing
+        
+        Returns:
+            None, unless dry_run=True.
+            If dry_run=True and remove_multiple_matches=False then return the expectation that *would be* removed.
+            If dry_run=True and remove_multiple_matches=True then return a list of expectations that *would be* removed.
+
+        Note:
+            If remove_expectation doesn't find any matches, it raises a ValueError.
+            If remove_expectation finds more than one matches and remove_multiple_matches!=True, it raises a ValueError.
+            If dry_run=True, then `remove_expectation` acts as a thin layer to find_expectations, with the default values for discard_output_format_kwargs, discard_include_configs_kwargs, and discard_catch_exceptions_kwargs
+        """
+
+        match_indexes = self.find_expectation_indexes(
+            expectation_type,
+            column,
+            expectation_kwargs,
+        )
+
+        if len(match_indexes) == 0:
+            raise ValueError('No matching expectation found.')
+
+        elif len(match_indexes) > 1:
+            if not remove_multiple_matches:
+                raise ValueError('Multiple expectations matched arguments. No expectations removed.')
+            else:
+
+                if not dry_run:
+                    self._expectations_config.expectations = [i for j, i in enumerate(self._expectations_config.expectations) if j not in match_indexes]
+                else:
+                    return self._copy_and_clean_up_expectations_from_indexes(match_indexes)
+
+        else: #Exactly one match
+            expectation = self._copy_and_clean_up_expectation(
+                self._expectations_config.expectations[match_indexes[0]]
+            )
+
+            if not dry_run:
+                del self._expectations_config.expectations[match_indexes[0]]
+
+            else:
+                if remove_multiple_matches:
+                    return [expectation]
+                else:
+                    return expectation
+
     def get_default_expectation_arguments(self):
         return self.default_expectation_args
 
@@ -210,7 +393,20 @@ class DataSet(object):
         discard_include_configs_kwargs=True,
         discard_catch_exceptions_kwargs=True,
         suppress_warnings=False
-    ):
+    ):        
+        """Returns _expectation_config as a JSON object, and perform some cleaning along the way.
+        Args:
+            discard_failed_expectations=True     : Only include expectations with success_on_last_run=True in the exported config.
+            discard_output_format_kwargs=True    : In returned expectation objects, suppress the `output_format` parameter.
+            discard_include_configs_kwargs=True  : In returned expectation objects, suppress the `include_configs` parameter.
+            discard_catch_exceptions_kwargs=True : In returned expectation objects, suppress the `catch_exceptions` parameter.
+        
+        Returns:
+            An expectation config.
+
+        Note:
+            get_expectations_config does not affect the underlying config at all. The returned config is a copy of _expectations_config, not the original object.
+        """
         config = dict(self._expectations_config)
         config = copy.deepcopy(config)
         expectations = config["expectations"]
@@ -233,6 +429,7 @@ class DataSet(object):
             expectations = new_expectations
 
         for expectation in expectations:
+            #FIXME: Factor this out into a new function. The logic is duplicated in remove_expectation, which calls _copy_and_clean_up_expectation
             if "success_on_last_run" in expectation:
                 del expectation["success_on_last_run"]
 
