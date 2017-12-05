@@ -10,8 +10,8 @@ class TestDistributionalExpectations(unittest.TestCase):
         super(TestDistributionalExpectations, self).__init__(*args, **kwargs)
         self.D = ge.read_csv('./tests/test_sets/distributional_expectations_data_test.csv')
 
-        with open('./tests/test_sets/test_partitions.json', 'r') as file:
-            self.test_partitions = json.loads(file.read())
+        with open('./tests/test_sets/test_partitions.json', 'r') as infile:
+            self.test_partitions = json.loads(infile.read())
 
     def test_expect_column_chisquare_test_p_value_to_be_greater_than(self):
         T = [
@@ -365,6 +365,26 @@ class TestDistributionalExpectations(unittest.TestCase):
         # Tail weight holdout is not defined for partitions already extending to infinity:
         with self.assertRaises(ValueError):
             test_df.expect_column_kl_divergence_to_be_less_than('x', test_partition, 0.5, tail_weight_holdout=0.01)
+
+    def test_expect_column_kl_divergence_to_be_less_than_continuous_serialized_infinite_partition(self):
+        with open('./tests/test_sets/test_partition_serialized_infinity_bins.json', 'r') as infile:
+            test_partition = json.loads(infile.read())['test_partition']
+
+        summary_expected_partition = {
+            'bins': [-np.inf, 0, 1, 2, 3, np.inf],
+            'weights': [0.1, 0.2, 0.4, 0.2, 0.1]
+        }
+        summary_observed_partition = {
+            'bins': [-np.inf, 0, 1, 2, 3, np.inf],
+            'weights': [0.1, 0.2, 0.4, 0.2, 0.1]
+        }
+        test_df = ge.dataset.PandasDataSet(
+            {'x': [-0.5, 0.5, 0.5, 1.5, 1.5, 1.5, 1.5, 2.5, 2.5, 3.5]})
+        # This should succeed: our data match the partition
+        out = test_df.expect_column_kl_divergence_to_be_less_than('x', test_partition, 0.5, output_format='SUMMARY')
+        self.assertTrue(out['success'])
+        self.assertDictEqual(out['summary_obj']['observed_partition'], summary_observed_partition)
+        self.assertDictEqual(out['summary_obj']['expected_partition'], summary_expected_partition)
 
     def test_expect_column_kl_divergence_to_be_less_than_continuous(self):
         T = [
