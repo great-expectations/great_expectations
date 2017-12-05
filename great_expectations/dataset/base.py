@@ -1054,8 +1054,10 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             "summary_obj": {
                 "bootstrap_samples": The number of bootstrap samples used
                 "bootstrap_sample_size": The number of samples taken from the column in each bootstrap sample
-                "observed_cdf": The cumulative density function observed in the data
-                "expected_cdf": The cumulative density function expected based on the partition object
+                "observed_cdf": The cumulative density function observed in the data, a dict containing 'x' values and cdf_values (suitable for plotting)
+                "expected_cdf": The cumulative density function expected based on the partition object, a dict containing 'x' values and cdf_values (suitable for plotting)
+                "observed_partition": The partition observed on the data, using the provided bins but also expanding from min(column) to max(column)
+                "expected_partition": The partition expected from the data. For KS test, this will always be the partition_object parameter
             }
         """
         raise NotImplementedError
