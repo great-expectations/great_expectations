@@ -30,12 +30,36 @@ class TestDistributionalExpectations(unittest.TestCase):
                         'p': 0.05
                     },
                     'out': {'success': False, 'true_value': 5.1397782097623862e-53}
+                },
+                {
+                    'args': ['categorical_fixed'],
+                    'kwargs': {
+                        'partition_object': self.test_partitions['categorical_fixed_alternate'],
+                        'p': 0.05, 'output_format': 'SUMMARY'
+                    },
+                    'out': {'success': False, 'true_value': 5.1397782097623862e-53,
+                            'summary_obj': {
+                                'observed_partition': {
+                                    'partition': [u'A', u'B', u'C'],
+                                    'weights': [540, 320, 140]
+                                },
+                                'missing_percent': 0.0,
+                                'element_count': 1000,
+                                'missing_count': 0,
+                                'expected_partition': {
+                                    'partition': [u'A', u'B', u'C'],
+                                    'weights': [333.3333333333333, 333.3333333333333, 333.3333333333333]
+                                }
+                            }
+                    }
                 }
         ]
         for t in T:
             out = self.D.expect_column_chisquare_test_p_value_to_be_greater_than(*t['args'], **t['kwargs'])
             self.assertEqual(out['success'],t['out']['success'])
             self.assertEqual(out['true_value'], t['out']['true_value'])
+            if 'output_format' in t['kwargs'] and t['kwargs']['output_format'] == 'SUMMARY':
+                self.assertDictEqual(out['summary_obj'], t['out']['summary_obj'])
 
     def test_expect_column_chisquare_test_p_value_to_be_greater_than_new_categorical_val(self):
         # Note: Chisquare test with true zero expected could be treated subtly. Here, we tolerate a warning from stats.
@@ -71,12 +95,35 @@ class TestDistributionalExpectations(unittest.TestCase):
                         'threshold': 0.1
                         },
                     'out': {'success': False, 'true_value': 0.12599700286677529}
+                },
+                {
+                    'args': ['categorical_fixed'],
+                    'kwargs': {
+                        'partition_object': self.test_partitions['categorical_fixed_alternate'],
+                        'threshold': 0.1, 'output_format': 'SUMMARY'
+                    },
+                    'out': {'success': False, 'true_value': 0.12599700286677529,
+                            'summary_obj': {
+                                'observed_partition': {
+                                    'weights': [0.54, 0.32, 0.14],
+                                    'values': [u'A', u'B', u'C']},
+                                'missing_percent': 0.0,
+                                'element_count': 1000,
+                                'missing_count': 0,
+                                'expected_partition': {
+                                    'weights': [0.3333333333333333, 0.3333333333333333, 0.3333333333333333],
+                                    'values': [u'A', u'B', u'C']
+                                }
+                            }
+                    }
                 }
-        ]
+            ]
         for t in T:
             out = self.D.expect_column_kl_divergence_to_be_less_than(*t['args'], **t['kwargs'])
             self.assertTrue(np.allclose(out['success'], t['out']['success']))
             self.assertTrue(np.allclose(out['true_value'], t['out']['true_value']))
+            if 'output_format' in t['kwargs'] and t['kwargs']['output_format'] == 'SUMMARY':
+                self.assertDictEqual(out['summary_obj'], t['out']['summary_obj'])
 
     def test_expect_column_kl_divergence_to_be_less_than_discrete_holdout(self):
         df = ge.dataset.PandasDataSet({'a': ['a', 'a', 'b', 'c']})
@@ -155,13 +202,42 @@ class TestDistributionalExpectations(unittest.TestCase):
                 {
                     'args': ['bimodal'],
                     'kwargs':{'partition_object': self.test_partitions['norm_0_1_auto'], "p": 0.05,
-                              'output_format': 'SUMMARY', 'include_config': True},
+                              'include_config': True},
                     'out':{'success':False, 'true_value': "RANDOMIZED"}
                 },
                 {
                     'args': ['bimodal'],
                     'kwargs':{'partition_object': self.test_partitions['norm_0_1_uniform'], "p": 0.05},
                     'out':{'success':False, 'true_value': "RANDOMIZED"}
+                },
+                {
+                    'args': ['bimodal'],
+                    'kwargs': {'partition_object': self.test_partitions['norm_0_1_uniform'], "p": 0.05, 'output_format': 'SUMMARY'},
+                    'out': {'success': False, 'true_value': "RANDOMIZED",
+                            'summary_obj': {
+                                'expected_cdf': {
+                                    'cdf_values': [0.0, 0.001, 0.009000000000000001, 0.056, 0.184, 0.429, 0.6779999999999999, 0.8899999999999999, 0.9689999999999999, 0.9929999999999999, 0.9999999999999999],
+                                    'x': [-3.721835843971108, -3.02304158492966, -2.324247325888213, -1.625453066846767, -0.926658807805319, -0.227864548763872, 0.470929710277574, 1.169723969319022, 1.868518228360469, 2.567312487401916, 3.266106746443364]
+                                },
+                                'observed_partition': {
+                                    'weights': [0.001, 0.006, 0.022, 0.07, 0.107, 0.146, 0.098, 0.04, 0.01, 0.0, 0.5],
+                                    'bins': [-3.721835843971108, -3.02304158492966, -2.324247325888213, -1.625453066846767, -0.926658807805319, -0.227864548763872, 0.470929710277574, 1.169723969319022, 1.868518228360469, 2.567312487401916, 3.266106746443364, 12.8787297644972]
+                                },
+                                'bootstrap_samples': 1000,
+                                'observed_cdf': {
+                                    'cdf_values': [0, 0.001, 0.007, 0.028999999999999998, 0.099, 0.20600000000000002, 0.352, 0.44999999999999996, 0.48999999999999994, 0.49999999999999994, 0.49999999999999994, 1.0],
+                                    'x': [-3.721835843971108, -3.02304158492966, -2.324247325888213, -1.625453066846767, -0.926658807805319, -0.227864548763872, 0.470929710277574, 1.169723969319022, 1.868518228360469, 2.567312487401916, 3.266106746443364, 12.8787297644972]
+                                },
+                                'expected_partition': {
+                                    'weights': [0.001, 0.008, 0.047, 0.128, 0.245, 0.249, 0.212, 0.079, 0.024, 0.007],
+                                    'bins': [-3.721835843971108, -3.02304158492966, -2.324247325888213, -1.625453066846767, -0.926658807805319, -0.227864548763872, 0.470929710277574, 1.169723969319022, 1.868518228360469, 2.567312487401916, 3.266106746443364]
+                                },
+                                'element_count': 1000,
+                                'bootstrap_sample_size': 20,
+                                'missing_percent': 0.0,
+                                'missing_count': 0
+                            }
+                    }
                 }
             ]
         for t in T:
@@ -171,6 +247,15 @@ class TestDistributionalExpectations(unittest.TestCase):
                 print(t)
                 print(out)
             self.assertEqual(out['success'], t['out']['success'])
+            if 'output_format' in t['kwargs'] and t['kwargs']['output_format'] == 'SUMMARY':
+                self.assertTrue(np.allclose(out['summary_obj']['observed_cdf']['x'],t['out']['summary_obj']['observed_cdf']['x']))
+                self.assertTrue(np.allclose(out['summary_obj']['observed_cdf']['cdf_values'],t['out']['summary_obj']['observed_cdf']['cdf_values']))
+                self.assertTrue(np.allclose(out['summary_obj']['expected_cdf']['x'],t['out']['summary_obj']['expected_cdf']['x']))
+                self.assertTrue(np.allclose(out['summary_obj']['expected_cdf']['cdf_values'],t['out']['summary_obj']['expected_cdf']['cdf_values']))
+                self.assertTrue(np.allclose(out['summary_obj']['observed_partition']['bins'],t['out']['summary_obj']['observed_partition']['bins']))
+                self.assertTrue(np.allclose(out['summary_obj']['observed_partition']['weights'],t['out']['summary_obj']['observed_partition']['weights']))
+                self.assertTrue(np.allclose(out['summary_obj']['expected_partition']['bins'],t['out']['summary_obj']['expected_partition']['bins']))
+                self.assertTrue(np.allclose(out['summary_obj']['expected_partition']['weights'],t['out']['summary_obj']['expected_partition']['weights']))
 
     def test_expect_column_kl_divergence_to_be_less_than_continuous(self):
         T = [
@@ -279,7 +364,7 @@ class TestDistributionalExpectations(unittest.TestCase):
                                  'missing_percent': 0.0,
                                  'element_count': 1000,
                                  'missing_count': 0,
-                                 'expected_partition': {'partition': [-np.inf, -3.721835843971108, -3.02304158492966, -2.324247325888213, -1.625453066846767, -0.926658807805319, -0.227864548763872, 0.470929710277574, 1.169723969319022, 1.868518228360469, 2.567312487401916, 3.266106746443364, np.inf],
+                                 'expected_partition': {'bins': [-np.inf, -3.721835843971108, -3.02304158492966, -2.324247325888213, -1.625453066846767, -0.926658807805319, -0.227864548763872, 0.470929710277574, 1.169723969319022, 1.868518228360469, 2.567312487401916, 3.266106746443364, np.inf],
                                                         'weights': [0.005, 0.00098, 0.00784, 0.04606, 0.12544, 0.24009999999999998, 0.24402, 0.20776, 0.07742, 0.02352, 0.00686, 0.005]
                                                         }
                                  }
@@ -296,6 +381,10 @@ class TestDistributionalExpectations(unittest.TestCase):
                 self.assertTrue(np.allclose(out['true_value'],t['out']['true_value']))
             if 'output_format' in t['kwargs'] and t['kwargs']['output_format'] == 'SUMMARY':
                 self.assertTrue(np.allclose(out['summary_obj']['observed_partition']['bins'],t['out']['summary_obj']['observed_partition']['bins']))
+                self.assertTrue(np.allclose(out['summary_obj']['observed_partition']['weights'],t['out']['summary_obj']['observed_partition']['weights']))
+                self.assertTrue(np.allclose(out['summary_obj']['expected_partition']['bins'],t['out']['summary_obj']['expected_partition']['bins']))
+                self.assertTrue(np.allclose(out['summary_obj']['expected_partition']['weights'],t['out']['summary_obj']['expected_partition']['weights']))
+
             if not out['success'] == t['out']['success']:
                 print("Test case error:")
                 print(t)

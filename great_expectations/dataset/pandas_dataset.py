@@ -842,19 +842,47 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
         test_result = (1 + sum(x >= p for x in results)) / (bootstrap_samples + 1)
 
+        hist, bin_edges = np.histogram(column, partition_object['bins'])
+        below_partition = len(np.where(column < np.min(partition_object['bins']))[0])
+        above_partition = len(np.where(column > np.max(partition_object['bins']))[0])
+
+        # Expand observed partition to report, if necessary
+        if below_partition > 0 and above_partition > 0:
+            observed_bins = [np.min(column)] + partition_object['bins'] + [np.max(column)]
+            observed_weights = np.concatenate(([below_partition], hist, [above_partition])) / len(column)
+        elif below_partition > 0:
+            observed_bins = [np.min(column)] + partition_object['bins']
+            observed_weights = np.concatenate(([below_partition], hist)) / len(column)
+        elif above_partition > 0:
+            observed_bins = partition_object['bins'] + [np.max(column)]
+            observed_weights = np.concatenate((hist, [above_partition])) / len(column)
+        else:
+            observed_bins = partition_object['bins']
+            observed_weights = hist / len(column)
+
+        observed_cdf_values = np.cumsum(observed_weights)
+
         result_obj = {
                 "success" : test_result > p,
                 "true_value": test_result,
                 "summary_obj": {
                     "bootstrap_samples": bootstrap_samples,
                     "bootstrap_sample_size": bootstrap_sample_size,
-                    "observed_cdf": {
+                    "observed_partition": {
+                        "bins": observed_bins,
+                        "weights": observed_weights.tolist()
+                    },
+                    "expected_partition": {
                         "bins": partition_object['bins'],
-                        "cdf_values": [estimated_cdf(x) for x in partition_object['bins']]
+                        "weights": partition_object['weights']
+                    },
+                    "observed_cdf": {
+                        "x": observed_bins,
+                        "cdf_values": [0] + observed_cdf_values.tolist()
                     },
                     "expected_cdf": {
-                        "bins": partition_object['bins'],
-                        "cdf_values": np.append(np.array([0]), np.cumsum(partition_object['weights'])).tolist()
+                        "x": partition_object['bins'],
+                        "cdf_values": test_cdf.tolist()
                     }
                 }
             }
@@ -907,11 +935,11 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
                 "true_value": kl_divergence,
                 "summary_obj": {
                     "observed_partition": {
-                        "bins": test_df.index.tolist(),
+                        "values": test_df.index.tolist(),
                         "weights": pk.tolist()
                     },
                     "expected_partition": {
-                        "partition": test_df.index.tolist(),
+                        "values": test_df.index.tolist(),
                         "weights": qk.tolist()
                     }
                 }
@@ -955,7 +983,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
                             "weights": pk.tolist()
                         },
                         "expected_partition": {
-                            "partition": [-np.inf] + partition_object['bins'] + [np.inf],
+                            "bins": [-np.inf] + partition_object['bins'] + [np.inf],
                             "weights": qk.tolist()
                         }
                     }
