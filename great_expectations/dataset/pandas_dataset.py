@@ -844,8 +844,8 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         test_result = (1 + sum(x >= p for x in results)) / (bootstrap_samples + 1)
 
         hist, bin_edges = np.histogram(column, partition_object['bins'])
-        below_partition = len(np.where(column < np.min(partition_object['bins']))[0])
-        above_partition = len(np.where(column > np.max(partition_object['bins']))[0])
+        below_partition = len(np.where(column < partition_object['bins'][0])[0])
+        above_partition = len(np.where(column > partition_object['bins'][-1])[0])
 
         # Expand observed partition to report, if necessary
         if below_partition > 0 and above_partition > 0:
@@ -948,17 +948,16 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
         else:
             # Data are expected to be continuous; discretize first
+
+            # Build the histogram first using expected bins so that the largest bin is >=
             hist, bin_edges = np.histogram(column, partition_object['bins'], density=False)
 
-            # Add in the frequencies observed above or below the provided partition:
-            below_partition = len(np.where(column < np.min(partition_object['bins']))[0])
-            above_partition = len(np.where(column > np.max(partition_object['bins']))[0])
+            # Add in the frequencies observed above or below the provided partition
+            below_partition = len(np.where(column < partition_object['bins'][0])[0])
+            above_partition = len(np.where(column > partition_object['bins'][-1])[0])
 
-            evaluation_counts = np.concatenate(([below_partition], hist, [above_partition]))
-            pk = evaluation_counts / len(column)
+            observed_weights = np.concatenate(([below_partition], hist, [above_partition])) / len(column)
 
-            # Compute baseline probabilities
-            # Rescale given partition based on holdout values:
             expected_weights = np.array(partition_object['weights']) * (1 - tail_weight_holdout - internal_weight_holdout)
 
             # Assign internal weight holdout values if applicable
@@ -969,23 +968,44 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
                         if value == 0:
                             expected_weights[index] = internal_weight_holdout / zero_count
 
-            qk = np.concatenate(([tail_weight_holdout / 2],
-                                 expected_weights,
-                                 [tail_weight_holdout / 2]))
+            # Assign tail weight holdout if applicable
+            # We need to check cases to only add tail weight holdout if it makes sense based on the provided partition.
+            if (partition_object['bins'][0] == -np.inf) and (partition_object['bins'][-1]) == np.inf:
+                if tail_weight_holdout > 0:
+                    raise ValueError("tail_weight_holdout cannot be used for partitions with infinite endpoints.")
+                expected_bins = partition_object['bins']
+                # Remove the below_partition and above_partition weights we just added (they will necessarily have been zero)
+                observed_weights = observed_weights[1:-1]
+                # No change to expected weights in this case
+            elif (partition_object['bins'][0] == -np.inf):
+                expected_bins = partition_object['bins'] + [np.inf]
+                # Remove the below_partition weight we just added (it will necessarily have been zero)
+                observed_weights = observed_weights[1:]
+                expected_weights = np.concatenate((expected_weights, [tail_weight_holdout]))
+            elif (partition_object['bins'][-1] == np.inf):
+                expected_bins = [-np.inf] + partition_object['bins']
+                # Remove the above_partition weight we just added (it will necessarily have been zero)
+                observed_weights = observed_weights[:-1]
+                expected_weights = np.concatenate(([tail_weight_holdout], expected_weights))
+            else:
+                expected_bins = [-np.inf] + partition_object['bins'] + [np.inf]
+                # No change to observed_weights in this case
+                expected_weights = np.concatenate(([tail_weight_holdout / 2], expected_weights, [tail_weight_holdout / 2]))
 
-            kl_divergence = stats.entropy(pk, qk)
+            kl_divergence = stats.entropy(observed_weights, expected_weights)
 
             result_obj = {
                     "success": kl_divergence <= threshold,
                     "true_value": kl_divergence,
                     "summary_obj": {
                         "observed_partition": {
-                            "bins": [-np.inf] + partition_object['bins'] + [np.inf],
-                            "weights": pk.tolist()
+                            # return expected_bins, since we used those bins to compute the observed_weights
+                            "bins": expected_bins,
+                            "weights": observed_weights.tolist()
                         },
                         "expected_partition": {
-                            "bins": [-np.inf] + partition_object['bins'] + [np.inf],
-                            "weights": qk.tolist()
+                            "bins": expected_bins,
+                            "weights": expected_weights.tolist()
                         }
                     }
                 }
