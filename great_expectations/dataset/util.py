@@ -116,7 +116,7 @@ def ensure_json_serializable(test_dict):
         elif isinstance(test_dict[key], dict):
             test_dict[key] = ensure_json_serializable(test_dict[key])
 
-        if isinstance(test_dict[key], (set)):
+        elif isinstance(test_dict[key], (set)):
             test_dict[key] = list(test_dict[key])
 
         else:
