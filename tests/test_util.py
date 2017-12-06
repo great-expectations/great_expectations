@@ -91,8 +91,17 @@ class TestUtilMethods(unittest.TestCase):
         self.assertFalse(ge.dataset.util.is_valid_partition_object({'partition': [0,1,2]}))
 
     def test_ensure_json_serializable(self):
-        # TODO: Make a meaningful test
-        self.assertEqual(1,1)
+        D = ge.dataset.PandasDataSet({
+            'x' : [1,2,3,4,5,6,7,8,9,10],
+        })
+        D.expect_column_values_to_be_in_set("x", set([1,2,3,4,5,6,7,8,9]), mostly=.8)
+
+        part = ge.dataset.util.partition_data(D.x)
+        D.expect_column_kl_divergence_less_than("x", part, .6)
+
+        #Dumping this JSON object verifies that everything is serializable        
+        json.dumps(D.get_expectations_config(), indent=2)
+
 
 if __name__ == "__main__":
     unittest.main()
