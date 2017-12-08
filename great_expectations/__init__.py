@@ -4,11 +4,14 @@ import pandas as pd
 from .util import *
 from great_expectations import dataset
 
-from pkg_resources import get_distribution
+from pkg_resources import get_distribution, DistributionNotFound
 try:
     __version__ = get_distribution('great_expectations').version
-except:
-    pass
+except DistributionNotFound:
+    try:
+        __version__ = open('version.txt', 'r').read()
+    except:
+        pass
 
 def list_sources():
     raise NotImplementedError

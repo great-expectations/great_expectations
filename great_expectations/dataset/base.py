@@ -10,10 +10,8 @@ import warnings
 import pandas as pd
 from collections import defaultdict
 
-# Get our own version to apply to configuration
-import pkg_resources  # part of setuptools
-version = pkg_resources.get_distribution("great_expectations").version
-
+with open('version.txt') as f:
+    __version__ = f.read()
 
 class DataSet(object):
 
@@ -167,7 +165,7 @@ class DataSet(object):
             self._expectations_config = DotDict({
                 "dataset_name" : name,
                 "meta": {
-                    "great_expectations.__version__": version
+                    "great_expectations.__version__": __version__
                 },
                 "expectations" : []
             })
@@ -516,7 +514,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         # Warn if our version is different from the version in the configuration
         try:
-            if expectations_config['meta']['great_expectations.__version__'] != version:
+            if expectations_config['meta']['great_expectations.__version__'] != __version__:
                 warnings.warn("WARNING: This configuration object was built using a different version of great_expectations than is currently validating it.")
         except KeyError:
             warnings.warn("WARNING: No great_expectations version found in configuration object.")

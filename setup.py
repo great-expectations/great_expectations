@@ -10,12 +10,15 @@ with open('requirements.txt') as f:
 with open('docs/source/intro.rst') as f:
     long_description = f.read()
 
+with open('version.txt') as f:
+    version = f.read()
+
 config = {
     'description': 'Always know what to expect from your data.',
     'author': 'The Great Expectations Team',
     'url': 'https://github.com/great-expectations/great_expectations',
     'author_email': 'great_expectations@superconductivehealth.com',
-    'version': '0.3.0',
+    'version': version,
     'install_requires': required,
     'packages': [
         'great_expectations',
