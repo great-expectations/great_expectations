@@ -10,6 +10,7 @@ import copy
 
 from functools import wraps
 
+
 class DotDict(dict):
     """dot.notation access to dictionary attributes"""
 
@@ -131,23 +132,42 @@ def ensure_json_serializable(test_dict):
 
     return test_dict
 
+
 def is_valid_partition_object(partition_object):
-    """Convenience method for determining whether a given partition object is a valid weighted partition of the real number line.
+    """Tests whether a given object is a valid continuous or categorical partition object.
+    :param partition_object: The partition_object to evaluate
+    :return: Boolean
     """
-    if (partition_object is None) or ("partition" not in partition_object) or ("weights" not in partition_object):
-        return False
-    if (len(partition_object['partition']) != (len(partition_object['weights']) + 1)):
-        if (len(partition_object['partition']) != len(partition_object['weights'])):
-            return False
-    if not np.allclose(np.sum(partition_object['weights']), 1):
-        return False
-    return True
+    if is_valid_continuous_partition_object(partition_object) or is_valid_categorical_partition_object(partition_object):
+        return True
+    return False
+
 
 def is_valid_categorical_partition_object(partition_object):
-    return is_valid_partition_object(partition_object) and (len(partition_object['partition']) == len(partition_object['weights']))
+    """Tests whether a given object is a valid categorical partition object.
+    :param partition_object: The partition_object to evaluate
+    :return: Boolean
+    """
+    if partition_object is None or ("weights" not in partition_object) or ("values" not in partition_object):
+        return False
+    # Expect the same number of values as weights; weights should sum to one
+    if len(partition_object['values']) == len(partition_object['weights']) and \
+            np.allclose(np.sum(partition_object['weights']), 1):
+        return True
+    return False
+
 
 def is_valid_continuous_partition_object(partition_object):
-    if is_valid_partition_object(partition_object) and (len(partition_object['partition']) == (len(partition_object['weights']) + 1)):
+    """Tests whether a given object is a valid continuous partition object.
+    :param partition_object: The partition_object to evaluate
+    :return: Boolean
+    """
+    if (partition_object is None) or ("weights" not in partition_object) or ("bins" not in partition_object):
+        return False
+    # Expect one more bin edge than weight; all bin edges should be monotonically increasing; weights should sum to one
+    if (len(partition_object['bins']) == (len(partition_object['weights']) + 1)) and \
+            np.all(np.diff(partition_object['bins']) > 0) and \
+            np.allclose(np.sum(partition_object['weights']), 1):
         return True
     return False
 
@@ -166,7 +186,7 @@ def categorical_partition_data(data):
     s = pd.Series(data).value_counts()
     weights = s.values / len(data)
     return {
-        "partition": s.index.tolist(),
+        "values": s.index.tolist(),
         "weights":  weights
     }
 
@@ -184,26 +204,26 @@ def kde_partition_data(data, estimate_tails=True):
             }
     """
     kde = stats.kde.gaussian_kde(data)
-    evaluation_partition = np.linspace(start=np.min(data) - (kde.covariance_factor() / 2),
-                                       stop=np.max(data) + (kde.covariance_factor() / 2),
-                                       num=np.floor(((np.max(data) - np.min(data)) / kde.covariance_factor()) + 1 ).astype(int))
-    cdf_vals = [kde.integrate_box_1d(-np.inf, x) for x in evaluation_partition]
+    evaluation_bins = np.linspace(start=np.min(data) - (kde.covariance_factor() / 2),
+                                  stop=np.max(data) + (kde.covariance_factor() / 2),
+                                  num=np.floor(((np.max(data) - np.min(data)) / kde.covariance_factor()) + 1 ).astype(int))
+    cdf_vals = [kde.integrate_box_1d(-np.inf, x) for x in evaluation_bins]
     evaluation_weights = np.diff(cdf_vals)
 
     if estimate_tails:
-        partition = np.concatenate(([np.min(data) - (1.5 * kde.covariance_factor())],
-                                    evaluation_partition,
-                                    [np.max(data) + (1.5 * kde.covariance_factor())]))
+        bins = np.concatenate(([np.min(data) - (1.5 * kde.covariance_factor())],
+                               evaluation_bins,
+                               [np.max(data) + (1.5 * kde.covariance_factor())]))
     else:
-        partition = np.concatenate(([-np.inf], evaluation_partition, [np.inf]))
-
+        bins = np.concatenate(([-np.inf], evaluation_bins, [np.inf]))
 
     weights = np.concatenate(([cdf_vals[0]], evaluation_weights, [1 - cdf_vals[-1]]))
 
     return {
-        "partition": partition,
+        "bins": bins,
         "weights": weights
     }
+
 
 def partition_data(data, bins='auto', n_bins=10):
     warnings.warn("partition_data is deprecated and will be removed. Use either continuous_partition_data or \
@@ -220,7 +240,7 @@ def continuous_partition_data(data, bins='auto', n_bins=10):
     :return: A new partition_object:
         dict:
             {
-                "partition": (list) The endpoints of the partial partition of reals,
+                "bins": (list) The endpoints of the partial partition of reals,
                 "weights": (list) The densities of the bins implied by the partition.
             }
     """
@@ -234,6 +254,6 @@ def continuous_partition_data(data, bins='auto', n_bins=10):
     hist, bin_edges = np.histogram(data, bins, density=False)
 
     return {
-        "partition": bin_edges,
+        "bins": bin_edges,
         "weights": hist / len(data)
     }
