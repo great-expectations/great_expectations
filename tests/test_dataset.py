@@ -1,12 +1,13 @@
 import json
 import tempfile
 import shutil
-import inspect
+import warnings
 
 import pandas as pd
 import great_expectations as ge
 
 import unittest
+
 
 class TestDataset(unittest.TestCase):
 
@@ -25,6 +26,9 @@ class TestDataset(unittest.TestCase):
             D._expectations_config,
             {
                 "dataset_name" : None,
+                "meta": {
+                    "great_expectations.__version__": ge.__version__
+                },
                 "expectations" : [{
                     "expectation_type" : "expect_column_to_exist",
                     "kwargs" : { "column" : "x" }
@@ -43,6 +47,9 @@ class TestDataset(unittest.TestCase):
             D.get_expectations_config(),
             {
                 "dataset_name" : None,
+                "meta": {
+                    "great_expectations.__version__": ge.__version__
+                },
                 "expectations" : [{
                     "expectation_type" : "expect_column_to_exist",
                     "kwargs" : { "column" : "x" }
@@ -183,7 +190,10 @@ class TestDataset(unittest.TestCase):
               }
             }
           ], 
-          "dataset_name": None
+          "dataset_name": None,
+          "meta": {
+            "great_expectations.__version__": ge.__version__
+          }
         }
 
         self.assertEqual(
@@ -251,7 +261,10 @@ class TestDataset(unittest.TestCase):
               }
             }
           ], 
-          "dataset_name": None
+          "dataset_name": None,
+          "meta": {
+            "great_expectations.__version__": ge.__version__
+          }
         }
 
         self.assertEqual(
@@ -315,7 +328,10 @@ class TestDataset(unittest.TestCase):
               }
             }
           ], 
-          "dataset_name": None
+          "dataset_name": None,
+          "meta": {
+            "great_expectations.__version__": ge.__version__
+          }
         }
 
         self.assertEqual(
@@ -714,7 +730,10 @@ class TestDataset(unittest.TestCase):
                         'kwargs': {'column': 'y', 'type_': 'int', 'target_datasource': 'python'}
                     }
                 ],
-                'dataset_name': None
+                'dataset_name': None,
+                "meta": {
+                    "great_expectations.__version__": ge.__version__
+                }
             }
         )
 
@@ -797,6 +816,21 @@ class TestDataset(unittest.TestCase):
             True
         )
 
+    def test_meta_version_warning(self):
+        D = ge.dataset.DataSet();
+
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            out = D.validate(expectations_config={"expectations": []})
+            print(w)
+            self.assertEqual(str(w[0].message),
+                             "WARNING: No great_expectations version found in configuration object.")
+
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            out = D.validate(expectations_config={"meta": {"great_expectations.__version__": "0.0.0"}, "expectations": []})
+            self.assertEqual(str(w[0].message),
+                             "WARNING: This configuration object was built using a different version of great_expectations than is currently validating it.")
 
 if __name__ == "__main__":
     unittest.main()
