@@ -822,7 +822,6 @@ class TestDataset(unittest.TestCase):
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
             out = D.validate(expectations_config={"expectations": []})
-            print(w)
             self.assertEqual(str(w[0].message),
                              "WARNING: No great_expectations version found in configuration object.")
 
