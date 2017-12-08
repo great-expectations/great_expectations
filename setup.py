@@ -14,8 +14,8 @@ config = {
     'description': 'Always know what to expect from your data.',
     'author': 'The Great Expectations Team',
     'url': 'https://github.com/great-expectations/great_expectations',
-    'author_email': 'abe@superconductivehealth.com',
-    'version': '0.2.1',
+    'author_email': 'great_expectations@superconductivehealth.com',
+    'version': '0.3.0',
     'install_requires': required,
     'packages': [
         'great_expectations',
