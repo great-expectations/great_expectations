@@ -64,6 +64,14 @@ class TestUtilMethods(unittest.TestCase):
                 self.test_partitions['categorical_fixed']['weights'][self.test_partitions['categorical_fixed']['values'].index(k)],
                 test_partition['weights'][test_partition['values'].index(k)])
 
+    def test_categorical_data_na(self):
+        df = ge.dataset.PandasDataSet({
+            'my_column': ["A", "B", "A", "B", None]
+        })
+        partition = ge.dataset.util.categorical_partition_data(df['my_column'])
+        self.assertTrue(ge.dataset.util.is_valid_categorical_partition_object(partition))
+        self.assertTrue(len(partition['values']) == 2)
+
     def test_is_valid_partition_object_simple(self):
         self.assertTrue(ge.dataset.util.is_valid_continuous_partition_object(ge.dataset.util.continuous_partition_data(self.D['norm_0_1'])))
         self.assertTrue(ge.dataset.util.is_valid_continuous_partition_object(ge.dataset.util.continuous_partition_data(self.D['bimodal'])))
