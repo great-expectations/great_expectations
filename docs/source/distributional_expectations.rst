@@ -28,6 +28,7 @@ For continuous data:
 * A partition is defined by an ordered list of points that define intervals on the real number line. Note that partition intervals do not need to be uniform.
  * Each bin in a partition is partially open: a data element x is in bin i if lower_bound_i <= x < upper_bound_i.
  * However, following the behavior of numpy.histogram, a data element x is in the largest bin k if x == upper_bound_k.
+ * A bin may include -Infinity and Infinity as endpoints, however, those endpoints are not supported by the Kolmogorov-Smirnov test.
 
 * Partition weights define the probability of the associated interval. Note that this effectively applies a "piecewise uniform" distribution to the data for the purpose of statistical tests.
 
@@ -35,7 +36,7 @@ Example continuous partition object:
 
 .. code-block:: python
   {
-    "partition": [ 0, 1, 2, 10],
+    "bins": [ 0, 1, 2, 10],
     "weights": [0.3, 0.3, 0.4]
   }
 
@@ -48,7 +49,7 @@ Example discrete partition object:
 
 .. code-block:: python
   {
-    "partition": [ "cat", "dog", "fish"],
+    "values": [ "cat", "dog", "fish"],
     "weights": [0.3, 0.3, 0.4]
   }
 
@@ -73,17 +74,17 @@ Distributional Expectations Core Tests
 --------------------------------------------------------------------------------
 Distributional expectations rely on three tests for their work.
 
-Kullback-Leibler (KL) divergence is available as an expectation for both categorical and continuous data (continuous data will be discretized according to the provided partition prior to computing divergence). Unlike KS and Chi-Squared tests which can use a pvalue, you must provide a threshold for the relative entropy to use KL divergence. Further, KL divergence is not symmetric.
+Kullback-Leibler (KL) divergence is available as an expectation for both categorical and continuous data (continuous data will be discretized according to the provided partition prior to computing divergence). Unlike KS and Chi-Squared tests which can use a p-value, you must provide a threshold for the relative entropy to use KL divergence. Further, KL divergence is not symmetric.
 
-* :func:`expect_column_kl_divergence_less_than <great_expectations.dataset.base.DataSet.expect_column_kl_divergence_less_than>`
+* :func:`expect_column_kl_divergence_to_be_less_than <great_expectations.dataset.base.DataSet.expect_column_kl_divergence_to_be_less_than>`
 
-For continuous data, the expect_column_bootstrapped_ks_test_p_value_greater_than expectation uses the Kolmogorov-Smirnov (KS) test, which compares the actual and expected cumulative densities of the data. Because of the partition_object's piecewise uniform approximation of the expected distribution, the test would be overly sensitive to differences when used with a sample of data of much larger than the size of the partition. The expectation consequently uses a bootstrapping method to sample the provided data into samples of the same size as the partition and uses the mean of the resulting pvalues as the final test's pvalue.
+For continuous data, the expect_column_bootstrapped_ks_test_p_value_to_be_greater_than expectation uses the Kolmogorov-Smirnov (KS) test, which compares the actual and expected cumulative densities of the data. Because of the partition_object's piecewise uniform approximation of the expected distribution, the test would be overly sensitive to differences when used with a sample of data of much larger than the size of the partition. The expectation consequently uses a bootstrapping method to sample the provided data with tunable specificity.
 
-* :func:`expect_column_bootstrapped_ks_test_p_value_greater_than <great_expectations.dataset.base.DataSet.expect_column_bootstrapped_ks_test_p_value_greater_than>`
+* :func:`expect_column_bootstrapped_ks_test_p_value_to_be_greater_than <great_expectations.dataset.base.DataSet.expect_column_bootstrapped_ks_test_p_value_to_be_greater_than>`
 
-For categorical data, the expect_column_chisquare_test_p_value_greater_than expectation uses the Chi-Squared test. The provided weights are scaled to the size of the data in the tested column at the time of the test.
+For categorical data, the expect_column_chisquare_test_p_value_to_be_greater_than expectation uses the Chi-Squared test. The provided weights are scaled to the size of the data in the tested column at the time of the test.
 
-* :func:`expect_column_chisquare_test_p_value_greater_than <great_expectations.dataset.base.DataSet.expect_column_chisquare_test_p_value_greater_than>`
+* :func:`expect_column_chisquare_test_p_value_to_be_greater_than <great_expectations.dataset.base.DataSet.expect_column_chisquare_test_p_value_to_be_greater_than>`
 
 
 
