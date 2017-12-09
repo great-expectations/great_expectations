@@ -690,6 +690,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
     def test_column_aggregate_expectation_function(self, function, *args, **kwargs):
         """Test a column aggregate expectation function
+
         Args:
             function (func): The function to be tested. (Must be a valid expectation function.)
             *args          : Positional arguments to be passed the the function
@@ -708,16 +709,27 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
     ##### Table shape expectations #####
 
-    def expect_column_to_exist(self, column,
-                               output_format=None, include_config=False, catch_exceptions=None, meta=None):
+    def expect_column_to_exist(self,
+            column,
+            output_format=None,
+            include_config=False,
+            catch_exceptions=None,
+            meta=None
+        ):
         """Expect the specified column to exist in the data set.
+
         Args:
             column (str): The column name.
+            output_format (str or None): 
+            include_config (boolean):
+            catch_exceptions (boolean or None):
+            meta (dict or None):
+
         Returns:
-            dict:
+            ::
+
                 {
                     "success": (bool) True if the column passed the expectation,
-                    "exceptions_list": (list) the values that did not pass the expectation
                 }
 
         """
@@ -726,15 +738,18 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
     def expect_table_row_count_to_be_between(self, min_value=0, max_value=None,
                                              output_format=None, include_config=False, catch_exceptions=None, meta=None):
         """Expect the number of rows in a data set to be between two values.
+
         Args:
             min_value (int or None): the minimum number of rows.
             max_value (int or None): the maximum number of rows.
+
         Returns:
-            dict:
+            ::
+
                 {
                     "success": (bool) True if the column passed the expectation,
-                    "exceptions_list": (list) the values that did not pass the expectation
                 }
+
         See Also:
             expect_table_row_count_to_equal
         """
@@ -743,14 +758,18 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
     def expect_table_row_count_to_equal(self, value=None,
                                         output_format=None, include_config=False, catch_exceptions=None, meta=None):
         """Expect the number of rows to be equal to a value.
+
         Args:
 	        value (int): The value that should equal the number of rows.
+
         Returns:
-            dict:
+            ::
+
                 {
                     "success": (bool) True if the column passed the expectation,
                     "exceptions_list": (list) the values that did not pass the expectation
                 }
+
         See Also:
             expect_table_row_count_to_be_between
         """
@@ -762,6 +781,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                                           mostly=None,
                                           output_format=None, include_config=False, catch_exceptions=None, meta=None):
         """Expect each nonempty column entry to be unique (no duplicates).
+
         Args:
             column (str): The column name.
         Keyword Args:
@@ -1240,11 +1260,14 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             value  (any): The value
             ties_okay (boolean or None): If True, then the expectation will succeed if other values are as common (but not more common) than the selected value
 
-        Returns:
-            dict:
+        Returns: 
+            A result object containing...
+            ::
+
                 {
                     "success": (bool) True if the column passed the expectation,
-                    "true_value": (float) the proportion of unique values
+                    "true_value": (float) the proportion of unique values,
+                    "summary_obj": {}
                 }
         """
         raise NotImplementedError
