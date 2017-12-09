@@ -111,5 +111,6 @@ class TestUtilMethods(unittest.TestCase):
         ge.dataset.util.ensure_json_serializable(x)
         self.assertEqual(type(x['x']), type([1, 2, 3]))
 
+
 if __name__ == "__main__":
     unittest.main()
