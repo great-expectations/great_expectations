@@ -1255,8 +1255,8 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         :param str column: The column name.
         :param list value_set: The list of designated values
-        :param bool_or_none ties_okay: If True, then the expectation will succeed if other values are as common (but not more common) than the selected value
-        :type bool_or_none: boolean or None
+        :param ties_okay: If True, then the expectation will succeed if other values are as common (but not more common) than the selected value
+        :type ties_okay: boolean or None
 
         :returns: 
             ::

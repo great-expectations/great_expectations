@@ -20,7 +20,7 @@ great_expectations.dataset.pandas_dataset module
     :undoc-members:
     :show-inheritance:
     :exclude-members: MetaPandasDataSet, PandasDataSet
-
+    
     .. autoclass:: great_expectations.dataset.pandas_dataset.MetaPandasDataSet
         :members:
         :undoc-members:
