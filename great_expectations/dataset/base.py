@@ -29,14 +29,14 @@ class DataSet(object):
         decorator relies on the DataSet expectation decorator, but will pass through the signature from the implementing method.
 
         When decorated with @expectation, a method will:
+
             1. Build and update the expectation config.
-            2. Handle the "include_config" boolean parameter, which allows a caller to retrieve the generated
-                configuration immediately after running the expectation.
-            3. Handle the "catch_exceptions" parameter, which allows a caller to catch any exception and report an
-                aggregate trace, useful for validation.
-            4. Handle the "output_format" parameter, and pass it down to the implementing method if its signature expects it.
-                By handing down the output_format, methods implementing expectations can optionally provide additional output formats
-                specific to the use cases that they handle.
+
+            2. Handle the "include_config" boolean parameter, which allows a caller to retrieve the generated configuration immediately after running the expectation.
+            
+            3. Handle the "catch_exceptions" parameter, which allows a caller to catch any exception and report an aggregate trace, useful for validation.
+
+            4. Handle the "output_format" parameter, and pass it down to the implementing method if its signature expects it. By handing down the output_format, methods implementing expectations can optionally provide additional output formats specific to the use cases that they handle.
         """
         def outer_wrapper(func):
             @wraps(func)
