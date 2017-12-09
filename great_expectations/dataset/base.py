@@ -1315,24 +1315,6 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         """
         raise NotImplementedError
 
-    def do_stuff(self, foo, bar):
-        """Do some stuff
-
-        :param foo: I'm an argument
-        :param bar: So am I
-
-        :return: dict::
-
-            {
-              "success": (Boolean) True if stuff was done
-              "meta": {
-                  "aaa": A nested return value
-                  "bbb": Another nested return value
-              }
-            }
-        """
-        pass
-
     def expect_column_kl_divergence_to_be_less_than(self, column, partition_object=None, threshold=None, tail_weight_holdout=0, internal_weight_holdout=0,
                                                     output_format=None, include_config=False, catch_exceptions=None, meta=None):
         """Expect the Kulback-Leibler divergence (relative entropy) of the specified column and the partition object to be lower than the provided threshold.
