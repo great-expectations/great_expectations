@@ -64,6 +64,14 @@ class TestUtilMethods(unittest.TestCase):
                 self.test_partitions['categorical_fixed']['weights'][self.test_partitions['categorical_fixed']['values'].index(k)],
                 test_partition['weights'][test_partition['values'].index(k)])
 
+    def test_categorical_data_na(self):
+        df = ge.dataset.PandasDataSet({
+            'my_column': ["A", "B", "A", "B", None]
+        })
+        partition = ge.dataset.util.categorical_partition_data(df['my_column'])
+        self.assertTrue(ge.dataset.util.is_valid_categorical_partition_object(partition))
+        self.assertTrue(len(partition['values']) == 2)
+
     def test_is_valid_partition_object_simple(self):
         self.assertTrue(ge.dataset.util.is_valid_continuous_partition_object(ge.dataset.util.continuous_partition_data(self.D['norm_0_1'])))
         self.assertTrue(ge.dataset.util.is_valid_continuous_partition_object(ge.dataset.util.continuous_partition_data(self.D['bimodal'])))
@@ -88,6 +96,17 @@ class TestUtilMethods(unittest.TestCase):
         self.assertFalse(ge.dataset.util.is_valid_partition_object({'bins': [0,1,2]}))
 
     def test_ensure_json_serializable(self):
+        D = ge.dataset.PandasDataSet({
+            'x' : [1,2,3,4,5,6,7,8,9,10],
+        })
+        D.expect_column_values_to_be_in_set("x", set([1,2,3,4,5,6,7,8,9]), mostly=.8)
+
+        part = ge.dataset.util.partition_data(D.x)
+        D.expect_column_kl_divergence_to_be_less_than("x", part, .6)
+
+        #Dumping this JSON object verifies that everything is serializable        
+        json.dumps(D.get_expectations_config(), indent=2)
+
         x = {'x': np.array([1, 2, 3])}
         ge.dataset.util.ensure_json_serializable(x)
         self.assertEqual(type(x['x']), type([1, 2, 3]))
