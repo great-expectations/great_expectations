@@ -1,15 +1,16 @@
+from .util import DotDict, ensure_json_serializable
+
 import json
 import inspect
 import copy
 from functools import wraps
 import traceback
+import warnings
 
 import pandas as pd
-import numpy as np
 from collections import defaultdict
 
-from .util import DotDict, ensure_json_serializable, DocInherit
-
+from ..version import __version__
 
 class DataSet(object):
 
@@ -162,6 +163,9 @@ class DataSet(object):
         else:
             self._expectations_config = DotDict({
                 "dataset_name" : name,
+                "meta": {
+                    "great_expectations.__version__": __version__
+                },
                 "expectations" : []
             })
 
@@ -506,6 +510,13 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                 discard_include_configs_kwargs=False,
                 discard_catch_exceptions_kwargs=False,
             )
+
+        # Warn if our version is different from the version in the configuration
+        try:
+            if expectations_config['meta']['great_expectations.__version__'] != __version__:
+                warnings.warn("WARNING: This configuration object was built using a different version of great_expectations than is currently validating it.")
+        except KeyError:
+            warnings.warn("WARNING: No great_expectations version found in configuration object.")
 
         for expectation in expectations_config['expectations']:
             expectation_method = getattr(self, expectation['expectation_type'])
