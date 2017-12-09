@@ -149,14 +149,23 @@ class MetaPandasDataSet(DataSet):
 
 
 class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
+    """
+    PandasDataset instantiates DataSet expectations API as a subclass of a pandas.DataFrame.
+
+    For the full API reference, please see :func:`DataSet <great_expectations.dataset.base.DataSet>`
+    """
 
     def __init__(self, *args, **kwargs):
         super(PandasDataSet, self).__init__(*args, **kwargs)
         self.add_default_expectations()
 
     def add_default_expectations(self):
-        ## Default behavior for PandasDataSet is to explicitly include expectations that every column present
-        ## upon initialization exists.
+        """
+        The default behavior for PandasDataSet is to explicitly include expectations that every column present upon initialization exists.
+
+        FIXME: This should probably live in the grandparent class, DataSet, instead.
+        """
+
         for col in self.columns:
             self.append_expectation({
                 "expectation_type": "expect_column_to_exist",
