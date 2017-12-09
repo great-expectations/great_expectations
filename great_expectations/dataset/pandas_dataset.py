@@ -11,7 +11,6 @@ import numpy as np
 import pandas as pd
 from dateutil.parser import parse
 from scipy import stats
-
 from six import string_types
 
 from .base import DataSet
