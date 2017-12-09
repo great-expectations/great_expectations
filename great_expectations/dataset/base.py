@@ -1253,12 +1253,12 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                                                      output_format=None, include_config=False, catch_exceptions=None, meta=None):
         """Expect the most common value to be within the designated value set
 
-        Args:
-            column (str): The column name.
-            value_set (list): The lis of designated values
-            ties_okay (boolean or None): If True, then the expectation will succeed if other values are as common (but not more common) than the selected value
+        :param column (str): The column name.
+        :param value_set (list): The lis of designated values
+        :param ties_okay (boolean or None): If True, then the expectation will succeed if other values are as common (but not more common) than the selected value
 
-        Returns:
+        :return:
+        
             dict:
                 {
                     "success": (bool) True if the column passed the expectation,
