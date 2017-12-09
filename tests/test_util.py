@@ -102,7 +102,7 @@ class TestUtilMethods(unittest.TestCase):
         D.expect_column_values_to_be_in_set("x", set([1,2,3,4,5,6,7,8,9]), mostly=.8)
 
         part = ge.dataset.util.partition_data(D.x)
-        D.expect_column_kl_divergence_less_than("x", part, .6)
+        D.expect_column_kl_divergence_to_be_less_than("x", part, .6)
 
         #Dumping this JSON object verifies that everything is serializable        
         json.dumps(D.get_expectations_config(), indent=2)
