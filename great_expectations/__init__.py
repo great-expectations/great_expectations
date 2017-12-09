@@ -4,11 +4,7 @@ import pandas as pd
 from .util import *
 from great_expectations import dataset
 
-from pkg_resources import get_distribution
-try:
-    __version__ = get_distribution('great_expectations').version
-except:
-    pass
+from .version import __version__
 
 def list_sources():
     raise NotImplementedError
