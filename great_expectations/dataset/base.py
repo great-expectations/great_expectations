@@ -10,8 +10,7 @@ import warnings
 import pandas as pd
 from collections import defaultdict
 
-with open('version.txt') as f:
-    __version__ = f.read()
+from ..version import __version__
 
 class DataSet(object):
 
