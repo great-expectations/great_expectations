@@ -32,11 +32,15 @@ class DataSet(object):
 
             1. Build and update the expectation config.
 
-            2. Handle the "include_config" boolean parameter, which allows a caller to retrieve the generated configuration immediately after running the expectation.
+            2. Handle the "include_config" boolean parameter, which allows a caller to retrieve the generated configuration \
+            immediately after running the expectation.
             
-            3. Handle the "catch_exceptions" parameter, which allows a caller to catch any exception and report an aggregate trace, useful for validation.
+            3. Handle the "catch_exceptions" parameter, which allows a caller to catch any exception and report an aggregate\
+            trace, useful for validation.
 
-            4. Handle the "output_format" parameter, and pass it down to the implementing method if its signature expects it. By handing down the output_format, methods implementing expectations can optionally provide additional output formats specific to the use cases that they handle.
+            4. Handle the "output_format" parameter, and pass it down to the implementing method if its signature expects it.\
+            By handing down the output_format, methods implementing expectations can optionally provide additional output\
+            formats specific to the use cases that they handle.
         """
         def outer_wrapper(func):
             @wraps(func)
@@ -1278,6 +1282,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         :param tail_weight_holdout: the amount of weight to split uniformly and add to the tails of the histogram (the area between -Infinity and the data's min value and between the data's max value and Infinity)
 
         :return: result_obj including:
+
         result_obj including:
             "success": (Boolean) True if the column passed the expectation
             "true_value": (float) The true KL divergence (relative entropy)
@@ -1302,6 +1307,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             A larger sample will increase the specificity of the test.
 
         :return: result_obj including:
+
             "success": (Boolean) True if the column passed the expectation
             "true_value": (float) The true p-value of the KS test
             "summary_obj": {
