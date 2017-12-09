@@ -117,6 +117,9 @@ def ensure_json_serializable(test_dict):
         elif isinstance(test_dict[key], dict):
             test_dict[key] = ensure_json_serializable(test_dict[key])
 
+        elif isinstance(test_dict[key], (set)):
+            test_dict[key] = list(test_dict[key])
+
         else:
             try:
                 # In Python 2, unicode and long should still be valid.
@@ -180,11 +183,19 @@ def categorical_partition_data(data):
                 "weights": (list) The weights of the values in the partition.
             }
     """
-    s = pd.Series(data).value_counts()
-    weights = s.values / len(data)
+
+    # Make dropna explicit (even though it defaults to true)
+    series = pd.Series(data)
+    value_counts = series.value_counts(dropna=True)
+
+    # Compute weights using denominator only of nonnull values
+    null_indexes = series.isnull()
+    nonnull_count = (null_indexes == False).sum()
+
+    weights = value_counts.values / nonnull_count
     return {
-        "values": s.index.tolist(),
-        "weights":  weights
+        "values": value_counts.index.tolist(),
+        "weights": weights
     }
 
 
