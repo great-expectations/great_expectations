@@ -1315,6 +1315,24 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         """
         raise NotImplementedError
 
+    def do_stuff(self, foo, bar):
+        """Do some stuff
+
+        :param foo: I'm an argument
+        :param bar: So am I
+
+        :return: dict::
+
+            {
+              "success": (Boolean) True if stuff was done
+              "meta": {
+                  "aaa": A nested return value
+                  "bbb": Another nested return value
+              }
+            }
+        """
+        pass
+
     def expect_column_kl_divergence_to_be_less_than(self, column, partition_object=None, threshold=None, tail_weight_holdout=0, internal_weight_holdout=0,
                                                     output_format=None, include_config=False, catch_exceptions=None, meta=None):
         """Expect the Kulback-Leibler divergence (relative entropy) of the specified column and the partition object to be lower than the provided threshold.
@@ -1322,9 +1340,12 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         In many practical contexts, choosing a value between 0.5 and 1 will provide a useful test.
 
         If the partition_object is categorical, this expectation will expect the values in column to also be categorical.
+
             * If the column includes values that are not present in the partition, the tail_weight_holdout will be equally split among those values, providing a mechanism to weaken the strictness of the expectation (otherwise, relative entropy would immediately go to infinity).
             * If the partition includes values that are not present in the column, the test will simply include zero weight for that value.
+
         If the partition_object is continuous, this expectation will discretize the values in the column according to the bins specified in the partition_object, and apply the test to the resulting distribution.
+
             * The internal_weight_holdout and tail_weight_holdout parameters provide a mechanism to weaken the expectation, since an expected weight of zero would drive relative entropy to be infinite if any data are observed in that interval.
             * If internal_weight_holdout is specified, that value will be distributed equally among any intervals with weight zero in the partition_object.
             * If tail_weight_holdout is specified, that value will be appended to the tails of the bins ((-Infinity, min(bins)) and (max(bins), Infinity).
@@ -1335,13 +1356,15 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         :param internal_weight_holdout: the amount of weight to split uniformly among zero-weighted partition elements in a given partition.
         :param tail_weight_holdout: the amount of weight to split uniformly and add to the tails of the histogram (the area between -Infinity and the data's min value and between the data's max value and Infinity)
 
-        :return: result_obj including:
-        result_obj including:
-            "success": (Boolean) True if the column passed the expectation
-            "true_value": (float) The true KL divergence (relative entropy)
-            "summary_obj": {
-                "observed_partition": The partition observed in the data
-                "expected_partition": The partition against which the data were compared, after applying specified holdouts.
+        :return: dict::
+
+            {
+              "success": (Boolean) True if the column passed the expectation
+              "true_value": (float) The true KL divergence (relative entropy)
+              "summary_obj": {
+                  "observed_partition": The partition observed in the data
+                  "expected_partition": The partition against which the data were compared, after applying specified holdouts.
+              }
             }
         """
         raise NotImplementedError
