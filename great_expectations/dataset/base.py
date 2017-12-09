@@ -1262,8 +1262,9 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             ::
 
                 {
-                "success": (bool) True if the column passed the expectation,
-                "true_value": (float) the proportion of unique values
+                    "success": (bool) True if the column passed the expectation True,
+                    "true_value": (float) the proportion of unique values,
+                    "summary_obj": {}
                 }
         """
         raise NotImplementedError
