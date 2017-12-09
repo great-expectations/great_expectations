@@ -12,6 +12,8 @@ import pandas as pd
 from dateutil.parser import parse
 from scipy import stats
 
+from six import string_types
+
 from .base import DataSet
 from .util import DocInherit, \
         is_valid_partition_object, is_valid_categorical_partition_object, is_valid_continuous_partition_object
@@ -408,19 +410,19 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
                 return False
             else:
                 if min_value != None and max_value != None:
-                    if type(val) in [str, unicode] and (type(min_value) not in [str, unicode] or type(max_value) not in [str, unicode]):
+                    if (isinstance(val, string_types) != isinstance(min_value, string_types)) or (isinstance(val, string_types) != isinstance(max_value, string_types)):
                         raise TypeError("Column values, min_value, and max_value must either be None or of the same type.")
                     else:
                         return (min_value <= val) and (val <= max_value)
 
                 elif min_value == None and max_value != None:
-                    if type(val) in [str, unicode] and (type(max_value) not in [str, unicode]):
+                    if isinstance(val, string_types) != isinstance(max_value, string_types):
                         raise TypeError("Column values, min_value, and max_value must either be None or of the same type.")
                     else:
                         return (val <= max_value)
 
                 elif min_value != None and max_value == None:
-                    if type(val) in [str, unicode] and (type(min_value) not in [str, unicode]):
+                    if isinstance(val, string_types) != isinstance(min_value, string_types):
                         raise TypeError("Column values, min_value, and max_value must either be None or of the same type.")
                     else:
                         return (min_value <= val)
