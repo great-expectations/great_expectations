@@ -720,10 +720,12 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         Args:
             column (str): The column name.
-            output_format (str or None): 
-            include_config (boolean):
-            catch_exceptions (boolean or None):
-            meta (dict or None):
+
+        Other Parameters:
+            output_format (str or None): See :ref:`output_format` for details.
+            include_config (boolean): See :ref:`output_format` for details.
+            catch_exceptions (boolean or None): See :ref:`output_format` for details.
+            meta (dict or None): See :ref:`output_format` for details.
 
         Returns:
             ::
