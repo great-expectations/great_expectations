@@ -60,7 +60,7 @@ All Expectations accept an optional `meta` parameter. If `meta` is a valid JSON-
 
 .. code-block:: bash
 
-    my_df.expect_column_values_to_be_in_set(
+    >> my_df.expect_column_values_to_be_in_set(
         "my_column",
         ["a", "b", "c"],
         meta={
@@ -81,6 +81,60 @@ All Expectations accept an optional `meta` parameter. If `meta` is a valid JSON-
 
 See :ref:`output_format` for more detail.
 
+`mostly`
+------------------------------------------------------------------------------
+
+`mostly` is a special argument that is automatically available in all `column_map_expectations`. `mostly` must be a float between 0 and 1. Great Expectations evaluates it as a percentage, allowing some wiggle room when evaluating expectations: as long as `mostly` percent of rows evaluate to `True`, the expectation returns `"success": True`.
+
+.. code-block:: bash
+    [0,1,2,3,4,5,6,7,8,9]
+
+    >> my_df.expect_column_values_to_be_between(
+        "my_column",
+        min_value=0,
+        max_value=7
+    )
+    {
+        "success": False,
+        ...
+    }
+
+    >> my_df.expect_column_values_to_be_between(
+        "my_column",
+        min_value=0,
+        max_value=7,
+        mostly=0.7
+    )
+    {
+        "success": True,
+        ...
+    }
+
+Expectations with `mostly` return exception lists even if they succeed:
+
+.. code-block:: bash
+    >> my_df.expect_column_values_to_be_between(
+        "my_column",
+        min_value=0,
+        max_value=7,
+        mostly=0.7
+    )
+    {
+      "success": true
+      "summary_obj": {
+        "exception_percent": 0.2, 
+        "partial_exception_index_list": [
+          8,
+          9
+        ], 
+        "partial_exception_list": [
+          8, 
+          9
+        ], 
+        "exception_percent_nonmissing": 0.2, 
+        "exception_count": 2
+      }, 
+    }
 
 DataSet defaults
 ------------------------------------------------------------------------------
