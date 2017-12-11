@@ -4,6 +4,7 @@ import shutil
 import warnings
 
 import pandas as pd
+import numpy as np
 import great_expectations as ge
 
 import unittest
@@ -83,6 +84,11 @@ class TestDataset(unittest.TestCase):
                 )
 
         self.assertEqual(k,1)
+
+        #This should raise an error because meta isn't serializable.
+        with self.assertRaises(Exception) as context:
+            df.expect_column_values_to_be_increasing("x", meta={"unserializable_array":np.array(range(10))})
+
 
     def test_expectation_meta_notes(self):
         df = ge.dataset.PandasDataSet({
