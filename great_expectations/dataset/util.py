@@ -29,26 +29,26 @@ class DotDict(dict):
 
 
 class DocInherit(object):
-    """
-    Docstring inheriting method descriptor
+    """Docstring inheriting method descriptor
 
     The class itself is also used as a decorator
     doc_inherit decorator
 
-    Usage:
+    Usage::
 
-    class Foo(object):
-        def foo(self):
-            "Frobber"
-            pass
+        class Foo(object):
+            def foo(self):
+                "Frobber"
+                pass
 
-    class Bar(Foo):
-        @doc_inherit
-        def foo(self):
-            pass
+        class Bar(Foo):
+            @doc_inherit
+            def foo(self):
+                pass
 
-    Now, Bar.foo.__doc__ == Bar().foo.__doc__ == Foo.foo.__doc__ == "Frobber"
-    # From here: https://stackoverflow.com/questions/2025562/inherit-docstrings-in-python-class-inheritance
+        Now, Bar.foo.__doc__ == Bar().foo.__doc__ == Foo.foo.__doc__ == "Frobber"
+        
+        # From https://stackoverflow.com/questions/2025562/inherit-docstrings-in-python-class-inheritance
 
     """
 
@@ -174,10 +174,13 @@ def is_valid_continuous_partition_object(partition_object):
 
 def categorical_partition_data(data):
     """Convenience method for creating weights from categorical data.
+    
     Args:
         data (list-like): The data from which to construct the estimate.
+    
     Returns:
-        dict:
+        A new partition object::
+
             {
                 "partition": (list) The categorical values present in the data
                 "weights": (list) The weights of the values in the partition.
@@ -202,14 +205,17 @@ def categorical_partition_data(data):
 def kde_partition_data(data, estimate_tails=True):
     """Convenience method for building a partition and weights using a gaussian Kernel Density Estimate and default bandwidth.
 
-    :param data (list-like): The data from which to construct the estimate
-    :param estimate_tails (bool): Whether to estimate the tails of the distribution to keep the partition object finite
-    :return: A new partition_object:
-        dict:
-            {
-                "partition": (list) The endpoints of the partial partition of reals,
-                "weights": (list) The densities of the bins implied by the partition.
-            }
+    Args:
+        data (list-like): The data from which to construct the estimate
+        estimate_tails (bool): Whether to estimate the tails of the distribution to keep the partition object finite
+
+    Returns:
+        A new partition_object::
+
+        {
+            "partition": (list) The endpoints of the partial partition of reals,
+            "weights": (list) The densities of the bins implied by the partition.
+        }
     """
     kde = stats.kde.gaussian_kde(data)
     evaluation_bins = np.linspace(start=np.min(data) - (kde.covariance_factor() / 2),
@@ -242,15 +248,18 @@ def partition_data(data, bins='auto', n_bins=10):
 def continuous_partition_data(data, bins='auto', n_bins=10):
     """Convenience method for building a partition object on continuous data
 
-    :param data (list-like): The data from which to construct the estimate.
-    :param bins (string): One of 'uniform' (for uniformly spaced bins), 'ntile' (for percentile-spaced bins), or 'auto' (for automatically spaced bins)
-    :param n_bins (int): Ignored if bins is auto.
-    :return: A new partition_object:
-        dict:
-            {
-                "bins": (list) The endpoints of the partial partition of reals,
-                "weights": (list) The densities of the bins implied by the partition.
-            }
+    Args:
+        data (list-like): The data from which to construct the estimate.
+        bins (string): One of 'uniform' (for uniformly spaced bins), 'ntile' (for percentile-spaced bins), or 'auto' (for automatically spaced bins)
+        n_bins (int): Ignored if bins is auto.
+
+    Returns:
+        A new partition_object::
+
+        {
+            "bins": (list) The endpoints of the partial partition of reals,
+            "weights": (list) The densities of the bins implied by the partition.
+        }
     """
     if bins == 'uniform':
         bins = np.linspace(start=np.min(data), stop=np.max(data), num = n_bins+1)
