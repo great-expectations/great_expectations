@@ -459,7 +459,7 @@ class TestDataset(unittest.TestCase):
             "x" : list("abcdefghijklmnopqrstuvwxyz")
         })
         self.assertEqual(
-            df.calc_map_expectation_success(
+            df._calc_map_expectation_success(
                 success_count=10,
                 nonnull_count=10,
                 mostly=None
@@ -468,7 +468,7 @@ class TestDataset(unittest.TestCase):
         )
 
         self.assertEqual(
-            df.calc_map_expectation_success(
+            df._calc_map_expectation_success(
                 success_count=90,
                 nonnull_count=100,
                 mostly=.9
@@ -477,7 +477,7 @@ class TestDataset(unittest.TestCase):
         )
 
         self.assertEqual(
-            df.calc_map_expectation_success(
+            df._calc_map_expectation_success(
                 success_count=90,
                 nonnull_count=100,
                 mostly=.8
@@ -486,7 +486,7 @@ class TestDataset(unittest.TestCase):
         )
 
         self.assertEqual(
-            df.calc_map_expectation_success(
+            df._calc_map_expectation_success(
                 success_count=80,
                 nonnull_count=100,
                 mostly=.9
@@ -495,7 +495,7 @@ class TestDataset(unittest.TestCase):
         )
 
         self.assertEqual(
-            df.calc_map_expectation_success(
+            df._calc_map_expectation_success(
                 success_count=0,
                 nonnull_count=0,
                 mostly=None
@@ -504,7 +504,7 @@ class TestDataset(unittest.TestCase):
         )
 
         self.assertEqual(
-            df.calc_map_expectation_success(
+            df._calc_map_expectation_success(
                 success_count=0,
                 nonnull_count=100,
                 mostly=None
