@@ -90,6 +90,9 @@ class DataSet(object):
                         del all_args["output_format"]
 
                 all_args = recursively_convert_to_json_serializable(all_args)
+                #Ensure that all_args is JSON serializable.
+                #FIXXME: If it's not, should we try to fix it? Allow users to override and proceed anyway?
+                json.dumps(all_args)
                 expectation_args = copy.deepcopy(all_args)
 
                 #Construct the expectation_config object
