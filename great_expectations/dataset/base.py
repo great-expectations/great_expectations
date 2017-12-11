@@ -69,10 +69,6 @@ class DataSet(object):
                     output_format = self.default_expectation_args["output_format"]
 
                 if "meta" in kwargs:
-                    #Ensure that meta is JSON serializable.
-                    #FIXXME: If it's not, should we try to fix it? Allow users to override and proceed anyway?
-                    json.dumps(kwargs["meta"])
-
                     meta = kwargs["meta"]
                     del all_args["meta"]
                 else:
@@ -90,9 +86,6 @@ class DataSet(object):
                         del all_args["output_format"]
 
                 all_args = recursively_convert_to_json_serializable(all_args)
-                #Ensure that all_args is JSON serializable.
-                #FIXXME: If it's not, should we try to fix it? Allow users to override and proceed anyway?
-                json.dumps(all_args)
                 expectation_args = copy.deepcopy(all_args)
 
                 #Construct the expectation_config object
@@ -184,6 +177,12 @@ class DataSet(object):
 
     def append_expectation(self, expectation_config):
         expectation_type = expectation_config['expectation_type']
+
+        #Test to ensure the new expectation is serializable.
+        #FIXME: If it's not, are we sure we want to raise an error?
+        #FIXME: Should we allow users to override the error?
+        #FIXME: Should we try to convert the object using something like recursively_convert_to_json_serializable?
+        json.dumps(expectation_config)
 
         #Drop existing expectations with the same expectation_type.
         #For column_expectations, append_expectation should only replace expectations
