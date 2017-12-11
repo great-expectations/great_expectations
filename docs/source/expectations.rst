@@ -138,4 +138,5 @@ This is how you always know what to expect from your data.
 
     >> my_df.save_expectations_config("my_titanic_expectations.json")
 
+For more detail on how to control expectation output, please see :ref:`standard_arguments` and :ref:`output_format`.
 

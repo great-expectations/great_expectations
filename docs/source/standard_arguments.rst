@@ -1,4 +1,4 @@
-.. _standard_args:
+.. _standard_arguments:
 
 ================================================================================
 Standard arguments for expectations
@@ -11,9 +11,6 @@ All expectations share four standard (optional) arguments:
 * `meta`
 * `output_format`
 
-`output_format` allows several cases, which are documented on a sepearate page: :ref:`output_format`.
-
-.. _include_config:
 `include_config`
 ------------------------------------------------------------------------------
 
@@ -54,6 +51,35 @@ All Expectations accept a boolean `catch_exceptions` parameter. If true, executi
     }
 
 `catch_exceptions` is on by default in command-line validation mode, and off by default in exploration mode.
+
+
+`meta`
+------------------------------------------------------------------------------
+
+All Expectations accept an optional `meta` parameter. If `meta` is a valid JSON-serializable dictionary, it will be passed through to the `expectation_result` object without modification.
+
+.. code-block:: bash
+
+    my_df.expect_column_values_to_be_in_set(
+        "my_column",
+        ["a", "b", "c"],
+        meta={
+            "foo": "bar",
+            "baz": [1,2,3,4]
+        }
+    )
+    {
+        "result": False,
+        "meta": {
+            "foo": "bar",
+            "baz": [1,2,3,4]
+        }
+    }
+
+`output_format`
+------------------------------------------------------------------------------
+
+See :ref:`output_format` for more detail.
 
 
 DataSet defaults
