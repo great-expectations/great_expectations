@@ -115,6 +115,7 @@ Build expectations as you conduct exploratory data analysis to ensure insights a
 You can also add notes or even structured metadta to expectations to describe the intent of an expectation or anything else relevant for understanding it:
 
 .. code-block:: bash
+
     >> my_df.expect_column_values_to_match_regex(
         "Name",
         "^[A-Za-z\, \(\)\']+$",
