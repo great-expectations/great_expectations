@@ -760,18 +760,29 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
     def expect_table_row_count_to_equal(self, value=None,
                                         output_format=None, include_config=False, catch_exceptions=None, meta=None):
-        """Expect the number of rows to be equal to a value.
+        """Expect the number of rows to equal a value.
 
-        Args:
-	        value (int): The value that should equal the number of rows.
+        expect_table_row_count_to_equal is a basic :func:`expectation <great_expectations.dataset.base.DataSet.expectation>`, not a `column_map_` or `column_aggregate_expectation`.
+
+        Other Parameters:
+            output_format (string or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`output_format <output_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
 
         Returns:
-            ::
+            A JSON-serializable expectation result object.
 
-                {
-                    "success": (bool) True if the column passed the expectation,
-                    "exceptions_list": (list) the values that did not pass the expectation
-                }
+            Exact fields vary depending on the values passed to :ref:`output_format <output_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
 
         See Also:
             expect_table_row_count_to_be_between
@@ -791,7 +802,6 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         For example, `[1, 2, 3, 3, 3]` will return `[3, 3, 3]` in `summary_obj.exceptions_list`, with `exception_percent=0.6.`
 
-
         expect_column_values_to_be_unique is a :func:`column_map_expectation <great_expectations.dataset.base.DataSet.column_map_expectation>`.
 
         Args:
@@ -802,11 +812,11 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             mostly (None or a float between 0 and 1): \
                 Return `"success": True` if the percentage of exceptions less than or equal to `mostly`. \
                 For more detail, see :ref:`mostly`.
+
+        Other Parameters:
             output_format (str or None): \
                 Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
                 For more detail, see :ref:`output_format <output_format>`.
-
-        Other Parameters:
             include_config (boolean): \
                 If True, then include the expectation config as part of the result object. \
                 For more detail, see :ref:`include_config`.
@@ -845,11 +855,11 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             mostly (None or a float between 0 and 1): \
                 Return `"success": True` if the percentage of exceptions less than or equal to `mostly`. \
                 For more detail, see :ref:`mostly`.
+
+        Other Parameters:
             output_format (str or None): \
                 Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
                 For more detail, see :ref:`output_format <output_format>`.
-
-        Other Parameters:
             include_config (boolean): \
                 If True, then include the expectation config as part of the result object. \
                 For more detail, see :ref:`include_config`.
