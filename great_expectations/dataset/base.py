@@ -807,7 +807,12 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
     def expect_column_values_to_not_be_null(self, column,
                                             mostly=None,
                                             output_format=None, include_config=False, catch_exceptions=None, meta=None):
-        """Expect each column entry to be nonempty.
+        """Expect column values to be not null.
+
+        To be counted as an exception, values must be explicitly null or missing, such as a NULL in PostgreSQL or an np.NaN in pandas.
+        Empty strings don't count as null unless they have been coerced to a null type.
+
+        expect_column_values_to_not_be_null is a :func:`column_map_expectation <great_expectations.dataset.base.DataSet.column_map_expectation>`.
 
         Args:
             column (str): \
@@ -838,13 +843,6 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             Exact fields vary depending on the values passed to :ref:`output_format <output_format>` and
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
             
-            Noteworthy fields for this Expectation are::
-
-                {
-                    "success": (bool) True if the column passed the expectation,
-                    ...
-                }
-
         See Also:
             expect_column_values_to_be_null
 
