@@ -653,6 +653,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
     def test_expectation_function(self, function, *args, **kwargs):
         """Test a generic expectation function
+
         Args:
             function (func): The function to be tested. (Must be a valid expectation function.)
             *args          : Positional arguments to be passed the the function
@@ -664,6 +665,8 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         Notes:
             This function is a thin layer to allow quick testing of new expectation functions, without having to define custom classes, etc.
             To use developed expectations from the command-line tool, you'll still need to define custom classes, etc.
+
+            Check out :ref:`custom_expectations` for more information.
         """
 
         new_function = self.expectation(inspect.getargspec(function)[0][1:])(function)
@@ -671,8 +674,9 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
     def test_column_map_expectation_function(self, function, *args, **kwargs):
         """Test a column map expectation function
+
         Args:
-            function (func): The function to be tested. (Must be a valid expectation function.)
+            function (func): The function to be tested. (Must be a valid column_map_expectation function.)
             *args          : Positional arguments to be passed the the function
             **kwargs       : Keyword arguments to be passed the the function
         
@@ -682,6 +686,8 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         Notes:
             This function is a thin layer to allow quick testing of new expectation functions, without having to define custom classes, etc.
             To use developed expectations from the command-line tool, you'll still need to define custom classes, etc.
+
+            Check out :ref:`custom_expectations` for more information.
         """
 
         new_function = self.column_map_expectation( function )
@@ -691,7 +697,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         """Test a column aggregate expectation function
 
         Args:
-            function (func): The function to be tested. (Must be a valid expectation function.)
+            function (func): The function to be tested. (Must be a valid column_aggregate_expectation function.)
             *args          : Positional arguments to be passed the the function
             **kwargs       : Keyword arguments to be passed the the function
         
@@ -701,6 +707,8 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         Notes:
             This function is a thin layer to allow quick testing of new expectation functions, without having to define custom classes, etc.
             To use developed expectations from the command-line tool, you'll still need to define custom classes, etc.
+
+            Check out :ref:`custom_expectations` for more information.
         """
 
         new_function = self.column_aggregate_expectation( function )
