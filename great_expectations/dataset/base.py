@@ -715,43 +715,79 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             catch_exceptions=None,
             meta=None
         ):
-        """Expect the specified column to exist in the data set.
+        """Expect the specified column to exist.
+
+        expect_column_to_exist is a :func:`expectation <great_expectations.dataset.base.DataSet.expectation>`, not a `column_map_` or `column_aggregate_expectation`.
 
         Args:
-            column (str): The column name.
+            column (str): \
+                The column name.
+
+        Other Parameters:
+            output_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`output_format <output_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
 
         Returns:
-            ::
+            A JSON-serializable expectation result object.
 
-                {
-                    "success": (bool) True if the column passed the expectation,
-                }
+            Exact fields vary depending on the values passed to :ref:`output_format <output_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
         """
 
         raise NotImplementedError
 
     def expect_table_row_count_to_be_between(self, min_value=0, max_value=None,
                                              output_format=None, include_config=False, catch_exceptions=None, meta=None):
-        """Expect the number of rows in a data set to be between two values.
+        """Expect the number of rows to be between two values.
+
+        min_value and max_value are both inclusive.
+
+        If min_value is None, then max_value is treated as an upper bound, and the number of acceptable rows has no minimum.
+
+        If max_value is None, then min_value is treated as a lower bound, and the number of acceptable rows has no maximum.
+
+        expect_table_row_count_to_be_between is a :func:`expectation <great_expectations.dataset.base.DataSet.expectation>`, not a `column_map_` or `column_aggregate_expectation`.
 
         Args:
-            min_value (int or None): the minimum number of rows.
-            max_value (int or None): the maximum number of rows.
+            column (str): \
+                The column name.
+
+        Keyword Args:
+            min_value (int or None): \
+                The minimum number of rows, inclusive.
+            max_value (int or None): \
+                The maximum number of rows, inclusive.
 
         Other Parameters:
-            output_format (str or None): `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
-            include_config (boolean): If True, then include the expectation config as part of the result object.
-            catch_exceptions (boolean or None): If True, then catch exceptions and include them as part of the result object.
-            meta (dict or None): A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification.
-
-        See :ref:`standard_arguments` and :ref:`output_format` for details about other parameters.
+            output_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`output_format <output_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
 
         Returns:
-            ::
+            A JSON-serializable expectation result object.
 
-                {
-                    "success": (bool) True if the column passed the expectation,
-                }
+            Exact fields vary depending on the values passed to :ref:`output_format <output_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
 
         See Also:
             expect_table_row_count_to_equal
