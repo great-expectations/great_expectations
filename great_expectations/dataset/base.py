@@ -655,7 +655,22 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         return return_obj
 
-    def calc_map_expectation_success(self, success_count, nonnull_count, mostly):
+    def _calc_map_expectation_success(self, success_count, nonnull_count, mostly):
+        """Calculate success and percent_success for column_map_expectations
+
+        Args:
+            success_count (int): \
+                The number of successful values in the column
+            nonnull_count (int): \
+                The number of nonnull values in the column
+            mostly (float or None): \
+                A value between 0 and 1 (or None), indicating the percentage of successes required to pass the expectation as a whole\
+                If mostly=None, then all values must succeed in order for the expectation as a whole to succeed.
+
+        Returns:
+            success (boolean), percent_success (float)
+        """
+
         if nonnull_count > 0:
             percent_success = float(success_count)/nonnull_count
 
