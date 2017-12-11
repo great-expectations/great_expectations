@@ -10,17 +10,6 @@ from collections import defaultdict
 
 from .util import DotDict, ensure_json_serializable, DocInherit
 
-expectation_docstring_boilerplate = """
-        Other Parameters:
-            output_format (str or None): `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
-            include_config (boolean): If True, then include the expectation config as part of the result object.
-            catch_exceptions (boolean or None): If True, then catch exceptions and include them as part of the result object.
-            meta (dict or None): A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification.
-
-        See :ref:`standard_arguments` and :ref:`output_format` for details about other parameters.
-"""
-
-
 class DataSet(object):
 
     def __init__(self, *args, **kwargs):
@@ -737,7 +726,6 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                 {
                     "success": (bool) True if the column passed the expectation,
                 }
-
         """
 
         raise NotImplementedError
@@ -825,7 +813,14 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             column (str): The column name.
 
         Keyword Args:
-            mostly=None: Return "success": True if the percentage of not null values is greater than or equal to mostly (a float between 0 and 1).
+            mostly (None or a float between 0 and 1): \
+                Return `"success": True` if the percentage of exceptions less than or equal to `mostly`.
+            output_format (str or None): Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+            include_config (boolean): If True, then include the expectation config as part of the result object.
+            catch_exceptions (boolean or None): If True, then catch exceptions and include them as part of the result object.
+            meta (dict or None): A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification.
+
+        See :ref:`standard_arguments` and :ref:`output_format` for details about other parameters.
 
         Returns:
             ::

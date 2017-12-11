@@ -1,20 +1,8 @@
 .. _output_format:
 
 ================================================================================
-Expectation result objects
+Expectation output formats
 ================================================================================
-
-Great Expectations tries to return results that are contextually rich and informative, following four basic principles:
-
-* Result objects should be intuitive and self-documenting
-* Result objects should be as consistent across expectations as reasonably possibly
-* Result objects should be as flat as reasonably possible
-* Result objects should help track data lineage
-
-It isn't possible to fully satisfy all these criteria all the time. Here's how Great Expectations handles the tradeoffs.
-
-`output_format`
-------------------------------------------------------------------------------
 
 All Expectations accept an `output_format` parameter. Great Expectations defins four values for `output_format`: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, and `SUMMARY`. The API also allows you to define new formats that mix, match, extend this initial set.
 
@@ -85,6 +73,8 @@ Behavior for `BOOLEAN_ONLY` result objects
 ------------------------------------------------------------------------------
 ...is simple: if the expectation is satisfied, it returns True. Otherwise it returns False.
 
+.. code-block:: bash
+
     >> my_df.expect_column_values_to_be_in_set(
         "possible_benefactors",
         ["Joe Gargery", "Mrs. Gargery", "Mr. Pumblechook", "Ms. Havisham", "Mr. Jaggers"]
@@ -109,8 +99,13 @@ Behavior for `BASIC` result objects
 
     {
         "success" : Boolean,
-        "partial_exception_list" : [A list of up to 20 values that violate the expectation]
-        "partial_exception_index_list" : [A list of the indexes of those values]
+        "summary_obj" : {
+            "partial_exception_list" : [A list of up to 20 values that violate the expectation]
+            "partial_exception_index_list" : [A list of the indexes of those values]
+            "exception_count" : The total count of exceptions in the column
+            "exception_percent" : The overall percent of exceptions
+            "exception_percent_nonmissing" : The percent of exceptions, excluding mising values from the denominator
+        }
     }
 
 
@@ -118,14 +113,19 @@ Note: when exception values are duplicated, `exception_list` will contain multip
 
 .. code-block:: bash
 
-    [1,2,2,3,3,3]
+    [1,2,2,3,3,3,None,None,None,None]
 
     expect_column_values_to_be_unique
 
     {
         "success" : Boolean,
-        "exception_list" : [2,2,3,3,3]
-        "exception_index_list" : [1,2,3,4,5]
+        "summary_obj" : {
+            "exception_list" : [2,2,3,3,3]
+            "exception_index_list" : [1,2,3,4,5]
+            "exception_count" : 5,
+            "exception_percent" : 0.5,
+            "exception_percent_nonmissing" : 0.8333333,
+        }
     }
 
 
