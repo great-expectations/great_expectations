@@ -10,7 +10,11 @@ import warnings
 import pandas as pd
 from collections import defaultdict
 
+<<<<<<< HEAD
 from ..version import __version__
+=======
+from .util import DotDict, ensure_json_serializable, DocInherit
+>>>>>>> 8a8d268ff715477f5e9ac0670d9396c92d6ef17b
 
 class DataSet(object):
 
@@ -30,14 +34,18 @@ class DataSet(object):
         decorator relies on the DataSet expectation decorator, but will pass through the signature from the implementing method.
 
         When decorated with @expectation, a method will:
+
             1. Build and update the expectation config.
-            2. Handle the "include_config" boolean parameter, which allows a caller to retrieve the generated
-                configuration immediately after running the expectation.
-            3. Handle the "catch_exceptions" parameter, which allows a caller to catch any exception and report an
-                aggregate trace, useful for validation.
-            4. Handle the "output_format" parameter, and pass it down to the implementing method if its signature expects it.
-                By handing down the output_format, methods implementing expectations can optionally provide additional output formats
-                specific to the use cases that they handle.
+
+            2. Handle the "include_config" boolean parameter, which allows a caller to retrieve the generated configuration \
+            immediately after running the expectation.
+            
+            3. Handle the "catch_exceptions" parameter, which allows a caller to catch any exception and report an aggregate\
+            trace, useful for validation.
+
+            4. Handle the "output_format" parameter, and pass it down to the implementing method if its signature expects it.\
+            By handing down the output_format, methods implementing expectations can optionally provide additional output\
+            formats specific to the use cases that they handle.
         """
         def outer_wrapper(func):
             @wraps(func)
@@ -661,6 +669,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
     def test_expectation_function(self, function, *args, **kwargs):
         """Test a generic expectation function
+
         Args:
             function (func): The function to be tested. (Must be a valid expectation function.)
             *args          : Positional arguments to be passed the the function
@@ -672,6 +681,8 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         Notes:
             This function is a thin layer to allow quick testing of new expectation functions, without having to define custom classes, etc.
             To use developed expectations from the command-line tool, you'll still need to define custom classes, etc.
+
+            Check out :ref:`custom_expectations` for more information.
         """
 
         new_function = self.expectation(inspect.getargspec(function)[0][1:])(function)
@@ -679,8 +690,9 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
     def test_column_map_expectation_function(self, function, *args, **kwargs):
         """Test a column map expectation function
+
         Args:
-            function (func): The function to be tested. (Must be a valid expectation function.)
+            function (func): The function to be tested. (Must be a valid column_map_expectation function.)
             *args          : Positional arguments to be passed the the function
             **kwargs       : Keyword arguments to be passed the the function
         
@@ -690,6 +702,8 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         Notes:
             This function is a thin layer to allow quick testing of new expectation functions, without having to define custom classes, etc.
             To use developed expectations from the command-line tool, you'll still need to define custom classes, etc.
+
+            Check out :ref:`custom_expectations` for more information.
         """
 
         new_function = self.column_map_expectation( function )
@@ -697,8 +711,9 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
     def test_column_aggregate_expectation_function(self, function, *args, **kwargs):
         """Test a column aggregate expectation function
+
         Args:
-            function (func): The function to be tested. (Must be a valid expectation function.)
+            function (func): The function to be tested. (Must be a valid column_aggregate_expectation function.)
             *args          : Positional arguments to be passed the the function
             **kwargs       : Keyword arguments to be passed the the function
         
@@ -708,6 +723,8 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         Notes:
             This function is a thin layer to allow quick testing of new expectation functions, without having to define custom classes, etc.
             To use developed expectations from the command-line tool, you'll still need to define custom classes, etc.
+
+            Check out :ref:`custom_expectations` for more information.
         """
 
         new_function = self.column_aggregate_expectation( function )
@@ -715,33 +732,87 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
     ##### Table shape expectations #####
 
-    def expect_column_to_exist(self, column,
-                               output_format=None, include_config=False, catch_exceptions=None, meta=None):
-        """Expect the specified column to exist in the data set.
+    def expect_column_to_exist(self,
+            column,
+            output_format=None,
+            include_config=False,
+            catch_exceptions=None,
+            meta=None
+        ):
+        """Expect the specified column to exist.
+
+        expect_column_to_exist is a :func:`expectation <great_expectations.dataset.base.DataSet.expectation>`, not a `column_map_` or `column_aggregate_expectation`.
+
         Args:
-            column (str): The column name.
+            column (str): \
+                The column name.
+
+        Other Parameters:
+            output_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`output_format <output_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
+
         Returns:
-            dict:
-                {
-                    "success": (bool) True if the column passed the expectation,
-                    "exceptions_list": (list) the values that did not pass the expectation
-                }
+            A JSON-serializable expectation result object.
+
+            Exact fields vary depending on the values passed to :ref:`output_format <output_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
 
         """
+
         raise NotImplementedError
 
     def expect_table_row_count_to_be_between(self, min_value=0, max_value=None,
                                              output_format=None, include_config=False, catch_exceptions=None, meta=None):
-        """Expect the number of rows in a data set to be between two values.
+        """Expect the number of rows to be between two values.
+
+        min_value and max_value are both inclusive.
+
+        If min_value is None, then max_value is treated as an upper bound, and the number of acceptable rows has no minimum.
+
+        If max_value is None, then min_value is treated as a lower bound, and the number of acceptable rows has no maximum.
+
+        expect_table_row_count_to_be_between is a :func:`expectation <great_expectations.dataset.base.DataSet.expectation>`, not a `column_map_` or `column_aggregate_expectation`.
+
         Args:
-            min_value (int or None): the minimum number of rows.
-            max_value (int or None): the maximum number of rows.
+            column (str): \
+                The column name.
+
+        Keyword Args:
+            min_value (int or None): \
+                The minimum number of rows, inclusive.
+            max_value (int or None): \
+                The maximum number of rows, inclusive.
+
+        Other Parameters:
+            output_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`output_format <output_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
+
         Returns:
-            dict:
-                {
-                    "success": (bool) True if the column passed the expectation,
-                    "exceptions_list": (list) the values that did not pass the expectation
-                }
+            A JSON-serializable expectation result object.
+
+            Exact fields vary depending on the values passed to :ref:`output_format <output_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
         See Also:
             expect_table_row_count_to_equal
         """
@@ -749,15 +820,30 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
     def expect_table_row_count_to_equal(self, value=None,
                                         output_format=None, include_config=False, catch_exceptions=None, meta=None):
-        """Expect the number of rows to be equal to a value.
-        Args:
-	        value (int): The value that should equal the number of rows.
+        """Expect the number of rows to equal a value.
+
+        expect_table_row_count_to_equal is a basic :func:`expectation <great_expectations.dataset.base.DataSet.expectation>`, not a `column_map_` or `column_aggregate_expectation`.
+
+        Other Parameters:
+            output_format (string or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`output_format <output_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
+
         Returns:
-            dict:
-                {
-                    "success": (bool) True if the column passed the expectation,
-                    "exceptions_list": (list) the values that did not pass the expectation
-                }
+            A JSON-serializable expectation result object.
+
+            Exact fields vary depending on the values passed to :ref:`output_format <output_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
         See Also:
             expect_table_row_count_to_be_between
         """
@@ -765,40 +851,91 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
     ##### Missing values, unique values, and types #####
 
-    def expect_column_values_to_be_unique(self, column,
-                                          mostly=None,
-                                          output_format=None, include_config=False, catch_exceptions=None, meta=None):
-        """Expect each nonempty column entry to be unique (no duplicates).
-        Args:
-            column (str): The column name.
-        Keyword Args:
-            mostly=None: Return "success": True if the percentage of unique values is greater than or equal to mostly (a float between 0 and 1).
-        Returns:
-            dict:
-                {
-                    "success": (bool) True if the column passed the expectation,
-                    "exceptions_list": (list) the values that did not pass the expectation
-                }
+    def expect_column_values_to_be_unique(self,
+        column,
+        mostly=None,
+        output_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
+        """Expect each column value to be unique.
 
-        Examples:
-	    Display multiple duplicated items. For example, ['2','2','2'] will return `['2','2']` for the exceptions_list.
+        This expectation detects duplicates. All duplicated values are counted as exceptions.
+
+        For example, `[1, 2, 3, 3, 3]` will return `[3, 3, 3]` in `summary_obj.exceptions_list`, with `exception_percent=0.6.`
+
+        expect_column_values_to_be_unique is a :func:`column_map_expectation <great_expectations.dataset.base.DataSet.column_map_expectation>`.
+
+        Args:
+            column (str): \
+                The column name.
+
+        Keyword Args:
+            mostly (None or a float between 0 and 1): \
+                Return `"success": True` if the percentage of exceptions less than or equal to `mostly`. \
+                For more detail, see :ref:`mostly`.
+
+        Other Parameters:
+            output_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`output_format <output_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
+
+        Returns:
+            A JSON-serializable expectation result object.
+
+            Exact fields vary depending on the values passed to :ref:`output_format <output_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
         """
         raise NotImplementedError
 
-    def expect_column_values_to_not_be_null(self, column,
-                                            mostly=None,
-                                            output_format=None, include_config=False, catch_exceptions=None, meta=None):
-        """Expect each column entry to be nonempty.
+    def expect_column_values_to_not_be_null(self,
+        column,
+        mostly=None,
+        output_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
+        """Expect column values to be not null.
+
+        To be counted as an exception, values must be explicitly null or missing, such as a NULL in PostgreSQL or an np.NaN in pandas.
+        Empty strings don't count as null unless they have been coerced to a null type.
+
+        expect_column_values_to_not_be_null is a :func:`column_map_expectation <great_expectations.dataset.base.DataSet.column_map_expectation>`.
+
         Args:
-            column (str): The column name.
+            column (str): \
+                The column name.
+
         Keyword Args:
-            mostly=None: Return "success": True if the percentage of not null values is greater than or equal to mostly (a float between 0 and 1).
+            mostly (None or a float between 0 and 1): \
+                Return `"success": True` if the percentage of exceptions less than or equal to `mostly`. \
+                For more detail, see :ref:`mostly`.
+
+        Other Parameters:
+            output_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`output_format <output_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
+
         Returns:
-            dict:
-                {
-                    "success": (bool) True if the column passed the expectation,
-                    "exceptions_list": (list) the values that did not pass the expectation
-                }
+            A JSON-serializable expectation result object.
+
+            Exact fields vary depending on the values passed to :ref:`output_format <output_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+            
         See Also:
             expect_column_values_to_be_null
 
@@ -809,16 +946,21 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                                         mostly=None,
                                         output_format=None, include_config=False, catch_exceptions=None, meta=None):
         """Expect the column entries to be empty.
+        
         Args:
             column (str): The column name.
+
         Keyword Args:
             mostly=None: Return "success": True if the percentage of null values is greater than or equal to mostly (a float between 0 and 1).
+
         Returns:
-            dict:
+            ::
+
                 {
                     "success": (bool) True if the column passed the expectation,
                     "exceptions_list": (list) the values that did not pass the expectation
                 }
+
         See Also:
             expect_column_values_to_not_be_null
 
@@ -829,21 +971,24 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                                            mostly=None,
                                            output_format=None, include_config=False, catch_exceptions=None, meta=None):
         """Expect each column entry to be a specified data type.
+        
         Args:
             column (str): The column name.
             type_ (str): A string representing the data type that each column should have as entries.
                 For example, "double integer" refers to an integer with double precision.
             target_datasource (str): The data source that specifies the implementation in the type_ parameter.
                 For example, options include "numpy", "sql", or "spark".
+
         Keyword Args:
             mostly=None: Return "success": True if the percentage of values of type_ is greater than or equal to mostly (a float between 0 and 1).
+
         Returns:
-            dict:
+            ::
+
                 {
                     "success": (bool) True if the column passed the expectation,
                     "exceptions_list": (list) the values that did not pass the expectation
                 }
-
         """
         raise NotImplementedError
 
@@ -851,16 +996,20 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                                                 mostly=None,
                                                 output_format=None, include_config=False, catch_exceptions=None, meta=None):
         """Expect each column entry to be a specified data type.
+        
         Args:
             column (str): The column name.
             type_list (list of str): A list of strings representing the data type that each column should have as entries.
                 For example, "double integer" refers to an integer with double precision.
             target_datasource (str): The data source that specifies the implementation in the type_ parameter.
                 For example, options include "numpy", "sql", or "spark".
+
         Keyword Args:
             mostly=None: Return "success": True if the percentage of values of type_ is greater than or equal to mostly (a float between 0 and 1).
+
         Returns:
-            dict:
+            ::
+
                 {
                     "success": (bool) True if the column passed the expectation,
                     "exceptions_list": (list) the values that did not pass the expectation
@@ -875,17 +1024,22 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                                           mostly=None,
                                           output_format=None, include_config=False, catch_exceptions=None, meta=None):
         """Expect each entry in a column to be in a given set.
+        
         Args:
             column (str): The column name.
             values_set (set-like): The set of objects or unique data points corresponding to the column.
+        
         Keyword Args:
             mostly=None: Return "success": True if the percentage of values in values_set is greater than or equal to mostly (a float between 0 and 1).
+        
         Returns:
-            dict:
+            ::
+
                 {
                     "success": (bool) True if the column passed the expectation,
                     "exceptions_list": (list) the values that did not pass the expectation
                 }
+
         See Also:
             expect_column_values_to_not_be_in_set
 
@@ -896,17 +1050,22 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                                               mostly=None,
                                               output_format=None, include_config=False, catch_exceptions=None, meta=None):
         """Expect column entries to not be in the set.
+        
         Args:
             column (str): The column name.
             values_set (list): The set of objects or unique data points that should not correspond to the column.
+        
         Keyword Args:
             mostly=None: Return "success": True if the percentage of values not in values_set is greater than or equal to mostly (a float between 0 and 1).
+        
         Returns:
-            dict:
+            ::
+
                 {
                     "success": (bool) True if the column passed the expectation,
                     "exceptions_list": (list) the values that did not pass the expectation
                 }
+        
         See Also:
             expect_column_values_to_not_be_in_set
 
@@ -917,19 +1076,24 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                                            mostly=None,
                                            output_format=None, include_config=False, catch_exceptions=None, meta=None):
         """Expect column entries to be a number between a minimum value and a maximum value.
+        
         Args:
             column (str): The column name.
             min_value (int or None): The minimum value for a column entry.
             max_value (int or None): The maximum value for a column entry.
             parse_strings_as_datetimes (boolean or None) : If True, parse min_value, max_values, and all non-null column values to datetimes before making comparisons.
+        
         Keyword Args:
             mostly=None: Return "success": True if the percentage of values between min_value and max_value is greater than or equal to mostly (a float between 0 and 1).
+        
         Returns:
-            dict:
+            ::
+
                 {
                     "success": (bool) True if the column passed the expectation,
                     "exceptions_list": (list) the values that did not pass the expectation
                 }
+        
         See Also:
             expect_column_value_lengths_to_be_between
 
@@ -940,16 +1104,20 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                                               mostly=None,
                                               output_format=None, include_config=False, catch_exceptions=None, meta=None):
         """Expect column values to be increasing. (Only works for numeric data.)
+        
         Args:
             column (str): The column name.
             strictly (Boolean or None): If True, values must be strictly greater than previous values
             parse_strings_as_datetimes (boolean or None) : If True, all non-null column values to datetimes before making comparisons
+        
         Returns:
-            dict:
+            ::
+
                 {
                     "success": (bool) True if the column passed the expectation,
                     "exceptions_list": (list) the values that did not pass the expectation
                 }
+        
         See Also:
             expect_column_values_to_be_decreasing
 
@@ -960,16 +1128,20 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                                               mostly=None,
                                               output_format=None, include_config=False, catch_exceptions=None, meta=None):
         """Expect column values to be decreasing. (Only works for numeric data.)
+        
         Args:
             column (str): The column name.
             strictly (Boolean or None): If True, values must be strictly less than than previous values
             parse_strings_as_datetimes (boolean or None) : If True, all non-null column values to datetimes before making comparisons
+        
         Returns:
-            dict:
+            ::
+
                 {
                     "success": (bool) True if the column passed the expectation,
                     "exceptions_list": (list) the values that did not pass the expectation
                 }
+        
         See Also:
             expect_column_values_to_be_increasing
 
@@ -983,18 +1155,23 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                                                   mostly=None,
                                                   output_format=None, include_config=False, catch_exceptions=None, meta=None):
         """Expect column entries to have a measurable length which lies between a minimum value and a maximum value.
+        
         Args:
             column (str): The column name.
             min_value (int or None): The minimum value for a column entry length.
             max_value (int or None): The maximum value for a column entry length.
+        
         Keyword Args:
             mostly=None: Return "success": True if the percentage of value lengths between min_value and max_value is greater than or equal to mostly (a float between 0 and 1).
+        
         Returns:
-            dict:
+            ::
+
                 {
                     "success": (bool) True if the column passed the expectation,
                     "exceptions_list": (list) the values that did not pass the expectation
                 }
+
         See Also:
             expect_column_values_to_be_between
 
@@ -1015,17 +1192,22 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                                             mostly=None,
                                             output_format=None, include_config=False, catch_exceptions=None, meta=None):
         """Expect column entries to be strings that match a given regular expression.
+        
         Args:
             column (str): The column name.
             regex (str): The regular expression that the column entry should match.
+        
         Keyword Args:
             mostly=None: Return "success": True if the percentage of matches is greater than or equal to mostly (a float between 0 and 1).
+        
         Returns:
-            dict:
+            ::
+
                 {
                     "success": (bool) True if the column passed the expectation,
                     "exceptions_list": (list) the values that did not pass the expectation
                 }
+        
         See Also:
             expect_column_values_to_not_match_regex
             expect_column_values_to_match_regex_list
@@ -1036,17 +1218,22 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                                                 mostly=None,
                                                 output_format=None, include_config=False, catch_exceptions=None, meta=None):
         """Expect column entries to be strings that do NOT match a given regular expression.
+        
         Args:
             column (str): The column name.
             regex (str): The regular expression that the column entry should NOT match.
+
         Keyword Args:
             mostly=None: Return "success": True if the percentage of NOT matches is greater than or equal to mostly (a float between 0 and 1).
+        
         Returns:
-            dict:
+            ::
+
                 {
                     "success": (bool) True if the column passed the expectation,
                     "exceptions_list": (list) the values that did not pass the expectation
                 }
+
         See Also:
             expect_column_values_to_match_regex
             expect_column_values_to_match_regex_list
@@ -1057,18 +1244,23 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                                                  mostly=None,
                                                  output_format=None, include_config=False, catch_exceptions=None, meta=None):
         """Expect the column entries to be strings that match at least one of a list of regular expressions.
+        
         Args:
             column (str): The column name.
             regex_list (list): The list of regular expressions in which the column entries should match according to match_on.
+        
         Keyword Args:
             match_on="any": Use "any" if the value should match at least one regular expression in the list. Use "all" if it should match each regular expression in the list.
             mostly=None: Return "success": True if the percentage of matches is greater than or equal to mostly (a float between 0 and 1).
+        
         Returns:
-            dict:
+            ::
+
                 {
                     "success": (bool) True if the column passed the expectation,
                     "exceptions_list": (list) the values that did not pass the expectation
                 }
+        
         See Also:
             expect_column_values_to_match_regex
             expect_column_values_to_not_match_regex
@@ -1081,15 +1273,20 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                                                       mostly=None,
                                                       output_format=None, include_config=False, catch_exceptions=None, meta=None):
         """Expect column entries to be strings representing a date or time with a given format.
+        
         WARNING: Note that strftime formats are not universally portable across implementations.
         For example, the %z directive may not be implemented before Python 3.2.
+        
         Args:
             column (str): The column name.
             strftime_format (str): The datetime format that the column entries should match.
+        
         Keyword Args:
             mostly=None: Return "success": True if the percentage of matches is greater than or equal to mostly (a float between 0 and 1).
+        
         Returns:
-            dict:
+            ::
+
                 {
                     "success": (bool) True if the column passed the expectation,
                     "exceptions_list": (list) the values that did not pass the expectation
@@ -1101,12 +1298,16 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                                                       mostly=None,
                                                       output_format=None, include_config=False, catch_exceptions=None, meta=None):
         """Expect column entries to be interpretable as a dateutil object.
+        
         Args:
             column (str): The column name.
+        
         Keyword Args:
             mostly=None: Return "success": True if the percentage of parseable values is greater than or equal to mostly (a float between 0 and 1).
+        
         Returns:
-            dict:
+            ::
+
                 {
                     "success": (bool) True if the column passed the expectation,
                     "exceptions_list": (list) the values that did not pass the expectation
@@ -1118,14 +1319,18 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                                                   mostly=None,
                                                   output_format=None, include_config=False, catch_exceptions=None, meta=None):
         """Expect column entries to be data written in JavaScript Object Notation.
+        
         Args:
             column (str): The column name.
+        
         Returns:
-            dict:
+            ::
+
                 {
                     "success": (bool) True if the column passed the expectation,
                     "exceptions_list": (list) the values that did not pass the expectation
                 }
+        
         See Also:
             expect_column_values_to_match_json_schema
         """
@@ -1135,15 +1340,19 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                                                   mostly=None,
                                                   output_format=None, include_config=False, catch_exceptions=None, meta=None):
         """Expect column entries to be JSON objects with a given JSON schema.
+        
         Args:
             column (str): The column name.
             json_schema (JSON object): The JSON schema that each column entry should resemble.
+        
         Returns:
-            dict:
+            ::
+
                 {
                     "success": (bool) True if the column passed the expectation,
                     "exceptions_list": (list) the values that did not pass the expectation
                 }
+        
         See Also:
             expect_column_values_to_be_json_parseable
 
@@ -1156,12 +1365,15 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
     def expect_column_mean_to_be_between(self, column, min_value=None, max_value=None,
                                          output_format=None, include_config=False, catch_exceptions=None, meta=None):
         """Expect the column mean to be between a minimum value and a maximum value.
+        
         Args:
             column (str): The column name.
             min_value (int or None): The minimum value for the column mean.
             max_value (int or None): The maximum value for the column mean.
+        
         Returns:
-            dict:
+            ::
+
                 {
                     "success": (bool) True if the column passed the expectation,
                     "true_mean": (float) the column mean
@@ -1172,12 +1384,15 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
     def expect_column_median_to_be_between(self, column, min_value=None, max_value=None,
                                            output_format=None, include_config=False, catch_exceptions=None, meta=None):
         """Expect the column median to be between a minimum value and a maximum value.
+        
         Args:
             column (str): The column name.
             min_value (int or None): The minimum value for the column median.
             max_value (int or None): The maximum value for the column median.
+        
         Returns:
-            dict:
+            ::
+
                 {
                     "success": (bool) True if the column passed the expectation,
                     "true_median": (float) the column median
@@ -1188,13 +1403,15 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
     def expect_column_stdev_to_be_between(self, column, min_value=None, max_value=None,
                                           output_format=None, include_config=False, catch_exceptions=None, meta=None):
         """Expect the column standard deviation to be between a minimum value and a maximum value.
+        
         Args:
             column (str): The column name.
             min_value (int or None): The minimum value for the column standard deviation.
             max_value (int or None): The maximum value for the column standard deviation.
 
         Returns:
-            dict:
+            ::
+
                 {
                     "success": (bool) True if the column passed the expectation,
                     "true_stdev": (float) the true standard deviation
@@ -1212,7 +1429,8 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             max_value (int or None): The maximum number of unique values. If None, then there is no maximum expected value.
 
         Returns:
-            dict:
+            ::
+
                 {
                     "success": (bool) True if the column passed the expectation,
                     "true_value": (float) the column mean
@@ -1230,7 +1448,8 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             max_value (float or None): The maximum proportion of unique values. (Proportions are on the range 0 to 1)
 
         Returns:
-            dict:
+            ::
+
                 {
                     "success": (bool) True if the column passed the expectation,
                     "true_value": (float) the proportion of unique values
@@ -1247,11 +1466,14 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             value  (any): The value
             ties_okay (boolean or None): If True, then the expectation will succeed if other values are as common (but not more common) than the selected value
 
-        Returns:
-            dict:
+        Returns: 
+            A result object containing...
+            ::
+
                 {
                     "success": (bool) True if the column passed the expectation,
-                    "true_value": (float) the proportion of unique values
+                    "true_value": (float) the proportion of unique values,
+                    "summary_obj": {}
                 }
         """
         raise NotImplementedError
@@ -1260,16 +1482,18 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                                                      output_format=None, include_config=False, catch_exceptions=None, meta=None):
         """Expect the most common value to be within the designated value set
 
-        Args:
-            column (str): The column name.
-            value_set (list): The lis of designated values
-            ties_okay (boolean or None): If True, then the expectation will succeed if other values are as common (but not more common) than the selected value
+        :param str column: The column name.
+        :param list value_set: The list of designated values
+        :param ties_okay: If True, then the expectation will succeed if other values are as common (but not more common) than the selected value
+        :type ties_okay: boolean or None
 
-        Returns:
-            dict:
+        :returns: 
+            ::
+
                 {
-                    "success": (bool) True if the column passed the expectation,
-                    "true_value": (float) the proportion of unique values
+                    "success": (bool) True if the column passed the expectation True,
+                    "true_value": (float) the proportion of unique values,
+                    "summary_obj": {}
                 }
         """
         raise NotImplementedError
@@ -1282,19 +1506,23 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         Expect the values in this column to match the distribution of the specified categorical values and their expected weights. \
         The expected distribution is calculated by scaling the weights according to the size of values in the test data.
 
-        :param column (str): The column name
-        :param partition_object (dict): A dictionary containing partition (categorical values) and associated weights.
-        :param p (float) = 0.05: The p-value threshold for the Chi-Squared test.\
-            For values below the specified threshold the expectation will return false, rejecting the null hypothesis that the distributions are the same.
-        :param tail_weight_holdout: the amount of weight to split uniformly and add to the tails of the histogram (the area between -Infinity and the data's min value and between the data's max value and Infinity)
+        Args:
+            column (str): The column name
+            partition_object (dict): A dictionary containing partition (categorical values) and associated weights.
+            p (float) = 0.05: The p-value threshold for the Chi-Squared test.\
+                For values below the specified threshold the expectation will return false, rejecting the null hypothesis that the distributions are the same.
+            tail_weight_holdout: the amount of weight to split uniformly and add to the tails of the histogram (the area between -Infinity and the data's min value and between the data's max value and Infinity)
 
-        :return: result_obj including:
-        result_obj including:
-            "success": (Boolean) True if the column passed the expectation
-            "true_value": (float) The true KL divergence (relative entropy)
-            "summary_obj": {
-                "observed_partition": The partition observed in the data
-                "expected_partition": The partition against which the data were compared, after applying specified holdouts.
+        Returns:
+            ::
+
+            {
+                "success": (Boolean) True if the column passed the expectation
+                "true_value": (float) The true KL divergence (relative entropy)
+                "summary_obj": {
+                    "observed_partition": The partition observed in the data
+                    "expected_partition": The partition against which the data were compared, after applying specified holdouts.
+                }            
             }
         """
         raise NotImplementedError
@@ -1304,24 +1532,29 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         """Expect the values in this column to match the distribution implied by the specified partition. \
         The expected CDF is constructed as a linear interpolation between the bins, using the provided weights.
 
-        :param column: The column name to test
-        :param partition_object: The expected partition object.
-        :param p: The p-value threshold for the Kolmogorov-Smirnov test.\
-            For values below the specified threshold the expectation will return false, rejecting the null hypothesis that the distributions are the same.
-        :param bootstrap_samples: The number of times to bootstrap. If None, defaults to 1000.
-        :param bootstrap_sample_size: The number of samples per bootstrap. If None, defaults to 2 * len(partition_object['weights'])\
-            A larger sample will increase the specificity of the test.
+        Args:
+            column: The column name to test
+            partition_object: The expected partition object.
+            p: The p-value threshold for the Kolmogorov-Smirnov test.\
+                For values below the specified threshold the expectation will return false, rejecting the null hypothesis that the distributions are the same.
+            bootstrap_samples: The number of times to bootstrap. If None, defaults to 1000.
+            bootstrap_sample_size: The number of samples per bootstrap. If None, defaults to 2 * len(partition_object['weights'])\
+                A larger sample will increase the specificity of the test.
 
-        :return: result_obj including:
-            "success": (Boolean) True if the column passed the expectation
-            "true_value": (float) The true p-value of the KS test
-            "summary_obj": {
-                "bootstrap_samples": The number of bootstrap samples used
-                "bootstrap_sample_size": The number of samples taken from the column in each bootstrap sample
-                "observed_cdf": The cumulative density function observed in the data, a dict containing 'x' values and cdf_values (suitable for plotting)
-                "expected_cdf": The cumulative density function expected based on the partition object, a dict containing 'x' values and cdf_values (suitable for plotting)
-                "observed_partition": The partition observed on the data, using the provided bins but also expanding from min(column) to max(column)
-                "expected_partition": The partition expected from the data. For KS test, this will always be the partition_object parameter
+        Return:
+            ::
+
+            {
+                "success": (Boolean) True if the column passed the expectation
+                "true_value": (float) The true p-value of the KS test
+                "summary_obj": {
+                    "bootstrap_samples": The number of bootstrap samples used
+                    "bootstrap_sample_size": The number of samples taken from the column in each bootstrap sample
+                    "observed_cdf": The cumulative density function observed in the data, a dict containing 'x' values and cdf_values (suitable for plotting)
+                    "expected_cdf": The cumulative density function expected based on the partition object, a dict containing 'x' values and cdf_values (suitable for plotting)
+                    "observed_partition": The partition observed on the data, using the provided bins but also expanding from min(column) to max(column)
+                    "expected_partition": The partition expected from the data. For KS test, this will always be the partition_object parameter
+                }            
             }
         """
         raise NotImplementedError
@@ -1333,26 +1566,33 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         In many practical contexts, choosing a value between 0.5 and 1 will provide a useful test.
 
         If the partition_object is categorical, this expectation will expect the values in column to also be categorical.
+
             * If the column includes values that are not present in the partition, the tail_weight_holdout will be equally split among those values, providing a mechanism to weaken the strictness of the expectation (otherwise, relative entropy would immediately go to infinity).
             * If the partition includes values that are not present in the column, the test will simply include zero weight for that value.
+
         If the partition_object is continuous, this expectation will discretize the values in the column according to the bins specified in the partition_object, and apply the test to the resulting distribution.
+
             * The internal_weight_holdout and tail_weight_holdout parameters provide a mechanism to weaken the expectation, since an expected weight of zero would drive relative entropy to be infinite if any data are observed in that interval.
             * If internal_weight_holdout is specified, that value will be distributed equally among any intervals with weight zero in the partition_object.
             * If tail_weight_holdout is specified, that value will be appended to the tails of the bins ((-Infinity, min(bins)) and (max(bins), Infinity).
 
-        :param column: the column to which to apply the expectation
-        :param partition_object: the partition_object with which to compare the data in column
-        :param threshold: the threshold below which the test should be considered to have passed
-        :param internal_weight_holdout: the amount of weight to split uniformly among zero-weighted partition elements in a given partition.
-        :param tail_weight_holdout: the amount of weight to split uniformly and add to the tails of the histogram (the area between -Infinity and the data's min value and between the data's max value and Infinity)
+        Args:
+            column: the column to which to apply the expectation
+            partition_object: the partition_object with which to compare the data in column
+            threshold: the threshold below which the test should be considered to have passed
+            internal_weight_holdout: the amount of weight to split uniformly among zero-weighted partition elements in a given partition.
+            tail_weight_holdout: the amount of weight to split uniformly and add to the tails of the histogram (the area between -Infinity and the data's min value and between the data's max value and Infinity)
 
-        :return: result_obj including:
-        result_obj including:
-            "success": (Boolean) True if the column passed the expectation
-            "true_value": (float) The true KL divergence (relative entropy)
-            "summary_obj": {
-                "observed_partition": The partition observed in the data
-                "expected_partition": The partition against which the data were compared, after applying specified holdouts.
+        Returns:
+            ::
+
+            {
+              "success": (Boolean) True if the column passed the expectation
+              "true_value": (float) The true KL divergence (relative entropy)
+              "summary_obj": {
+                  "observed_partition": The partition observed in the data
+                  "expected_partition": The partition against which the data were compared, after applying specified holdouts.
+              }
             }
         """
         raise NotImplementedError

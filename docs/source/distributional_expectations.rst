@@ -26,15 +26,16 @@ Distributional expectations currently focus exclusively on unidimensional (colum
 For continuous data:
 
 * A partition is defined by an ordered list of points that define intervals on the real number line. Note that partition intervals do not need to be uniform.
- * Each bin in a partition is partially open: a data element x is in bin i if lower_bound_i <= x < upper_bound_i.
- * However, following the behavior of numpy.histogram, a data element x is in the largest bin k if x == upper_bound_k.
- * A bin may include -Infinity and Infinity as endpoints, however, those endpoints are not supported by the Kolmogorov-Smirnov test.
+* Each bin in a partition is partially open: a data element x is in bin i if lower_bound_i <= x < upper_bound_i.
+* However, following the behavior of numpy.histogram, a data element x is in the largest bin k if x == upper_bound_k.
+* A bin may include -Infinity and Infinity as endpoints, however, those endpoints are not supported by the Kolmogorov-Smirnov test.
 
 * Partition weights define the probability of the associated interval. Note that this effectively applies a "piecewise uniform" distribution to the data for the purpose of statistical tests.
 
 Example continuous partition object:
 
 .. code-block:: python
+
   {
     "bins": [ 0, 1, 2, 10],
     "weights": [0.3, 0.3, 0.4]
@@ -48,6 +49,7 @@ For discrete/categorical data:
 Example discrete partition object:
 
 .. code-block:: python
+
   {
     "values": [ "cat", "dog", "fish"],
     "weights": [0.3, 0.3, 0.4]
