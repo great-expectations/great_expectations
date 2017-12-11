@@ -1,4 +1,4 @@
-from .util import DotDict, ensure_json_serializable
+from .util import DotDict, recursively_convert_to_json_serializable
 
 import json
 import inspect
@@ -89,7 +89,7 @@ class DataSet(object):
                     if "output_format" in all_args:
                         del all_args["output_format"]
 
-                all_args = ensure_json_serializable(all_args)
+                all_args = recursively_convert_to_json_serializable(all_args)
                 expectation_args = copy.deepcopy(all_args)
 
                 #Construct the expectation_config object
