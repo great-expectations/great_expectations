@@ -69,7 +69,7 @@ All Expectations accept an optional `meta` parameter. If `meta` is a valid JSON-
         }
     )
     {
-        "result": False,
+        "success": False,
         "meta": {
             "foo": "bar",
             "baz": [1,2,3,4]
