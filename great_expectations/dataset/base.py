@@ -69,6 +69,10 @@ class DataSet(object):
                     output_format = self.default_expectation_args["output_format"]
 
                 if "meta" in kwargs:
+                    #Ensure that meta is JSON serializable.
+                    #FIXXME: If it's not, should we try to fix it? Allow users to override and proceed anyway?
+                    json.dumps(kwargs["meta"])
+
                     meta = kwargs["meta"]
                     del all_args["meta"]
                 else:
