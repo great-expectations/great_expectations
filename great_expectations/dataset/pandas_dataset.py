@@ -58,7 +58,7 @@ class MetaPandasDataSet(DataSet):
 
             success, percent_success = self.calc_map_expectation_success(success_count, nonnull_count, mostly)
 
-            return_obj = self.format_column_map_output(
+            return_obj = self._format_column_map_output(
                 output_format, success,
                 element_count,
                 nonnull_values, nonnull_count,
@@ -250,7 +250,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         # Pass element_count instead of nonnull_count, because that's the right denominator for this expectation
         success, percent_success = self.calc_map_expectation_success(success_count, element_count, mostly)
 
-        return_obj = self.format_column_map_output(
+        return_obj = self._format_column_map_output(
             output_format, success,
             element_count,
             nonnull_values, nonnull_count,
@@ -285,7 +285,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         # Pass element_count instead of nonnull_count, because that's the right denominator for this expectation
         success, percent_success = self.calc_map_expectation_success(success_count, element_count, mostly)
 
-        return_obj = self.format_column_map_output(
+        return_obj = self._format_column_map_output(
             output_format, success,
             element_count,
             nonnull_values, nonnull_count,
