@@ -10,11 +10,8 @@ import warnings
 import pandas as pd
 from collections import defaultdict
 
-<<<<<<< HEAD
 from ..version import __version__
-=======
 from .util import DotDict, ensure_json_serializable, DocInherit
->>>>>>> 8a8d268ff715477f5e9ac0670d9396c92d6ef17b
 
 class DataSet(object):
 
