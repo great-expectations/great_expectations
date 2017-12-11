@@ -785,7 +785,12 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         mostly=None,
         output_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
-        """Expect each nonempty column entry to be unique (no duplicates).
+        """Expect each column value to be unique.
+
+        This expectation detects duplicates. All duplicated values are counted as exceptions.
+
+        For example, `[1, 2, 3, 3, 3]` will return `[3, 3, 3]` in `summary_obj.exceptions_list`, with `exception_percent=0.6.`
+
 
         expect_column_values_to_be_unique is a :func:`column_map_expectation <great_expectations.dataset.base.DataSet.column_map_expectation>`.
 
@@ -817,10 +822,6 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
             Exact fields vary depending on the values passed to :ref:`output_format <output_format>` and
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
-
-        Examples:
-    	    Display multiple duplicated items. For example, ['2','2','2'] will return `['2','2']` for the exceptions_list.
-            
         """
         raise NotImplementedError
 
