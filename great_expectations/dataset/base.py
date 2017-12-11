@@ -560,13 +560,21 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
 
     ##### Output generation #####
-    def format_column_map_output(self,
+    def _format_column_map_output(self,
         output_format, success,
         element_count,
         nonnull_values, nonnull_count,
         boolean_mapped_success_values, success_count,
         exception_list, exception_index_list
     ):
+        """Helper function to construct expectation result objects for column_map_expectations.
+
+        Expectations support four output_formats: BOOLEAN_ONLY, BASIC, SUMMARY, and COMPLETE.
+        In each case, the object returned has a different set of populated fields.
+        See :ref:`output_format` for more information.
+
+        This function handles the logic for mapping those fields for column_map_expectations.
+        """
         if output_format == "BOOLEAN_ONLY":
             return_obj = success
 

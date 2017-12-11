@@ -380,7 +380,7 @@ class TestDataset(unittest.TestCase):
         exception_index_list = []
 
         self.assertEqual(
-            df.format_column_map_output(
+            df._format_column_map_output(
                 "BOOLEAN_ONLY",
                 success,
                 element_count,
@@ -392,7 +392,7 @@ class TestDataset(unittest.TestCase):
         )
 
         self.assertEqual(
-            df.format_column_map_output(
+            df._format_column_map_output(
                 "BASIC",
                 success,
                 element_count,
@@ -412,7 +412,7 @@ class TestDataset(unittest.TestCase):
         )
 
         self.assertEqual(
-            df.format_column_map_output(
+            df._format_column_map_output(
                 "COMPLETE",
                 success,
                 element_count,
@@ -428,7 +428,7 @@ class TestDataset(unittest.TestCase):
         )
 
         self.assertEqual(
-            df.format_column_map_output(
+            df._format_column_map_output(
                 "SUMMARY",
                 success,
                 element_count,
