@@ -390,9 +390,40 @@ class DataSet(object):
                     return expectation
 
     def get_default_expectation_arguments(self):
+        """Fetch default expectation arguments for this DataSet
+
+        Args:
+            None
+
+        Returns:
+            A dictionary containing all the current default expectation arguments for a DataSet
+
+            Ex::
+
+            {
+                "include_config" : False,
+                "catch_exceptions" : False,
+                "output_format" : 'BASIC'
+            }
+
+        See also:
+            set_default_expectation_arguments
+        """
         return self.default_expectation_args
 
     def set_default_expectation_argument(self, argument, value):
+        """Set a default expectation argument for this DataSet
+
+        Args:
+            argument (string): The argument to be replaced
+            value : The New argument to use for replacement
+
+        Returns:
+            None
+
+        See also:
+            get_default_expectation_arguments
+        """
         #!!! Maybe add a validation check here?
 
         self.default_expectation_args[argument] = value
