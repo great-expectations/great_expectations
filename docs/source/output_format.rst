@@ -225,7 +225,7 @@ Quick reference
 |meta (dict)                            |Included if and only if meta=True              |
 +---------------------------------------+-------+-----------+---------------------------+
 +---------------------------------------+-------+-----------+---------------------------+
-|true_value (depends)                   |Included for all column_map_expectations       |
+|true_value (depends)                   |Included for all column_aggregate_expectations |
 +---------------------------------------+-------+-----------+---------------------------+
 |exception_index_list (list)            |no     |no         |yes                        |
 +---------------------------------------+-------+-----------+---------------------------+
