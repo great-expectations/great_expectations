@@ -780,33 +780,55 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
     ##### Missing values, unique values, and types #####
 
-    def expect_column_values_to_be_unique(self, column,
-                                          mostly=None,
-                                          output_format=None, include_config=False, catch_exceptions=None, meta=None):
+    def expect_column_values_to_be_unique(self,
+        column,
+        mostly=None,
+        output_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
         """Expect each nonempty column entry to be unique (no duplicates).
 
+        expect_column_values_to_be_unique is a :func:`column_map_expectation <great_expectations.dataset.base.DataSet.column_map_expectation>`.
+
         Args:
-            column (str): The column name.
-        
+            column (str): \
+                The column name.
+
         Keyword Args:
-            mostly=None: Return "success": True if the percentage of unique values is greater than or equal to mostly (a float between 0 and 1).
-        
+            mostly (None or a float between 0 and 1): \
+                Return `"success": True` if the percentage of exceptions less than or equal to `mostly`. \
+                For more detail, see :ref:`mostly`.
+            output_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`output_format <output_format>`.
+
+        Other Parameters:
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
+
         Returns:
-            ::
-            
-                {
-                    "success": (bool) True if the column passed the expectation,
-                    "exceptions_list": (list) the values that did not pass the expectation
-                }
+            A JSON-serializable expectation result object.
+
+            Exact fields vary depending on the values passed to :ref:`output_format <output_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
 
         Examples:
-	    Display multiple duplicated items. For example, ['2','2','2'] will return `['2','2']` for the exceptions_list.
+    	    Display multiple duplicated items. For example, ['2','2','2'] will return `['2','2']` for the exceptions_list.
+            
         """
         raise NotImplementedError
 
-    def expect_column_values_to_not_be_null(self, column,
-                                            mostly=None,
-                                            output_format=None, include_config=False, catch_exceptions=None, meta=None):
+    def expect_column_values_to_not_be_null(self,
+        column,
+        mostly=None,
+        output_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
         """Expect column values to be not null.
 
         To be counted as an exception, values must be explicitly null or missing, such as a NULL in PostgreSQL or an np.NaN in pandas.
