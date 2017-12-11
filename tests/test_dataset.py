@@ -754,7 +754,7 @@ class TestDataset(unittest.TestCase):
         })
         def expect_dataframe_to_contain_7(self):
             return {
-                "success": (self==7).sum().sum() > 0
+                "success": bool((self==7).sum().sum() > 0)
             }
         
         self.assertEqual(
