@@ -93,7 +93,11 @@ Behavior for `BASIC` result objects
 ------------------------------------------------------------------------------
 ...depends on the expectation. Great Expectations has native support for three types of Expectations: `column_map_expectation`, `column_aggregate_expectation`, and a base type `expectation`.
 
-`column_map_expectations` apply a boolean test function to each element within a column. The basic format is:
+`column_map_expectations` apply a boolean test function to each element within a column.
+This format is intended for quick, at-a-glance feedback. For example, it tends to work well
+in jupyter notebooks.
+
+The basic format is:
 
 .. code-block:: bash
 
@@ -101,7 +105,6 @@ Behavior for `BASIC` result objects
         "success" : Boolean,
         "summary_obj" : {
             "partial_exception_list" : [A list of up to 20 values that violate the expectation]
-            "partial_exception_index_list" : [A list of the indexes of those values]
             "exception_count" : The total count of exceptions in the column
             "exception_percent" : The overall percent of exceptions
             "exception_percent_nonmissing" : The percent of exceptions, excluding mising values from the denominator
@@ -129,7 +132,7 @@ Note: when exception values are duplicated, `exception_list` will contain multip
     }
 
 
-`column_aggregate_expectations` compute a single value for the column.
+`column_aggregate_expectations` compute a single value for the column and put it into `true_value`.
 
 Format:
 
@@ -239,7 +242,7 @@ Quick reference
 +=======================================+======================+========================+
 |    partial_exception_list             |yes*                  |yes*                    |
 +---------------------------------------+----------------------+------------------------+
-|    partial_exception_index_list       |yes*                  |yes*                    |
+|    partial_exception_index_list       |no                    |yes*                    |
 +---------------------------------------+----------------------+------------------------+
 |    exception_count                    |yes*                  |yes*                    |
 +---------------------------------------+----------------------+------------------------+
