@@ -897,7 +897,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         mostly=None,
         output_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
-        """Expect column values to be not null.
+        """Expect column values to not be null.
 
         To be counted as an exception, values must be explicitly null or missing, such as a NULL in PostgreSQL or an np.NaN in pandas.
         Empty strings don't count as null unless they have been coerced to a null type.
@@ -942,22 +942,37 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
     def expect_column_values_to_be_null(self, column,
                                         mostly=None,
                                         output_format=None, include_config=False, catch_exceptions=None, meta=None):
-        """Expect the column entries to be empty.
+        """Expect column values to be null.
         
         Args:
-            column (str): The column name.
+            column (str): \
+                The column name.
 
         Keyword Args:
-            mostly=None: Return "success": True if the percentage of null values is greater than or equal to mostly (a float between 0 and 1).
+            mostly (None or a float between 0 and 1): \
+                Return `"success": True` if the percentage of exceptions less than or equal to `mostly`. \
+                For more detail, see :ref:`mostly`.
+
+        Other Parameters:
+            output_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`output_format <output_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
 
         Returns:
-            ::
+            A JSON-serializable expectation result object.
 
-                {
-                    "success": (bool) True if the column passed the expectation,
-                    "exceptions_list": (list) the values that did not pass the expectation
-                }
-
+            Exact fields vary depending on the values passed to :ref:`output_format <output_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+            
         See Also:
             expect_column_values_to_not_be_null
 
@@ -970,22 +985,45 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         """Expect each column entry to be a specified data type.
         
         Args:
-            column (str): The column name.
-            type_ (str): A string representing the data type that each column should have as entries.
+            column (str): \
+                The column name.
+            type_ (str): \
+                A string representing the data type that each column should have as entries.
                 For example, "double integer" refers to an integer with double precision.
-            target_datasource (str): The data source that specifies the implementation in the type_ parameter.
+            target_datasource (str): \
+                The data source that specifies the implementation in the type_ parameter.
                 For example, options include "numpy", "sql", or "spark".
 
         Keyword Args:
-            mostly=None: Return "success": True if the percentage of values of type_ is greater than or equal to mostly (a float between 0 and 1).
+            mostly (None or a float between 0 and 1): \
+                Return `"success": True` if the percentage of exceptions less than or equal to `mostly`. \
+                For more detail, see :ref:`mostly`.
+
+        Other Parameters:
+            output_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`output_format <output_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
 
         Returns:
-            ::
+            A JSON-serializable expectation result object.
 
-                {
-                    "success": (bool) True if the column passed the expectation,
-                    "exceptions_list": (list) the values that did not pass the expectation
-                }
+            Exact fields vary depending on the values passed to :ref:`output_format <output_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+            
+        Warning:
+            expect_column_values_to_be_of_type is slated for major changes in future versions of great_expectations.
+            As of v0.3, great_expectations is exclusively based on pandas, which handles typing in its own peculiar way.
+            Future versions of great_expectations will allow for datasets in SQL, spark, etc.
+            When we make that change, we expect some breaking changes in parts of the codebase that are based strongly on pandas notions of typing. 
         """
         raise NotImplementedError
 
