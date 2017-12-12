@@ -615,34 +615,30 @@ class TestPandasDataset(unittest.TestCase):
 
         """
 
-        D = ge.dataset.PandasDataSet({
-            'x' : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-            'y' : [1, 2, 3, 4, 5, 6, 7, 8, 9, "abc"],
-            'z' : [1, 2, 3, 4, 5, None, None, None, None, None],
-            'ts' : [
-                'Jan 01 1870 12:00:01',
-                'Dec 31 1999 12:00:01',
-                'Jan 01 2000 12:00:01',
-                'Feb 01 2000 12:00:01',
-                'Mar 01 2000 12:00:01',
-                'Apr 01 2000 12:00:01',
-                'May 01 2000 12:00:01',
-                'Jun 01 2000 12:00:01',
-                None,
-                'Jan 01 2001 12:00:01',
-            ],
-        })
+        with open("./tests/test_sets/expect_column_values_to_be_between_test_set_ADJ.json") as f:
+            fixture = json.load(f)
+
+        dataset = fixture["dataset"]
+        tests = fixture["tests"]
+
+        D = ge.dataset.PandasDataSet(dataset)
         D.set_default_expectation_argument("output_format", "COMPLETE")
 
         self.maxDiff = None
 
-        with open("./tests/test_sets/expect_column_values_to_be_between_test_set_ADJ.json") as f:
-            T = json.load(f)
-            # print json.dumps(T, indent=2)
+        for t in tests:
+            out = D.expect_column_values_to_be_between(**t['in'])
 
-        for t in T:
-            out = D.expect_column_values_to_be_between(**t['in'])#, **t['kwargs'])
-            self.assertEqual(out, t['out'])
+            # print '-'*80
+            print(t)
+            # print(json.dumps(out, indent=2))
+
+            if 'out' in t:
+                self.assertEqual(out, t['out'])
+
+            if 'error' in t:
+                self.assertEqual(out['raised_exception'], True)
+                self.assertIn(t['error']['traceback_substring'], out['exception_traceback'])
 
     def test_expect_column_value_lengths_to_be_between(self):
         D = ge.dataset.PandasDataSet({
@@ -1236,6 +1232,9 @@ class TestPandasDataset(unittest.TestCase):
         })
         df.set_default_expectation_argument("output_format", "COMPLETE")
 
+        # print '&'*80
+        # print json.dumps(df.expect_column_values_to_be_between('x', min_value=1, max_value=5, output_format="SUMMARY"), indent=2)
+
         self.maxDiff = None
         self.assertEqual(
             df.expect_column_values_to_be_between('x', min_value=1, max_value=5, output_format="SUMMARY"),
@@ -1305,8 +1304,31 @@ class TestPandasDataset(unittest.TestCase):
             {'success':True, 'exception_list':['abc'], 'exception_index_list':[4]}
         )
 
+    def test_output_format_argument_in_decorators(self):
+        df = ge.dataset.PandasDataSet({
+            'x':[1,3,5,7,9],
+            'y':[2,4,6,8,10],
+            'z':[None,'a','b','c','abc']
+        })
+        df.set_default_expectation_argument('output_format', 'COMPLETE')
 
+        #Test explicit Nones in output_format
+        self.assertEqual(
+            df.expect_column_mean_to_be_between('x',4,6, output_format=None),
+            {'success':True, 'true_value':5}
+        )
 
+        self.assertEqual(
+            df.expect_column_values_to_be_between('y',1,6, output_format=None),
+            {'success':False, 'exception_list':[8,10], 'exception_index_list':[3,4]}
+        )
+
+        #Test unknown output format
+        with self.assertRaises(ValueError):
+            df.expect_column_values_to_be_between('y',1,6, output_format="QUACK")
+
+        with self.assertRaises(ValueError):
+            df.expect_column_mean_to_be_between('x',4,6, output_format="QUACK")
 
 if __name__ == "__main__":
     unittest.main()
