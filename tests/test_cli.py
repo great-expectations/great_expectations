@@ -45,9 +45,11 @@ class TestCLI(unittest.TestCase):
         # )
 
         command_str = 'python '+filepath+'/../bin/great_expectations validate '+filepath+'/test_sets/Titanic.csv '+filepath+'/test_sets/titanic_expectations.json'
+        print(command_str)
+        
         try:
-          result = get_system_command_result(command_str)["output"]
-          json_result = json.loads(result)
+          result = get_system_command_result(command_str)
+          json_result = json.loads(result["output"])
         except ValueError as ve:
           print ("=== Result ==================================================")
           print (result)
@@ -55,9 +57,9 @@ class TestCLI(unittest.TestCase):
           print(ve)
           json_result = {}
 
-        # print("^"*80)
-        # print json.dumps(json_result, indent=2)
-        # self.maxDiff = None
+        print("^"*80)
+        print(json.dumps(json_result, indent=2))
+        self.maxDiff = None
 
         assertDeepAlmostEqual(self,
             json_result,
@@ -273,14 +275,17 @@ class TestCLI(unittest.TestCase):
                       + filepath + '/test_sets/titanic_custom_expectations.json -f -m='\
                       + filepath + '/test_fixtures/custom_dataset.py -c=CustomPandasDataSet'
         try:
-          result = get_system_command_result(command_str)["output"]
-          json_result = json.loads(result)
+          result = get_system_command_result(command_str)
+          json_result = json.loads(result["output"])
         except ValueError as ve:
+          print ("=== Result ==================================================")
+          print (result)
+          print ("=== Error ===================================================")
           print(ve)
           json_result = {}
 
-        # self.maxDiff = None
-        # print(json.dumps(json_result, indent=2))
+        self.maxDiff = None
+        print(json.dumps(json_result, indent=2))
 
         self.assertEqual(
             json_result,

@@ -14,7 +14,7 @@ from scipy import stats
 from six import string_types
 
 from .base import DataSet
-from .util import DocInherit, \
+from .util import DocInherit, ensure_json_serializable, \
         is_valid_partition_object, is_valid_categorical_partition_object, is_valid_continuous_partition_object
 
 class MetaPandasDataSet(DataSet):
@@ -48,7 +48,7 @@ class MetaPandasDataSet(DataSet):
 
             element_count = int(len(series))
             nonnull_values = series[boolean_mapped_null_values==False]
-            nonnull_count = (boolean_mapped_null_values==False).sum()
+            nonnull_count = int((boolean_mapped_null_values==False).sum())
 
             boolean_mapped_success_values = func(self, nonnull_values, *args, **kwargs)
             success_count = boolean_mapped_success_values.sum()
@@ -99,7 +99,7 @@ class MetaPandasDataSet(DataSet):
 
             element_count = int(len(series))
             nonnull_values = series[null_indexes == False]
-            nonnull_count = (null_indexes == False).sum()
+            nonnull_count = int((null_indexes == False).sum())
             null_count = element_count - nonnull_count
 
             result_obj = func(self, nonnull_values, *args, **kwargs)
@@ -239,7 +239,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
         element_count = int(len(series))
         nonnull_values = series[boolean_mapped_null_values==False]
-        nonnull_count = (boolean_mapped_null_values==False).sum()
+        nonnull_count = int((boolean_mapped_null_values==False).sum())
 
         boolean_mapped_success_values = boolean_mapped_null_values==False
         success_count = boolean_mapped_success_values.sum()
@@ -431,7 +431,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
                 elif min_value == None and max_value != None:
                     if allow_cross_type_comparisons:
                         try:
-                            return (val <= max_value)
+                            return val <= max_value
                         except TypeError:
                             return False
 
@@ -439,12 +439,12 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
                         if isinstance(val, string_types) != isinstance(max_value, string_types):
                             raise TypeError("Column values, min_value, and max_value must either be None or of the same type.")
 
-                        return (val <= max_value)
+                        return val <= max_value
 
                 elif min_value != None and max_value == None:
                     if allow_cross_type_comparisons:
                         try:
-                            return (min_value <= val)
+                            return min_value <= val
                         except TypeError:
                             return False
 
@@ -452,7 +452,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
                         if isinstance(val, string_types) != isinstance(min_value, string_types):
                             raise TypeError("Column values, min_value, and max_value must either be None or of the same type.")
 
-                        return (min_value <= val)
+                        return min_value <= val
 
                 else:
                     return False
