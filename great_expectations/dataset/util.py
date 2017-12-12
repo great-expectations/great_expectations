@@ -91,7 +91,7 @@ class DocInherit(object):
         return func
 
 
-def ensure_json_serializable(test_dict):
+def recursively_convert_to_json_serializable(test_dict):
     """
     Helper function to convert a dict object to one that is serializable
 
@@ -115,7 +115,7 @@ def ensure_json_serializable(test_dict):
 
 
         elif isinstance(test_dict[key], dict):
-            test_dict[key] = ensure_json_serializable(test_dict[key])
+            test_dict[key] = recursively_convert_to_json_serializable(test_dict[key])
 
         elif isinstance(test_dict[key], (set)):
             test_dict[key] = list(test_dict[key])
