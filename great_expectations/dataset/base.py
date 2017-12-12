@@ -946,6 +946,8 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
     ):
         """Expect column values to be null.
         
+        expect_column_values_to_be_null is a :func:`column_map_expectation <great_expectations.dataset.base.DataSet.column_map_expectation>`.
+
         Args:
             column (str): \
                 The column name.
@@ -990,6 +992,8 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         output_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
         """Expect each column entry to be a specified data type.
+
+        expect_column_values_to_be_of_type is a :func:`column_map_expectation <great_expectations.dataset.base.DataSet.column_map_expectation>`.
         
         Args:
             column (str): \
@@ -1048,6 +1052,8 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
     ):
         """Expect each column entry to match a list of specified data types.
 
+        expect_column_values_to_be_in_type_list is a :func:`column_map_expectation <great_expectations.dataset.base.DataSet.column_map_expectation>`.
+
         Args:
             column (str): \
                 The column name.
@@ -1104,7 +1110,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         output_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
         """Expect each column value to be in a given set.
-        
+
         For example:
         :: 
 
@@ -1124,6 +1130,9 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                 ], 
               }, 
             }
+
+        expect_column_values_to_be_in_set is a :func:`column_map_expectation <great_expectations.dataset.base.DataSet.column_map_expectation>`.
+
 
         Args:
             column (str): \
@@ -1185,6 +1194,8 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                 ], 
               }, 
             }
+
+        expect_column_values_to_not_be_in_set is a :func:`column_map_expectation <great_expectations.dataset.base.DataSet.column_map_expectation>`.
         
         Args:
             column (str): \
@@ -1250,27 +1261,57 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         """
         raise NotImplementedError
 
-    def expect_column_values_to_be_increasing(self, column, strictly=None, parse_strings_as_datetimes=None,
-                                              mostly=None,
-                                              output_format=None, include_config=False, catch_exceptions=None, meta=None):
-        """Expect column values to be increasing. (Only works for numeric data.)
+    def expect_column_values_to_be_increasing(self,
+        column,
+        strictly=None,
+        parse_strings_as_datetimes=None,
+        mostly=None,
+        output_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
+        """Expect column values to be increasing.
+
+        By default, this expectation only works for numeric or datetime data.
+        When `parse_strings_as_datetimes=True`, it can also parse strings to datetimes.
+
+        If `strictly=True`, then this expectation is only satisfied if each consecutive value
+        is strictly increasing--equal values are treated as failures.
         
+        expect_column_values_to_be_increasing is a :func:`column_map_expectation <great_expectations.dataset.base.DataSet.column_map_expectation>`.
+
         Args:
             column (str): The column name.
-            strictly (Boolean or None): If True, values must be strictly greater than previous values
-            parse_strings_as_datetimes (boolean or None) : If True, all non-null column values to datetimes before making comparisons
-        
-        Returns:
-            ::
+            
+        Keyword Args:
+            strictly (Boolean or None): \
+                If True, values must be strictly greater than previous values
+            parse_strings_as_datetimes (boolean or None) : \
+                If True, all non-null column values to datetimes before making comparisons
+            mostly (None or a float between 0 and 1): \
+                Return `"success": True` if the percentage of exceptions less than or equal to `mostly`. \
+                For more detail, see :ref:`mostly`.
 
-                {
-                    "success": (bool) True if the column passed the expectation,
-                    "exceptions_list": (list) the values that did not pass the expectation
-                }
-        
+        Other Parameters:
+            output_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`output_format <output_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
+
+        Returns:
+            A JSON-serializable expectation result object.
+
+            Exact fields vary depending on the values passed to :ref:`output_format <output_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
         See Also:
             expect_column_values_to_be_decreasing
-
         """
         raise NotImplementedError
 
