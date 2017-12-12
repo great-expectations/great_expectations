@@ -613,9 +613,14 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         elif output_format == "BASIC":
             exception_count = len(exception_list)
 
-            if nonnull_count > 0:
-                exception_percent = float(exception_count) / element_count
-                exception_percent_nonmissing = float(exception_count) / nonnull_count
+            if element_count > 0:
+                if nonnull_count > 0:
+                    exception_percent = float(exception_count) / element_count
+                    exception_percent_nonmissing = float(exception_count) / nonnull_count
+                    
+                else:
+                    exception_percent = float(exception_count) / element_count
+                    exception_percent_nonmissing = None
             else:
                 exception_percent = None
                 exception_percent_nonmissing = None
@@ -627,7 +632,6 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                     "exception_count": exception_count,
                     "exception_percent": exception_percent,
                     "exception_percent_nonmissing": exception_percent_nonmissing,
-                    # "exception_percent": excefloat(exception_count) / nonnull_count,
                 }
             }
 
