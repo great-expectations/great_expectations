@@ -46,7 +46,7 @@ class TestCLI(unittest.TestCase):
 
         command_str = 'python '+filepath+'/../bin/great_expectations validate '+filepath+'/test_sets/Titanic.csv '+filepath+'/test_sets/titanic_expectations.json'
         print(command_str)
-        
+
         try:
           result = get_system_command_result(command_str)
           json_result = json.loads(result["output"])
@@ -287,6 +287,8 @@ class TestCLI(unittest.TestCase):
         self.maxDiff = None
         print(json.dumps(json_result, indent=2))
 
+        #Remove partial exception counts, because we can't guarantee that they'll be the same every time.
+        del json_result["results"][0]["summary_obj"]['partial_exception_counts']
         self.assertEqual(
             json_result,
             {
@@ -344,28 +346,6 @@ class TestCLI(unittest.TestCase):
                       "Bradley, Mr George", 
                       "Brady, Mr John Bertram"
                     ], 
-                    "partial_exception_counts": {
-                      "Greenfield, Mr William Bertram": 1, 
-                      "Olsson, Mr Oscar Johansson": 1, 
-                      "Davison, Mr Thomas Henry": 1, 
-                      "Harper, Rev John": 1, 
-                      "Sage, Master William": 1, 
-                      "Ryerson, Miss Susan (Suzette) Parker": 1, 
-                      "Nassr, Mr Saade Jean": 1, 
-                      "Serota, Mr Maurice": 1, 
-                      "Windelov, Mr Einar": 1, 
-                      "Enander, Mr Ingvar": 1, 
-                      "Abelseth, Mr Olaus": 1, 
-                      "Carter, Mrs William Ernest (Lucile Polk)": 1, 
-                      "Keefe, Mr Arthur": 1, 
-                      "Emanuel, Miss Virginia Ethel": 1, 
-                      "Wilson, Ms Helen": 1, 
-                      "Lefebre, Mrs Frank": 1, 
-                      "Malachard, Mr Noel": 1, 
-                      "Hoyt, Mrs Frederick Maxfield (Jane Anne Forby)": 1, 
-                      "Dick, Mr Albert Adrian": 1, 
-                      "Graham, Mr George Edward": 1
-                    }
                   }, 
                   "success": False, 
                   "raised_exception": False, 
