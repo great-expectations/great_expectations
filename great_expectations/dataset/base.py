@@ -705,9 +705,14 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         """
         raise NotImplementedError
 
-    def expect_column_values_to_be_between(self, column, min_value=None, max_value=None, parse_strings_as_datetimes=None,
-                                           mostly=None,
-                                           output_format=None, include_config=False, catch_exceptions=None, meta=None):
+    def expect_column_values_to_be_between(self,
+        column,
+        min_value=None, max_value=None,
+        parse_strings_as_datetimes=None,
+        allow_cross_type_comparisons=None,
+        mostly=None,
+        output_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
         """Expect column entries to be a number between a minimum value and a maximum value.
         Args:
             column (str): The column name.

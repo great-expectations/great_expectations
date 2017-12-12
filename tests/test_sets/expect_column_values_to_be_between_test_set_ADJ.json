@@ -269,6 +269,40 @@
       "error":{
         "traceback_substring" : "TypeError: Column values, min_value, and max_value must either be None or of the same type."
       }
+    },
+    {
+      "note": "Test allow_cross_type_comparisons",
+      "in": {
+        "column": "y",
+        "max_value": 0,
+        "min_value": 10,
+        "allow_cross_type_comparisons": true
+      },
+      "out": {
+        "exception_list": [
+          "abc"
+        ],
+        "exception_index_list": [
+          9
+        ],
+        "success": false
+      }
+    },
+    {
+      "note": "Test allow_cross_type_comparisons",
+      "in": {
+        "column": "numeric",
+        "max_value": 0,
+        "min_value": 10,
+        "allow_cross_type_comparisons": true
+      },
+      "out": {
+        "exception_list": ["1","2","3","4","5","6","7","8","9","10"],
+        "exception_index_list": [
+          0,1,2,3,4,5,6,7,8,9
+        ],
+        "success": false
+      }
     }
   ]
 }
