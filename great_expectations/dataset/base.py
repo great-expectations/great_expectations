@@ -1,15 +1,16 @@
+from .util import DotDict, recursively_convert_to_json_serializable
+
 import json
 import inspect
 import copy
 from functools import wraps
 import traceback
+import warnings
 
 import pandas as pd
-import numpy as np
 from collections import defaultdict
 
-from .util import DotDict, ensure_json_serializable, DocInherit
-
+from ..version import __version__
 
 class DataSet(object):
 
@@ -84,7 +85,7 @@ class DataSet(object):
                     if "output_format" in all_args:
                         del all_args["output_format"]
 
-                all_args = ensure_json_serializable(all_args)
+                all_args = recursively_convert_to_json_serializable(all_args)
                 expectation_args = copy.deepcopy(all_args)
 
                 #Construct the expectation_config object
@@ -136,7 +137,7 @@ class DataSet(object):
                         return_obj["raised_exception"] = raised_exception
                         return_obj["exception_traceback"] = exception_traceback
 
-                return_obj = ensure_json_serializable(return_obj)
+                return_obj = recursively_convert_to_json_serializable(return_obj)
                 return return_obj
 
             # wrapper.__name__ = func.__name__
@@ -163,6 +164,9 @@ class DataSet(object):
         else:
             self._expectations_config = DotDict({
                 "dataset_name" : name,
+                "meta": {
+                    "great_expectations.__version__": __version__
+                },
                 "expectations" : []
             })
 
@@ -174,6 +178,12 @@ class DataSet(object):
 
     def append_expectation(self, expectation_config):
         expectation_type = expectation_config['expectation_type']
+
+        #Test to ensure the new expectation is serializable.
+        #FIXME: If it's not, are we sure we want to raise an error?
+        #FIXME: Should we allow users to override the error?
+        #FIXME: Should we try to convert the object using something like recursively_convert_to_json_serializable?
+        json.dumps(expectation_config)
 
         #Drop existing expectations with the same expectation_type.
         #For column_expectations, append_expectation should only replace expectations
@@ -197,10 +207,224 @@ class DataSet(object):
 
         self._expectations_config.expectations.append(expectation_config)
 
+    def _copy_and_clean_up_expectation(self,
+        expectation,
+        discard_output_format_kwargs=True,
+        discard_include_configs_kwargs=True,
+        discard_catch_exceptions_kwargs=True,
+    ):
+        new_expectation = copy.deepcopy(expectation)
+
+        if "success_on_last_run" in new_expectation:
+            del new_expectation["success_on_last_run"]
+
+        if discard_output_format_kwargs:
+            if "output_format" in new_expectation["kwargs"]:
+                del new_expectation["kwargs"]["output_format"]
+                # discards["output_format"] += 1
+
+        if discard_include_configs_kwargs:
+            if "include_configs" in new_expectation["kwargs"]:
+                del new_expectation["kwargs"]["include_configs"]
+                # discards["include_configs"] += 1
+
+        if discard_catch_exceptions_kwargs:
+            if "catch_exceptions" in new_expectation["kwargs"]:
+                del new_expectation["kwargs"]["catch_exceptions"]
+                # discards["catch_exceptions"] += 1
+
+        return new_expectation
+
+    def _copy_and_clean_up_expectations_from_indexes(
+        self,
+        match_indexes,
+        discard_output_format_kwargs=True,
+        discard_include_configs_kwargs=True,
+        discard_catch_exceptions_kwargs=True,
+    ):
+        rval = []
+        for i in match_indexes:
+            rval.append(
+                self._copy_and_clean_up_expectation(
+                    self._expectations_config.expectations[i],
+                    discard_output_format_kwargs,
+                    discard_include_configs_kwargs,
+                    discard_catch_exceptions_kwargs,
+                )
+            )
+
+        return rval
+
+    def find_expectation_indexes(self,
+        expectation_type=None,
+        column=None,
+        expectation_kwargs=None
+    ):
+        """Find matching expectations within _expectation_config.
+        Args:
+            expectation_type=None                : The name of the expectation type to be matched.
+            column=None                          : The name of the column to be matched.
+            expectation_kwargs=None              : A dictionary of kwargs to match against.
+        
+        Returns:
+            A list of indexes for matching expectation objects.
+            If there are no matches, the list will be empty.
+        """
+        if expectation_kwargs == None:
+            expectation_kwargs = {}
+
+        if "column" in expectation_kwargs and column != None and column != expectation_kwargs["column"]:
+            raise ValueError("Conflicting column names in remove_expectation: %s and %s" % (column, expectation_kwargs["column"]))
+
+        if column != None:
+            expectation_kwargs["column"] = column
+
+        match_indexes = []
+        for i, exp in enumerate(self._expectations_config.expectations):
+            if expectation_type == None or (expectation_type == exp['expectation_type']):
+                # if column == None or ('column' not in exp['kwargs']) or (exp['kwargs']['column'] == column) or (exp['kwargs']['column']==:
+                match = True
+                
+                for k,v in expectation_kwargs.items():
+                    if k in exp['kwargs'] and exp['kwargs'][k] == v:
+                        continue
+                    else:
+                        match = False
+
+                if match:
+                    match_indexes.append(i)
+
+        return match_indexes
+
+    def find_expectations(self,
+        expectation_type=None,
+        column=None,
+        expectation_kwargs=None,
+        discard_output_format_kwargs=True,
+        discard_include_configs_kwargs=True,
+        discard_catch_exceptions_kwargs=True,
+    ):
+        """Find matching expectations within _expectation_config.
+        Args:
+            expectation_type=None                : The name of the expectation type to be matched.
+            column=None                          : The name of the column to be matched.
+            expectation_kwargs=None              : A dictionary of kwargs to match against.
+            discard_output_format_kwargs=True    : In returned expectation object(s), suppress the `output_format` parameter.
+            discard_include_configs_kwargs=True  : In returned expectation object(s), suppress the `include_configs` parameter.
+            discard_catch_exceptions_kwargs=True : In returned expectation object(s), suppress the `catch_exceptions` parameter.
+        
+        Returns:
+            A list of matching expectation objects.
+            If there are no matches, the list will be empty.
+        """
+
+        match_indexes = self.find_expectation_indexes(
+            expectation_type,
+            column,
+            expectation_kwargs,
+        )
+
+        return self._copy_and_clean_up_expectations_from_indexes(
+            match_indexes,
+            discard_output_format_kwargs,
+            discard_include_configs_kwargs,
+            discard_catch_exceptions_kwargs,
+        )
+
+    def remove_expectation(self,
+        expectation_type=None,
+        column=None,
+        expectation_kwargs=None,
+        remove_multiple_matches=False,
+        dry_run=False,
+    ):
+        """Remove matching expectation(s) from _expectation_config.
+        Args:
+            expectation_type=None                : The name of the expectation type to be matched.
+            column=None                          : The name of the column to be matched.
+            expectation_kwargs=None              : A dictionary of kwargs to match against.
+            remove_multiple_matches=False        : Match multiple expectations
+            dry_run=False                        : Return a list of matching expectations without removing
+        
+        Returns:
+            None, unless dry_run=True.
+            If dry_run=True and remove_multiple_matches=False then return the expectation that *would be* removed.
+            If dry_run=True and remove_multiple_matches=True then return a list of expectations that *would be* removed.
+
+        Note:
+            If remove_expectation doesn't find any matches, it raises a ValueError.
+            If remove_expectation finds more than one matches and remove_multiple_matches!=True, it raises a ValueError.
+            If dry_run=True, then `remove_expectation` acts as a thin layer to find_expectations, with the default values for discard_output_format_kwargs, discard_include_configs_kwargs, and discard_catch_exceptions_kwargs
+        """
+
+        match_indexes = self.find_expectation_indexes(
+            expectation_type,
+            column,
+            expectation_kwargs,
+        )
+
+        if len(match_indexes) == 0:
+            raise ValueError('No matching expectation found.')
+
+        elif len(match_indexes) > 1:
+            if not remove_multiple_matches:
+                raise ValueError('Multiple expectations matched arguments. No expectations removed.')
+            else:
+
+                if not dry_run:
+                    self._expectations_config.expectations = [i for j, i in enumerate(self._expectations_config.expectations) if j not in match_indexes]
+                else:
+                    return self._copy_and_clean_up_expectations_from_indexes(match_indexes)
+
+        else: #Exactly one match
+            expectation = self._copy_and_clean_up_expectation(
+                self._expectations_config.expectations[match_indexes[0]]
+            )
+
+            if not dry_run:
+                del self._expectations_config.expectations[match_indexes[0]]
+
+            else:
+                if remove_multiple_matches:
+                    return [expectation]
+                else:
+                    return expectation
+
     def get_default_expectation_arguments(self):
+        """Fetch default expectation arguments for this DataSet
+
+        Args:
+            None
+
+        Returns:
+            A dictionary containing all the current default expectation arguments for a DataSet
+
+            Ex::
+
+            {
+                "include_config" : False,
+                "catch_exceptions" : False,
+                "output_format" : 'BASIC'
+            }
+
+        See also:
+            set_default_expectation_arguments
+        """
         return self.default_expectation_args
 
     def set_default_expectation_argument(self, argument, value):
+        """Set a default expectation argument for this DataSet
+
+        Args:
+            argument (string): The argument to be replaced
+            value : The New argument to use for replacement
+
+        Returns:
+            None
+
+        See also:
+            get_default_expectation_arguments
+        """
         #!!! Maybe add a validation check here?
 
         self.default_expectation_args[argument] = value
@@ -211,7 +435,20 @@ class DataSet(object):
         discard_include_configs_kwargs=True,
         discard_catch_exceptions_kwargs=True,
         suppress_warnings=False
-    ):
+    ):        
+        """Returns _expectation_config as a JSON object, and perform some cleaning along the way.
+        Args:
+            discard_failed_expectations=True     : Only include expectations with success_on_last_run=True in the exported config.
+            discard_output_format_kwargs=True    : In returned expectation objects, suppress the `output_format` parameter.
+            discard_include_configs_kwargs=True  : In returned expectation objects, suppress the `include_configs` parameter.
+            discard_catch_exceptions_kwargs=True : In returned expectation objects, suppress the `catch_exceptions` parameter.
+        
+        Returns:
+            An expectation config.
+
+        Note:
+            get_expectations_config does not affect the underlying config at all. The returned config is a copy of _expectations_config, not the original object.
+        """
         config = dict(self._expectations_config)
         config = copy.deepcopy(config)
         expectations = config["expectations"]
@@ -234,6 +471,7 @@ class DataSet(object):
             expectations = new_expectations
 
         for expectation in expectations:
+            #FIXME: Factor this out into a new function. The logic is duplicated in remove_expectation, which calls _copy_and_clean_up_expectation
             if "success_on_last_run" in expectation:
                 del expectation["success_on_last_run"]
 
@@ -311,6 +549,13 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                 discard_catch_exceptions_kwargs=False,
             )
 
+        # Warn if our version is different from the version in the configuration
+        try:
+            if expectations_config['meta']['great_expectations.__version__'] != __version__:
+                warnings.warn("WARNING: This configuration object was built using a different version of great_expectations than is currently validating it.")
+        except KeyError:
+            warnings.warn("WARNING: No great_expectations version found in configuration object.")
+
         for expectation in expectations_config['expectations']:
             expectation_method = getattr(self, expectation['expectation_type'])
 
@@ -347,13 +592,21 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
 
     ##### Output generation #####
-    def format_column_map_output(self,
+    def _format_column_map_output(self,
         output_format, success,
         element_count,
         nonnull_values, nonnull_count,
         boolean_mapped_success_values, success_count,
         exception_list, exception_index_list
     ):
+        """Helper function to construct expectation result objects for column_map_expectations.
+
+        Expectations support four output_formats: BOOLEAN_ONLY, BASIC, SUMMARY, and COMPLETE.
+        In each case, the object returned has a different set of populated fields.
+        See :ref:`output_format` for more information.
+
+        This function handles the logic for mapping those fields for column_map_expectations.
+        """
         if output_format == "BOOLEAN_ONLY":
             return_obj = success
 
@@ -434,7 +687,22 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         return return_obj
 
-    def calc_map_expectation_success(self, success_count, nonnull_count, mostly):
+    def _calc_map_expectation_success(self, success_count, nonnull_count, mostly):
+        """Calculate success and percent_success for column_map_expectations
+
+        Args:
+            success_count (int): \
+                The number of successful values in the column
+            nonnull_count (int): \
+                The number of nonnull values in the column
+            mostly (float or None): \
+                A value between 0 and 1 (or None), indicating the percentage of successes required to pass the expectation as a whole\
+                If mostly=None, then all values must succeed in order for the expectation as a whole to succeed.
+
+        Returns:
+            success (boolean), percent_success (float)
+        """
+
         if nonnull_count > 0:
             percent_success = float(success_count)/nonnull_count
 
@@ -1074,53 +1342,69 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
 
     ### Distributional expectations
-    def expect_column_chisquare_test_p_value_greater_than(self, column, partition_object=None, p=0.05, tail_weight_holdout=0,
-                                                          output_format=None, include_config=False, catch_exceptions=None, meta=None):
-        """
-        Expect the values in this column to match the distribution of the specified categorical vals and their expected_frequencies. \
-
-        Args:
-            :param column (str): The column name
-            :param partition_object (dict): A dictionary containing partition (categorical values) and associated weights.
-            :param p (float) = 0.05: The p-value threshold for the Chi-Squared test.\
-                For values below the specified threshold the expectation will return false, rejecting the null hypothesis that the distributions are the same.
-            :param tail_weight_holdout: the amount of weight to split uniformly and add to the tails of the histogram (the area between -Infinity and the data's min value and between the data's max value and Infinity)
-
-        Returns:
-            {
-                "success": (bool) True if the column passed the expectation,
-                "true_value": (float) the true pvalue of the ChiSquared test
-            }
-        """
-        raise NotImplementedError
-
-    def expect_column_bootstrapped_ks_test_p_value_greater_than(self, column, partition_object=None, p=0.05, bootstrap_samples=0,
+    def expect_column_chisquare_test_p_value_to_be_greater_than(self, column, partition_object=None, p=0.05, tail_weight_holdout=0,
                                                                 output_format=None, include_config=False, catch_exceptions=None, meta=None):
         """
-        Expect the values in this column to match the distribution implied by the specified partition and cdf_vals. \
-        The implied CDF is constructed as a linear interpolation of the provided cdf_vals.
+        Expect the values in this column to match the distribution of the specified categorical values and their expected weights. \
+        The expected distribution is calculated by scaling the weights according to the size of values in the test data.
 
-        Args:
-            column (str): The column name
-            partition_object (dict): A dictionary containing partition (bin edges) and associated weights.
-                - partition (list): A list of values that correspond to the endpoints of an implied partition on the real number line.
-                - weights (list): A list of weights. They should sum to one.
-            p (float) = 0.05: The p-value threshold for the Kolmogorov-Smirnov test.\
-                For values below the specified threshold the expectation will return false, rejecting the null hypothesis that the distributions are the same.
-            bootstrap_samples (int) = 0: The number of bootstrapping rounds to use in building the estimated pvalue. \
-                If zero, chooses a default number of rounds (currently 1000, but may be altered based on size of dataset).
-        Returns:
-            {
-                "success": (bool) True if the column passed the expectation,
-                "true_value": (float) the true pvalue of the KS test
+        :param column (str): The column name
+        :param partition_object (dict): A dictionary containing partition (categorical values) and associated weights.
+        :param p (float) = 0.05: The p-value threshold for the Chi-Squared test.\
+            For values below the specified threshold the expectation will return false, rejecting the null hypothesis that the distributions are the same.
+        :param tail_weight_holdout: the amount of weight to split uniformly and add to the tails of the histogram (the area between -Infinity and the data's min value and between the data's max value and Infinity)
+
+        :return: result_obj including:
+        result_obj including:
+            "success": (Boolean) True if the column passed the expectation
+            "true_value": (float) The true KL divergence (relative entropy)
+            "summary_obj": {
+                "observed_partition": The partition observed in the data
+                "expected_partition": The partition against which the data were compared, after applying specified holdouts.
             }
         """
         raise NotImplementedError
 
-    def expect_column_kl_divergence_less_than(self, column, partition_object=None, threshold=None, tail_weight_holdout=0, internal_weight_holdout=0,
-                                              output_format=None, include_config=False, catch_exceptions=None, meta=None):
-        """Expect the values in this column to have lower Kulback-Leibler divergence (relative entropy) with the
-        distribution provided in partition_object of less than the provided threshold.
+    def expect_column_bootstrapped_ks_test_p_value_to_be_greater_than(self, column, partition_object=None, p=0.05, bootstrap_samples=None, bootstrap_sample_size=None,
+                                                                      output_format=None, include_config=False, catch_exceptions=None, meta=None):
+        """Expect the values in this column to match the distribution implied by the specified partition. \
+        The expected CDF is constructed as a linear interpolation between the bins, using the provided weights.
+
+        :param column: The column name to test
+        :param partition_object: The expected partition object.
+        :param p: The p-value threshold for the Kolmogorov-Smirnov test.\
+            For values below the specified threshold the expectation will return false, rejecting the null hypothesis that the distributions are the same.
+        :param bootstrap_samples: The number of times to bootstrap. If None, defaults to 1000.
+        :param bootstrap_sample_size: The number of samples per bootstrap. If None, defaults to 2 * len(partition_object['weights'])\
+            A larger sample will increase the specificity of the test.
+
+        :return: result_obj including:
+            "success": (Boolean) True if the column passed the expectation
+            "true_value": (float) The true p-value of the KS test
+            "summary_obj": {
+                "bootstrap_samples": The number of bootstrap samples used
+                "bootstrap_sample_size": The number of samples taken from the column in each bootstrap sample
+                "observed_cdf": The cumulative density function observed in the data, a dict containing 'x' values and cdf_values (suitable for plotting)
+                "expected_cdf": The cumulative density function expected based on the partition object, a dict containing 'x' values and cdf_values (suitable for plotting)
+                "observed_partition": The partition observed on the data, using the provided bins but also expanding from min(column) to max(column)
+                "expected_partition": The partition expected from the data. For KS test, this will always be the partition_object parameter
+            }
+        """
+        raise NotImplementedError
+
+    def expect_column_kl_divergence_to_be_less_than(self, column, partition_object=None, threshold=None, tail_weight_holdout=0, internal_weight_holdout=0,
+                                                    output_format=None, include_config=False, catch_exceptions=None, meta=None):
+        """Expect the Kulback-Leibler divergence (relative entropy) of the specified column and the partition object to be lower than the provided threshold.
+        When KL divergence is zero, the datasets are both distributed identically (according to the provided partition).
+        In many practical contexts, choosing a value between 0.5 and 1 will provide a useful test.
+
+        If the partition_object is categorical, this expectation will expect the values in column to also be categorical.
+            * If the column includes values that are not present in the partition, the tail_weight_holdout will be equally split among those values, providing a mechanism to weaken the strictness of the expectation (otherwise, relative entropy would immediately go to infinity).
+            * If the partition includes values that are not present in the column, the test will simply include zero weight for that value.
+        If the partition_object is continuous, this expectation will discretize the values in the column according to the bins specified in the partition_object, and apply the test to the resulting distribution.
+            * The internal_weight_holdout and tail_weight_holdout parameters provide a mechanism to weaken the expectation, since an expected weight of zero would drive relative entropy to be infinite if any data are observed in that interval.
+            * If internal_weight_holdout is specified, that value will be distributed equally among any intervals with weight zero in the partition_object.
+            * If tail_weight_holdout is specified, that value will be appended to the tails of the bins ((-Infinity, min(bins)) and (max(bins), Infinity).
 
         :param column: the column to which to apply the expectation
         :param partition_object: the partition_object with which to compare the data in column
@@ -1128,6 +1412,13 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         :param internal_weight_holdout: the amount of weight to split uniformly among zero-weighted partition elements in a given partition.
         :param tail_weight_holdout: the amount of weight to split uniformly and add to the tails of the histogram (the area between -Infinity and the data's min value and between the data's max value and Infinity)
 
-        :return: result_object consistent with the specified output_format
+        :return: result_obj including:
+        result_obj including:
+            "success": (Boolean) True if the column passed the expectation
+            "true_value": (float) The true KL divergence (relative entropy)
+            "summary_obj": {
+                "observed_partition": The partition observed in the data
+                "expected_partition": The partition against which the data were compared, after applying specified holdouts.
+            }
         """
         raise NotImplementedError

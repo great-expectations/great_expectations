@@ -1,0 +1,19 @@
+{
+  "test_partition": {
+    "bins": [
+      -Infinity,
+      0,
+      1,
+      2,
+      3,
+      Infinity
+    ],
+    "weights": [
+      0.1,
+      0.2,
+      0.4,
+      0.2,
+      0.1
+    ]
+  }
+}
