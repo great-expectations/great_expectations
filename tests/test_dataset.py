@@ -4,6 +4,7 @@ import shutil
 import warnings
 
 import pandas as pd
+import numpy as np
 import great_expectations as ge
 
 import unittest
@@ -83,6 +84,11 @@ class TestDataset(unittest.TestCase):
                 )
 
         self.assertEqual(k,1)
+
+        #This should raise an error because meta isn't serializable.
+        with self.assertRaises(Exception) as context:
+            df.expect_column_values_to_be_increasing("x", meta={"unserializable_array":np.array(range(10))})
+
 
     def test_expectation_meta_notes(self):
         df = ge.dataset.PandasDataSet({
@@ -374,7 +380,7 @@ class TestDataset(unittest.TestCase):
         exception_index_list = []
 
         self.assertEqual(
-            df.format_column_map_output(
+            df._format_column_map_output(
                 "BOOLEAN_ONLY",
                 success,
                 element_count,
@@ -386,7 +392,7 @@ class TestDataset(unittest.TestCase):
         )
 
         self.assertEqual(
-            df.format_column_map_output(
+            df._format_column_map_output(
                 "BASIC",
                 success,
                 element_count,
@@ -406,7 +412,7 @@ class TestDataset(unittest.TestCase):
         )
 
         self.assertEqual(
-            df.format_column_map_output(
+            df._format_column_map_output(
                 "COMPLETE",
                 success,
                 element_count,
@@ -422,7 +428,7 @@ class TestDataset(unittest.TestCase):
         )
 
         self.assertEqual(
-            df.format_column_map_output(
+            df._format_column_map_output(
                 "SUMMARY",
                 success,
                 element_count,
@@ -453,7 +459,7 @@ class TestDataset(unittest.TestCase):
             "x" : list("abcdefghijklmnopqrstuvwxyz")
         })
         self.assertEqual(
-            df.calc_map_expectation_success(
+            df._calc_map_expectation_success(
                 success_count=10,
                 nonnull_count=10,
                 mostly=None
@@ -462,7 +468,7 @@ class TestDataset(unittest.TestCase):
         )
 
         self.assertEqual(
-            df.calc_map_expectation_success(
+            df._calc_map_expectation_success(
                 success_count=90,
                 nonnull_count=100,
                 mostly=.9
@@ -471,7 +477,7 @@ class TestDataset(unittest.TestCase):
         )
 
         self.assertEqual(
-            df.calc_map_expectation_success(
+            df._calc_map_expectation_success(
                 success_count=90,
                 nonnull_count=100,
                 mostly=.8
@@ -480,7 +486,7 @@ class TestDataset(unittest.TestCase):
         )
 
         self.assertEqual(
-            df.calc_map_expectation_success(
+            df._calc_map_expectation_success(
                 success_count=80,
                 nonnull_count=100,
                 mostly=.9
@@ -489,7 +495,7 @@ class TestDataset(unittest.TestCase):
         )
 
         self.assertEqual(
-            df.calc_map_expectation_success(
+            df._calc_map_expectation_success(
                 success_count=0,
                 nonnull_count=0,
                 mostly=None
@@ -498,7 +504,7 @@ class TestDataset(unittest.TestCase):
         )
 
         self.assertEqual(
-            df.calc_map_expectation_success(
+            df._calc_map_expectation_success(
                 success_count=0,
                 nonnull_count=100,
                 mostly=None
@@ -748,7 +754,7 @@ class TestDataset(unittest.TestCase):
         })
         def expect_dataframe_to_contain_7(self):
             return {
-                "success": (self==7).sum().sum() > 0
+                "success": bool((self==7).sum().sum() > 0)
             }
         
         self.assertEqual(
