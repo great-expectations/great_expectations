@@ -1304,8 +1304,31 @@ class TestPandasDataset(unittest.TestCase):
             {'success':True, 'exception_list':['abc'], 'exception_index_list':[4]}
         )
 
+    def test_output_format_argument_in_decorators(self):
+        df = ge.dataset.PandasDataSet({
+            'x':[1,3,5,7,9],
+            'y':[2,4,6,8,10],
+            'z':[None,'a','b','c','abc']
+        })
+        df.set_default_expectation_argument('output_format', 'COMPLETE')
 
+        #Test explicit Nones in output_format
+        self.assertEqual(
+            df.expect_column_mean_to_be_between('x',4,6, output_format=None),
+            {'success':True, 'true_value':5}
+        )
 
+        self.assertEqual(
+            df.expect_column_values_to_be_between('y',1,6, output_format=None),
+            {'success':False, 'exception_list':[8,10], 'exception_index_list':[3,4]}
+        )
+
+        #Test unknown output format
+        with self.assertRaises(ValueError):
+            df.expect_column_values_to_be_between('y',1,6, output_format="QUACK")
+
+        with self.assertRaises(ValueError):
+            df.expect_column_mean_to_be_between('x',4,6, output_format="QUACK")
 
 if __name__ == "__main__":
     unittest.main()

@@ -110,6 +110,10 @@ class MetaPandasDataSet(DataSet):
             #!!!    true_value: int or float
             #!!!    summary_obj: json-serializable dict
 
+            # if not output_format in ["BASIC", "COMPLETE", "SUMMARY", "BOOLEAN_ONLY"]:
+            #     print ("Warning: Unknown output_format %s. Defaulting to %s." % (output_format, self.default_expectation_args["output_format"]))
+
+
             if output_format in ["BASIC", "COMPLETE"]:
                 return_obj = {
                     "success" : bool(result_obj["success"]),
@@ -138,11 +142,7 @@ class MetaPandasDataSet(DataSet):
                 return_obj = bool(result_obj["success"])
 
             else:
-                print ("Warning: Unknown output_format %s. Defaulting to BASIC." % (output_format,))
-                return_obj = {
-                    "success" : bool(result_obj["success"]),
-                    "true_value" : result_obj["true_value"],
-                }
+                raise ValueError("Unknown output_format %s." % (output_format,))
 
             return return_obj
 
