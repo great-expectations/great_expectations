@@ -78,9 +78,9 @@ Aggregate functions
 Distributional functions
 --------------------------------------------------------------------------------
 
-* :func:`expect_column_kl_divergence_less_than <great_expectations.dataset.base.DataSet.expect_column_kl_divergence_less_than>`
-* :func:`expect_column_bootstrapped_ks_test_p_value_greater_than <great_expectations.dataset.base.DataSet.expect_column_bootstrapped_ks_test_p_value_greater_than>`
-* :func:`expect_column_chisquare_test_p_value_greater_than <great_expectations.dataset.base.DataSet.expect_column_chisquare_test_p_value_greater_than>`
+* :func:`expect_column_kl_divergence_to_be_less_than <great_expectations.dataset.base.DataSet.expect_column_kl_divergence_to_be_less_than>`
+* :func:`expect_column_bootstrapped_ks_test_p_value_to_be_greater_than <great_expectations.dataset.base.DataSet.expect_column_bootstrapped_ks_test_p_value_to_be_greater_than>`
+* :func:`expect_column_chisquare_test_p_value_to_be_greater_than <great_expectations.dataset.base.DataSet.expect_column_chisquare_test_p_value_to_be_greater_than>`
 
 
 Distributional function helpers

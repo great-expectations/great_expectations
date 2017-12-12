@@ -25,6 +25,7 @@ Advanced
    output_format
    custom_expectations
    conventions
+   roadmap
 
 Indices and tables
 ------------------
