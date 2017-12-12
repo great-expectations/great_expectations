@@ -152,7 +152,7 @@ class TestDataset(unittest.TestCase):
             'z' : ['hello', 'jello', 'mello'],
         })
         df.expect_column_values_to_be_in_set('x', [1,2,4])
-        df.expect_column_values_to_be_in_set('y', [1,2,4])
+        df.expect_column_values_to_be_in_set('y', [1,2,4], catch_exceptions=True, include_config=True)
         df.expect_column_values_to_match_regex('z', 'ello')
 
         ### First test set ###
@@ -367,8 +367,11 @@ class TestDataset(unittest.TestCase):
 
     def test_format_column_map_output(self):
         df = ge.dataset.PandasDataSet({
-            "x" : list("abcdefghijklmnopqrstuvwxyz")
+            "x" : list("abcdefghijklmnopqrstuvwxyz"),
         })
+        self.maxDiff = None
+
+        ### Normal Test ###
 
         success = True
         element_count = 20
@@ -452,7 +455,173 @@ class TestDataset(unittest.TestCase):
             }
         )
 
+        ### Test the case where all elements are null ###
 
+        success = True
+        element_count = 20
+        nonnull_values = pd.Series([])
+        nonnull_count = 0
+        boolean_mapped_success_values = pd.Series([])
+        success_count = 0
+        exception_list = []
+        exception_index_list = []
+
+        self.assertEqual(
+            df._format_column_map_output(
+                "BOOLEAN_ONLY",
+                success,
+                element_count,
+                nonnull_values, nonnull_count,
+                boolean_mapped_success_values, success_count,
+                exception_list, exception_index_list
+            ),
+            True
+        )
+
+        self.assertEqual(
+            df._format_column_map_output(
+                "BASIC",
+                success,
+                element_count,
+                nonnull_values, nonnull_count,
+                boolean_mapped_success_values, success_count,
+                exception_list, exception_index_list
+            ),
+            {
+                'success': True,
+                'summary_obj': {
+                    'exception_percent': 0.0,
+                    'partial_exception_list': [],
+                    'exception_percent_nonmissing': None,
+                    'exception_count': 0
+                }
+            }
+        )
+
+        self.assertEqual(
+            df._format_column_map_output(
+                "COMPLETE",
+                success,
+                element_count,
+                nonnull_values, nonnull_count,
+                boolean_mapped_success_values, success_count,
+                exception_list, exception_index_list
+            ),
+            {
+                'success': True,
+                'exception_list': [],
+                'exception_index_list': [],
+            }
+        )
+
+        self.assertEqual(
+            df._format_column_map_output(
+                "SUMMARY",
+                success,
+                element_count,
+                nonnull_values, nonnull_count,
+                boolean_mapped_success_values, success_count,
+                exception_list, exception_index_list
+            ),
+            {
+                'success': True,
+                'summary_obj': {
+                    'element_count': 20,
+                    'exception_count': 0,
+                    'exception_percent': 0.0,
+                    'exception_percent_nonmissing': None,
+                    'missing_count': 20,
+                    'missing_percent': 1.0,
+                    'partial_exception_counts': {},
+                    'partial_exception_index_list': [],
+                    'partial_exception_list': []
+                }
+            }
+        )
+
+        ### Test the degenerate case where there are no elements ###
+
+        success = False
+        element_count = 0
+        nonnull_values = pd.Series([])
+        nonnull_count = 0
+        boolean_mapped_success_values = pd.Series([])
+        success_count = 0
+        exception_list = []
+        exception_index_list = []
+
+        self.assertEqual(
+            df._format_column_map_output(
+                "BOOLEAN_ONLY",
+                success,
+                element_count,
+                nonnull_values, nonnull_count,
+                boolean_mapped_success_values, success_count,
+                exception_list, exception_index_list
+            ),
+            False
+        )
+
+        self.assertEqual(
+            df._format_column_map_output(
+                "BASIC",
+                success,
+                element_count,
+                nonnull_values, nonnull_count,
+                boolean_mapped_success_values, success_count,
+                exception_list, exception_index_list
+            ),
+            {
+                'success': False,
+                'summary_obj': {
+                    'exception_percent': None,
+                    'partial_exception_list': [],
+                    'exception_percent_nonmissing': None,
+                    'exception_count': 0
+                }
+            }
+        )
+
+        self.assertEqual(
+            df._format_column_map_output(
+                "COMPLETE",
+                success,
+                element_count,
+                nonnull_values, nonnull_count,
+                boolean_mapped_success_values, success_count,
+                exception_list, exception_index_list
+            ),
+            {
+                'success': False,
+                'exception_list': [],
+                'exception_index_list': [],
+            }
+        )
+
+        self.assertEqual(
+            df._format_column_map_output(
+                "SUMMARY",
+                success,
+                element_count,
+                nonnull_values, nonnull_count,
+                boolean_mapped_success_values, success_count,
+                exception_list, exception_index_list
+            ),
+            {
+                'success': False,
+                'summary_obj': {
+                    'element_count': 0,
+                    'exception_count': 0,
+                    'exception_percent': None,
+                    'exception_percent_nonmissing': None,
+                    'missing_count': 0,
+                    'missing_percent': None,
+                    'partial_exception_counts': {},
+                    'partial_exception_index_list': [],
+                    'partial_exception_list': []
+                }
+            }
+        )
 
     def test_calc_map_expectation_success(self):
         df = ge.dataset.PandasDataSet({
@@ -608,7 +777,7 @@ class TestDataset(unittest.TestCase):
         })
         my_df.expect_column_values_to_be_of_type('x', 'int', 'python')
         my_df.expect_column_values_to_be_of_type('y', 'int', 'python')
-        my_df.expect_column_values_to_be_of_type('z', 'int', 'python')
+        my_df.expect_column_values_to_be_of_type('z', 'int', 'python', include_config=True, catch_exceptions=True)
         my_df.expect_column_values_to_be_increasing('x')
         my_df.expect_column_values_to_match_regex('z', 'ello')
 
@@ -636,6 +805,16 @@ class TestDataset(unittest.TestCase):
                 "column": "y"
               }
             }
+        )
+
+        self.assertEqual(
+            my_df.remove_expectation("expect_column_to_exist", expectation_kwargs={"column": "y"}, remove_multiple_matches=True, dry_run=True),
+            [{
+              "expectation_type": "expect_column_to_exist", 
+              "kwargs": {
+                "column": "y"
+              }
+            }]
         )
 
         with self.assertRaises(ValueError) as context:
