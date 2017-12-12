@@ -11,7 +11,7 @@ import pandas as pd
 from collections import defaultdict
 
 from ..version import __version__
-from .util import DotDict, ensure_json_serializable, DocInherit
+from .util import DotDict, recursively_convert_to_json_serializable, DocInherit
 
 class DataSet(object):
 
@@ -966,7 +966,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         Args:
             column (str): \
-                The column name.
+                - The column name.
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
