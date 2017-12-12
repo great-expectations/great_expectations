@@ -108,8 +108,8 @@ class TestUtilMethods(unittest.TestCase):
         json.dumps(D.get_expectations_config(), indent=2)
 
         x = {'x': np.array([1, 2, 3])}
-        ge.dataset.util.recursively_convert_to_json_serializable(x)
-        self.assertEqual(type(x['x']), type([1, 2, 3]))
+        x = ge.dataset.util.recursively_convert_to_json_serializable(x)
+        self.assertEqual(type(x['x']), list)
 
 
 if __name__ == "__main__":
