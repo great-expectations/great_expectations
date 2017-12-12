@@ -966,7 +966,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         Args:
             column (str): \
-                - The column name.
+                The column name.
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
