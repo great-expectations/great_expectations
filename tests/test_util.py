@@ -1,4 +1,5 @@
 import json
+import datetime
 import numpy as np
 import unittest
 
@@ -107,9 +108,35 @@ class TestUtilMethods(unittest.TestCase):
         #Dumping this JSON object verifies that everything is serializable        
         json.dumps(D.get_expectations_config(), indent=2)
 
-        x = {'x': np.array([1, 2, 3])}
+
+        x = {
+            'w': [
+                "aaaa", "bbbb", 1.3, 5, 6, 7
+            ],
+            'x': np.array([1, 2, 3]),
+            'y': {
+                'alpha' : None,
+                'beta' : np.nan,
+                'delta': np.inf,
+                'gamma' : -np.inf
+            },
+            'z': set([1,2,3,4,5]),
+            'zz': (1,2,3),
+            'zzz': [
+                datetime.datetime(2017,1,1),
+                datetime.date(2017,5,1),
+            ]
+        }
         x = ge.dataset.util.recursively_convert_to_json_serializable(x)
         self.assertEqual(type(x['x']), list)
+
+        try:
+            x = unicode("abcdefg")
+            x = ge.dataset.util.recursively_convert_to_json_serializable(x)
+            self.assertEqual(type(x), str)
+        except NameError:
+            pass
+
 
 
 if __name__ == "__main__":
