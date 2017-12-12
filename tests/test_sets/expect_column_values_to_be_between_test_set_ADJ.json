@@ -262,8 +262,8 @@
     {
       "in": {
         "column": "numeric",
-        "max_value": 0,
-        "min_value": 10,
+        "max_value": 10,
+        "min_value": 0,
         "catch_exceptions": true
       },
       "error":{
@@ -271,11 +271,23 @@
       }
     },
     {
+      "note" : "Test 'min_value is greater than max_value'",
+      "in": {
+        "column": "x",
+        "min_value": 10,
+        "max_value": 0,
+        "catch_exceptions": true
+      },
+      "error":{
+        "traceback_substring" : "ValueError: min_value is greater than max_value"
+      }
+    },
+    {
       "note": "Test allow_cross_type_comparisons",
       "in": {
         "column": "y",
-        "max_value": 0,
-        "min_value": 10,
+        "min_value": 0,
+        "max_value": 10,
         "allow_cross_type_comparisons": true
       },
       "out": {
@@ -292,8 +304,8 @@
       "note": "Test allow_cross_type_comparisons",
       "in": {
         "column": "numeric",
-        "max_value": 0,
-        "min_value": 10,
+        "min_value": 0,
+        "max_value": 10,
         "allow_cross_type_comparisons": true
       },
       "out": {
