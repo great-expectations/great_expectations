@@ -95,7 +95,7 @@ class TestUtilMethods(unittest.TestCase):
         self.assertFalse(ge.dataset.util.is_valid_partition_object({'weights': [0.5,0.5]}))
         self.assertFalse(ge.dataset.util.is_valid_partition_object({'bins': [0,1,2]}))
 
-    def test_ensure_json_serializable(self):
+    def test_recursively_convert_to_json_serializable(self):
         D = ge.dataset.PandasDataSet({
             'x' : [1,2,3,4,5,6,7,8,9,10],
         })
@@ -108,7 +108,7 @@ class TestUtilMethods(unittest.TestCase):
         json.dumps(D.get_expectations_config(), indent=2)
 
         x = {'x': np.array([1, 2, 3])}
-        ge.dataset.util.ensure_json_serializable(x)
+        ge.dataset.util.recursively_convert_to_json_serializable(x)
         self.assertEqual(type(x['x']), type([1, 2, 3]))
 
 

@@ -1,4 +1,4 @@
-from .util import DotDict, ensure_json_serializable
+from .util import DotDict, recursively_convert_to_json_serializable
 
 import json
 import inspect
@@ -85,7 +85,7 @@ class DataSet(object):
                     if "output_format" in all_args:
                         del all_args["output_format"]
 
-                all_args = ensure_json_serializable(all_args)
+                all_args = recursively_convert_to_json_serializable(all_args)
                 expectation_args = copy.deepcopy(all_args)
 
                 #Construct the expectation_config object
@@ -177,6 +177,12 @@ class DataSet(object):
 
     def append_expectation(self, expectation_config):
         expectation_type = expectation_config['expectation_type']
+
+        #Test to ensure the new expectation is serializable.
+        #FIXME: If it's not, are we sure we want to raise an error?
+        #FIXME: Should we allow users to override the error?
+        #FIXME: Should we try to convert the object using something like recursively_convert_to_json_serializable?
+        json.dumps(expectation_config)
 
         #Drop existing expectations with the same expectation_type.
         #For column_expectations, append_expectation should only replace expectations
@@ -384,9 +390,40 @@ class DataSet(object):
                     return expectation
 
     def get_default_expectation_arguments(self):
+        """Fetch default expectation arguments for this DataSet
+
+        Args:
+            None
+
+        Returns:
+            A dictionary containing all the current default expectation arguments for a DataSet
+
+            Ex::
+
+            {
+                "include_config" : False,
+                "catch_exceptions" : False,
+                "output_format" : 'BASIC'
+            }
+
+        See also:
+            set_default_expectation_arguments
+        """
         return self.default_expectation_args
 
     def set_default_expectation_argument(self, argument, value):
+        """Set a default expectation argument for this DataSet
+
+        Args:
+            argument (string): The argument to be replaced
+            value : The New argument to use for replacement
+
+        Returns:
+            None
+
+        See also:
+            get_default_expectation_arguments
+        """
         #!!! Maybe add a validation check here?
 
         self.default_expectation_args[argument] = value
@@ -554,13 +591,21 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
 
     ##### Output generation #####
-    def format_column_map_output(self,
+    def _format_column_map_output(self,
         output_format, success,
         element_count,
         nonnull_values, nonnull_count,
         boolean_mapped_success_values, success_count,
         exception_list, exception_index_list
     ):
+        """Helper function to construct expectation result objects for column_map_expectations.
+
+        Expectations support four output_formats: BOOLEAN_ONLY, BASIC, SUMMARY, and COMPLETE.
+        In each case, the object returned has a different set of populated fields.
+        See :ref:`output_format` for more information.
+
+        This function handles the logic for mapping those fields for column_map_expectations.
+        """
         if output_format == "BOOLEAN_ONLY":
             return_obj = success
 
@@ -641,7 +686,22 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         return return_obj
 
-    def calc_map_expectation_success(self, success_count, nonnull_count, mostly):
+    def _calc_map_expectation_success(self, success_count, nonnull_count, mostly):
+        """Calculate success and percent_success for column_map_expectations
+
+        Args:
+            success_count (int): \
+                The number of successful values in the column
+            nonnull_count (int): \
+                The number of nonnull values in the column
+            mostly (float or None): \
+                A value between 0 and 1 (or None), indicating the percentage of successes required to pass the expectation as a whole\
+                If mostly=None, then all values must succeed in order for the expectation as a whole to succeed.
+
+        Returns:
+            success (boolean), percent_success (float)
+        """
+
         if nonnull_count > 0:
             percent_success = float(success_count)/nonnull_count
 
