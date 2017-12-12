@@ -136,6 +136,7 @@ class DataSet(object):
                         return_obj["raised_exception"] = raised_exception
                         return_obj["exception_traceback"] = exception_traceback
 
+                return_obj = ensure_json_serializable(return_obj)
                 return return_obj
 
             # wrapper.__name__ = func.__name__
