@@ -8,6 +8,7 @@ import warnings
 import sys
 import copy
 import json
+import datetime
 
 from functools import wraps
 
@@ -96,8 +97,14 @@ def recursively_convert_to_json_serializable(test_obj):
     """
     Helper function to convert a dict object to one that is serializable
 
-    :param test_obj: the dictionary to attempt to convert to be serializable to json.
-    :return: None. test_obj is converted in place
+    Args:
+        test_obj: an object to attempt to convert a corresponding json-serializable object
+
+    Returns:
+        (dict) A converted test_object
+
+    Warning:
+        test_obj may also be converted in place.
 
     FIXME: Somebody else must have already written this function. Can we use a fully-baked version instead?
     """
@@ -112,31 +119,35 @@ def recursively_convert_to_json_serializable(test_obj):
         # No problem to encode json
         return test_obj
 
-    elif isinstance(test_obj, np.int64):
-        test_obj = int(test_obj)
-
-    elif isinstance(test_obj, np.float64):
-        test_obj = float(round(test_obj, sys.float_info.dig))
-
-    elif isinstance(test_obj, (np.ndarray, pd.Index)):
-        #test_obj[key] = test_obj[key].tolist()
-        ## If we have an array or index, convert it first to a list--causing coercion to float--and then round
-        ## to the number of digits for which the string representation will equal the float representation
-        test_obj = [recursively_convert_to_json_serializable(x) for x in test_obj.tolist()]
-
     elif isinstance(test_obj, dict):
         new_dict = {}
         for key in test_obj:
             new_dict[key] = recursively_convert_to_json_serializable(test_obj[key])
 
-        test_obj = new_dict
+        return new_dict
 
     elif isinstance(test_obj, (list, tuple, set)):
         new_list = []
         for val in test_obj:
-
             new_list.append(recursively_convert_to_json_serializable(val))
-        test_obj = new_list
+
+        return new_list
+
+    elif isinstance(test_obj, (np.ndarray, pd.Index)):
+        #test_obj[key] = test_obj[key].tolist()
+        ## If we have an array or index, convert it first to a list--causing coercion to float--and then round
+        ## to the number of digits for which the string representation will equal the float representation
+        return [recursively_convert_to_json_serializable(x) for x in test_obj.tolist()]
+
+    elif isinstance(test_obj, np.int64):
+        return int(test_obj)
+
+    elif isinstance(test_obj, np.float64):
+        return float(round(test_obj, sys.float_info.dig))
+
+    elif isinstance(test_obj, (datetime.datetime, datetime.date)):
+        return str(test_obj)
+
 
     else:
         try:
@@ -147,9 +158,6 @@ def recursively_convert_to_json_serializable(test_obj):
                 return test_obj
         except:
             raise TypeError('%s is of type %s which cannot be serialized.' % (str(test_obj), type(test_obj).__name__))
-
-    # print(type(test_obj), test_obj)
-    return test_obj
 
 
 def is_valid_partition_object(partition_object):
