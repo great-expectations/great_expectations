@@ -133,7 +133,7 @@ class TestUtilMethods(unittest.TestCase):
         try:
             x = unicode("abcdefg")
             x = ge.dataset.util.recursively_convert_to_json_serializable(x)
-            self.assertEqual(type(x), str)
+            self.assertEqual(type(x), unicode)
         except NameError:
             pass
 
