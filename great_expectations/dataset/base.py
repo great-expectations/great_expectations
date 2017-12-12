@@ -679,11 +679,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             }
 
         else:
-            print ("Warning: Unknown output_format %s. Defaulting to BASIC." % (output_format,))
-            return_obj = {
-                "success" : success,
-                "exception_list" : exception_list,
-            }
+            raise ValueError("Unknown output_format %s." % (output_format,))
 
         return return_obj
 
