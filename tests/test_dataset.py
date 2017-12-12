@@ -694,7 +694,7 @@ class TestDataset(unittest.TestCase):
         })
         my_df.expect_column_values_to_be_of_type('x', 'int', 'python')
         my_df.expect_column_values_to_be_of_type('y', 'int', 'python')
-        my_df.expect_column_values_to_be_of_type('z', 'int', 'python')
+        my_df.expect_column_values_to_be_of_type('z', 'int', 'python', include_config=True, catch_exceptions=True)
         my_df.expect_column_values_to_be_increasing('x')
         my_df.expect_column_values_to_match_regex('z', 'ello')
 
