@@ -1686,90 +1686,172 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
     ##### Datetime and JSON parsing #####
 
-    def expect_column_values_to_match_strftime_format(self, column, strftime_format,
-                                                      mostly=None,
-                                                      output_format=None, include_config=False, catch_exceptions=None, meta=None):
+    def expect_column_values_to_match_strftime_format(self,
+        column,
+        strftime_format,
+        mostly=None,
+        output_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
         """Expect column entries to be strings representing a date or time with a given format.
         
-        WARNING: Note that strftime formats are not universally portable across implementations.
-        For example, the %z directive may not be implemented before Python 3.2.
-        
-        Args:
-            column (str): The column name.
-            strftime_format (str): The datetime format that the column entries should match.
-        
-        Keyword Args:
-            mostly=None: Return "success": True if the percentage of matches is greater than or equal to mostly (a float between 0 and 1).
-        
-        Returns:
-            ::
+        expect_column_values_to_match_strftime_format is a :func:`column_map_expectation <great_expectations.dataset.base.DataSet.column_map_expectation>`.
 
-                {
-                    "success": (bool) True if the column passed the expectation,
-                    "exceptions_list": (list) the values that did not pass the expectation
-                }
+        Args:
+            column (str): \
+                The column name.
+            strftime_format (str): \
+                A strftime format string to use for matching
+            
+        Keyword Args:
+            mostly (None or a float between 0 and 1): \
+                Return `"success": True` if the percentage of exceptions less than or equal to `mostly`. \
+                For more detail, see :ref:`mostly`.
+
+        Other Parameters:
+            output_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`output_format <output_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
+
+        Returns:
+            A JSON-serializable expectation result object.
+
+            Exact fields vary depending on the values passed to :ref:`output_format <output_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
         """
         raise NotImplementedError
 
-    def expect_column_values_to_be_dateutil_parseable(self, column,
-                                                      mostly=None,
-                                                      output_format=None, include_config=False, catch_exceptions=None, meta=None):
-        """Expect column entries to be interpretable as a dateutil object.
+    def expect_column_values_to_be_dateutil_parseable(self,
+        column,
+        mostly=None,
+        output_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
+        """Expect column entries to be parseable using dateutil.
         
-        Args:
-            column (str): The column name.
-        
-        Keyword Args:
-            mostly=None: Return "success": True if the percentage of parseable values is greater than or equal to mostly (a float between 0 and 1).
-        
-        Returns:
-            ::
+        expect_column_values_to_be_dateutil_parseable is a :func:`column_map_expectation <great_expectations.dataset.base.DataSet.column_map_expectation>`.
 
-                {
-                    "success": (bool) True if the column passed the expectation,
-                    "exceptions_list": (list) the values that did not pass the expectation
-                }
+        Args:
+            column (str): \
+                The column name.
+            
+        Keyword Args:
+            mostly (None or a float between 0 and 1): \
+                Return `"success": True` if the percentage of exceptions less than or equal to `mostly`. \
+                For more detail, see :ref:`mostly`.
+
+        Other Parameters:
+            output_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`output_format <output_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
+
+        Returns:
+            A JSON-serializable expectation result object.
+
+            Exact fields vary depending on the values passed to :ref:`output_format <output_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
         """
         raise NotImplementedError
 
-    def expect_column_values_to_be_json_parseable(self, column,
-                                                  mostly=None,
-                                                  output_format=None, include_config=False, catch_exceptions=None, meta=None):
+    def expect_column_values_to_be_json_parseable(self,
+        column,
+        mostly=None,
+        output_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
         """Expect column entries to be data written in JavaScript Object Notation.
         
-        Args:
-            column (str): The column name.
-        
-        Returns:
-            ::
+        expect_column_values_to_be_json_parseable is a :func:`column_map_expectation <great_expectations.dataset.base.DataSet.column_map_expectation>`.
 
-                {
-                    "success": (bool) True if the column passed the expectation,
-                    "exceptions_list": (list) the values that did not pass the expectation
-                }
-        
+        Args:
+            column (str): \
+                The column name.
+            
+        Keyword Args:
+            mostly (None or a float between 0 and 1): \
+                Return `"success": True` if the percentage of exceptions less than or equal to `mostly`. \
+                For more detail, see :ref:`mostly`.
+
+        Other Parameters:
+            output_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`output_format <output_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
+
+        Returns:
+            A JSON-serializable expectation result object.
+
+            Exact fields vary depending on the values passed to :ref:`output_format <output_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
         See Also:
             expect_column_values_to_match_json_schema
         """
         raise NotImplementedError
 
-    def expect_column_values_to_match_json_schema(self, column, json_schema,
-                                                  mostly=None,
-                                                  output_format=None, include_config=False, catch_exceptions=None, meta=None):
-        """Expect column entries to be JSON objects with a given JSON schema.
+    def expect_column_values_to_match_json_schema(self,
+        column,
+        json_schema,
+        mostly=None,
+        output_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
+        """Expect column entries to be JSON objects matching a given JSON schema.
         
-        Args:
-            column (str): The column name.
-            json_schema (JSON object): The JSON schema that each column entry should resemble.
-        
-        Returns:
-            ::
+        expect_column_values_to_match_json_schema is a :func:`column_map_expectation <great_expectations.dataset.base.DataSet.column_map_expectation>`.
 
-                {
-                    "success": (bool) True if the column passed the expectation,
-                    "exceptions_list": (list) the values that did not pass the expectation
-                }
-        
+        Args:
+            column (str): \
+                The column name.
+            
+        Keyword Args:
+            mostly (None or a float between 0 and 1): \
+                Return `"success": True` if the percentage of exceptions less than or equal to `mostly`. \
+                For more detail, see :ref:`mostly`.
+
+        Other Parameters:
+            output_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`output_format <output_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
+
+        Returns:
+            A JSON-serializable expectation result object.
+
+            Exact fields vary depending on the values passed to :ref:`output_format <output_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
         See Also:
             expect_column_values_to_be_json_parseable
 
