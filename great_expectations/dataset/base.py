@@ -397,19 +397,16 @@ class DataSet(object):
     def get_default_expectation_arguments(self):
         """Fetch default expectation arguments for this DataSet
 
-        Args:
-            None
-
         Returns:
             A dictionary containing all the current default expectation arguments for a DataSet
 
             Ex::
 
-            {
-                "include_config" : False,
-                "catch_exceptions" : False,
-                "output_format" : 'BASIC'
-            }
+                {
+                    "include_config" : False,
+                    "catch_exceptions" : False,
+                    "output_format" : 'BASIC'
+                }
 
         See also:
             set_default_expectation_arguments
@@ -832,12 +829,6 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                                              output_format=None, include_config=False, catch_exceptions=None, meta=None):
         """Expect the number of rows to be between two values.
 
-        min_value and max_value are both inclusive.
-
-        If min_value is None, then max_value is treated as an upper bound, and the number of acceptable rows has no minimum.
-
-        If max_value is None, then min_value is treated as a lower bound, and the number of acceptable rows has no maximum.
-
         expect_table_row_count_to_be_between is a :func:`expectation <great_expectations.dataset.base.DataSet.expectation>`, not a `column_map_` or `column_aggregate_expectation`.
 
         Args:
@@ -869,6 +860,11 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
             Exact fields vary depending on the values passed to :ref:`output_format <output_format>` and
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+        Notes:
+            * min_value and max_value are both inclusive.
+            * If min_value is None, then max_value is treated as an upper bound, and the number of acceptable rows has no minimum.
+            * If max_value is None, then min_value is treated as a lower bound, and the number of acceptable rows has no maximum.
 
         See Also:
             expect_table_row_count_to_equal
@@ -1302,7 +1298,8 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         """Expect column entries to be a number between a minimum value and a maximum value.
         
         Args:
-            column (str): The column name.
+            column (str): \
+                The column name.
             min_value (int or None): The minimum value for a column entry.
             max_value (int or None): The maximum value for a column entry.
             parse_strings_as_datetimes (boolean or None) : If True, parse min_value, max_values, and all non-null column values to datetimes before making comparisons.
@@ -1342,7 +1339,8 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         expect_column_values_to_be_increasing is a :func:`column_map_expectation <great_expectations.dataset.base.DataSet.column_map_expectation>`.
 
         Args:
-            column (str): The column name.
+            column (str): \
+                The column name.
             
         Keyword Args:
             strictly (Boolean or None): \
@@ -1396,7 +1394,8 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         expect_column_values_to_be_decreasing is a :func:`column_map_expectation <great_expectations.dataset.base.DataSet.column_map_expectation>`.
 
         Args:
-            column (str): The column name.
+            column (str): \
+                The column name.
             
         Keyword Args:
             strictly (Boolean or None): \
@@ -1436,41 +1435,107 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
     ##### String matching #####
 
-    def expect_column_value_lengths_to_be_between(self, column, min_value=None, max_value=None,
-                                                  mostly=None,
-                                                  output_format=None, include_config=False, catch_exceptions=None, meta=None):
-        """Expect column entries to have a measurable length which lies between a minimum value and a maximum value.
-        
-        Args:
-            column (str): The column name.
-            min_value (int or None): The minimum value for a column entry length.
-            max_value (int or None): The maximum value for a column entry length.
-        
-        Keyword Args:
-            mostly=None: Return "success": True if the percentage of value lengths between min_value and max_value is greater than or equal to mostly (a float between 0 and 1).
-        
-        Returns:
-            ::
+    def expect_column_value_lengths_to_be_between(self,
+        column,
+        min_value=None,
+        max_value=None,
+        mostly=None,
+        output_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
+        """Expect column entries to a string length between a minimum value and a maximum value.
 
-                {
-                    "success": (bool) True if the column passed the expectation,
-                    "exceptions_list": (list) the values that did not pass the expectation
-                }
+        This expectation only works for string-type values. Invoking it on ints or floats will raise a TypeError.
+
+        expect_column_values_to_be_between is a :func:`column_map_expectation <great_expectations.dataset.base.DataSet.column_map_expectation>`.
+
+        Args:
+            column (str): \
+                The column name.
+            
+        Keyword Args:
+            min_value (int or None): \
+                The minimum value for a column entry length.
+            max_value (int or None): \
+                The maximum value for a column entry length.
+            mostly (None or a float between 0 and 1): \
+                Return `"success": True` if the percentage of exceptions less than or equal to `mostly`. \
+                For more detail, see :ref:`mostly`.
+
+        Other Parameters:
+            output_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`output_format <output_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
+
+        Returns:
+            A JSON-serializable expectation result object.
+
+            Exact fields vary depending on the values passed to :ref:`output_format <output_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+        Notes:
+            * min_value and max_value are both inclusive.
+            * If min_value is None, then max_value is treated as an upper bound, and the number of acceptable rows has no minimum.
+            * If max_value is None, then min_value is treated as a lower bound, and the number of acceptable rows has no maximum.
 
         See Also:
-            expect_column_values_to_be_between
-
+            expect_column_value_lengths_to_equal
         """
         raise NotImplementedError
 
-    def expect_column_value_lengths_to_equal(self, column, value,
-                                             mostly=None,
-                                             output_format=None, include_config=False, catch_exceptions=None, meta=None):
-        """Expect column entries to have a measurable length which is equal to the provided value.
+    def expect_column_value_lengths_to_equal(self,
+        column,
+        value,
+        mostly=None,
+        output_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
+        """Expect column entries to have length equal to the provided value.
 
-        :param column (str): The column name.
-        :param value (int): The expected value of the column length.
-        :return: Column map expectation return object in accordance with output_format
+        This expectation only works for string-type values. Invoking it on ints or floats will raise a TypeError.
+        
+        expect_column_values_to_be_between is a :func:`column_map_expectation <great_expectations.dataset.base.DataSet.column_map_expectation>`.
+
+        Args:
+            column (str): \
+                The column name.
+            value (int or None): \
+                The expected value for a column entry length.
+            
+        Keyword Args:
+            mostly (None or a float between 0 and 1): \
+                Return `"success": True` if the percentage of exceptions less than or equal to `mostly`. \
+                For more detail, see :ref:`mostly`.
+
+        Other Parameters:
+            output_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`output_format <output_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
+
+        Returns:
+            A JSON-serializable expectation result object.
+
+            Exact fields vary depending on the values passed to :ref:`output_format <output_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+        See Also:
+            expect_column_value_lengths_to_be_between
         """
 
     def expect_column_values_to_match_regex(self, column, regex,
