@@ -1442,7 +1442,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         mostly=None,
         output_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
-        """Expect column entries to a string length between a minimum value and a maximum value.
+        """Expect column entries to be strings with length between a minimum value and a maximum value.
 
         This expectation only works for string-type values. Invoking it on ints or floats will raise a TypeError.
 
@@ -1497,7 +1497,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         mostly=None,
         output_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
-        """Expect column entries to have length equal to the provided value.
+        """Expect column entries to be strings with length equal to the provided value.
 
         This expectation only works for string-type values. Invoking it on ints or floats will raise a TypeError.
         
@@ -1538,51 +1538,93 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             expect_column_value_lengths_to_be_between
         """
 
-    def expect_column_values_to_match_regex(self, column, regex,
-                                            mostly=None,
-                                            output_format=None, include_config=False, catch_exceptions=None, meta=None):
+    def expect_column_values_to_match_regex(self,
+        column,
+        regex,
+        mostly=None,
+        output_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
         """Expect column entries to be strings that match a given regular expression.
         
-        Args:
-            column (str): The column name.
-            regex (str): The regular expression that the column entry should match.
-        
-        Keyword Args:
-            mostly=None: Return "success": True if the percentage of matches is greater than or equal to mostly (a float between 0 and 1).
-        
-        Returns:
-            ::
+        expect_column_values_to_match_regex is a :func:`column_map_expectation <great_expectations.dataset.base.DataSet.column_map_expectation>`.
 
-                {
-                    "success": (bool) True if the column passed the expectation,
-                    "exceptions_list": (list) the values that did not pass the expectation
-                }
-        
+        Args:
+            column (str): \
+                The column name.
+            regex (str): \
+                The regular expression the column entries should match.
+            
+        Keyword Args:
+            mostly (None or a float between 0 and 1): \
+                Return `"success": True` if the percentage of exceptions less than or equal to `mostly`. \
+                For more detail, see :ref:`mostly`.
+
+        Other Parameters:
+            output_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`output_format <output_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
+
+        Returns:
+            A JSON-serializable expectation result object.
+
+            Exact fields vary depending on the values passed to :ref:`output_format <output_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
         See Also:
             expect_column_values_to_not_match_regex
             expect_column_values_to_match_regex_list
         """
         raise NotImplementedError
 
-    def expect_column_values_to_not_match_regex(self, column, regex,
-                                                mostly=None,
-                                                output_format=None, include_config=False, catch_exceptions=None, meta=None):
+    def expect_column_values_to_not_match_regex(self,
+        column,
+        regex,
+        mostly=None,
+        output_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
         """Expect column entries to be strings that do NOT match a given regular expression.
         
+        expect_column_values_to_not_match_regex is a :func:`column_map_expectation <great_expectations.dataset.base.DataSet.column_map_expectation>`.
+
         Args:
-            column (str): The column name.
-            regex (str): The regular expression that the column entry should NOT match.
-
+            column (str): \
+                The column name.
+            regex (str): \
+                The regular expression the column entries should NOT match.
+            
         Keyword Args:
-            mostly=None: Return "success": True if the percentage of NOT matches is greater than or equal to mostly (a float between 0 and 1).
-        
-        Returns:
-            ::
+            mostly (None or a float between 0 and 1): \
+                Return `"success": True` if the percentage of exceptions less than or equal to `mostly`. \
+                For more detail, see :ref:`mostly`.
 
-                {
-                    "success": (bool) True if the column passed the expectation,
-                    "exceptions_list": (list) the values that did not pass the expectation
-                }
+        Other Parameters:
+            output_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`output_format <output_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
+
+        Returns:
+            A JSON-serializable expectation result object.
+
+            Exact fields vary depending on the values passed to :ref:`output_format <output_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
 
         See Also:
             expect_column_values_to_match_regex
