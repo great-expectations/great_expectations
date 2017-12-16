@@ -1894,22 +1894,62 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
     ##### Aggregate functions #####
 
-    def expect_column_mean_to_be_between(self, column, min_value=None, max_value=None,
-                                         output_format=None, include_config=False, catch_exceptions=None, meta=None):
+    def expect_column_mean_to_be_between(self,
+        column,
+        min_value=None,
+        max_value=None,
+        output_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
         """Expect the column mean to be between a minimum value and a maximum value.
         
-        Args:
-            column (str): The column name.
-            min_value (int or None): The minimum value for the column mean.
-            max_value (int or None): The maximum value for the column mean.
+        expect_column_mean_to_be_between is a :func:`column_aggregate_expectation <great_expectations.dataset.base.DataSet.column_aggregate_expectation>`.
         
+        Args:
+            column (str): \
+                The column name.
+        
+        Keyword Args:
+            min_value (int or None): \
+                The minimum value for a column entry.
+            max_value (int or None): \
+                The maximum value for a column entry.
+            mostly=None: Return "success": True if the percentage of values between min_value and max_value is greater than or equal to mostly (a float between 0 and 1).
+        
+        Other Parameters:
+            output_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`output_format <output_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
+
         Returns:
+            A JSON-serializable expectation result object.
+
+            Exact fields vary depending on the values passed to :ref:`output_format <output_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+        Notes:
+            * min_value and max_value are both inclusive.
+            * If min_value is None, then max_value is treated as an upper bound, and the number of acceptable rows has no minimum.
+            * If max_value is None, then min_value is treated as a lower bound, and the number of acceptable rows has no maximum.
+
+            These fields in the result object are customized for this expectation:
             ::
 
                 {
-                    "success": (bool) True if the column passed the expectation,
-                    "true_mean": (float) the column mean
+                    "true_value": (float) The true mean for the column
                 }
+
+        See Also:
+            expect_column_median_to_be_between
+            expect_column_stdev_to_be_between
         """
         raise NotImplementedError
 
