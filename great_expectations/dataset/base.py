@@ -1935,16 +1935,16 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
 
         Notes:
-            * min_value and max_value are both inclusive.
-            * If min_value is None, then max_value is treated as an upper bound.
-            * If max_value is None, then min_value is treated as a lower bound.
-
             These fields in the result object are customized for this expectation:
             ::
 
                 {
                     "true_value": (float) The true mean for the column
                 }
+
+            * min_value and max_value are both inclusive.
+            * If min_value is None, then max_value is treated as an upper bound.
+            * If max_value is None, then min_value is treated as a lower bound.
 
         See Also:
             expect_column_median_to_be_between
@@ -1993,16 +1993,16 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
 
         Notes:
-            * min_value and max_value are both inclusive.
-            * If min_value is None, then max_value is treated as an upper bound
-            * If max_value is None, then min_value is treated as a lower bound
-
             These fields in the result object are customized for this expectation:
             ::
 
                 {
                     "true_value": (float) The true median for the column
                 }
+
+            * min_value and max_value are both inclusive.
+            * If min_value is None, then max_value is treated as an upper bound
+            * If max_value is None, then min_value is treated as a lower bound
 
         See Also:
             expect_column_mean_to_be_between
@@ -2052,16 +2052,16 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
 
         Notes:
-            * min_value and max_value are both inclusive.
-            * If min_value is None, then max_value is treated as an upper bound
-            * If max_value is None, then min_value is treated as a lower bound
-
             These fields in the result object are customized for this expectation:
             ::
 
                 {
                     "true_value": (float) The true stdev for the column
                 }
+
+            * min_value and max_value are both inclusive.
+            * If min_value is None, then max_value is treated as an upper bound
+            * If max_value is None, then min_value is treated as a lower bound
 
         See Also:
             expect_column_mean_to_be_between
@@ -2110,16 +2110,16 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
 
         Notes:
-            * min_value and max_value are both inclusive.
-            * If min_value is None, then max_value is treated as an upper bound
-            * If max_value is None, then min_value is treated as a lower bound
-
             These fields in the result object are customized for this expectation:
             ::
 
                 {
                     "true_value": (float) The number of unique values in the column
                 }
+
+            * min_value and max_value are both inclusive.
+            * If min_value is None, then max_value is treated as an upper bound
+            * If max_value is None, then min_value is treated as a lower bound
 
         See Also:
             expect_column_proportion_of_unique_values_to_be_between
