@@ -2324,28 +2324,64 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         tail_weight_holdout=0,
         output_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
-        """
-        Expect the values in this column to match the distribution of the specified categorical values and their expected weights. \
-        The expected distribution is calculated by scaling the weights according to the size of values in the test data.
+        """Expect the values in this column to match the specified categorical partition. \
+
+        This expectation compares categorical distributions using a Chi-squared test. \
+        It returns `success=True` if values in the column closely match the distribution of the specified partition.
+        
+        expect_column_chisquare_test_p_value_to_be_greater_than is a :func:`column_aggregate_expectation <great_expectations.dataset.base.DataSet.column_aggregate_expectation>`.
 
         Args:
-            column (str): The column name
-            partition_object (dict): A dictionary containing partition (categorical values) and associated weights.
-            p (float) = 0.05: The p-value threshold for the Chi-Squared test.\
-                For values below the specified threshold the expectation will return false, rejecting the null hypothesis that the distributions are the same.
-            tail_weight_holdout: the amount of weight to split uniformly and add to the tails of the histogram (the area between -Infinity and the data's min value and between the data's max value and Infinity)
+            column (str): \
+                The column name.
+            partition_object (dict): \
+                The expected partition object.
+
+        Keyword Args:
+            p (float): \
+                The p-value threshold for the Chi-Squared test.\
+                For values below the specified threshold the expectation will return false,\
+                rejecting the null hypothesis that the distributions are the same.
+            tail_weight_holdout (float): \
+                the amount of weight to split uniformly and add to the tails of the histogram\
+                (the area between -Infinity and the data's min value and between the data's max value and Infinity)
+                
+        Other Parameters:
+            output_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`output_format <output_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
 
         Returns:
+            A JSON-serializable expectation result object.
+
+            Exact fields vary depending on the values passed to :ref:`output_format <output_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+        Notes:
+            These fields in the result object are customized for this expectation:
             ::
 
             {
-                "success": (Boolean) True if the column passed the expectation
-                "true_value": (float) The true KL divergence (relative entropy)
+                "true_value": (float) The true p-value of the KS test
                 "summary_obj": {
-                    "observed_partition": The partition observed in the data
-                    "expected_partition": The partition against which the data were compared, after applying specified holdouts.
+                    "observed_partition" (dict):
+                        The partition observed on the data, using the provided
+                        bins but also expanding from min(column) to max(column)
+                    "expected_partition" (dict):
+                        The partition expected from the data. For KS test,
+                        this will always be the partition_object parameter
                 }            
             }
+
         """
         raise NotImplementedError
 
