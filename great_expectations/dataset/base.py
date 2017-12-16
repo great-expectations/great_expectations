@@ -2069,8 +2069,12 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         """
         raise NotImplementedError
 
-    def expect_column_unique_value_count_to_be_between(self, column, min_value=None, max_value=None,
-                                                       output_format=None, include_config=False, catch_exceptions=None, meta=None):
+    def expect_column_unique_value_count_to_be_between(self,
+        column,
+        min_value=None,
+        max_value=None,
+        output_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
         """Expect the number of unique values to be between a minimum value and a maximum value.
 
         Args:
@@ -2088,8 +2092,12 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         """
         raise NotImplementedError
 
-    def expect_column_proportion_of_unique_values_to_be_between(self, column, min_value=0, max_value=1,
-                                                                output_format=None, include_config=False, catch_exceptions=None, meta=None):
+    def expect_column_proportion_of_unique_values_to_be_between(self,
+        column,
+        min_value=0,
+        max_value=1,
+        output_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
         """Expect the proportion of unique values to be between a minimum value and a maximum value.
 
         Args:
@@ -2107,8 +2115,12 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         """
         raise NotImplementedError
 
-    def expect_column_most_common_value_to_be(self, column, value, ties_okay=None,
-                                              output_format=None, include_config=False, catch_exceptions=None, meta=None):
+    def expect_column_most_common_value_to_be(self,
+        column,
+        value,
+        ties_okay=None,
+        output_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
         """Expect the most common value to be equal to `value`
 
         Args:
@@ -2128,8 +2140,12 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         """
         raise NotImplementedError
 
-    def expect_column_most_common_value_to_be_in_set(self, column, value_set, ties_okay=None,
-                                                     output_format=None, include_config=False, catch_exceptions=None, meta=None):
+    def expect_column_most_common_value_to_be_in_set(self,
+        column,
+        value_set,
+        ties_okay=None,
+        output_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
         """Expect the most common value to be within the designated value set
 
         :param str column: The column name.
@@ -2150,8 +2166,13 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
 
     ### Distributional expectations
-    def expect_column_chisquare_test_p_value_to_be_greater_than(self, column, partition_object=None, p=0.05, tail_weight_holdout=0,
-                                                                output_format=None, include_config=False, catch_exceptions=None, meta=None):
+    def expect_column_chisquare_test_p_value_to_be_greater_than(self,
+        column,
+        partition_object=None,
+        p=0.05,
+        tail_weight_holdout=0,
+        output_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
         """
         Expect the values in this column to match the distribution of the specified categorical values and their expected weights. \
         The expected distribution is calculated by scaling the weights according to the size of values in the test data.
