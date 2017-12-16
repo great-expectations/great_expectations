@@ -2134,18 +2134,59 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
     ):
         """Expect the proportion of unique values to be between a minimum value and a maximum value.
 
+        For example, in a column containing [1, 2, 2, 3, 3, 3, 4, 4, 4, 4], there are 4 unique values for a proportion of 0.4.
+
         Args:
             column (str): The column name.
             min_value (float or None): The minimum proportion of unique values. (Proportions are on the range 0 to 1)
             max_value (float or None): The maximum proportion of unique values. (Proportions are on the range 0 to 1)
 
+        expect_column_unique_value_count_to_be_between is a :func:`column_aggregate_expectation <great_expectations.dataset.base.DataSet.column_aggregate_expectation>`.
+        
+        Args:
+            column (str): \
+                The column name.
+        
+        Keyword Args:
+            min_value (int or None): \
+                The minimum number of unique values allowed.
+            max_value (int or None): \
+                The maximum number of unique values allowed.
+
+        Other Parameters:
+            output_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`output_format <output_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
+
         Returns:
+            A JSON-serializable expectation result object.
+
+            Exact fields vary depending on the values passed to :ref:`output_format <output_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+        Notes:
+            These fields in the result object are customized for this expectation:
             ::
 
                 {
-                    "success": (bool) True if the column passed the expectation,
-                    "true_value": (float) the proportion of unique values
+                    "true_value": (float) The number of unique values in the column
                 }
+
+            * min_value and max_value are both inclusive.
+            * If min_value is None, then max_value is treated as an upper bound
+            * If max_value is None, then min_value is treated as a lower bound
+
+        See Also:
+            expect_column_unique_value_count_to_be_between
         """
         raise NotImplementedError
 
