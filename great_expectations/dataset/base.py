@@ -2255,7 +2255,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                 `true_value` will contain an element from `summary_obj.value_list`, with no guarantees about which element will be chosen.
 
         See Also:
-            expect_column_unique_value_count_to_be_between
+            expect_column_most_common_value_to_be_in_set
 
         """
         raise NotImplementedError
@@ -2268,19 +2268,50 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
     ):
         """Expect the most common value to be within the designated value set
 
-        :param str column: The column name.
-        :param list value_set: The list of designated values
-        :param ties_okay: If True, then the expectation will succeed if other values are as common (but not more common) than the selected value
-        :type ties_okay: boolean or None
+        expect_column_most_common_value_to_be_in_set is a :func:`column_aggregate_expectation <great_expectations.dataset.base.DataSet.column_aggregate_expectation>`.
+        
+        Args:
+            column (str): \
+                The column name
+            value_set (set-like): \
+                A list of potential values to match
+        
+        Keyword Args:
+            ties_okay (boolean or None): \
+                If True, then the expectation will still succeed if values outside the designated set are as common (but not more common) than designated values
 
-        :returns: 
+        Other Parameters:
+            output_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`output_format <output_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
+
+        Returns:
+            A JSON-serializable expectation result object.
+
+            Exact fields vary depending on the values passed to :ref:`output_format <output_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+        Notes:
+            These fields in the result object are customized for this expectation:
             ::
 
                 {
-                    "success": (bool) True if the column passed the expectation True,
-                    "true_value": (float) the proportion of unique values,
-                    "summary_obj": {}
+                    "true_value": (list) The most common values in the column
                 }
+
+            `true_value` contains a list of the most common values.
+            Often, this will just be a single element. But if there's a tie for most common among multiple values,
+            `true_value` will contain a single copy of each most common value.
+
         """
         raise NotImplementedError
 
