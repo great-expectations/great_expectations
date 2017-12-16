@@ -38,23 +38,6 @@ String matching
 * :func:`expect_column_values_to_not_match_regex <great_expectations.dataset.base.DataSet.expect_column_values_to_not_match_regex>`
 * :func:`expect_column_values_to_match_regex_list <great_expectations.dataset.base.DataSet.expect_column_values_to_match_regex_list>`
 
-*Named Regex Patterns*
-
-.. code-block:: bash
-
-	leading_whitespace :     ^[ \t\r\n]
-	trailing_whitespace :    [ \t\r\n]$
-	date :                   [1-2][0-9]{3}[-][0-1][0-9][-][0-3][0-9]
-	phone_number :           [0-9]{10}
-	state :                  [A-Z][A-Z]
-	five_digit_zip_code :    [0-9]{5}
-	nine_digit_zip_code :    [0-9]{9}
-	name_suffix :            (JR|Jr|SR|Sr|II|III|IV)$
-	name_like :              ^[A-Z][a-z]+$
-	number_like :            ^\d+$
-	email_like :             (^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)
-	address_like :           \s*([0-9]*)\s((NW|SW|SE|NE|S|N|E|W))?(.*)((NW|SW|SE|NE|S|N|E|W))?((#|APT|BSMT|BLDG|DEPT|FL|FRNT|HNGR|KEY|LBBY|LOT|LOWR|OFC|PH|PIER|REAR|RM|SIDE|SLIP|SPC|STOP|STE|TRLR|UNIT|UPPR|\,)[^,]*)(\,)([\s\w]*)\n
-
 Datetime and JSON parsing
 --------------------------------------------------------------------------------
 

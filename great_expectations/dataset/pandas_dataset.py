@@ -18,6 +18,13 @@ from .util import DocInherit, recursively_convert_to_json_serializable, \
         is_valid_partition_object, is_valid_categorical_partition_object, is_valid_continuous_partition_object
 
 class MetaPandasDataSet(DataSet):
+    """
+    MetaPandasDataSet is a thin layer between DataSet and PandasDataSet. This two-layer inheritance is required to make @classmethod decorators work.
+
+    Practically speaking, that means that MetaPandasDataSet implements
+    expectation decorators, like `column_map_expectation` and `column_aggregate_expectation`,
+    and PandasDataset implements the expectation methods themselves.
+    """
 
     def __init__(self, *args, **kwargs):
         super(MetaPandasDataSet, self).__init__(*args, **kwargs)
@@ -150,14 +157,23 @@ class MetaPandasDataSet(DataSet):
 
 
 class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
+    """
+    PandasDataset instantiates the great_expectations Expectations API as a subclass of a pandas.DataFrame.
+
+    For the full API reference, please see :func:`DataSet <great_expectations.dataset.base.DataSet>`
+    """
 
     def __init__(self, *args, **kwargs):
         super(PandasDataSet, self).__init__(*args, **kwargs)
         self.add_default_expectations()
 
     def add_default_expectations(self):
-        ## Default behavior for PandasDataSet is to explicitly include expectations that every column present
-        ## upon initialization exists.
+        """
+        The default behavior for PandasDataSet is to explicitly include expectations that every column present upon initialization exists.
+
+        FIXME: This should probably live in the grandparent class, DataSet, instead.
+        """
+
         for col in self.columns:
             self.append_expectation({
                 "expectation_type": "expect_column_to_exist",
