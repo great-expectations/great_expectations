@@ -872,12 +872,16 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         raise NotImplementedError
 
     def expect_table_row_count_to_equal(self,
-        value=None,
+        value,
         output_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
         """Expect the number of rows to equal a value.
 
         expect_table_row_count_to_equal is a basic :func:`expectation <great_expectations.dataset.base.DataSet.expectation>`, not a `column_map_` or `column_aggregate_expectation`.
+
+        Args:
+            value (int): \
+                The expected number of rows.
 
         Other Parameters:
             output_format (string or None): \
