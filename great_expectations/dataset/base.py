@@ -142,6 +142,7 @@ class DataSet(object):
                         return_obj["raised_exception"] = raised_exception
                         return_obj["exception_traceback"] = exception_traceback
 
+                return_obj = recursively_convert_to_json_serializable(return_obj)
                 return return_obj
 
             # wrapper.__name__ = func.__name__
@@ -614,9 +615,14 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         elif output_format == "BASIC":
             exception_count = len(exception_list)
 
-            if nonnull_count > 0:
-                exception_percent = float(exception_count) / element_count
-                exception_percent_nonmissing = float(exception_count) / nonnull_count
+            if element_count > 0:
+                if nonnull_count > 0:
+                    exception_percent = float(exception_count) / element_count
+                    exception_percent_nonmissing = float(exception_count) / nonnull_count
+                    
+                else:
+                    exception_percent = float(exception_count) / element_count
+                    exception_percent_nonmissing = None
             else:
                 exception_percent = None
                 exception_percent_nonmissing = None
@@ -628,7 +634,6 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                     "exception_count": exception_count,
                     "exception_percent": exception_percent,
                     "exception_percent_nonmissing": exception_percent_nonmissing,
-                    # "exception_percent": excefloat(exception_count) / nonnull_count,
                 }
             }
 
@@ -680,11 +685,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             }
 
         else:
-            print ("Warning: Unknown output_format %s. Defaulting to BASIC." % (output_format,))
-            return_obj = {
-                "success" : success,
-                "exception_list" : exception_list,
-            }
+            raise ValueError("Unknown output_format %s." % (output_format,))
 
         return return_obj
 
@@ -1302,11 +1303,12 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         column,
         min_value=None,
         max_value=None,
+        allow_cross_type_comparisons=None,
         parse_strings_as_datetimes=None,
         mostly=None,
         output_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
-        """Expect column entries to be numeric values between a minimum and maximum.
+        """Expect column values to be between a minimum and maximum.
 
         expect_column_values_to_be_between is a :func:`column_map_expectation <great_expectations.dataset.base.DataSet.column_map_expectation>`.
         
