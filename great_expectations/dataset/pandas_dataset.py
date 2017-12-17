@@ -206,6 +206,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         if max_value is not None and not float(max_value).is_integer():
             raise ValueError("min_value and max_value must be integers")
 
+        #FIXME: Missing logic for Nones in min_ and max_value
         if min_value <= self.shape[0] <= max_value:
             outcome = True
         else:
@@ -423,6 +424,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
             else:
                 try:
 
+                    #FIXME: Look into factoring this out
                     if min_value != None and max_value != None:
                         return (min_value <= val) and (val <= max_value)
 
@@ -788,6 +790,34 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
             "success" : success,
             "true_value": mode_list,
             "summary_obj": {},
+        }
+
+    @DocInherit
+    @MetaPandasDataSet.column_aggregate_expectation
+    def expect_column_sum_to_be_between(self,
+        column,
+        min_value=None,
+        max_value=None,
+        output_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
+        if min_value is None and max_value is None:
+            raise ValueError("min_value and max_value cannot both be None")
+
+        col_sum = column.sum()
+
+        if min_value != None and max_value != None:
+            success = (min_value <= col_sum) and (col_sum <= max_value)
+
+        elif min_value == None and max_value != None:
+            success = (col_sum <= max_value)
+
+        elif min_value != None and max_value == None:
+            success = (min_value <= col_sum)
+
+        return {
+            "success" : success,
+            "true_value" : col_sum,
+            "summary_obj" : {}
         }
 
     @DocInherit
