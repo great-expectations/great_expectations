@@ -925,7 +925,8 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                                         output_format=None, include_config=False, catch_exceptions=None, meta=None):
         """Expect the number of rows to equal a value.
 
-        expect_table_row_count_to_equal is a basic :func:`expectation <great_expectations.dataset.base.DataSet.expectation>`, not a `column_map_` or `column_aggregate_expectation`.
+        expect_table_row_count_to_equal is a basic :func:`expectation <great_expectations.dataset.base.DataSet.expectation>`, \
+        not a `column_map_expectation` or `column_aggregate_expectation`.
 
         Other Parameters:
             output_format (string or None): \
