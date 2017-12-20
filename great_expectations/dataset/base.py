@@ -79,10 +79,6 @@ class DataSet(object):
                 else:
                     meta = None
 
-                if "meta_notes" in kwargs:
-                    meta = { "notes": kwargs["meta_notes"] }
-                    del all_args["meta_notes"]
-
                 # This intends to get the signature of the inner wrapper, if there is one.
                 if "output_format" in inspect.getargspec(func)[0][1:]:
                     all_args["output_format"] = output_format
