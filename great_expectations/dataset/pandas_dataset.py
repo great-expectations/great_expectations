@@ -32,15 +32,15 @@ class MetaPandasDataSet(DataSet):
 
     @classmethod
     def column_map_expectation(cls, func):
-        """
-        The column_map_expectation decorator handles boilerplate issues surrounding the common pattern of evaluating
-        truthiness of some condition on a per row basis.
+        """Constructs an expectation using column-map semantics.
 
-        NOTE: The MetaPandasDataSet implementation replaces the "column" parameter supplied by the user with a pandas Series
+
+        The MetaPandasDataSet implementation replaces the "column" parameter supplied by the user with a pandas Series
         object containing the actual column from the relevant pandas dataframe. This simplifies the implementing expectation
         logic while preserving the standard DataSet signature and expected behavior.
 
-        Further, the column_map_expectation provides a unique set of output_format options and handles the optional "mostly" parameter.
+        See :func:`column_map_expectation <great_expectations.dataset.base.DataSet.column_map_expectation>` \
+        for full documentation of this function.
         """
 
         @cls.expectation(inspect.getargspec(func)[0][1:])
@@ -84,15 +84,14 @@ class MetaPandasDataSet(DataSet):
 
     @classmethod
     def column_aggregate_expectation(cls, func):
-        """
-        The column_aggregate_expectation decorator handles boilerplate issues surrounding computing aggregate measures
-        from all nonnull values in a column.
+        """Constructs an expectation using column-aggregate semantics.
 
-        NOTE: The MetaPandasDataSet implementation replaces the "column" parameter supplied by the user with a pandas
+        The MetaPandasDataSet implementation replaces the "column" parameter supplied by the user with a pandas
         Series object containing the actual column from the relevant pandas dataframe. This simplifies the implementing
         expectation logic while preserving the standard DataSet signature and expected behavior.
 
-        Further, the column_aggregate_expectation provides a unique set of output_format options.
+        See :func:`column_aggregate_expectation <great_expectations.dataset.base.DataSet.column_aggregate_expectation>` \
+        for full documentation of this function.
         """
         @cls.expectation(inspect.getargspec(func)[0][1:])
         @wraps(func)
