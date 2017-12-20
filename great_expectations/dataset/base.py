@@ -843,7 +843,8 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         ):
         """Expect the specified column to exist.
 
-        expect_column_to_exist is a :func:`expectation <great_expectations.dataset.base.DataSet.expectation>`, not a `column_map_` or `column_aggregate_expectation`.
+        expect_column_to_exist is a :func:`expectation <great_expectations.dataset.base.DataSet.expectation>`, not a \
+        `column_map_expectation` or `column_aggregate_expectation`.
 
         Args:
             column (str): \
