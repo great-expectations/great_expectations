@@ -1352,7 +1352,9 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         output_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
         """Expect column entries to be between a minimum value and a maximum value (inclusive).
-        
+
+        expect_column_values_to_be_between is a :func:`column_map_expectation <great_expectations.dataset.base.DataSet.column_map_expectation>`.
+
         Args:
             column (str): \
                 The column name.
@@ -1513,11 +1515,11 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         mostly=None,
         output_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
-        """Expect column entries to be strings with length between a minimum value and a maximum value.
+        """Expect column entries to be strings with length between a minimum value and a maximum value (inclusive).
 
         This expectation only works for string-type values. Invoking it on ints or floats will raise a TypeError.
 
-        expect_column_values_to_be_between is a :func:`column_map_expectation <great_expectations.dataset.base.DataSet.column_map_expectation>`.
+        expect_column_value_lengths_to_be_between is a :func:`column_map_expectation <great_expectations.dataset.base.DataSet.column_map_expectation>`.
 
         Args:
             column (str): \
