@@ -21,28 +21,35 @@ class DataSet(object):
 
     @classmethod
     def expectation(cls, method_arg_names):
-        """
-        The core expectation decorator, this method takes a single parameter which it uses to build and save the
-        expectation config to the DataSet object. The parameter defines an ordered list of the positional arguments to
-        be used by the method implementing the expectation.
+        """Manages configuration and running of expectation objects.
 
-        Note that intermediate decorators that call the core @expectation decorator will most likely need to pass their
-        decorated methods' signature up to the expectation decorator. For example, the MetaPandasDataSet column_map_expectation
-        decorator relies on the DataSet expectation decorator, but will pass through the signature from the implementing method.
+        Expectation builds and saves a new expectation configuration to the DataSet object. It is the core decorator \
+        used by great expectations to manage expectation configurations.
 
-        When decorated with @expectation, a method will:
+        Args:
+            method_arg_names (List) : An ordered list of the arguments used by the method implementing the expectation \
+                (typically the result of inspection). Positional arguments are explicitly mapped to \
+                keyword arguments when the expectation is run.
 
-            1. Build and update the expectation config.
+        Notes:
+            Intermediate decorators that call the core @expectation decorator will most likely need to pass their \
+            decorated methods' signature up to the expectation decorator. For example, the MetaPandasDataSet \
+            column_map_expectation decorator relies on the DataSet expectation decorator, but will pass through the \
+            signature from the implementing method.
 
-            2. Handle the "include_config" boolean parameter, which allows a caller to retrieve the generated configuration \
-            immediately after running the expectation.
-            
-            3. Handle the "catch_exceptions" parameter, which allows a caller to catch any exception and report an aggregate\
-            trace, useful for validation.
-
-            4. Handle the "output_format" parameter, and pass it down to the implementing method if its signature expects it.\
-            By handing down the output_format, methods implementing expectations can optionally provide additional output\
-            formats specific to the use cases that they handle.
+            @expectation intercepts and takes action based on the following parameters:
+                * include_config (boolean or None) : \
+                    If True, then include the generated expectation config as part of the result object. \
+                    For more detail, see :ref:`include_config`.
+                * catch_exceptions (boolean or None) : \
+                    If True, then catch exceptions and include them as part of the result object. \
+                    For more detail, see :ref:`catch_exceptions`.
+                * output_format (str or None) : \
+                    Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                    For more detail, see :ref:`output_format <output_format>`.
+                * meta (dict or None): \
+                    A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                    For more detail, see :ref:`meta`.
         """
         def outer_wrapper(func):
             @wraps(func)
