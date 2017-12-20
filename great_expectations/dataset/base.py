@@ -1351,28 +1351,43 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         mostly=None,
         output_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
-        """Expect column entries to be a number between a minimum value and a maximum value.
+        """Expect column entries to be between a minimum value and a maximum value (inclusive).
         
         Args:
             column (str): \
                 The column name.
-            min_value (int or None): The minimum value for a column entry.
-            max_value (int or None): The maximum value for a column entry.
-            parse_strings_as_datetimes (boolean or None) : If True, parse min_value, max_values, and all non-null column values to datetimes before making comparisons.
-        
-        Keyword Args:
-            mostly=None: Return "success": True if the percentage of values between min_value and max_value is greater than or equal to mostly (a float between 0 and 1).
-        
-        Returns:
-            ::
+            min_value (comparable type or None): The minimum value for a column entry.
+            max_value (comparable type or None): The maximum value for a column entry.
 
-                {
-                    "success": (bool) True if the column passed the expectation,
-                    "exceptions_list": (list) the values that did not pass the expectation
-                }
-        
-        See Also:
-            expect_column_value_lengths_to_be_between
+        Keyword Args:
+            allow_cross_type_comparisons (boolean or None) : If True, allow comparisons between types (e.g. integer and\
+            string). Otherwise, attempting such comparisons will raise an exception.
+            parse_strings_as_datetimes (boolean or None) : If True, parse min_value, max_value, and all non-null column\
+            values to datetimes before making comparisons.
+
+            mostly (None or a float between 0 and 1): \
+                Return `"success": True` if the percentage of exceptions less than or equal to `mostly`. \
+                For more detail, see :ref:`mostly`.
+
+        Other Parameters:
+            output_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`output_format <output_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
+
+        Returns:
+            A JSON-serializable expectation result object.
+
+            Exact fields vary depending on the values passed to :ref:`output_format <output_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
 
         """
         raise NotImplementedError
