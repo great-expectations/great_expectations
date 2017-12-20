@@ -1712,7 +1712,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         mostly=None,
         output_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
-        """Expect the column entries to be strings that match a list of regular expressions.
+        """Expect the column entries to be strings that match either any of or all of a list of regular expressions.
         
         expect_column_values_to_match_regex_list is a :func:`column_map_expectation <great_expectations.dataset.base.DataSet.column_map_expectation>`.
 
