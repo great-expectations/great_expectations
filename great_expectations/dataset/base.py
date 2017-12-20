@@ -156,10 +156,53 @@ class DataSet(object):
 
     @classmethod
     def column_map_expectation(cls, func):
+        """Constructs an expectation using column-map semantics.
+
+        The column_map_expectation decorator handles boilerplate issues surrounding the common pattern of evaluating
+        truthiness of some condition on a per-row basis.
+
+        Args:
+            func (function): \
+                The function implementing a row-wise expectation. The function should take a column of data and \
+                return an equally-long column of boolean values corresponding to whether the truthiness of the \
+                underlying expectation.
+
+        Notes:
+            column_map_expectation intercepts and takes action based on the following parameters:
+                * mostly (float) : a parameter between zero and one indicating the proportion of rows that must \
+                match the expectation for the overall success to be True (defaults to one)
+
+            column_map_expectation *excludes null values* from being passed to the function
+
+            Depending on the `output_format` selected, column_map_expectation can additional data to a return object, \
+            including `element_count`, `nonnull_values`, `nonnull_count`, `success_count`, `exception_list`, and \
+            `exception_index_list`. See :func:`_format_column_map_output <great_expectations.dataset.base.DataSet._format_column_map_output>`
+
+        See also:
+            :func:`expect_column_values_to_be_unique <great_expectations.dataset.base.DataSet.expect_column_values_to_be_unique>` \
+            for an example of a column_map_expectation
+        """
         raise NotImplementedError
 
     @classmethod
     def column_aggregate_expectation(cls, func):
+        """Constructs an expectation using column-aggregate semantics.
+
+        The column_aggregate_expectation decorator handles boilerplate issues surrounding the common pattern of \
+        evaluating truthiness of some condition on an aggregated-column basis.
+
+        Args:
+            func (function): \
+                The function implementing an expectation using an aggregate property of a column. \
+                The function should take a column of data and return the aggregate value it computes.
+
+        Notes:
+            column_aggregate_expectation *excludes null values* from being passed to the function
+
+        See also:
+            :func:`expect_column_mean_to_be_between <great_expectations.dataset.base.DataSet.expect_column_mean_to_be_between>` \
+            for an example of a column_aggregate_expectation
+        """
         raise NotImplementedError
 
     def initialize_expectations(self, config=None, name=None):
