@@ -1454,7 +1454,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         mostly=None,
         output_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
-        """Expect column values to be decreasing. (Only works for numeric data.)
+        """Expect column values to be decreasing.
         
         By default, this expectation only works for numeric or datetime data.
         When `parse_strings_as_datetimes=True`, it can also parse strings to datetimes.
