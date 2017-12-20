@@ -876,9 +876,10 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
     def expect_table_row_count_to_be_between(self, min_value=0, max_value=None,
                                              output_format=None, include_config=False, catch_exceptions=None, meta=None):
-        """Expect the number of rows to be between two values.
+        """Expect the number of rows to be between two values (inclusive).
 
-        expect_table_row_count_to_be_between is a :func:`expectation <great_expectations.dataset.base.DataSet.expectation>`, not a `column_map_` or `column_aggregate_expectation`.
+        expect_table_row_count_to_be_between is a :func:`expectation <great_expectations.dataset.base.DataSet.expectation>`, \
+        not a `column_map_expectation` or `column_aggregate_expectation`.
 
         Args:
             column (str): \
