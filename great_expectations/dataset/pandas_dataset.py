@@ -785,27 +785,6 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
     @DocInherit
     @MetaPandasDataSet.column_aggregate_expectation
-    def expect_column_most_common_value_to_be(self, column, value, ties_okay=None,
-                                              output_format=None, include_config=False, catch_exceptions=None, meta=None):
-
-        mode_list = list(column.mode().values)
-
-        if ties_okay:
-            success = value in mode_list
-        else:
-            if len(mode_list) > 1:
-                success = False
-            else:
-                success = value == mode_list[0]
-
-        return {
-            "success" : success,
-            "true_value": mode_list,
-            "summary_obj": {},
-        }
-
-    @DocInherit
-    @MetaPandasDataSet.column_aggregate_expectation
     def expect_column_most_common_value_to_be_in_set(self, column, value_set, ties_okay=None,
                                                      output_format=None, include_config=False, catch_exceptions=None, meta=None):
 

@@ -1148,46 +1148,6 @@ class TestPandasDataset(unittest.TestCase):
             out = D.expect_column_values_to_be_decreasing(**t['in'])
             self.assertEqual(out, t['out'])
 
-
-    def test_expect_column_most_common_value_to_be(self):
-
-        D = ge.dataset.PandasDataSet({
-            'x' : [1,1,2,2,3,None, None, None, None, None],
-            'y' : ['hello', 'jello', 'mello', 'hello', 'jello', 'mello', 'hello', 'jello', 'mello', 'jello'],
-            'z' : [1,2,2,3,3,3,4,4,4,4],
-        })
-        D.set_default_expectation_argument("output_format", "COMPLETE")
-
-        T = [
-                {
-                    'in':{"column":"x","value":1},
-                    'out':{"success":False, "true_value":[1,2]},
-                },{
-                    'in':{"column":"x", "value":1, "ties_okay":True},
-                    'out':{"success":True, "true_value":[1,2]},
-                },{
-                    'in':{"column":"x","value":3},
-                    'out':{"success":False, "true_value":[1,2]},
-                },{
-                    'in':{"column":"x","value":3, "ties_okay":True},
-                    'out':{"success":False, "true_value":[1,2]},
-                },{
-                    'in':{"column":"y","value":"jello"},
-                    'out':{'success':True, "true_value":["jello"]},
-                },{
-                    'in':{"column":"y","value":"hello"},
-                    'out':{'success':False, "true_value":["jello"]},
-                },{
-                    'in':{"column":"z","value":4},
-                    'out':{'success':True, "true_value":[4]},
-                }
-        ]
-
-        for t in T:
-            out = D.expect_column_most_common_value_to_be(**t['in'])
-            self.assertEqual(out, t['out'])
-
-
     def test_expect_column_most_common_value_to_be_in_set(self):
 
         D = ge.dataset.PandasDataSet({
