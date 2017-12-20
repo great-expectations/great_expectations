@@ -169,8 +169,9 @@ class DataSet(object):
 
         Notes:
             column_map_expectation intercepts and takes action based on the following parameters:
-                * mostly (float) : a parameter between zero and one indicating the proportion of rows that must \
-                match the expectation for the overall success to be True (defaults to one)
+                mostly (None or a float between 0 and 1): \
+                    Return `"success": True` if the percentage of exceptions less than or equal to `mostly`. \
+                    For more detail, see :ref:`mostly`.
 
             column_map_expectation *excludes null values* from being passed to the function
 
