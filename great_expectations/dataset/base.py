@@ -789,10 +789,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
     def expect_column_to_exist(self,
             column,
-            output_format=None,
-            include_config=False,
-            catch_exceptions=None,
-            meta=None
+            output_format=None, include_config=False, catch_exceptions=None, meta=None
         ):
         """Expect the specified column to exist.
 
@@ -826,8 +823,11 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         raise NotImplementedError
 
-    def expect_table_row_count_to_be_between(self, min_value=0, max_value=None,
-                                             output_format=None, include_config=False, catch_exceptions=None, meta=None):
+    def expect_table_row_count_to_be_between(self,
+        min_value=0,
+        max_value=None,
+        output_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
         """Expect the number of rows to be between two values.
 
         expect_table_row_count_to_be_between is a :func:`expectation <great_expectations.dataset.base.DataSet.expectation>`, not a `column_map_` or `column_aggregate_expectation`.
@@ -872,11 +872,17 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         """
         raise NotImplementedError
 
-    def expect_table_row_count_to_equal(self, value=None,
-                                        output_format=None, include_config=False, catch_exceptions=None, meta=None):
+    def expect_table_row_count_to_equal(self,
+        value,
+        output_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
         """Expect the number of rows to equal a value.
 
         expect_table_row_count_to_equal is a basic :func:`expectation <great_expectations.dataset.base.DataSet.expectation>`, not a `column_map_` or `column_aggregate_expectation`.
+
+        Args:
+            value (int): \
+                The expected number of rows.
 
         Other Parameters:
             output_format (string or None): \
@@ -1295,31 +1301,54 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
     def expect_column_values_to_be_between(self,
         column,
-        min_value=None, max_value=None,
-        parse_strings_as_datetimes=None,
+        min_value=None,
+        max_value=None,
         allow_cross_type_comparisons=None,
+        parse_strings_as_datetimes=None,
         mostly=None,
         output_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
-        """Expect column entries to be a number between a minimum value and a maximum value.
+        """Expect column values to be between a minimum and maximum.
+
+        expect_column_values_to_be_between is a :func:`column_map_expectation <great_expectations.dataset.base.DataSet.column_map_expectation>`.
         
         Args:
             column (str): \
                 The column name.
-            min_value (int or None): The minimum value for a column entry.
-            max_value (int or None): The maximum value for a column entry.
-            parse_strings_as_datetimes (boolean or None) : If True, parse min_value, max_values, and all non-null column values to datetimes before making comparisons.
         
         Keyword Args:
+            min_value (int or None): \
+                The minimum value for a column entry.
+            max_value (int or None): \
+                The maximum value for a column entry.
+            parse_strings_as_datetimes (boolean or None): \
+                If True, parse min_value, max_values, and all non-null column values to datetimes before making comparisons.
             mostly=None: Return "success": True if the percentage of values between min_value and max_value is greater than or equal to mostly (a float between 0 and 1).
         
-        Returns:
-            ::
+        Other Parameters:
+            output_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`output_format <output_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
 
-                {
-                    "success": (bool) True if the column passed the expectation,
-                    "exceptions_list": (list) the values that did not pass the expectation
-                }
+        Returns:
+            A JSON-serializable expectation result object.
+
+            Exact fields vary depending on the values passed to :ref:`output_format <output_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+        Notes:
+            * min_value and max_value are both inclusive.
+            * If min_value is None, then max_value is treated as an upper bound, and the number of acceptable rows has no minimum.
+            * If max_value is None, then min_value is treated as a lower bound, and the number of acceptable rows has no maximum.
         
         See Also:
             expect_column_value_lengths_to_be_between
@@ -1867,200 +1896,576 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
     ##### Aggregate functions #####
 
-    def expect_column_mean_to_be_between(self, column, min_value=None, max_value=None,
-                                         output_format=None, include_config=False, catch_exceptions=None, meta=None):
+    def expect_column_mean_to_be_between(self,
+        column,
+        min_value=None,
+        max_value=None,
+        output_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
         """Expect the column mean to be between a minimum value and a maximum value.
         
-        Args:
-            column (str): The column name.
-            min_value (int or None): The minimum value for the column mean.
-            max_value (int or None): The maximum value for the column mean.
+        expect_column_mean_to_be_between is a :func:`column_aggregate_expectation <great_expectations.dataset.base.DataSet.column_aggregate_expectation>`.
         
+        Args:
+            column (str): \
+                The column name.
+        
+        Keyword Args:
+            min_value (int or None): \
+                The minimum value for a column entry.
+            max_value (int or None): \
+                The maximum value for a column entry.
+        
+        Other Parameters:
+            output_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`output_format <output_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
+
         Returns:
+            A JSON-serializable expectation result object.
+
+            Exact fields vary depending on the values passed to :ref:`output_format <output_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+        Notes:
+            These fields in the result object are customized for this expectation:
             ::
 
                 {
-                    "success": (bool) True if the column passed the expectation,
-                    "true_mean": (float) the column mean
+                    "true_value": (float) The true mean for the column
                 }
+
+            * min_value and max_value are both inclusive.
+            * If min_value is None, then max_value is treated as an upper bound.
+            * If max_value is None, then min_value is treated as a lower bound.
+
+        See Also:
+            expect_column_median_to_be_between
+            expect_column_stdev_to_be_between
         """
         raise NotImplementedError
 
-    def expect_column_median_to_be_between(self, column, min_value=None, max_value=None,
-                                           output_format=None, include_config=False, catch_exceptions=None, meta=None):
+    def expect_column_median_to_be_between(self,
+        column,
+        min_value=None,
+        max_value=None,
+        output_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
         """Expect the column median to be between a minimum value and a maximum value.
         
-        Args:
-            column (str): The column name.
-            min_value (int or None): The minimum value for the column median.
-            max_value (int or None): The maximum value for the column median.
+        expect_column_median_to_be_between is a :func:`column_aggregate_expectation <great_expectations.dataset.base.DataSet.column_aggregate_expectation>`.
         
+        Args:
+            column (str): \
+                The column name.
+        
+        Keyword Args:
+            min_value (int or None): \
+                The minimum value for the column median.
+            max_value (int or None): \
+                The maximum value for the column median.
+
+        Other Parameters:
+            output_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`output_format <output_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
+
         Returns:
+            A JSON-serializable expectation result object.
+
+            Exact fields vary depending on the values passed to :ref:`output_format <output_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+        Notes:
+            These fields in the result object are customized for this expectation:
             ::
 
                 {
-                    "success": (bool) True if the column passed the expectation,
-                    "true_median": (float) the column median
+                    "true_value": (float) The true median for the column
                 }
+
+            * min_value and max_value are both inclusive.
+            * If min_value is None, then max_value is treated as an upper bound
+            * If max_value is None, then min_value is treated as a lower bound
+
+        See Also:
+            expect_column_mean_to_be_between
+            expect_column_stdev_to_be_between
+
         """
         raise NotImplementedError
 
-    def expect_column_stdev_to_be_between(self, column, min_value=None, max_value=None,
-                                          output_format=None, include_config=False, catch_exceptions=None, meta=None):
+    def expect_column_stdev_to_be_between(self,
+        column,
+        min_value=None,
+        max_value=None,
+        output_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
         """Expect the column standard deviation to be between a minimum value and a maximum value.
         
+        expect_column_stdev_to_be_between is a :func:`column_aggregate_expectation <great_expectations.dataset.base.DataSet.column_aggregate_expectation>`.
+        
         Args:
-            column (str): The column name.
-            min_value (int or None): The minimum value for the column standard deviation.
-            max_value (int or None): The maximum value for the column standard deviation.
+            column (str): \
+                The column name.
+        
+        Keyword Args:
+            min_value (int or None): \
+                The minimum value for the column standard deviation.
+            max_value (int or None): \
+                The maximum value for the column standard deviation.
+
+        Other Parameters:
+            output_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`output_format <output_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
 
         Returns:
+            A JSON-serializable expectation result object.
+
+            Exact fields vary depending on the values passed to :ref:`output_format <output_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+        Notes:
+            These fields in the result object are customized for this expectation:
             ::
 
                 {
-                    "success": (bool) True if the column passed the expectation,
-                    "true_stdev": (float) the true standard deviation
+                    "true_value": (float) The true stdev for the column
                 }
+
+            * min_value and max_value are both inclusive.
+            * If min_value is None, then max_value is treated as an upper bound
+            * If max_value is None, then min_value is treated as a lower bound
+
+        See Also:
+            expect_column_mean_to_be_between
+            expect_column_median_to_be_between
         """
         raise NotImplementedError
 
-    def expect_column_unique_value_count_to_be_between(self, column, min_value=None, max_value=None,
-                                                       output_format=None, include_config=False, catch_exceptions=None, meta=None):
+    def expect_column_unique_value_count_to_be_between(self,
+        column,
+        min_value=None,
+        max_value=None,
+        output_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
         """Expect the number of unique values to be between a minimum value and a maximum value.
 
+        expect_column_unique_value_count_to_be_between is a :func:`column_aggregate_expectation <great_expectations.dataset.base.DataSet.column_aggregate_expectation>`.
+        
         Args:
-            column (str): The column name.
-            min_value (int or None): The minimum number of unique values. If None, then there is no minimium expected value.
-            max_value (int or None): The maximum number of unique values. If None, then there is no maximum expected value.
+            column (str): \
+                The column name.
+        
+        Keyword Args:
+            min_value (int or None): \
+                The minimum number of unique values allowed.
+            max_value (int or None): \
+                The maximum number of unique values allowed.
+
+        Other Parameters:
+            output_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`output_format <output_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
 
         Returns:
+            A JSON-serializable expectation result object.
+
+            Exact fields vary depending on the values passed to :ref:`output_format <output_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+        Notes:
+            These fields in the result object are customized for this expectation:
             ::
 
                 {
-                    "success": (bool) True if the column passed the expectation,
-                    "true_value": (float) the column mean
+                    "true_value": (float) The number of unique values in the column
                 }
+
+            * min_value and max_value are both inclusive.
+            * If min_value is None, then max_value is treated as an upper bound
+            * If max_value is None, then min_value is treated as a lower bound
+
+        See Also:
+            expect_column_proportion_of_unique_values_to_be_between
         """
         raise NotImplementedError
 
-    def expect_column_proportion_of_unique_values_to_be_between(self, column, min_value=0, max_value=1,
-                                                                output_format=None, include_config=False, catch_exceptions=None, meta=None):
+    def expect_column_proportion_of_unique_values_to_be_between(self,
+        column,
+        min_value=0,
+        max_value=1,
+        output_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
         """Expect the proportion of unique values to be between a minimum value and a maximum value.
+
+        For example, in a column containing [1, 2, 2, 3, 3, 3, 4, 4, 4, 4], there are 4 unique values for a proportion of 0.4.
 
         Args:
             column (str): The column name.
             min_value (float or None): The minimum proportion of unique values. (Proportions are on the range 0 to 1)
             max_value (float or None): The maximum proportion of unique values. (Proportions are on the range 0 to 1)
 
-        Returns:
-            ::
-
-                {
-                    "success": (bool) True if the column passed the expectation,
-                    "true_value": (float) the proportion of unique values
-                }
-        """
-        raise NotImplementedError
-
-    def expect_column_most_common_value_to_be(self, column, value, ties_okay=None,
-                                              output_format=None, include_config=False, catch_exceptions=None, meta=None):
-        """Expect the most common value to be equal to `value`
-
+        expect_column_unique_value_count_to_be_between is a :func:`column_aggregate_expectation <great_expectations.dataset.base.DataSet.column_aggregate_expectation>`.
+        
         Args:
-            column (str): The column name.
-            value  (any): The value
-            ties_okay (boolean or None): If True, then the expectation will succeed if other values are as common (but not more common) than the selected value
+            column (str): \
+                The column name.
+        
+        Keyword Args:
+            min_value (int or None): \
+                The minimum number of unique values allowed.
+            max_value (int or None): \
+                The maximum number of unique values allowed.
 
-        Returns: 
-            A result object containing...
+        Other Parameters:
+            output_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`output_format <output_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
+
+        Returns:
+            A JSON-serializable expectation result object.
+
+            Exact fields vary depending on the values passed to :ref:`output_format <output_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+        Notes:
+            These fields in the result object are customized for this expectation:
             ::
 
                 {
-                    "success": (bool) True if the column passed the expectation,
-                    "true_value": (float) the proportion of unique values,
-                    "summary_obj": {}
+                    "true_value": (float) The number of unique values in the column
                 }
+
+            * min_value and max_value are both inclusive.
+            * If min_value is None, then max_value is treated as an upper bound
+            * If max_value is None, then min_value is treated as a lower bound
+
+        See Also:
+            expect_column_unique_value_count_to_be_between
         """
         raise NotImplementedError
 
-    def expect_column_most_common_value_to_be_in_set(self, column, value_set, ties_okay=None,
-                                                     output_format=None, include_config=False, catch_exceptions=None, meta=None):
+    def expect_column_most_common_value_to_be(self,
+        column,
+        value,
+        ties_okay=None,
+        output_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
+        """Expect the most common value to be `value`
+
+        expect_column_most_common_value_to_be is a :func:`column_aggregate_expectation <great_expectations.dataset.base.DataSet.column_aggregate_expectation>`.
+        
+        Args:
+            column (str): \
+                The column name
+            value: \
+                The value to match
+        
+        Keyword Args:
+            ties_okay (boolean or None): \
+                If True, then the expectation will still succeed if other values are as common (but not more common) than the selected value
+
+        Other Parameters:
+            output_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`output_format <output_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
+
+        Returns:
+            A JSON-serializable expectation result object.
+
+            Exact fields vary depending on the values passed to :ref:`output_format <output_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+        Notes:
+            These fields in the result object are customized for this expectation:
+            ::
+
+                {
+                    "true_value": The most common value in the column
+                    "summary_obj": {
+                        "true_value_list" : (list) A list of equally common values in the column
+                    }
+                }
+
+            `summary_obj.true_value_list` contains a list of the most common values.
+            Often, this will just be a single element. But if there's a tie for most common among multiple values,
+            `summary_obj.true_value_list` will contain a single copy of each most common value.
+
+            Since, `true_value` can only contain a single value, dealing with ties is a bit involved.
+
+            * If `summary_obj.value_list` contains multiple elements, and `ties_okay=False`, then `true_value = None`.
+
+            * If `summary_obj.value_list` contains multiple elements, and `ties_okay=True` and `success=True`, then `true_value = value`.
+
+            * If `summary_obj.value_list` contains multiple elements, and `ties_okay=True` and `success=False`, then \
+                `true_value` will contain an element from `summary_obj.value_list`, with no guarantees about which element will be chosen.
+
+        See Also:
+            expect_column_most_common_value_to_be_in_set
+
+        """
+        raise NotImplementedError
+
+    def expect_column_most_common_value_to_be_in_set(self,
+        column,
+        value_set,
+        ties_okay=None,
+        output_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
         """Expect the most common value to be within the designated value set
 
-        :param str column: The column name.
-        :param list value_set: The list of designated values
-        :param ties_okay: If True, then the expectation will succeed if other values are as common (but not more common) than the selected value
-        :type ties_okay: boolean or None
+        expect_column_most_common_value_to_be_in_set is a :func:`column_aggregate_expectation <great_expectations.dataset.base.DataSet.column_aggregate_expectation>`.
+        
+        Args:
+            column (str): \
+                The column name
+            value_set (set-like): \
+                A list of potential values to match
+        
+        Keyword Args:
+            ties_okay (boolean or None): \
+                If True, then the expectation will still succeed if values outside the designated set are as common (but not more common) than designated values
 
-        :returns: 
+        Other Parameters:
+            output_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`output_format <output_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
+
+        Returns:
+            A JSON-serializable expectation result object.
+
+            Exact fields vary depending on the values passed to :ref:`output_format <output_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+        Notes:
+            These fields in the result object are customized for this expectation:
             ::
 
                 {
-                    "success": (bool) True if the column passed the expectation True,
-                    "true_value": (float) the proportion of unique values,
-                    "summary_obj": {}
+                    "true_value": (list) The most common values in the column
                 }
+
+            `true_value` contains a list of the most common values.
+            Often, this will just be a single element. But if there's a tie for most common among multiple values,
+            `true_value` will contain a single copy of each most common value.
+
         """
         raise NotImplementedError
 
 
     ### Distributional expectations
-    def expect_column_chisquare_test_p_value_to_be_greater_than(self, column, partition_object=None, p=0.05, tail_weight_holdout=0,
-                                                                output_format=None, include_config=False, catch_exceptions=None, meta=None):
-        """
-        Expect the values in this column to match the distribution of the specified categorical values and their expected weights. \
-        The expected distribution is calculated by scaling the weights according to the size of values in the test data.
+    def expect_column_chisquare_test_p_value_to_be_greater_than(self,
+        column,
+        partition_object=None,
+        p=0.05,
+        tail_weight_holdout=0,
+        output_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
+        """Expect the values in this column to match the specified categorical partition. \
+
+        This expectation compares categorical distributions using a Chi-squared test. \
+        It returns `success=True` if values in the column closely match the distribution of the specified partition.
+        
+        expect_column_chisquare_test_p_value_to_be_greater_than is a :func:`column_aggregate_expectation <great_expectations.dataset.base.DataSet.column_aggregate_expectation>`.
 
         Args:
-            column (str): The column name
-            partition_object (dict): A dictionary containing partition (categorical values) and associated weights.
-            p (float) = 0.05: The p-value threshold for the Chi-Squared test.\
-                For values below the specified threshold the expectation will return false, rejecting the null hypothesis that the distributions are the same.
-            tail_weight_holdout: the amount of weight to split uniformly and add to the tails of the histogram (the area between -Infinity and the data's min value and between the data's max value and Infinity)
+            column (str): \
+                The column name.
+            partition_object (dict): \
+                The expected partition object.
+
+        Keyword Args:
+            p (float): \
+                The p-value threshold for the Chi-Squared test.\
+                For values below the specified threshold the expectation will return false,\
+                rejecting the null hypothesis that the distributions are the same.
+            tail_weight_holdout (float): \
+                the amount of weight to split uniformly and add to the tails of the histogram\
+                (the area between -Infinity and the data's min value and between the data's max value and Infinity)
+                
+        Other Parameters:
+            output_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`output_format <output_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
 
         Returns:
+            A JSON-serializable expectation result object.
+
+            Exact fields vary depending on the values passed to :ref:`output_format <output_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+        Notes:
+            These fields in the result object are customized for this expectation:
             ::
 
             {
-                "success": (Boolean) True if the column passed the expectation
-                "true_value": (float) The true KL divergence (relative entropy)
+                "true_value": (float) The true p-value of the KS test
                 "summary_obj": {
-                    "observed_partition": The partition observed in the data
-                    "expected_partition": The partition against which the data were compared, after applying specified holdouts.
+                    "observed_partition" (dict):
+                        The partition observed on the data, using the provided
+                        bins but also expanding from min(column) to max(column)
+                    "expected_partition" (dict):
+                        The partition expected from the data. For KS test,
+                        this will always be the partition_object parameter
                 }            
             }
+
         """
         raise NotImplementedError
 
-    def expect_column_bootstrapped_ks_test_p_value_to_be_greater_than(self, column, partition_object=None, p=0.05, bootstrap_samples=None, bootstrap_sample_size=None,
-                                                                      output_format=None, include_config=False, catch_exceptions=None, meta=None):
-        """Expect the values in this column to match the distribution implied by the specified partition. \
-        The expected CDF is constructed as a linear interpolation between the bins, using the provided weights.
+    def expect_column_bootstrapped_ks_test_p_value_to_be_greater_than(self,
+        column,
+        partition_object=None,
+        p=0.05,
+        bootstrap_samples=None,
+        bootstrap_sample_size=None,
+        output_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
+        """Compare column values to a partition using a Kolmogorov-Smirnov test, and expect the p-value to be greater than a threshold value, usually  p=0.05.
+
+        This expectation compares continuous distributions using bootstrapped samples. It returns `success=True` if values in the column match the distribution of the specified partition.
+        
+        expect_column_bootstrapped_ks_test_p_value_to_be_greater_than is a :func:`column_aggregate_expectation <great_expectations.dataset.base.DataSet.column_aggregate_expectation>`.
 
         Args:
-            column: The column name to test
-            partition_object: The expected partition object.
-            p: The p-value threshold for the Kolmogorov-Smirnov test.\
+            column (str): \
+                The column name.
+            partition_object (dict): \
+                The expected partition object.
+
+        Keyword Args:
+            p (float): \
+                The p-value threshold for the Kolmogorov-Smirnov test.
                 For values below the specified threshold the expectation will return false, rejecting the null hypothesis that the distributions are the same.
-            bootstrap_samples: The number of times to bootstrap. If None, defaults to 1000.
-            bootstrap_sample_size: The number of samples per bootstrap. If None, defaults to 2 * len(partition_object['weights'])\
+                Defaults to 0.05
+            bootstrap_samples (int): \
+                The number of times to bootstrap. If None, defaults to 1000.
+            bootstrap_sample_size (int): \
+                The number of samples per bootstrap. If None, defaults to 2 * len(partition_object['weights'])
                 A larger sample will increase the specificity of the test.
 
-        Return:
+        Other Parameters:
+            output_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`output_format <output_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
+
+        Returns:
+            A JSON-serializable expectation result object.
+
+            Exact fields vary depending on the values passed to :ref:`output_format <output_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+        Notes:
+            These fields in the result object are customized for this expectation:
             ::
 
-            {
-                "success": (Boolean) True if the column passed the expectation
-                "true_value": (float) The true p-value of the KS test
-                "summary_obj": {
-                    "bootstrap_samples": The number of bootstrap samples used
-                    "bootstrap_sample_size": The number of samples taken from the column in each bootstrap sample
-                    "observed_cdf": The cumulative density function observed in the data, a dict containing 'x' values and cdf_values (suitable for plotting)
-                    "expected_cdf": The cumulative density function expected based on the partition object, a dict containing 'x' values and cdf_values (suitable for plotting)
-                    "observed_partition": The partition observed on the data, using the provided bins but also expanding from min(column) to max(column)
-                    "expected_partition": The partition expected from the data. For KS test, this will always be the partition_object parameter
-                }            
-            }
+                {
+                    "true_value": (float) The true p-value of the KS test
+                    "summary_obj": {
+                        "bootstrap_samples": The number of bootstrap samples used
+                        "bootstrap_sample_size": The number of samples taken from
+                            the column in each bootstrap samples
+                        "observed_cdf": The cumulative density function observed
+                            in the data, a dict containing 'x' values and cdf_values
+                            (suitable for plotting)
+                        "expected_cdf" (dict):
+                            The cumulative density function expected based on the
+                            partition object, a dict containing 'x' values and
+                            cdf_values (suitable for plotting)
+                        "observed_partition" (dict):
+                            The partition observed on the data, using the provided
+                            bins but also expanding from min(column) to max(column)
+                        "expected_partition" (dict):
+                            The partition expected from the data. For KS test,
+                            this will always be the partition_object parameter
+                    }            
+                }
+
+            The expected CDF is constructed as a linear interpolation between the bins, using the provided weights.
+
         """
         raise NotImplementedError
 
