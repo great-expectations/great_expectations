@@ -12,7 +12,7 @@ Introduction
 What is Great Expectations?
 --------------------------------------------------------------------------------
 
-Great Expectations is a python framework for bringing data pipelines and products under test.
+Great Expectations is a framework for bringing data pipelines and products under test.
 
 Software developers have long known that automated testing is essential for managing complex codebases. Great Expectations brings the same discipline, confidence, and acceleration to data science and engineering teams.
 
@@ -48,7 +48,7 @@ You can also clone the repository, which includes examples of using great_expect
     $ git clone https://github.com/great-expectations/great_expectations.git
     $ pip install great_expectations/
 
-Since Great Expectation is under active development, the `develop` branch is often a few days ahead of the latest production release. If you want to work from the latest commit on `develop`, we recommend you install by branch name or hash.
+Since Great Expectation is under active development, the `develop` branch is often a ahead of the latest production release. If you want to work from the latest commit on `develop`, we recommend you install by branch name or hash.
 
 branch-name:
 
