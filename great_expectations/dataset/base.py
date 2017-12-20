@@ -1936,19 +1936,26 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
     def expect_column_mean_to_be_between(self, column, min_value=None, max_value=None,
                                          output_format=None, include_config=False, catch_exceptions=None, meta=None):
-        """Expect the column mean to be between a minimum value and a maximum value.
+        """Expect the column mean to be between a minimum value and a maximum value (inclusive).
         
         Args:
-            column (str): The column name.
-            min_value (int or None): The minimum value for the column mean.
-            max_value (int or None): The maximum value for the column mean.
+            column (str): \
+                The column name.
+            min_value (float or None): The minimum value for the column mean.
+            max_value (float or None): The maximum value for the column mean.
         
         Returns:
+            A JSON-serializable expectation result object.
+
+            Exact fields vary depending on the values passed to :ref:`output_format <output_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+        Notes:
+            These fields in the result object are customized for this expectation:
             ::
 
                 {
-                    "success": (bool) True if the column passed the expectation,
-                    "true_mean": (float) the column mean
+                  "true_value": (float) The true column mean
                 }
         """
         raise NotImplementedError
