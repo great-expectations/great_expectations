@@ -717,6 +717,9 @@ class TestPandasDataset(unittest.TestCase):
         with self.assertRaises(TypeError):
             D.expect_column_value_lengths_to_be_between(**{'column':'s4', 'min_value':None, 'max_value':10})
 
+        with self.assertRaises(ValueError):
+            D.expect_column_value_lengths_to_be_between("s4", min_value=None, max_value=None)
+
 
     def test_expect_column_values_to_match_regex(self):
         """
@@ -1054,8 +1057,8 @@ class TestPandasDataset(unittest.TestCase):
         with self.assertRaises(TypeError):
             typedf.expect_column_mean_to_be_between(T[0]['in'])
 
-        # with self.assertRaises(ValueError):
-            # typedf.expect_column_mean_to_be_between("s")
+        with self.assertRaises(ValueError):
+            typedf.expect_column_mean_to_be_between("s")
 
 
 
