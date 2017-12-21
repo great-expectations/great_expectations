@@ -29,6 +29,15 @@
     },
     "out":{"success":false, "true_value":4}
   },{
+    "in":{
+      "min_value": null,
+      "max_value": 10
+    },
+    "out":{
+      "success": true,
+      "true_value": 4
+    }
+  },{
     "notes": "Test error handling for non-int min_value",
     "in":{
       "min_value": "quack",
