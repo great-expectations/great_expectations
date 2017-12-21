@@ -2331,11 +2331,9 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         Args:
             column (str): \
                 The column name
-        
-        Keyword Args:
-            min_value (int or None): \
+            min_value (comparable type or None): \
                 The minimum number of unique values allowed.
-            max_value (int or None): \
+            max_value (comparable type or None): \
                 The maximum number of unique values allowed.
 
         Other Parameters:
@@ -2389,12 +2387,12 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         Args:
             column (str): \
                 The column name
+            min_value (comparable type or None): \
+                The minimum number of unique values allowed.
+            max_value (comparable type or None): \
+                The maximum number of unique values allowed.
         
         Keyword Args:
-            min_value (int or None): \
-                The minimum number of unique values allowed.
-            max_value (int or None): \
-                The maximum number of unique values allowed.
             parse_strings_as_datetimes (Boolean or None): \
                 If True, parse min_value, max_values, and all non-null column values to datetimes before making comparisons.
             output_strftime_format (str or None): \
@@ -2451,12 +2449,12 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         Args:
             column (str): \
                 The column name
+            min_value (comparable type or None): \
+                The minimum number of unique values allowed.
+            max_value (comparable type or None): \
+                The maximum number of unique values allowed.
         
         Keyword Args:
-            min_value (int or None): \
-                The minimum number of unique values allowed.
-            max_value (int or None): \
-                The maximum number of unique values allowed.
             parse_strings_as_datetimes (Boolean or None): \
                 If True, parse min_value, max_values, and all non-null column values to datetimes before making comparisons.
             output_strftime_format (str or None): \
