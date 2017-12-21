@@ -2013,8 +2013,6 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         Args:
             column (str): \
                 The column name.
-
-        Keyword Args:
             min_value (int or None): \
                 The minimum value for the column median.
             max_value (int or None): \
