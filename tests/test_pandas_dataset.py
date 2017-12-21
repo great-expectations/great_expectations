@@ -1240,6 +1240,69 @@ class TestPandasDataset(unittest.TestCase):
             self.assertEqual(out, t['out'])
 
 
+    def test_expect_column_sum_to_be_between(self):
+        with open("./tests/test_sets/expect_column_sum_to_be_between_test_set.json") as f:
+            J = json.load(f)
+            D = ge.dataset.PandasDataSet(J["dataset"])
+            D.set_default_expectation_argument("output_format", "COMPLETE")
+            T = J["tests"]
+
+            self.maxDiff = None
+
+        for t in T:
+            print(json.dumps(t))
+            out = D.expect_column_sum_to_be_between(**t['in'])
+            print(out)
+
+            if "out" in t:
+                self.assertEqual(out, t['out'])
+
+            if "error" in t:
+                self.assertEqual(out['raised_exception'], True)
+                self.assertIn(t['error']['traceback_substring'], out['exception_traceback'])
+
+    def test_expect_column_min_to_be_between(self):
+        with open("./tests/test_sets/expect_column_min_to_be_between_test_set.json") as f:
+            J = json.load(f)
+            D = ge.dataset.PandasDataSet(J["dataset"])
+            D.set_default_expectation_argument("output_format", "COMPLETE")
+            T = J["tests"]
+
+            self.maxDiff = None
+
+        for t in T:
+            print(json.dumps(t))
+            out = D.expect_column_min_to_be_between(**t['in'])
+            print(out)
+
+            if "out" in t:
+                self.assertEqual(out, t['out'])
+
+            if "error" in t:
+                self.assertEqual(out['raised_exception'], True)
+                self.assertIn(t['error']['traceback_substring'], out['exception_traceback'])
+
+    def test_expect_column_max_to_be_between(self):
+        with open("./tests/test_sets/expect_column_max_to_be_between_test_set.json") as f:
+            J = json.load(f)
+            D = ge.dataset.PandasDataSet(J["dataset"])
+            D.set_default_expectation_argument("output_format", "COMPLETE")
+            T = J["tests"]
+
+            self.maxDiff = None
+
+        for t in T:
+            print(json.dumps(t))
+            out = D.expect_column_max_to_be_between(**t['in'])
+            print(out)
+
+            if "out" in t:
+                self.assertEqual(out, t['out'])
+
+            if "error" in t:
+                self.assertEqual(out['raised_exception'], True)
+                self.assertIn(t['error']['traceback_substring'], out['exception_traceback'])
+
     def test_expectation_decorator_summary_mode(self):
 
         df = ge.dataset.PandasDataSet({

@@ -2281,6 +2281,184 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         """
         raise NotImplementedError
 
+    def expect_column_sum_to_be_between(self,
+        column,
+        min_value=None,
+        max_value=None,
+        ties_okay=None,
+        output_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
+        """Expect the column to sum to be between an min and max value
+
+        expect_column_sum_to_be_between is a :func:`column_aggregate_expectation <great_expectations.dataset.base.DataSet.column_aggregate_expectation>`.
+        
+        Args:
+            column (str): \
+                The column name
+            min_value (comparable type or None): \
+                The minimum number of unique values allowed.
+            max_value (comparable type or None): \
+                The maximum number of unique values allowed.
+
+        Other Parameters:
+            output_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`output_format <output_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
+
+        Returns:
+            A JSON-serializable expectation result object.
+
+            Exact fields vary depending on the values passed to :ref:`output_format <output_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+        Notes:
+            These fields in the result object are customized for this expectation:
+            ::
+
+                {
+                    "true_value": (list) The actual column sum
+                }
+
+
+            * min_value and max_value are both inclusive.
+            * If min_value is None, then max_value is treated as an upper bound
+            * If max_value is None, then min_value is treated as a lower bound
+
+        """
+        raise NotImplementedError
+
+    def expect_column_min_to_be_between(self,
+        column,
+        min_value=None,
+        max_value=None,
+        parse_strings_as_datetimes=None,
+        output_strftime_format=None,
+        output_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
+        """Expect the column to sum to be between an min and max value
+
+        expect_column_min_to_be_between is a :func:`column_aggregate_expectation <great_expectations.dataset.base.DataSet.column_aggregate_expectation>`.
+        
+        Args:
+            column (str): \
+                The column name
+            min_value (comparable type or None): \
+                The minimum number of unique values allowed.
+            max_value (comparable type or None): \
+                The maximum number of unique values allowed.
+        
+        Keyword Args:
+            parse_strings_as_datetimes (Boolean or None): \
+                If True, parse min_value, max_values, and all non-null column values to datetimes before making comparisons.
+            output_strftime_format (str or None): \
+                A valid strfime format for datetime output. Only used if parse_strings_as_datetimes=True.
+
+        Other Parameters:
+            output_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`output_format <output_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
+
+        Returns:
+            A JSON-serializable expectation result object.
+
+            Exact fields vary depending on the values passed to :ref:`output_format <output_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+        Notes:
+            These fields in the result object are customized for this expectation:
+            ::
+
+                {
+                    "true_value": (list) The actual column min
+                }
+
+
+            * min_value and max_value are both inclusive.
+            * If min_value is None, then max_value is treated as an upper bound
+            * If max_value is None, then min_value is treated as a lower bound
+
+        """
+        raise NotImplementedError
+
+    def expect_column_max_to_be_between(self,
+        column,
+        min_value=None,
+        max_value=None,
+        parse_strings_as_datetimes=None,
+        output_strftime_format=None,
+        output_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
+        """Expect the column max to be between an min and max value
+
+        expect_column_sum_to_be_between is a :func:`column_aggregate_expectation <great_expectations.dataset.base.DataSet.column_aggregate_expectation>`.
+        
+        Args:
+            column (str): \
+                The column name
+            min_value (comparable type or None): \
+                The minimum number of unique values allowed.
+            max_value (comparable type or None): \
+                The maximum number of unique values allowed.
+        
+        Keyword Args:
+            parse_strings_as_datetimes (Boolean or None): \
+                If True, parse min_value, max_values, and all non-null column values to datetimes before making comparisons.
+            output_strftime_format (str or None): \
+                A valid strfime format for datetime output. Only used if parse_strings_as_datetimes=True.
+
+        Other Parameters:
+            output_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`output_format <output_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
+
+        Returns:
+            A JSON-serializable expectation result object.
+
+            Exact fields vary depending on the values passed to :ref:`output_format <output_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+        Notes:
+            These fields in the result object are customized for this expectation:
+            ::
+
+                {
+                    "true_value": (list) The actual column max
+                }
+
+
+            * min_value and max_value are both inclusive.
+            * If min_value is None, then max_value is treated as an upper bound
+            * If max_value is None, then min_value is treated as a lower bound
+
+        """
+        raise NotImplementedError
 
     ### Distributional expectations
     def expect_column_chisquare_test_p_value_to_be_greater_than(self,
