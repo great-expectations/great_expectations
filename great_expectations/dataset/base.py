@@ -2430,9 +2430,13 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         bootstrap_sample_size=None,
         output_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
-        """Compare column values to a partition using a Kolmogorov-Smirnov test, and expect the p-value to be greater than a threshold value, usually  p=0.05.
+        """Expect column values to be distributed similarly to the provided continuous partition. This expectation \
+        compares continuous distributions using a bootstrapped Kolmogorov-Smirnov test. It returns `success=True` if \
+        values in the column match the distribution of the provided partition.
 
-        This expectation compares continuous distributions using bootstrapped samples. It returns `success=True` if values in the column match the distribution of the specified partition.
+        The expected cumulative density function (CDF) is constructed as a linear interpolation between the bins, \
+        using the provided weights. Consequently the test expects a piecewise uniform distribution using the bins from \
+        the provided partition object.
 
         expect_column_bootstrapped_ks_test_p_value_to_be_greater_than is a :func:`column_aggregate_expectation <great_expectations.dataset.base.DataSet.column_aggregate_expectation>`.
 
@@ -2440,18 +2444,19 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             column (str): \
                 The column name.
             partition_object (dict): \
-                The expected partition object.
-
-        Keyword Args:
+                The expected partition object (see :ref:`partition_object`).
             p (float): \
                 The p-value threshold for the Kolmogorov-Smirnov test.
-                For values below the specified threshold the expectation will return false, rejecting the null hypothesis that the distributions are the same.
-                Defaults to 0.05
+                For values below the specified threshold the expectation will return `success=False`, rejecting the \
+                null hypothesis that the distributions are the same. \
+                Defaults to 0.05.
+
+        Keyword Args:
             bootstrap_samples (int): \
-                The number of times to bootstrap. If None, defaults to 1000.
+                The number bootstrap rounds. Defaults to 1000.
             bootstrap_sample_size (int): \
-                The number of samples per bootstrap. If None, defaults to 2 * len(partition_object['weights'])
-                A larger sample will increase the specificity of the test.
+                The number of samples to take from the column for each bootstrap. A larger sample will increase the \
+                specificity of the test. Defaults to 2 * len(partition_object['weights'])
 
         Other Parameters:
             output_format (str or None): \
@@ -2480,9 +2485,9 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                 {
                     "true_value": (float) The true p-value of the KS test
                     "summary_obj": {
-                        "bootstrap_samples": The number of bootstrap samples used
+                        "bootstrap_samples": The number of bootstrap rounds used
                         "bootstrap_sample_size": The number of samples taken from
-                            the column in each bootstrap samples
+                            the column in each bootstrap round
                         "observed_cdf": The cumulative density function observed
                             in the data, a dict containing 'x' values and cdf_values
                             (suitable for plotting)
@@ -2498,8 +2503,6 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                             this will always be the partition_object parameter
                     }
                 }
-
-            The expected CDF is constructed as a linear interpolation between the bins, using the provided weights.
 
         """
         raise NotImplementedError
