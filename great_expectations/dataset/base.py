@@ -2070,11 +2070,9 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         Args:
             column (str): \
                 The column name.
-
-        Keyword Args:
-            min_value (int or None): \
+            min_value (float or None): \
                 The minimum value for the column standard deviation.
-            max_value (int or None): \
+            max_value (float or None): \
                 The maximum value for the column standard deviation.
 
         Other Parameters:
@@ -2102,7 +2100,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             ::
 
                 {
-                    "true_value": (float) The true stdev for the column
+                    "true_value": (float) The true standard deviation for the column
                 }
 
             * min_value and max_value are both inclusive.
