@@ -2377,6 +2377,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         min_value=None,
         max_value=None,
         parse_strings_as_datetimes=None,
+        output_strftime_format=None,
         output_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
         """Expect the column to sum to be between an min and max value
@@ -2394,6 +2395,8 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                 The maximum number of unique values allowed.
             parse_strings_as_datetimes (Boolean or None): \
                 If True, parse min_value, max_values, and all non-null column values to datetimes before making comparisons.
+            output_strftime_format (str or None): \
+                A valid strfime format for datetime output. Only used if parse_strings_as_datetimes=True.
 
         Other Parameters:
             output_format (str or None): \
@@ -2436,6 +2439,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         min_value=None,
         max_value=None,
         parse_strings_as_datetimes=None,
+        output_strftime_format=None,
         output_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
         """Expect the column max to be between an min and max value
@@ -2453,6 +2457,8 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                 The maximum number of unique values allowed.
             parse_strings_as_datetimes (Boolean or None): \
                 If True, parse min_value, max_values, and all non-null column values to datetimes before making comparisons.
+            output_strftime_format (str or None): \
+                A valid strfime format for datetime output. Only used if parse_strings_as_datetimes=True.
 
         Other Parameters:
             output_format (str or None): \

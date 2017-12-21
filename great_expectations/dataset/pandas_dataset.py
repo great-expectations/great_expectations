@@ -827,6 +827,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         min_value=None,
         max_value=None,
         parse_strings_as_datetimes=None,
+        output_strftime_format=None,
         output_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
         if min_value is None and max_value is None:
@@ -856,8 +857,10 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
             success = (min_value <= col_min)
 
         if parse_strings_as_datetimes:
-            #FIXME: This is begging for an optional strftime format
-            col_min = str(col_min)
+            if output_strftime_format:
+                col_min = datetime.strftime(col_min, output_strftime_format)
+            else:
+                col_min = str(col_min)
 
         return {
             "success" : success,
@@ -872,25 +875,43 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         min_value=None,
         max_value=None,
         parse_strings_as_datetimes=None,
+        output_strftime_format=None,
         output_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
 
-        col_sum = column.max()
+
+        if parse_strings_as_datetimes:
+            if min_value:
+                min_value = parse(min_value)
+
+            if max_value:
+                max_value = parse(max_value)
+
+            temp_column = column.map(parse)
+
+        else:
+            temp_column = column
+
+        col_max = Temp_column.max()
 
         if min_value != None and max_value != None:
-            success = (min_value <= col_sum) and (col_sum <= max_value)
+            success = (min_value <= col_max) and (col_max <= max_value)
 
         elif min_value == None and max_value != None:
-            success = (col_sum <= max_value)
+            success = (col_max <= max_value)
 
         elif min_value != None and max_value == None:
-            success = (min_value <= col_sum)
+            success = (min_value <= col_max)
+
+        if parse_strings_as_datetimes:
+            #FIXME: This is begging for an optional strftime format
+            col_min = str(col_min)
 
         return {
             "success" : success,
-            "true_value" : col_sum,
+            "true_value" : col_max,
             "summary_obj" : {}
         }
 
