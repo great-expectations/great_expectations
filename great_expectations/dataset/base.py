@@ -2176,24 +2176,18 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
     ):
         """Expect the proportion of unique values to be between a minimum value and a maximum value.
 
-        For example, in a column containing [1, 2, 2, 3, 3, 3, 4, 4, 4, 4], there are 4 unique values for a proportion of 0.4.
-
-        Args:
-            column (str): The column name.
-            min_value (float or None): The minimum proportion of unique values. (Proportions are on the range 0 to 1)
-            max_value (float or None): The maximum proportion of unique values. (Proportions are on the range 0 to 1)
-
-        expect_column_unique_value_count_to_be_between is a :func:`column_aggregate_expectation <great_expectations.dataset.base.DataSet.column_aggregate_expectation>`.
+        For example, in a column containing [1, 2, 2, 3, 3, 3, 4, 4, 4, 4], there are 4 unique values and 10 total \
+        values for a proportion of 0.4.
 
         Args:
             column (str): \
                 The column name.
+            min_value (float or None): \
+                The minimum proportion of unique values. (Proportions are on the range 0 to 1)
+            max_value (float or None): \
+                The maximum proportion of unique values. (Proportions are on the range 0 to 1)
 
-        Keyword Args:
-            min_value (int or None): \
-                The minimum number of unique values allowed.
-            max_value (int or None): \
-                The maximum number of unique values allowed.
+        expect_column_unique_value_count_to_be_between is a :func:`column_aggregate_expectation <great_expectations.dataset.base.DataSet.column_aggregate_expectation>`.
 
         Other Parameters:
             output_format (str or None): \
@@ -2220,7 +2214,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             ::
 
                 {
-                    "true_value": (float) The number of unique values in the column
+                    "true_value": (float) The proportion of unique values in the column
                 }
 
             * min_value and max_value are both inclusive.
@@ -2287,7 +2281,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             Often, this will just be a single element. But if there's a tie for most common among multiple values,
             `summary_obj.true_value_list` will contain a single copy of each most common value.
 
-            Since, `true_value` can only contain a single value, dealing with ties is a bit involved.
+            Since `true_value` can only contain a single value, dealing with ties is a bit involved.
 
             * If `summary_obj.value_list` contains multiple elements, and `ties_okay=False`, then `true_value = None`.
 
