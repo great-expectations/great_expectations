@@ -2360,10 +2360,10 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         tail_weight_holdout=0,
         output_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
-        """Expect the values in this column to match the specified categorical partition. \
+        """Expect column values to be distributed similarly to the provided categorical partition. \
 
         This expectation compares categorical distributions using a Chi-squared test. \
-        It returns `success=True` if values in the column closely match the distribution of the specified partition.
+        It returns `success=True` if values in the column match the distribution of the provided partition.
 
         expect_column_chisquare_test_p_value_to_be_greater_than is a :func:`column_aggregate_expectation <great_expectations.dataset.base.DataSet.column_aggregate_expectation>`.
 
@@ -2371,16 +2371,19 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             column (str): \
                 The column name.
             partition_object (dict): \
-                The expected partition object.
+                The expected partition object (see :ref:`partition_object`).
+            p (float): \
+                The p-value threshold for rejecting the null hypothesis of the Chi-Squared test.\
+                For values below the specified threshold, the expectation will return `success=False`,\
+                rejecting the null hypothesis that the distributions are the same.\
+                Defaults to 0.05.
 
         Keyword Args:
-            p (float): \
-                The p-value threshold for the Chi-Squared test.\
-                For values below the specified threshold the expectation will return false,\
-                rejecting the null hypothesis that the distributions are the same.
-            tail_weight_holdout (float): \
-                the amount of weight to split uniformly and add to the tails of the histogram\
-                (the area between -Infinity and the data's min value and between the data's max value and Infinity)
+            tail_weight_holdout (float between 0 and 1 or None): \
+                The amount of weight to split uniformly between values observed in the data but not present in the \
+                provided partition. tail_weight_holdout provides a mechanism to make the test less strict by \
+                assigning positive weights to unknown values observed in the data that are not present in the \
+                partition.
 
         Other Parameters:
             output_format (str or None): \
@@ -2406,17 +2409,15 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             These fields in the result object are customized for this expectation:
             ::
 
-            {
-                "true_value": (float) The true p-value of the KS test
-                "summary_obj": {
-                    "observed_partition" (dict):
-                        The partition observed on the data, using the provided
-                        bins but also expanding from min(column) to max(column)
-                    "expected_partition" (dict):
-                        The partition expected from the data. For KS test,
-                        this will always be the partition_object parameter
+                {
+                    "true_value": (float) The true p-value of the Chi-squared test
+                    "summary_obj": {
+                        "observed_partition" (dict):
+                            The partition observed in the data.
+                        "expected_partition" (dict):
+                            The partition expected from the data, after including tail_weight_holdout
+                    }
                 }
-            }
 
         """
         raise NotImplementedError
