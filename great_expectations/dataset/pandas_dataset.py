@@ -894,7 +894,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         else:
             temp_column = column
 
-        col_max = Temp_column.max()
+        col_max = temp_column.max()
 
         if min_value != None and max_value != None:
             success = (min_value <= col_max) and (col_max <= max_value)
