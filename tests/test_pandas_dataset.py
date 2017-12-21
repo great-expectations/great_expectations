@@ -1051,8 +1051,8 @@ class TestPandasDataset(unittest.TestCase):
         with self.assertRaises(TypeError):
             typedf.expect_column_mean_to_be_between(T[0]['in'])
 
-        with self.assertRaises(ValueError):
-            typedf.expect_column_mean_to_be_between("s")
+        # with self.assertRaises(ValueError):
+            # typedf.expect_column_mean_to_be_between("s")
 
 
 
@@ -1082,6 +1082,9 @@ class TestPandasDataset(unittest.TestCase):
         for t in T:
             out = D.expect_column_stdev_to_be_between(**t['in'])
             self.assertEqual(out, t['out'])
+
+        with self.assertRaises(ValueError):
+            D.expect_column_stdev_to_be_between("dist1")
 
 
     def test_expect_column_unique_value_count_to_be_between(self):
