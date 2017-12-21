@@ -238,7 +238,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
     ):
         try:
             if value is not None:
-                float(value).is_integer():
+                float(value).is_integer()
 
         except ValueError:
             raise ValueError("value must be an integer")
