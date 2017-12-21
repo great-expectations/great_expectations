@@ -4,7 +4,7 @@
     "x" : [2, 3, 4, 5, 6, 7, 8, 9, null, null],
     "y" : [1, 1, 1, 2, 2, 2, 3, 3, 3, 4],
     "z" : ["a", "b", "c", "d", "e", null, null, null, null, null],
-    "zz" : ["1/1/2016", "1/2/2016", "2/2/2016", "2/2/2016", "3/1/2016", null, null, null, null, null],
+    "zz" : ["2/1/2016", "2/2/2016", "2/2/2016", "10/1/2016", "1/2/2017", "10/1/2017", null, null, null, null],
     "a" : [null, 0, null, null, 1, null, null, 2, null, null],
     "b" : [null, 0, null, null, 2, null, null, 1, null, null]
   },
@@ -68,6 +68,29 @@
     "out": {
       "success": false,
       "true_value": 1
+    }
+  },{
+    "notes": "Test on a series with mostly nulls",
+    "in": {
+      "column": "a",
+      "min_value": 1,
+      "max_value": 2
+    },
+    "out": {
+      "success": false,
+      "true_value": 0
+    }
+  },{
+    "notes": "Test on a series containing dates",
+    "in": {
+      "column": "zz",
+      "min_value": "2/1/2016",
+      "max_value": "3/1/2016",
+      "parse_strings_as_datetimes": true
+    },
+    "out": {
+      "success": true,
+      "true_value": "2016-02-01 00:00:00"
     }
   }]
 }

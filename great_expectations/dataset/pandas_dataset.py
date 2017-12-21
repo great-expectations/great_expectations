@@ -826,25 +826,42 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         column,
         min_value=None,
         max_value=None,
+        parse_strings_as_datetimes=None,
         output_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
 
-        col_sum = column.min()
+        if parse_strings_as_datetimes:
+            if min_value:
+                min_value = parse(min_value)
+
+            if max_value:
+                max_value = parse(max_value)
+
+            temp_column = column.map(parse)
+
+        else:
+            temp_column = column
+
+        col_min = temp_column.min()
 
         if min_value != None and max_value != None:
-            success = (min_value <= col_sum) and (col_sum <= max_value)
+            success = (min_value <= col_min) and (col_min <= max_value)
 
         elif min_value == None and max_value != None:
-            success = (col_sum <= max_value)
+            success = (col_min <= max_value)
 
         elif min_value != None and max_value == None:
-            success = (min_value <= col_sum)
+            success = (min_value <= col_min)
+
+        if parse_strings_as_datetimes:
+            #FIXME: This is begging for an optional strftime format
+            col_min = str(col_min)
 
         return {
             "success" : success,
-            "true_value" : col_sum,
+            "true_value" : col_min,
             "summary_obj" : {}
         }
 
@@ -854,6 +871,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         column,
         min_value=None,
         max_value=None,
+        parse_strings_as_datetimes=None,
         output_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
         if min_value is None and max_value is None:
