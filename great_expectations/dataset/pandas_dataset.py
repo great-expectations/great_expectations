@@ -201,10 +201,14 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
     def expect_table_row_count_to_be_between(self, min_value=0, max_value=None,
                                              output_format=None, include_config=False, catch_exceptions=None, meta=None):
         # Assert that min_value and max_value are integers
-        if min_value is not None and not float(min_value).is_integer():
-            raise ValueError("min_value and max_value must be integers")
+        try:
+            if min_value is not None and not float(min_value).is_integer():
+                raise ValueError("min_value and max_value must be integers")
 
-        if max_value is not None and not float(max_value).is_integer():
+            if max_value is not None and not float(max_value).is_integer():
+                raise ValueError("min_value and max_value must be integers")
+
+        except ValueError:
             raise ValueError("min_value and max_value must be integers")
 
         if min_value <= self.shape[0] <= max_value:
@@ -221,8 +225,13 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
     @DataSet.expectation(['value'])
     def expect_table_row_count_to_equal(self, value,
                                         output_format=None, include_config=False, catch_exceptions=None, meta=None):
-        if value is not None and not float(value).is_integer():
+        try:
+            if value is not None and not float(value).is_integer():
+                raise ValueError("value must be an integer")
+
+        except ValueError:
             raise ValueError("value must be an integer")
+
 
         if self.shape[0] == value:
             outcome = True
@@ -542,11 +551,16 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
             raise ValueError("min_value and max_value cannot both be None")
 
         # Assert that min_value and max_value are integers
-        if min_value is not None and not float(min_value).is_integer():
+        try:
+            if min_value is not None and not float(min_value).is_integer():
+                raise ValueError("min_value and max_value must be integers")
+
+            if max_value is not None and not float(max_value).is_integer():
+                raise ValueError("min_value and max_value must be integers")
+        
+        except ValueError:
             raise ValueError("min_value and max_value must be integers")
 
-        if max_value is not None and not float(max_value).is_integer():
-            raise ValueError("min_value and max_value must be integers")
 
         def length_is_between(val):
             if min_value != None and max_value != None:
