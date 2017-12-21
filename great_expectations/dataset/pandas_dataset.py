@@ -906,8 +906,10 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
             success = (min_value <= col_max)
 
         if parse_strings_as_datetimes:
-            #FIXME: This is begging for an optional strftime format
-            col_min = str(col_min)
+            if output_strftime_format:
+                col_max = datetime.strftime(col_max, output_strftime_format)
+            else:
+                col_max = str(col_max)
 
         return {
             "success" : success,

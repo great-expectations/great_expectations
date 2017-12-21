@@ -4,7 +4,7 @@
     "x" : [2, 3, 4, 5, 6, 7, 8, 9, null, null],
     "y" : [1, 1, 1, 2, 2, 2, 3, 3, 3, 4],
     "z" : ["a", "b", "c", "d", "e", null, null, null, null, null],
-    "zz" : ["1/1/2016", "1/2/2016", "2/2/2016", "2/2/2016", "3/1/2016", null, null, null, null, null],
+    "zz" : ["1/1/2016", "1/2/2016", "2/2/2016", "2/2/2016", "3/1/2016", "2/1/2017", null, null, null, null],
     "a" : [null, 0, null, null, 1, null, null, 2, null, null],
     "b" : [null, 0, null, null, 2, null, null, 1, null, null]
   },
@@ -68,6 +68,42 @@
     "out": {
       "success": false,
       "true_value": 5
+    }
+  },{
+    "notes": "Test on a series containing dates, with an output_strftime_format value",
+    "in": {
+      "column": "zz",
+      "min_value": "2/1/2016",
+      "max_value": "3/1/2016",
+      "parse_strings_as_datetimes": true,
+      "output_strftime_format" : "%m/%d/%Y"
+    },
+    "out": {
+      "success": false,
+      "true_value": "02/01/2017"
+    }
+  },{
+    "notes": "Test on a date-like series containing strings",
+    "in": {
+      "column": "zz",
+      "min_value": "2/1/2016",
+      "max_value": "3/1/2016",
+      "parse_strings_as_datetimes": false
+    },
+    "out": {
+      "success": true,
+      "true_value": "3/1/2016"
+    }
+  },{
+    "notes": "Test on a strings",
+    "in": {
+      "column": "z",
+      "min_value": "d",
+      "max_value": "f"
+    },
+    "out": {
+      "success": true,
+      "true_value": "e"
     }
   }]
 }
