@@ -4,24 +4,37 @@
 Distributional Expectations
 ================================================================================
 
-Distributional expectations help identify when new datasets or samples may be different than expected, and can help ensure that assumptions developed during exploratory analysis still hold as new data becomes available. You should use distributional expectations in the same way as other expectations: to help accelerate identification of risks as diverse as changes in a system being modeled or disruptions to a complex upstream data feed.
+Distributional expectations help identify when new datasets or samples may be different than expected, and can help \
+ensure that assumptions developed during exploratory analysis still hold as new data becomes available. You should use \
+distributional expectations in the same way as other expectations: to help accelerate identification of risks as \
+diverse as changes in a system being modeled or disruptions to a complex upstream data feed.
 
 Great Expectations' Philosophy of Distributional Expectations
 --------------------------------------------------------------------------------
 
-Great Expectations attempts to provide a simple, expressive framework for describing distributional expectations. The framework generally adopts a nonparametric approach, although it is possible to build expectations from parameterized distributions.
+Great Expectations attempts to provide a simple, expressive framework for describing distributional expectations. \
+The framework generally adopts a nonparametric approach, although it is possible to build expectations from \
+parameterized distributions.
 
 The design is motivated by the following assumptions:
 
-* Encoding expectations into a simple object that allows for portable data pipeline testing is the top priority. In many circumstances the loss of precision associated with "compressing" data into an expectation may be beneficial because of its intentional simplicity as well as because it adds a very light layer of obfuscation over the data which may align with privacy preservation goals.
-* While it should be possible to easily extend the framework with more rigorous statistical tests, great expectations should provide simple, reasonable defaults. Care should be taken in cases where robust statistical guarantees are expected.
-* Building and interpreting expectations should be intuitive: a more precise partition object implies a more precise expectation.
+* Encoding expectations into a simple object that allows for portable data pipeline testing is the top priority. \
+    In many circumstances the loss of precision associated with "compressing" data into an expectation may be beneficial \
+    because of its intentional simplicity as well as because it adds a very light layer of obfuscation over the data \
+    which may align with privacy preservation goals.
+* While it should be possible to easily extend the framework with more rigorous statistical tests, great expectations \
+    should provide simple, reasonable defaults. Care should be taken in cases where robust statistical guarantees are \
+    expected.
+* Building and interpreting expectations should be intuitive: a more precise partition object implies a more precise \
+    expectation.
 
 
-Distributional Expectations' Core Datatypes
+.. _partition_object:
+
+Partition Objects
 --------------------------------------------------------------------------------
 
-Distributional expectations currently focus exclusively on unidimensional (columnar) data. The core constructs of a great expectations distributional expectation are the partition and associated weights.
+The core constructs of a great expectations distributional expectation are the partition and associated weights.
 
 For continuous data:
 
