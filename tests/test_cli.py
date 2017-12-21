@@ -45,9 +45,11 @@ class TestCLI(unittest.TestCase):
         # )
 
         command_str = 'python '+filepath+'/../bin/great_expectations validate '+filepath+'/test_sets/Titanic.csv '+filepath+'/test_sets/titanic_expectations.json'
+        print(command_str)
+
         try:
-          result = get_system_command_result(command_str)["output"]
-          json_result = json.loads(result)
+          result = get_system_command_result(command_str)
+          json_result = json.loads(result["output"])
         except ValueError as ve:
           print ("=== Result ==================================================")
           print (result)
@@ -55,69 +57,73 @@ class TestCLI(unittest.TestCase):
           print(ve)
           json_result = {}
 
+        print("^"*80)
+        print(json.dumps(json_result, indent=2))
+        self.maxDiff = None
+
         assertDeepAlmostEqual(self,
             json_result,
             {
               "results": [
                 {
-                  "success": True, 
-                  "exception_traceback": None, 
-                  "expectation_type": "expect_column_to_exist", 
-                  "raised_exception": False, 
                   "kwargs": {
                     "column": "Name", 
-                    "output_format": "BASIC"
-                  }
-                }, 
-                {
-                  "success": True, 
+                    "output_format": "SUMMARY"
+                  }, 
                   "exception_traceback": None, 
                   "expectation_type": "expect_column_to_exist", 
-                  "raised_exception": False, 
+                  "success": True, 
+                  "raised_exception": False
+                }, 
+                {
                   "kwargs": {
                     "column": "PClass", 
-                    "output_format": "BASIC"
-                  }
-                }, 
-                {
-                  "success": True, 
+                    "output_format": "SUMMARY"
+                  }, 
                   "exception_traceback": None, 
                   "expectation_type": "expect_column_to_exist", 
-                  "raised_exception": False, 
+                  "success": True, 
+                  "raised_exception": False
+                }, 
+                {
                   "kwargs": {
                     "column": "Age", 
-                    "output_format": "BASIC"
-                  }
-                }, 
-                {
-                  "success": True, 
+                    "output_format": "SUMMARY"
+                  }, 
                   "exception_traceback": None, 
                   "expectation_type": "expect_column_to_exist", 
-                  "raised_exception": False, 
+                  "success": True, 
+                  "raised_exception": False
+                }, 
+                {
                   "kwargs": {
                     "column": "Sex", 
-                    "output_format": "BASIC"
-                  }
-                }, 
-                {
-                  "success": True, 
+                    "output_format": "SUMMARY"
+                  }, 
                   "exception_traceback": None, 
                   "expectation_type": "expect_column_to_exist", 
-                  "raised_exception": False, 
+                  "success": True, 
+                  "raised_exception": False
+                }, 
+                {
                   "kwargs": {
                     "column": "Survived", 
-                    "output_format": "BASIC"
-                  }
-                }, 
-                {
-                  "success": True, 
+                    "output_format": "SUMMARY"
+                  }, 
                   "exception_traceback": None, 
                   "expectation_type": "expect_column_to_exist", 
-                  "raised_exception": False, 
+                  "success": True, 
+                  "raised_exception": False
+                }, 
+                {
                   "kwargs": {
                     "column": "SexCode", 
-                    "output_format": "BASIC"
-                  }
+                    "output_format": "SUMMARY"
+                  }, 
+                  "exception_traceback": None, 
+                  "expectation_type": "expect_column_to_exist", 
+                  "success": True, 
+                  "raised_exception": False
                 }, 
                 {
                   "exception_traceback": None, 
@@ -128,72 +134,104 @@ class TestCLI(unittest.TestCase):
                   "kwargs": {
                     "column": "Age", 
                     "max_value": 40, 
-                    "output_format": "BASIC", 
+                    "output_format": "SUMMARY", 
                     "min_value": 20
+                  }, 
+                  "summary_obj": {
+                    "element_count": 1313, 
+                    "missing_percent": 0.4242193450114242, 
+                    "missing_count": 557
                   }
                 }, 
                 {
                   "exception_traceback": None, 
-                  "expectation_type": "expect_column_values_to_be_between", 
+                  "summary_obj": {
+                    "exception_percent_nonmissing": 0.0, 
+                    "missing_count": 557, 
+                    "partial_exception_index_list": [], 
+                    "element_count": 1313, 
+                    "exception_count": 0, 
+                    "missing_percent": 0.4242193450114242, 
+                    "exception_percent": 0.0, 
+                    "partial_exception_list": [], 
+                    "partial_exception_counts": {}
+                  }, 
                   "success": True, 
                   "raised_exception": False, 
                   "kwargs": {
                     "column": "Age", 
                     "max_value": 80, 
-                    "output_format": "BASIC", 
+                    "output_format": "SUMMARY", 
                     "min_value": 0
                   }, 
-                  "summary_obj": {
-                    "exception_percent": 0.0, 
-                    "partial_exception_list": [], 
-                    "exception_percent_nonmissing": 0.0, 
-                    "exception_count": 0
-                  }
+                  "expectation_type": "expect_column_values_to_be_between"
                 }, 
                 {
                   "exception_traceback": None, 
-                  "expectation_type": "expect_column_values_to_match_regex", 
-                  "success": True, 
-                  "raised_exception": False, 
-                  "kwargs": {
-                    "regex": "[A-Z][a-z]+(?: \\([A-Z][a-z]+\\))?, ", 
-                    "column": "Name", 
-                    "output_format": "BASIC", 
-                    "mostly": 0.95
-                  }, 
                   "summary_obj": {
+                    "exception_percent_nonmissing": 0.002284843869002285, 
+                    "missing_count": 0, 
+                    "partial_exception_index_list": [
+                      394, 
+                      456, 
+                      1195
+                    ], 
+                    "element_count": 1313, 
+                    "exception_count": 3, 
+                    "missing_percent": 0.0, 
                     "exception_percent": 0.002284843869002285, 
                     "partial_exception_list": [
                       "Downton (?Douton), Mr William James", 
                       "Jacobsohn Mr Samuel", 
                       "Seman Master Betros"
                     ], 
-                    "exception_percent_nonmissing": 0.002284843869002285, 
-                    "exception_count": 3
-                  }
+                    "partial_exception_counts": {
+                      "Seman Master Betros": 1, 
+                      "Downton (?Douton), Mr William James": 1, 
+                      "Jacobsohn Mr Samuel": 1
+                    }
+                  }, 
+                  "success": True, 
+                  "raised_exception": False, 
+                  "kwargs": {
+                    "regex": "[A-Z][a-z]+(?: \\([A-Z][a-z]+\\))?, ", 
+                    "column": "Name", 
+                    "output_format": "SUMMARY", 
+                    "mostly": 0.95
+                  }, 
+                  "expectation_type": "expect_column_values_to_match_regex"
                 }, 
                 {
                   "exception_traceback": None, 
-                  "expectation_type": "expect_column_values_to_be_in_set", 
-                  "success": False, 
-                  "raised_exception": False, 
-                  "kwargs": {
-                    "column": "PClass", 
-                    "output_format": "BASIC", 
-                    "values_set": [
-                      "1st", 
-                      "2nd", 
-                      "3rd"
-                    ]
-                  }, 
                   "summary_obj": {
+                    "exception_percent_nonmissing": 0.0007616146230007616, 
+                    "missing_count": 0, 
+                    "partial_exception_index_list": [
+                      456
+                    ], 
+                    "element_count": 1313, 
+                    "exception_count": 1, 
+                    "missing_percent": 0.0, 
                     "exception_percent": 0.0007616146230007616, 
                     "partial_exception_list": [
                       "*"
                     ], 
-                    "exception_percent_nonmissing": 0.0007616146230007616, 
-                    "exception_count": 1
-                  }
+                    "partial_exception_counts": {
+                      "*": 1
+                    }
+                  }, 
+                  "success": False, 
+                  "raised_exception": False, 
+                  "kwargs": {
+                    "column": "PClass", 
+                    "values_set": [
+                      "1st", 
+                      "2nd", 
+                      "3rd"
+                    ], 
+                    "output_format": "SUMMARY"
+                  }, 
+                  "expectation_type": "expect_column_values_to_be_in_set"
                 }
               ]
             }
@@ -237,26 +275,54 @@ class TestCLI(unittest.TestCase):
                       + filepath + '/test_sets/titanic_custom_expectations.json -f -m='\
                       + filepath + '/test_fixtures/custom_dataset.py -c=CustomPandasDataSet'
         try:
-          result = get_system_command_result(command_str)["output"]
-          json_result = json.loads(result)
+          result = get_system_command_result(command_str)
+          json_result = json.loads(result["output"])
         except ValueError as ve:
+          print ("=== Result ==================================================")
+          print (result)
+          print ("=== Error ===================================================")
           print(ve)
           json_result = {}
 
+        self.maxDiff = None
+        print(json.dumps(json_result, indent=2))
+
+        #Remove partial exception counts, because we can't guarantee that they'll be the same every time.
+        del json_result["results"][0]["summary_obj"]['partial_exception_counts']
         self.assertEqual(
             json_result,
             {
               "results": [
                 {
                   "exception_traceback": None, 
-                  "expectation_type": "expect_column_values_to_have_odd_lengths", 
-                  "success": False, 
-                  "raised_exception": False,
-                  "kwargs": {
-                    "column": "Name", 
-                    "output_format": "BASIC"
-                  }, 
                   "summary_obj": {
+                    "exception_percent_nonmissing": 0.5026656511805027, 
+                    "missing_count": 0, 
+                    "partial_exception_index_list": [
+                      0, 
+                      5, 
+                      6, 
+                      7, 
+                      8, 
+                      9, 
+                      11, 
+                      12, 
+                      13, 
+                      14, 
+                      15, 
+                      18, 
+                      20, 
+                      21, 
+                      22, 
+                      23, 
+                      27, 
+                      31, 
+                      32, 
+                      33
+                    ], 
+                    "element_count": 1313, 
+                    "exception_count": 660, 
+                    "missing_percent": 0.0, 
                     "exception_percent": 0.5026656511805027, 
                     "partial_exception_list": [
                       "Allen, Miss Elisabeth Walton", 
@@ -280,12 +346,18 @@ class TestCLI(unittest.TestCase):
                       "Bradley, Mr George", 
                       "Brady, Mr John Bertram"
                     ], 
-                    "exception_percent_nonmissing": 0.5026656511805027, 
-                    "exception_count": 660
-                  }
+                  }, 
+                  "success": False, 
+                  "raised_exception": False, 
+                  "kwargs": {
+                    "column": "Name", 
+                    "output_format": "SUMMARY"
+                  }, 
+                  "expectation_type": "expect_column_values_to_have_odd_lengths"
                 }
               ]
             }
+
         )
         # command_str = 'python '+filepath+'/../bin/great_expectations validate '+filepath+'/examples/Titanic.csv '+filepath+'/examples/titanic_expectations.json -f'
         # # print get_system_command_result(command_str)

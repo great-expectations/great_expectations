@@ -11,9 +11,10 @@ import numpy as np
 import pandas as pd
 from dateutil.parser import parse
 from scipy import stats
+from six import string_types
 
 from .base import DataSet
-from .util import DocInherit, \
+from .util import DocInherit, recursively_convert_to_json_serializable, \
         is_valid_partition_object, is_valid_categorical_partition_object, is_valid_continuous_partition_object
 
 class MetaPandasDataSet(DataSet):
@@ -54,7 +55,7 @@ class MetaPandasDataSet(DataSet):
 
             element_count = int(len(series))
             nonnull_values = series[boolean_mapped_null_values==False]
-            nonnull_count = (boolean_mapped_null_values==False).sum()
+            nonnull_count = int((boolean_mapped_null_values==False).sum())
 
             boolean_mapped_success_values = func(self, nonnull_values, *args, **kwargs)
             success_count = boolean_mapped_success_values.sum()
@@ -105,7 +106,7 @@ class MetaPandasDataSet(DataSet):
 
             element_count = int(len(series))
             nonnull_values = series[null_indexes == False]
-            nonnull_count = (null_indexes == False).sum()
+            nonnull_count = int((null_indexes == False).sum())
             null_count = element_count - nonnull_count
 
             result_obj = func(self, nonnull_values, *args, **kwargs)
@@ -115,6 +116,10 @@ class MetaPandasDataSet(DataSet):
             #!!!    success: bool
             #!!!    true_value: int or float
             #!!!    summary_obj: json-serializable dict
+
+            # if not output_format in ["BASIC", "COMPLETE", "SUMMARY", "BOOLEAN_ONLY"]:
+            #     print ("Warning: Unknown output_format %s. Defaulting to %s." % (output_format, self.default_expectation_args["output_format"]))
+
 
             if output_format in ["BASIC", "COMPLETE"]:
                 return_obj = {
@@ -144,11 +149,7 @@ class MetaPandasDataSet(DataSet):
                 return_obj = bool(result_obj["success"])
 
             else:
-                print ("Warning: Unknown output_format %s. Defaulting to BASIC." % (output_format,))
-                return_obj = {
-                    "success" : bool(result_obj["success"]),
-                    "true_value" : result_obj["true_value"],
-                }
+                raise ValueError("Unknown output_format %s." % (output_format,))
 
             return return_obj
 
@@ -255,7 +256,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
         element_count = int(len(series))
         nonnull_values = series[boolean_mapped_null_values==False]
-        nonnull_count = (boolean_mapped_null_values==False).sum()
+        nonnull_count = int((boolean_mapped_null_values==False).sum())
 
         boolean_mapped_success_values = boolean_mapped_null_values==False
         success_count = boolean_mapped_success_values.sum()
@@ -397,10 +398,14 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
     @DocInherit
     @MetaPandasDataSet.column_map_expectation
-    def expect_column_values_to_be_between(self, column, min_value=None, max_value=None,
-                                           parse_strings_as_datetimes=None,
-                                           mostly=None,
-                                           output_format=None, include_config=False, catch_exceptions=None, meta=None):
+    def expect_column_values_to_be_between(self,
+        column,
+        min_value=None, max_value=None,
+        parse_strings_as_datetimes=None,
+        allow_cross_type_comparisons=None,
+        mostly=None,
+        output_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
 
@@ -416,29 +421,59 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         else:
             temp_column = column
 
+        if min_value > max_value:
+            raise ValueError("min_value is greater than max_value")
+
         def is_between(val):
             # TODO Might be worth explicitly defining comparisons between types (for example, between strings and ints).
             # Ensure types can be compared since some types in Python 3 cannot be logically compared.
+            # print type(val), type(min_value), type(max_value), val, min_value, max_value
+
             if type(val) == None:
                 return False
             else:
-                try:
-
-                    #FIXME: Look into factoring this out
-                    if min_value != None and max_value != None:
-                        return (min_value <= val) and (val <= max_value)
-
-                    elif min_value == None and max_value != None:
-                        return (val <= max_value)
-
-                    elif min_value != None and max_value == None:
-                        return (min_value <= val)
+                if min_value != None and max_value != None:
+                    if allow_cross_type_comparisons:
+                        try:
+                            return (min_value <= val) and (val <= max_value)
+                        except TypeError:
+                            return False
 
                     else:
-                        return False
+                        if (isinstance(val, string_types) != isinstance(min_value, string_types)) or (isinstance(val, string_types) != isinstance(max_value, string_types)):
+                            raise TypeError("Column values, min_value, and max_value must either be None or of the same type.")
 
-                except:
+                        return (min_value <= val) and (val <= max_value)
+
+                elif min_value == None and max_value != None:
+                    if allow_cross_type_comparisons:
+                        try:
+                            return val <= max_value
+                        except TypeError:
+                            return False
+
+                    else:
+                        if isinstance(val, string_types) != isinstance(max_value, string_types):
+                            raise TypeError("Column values, min_value, and max_value must either be None or of the same type.")
+
+                        return val <= max_value
+
+                elif min_value != None and max_value == None:
+                    if allow_cross_type_comparisons:
+                        try:
+                            return min_value <= val
+                        except TypeError:
+                            return False
+
+                    else:
+                        if isinstance(val, string_types) != isinstance(min_value, string_types):
+                            raise TypeError("Column values, min_value, and max_value must either be None or of the same type.")
+
+                        return min_value <= val
+
+                else:
                     return False
+
 
         return temp_column.map(is_between)
 
