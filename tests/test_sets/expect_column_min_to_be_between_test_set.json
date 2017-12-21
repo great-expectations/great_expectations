@@ -105,5 +105,24 @@
       "success": true,
       "true_value": "02/01/2016"
     }
+  },{
+    "notes": "Negative test case with only a max",
+    "in": {
+      "column": "y",
+      "max_value": 0
+    },
+    "out": {
+      "success": false,
+      "true_value": 1
+    }
+  },{
+    "notes": "Raise ValueError with both max and min are missing",
+    "in": {
+      "column": "y",
+      "catch_exceptions": true
+    },
+    "error": {
+      "traceback_substring": "cannot both be None"
+    }
   }]
 }

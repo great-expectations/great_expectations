@@ -69,5 +69,24 @@
       "success": false,
       "true_value": 30
     }
+  },{
+    "notes": "Negative test case with only a max",
+    "in": {
+      "column": "y",
+      "max_value": 20
+    },
+    "out": {
+      "success": false,
+      "true_value": 22
+    }
+  },{
+    "notes": "Raise ValueError with both max and min are missing",
+    "in": {
+      "column": "y",
+      "catch_exceptions": true
+    },
+    "error": {
+      "traceback_substring": "cannot both be None"
+    }
   }]
 }
