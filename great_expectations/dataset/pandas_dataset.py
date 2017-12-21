@@ -232,11 +232,13 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
     @DocInherit
     @DataSet.expectation(['value'])
-    def expect_table_row_count_to_equal(self, value,
-                                        output_format=None, include_config=False, catch_exceptions=None, meta=None):
+    def expect_table_row_count_to_equal(self,
+        value,
+        output_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
         try:
-            if value is not None and not float(value).is_integer():
-                raise ValueError("value must be an integer")
+            if value is not None:
+                float(value).is_integer():
 
         except ValueError:
             raise ValueError("value must be an integer")
