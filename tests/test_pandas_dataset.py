@@ -1244,7 +1244,35 @@ class TestPandasDataset(unittest.TestCase):
             print(out)
             self.assertEqual(out, t['out'])
 
+    def test_expect_column_min_to_be_between(self):
+        with open("./tests/test_sets/expect_column_min_to_be_between_test_set.json") as f:
+            J = json.load(f)
+            D = ge.dataset.PandasDataSet(J["dataset"])
+            D.set_default_expectation_argument("output_format", "COMPLETE")
+            T = J["tests"]
 
+            self.maxDiff = None
+
+        for t in T:
+            print(json.dumps(t))
+            out = D.expect_column_min_to_be_between(**t['in'])
+            print(out)
+            self.assertEqual(out, t['out'])
+
+    def test_expect_column_max_to_be_between(self):
+        with open("./tests/test_sets/expect_column_max_to_be_between_test_set.json") as f:
+            J = json.load(f)
+            D = ge.dataset.PandasDataSet(J["dataset"])
+            D.set_default_expectation_argument("output_format", "COMPLETE")
+            T = J["tests"]
+
+            self.maxDiff = None
+
+        for t in T:
+            print(json.dumps(t))
+            out = D.expect_column_max_to_be_between(**t['in'])
+            print(out)
+            self.assertEqual(out, t['out'])
 
     def test_expectation_decorator_summary_mode(self):
 
