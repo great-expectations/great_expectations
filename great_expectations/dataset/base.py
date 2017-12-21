@@ -881,10 +881,6 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         expect_table_row_count_to_be_between is a :func:`expectation <great_expectations.dataset.base.DataSet.expectation>`, \
         not a `column_map_expectation` or `column_aggregate_expectation`.
 
-        Args:
-            column (str): \
-                The column name.
-
         Keyword Args:
             min_value (int or None): \
                 The minimum number of rows, inclusive.
