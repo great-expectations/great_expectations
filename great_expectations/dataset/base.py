@@ -2376,7 +2376,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         column,
         min_value=None,
         max_value=None,
-        ties_okay=None,
+        parse_strings_as_datetimes=None,
         output_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
         """Expect the column to sum to be between an min and max value
@@ -2392,6 +2392,8 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                 The minimum number of unique values allowed.
             max_value (int or None): \
                 The maximum number of unique values allowed.
+            parse_strings_as_datetimes (Boolean or None): \
+                If True, parse min_value, max_values, and all non-null column values to datetimes before making comparisons.
 
         Other Parameters:
             output_format (str or None): \
@@ -2433,7 +2435,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         column,
         min_value=None,
         max_value=None,
-        ties_okay=None,
+        parse_strings_as_datetimes=None,
         output_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
         """Expect the column max to be between an min and max value
@@ -2449,6 +2451,8 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                 The minimum number of unique values allowed.
             max_value (int or None): \
                 The maximum number of unique values allowed.
+            parse_strings_as_datetimes (Boolean or None): \
+                If True, parse min_value, max_values, and all non-null column values to datetimes before making comparisons.
 
         Other Parameters:
             output_format (str or None): \
