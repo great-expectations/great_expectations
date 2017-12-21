@@ -8,39 +8,61 @@ import great_expectations as ge
 
 class TestPandasDataset(unittest.TestCase):
 
-    def test_expect_table_row_count_to_be_between(self):
+    def test_expect_column_to_exist(self):
+        print("=== test_expect_column_to_exist ===")
+        with open("./tests/test_sets/expect_column_to_exist_test_set.json") as f:
+            J = json.load(f)
+            D = ge.dataset.PandasDataSet(J["dataset"])
+            D.set_default_expectation_argument("output_format", "COMPLETE")
+            T = J["tests"]
 
-        # Data for testing
-        D = ge.dataset.PandasDataSet({
-            'c1' : [4,5,6,7],
-            'c2' : ['a','b','c','d'],
-            'c3' : [None,None,None,None]
-        })
-        D.set_default_expectation_argument("output_format", "COMPLETE")
-
-        # Tests
-        T = [
-                {
-                    'in':[3,5],
-                    'kwargs':{},
-                    'out':{'success':True, 'true_value':4}},
-                {
-                    'in':[0,1],
-                    'kwargs':{},
-                    'out':{'success':False, 'true_value':4}},
-                {
-                    'in':[4,4],
-                    'kwargs':{},
-                    'out':{'success':True, 'true_value':4}},
-                {
-                    'in':[1,0],
-                    'kwargs':{},
-                    'out':{'success':False, 'true_value':4}}
-        ]
+            self.maxDiff = None
 
         for t in T:
-            out = D.expect_table_row_count_to_be_between(*t['in'], **t['kwargs'])
-            self.assertEqual(out, t['out'])
+            print(t)
+            out = D.expect_column_to_exist(**t['in'])
+
+            if 'out' in t:
+                self.assertEqual(out, t['out'])
+
+            if 'error' in t:
+                self.assertEqual(out['raised_exception'], True)
+                self.assertIn(t['error']['traceback_substring'], out['exception_traceback'])
+
+    def test_expect_table_row_count_to_be_between(self):
+
+        # Pulled out into expect_table_row_count_to_be_between_test_set.json
+        # Data for testing
+        # D = ge.dataset.PandasDataSet({
+        #     'c1' : [4,5,6,7],
+        #     'c2' : ['a','b','c','d'],
+        #     'c3' : [None,None,None,None]
+        # })
+        # D.set_default_expectation_argument("output_format", "COMPLETE")
+
+        # # Tests
+        # T = [
+        #         {
+        #             'in':[3,5],
+        #             'kwargs':{},
+        #             'out':{'success':True, 'true_value':4}},
+        #         {
+        #             'in':[0,1],
+        #             'kwargs':{},
+        #             'out':{'success':False, 'true_value':4}},
+        #         {
+        #             'in':[4,4],
+        #             'kwargs':{},
+        #             'out':{'success':True, 'true_value':4}},
+        #         {
+        #             'in':[1,0],
+        #             'kwargs':{},
+        #             'out':{'success':False, 'true_value':4}}
+        # ]
+
+        # for t in T:
+        #     out = D.expect_table_row_count_to_be_between(*t['in'], **t['kwargs'])
+        #     self.assertEqual(out, t['out'])
 
         D = ge.dataset.PandasDataSet({
             'c1':[1,None,3,None,5],
