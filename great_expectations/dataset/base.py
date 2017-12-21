@@ -2372,7 +2372,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         """
         raise NotImplementedError
 
-    def expect_column_smin_to_be_between(self,
+    def expect_column_min_to_be_between(self,
         column,
         min_value=None,
         max_value=None,

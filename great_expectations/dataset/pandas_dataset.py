@@ -822,6 +822,62 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
     @DocInherit
     @MetaPandasDataSet.column_aggregate_expectation
+    def expect_column_min_to_be_between(self,
+        column,
+        min_value=None,
+        max_value=None,
+        output_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
+        if min_value is None and max_value is None:
+            raise ValueError("min_value and max_value cannot both be None")
+
+        col_sum = column.min()
+
+        if min_value != None and max_value != None:
+            success = (min_value <= col_sum) and (col_sum <= max_value)
+
+        elif min_value == None and max_value != None:
+            success = (col_sum <= max_value)
+
+        elif min_value != None and max_value == None:
+            success = (min_value <= col_sum)
+
+        return {
+            "success" : success,
+            "true_value" : col_sum,
+            "summary_obj" : {}
+        }
+
+    @DocInherit
+    @MetaPandasDataSet.column_aggregate_expectation
+    def expect_column_max_to_be_between(self,
+        column,
+        min_value=None,
+        max_value=None,
+        output_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
+        if min_value is None and max_value is None:
+            raise ValueError("min_value and max_value cannot both be None")
+
+        col_sum = column.max()
+
+        if min_value != None and max_value != None:
+            success = (min_value <= col_sum) and (col_sum <= max_value)
+
+        elif min_value == None and max_value != None:
+            success = (col_sum <= max_value)
+
+        elif min_value != None and max_value == None:
+            success = (min_value <= col_sum)
+
+        return {
+            "success" : success,
+            "true_value" : col_sum,
+            "summary_obj" : {}
+        }
+
+    @DocInherit
+    @MetaPandasDataSet.column_aggregate_expectation
     def expect_column_chisquare_test_p_value_to_be_greater_than(self, column, partition_object=None, p=0.05, tail_weight_holdout=0,
                                                                 output_format=None, include_config=False, catch_exceptions=None, meta=None):
         if not is_valid_categorical_partition_object(partition_object):
