@@ -171,6 +171,9 @@ class TestPandasDataset(unittest.TestCase):
             out = D.expect_table_row_count_to_equal(*t['in'], **t['kwargs'])
             self.assertEqual(out, t['out'])
 
+        with self.assertRaises(ValueError):
+            D.expect_table_row_count_to_equal("c1", value="hello")
+
 
     def test_expect_column_values_to_be_unique(self):
 

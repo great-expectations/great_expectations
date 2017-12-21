@@ -315,6 +315,18 @@
         ],
         "success": false
       }
+    },
+    {
+      "notes": "Verify that min_value=max_value=None raises an error",
+      "in": {
+        "column": "y",
+        "max_value": null,
+        "min_value": null,
+        "catch_exceptions": true
+      },
+      "error":{
+        "traceback_substring" : "cannot both be None"
+      }
     }
   ]
 }
