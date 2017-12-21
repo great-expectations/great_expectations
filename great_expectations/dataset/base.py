@@ -2126,8 +2126,6 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         Args:
             column (str): \
                 The column name.
-
-        Keyword Args:
             min_value (int or None): \
                 The minimum number of unique values allowed.
             max_value (int or None): \
@@ -2158,7 +2156,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             ::
 
                 {
-                    "true_value": (float) The number of unique values in the column
+                    "true_value": (int) The number of unique values in the column
                 }
 
             * min_value and max_value are both inclusive.
