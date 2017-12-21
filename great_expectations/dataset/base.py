@@ -2507,12 +2507,20 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         """
         raise NotImplementedError
 
-    def expect_column_kl_divergence_to_be_less_than(self, column, partition_object=None, threshold=None, tail_weight_holdout=0, internal_weight_holdout=0,
-                                                    output_format=None, include_config=False, catch_exceptions=None, meta=None):
-        """Expect the Kulback-Leibler divergence (relative entropy) of the specified column and the partition object to be lower than the provided threshold.
+    def expect_column_kl_divergence_to_be_less_than(self,
+        column,
+        partition_object=None,
+        threshold=None,
+        tail_weight_holdout=0,
+        internal_weight_holdout=0,
+        output_format=None, include_config=False, catch_exceptions=None, meta=None):
+        """Expect the Kulback-Leibler (KL) divergence (relative entropy) of the specified column with respect to the \
+        partition object to be lower than the provided threshold.
 
-        KL divergence compares two partitions. The higher the divergence value (relative entropy), the larger the difference between the two distributions.
-        A relative entropy of zero indicates that the partitions are distributed identically.
+        KL divergence compares two distributions. The higher the divergence value (relative entropy), the larger the \
+        difference between the two distributions. A relative entropy of zero indicates that the data are \
+        distributed identically, `when binned according to the provided partition`.
+
         In many practical contexts, choosing a value between 0.5 and 1 will provide a useful test.
 
         This expectation works on both categorical and continuous partitions. See notes below for details.
@@ -2523,16 +2531,25 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             column (str): \
                 The column name.
             partition_object (dict): \
-                the partition_object with which to compare the data in column
+                The expected partition object (see :ref:`partition_object`).
             threshold (float): \
-                the threshold below which the test should be considered to have passed
+                The maximum KL divergence to for which to return `success=True`. If KL divergence is larger than the\
+                provided threshold, the test will return `success=False`.
 
         Keyword Args:
-            internal_weight_holdout (float): \
-                the amount of weight to split uniformly among zero-weighted partition elements.
-            tail_weight_holdout (float): \
-                the amount of weight to split uniformly and add to the tails of the histogram
-                (i.e. the area between -Infinity and the data's min value and between the data's max value and Infinity)
+            internal_weight_holdout (float between 0 and 1 or None): \
+                The amount of weight to split uniformly among zero-weighted partition bins. internal_weight_holdout \
+                provides a mechanims to make the test less strict by assigning positive weights to values observed in \
+                the data for which the partition explicitly expected zero weight. With no internal_weight_holdout, \
+                any value observed in such a region will cause KL divergence to rise to +Infinity.\
+                Defaults to 0.
+            tail_weight_holdout (float between 0 and 1 or None): \
+                The amount of weight to add to the tails of the histogram. Tail weight holdout is split evenly between\
+                (-Infinity, min(partition_object['bins'])) and (max(partition_object['bins']), +Infinity). \
+                tail_weight_holdout provides a mechanism to make the test less strict by assigning positive weights to \
+                values observed in the data that are not present in the partition. With no tail_weight_holdout, \
+                any value observed outside the provided partition_object will cause KL divergence to rise to +Infinity.\
+                Defaults to 0.
 
         Other Parameters:
             output_format (str or None): \
@@ -2567,16 +2584,25 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                   }
                 }
 
-            If the partition_object is categorical, this expectation will expect the values in column to also be categorical.
+            If the partition_object is categorical, this expectation will expect the values in column to also be \
+            categorical.
 
-                * If the column includes values that are not present in the partition, the tail_weight_holdout will be equally split among those values, providing a mechanism to weaken the strictness of the expectation (otherwise, relative entropy would immediately go to infinity).
-                * If the partition includes values that are not present in the column, the test will simply include zero weight for that value.
+                * If the column includes values that are not present in the partition, the tail_weight_holdout will be \
+                equally split among those values, providing a mechanism to weaken the strictness of the expectation \
+                (otherwise, relative entropy would immediately go to infinity).
+                * If the partition includes values that are not present in the column, the test will simply include \
+                zero weight for that value.
 
-            If the partition_object is continuous, this expectation will discretize the values in the column according to the bins specified in the partition_object, and apply the test to the resulting distribution.
+            If the partition_object is continuous, this expectation will discretize the values in the column according \
+            to the bins specified in the partition_object, and apply the test to the resulting distribution.
 
-                * The internal_weight_holdout and tail_weight_holdout parameters provide a mechanism to weaken the expectation, since an expected weight of zero would drive relative entropy to be infinite if any data are observed in that interval.
-                * If internal_weight_holdout is specified, that value will be distributed equally among any intervals with weight zero in the partition_object.
-                * If tail_weight_holdout is specified, that value will be appended to the tails of the bins ((-Infinity, min(bins)) and (max(bins), Infinity).
+                * The internal_weight_holdout and tail_weight_holdout parameters provide a mechanism to weaken the \
+                expectation, since an expected weight of zero would drive relative entropy to be infinite if any data \
+                are observed in that interval.
+                * If internal_weight_holdout is specified, that value will be distributed equally among any intervals \
+                with weight zero in the partition_object.
+                * If tail_weight_holdout is specified, that value will be appended to the tails of the bins \
+                ((-Infinity, min(bins)) and (max(bins), Infinity).
 
         See also:
             expect_column_chisquare_test_p_value_to_be_greater_than
