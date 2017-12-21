@@ -32,15 +32,15 @@ class MetaPandasDataSet(DataSet):
 
     @classmethod
     def column_map_expectation(cls, func):
-        """
-        The column_map_expectation decorator handles boilerplate issues surrounding the common pattern of evaluating
-        truthiness of some condition on a per row basis.
+        """Constructs an expectation using column-map semantics.
 
-        NOTE: The MetaPandasDataSet implementation replaces the "column" parameter supplied by the user with a pandas Series
+
+        The MetaPandasDataSet implementation replaces the "column" parameter supplied by the user with a pandas Series
         object containing the actual column from the relevant pandas dataframe. This simplifies the implementing expectation
         logic while preserving the standard DataSet signature and expected behavior.
 
-        Further, the column_map_expectation provides a unique set of output_format options and handles the optional "mostly" parameter.
+        See :func:`column_map_expectation <great_expectations.dataset.base.DataSet.column_map_expectation>` \
+        for full documentation of this function.
         """
 
         @cls.expectation(inspect.getargspec(func)[0][1:])
@@ -84,15 +84,14 @@ class MetaPandasDataSet(DataSet):
 
     @classmethod
     def column_aggregate_expectation(cls, func):
-        """
-        The column_aggregate_expectation decorator handles boilerplate issues surrounding computing aggregate measures
-        from all nonnull values in a column.
+        """Constructs an expectation using column-aggregate semantics.
 
-        NOTE: The MetaPandasDataSet implementation replaces the "column" parameter supplied by the user with a pandas
+        The MetaPandasDataSet implementation replaces the "column" parameter supplied by the user with a pandas
         Series object containing the actual column from the relevant pandas dataframe. This simplifies the implementing
         expectation logic while preserving the standard DataSet signature and expected behavior.
 
-        Further, the column_aggregate_expectation provides a unique set of output_format options.
+        See :func:`column_aggregate_expectation <great_expectations.dataset.base.DataSet.column_aggregate_expectation>` \
+        for full documentation of this function.
         """
         @cls.expectation(inspect.getargspec(func)[0][1:])
         @wraps(func)
@@ -198,32 +197,51 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
     @DocInherit
     @DataSet.expectation(['min_value', 'max_value'])
-    def expect_table_row_count_to_be_between(self, min_value=0, max_value=None,
-                                             output_format=None, include_config=False, catch_exceptions=None, meta=None):
+    def expect_table_row_count_to_be_between(self,
+        min_value=0,
+        max_value=None,
+        output_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
         # Assert that min_value and max_value are integers
-        if min_value is not None and not float(min_value).is_integer():
+        try:
+            if min_value is not None:
+                float(min_value).is_integer()
+
+            if max_value is not None:
+                float(max_value).is_integer()
+
+        except ValueError:
             raise ValueError("min_value and max_value must be integers")
 
-        if max_value is not None and not float(max_value).is_integer():
-            raise ValueError("min_value and max_value must be integers")
+        row_count = self.shape[0]
 
-        #FIXME: Missing logic for Nones in min_ and max_value
-        if min_value <= self.shape[0] <= max_value:
-            outcome = True
-        else:
-            outcome = False
+        if min_value != None and max_value != None:
+            outcome = row_count >= min_value and row_count <= max_value
+
+        elif min_value == None and max_value != None:
+            outcome = row_count <= max_value
+
+        elif min_value != None and max_value == None:
+            outcome = row_count >= min_value
 
         return {
-            'success':outcome,
-            'true_value': self.shape[0]
+            'success': outcome,
+            'true_value': row_count
         }
 
     @DocInherit
     @DataSet.expectation(['value'])
-    def expect_table_row_count_to_equal(self, value,
-                                        output_format=None, include_config=False, catch_exceptions=None, meta=None):
-        if value is not None and not float(value).is_integer():
+    def expect_table_row_count_to_equal(self,
+        value,
+        output_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
+        try:
+            if value is not None:
+                float(value).is_integer()
+
+        except ValueError:
             raise ValueError("value must be an integer")
+
 
         if self.shape[0] == value:
             outcome = True
@@ -543,11 +561,16 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
             raise ValueError("min_value and max_value cannot both be None")
 
         # Assert that min_value and max_value are integers
-        if min_value is not None and not float(min_value).is_integer():
+        try:
+            if min_value is not None and not float(min_value).is_integer():
+                raise ValueError("min_value and max_value must be integers")
+
+            if max_value is not None and not float(max_value).is_integer():
+                raise ValueError("min_value and max_value must be integers")
+        
+        except ValueError:
             raise ValueError("min_value and max_value must be integers")
 
-        if max_value is not None and not float(max_value).is_integer():
-            raise ValueError("min_value and max_value must be integers")
 
         def length_is_between(val):
             if min_value != None and max_value != None:
@@ -782,27 +805,6 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
             ),
             "true_value": proportion_unique,
             "summary_obj": {}
-        }
-
-    @DocInherit
-    @MetaPandasDataSet.column_aggregate_expectation
-    def expect_column_most_common_value_to_be(self, column, value, ties_okay=None,
-                                              output_format=None, include_config=False, catch_exceptions=None, meta=None):
-
-        mode_list = list(column.mode().values)
-
-        if ties_okay:
-            success = value in mode_list
-        else:
-            if len(mode_list) > 1:
-                success = False
-            else:
-                success = value == mode_list[0]
-
-        return {
-            "success" : success,
-            "true_value": mode_list,
-            "summary_obj": {},
         }
 
     @DocInherit
