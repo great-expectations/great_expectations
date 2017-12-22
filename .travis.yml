@@ -14,6 +14,7 @@ install:
   - if [ $PANDAS=latest ]; then pip install pandas; else pip install pandas==$PANDAS; fi
   - pip install coverage coveralls
   - pip install -r requirements.txt
+  - pip install great_expectations
 script:
   - coverage run --source great_expectations -m unittest tests
   - coveralls
