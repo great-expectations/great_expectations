@@ -5,11 +5,11 @@ import json
 
 #!!! This is a hack to allow testing of this CLT without
 #!!! re-installing great_expectations every time there's an edit
-# import sys
-# import os
-# import os.path
-# dir_path = os.path.dirname(os.path.realpath(__file__))
-# sys.path.append(dir_path+'/..')
+import sys
+import os
+import os.path
+dir_path = os.path.dirname(os.path.realpath(__file__))
+sys.path.append(dir_path+'/..')
 
 import great_expectations as ge
 
