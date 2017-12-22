@@ -1,0 +1,21 @@
+package:
+  name: great_expectations
+  version: "0.2"
+
+source:
+  git_rev: "0.2"
+  git_url: https://github.com/great-expectations/great_expectations.git
+
+requirements:
+  build:
+    - python
+    - setuptools
+
+  run:
+    - python
+
+
+about:
+  home: https://github.com/great-expectations/great_expectations
+  license: Apache-2.0
+  license_file: LICENSE
