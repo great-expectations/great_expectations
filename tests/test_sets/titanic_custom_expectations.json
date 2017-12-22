@@ -1,0 +1,11 @@
+{
+  "expectations": [
+    {
+      "expectation_type": "expect_column_values_to_have_odd_lengths", 
+      "kwargs": {
+        "column": "Name"
+      }
+    }
+ ], 
+  "dataset_name": null
+}

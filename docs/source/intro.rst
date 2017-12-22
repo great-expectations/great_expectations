@@ -12,7 +12,7 @@ Introduction
 What is Great Expectations?
 --------------------------------------------------------------------------------
 
-Great Expectations is a python framework for bringing data pipelines and products under test.
+Great Expectations is a framework for bringing data pipelines and products under test.
 
 Software developers have long known that automated testing is essential for managing complex codebases. Great Expectations brings the same discipline, confidence, and acceleration to data science and engineering teams.
 
@@ -35,13 +35,23 @@ See :ref:`workflow_advantages` to learn more about how Great Expectations speeds
 Getting started
 --------------------------------------------------------------------------------
 
-...is easy. Just clone the repository and install using pip.
+...is easy. Just use pip install:
+
+.. code-block:: bash
+
+    $ pip install great_expecatations
+
+You can also clone the repository, which includes examples of using great_expectations.
 
 .. code-block:: bash
 
     $ git clone https://github.com/great-expectations/great_expectations.git
     $ pip install great_expectations/
 
-.. _`pipeline testing`: irc://freenode.net
-.. _`workflow advantages`: http://github.com/example/crawler/issues
+Since Great Expectation is under active development, the `develop` branch is often a ahead of the latest production release. If you want to work from the latest commit on `develop`, we recommend you install by branch name or hash.
 
+branch-name:
+
+.. code-block:: bash
+
+	$ pip install git+git://github.com/great-expectations/great_expectations.git@develop

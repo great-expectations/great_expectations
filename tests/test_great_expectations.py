@@ -7,49 +7,7 @@ import numpy as np
 
 import great_expectations as ge
 from great_expectations.dataset import PandasDataSet, MetaPandasDataSet
-
-
-## Taken from the following stackoverflow: https://stackoverflow.com/questions/23549419/assert-that-two-dictionaries-are-almost-equal
-def assertDeepAlmostEqual(test_case, expected, actual, *args, **kwargs):
-    """
-    Assert that two complex structures have almost equal contents.
-
-    Compares lists, dicts and tuples recursively. Checks numeric values
-    using test_case's :py:meth:`unittest.TestCase.assertAlmostEqual` and
-    checks all other values with :py:meth:`unittest.TestCase.assertEqual`.
-    Accepts additional positional and keyword arguments and pass those
-    intact to assertAlmostEqual() (that's how you specify comparison
-    precision).
-
-    :param test_case: TestCase object on which we can call all of the basic
-    'assert' methods.
-    :type test_case: :py:class:`unittest.TestCase` object
-    """
-    is_root = not '__trace' in kwargs
-    trace = kwargs.pop('__trace', 'ROOT')
-    try:
-       # if isinstance(expected, (int, float, long, complex)):
-        if isinstance(expected, (int, float, complex)):
-            test_case.assertAlmostEqual(expected, actual, *args, **kwargs)
-        elif isinstance(expected, (list, tuple, np.ndarray)):
-            test_case.assertEqual(len(expected), len(actual))
-            for index in range(len(expected)):
-                v1, v2 = expected[index], actual[index]
-                assertDeepAlmostEqual(test_case, v1, v2,
-                                      __trace=repr(index), *args, **kwargs)
-        elif isinstance(expected, dict):
-            test_case.assertEqual(set(expected), set(actual))
-            for key in expected:
-                assertDeepAlmostEqual(test_case, expected[key], actual[key],
-                                      __trace=repr(key), *args, **kwargs)
-        else:
-            test_case.assertEqual(expected, actual)
-    except AssertionError as exc:
-        exc.__dict__.setdefault('traces', []).append(trace)
-        if is_root:
-            trace = ' -> '.join(reversed(exc.traces))
-            exc = AssertionError("%s\nTRACE: %s" % (exc.message, trace))
-        raise exc
+from .util import assertDeepAlmostEqual
 
 def isprime(n):
     #https://stackoverflow.com/questions/18833759/python-prime-number-checker
@@ -91,7 +49,7 @@ class TestCustomClass(unittest.TestCase):
     def test_custom_class(self):
         script_path = os.path.dirname(os.path.realpath(__file__))
         df = ge.read_csv(
-            script_path+'/examples/Titanic.csv',
+            script_path+'/test_sets/Titanic.csv',
             dataset_class=CustomPandasDataSet
         )
         df.set_default_expectation_argument("output_format", "COMPLETE")
@@ -112,11 +70,11 @@ class TestCustomClass(unittest.TestCase):
 class TestValidation(unittest.TestCase):
     def test_validate(self):
 
-        with open("./tests/examples/titanic_expectations.json") as f:
+        with open("./tests/test_sets/titanic_expectations.json") as f:
             my_expectations_config = json.load(f)
 
         my_df = ge.read_csv(
-            "./tests/examples/Titanic.csv",
+            "./tests/test_sets/Titanic.csv",
             expectations_config=my_expectations_config
         )
         my_df.set_default_expectation_argument("output_format", "COMPLETE")
@@ -124,7 +82,7 @@ class TestValidation(unittest.TestCase):
         results = my_df.validate(catch_exceptions=False)
         # print json.dumps(results, indent=2)
 
-        with open('./tests/examples/expected_results_20170721.json') as f:
+        with open('./tests/test_sets/expected_results_20170721.json') as f:
             expected_results = json.load(f)
             # print json.dumps(expected_results, indent=2)
 
@@ -150,13 +108,23 @@ class TestValidation(unittest.TestCase):
                             )
 
 
+        validation_results = my_df.validate(only_return_failures=True)
+        # print json.dumps(validation_results, indent=2)
+        assertDeepAlmostEqual(
+            self,
+            validation_results,
+            {"results": [{"exception_traceback": None, "expectation_type": "expect_column_values_to_be_in_set", "success": False, "exception_list": ["*"], "raised_exception": False, "kwargs": {"column": "PClass", "output_format": "COMPLETE", "values_set": ["1st", "2nd", "3rd"]}, "exception_index_list": [456]}]}
+        )
+
+
+
 class TestRepeatedAppendExpectation(unittest.TestCase):
     def test_validate(self):
 
-        with open("./tests/examples/titanic_expectations.json") as f:
+        with open("./tests/test_sets/titanic_expectations.json") as f:
             my_expectations_config = json.load(f)
 
-        my_df = ge.read_csv("./tests/examples/Titanic.csv")
+        my_df = ge.read_csv("./tests/test_sets/Titanic.csv")
 
         self.assertEqual(
             len(my_df.get_expectations_config()['expectations']),
