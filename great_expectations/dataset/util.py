@@ -1,123 +1,292 @@
-#!! This is a second copy of this file. Inelegant.
+# Utility methods for dealing with DataSet objects
 
+from __future__ import division
 import numpy as np
 from scipy import stats
 import pandas as pd
+import warnings
+import sys
+import copy
+import json
+import datetime
+
+from functools import wraps
 
 
 class DotDict(dict):
     """dot.notation access to dictionary attributes"""
+
     def __getattr__(self, attr):
         return self.get(attr)
+
     __setattr__= dict.__setitem__
     __delattr__= dict.__delitem__
+
     def __dir__(self):
         return self.keys()
 
-def ensure_json_serializable(test_dict):
-    # Validate that all aruguments are of approved types, coerce if it's easy, else exception
-    # TODO: ensure in-place iteration like this is okay
-    for key in test_dict:
-        ## TODO: Brittle if non python3 (unicode, long type?)
-        if isinstance(test_dict[key], (list, tuple, str, int, float, bool)):
-            # No problem to encode json
-            continue
+    #Cargo-cultishly copied from: https://github.com/spindlelabs/pyes/commit/d2076b385c38d6d00cebfe0df7b0d1ba8df934bc
+    def __deepcopy__(self, memo):
+        return DotDict([(copy.deepcopy(k, memo), copy.deepcopy(v, memo)) for k, v in self.items()])
 
-        elif test_dict[key] is None:
-            continue
 
-        elif isinstance(test_dict[key], (np.ndarray, pd.Index)):
-            #TODO: Evaluate risk of precision loss in this call and weigh options for performance
-            test_dict[key] = test_dict[key].tolist()
+class DocInherit(object):
+    """Docstring inheriting method descriptor
 
-        elif isinstance(test_dict[key], dict):
-            test_dict[key] = ensure_json_serializable(test_dict[key])
+    The class itself is also used as a decorator
+    doc_inherit decorator
 
+    Usage::
+
+        class Foo(object):
+            def foo(self):
+                "Frobber"
+                pass
+
+        class Bar(Foo):
+            @doc_inherit
+            def foo(self):
+                pass
+
+        Now, Bar.foo.__doc__ == Bar().foo.__doc__ == Foo.foo.__doc__ == "Frobber"
+        
+        # From https://stackoverflow.com/questions/2025562/inherit-docstrings-in-python-class-inheritance
+
+    """
+
+    def __init__(self, mthd):
+        self.mthd = mthd
+        self.name = mthd.__name__
+
+    def __get__(self, obj, cls):
+        if obj is not None:
+            return self.get_with_inst(obj, cls)
         else:
-            try:
-                # In Python 2, unicode and long should still be valid.
-                # This will break in Python 3 and throw the exception instead.
-                if isinstance(test_dict[key], (long, unicode)):
-                    # No problem to encode json
-                    continue
-            except:
-                raise TypeError(key + ' is type ' + type(test_dict[key]).__name__ + ' which cannot be serialized.')
+            return self.get_no_inst(cls)
 
-    return test_dict
+    def get_with_inst(self, obj, cls):
+
+        overridden = getattr(super(cls, obj), self.name, None)
+
+        @wraps(self.mthd, assigned=('__name__', '__module__'))
+        def f(*args, **kwargs):
+            return self.mthd(obj, *args, **kwargs)
+
+        return self.use_parent_doc(f, overridden)
+
+    def get_no_inst(self, cls):
+
+        for parent in cls.__mro__[1:]:
+            overridden = getattr(parent, self.name, None)
+            if overridden: break
+
+        @wraps(self.mthd, assigned=('__name__', '__module__'))
+        def f(*args, **kwargs):
+            return self.mthd(*args, **kwargs)
+
+        return self.use_parent_doc(f, overridden)
+
+    def use_parent_doc(self, func, source):
+        if source is None:
+            raise NameError("Can't find '%s' in parents" % self.name)
+        func.__doc__ = source.__doc__
+        return func
+
+
+def recursively_convert_to_json_serializable(test_obj):
+    """
+    Helper function to convert a dict object to one that is serializable
+
+    Args:
+        test_obj: an object to attempt to convert a corresponding json-serializable object
+
+    Returns:
+        (dict) A converted test_object
+
+    Warning:
+        test_obj may also be converted in place.
+
+    FIXME: Somebody else must have already written this function. Can we use a fully-baked version instead?
+    """
+    # Validate that all aruguments are of approved types, coerce if it's easy, else exception
+    # print(type(test_obj), test_obj)
+
+    if isinstance(test_obj, (str, int, float, bool)):
+        # No problem to encode json
+        return test_obj
+
+    elif test_obj is None:
+        # No problem to encode json
+        return test_obj
+
+    elif isinstance(test_obj, dict):
+        new_dict = {}
+        for key in test_obj:
+            new_dict[key] = recursively_convert_to_json_serializable(test_obj[key])
+
+        return new_dict
+
+    elif isinstance(test_obj, (list, tuple, set)):
+        new_list = []
+        for val in test_obj:
+            new_list.append(recursively_convert_to_json_serializable(val))
+
+        return new_list
+
+    elif isinstance(test_obj, (np.ndarray, pd.Index)):
+        #test_obj[key] = test_obj[key].tolist()
+        ## If we have an array or index, convert it first to a list--causing coercion to float--and then round
+        ## to the number of digits for which the string representation will equal the float representation
+        return [recursively_convert_to_json_serializable(x) for x in test_obj.tolist()]
+
+    elif isinstance(test_obj, np.int64):
+        return int(test_obj)
+
+    elif isinstance(test_obj, np.float64):
+        return float(round(test_obj, sys.float_info.dig))
+
+    elif isinstance(test_obj, (datetime.datetime, datetime.date)):
+        return str(test_obj)
+
+
+    else:
+        try:
+            # In Python 2, unicode and long should still be valid.
+            # This will break in Python 3 and throw the exception instead.
+            if isinstance(test_obj, (long, unicode)):
+                # No problem to encode json
+                return test_obj
+        except:
+            raise TypeError('%s is of type %s which cannot be serialized.' % (str(test_obj), type(test_obj).__name__))
+
 
 def is_valid_partition_object(partition_object):
-    """Convenience method for determing whether a given partition object is a valid weighted partition of the real number line.
+    """Tests whether a given object is a valid continuous or categorical partition object.
+    :param partition_object: The partition_object to evaluate
+    :return: Boolean
     """
-    if (partition_object is None) or ("partition" not in partition_object) or ("weights" not in partition_object):
+    if is_valid_continuous_partition_object(partition_object) or is_valid_categorical_partition_object(partition_object):
+        return True
+    return False
+
+
+def is_valid_categorical_partition_object(partition_object):
+    """Tests whether a given object is a valid categorical partition object.
+    :param partition_object: The partition_object to evaluate
+    :return: Boolean
+    """
+    if partition_object is None or ("weights" not in partition_object) or ("values" not in partition_object):
         return False
-    if (len(partition_object['partition']) != (len(partition_object['weights']) + 1)):
-        if (len(partition_object['partition']) != len(partition_object['weights'])):
-            return False
-    # TODO: Evaluate desired tolerance for weights
-    if (abs(np.sum(partition_object['weights']) - 1) > 1e-6):
+    # Expect the same number of values as weights; weights should sum to one
+    if len(partition_object['values']) == len(partition_object['weights']) and \
+            np.allclose(np.sum(partition_object['weights']), 1):
+        return True
+    return False
+
+
+def is_valid_continuous_partition_object(partition_object):
+    """Tests whether a given object is a valid continuous partition object.
+    :param partition_object: The partition_object to evaluate
+    :return: Boolean
+    """
+    if (partition_object is None) or ("weights" not in partition_object) or ("bins" not in partition_object):
         return False
-    return True
+    # Expect one more bin edge than weight; all bin edges should be monotonically increasing; weights should sum to one
+    if (len(partition_object['bins']) == (len(partition_object['weights']) + 1)) and \
+            np.all(np.diff(partition_object['bins']) > 0) and \
+            np.allclose(np.sum(partition_object['weights']), 1):
+        return True
+    return False
 
 
 def categorical_partition_data(data):
     """Convenience method for creating weights from categorical data.
+    
     Args:
         data (list-like): The data from which to construct the estimate.
+    
     Returns:
-        dict:
+        A new partition object::
+
             {
                 "partition": (list) The categorical values present in the data
                 "weights": (list) The weights of the values in the partition.
             }
     """
-    s = pd.Series(data).value_counts()
-    return {
-        "partition": s.index,
-        "weights":  s.values / (1. * len(data))
-    }
 
-def kde_smooth_data(data):
-    """Convenience method for building a partition and weights using a gaussian Kernel Density Estimate and default bandwidth.
-    Args:
-        data (list-like): The data from which to construct the estimate.
-    Returns:
-        dict:
-            {
-                "partition": (list) The edges of the partial partition of reals implied by the data and covariance_factor,
-                "weights": (list) The densities of the bins implied by the partition.
-            }
-    """
-    kde = stats.kde.gaussian_kde(data)
-    evaluation_partition = np.linspace(start = np.min(data) - (kde.covariance_factor() / 2),
-                            stop = np.max(data) + (kde.covariance_factor() / 2),
-                            num = np.floor(((np.max(data) - np.min(data)) / kde.covariance_factor()) + 1 ).astype(int))
-    cdf_vals = [kde.integrate_box_1d(-np.inf, x) for x in evaluation_partition]
-    evaluation_weights = np.diff(cdf_vals)
-    #evaluation_weights = [cdf_vals[k+1] - cdf_vals[k] for k in range(len(evaluation_partition)-1)]
+    # Make dropna explicit (even though it defaults to true)
+    series = pd.Series(data)
+    value_counts = series.value_counts(dropna=True)
 
-    # We need to account for weight outside the explicit partition at this point since we have smoothed.
-    # Following is basically a crude rule of thumb for what should be -inf and inf as real endpoints.
-    lower_bound = np.min(data) - (1.5 * kde.covariance_factor())
-    upper_bound = np.max(data) + (1.5 * kde.covariance_factor())
-    partition = [ lower_bound ] + evaluation_partition.tolist() + [ upper_bound ]
-    weights = [ cdf_vals[0] ] + evaluation_weights.tolist() + [1 - cdf_vals[-1]]
+    # Compute weights using denominator only of nonnull values
+    null_indexes = series.isnull()
+    nonnull_count = (null_indexes == False).sum()
+
+    weights = value_counts.values / nonnull_count
     return {
-        "partition": partition,
+        "values": value_counts.index.tolist(),
         "weights": weights
     }
 
+
+def kde_partition_data(data, estimate_tails=True):
+    """Convenience method for building a partition and weights using a gaussian Kernel Density Estimate and default bandwidth.
+
+    Args:
+        data (list-like): The data from which to construct the estimate
+        estimate_tails (bool): Whether to estimate the tails of the distribution to keep the partition object finite
+
+    Returns:
+        A new partition_object::
+
+        {
+            "partition": (list) The endpoints of the partial partition of reals,
+            "weights": (list) The densities of the bins implied by the partition.
+        }
+    """
+    kde = stats.kde.gaussian_kde(data)
+    evaluation_bins = np.linspace(start=np.min(data) - (kde.covariance_factor() / 2),
+                                  stop=np.max(data) + (kde.covariance_factor() / 2),
+                                  num=np.floor(((np.max(data) - np.min(data)) / kde.covariance_factor()) + 1 ).astype(int))
+    cdf_vals = [kde.integrate_box_1d(-np.inf, x) for x in evaluation_bins]
+    evaluation_weights = np.diff(cdf_vals)
+
+    if estimate_tails:
+        bins = np.concatenate(([np.min(data) - (1.5 * kde.covariance_factor())],
+                               evaluation_bins,
+                               [np.max(data) + (1.5 * kde.covariance_factor())]))
+    else:
+        bins = np.concatenate(([-np.inf], evaluation_bins, [np.inf]))
+
+    weights = np.concatenate(([cdf_vals[0]], evaluation_weights, [1 - cdf_vals[-1]]))
+
+    return {
+        "bins": bins,
+        "weights": weights
+    }
+
+
 def partition_data(data, bins='auto', n_bins=10):
-    """Convenience method for building a partition and weights using simple options.
+    warnings.warn("partition_data is deprecated and will be removed. Use either continuous_partition_data or \
+                    categorical_partition_data instead.", DeprecationWarning)
+    return continuous_partition_data(data, bins, n_bins)
+
+
+def continuous_partition_data(data, bins='auto', n_bins=10):
+    """Convenience method for building a partition object on continuous data
+
     Args:
         data (list-like): The data from which to construct the estimate.
         bins (string): One of 'uniform' (for uniformly spaced bins), 'ntile' (for percentile-spaced bins), or 'auto' (for automatically spaced bins)
         n_bins (int): Ignored if bins is auto.
+
     Returns:
-        dict:
-            {
-                "partition": (list) The endpoints of the partial partition of reals,
-                "weights": (list) The densities of the bins implied by the partition.
-            }
+        A new partition_object::
+
+        {
+            "bins": (list) The endpoints of the partial partition of reals,
+            "weights": (list) The densities of the bins implied by the partition.
+        }
     """
     if bins == 'uniform':
         bins = np.linspace(start=np.min(data), stop=np.max(data), num = n_bins+1)
@@ -128,27 +297,7 @@ def partition_data(data, bins='auto', n_bins=10):
 
     hist, bin_edges = np.histogram(data, bins, density=False)
 
-    #TODO: Evaluate numpy deprecation of np.histogram's normed option to ensure we're okay with the numerical issues here.
-    # Probably we're having bigger problems through serialization.
-
-    #TODO: Consider proper weighting if data includes null values
     return {
-        "partition": bin_edges,
-        "weights": hist / (1.*len(data))
+        "bins": bin_edges,
+        "weights": hist / len(data)
     }
-
-def remove_empty_intervals(partition_object):
-    partition_object['weights'] = np.array(partition_object['weights'])
-    partition_object['partition'] = np.array(partition_object['partition'])
-    for k in range(len(partition_object['weights'])):
-        if (partition_object['weights'][k] == 0):
-
-            #del(partition_object['weights'][k])
-            partition_object['weights'] = np.delete(partition_object['weights'],k)
-            if ( (k + 1) < len(partition_object['weights'])):
-                interval = partition_object['partition'][k+1] - partition_object['partition'][k]
-                partition_object['partition'][k+1] = partition_object['partition'][k+1] - (interval / 2)
-            #del(partition_object['partition'][k])
-            partition_object['partition'] =np.delete(partition_object['partition'],k)
-            return remove_empty_intervals(partition_object)
-    return partition_object

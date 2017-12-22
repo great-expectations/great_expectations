@@ -1,0 +1,51 @@
+{
+  "dataset" : {
+    "w" : [2, 3, 4, 5, 6, 7, 8, 9, 10, null],
+    "x" : ["{\"a\":1}", "{\"a\":2}", "{\"a\":3}", "{\"a\":4}", "{\"a\":5}", null, null, null, null, null]
+  },
+  "tests" : [{
+    "in": {
+      "column": "x",
+      "json_schema": {}
+    },
+    "out": {
+      "exception_list": [],
+      "exception_index_list": [],
+      "success": true
+    }
+  },{
+    "in": {
+      "column": "x",
+      "json_schema": {
+        "properties": {
+          "a": {
+            "type": "integer"
+          }
+        },
+        "required": ["a"]
+      }
+    },
+    "out": {
+      "exception_list": [],
+      "exception_index_list": [],
+      "success": true
+    }
+  },{
+    "in": {
+      "column": "x",
+      "json_schema": {
+        "properties": {
+          "a": {
+            "type": "integer"
+          }
+        },
+        "required": ["b"]
+      }
+    },
+    "out": {
+      "exception_list": ["{\"a\":1}", "{\"a\":2}", "{\"a\":3}", "{\"a\":4}", "{\"a\":5}"],
+      "exception_index_list": [0,1,2,3,4],
+      "success": false
+    }
+  }]
+}

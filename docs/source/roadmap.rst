@@ -1,14 +1,15 @@
 Roadmap
 =======
-Updated August 2017
+Updated December 2017
 
-0.3
----
-* Testing coverage and multi-platform support
-
-Beyond
-------
-* Support non-tabular datasources and generic datasources API
-* Database constraint/schema <-> expectation api
-* Support streaming datasets
+v0.4
+---------------
+* Support for meta variables
 * Support for multi-column expectations
+
+v0.5
+---------------
+* Generic datasources API (SQL, Spark, Spark Streaming)
+  - Support non-tabular datasources (e.g. JSON, XML, AVRO)
+  - Real-time/streaming and adaption of distributional expectations
+  - Database constraint/schema <-> expectation api
