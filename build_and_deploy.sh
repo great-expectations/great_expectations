@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 rm -r dist/*
 rm -r build/*
 rmdir dist
