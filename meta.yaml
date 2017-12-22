@@ -1,9 +1,9 @@
 package:
   name: great_expectations
-  version: "0.2"
+  version: "0.3.0"
 
 source:
-  git_rev: "0.2"
+  git_rev: "0.3.0"
   git_url: https://github.com/great-expectations/great_expectations.git
 
 requirements:
