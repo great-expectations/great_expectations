@@ -510,7 +510,7 @@ class TestDataset(unittest.TestCase):
                     'exception_percent_nonmissing': None,
                     'missing_count': 20,
                     'missing_percent': 1.0,
-                    'partial_exception_counts': {},
+                    'partial_exception_counts': [],
                     'partial_exception_index_list': [],
                     'partial_exception_list': []
                 }
@@ -594,7 +594,7 @@ class TestDataset(unittest.TestCase):
                     'exception_percent_nonmissing': None,
                     'missing_count': 0,
                     'missing_percent': None,
-                    'partial_exception_counts': {},
+                    'partial_exception_counts': [],
                     'partial_exception_index_list': [],
                     'partial_exception_list': []
                 }
