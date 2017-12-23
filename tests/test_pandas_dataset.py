@@ -1,6 +1,7 @@
 import unittest
 import json
 import numpy as np
+import datetime
 
 import great_expectations as ge
 
@@ -22,8 +23,6 @@ class TestPandasDataset(unittest.TestCase):
             out = json.loads(json.dumps(out))
             self.assertEqual(out, t['out'])
 
-
-
     def test_expect_table_row_count_to_be_between(self):
 
         # Data for testing
@@ -34,29 +33,61 @@ class TestPandasDataset(unittest.TestCase):
         })
         D.set_default_expectation_argument("output_format", "COMPLETE")
 
-        # Tests
-        T = [
-                {
-                    'in':[3,5],
-                    'kwargs':{},
-                    'out':{'success':True, 'true_value':4}},
-                {
-                    'in':[0,1],
-                    'kwargs':{},
-                    'out':{'success':False, 'true_value':4}},
-                {
-                    'in':[4,4],
-                    'kwargs':{},
-                    'out':{'success':True, 'true_value':4}},
-                {
-                    'in':[1,0],
-                    'kwargs':{},
-                    'out':{'success':False, 'true_value':4}}
-        ]
+    def test_expect_column_to_exist(self):
+        print("=== test_expect_column_to_exist ===")
+        with open("./tests/test_sets/expect_column_to_exist_test_set.json") as f:
+            J = json.load(f)
+            D = ge.dataset.PandasDataSet(J["dataset"])
+            D.set_default_expectation_argument("output_format", "COMPLETE")
+            T = J["tests"]
+
+            self.maxDiff = None
 
         for t in T:
-            out = D.expect_table_row_count_to_be_between(*t['in'], **t['kwargs'])
-            self.assertEqual(out, t['out'])
+            print(t)
+            out = D.expect_column_to_exist(**t['in'])
+
+            if 'out' in t:
+                self.assertEqual(out, t['out'])
+
+            if 'error' in t:
+                self.assertEqual(out['raised_exception'], True)
+                self.assertIn(t['error']['traceback_substring'], out['exception_traceback'])
+
+    def test_expect_table_row_count_to_be_between(self):
+
+        # Pulled out into expect_table_row_count_to_be_between_test_set.json
+        # Data for testing
+        # D = ge.dataset.PandasDataSet({
+        #     'c1' : [4,5,6,7],
+        #     'c2' : ['a','b','c','d'],
+        #     'c3' : [None,None,None,None]
+        # })
+        # D.set_default_expectation_argument("output_format", "COMPLETE")
+
+        # # Tests
+        # T = [
+        #         {
+        #             'in':[3,5],
+        #             'kwargs':{},
+        #             'out':{'success':True, 'true_value':4}},
+        #         {
+        #             'in':[0,1],
+        #             'kwargs':{},
+        #             'out':{'success':False, 'true_value':4}},
+        #         {
+        #             'in':[4,4],
+        #             'kwargs':{},
+        #             'out':{'success':True, 'true_value':4}},
+        #         {
+        #             'in':[1,0],
+        #             'kwargs':{},
+        #             'out':{'success':False, 'true_value':4}}
+        # ]
+
+        # for t in T:
+        #     out = D.expect_table_row_count_to_be_between(*t['in'], **t['kwargs'])
+        #     self.assertEqual(out, t['out'])
 
         D = ge.dataset.PandasDataSet({
             'c1':[1,None,3,None,5],
@@ -87,6 +118,27 @@ class TestPandasDataset(unittest.TestCase):
         for t in T:
             out = D.expect_table_row_count_to_be_between(*t['in'], **t['kwargs'])
             self.assertEqual(out, t['out'])
+
+    def test_expect_table_row_count_to_be_between(self):
+        print("=== test_expect_table_row_count_to_be_between ===")
+        with open("./tests/test_sets/expect_table_row_count_to_be_between_test_set.json") as f:
+            J = json.load(f)
+            D = ge.dataset.PandasDataSet(J["dataset"])
+            D.set_default_expectation_argument("output_format", "COMPLETE")
+            T = J["tests"]
+
+            self.maxDiff = None
+
+        for t in T:
+            print(t)
+            out = D.expect_table_row_count_to_be_between(**t['in'])
+
+            if 'out' in t:
+                self.assertEqual(out, t['out'])
+
+            if 'error' in t:
+                self.assertEqual(out['raised_exception'], True)
+                self.assertIn(t['error']['traceback_substring'], out['exception_traceback'])
 
 
     def test_expect_table_row_count_to_equal(self):
@@ -143,6 +195,9 @@ class TestPandasDataset(unittest.TestCase):
         for t in T:
             out = D.expect_table_row_count_to_equal(*t['in'], **t['kwargs'])
             self.assertEqual(out, t['out'])
+
+        with self.assertRaises(ValueError):
+            D.expect_table_row_count_to_equal("c1", value="hello")
 
 
     def test_expect_column_values_to_be_unique(self):
@@ -631,34 +686,30 @@ class TestPandasDataset(unittest.TestCase):
 
         """
 
-        D = ge.dataset.PandasDataSet({
-            'x' : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-            'y' : [1, 2, 3, 4, 5, 6, 7, 8, 9, "abc"],
-            'z' : [1, 2, 3, 4, 5, None, None, None, None, None],
-            'ts' : [
-                'Jan 01 1870 12:00:01',
-                'Dec 31 1999 12:00:01',
-                'Jan 01 2000 12:00:01',
-                'Feb 01 2000 12:00:01',
-                'Mar 01 2000 12:00:01',
-                'Apr 01 2000 12:00:01',
-                'May 01 2000 12:00:01',
-                'Jun 01 2000 12:00:01',
-                None,
-                'Jan 01 2001 12:00:01',
-            ],
-        })
+        with open("./tests/test_sets/expect_column_values_to_be_between_test_set_ADJ.json") as f:
+            fixture = json.load(f)
+
+        dataset = fixture["dataset"]
+        tests = fixture["tests"]
+
+        D = ge.dataset.PandasDataSet(dataset)
         D.set_default_expectation_argument("output_format", "COMPLETE")
 
         self.maxDiff = None
 
-        with open("./tests/test_sets/expect_column_values_to_be_between_test_set_ADJ.json") as f:
-            T = json.load(f)
-            # print json.dumps(T, indent=2)
+        for t in tests:
+            out = D.expect_column_values_to_be_between(**t['in'])
 
-        for t in T:
-            out = D.expect_column_values_to_be_between(**t['in'])#, **t['kwargs'])
-            self.assertEqual(out, t['out'])
+            # print '-'*80
+            print(t)
+            # print(json.dumps(out, indent=2))
+
+            if 'out' in t:
+                self.assertEqual(out, t['out'])
+
+            if 'error' in t:
+                self.assertEqual(out['raised_exception'], True)
+                self.assertIn(t['error']['traceback_substring'], out['exception_traceback'])
 
     def test_expect_column_value_lengths_to_be_between(self):
         D = ge.dataset.PandasDataSet({
@@ -690,6 +741,9 @@ class TestPandasDataset(unittest.TestCase):
 
         with self.assertRaises(TypeError):
             D.expect_column_value_lengths_to_be_between(**{'column':'s4', 'min_value':None, 'max_value':10})
+
+        with self.assertRaises(ValueError):
+            D.expect_column_value_lengths_to_be_between("s4", min_value=None, max_value=None)
 
 
     def test_expect_column_values_to_match_regex(self):
@@ -810,11 +864,6 @@ class TestPandasDataset(unittest.TestCase):
 
     def test_expect_column_values_to_match_strftime_format(self):
         """
-        Cases Tested:
-
-
-        !!! TODO: Add tests for in types and raised exceptions
-
         """
 
         D = ge.dataset.PandasDataSet({
@@ -822,63 +871,92 @@ class TestPandasDataset(unittest.TestCase):
             'us_dates' : ['4/30/2017','4/30/2017','7/4/1776'],
             'us_dates_type_error' : ['4/30/2017','4/30/2017', 5],
             'almost_iso8601' : ['1977-05-25T00:00:00', '1980-05-21T13:47:59', '2017-06-12T23:57:59'],
-            'almost_iso8601_val_error' : ['1977-05-55T00:00:00', '1980-05-21T13:47:59', '2017-06-12T23:57:59']
+            'almost_iso8601_val_error' : ['1977-05-55T00:00:00', '1980-05-21T13:47:59', '2017-06-12T23:57:59'],
+            'already_datetime' : [datetime.datetime(2015,1,1), datetime.datetime(2016,1,1), datetime.datetime(2017,1,1)]
         })
         D.set_default_expectation_argument("output_format", "COMPLETE")
 
         T = [
                 {
                     'in':{'column':'us_dates', 'strftime_format':'%m/%d/%Y'},
-                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}},
+                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}
+                },
                 {
-                    'in':{'column':'us_dates_type_error','strftime_format':'%m/%d/%Y', 'mostly': 0.5},
-                    'out':{'success':True, 'exception_index_list':[2], 'exception_list':[5]}},
+                    'in':{'column':'us_dates_type_error','strftime_format':'%m/%d/%Y', 'mostly': 0.5, 'catch_exceptions': True},
+                    # 'out':{'success':True, 'exception_index_list':[2], 'exception_list':[5]}},
+                    'error':{
+                        'traceback_substring' : 'TypeError'
+                    },
+                },
                 {
-                    'in':{'column':'us_dates_type_error','strftime_format':'%m/%d/%Y'},
-                    'out':{'success':False,'exception_index_list':[2], 'exception_list':[5]}},
+                    'in':{'column':'us_dates_type_error','strftime_format':'%m/%d/%Y', 'catch_exceptions': True},
+                    'error':{
+                        'traceback_substring' : 'TypeError'
+                    }
+                },
                 {
                     'in':{'column':'almost_iso8601','strftime_format':'%Y-%m-%dT%H:%M:%S'},
                     'out':{'success':True,'exception_index_list':[], 'exception_list':[]}},
                 {
                     'in':{'column':'almost_iso8601_val_error','strftime_format':'%Y-%m-%dT%H:%M:%S'},
-                    'out':{'success':False,'exception_index_list':[0], 'exception_list':['1977-05-55T00:00:00']}}
+                    'out':{'success':False,'exception_index_list':[0], 'exception_list':['1977-05-55T00:00:00']}},
+                {
+                    'in':{'column':'already_datetime','strftime_format':'%Y-%m-%d', 'catch_exceptions':True},
+                    # 'out':{'success':False,'exception_index_list':[0], 'exception_list':['1977-05-55T00:00:00']},
+                    'error':{
+                        'traceback_substring' : 'TypeError: Values passed to expect_column_values_to_match_strftime_format must be of type string.'
+                    },
+                }
         ]
 
         for t in T:
             out = D.expect_column_values_to_match_strftime_format(**t['in'])
-            self.assertEqual(out, t['out'])
+            if 'out' in t:
+                self.assertEqual(out, t['out'])
+            elif 'error' in t:
+                self.assertEqual(out['raised_exception'], True)
+                self.assertIn(t['error']['traceback_substring'], out['exception_traceback'])
 
     def test_expect_column_values_to_be_dateutil_parseable(self):
 
         D = ge.dataset.PandasDataSet({
             'c1':['03/06/09','23 April 1973','January 9, 2016'],
             'c2':['9/8/2012','covfefe',25],
-            'c3':['Jared','June 1, 2013','July 18, 1976']
+            'c3':['Jared','June 1, 2013','July 18, 1976'],
+            'already_datetime' : [datetime.datetime(2015,1,1), datetime.datetime(2016,1,1), datetime.datetime(2017,1,1)],
         })
         D.set_default_expectation_argument("output_format", "COMPLETE")
 
         T = [
                 {
-                    'in':['c1'],
-                    'kwargs':{},
+                    'in':{'column': 'c1'},
                     'out':{'success':True, 'exception_list':[], 'exception_index_list': []}},
                 {
-                    'in':['c2'],
-                    'kwargs':{},
-                    'out':{'success':False, 'exception_list':['covfefe', 25], 'exception_index_list': [1, 2]}},
+                    'in':{"column":'c2', "catch_exceptions":True},
+                    # 'out':{'success':False, 'exception_list':['covfefe', 25], 'exception_index_list': [1, 2]}},
+                    'error':{ 'traceback_substring' : 'TypeError: Values passed to expect_column_values_to_be_dateutil_parseable must be of type string' },
+                },
                 {
-                    'in':['c3'],
-                    'kwargs':{},
+                    'in':{"column":'c3'},
                     'out':{'success':False, 'exception_list':['Jared'], 'exception_index_list': [0]}},
                 {
-                    'in':['c3'],
-                    'kwargs':{'mostly':.5},
-                    'out':{'success':True, 'exception_list':['Jared'], 'exception_index_list': [0]}}
+                    'in':{'column': 'c3', 'mostly':.5},
+                    'out':{'success':True, 'exception_list':['Jared'], 'exception_index_list': [0]}
+                },
+                {
+                    'in':{'column':'already_datetime', 'catch_exceptions':True},
+                    'error':{ 'traceback_substring' : 'TypeError: Values passed to expect_column_values_to_be_dateutil_parseable must be of type string' },
+                }
         ]
 
         for t in T:
-            out = D.expect_column_values_to_be_dateutil_parseable(*t['in'], **t['kwargs'])
-            self.assertEqual(out, t['out'])
+            out = D.expect_column_values_to_be_dateutil_parseable(**t['in'])
+            if 'out' in t:
+                self.assertEqual(out, t['out'])
+            elif 'error' in t:
+                self.assertEqual(out['raised_exception'], True)
+                self.assertIn(t['error']['traceback_substring'], out['exception_traceback'])
+
 
     def test_expect_column_values_to_be_json_parseable(self):
         d1 = json.dumps({'i':[1,2,3],'j':35,'k':{'x':'five','y':5,'z':'101'}})
@@ -1004,6 +1082,9 @@ class TestPandasDataset(unittest.TestCase):
         with self.assertRaises(TypeError):
             typedf.expect_column_mean_to_be_between(T[0]['in'])
 
+        with self.assertRaises(ValueError):
+            typedf.expect_column_mean_to_be_between("s")
+
 
 
     def test_expect_column_stdev_to_be_between(self):
@@ -1032,6 +1113,9 @@ class TestPandasDataset(unittest.TestCase):
         for t in T:
             out = D.expect_column_stdev_to_be_between(**t['in'])
             self.assertEqual(out, t['out'])
+
+        with self.assertRaises(ValueError):
+            D.expect_column_stdev_to_be_between("dist1")
 
 
     def test_expect_column_unique_value_count_to_be_between(self):
@@ -1144,46 +1228,6 @@ class TestPandasDataset(unittest.TestCase):
             out = D.expect_column_values_to_be_decreasing(**t['in'])
             self.assertEqual(out, t['out'])
 
-
-    def test_expect_column_most_common_value_to_be(self):
-
-        D = ge.dataset.PandasDataSet({
-            'x' : [1,1,2,2,3,None, None, None, None, None],
-            'y' : ['hello', 'jello', 'mello', 'hello', 'jello', 'mello', 'hello', 'jello', 'mello', 'jello'],
-            'z' : [1,2,2,3,3,3,4,4,4,4],
-        })
-        D.set_default_expectation_argument("output_format", "COMPLETE")
-
-        T = [
-                {
-                    'in':{"column":"x","value":1},
-                    'out':{"success":False, "true_value":[1,2]},
-                },{
-                    'in':{"column":"x", "value":1, "ties_okay":True},
-                    'out':{"success":True, "true_value":[1,2]},
-                },{
-                    'in':{"column":"x","value":3},
-                    'out':{"success":False, "true_value":[1,2]},
-                },{
-                    'in':{"column":"x","value":3, "ties_okay":True},
-                    'out':{"success":False, "true_value":[1,2]},
-                },{
-                    'in':{"column":"y","value":"jello"},
-                    'out':{'success':True, "true_value":["jello"]},
-                },{
-                    'in':{"column":"y","value":"hello"},
-                    'out':{'success':False, "true_value":["jello"]},
-                },{
-                    'in':{"column":"z","value":4},
-                    'out':{'success':True, "true_value":[4]},
-                }
-        ]
-
-        for t in T:
-            out = D.expect_column_most_common_value_to_be(**t['in'])
-            self.assertEqual(out, t['out'])
-
-
     def test_expect_column_most_common_value_to_be_in_set(self):
 
         D = ge.dataset.PandasDataSet({
@@ -1221,12 +1265,78 @@ class TestPandasDataset(unittest.TestCase):
             self.assertEqual(out, t['out'])
 
 
+    def test_expect_column_sum_to_be_between(self):
+        with open("./tests/test_sets/expect_column_sum_to_be_between_test_set.json") as f:
+            J = json.load(f)
+            D = ge.dataset.PandasDataSet(J["dataset"])
+            D.set_default_expectation_argument("output_format", "COMPLETE")
+            T = J["tests"]
+
+            self.maxDiff = None
+
+        for t in T:
+            print(json.dumps(t))
+            out = D.expect_column_sum_to_be_between(**t['in'])
+            print(out)
+
+            if "out" in t:
+                self.assertEqual(out, t['out'])
+
+            if "error" in t:
+                self.assertEqual(out['raised_exception'], True)
+                self.assertIn(t['error']['traceback_substring'], out['exception_traceback'])
+
+    def test_expect_column_min_to_be_between(self):
+        with open("./tests/test_sets/expect_column_min_to_be_between_test_set.json") as f:
+            J = json.load(f)
+            D = ge.dataset.PandasDataSet(J["dataset"])
+            D.set_default_expectation_argument("output_format", "COMPLETE")
+            T = J["tests"]
+
+            self.maxDiff = None
+
+        for t in T:
+            print(json.dumps(t))
+            out = D.expect_column_min_to_be_between(**t['in'])
+            print(out)
+
+            if "out" in t:
+                self.assertEqual(out, t['out'])
+
+            if "error" in t:
+                self.assertEqual(out['raised_exception'], True)
+                self.assertIn(t['error']['traceback_substring'], out['exception_traceback'])
+
+    def test_expect_column_max_to_be_between(self):
+        with open("./tests/test_sets/expect_column_max_to_be_between_test_set.json") as f:
+            J = json.load(f)
+            D = ge.dataset.PandasDataSet(J["dataset"])
+            D.set_default_expectation_argument("output_format", "COMPLETE")
+            T = J["tests"]
+
+            self.maxDiff = None
+
+        for t in T:
+            print(json.dumps(t))
+            out = D.expect_column_max_to_be_between(**t['in'])
+            print(out)
+
+            if "out" in t:
+                self.assertEqual(out, t['out'])
+
+            if "error" in t:
+                self.assertEqual(out['raised_exception'], True)
+                self.assertIn(t['error']['traceback_substring'], out['exception_traceback'])
+
     def test_expectation_decorator_summary_mode(self):
 
         df = ge.dataset.PandasDataSet({
             'x' : [1,2,3,4,5,6,7,7,None,None],
         })
         df.set_default_expectation_argument("output_format", "COMPLETE")
+
+        # print '&'*80
+        # print json.dumps(df.expect_column_values_to_be_between('x', min_value=1, max_value=5, output_format="SUMMARY"), indent=2)
 
         self.maxDiff = None
         self.assertEqual(
@@ -1303,6 +1413,24 @@ class TestPandasDataset(unittest.TestCase):
             {'success':True, 'exception_list':['abc'], 'exception_index_list':[4]}
         )
 
+    def test_output_format_argument_in_decorators(self):
+        df = ge.dataset.PandasDataSet({
+            'x':[1,3,5,7,9],
+            'y':[2,4,6,8,10],
+            'z':[None,'a','b','c','abc']
+        })
+        df.set_default_expectation_argument('output_format', 'COMPLETE')
+
+        #Test explicit Nones in output_format
+        self.assertEqual(
+            df.expect_column_mean_to_be_between('x',4,6, output_format=None),
+            {'success':True, 'true_value':5}
+        )
+
+        self.assertEqual(
+            df.expect_column_values_to_be_between('y',1,6, output_format=None),
+            {'success':False, 'exception_list':[8,10], 'exception_index_list':[3,4]}
+        )
 
     def test_expect_column_pair_values_to_be_equal(self):
         """
@@ -1333,6 +1461,12 @@ class TestPandasDataset(unittest.TestCase):
             "expect_column_pair_values_to_be_in_set",
             "./tests/test_sets/expect_column_pair_values_to_be_in_set_test_set.json",
         )
+        #Test unknown output format
+        with self.assertRaises(ValueError):
+            df.expect_column_values_to_be_between('y',1,6, output_format="QUACK")
+
+        with self.assertRaises(ValueError):
+            df.expect_column_mean_to_be_between('x',4,6, output_format="QUACK")
 
 if __name__ == "__main__":
     unittest.main()
