@@ -1,22 +1,10 @@
 .. _output_format:
 
 ================================================================================
-Expectation result objects
+Expectation output formats
 ================================================================================
 
-Great Expectations tries return results that are contextually rich and informative, follows four basic principles:
-
-* Result objects should be intuitive and self-documenting
-* Result objects should be as consistent across expectations as reasonably possibly
-* Result objects should be as flat as reasonably possible
-* Result objects should help track data lineage
-
-It isn't possible to fully satisfy all these criteria all the time. Here's how Great Expectations handles the tradeoffs.
-
-`output_format`
-------------------------------------------------------------------------------
-
-All Expectations accept an `output_format` parameter. Great Expectations defins four values for `output_format`: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, and `SUMMARY`. The API also allows you to define new formats that mix, match, extend this initial set.
+All Expectations accept an `output_format` parameter. Great Expectations defines four values for `output_format`: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, and `SUMMARY`. The API also allows you to define new formats that mix, match, extend this initial set.
 
 .. code-block:: bash
 
@@ -85,6 +73,8 @@ Behavior for `BOOLEAN_ONLY` result objects
 ------------------------------------------------------------------------------
 ...is simple: if the expectation is satisfied, it returns True. Otherwise it returns False.
 
+.. code-block:: bash
+
     >> my_df.expect_column_values_to_be_in_set(
         "possible_benefactors",
         ["Joe Gargery", "Mrs. Gargery", "Mr. Pumblechook", "Ms. Havisham", "Mr. Jaggers"]
@@ -103,14 +93,22 @@ Behavior for `BASIC` result objects
 ------------------------------------------------------------------------------
 ...depends on the expectation. Great Expectations has native support for three types of Expectations: `column_map_expectation`, `column_aggregate_expectation`, and a base type `expectation`.
 
-`column_map_expectations` apply a boolean test function to each element within a column. The basic format is:
+`column_map_expectations` apply a boolean test function to each element within a column.
+This format is intended for quick, at-a-glance feedback. For example, it tends to work well
+in jupyter notebooks.
+
+The basic format is:
 
 .. code-block:: bash
 
     {
         "success" : Boolean,
-        "partial_exception_list" : [A list of up to 20 values that violate the expectation]
-        "partial_exception_index_list" : [A list of the indexes of those values]
+        "summary_obj" : {
+            "partial_exception_list" : [A list of up to 20 values that violate the expectation]
+            "exception_count" : The total count of exceptions in the column
+            "exception_percent" : The overall percent of exceptions
+            "exception_percent_nonmissing" : The percent of exceptions, excluding mising values from the denominator
+        }
     }
 
 
@@ -118,18 +116,23 @@ Note: when exception values are duplicated, `exception_list` will contain multip
 
 .. code-block:: bash
 
-    [1,2,2,3,3,3]
+    [1,2,2,3,3,3,None,None,None,None]
 
     expect_column_values_to_be_unique
 
     {
         "success" : Boolean,
-        "exception_list" : [2,2,3,3,3]
-        "exception_index_list" : [1,2,3,4,5]
+        "summary_obj" : {
+            "exception_list" : [2,2,3,3,3]
+            "exception_index_list" : [1,2,3,4,5]
+            "exception_count" : 5,
+            "exception_percent" : 0.5,
+            "exception_percent_nonmissing" : 0.8333333,
+        }
     }
 
 
-`column_aggregate_expectations` compute a single value for the column.
+`column_aggregate_expectations` compute a single value for the column and put it into `true_value`.
 
 Format:
 
@@ -205,61 +208,57 @@ For `column_aggregate_expectations`, `SUMMARY` output is the same as `BASIC` out
     }
 
 
+Quick reference
+-------------------------------------------------------------------------------
 
-`include_config`
-------------------------------------------------------------------------------
++---------------------------------------+-------+-----------+---------------------------+
+| Expectation result fields             |BASIC  |SUMMARY    |COMPLETE                   |
++=======================================+=======+===========+===========================+
+|success (boolean)                      |Included for all 3 output_formats              |
++---------------------------------------+-------+-----------+---------------------------+
++---------------------------------------+-------+-----------+---------------------------+
+|expectation_type (string)              |Included if and only if include_config=True    |
++---------------------------------------+-------+-----------+---------------------------+
+|expectation_kwargs (dict)              |Included if and only if include_config=True    |
++---------------------------------------+-------+-----------+---------------------------+
+|raised_exception (boolean)             |Included if and only if catch_exceptions=True  |
++---------------------------------------+-------+-----------+---------------------------+
+|exception_traceback (string or None)   |Included if and only if catch_exceptions=True  |
++---------------------------------------+-------+-----------+---------------------------+
+|meta (dict)                            |Included if and only if meta=True              |
++---------------------------------------+-------+-----------+---------------------------+
+|true_value (depends)                   |Included for all column_aggregate_expectations |
++---------------------------------------+-------+-----------+---------------------------+
++---------------------------------------+-------+-----------+---------------------------+
+|exception_index_list (list)            |no     |no         |yes                        |
++---------------------------------------+-------+-----------+---------------------------+
+|exception_list (list)                  |no     |no         |yes                        |
++---------------------------------------+-------+-----------+---------------------------+
+|summary_obj (dict)                     |yes    |yes        |no                         |
++---------------------------------------+-------+-----------+---------------------------+
 
-In addition, all Expectations accept a boolean `include_config` parameter. If true, then the expectation config itself is returned as part of the result object
++---------------------------------------+----------------------+------------------------+
+|Fields within `summary_obj`            |BASIC                 |SUMMARY                 |
++=======================================+======================+========================+
+|    partial_exception_list             |yes*                  |yes*                    |
++---------------------------------------+----------------------+------------------------+
+|    partial_exception_index_list       |no                    |yes*                    |
++---------------------------------------+----------------------+------------------------+
+|    exception_count                    |yes*                  |yes*                    |
++---------------------------------------+----------------------+------------------------+
+|    exception_percent                  |yes*                  |yes*                    |
++---------------------------------------+----------------------+------------------------+
+|    exception_percent_nonmissing       |yes*                  |yes*                    |
++---------------------------------------+----------------------+------------------------+
+|    element_count                      |no                    |yes                     |
++---------------------------------------+----------------------+------------------------+
+|    missing_count                      |no                    |yes                     |
++---------------------------------------+----------------------+------------------------+
+|    missing_percent                    |no                    |yes                     |
++---------------------------------------+----------------------+------------------------+
+|    partial_exception_counts           |no                    |yes*                    |
++---------------------------------------+----------------------+------------------------+
+|    Other...                           |Defined on a case by case basis.               |
++---------------------------------------+----------------------+------------------------+
 
-.. code-block:: bash
-
-    >> expect_column_values_to_be_in_set(
-        "my_var",
-        ['B', 'C', 'D', 'F', 'G', 'H'],
-        output_format="COMPLETE",
-        include_config=True,
-    )
-
-    {
-        'exception_index_list': [0, 10, 11, 12, 13, 14],
-        'exception_list': ['A', 'E', 'E', 'E', 'E', 'E'],
-        'expectation_type': 'expect_column_values_to_be_in_set',
-        'expectation_kwargs': {
-            'column': 'my_var',
-            'output_format': 'COMPLETE',
-            'value_set': ['B', 'C', 'D', 'F', 'G', 'H']
-        },
-        'success': False
-    }
-
-`catch_exceptions`
-------------------------------------------------------------------------------
-
-All Expectations accept a boolean `catch_exceptions` parameter. If true, execution will not fail if the Expectation encounters an error. Instead, it will return False and (in `BASIC` and `SUMMARY` modes) an informative error message
-
-.. code-block:: bash
-
-    {
-        "result": False,
-        "raised_exception": True,
-        "exception_traceback": "..."
-    }
-
-`catch_exceptions` is on by default in command-line validation mode, and off by default in exploration mode.
-
-
-DataSet defaults
-------------------------------------------------------------------------------
-
-This default behavior for `output_format`, `include_config`, `catch_exceptions` can be overridden at the DataSet level:
-
-.. code-block:: bash
-
-    my_dataset.set_default_expectation_argument("output_format", "SUMMARY")
-
-In validation mode, they can be overridden using flags:
-
-.. code-block:: bash
-
-    great_expectations my_dataset.csv my_expectations.json --output_format=BOOLEAN_ONLY --catch_exceptions=False --include_config=True
-
+yes* : These variables are only defined for `column_map_expectations`.

@@ -22,9 +22,11 @@ Advanced
 .. toctree::
    :maxdepth: 2
 
+   standard_arguments
    output_format
    custom_expectations
    conventions
+   roadmap
 
 Indices and tables
 ------------------
