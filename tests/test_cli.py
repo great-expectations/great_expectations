@@ -61,6 +61,9 @@ class TestCLI(unittest.TestCase):
         print(json.dumps(json_result, indent=2))
         self.maxDiff = None
 
+        #Remove partial exception counts, because we can't guarantee that they'll be the same every time.
+        del json_result["results"][8]["summary_obj"]['partial_exception_counts']
+
         assertDeepAlmostEqual(self,
             json_result,
             {
@@ -185,11 +188,11 @@ class TestCLI(unittest.TestCase):
                       "Jacobsohn Mr Samuel", 
                       "Seman Master Betros"
                     ], 
-                    "partial_exception_counts": [
-                      {"value": "Seman Master Betros", "count": 1},
-                      {"value": "Downton (?Douton), Mr William James", "count": 1}, 
-                      {"value": "Jacobsohn Mr Samuel", "count": 1}
-                    ]
+                    # "partial_exception_counts": [
+                    #   {"value": "Seman Master Betros", "count": 1},
+                    #   {"value": "Downton (?Douton), Mr William James", "count": 1}, 
+                    #   {"value": "Jacobsohn Mr Samuel", "count": 1}
+                    # ]
                   }, 
                   "success": True, 
                   "raised_exception": False, 
