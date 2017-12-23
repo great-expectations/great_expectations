@@ -1432,6 +1432,13 @@ class TestPandasDataset(unittest.TestCase):
             {'success':False, 'exception_list':[8,10], 'exception_index_list':[3,4]}
         )
 
+        #Test unknown output format
+        with self.assertRaises(ValueError):
+            df.expect_column_values_to_be_between('y',1,6, output_format="QUACK")
+
+        with self.assertRaises(ValueError):
+            df.expect_column_mean_to_be_between('x',4,6, output_format="QUACK")
+
     def test_expect_column_pair_values_to_be_equal(self):
         """
 
@@ -1461,12 +1468,6 @@ class TestPandasDataset(unittest.TestCase):
             "expect_column_pair_values_to_be_in_set",
             "./tests/test_sets/expect_column_pair_values_to_be_in_set_test_set.json",
         )
-        #Test unknown output format
-        with self.assertRaises(ValueError):
-            df.expect_column_values_to_be_between('y',1,6, output_format="QUACK")
-
-        with self.assertRaises(ValueError):
-            df.expect_column_mean_to_be_between('x',4,6, output_format="QUACK")
 
 if __name__ == "__main__":
     unittest.main()
