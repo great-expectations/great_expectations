@@ -1373,9 +1373,9 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         Keyword Args:
             allow_cross_type_comparisons (boolean or None) : If True, allow comparisons between types (e.g. integer and\
-            string). Otherwise, attempting such comparisons will raise an exception.
+                string). Otherwise, attempting such comparisons will raise an exception.
             parse_strings_as_datetimes (boolean or None) : If True, parse min_value, max_value, and all non-null column\
-            values to datetimes before making comparisons.
+                values to datetimes before making comparisons.
             mostly (None or a float between 0 and 1): \
                 Return `"success": True` if the percentage of exceptions less than or equal to `mostly`. \
                 For more detail, see :ref:`mostly`.
@@ -2728,7 +2728,11 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
     ### Column pairs ###
 
-    def expect_column_pair_values_to_be_equal(self, column_A, column_B, output_format=None, include_config=False, catch_exceptions=None):
+    def expect_column_pair_values_to_be_equal(self,
+        column_A,
+        column_B,
+        output_format=None, include_config=False, catch_exceptions=None
+    ):
         """
         Expect the values in this column to have lower Kulback-Leibler divergence (relative entropy) with the distriution provided in partition_object of less than the provided threshold.
 
@@ -2739,7 +2743,13 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         """
         raise NotImplementedError
 
-    def expect_column_pair_values_to_be_greater_than(self, column_A, column_B, or_equal=None, output_format=None, include_config=False, catch_exceptions=None):
+    def expect_column_A_values_to_be_greater_than_column_B(self,
+        column_A,
+        column_B,
+        or_equal=None,
+        allow_cross_type_comparisons=None,
+        output_format=None, include_config=False, catch_exceptions=None
+    ):
         """
         Expect the values in this column to have lower Kulback-Leibler divergence (relative entropy) with the distriution provided in partition_object of less than the provided threshold.
 
@@ -2748,11 +2758,20 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             column_B (str): The second column name
             or_equal (boolean or None): If True, then values can be equal, not strictly greater
 
+        Keyword Args:
+            allow_cross_type_comparisons (boolean or None) : If True, allow comparisons between types (e.g. integer and\
+                string). Otherwise, attempting such comparisons will raise an exception.
+
         """
         raise NotImplementedError
 
 
-    def expect_column_pair_values_to_be_in_set(self, column_A, column_B, value_pairs_set, output_format=None, include_config=False, catch_exceptions=None):
+    def expect_column_pair_values_to_be_in_set(self,
+        column_A,
+        column_B,
+        value_pairs_set,
+        output_format=None, include_config=False, catch_exceptions=None
+    ):
         """
         Expect the values in this column to have lower Kulback-Leibler divergence (relative entropy) with the distriution provided in partition_object of less than the provided threshold.
 
@@ -2760,5 +2779,6 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             column_A (str): The first column name
             column_B (str): The second column name
             value_pairs_set (list of lists): All the valid pairs to be matched
+
         """
         raise NotImplementedError
