@@ -1,11 +1,32 @@
 .. _output_format:
 
 ================================================================================
-Expectation output formats
+Expectation result object formats
 ================================================================================
 
-All Expectations accept an `output_format` parameter. Great Expectations defines four values for `output_format`: \
-`BOOLEAN_ONLY`, `BASIC`, `SUMMARY`, and `COMPLETE`.
+All Expectations accept a `result_obj_format` parameter, which controls what information is returned from the \
+evaluation of an expectation. The value of `result_obj_format` does not affect the other configurations affecting \
+return values such as `include_config` and `catch_excpetions`.
+
+Great Expectations defines four values for `result_obj_format`: `NONE`, `BASIC`, `SUMMARY`, and `COMPLETE`. \
+Each value supports a different use case for working with Great Expectations, including interactive exploratory work \
+and automatic validation.
+
++---------------------------------------+--------------------------------------------------------------+
+| `result_obj_format` Setting           | Primary use case                                             |
++=======================================+==============================================================+
+|    NONE                               | Automatic validation. No result_obj is returned.             |
++---------------------------------------+--------------------------------------------------------------+
+|    BASIC                              | Exploratory analysis in a notebook.                          |
++---------------------------------------+--------------------------------------------------------------+
+|    SUMMARY                            | Detailed exploratory work with follow-on investigation.      |
++---------------------------------------+--------------------------------------------------------------+
+|    COMPLETE                           | Debugging pipelines or developing detailed regression tests. |
++---------------------------------------+--------------------------------------------------------------+
+
+
+result_obj_format examples
+------------------------------------------------------------------------------
 
 .. code-block:: bash
 
@@ -15,105 +36,120 @@ All Expectations accept an `output_format` parameter. Great Expectations defines
     >> my_df.expect_column_values_to_be_in_set(
         "my_var",
         ["B", "C", "D", "F", "G", "H"],
-        output_format="BOOLEAN_ONLY"
-    )
-    False
-
-    >> my_df.expect_column_values_to_be_in_set(
-        "my_var",
-        ["B", "C", "D", "F", "G", "H"],
-        output_format="BASIC"
+        result_obj_format="NONE"
     )
     {
-        'success': False,
-        'summary_obj': {
-            'exception_count': 6,
-            'exception_percent': 0.16666666666666666,
-            'exception_percent_nonmissing': 0.16666666666666666,
-            'partial_exception_list': ['A', 'E', 'E', 'E', 'E', 'E']
-        }
+        'success': False
     }
 
     >> my_df.expect_column_values_to_be_in_set(
         "my_var",
         ["B", "C", "D", "F", "G", "H"],
-        output_format="COMPLETE"
+        result_obj_format="BASIC"
     )
     {
-        'exception_index_list': [0, 10, 11, 12, 13, 14],
-        'exception_list': ['A', 'E', 'E', 'E', 'E', 'E'],
-        'success': False
+        'success': False,
+        'result_obj': {
+            'unexpected_count': 6,
+            'unexpected_percent': 0.16666666666666666,
+            'unexpected_percent_nonmissing': 0.16666666666666666,
+            'partial_unexpected_list': ['A', 'E', 'E', 'E', 'E', 'E']
+        }
     }
 
     >> expect_column_values_to_match_regex(
         "my_column",
         "[A-Z][a-z]+",
-        output_format="SUMMARY"
+        result_obj_format="SUMMARY"
     )
     {
         'success': False,
-        'summary_obj': {
+        'result_obj': {
             'element_count': 36,
-            'exception_count': 6,
-            'exception_percent': 0.16666666666666666,
-            'exception_percent_nonmissing': 0.16666666666666666,
+            'unexpected_count': 6,
+            'unexpected_percent': 0.16666666666666666,
+            'unexpected_percent_nonmissing': 0.16666666666666666,
             'missing_count': 0,
             'missing_percent': 0.0,
-            'partial_exception_counts': {'A': 1, 'E': 5},
-            'partial_exception_index_list': [0, 10, 11, 12, 13, 14],
-            'partial_exception_list': ['A', 'E', 'E', 'E', 'E', 'E']
+            'partial_unexpected_counts': {'A': 1, 'E': 5},
+            'partial_unexpected_index_list': [0, 10, 11, 12, 13, 14],
+            'partial_unexpected_list': ['A', 'E', 'E', 'E', 'E', 'E']
         }
     }
 
-The out-of-the-box default is `output_format=BASIC`.
+    >> my_df.expect_column_values_to_be_in_set(
+        "my_var",
+        ["B", "C", "D", "F", "G", "H"],
+        result_obj_format="COMPLETE"
+    )
+    {
+        'success': False,
+        'result_obj': {
+            'unexpected_index_list': [0, 10, 11, 12, 13, 14],
+            'unexpected_list': ['A', 'E', 'E', 'E', 'E', 'E']
+        }
+    }
 
-Note: accepting a single parameter for `output_format` should make the library of formats relatively easy to extend in the future.
 
 
-Behavior for `BOOLEAN_ONLY` result objects
+The out-of-the-box default is `result_obj_format=BASIC`.
+
+
+Behavior for `NONE`
 ------------------------------------------------------------------------------
-...is simple: if the expectation is satisfied, it returns True. Otherwise it returns False.
+When the `result_obj_format` is `NONE`, no `result_obj` is returned. The result of evaluating the expectation is \
+exclusively returned via the value of the `success` parameter.
+
+For example:
 
 .. code-block:: bash
 
     >> my_df.expect_column_values_to_be_in_set(
         "possible_benefactors",
         ["Joe Gargery", "Mrs. Gargery", "Mr. Pumblechook", "Ms. Havisham", "Mr. Jaggers"]
-        output_format="BOOLEAN_ONLY"
+        result_obj_format="BOOLEAN_ONLY"
     )
-    False
+    {
+        'success': False
+    }
 
     >> my_df.expect_column_values_to_be_in_set(
         "possible_benefactors",
         ["Joe Gargery", "Mrs. Gargery", "Mr. Pumblechook", "Ms. Havisham", "Mr. Jaggers", "Mr. Magwitch"]
-        output_format="BOOLEAN_ONLY"
+        result_obj_format="BOOLEAN_ONLY"
     )
-    False
+    {
+        'success': False
+    }
 
-Behavior for `BASIC` result objects
+
+Behavior for `BASIC`
 ------------------------------------------------------------------------------
-...depends on the expectation. Great Expectations has native support for three types of Expectations: `column_map_expectation`, `column_aggregate_expectation`, and a base type `expectation`.
+A `result_obj` is generated with a basic justification for why an expectation was met or not. The format is intended \
+for quick, at-a-glance feedback. For example, it tends to work well in jupyter notebooks.
 
-`column_map_expectations` apply a boolean test function to each element within a column.
-This format is intended for quick, at-a-glance feedback. For example, it tends to work well
-in jupyter notebooks.
+Great Expectations has standard behavior for support for describing the results of `column_map_expectation` and
+`column_aggregate_expectation` expectations.
 
-The basic format is:
+`column_map_expectation` applies a boolean test function to each element within a column, and so returns a list of \
+unexpected values to justify the expectation result.
+
+
+The basic `result_obj` includes:
 
 .. code-block:: bash
 
     {
         "success" : Boolean,
-        "summary_obj" : {
-            "partial_exception_list" : [A list of up to 20 values that violate the expectation]
-            "exception_count" : The total count of exceptions in the column
-            "exception_percent" : The overall percent of exceptions
-            "exception_percent_nonmissing" : The percent of exceptions, excluding mising values from the denominator
+        "result_obj" : {
+            "partial_unexpected_list" : [A list of up to 20 values that violate the expectation]
+            "unexpected_count" : The total count of unexpected values in the column
+            "unexpected_percent" : The overall percent of unexpected values
+            "unexpected_percent_nonmissing" : The percent of unexpected values, excluding missing values from the denominator
         }
     }
 
-
-Note: when exception values are duplicated, `exception_list` will contain multiple copies of the value.
+Note: when unexpected values are duplicated, `unexpected_list` will contain multiple copies of the value.
 
 .. code-block:: bash
 
@@ -123,143 +159,270 @@ Note: when exception values are duplicated, `exception_list` will contain multip
 
     {
         "success" : Boolean,
-        "summary_obj" : {
-            "exception_list" : [2,2,3,3,3]
-            "exception_index_list" : [1,2,3,4,5]
-            "exception_count" : 5,
-            "exception_percent" : 0.5,
-            "exception_percent_nonmissing" : 0.8333333,
+        "result_obj" : {
+            "partial_unexpected_list" : [2,2,3,3,3]
+            "unexpected_count" : 5,
+            "unexpected_percent" : 0.5,
+            "unexpected_percent_nonmissing" : 0.8333333
         }
     }
 
 
-`column_aggregate_expectations` compute a single value for the column and put it into `true_value`.
+`column_aggregate_expectation` computes a single aggregate value for the column, and so returns a single `true_value` \
+to justify the expectation result.
 
-Format:
+The basic `result_obj` includes:
+
+.. code-block:: bash
+
+
+    {
+        "success" : Boolean,
+        "result_obj" : {
+            "true_value" : The aggregate statistic computed for the column
+        }
+    }
+    
+For example:
+
+.. code-block:: bash
+
+    [1, 1, 2, 2]
+
+    expect_column_mean_to_be_between
+
+    {
+        "success" : Boolean,
+        "result_obj" : {
+            "true_value" : 1.5
+        }
+    }
+
+
+Behavior for `SUMMARY`
+------------------------------------------------------------------------------
+A `result_obj` is generated with a summary justification for why an expectation was met or not. The format is intended \
+for more detailed exploratory work and includes additional information beyond what is included by `BASIC`.
+For example, it can support generating dashboard results of whether a set of expectations are being met.
+
+Great Expectations has standard behavior for support for describing the results of `column_map_expectation` and
+`column_aggregate_expectation` expectations.
+
+`column_map_expectation` applies a boolean test function to each element within a column, and so returns a list of \
+unexpected values to justify the expectation result.
+
+The summary `result_obj` includes:
 
 .. code-block:: bash
 
     {
-        "success" : Boolean,
-        "true_value" : Depends
+        'success': False,
+        'result_obj': {
+            'element_count': The total number of values in the column
+            'unexpected_count': The total count of unexpected values in the column (also in `BASIC`)
+            'unexpected_percent': The overall percent of unexpected values (also in `BASIC`)
+            'unexpected_percent_nonmissing': The percent of unexpected values, excluding missing values from the denominator (also in `BASIC`)
+            "partial_unexpected_list" : [A list of up to 20 values that violate the expectation] (also in `BASIC`)
+            'missing_count': The number of missing values in the column
+            'missing_percent': The total percent of missing values in the column
+            'partial_unexpected_counts': {A dictionary of the number of times each of the unexpected values occurs}
+            'partial_unexpected_index_list': [A list of up to 20 of the indices of the unexpected values in the column]
+        }
     }
-    
 
 For example:
 
 .. code-block:: bash
 
-    expect_table_row_count_to_be_between
-
-    {
-        "success" : true,
-        "true_value" : 7
-    }
-
-
-    expect_column_stdev_to_be_between
-    {
-        "success" : false
-        "true_value" : 3.04
-    }
-
-    expect_column_most_common_value_to_be
-    {
-        "success" : ...
-        "true_value" : ...
-    }
-
-
-Behavior for `SUMMARY` result objects
-------------------------------------------------------------------------------
-
-`SUMMARY` provides a `summary_obj` with values usef of common exception values. For `column_map_expectations`, the standard format is:
-
-.. code-block:: bash
-
     {
         'success': False,
-        'summary_obj': {
+        'result_obj': {
             'element_count': 36,
-            'exception_count': 6,
-            'exception_percent': 0.16666666666666666,
-            'exception_percent_nonmissing': 0.16666666666666666,
+            'unexpected_count': 6,
+            'unexpected_percent': 0.16666666666666666,
+            'unexpected_percent_nonmissing': 0.16666666666666666,
             'missing_count': 0,
             'missing_percent': 0.0,
-            'partial_exception_counts': {'A': 1, 'E': 5},
-            'partial_exception_index_list': [0, 10, 11, 12, 13, 14],
-            'partial_exception_list': ['A', 'E', 'E', 'E', 'E', 'E']
+            'partial_unexpected_counts': {'A': 1, 'E': 5},
+            'partial_unexpected_index_list': [0, 10, 11, 12, 13, 14],
+            'partial_unexpected_list': ['A', 'E', 'E', 'E', 'E', 'E']
         }
     }
 
 
+`column_aggregate_expectation` computes a single aggregate value for the column, and so returns a `true_value` \
+to justify the expectation result. It also includes additional information regarding observed values and counts, \
+depending on the specific expectation.
 
-For `column_aggregate_expectations`, `SUMMARY` output is the same as `BASIC` output, plus a `summary_obj`.
+
+The summary `result_obj` includes:
+
 
 .. code-block:: bash
 
     {
         'success': False,
-        'true_value': 3.04,
-        'summary_obj': {
-            'element_count': 77,
-            'missing_count': 7,
-            'missing_percent': 0.1,
+        'result_obj': {
+            'true_value': The aggregate statistic computed for the column (also in `BASIC`)
+            'element_count': The total number of values in the column
+            'missing_count':  The number of missing values in the column
+            'missing_percent': The total percent of missing values in the column
+            <expectation-specific result justification fields>
+        }
+    }
+
+For example:
+
+.. code-block:: bash
+
+    [1, 1, 2, 2, NaN]
+
+    expect_column_mean_to_be_between
+
+    {
+        "success" : Boolean,
+        "result_obj" : {
+            "true_value" : 1.5,
+            'element_count': 5,
+            'missing_count: 1,
+            'missing_percent: 0.2
         }
     }
 
 
-Quick reference
+Behavior for `COMPLETE`
+------------------------------------------------------------------------------
+A `result_obj` is generated with all available justification for why an expectation was met or not. The format is \
+intended for debugging pipelines or developing detailed regression tests.
+
+Great Expectations has standard behavior for support for describing the results of `column_map_expectation` and
+`column_aggregate_expectation` expectations.
+
+`column_map_expectation` applies a boolean test function to each element within a column, and so returns a list of \
+unexpected values to justify the expectation result.
+
+The complete `result_obj` includes:
+
+.. code-block:: bash
+
+    {
+        'success': False,
+        'result_obj': {
+            "unexpected_list" : [A list of all values that violate the expectation]
+            'unexpected_index_list': [A list of the indices of the unexpected values in the column]
+            'element_count': The total number of values in the column (also in `SUMMARY`)
+            'unexpected_count': The total count of unexpected values in the column (also in `SUMMARY`)
+            'unexpected_percent': The overall percent of unexpected values (also in `SUMMARY`)
+            'unexpected_percent_nonmissing': The percent of unexpected values, excluding missing values from the denominator (also in `SUMMARY`)
+            'missing_count': The number of missing values in the column  (also in `SUMMARY`)
+            'missing_percent': The total percent of missing values in the column  (also in `SUMMARY`)
+        }
+    }
+
+For example:
+
+.. code-block:: bash
+
+    {
+        'success': False,
+        'result_obj': {
+            'element_count': 36,
+            'unexpected_count': 6,
+            'unexpected_percent': 0.16666666666666666,
+            'unexpected_percent_nonmissing': 0.16666666666666666,
+            'missing_count': 0,
+            'missing_percent': 0.0,
+            'unexpected_index_list': [0, 10, 11, 12, 13, 14],
+            'unexpected_list': ['A', 'E', 'E', 'E', 'E', 'E']
+        }
+    }
+
+
+`column_aggregate_expectation` computes a single aggregate value for the column, and so returns a `true_value` \
+to justify the expectation result. It also includes additional information regarding observed values and counts, \
+depending on the specific expectation.
+
+
+The complete `result_obj` includes:
+
+
+.. code-block:: bash
+
+    {
+        'success': False,
+        'result_obj': {
+            'true_value': The aggregate statistic computed for the column (also in `SUMMARY`)
+            'element_count': The total number of values in the column (also in `SUMMARY`)
+            'missing_count':  The number of missing values in the column (also in `SUMMARY`)
+            'missing_percent': The total percent of missing values in the column (also in `SUMMARY`)
+            <expectation-specific result justification fields, which may be more detailed than in `SUMMARY`>
+        }
+    }
+
+For example:
+
+.. code-block:: bash
+
+    [1, 1, 2, 2, NaN]
+
+    expect_column_mean_to_be_between
+
+    {
+        "success" : Boolean,
+        "result_obj" : {
+            "true_value" : 1.5,
+            'element_count': 5,
+            'missing_count: 1,
+            'missing_percent: 0.2
+        }
+    }
+
+
+
+Result_obj Output Format Reference
 -------------------------------------------------------------------------------
 
-+---------------------------------------+-------+-----------+---------------------------+
-| Expectation result fields             |BASIC  |SUMMARY    |COMPLETE                   |
-+=======================================+=======+===========+===========================+
-|success (boolean)                      |Included for all 3 output_formats              |
-+---------------------------------------+-------+-----------+---------------------------+
-+---------------------------------------+-------+-----------+---------------------------+
-|expectation_type (string)              |Included if and only if include_config=True    |
-+---------------------------------------+-------+-----------+---------------------------+
-|expectation_kwargs (dict)              |Included if and only if include_config=True    |
-+---------------------------------------+-------+-----------+---------------------------+
-|raised_exception (boolean)             |Included if and only if catch_exceptions=True  |
-+---------------------------------------+-------+-----------+---------------------------+
-|exception_traceback (string or None)   |Included if and only if catch_exceptions=True  |
-+---------------------------------------+-------+-----------+---------------------------+
-|meta (dict)                            |Included if and only if meta=True              |
-+---------------------------------------+-------+-----------+---------------------------+
-|true_value (depends)                   |Included for all column_aggregate_expectations |
-+---------------------------------------+-------+-----------+---------------------------+
-+---------------------------------------+-------+-----------+---------------------------+
-|exception_index_list (list)            |no     |no         |yes                        |
-+---------------------------------------+-------+-----------+---------------------------+
-|exception_list (list)                  |no     |no         |yes                        |
-+---------------------------------------+-------+-----------+---------------------------+
-|summary_obj (dict)                     |yes    |yes        |no                         |
-+---------------------------------------+-------+-----------+---------------------------+
++---------------------------------------+----------------------+------------------------+----------------+
+|Fields within `result_obj `            |BASIC                 |SUMMARY                 |COMPLETE        |
++=======================================+======================+========================+================+
+|    unexpected_index_list*             |no                    |no                      |yes             |
++---------------------------------------+----------------------+------------------------+----------------+
+|    unexpected_list*                   |no                    |no                      |yes             |
++---------------------------------------+----------------------+------------------------+----------------+
+|    partial_unexpected_list*           |yes                   |yes                     |no              |
++---------------------------------------+----------------------+------------------------+----------------+
+|    partial_unexpected_index_list*     |no                    |yes                     |no              |
++---------------------------------------+----------------------+------------------------+----------------+
+|    partial_unexpected_counts*         |no                    |yes                     |no              |
++---------------------------------------+----------------------+------------------------+----------------+
+|    true_value+                        |yes                   |yes                     |yes             |
++---------------------------------------+----------------------+------------------------+----------------+
+|    unexpected_count                   |yes                   |yes                     |yes             |
++---------------------------------------+----------------------+------------------------+----------------+
+|    unexpected_percent                 |yes                   |yes                     |yes             |
++---------------------------------------+----------------------+------------------------+----------------+
+|    unexpected_percent_nonmissing      |yes                   |yes                     |yes             |
++---------------------------------------+----------------------+------------------------+----------------+
+|    element_count                      |no                    |yes                     |yes             |
++---------------------------------------+----------------------+------------------------+----------------+
+|    missing_count                      |no                    |yes                     |yes             |
++---------------------------------------+----------------------+------------------------+----------------+
+|    missing_percent                    |no                    |yes                     |yes             |
++---------------------------------------+----------------------+------------------------+----------------+
+|    Other...                           |Defined on per-expectation basis                                |
++---------------------------------------+----------------------+------------------------+----------------+
 
-+---------------------------------------+----------------------+------------------------+
-|Fields within `summary_obj`            |BASIC                 |SUMMARY                 |
-+=======================================+======================+========================+
-|    partial_exception_list             |yes*                  |yes*                    |
-+---------------------------------------+----------------------+------------------------+
-|    partial_exception_index_list       |no                    |yes*                    |
-+---------------------------------------+----------------------+------------------------+
-|    exception_count                    |yes*                  |yes*                    |
-+---------------------------------------+----------------------+------------------------+
-|    exception_percent                  |yes*                  |yes*                    |
-+---------------------------------------+----------------------+------------------------+
-|    exception_percent_nonmissing       |yes*                  |yes*                    |
-+---------------------------------------+----------------------+------------------------+
-|    element_count                      |no                    |yes                     |
-+---------------------------------------+----------------------+------------------------+
-|    missing_count                      |no                    |yes                     |
-+---------------------------------------+----------------------+------------------------+
-|    missing_percent                    |no                    |yes                     |
-+---------------------------------------+----------------------+------------------------+
-|    partial_exception_counts           |no                    |yes*                    |
-+---------------------------------------+----------------------+------------------------+
-|    Other...                           |Defined on a case by case basis.               |
-+---------------------------------------+----------------------+------------------------+
+* : These variables are only defined for `column_map_expectation` type expectations.
++ : These variables are only defined for `column_aggregate_expectation` type expectations.
 
-yes* : These variables are only defined for `column_map_expectations`.
+
+
+Top-level return objectReference
+-------------------------------------------------------------------------------
+After evaluating an expectation, Great Expectations will return the following fields:
+ - success (boolean): always
+ - result_obj: Included if result_obj_output_format is not `NONE`
+ - expectation_config: Included if and only if include_config=True
+ - raised_exception (boolean): Included if and only if catch_exceptions=True
+ - exceptions: Included if and only if catch_exceptions=True
+ - exception_traceback (string or None) Included if and only if catch_exceptions=True
