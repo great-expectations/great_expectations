@@ -4,7 +4,8 @@
 Expectation output formats
 ================================================================================
 
-All Expectations accept an `output_format` parameter. Great Expectations defines four values for `output_format`: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, and `SUMMARY`. The API also allows you to define new formats that mix, match, extend this initial set.
+All Expectations accept an `output_format` parameter. Great Expectations defines four values for `output_format`: \
+`BOOLEAN_ONLY`, `BASIC`, `SUMMARY`, and `COMPLETE`.
 
 .. code-block:: bash
 
