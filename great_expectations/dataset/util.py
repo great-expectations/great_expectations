@@ -49,48 +49,39 @@ class DocInherit(object):
                 pass
 
         Now, Bar.foo.__doc__ == Bar().foo.__doc__ == Foo.foo.__doc__ == "Frobber"
-        
-        # From https://stackoverflow.com/questions/2025562/inherit-docstrings-in-python-class-inheritance
 
+        Original implementation cribbed from:
+        https://stackoverflow.com/questions/2025562/inherit-docstrings-in-python-class-inheritance,
+        following a discussion on comp.lang.python that resulted in:
+        http://code.activestate.com/recipes/576862/. Unfortunately, the
+        original authors did not anticipate deep inheritance hierarchies, and
+        we ran into a recursion issue when implementing custom subclasses of
+        PandasDataSet:
+        https://github.com/great-expectations/great_expectations/issues/177.
+
+        Our new homegrown implementation directly searches the MRO, instead
+        of relying on super.
     """
-
     def __init__(self, mthd):
         self.mthd = mthd
         self.name = mthd.__name__
 
     def __get__(self, obj, cls):
-        if obj is not None:
-            return self.get_with_inst(obj, cls)
-        else:
-            return self.get_no_inst(cls)
+        doc = None
 
-    def get_with_inst(self, obj, cls):
-
-        overridden = getattr(super(cls, obj), self.name, None)
+        for parent in cls.mro():
+            if self.name not in parent.__dict__:
+                continue
+            doc = parent.__dict__[self.name].__doc__
+            if doc is not None:
+                break
 
         @wraps(self.mthd, assigned=('__name__', '__module__'))
         def f(*args, **kwargs):
             return self.mthd(obj, *args, **kwargs)
 
-        return self.use_parent_doc(f, overridden)
-
-    def get_no_inst(self, cls):
-
-        for parent in cls.__mro__[1:]:
-            overridden = getattr(parent, self.name, None)
-            if overridden: break
-
-        @wraps(self.mthd, assigned=('__name__', '__module__'))
-        def f(*args, **kwargs):
-            return self.mthd(*args, **kwargs)
-
-        return self.use_parent_doc(f, overridden)
-
-    def use_parent_doc(self, func, source):
-        if source is None:
-            raise NameError("Can't find '%s' in parents" % self.name)
-        func.__doc__ = source.__doc__
-        return func
+        f.__doc__ = doc
+        return f
 
 
 def recursively_convert_to_json_serializable(test_obj):
