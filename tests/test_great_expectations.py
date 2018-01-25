@@ -66,6 +66,20 @@ class TestCustomClass(unittest.TestCase):
             {'exception_list': [], 'exception_index_list': [], 'success': True}
         )
 
+   # Ensure that Custom Data Set classes can properly call non-overridden methods from their parent class
+    def test_base_class_expectation(self):
+        df = CustomPandasDataSet({
+            "aaa": [1, 2, 3, 4, 5],
+            "bbb": [10, 20, 30, 40, 50],
+            "ccc": [9, 10, 11, 12, 13],
+        })
+
+
+        self.assertEqual(
+            df.expect_column_values_to_be_between("aaa", min_value=1, max_value=5)['success'],
+            True
+        )
+
 
 class TestValidation(unittest.TestCase):
     def test_validate(self):
