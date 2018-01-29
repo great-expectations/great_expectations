@@ -1323,10 +1323,12 @@ class TestPandasDataset(unittest.TestCase):
                     "missing_count" : 2,
                     "missing_percent" : .2,
                     "exception_count" : 3,
-                    "partial_exception_counts": {
-                        6.0 : 1,
-                        7.0 : 2,
-                    },
+                    "partial_exception_counts": [
+                        {"value": 7.0,
+                         "count": 2},
+                        {"value": 6.0,
+                         "count": 1}
+                    ],
                     "exception_percent": 0.3,
                     "exception_percent_nonmissing": 0.375,
                     "partial_exception_list" : [6.0,7.0,7.0],
