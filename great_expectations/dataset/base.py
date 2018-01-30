@@ -7,8 +7,10 @@ from functools import wraps
 import traceback
 import warnings
 
-import pandas as pd
-from collections import defaultdict
+from collections import (
+    Counter,
+    defaultdict
+)
 
 from ..version import __version__
 from .util import DotDict, recursively_convert_to_json_serializable, DocInherit
@@ -696,11 +698,13 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             missing_count = element_count-int(len(nonnull_values))#int(null_indexes.sum())
             exception_count = len(exception_list)
 
-            exception_value_series = pd.Series(exception_list).value_counts().iloc[:20]
-            partial_exception_counts = dict(zip(
-                list(exception_value_series.index),
-                list(exception_value_series.values),
-            ))
+            partial_exception_counts = [
+                {'value': key, 'count': value}
+                for key, value
+                in sorted(
+                    Counter(exception_list).most_common(20),
+                    key=lambda x: (-x[1], x[0]))
+            ]
 
             if element_count > 0:
                 missing_percent = float(missing_count) / element_count
