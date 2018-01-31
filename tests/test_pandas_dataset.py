@@ -898,6 +898,7 @@ class TestPandasDataset(unittest.TestCase):
             'c1':['03/06/09','23 April 1973','January 9, 2016'],
             'c2':['9/8/2012','covfefe',25],
             'c3':['Jared','June 1, 2013','July 18, 1976'],
+            'c4':['1', '2', '49000004632'],
             'already_datetime' : [datetime.datetime(2015,1,1), datetime.datetime(2016,1,1), datetime.datetime(2017,1,1)],
         })
         D.set_default_expectation_argument("output_format", "COMPLETE")
@@ -917,6 +918,10 @@ class TestPandasDataset(unittest.TestCase):
                 {
                     'in':{'column': 'c3', 'mostly':.5},
                     'out':{'success':True, 'exception_list':['Jared'], 'exception_index_list': [0]}
+                },
+                {
+                    'in':{'column': 'c4'},
+                    'out':{'success':False, 'exception_list':['49000004632'], 'exception_index_list': [2]}
                 },
                 {
                     'in':{'column':'already_datetime', 'catch_exceptions':True},
