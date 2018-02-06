@@ -1,21 +1,73 @@
 .. _output_format:
 
 ================================================================================
-Expectation result object formats
+Expectation result formats
 ================================================================================
 
-All Expectations accept a `result_obj_format` parameter, which controls what information is returned from the \
-evaluation of an expectation. The value of `result_obj_format` does not affect the other configurations affecting \
-return values such as `include_config` and `catch_excpetions`.
+All Expectations return a json-serializable dictionary when evaluated. They accept a `result_format` parameter which \
+controls what information is returned from the evaluation of the expectation expectation.
 
-Great Expectations defines four values for `result_obj_format`: `NONE`, `BASIC`, `SUMMARY`, and `COMPLETE`. \
-Each value supports a different use case for working with Great Expectations, including interactive exploratory work \
-and automatic validation.
+The `result_format` paramter is a dictionary which may include the following keys:
+ - result_obj_format: see :ref:`result_obj_format`
+ - partial_unexpected_count: the number of results to include in partial_unexpected_count, if applicable.
+ - include_config: If true, then the expectation config itself is returned as part of the result object.
+ - catch_exceptions: If true, execution will not fail if the Expectation encounters an error. Instead, it will return \
+ success = False and provide an informative error message.
+
+
+.. _result_obj:
+
+`result_obj_format`
+------------------------------------------------------------------------------
+
+Great Expectations supports four values for `result_obj_format`: `SUCCESS_ONLY`, `BASIC`, `SUMMARY`, and `COMPLETE`. \
+Each successive value includes more detail and so can support different use cases for working with Great Expectations, \
+including interactive exploratory work and automatic validation.
+
+
++---------------------------------------+----------------------+------------------------+----------------+----------------+
+|Fields within `result_obj `            |SUCCESS_ONLY          |BASIC                   |SUMMARY         |COMPLETE        |
++=======================================+======================+========================+================+================+
+|    element_count                      |no                    |yes                     |yes             |yes             |
++---------------------------------------+----------------------+------------------------+----------------+----------------+
+|    missing_count                      |no                    |yes                     |yes             |yes             |
++---------------------------------------+----------------------+------------------------+----------------+----------------+
+|    missing_percent                    |no                    |yes                     |yes             |yes             |
++---------------------------------------+----------------------+------------------------+----------------+----------------+
+|    detail...                          |Defined on per-expectation basis                                                 |
++---------------------------------------+----------------------+------------------------+----------------+----------------+
+| Fields defined only for `column_map_expectation` type expectations:                                                     |
++---------------------------------------+----------------------+------------------------+----------------+----------------+
+|    unexpected_count*                  |no                    |yes                     |yes             |yes             |
++---------------------------------------+----------------------+------------------------+----------------+----------------+
+|    unexpected_percent*                |no                    |yes                     |yes             |yes             |
++---------------------------------------+----------------------+------------------------+----------------+----------------+
+|    unexpected_percent_nonmissing*     |no                    |yes                     |yes             |yes             |
++---------------------------------------+----------------------+------------------------+----------------+----------------+
+|    partial_unexpected_list*           |no                    |yes                     |yes             |yes             |
++---------------------------------------+----------------------+------------------------+----------------+----------------+
+|    partial_unexpected_index_list*     |no                    |no                      |yes             |yes             |
++---------------------------------------+----------------------+------------------------+----------------+----------------+
+|    partial_unexpected_counts*         |no                    |no                      |yes             |yes             |
++---------------------------------------+----------------------+------------------------+----------------+----------------+
+|    unexpected_index_list*             |no                    |no                      |no              |yes             |
++---------------------------------------+----------------------+------------------------+----------------+----------------+
+|    unexpected_list*                   |no                    |no                      |no              |yes             |
++---------------------------------------+----------------------+------------------------+----------------+----------------+
+| Fields defined only for `column_aggregate_expectation` type expectations:
++---------------------------------------+----------------------+------------------------+----------------+----------------+
+|    observed_value+                    |no                    |yes                     |yes             |yes             |
++---------------------------------------+----------------------+------------------------+----------------+----------------+
+
+
+* : These variables are only defined for `column_map_expectation` type expectations.
++ : These variables are only defined for `column_aggregate_expectation` type expectations.
+
 
 +---------------------------------------+--------------------------------------------------------------+
-| `result_obj_format` Setting           | Primary use case                                             |
-+=======================================+==============================================================+
-|    NO_OBJECT                               | Automatic validation. No result_obj is returned.             |
+| `result_obj_format` Setting           | Example use case                                             |
++=================`=====================+==============================================================+
+|    SUCCESS_ONLY                       | Automatic validation. No result_obj is returned.             |
 +---------------------------------------+--------------------------------------------------------------+
 |    BASIC                              | Exploratory analysis in a notebook.                          |
 +---------------------------------------+--------------------------------------------------------------+
@@ -382,38 +434,6 @@ For example:
 Result_obj Output Format Reference
 -------------------------------------------------------------------------------
 
-+---------------------------------------+----------------------+------------------------+----------------+
-|Fields within `result_obj `            |BASIC                 |SUMMARY                 |COMPLETE        |
-+=======================================+======================+========================+================+
-|    unexpected_index_list*             |no                    |no                      |yes             |
-+---------------------------------------+----------------------+------------------------+----------------+
-|    unexpected_list*                   |no                    |no                      |yes             |
-+---------------------------------------+----------------------+------------------------+----------------+
-|    partial_unexpected_list*           |yes                   |yes                     |no              |
-+---------------------------------------+----------------------+------------------------+----------------+
-|    partial_unexpected_index_list*     |no                    |yes                     |no              |
-+---------------------------------------+----------------------+------------------------+----------------+
-|    partial_unexpected_counts*         |no                    |yes                     |no              |
-+---------------------------------------+----------------------+------------------------+----------------+
-|    true_value+                        |yes                   |yes                     |yes             |
-+---------------------------------------+----------------------+------------------------+----------------+
-|    unexpected_count                   |yes                   |yes                     |yes             |
-+---------------------------------------+----------------------+------------------------+----------------+
-|    unexpected_percent                 |yes                   |yes                     |yes             |
-+---------------------------------------+----------------------+------------------------+----------------+
-|    unexpected_percent_nonmissing      |yes                   |yes                     |yes             |
-+---------------------------------------+----------------------+------------------------+----------------+
-|    element_count                      |no                    |yes                     |yes             |
-+---------------------------------------+----------------------+------------------------+----------------+
-|    missing_count                      |no                    |yes                     |yes             |
-+---------------------------------------+----------------------+------------------------+----------------+
-|    missing_percent                    |no                    |yes                     |yes             |
-+---------------------------------------+----------------------+------------------------+----------------+
-|    Other...                           |Defined on per-expectation basis                                |
-+---------------------------------------+----------------------+------------------------+----------------+
-
-* : These variables are only defined for `column_map_expectation` type expectations.
-+ : These variables are only defined for `column_aggregate_expectation` type expectations.
 
 
 
