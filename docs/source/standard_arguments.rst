@@ -4,58 +4,16 @@
 Standard arguments for expectations
 ================================================================================
 
-All expectations share four standard (optional) arguments:
+All Expectations return a json-serializable dictionary when evaluated, and share two standard (optional) arguments:
 
-* `include_config`
-* `catch_exceptions`
-* `meta`
-* `output_format`
+ - :ref:`result_format`: controls what information is returned from the evaluation of the expectation expectation.
+ - :ref:`meta`: allows user-supplied meta-data to be stored with an expectation.
 
-.. _include_config:
 
-`include_config`
+`result_format`
 ------------------------------------------------------------------------------
 
-All Expectations accept a boolean `include_config` parameter. If true, then the expectation config itself is returned as part of the result object
-
-.. code-block:: bash
-
-    >> expect_column_values_to_be_in_set(
-        "my_var",
-        ['B', 'C', 'D', 'F', 'G', 'H'],
-        output_format="COMPLETE",
-        include_config=True,
-    )
-
-    {
-        'exception_index_list': [0, 10, 11, 12, 13, 14],
-        'exception_list': ['A', 'E', 'E', 'E', 'E', 'E'],
-        'expectation_type': 'expect_column_values_to_be_in_set',
-        'expectation_kwargs': {
-            'column': 'my_var',
-            'output_format': 'COMPLETE',
-            'value_set': ['B', 'C', 'D', 'F', 'G', 'H']
-        },
-        'success': False
-    }
-
-.. _catch_exceptions:
-
-`catch_exceptions`
-------------------------------------------------------------------------------
-
-All Expectations accept a boolean `catch_exceptions` parameter. If true, execution will not fail if the Expectation encounters an error. Instead, it will return False and (in `BASIC` and `SUMMARY` modes) an informative error message
-
-.. code-block:: bash
-
-    {
-        "result": False,
-        "raised_exception": True,
-        "exception_traceback": "..."
-    }
-
-`catch_exceptions` is on by default in command-line validation mode, and off by default in exploration mode.
-
+See :ref:`result_format` for more information.
 
 .. _meta:
 
@@ -82,10 +40,6 @@ All Expectations accept an optional `meta` parameter. If `meta` is a valid JSON-
         }
     }
 
-`output_format`
-------------------------------------------------------------------------------
-
-See :ref:`output_format` for more detail.
 
 .. _mostly:
 
@@ -132,19 +86,20 @@ Expectations with `mostly` return exception lists even if they succeed:
     {
       "success": true
       "summary_obj": {
-        "exception_percent": 0.2, 
+        "exception_percent": 0.2,
         "partial_exception_index_list": [
           8,
           9
-        ], 
+        ],
         "partial_exception_list": [
-          8, 
+          8,
           9
-        ], 
-        "exception_percent_nonmissing": 0.2, 
+        ],
+        "exception_percent_nonmissing": 0.2,
         "exception_count": 2
       }
     }
+
 
 DataSet defaults
 ------------------------------------------------------------------------------
