@@ -1,5 +1,11 @@
 Great Expectations Changelog
 
+0.3.1
+-----
+* Fix infinite recursion error when building custom expectations
+* Catch dateutil parsing overflow errors
+* Include requirements file in source dist to support conda
+
 0.2
 ---
 * Distributional expectations and associated helpers are improved and renamed to be more clear regarding the tests they apply
