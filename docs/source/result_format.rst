@@ -31,7 +31,7 @@ including interactive exploratory work and automatic validation.
 +---------------------------------------+----------------+----------------+----------------+----------------+
 |    missing_percent                    |no              |yes             |yes             |yes             |
 +---------------------------------------+----------------+----------------+----------------+----------------+
-|    detail (dictionary)                |Defined on per-expectation basis                                   |
+|    detail (dictionary)                |Defined on a per-expectation basis                                 |
 +---------------------------------------+----------------+----------------+----------------+----------------+
 | Fields defined only for `column_map_expectation` type expectations:                                       |
 +---------------------------------------+----------------+----------------+----------------+----------------+
