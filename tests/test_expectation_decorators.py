@@ -125,7 +125,7 @@ class TestExpectationDecorators(unittest.TestCase):
                 }, 
                 "summary_obj": {
                     "exception_percent": 0.2,
-                    'exception_percent_nonmissing': 0.2,
+                    "exception_percent_nonmissing": 0.2,
                     "partial_exception_list": [
                         2, 
                         4

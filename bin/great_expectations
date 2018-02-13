@@ -18,7 +18,7 @@ def initialize():
 
 @argh.arg('data_set')
 @argh.arg('expectations_config_file')
-@argh.arg('--output_format', '-o', default="BASIC")
+@argh.arg('--output_format', '-o', default="SUMMARY")
 @argh.arg('--catch_exceptions', '-e', default=True)
 @argh.arg('--include_config', '-n', default=None)
 @argh.arg('--only_return_failures', '-f', default=False)

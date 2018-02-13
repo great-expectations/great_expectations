@@ -20,7 +20,15 @@ Great Expectations's connect-and-expect API makes it easy to declare Expectation
         "Sex",
         ["male", "female"]
     )
-    {'exception_list': [], 'success': True}
+    {
+        'success': True,
+        'summary_obj': {
+            'exception_count': 0,
+            'exception_percent': 0.0,
+            'exception_percent_nonmissing': 0.0,
+            'partial_exception_list': []
+        }
+    }
 
 
 
@@ -44,7 +52,15 @@ For example:
         "PClass",
         ["1st", "2nd", "3rd"]
     )
-    {'exception_list': ['*'], 'success': False}
+    {
+        'success': False,
+        'summary_obj': {
+            'exception_count': 1,
+            'exception_percent': 0.0007616146230007616,
+            'exception_percent_nonmissing': 0.0007616146230007616,
+            'partial_exception_list': ['*']
+        }
+    }
 
 Another example:
 
@@ -55,30 +71,39 @@ Another example:
         "^[A-Za-z\, \(\)\']+$"
     )
     {
-        'exception_list': [
-            'Bjornstrm-Steffansson, Mr Mauritz Hakan',
-            'Brown, Mrs James Joseph (Margaret Molly" Tobin)"',
-            'Frolicher-Stehli, Mr Maxmillian',
-            'Frolicher-Stehli, Mrs Maxmillian (Margaretha Emerentia Stehli)',
-            'Lindeberg-Lind, Mr Erik Gustaf',
-            'Roebling, Mr Washington Augustus 2nd',
-            'Rothes, the Countess of (Noel Lucy Martha Dyer-Edwardes)',
-            'Simonius-Blumer, Col Alfons',
-            'Thorne, Mr George (alias of: Mr George Rosenshine)',
-            'Downton (?Douton), Mr William James',
-            'Aijo-Nirva, Mr Isak',
-            'Johannesen-Bratthammer, Mr Bernt',
-            'Larsson-Rondberg, Mr Edvard',
-            'Nicola-Yarred, Miss Jamila',
-            'Nicola-Yarred, Master Elias',
-            'Thomas, Mr John (? 1st/2nd class)'
-        ],
-        'success': False
-    }
+        'success': False,
+        'summary_obj': {
+            'exception_count': 16,
+            'exception_percent': 0.012185833968012186,
+            'exception_percent_nonmissing': 0.012185833968012186,
+            'partial_exception_list': [
+                'Bjornstrm-Steffansson, Mr Mauritz Hakan',
+                'Brown, Mrs James Joseph (Margaret Molly" Tobin)"',
+                'Frolicher-Stehli, Mr Maxmillian',
+                'Frolicher-Stehli, Mrs Maxmillian (Margaretha Emerentia Stehli)',
+                'Lindeberg-Lind, Mr Erik Gustaf',
+                'Roebling, Mr Washington Augustus 2nd',
+                'Rothes, the Countess of (Noel Lucy Martha Dyer-Edwardes)',
+                'Simonius-Blumer, Col Alfons',
+                'Thorne, Mr George (alias of: Mr George Rosenshine)',
+                'Downton (?Douton), Mr William James',
+                'Aijo-Nirva, Mr Isak',
+                'Johannesen-Bratthammer, Mr Bernt',
+                'Larsson-Rondberg, Mr Edvard',
+                'Nicola-Yarred, Miss Jamila',
+                'Nicola-Yarred, Master Elias',
+                'Thomas, Mr John (? 1st/2nd class)'
+            ]
+        }
+   }
+
 
 This instant feedback helps you zero in on exceptions very quickly, taking a lot of the pain and guesswork out of early data exploration.
 
-Great Expectations's library of Expectations has been developed by a broad cross-section of data scientists and engineers. Check out the :ref:`glossary`; it covers all kinds of practical use cases:
+Capture More About Your Data
+------------------------------------------------------------------------------
+
+Build expectations as you conduct exploratory data analysis to ensure insights about data processes and pipelines remain part of your team's knowldege. Great Expectations's library of Expectations has been developed by a broad cross-section of data scientists and engineers. Check out the :ref:`glossary`; it covers all kinds of practical use cases:
 
 * Foreign key verification and row-based accounting for ETL
 * Form validation and regex pattern-matching for names, URLs, dates, addresses, etc.
@@ -86,6 +111,16 @@ Great Expectations's library of Expectations has been developed by a broad cross
 * Crosstabs
 * Distributions for statistical modeling. 
 * etc.
+
+You can also add notes or even structured metadata to expectations to describe the intent of an expectation or anything else relevant for understanding it:
+
+.. code-block:: bash
+
+    >> my_df.expect_column_values_to_match_regex(
+        "Name",
+        "^[A-Za-z\, \(\)\']+$",
+        meta = { "notes": "A simple experimental regex for name matching.", "source": "http://great-expectations.readthedocs.io/en/latest/glossary.html" })
+
 
 Saving Expectations
 ------------------------------------------------------------------------------
@@ -98,4 +133,5 @@ This is how you always know what to expect from your data.
 
     >> my_df.save_expectations_config("my_titanic_expectations.json")
 
+For more detail on how to control expectation output, please see :ref:`standard_arguments` and :ref:`output_format`.
 

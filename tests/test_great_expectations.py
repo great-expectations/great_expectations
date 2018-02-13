@@ -49,7 +49,7 @@ class TestCustomClass(unittest.TestCase):
     def test_custom_class(self):
         script_path = os.path.dirname(os.path.realpath(__file__))
         df = ge.read_csv(
-            script_path+'/examples/Titanic.csv',
+            script_path+'/test_sets/Titanic.csv',
             dataset_class=CustomPandasDataSet
         )
         df.set_default_expectation_argument("output_format", "COMPLETE")
@@ -66,15 +66,29 @@ class TestCustomClass(unittest.TestCase):
             {'exception_list': [], 'exception_index_list': [], 'success': True}
         )
 
+   # Ensure that Custom Data Set classes can properly call non-overridden methods from their parent class
+    def test_base_class_expectation(self):
+        df = CustomPandasDataSet({
+            "aaa": [1, 2, 3, 4, 5],
+            "bbb": [10, 20, 30, 40, 50],
+            "ccc": [9, 10, 11, 12, 13],
+        })
+
+
+        self.assertEqual(
+            df.expect_column_values_to_be_between("aaa", min_value=1, max_value=5)['success'],
+            True
+        )
+
 
 class TestValidation(unittest.TestCase):
     def test_validate(self):
 
-        with open("./tests/examples/titanic_expectations.json") as f:
+        with open("./tests/test_sets/titanic_expectations.json") as f:
             my_expectations_config = json.load(f)
 
         my_df = ge.read_csv(
-            "./tests/examples/Titanic.csv",
+            "./tests/test_sets/Titanic.csv",
             expectations_config=my_expectations_config
         )
         my_df.set_default_expectation_argument("output_format", "COMPLETE")
@@ -82,7 +96,7 @@ class TestValidation(unittest.TestCase):
         results = my_df.validate(catch_exceptions=False)
         # print json.dumps(results, indent=2)
 
-        with open('./tests/examples/expected_results_20170721.json') as f:
+        with open('./tests/test_sets/expected_results_20170721.json') as f:
             expected_results = json.load(f)
             # print json.dumps(expected_results, indent=2)
 
@@ -107,9 +121,12 @@ class TestValidation(unittest.TestCase):
                             expected_results
                             )
 
+
+        validation_results = my_df.validate(only_return_failures=True)
+        # print json.dumps(validation_results, indent=2)
         assertDeepAlmostEqual(
             self,
-            my_df.validate(only_return_failures=True),
+            validation_results,
             {"results": [{"exception_traceback": None, "expectation_type": "expect_column_values_to_be_in_set", "success": False, "exception_list": ["*"], "raised_exception": False, "kwargs": {"column": "PClass", "output_format": "COMPLETE", "values_set": ["1st", "2nd", "3rd"]}, "exception_index_list": [456]}]}
         )
 
@@ -118,10 +135,10 @@ class TestValidation(unittest.TestCase):
 class TestRepeatedAppendExpectation(unittest.TestCase):
     def test_validate(self):
 
-        with open("./tests/examples/titanic_expectations.json") as f:
+        with open("./tests/test_sets/titanic_expectations.json") as f:
             my_expectations_config = json.load(f)
 
-        my_df = ge.read_csv("./tests/examples/Titanic.csv")
+        my_df = ge.read_csv("./tests/test_sets/Titanic.csv")
 
         self.assertEqual(
             len(my_df.get_expectations_config()['expectations']),

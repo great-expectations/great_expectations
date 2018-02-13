@@ -30,10 +30,13 @@ sys.path.insert(0, os.path.abspath('../..'))
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ['sphinx.ext.autodoc',
+extensions = [
+    'sphinx.ext.autodoc',
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
-    'sphinx.ext.mathjax']
+    # 'sphinx.ext.mathjax'
+    'sphinxcontrib.napoleon'
+]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -50,7 +53,7 @@ master_doc = 'index'
 # General information about the project.
 project = u'great_expectations'
 copyright = u'2017, The Great Expectations Team'
-author = u'Abe Gong, Derek Miller, James Campbell'
+author = u'The Great Expectations Team'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -85,7 +88,8 @@ todo_include_todos = True
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'alabaster'
+# html_theme = 'alabaster'
+html_theme = 'sphinx_rtd_theme'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -97,6 +101,56 @@ html_theme = 'alabaster'
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+
+
+# -- Options for Napoleon Extension --------------------------------------------
+
+# Parse Google style docstrings.
+# See http://google.github.io/styleguide/pyguide.html
+napoleon_google_docstring = True
+
+# Parse NumPy style docstrings.
+# See https://github.com/numpy/numpy/blob/master/doc/HOWTO_DOCUMENT.rst.txt
+napoleon_numpy_docstring = True
+
+# Should special members (like __membername__) and private members
+# (like _membername) members be included in the documentation if they
+# have docstrings.
+napoleon_include_private_with_doc = False
+napoleon_include_special_with_doc = True
+
+# If True, docstring sections will use the ".. admonition::" directive.
+# If False, docstring sections will use the ".. rubric::" directive.
+# One may look better than the other depending on what HTML theme is used.
+napoleon_use_admonition_for_examples = False
+napoleon_use_admonition_for_notes = False
+napoleon_use_admonition_for_references = False
+
+# If True, use Sphinx :ivar: directive for instance variables:
+#     :ivar attr1: Description of attr1.
+#     :type attr1: type
+# If False, use Sphinx .. attribute:: directive for instance variables:
+#     .. attribute:: attr1
+#
+#        *type*
+#
+#        Description of attr1.
+napoleon_use_ivar = False
+
+# If True, use Sphinx :param: directive for function parameters:
+#     :param arg1: Description of arg1.
+#     :type arg1: type
+# If False, output function parameters using the :parameters: field:
+#     :parameters: **arg1** (*type*) -- Description of arg1.
+napoleon_use_param = True
+
+# If True, use Sphinx :rtype: directive for the return type:
+#     :returns: Description of return value.
+#     :rtype: type
+# If False, output the return type inline with the return description:
+#     :returns: *type* -- Description of return value.
+napoleon_use_rtype = True
+
 
 
 # -- Options for HTMLHelp output ------------------------------------------
@@ -130,7 +184,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     (master_doc, 'great_expectations.tex', u'great\\_expectations Documentation',
-     u'Abe Gong, Derek Miller, James Campbell', 'manual'),
+     u'The Great Expectations Team', 'manual'),
 ]
 
 
@@ -157,3 +211,4 @@ texinfo_documents = [
 
 
 
+autodoc_member_order = 'bysource'
