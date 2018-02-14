@@ -1413,5 +1413,17 @@ class TestPandasDataset(unittest.TestCase):
         with self.assertRaises(ValueError):
             df.expect_column_mean_to_be_between('x',4,6, output_format="QUACK")
 
+    def test_ge_pandas_subsetting(self):
+        df = ge.dataset.PandasDataSet({
+            'A':[1,2,3,4],
+            'B':[5,6,7,8],
+            'C':['a','b','c','d'],
+            'D':['e','f','g','h']
+        })
+        sub_df = df[['A', 'D']]
+        self.assertIsInstance(sub_df, type(df))
+
+
+
 if __name__ == "__main__":
     unittest.main()

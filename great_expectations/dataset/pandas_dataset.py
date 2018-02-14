@@ -162,6 +162,10 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
     For the full API reference, please see :func:`DataSet <great_expectations.dataset.base.DataSet>`
     """
 
+    @property
+    def _constructor(self):
+        return PandasDataSet
+
     def __init__(self, *args, **kwargs):
         super(PandasDataSet, self).__init__(*args, **kwargs)
         self.add_default_expectations()
