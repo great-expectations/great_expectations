@@ -2,7 +2,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/great-expectations/great_expectations/badge.svg?branch=develop)](https://coveralls.io/github/great-expectations/great_expectations?branch=develop)
 [![Documentation Status](https://readthedocs.org/projects/great-expectations/badge/?version=latest)](http://great-expectations.readthedocs.io/en/latest/?badge=latest)
 
-<img align="right" src="./dcopperfield.png">
+<img align="right" src="./generic_dickens_protagonist.png">
 
 Great Expectations
 ================================================================================
