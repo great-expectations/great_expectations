@@ -1413,5 +1413,36 @@ class TestPandasDataset(unittest.TestCase):
         with self.assertRaises(ValueError):
             df.expect_column_mean_to_be_between('x',4,6, output_format="QUACK")
 
+    def test_expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than(self):
+        df = ge.dataset.PandasDataSet({
+            'normal_column': np.random.normal(0,5,1000),
+            'todo': None
+        })
+
+        # Test specified mean and variance and p-value
+        self.assertTrue(
+            df.expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than('normal_column', 'norm', mean=0,
+                                                                                           std_dev=5, p_value=0.05
+                                                                                           )['success']
+        )
+
+        # Test non-specified mean and variance
+        self.assertTrue(
+            df.expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than('normal_column', 'norm')['success']
+        )
+
+        # Test negative p value
+        with self.assertRaises(ValueError):
+            df.expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than('normal_column',
+                                                                                           'norm', p_value=-0.1)
+        # Test negative standard deviation
+        with self.assertRaises(ValueError):
+            df.expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than('normal_column', 'norm',
+                                                                                       mean=0, std_dev=-1)['success']
+        # Test a non-existent distribution
+        with self.assertRaises(AttributeError):
+            df.expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than('normal_column', 'fake_distribution')
+
+
 if __name__ == "__main__":
     unittest.main()

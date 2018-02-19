@@ -1944,6 +1944,86 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
     ##### Aggregate functions #####
 
+    def expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than(self,
+        column,
+        distribution,
+        p_value=0.05,
+        mean=None,
+        std_dev=None
+    ):
+        """
+        Expect the column values to be distributed similarly to the provided scipy distribution. \
+
+        This expectation compares continuous distributions with a parameteric Kolmogorov-Smirnov test. The K-S test \
+        uses the column's mean and standard deviation, if not provided, to construct a cumulative density \
+        function (CDF) of the provided scipy distribution. It returns 'success'=True if the p-value from the \
+        K-S test is greater than the provided p-value.
+
+        expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than is a :func:`column_aggregate_expectation <great_expectations.dataset.base.DataSet.column_aggregate_expectation>`.
+
+        Args:
+            column (str): \
+                The column name.
+            distribution (str): \
+                The scipy distribution name. See: https://docs.scipy.org/doc/scipy/reference/stats.html
+            p_value (float): \
+                The threshold p-value for a passing test. Default is 0.05
+            mean (float or None): \
+                The mean of the distribution to test against. Default is the mean of the provided column.
+            std_dev (float or None): \
+                The standard deviation of the distribution to test against. Default is the standard deviation of \
+                the provided column.
+
+        Other Parameters:
+            output_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`output_format <output_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
+
+        Returns:
+            A JSON-serializable expectation result object.
+
+            Exact fields vary depending on the values passed to :ref:`output_format <output_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+        Notes:
+            These fields in the result object are customized for this expectation:
+            ::
+
+                {
+                    "true_value": (float) The true p-value from the Kolmogorov-Smirnov test
+                }
+
+            * The Kolmogorov-Smirnov test's null hypothesis is that the column is similar to the provided distribution.
+
+        """
+        if p_value <= 0.:
+            raise ValueError("p_value cannot be 0 or less")
+
+        if mean is None:
+            mean = column.mean()
+
+        if std_dev is None:
+            std_dev = column.std()
+        elif std_dev < 0:
+            raise ValueError("std_dev cannot be less than zero")
+
+        results = stats.kstest(column, distribution, args=(mean, std_dev))
+
+        return {
+            "success": results[1] > p_value,
+            "true_value": results[1],
+            "summary_obj": {results}
+        }
+
     def expect_column_mean_to_be_between(self,
         column,
         min_value=None,
