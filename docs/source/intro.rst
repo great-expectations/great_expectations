@@ -39,7 +39,7 @@ Getting started
 
 .. code-block:: bash
 
-    $ pip install great_expecatations
+    $ pip install great_expectations
 
 You can also clone the repository, which includes examples of using great_expectations.
 
