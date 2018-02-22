@@ -34,23 +34,12 @@ Getting started
 
 ...is easy. Just use pip install:
 
-.. code-block:: bash
 
     $ pip install great_expectations
 
 You can also clone the repository, which includes examples of using great_expectations.
 
-.. code-block:: bash
-
     $ git clone https://github.com/great-expectations/great_expectations.git
     $ pip install great_expectations/
-
-Since Great Expectation is under active development, the `develop` branch is often a ahead of the latest production release. If you want to work from the latest commit on `develop`, we recommend you install by branch name or hash.
-
-branch-name:
-
-.. code-block:: bash
-
-	$ pip install git+git://github.com/great-expectations/great_expectations.git@develop
 
 Visit [the Great Expectations documentation](http://great-expectations.readthedocs.io/en/latest/) for more info.
