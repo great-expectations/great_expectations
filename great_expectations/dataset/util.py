@@ -72,9 +72,8 @@ class DocInherit(object):
         for parent in cls.mro():
             if self.name not in parent.__dict__:
                 continue
-            doc = parent.__dict__[self.name].__doc__
-            if doc is not None:
-                break
+            if parent.__dict__[self.name].__doc__ is not None:
+                doc = parent.__dict__[self.name].__doc__
 
         @wraps(self.mthd, assigned=('__name__', '__module__'))
         def f(*args, **kwargs):
