@@ -39,7 +39,7 @@ Getting started
 
 .. code-block:: bash
 
-    $ pip install great_expecatations
+    $ pip install great_expectations
 
 You can also clone the repository, which includes examples of using great_expectations.
 
@@ -49,8 +49,6 @@ You can also clone the repository, which includes examples of using great_expect
     $ pip install great_expectations/
 
 Since Great Expectation is under active development, the `develop` branch is often a ahead of the latest production release. If you want to work from the latest commit on `develop`, we recommend you install by branch name or hash.
-
-branch-name:
 
 .. code-block:: bash
 
