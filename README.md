@@ -43,3 +43,15 @@ For quick, hands-on introductions to Great Expectations' key features, check out
 
 For full documentation, visit [Great Expectations on readthedocs.io](http://great-expectations.readthedocs.io/en/latest/).
 
+What's the best way to get in touch with the Great Expectations team?
+--------------------------------------------------------------------------------
+
+[Issues on GitHub](https://github.com/great-expectations/great_expectations/issues). If you have questions, comments, feature requests, etc., [opening an issue](https://github.com/great-expectations/great_expectations/issues/new) is definitely the best path forward.
+
+Great Expectations doesn't do X. Is it right for my use case?
+--------------------------------------------------------------------------------
+
+It depends. Great Expectations is under active development, so your use case might be supported soon.
+
+If you have needs that the library doesn't meet yet, please [upvote an existing issue(s)](https://github.com/great-expectations/great_expectations/issues) or [open a new issue](https://github.com/great-expectations/great_expectations/issues/new) and we'll see what we can do.
+
