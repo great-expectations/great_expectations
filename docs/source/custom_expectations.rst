@@ -64,34 +64,37 @@ This is more complicated, since you have to handle all the logic of additional p
 
 .. code-block:: bash
 
-    from great_expectations.dataset import PandasDataSet, expectation
+    from great_expectations.dataset import PandasDataSet, MetaPandasDataSet
 
-    class CustomPandasDataSet(ge.dataset.PandasDataSet):
+    class CustomPandasDataSet(PandasDataSet):
 
-        @expectation
-        def expect_column_values_to_equal_1(self, column, mostly=None, suppress_expectations=False):
-            notnull = self[column].notnull()
+        @MetaPandasDataSet.expectation(["column", "mostly"])
+        def expect_column_values_to_equal_1(self, column, mostly=None):
+            not_null = self[column].notnull()
             
-            result = self[column][notnull] == 1
-            exceptions = list(self[column][notnull][result==False])
+            result = self[column][not_null] == 1
+            exceptions = list(self[column][not_null][result==False])
             
             if mostly:
                 #Prevent division-by-zero errors
-                if len(not_null_values) == 0:
+                if len(not_null) == 0:
                     return {
                         'success':True,
-                        'exception_list':exceptions
+                        'exception_list':exceptions,
+                        'exception_index_list':self.index[result],
                     }
 
-                percent_properly_formatted = float(sum(properly_formatted))/len(not_null_values)
+                percent_equaling_1 = float(sum(result))/len(not_null)
                 return {
-                    "success" : percent_properly_formatted >= mostly,
-                    "exception_list" : exceptions
+                    "success" : percent_equaling_1 >= mostly,
+                    "exception_list" : exceptions[:20],
+                    "exception_index_list" : list(self.index[result==False])[:20],
                 }
             else:
                 return {
                     "success" : len(exceptions) == 0,
-                    "exception_list" : exceptions
+                    "exception_list" : exceptions[:20],
+                    "exception_index_list" : list(self.index[result==False])[:20],
                 }
 
 The quick way
