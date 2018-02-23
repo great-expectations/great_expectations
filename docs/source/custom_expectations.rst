@@ -29,15 +29,15 @@ Note: following Great Expectations :ref:`naming_conventions` is highly recommend
 
 .. code-block:: bash
 
-    from great_expectations.dataset import PandasDataSet, column_expectation, elementwise_expectation
+    from great_expectations.dataset import PandasDataSet, MetaPandasDataSet
 
-    class CustomPandasDataSet(ge.dataset.PandasDataSet):
+    class CustomPandasDataSet(PandasDataSet):
 
-        @column_map_expectation
+        @MetaPandasDataSet.column_map_expectation
         def expect_column_values_to_equal_2(self, series):
             return series.map(lambda x: x==2)
 
-        @column_aggregate_expectation
+        @MetaPandasDataSet.column_aggregate_expectation
         def expect_column_mode_to_equal_0(self, series):
             mode = series.mode[0]
             return {
