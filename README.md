@@ -51,7 +51,7 @@ What's the best way to get in touch with the Great Expectations team?
 Great Expectations doesn't do X. Is it right for my use case?
 --------------------------------------------------------------------------------
 
-It depends. Great Expectations is under active development, so your use case might be supported soon.
+It depends. If you have needs that the library doesn't meet yet, please [upvote an existing issue(s)](https://github.com/great-expectations/great_expectations/issues) or [open a new issue](https://github.com/great-expectations/great_expectations/issues/new) and we'll see what we can do. Great Expectations is under active development, so your use case might be supported soon.
 
-If you have needs that the library doesn't meet yet, please [upvote an existing issue(s)](https://github.com/great-expectations/great_expectations/issues) or [open a new issue](https://github.com/great-expectations/great_expectations/issues/new) and we'll see what we can do.
+
 
