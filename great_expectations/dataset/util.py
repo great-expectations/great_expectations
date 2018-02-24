@@ -124,10 +124,6 @@ def recursively_convert_to_json_serializable(test_obj):
         # No problem to encode json
         return test_obj
 
-    elif test_obj == None:
-        # No problem to encode json
-        return test_obj
-
     elif isinstance(test_obj, dict):
         new_dict = {}
         for key in test_obj:
@@ -147,6 +143,12 @@ def recursively_convert_to_json_serializable(test_obj):
         ## If we have an array or index, convert it first to a list--causing coercion to float--and then round
         ## to the number of digits for which the string representation will equal the float representation
         return [recursively_convert_to_json_serializable(x) for x in test_obj.tolist()]
+
+    #Note: This clause has to come after checking for np.ndarray or we get:
+    #      `ValueError: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()`
+    elif test_obj == None:
+        # No problem to encode json
+        return test_obj
 
     elif isinstance(test_obj, np.int64):
         return int(test_obj)
