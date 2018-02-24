@@ -1312,7 +1312,21 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         output_format=None, include_config=False, catch_exceptions=None
     ):
         temp_df = pd.DataFrame({"A": column_A, "B": column_B})
-        value_pair_df = pd.DataFrame(value_pairs_set, columns=["A", "B"])
-        return temp_df.isin(value_pair_df).all(axis=1)
+        value_pairs_set = {(x,y) for x,y in value_pairs_set}
 
+        results = []
+        for i, t in temp_df.iterrows():
+            if np.isnan(t["A"]):
+                a = None
+            else:
+                a = t["A"]
+                
+            if np.isnan(t["B"]):
+                b = None
+            else:
+                b = t["B"]
+                
+            results.append((a, b) in value_pairs_set)
+
+        return pd.Series(results, temp_df.index)
 
