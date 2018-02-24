@@ -2792,6 +2792,34 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             allow_cross_type_comparisons (boolean or None) : If True, allow comparisons between types (e.g. integer and\
                 string). Otherwise, attempting such comparisons will raise an exception.
 
+        Keyword Args:
+            keep_missing (str): "either" or "both"
+
+        Other Parameters:
+            output_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`output_format <output_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
+
+        Returns:
+            A JSON-serializable expectation result object.
+
+            Exact fields vary depending on the values passed to :ref:`output_format <output_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+        Notes:
+            Missing values are tricky in `column_pair` expectations. By default, `expect_column_pair_values_to_be_equal` compares
+            values from column A and column B unless *both* values are missing. This is `keep_missing="either".` That means that
+            missing values will be compared to non-missing values and found to be not equal. You can override this behavior by
+            setting `keep_missing="both"`.
         """
         raise NotImplementedError
 
@@ -2800,6 +2828,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         column_A,
         column_B,
         value_pairs_set,
+        keep_missing="both",
         output_format=None, include_config=False, catch_exceptions=None
     ):
         """
@@ -2810,5 +2839,36 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             column_B (str): The second column name
             value_pairs_set (list of lists): All the valid pairs to be matched
 
+        Keyword Args:
+            keep_missing (str): "either" or "both"
+
+        Other Parameters:
+            output_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`output_format <output_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
+
+        Returns:
+            A JSON-serializable expectation result object.
+
+            Exact fields vary depending on the values passed to :ref:`output_format <output_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+        Notes:
+            Missing values are tricky in `column_pair` expectations. By default, `expect_column_pair_values_to_be_equal` compares
+            values from column A and column B unless *both* values are missing. This is `keep_missing="either".` That means that
+            missing values will be compared to non-missing values and found to be not equal. You can override this behavior by
+            setting `keep_missing="both"`.
+
+        Warning:
+            `keep_missing="either"` has not yet been implemented for this expectation.
         """
         raise NotImplementedError
