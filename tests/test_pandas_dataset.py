@@ -1447,19 +1447,6 @@ class TestPandasDataset(unittest.TestCase):
             "./tests/test_sets/expect_column_pair_values_to_be_equal_test_set.json",
         )
 
-        # with open("./tests/test_sets/expect_column_pair_values_to_be_equal_test_set.json") as f:
-        #     T = json.load(f)
-
-        # D = ge.dataset.PandasDataSet(T["dataset"])
-        # D.set_default_expectation_argument("output_format", "COMPLETE")
-
-        # self.maxDiff = None
-
-        # for t in T["tests"]:
-        #     out = D.expect_column_pair_values_to_be_equal(**t['in'])
-        #     out = json.loads(json.dumps(out))
-        #     self.assertEqual(out, t['out'])
-
     def test_expect_column_A_values_to_be_greater_than_column_B(self):
         self.run_encapsulated_test(
             "expect_column_A_values_to_be_greater_than_column_B",
