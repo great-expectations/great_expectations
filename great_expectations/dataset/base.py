@@ -2731,14 +2731,44 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
     def expect_column_pair_values_to_be_equal(self,
         column_A,
         column_B,
+        keep_missing="either",
         output_format=None, include_config=False, catch_exceptions=None
     ):
         """
-        Expect the values in this column to have lower Kulback-Leibler divergence (relative entropy) with the distriution provided in partition_object of less than the provided threshold.
+        Expect the values in column A to be the same as column B.
 
         Args:
             column_A (str): The first column name
             column_B (str): The second column name
+
+        Keyword Args:
+            keep_missing (str): "either" or "both"
+
+        Other Parameters:
+            output_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`output_format <output_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
+
+        Returns:
+            A JSON-serializable expectation result object.
+
+            Exact fields vary depending on the values passed to :ref:`output_format <output_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+        Notes:
+            Missing values are tricky in `column_pair` expectations. By default, `expect_column_pair_values_to_be_equal` compares
+            values from column A and column B unless *both* values are missing. This is `keep_missing="either".` That means that
+            missing values will be compared to non-missing values and found to be not equal. You can override this behavior by
+            setting `keep_missing="both"`.
 
         """
         raise NotImplementedError
@@ -2751,7 +2781,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         output_format=None, include_config=False, catch_exceptions=None
     ):
         """
-        Expect the values in this column to have lower Kulback-Leibler divergence (relative entropy) with the distriution provided in partition_object of less than the provided threshold.
+        Expect values in column A to be greater than column B.
 
         Args:
             column_A (str): The first column name
@@ -2773,7 +2803,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         output_format=None, include_config=False, catch_exceptions=None
     ):
         """
-        Expect the values in this column to have lower Kulback-Leibler divergence (relative entropy) with the distriution provided in partition_object of less than the provided threshold.
+        Expect paired values from columns A and B to belong to a set of valid pairs.
 
         Args:
             column_A (str): The first column name
