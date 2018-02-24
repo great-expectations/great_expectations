@@ -1441,7 +1441,7 @@ class TestPandasDataset(unittest.TestCase):
         with self.assertRaises(ValueError):
             df.expect_column_mean_to_be_between('x',4,6, output_format="QUACK")
 
-    def bwtest_expect_column_pair_values_to_be_equal(self):
+    def test_expect_column_pair_values_to_be_equal(self):
         self.run_encapsulated_test(
             "expect_column_pair_values_to_be_equal",
             "./tests/test_sets/expect_column_pair_values_to_be_equal_test_set.json",
@@ -1460,13 +1460,13 @@ class TestPandasDataset(unittest.TestCase):
         #     out = json.loads(json.dumps(out))
         #     self.assertEqual(out, t['out'])
 
-    def bwtest_expect_column_A_values_to_be_greater_than_column_B(self):
+    def test_expect_column_A_values_to_be_greater_than_column_B(self):
         self.run_encapsulated_test(
             "expect_column_A_values_to_be_greater_than_column_B",
             "./tests/test_sets/expect_column_A_values_to_be_greater_than_column_B_test_set.json",
         )
 
-    def bwtest_expect_column_pair_values_to_be_in_set(self):
+    def test_expect_column_pair_values_to_be_in_set(self):
         self.run_encapsulated_test(
             "expect_column_pair_values_to_be_in_set",
             "./tests/test_sets/expect_column_pair_values_to_be_in_set_test_set.json",
