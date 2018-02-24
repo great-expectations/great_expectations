@@ -1281,15 +1281,26 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         column_A,
         column_B,
         or_equal=None,
+        parse_strings_as_datetimes=None,
         allow_cross_type_comparisons=None,
         keep_missing="either",
         output_format=None, include_config=False, catch_exceptions=None
     ):
         #FIXME: Implement allow_cross_type_comparisons
-        if or_equal:
-            return column_A >= column_B
+
+        if parse_strings_as_datetimes:
+            temp_column_A = column_A.map(parse)
+            temp_column_B = column_B.map(parse)
+
         else:
-            return column_A > column_B
+            temp_column_A = column_A
+            temp_column_B = column_B
+
+
+        if or_equal:
+            return temp_column_A >= temp_column_B
+        else:
+            return temp_column_A > temp_column_B
 
     @DocInherit
     @MetaPandasDataSet.column_pair_map_expectation

@@ -2775,7 +2775,9 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         column_A,
         column_B,
         or_equal=None,
+        parse_strings_as_datetimes=None,
         allow_cross_type_comparisons=None,
+        keep_missing="either",
         output_format=None, include_config=False, catch_exceptions=None
     ):
         """
