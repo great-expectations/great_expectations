@@ -90,7 +90,7 @@ class MetaPandasDataSet(DataSet):
 
         @cls.expectation(inspect.getargspec(func)[0][1:])
         @wraps(func)
-        def inner_wrapper(self, column_A, column_B, mostly=None, output_format=None, *args, **kwargs):
+        def inner_wrapper(self, column_A, column_B, mostly=None, keep_missing="both", output_format=None, *args, **kwargs):
 
             if output_format is None:
                 output_format = self.default_expectation_args["output_format"]
@@ -98,7 +98,11 @@ class MetaPandasDataSet(DataSet):
             series_A = self[column_A]
             series_B = self[column_B]
 
-            boolean_mapped_null_values = series_A.isnull() | series_B.isnull()
+            if keep_missing=="both":
+                boolean_mapped_null_values = series_A.isnull() | series_B.isnull()
+            else:
+                boolean_mapped_null_values = series_A.isnull() & series_B.isnull()
+
 
             #This next row assumes that series_A and _B are the same length
             element_count = int(len(series_A)) 
@@ -130,6 +134,11 @@ class MetaPandasDataSet(DataSet):
                 boolean_mapped_success_values, success_count,
                 exception_list, exception_index_list
             )
+            print column_A, series_A
+            print column_B, series_B
+            print boolean_mapped_success_values
+            print boolean_mapped_null_values
+            print return_obj
 
             return return_obj
 
@@ -1260,6 +1269,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
     def expect_column_pair_values_to_be_equal(self,
         column_A,
         column_B,
+        keep_missing="either",
         output_format=None, include_config=False, catch_exceptions=None
     ):
         return column_A == column_B
@@ -1271,6 +1281,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         column_B,
         or_equal=None,
         allow_cross_type_comparisons=None,
+        keep_missing="either",
         output_format=None, include_config=False, catch_exceptions=None
     ):
         #FIXME: Implement allow_cross_type_comparisons
@@ -1285,6 +1296,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         column_A,
         column_B,
         value_pairs_set,
+        keep_missing="either",
         output_format=None, include_config=False, catch_exceptions=None
     ):
         temp_df = pd.DataFrame({"A": column_A, "B": column_B})

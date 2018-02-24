@@ -18,6 +18,12 @@ class TestPandasDataset(unittest.TestCase):
         self.maxDiff = None
 
         for t in T["tests"]:
+
+            if "title" in t:
+                print(t["title"])
+            else:
+                print("WARNING: test set has no `title` field. In future versions of Great Expectations, this will be required.")
+
             expectation = getattr(D, expectation_name)
             out = expectation(**t['in'])
             out = json.loads(json.dumps(out))
@@ -1440,22 +1446,23 @@ class TestPandasDataset(unittest.TestCase):
             df.expect_column_mean_to_be_between('x',4,6, output_format="QUACK")
 
     def test_expect_column_pair_values_to_be_equal(self):
-        """
+        self.run_encapsulated_test(
+            "expect_column_A_values_to_be_greater_than_column_B",
+            "./tests/test_sets/expect_column_pair_values_to_be_equal_test_set.json",
+        )
 
-        """
+        # with open("./tests/test_sets/expect_column_pair_values_to_be_equal_test_set.json") as f:
+        #     T = json.load(f)
 
-        with open("./tests/test_sets/expect_column_pair_values_to_be_equal_test_set.json") as f:
-            T = json.load(f)
+        # D = ge.dataset.PandasDataSet(T["dataset"])
+        # D.set_default_expectation_argument("output_format", "COMPLETE")
 
-        D = ge.dataset.PandasDataSet(T["dataset"])
-        D.set_default_expectation_argument("output_format", "COMPLETE")
+        # self.maxDiff = None
 
-        self.maxDiff = None
-
-        for t in T["tests"]:
-            out = D.expect_column_pair_values_to_be_equal(**t['in'])
-            out = json.loads(json.dumps(out))
-            self.assertEqual(out, t['out'])
+        # for t in T["tests"]:
+        #     out = D.expect_column_pair_values_to_be_equal(**t['in'])
+        #     out = json.loads(json.dumps(out))
+        #     self.assertEqual(out, t['out'])
 
     def test_expect_column_A_values_to_be_greater_than_column_B(self):
         self.run_encapsulated_test(
