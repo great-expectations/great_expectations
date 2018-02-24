@@ -80,11 +80,11 @@
     },
     "out" : {
       "summary_obj": {
-        "exception_percent": 0.5,
+        "exception_percent": 0.4,
         "partial_exception_list": [
-          [6,null], [7,null], [8,null], [9,null]
+          [6.0,null], [7.0,null], [8.0,null], [9.0,null]
         ], 
-        "exception_percent_nonmissing": 0.5555555555555556,
+        "exception_percent_nonmissing": 0.4444444444444444,
         "exception_count": 4
       }, 
       "success": false
@@ -98,11 +98,11 @@
     },
     "out" : {
       "summary_obj": {
-        "exception_percent": 0.5,
+        "exception_percent": 0.4,
         "partial_exception_list": [
-          [6,null], [7,null], [8,null], [9,null]
+          [6.0,null], [7.0,null], [8.0,null], [9.0,null]
         ], 
-        "exception_percent_nonmissing": 0.5555555555555556,
+        "exception_percent_nonmissing": 0.4444444444444444,
         "exception_count": 4
       }, 
       "success": false
@@ -119,9 +119,9 @@
         "element_count": 10,
         "missing_count": 1,
         "missing_percent": 0.1,
-        "exception_percent": 0.5,
+        "exception_percent": 0.4,
         "partial_exception_list": [
-          [6,null], [7,null], [8,null], [9,null]
+          [6.0,null], [7.0,null], [8.0,null], [9.0,null]
         ], 
         "partial_exception_counts" : [
           {"value" : [6.0,null], "count" : 1},
@@ -129,8 +129,8 @@
           {"value" : [8.0,null], "count" : 1},
           {"value" : [9.0,null], "count" : 1}
         ],
-        "partial_exception_index_list": [6,7,8,9],
-        "exception_percent_nonmissing": 0.5555555555555556,
+        "partial_exception_index_list": [5,6,7,8],
+        "exception_percent_nonmissing": 0.4444444444444444,
         "exception_count": 4
       }, 
       "success": false
@@ -150,7 +150,7 @@
         "missing_percent": 0.1,
         "exception_percent": 0.5,
         "partial_exception_list": [
-          [6,null], [7,null], [8,null], [9,null]
+          [6.0,null], [7.0,null], [8.0,null], [9.0,null]
         ], 
         "partial_exception_counts" : [
           {"value" : [6.0,null], "count" : 1},
@@ -158,8 +158,8 @@
           {"value" : [8.0,null], "count" : 1},
           {"value" : [9.0,null], "count" : 1}
         ],
-        "partial_exception_index_list": [6,7,8,9],
-        "exception_percent_nonmissing": 0.5555555555555556,
+        "partial_exception_index_list": [5,6,7,8],
+        "exception_percent_nonmissing": 0.4444444444444444,
         "exception_count": 4
       },
       "success": true

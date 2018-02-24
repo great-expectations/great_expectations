@@ -90,7 +90,7 @@ class MetaPandasDataSet(DataSet):
 
         @cls.expectation(inspect.getargspec(func)[0][1:])
         @wraps(func)
-        def inner_wrapper(self, column_A, column_B, mostly=None, keep_missing="both", output_format=None, *args, **kwargs):
+        def inner_wrapper(self, column_A, column_B, mostly=None, keep_missing="either", output_format=None, *args, **kwargs):
 
             if output_format is None:
                 output_format = self.default_expectation_args["output_format"]
@@ -134,11 +134,12 @@ class MetaPandasDataSet(DataSet):
                 boolean_mapped_success_values, success_count,
                 exception_list, exception_index_list
             )
-            print column_A, series_A
-            print column_B, series_B
-            print boolean_mapped_success_values
-            print boolean_mapped_null_values
-            print return_obj
+            # print keep_missing
+            # print column_A, series_A
+            # print column_B, series_B
+            # print boolean_mapped_success_values
+            # print boolean_mapped_null_values
+            # print return_obj
 
             return return_obj
 

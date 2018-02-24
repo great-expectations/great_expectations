@@ -4,6 +4,7 @@ from __future__ import division
 import numpy as np
 from scipy import stats
 import pandas as pd
+import numpy as np
 import warnings
 import sys
 import copy
@@ -110,12 +111,20 @@ def recursively_convert_to_json_serializable(test_obj):
     """
     # Validate that all aruguments are of approved types, coerce if it's easy, else exception
     # print(type(test_obj), test_obj)
+    try:
+        if np.isnan(test_obj):
+            return None
+    except TypeError:
+        pass
+    except ValueError:
+        pass
+
 
     if isinstance(test_obj, (str, int, float, bool)):
         # No problem to encode json
         return test_obj
 
-    elif test_obj is None:
+    elif test_obj == None:
         # No problem to encode json
         return test_obj
 
