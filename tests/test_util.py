@@ -2,6 +2,7 @@ import json
 import datetime
 import numpy as np
 import unittest
+from functools import wraps
 
 import great_expectations as ge
 
@@ -138,6 +139,64 @@ class TestUtilMethods(unittest.TestCase):
             pass
 
 
+
+"""
+The following Parent and Child classes are used for testing documentation inheritance.
+"""
+class Parent(object):
+    """Parent class docstring
+    """
+
+    @classmethod
+    def expectation(cls, func):
+        """Manages configuration and running of expectation objects.
+        """
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            # wrapper logic
+            func(*args, **kwargs)
+
+        return wrapper
+
+
+    def override_me(self):
+        """Parent method docstring
+        Returns:
+            Unattainable abiding satisfaction.
+        """
+        raise NotImplementedError
+
+
+class Child(Parent):
+    """
+    Child class docstring
+    """
+
+    @ge.dataset.util.DocInherit
+    @Parent.expectation
+    def override_me(self):
+        """Child method docstring
+        Returns:
+            Real, instantiable, abiding satisfaction.
+        """
+
+
+class TestDocumentation(unittest.TestCase):
+
+    def test_doc_inheritance(self):
+        c = Child()
+
+        self.assertEqual(
+            c.__getattribute__('override_me').__doc__,
+        """Child method docstring
+        Returns:
+            Real, instantiable, abiding satisfaction.
+        """ + '\n' +
+        """Parent method docstring
+        Returns:
+            Unattainable abiding satisfaction.
+        """
+        )
 
 if __name__ == "__main__":
     unittest.main()
