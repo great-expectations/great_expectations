@@ -195,6 +195,25 @@ class TestRepeatedAppendExpectation(unittest.TestCase):
             7
         )
 
+class TestIO(unittest.TestCase):
+
+    def test_read_csv(self):
+        script_path = os.path.dirname(os.path.realpath(__file__))
+        df = ge.read_csv(
+            script_path+'/test_sets/Titanic.csv',
+        )
+
+    def test_read_json(self):
+        script_path = os.path.dirname(os.path.realpath(__file__))
+        df = ge.read_json(
+            script_path+'/test_sets/test_json_data_file.json',
+        )
+
+        df = ge.read_json(
+            script_path+'/test_sets/nested_test_json_data_file.json',
+            accessor_func= lambda x: x["data"]
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
