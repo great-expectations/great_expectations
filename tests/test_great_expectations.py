@@ -4,6 +4,7 @@ import random
 import unittest
 
 import numpy as np
+import pandas as pd
 
 import great_expectations as ge
 from great_expectations.dataset import PandasDataSet, MetaPandasDataSet
@@ -171,6 +172,66 @@ class TestValidation(unittest.TestCase):
             self,
             validation_results,
             {"results": [{"exception_traceback": None, "expectation_type": "expect_column_values_to_be_in_set", "success": False, "exception_list": ["*"], "raised_exception": False, "kwargs": {"column": "PClass", "output_format": "COMPLETE", "values_set": ["1st", "2nd", "3rd"]}, "exception_index_list": [456]}]}
+        )
+
+    def test_top_level_validate(self):
+        my_df = pd.DataFrame({
+            "x" : [1,2,3,4,5]
+        })
+        validation_result = ge.validate(my_df, {
+            "dataset_name" : None,
+            "meta": {
+                "great_expectations.__version__": ge.__version__
+            },
+            "expectations" : [{
+                "expectation_type" : "expect_column_to_exist",
+                "kwargs" : {
+                    "column" : "x"
+                }
+            },{
+                "expectation_type" : "expect_column_values_to_be_between",
+                "kwargs" : {
+                    "column" : "x",
+                    "min_value" : 3,
+                    "max_value" : 5
+                }
+            }]
+        })
+        self.assertEqual(
+            validation_result,
+            {
+              "results": [
+                {
+                  "raised_exception": False, 
+                  "exception_traceback": None, 
+                  "expectation_type": "expect_column_to_exist", 
+                  "success": True,
+                  "kwargs": {
+                    "column": "x"
+                  }
+                }, 
+                {
+                  "exception_traceback": None,
+                  "expectation_type": "expect_column_values_to_be_between", 
+                  "success": False, 
+                  "raised_exception": False, 
+                  "kwargs": {
+                    "column": "x", 
+                    "max_value": 5, 
+                    "min_value": 3
+                  }, 
+                  "summary_obj": {
+                    "exception_percent": 0.4, 
+                    "partial_exception_list": [
+                      1, 
+                      2
+                    ], 
+                    "exception_percent_nonmissing": 0.4, 
+                    "exception_count": 2
+                  }
+                }
+              ]
+            }
         )
 
 
