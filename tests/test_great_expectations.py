@@ -43,6 +43,34 @@ class CustomPandasDataSet(PandasDataSet):
     def expect_column_values_to_be_prime(self, column):
         return column.map(isprime)
 
+    @MetaPandasDataSet.expectation(["column", "mostly"])
+    def expect_column_values_to_equal_1(self, column, mostly=None):
+        not_null = self[column].notnull()
+        
+        result = self[column][not_null] == 1
+        exceptions = list(self[column][not_null][result==False])
+        
+        if mostly:
+            #Prevent division-by-zero errors
+            if len(not_null) == 0:
+                return {
+                    'success':True,
+                    'exception_list':exceptions,
+                    'exception_index_list':self.index[result],
+                }
+
+            percent_equaling_1 = float(sum(result))/len(not_null)
+            return {
+                "success" : percent_equaling_1 >= mostly,
+                "exception_list" : exceptions[:20],
+                "exception_index_list" : list(self.index[result==False])[:20],
+            }
+        else:
+            return {
+                "success" : len(exceptions) == 0,
+                "exception_list" : exceptions[:20],
+                "exception_index_list" : list(self.index[result==False])[:20],
+            }
 
 class TestCustomClass(unittest.TestCase):
 
@@ -65,6 +93,21 @@ class TestCustomClass(unittest.TestCase):
             df.expect_column_values_to_be_prime("primes"),
             {'exception_list': [], 'exception_index_list': [], 'success': True}
         )
+
+    def test_custom_expectation(self):
+        df = CustomPandasDataSet({'x': [1,1,1,1,2]})
+        df.set_default_expectation_argument("output_format", "COMPLETE")
+
+        self.assertEqual(
+            df.expect_column_values_to_be_prime('x'),
+            {'exception_list':[1,1,1,1],'exception_index_list':[0,1,2,3], 'success':False}
+        )
+
+        self.assertEqual(
+            df.expect_column_values_to_equal_1('x', mostly=.8),
+            {'exception_list':[2],'exception_index_list':[4],'success':True}
+        )
+
 
    # Ensure that Custom Data Set classes can properly call non-overridden methods from their parent class
     def test_base_class_expectation(self):
@@ -150,6 +193,25 @@ class TestRepeatedAppendExpectation(unittest.TestCase):
         self.assertEqual(
             len(my_df.get_expectations_config()['expectations']),
             7
+        )
+
+class TestIO(unittest.TestCase):
+
+    def test_read_csv(self):
+        script_path = os.path.dirname(os.path.realpath(__file__))
+        df = ge.read_csv(
+            script_path+'/test_sets/Titanic.csv',
+        )
+
+    def test_read_json(self):
+        script_path = os.path.dirname(os.path.realpath(__file__))
+        df = ge.read_json(
+            script_path+'/test_sets/test_json_data_file.json',
+        )
+
+        df = ge.read_json(
+            script_path+'/test_sets/nested_test_json_data_file.json',
+            accessor_func= lambda x: x["data"]
         )
 
 
