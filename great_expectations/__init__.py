@@ -60,5 +60,13 @@ def read_json(
     df = _convert_to_dataset_class(df, dataset_class, expectations_config)
     return df
 
+def validate(df, expectations_config, *args, **kwargs):
+    #FIXME: I'm not sure that this should always default to PandasDataSet
+    dataset_ = _convert_to_dataset_class(df,
+        dataset.pandas_dataset.PandasDataSet,
+        expectations_config
+    )
+    return dataset_.validate(*args, **kwargs)
+
 def expect(data_source_str, expectation):
     raise NotImplementedError
