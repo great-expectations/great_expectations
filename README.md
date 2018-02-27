@@ -33,7 +33,7 @@ To get more done with data, faster. Teams use great_expectations to
 How do I get started?
 --------------------------------------------------------------------------------
 
-...is easy. Just use pip install:
+It's easy! Just use pip install:
 
 
     $ pip install great_expectations
@@ -42,8 +42,6 @@ You can also clone the repository, which includes examples of using great_expect
 
     $ git clone https://github.com/great-expectations/great_expectations.git
     $ pip install great_expectations/
-
-
 
 How do I learn more?
 --------------------------------------------------------------------------------
