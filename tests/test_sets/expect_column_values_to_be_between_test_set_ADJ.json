@@ -21,8 +21,8 @@
   "tests": [
     {
       "out": {
-        "exception_list": [],
-        "exception_index_list": [],
+        "unexpected_list": [],
+        "unexpected_index_list": [],
         "success": true
       },
       "in": {
@@ -33,8 +33,8 @@
     },
     {
       "out": {
-        "exception_list": [],
-        "exception_index_list": [],
+        "unexpected_list": [],
+        "unexpected_index_list": [],
         "success": true
       },
       "in": {
@@ -45,10 +45,10 @@
     },
     {
       "out": {
-        "exception_list": [
+        "unexpected_list": [
           10
         ],
-        "exception_index_list": [9],
+        "unexpected_index_list": [9],
         "success": false
       },
       "in": {
@@ -59,11 +59,11 @@
     },
     {
       "out": {
-        "exception_list": [
+        "unexpected_list": [
           1,
           2
         ],
-        "exception_index_list": [0, 1],
+        "unexpected_index_list": [0, 1],
         "success": false
       },
       "in": {
@@ -110,8 +110,8 @@
     },
     {
       "out": {
-        "exception_list": [],
-        "exception_index_list": [],
+        "unexpected_list": [],
+        "unexpected_index_list": [],
         "success": true
       },
       "in": {
@@ -123,8 +123,8 @@
     },
     {
       "out": {
-        "exception_list": [],
-        "exception_index_list": [],
+        "unexpected_list": [],
+        "unexpected_index_list": [],
         "success": true
       },
       "in": {
@@ -136,10 +136,10 @@
     },
     {
       "out": {
-        "exception_list": [
+        "unexpected_list": [
           10
         ],
-        "exception_index_list": [
+        "unexpected_index_list": [
           9
         ],
         "success": true
@@ -153,11 +153,11 @@
     },
     {
       "out": {
-        "exception_list": [
+        "unexpected_list": [
           1,
           2
         ],
-        "exception_index_list": [
+        "unexpected_index_list": [
           0,
           1
         ],
@@ -208,10 +208,10 @@
      },
     {
       "out": {
-        "exception_list": [
+        "unexpected_list": [
           5
         ],
-        "exception_index_list": [
+        "unexpected_index_list": [
           4
         ],
         "success": false
@@ -225,10 +225,10 @@
     },
     {
       "out": {
-        "exception_list": [
+        "unexpected_list": [
           5
         ],
-        "exception_index_list": [
+        "unexpected_index_list": [
           4
         ],
         "success": true
@@ -242,12 +242,12 @@
     },
     {
       "out": {
-        "exception_list": [
+        "unexpected_list": [
           "Jan 01 1870 12:00:01",
           "Dec 31 1999 12:00:01",
           "Jan 01 2001 12:00:01"
         ],
-        "exception_index_list": [
+        "unexpected_index_list": [
           0, 1, 9
         ],
         "success": false
@@ -291,10 +291,10 @@
         "allow_cross_type_comparisons": true
       },
       "out": {
-        "exception_list": [
+        "unexpected_list": [
           "abc"
         ],
-        "exception_index_list": [
+        "unexpected_index_list": [
           9
         ],
         "success": false
@@ -309,8 +309,8 @@
         "allow_cross_type_comparisons": true
       },
       "out": {
-        "exception_list": ["1","2","3","4","5","6","7","8","9","10"],
-        "exception_index_list": [
+        "unexpected_list": ["1","2","3","4","5","6","7","8","9","10"],
+        "unexpected_index_list": [
           0,1,2,3,4,5,6,7,8,9
         ],
         "success": false
