@@ -725,8 +725,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
                 ((min_value is None) or (min_value <= column_mean)) and
                 ((max_value is None) or (column_mean <= max_value))
             ),
-            "true_value": column_mean,
-            "summary_obj": {}
+            "true_value": column_mean
         }
 
     @DocInherit
@@ -744,8 +743,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
                 ((min_value or None) or (min_value <= column_median)) and
                 ((max_value or None) or (column_median <= max_value))
             ),
-            "true_value": column_median,
-            "summary_obj": {}
+            "true_value": column_median
         }
 
     @DocInherit
@@ -763,8 +761,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
                 ((min_value is None) or (min_value <= column_stdev)) and
                 ((max_value is None) or (column_stdev <= max_value))
             ),
-            "true_value": column_stdev,
-            "summary_obj": {}
+            "true_value": column_stdev
         }
 
     @DocInherit
@@ -782,8 +779,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
                 ((min_value is None) or (min_value <= unique_value_count)) and
                 ((max_value is None) or (unique_value_count <= max_value))
             ),
-            "true_value": unique_value_count,
-            "summary_obj": {}
+            "true_value": unique_value_count
         }
 
     @DocInherit
@@ -803,8 +799,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
                 ((min_value is None) or (min_value <= proportion_unique)) and
                 ((max_value is None) or (proportion_unique <= max_value))
             ),
-            "true_value": proportion_unique,
-            "summary_obj": {}
+            "true_value": proportion_unique
         }
 
     @DocInherit
@@ -825,8 +820,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
         return {
             "success" : success,
-            "true_value": mode_list,
-            "summary_obj": {},
+            "true_value": mode_list
         }
 
     @DocInherit
@@ -853,8 +847,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
         return {
             "success" : success,
-            "true_value" : col_sum,
-            "summary_obj" : {}
+            "true_value" : col_sum
         }
 
     @DocInherit
@@ -901,8 +894,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
         return {
             "success" : success,
-            "true_value" : col_min,
-            "summary_obj" : {}
+            "true_value" : col_min
         }
 
     @DocInherit
@@ -950,8 +942,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
         return {
             "success" : success,
-            "true_value" : col_max,
-            "summary_obj" : {}
+            "true_value" : col_max
         }
 
     @DocInherit
@@ -983,7 +974,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         result_obj = {
                 "success": test_result > p,
                 "true_value": test_result,
-                "summary_obj": {
+                "details": {
                     "observed_partition": {
                         "values": test_df.index.tolist(),
                         "weights": test_df[column.name].tolist()
@@ -1053,7 +1044,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         result_obj = {
                 "success" : test_result > p,
                 "true_value": test_result,
-                "summary_obj": {
+                "details": {
                     "bootstrap_samples": bootstrap_samples,
                     "bootstrap_sample_size": bootstrap_sample_size,
                     "observed_partition": {
@@ -1121,7 +1112,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
             result_obj = {
                 "success": kl_divergence <= threshold,
                 "true_value": kl_divergence,
-                "summary_obj": {
+                "details": {
                     "observed_partition": {
                         "values": test_df.index.tolist(),
                         "weights": pk.tolist()
@@ -1184,7 +1175,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
             result_obj = {
                     "success": kl_divergence <= threshold,
                     "true_value": kl_divergence,
-                    "summary_obj": {
+                    "details": {
                         "observed_partition": {
                             # return expected_bins, since we used those bins to compute the observed_weights
                             "bins": expected_bins,
