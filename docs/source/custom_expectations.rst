@@ -71,30 +71,30 @@ This is more complicated, since you have to handle all the logic of additional p
         @MetaPandasDataSet.expectation(["column", "mostly"])
         def expect_column_values_to_equal_1(self, column, mostly=None):
             not_null = self[column].notnull()
-            
+
             result = self[column][not_null] == 1
-            exceptions = list(self[column][not_null][result==False])
-            
+            unexpected_values = list(self[column][not_null][result==False])
+
             if mostly:
                 #Prevent division-by-zero errors
                 if len(not_null) == 0:
                     return {
                         'success':True,
-                        'exception_list':exceptions,
-                        'exception_index_list':self.index[result],
+                        'unexpected_list':unexpected_values,
+                        'unexpected_index_list':self.index[result],
                     }
 
                 percent_equaling_1 = float(sum(result))/len(not_null)
                 return {
                     "success" : percent_equaling_1 >= mostly,
-                    "exception_list" : exceptions[:20],
-                    "exception_index_list" : list(self.index[result==False])[:20],
+                    "unexpected_list" : unexpected_values[:20],
+                    "unexpected_index_list" : list(self.index[result==False])[:20],
                 }
             else:
                 return {
-                    "success" : len(exceptions) == 0,
-                    "exception_list" : exceptions[:20],
-                    "exception_index_list" : list(self.index[result==False])[:20],
+                    "success" : len(unexpected_values) == 0,
+                    "unexpected_list" : unexpected_values[:20],
+                    "unexpected_index_list" : list(self.index[result==False])[:20],
                 }
 
 The quick way
