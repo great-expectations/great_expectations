@@ -661,7 +661,7 @@ class TestPandasDataset(unittest.TestCase):
 
         """
 
-        with open("./tests/test_sets/expect_column_values_to_be_between_test_set_ADJ.json") as f:
+        with open("./tests/test_sets/expect_column_values_to_be_between_test_set.json") as f:
             fixture = json.load(f)
 
         dataset = fixture["dataset"]
