@@ -990,7 +990,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         This expectation detects duplicates. All duplicated values are counted as exceptions.
 
-        For example, `[1, 2, 3, 3, 3]` will return `[3, 3, 3]` in `summary_obj.exceptions_list`, with `unexpected_percent=0.6.`
+        For example, `[1, 2, 3, 3, 3]` will return `[3, 3, 3]` in `result_obj.exceptions_list`, with `unexpected_percent=0.6.`
 
         expect_column_values_to_be_unique is a :func:`column_map_expectation <great_expectations.dataset.base.DataSet.column_map_expectation>`.
 
@@ -1254,7 +1254,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             )
             {
               "success": false
-              "summary_obj": {
+              "result_obj": {
                 "unexpected_count": 1
                 "unexpected_percent": 0.16666666666666666,
                 "unexpected_percent_nonmissing": 0.16666666666666666,
@@ -1321,7 +1321,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             )
             {
               "success": false
-              "summary_obj": {
+              "result_obj": {
                 "unexpected_count": 3
                 "unexpected_percent": 0.5,
                 "unexpected_percent_nonmissing": 0.5,
@@ -2543,7 +2543,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
                 {
                     "true_value": (float) The true p-value of the Chi-squared test
-                    "summary_obj": {
+                    "details": {
                         "observed_partition" (dict):
                             The partition observed in the data.
                         "expected_partition" (dict):
@@ -2616,7 +2616,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
                 {
                     "true_value": (float) The true p-value of the KS test
-                    "summary_obj": {
+                    "details": {
                         "bootstrap_samples": The number of bootstrap rounds used
                         "bootstrap_sample_size": The number of samples taken from
                             the column in each bootstrap round
@@ -2709,7 +2709,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
                 {
                   "true_value": (float) The true KL divergence (relative entropy)
-                  "summary_obj": {
+                  "details": {
                     "observed_partition": (dict) The partition observed in the data
                     "expected_partition": (dict) The partition against which the data were compared,
                                             after applying specified weight holdouts.
