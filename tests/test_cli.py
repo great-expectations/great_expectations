@@ -146,15 +146,15 @@ class TestCLI(unittest.TestCase):
                 {
                   "exception_traceback": None, 
                   "summary_obj": {
-                    "exception_percent_nonmissing": 0.0, 
+                    "unexpected_percent_nonmissing": 0.0,
                     "missing_count": 557, 
-                    "partial_exception_index_list": [], 
+                    "partial_unexpected_index_list": [],
                     "element_count": 1313, 
-                    "exception_count": 0, 
+                    "unexpected_count": 0,
                     "missing_percent": 0.4242193450114242, 
-                    "exception_percent": 0.0, 
-                    "partial_exception_list": [], 
-                    "partial_exception_counts": []
+                    "unexpected_percent": 0.0,
+                    "partial_unexpected_list": [],
+                    "partial_unexpected_counts": []
                   }, 
                   "success": True, 
                   "raised_exception": False, 
@@ -169,23 +169,23 @@ class TestCLI(unittest.TestCase):
                 {
                   "exception_traceback": None, 
                   "summary_obj": {
-                    "exception_percent_nonmissing": 0.002284843869002285, 
+                    "unexpected_percent_nonmissing": 0.002284843869002285,
                     "missing_count": 0, 
-                    "partial_exception_index_list": [
+                    "partial_unexpected_index_list": [
                       394, 
                       456, 
                       1195
                     ], 
                     "element_count": 1313, 
-                    "exception_count": 3, 
+                    "unexpected_count": 3,
                     "missing_percent": 0.0, 
-                    "exception_percent": 0.002284843869002285, 
-                    "partial_exception_list": [
+                    "unexpected_percent": 0.002284843869002285,
+                    "partial_unexpected_list": [
                       "Downton (?Douton), Mr William James", 
                       "Jacobsohn Mr Samuel", 
                       "Seman Master Betros"
                     ], 
-                    "partial_exception_counts": [
+                    "partial_unexpected_counts": [
                       {"value": "Downton (?Douton), Mr William James",
                        "count": 1},
                       {"value": "Jacobsohn Mr Samuel",
@@ -207,25 +207,25 @@ class TestCLI(unittest.TestCase):
                 {
                   "exception_traceback": None, 
                   "summary_obj": {
-                    "exception_percent_nonmissing": 0.0007616146230007616, 
+                    "unexpected_percent_nonmissing": 0.0007616146230007616,
                     "missing_count": 0, 
-                    "partial_exception_index_list": [
+                    "partial_unexpected_index_list": [
                       456
                     ], 
                     "element_count": 1313, 
-                    "exception_count": 1, 
+                    "unexpected_count": 1,
                     "missing_percent": 0.0, 
-                    "exception_percent": 0.0007616146230007616, 
-                    "partial_exception_list": [
+                    "unexpected_percent": 0.0007616146230007616,
+                    "partial_unexpected_list": [
                       "*"
                     ], 
-                    "partial_exception_counts": [
+                    "partial_unexpected_counts": [
                       {"value": "*",
                        "count": 1}
                     ]
                   }, 
                   "success": False, 
-                  "raised_exception": False, 
+                  "raised_exception": False,
                   "kwargs": {
                     "column": "PClass", 
                     "values_set": [
@@ -244,13 +244,13 @@ class TestCLI(unittest.TestCase):
         # command_str = 'python '+filepath+'/../bin/great_expectations validate '+filepath+'/examples/Titanic.csv '+filepath+'/examples/titanic_expectations.json -f'
         # self.assertEqual(
         #     get_system_command_result(command_str),
-        #     {'output': '{\n  "results": [\n    {\n      "exception_traceback": null, \n      "expectation_type": "expect_column_values_to_be_in_set", \n      "success": false, \n      "raised_exception": false, \n      "kwargs": {\n        "column": "PClass", \n        "output_format": "BASIC", \n        "value_set": [\n          "1st", \n          "2nd", \n          "3rd"\n        ]\n      }, \n      "summary_obj": {\n        "exception_percent": 0.0007616146230007616, \n        "partial_exception_list": [\n          "*"\n        ], \n        "exception_percent_nonmissing": 0.0007616146230007616, \n        "exception_count": 1\n      }\n    }\n  ]\n}\n', 'errors': ''}
+        #     {'output': '{\n  "results": [\n    {\n      "exception_traceback": null, \n      "expectation_type": "expect_column_values_to_be_in_set", \n      "success": false, \n      "raised_exception": false, \n      "kwargs": {\n        "column": "PClass", \n        "output_format": "BASIC", \n        "value_set": [\n          "1st", \n          "2nd", \n          "3rd"\n        ]\n      }, \n      "summary_obj": {\n        "unexpected_percent": 0.0007616146230007616, \n        "partial_unexpected_list": [\n          "*"\n        ], \n        "unexpected_percent_nonmissing": 0.0007616146230007616, \n        "unexpected_count": 1\n      }\n    }\n  ]\n}\n', 'errors': ''}
         # )
         #
         # command_str = 'python '+filepath+'/../bin/great_expectations validate '+filepath+'/examples/Titanic.csv '+filepath+'/examples/titanic_expectations.json -f -o=COMPLETE'
         # self.assertEqual(
         #     get_system_command_result(command_str),
-        #     {'output': '{\n  "results": [\n    {\n      "exception_traceback": null, \n      "expectation_type": "expect_column_values_to_be_in_set", \n      "success": false, \n      "exception_list": [\n        "*"\n      ], \n      "raised_exception": false, \n      "kwargs": {\n        "column": "PClass", \n        "output_format": "COMPLETE", \n        "value_set": [\n          "1st", \n          "2nd", \n          "3rd"\n        ]\n      }, \n      "exception_index_list": [\n        456\n      ]\n    }\n  ]\n}\n', 'errors': ''}
+        #     {'output': '{\n  "results": [\n    {\n      "exception_traceback": null, \n      "expectation_type": "expect_column_values_to_be_in_set", \n      "success": false, \n      "unexpected_list": [\n        "*"\n      ], \n      "raised_exception": false, \n      "kwargs": {\n        "column": "PClass", \n        "output_format": "COMPLETE", \n        "value_set": [\n          "1st", \n          "2nd", \n          "3rd"\n        ]\n      }, \n      "unexpected_index_list": [\n        456\n      ]\n    }\n  ]\n}\n', 'errors': ''}
         # )
         #
         # command_str = 'python '+filepath+'/../bin/great_expectations validate '+filepath+'/examples/Titanic.csv '+filepath+'/examples/titanic_expectations.json -f -o=BOOLEAN_ONLY'
@@ -263,14 +263,14 @@ class TestCLI(unittest.TestCase):
         # # print get_system_command_result(command_str)
         # self.assertEqual(
         #     get_system_command_result(command_str),
-        #     {'output': '{\n  "results": [\n    {\n      "summary_obj": {\n        "exception_percent": 0.0007616146230007616, \n        "partial_exception_list": [\n          "*"\n        ], \n        "exception_percent_nonmissing": 0.0007616146230007616, \n        "exception_count": 1\n      }, \n      "expectation_type": "expect_column_values_to_be_in_set", \n      "success": false, \n      "kwargs": {\n        "column": "PClass", \n        "output_format": "BASIC", \n        "value_set": [\n          "1st", \n          "2nd", \n          "3rd"\n        ]\n      }\n    }\n  ]\n}\n', 'errors': ''}
+        #     {'output': '{\n  "results": [\n    {\n      "summary_obj": {\n        "unexpected_percent": 0.0007616146230007616, \n        "partial_unexpected_list": [\n          "*"\n        ], \n        "unexpected_percent_nonmissing": 0.0007616146230007616, \n        "unexpected_count": 1\n      }, \n      "expectation_type": "expect_column_values_to_be_in_set", \n      "success": false, \n      "kwargs": {\n        "column": "PClass", \n        "output_format": "BASIC", \n        "value_set": [\n          "1st", \n          "2nd", \n          "3rd"\n        ]\n      }\n    }\n  ]\n}\n', 'errors': ''}
         # )
         #
         # command_str = 'python '+filepath+'/../bin/great_expectations validate '+filepath+'/examples/Titanic.csv '+filepath+'/examples/titanic_expectations.json -f -e'
         # # print get_system_command_result(command_str)
         # self.assertEqual(
         #     get_system_command_result(command_str)["output"],
-        #     "{\n  \"results\": [\n    {\n      \"summary_obj\": {\n        \"exception_percent\": 0.0007616146230007616, \n        \"partial_exception_list\": [\n          \"*\"\n        ], \n        \"exception_percent_nonmissing\": 0.0007616146230007616, \n        \"exception_count\": 1\n      }, \n      \"expectation_type\": \"expect_column_values_to_be_in_set\", \n      \"success\": false, \n      \"kwargs\": {\n        \"column\": \"PClass\", \n        \"output_format\": \"BASIC\", \n        \"value_set\": [\n          \"1st\", \n          \"2nd\", \n          \"3rd\"\n        ]\n      }\n    }\n  ]\n}\n"
+        #     "{\n  \"results\": [\n    {\n      \"summary_obj\": {\n        \"unexpected_percent\": 0.0007616146230007616, \n        \"partial_unexpected_list\": [\n          \"*\"\n        ], \n        \"unexpected_percent_nonmissing\": 0.0007616146230007616, \n        \"unexpected_count\": 1\n      }, \n      \"expectation_type\": \"expect_column_values_to_be_in_set\", \n      \"success\": false, \n      \"kwargs\": {\n        \"column\": \"PClass\", \n        \"output_format\": \"BASIC\", \n        \"value_set\": [\n          \"1st\", \n          \"2nd\", \n          \"3rd\"\n        ]\n      }\n    }\n  ]\n}\n"
         # )
         #print(filepath)
 
@@ -291,8 +291,8 @@ class TestCLI(unittest.TestCase):
         self.maxDiff = None
         print(json.dumps(json_result, indent=2))
 
-        #Remove partial exception counts, because we can't guarantee that they'll be the same every time.
-        del json_result["results"][0]["summary_obj"]['partial_exception_counts']
+        #Remove partial unexpected counts, because we can't guarantee that they'll be the same every time.
+        del json_result["results"][0]["summary_obj"]['partial_unexpected_counts']
         self.assertEqual(
             json_result,
             {
@@ -300,9 +300,9 @@ class TestCLI(unittest.TestCase):
                 {
                   "exception_traceback": None, 
                   "summary_obj": {
-                    "exception_percent_nonmissing": 0.5026656511805027, 
+                    "unexpected_percent_nonmissing": 0.5026656511805027,
                     "missing_count": 0, 
-                    "partial_exception_index_list": [
+                    "partial_unexpected_index_list": [
                       0, 
                       5, 
                       6, 
@@ -325,10 +325,10 @@ class TestCLI(unittest.TestCase):
                       33
                     ], 
                     "element_count": 1313, 
-                    "exception_count": 660, 
+                    "unexpected_count": 660,
                     "missing_percent": 0.0, 
-                    "exception_percent": 0.5026656511805027, 
-                    "partial_exception_list": [
+                    "unexpected_percent": 0.5026656511805027,
+                    "partial_unexpected_list": [
                       "Allen, Miss Elisabeth Walton", 
                       "Anderson, Mr Harry", 
                       "Andrews, Miss Kornelia Theodosia", 
@@ -385,12 +385,12 @@ class TestCLI(unittest.TestCase):
         #             ]
         #           }, 
         #           "summary_obj": {
-        #             "exception_percent": 0.0007616146230007616, 
-        #             "partial_exception_list": [
+        #             "unexpected_percent": 0.0007616146230007616,
+        #             "partial_unexpected_list": [
         #               "*"
         #             ], 
-        #             "exception_percent_nonmissing": 0.0007616146230007616, 
-        #             "exception_count": 1
+        #             "unexpected_percent_nonmissing": 0.0007616146230007616,
+        #             "unexpected_count": 1
         #           }
         #         }
         #       ]
