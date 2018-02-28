@@ -18,7 +18,12 @@
     },
     "out": {
       "success": true,
-      "true_value": 5
+      "result_obj": {
+         "observed_value": 5,
+        "element_count": 10,
+        "missing_count": 0,
+        "missing_percent": 0.0
+      }
     }
   },{
     "notes": "Basic negative test case",
@@ -30,7 +35,12 @@
     },
     "out": {
       "success": false,
-      "true_value": 5
+      "result_obj": {
+         "observed_value": 5,
+        "element_count": 10,
+        "missing_count": 0,
+        "missing_percent": 0.0
+      }
     }
   },{
     "notes": "Test case with output_format=SUMMARY. Also verifies that max_value is inclusive",
@@ -42,8 +52,8 @@
     },
     "out": {
       "success": true,
-      "true_value": 5,
-      "summary_obj": {
+      "result_obj": {
+        "observed_value": 5,
         "element_count": 10,
         "missing_count": 0,
         "missing_percent": 0.0
@@ -57,7 +67,12 @@
     },
     "out": {
       "success": true,
-      "true_value": 9.0
+      "result_obj": {
+        "observed_value": 9.0,
+        "element_count": 10,
+        "missing_count": 2,
+        "missing_percent": 0.2
+      }
     }
   },{
     "notes": "Negative test case with only a lower bound",
@@ -67,7 +82,12 @@
     },
     "out": {
       "success": false,
-      "true_value": 5
+      "result_obj": {
+        "observed_value": 5,
+        "element_count": 10,
+        "missing_count": 0,
+        "missing_percent": 0.0
+      }
     }
   },{
     "notes": "Test on a series containing dates, with an output_strftime_format value",
@@ -80,7 +100,12 @@
     },
     "out": {
       "success": false,
-      "true_value": "02/01/2017"
+      "result_obj": {
+        "observed_value": "02/01/2017",
+        "element_count": 10,
+        "missing_count": 4,
+        "missing_percent": 0.4
+      }
     }
   },{
     "notes": "Test on a date-like series containing strings",
@@ -92,7 +117,12 @@
     },
     "out": {
       "success": true,
-      "true_value": "3/1/2016"
+      "result_obj": {
+        "observed_value": "3/1/2016",
+        "element_count": 10,
+        "missing_count": 4,
+        "missing_percent": 0.4
+      }
     }
   },{
     "notes": "Test on a strings",
@@ -103,7 +133,12 @@
     },
     "out": {
       "success": true,
-      "true_value": "e"
+      "result_obj": {
+        "observed_value": "e",
+        "element_count": 10,
+        "missing_count": 5,
+        "missing_percent": 0.5
+      }
     }
   }]
 }
