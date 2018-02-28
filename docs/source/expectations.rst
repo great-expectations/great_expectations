@@ -23,10 +23,10 @@ Great Expectations's connect-and-expect API makes it easy to declare Expectation
     {
         'success': True,
         'summary_obj': {
-            'exception_count': 0,
-            'exception_percent': 0.0,
-            'exception_percent_nonmissing': 0.0,
-            'partial_exception_list': []
+            'unexpected_count': 0,
+            'unexpected_percent': 0.0,
+            'unexpected_percent_nonmissing': 0.0,
+            'partial_unexpected_list': []
         }
     }
 
@@ -55,10 +55,10 @@ For example:
     {
         'success': False,
         'summary_obj': {
-            'exception_count': 1,
-            'exception_percent': 0.0007616146230007616,
-            'exception_percent_nonmissing': 0.0007616146230007616,
-            'partial_exception_list': ['*']
+            'unexpected_count': 1,
+            'unexpected_percent': 0.0007616146230007616,
+            'unexpected_percent_nonmissing': 0.0007616146230007616,
+            'partial_unexpected_list': ['*']
         }
     }
 
@@ -73,10 +73,10 @@ Another example:
     {
         'success': False,
         'summary_obj': {
-            'exception_count': 16,
-            'exception_percent': 0.012185833968012186,
-            'exception_percent_nonmissing': 0.012185833968012186,
-            'partial_exception_list': [
+            'unexpected_count': 16,
+            'unexpected_percent': 0.012185833968012186,
+            'unexpected_percent_nonmissing': 0.012185833968012186,
+            'partial_unexpected_list': [
                 'Bjornstrm-Steffansson, Mr Mauritz Hakan',
                 'Brown, Mrs James Joseph (Margaret Molly" Tobin)"',
                 'Frolicher-Stehli, Mr Maxmillian',
