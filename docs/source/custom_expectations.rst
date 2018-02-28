@@ -130,7 +130,7 @@ Once you do this, all the functionality of your new expectations will be availab
     >> my_df.expect_column_values_to_equal_1("all_twos")
     {
         "success": False,
-        "exception_list": [2,2,2,2,2,2,2,2]
+        "unexpected_list": [2,2,2,2,2,2,2,2]
     }
 
 A similar approach works for the command-line tool.

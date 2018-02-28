@@ -86,17 +86,17 @@ Expectations with `mostly` return exception lists even if they succeed:
     {
       "success": true
       "summary_obj": {
-        "exception_percent": 0.2,
-        "partial_exception_index_list": [
+        "unexpected_percent": 0.2,
+        "partial_unexpected_index_list": [
           8,
           9
         ],
-        "partial_exception_list": [
+        "partial_unexpected_list": [
           8,
           9
         ],
-        "exception_percent_nonmissing": 0.2,
-        "exception_count": 2
+        "unexpected_percent_nonmissing": 0.2,
+        "unexpected_count": 2
       }
     }
 
