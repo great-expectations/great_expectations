@@ -17,13 +17,13 @@ The `result_format` parameter is a dictionary which may include the following ke
 `result_obj_format`
 ------------------------------------------------------------------------------
 
-Great Expectations supports four values for `result_obj_format`: `SUCCESS_ONLY`, `BASIC`, `SUMMARY`, and `COMPLETE`. \
+Great Expectations supports four values for `result_obj_format`: `BOOLEAN_ONLY`, `BASIC`, `SUMMARY`, and `COMPLETE`. \
 Each successive value includes more detail and so can support different use cases for working with Great Expectations, \
 including interactive exploratory work and automatic validation.
 
 
 +---------------------------------------+----------------+----------------+----------------+----------------+
-| Fields within `result_obj`            |SUCCESS_ONLY    |BASIC           |SUMMARY         |COMPLETE        |
+| Fields within `result_obj`            |BOOLEAN_ONLY    |BASIC           |SUMMARY         |COMPLETE        |
 +=======================================+================+================+================+================+
 |    element_count                      |no              |yes             |yes             |yes             |
 +---------------------------------------+----------------+----------------+----------------+----------------+
@@ -61,7 +61,7 @@ including interactive exploratory work and automatic validation.
 +---------------------------------------+--------------------------------------------------------------+
 | `result_obj_format` Setting           | Example use case                                             |
 +=======================================+==============================================================+
-|    SUCCESS_ONLY                       | Automatic validation. No result_obj is returned.             |
+|    BOOLEAN_ONLY                       | Automatic validation. No result_obj is returned.             |
 +---------------------------------------+--------------------------------------------------------------+
 |    BASIC                              | Exploratory analysis in a notebook.                          |
 +---------------------------------------+--------------------------------------------------------------+
@@ -82,7 +82,7 @@ result_obj_format examples
     >> my_df.expect_column_values_to_be_in_set(
         "my_var",
         ["B", "C", "D", "F", "G", "H"],
-        result_format={'result_obj_format': 'SUCCESS_ONLY'}
+        result_format={'result_obj_format': 'BOOLEAN_ONLY'}
     )
     {
         'success': False
@@ -141,9 +141,9 @@ result_obj_format examples
 The out-of-the-box default is `{'result_obj_format'='BASIC'}`.
 
 
-Behavior for `SUCCESS_ONLY`
+Behavior for `BOOLEAN_ONLY`
 ------------------------------------------------------------------------------
-When the `result_obj_format` is `SUCCESS_ONLY`, no `result_obj` is returned. The result of evaluating the expectation is \
+When the `result_obj_format` is `BOOLEAN_ONLY`, no `result_obj` is returned. The result of evaluating the expectation is \
 exclusively returned via the value of the `success` parameter.
 
 For example:
@@ -153,7 +153,7 @@ For example:
     >> my_df.expect_column_values_to_be_in_set(
         "possible_benefactors",
         ["Joe Gargery", "Mrs. Gargery", "Mr. Pumblechook", "Ms. Havisham", "Mr. Jaggers"]
-        result_format={'result_obj_format': 'SUCCESS_ONLY'}
+        result_format={'result_obj_format': 'BOOLEAN_ONLY'}
     )
     {
         'success': False
@@ -162,7 +162,7 @@ For example:
     >> my_df.expect_column_values_to_be_in_set(
         "possible_benefactors",
         ["Joe Gargery", "Mrs. Gargery", "Mr. Pumblechook", "Ms. Havisham", "Mr. Jaggers", "Mr. Magwitch"]
-        result_format={'result_obj_format': 'SUCCESS_ONLY'}
+        result_format={'result_obj_format': 'BOOLEAN_ONLY'}
     )
     {
         'success': False
