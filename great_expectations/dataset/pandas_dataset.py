@@ -62,7 +62,6 @@ class MetaPandasDataSet(DataSet):
 
             unexpected_list = list(series[(boolean_mapped_success_values==False)&(boolean_mapped_null_values==False)])
             unexpected_index_list = list(series[(boolean_mapped_success_values==False)&(boolean_mapped_null_values==False)].index)
-            unexpected_count = len(unexpected_list)
 
             success, percent_success = self._calc_map_expectation_success(success_count, nonnull_count, mostly)
 
@@ -108,49 +107,41 @@ class MetaPandasDataSet(DataSet):
             nonnull_count = int((null_indexes == False).sum())
             null_count = element_count - nonnull_count
 
-            result_obj = func(self, nonnull_values, *args, **kwargs)
+            evaluation_result = func(self, nonnull_values, *args, **kwargs)
 
-            #!!! This would be the right place to validate result_obj
-            #!!! It should contain:
-            #!!!    success: bool
-            #!!!    true_value: int or float
-            #!!!    summary_obj: json-serializable dict
+            if ('success' not in evaluation_result) or \
+                ('result_obj' not in evaluation_result) or \
+                ('true_value' not in evaluation_result['result_obj']):
+                raise ValueError("Column aggregate expectation failed to return required return information.")
 
-            # if not output_format in ["BASIC", "COMPLETE", "SUMMARY", "BOOLEAN_ONLY"]:
-            #     print ("Warning: Unknown output_format %s. Defaulting to %s." % (output_format, self.default_expectation_args["output_format"]))
+            # Retain support for string-only output formats:
+            if isinstance(output_format, str):
+                output_format = {'result_obj_format': output_format}
 
+            return_obj = {
+                'success': bool(evaluation_result['success'])
+            }
 
-            if output_format in ["BASIC", "COMPLETE"]:
-                return_obj = {
-                    "success" : bool(result_obj["success"]),
-                    "true_value" : result_obj["true_value"],
-                }
+            if output_format['result_obj_format'] == 'BOOLEAN_ONLY':
+                return return_obj
 
-            elif (output_format == "SUMMARY"):
-                new_summary_obj = {
-                    "element_count": element_count,
-                    "missing_count": null_count,
-                    "missing_percent": null_count*1.0 / element_count if element_count > 0 else None
-                }
+            return_obj['result_obj'] = {
+                'observed_value': evaluation_result['result_obj']['observed_value'],
+                "element_count": element_count,
+                "missing_count": null_count,
+                "missing_percent": null_count * 1.0 / element_count if element_count > 0 else None,
+            }
 
-                if "summary_obj" in result_obj and result_obj["summary_obj"] is not None:
-                    result_obj["summary_obj"].update(new_summary_obj)
-                else:
-                    result_obj["summary_obj"] = new_summary_obj
+            if output_format['result_obj_format'] == 'BASIC':
+                return return_obj
 
-                return_obj = {
-                    "success" : bool(result_obj["success"]),
-                    "true_value" : result_obj["true_value"],
-                    "summary_obj" : result_obj["summary_obj"]
-                }
+            if 'details' in evaluation_result['return_obj']:
+                return_obj['result_obj']['details'] = evaluation_result['return_obj']['details']
 
-            elif output_format=="BOOLEAN_ONLY":
-                return_obj = bool(result_obj["success"])
+            if output_format['result_obj_format'] in ["SUMMARY", "COMPLETE"]:
+                return return_obj
 
-            else:
-                raise ValueError("Unknown output_format %s." % (output_format,))
-
-            return return_obj
+            raise ValueError("Unknown output_format %s." % (output_format['result_obj_format'],))
 
         return inner_wrapper
 
