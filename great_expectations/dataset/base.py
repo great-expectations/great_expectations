@@ -6,6 +6,7 @@ import copy
 from functools import wraps
 import traceback
 import warnings
+from six import string_types
 
 from collections import (
     Counter,
@@ -680,7 +681,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         """
 
         # Retain support for string-only output formats:
-        if isinstance(output_format, str):
+        if isinstance(output_format, string_types):
             output_format = {'result_obj_format': output_format}
 
         if 'partial_unexpected_count' in output_format:
