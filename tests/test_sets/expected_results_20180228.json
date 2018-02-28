@@ -53,8 +53,8 @@
       }
     }, 
     {
-      "exception_list": [], 
-      "exception_index_list": [], 
+      "unexpected_list": [],
+      "unexpected_index_list": [],
       "expectation_type": "expect_column_values_to_be_between", 
       "success": true, 
       "kwargs": {
@@ -64,12 +64,12 @@
       }
     }, 
     {
-      "exception_list": [
+      "unexpected_list": [
         "Downton (?Douton), Mr William James", 
         "Jacobsohn Mr Samuel", 
         "Seman Master Betros"
       ], 
-      "exception_index_list": [   
+      "unexpected_index_list": [
         394,    
         456,    
         1195    
@@ -83,10 +83,10 @@
       }
     }, 
     {
-      "exception_list": [
+      "unexpected_list": [
         "*"
       ],
-      "exception_index_list": [   
+      "unexpected_index_list": [
         456   
       ], 
       "expectation_type": "expect_column_values_to_be_in_set", 
