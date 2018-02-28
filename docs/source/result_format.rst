@@ -117,7 +117,7 @@ result_obj_format examples
             'unexpected_percent_nonmissing': 0.16666666666666666,
             'missing_count': 0,
             'missing_percent': 0.0,
-            'partial_unexpected_counts': {'A': 1, 'E': 5},
+            'partial_unexpected_counts': [{'value': 'A', 'count': 1}, {'value': 'E', 'count': 5}],
             'partial_unexpected_index_list': [0, 10, 11, 12, 13, 14],
             'partial_unexpected_list': ['A', 'E', 'E', 'E', 'E', 'E']
         }
@@ -271,7 +271,7 @@ The summary `result_obj` includes:
             "partial_unexpected_list" : [A list of up to 20 values that violate the expectation] (also in `BASIC`)
             'missing_count': The number of missing values in the column
             'missing_percent': The total percent of missing values in the column
-            'partial_unexpected_counts': {A dictionary of the number of times each of the unexpected values occurs}
+            'partial_unexpected_counts': [{A list of objects with value and counts, showing the number of times each of the unexpected values occurs}]
             'partial_unexpected_index_list': [A list of up to 20 of the indices of the unexpected values in the column]
         }
     }
@@ -289,7 +289,7 @@ For example:
             'unexpected_percent_nonmissing': 0.16666666666666666,
             'missing_count': 0,
             'missing_percent': 0.0,
-            'partial_unexpected_counts': {'A': 1, 'E': 5},
+            'partial_unexpected_counts': [{'value': 'A', 'count': 1}, {'value': 'E', 'count': 5}],
             'partial_unexpected_index_list': [0, 10, 11, 12, 13, 14],
             'partial_unexpected_list': ['A', 'E', 'E', 'E', 'E', 'E']
         }
