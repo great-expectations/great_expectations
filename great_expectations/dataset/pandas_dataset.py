@@ -738,7 +738,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
                 parse(val)
                 return True
 
-            except ValueError:
+            except (ValueError, OverflowError):
                 return False
 
         return column.map(is_parseable)
