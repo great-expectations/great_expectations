@@ -2008,7 +2008,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             ::
 
                 {
-                    "true_value": (float) The true mean for the column
+                    "observed_value": (float) The true mean for the column
                 }
 
             * min_value and max_value are both inclusive.
@@ -2064,7 +2064,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             ::
 
                 {
-                    "true_value": (float) The true median for the column
+                    "observed_value": (float) The true median for the column
                 }
 
             * min_value and max_value are both inclusive.
@@ -2121,7 +2121,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             ::
 
                 {
-                    "true_value": (float) The true standard deviation for the column
+                    "observed_value": (float) The true standard deviation for the column
                 }
 
             * min_value and max_value are both inclusive.
@@ -2177,7 +2177,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             ::
 
                 {
-                    "true_value": (int) The number of unique values in the column
+                    "observed_value": (int) The number of unique values in the column
                 }
 
             * min_value and max_value are both inclusive.
@@ -2235,7 +2235,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             ::
 
                 {
-                    "true_value": (float) The proportion of unique values in the column
+                    "observed_value": (float) The proportion of unique values in the column
                 }
 
             * min_value and max_value are both inclusive.
@@ -2292,12 +2292,12 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             ::
 
                 {
-                    "true_value": (list) The most common values in the column
+                    "observed_value": (list) The most common values in the column
                 }
 
-            `true_value` contains a list of the most common values.
+            `observed_value` contains a list of the most common values.
             Often, this will just be a single element. But if there's a tie for most common among multiple values,
-            `true_value` will contain a single copy of each most common value.
+            `observed_value` will contain a single copy of each most common value.
 
         """
         raise NotImplementedError
@@ -2346,7 +2346,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             ::
 
                 {
-                    "true_value": (list) The actual column sum
+                    "observed_value": (list) The actual column sum
                 }
 
 
@@ -2408,7 +2408,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             ::
 
                 {
-                    "true_value": (list) The actual column min
+                    "observed_value": (list) The actual column min
                 }
 
 
@@ -2470,7 +2470,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             ::
 
                 {
-                    "true_value": (list) The actual column max
+                    "observed_value": (list) The actual column max
                 }
 
 
@@ -2539,7 +2539,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             ::
 
                 {
-                    "true_value": (float) The true p-value of the Chi-squared test
+                    "observed_value": (float) The true p-value of the Chi-squared test
                     "details": {
                         "observed_partition" (dict):
                             The partition observed in the data.
@@ -2612,7 +2612,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             ::
 
                 {
-                    "true_value": (float) The true p-value of the KS test
+                    "observed_value": (float) The true p-value of the KS test
                     "details": {
                         "bootstrap_samples": The number of bootstrap rounds used
                         "bootstrap_sample_size": The number of samples taken from
@@ -2705,7 +2705,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             ::
 
                 {
-                  "true_value": (float) The true KL divergence (relative entropy)
+                  "observed_value": (float) The true KL divergence (relative entropy)
                   "details": {
                     "observed_partition": (dict) The partition observed in the data
                     "expected_partition": (dict) The partition against which the data were compared,

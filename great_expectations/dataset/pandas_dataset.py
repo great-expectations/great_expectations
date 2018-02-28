@@ -111,7 +111,7 @@ class MetaPandasDataSet(DataSet):
 
             if ('success' not in evaluation_result) or \
                 ('result_obj' not in evaluation_result) or \
-                ('true_value' not in evaluation_result['result_obj']):
+                ('observed_value' not in evaluation_result['result_obj']):
                 raise ValueError("Column aggregate expectation failed to return required return information.")
 
             # Retain support for string-only output formats:
@@ -217,7 +217,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
         return {
             'success': outcome,
-            'true_value': row_count
+            'observed_value': row_count
         }
 
     @DocInherit
@@ -241,7 +241,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
         return {
             'success':outcome,
-            'true_value':self.shape[0]
+            'observed_value':self.shape[0]
         }
 
     @DocInherit
@@ -716,7 +716,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
                 ((min_value is None) or (min_value <= column_mean)) and
                 ((max_value is None) or (column_mean <= max_value))
             ),
-            "true_value": column_mean
+            "observed_value": column_mean
         }
 
     @DocInherit
@@ -734,7 +734,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
                 ((min_value or None) or (min_value <= column_median)) and
                 ((max_value or None) or (column_median <= max_value))
             ),
-            "true_value": column_median
+            "observed_value": column_median
         }
 
     @DocInherit
@@ -752,7 +752,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
                 ((min_value is None) or (min_value <= column_stdev)) and
                 ((max_value is None) or (column_stdev <= max_value))
             ),
-            "true_value": column_stdev
+            "observed_value": column_stdev
         }
 
     @DocInherit
@@ -770,7 +770,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
                 ((min_value is None) or (min_value <= unique_value_count)) and
                 ((max_value is None) or (unique_value_count <= max_value))
             ),
-            "true_value": unique_value_count
+            "observed_value": unique_value_count
         }
 
     @DocInherit
@@ -790,7 +790,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
                 ((min_value is None) or (min_value <= proportion_unique)) and
                 ((max_value is None) or (proportion_unique <= max_value))
             ),
-            "true_value": proportion_unique
+            "observed_value": proportion_unique
         }
 
     @DocInherit
@@ -811,7 +811,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
         return {
             "success" : success,
-            "true_value": mode_list
+            "observed_value": mode_list
         }
 
     @DocInherit
@@ -838,7 +838,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
         return {
             "success" : success,
-            "true_value" : col_sum
+            "observed_value" : col_sum
         }
 
     @DocInherit
@@ -885,7 +885,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
         return {
             "success" : success,
-            "true_value" : col_min
+            "observed_value" : col_min
         }
 
     @DocInherit
@@ -933,8 +933,11 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
         return {
             "success" : success,
-            "true_value" : col_max
+            "result_obj": {
+                "observed_value" : col_max
+            }
         }
+
 
     @DocInherit
     @MetaPandasDataSet.column_aggregate_expectation
@@ -964,7 +967,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
         result_obj = {
                 "success": test_result > p,
-                "true_value": test_result,
+                "observed_value": test_result,
                 "details": {
                     "observed_partition": {
                         "values": test_df.index.tolist(),
@@ -1034,7 +1037,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
         result_obj = {
                 "success" : test_result > p,
-                "true_value": test_result,
+                "observed_value": test_result,
                 "details": {
                     "bootstrap_samples": bootstrap_samples,
                     "bootstrap_sample_size": bootstrap_sample_size,
@@ -1102,7 +1105,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
             result_obj = {
                 "success": kl_divergence <= threshold,
-                "true_value": kl_divergence,
+                "observed_value": kl_divergence,
                 "details": {
                     "observed_partition": {
                         "values": test_df.index.tolist(),
@@ -1165,7 +1168,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
             result_obj = {
                     "success": kl_divergence <= threshold,
-                    "true_value": kl_divergence,
+                    "observed_value": kl_divergence,
                     "details": {
                         "observed_partition": {
                             # return expected_bins, since we used those bins to compute the observed_weights
