@@ -115,7 +115,7 @@ class MetaPandasDataSet(DataSet):
                 raise ValueError("Column aggregate expectation failed to return required return information.")
 
             # Retain support for string-only output formats:
-            if isinstance(output_format, str):
+            if isinstance(output_format, string_types):
                 output_format = {'result_obj_format': output_format}
 
             return_obj = {
@@ -129,14 +129,14 @@ class MetaPandasDataSet(DataSet):
                 'observed_value': evaluation_result['result_obj']['observed_value'],
                 "element_count": element_count,
                 "missing_count": null_count,
-                "missing_percent": null_count * 1.0 / element_count if element_count > 0 else None,
+                "missing_percent": null_count * 1.0 / element_count if element_count > 0 else None
             }
 
             if output_format['result_obj_format'] == 'BASIC':
                 return return_obj
 
-            if 'details' in evaluation_result['return_obj']:
-                return_obj['result_obj']['details'] = evaluation_result['return_obj']['details']
+            if 'details' in evaluation_result['result_obj']:
+                return_obj['result_obj']['details'] = evaluation_result['result_obj']['details']
 
             if output_format['result_obj_format'] in ["SUMMARY", "COMPLETE"]:
                 return return_obj
