@@ -190,19 +190,19 @@ class TestPandasDataset(unittest.TestCase):
         T = [
                 {
                     'in':{'column':'a'},
-                    'out':{'success':False, 'exception_index_list':[0,1], 'exception_list':['2','2']}},
+                    'out':{'success':False, 'unexpected_index_list':[0,1], 'unexpected_list':['2','2']}},
                 {
                     'in':{'column':'b'},
-                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}},
+                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}},
                 {
                     'in':{'column':'c'},
-                    'out':{'success':False, 'exception_index_list':[0,1], 'exception_list':[1,1]}},
+                    'out':{'success':False, 'unexpected_index_list':[0,1], 'unexpected_list':[1,1]}},
                 {
                     'in':{'column':'d'},
-                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}},
+                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}},
                 {
                     'in':{'column':'n'},
-                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}}
+                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}}
         ]
 
         for t in T:
@@ -222,23 +222,23 @@ class TestPandasDataset(unittest.TestCase):
                 {
                     'in':['a'],
                     'kwargs':{},
-                    'out':{'success':False, 'exception_index_list':[0,1,2,3], 'exception_list':['2','2','2','2']}},
+                    'out':{'success':False, 'unexpected_index_list':[0,1,2,3], 'unexpected_list':['2','2','2','2']}},
                 {
                     'in':['b'],
                     'kwargs':{'mostly':.25},
-                    'out':{'success':True, 'exception_index_list':[1,2], 'exception_list':['2','2']}},
+                    'out':{'success':True, 'unexpected_index_list':[1,2], 'unexpected_list':['2','2']}},
                 {
                     'in':['b'],
                     'kwargs':{'mostly':.75},
-                    'out':{'success':False, 'exception_index_list':[1,2], 'exception_list':['2','2']}},
+                    'out':{'success':False, 'unexpected_index_list':[1,2], 'unexpected_list':['2','2']}},
                 {
                     'in':['a'],
                     'kwargs':{'mostly':1},
-                    'out':{'success':False, 'exception_index_list':[0,1,2,3], 'exception_list':['2','2','2','2']}},
+                    'out':{'success':False, 'unexpected_index_list':[0,1,2,3], 'unexpected_list':['2','2','2','2']}},
                 {
                     'in':['n'],
                     'kwargs':{'mostly':.2},
-                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}}
+                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}}
         ]
 
         for t in T:
@@ -267,22 +267,22 @@ class TestPandasDataset(unittest.TestCase):
         T = [
                 {
                     'in':{'column':'y'},
-                    'out':{'success':False, 'exception_index_list':[1], 'exception_list':[None]}},
+                    'out':{'success':False, 'unexpected_index_list':[1], 'unexpected_list':[None]}},
                 {
                     'in':{'column':'n'},
-                    'out':{'success':False, 'exception_index_list':[0,1], 'exception_list':[None, None]}},
+                    'out':{'success':False, 'unexpected_index_list':[0,1], 'unexpected_list':[None, None]}},
                 # {
                 #     'in':{'column':'y'},
-                #     'out':{'success':False, 'exception_index_list':[1], 'exception_list':[np.nan]}},
+                #     'out':{'success':False, 'unexpected_index_list':[1], 'unexpected_list':[np.nan]}},
                 # {
                 #     'in':{'column':'n'},
-                #     'out':{'success':False, 'exception_index_list':[0,1], 'exception_list':[None, np.nan]}},
+                #     'out':{'success':False, 'unexpected_index_list':[0,1], 'unexpected_list':[None, np.nan]}},
                 {
                     'in':{'column':'x'},
-                    'out':{'success':False, 'exception_index_list':[1], 'exception_list':[None]}},
+                    'out':{'success':False, 'unexpected_index_list':[1], 'unexpected_list':[None]}},
                 {
                     'in':{'column':'z'},
-                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}}
+                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}}
         ]
 
 
@@ -299,30 +299,30 @@ class TestPandasDataset(unittest.TestCase):
 
         #assert_equal(
         #    D.expect_column_values_to_not_be_null('x'),
-        #    {'success':False, 'exception_list':[None]}
+        #    {'success':False, 'unexpected_list':[None]}
         #)
 
         T = [
                 {
                     'in':['a'],
                     'kwargs':{},
-                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}},
+                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}},
                 {
                     'in':['a'],
                     'kwargs':{'mostly':.90},
-                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}},
+                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}},
                 {
                     'in':['b'],
                     'kwargs':{},
-                    'out':{'success':False, 'exception_index_list':[9], 'exception_list':[None]}},
+                    'out':{'success':False, 'unexpected_index_list':[9], 'unexpected_list':[None]}},
                 {
                     'in':['b'],
                     'kwargs':{'mostly':.95},
-                    'out':{'success':False, 'exception_index_list':[9], 'exception_list':[None]}},
+                    'out':{'success':False, 'unexpected_index_list':[9], 'unexpected_list':[None]}},
                 {
                     'in':['b'],
                     'kwargs':{'mostly':.90},
-                    'out':{'success':True, 'exception_index_list':[9], 'exception_list':[None]}}
+                    'out':{'success':True, 'unexpected_index_list':[9], 'unexpected_list':[None]}}
         ]
 
         for t in T:
@@ -339,12 +339,12 @@ class TestPandasDataset(unittest.TestCase):
                 {
                     'in':['a'],
                     'kwargs':{},
-                    'out':{'success':False, 'exception_index_list':[0,1,2,3], 'exception_list':[None,None,None,None]}
+                    'out':{'success':False, 'unexpected_index_list':[0,1,2,3], 'unexpected_list':[None,None,None,None]}
                 },
                 {
                     'in':['a'],
                     'kwargs':{"mostly":.95},
-                    'out':{'success':False, 'exception_index_list':[0,1,2,3], 'exception_list':[None,None,None,None]}
+                    'out':{'success':False, 'unexpected_index_list':[0,1,2,3], 'unexpected_list':[None,None,None,None]}
                 },
         ]
 
@@ -375,26 +375,26 @@ class TestPandasDataset(unittest.TestCase):
         T = [
                 {
                     'in':{'column':'x'},
-                    'out':{'success':False, 'exception_index_list':[0,2], 'exception_list':[2,2]}},
+                    'out':{'success':False, 'unexpected_index_list':[0,2], 'unexpected_list':[2,2]}},
                 {
                     'in':{'column':'y'},
-                    'out':{'success':False, 'exception_index_list':[0,2], 'exception_list':[2,2]}},
+                    'out':{'success':False, 'unexpected_index_list':[0,2], 'unexpected_list':[2,2]}},
                 {
                     'in':{'column':'z'},
-                    'out':{'success':False, 'exception_index_list':[0,1,2], 'exception_list':[2,5,7]}},
+                    'out':{'success':False, 'unexpected_index_list':[0,1,2], 'unexpected_list':[2,5,7]}},
                 {
                     'in':{'column':'a'},
-                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}},
+                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}},
                 {
                     'in':{'column':'x', 'mostly':.2},
-                    'out':{'success':True, 'exception_index_list':[0,2], 'exception_list':[2,2]}},
+                    'out':{'success':True, 'unexpected_index_list':[0,2], 'unexpected_list':[2,2]}},
                 {
                     'in':{'column':'x', 'mostly':.8},
-                    'out':{'success':False, 'exception_index_list':[0,2], 'exception_list':[2,2]}
+                    'out':{'success':False, 'unexpected_index_list':[0,2], 'unexpected_list':[2,2]}
                     },
                 {
                     'in':{'column':'a', 'mostly':.5},
-                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}}
+                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}}
         ]
 
         for t in T:
@@ -412,22 +412,22 @@ class TestPandasDataset(unittest.TestCase):
                 {
                     'in':['a'],
                     'kwargs':{},
-                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}
+                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}
                 },
                 {
                     'in':['a'],
                     'kwargs':{"mostly":.95},
-                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}
+                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}
                 },
                 {
                     'in':['b'],
                     'kwargs':{},
-                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}
+                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}
                 },
                 {
                     'in':['b'],
                     'kwargs':{"mostly":.95},
-                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}
+                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}
                 },
         ]
 
@@ -453,30 +453,30 @@ class TestPandasDataset(unittest.TestCase):
         T = [
                 {
                     'in':{"column":"x","type_":"int","target_datasource":"python"},
-                    'out':{'success':True, 'exception_list':[], 'exception_index_list':[]}},
+                    'out':{'success':True, 'unexpected_list':[], 'unexpected_index_list':[]}},
                 {
                     'in':{"column":"x","type_":"string","target_datasource":"numpy"},
-                    'out':{'success':False, 'exception_list':[1,2,4], 'exception_index_list':[0,1,2]}},
+                    'out':{'success':False, 'unexpected_list':[1,2,4], 'unexpected_index_list':[0,1,2]}},
                 {
                     'in':{"column":"y","type_":"float","target_datasource":"python"},
-                    'out':{'success':True, 'exception_list':[], 'exception_index_list':[]}},
+                    'out':{'success':True, 'unexpected_list':[], 'unexpected_index_list':[]}},
                 {
                     'in':{"column":"y","type_":"float","target_datasource":"numpy"},
-                    'out':{'success':False, 'exception_list':[1.0,2.2,5.3], 'exception_index_list':[0,1,2]}},
+                    'out':{'success':False, 'unexpected_list':[1.0,2.2,5.3], 'unexpected_index_list':[0,1,2]}},
                 {
                     'in':{"column":"z","type_":"string","target_datasource":"python"},
-                    'out':{'success':True, 'exception_list':[], 'exception_index_list':[]}},
+                    'out':{'success':True, 'unexpected_list':[], 'unexpected_index_list':[]}},
                 {
                     'in':{"column":"b","type_":"boolean","target_datasource":"python"},
-                    'out':{'success':True, 'exception_list':[], 'exception_index_list':[]}}
+                    'out':{'success':True, 'unexpected_list':[], 'unexpected_index_list':[]}}
                 #{
                 #    'in':['n','null','python'],
                 #    'kwargs':{},
-                #    'out':{'success':False, 'exception_list':[np.nan]}},
+                #    'out':{'success':False, 'unexpected_list':[np.nan]}},
                 #{
                 #    'in':['n','null','python'],
                 #    'kwargs':{'mostly':.5},
-                #    'out':{'success':True, 'exception_list':[np.nan]}}
+                #    'out':{'success':True, 'unexpected_list':[np.nan]}}
         ]
 
         for t in T:
@@ -499,29 +499,29 @@ class TestPandasDataset(unittest.TestCase):
         T = [
                 {
                     'in':{"column":"x","type_list":["int"],"target_datasource":"python"},
-                    'out':{'success':True, 'exception_list':[], 'exception_index_list':[]}},
+                    'out':{'success':True, 'unexpected_list':[], 'unexpected_index_list':[]}},
                 {
                     'in':{"column":"x","type_list":["string"],"target_datasource":"numpy"},
-                    'out':{'success':False, 'exception_list':[1,2,4], 'exception_index_list':[0,1,2]}},
+                    'out':{'success':False, 'unexpected_list':[1,2,4], 'unexpected_index_list':[0,1,2]}},
                 {
                     'in':{"column":"y","type_list":["float"],"target_datasource":"python"},
-                    'out':{'success':True, 'exception_list':[], 'exception_index_list':[]}},
+                    'out':{'success':True, 'unexpected_list':[], 'unexpected_index_list':[]}},
                 {
                     'in':{"column":"y","type_list":["float"],"target_datasource":"numpy"},
-                    'out':{'success':False, 'exception_list':[1.0,2.2,5.3], 'exception_index_list':[0,1,2]}},
+                    'out':{'success':False, 'unexpected_list':[1.0,2.2,5.3], 'unexpected_index_list':[0,1,2]}},
                 {
                     'in':{"column":"z","type_list":["string"],"target_datasource":"python"},
-                    'out':{'success':True, 'exception_list':[], 'exception_index_list':[]}},
+                    'out':{'success':True, 'unexpected_list':[], 'unexpected_index_list':[]}},
                 {
                     'in':{"column":"b","type_list":["boolean"],"target_datasource":"python"},
-                    'out':{'success':True, 'exception_list':[], 'exception_index_list':[]}},
+                    'out':{'success':True, 'unexpected_list':[], 'unexpected_index_list':[]}},
                 {
                    'in':{"column":"s", "type_list":["string", "int"], "target_datasource":"python"},
-                   'out':{'success':True, 'exception_list':[], 'exception_index_list':[]}},
+                   'out':{'success':True, 'unexpected_list':[], 'unexpected_index_list':[]}},
                 #{
                 #    'in':['n','null','python'],
                 #    'kwargs':{'mostly':.5},
-                #    'out':{'success':True, 'exception_list':[np.nan]}}
+                #    'out':{'success':True, 'unexpected_list':[np.nan]}}
         ]
 
         for t in T:
@@ -545,19 +545,19 @@ class TestPandasDataset(unittest.TestCase):
         T = [
                 {
                     'in':['x', [1,2,4]],
-                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}},
+                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}},
                 {
                     'in':['x', [4,2]],
-                    'out':{'success':False, 'exception_index_list':[0], 'exception_list':[1]}},
+                    'out':{'success':False, 'unexpected_index_list':[0], 'unexpected_list':[1]}},
                 {
                     'in':['y', []],
-                    'out':{'success':False, 'exception_index_list':[0,1,2], 'exception_list':[1,2,5]}},
+                    'out':{'success':False, 'unexpected_index_list':[0,1,2], 'unexpected_list':[1,2,5]}},
                 {
                     'in':['z', ['hello','jello','mello']],
-                    'out': {'success':True, 'exception_index_list':[], 'exception_list':[]}},
+                    'out': {'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}},
                 {
                     'in':['z', ['hello']],
-                    'out': {'success':False, 'exception_index_list':[1,2], 'exception_list':['jello','mello']}}
+                    'out': {'success':False, 'unexpected_index_list':[1,2], 'unexpected_list':['jello','mello']}}
         ]
 
         for t in T:
@@ -578,22 +578,22 @@ class TestPandasDataset(unittest.TestCase):
         T = [
                 {
                     'in':{'column':'x', 'values_set':[1,2]},
-                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}},
+                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}},
                 {
                     'in':{'column':'x', 'values_set':[1]},
-                    'out':{'success':False, 'exception_index_list':[2], 'exception_list':[2]}},
+                    'out':{'success':False, 'unexpected_index_list':[2], 'unexpected_list':[2]}},
                 {
                     'in':{'column':'x', 'values_set':[1], 'mostly':.66},
-                    'out':{'success':True, 'exception_index_list':[2], 'exception_list':[2]}},
+                    'out':{'success':True, 'unexpected_index_list':[2], 'unexpected_list':[2]}},
                 {
                     'in':{'column':'x', 'values_set':[2], 'mostly':.66},
-                    'out':{'success':False, 'exception_index_list':[0,1], 'exception_list':[1,1]}},
+                    'out':{'success':False, 'unexpected_index_list':[0,1], 'unexpected_list':[1,1]}},
                 {
                     'in':{'column':'y', 'values_set':[]},
-                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}},
+                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}},
                 {
                     'in':{'column':'y', 'values_set':[2], 'mostly':.5},
-                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}}
+                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}}
         ]
 
         for t in T:
@@ -619,35 +619,35 @@ class TestPandasDataset(unittest.TestCase):
         T = [
                 {
                     'in':['x', [1,2]],'kwargs':{},
-                    'out':{'success':False, 'exception_index_list':[0,1], 'exception_list':[1,2]}},
+                    'out':{'success':False, 'unexpected_index_list':[0,1], 'unexpected_list':[1,2]}},
                 {
                     'in':['x',[5,6]],'kwargs':{},
-                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}},
+                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}},
                 {
                     'in':['z',['hello', 'jello']],'kwargs':{},
-                    'out':{'success':False, 'exception_index_list':[0,1], 'exception_list':['hello', 'jello']}},
+                    'out':{'success':False, 'unexpected_index_list':[0,1], 'unexpected_list':['hello', 'jello']}},
                 {
                     'in':['z',[]],'kwargs':{},
-                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}},
+                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}},
                 {
                     'in':['a', [1]],'kwargs':{},
-                    'out':{'success':False, 'exception_index_list':[0,1], 'exception_list':[1, 1]}},
+                    'out':{'success':False, 'unexpected_index_list':[0,1], 'unexpected_list':[1, 1]}},
                 {
                     'in':['n', [2]],
                     'kwargs':{},
-                    'out':{'success':False, 'exception_index_list':[2], 'exception_list':[2]}},
+                    'out':{'success':False, 'unexpected_index_list':[2], 'unexpected_list':[2]}},
                 {
                     'in':['n', []],
                     'kwargs':{},
-                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}},
+                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}},
                 {
                     'in':['a', [1]], 
                     'kwargs':{'mostly':.1},
-                    'out':{'success':True, 'exception_index_list':[0,1], 'exception_list':[1, 1]}},
+                    'out':{'success':True, 'unexpected_index_list':[0,1], 'unexpected_list':[1, 1]}},
                 {
                     'in':['n', [2]],
                     'kwargs':{'mostly':.9},
-                    'out':{'success':False, 'exception_index_list':[2], 'exception_list':[2]}}
+                    'out':{'success':False, 'unexpected_index_list':[2], 'unexpected_list':[2]}}
         ]
 
         for t in T:
@@ -698,16 +698,16 @@ class TestPandasDataset(unittest.TestCase):
         T = [
                 {
                     'in':{'column':'s1', 'min_value':3, 'max_value':5},
-                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}},
+                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}},
                 {
                     'in':{'column':'s2', 'min_value':4, 'max_value':6},
-                    'out':{'success':False, 'exception_index_list':[2], 'exception_list':['collected']}},
+                    'out':{'success':False, 'unexpected_index_list':[2], 'unexpected_list':['collected']}},
                 {
                     'in':{'column':'s2', 'min_value':None, 'max_value':10},
-                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}},
+                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}},
                 {
                     'in':{'column':'s3', 'min_value':None, 'max_value':10},
-                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}}
+                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}}
         ]
 
         for t in T:
@@ -744,19 +744,19 @@ class TestPandasDataset(unittest.TestCase):
         T = [
                 {
                     'in':{'column':'x', 'regex':'^a'},
-                    'out':{'success':True, 'exception_list':[], 'exception_index_list':[]}},
+                    'out':{'success':True, 'unexpected_list':[], 'unexpected_index_list':[]}},
                 {
                     'in':{'column':'x', 'regex':'aa'},
-                    'out':{'success':False, 'exception_list':['ab', 'ac', 'a1'], 'exception_index_list':[1,2,3]}},
+                    'out':{'success':False, 'unexpected_list':['ab', 'ac', 'a1'], 'unexpected_index_list':[1,2,3]}},
                 {
                     'in':{'column':'x', 'regex':'a[a-z]'},
-                    'out':{'success':False, 'exception_list':['a1'], 'exception_index_list':[3]}},
+                    'out':{'success':False, 'unexpected_list':['a1'], 'unexpected_index_list':[3]}},
                 {
                     'in':{'column':'y', 'regex':'[abc]{2}'},
-                    'out':{'success':True, 'exception_list':[], 'exception_index_list':[]}},
+                    'out':{'success':True, 'unexpected_list':[], 'unexpected_index_list':[]}},
                 {
                     'in':{'column':'y', 'regex':'[z]'},
-                    'out':{'success':False, 'exception_list':['aa', 'ab', 'ac', 'ba', 'ca'], 'exception_index_list':[0,1,2,3,4]}}
+                    'out':{'success':False, 'unexpected_list':['aa', 'ab', 'ac', 'ba', 'ca'], 'unexpected_index_list':[0,1,2,3,4]}}
         ]
 
         for t in T:
@@ -766,28 +766,28 @@ class TestPandasDataset(unittest.TestCase):
         T = [
                 {
                     'in':{'column':'a', 'regex':'^a', 'mostly':.9},
-                    'out':{'success':False, 'exception_list':['bee'], 'exception_index_list':[4]}},
+                    'out':{'success':False, 'unexpected_list':['bee'], 'unexpected_index_list':[4]}},
                 {
                     'in':{'column':'a', 'regex':'^a', 'mostly':.8},
-                    'out':{'success':True, 'exception_list':['bee'], 'exception_index_list':[4]}},
+                    'out':{'success':True, 'unexpected_list':['bee'], 'unexpected_index_list':[4]}},
                 {
                     'in':{'column':'a', 'regex':'^a', 'mostly':.7},
-                    'out':{'success':True, 'exception_list':['bee'], 'exception_index_list':[4]}},
+                    'out':{'success':True, 'unexpected_list':['bee'], 'unexpected_index_list':[4]}},
                 {
                     'in':{'column':'b', 'regex':'^a', 'mostly':.9},
-                    'out':{'success':False, 'exception_list':['bdd'], 'exception_index_list':[3]}},
+                    'out':{'success':False, 'unexpected_list':['bdd'], 'unexpected_index_list':[3]}},
                 {
                     'in':{'column':'b', 'regex':'^a', 'mostly':.75},
-                    'out':{'success':True, 'exception_list':['bdd'], 'exception_index_list':[3]}},
+                    'out':{'success':True, 'unexpected_list':['bdd'], 'unexpected_index_list':[3]}},
                 {
                     'in':{'column':'b', 'regex':'^a', 'mostly':.5},
-                    'out':{'success':True, 'exception_list':['bdd'], 'exception_index_list':[3]}},
+                    'out':{'success':True, 'unexpected_list':['bdd'], 'unexpected_index_list':[3]}},
                 {
                     'in':{'column':'c', 'regex':'^a'},
-                    'out':{'success':True, 'exception_list':[], 'exception_index_list':[]}},
+                    'out':{'success':True, 'unexpected_list':[], 'unexpected_index_list':[]}},
                 {
                     'in':{'column':'c', 'regex':'^a', 'mostly':.5},
-                    'out':{'success':True, 'exception_list':[], 'exception_index_list':[]}}
+                    'out':{'success':True, 'unexpected_list':[], 'unexpected_index_list':[]}}
         ]
 
         for t in T:
@@ -809,13 +809,13 @@ class TestPandasDataset(unittest.TestCase):
         T = [
                 {
                     'in':{'column':'x', 'regex':'^a'},
-                    'out':{'success':False, 'exception_index_list':[0,1,2,3], 'exception_list':['aa', 'ab', 'ac', 'a1']}},
+                    'out':{'success':False, 'unexpected_index_list':[0,1,2,3], 'unexpected_list':['aa', 'ab', 'ac', 'a1']}},
                 {
                     'in':{'column':'x', 'regex':'^b'},
-                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}},
+                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}},
                 {
                     'in':{'column':'y', 'regex':'^z'},
-                    'out':{'success':False, 'exception_index_list':[6], 'exception_list':['zxxxx']}}
+                    'out':{'success':False, 'unexpected_index_list':[6], 'unexpected_list':['zxxxx']}}
         ]
 
         for t in T:
@@ -854,11 +854,11 @@ class TestPandasDataset(unittest.TestCase):
         T = [
                 {
                     'in':{'column':'us_dates', 'strftime_format':'%m/%d/%Y'},
-                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}
+                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}
                 },
                 {
                     'in':{'column':'us_dates_type_error','strftime_format':'%m/%d/%Y', 'mostly': 0.5, 'catch_exceptions': True},
-                    # 'out':{'success':True, 'exception_index_list':[2], 'exception_list':[5]}},
+                    # 'out':{'success':True, 'unexpected_index_list':[2], 'unexpected_list':[5]}},
                     'error':{
                         'traceback_substring' : 'TypeError'
                     },
@@ -871,13 +871,13 @@ class TestPandasDataset(unittest.TestCase):
                 },
                 {
                     'in':{'column':'almost_iso8601','strftime_format':'%Y-%m-%dT%H:%M:%S'},
-                    'out':{'success':True,'exception_index_list':[], 'exception_list':[]}},
+                    'out':{'success':True,'unexpected_index_list':[], 'unexpected_list':[]}},
                 {
                     'in':{'column':'almost_iso8601_val_error','strftime_format':'%Y-%m-%dT%H:%M:%S'},
-                    'out':{'success':False,'exception_index_list':[0], 'exception_list':['1977-05-55T00:00:00']}},
+                    'out':{'success':False,'unexpected_index_list':[0], 'unexpected_list':['1977-05-55T00:00:00']}},
                 {
                     'in':{'column':'already_datetime','strftime_format':'%Y-%m-%d', 'catch_exceptions':True},
-                    # 'out':{'success':False,'exception_index_list':[0], 'exception_list':['1977-05-55T00:00:00']},
+                    # 'out':{'success':False,'unexpected_index_list':[0], 'unexpected_list':['1977-05-55T00:00:00']},
                     'error':{
                         'traceback_substring' : 'TypeError: Values passed to expect_column_values_to_match_strftime_format must be of type string.'
                     },
@@ -906,22 +906,22 @@ class TestPandasDataset(unittest.TestCase):
         T = [
                 {
                     'in':{'column': 'c1'},
-                    'out':{'success':True, 'exception_list':[], 'exception_index_list': []}},
+                    'out':{'success':True, 'unexpected_list':[], 'unexpected_index_list': []}},
                 {
                     'in':{"column":'c2', "catch_exceptions":True},
-                    # 'out':{'success':False, 'exception_list':['covfefe', 25], 'exception_index_list': [1, 2]}},
+                    # 'out':{'success':False, 'unexpected_list':['covfefe', 25], 'unexpected_index_list': [1, 2]}},
                     'error':{ 'traceback_substring' : 'TypeError: Values passed to expect_column_values_to_be_dateutil_parseable must be of type string' },
                 },
                 {
                     'in':{"column":'c3'},
-                    'out':{'success':False, 'exception_list':['Jared'], 'exception_index_list': [0]}},
+                    'out':{'success':False, 'unexpected_list':['Jared'], 'unexpected_index_list': [0]}},
                 {
                     'in':{'column': 'c3', 'mostly':.5},
-                    'out':{'success':True, 'exception_list':['Jared'], 'exception_index_list': [0]}
+                    'out':{'success':True, 'unexpected_list':['Jared'], 'unexpected_index_list': [0]}
                 },
                 {
                     'in':{'column': 'c4'},
-                    'out':{'success':False, 'exception_list':['49000004632'], 'exception_index_list': [2]}
+                    'out':{'success':False, 'unexpected_list':['49000004632'], 'unexpected_index_list': [2]}
                 },
                 {
                     'in':{'column':'already_datetime', 'catch_exceptions':True},
@@ -954,19 +954,19 @@ class TestPandasDataset(unittest.TestCase):
         T = [
                 {
                     'in':{'column':'json_col'},
-                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}},
+                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}},
                 {
                     'in':{'column':'not_json'},
-                    'out':{'success':False, 'exception_index_list':[0,1,2,3], 'exception_list':[4,5,6,7]}},
+                    'out':{'success':False, 'unexpected_index_list':[0,1,2,3], 'unexpected_list':[4,5,6,7]}},
                 {
                     'in':{'column':'py_dict'},
-                    'out':{'success':False, 'exception_index_list':[0,1,2,3], 'exception_list':[{'a':1, 'out':1},{'b':2, 'out':4},{'c':3, 'out':9},{'d':4, 'out':16}]}},
+                    'out':{'success':False, 'unexpected_index_list':[0,1,2,3], 'unexpected_list':[{'a':1, 'out':1},{'b':2, 'out':4},{'c':3, 'out':9},{'d':4, 'out':16}]}},
                 {
                     'in':{'column':'most'},
-                    'out':{'success':False, 'exception_index_list':[3], 'exception_list':['d4']}},
+                    'out':{'success':False, 'unexpected_index_list':[3], 'unexpected_list':['d4']}},
                 {
                     'in':{'column':'most', 'mostly':.75},
-                    'out':{'success':True, 'exception_index_list':[3], 'exception_list':['d4']}}
+                    'out':{'success':True, 'unexpected_index_list':[3], 'unexpected_list':['d4']}}
         ]
 
         for t in T:
@@ -991,7 +991,7 @@ class TestPandasDataset(unittest.TestCase):
 
     def test_expect_column_mean_to_be_between(self):
         """
-        #!!! Ignores null (None and np.nan) values. If all null values, return {'success':False, 'exception_list':None)
+        #!!! Ignores null (None and np.nan) values. If all null values, return {'success':False, 'unexpected_list':None)
         Cases Tested:
             Tested with float - float
             Tested with float - int
@@ -1327,17 +1327,17 @@ class TestPandasDataset(unittest.TestCase):
                     "element_count" : 10,
                     "missing_count" : 2,
                     "missing_percent" : .2,
-                    "exception_count" : 3,
-                    "partial_exception_counts": [
+                    "unexpected_count" : 3,
+                    "partial_unexpected_counts": [
                         {"value": 7.0,
                          "count": 2},
                         {"value": 6.0,
                          "count": 1}
                     ],
-                    "exception_percent": 0.3,
-                    "exception_percent_nonmissing": 0.375,
-                    "partial_exception_list" : [6.0,7.0,7.0],
-                    "partial_exception_index_list": [5,6,7],
+                    "unexpected_percent": 0.3,
+                    "unexpected_percent_nonmissing": 0.375,
+                    "partial_unexpected_list" : [6.0,7.0,7.0],
+                    "partial_unexpected_index_list": [5,6,7],
                 }
             }
         )
@@ -1371,22 +1371,22 @@ class TestPandasDataset(unittest.TestCase):
 
         self.assertEqual(
             df.expect_column_values_to_be_between('y',1,6),
-            {'success':False, 'exception_list':[8,10], 'exception_index_list':[3,4]}
+            {'success':False, 'unexpected_list':[8,10], 'unexpected_index_list':[3,4]}
         )
 
         self.assertEqual(
             df.expect_column_values_to_be_between('y',1,6,mostly=.5),
-            {'success':True, 'exception_list':[8,10], 'exception_index_list':[3,4]}
+            {'success':True, 'unexpected_list':[8,10], 'unexpected_index_list':[3,4]}
         )
 
         self.assertEqual(
             df.expect_column_values_to_be_in_set('z',['a','b','c']),
-            {'success':False, 'exception_list':['abc'], 'exception_index_list':[4]}
+            {'success':False, 'unexpected_list':['abc'], 'unexpected_index_list':[4]}
         )
 
         self.assertEqual(
             df.expect_column_values_to_be_in_set('z',['a','b','c'],mostly=.5),
-            {'success':True, 'exception_list':['abc'], 'exception_index_list':[4]}
+            {'success':True, 'unexpected_list':['abc'], 'unexpected_index_list':[4]}
         )
 
     def test_output_format_argument_in_decorators(self):
@@ -1405,7 +1405,7 @@ class TestPandasDataset(unittest.TestCase):
 
         self.assertEqual(
             df.expect_column_values_to_be_between('y',1,6, output_format=None),
-            {'success':False, 'exception_list':[8,10], 'exception_index_list':[3,4]}
+            {'success':False, 'unexpected_list':[8,10], 'unexpected_index_list':[3,4]}
         )
 
         #Test unknown output format
