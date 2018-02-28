@@ -292,3 +292,84 @@ def continuous_partition_data(data, bins='auto', n_bins=10):
         "bins": bin_edges,
         "weights": hist / len(data)
     }
+
+
+def infer_distribution_parameters(column, distribution, params=None):
+    """Convenience method for determining the shape parameters of a given distribution
+
+    Args:
+        column (list-like): The data to build shape parameters out of
+        distribution (string): Scipy distribution, determines which shape parameters to return
+        params (dict): The known parameters of desired distribution (even if it conflicts with `column`)
+                       Keep as None to infer necessary parameters from the data column
+
+    Returns:
+        Tuple of arguments that match scipy.kstest `args` for the specified distribution
+
+        See: https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.kstest.html#scipy.stats.kstest
+    """
+
+    if params is None:
+        params = dict()
+        params['mean'] = column.mean()
+        params['std_dev'] = column.std()
+    elif not isinstance(params, dict):
+        raise TypeError("params must be a dictionary object, see great_expectations documentation")
+
+    if 'mean' not in params.keys():
+        params['mean'] = column.mean()
+
+    if 'std_dev' not in params.keys():
+        params['std_dev'] = column.std()
+    elif params['std_dev'] < 0:
+        raise ValueError("std_dev cannot be less than zero")
+
+    if distribution == "norm":
+        return params['mean'], params['std_dev']
+
+    if distribution == "beta":
+        if 'alpha' not in params.keys():
+            # from https://stats.stackexchange.com/questions/12232/calculating-the-parameters-of-a-beta-distribution-using-the-mean-and-variance
+            params['alpha'] = (params['mean'] ** 2) * (
+                        ((1 - params['mean']) / params['std_dev'] ** 2) - (1 / params['mean']))
+        if 'beta' not in params.keys():
+            params['beta'] = params['alpha'] * ((1 / params['mean']) - 1)
+        return params['alpha'], params['beta']
+
+    if distribution == 'gamma':
+        if 'alpha' not in params.keys():
+            # from https://www.rocscience.com/help/swedge/webhelp/swedge/Gamma_Distribution.htm
+            params['alpha'] = (params['mean'] / params['std_dev']) ** 2
+        if 'beta' not in params.keys():
+            params['beta'] = params['std_dev'] ** 2 / params['mean']
+        return params['alpha'], params['beta']
+
+    if distribution == 'poisson':
+        if 'lambda' not in params.keys():
+            params['lambda'] = params['mean']
+        return params['lambda']
+
+    if distribution == 'uniform':
+        if 'min' not in params.keys():
+            params['min'] = min(column)
+        if 'max' not in params.keys():
+            params['scale'] = max(column) - params['min']
+        return params['min'], params['scale']
+
+    if distribution == 'chi2':
+        if 'df' not in params.keys():
+            # from https://en.wikipedia.org/wiki/Chi-squared_distribution
+            params['df'] = params['mean']
+        return [params['df']]
+
+    if distribution == 'expon':
+        # Let's see how to incorporate lambda
+            #  If user specifies, use as rate paramater? How do we use that rate parameter in the cdf?
+        #if 'lambda' not in params.keys():
+            # from https://en.wikipedia.org/wiki/Exponential_distribution
+            #params['lambda'] = 1 / params['mean']
+        if 'loc' not in params.keys() or 'scale' not in params.keys():
+            raise KeyError("Exponential Distribution requires a loc and scale distribution.\nSee CDF doc https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.expon.html#scipy.stats.expon")
+        return params['loc'], params['scale']
+    else:
+        raise AttributeError("Unsupported distribution type. Please refer to Great Expectations Documentation")

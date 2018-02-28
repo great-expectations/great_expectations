@@ -1957,7 +1957,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         This expectation compares continuous distributions with a parameteric Kolmogorov-Smirnov test. The K-S test \
         uses the column's mean and standard deviation, if not provided, to construct a cumulative density \
         function (CDF) of the provided scipy distribution. It returns 'success'=True if the p-value from the \
-        K-S test is greater than the provided p-value.
+        K-S test is greater than or equal to the provided p-value.
 
         expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than is a :func:`column_aggregate_expectation <great_expectations.dataset.base.DataSet.column_aggregate_expectation>`.
 
@@ -1968,11 +1968,11 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                 The scipy distribution name. See: https://docs.scipy.org/doc/scipy/reference/stats.html
             p_value (float): \
                 The threshold p-value for a passing test. Default is 0.05
-            mean (float or None): \
-                The mean of the distribution to test against. Default is the mean of the provided column.
-            std_dev (float or None): \
-                The standard deviation of the distribution to test against. Default is the standard deviation of \
-                the provided column.
+            params (dict) : \
+                A dictionary of shape parameters that describe the disrtibution you want to test the data against.\
+                If not provided, the parameters will be attempted to be constructed from the column data. Include \
+                key values specific to the distribution from the appropriate scipy distribution CDF function \
+                See https://docs.scipy.org/doc/scipy/reference/stats.html#continuous-distributions
 
         Other Parameters:
             output_format (str or None): \
@@ -2000,9 +2000,22 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
                 {
                     "true_value": (float) The true p-value from the Kolmogorov-Smirnov test
+                    "summary_obj":
+                        "distribution" (string): The distribution compared to the given column
+                        "p_value" (float): The p-value threshold for a passing test
+                        "params" (dict): The specified and inferred parameters of the distribution to test for
+                        "ks_results" (dict): The raw result object returned by stats.kstest()
                 }
 
             * The Kolmogorov-Smirnov test's null hypothesis is that the column is similar to the provided distribution.
+            * Supported scipy distributions:
+                -norm
+                -beta
+                -*gamma (in the works)
+                -uniform
+                -poisson
+                -chi2
+                -expon
 
         """
         if p_value <= 0.:

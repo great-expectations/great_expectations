@@ -15,7 +15,8 @@ from six import string_types
 
 from .base import DataSet
 from .util import DocInherit, recursively_convert_to_json_serializable, \
-        is_valid_partition_object, is_valid_categorical_partition_object, is_valid_continuous_partition_object
+        is_valid_partition_object, is_valid_categorical_partition_object, is_valid_continuous_partition_object, \
+        infer_distribution_parameters
 
 class MetaPandasDataSet(DataSet):
     """
@@ -712,25 +713,24 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
     @DocInherit
     @MetaPandasDataSet.column_aggregate_expectation
     def expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than(self, column, distribution,
-                                                                                    p_value=0.05, mean=None,
-                                                                                    std_dev=None):
+                                                                                    p_value=0.05, params=None,
+                                                                                    output_format=None,
+                                                                                    include_config=False,
+                                                                                    catch_exceptions=None, meta=None):
         if p_value <= 0.:
             raise ValueError("p_value cannot be 0 or less")
 
-        if mean is None:
-            mean = column.mean()
-
-        if std_dev is None:
-            std_dev = column.std()
-        elif std_dev < 0:
-            raise ValueError("std_dev cannot be less than zero")
-
-        results = stats.kstest(column, distribution, args=(mean, std_dev))
+        ks_result = stats.kstest(column, distribution, args=infer_distribution_parameters(column, distribution, params))
 
         return {
-            "success": results[1] > p_value,
-            "true_value": results[1],
-            "summary_obj": {results}
+            "success": ks_result[1] >= p_value,
+            "true_value": ks_result[1],
+            "summary_obj": {
+                "distribution": distribution,
+                "p_value": p_value,
+                "params": params,
+                "ks_result": ks_result
+            }
         }
 
     @DocInherit
