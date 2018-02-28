@@ -48,8 +48,8 @@ class TestExpectationDecorators(unittest.TestCase):
         self.assertEqual(
             df.expect_column_values_to_be_odd("all_odd"),
             {
-                'exception_list': [],
-                'exception_index_list': [],
+                'unexpected_list': [],
+                'unexpected_index_list': [],
                 'success': True
             }
         )
@@ -57,8 +57,8 @@ class TestExpectationDecorators(unittest.TestCase):
         self.assertEqual(
             df.expect_column_values_to_be_odd("all_missing"),
             {
-                'exception_list': [],
-                'exception_index_list': [],
+                'unexpected_list': [],
+                'unexpected_index_list': [],
                 'success': True
             }
         )
@@ -66,8 +66,8 @@ class TestExpectationDecorators(unittest.TestCase):
         self.assertEqual(
             df.expect_column_values_to_be_odd("odd_missing"),
             {
-                'exception_list': [],
-                'exception_index_list': [],
+                'unexpected_list': [],
+                'unexpected_index_list': [],
                 'success': True
             }
         )
@@ -75,8 +75,8 @@ class TestExpectationDecorators(unittest.TestCase):
         self.assertEqual(
             df.expect_column_values_to_be_odd("mixed_missing"),
             {
-                'exception_list': [2,4],
-                'exception_index_list': [5,6],
+                'unexpected_list': [2,4],
+                'unexpected_index_list': [5,6],
                 'success': False
             }
         )
@@ -84,8 +84,8 @@ class TestExpectationDecorators(unittest.TestCase):
         self.assertEqual(
             df.expect_column_values_to_be_odd("mostly_odd"),
             {
-                'exception_list': [2, 4],
-                'exception_index_list': [5, 6],
+                'unexpected_list': [2, 4],
+                'unexpected_index_list': [5, 6],
                 'success': False
             }
         )
@@ -93,8 +93,8 @@ class TestExpectationDecorators(unittest.TestCase):
         self.assertEqual(
             df.expect_column_values_to_be_odd("mostly_odd", mostly=.6),
             {
-                'exception_list': [2, 4],
-                'exception_index_list': [5, 6],
+                'unexpected_list': [2, 4],
+                'unexpected_index_list': [5, 6],
                 'success': True
             }
         )
@@ -124,20 +124,20 @@ class TestExpectationDecorators(unittest.TestCase):
                     "output_format": "BASIC"
                 }, 
                 "summary_obj": {
-                    "exception_percent": 0.2,
-                    "exception_percent_nonmissing": 0.2,
-                    "partial_exception_list": [
+                    "unexpected_percent": 0.2,
+                    "unexpected_percent_nonmissing": 0.2,
+                    "partial_unexpected_list": [
                         2, 
                         4
                     ], 
-                    "exception_count": 2
+                    "unexpected_count": 2
                 }, 
                 "success": False, 
                 "expectation_type": "expect_column_values_to_be_odd"
             }
             # {
-            #     'exception_list': [2, 4],
-            #     'exception_index_list': [5, 6],
+            #     'unexpected_list': [2, 4],
+            #     'unexpected_index_list': [5, 6],
             #     'success': False,
             #     'expectation_type' : 'expect_column_values_to_be_odd',
             #     'expectation_kwargs' : {
@@ -149,7 +149,7 @@ class TestExpectationDecorators(unittest.TestCase):
         # self.assertEqual(
         #     df.expect_column_value_to_be_odd("all_odd"),
         #     {
-        #         'exception_list': [],
+        #         'unexpected_list': [],
         #         'success': True
         #     }
         # )
@@ -246,8 +246,8 @@ class TestExpectationDecorators(unittest.TestCase):
         self.assertEqual(
             df.expectation_that_crashes_on_sixes("all_odd"),
             {
-                'exception_list': [],
-                'exception_index_list': [],
+                'unexpected_list': [],
+                'unexpected_index_list': [],
                 'success': True
             }
         )
@@ -256,8 +256,8 @@ class TestExpectationDecorators(unittest.TestCase):
             df.expectation_that_crashes_on_sixes("all_odd", catch_exceptions=False),
             {
                 'success': True,
-                'exception_list': [],
-                'exception_index_list': [],
+                'unexpected_list': [],
+                'unexpected_index_list': [],
             }
         )
 
@@ -265,8 +265,8 @@ class TestExpectationDecorators(unittest.TestCase):
             df.expectation_that_crashes_on_sixes("all_odd", catch_exceptions=True),
             {
                 'success': True,
-                'exception_list': [],
-                'exception_index_list': [],
+                'unexpected_list': [],
+                'unexpected_index_list': [],
                 'raised_exception': False,
                 'exception_traceback': None,
             }
