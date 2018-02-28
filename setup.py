@@ -7,8 +7,11 @@ except ImportError:
 with open('requirements.txt') as f:
     required = f.read().splitlines()
 
-with open('docs/source/intro.rst') as f:
-    long_description = f.read()
+try:
+    import pypandoc
+    long_description = pypandoc.convert('README.md', 'rst')
+except (IOError, ImportError):
+    long_description = ''
 
 exec(open('great_expectations/version.py').read())
 

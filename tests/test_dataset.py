@@ -994,5 +994,20 @@ class TestDataset(unittest.TestCase):
             self.assertEqual(str(w[0].message),
                              "WARNING: This configuration object was built using a different version of great_expectations than is currently validating it.")
 
+    def test_catch_exceptions_with_bad_expectation_type(self):
+        my_df = ge.dataset.PandasDataSet({"x":range(10)})
+        my_df.append_expectation({'expectation_type':'foobar', 'kwargs':{}})
+        result = my_df.validate(catch_exceptions=True)
+
+        self.assertEqual(result["results"][1]["success"], False)
+        self.assertEqual(result["results"][1]["expectation_type"], "foobar")
+        self.assertEqual(result["results"][1]["kwargs"], {})
+        self.assertEqual(result["results"][1]["raised_exception"], True)
+        assert "AttributeError: \'PandasDataSet\' object has no attribute \'foobar\'" in result["results"][1]["exception_traceback"]
+
+        with self.assertRaises(AttributeError) as context:
+            result = my_df.validate(catch_exceptions=False)
+
+
 if __name__ == "__main__":
     unittest.main()

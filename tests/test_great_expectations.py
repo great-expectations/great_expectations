@@ -4,6 +4,7 @@ import random
 import unittest
 
 import numpy as np
+import pandas as pd
 
 import great_expectations as ge
 from great_expectations.dataset import PandasDataSet, MetaPandasDataSet
@@ -43,6 +44,34 @@ class CustomPandasDataSet(PandasDataSet):
     def expect_column_values_to_be_prime(self, column):
         return column.map(isprime)
 
+    @MetaPandasDataSet.expectation(["column", "mostly"])
+    def expect_column_values_to_equal_1(self, column, mostly=None):
+        not_null = self[column].notnull()
+        
+        result = self[column][not_null] == 1
+        exceptions = list(self[column][not_null][result==False])
+        
+        if mostly:
+            #Prevent division-by-zero errors
+            if len(not_null) == 0:
+                return {
+                    'success':True,
+                    'exception_list':exceptions,
+                    'exception_index_list':self.index[result],
+                }
+
+            percent_equaling_1 = float(sum(result))/len(not_null)
+            return {
+                "success" : percent_equaling_1 >= mostly,
+                "exception_list" : exceptions[:20],
+                "exception_index_list" : list(self.index[result==False])[:20],
+            }
+        else:
+            return {
+                "success" : len(exceptions) == 0,
+                "exception_list" : exceptions[:20],
+                "exception_index_list" : list(self.index[result==False])[:20],
+            }
 
 class TestCustomClass(unittest.TestCase):
 
@@ -64,6 +93,35 @@ class TestCustomClass(unittest.TestCase):
         self.assertEqual(
             df.expect_column_values_to_be_prime("primes"),
             {'exception_list': [], 'exception_index_list': [], 'success': True}
+        )
+
+    def test_custom_expectation(self):
+        df = CustomPandasDataSet({'x': [1,1,1,1,2]})
+        df.set_default_expectation_argument("output_format", "COMPLETE")
+
+        self.assertEqual(
+            df.expect_column_values_to_be_prime('x'),
+            {'exception_list':[1,1,1,1],'exception_index_list':[0,1,2,3], 'success':False}
+        )
+
+        self.assertEqual(
+            df.expect_column_values_to_equal_1('x', mostly=.8),
+            {'exception_list':[2],'exception_index_list':[4],'success':True}
+        )
+
+
+   # Ensure that Custom Data Set classes can properly call non-overridden methods from their parent class
+    def test_base_class_expectation(self):
+        df = CustomPandasDataSet({
+            "aaa": [1, 2, 3, 4, 5],
+            "bbb": [10, 20, 30, 40, 50],
+            "ccc": [9, 10, 11, 12, 13],
+        })
+
+
+        self.assertEqual(
+            df.expect_column_values_to_be_between("aaa", min_value=1, max_value=5)['success'],
+            True
         )
 
 
@@ -116,6 +174,66 @@ class TestValidation(unittest.TestCase):
             {"results": [{"exception_traceback": None, "expectation_type": "expect_column_values_to_be_in_set", "success": False, "exception_list": ["*"], "raised_exception": False, "kwargs": {"column": "PClass", "output_format": "COMPLETE", "values_set": ["1st", "2nd", "3rd"]}, "exception_index_list": [456]}]}
         )
 
+    def test_top_level_validate(self):
+        my_df = pd.DataFrame({
+            "x" : [1,2,3,4,5]
+        })
+        validation_result = ge.validate(my_df, {
+            "dataset_name" : None,
+            "meta": {
+                "great_expectations.__version__": ge.__version__
+            },
+            "expectations" : [{
+                "expectation_type" : "expect_column_to_exist",
+                "kwargs" : {
+                    "column" : "x"
+                }
+            },{
+                "expectation_type" : "expect_column_values_to_be_between",
+                "kwargs" : {
+                    "column" : "x",
+                    "min_value" : 3,
+                    "max_value" : 5
+                }
+            }]
+        })
+        self.assertEqual(
+            validation_result,
+            {
+              "results": [
+                {
+                  "raised_exception": False, 
+                  "exception_traceback": None, 
+                  "expectation_type": "expect_column_to_exist", 
+                  "success": True,
+                  "kwargs": {
+                    "column": "x"
+                  }
+                }, 
+                {
+                  "exception_traceback": None,
+                  "expectation_type": "expect_column_values_to_be_between", 
+                  "success": False, 
+                  "raised_exception": False, 
+                  "kwargs": {
+                    "column": "x", 
+                    "max_value": 5, 
+                    "min_value": 3
+                  }, 
+                  "summary_obj": {
+                    "exception_percent": 0.4, 
+                    "partial_exception_list": [
+                      1, 
+                      2
+                    ], 
+                    "exception_percent_nonmissing": 0.4, 
+                    "exception_count": 2
+                  }
+                }
+              ]
+            }
+        )
+
 
 
 class TestRepeatedAppendExpectation(unittest.TestCase):
@@ -136,6 +254,25 @@ class TestRepeatedAppendExpectation(unittest.TestCase):
         self.assertEqual(
             len(my_df.get_expectations_config()['expectations']),
             7
+        )
+
+class TestIO(unittest.TestCase):
+
+    def test_read_csv(self):
+        script_path = os.path.dirname(os.path.realpath(__file__))
+        df = ge.read_csv(
+            script_path+'/test_sets/Titanic.csv',
+        )
+
+    def test_read_json(self):
+        script_path = os.path.dirname(os.path.realpath(__file__))
+        df = ge.read_json(
+            script_path+'/test_sets/test_json_data_file.json',
+        )
+
+        df = ge.read_json(
+            script_path+'/test_sets/nested_test_json_data_file.json',
+            accessor_func= lambda x: x["data"]
         )
 
 
