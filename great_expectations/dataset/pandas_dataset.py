@@ -60,9 +60,9 @@ class MetaPandasDataSet(DataSet):
             boolean_mapped_success_values = func(self, nonnull_values, *args, **kwargs)
             success_count = boolean_mapped_success_values.sum()
 
-            exception_list = list(series[(boolean_mapped_success_values==False)&(boolean_mapped_null_values==False)])
-            exception_index_list = list(series[(boolean_mapped_success_values==False)&(boolean_mapped_null_values==False)].index)
-            exception_count = len(exception_list)
+            unexpected_list = list(series[(boolean_mapped_success_values==False)&(boolean_mapped_null_values==False)])
+            unexpected_index_list = list(series[(boolean_mapped_success_values==False)&(boolean_mapped_null_values==False)].index)
+            unexpected_count = len(unexpected_list)
 
             success, percent_success = self._calc_map_expectation_success(success_count, nonnull_count, mostly)
 
@@ -71,7 +71,7 @@ class MetaPandasDataSet(DataSet):
                 element_count,
                 nonnull_values, nonnull_count,
                 boolean_mapped_success_values, success_count,
-                exception_list, exception_index_list
+                unexpected_list, unexpected_index_list
             )
 
             return return_obj
@@ -279,9 +279,9 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         boolean_mapped_success_values = boolean_mapped_null_values==False
         success_count = boolean_mapped_success_values.sum()
 
-        exception_list = [None for i in list(series[(boolean_mapped_success_values==False)])]
-        exception_index_list = list(series[(boolean_mapped_success_values==False)].index)
-        exception_count = len(exception_list)
+        unexpected_list = [None for i in list(series[(boolean_mapped_success_values==False)])]
+        unexpected_index_list = list(series[(boolean_mapped_success_values==False)].index)
+        unexpected_count = len(unexpected_list)
 
         # Pass element_count instead of nonnull_count, because that's the right denominator for this expectation
         success, percent_success = self._calc_map_expectation_success(success_count, element_count, mostly)
@@ -291,7 +291,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
             element_count,
             nonnull_values, nonnull_count,
             boolean_mapped_success_values, success_count,
-            exception_list, exception_index_list
+            unexpected_list, unexpected_index_list
         )
 
         return return_obj
@@ -314,9 +314,9 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         boolean_mapped_success_values = boolean_mapped_null_values
         success_count = boolean_mapped_success_values.sum()
 
-        exception_list = list(series[(boolean_mapped_success_values==False)])
-        exception_index_list = list(series[(boolean_mapped_success_values==False)].index)
-        exception_count = len(exception_list)
+        unexpected_list = list(series[(boolean_mapped_success_values==False)])
+        unexpected_index_list = list(series[(boolean_mapped_success_values==False)].index)
+        unexpected_count = len(unexpected_list)
 
         # Pass element_count instead of nonnull_count, because that's the right denominator for this expectation
         success, percent_success = self._calc_map_expectation_success(success_count, element_count, mostly)
@@ -326,7 +326,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
             element_count,
             nonnull_values, nonnull_count,
             boolean_mapped_success_values, success_count,
-            exception_list, exception_index_list
+            unexpected_list, unexpected_index_list
         )
 
         return return_obj

@@ -171,9 +171,9 @@ class DataSet(object):
 
         Notes:
             column_map_expectation intercepts and takes action based on the following parameters:
-                mostly (None or a float between 0 and 1): \
-                    Return `"success": True` if the percentage of exceptions less than or equal to `mostly`. \
-                    For more detail, see :ref:`mostly`.
+            mostly (None or a float between 0 and 1): \
+                Return `"success": True` if the percentage of unexpected values is less than or equal to `mostly`. \
+                For more detail, see :ref:`mostly`.
 
             column_map_expectation *excludes null values* from being passed to the function
 
@@ -664,12 +664,12 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
     ##### Output generation #####
     def _format_column_map_output(self,
-        output_format, success,
-        element_count,
-        nonnull_values, nonnull_count,
-        boolean_mapped_success_values, success_count,
-        exception_list, exception_index_list
-    ):
+                                  output_format, success,
+                                  element_count,
+                                  nonnull_values, nonnull_count,
+                                  boolean_mapped_success_values, success_count,
+                                  unexpected_list, unexpected_index_list
+                                  ):
         """Helper function to construct expectation result objects for column_map_expectations.
 
         Expectations support four output_formats: BOOLEAN_ONLY, BASIC, SUMMARY, and COMPLETE.
@@ -682,63 +682,63 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             return_obj = success
 
         elif output_format == "BASIC":
-            exception_count = len(exception_list)
+            unexpected_count = len(unexpected_list)
 
             if element_count > 0:
                 if nonnull_count > 0:
-                    exception_percent = float(exception_count) / element_count
-                    exception_percent_nonmissing = float(exception_count) / nonnull_count
+                    unexpected_percent = float(unexpected_count) / element_count
+                    unexpected_percent_nonmissing = float(unexpected_count) / nonnull_count
 
                 else:
-                    exception_percent = float(exception_count) / element_count
-                    exception_percent_nonmissing = None
+                    unexpected_percent = float(unexpected_count) / element_count
+                    unexpected_percent_nonmissing = None
             else:
-                exception_percent = None
-                exception_percent_nonmissing = None
+                unexpected_percent = None
+                unexpected_percent_nonmissing = None
 
             return_obj = {
                 "success": success,
                 "summary_obj": {
-                    "partial_exception_list": exception_list[:20],
-                    "exception_count": exception_count,
-                    "exception_percent": exception_percent,
-                    "exception_percent_nonmissing": exception_percent_nonmissing,
+                    "partial_unexpected_list": unexpected_list[:20],
+                    "unexpected_count": unexpected_count,
+                    "unexpected_percent": unexpected_percent,
+                    "unexpected_percent_nonmissing": unexpected_percent_nonmissing,
                 }
             }
 
         elif output_format == "COMPLETE":
             return_obj = {
                 "success": success,
-                "exception_list": exception_list,
-                "exception_index_list": exception_index_list,
+                "unexpected_list": unexpected_list,
+                "unexpected_index_list": unexpected_index_list,
             }
 
         elif output_format == "SUMMARY":
             # element_count = int(len(series))
             missing_count = element_count-int(len(nonnull_values))#int(null_indexes.sum())
-            exception_count = len(exception_list)
+            unexpected_count = len(unexpected_list)
 
-            partial_exception_counts = [
+            partial_unexpected_counts = [
                 {'value': key, 'count': value}
                 for key, value
                 in sorted(
-                    Counter(exception_list).most_common(20),
+                    Counter(unexpected_list).most_common(20),
                     key=lambda x: (-x[1], x[0]))
             ]
 
             if element_count > 0:
                 missing_percent = float(missing_count) / element_count
-                exception_percent = float(exception_count) / element_count
+                unexpected_percent = float(unexpected_count) / element_count
 
                 if nonnull_count > 0:
-                    exception_percent_nonmissing = float(exception_count) / nonnull_count
+                    unexpected_percent_nonmissing = float(unexpected_count) / nonnull_count
                 else:
-                    exception_percent_nonmissing = None
+                    unexpected_percent_nonmissing = None
 
             else:
                 missing_percent = None
-                exception_percent = None
-                exception_percent_nonmissing = None
+                unexpected_percent = None
+                unexpected_percent_nonmissing = None
 
             return_obj = {
                 "success": success,
@@ -746,12 +746,12 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                     "element_count": element_count,
                     "missing_count": missing_count,
                     "missing_percent": missing_percent,
-                    "exception_count": exception_count,
-                    "exception_percent": exception_percent,
-                    "exception_percent_nonmissing": exception_percent_nonmissing,
-                    "partial_exception_counts": partial_exception_counts,
-                    "partial_exception_list": exception_list[:20],
-                    "partial_exception_index_list": exception_index_list[:20],
+                    "unexpected_count": unexpected_count,
+                    "unexpected_percent": unexpected_percent,
+                    "unexpected_percent_nonmissing": unexpected_percent_nonmissing,
+                    "partial_unexpected_counts": partial_unexpected_counts,
+                    "partial_unexpected_list": unexpected_list[:20],
+                    "partial_unexpected_index_list": unexpected_index_list[:20],
                 }
             }
 
@@ -1000,7 +1000,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if the percentage of exceptions less than or equal to `mostly`. \
+                Return `"success": True` if the percentage of unexpected values is less than or equal to `mostly`. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1043,7 +1043,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if the percentage of exceptions less than or equal to `mostly`. \
+                Return `"success": True` if the percentage of unexpected values is less than or equal to `mostly`. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1087,7 +1087,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if the percentage of exceptions less than or equal to `mostly`. \
+                Return `"success": True` if the percentage of unexpected values is less than or equal to `mostly`. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1140,7 +1140,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if the percentage of exceptions less than or equal to `mostly`. \
+                Return `"success": True` if the percentage of unexpected values is less than or equal to `mostly`. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1199,7 +1199,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if the percentage of exceptions less than or equal to `mostly`. \
+                Return `"success": True` if the percentage of unexpected values is less than or equal to `mostly`. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1255,10 +1255,10 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             {
               "success": false
               "summary_obj": {
-                "exception_count": 1
-                "exception_percent": 0.16666666666666666,
-                "exception_percent_nonmissing": 0.16666666666666666,
-                "partial_exception_list": [
+                "unexpected_count": 1
+                "unexpected_percent": 0.16666666666666666,
+                "unexpected_percent_nonmissing": 0.16666666666666666,
+                "partial_unexpected_list": [
                   1
                 ],
               },
@@ -1275,7 +1275,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if the percentage of exceptions less than or equal to `mostly`. \
+                Return `"success": True` if the percentage of unexpected values is less than or equal to `mostly`. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1322,10 +1322,10 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             {
               "success": false
               "summary_obj": {
-                "exception_count": 3
-                "exception_percent": 0.5,
-                "exception_percent_nonmissing": 0.5,
-                "partial_exception_list": [
+                "unexpected_count": 3
+                "unexpected_percent": 0.5,
+                "unexpected_percent_nonmissing": 0.5,
+                "partial_unexpected_list": [
                   1, 2, 2
                 ],
               },
@@ -1341,7 +1341,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if the percentage of exceptions less than or equal to `mostly`. \
+                Return `"success": True` if the percentage of unexpected values is less than or equal to `mostly`. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1394,7 +1394,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             parse_strings_as_datetimes (boolean or None) : If True, parse min_value, max_value, and all non-null column\
             values to datetimes before making comparisons.
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if the percentage of exceptions less than or equal to `mostly`. \
+                Return `"success": True` if the percentage of unexpected values is less than or equal to `mostly`. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1455,7 +1455,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             parse_strings_as_datetimes (boolean or None) : \
                 If True, all non-null column values to datetimes before making comparisons
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if the percentage of exceptions less than or equal to `mostly`. \
+                Return `"success": True` if the percentage of unexpected values is less than or equal to `mostly`. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1510,7 +1510,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             parse_strings_as_datetimes (boolean or None) : \
                 If True, all non-null column values to datetimes before making comparisons
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if the percentage of exceptions less than or equal to `mostly`. \
+                Return `"success": True` if the percentage of unexpected values is less than or equal to `mostly`. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1565,7 +1565,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             max_value (int or None): \
                 The maximum value for a column entry length.
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if the percentage of exceptions less than or equal to `mostly`. \
+                Return `"success": True` if the percentage of unexpected values is less than or equal to `mostly`. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1618,7 +1618,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if the percentage of exceptions less than or equal to `mostly`. \
+                Return `"success": True` if the percentage of unexpected values is less than or equal to `mostly`. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1663,7 +1663,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if the percentage of exceptions less than or equal to `mostly`. \
+                Return `"success": True` if the percentage of unexpected values is less than or equal to `mostly`. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1710,7 +1710,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if the percentage of exceptions less than or equal to `mostly`. \
+                Return `"success": True` if the percentage of unexpected values is less than or equal to `mostly`. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1762,7 +1762,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                 Use "any" if the value should match at least one regular expression in the list.
                 Use "all" if it should match each regular expression in the list.
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if the percentage of exceptions less than or equal to `mostly`. \
+                Return `"success": True` if the percentage of unexpected values is less than or equal to `mostly`. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1811,7 +1811,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if the percentage of exceptions less than or equal to `mostly`. \
+                Return `"success": True` if the percentage of unexpected values is less than or equal to `mostly`. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1852,7 +1852,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if the percentage of exceptions less than or equal to `mostly`. \
+                Return `"success": True` if the percentage of unexpected values is less than or equal to `mostly`. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1892,7 +1892,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if the percentage of exceptions less than or equal to `mostly`. \
+                Return `"success": True` if the percentage of unexpected values is less than or equal to `mostly`. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1936,7 +1936,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if the percentage of exceptions less than or equal to `mostly`. \
+                Return `"success": True` if the percentage of unexpected values is less than or equal to `mostly`. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
