@@ -357,8 +357,8 @@ class TestDataset(unittest.TestCase):
         nonnull_count = 15
         boolean_mapped_success_values = pd.Series([True for i in range(15)])
         success_count = 15
-        exception_list = []
-        exception_index_list = []
+        unexpected_list = []
+        unexpected_index_list = []
 
         self.assertEqual(
             df._format_column_map_output(
@@ -367,7 +367,7 @@ class TestDataset(unittest.TestCase):
                 element_count,
                 nonnull_values, nonnull_count,
                 boolean_mapped_success_values, success_count,
-                exception_list, exception_index_list
+                unexpected_list, unexpected_index_list
             ),
             True
         )
@@ -379,15 +379,15 @@ class TestDataset(unittest.TestCase):
                 element_count,
                 nonnull_values, nonnull_count,
                 boolean_mapped_success_values, success_count,
-                exception_list, exception_index_list
+                unexpected_list, unexpected_index_list
             ),
             {
                 'success': True,
                 'summary_obj': {
-                    'exception_percent': 0.0,
-                    'partial_exception_list': [],
-                    'exception_percent_nonmissing': 0.0,
-                    'exception_count': 0
+                    'unexpected_percent': 0.0,
+                    'partial_unexpected_list': [],
+                    'unexpected_percent_nonmissing': 0.0,
+                    'unexpected_count': 0
                 }
             }
         )
@@ -399,12 +399,12 @@ class TestDataset(unittest.TestCase):
                 element_count,
                 nonnull_values, nonnull_count,
                 boolean_mapped_success_values, success_count,
-                exception_list, exception_index_list
+                unexpected_list, unexpected_index_list
             ),
             {
                 'success': True,
-                'exception_list': [],
-                'exception_index_list': [],
+                'unexpected_list': [],
+                'unexpected_index_list': [],
             }
         )
 
@@ -415,20 +415,20 @@ class TestDataset(unittest.TestCase):
                 element_count,
                 nonnull_values, nonnull_count,
                 boolean_mapped_success_values, success_count,
-                exception_list, exception_index_list
+                unexpected_list, unexpected_index_list
             ),
             {
                 'success': True,
                 'summary_obj': {
                     'element_count': 20,
-                    'exception_count': 0,
-                    'exception_percent': 0.0,
-                    'exception_percent_nonmissing': 0.0,
+                    'unexpected_count': 0,
+                    'unexpected_percent': 0.0,
+                    'unexpected_percent_nonmissing': 0.0,
                     'missing_count': 5,
                     'missing_percent': 0.25,
-                    'partial_exception_counts': [],
-                    'partial_exception_index_list': [],
-                    'partial_exception_list': []
+                    'partial_unexpected_counts': [],
+                    'partial_unexpected_index_list': [],
+                    'partial_unexpected_list': []
                 }
             }
         )
@@ -441,8 +441,8 @@ class TestDataset(unittest.TestCase):
         nonnull_count = 0
         boolean_mapped_success_values = pd.Series([])
         success_count = 0
-        exception_list = []
-        exception_index_list = []
+        unexpected_list = []
+        unexpected_index_list = []
 
         self.assertEqual(
             df._format_column_map_output(
@@ -451,7 +451,7 @@ class TestDataset(unittest.TestCase):
                 element_count,
                 nonnull_values, nonnull_count,
                 boolean_mapped_success_values, success_count,
-                exception_list, exception_index_list
+                unexpected_list, unexpected_index_list
             ),
             True
         )
@@ -463,15 +463,15 @@ class TestDataset(unittest.TestCase):
                 element_count,
                 nonnull_values, nonnull_count,
                 boolean_mapped_success_values, success_count,
-                exception_list, exception_index_list
+                unexpected_list, unexpected_index_list
             ),
             {
                 'success': True,
                 'summary_obj': {
-                    'exception_percent': 0.0,
-                    'partial_exception_list': [],
-                    'exception_percent_nonmissing': None,
-                    'exception_count': 0
+                    'unexpected_percent': 0.0,
+                    'partial_unexpected_list': [],
+                    'unexpected_percent_nonmissing': None,
+                    'unexpected_count': 0
                 }
             }
         )
@@ -483,12 +483,12 @@ class TestDataset(unittest.TestCase):
                 element_count,
                 nonnull_values, nonnull_count,
                 boolean_mapped_success_values, success_count,
-                exception_list, exception_index_list
+                unexpected_list, unexpected_index_list
             ),
             {
                 'success': True,
-                'exception_list': [],
-                'exception_index_list': [],
+                'unexpected_list': [],
+                'unexpected_index_list': [],
             }
         )
 
@@ -499,20 +499,20 @@ class TestDataset(unittest.TestCase):
                 element_count,
                 nonnull_values, nonnull_count,
                 boolean_mapped_success_values, success_count,
-                exception_list, exception_index_list
+                unexpected_list, unexpected_index_list
             ),
             {
                 'success': True,
                 'summary_obj': {
                     'element_count': 20,
-                    'exception_count': 0,
-                    'exception_percent': 0.0,
-                    'exception_percent_nonmissing': None,
+                    'unexpected_count': 0,
+                    'unexpected_percent': 0.0,
+                    'unexpected_percent_nonmissing': None,
                     'missing_count': 20,
                     'missing_percent': 1.0,
-                    'partial_exception_counts': [],
-                    'partial_exception_index_list': [],
-                    'partial_exception_list': []
+                    'partial_unexpected_counts': [],
+                    'partial_unexpected_index_list': [],
+                    'partial_unexpected_list': []
                 }
             }
         )
@@ -525,8 +525,8 @@ class TestDataset(unittest.TestCase):
         nonnull_count = 0
         boolean_mapped_success_values = pd.Series([])
         success_count = 0
-        exception_list = []
-        exception_index_list = []
+        unexpected_list = []
+        unexpected_index_list = []
 
         self.assertEqual(
             df._format_column_map_output(
@@ -535,7 +535,7 @@ class TestDataset(unittest.TestCase):
                 element_count,
                 nonnull_values, nonnull_count,
                 boolean_mapped_success_values, success_count,
-                exception_list, exception_index_list
+                unexpected_list, unexpected_index_list
             ),
             False
         )
@@ -547,15 +547,15 @@ class TestDataset(unittest.TestCase):
                 element_count,
                 nonnull_values, nonnull_count,
                 boolean_mapped_success_values, success_count,
-                exception_list, exception_index_list
+                unexpected_list, unexpected_index_list
             ),
             {
                 'success': False,
                 'summary_obj': {
-                    'exception_percent': None,
-                    'partial_exception_list': [],
-                    'exception_percent_nonmissing': None,
-                    'exception_count': 0
+                    'unexpected_percent': None,
+                    'partial_unexpected_list': [],
+                    'unexpected_percent_nonmissing': None,
+                    'unexpected_count': 0
                 }
             }
         )
@@ -567,12 +567,12 @@ class TestDataset(unittest.TestCase):
                 element_count,
                 nonnull_values, nonnull_count,
                 boolean_mapped_success_values, success_count,
-                exception_list, exception_index_list
+                unexpected_list, unexpected_index_list
             ),
             {
                 'success': False,
-                'exception_list': [],
-                'exception_index_list': [],
+                'unexpected_list': [],
+                'unexpected_index_list': [],
             }
         )
 
@@ -583,20 +583,20 @@ class TestDataset(unittest.TestCase):
                 element_count,
                 nonnull_values, nonnull_count,
                 boolean_mapped_success_values, success_count,
-                exception_list, exception_index_list
+                unexpected_list, unexpected_index_list
             ),
             {
                 'success': False,
                 'summary_obj': {
                     'element_count': 0,
-                    'exception_count': 0,
-                    'exception_percent': None,
-                    'exception_percent_nonmissing': None,
+                    'unexpected_count': 0,
+                    'unexpected_percent': None,
+                    'unexpected_percent_nonmissing': None,
                     'missing_count': 0,
                     'missing_percent': None,
-                    'partial_exception_counts': [],
-                    'partial_exception_index_list': [],
-                    'partial_exception_list': []
+                    'partial_unexpected_counts': [],
+                    'partial_unexpected_index_list': [],
+                    'partial_unexpected_list': []
                 }
             }
         )
@@ -935,7 +935,7 @@ class TestDataset(unittest.TestCase):
 
         self.assertEqual(
             D.test_column_map_expectation_function(is_odd, column='x'),
-            {'summary_obj': {'exception_percent': 0.0, 'partial_exception_list': [], 'exception_percent_nonmissing': 0.0, 'exception_count': 0}, 'success': True}
+            {'summary_obj': {'unexpected_percent': 0.0, 'partial_unexpected_list': [], 'unexpected_percent_nonmissing': 0.0, 'unexpected_count': 0}, 'success': True}
         )
         self.assertEqual(
             D.test_column_map_expectation_function(is_odd, 'x', output_format="BOOLEAN_ONLY"),
