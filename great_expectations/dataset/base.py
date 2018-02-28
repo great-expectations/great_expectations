@@ -678,87 +678,83 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         This function handles the logic for mapping those fields for column_map_expectations.
         """
-        if output_format == "BOOLEAN_ONLY":
-            return_obj = success
 
-        elif output_format == "BASIC":
-            unexpected_count = len(unexpected_list)
+        # Retain support for string-only output formats:
+        if isinstance(output_format, str):
+            output_format = {'result_obj_format': output_format}
 
-            if element_count > 0:
-                if nonnull_count > 0:
-                    unexpected_percent = float(unexpected_count) / element_count
-                    unexpected_percent_nonmissing = float(unexpected_count) / nonnull_count
+        if 'partial_unexpected_count' in output_format:
+            count = output_format['partial_unexpected_count']
+        else:
+            count = 20
 
-                else:
-                    unexpected_percent = float(unexpected_count) / element_count
-                    unexpected_percent_nonmissing = None
+        # Incrementally add to result_obj and return when all values for the specified level are present
+        return_obj = {
+            'success': success
+        }
+
+        if output_format['result_obj_format'] == 'BOOLEAN_ONLY':
+            return return_obj
+
+        missing_count = element_count - int(len(nonnull_values))
+        unexpected_count = len(unexpected_list)
+
+        if element_count > 0:
+            unexpected_percent = float(unexpected_count) / element_count
+            missing_percent = float(missing_count) / element_count
+
+            if nonnull_count > 0:
+                unexpected_percent_nonmissing = float(unexpected_count) / nonnull_count
             else:
-                unexpected_percent = None
                 unexpected_percent_nonmissing = None
-
-            return_obj = {
-                "success": success,
-                "summary_obj": {
-                    "partial_unexpected_list": unexpected_list[:20],
-                    "unexpected_count": unexpected_count,
-                    "unexpected_percent": unexpected_percent,
-                    "unexpected_percent_nonmissing": unexpected_percent_nonmissing,
-                }
-            }
-
-        elif output_format == "COMPLETE":
-            return_obj = {
-                "success": success,
-                "unexpected_list": unexpected_list,
-                "unexpected_index_list": unexpected_index_list,
-            }
-
-        elif output_format == "SUMMARY":
-            # element_count = int(len(series))
-            missing_count = element_count-int(len(nonnull_values))#int(null_indexes.sum())
-            unexpected_count = len(unexpected_list)
-
-            partial_unexpected_counts = [
-                {'value': key, 'count': value}
-                for key, value
-                in sorted(
-                    Counter(unexpected_list).most_common(20),
-                    key=lambda x: (-x[1], x[0]))
-            ]
-
-            if element_count > 0:
-                missing_percent = float(missing_count) / element_count
-                unexpected_percent = float(unexpected_count) / element_count
-
-                if nonnull_count > 0:
-                    unexpected_percent_nonmissing = float(unexpected_count) / nonnull_count
-                else:
-                    unexpected_percent_nonmissing = None
-
-            else:
-                missing_percent = None
-                unexpected_percent = None
-                unexpected_percent_nonmissing = None
-
-            return_obj = {
-                "success": success,
-                "summary_obj": {
-                    "element_count": element_count,
-                    "missing_count": missing_count,
-                    "missing_percent": missing_percent,
-                    "unexpected_count": unexpected_count,
-                    "unexpected_percent": unexpected_percent,
-                    "unexpected_percent_nonmissing": unexpected_percent_nonmissing,
-                    "partial_unexpected_counts": partial_unexpected_counts,
-                    "partial_unexpected_list": unexpected_list[:20],
-                    "partial_unexpected_index_list": unexpected_index_list[:20],
-                }
-            }
 
         else:
-            raise ValueError("Unknown output_format %s." % (output_format,))
+            missing_percent = None
+            unexpected_percent = None
+            unexpected_percent_nonmissing = None
 
-        return return_obj
+        return_obj['result_obj'] = {
+            'element_count': element_count,
+            'missing_count': missing_count,
+            'missing_percent': missing_percent,
+            'unexpected_count': unexpected_count,
+            'unexpected_percent': unexpected_percent,
+            'unexpected_percent_nonmissing': unexpected_percent_nonmissing,
+            'partial_unexpected_list': unexpected_list[:count]
+        }
+
+        if output_format['result_obj_format'] == 'BASIC':
+            return return_obj
+
+        partial_unexpected_counts = [
+            {'value': key, 'count': value}
+            for key, value
+            in sorted(
+                Counter(unexpected_list).most_common(count),
+                key=lambda x: (-x[1], x[0]))
+        ]
+
+        return_obj['result_obj'].update(
+            {
+                'partial_unexpected_index_list': unexpected_index_list[:count],
+                'partial_unexpected_counts': partial_unexpected_counts
+            }
+        )
+
+        if output_format['result_obj_format'] == 'SUMMARY':
+            return return_obj
+
+        return_obj['result_obj'].update(
+            {
+                'unexpected_list': unexpected_list,
+                'unexpected_index_list': unexpected_index_list
+            }
+        )
+
+        if output_format['result_obj_format'] == 'COMPLETE':
+            return return_obj
+
+        raise ValueError("Unknown output_format %s." % (output_format['result_obj_format'],))
 
     def _calc_map_expectation_success(self, success_count, nonnull_count, mostly):
         """Calculate success and percent_success for column_map_expectations
