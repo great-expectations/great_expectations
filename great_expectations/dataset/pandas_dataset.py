@@ -754,7 +754,9 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
                 ((min_value is None) or (min_value <= column_stdev)) and
                 ((max_value is None) or (column_stdev <= max_value))
             ),
-            "observed_value": column_stdev
+            "result_obj": {
+                "observed_value": column_stdev
+            }
         }
 
     @DocInherit
