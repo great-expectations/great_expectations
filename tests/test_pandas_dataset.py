@@ -1081,16 +1081,16 @@ class TestPandasDataset(unittest.TestCase):
         T = [
                 {
                     'in':{'column':'dist1', 'min_value':.5, 'max_value':1.5},
-                    'out':{'success':True, 'true_value':D['dist1'].std()}},
+                    'out':{'success':True, "result_obj": { "observed_value": D['dist1'].std(), "element_count": 3, "missing_count": 0, "missing_percent": 0}}},
                 {
                     'in':{'column':'dist1', 'min_value':2, 'max_value':3},
-                    'out':{'success':False, 'true_value':D['dist1'].std()}},
+                    'out':{'success':False, "result_obj": { "observed_value": D['dist1'].std(), "element_count": 3, "missing_count": 0, "missing_percent": 0}}},
                 {
                     'in':{'column':'dist2', 'min_value':2, 'max_value':3},
-                    'out':{'success':False, 'true_value':1.0}},
+                    'out':{'success':False, "result_obj": { "observed_value": 1, "element_count": 3, "missing_count": 0, "missing_percent": 0}}},
                 {
                     'in':{'column':'dist2', 'min_value':0, 'max_value':1},
-                    'out':{'success':True, 'true_value':1.0}}
+                    'out':{'success':True, "result_obj": { "observed_value": 1, "element_count": 3, "missing_count": 0, "missing_percent": 0}}}
         ]
 
         for t in T:
