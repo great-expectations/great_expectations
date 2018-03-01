@@ -35,7 +35,9 @@
     },
     "out":{
       "success": true,
-      "true_value": 4
+      "result_obj": {
+        "observed_value": 4
+      }
     }
   },{
     "notes": "Test error handling for non-int min_value",
