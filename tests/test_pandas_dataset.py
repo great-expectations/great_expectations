@@ -1119,7 +1119,7 @@ class TestPandasDataset(unittest.TestCase):
                         'max_value': 10
                     },
                     'kwargs':{},
-                    'out':{'success':True, 'true_value': 8}
+                    'out':{'success':True, "result_obj": { "observed_value": 8, "element_count": 8, "missing_count": 0, "missing_percent": 0}}
                 },{
                     'in':{
                         "column" : 'dist2',
@@ -1127,7 +1127,7 @@ class TestPandasDataset(unittest.TestCase):
                         "max_value" : None
                     },
                     'kwargs':{},
-                    'out':{'success':True, 'true_value': 5}
+                    'out':{'success':True, "result_obj": { "observed_value": 5, "element_count": 8, "missing_count": 3, "missing_percent": 3/8}}
                 },{
                     'in':{
                         "column": 'dist3',
@@ -1135,7 +1135,7 @@ class TestPandasDataset(unittest.TestCase):
                         "max_value": 5
                     },
                     'kwargs':{},
-                    'out':{'success':True, 'true_value': 5}
+                    'out':{'success':True, "result_obj": { "observed_value": 5, "element_count": 8, "missing_count": 0, "missing_percent": 0}}
                 },{
                     'in':{
                         "column": 'dist4',
@@ -1143,7 +1143,7 @@ class TestPandasDataset(unittest.TestCase):
                         "max_value": None
                     },
                     'kwargs':{},
-                    'out':{'success':False, 'true_value': 1}
+                    'out':{'success':False, "result_obj": { "observed_value": 1, "element_count": 8, "missing_count": 4, "missing_percent": 0.5}}
                 }
         ]
 
