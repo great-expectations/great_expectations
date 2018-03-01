@@ -818,8 +818,10 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
                 success = intersection_count==1
 
         return {
-            "success" : success,
-            "observed_value": mode_list
+            'success' : success,
+            'result_obj': {
+                'observed_value': mode_list
+            }
         }
 
     @DocInherit
