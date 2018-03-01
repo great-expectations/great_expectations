@@ -4,18 +4,9 @@ import pandas as pd
 from .util import *
 from great_expectations import dataset
 
-# from .connections import GreatExpectationsConnection, SqlConnection, SparkSqlConnection
+from .connections import GreatExpectationsConnection, SqlConnection, SparkSqlConnection
 
 from .version import __version__
-
-# def list_sources():
-#     raise NotImplementedError
-
-# def connect_to_datasource():
-#     raise NotImplementedError
-
-# def connect_to_dataset():
-#     raise NotImplementedError
 
 def _convert_to_dataset_class(df, dataset_class, expectations_config=None):
     """
