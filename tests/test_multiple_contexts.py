@@ -10,26 +10,27 @@ class TestConnections(unittest.TestCase):
 
     def test_SqlConnection(self):
 
-		my_auth = json.loads(open(auth))
-		my_conn = SqlAlchemyConnection(**my_auth)
+        my_conn = SqlConnection("sqlite:////Users/abe/Downloads/chinook.db")
 
-		my_conn.list_tables()
+        print(my_conn.get_table_list())
 
-		my_df = my_conn.get_table("TableName")
-		# my_df.expect...
+        my_df = my_conn.get_table("albums")
+        # my_df.expect...
 
 
-		my_df.validate()
+        my_df.validate()
 
     def test_SparkSqlConnection(self):
+        #FIXME: Unsuppress.
+        return
 
-		my_auth = json.loads(open(auth))
-		my_conn = SparkSQLConnection(**my_auth)
+        my_auth = json.loads(open(auth))
+        my_conn = SparkSQLConnection(**my_auth)
 
-		my_conn.list_tables()
+        my_conn.list_tables()
 
-		my_df = my_conn.get_table("TableName")
-		# my_df.expect...
+        my_df = my_conn.get_table("albums")
+        # my_df.expect...
 
 
-		my_df.validate()
+        my_df.validate()
