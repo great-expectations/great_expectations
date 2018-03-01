@@ -120,12 +120,10 @@ class DataSet(object):
                         raised_exception = True
                         exception_traceback = traceback.format_exc()
 
-                        if output_format != "BOOLEAN_ONLY":
-                            return_obj = {
-                                "success": False
-                            }
-                        else:
-                            return_obj = False
+                        return_obj = {
+                            "success": False
+                        }
+
                     else:
                         raise(err)
 
