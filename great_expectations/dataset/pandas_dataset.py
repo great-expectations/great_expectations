@@ -712,11 +712,13 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         column_mean = column.mean()
 
         return {
-            "success": (
+            'success': (
                 ((min_value is None) or (min_value <= column_mean)) and
                 ((max_value is None) or (column_mean <= max_value))
             ),
-            "observed_value": column_mean
+            'result_obj': {
+                'observed_value': column_mean
+            }
         }
 
     @DocInherit
