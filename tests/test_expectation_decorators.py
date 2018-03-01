@@ -32,7 +32,7 @@ class TestExpectationDecorators(unittest.TestCase):
             'mixed_missing' : [1,3,5,None,None,2,4,1,3,None],
             'all_missing' : [None,None,None,None,None,None,None,None,None,None]
         })
-        df.set_default_expectation_argument("output_format", "COMPLETE")
+        df.set_default_expectation_argument("result_format", "COMPLETE")
 
         self.assertEqual(
             df.expect_column_values_to_be_odd("all_odd"),
@@ -131,25 +131,25 @@ class TestExpectationDecorators(unittest.TestCase):
         )
 
         self.assertEqual(
-            df.expect_column_values_to_be_odd("mostly_odd", output_format="BOOLEAN_ONLY"),
+            df.expect_column_values_to_be_odd("mostly_odd", result_format="BOOLEAN_ONLY"),
             {'success': False}
         )
 
-        df.default_expectation_args["output_format"] = "BOOLEAN_ONLY"
+        df.default_expectation_args["result_format"] = "BOOLEAN_ONLY"
 
         self.assertEqual(
             df.expect_column_values_to_be_odd("mostly_odd"),
             {'success': False}
         )
 
-        df.default_expectation_args["output_format"] = "BASIC"
+        df.default_expectation_args["result_format"] = "BASIC"
 
         self.assertEqual(
             df.expect_column_values_to_be_odd("mostly_odd", include_config=True),
             {
                 "expectation_kwargs": {
                     "column": "mostly_odd", 
-                    "output_format": "BASIC"
+                    "result_format": "BASIC"
                 },
                 'result_obj': {'element_count': 10,
                                'missing_count': 0,
@@ -184,7 +184,7 @@ class TestExpectationDecorators(unittest.TestCase):
             'mixed_missing_2' : [1,3,None,None,6],
             'all_missing' : [None,None,None,None,None,],
         })
-        df.set_default_expectation_argument("output_format", "COMPLETE")
+        df.set_default_expectation_argument("result_format", "COMPLETE")
 
         self.assertEqual(
             df.expect_column_median_to_be_odd("all_odd"),
@@ -203,7 +203,7 @@ class TestExpectationDecorators(unittest.TestCase):
         )
 
         self.assertEqual(
-            df.expect_column_median_to_be_odd("all_even", output_format="SUMMARY"),
+            df.expect_column_median_to_be_odd("all_even", result_format="SUMMARY"),
             {
                 'result_obj': {'observed_value': 6, 'element_count': 5, 'missing_count': 0, 'missing_percent': 0},
                 'success': False
@@ -211,18 +211,18 @@ class TestExpectationDecorators(unittest.TestCase):
         )
 
         self.assertEqual(
-            df.expect_column_median_to_be_odd("all_even", output_format="BOOLEAN_ONLY"),
+            df.expect_column_median_to_be_odd("all_even", result_format="BOOLEAN_ONLY"),
             {'success': False}
         )
 
-        df.default_expectation_args["output_format"] = "BOOLEAN_ONLY"
+        df.default_expectation_args["result_format"] = "BOOLEAN_ONLY"
         self.assertEqual(
             df.expect_column_median_to_be_odd("all_even"),
             {'success': False}
         )
 
         self.assertEqual(
-            df.expect_column_median_to_be_odd("all_even", output_format="BASIC"),
+            df.expect_column_median_to_be_odd("all_even", result_format="BASIC"),
             {
                 'result_obj': {'observed_value': 6, 'element_count': 5, 'missing_count': 0, 'missing_percent': 0},
                 'success': False
@@ -250,7 +250,7 @@ class TestExpectationDecorators(unittest.TestCase):
             'mixed_missing' : [1,3,5,None,None,2,4,1,3,None],
             'all_missing' : [None,None,None,None,None,None,None,None,None,None]
         })
-        df.set_default_expectation_argument("output_format", "COMPLETE")
+        df.set_default_expectation_argument("result_format", "COMPLETE")
 
         self.assertEqual(
             df.expectation_that_crashes_on_sixes("all_odd", catch_exceptions=False),
@@ -328,12 +328,12 @@ class TestExpectationDecorators(unittest.TestCase):
 
 
         self.assertEqual(
-            df.expectation_that_crashes_on_sixes("all_odd", output_format="BOOLEAN_ONLY", catch_exceptions=True),
+            df.expectation_that_crashes_on_sixes("all_odd", result_format="BOOLEAN_ONLY", catch_exceptions=True),
             {'success': True}
         )
 
         self.assertEqual(
-            df.expectation_that_crashes_on_sixes("all_even", output_format="BOOLEAN_ONLY", catch_exceptions=True),
+            df.expectation_that_crashes_on_sixes("all_even", result_format="BOOLEAN_ONLY", catch_exceptions=True),
             {'success': False}
         )
 

@@ -12,7 +12,7 @@
     "notes": "Basic positive test case",
     "in": {
       "column": "w",
-      "output_format": "BASIC",
+      "result_format": "BASIC",
       "min_value": 30,
       "max_value": 30
     },
@@ -29,7 +29,7 @@
     "notes": "Basic negative test case",
     "in": {
       "column": "w",
-      "output_format": "BASIC",
+      "result_format": "BASIC",
       "min_value": 40,
       "max_value": 50
     },
@@ -42,10 +42,10 @@
         "missing_percent": 0
       }    }
   },{
-    "notes": "Test case with output_format=SUMMARY",
+    "notes": "Test case with result_format=SUMMARY",
     "in": {
       "column": "w",
-      "output_format": "SUMMARY",
+      "result_format": "SUMMARY",
       "min_value": 20,
       "max_value": 40
     },
