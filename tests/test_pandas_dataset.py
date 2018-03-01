@@ -15,7 +15,7 @@ class TestPandasDataset(unittest.TestCase):
         with open("./tests/test_sets/expect_column_to_exist_test_set.json") as f:
             J = json.load(f)
             D = ge.dataset.PandasDataSet(J["dataset"])
-            D.set_default_expectation_argument("output_format", "COMPLETE")
+            D.set_default_expectation_argument("result_format", "COMPLETE")
             T = J["tests"]
 
             self.maxDiff = None
@@ -36,7 +36,7 @@ class TestPandasDataset(unittest.TestCase):
         with open("./tests/test_sets/expect_table_row_count_to_be_between_test_set.json") as f:
             J = json.load(f)
             D = ge.dataset.PandasDataSet(J["dataset"])
-            D.set_default_expectation_argument("output_format", "COMPLETE")
+            D.set_default_expectation_argument("result_format", "COMPLETE")
             T = J["tests"]
 
             self.maxDiff = None
@@ -60,7 +60,7 @@ class TestPandasDataset(unittest.TestCase):
             'c2':['a','b','c','d'],
             'c3':[None,None,None,None]
         })
-        D.set_default_expectation_argument("output_format", "COMPLETE")
+        D.set_default_expectation_argument("result_format", "COMPLETE")
 
         # Tests
         T = [
@@ -91,7 +91,7 @@ class TestPandasDataset(unittest.TestCase):
             'c2':[None,4,5,None,None],
             'c3':[None,None,None,None,None]
         })
-        D.set_default_expectation_argument("output_format", "COMPLETE")
+        D.set_default_expectation_argument("result_format", "COMPLETE")
 
         T = [
                 {
@@ -122,7 +122,7 @@ class TestPandasDataset(unittest.TestCase):
             'd' : [1, '1'],
             'n' : [None, np.nan]
         })
-        D.set_default_expectation_argument("output_format", "COMPLETE")
+        D.set_default_expectation_argument("result_format", "COMPLETE")
 
         # Tests for D
         T = [
@@ -154,7 +154,7 @@ class TestPandasDataset(unittest.TestCase):
             'b' : [1, '2', '2', '3'],
             'n' : [None, None, np.nan, None],
         })
-        df.set_default_expectation_argument("output_format", "COMPLETE")
+        df.set_default_expectation_argument("result_format", "COMPLETE")
 
         # Tests for df
         T = [
@@ -202,7 +202,7 @@ class TestPandasDataset(unittest.TestCase):
             'n' : [None, np.nan],
             'z' : [2, 5],
         })
-        D.set_default_expectation_argument("output_format", "COMPLETE")
+        D.set_default_expectation_argument("result_format", "COMPLETE")
 
         T = [
                 {
@@ -236,7 +236,7 @@ class TestPandasDataset(unittest.TestCase):
             'a' : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
             'b' : [1, 2, 3, 4, 5, 6, 7, 8, 9, None],
         })
-        D2.set_default_expectation_argument("output_format", "COMPLETE")
+        D2.set_default_expectation_argument("result_format", "COMPLETE")
 
         #assert_equal(
         #    D.expect_column_values_to_not_be_null('x'),
@@ -275,7 +275,7 @@ class TestPandasDataset(unittest.TestCase):
         D3 = ge.dataset.PandasDataSet({
             'a' : [None, None, None, None],
         })
-        D3.set_default_expectation_argument("output_format", "COMPLETE")
+        D3.set_default_expectation_argument("result_format", "COMPLETE")
 
         T = [
                 {
@@ -313,7 +313,7 @@ class TestPandasDataset(unittest.TestCase):
             'z' : [2, 5, 7],
             'a' : [None, np.nan, None],
         })
-        D.set_default_expectation_argument("output_format", "COMPLETE")
+        D.set_default_expectation_argument("result_format", "COMPLETE")
 
         T = [
                 {
@@ -350,7 +350,7 @@ class TestPandasDataset(unittest.TestCase):
             'a' : [None, None, None, None],
             'b' : [np.nan, np.nan, np.nan, np.nan],
         })
-        D3.set_default_expectation_argument("output_format", "COMPLETE")
+        D3.set_default_expectation_argument("result_format", "COMPLETE")
 
         T = [
                 {
@@ -393,7 +393,7 @@ class TestPandasDataset(unittest.TestCase):
             's' : ['hello', 'jello', 1],
             's1' : ['hello', 2.0, 1],
         })
-        D.set_default_expectation_argument("output_format", "COMPLETE")
+        D.set_default_expectation_argument("result_format", "COMPLETE")
 
         T = [
                 {
@@ -441,7 +441,7 @@ class TestPandasDataset(unittest.TestCase):
             's' : ['hello', 'jello', 1],
             's1' : ['hello', 2.0, 1],
         })
-        D.set_default_expectation_argument("output_format", "COMPLETE")
+        D.set_default_expectation_argument("result_format", "COMPLETE")
 
         T = [
                 {
@@ -488,7 +488,7 @@ class TestPandasDataset(unittest.TestCase):
             'y' : [1,2,5],
             'z' : ['hello', 'jello', 'mello'],
         })
-        D.set_default_expectation_argument("output_format", "COMPLETE")
+        D.set_default_expectation_argument("result_format", "COMPLETE")
 
         T = [
                 {
@@ -523,7 +523,7 @@ class TestPandasDataset(unittest.TestCase):
             'x' : [1,1,2,None],
             'y' : [None,None,None,None],
         })
-        D2.set_default_expectation_argument("output_format", "COMPLETE")
+        D2.set_default_expectation_argument("result_format", "COMPLETE")
 
         T = [
                 {
@@ -565,7 +565,7 @@ class TestPandasDataset(unittest.TestCase):
             'a' : [1,1,2],
             'n' : [None,None,2],
         })
-        D.set_default_expectation_argument("output_format", "COMPLETE")
+        D.set_default_expectation_argument("result_format", "COMPLETE")
 
         T = [
                 {
@@ -620,7 +620,7 @@ class TestPandasDataset(unittest.TestCase):
         tests = fixture["tests"]
 
         D = ge.dataset.PandasDataSet(dataset)
-        D.set_default_expectation_argument("output_format", "COMPLETE")
+        D.set_default_expectation_argument("result_format", "COMPLETE")
 
         self.maxDiff = None
 
@@ -649,7 +649,7 @@ class TestPandasDataset(unittest.TestCase):
             's3':['cool','calm','collected','casual',None],
             's4':[1,2,3,4,5]
         })
-        D.set_default_expectation_argument("output_format", "COMPLETE")
+        D.set_default_expectation_argument("result_format", "COMPLETE")
 
         T = [
                 {
@@ -690,7 +690,7 @@ class TestPandasDataset(unittest.TestCase):
             'x' : ['aa', 'ab', 'ac', 'a1', None],
             'y' : ['aa', 'ab', 'ac', 'ba', 'ca'],
         })
-        D.set_default_expectation_argument("output_format", "COMPLETE")
+        D.set_default_expectation_argument("result_format", "COMPLETE")
 
 
         D2 = ge.dataset.PandasDataSet({
@@ -698,7 +698,7 @@ class TestPandasDataset(unittest.TestCase):
             'b' : ['aaa', 'abb', 'acc', 'bdd', None],
             'c' : [ None,  None,  None,  None, None],
         })
-        D2.set_default_expectation_argument("output_format", "COMPLETE")
+        D2.set_default_expectation_argument("result_format", "COMPLETE")
 
         T = [
                 {
@@ -766,7 +766,7 @@ class TestPandasDataset(unittest.TestCase):
             'y' : ['axxx', 'exxxx', 'ixxxx', 'oxxxxx', 'uxxxxx', 'yxxxxx', 'zxxxx'],
             'z' : [None, None, None, None, None, None, None]
         })
-        D.set_default_expectation_argument("output_format", "COMPLETE")
+        D.set_default_expectation_argument("result_format", "COMPLETE")
 
         T = [
                 {
@@ -790,7 +790,7 @@ class TestPandasDataset(unittest.TestCase):
         with open("./tests/test_sets/expect_column_values_to_match_regex_list_test_set.json") as f:
             J = json.load(f)
             D = ge.dataset.PandasDataSet(J["dataset"])
-            D.set_default_expectation_argument("output_format", "COMPLETE")
+            D.set_default_expectation_argument("result_format", "COMPLETE")
             T = J["tests"]
 
             self.maxDiff = None
@@ -815,7 +815,7 @@ class TestPandasDataset(unittest.TestCase):
             'almost_iso8601_val_error' : ['1977-05-55T00:00:00', '1980-05-21T13:47:59', '2017-06-12T23:57:59'],
             'already_datetime' : [datetime.datetime(2015,1,1), datetime.datetime(2016,1,1), datetime.datetime(2017,1,1)]
         })
-        D.set_default_expectation_argument("output_format", "COMPLETE")
+        D.set_default_expectation_argument("result_format", "COMPLETE")
 
         T = [
                 {
@@ -871,7 +871,7 @@ class TestPandasDataset(unittest.TestCase):
             'c4':['1', '2', '49000004632'],
             'already_datetime' : [datetime.datetime(2015,1,1), datetime.datetime(2016,1,1), datetime.datetime(2017,1,1)],
         })
-        D.set_default_expectation_argument("output_format", "COMPLETE")
+        D.set_default_expectation_argument("result_format", "COMPLETE")
 
         T = [
                 {
@@ -921,7 +921,7 @@ class TestPandasDataset(unittest.TestCase):
             'py_dict':[{'a':1, 'out':1},{'b':2, 'out':4},{'c':3, 'out':9},{'d':4, 'out':16}],
             'most':[d1,d2,d3,'d4']
         })
-        D.set_default_expectation_argument("output_format", "COMPLETE")
+        D.set_default_expectation_argument("result_format", "COMPLETE")
 
         T = [
                 {
@@ -952,7 +952,7 @@ class TestPandasDataset(unittest.TestCase):
         with open("./tests/test_sets/expect_column_values_to_match_json_schema_test_set.json") as f:
             J = json.load(f)
             D = ge.dataset.PandasDataSet(J["dataset"])
-            D.set_default_expectation_argument("output_format", "COMPLETE")
+            D.set_default_expectation_argument("result_format", "COMPLETE")
             T = J["tests"]
 
             self.maxDiff = None
@@ -981,7 +981,7 @@ class TestPandasDataset(unittest.TestCase):
             'n' : [0, None],
             'b' : [True, False],
         })
-        D.set_default_expectation_argument("output_format", "BASIC")
+        D.set_default_expectation_argument("result_format", "BASIC")
 
         T = [
                 {
@@ -1018,7 +1018,7 @@ class TestPandasDataset(unittest.TestCase):
             'b' : [True, False, False, True],
             'x' : [True, None, False, None],
         })
-        typedf.set_default_expectation_argument("output_format", "BASIC")
+        typedf.set_default_expectation_argument("result_format", "BASIC")
 
         T = [
                 {
@@ -1069,7 +1069,7 @@ class TestPandasDataset(unittest.TestCase):
             'dist1' : [1,1,3],
             'dist2' : [-1,0,1]
         })
-        D.set_default_expectation_argument("output_format", "COMPLETE")
+        D.set_default_expectation_argument("result_format", "COMPLETE")
 
         T = [
                 {
@@ -1102,7 +1102,7 @@ class TestPandasDataset(unittest.TestCase):
             'dist3' : [2,2,2,2,5,6,7,8],
             'dist4' : [1,1,1,1,None,None,None,None]
         })
-        D.set_default_expectation_argument("output_format", "COMPLETE")
+        D.set_default_expectation_argument("result_format", "COMPLETE")
 
         T = [
                 {
@@ -1153,7 +1153,7 @@ class TestPandasDataset(unittest.TestCase):
             'dist1' : [1,1,3],
             'dist2' : [-1,0,1]
         })
-        D.set_default_expectation_argument("output_format", "COMPLETE")
+        D.set_default_expectation_argument("result_format", "COMPLETE")
 
         T = [
                 {
@@ -1179,7 +1179,7 @@ class TestPandasDataset(unittest.TestCase):
         with open("./tests/test_sets/expect_column_values_to_be_increasing_test_set.json") as f:
             J = json.load(f)
             D = ge.dataset.PandasDataSet(J["dataset"])
-            D.set_default_expectation_argument("output_format", "COMPLETE")
+            D.set_default_expectation_argument("result_format", "COMPLETE")
             T = J["tests"]
 
             self.maxDiff = None
@@ -1198,7 +1198,7 @@ class TestPandasDataset(unittest.TestCase):
         with open("./tests/test_sets/expect_column_values_to_be_decreasing_test_set.json") as f:
             J = json.load(f)
             D = ge.dataset.PandasDataSet(J["dataset"])
-            D.set_default_expectation_argument("output_format", "COMPLETE")
+            D.set_default_expectation_argument("result_format", "COMPLETE")
             T = J["tests"]
 
             self.maxDiff = None
@@ -1219,7 +1219,7 @@ class TestPandasDataset(unittest.TestCase):
             'y' : ['hello', 'jello', 'mello', 'hello', 'jello', 'mello', 'hello', 'jello', 'mello', 'jello'],
             'z' : [1,2,2,3,3,3,4,4,4,4],
         })
-        D.set_default_expectation_argument("output_format", "COMPLETE")
+        D.set_default_expectation_argument("result_format", "COMPLETE")
 
         T = [
                 {
@@ -1253,7 +1253,7 @@ class TestPandasDataset(unittest.TestCase):
         with open("./tests/test_sets/expect_column_sum_to_be_between_test_set.json") as f:
             J = json.load(f)
             D = ge.dataset.PandasDataSet(J["dataset"])
-            D.set_default_expectation_argument("output_format", "COMPLETE")
+            D.set_default_expectation_argument("result_format", "COMPLETE")
             T = J["tests"]
 
             self.maxDiff = None
@@ -1278,7 +1278,7 @@ class TestPandasDataset(unittest.TestCase):
         with open("./tests/test_sets/expect_column_min_to_be_between_test_set.json") as f:
             J = json.load(f)
             D = ge.dataset.PandasDataSet(J["dataset"])
-            D.set_default_expectation_argument("output_format", "COMPLETE")
+            D.set_default_expectation_argument("result_format", "COMPLETE")
             T = J["tests"]
 
             self.maxDiff = None
@@ -1303,7 +1303,7 @@ class TestPandasDataset(unittest.TestCase):
         with open("./tests/test_sets/expect_column_max_to_be_between_test_set.json") as f:
             J = json.load(f)
             D = ge.dataset.PandasDataSet(J["dataset"])
-            D.set_default_expectation_argument("output_format", "COMPLETE")
+            D.set_default_expectation_argument("result_format", "COMPLETE")
             T = J["tests"]
 
             self.maxDiff = None
@@ -1329,14 +1329,14 @@ class TestPandasDataset(unittest.TestCase):
         df = ge.dataset.PandasDataSet({
             'x' : [1,2,3,4,5,6,7,7,None,None],
         })
-        df.set_default_expectation_argument("output_format", "COMPLETE")
+        df.set_default_expectation_argument("result_format", "COMPLETE")
 
         # print '&'*80
-        # print json.dumps(df.expect_column_values_to_be_between('x', min_value=1, max_value=5, output_format="SUMMARY"), indent=2)
+        # print json.dumps(df.expect_column_values_to_be_between('x', min_value=1, max_value=5, result_format="SUMMARY"), indent=2)
 
         self.maxDiff = None
         self.assertEqual(
-            df.expect_column_values_to_be_between('x', min_value=1, max_value=5, output_format="SUMMARY"),
+            df.expect_column_values_to_be_between('x', min_value=1, max_value=5, result_format="SUMMARY"),
             {
                 "success" : False,
                 "result_obj" : {
@@ -1359,7 +1359,7 @@ class TestPandasDataset(unittest.TestCase):
         )
 
         self.assertEqual(
-            df.expect_column_mean_to_be_between("x", 3, 7, output_format="SUMMARY"),
+            df.expect_column_mean_to_be_between("x", 3, 7, result_format="SUMMARY"),
             {
                 'success': True,
                 'result_obj': {
@@ -1378,7 +1378,7 @@ class TestPandasDataset(unittest.TestCase):
             'y':[2,4,6,8,10],
             'z':[None,'a','b','c','abc']
         })
-        df.set_default_expectation_argument('output_format', 'COMPLETE')
+        df.set_default_expectation_argument('result_format', 'COMPLETE')
 
         self.assertEqual(
             df.expect_column_mean_to_be_between('x',4,6),
@@ -1423,17 +1423,17 @@ class TestPandasDataset(unittest.TestCase):
             if 'unexpected_list' in t['out']:
                 self.assertEqual(t['out']['unexpected_list'], out['result_obj']['unexpected_list'])
 
-    def test_output_format_argument_in_decorators(self):
+    def test_result_format_argument_in_decorators(self):
         df = ge.dataset.PandasDataSet({
             'x':[1,3,5,7,9],
             'y':[2,4,6,8,10],
             'z':[None,'a','b','c','abc']
         })
-        df.set_default_expectation_argument('output_format', 'COMPLETE')
+        df.set_default_expectation_argument('result_format', 'COMPLETE')
 
-        #Test explicit Nones in output_format
+        #Test explicit Nones in result_format
         self.assertEqual(
-            df.expect_column_mean_to_be_between('x',4,6, output_format=None),
+            df.expect_column_mean_to_be_between('x',4,6, result_format=None),
             {'success':True, 'result_obj': {'observed_value': 5, 'element_count': 5,
                 'missing_count': 0,
                 'missing_percent': 0.0
@@ -1441,7 +1441,7 @@ class TestPandasDataset(unittest.TestCase):
         )
 
         self.assertEqual(
-            df.expect_column_values_to_be_between('y',1,6, output_format=None),
+            df.expect_column_values_to_be_between('y',1,6, result_format=None),
             {'result_obj': {'element_count': 5,
                             'missing_count': 0,
                             'missing_percent': 0.0,
@@ -1459,10 +1459,10 @@ class TestPandasDataset(unittest.TestCase):
 
         #Test unknown output format
         with self.assertRaises(ValueError):
-            df.expect_column_values_to_be_between('y',1,6, output_format="QUACK")
+            df.expect_column_values_to_be_between('y',1,6, result_format="QUACK")
 
         with self.assertRaises(ValueError):
-            df.expect_column_mean_to_be_between('x',4,6, output_format="QUACK")
+            df.expect_column_mean_to_be_between('x',4,6, result_format="QUACK")
 
 if __name__ == "__main__":
     unittest.main()

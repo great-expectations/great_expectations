@@ -87,7 +87,7 @@ class TestCustomClass(unittest.TestCase):
             script_path+'/test_sets/Titanic.csv',
             dataset_class=CustomPandasDataSet
         )
-        df.set_default_expectation_argument("output_format", "COMPLETE")
+        df.set_default_expectation_argument("result_format", "COMPLETE")
         self.assertEqual(
             df.expect_column_values_to_be_prime('Age')['result_obj']['unexpected_list'],
             [30.0, 25.0, 0.92000000000000004, 63.0, 39.0, 58.0, 50.0, 24.0, 36.0, 26.0, 25.0, 25.0, 28.0, 45.0, 39.0,
@@ -136,7 +136,7 @@ class TestCustomClass(unittest.TestCase):
 
     def test_custom_expectation(self):
         df = CustomPandasDataSet({'x': [1,1,1,1,2]})
-        df.set_default_expectation_argument("output_format", "COMPLETE")
+        df.set_default_expectation_argument("result_format", "COMPLETE")
 
         out = df.expect_column_values_to_be_prime('x')
         t = {'out': {'unexpected_list':[1,1,1,1],'unexpected_index_list':[0,1,2,3], 'success':False}}
@@ -179,7 +179,7 @@ class TestValidation(unittest.TestCase):
             "./tests/test_sets/Titanic.csv",
             expectations_config=my_expectations_config
         )
-        my_df.set_default_expectation_argument("output_format", "COMPLETE")
+        my_df.set_default_expectation_argument("result_format", "COMPLETE")
 
         results = my_df.validate(catch_exceptions=False)
         #print json.dumps(results, indent=2)
@@ -209,7 +209,7 @@ class TestValidation(unittest.TestCase):
             {"results": [
                 {"exception_traceback": None, "expectation_type": "expect_column_values_to_be_in_set", "success": False,
                  "raised_exception": False,
-                 "kwargs": {"column": "PClass", "values_set": ["1st", "2nd", "3rd"], "output_format": "COMPLETE"},
+                 "kwargs": {"column": "PClass", "values_set": ["1st", "2nd", "3rd"], "result_format": "COMPLETE"},
                  "result_obj": {"partial_unexpected_index_list": [456], "unexpected_count": 1, "unexpected_list": ["*"],
                                 "unexpected_percent": 0.0007616146230007616, "element_count": 1313,
                                 "missing_percent": 0.0, "partial_unexpected_counts": [{"count": 1, "value": "*"}],

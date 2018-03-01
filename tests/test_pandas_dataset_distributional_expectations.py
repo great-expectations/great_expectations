@@ -35,7 +35,7 @@ class TestDistributionalExpectations(unittest.TestCase):
                     'args': ['categorical_fixed'],
                     'kwargs': {
                         'partition_object': self.test_partitions['categorical_fixed_alternate'],
-                        'p': 0.05, 'output_format': 'SUMMARY'
+                        'p': 0.05, 'result_format': 'SUMMARY'
                     },
                     'out': {'success': False, 'observed_value': 5.1397782097623862e-53,
                             'details': {
@@ -55,7 +55,7 @@ class TestDistributionalExpectations(unittest.TestCase):
             out = self.D.expect_column_chisquare_test_p_value_to_be_greater_than(*t['args'], **t['kwargs'])
             self.assertEqual(t['out']['success'], out['success'])
             self.assertEqual(t['out']['observed_value'], out['result_obj']['observed_value'])
-            if 'output_format' in t['kwargs'] and t['kwargs']['output_format'] == 'SUMMARY':
+            if 'result_format' in t['kwargs'] and t['kwargs']['result_format'] == 'SUMMARY':
                 self.assertDictEqual(t['out']['details'], out['result_obj']['details'])
 
     def test_expect_column_chisquare_test_p_value_to_be_greater_than_new_categorical_val(self):
@@ -97,7 +97,7 @@ class TestDistributionalExpectations(unittest.TestCase):
                     'args': ['categorical_fixed'],
                     'kwargs': {
                         'partition_object': self.test_partitions['categorical_fixed_alternate'],
-                        'threshold': 0.1, 'output_format': 'SUMMARY'
+                        'threshold': 0.1, 'result_format': 'SUMMARY'
                     },
                     'out': {'success': False, 'observed_value': 0.12599700286677529,
                             'details': {
@@ -116,7 +116,7 @@ class TestDistributionalExpectations(unittest.TestCase):
             out = self.D.expect_column_kl_divergence_to_be_less_than(*t['args'], **t['kwargs'])
             self.assertTrue(np.allclose(out['success'], t['out']['success']))
             self.assertTrue(np.allclose(out['result_obj']['observed_value'], t['out']['observed_value']))
-            if 'output_format' in t['kwargs'] and t['kwargs']['output_format'] == 'SUMMARY':
+            if 'result_format' in t['kwargs'] and t['kwargs']['result_format'] == 'SUMMARY':
                 self.assertDictEqual(out['result_obj']['details'], t['out']['details'])
 
     def test_expect_column_kl_divergence_to_be_less_than_discrete_holdout(self):
@@ -206,7 +206,7 @@ class TestDistributionalExpectations(unittest.TestCase):
                 },
                 {
                     'args': ['bimodal'],
-                    'kwargs': {'partition_object': self.test_partitions['norm_0_1_uniform'], "p": 0.05, 'output_format': 'SUMMARY'},
+                    'kwargs': {'partition_object': self.test_partitions['norm_0_1_uniform'], "p": 0.05, 'result_format': 'SUMMARY'},
                     'out': {'success': False, 'observed_value': "RANDOMIZED",
                             'details': {
                                 'expected_cdf': {
@@ -238,7 +238,7 @@ class TestDistributionalExpectations(unittest.TestCase):
                 print(t)
                 print(out)
             self.assertEqual(out['success'], t['out']['success'])
-            if 'output_format' in t['kwargs'] and t['kwargs']['output_format'] == 'SUMMARY':
+            if 'result_format' in t['kwargs'] and t['kwargs']['result_format'] == 'SUMMARY':
                 self.assertTrue(np.allclose(out['result_obj']['details']['observed_cdf']['x'],t['out']['details']['observed_cdf']['x']))
                 self.assertTrue(np.allclose(out['result_obj']['details']['observed_cdf']['cdf_values'],t['out']['details']['observed_cdf']['cdf_values']))
                 self.assertTrue(np.allclose(out['result_obj']['details']['expected_cdf']['x'],t['out']['details']['expected_cdf']['x']))
@@ -251,25 +251,25 @@ class TestDistributionalExpectations(unittest.TestCase):
     def test_expect_column_bootstrapped_ks_test_p_value_to_be_greater_than_expanded_partitions(self):
         # Extend observed above and below expected
         out = self.D.expect_column_bootstrapped_ks_test_p_value_to_be_greater_than('norm_0_1', {'bins': np.linspace(-1, 1, 11), 'weights': [0.1] * 10},
-                                                                                   output_format='SUMMARY')
+                                                                                   result_format='SUMMARY')
         self.assertTrue(out['result_obj']['details']['observed_cdf']['x'][0] < -1)
         self.assertTrue(out['result_obj']['details']['observed_cdf']['x'][-1] > 1)
         # Extend observed below expected
         out = self.D.expect_column_bootstrapped_ks_test_p_value_to_be_greater_than('norm_0_1',
                                                                                    {'bins': np.linspace(-10, 1, 11), 'weights': [0.1] * 10},
-                                                                                   output_format='SUMMARY')
+                                                                                   result_format='SUMMARY')
         self.assertTrue(out['result_obj']['details']['observed_cdf']['x'][0] == -10)
         self.assertTrue(out['result_obj']['details']['observed_cdf']['x'][-1] > 1)
         # Extend observed above expected
         out = self.D.expect_column_bootstrapped_ks_test_p_value_to_be_greater_than('norm_0_1',
                                                                                    {'bins': np.linspace(-1, 10, 11), 'weights': [0.1] * 10},
-                                                                                   output_format='SUMMARY')
+                                                                                   result_format='SUMMARY')
         self.assertTrue(out['result_obj']['details']['observed_cdf']['x'][0] < -1)
         self.assertTrue(out['result_obj']['details']['observed_cdf']['x'][-1] == 10)
         # Extend expected above and below observed
         out = self.D.expect_column_bootstrapped_ks_test_p_value_to_be_greater_than('norm_0_1',
                                                                                    {'bins': np.linspace(-10, 10, 11), 'weights': [0.1] * 10},
-                                                                                   output_format='SUMMARY')
+                                                                                   result_format='SUMMARY')
         self.assertTrue(out['result_obj']['details']['observed_cdf']['x'][0] == -10)
         self.assertTrue(out['result_obj']['details']['observed_cdf']['x'][-1] == 10)
 
@@ -306,7 +306,7 @@ class TestDistributionalExpectations(unittest.TestCase):
         test_df = ge.dataset.PandasDataSet(
             {'x': [-0.5, 0.5, 1.5, 2.5]})
         # This should succeed: our data match the partition
-        out = test_df.expect_column_kl_divergence_to_be_less_than('x', test_partition, 0.5, output_format='SUMMARY')
+        out = test_df.expect_column_kl_divergence_to_be_less_than('x', test_partition, 0.5, result_format='SUMMARY')
         self.assertTrue(out['success'])
         self.assertDictEqual(out['result_obj']['details']['observed_partition'], summary_observed_partition)
         self.assertDictEqual(out['result_obj']['details']['expected_partition'], summary_expected_partition)
@@ -326,7 +326,7 @@ class TestDistributionalExpectations(unittest.TestCase):
         }
         test_df = ge.dataset.PandasDataSet(
             {'x': [-0.5, 0.5, 1.5, 2.5, 3.5]})
-        out = test_df.expect_column_kl_divergence_to_be_less_than('x', test_partition, 0.5, output_format='SUMMARY')
+        out = test_df.expect_column_kl_divergence_to_be_less_than('x', test_partition, 0.5, result_format='SUMMARY')
         # This should fail: we expect zero weight less than 0
         self.assertFalse(out['success'])
         self.assertDictEqual(out['result_obj']['details']['observed_partition'], summary_observed_partition)
@@ -348,7 +348,7 @@ class TestDistributionalExpectations(unittest.TestCase):
         test_df = ge.dataset.PandasDataSet(
             {'x': [-0.5, 0.5, 0.5, 1.5, 1.5, 1.5, 1.5, 2.5, 2.5, 3.5]})
         # This should succeed: our data match the partition
-        out = test_df.expect_column_kl_divergence_to_be_less_than('x', test_partition, 0.5, output_format='SUMMARY')
+        out = test_df.expect_column_kl_divergence_to_be_less_than('x', test_partition, 0.5, result_format='SUMMARY')
         self.assertTrue(out['success'])
         self.assertDictEqual(out['result_obj']['details']['observed_partition'], summary_observed_partition)
         self.assertDictEqual(out['result_obj']['details']['expected_partition'], summary_expected_partition)
@@ -372,7 +372,7 @@ class TestDistributionalExpectations(unittest.TestCase):
         test_df = ge.dataset.PandasDataSet(
             {'x': [-0.5, 0.5, 0.5, 1.5, 1.5, 1.5, 1.5, 2.5, 2.5, 3.5]})
         # This should succeed: our data match the partition
-        out = test_df.expect_column_kl_divergence_to_be_less_than('x', test_partition, 0.5, output_format='SUMMARY')
+        out = test_df.expect_column_kl_divergence_to_be_less_than('x', test_partition, 0.5, result_format='SUMMARY')
         self.assertTrue(out['success'])
         self.assertDictEqual(out['result_obj']['details']['observed_partition'], summary_observed_partition)
         self.assertDictEqual(out['result_obj']['details']['expected_partition'], summary_expected_partition)
@@ -486,7 +486,7 @@ class TestDistributionalExpectations(unittest.TestCase):
                                "threshold": 0.1,
                                "tail_weight_holdout": 0.01,
                                "internal_weight_holdout": 0.01,
-                               "output_format": "SUMMARY"},
+                               "result_format": "SUMMARY"},
                     'out': {'success': False, 'observed_value': "NOTTESTED",
                             'details':
                                 {'observed_partition':
@@ -511,7 +511,7 @@ class TestDistributionalExpectations(unittest.TestCase):
                     print(t)
                     print(out)
                 self.assertTrue(np.allclose(out['observed_value'],t['out']['observed_value']))
-            if 'output_format' in t['kwargs'] and t['kwargs']['output_format'] == 'SUMMARY':
+            if 'result_format' in t['kwargs'] and t['kwargs']['result_format'] == 'SUMMARY':
                 self.assertTrue(np.allclose(out['result_obj']['details']['observed_partition']['bins'],t['out']['details']['observed_partition']['bins']))
                 self.assertTrue(np.allclose(out['result_obj']['details']['observed_partition']['weights'],t['out']['details']['observed_partition']['weights']))
                 self.assertTrue(np.allclose(out['result_obj']['details']['expected_partition']['bins'],t['out']['details']['expected_partition']['bins']))

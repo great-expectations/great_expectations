@@ -78,7 +78,7 @@
         "column": "x",
         "max_value": 10,
         "min_value": 1,
-        "output_format": "BOOLEAN_ONLY"
+        "result_format": "BOOLEAN_ONLY"
       }
     },
     {
@@ -87,7 +87,7 @@
         "column": "x",
         "max_value": 20,
         "min_value": 0,
-        "output_format": "BOOLEAN_ONLY"
+        "result_format": "BOOLEAN_ONLY"
       }
     },
     {
@@ -96,7 +96,7 @@
         "column": "x",
         "max_value": 9,
         "min_value": 1,
-        "output_format": "BOOLEAN_ONLY"
+        "result_format": "BOOLEAN_ONLY"
       }
     },
     {
@@ -105,7 +105,7 @@
         "column": "x",
         "max_value": 10,
         "min_value": 3,
-        "output_format": "BOOLEAN_ONLY"
+        "result_format": "BOOLEAN_ONLY"
       }
     },
     {

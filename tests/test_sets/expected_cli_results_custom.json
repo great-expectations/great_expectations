@@ -6,7 +6,7 @@
       "raised_exception": false,
       "kwargs": {
         "column": "Name",
-        "output_format": "SUMMARY"
+        "result_format": "SUMMARY"
       },
       "result_obj": {
         "partial_unexpected_index_list": [

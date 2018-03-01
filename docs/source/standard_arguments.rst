@@ -30,7 +30,7 @@ All Expectations accept a boolean `include_config` parameter. If true, then the 
     >> expect_column_values_to_be_in_set(
         "my_var",
         ['B', 'C', 'D', 'F', 'G', 'H'],
-        output_format="COMPLETE",
+        result_format="COMPLETE",
         include_config=True,
     )
 
@@ -40,7 +40,7 @@ All Expectations accept a boolean `include_config` parameter. If true, then the 
         'expectation_type': 'expect_column_values_to_be_in_set',
         'expectation_kwargs': {
             'column': 'my_var',
-            'output_format': 'COMPLETE',
+            'result_format': 'COMPLETE',
             'value_set': ['B', 'C', 'D', 'F', 'G', 'H']
         },
         'success': False
@@ -153,15 +153,15 @@ Expectations with `mostly` return exception lists even if they succeed:
 DataSet defaults
 ------------------------------------------------------------------------------
 
-This default behavior for `output_format`, `include_config`, `catch_exceptions` can be overridden at the DataSet level:
+This default behavior for `result_format`, `include_config`, `catch_exceptions` can be overridden at the DataSet level:
 
 .. code-block:: bash
 
-    my_dataset.set_default_expectation_argument("output_format", "SUMMARY")
+    my_dataset.set_default_expectation_argument("result_format", "SUMMARY")
 
 In validation mode, they can be overridden using flags:
 
 .. code-block:: bash
 
-    great_expectations my_dataset.csv my_expectations.json --output_format=BOOLEAN_ONLY --catch_exceptions=False --include_config=True
+    great_expectations my_dataset.csv my_expectations.json --result_format=BOOLEAN_ONLY --catch_exceptions=False --include_config=True
 

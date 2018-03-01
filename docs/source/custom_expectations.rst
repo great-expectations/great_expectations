@@ -46,7 +46,7 @@ Note: following Great Expectations :ref:`naming_conventions` is highly recommend
                 "summary_obj" : {}
             }
 
-`@column_map_expectation` decorates a custom function, wrapping it with all the business logic required to turn it into a fully-fledged Expectation. This spares you the hassle of defining logic to handle required arguments like `mostly` and `output_format`. Your custom function can focus exclusively on the business logic of passing or failing the expectation.
+`@column_map_expectation` decorates a custom function, wrapping it with all the business logic required to turn it into a fully-fledged Expectation. This spares you the hassle of defining logic to handle required arguments like `mostly` and `result_format`. Your custom function can focus exclusively on the business logic of passing or failing the expectation.
 
 To work with these decorators, your custom function must accept two arguments: `self` and `series`. When your function is called, `series` will contain all the non-null values in the given column. Your function must return a series of boolean values in the same order, with the same index.
 
@@ -60,7 +60,7 @@ The hard way
 2. Write the whole expectation yourself
 3. Decorate it with the `@expectation` decorator
 
-This is more complicated, since you have to handle all the logic of additional parameters and output formats. Pay special attention to proper formatting of :ref:`output_format`. Malformed result objects can break Great Expectations in subtle and unanticipated ways.
+This is more complicated, since you have to handle all the logic of additional parameters and output formats. Pay special attention to proper formatting of :ref:`result_format`. Malformed result objects can break Great Expectations in subtle and unanticipated ways.
 
 .. code-block:: bash
 

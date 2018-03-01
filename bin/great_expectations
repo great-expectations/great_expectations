@@ -18,7 +18,7 @@ def initialize():
 
 @argh.arg('data_set')
 @argh.arg('expectations_config_file')
-@argh.arg('--output_format', '-o', default="SUMMARY")
+@argh.arg('--result_format', '-o', default="SUMMARY")
 @argh.arg('--catch_exceptions', '-e', default=True)
 @argh.arg('--include_config', '-n', default=None)
 @argh.arg('--only_return_failures', '-f', default=False)
@@ -48,7 +48,7 @@ def validate(data_set, expectations_config_file, **kwargs):
 	df = ge.read_csv(data_set, expectations_config=expectations_config, dataset_class=dataset_class)
 
 	result = df.validate(
-		output_format=kwargs["output_format"],
+		result_format=kwargs["result_format"],
 		catch_exceptions=kwargs["catch_exceptions"],
 		include_config=kwargs["include_config"],
 		only_return_failures=kwargs["only_return_failures"],

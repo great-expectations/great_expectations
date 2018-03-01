@@ -7,7 +7,7 @@
       "raised_exception": false,
       "kwargs": {
         "column": "Name",
-        "output_format": "SUMMARY"
+        "result_format": "SUMMARY"
       }
     },
     {
@@ -17,7 +17,7 @@
       "raised_exception": false,
       "kwargs": {
         "column": "PClass",
-        "output_format": "SUMMARY"
+        "result_format": "SUMMARY"
       }
     },
     {
@@ -27,7 +27,7 @@
       "raised_exception": false,
       "kwargs": {
         "column": "Age",
-        "output_format": "SUMMARY"
+        "result_format": "SUMMARY"
       }
     },
     {
@@ -37,7 +37,7 @@
       "raised_exception": false,
       "kwargs": {
         "column": "Sex",
-        "output_format": "SUMMARY"
+        "result_format": "SUMMARY"
       }
     },
     {
@@ -47,7 +47,7 @@
       "raised_exception": false,
       "kwargs": {
         "column": "Survived",
-        "output_format": "SUMMARY"
+        "result_format": "SUMMARY"
       }
     },
     {
@@ -57,7 +57,7 @@
       "raised_exception": false,
       "kwargs": {
         "column": "SexCode",
-        "output_format": "SUMMARY"
+        "result_format": "SUMMARY"
       }
     },
     {
@@ -68,7 +68,7 @@
       "kwargs": {
         "column": "Age",
         "max_value": 40,
-        "output_format": "SUMMARY",
+        "result_format": "SUMMARY",
         "min_value": 20
       },
       "result_obj": {
@@ -86,7 +86,7 @@
       "kwargs": {
         "column": "Age",
         "max_value": 80,
-        "output_format": "SUMMARY",
+        "result_format": "SUMMARY",
         "min_value": 0
       },
       "result_obj": {
@@ -109,7 +109,7 @@
       "kwargs": {
         "regex": "[A-Z][a-z]+(?: \\([A-Z][a-z]+\\))?, ",
         "column": "Name",
-        "output_format": "SUMMARY",
+        "result_format": "SUMMARY",
         "mostly": 0.95
       },
       "result_obj": {
@@ -157,7 +157,7 @@
           "2nd",
           "3rd"
         ],
-        "output_format": "SUMMARY"
+        "result_format": "SUMMARY"
       },
       "result_obj": {
         "partial_unexpected_index_list": [
