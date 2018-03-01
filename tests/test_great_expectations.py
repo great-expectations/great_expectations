@@ -263,15 +263,17 @@ class TestValidation(unittest.TestCase):
                     "column": "x", 
                     "max_value": 5, 
                     "min_value": 3
-                  }, 
-                  "summary_obj": {
-                    "unexpected_percent": 0.4,
-                    "partial_unexpected_list": [
-                      1, 
-                      2
-                    ], 
-                    "unexpected_percent_nonmissing": 0.4,
-                    "unexpected_count": 2
+                  },
+                  'result_obj': {'element_count': 5,
+                                 'missing_count': 0,
+                                 'missing_percent': 0.0,
+                                 "unexpected_percent": 0.4,
+                                 "partial_unexpected_list": [
+                                      1,
+                                      2
+                                 ],
+                                 "unexpected_percent_nonmissing": 0.4,
+                                 "unexpected_count": 2
                   }
                 }
               ]
