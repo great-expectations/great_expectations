@@ -5,10 +5,11 @@ result_format
 ================================================================================
 
 The `result_format` parameter may be either a string or a dictionary which specifies the fields to return in result_obj.
- - For string usage, see :ref:`result_obj_format`.
- - For dictionary usage, `result_format` which may include the following keys:
-   - :ref:`result_obj_format`: Sets the fields to return in result_obj.
-   - partial_unexpected_count: Sets the number of results to include in partial_unexpected_count, if applicable.
+  - For string usage, see :ref:`result_obj_format`.
+  - For dictionary usage, `result_format` which may include the following keys:
+
+    - :ref:`result_obj_format`: Sets the fields to return in result_obj.
+    - partial_unexpected_count: Sets the number of results to include in partial_unexpected_count, if applicable.
 
 
 .. _result_obj_format:
