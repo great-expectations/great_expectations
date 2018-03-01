@@ -182,22 +182,13 @@ class TestValidation(unittest.TestCase):
         my_df.set_default_expectation_argument("output_format", "COMPLETE")
 
         results = my_df.validate(catch_exceptions=False)
-        # print json.dumps(results, indent=2)
+        #print json.dumps(results, indent=2)
 
         with open('./tests/test_sets/expected_results_20180228.json') as f:
             expected_results = json.load(f)
-            # print json.dumps(expected_results, indent=2)
+            #print json.dumps(expected_results, indent=2)
 
         self.maxDiff = None
-        #!!! This needs to be converted to unicode, I think
-
-        # print json.dumps(results, indent=2)
-        # print '-'*80
-        # print json.dumps(expected_results, indent=2)
-        # self.assertEqual(
-        #     json.loads(json.dumps(results)),
-        #     json.loads(json.dumps(expected_results))
-        # )
         assertDeepAlmostEqual(self,
                               results,
                               expected_results
@@ -211,11 +202,21 @@ class TestValidation(unittest.TestCase):
 
 
         validation_results = my_df.validate(only_return_failures=True)
-        # print json.dumps(validation_results, indent=2)
+        #print json.dumps(validation_results)
         assertDeepAlmostEqual(
             self,
             validation_results,
-            {"results": [{"exception_traceback": None, "expectation_type": "expect_column_values_to_be_in_set", "success": False, "unexpected_list": ["*"], "raised_exception": False, "kwargs": {"column": "PClass", "output_format": "COMPLETE", "values_set": ["1st", "2nd", "3rd"]}, "unexpected_index_list": [456]}]}
+            {"results": [
+                {"exception_traceback": None, "expectation_type": "expect_column_values_to_be_in_set", "success": False,
+                 "raised_exception": False,
+                 "kwargs": {"column": "PClass", "values_set": ["1st", "2nd", "3rd"], "output_format": "COMPLETE"},
+                 "result_obj": {"partial_unexpected_index_list": [456], "unexpected_count": 1, "unexpected_list": ["*"],
+                                "unexpected_percent": 0.0007616146230007616, "element_count": 1313,
+                                "missing_percent": 0.0, "partial_unexpected_counts": [{"count": 1, "value": "*"}],
+                                "partial_unexpected_list": ["*"],
+                                "unexpected_percent_nonmissing": 0.0007616146230007616, "missing_count": 0,
+                                "unexpected_index_list": [456]}}]}
+
         )
 
     def test_top_level_validate(self):
