@@ -369,7 +369,7 @@ class TestDataset(unittest.TestCase):
                 boolean_mapped_success_values, success_count,
                 unexpected_list, unexpected_index_list
             ),
-            True
+            {'success': True}
         )
 
         self.assertEqual(
@@ -383,11 +383,39 @@ class TestDataset(unittest.TestCase):
             ),
             {
                 'success': True,
-                'summary_obj': {
-                    'unexpected_percent': 0.0,
+                'result_obj': {
+                    'element_count': 20,
+                    'missing_count': 5,
+                    'missing_percent': 0.25,
                     'partial_unexpected_list': [],
+                    'unexpected_count': 0,
+                    'unexpected_percent': 0.0,
+                    'unexpected_percent_nonmissing': 0.0
+                }
+            }
+        )
+
+        self.assertEqual(
+            df._format_column_map_output(
+                "SUMMARY",
+                success,
+                element_count,
+                nonnull_values, nonnull_count,
+                boolean_mapped_success_values, success_count,
+                unexpected_list, unexpected_index_list
+            ),
+            {
+                'success': True,
+                'result_obj': {
+                    'element_count': 20,
+                    'missing_count': 5,
+                    'missing_percent': 0.25,
+                    'partial_unexpected_list': [],
+                    'unexpected_count': 0,
+                    'unexpected_percent': 0.0,
                     'unexpected_percent_nonmissing': 0.0,
-                    'unexpected_count': 0
+                    'partial_unexpected_index_list': [],
+                    'partial_unexpected_counts': []
                 }
             }
         )
@@ -403,33 +431,20 @@ class TestDataset(unittest.TestCase):
             ),
             {
                 'success': True,
-                'unexpected_list': [],
-                'unexpected_index_list': [],
-            }
-        )
-
-        self.assertEqual(
-            df._format_column_map_output(
-                "SUMMARY",
-                success,
-                element_count,
-                nonnull_values, nonnull_count,
-                boolean_mapped_success_values, success_count,
-                unexpected_list, unexpected_index_list
-            ),
-            {
-                'success': True,
-                'summary_obj': {
-                    'element_count': 20,
-                    'unexpected_count': 0,
-                    'unexpected_percent': 0.0,
-                    'unexpected_percent_nonmissing': 0.0,
-                    'missing_count': 5,
-                    'missing_percent': 0.25,
-                    'partial_unexpected_counts': [],
-                    'partial_unexpected_index_list': [],
-                    'partial_unexpected_list': []
-                }
+                'result_obj':
+                    {
+                        'element_count': 20,
+                        'missing_count': 5,
+                        'missing_percent': 0.25,
+                        'partial_unexpected_list': [],
+                        'unexpected_count': 0,
+                        'unexpected_percent': 0.0,
+                        'unexpected_percent_nonmissing': 0.0,
+                        'partial_unexpected_index_list': [],
+                        'partial_unexpected_counts': [],
+                        'unexpected_list': [],
+                        'unexpected_index_list': []
+                    }
             }
         )
 
@@ -453,7 +468,7 @@ class TestDataset(unittest.TestCase):
                 boolean_mapped_success_values, success_count,
                 unexpected_list, unexpected_index_list
             ),
-            True
+            {'success': True}
         )
 
         self.assertEqual(
@@ -467,11 +482,39 @@ class TestDataset(unittest.TestCase):
             ),
             {
                 'success': True,
-                'summary_obj': {
-                    'unexpected_percent': 0.0,
+                'result_obj': {
+                    'element_count': 20,
+                    'missing_count': 20,
+                    'missing_percent': 1,
                     'partial_unexpected_list': [],
+                    'unexpected_count': 0,
+                    'unexpected_percent': 0.0,
+                    'unexpected_percent_nonmissing': None
+                }
+            }
+        )
+
+        self.assertEqual(
+            df._format_column_map_output(
+                "SUMMARY",
+                success,
+                element_count,
+                nonnull_values, nonnull_count,
+                boolean_mapped_success_values, success_count,
+                unexpected_list, unexpected_index_list
+            ),
+            {
+                'success': True,
+                'result_obj': {
+                    'element_count': 20,
+                    'missing_count': 20,
+                    'missing_percent': 1,
+                    'partial_unexpected_list': [],
+                    'unexpected_count': 0,
+                    'unexpected_percent': 0.0,
                     'unexpected_percent_nonmissing': None,
-                    'unexpected_count': 0
+                    'partial_unexpected_index_list': [],
+                    'partial_unexpected_counts': []
                 }
             }
         )
@@ -487,32 +530,18 @@ class TestDataset(unittest.TestCase):
             ),
             {
                 'success': True,
-                'unexpected_list': [],
-                'unexpected_index_list': [],
-            }
-        )
-
-        self.assertEqual(
-            df._format_column_map_output(
-                "SUMMARY",
-                success,
-                element_count,
-                nonnull_values, nonnull_count,
-                boolean_mapped_success_values, success_count,
-                unexpected_list, unexpected_index_list
-            ),
-            {
-                'success': True,
-                'summary_obj': {
+                'result_obj': {
                     'element_count': 20,
+                    'missing_count': 20,
+                    'missing_percent': 1,
+                    'partial_unexpected_list': [],
                     'unexpected_count': 0,
                     'unexpected_percent': 0.0,
                     'unexpected_percent_nonmissing': None,
-                    'missing_count': 20,
-                    'missing_percent': 1.0,
-                    'partial_unexpected_counts': [],
                     'partial_unexpected_index_list': [],
-                    'partial_unexpected_list': []
+                    'partial_unexpected_counts': [],
+                    'unexpected_list': [],
+                    'unexpected_index_list': []
                 }
             }
         )
@@ -537,7 +566,7 @@ class TestDataset(unittest.TestCase):
                 boolean_mapped_success_values, success_count,
                 unexpected_list, unexpected_index_list
             ),
-            False
+            {'success': False}
         )
 
         self.assertEqual(
@@ -551,11 +580,39 @@ class TestDataset(unittest.TestCase):
             ),
             {
                 'success': False,
-                'summary_obj': {
-                    'unexpected_percent': None,
+                'result_obj': {
+                    'element_count': 0,
+                    'missing_count': 0,
+                    'missing_percent': None,
                     'partial_unexpected_list': [],
+                    'unexpected_count': 0,
+                    'unexpected_percent': None,
+                    'unexpected_percent_nonmissing': None
+                }
+            }
+        )
+
+        self.assertEqual(
+            df._format_column_map_output(
+                "SUMMARY",
+                success,
+                element_count,
+                nonnull_values, nonnull_count,
+                boolean_mapped_success_values, success_count,
+                unexpected_list, unexpected_index_list
+            ),
+            {
+                'success': False,
+                'result_obj': {
+                    'element_count': 0,
+                    'missing_count': 0,
+                    'missing_percent': None,
+                    'partial_unexpected_list': [],
+                    'unexpected_count': 0,
+                    'unexpected_percent': None,
                     'unexpected_percent_nonmissing': None,
-                    'unexpected_count': 0
+                    'partial_unexpected_counts': [],
+                    'partial_unexpected_index_list': []
                 }
             }
         )
@@ -571,32 +628,18 @@ class TestDataset(unittest.TestCase):
             ),
             {
                 'success': False,
-                'unexpected_list': [],
-                'unexpected_index_list': [],
-            }
-        )
-
-        self.assertEqual(
-            df._format_column_map_output(
-                "SUMMARY",
-                success,
-                element_count,
-                nonnull_values, nonnull_count,
-                boolean_mapped_success_values, success_count,
-                unexpected_list, unexpected_index_list
-            ),
-            {
-                'success': False,
-                'summary_obj': {
+                'result_obj': {
                     'element_count': 0,
+                    'missing_count': 0,
+                    'missing_percent': None,
+                    'partial_unexpected_list': [],
                     'unexpected_count': 0,
                     'unexpected_percent': None,
                     'unexpected_percent_nonmissing': None,
-                    'missing_count': 0,
-                    'missing_percent': None,
                     'partial_unexpected_counts': [],
                     'partial_unexpected_index_list': [],
-                    'partial_unexpected_list': []
+                    'unexpected_list': [],
+                    'unexpected_index_list': []
                 }
             }
         )
