@@ -792,7 +792,9 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
                 ((min_value is None) or (min_value <= proportion_unique)) and
                 ((max_value is None) or (proportion_unique <= max_value))
             ),
-            "observed_value": proportion_unique
+            "result_obj": {
+                "observed_value": proportion_unique
+            }
         }
 
     @DocInherit
