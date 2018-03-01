@@ -1382,28 +1382,46 @@ class TestPandasDataset(unittest.TestCase):
 
         self.assertEqual(
             df.expect_column_mean_to_be_between('x',4,6),
-            {'success':True, 'true_value':5}
+            {'success':True, 'result_obj': {'observed_value': 5, 'element_count': 5,
+                'missing_count': 0,
+                'missing_percent': 0.0}}
         )
 
-        self.assertEqual(
-            df.expect_column_values_to_be_between('y',1,6),
-            {'success':False, 'unexpected_list':[8,10], 'unexpected_index_list':[3,4]}
-        )
+        out = df.expect_column_values_to_be_between('y',1,6)
+        t = {'out': {'success':False, 'unexpected_list':[8,10], 'unexpected_index_list': [3,4]}}
+        if 'out' in t:
+            self.assertEqual(t['out']['success'], out['success'])
+            if 'unexpected_index_list' in t['out']:
+                self.assertEqual(t['out']['unexpected_index_list'], out['result_obj']['unexpected_index_list'])
+            if 'unexpected_list' in t['out']:
+                self.assertEqual(t['out']['unexpected_list'], out['result_obj']['unexpected_list'])
 
-        self.assertEqual(
-            df.expect_column_values_to_be_between('y',1,6,mostly=.5),
-            {'success':True, 'unexpected_list':[8,10], 'unexpected_index_list':[3,4]}
-        )
+        out = df.expect_column_values_to_be_between('y',1,6,mostly=.5)
+        t = {'out': {'success':True, 'unexpected_list':[8,10], 'unexpected_index_list':[3,4]}}
+        if 'out' in t:
+            self.assertEqual(t['out']['success'], out['success'])
+            if 'unexpected_index_list' in t['out']:
+                self.assertEqual(t['out']['unexpected_index_list'], out['result_obj']['unexpected_index_list'])
+            if 'unexpected_list' in t['out']:
+                self.assertEqual(t['out']['unexpected_list'], out['result_obj']['unexpected_list'])
 
-        self.assertEqual(
-            df.expect_column_values_to_be_in_set('z',['a','b','c']),
-            {'success':False, 'unexpected_list':['abc'], 'unexpected_index_list':[4]}
-        )
+        out = df.expect_column_values_to_be_in_set('z',['a','b','c'])
+        t = {'out': {'success':False, 'unexpected_list':['abc'], 'unexpected_index_list':[4]}}
+        if 'out' in t:
+            self.assertEqual(t['out']['success'], out['success'])
+            if 'unexpected_index_list' in t['out']:
+                self.assertEqual(t['out']['unexpected_index_list'], out['result_obj']['unexpected_index_list'])
+            if 'unexpected_list' in t['out']:
+                self.assertEqual(t['out']['unexpected_list'], out['result_obj']['unexpected_list'])
 
-        self.assertEqual(
-            df.expect_column_values_to_be_in_set('z',['a','b','c'],mostly=.5),
-            {'success':True, 'unexpected_list':['abc'], 'unexpected_index_list':[4]}
-        )
+        out = df.expect_column_values_to_be_in_set('z',['a','b','c'],mostly=.5)
+        t = {'out': {'success':True, 'unexpected_list':['abc'], 'unexpected_index_list':[4]}}
+        if 'out' in t:
+            self.assertEqual(t['out']['success'], out['success'])
+            if 'unexpected_index_list' in t['out']:
+                self.assertEqual(t['out']['unexpected_index_list'], out['result_obj']['unexpected_index_list'])
+            if 'unexpected_list' in t['out']:
+                self.assertEqual(t['out']['unexpected_list'], out['result_obj']['unexpected_list'])
 
     def test_output_format_argument_in_decorators(self):
         df = ge.dataset.PandasDataSet({
