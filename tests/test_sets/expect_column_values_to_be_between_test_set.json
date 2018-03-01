@@ -73,7 +73,7 @@
       }
     },
     {
-      "out": true,
+      "out": {"success": true},
       "in": {
         "column": "x",
         "max_value": 10,
@@ -82,7 +82,7 @@
       }
     },
     {
-      "out": true,
+      "out": {"success": true},
       "in": {
         "column": "x",
         "max_value": 20,
@@ -91,7 +91,7 @@
       }
     },
     {
-      "out": false,
+      "out": {"success": false},
       "in": {
         "column": "x",
         "max_value": 9,
@@ -100,7 +100,7 @@
       }
     },
     {
-      "out": false,
+      "out": {"success": false},
       "in": {
         "column": "x",
         "max_value": 10,
