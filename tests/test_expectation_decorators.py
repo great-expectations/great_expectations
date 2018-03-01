@@ -1,19 +1,9 @@
-# import json
-# import hashlib
-# import datetime
-# import numpy as np
-# import random
-# import os
-# import inspect
+from __future__ import division
 
-# from nose.tools import *
 import sys
 import unittest
-import great_expectations as ge
-#reload(ge)
-# from great_expectations.dataset import PandasDataSet
-PandasDataSet = ge.dataset.PandasDataSet
-MetaPandasDataSet = ge.dataset.MetaPandasDataSet
+from great_expectations.dataset import PandasDataSet, MetaPandasDataSet
+
 
 # from ge.decorators import expectation, column_map_expectation, column_aggregate_expectation
 
@@ -34,87 +24,125 @@ class TestExpectationDecorators(unittest.TestCase):
             def expectation_that_crashes_on_sixes(self, column):
                 return column.map(lambda x: (x-6)/0 != "duck")
 
-
         df = CustomPandasDataSet({
             'all_odd' : [1,3,5,5,5,7,9,9,9,11],
             'mostly_odd' : [1,3,5,7,9,2,4,1,3,5],
             'all_even' : [2,4,4,6,6,6,8,8,8,8],
             'odd_missing' : [1,3,5,None,None,None,None,1,3,None],
             'mixed_missing' : [1,3,5,None,None,2,4,1,3,None],
-            'all_missing' : [None,None,None,None,None,None,None,None,None,None,],
+            'all_missing' : [None,None,None,None,None,None,None,None,None,None]
         })
         df.set_default_expectation_argument("output_format", "COMPLETE")
 
         self.assertEqual(
             df.expect_column_values_to_be_odd("all_odd"),
-            {
-                'unexpected_list': [],
-                'unexpected_index_list': [],
-                'success': True
-            }
+            {'result_obj': {'element_count': 10,
+                            'missing_count': 0,
+                            'missing_percent': 0.0,
+                            'partial_unexpected_counts': [],
+                            'partial_unexpected_index_list': [],
+                            'partial_unexpected_list': [],
+                            'unexpected_count': 0,
+                            'unexpected_index_list': [],
+                            'unexpected_list': [],
+                            'unexpected_percent': 0.0,
+                            'unexpected_percent_nonmissing': 0.0},
+             'success': True}
         )
 
         self.assertEqual(
             df.expect_column_values_to_be_odd("all_missing"),
-            {
-                'unexpected_list': [],
-                'unexpected_index_list': [],
-                'success': True
-            }
+            {'result_obj': {'element_count': 10,
+                            'missing_count': 10,
+                            'missing_percent': 1,
+                            'partial_unexpected_counts': [],
+                            'partial_unexpected_index_list': [],
+                            'partial_unexpected_list': [],
+                            'unexpected_count': 0,
+                            'unexpected_index_list': [],
+                            'unexpected_list': [],
+                            'unexpected_percent': 0.0,
+                            'unexpected_percent_nonmissing': None},
+             'success': True}
         )
 
         self.assertEqual(
             df.expect_column_values_to_be_odd("odd_missing"),
-            {
-                'unexpected_list': [],
-                'unexpected_index_list': [],
-                'success': True
-            }
+            {'result_obj': {'element_count': 10,
+                            'missing_count': 5,
+                            'missing_percent': 0.5,
+                            'partial_unexpected_counts': [],
+                            'partial_unexpected_index_list': [],
+                            'partial_unexpected_list': [],
+                            'unexpected_count': 0,
+                            'unexpected_index_list': [],
+                            'unexpected_list': [],
+                            'unexpected_percent': 0.0,
+                            'unexpected_percent_nonmissing': 0.0},
+             'success': True}
         )
 
         self.assertEqual(
             df.expect_column_values_to_be_odd("mixed_missing"),
-            {
-                'unexpected_list': [2,4],
-                'unexpected_index_list': [5,6],
-                'success': False
-            }
+            {'result_obj': {'element_count': 10,
+                            'missing_count': 3,
+                            'missing_percent': 0.3,
+                            'partial_unexpected_counts': [{'value': 2., 'count': 1}, {'value': 4., 'count': 1}],
+                            'partial_unexpected_index_list': [5, 6],
+                            'partial_unexpected_list': [2., 4.],
+                            'unexpected_count': 2,
+                            'unexpected_index_list': [5, 6],
+                            'unexpected_list': [2., 4.],
+                            'unexpected_percent': 0.2,
+                            'unexpected_percent_nonmissing': 2/7},
+             'success': False}
         )
 
         self.assertEqual(
             df.expect_column_values_to_be_odd("mostly_odd"),
-            {
-                'unexpected_list': [2, 4],
-                'unexpected_index_list': [5, 6],
-                'success': False
-            }
+            {'result_obj': {'element_count': 10,
+                            'missing_count': 0,
+                            'missing_percent': 0,
+                            'partial_unexpected_counts': [{'value': 2., 'count': 1}, {'value': 4., 'count': 1}],
+                            'partial_unexpected_index_list': [5, 6],
+                            'partial_unexpected_list': [2., 4.],
+                            'unexpected_count': 2,
+                            'unexpected_index_list': [5, 6],
+                            'unexpected_list': [2., 4.],
+                            'unexpected_percent': 0.2,
+                            'unexpected_percent_nonmissing': 0.2},
+             'success': False}
         )
 
         self.assertEqual(
             df.expect_column_values_to_be_odd("mostly_odd", mostly=.6),
-            {
-                'unexpected_list': [2, 4],
-                'unexpected_index_list': [5, 6],
-                'success': True
-            }
+            {'result_obj': {'element_count': 10,
+                            'missing_count': 0,
+                            'missing_percent': 0,
+                            'partial_unexpected_counts': [{'value': 2., 'count': 1}, {'value': 4., 'count': 1}],
+                            'partial_unexpected_index_list': [5, 6],
+                            'partial_unexpected_list': [2., 4.],
+                            'unexpected_count': 2,
+                            'unexpected_index_list': [5, 6],
+                            'unexpected_list': [2., 4.],
+                            'unexpected_percent': 0.2,
+                            'unexpected_percent_nonmissing': 0.2},
+             'success': True}
         )
 
         self.assertEqual(
             df.expect_column_values_to_be_odd("mostly_odd", output_format="BOOLEAN_ONLY"),
-            False
+            {'success': False}
         )
 
         df.default_expectation_args["output_format"] = "BOOLEAN_ONLY"
 
         self.assertEqual(
             df.expect_column_values_to_be_odd("mostly_odd"),
-            False
+            {'success': False}
         )
 
         df.default_expectation_args["output_format"] = "BASIC"
-
-        # import json
-        # print json.dumps(df.expect_column_values_to_be_odd("mostly_odd", include_config=True), indent=2)
 
         self.assertEqual(
             df.expect_column_values_to_be_odd("mostly_odd", include_config=True),
@@ -122,37 +150,19 @@ class TestExpectationDecorators(unittest.TestCase):
                 "expectation_kwargs": {
                     "column": "mostly_odd", 
                     "output_format": "BASIC"
-                }, 
-                "summary_obj": {
-                    "unexpected_percent": 0.2,
-                    "unexpected_percent_nonmissing": 0.2,
-                    "partial_unexpected_list": [
-                        2, 
-                        4
-                    ], 
-                    "unexpected_count": 2
-                }, 
-                "success": False, 
+                },
+                'result_obj': {'element_count': 10,
+                               'missing_count': 0,
+                               'missing_percent': 0,
+                               'partial_unexpected_list': [2., 4.],
+                               'unexpected_count': 2,
+                               'unexpected_percent': 0.2,
+                               'unexpected_percent_nonmissing': 0.2},
+                'success': False,
                 "expectation_type": "expect_column_values_to_be_odd"
             }
-            # {
-            #     'unexpected_list': [2, 4],
-            #     'unexpected_index_list': [5, 6],
-            #     'success': False,
-            #     'expectation_type' : 'expect_column_values_to_be_odd',
-            #     'expectation_kwargs' : {
-            #         'column' : 'mostly_odd'
-            #     }
-            # }
         )
 
-        # self.assertEqual(
-        #     df.expect_column_value_to_be_odd("all_odd"),
-        #     {
-        #         'unexpected_list': [],
-        #         'success': True
-        #     }
-        # )
 
 
     def test_column_aggregate_expectation_decorator(self):
