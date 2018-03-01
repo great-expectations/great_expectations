@@ -1001,25 +1001,26 @@ class TestDataset(unittest.TestCase):
         def expect_second_value_to_be(self, column, value, output_format=None, include_config=False, catch_exceptions=None, meta=None):
             return {
                 "success": column.ix[1] == value,
-                "true_value": column.ix[1],
-                "summary_obj": {}
+                "result_obj": {
+                    "observed_value": column.ix[1],
+                }
             }
 
         self.assertEqual(
             D.test_column_aggregate_expectation_function(expect_second_value_to_be, 'x', 2),
-            {'true_value': 3.0, 'success': False}
+            {'result_obj': {'observed_value': 3.0, 'element_count': 5, 'missing_count': 0, 'missing_percent': 0.0}, 'success': False}
         )
         self.assertEqual(
             D.test_column_aggregate_expectation_function(expect_second_value_to_be, column='x', value=3),
-            {'true_value': 3.0, 'success': True}
+            {'result_obj': {'observed_value': 3.0, 'element_count': 5, 'missing_count': 0, 'missing_percent': 0.0}, 'success': True}
         )
         self.assertEqual(
             D.test_column_aggregate_expectation_function(expect_second_value_to_be, 'y', value=3, output_format="BOOLEAN_ONLY"),
-            False
+            {'success': False}
         )
         self.assertEqual(
             D.test_column_aggregate_expectation_function(expect_second_value_to_be, 'y', 2, output_format="BOOLEAN_ONLY"),
-            True
+            {'success': True}
         )
 
     def test_meta_version_warning(self):
