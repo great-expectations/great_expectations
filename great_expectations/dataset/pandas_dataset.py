@@ -844,7 +844,9 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
         return {
             "success" : success,
-            "observed_value" : col_sum
+            "result_obj": {
+                "observed_value" : col_sum
+            }
         }
 
     @DocInherit
