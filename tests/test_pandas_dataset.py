@@ -1339,7 +1339,7 @@ class TestPandasDataset(unittest.TestCase):
             df.expect_column_values_to_be_between('x', min_value=1, max_value=5, output_format="SUMMARY"),
             {
                 "success" : False,
-                "summary_obj" : {
+                "result_obj" : {
                     "element_count" : 10,
                     "missing_count" : 2,
                     "missing_percent" : .2,
@@ -1362,8 +1362,8 @@ class TestPandasDataset(unittest.TestCase):
             df.expect_column_mean_to_be_between("x", 3, 7, output_format="SUMMARY"),
             {
                 'success': True,
-                'true_value': 4.375,
-                'summary_obj': {
+                'result_obj': {
+                    'observed_value': 4.375,
                     'element_count': 10,
                     'missing_count': 2,
                     'missing_percent': .2
