@@ -978,19 +978,19 @@ class TestDataset(unittest.TestCase):
 
         self.assertEqual(
             D.test_column_map_expectation_function(is_odd, column='x'),
-            {'summary_obj': {'unexpected_percent': 0.0, 'partial_unexpected_list': [], 'unexpected_percent_nonmissing': 0.0, 'unexpected_count': 0}, 'success': True}
+            {'result_obj': {'element_count': 5, 'missing_count': 0, 'missing_percent': 0, 'unexpected_percent': 0.0, 'partial_unexpected_list': [], 'unexpected_percent_nonmissing': 0.0, 'unexpected_count': 0}, 'success': True}
         )
         self.assertEqual(
             D.test_column_map_expectation_function(is_odd, 'x', output_format="BOOLEAN_ONLY"),
-            True
+            {'success': True}
         )
         self.assertEqual(
             D.test_column_map_expectation_function(is_odd, column='y', output_format="BOOLEAN_ONLY"),
-            False
+            {'success': False}
         )
         self.assertEqual(
             D.test_column_map_expectation_function(is_odd, column='y', output_format="BOOLEAN_ONLY", mostly=.7),
-            True
+            {'success': True}
         )        
 
     def test_test_column_aggregate_expectation_function(self):
