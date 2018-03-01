@@ -6,6 +6,7 @@ from sqlalchemy import MetaData
 # import pyspark
 
 from great_expectations.dataset import SqlDataSet
+import great_expectations as ge
 
 class GreatExpectationsConnection(object):
 	
@@ -32,11 +33,12 @@ class SqlConnection(GreatExpectationsConnection):
 	def get_table_list(self):
 		return self.engine.table_names()
 
-	def get_table(self, table_name):
-		table = SqlDataSet(
-			table=self.metadata.tables[table_name]
-		)
-		return self.metadata.tables[table_name]
+	def get_table(self, table_name, expectations_config=None):
+		table = self.metadata.tables[table_name]
+		table.__class__ = SqlDataSet
+		table.initialize_expectations(expectations_config)
+
+		return table
 
 
 class SparkSqlConnection():

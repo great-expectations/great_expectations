@@ -21,6 +21,7 @@ def _convert_to_dataset_class(df, dataset_class, expectations_config=None):
         try:
             df = dataset_class(df)
         except:
+            #FIXME: This error message says the wrong thing. It references read_csv, but we're in a different function.
             raise NotImplementedError("read_csv requires a DataSet class that can be instantiated from a Pandas DataFrame")
 
     return df

@@ -12,6 +12,7 @@ import pandas as pd
 from dateutil.parser import parse
 from scipy import stats
 from six import string_types
+from sqlalchemy.sql.schema import Table
 
 from .base import DataSet
 from .util import DocInherit, recursively_convert_to_json_serializable, \
@@ -29,7 +30,7 @@ class MetaSqlDataSet(DataSet):
     """
 
     def __init__(self, *args, **kwargs):
-        super(SqlDataSet, self).__init__(*args, **kwargs)
+        super(MetaSqlDataSet, self).__init__(*args, **kwargs)
 
 
     @classmethod
@@ -158,15 +159,17 @@ class MetaSqlDataSet(DataSet):
 
 
 #FIXME: Maybe needs another parent class...?
-class SqlDataSet(MetaSqlDataSet):
+class SqlDataSet(MetaSqlDataSet, Table):
     """
     PandasDataset instantiates the great_expectations Expectations API as a subclass of a pandas.DataFrame.
 
     For the full API reference, please see :func:`DataSet <great_expectations.dataset.base.DataSet>`
     """
 
-    def __init__(self, *args, **kwargs):
-        super(PandasDataSet, self).__init__(*args, **kwargs)
+    def __init__(self, table, *args, **kwargs):
+        #FIXME: Doesn't `super` work differently in py3?
+        super(SqlDataSet, self).__init__(*args, **kwargs)
+        self.table = table
         self.add_default_expectations()
 
     def add_default_expectations(self):
