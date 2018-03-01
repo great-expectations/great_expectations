@@ -727,13 +727,17 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         if output_format['result_obj_format'] == 'BASIC':
             return return_obj
 
-        partial_unexpected_counts = [
-            {'value': key, 'count': value}
-            for key, value
-            in sorted(
-                Counter(unexpected_list).most_common(count),
-                key=lambda x: (-x[1], x[0]))
-        ]
+        # Try to return the most common values, if possible.
+        try:
+            partial_unexpected_counts = [
+                {'value': key, 'count': value}
+                for key, value
+                in sorted(
+                    Counter(unexpected_list).most_common(count),
+                    key=lambda x: (-x[1], x[0]))
+            ]
+        except TypeError:
+            partial_unexpected_counts = ['partial_exception_counts requires a hashable type']
 
         return_obj['result_obj'].update(
             {
