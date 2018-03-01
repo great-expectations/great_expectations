@@ -1042,7 +1042,26 @@ class TestPandasDataset(unittest.TestCase):
         with self.assertRaises(ValueError):
             typedf.expect_column_mean_to_be_between("s")
 
+    def test_expect_column_median_to_be_between(self):
+        ds = ge.dataset.PandasDataSet({
+            'a': [0,1,2,3],
+            'b': [0,1,1,2]
+        })
 
+        self.assertEqual(
+            True,
+            ds.expect_column_median_to_be_between('a', 1, 2)['success']
+        )
+
+        self.assertEqual(
+            1.5,
+            ds.expect_column_median_to_be_between('a', 1, 2)['result_obj']['observed_value']
+        )
+
+        self.assertEqual(
+            1,
+            ds.expect_column_median_to_be_between('b', 1, 1)['result_obj']['observed_value']
+        )
 
     def test_expect_column_stdev_to_be_between(self):
 
