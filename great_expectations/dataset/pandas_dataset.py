@@ -981,15 +981,17 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
         result_obj = {
                 "success": test_result > p,
-                "observed_value": test_result,
-                "details": {
-                    "observed_partition": {
-                        "values": test_df.index.tolist(),
-                        "weights": test_df[column.name].tolist()
-                    },
-                    "expected_partition": {
-                        "values": test_df.index.tolist(),
-                        "weights": test_df['expected'].tolist()
+                "result_obj": {
+                    "observed_value": test_result,
+                    "details": {
+                        "observed_partition": {
+                            "values": test_df.index.tolist(),
+                            "weights": test_df[column.name].tolist()
+                        },
+                        "expected_partition": {
+                            "values": test_df.index.tolist(),
+                            "weights": test_df['expected'].tolist()
+                        }
                     }
                 }
             }
@@ -1051,25 +1053,27 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
         result_obj = {
                 "success" : test_result > p,
-                "observed_value": test_result,
-                "details": {
-                    "bootstrap_samples": bootstrap_samples,
-                    "bootstrap_sample_size": bootstrap_sample_size,
-                    "observed_partition": {
-                        "bins": observed_bins,
-                        "weights": observed_weights.tolist()
-                    },
-                    "expected_partition": {
-                        "bins": partition_object['bins'],
-                        "weights": partition_object['weights']
-                    },
-                    "observed_cdf": {
-                        "x": observed_bins,
-                        "cdf_values": [0] + observed_cdf_values.tolist()
-                    },
-                    "expected_cdf": {
-                        "x": partition_object['bins'],
-                        "cdf_values": test_cdf.tolist()
+                "result_obj": {
+                    "observed_value": test_result,
+                    "details": {
+                        "bootstrap_samples": bootstrap_samples,
+                        "bootstrap_sample_size": bootstrap_sample_size,
+                        "observed_partition": {
+                            "bins": observed_bins,
+                            "weights": observed_weights.tolist()
+                        },
+                        "expected_partition": {
+                            "bins": partition_object['bins'],
+                            "weights": partition_object['weights']
+                        },
+                        "observed_cdf": {
+                            "x": observed_bins,
+                            "cdf_values": [0] + observed_cdf_values.tolist()
+                        },
+                        "expected_cdf": {
+                            "x": partition_object['bins'],
+                            "cdf_values": test_cdf.tolist()
+                        }
                     }
                 }
             }
@@ -1119,15 +1123,17 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
             result_obj = {
                 "success": kl_divergence <= threshold,
-                "observed_value": kl_divergence,
-                "details": {
-                    "observed_partition": {
-                        "values": test_df.index.tolist(),
-                        "weights": pk.tolist()
-                    },
-                    "expected_partition": {
-                        "values": test_df.index.tolist(),
-                        "weights": qk.tolist()
+                "result_obj": {
+                    "observed_value": kl_divergence,
+                    "details": {
+                        "observed_partition": {
+                            "values": test_df.index.tolist(),
+                            "weights": pk.tolist()
+                        },
+                        "expected_partition": {
+                            "values": test_df.index.tolist(),
+                            "weights": qk.tolist()
+                        }
                     }
                 }
             }
@@ -1179,21 +1185,23 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
                 expected_weights = np.concatenate(([tail_weight_holdout / 2], expected_weights, [tail_weight_holdout / 2]))
 
             kl_divergence = stats.entropy(observed_weights, expected_weights)
-
             result_obj = {
                     "success": kl_divergence <= threshold,
-                    "observed_value": kl_divergence,
-                    "details": {
-                        "observed_partition": {
-                            # return expected_bins, since we used those bins to compute the observed_weights
-                            "bins": expected_bins,
-                            "weights": observed_weights.tolist()
-                        },
-                        "expected_partition": {
-                            "bins": expected_bins,
-                            "weights": expected_weights.tolist()
+                    "result_obj": {
+                        "observed_value": kl_divergence,
+                        "details": {
+                            "observed_partition": {
+                                # return expected_bins, since we used those bins to compute the observed_weights
+                                "bins": expected_bins,
+                                "weights": observed_weights.tolist()
+                            },
+                            "expected_partition": {
+                                "bins": expected_bins,
+                                "weights": expected_weights.tolist()
+                            }
                         }
                     }
                 }
+
 
         return result_obj
