@@ -853,7 +853,11 @@ class TestPandasDataset(unittest.TestCase):
         for t in T:
             out = D.expect_column_values_to_match_strftime_format(**t['in'])
             if 'out' in t:
-                self.assertEqual(out, t['out'])
+                self.assertEqual(t['out']['success'], out['success'])
+                if 'unexpected_index_list' in t['out']:
+                    self.assertEqual(t['out']['unexpected_index_list'], out['result_obj']['unexpected_index_list'])
+                if 'unexpected_list' in t['out']:
+                    self.assertEqual(t['out']['unexpected_list'], out['result_obj']['unexpected_list'])
             elif 'error' in t:
                 self.assertEqual(out['raised_exception'], True)
                 self.assertIn(t['error']['traceback_substring'], out['exception_traceback'])
