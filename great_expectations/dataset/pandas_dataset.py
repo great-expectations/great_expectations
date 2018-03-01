@@ -884,11 +884,13 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
                 col_min = datetime.strftime(col_min, output_strftime_format)
             else:
                 col_min = str(col_min)
-
         return {
-            "success" : success,
-            "observed_value" : col_min
+            'success' : success,
+            'result_obj': {
+                'observed_value' : col_min
+            }
         }
+
 
     @DocInherit
     @MetaPandasDataSet.column_aggregate_expectation
