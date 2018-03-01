@@ -248,34 +248,40 @@ class TestExpectationDecorators(unittest.TestCase):
             'all_even' : [2,4,4,6,6,6,8,8,8,8],
             'odd_missing' : [1,3,5,None,None,None,None,1,3,None],
             'mixed_missing' : [1,3,5,None,None,2,4,1,3,None],
-            'all_missing' : [None,None,None,None,None,None,None,None,None,None,],
+            'all_missing' : [None,None,None,None,None,None,None,None,None,None]
         })
         df.set_default_expectation_argument("output_format", "COMPLETE")
 
         self.assertEqual(
-            df.expectation_that_crashes_on_sixes("all_odd"),
-            {
-                'unexpected_list': [],
-                'unexpected_index_list': [],
-                'success': True
-            }
-        )
-
-        self.assertEqual(
             df.expectation_that_crashes_on_sixes("all_odd", catch_exceptions=False),
-            {
-                'success': True,
-                'unexpected_list': [],
-                'unexpected_index_list': [],
-            }
+            {'result_obj': {'element_count': 10,
+                            'missing_count': 0,
+                            'missing_percent': 0.0,
+                            'partial_unexpected_counts': [],
+                            'partial_unexpected_index_list': [],
+                            'partial_unexpected_list': [],
+                            'unexpected_count': 0,
+                            'unexpected_index_list': [],
+                            'unexpected_list': [],
+                            'unexpected_percent': 0.0,
+                            'unexpected_percent_nonmissing': 0.0},
+             'success': True}
         )
 
         self.assertEqual(
             df.expectation_that_crashes_on_sixes("all_odd", catch_exceptions=True),
-            {
+            {'result_obj': {'element_count': 10,
+                            'missing_count': 0,
+                            'missing_percent': 0.0,
+                            'partial_unexpected_counts': [],
+                            'partial_unexpected_index_list': [],
+                            'partial_unexpected_list': [],
+                            'unexpected_count': 0,
+                            'unexpected_index_list': [],
+                            'unexpected_list': [],
+                            'unexpected_percent': 0.0,
+                            'unexpected_percent_nonmissing': 0.0},
                 'success': True,
-                'unexpected_list': [],
-                'unexpected_index_list': [],
                 'raised_exception': False,
                 'exception_traceback': None,
             }
@@ -310,11 +316,6 @@ class TestExpectationDecorators(unittest.TestCase):
             )
 
         else:
-            ## This can fail depending on the architecture, because the error may also be "long division or modulo by zero"
-            #self.assertEqual(
-            #    result_obj["exception_traceback"].split('\n')[-2],
-            #    "ZeroDivisionError: integer division or modulo by zero"
-            #)
             self.assertEqual(
                 result_obj["exception_traceback"].split('\n')[-2].split(':')[0],
                 "ZeroDivisionError"
@@ -328,12 +329,12 @@ class TestExpectationDecorators(unittest.TestCase):
 
         self.assertEqual(
             df.expectation_that_crashes_on_sixes("all_odd", output_format="BOOLEAN_ONLY", catch_exceptions=True),
-            True
+            {'success': True}
         )
 
         self.assertEqual(
             df.expectation_that_crashes_on_sixes("all_even", output_format="BOOLEAN_ONLY", catch_exceptions=True),
-            False
+            {'success': False}
         )
 
         # with self.assertRaises(ZeroDivisionError):
