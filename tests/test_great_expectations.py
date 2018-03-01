@@ -56,21 +56,27 @@ class CustomPandasDataSet(PandasDataSet):
             if len(not_null) == 0:
                 return {
                     'success':True,
-                    'unexpected_list':unexpected_values,
-                    'unexpected_index_list':self.index[result],
+                    'result_obj': {
+                        'unexpected_list':unexpected_values,
+                        'unexpected_index_list':self.index[result],
+                    }
                 }
 
             percent_equaling_1 = float(sum(result))/len(not_null)
             return {
                 "success" : percent_equaling_1 >= mostly,
-                "unexpected_list" : unexpected_values[:20],
-                "unexpected_index_list" : list(self.index[result==False])[:20],
+                'result_obj': {
+                    "unexpected_list" : unexpected_values[:20],
+                    "unexpected_index_list" : list(self.index[result==False])[:20],
+                }
             }
         else:
             return {
                 "success" : len(unexpected_values) == 0,
-                "unexpected_list" : unexpected_values[:20],
-                "unexpected_index_list" : list(self.index[result==False])[:20],
+                'result_obj': {
+                    "unexpected_list" : unexpected_values[:20],
+                    "unexpected_index_list" : list(self.index[result==False])[:20],
+                }
             }
 
 class TestCustomClass(unittest.TestCase):
@@ -132,16 +138,22 @@ class TestCustomClass(unittest.TestCase):
         df = CustomPandasDataSet({'x': [1,1,1,1,2]})
         df.set_default_expectation_argument("output_format", "COMPLETE")
 
-        self.assertEqual(
-            df.expect_column_values_to_be_prime('x'),
-            {'unexpected_list':[1,1,1,1],'unexpected_index_list':[0,1,2,3], 'success':False}
-        )
+        out = df.expect_column_values_to_be_prime('x')
+        t = {'out': {'unexpected_list':[1,1,1,1],'unexpected_index_list':[0,1,2,3], 'success':False}}
+        self.assertEqual(t['out']['success'], out['success'])
+        if 'unexpected_index_list' in t['out']:
+            self.assertEqual(t['out']['unexpected_index_list'], out['result_obj']['unexpected_index_list'])
+        if 'unexpected_list' in t['out']:
+            self.assertEqual(t['out']['unexpected_list'], out['result_obj']['unexpected_list'])
 
-        self.assertEqual(
-            df.expect_column_values_to_equal_1('x', mostly=.8),
-            {'unexpected_list':[2],'unexpected_index_list':[4],'success':True}
-        )
-
+        out = df.expect_column_values_to_equal_1('x', mostly=.8)
+        print(out)
+        t = {'out': {'unexpected_list':[2],'unexpected_index_list':[4],'success':True}}
+        self.assertEqual(t['out']['success'], out['success'])
+        if 'unexpected_index_list' in t['out']:
+            self.assertEqual(t['out']['unexpected_index_list'], out['result_obj']['unexpected_index_list'])
+        if 'unexpected_list' in t['out']:
+            self.assertEqual(t['out']['unexpected_list'], out['result_obj']['unexpected_list'])
 
    # Ensure that Custom Data Set classes can properly call non-overridden methods from their parent class
     def test_base_class_expectation(self):
