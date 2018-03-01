@@ -1010,25 +1010,26 @@ class TestPandasDataset(unittest.TestCase):
         T = [
                 {
                     'in':{'column':'x', 'min_value':2, 'max_value':5},
-                    'out':{'success':True, 'true_value':3.5}},
+                    'out':{'success':True, 'result_obj': {'observed_value': 3.5, 'element_count': 2, 'missing_count': 0, 'missing_percent': 0}}},
                 {
                     'in':{'column':'x', 'min_value':1, 'max_value':2},
-                    'out':{'success':False, 'true_value':3.5}},
+                    'out':{'success':False, 'result_obj': {'observed_value': 3.5, 'element_count': 2, 'missing_count': 0, 'missing_percent': 0}}},
                 {
                     'in':{'column':'y', 'min_value':5, 'max_value':5},
-                    'out':{'success':True, 'true_value':5}},
+                    'out':{'success':True, 'result_obj': {'observed_value': 5, 'element_count': 2, 'missing_count': 0, 'missing_percent': 0}}},
                 {
                     'in':{'column':'y', 'min_value':4, 'max_value':4},
-                    'out':{'success':False, 'true_value':5}},
+                    'out':{'success':False, 'result_obj': {'observed_value': 5, 'element_count': 2, 'missing_count': 0, 'missing_percent': 0}}},
                 {
                     'in':{'column':'z', 'min_value':5, 'max_value':5},
-                    'out':{'success':True, 'true_value':5}},
+                    'out':{'success':True, 'result_obj': {'observed_value': 5, 'element_count': 2, 'missing_count': 0, 'missing_percent': 0}}},
                 {
                     'in':{'column':'z', 'min_value':13, 'max_value':14},
-                    'out':{'success':False, 'true_value':5}},
+                    'out':{'success':False, 'result_obj': {'observed_value': 5, 'element_count': 2, 'missing_count': 0, 'missing_percent': 0}}},
                 {
                     'in':{'column':'n', 'min_value':0, 'max_value':0},
-                    'out':{'success':True, 'true_value':0.0}}
+                    'out':{'success':True, 'result_obj': {'observed_value': 0.0, 'element_count': 2, 'missing_count': 1, 'missing_percent': 0.5}}
+                }
         ]
 
         for t in T:
@@ -1046,13 +1047,13 @@ class TestPandasDataset(unittest.TestCase):
         T = [
                 {
                     'in':{'column':'s', 'min_value':0, 'max_value':0},
-                    'out':{'success':False, 'true_value':None}},
+                    'out':{'success':False, 'result_obj': {'observed_value':None, 'element_count': 4, 'missing_count': 3, 'missing_percent': 0.75}}},
                 {
                     'in':{'column':'b', 'min_value':0, 'max_value':1},
-                    'out':{'success':True, 'true_value':0.5}},
+                    'out':{'success':True, 'result_obj': {'observed_value':0.5, 'element_count': 4, 'missing_count': 0, 'missing_percent': 0}}},
                 {
                     'in':{'column':'x', 'min_value':0, 'max_value':1},
-                    'out':{'success':True, 'true_value':0.5}}
+                    'out':{'success':True, 'result_obj': {'observed_value':0.5, 'element_count': 4, 'missing_count': 2, 'missing_percent': 0.5}}}
         ]
 
         for t in T[1:]:
