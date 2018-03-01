@@ -217,7 +217,9 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
         return {
             'success': outcome,
-            'observed_value': row_count
+            'result_obj': {
+                'observed_value': row_count
+            }
         }
 
     @DocInherit
@@ -241,7 +243,9 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
         return {
             'success':outcome,
-            'observed_value':self.shape[0]
+            'result_obj': {
+                'observed_value':self.shape[0]
+            }
         }
 
     @DocInherit
