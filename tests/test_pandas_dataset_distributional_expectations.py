@@ -21,7 +21,7 @@ class TestDistributionalExpectations(unittest.TestCase):
                         'partition_object': self.test_partitions['categorical_fixed'],
                         'p': 0.05
                         },
-                    'out': {'success': True, 'true_value': 1.}
+                    'out': {'success': True, 'observed_value': 1.}
                 },
                 {
                     'args': ['categorical_fixed'],
@@ -29,7 +29,7 @@ class TestDistributionalExpectations(unittest.TestCase):
                         'partition_object': self.test_partitions['categorical_fixed_alternate'],
                         'p': 0.05
                     },
-                    'out': {'success': False, 'true_value': 5.1397782097623862e-53}
+                    'out': {'success': False, 'observed_value': 5.1397782097623862e-53}
                 },
                 {
                     'args': ['categorical_fixed'],
@@ -37,15 +37,12 @@ class TestDistributionalExpectations(unittest.TestCase):
                         'partition_object': self.test_partitions['categorical_fixed_alternate'],
                         'p': 0.05, 'output_format': 'SUMMARY'
                     },
-                    'out': {'success': False, 'true_value': 5.1397782097623862e-53,
-                            'summary_obj': {
+                    'out': {'success': False, 'observed_value': 5.1397782097623862e-53,
+                            'details': {
                                 'observed_partition': {
                                     'values': [u'A', u'B', u'C'],
                                     'weights': [540, 320, 140]
                                 },
-                                'missing_percent': 0.0,
-                                'element_count': 1000,
-                                'missing_count': 0,
                                 'expected_partition': {
                                     'values': [u'A', u'B', u'C'],
                                     'weights': [333.3333333333333, 333.3333333333333, 333.3333333333333]
@@ -56,10 +53,10 @@ class TestDistributionalExpectations(unittest.TestCase):
         ]
         for t in T:
             out = self.D.expect_column_chisquare_test_p_value_to_be_greater_than(*t['args'], **t['kwargs'])
-            self.assertEqual(out['success'],t['out']['success'])
-            self.assertEqual(out['true_value'], t['out']['true_value'])
+            self.assertEqual(t['out']['success'], out['success'])
+            self.assertEqual(t['out']['observed_value'], out['result_obj']['observed_value'])
             if 'output_format' in t['kwargs'] and t['kwargs']['output_format'] == 'SUMMARY':
-                self.assertDictEqual(out['summary_obj'], t['out']['summary_obj'])
+                self.assertDictEqual(t['out']['details'], out['result_obj']['details'])
 
     def test_expect_column_chisquare_test_p_value_to_be_greater_than_new_categorical_val(self):
         # Note: Chisquare test with true zero expected could be treated subtly. Here, we tolerate a warning from stats.
@@ -86,7 +83,7 @@ class TestDistributionalExpectations(unittest.TestCase):
                         'partition_object': self.test_partitions['categorical_fixed'],
                         'threshold': 0.1
                         },
-                    'out': {'success': True, 'true_value': 0.}
+                    'out': {'success': True, 'observed_value': 0.}
                 },
                 {
                     'args': ['categorical_fixed'],
@@ -94,7 +91,7 @@ class TestDistributionalExpectations(unittest.TestCase):
                         'partition_object': self.test_partitions['categorical_fixed_alternate'],
                         'threshold': 0.1
                         },
-                    'out': {'success': False, 'true_value': 0.12599700286677529}
+                    'out': {'success': False, 'observed_value': 0.12599700286677529}
                 },
                 {
                     'args': ['categorical_fixed'],
@@ -102,14 +99,11 @@ class TestDistributionalExpectations(unittest.TestCase):
                         'partition_object': self.test_partitions['categorical_fixed_alternate'],
                         'threshold': 0.1, 'output_format': 'SUMMARY'
                     },
-                    'out': {'success': False, 'true_value': 0.12599700286677529,
-                            'summary_obj': {
+                    'out': {'success': False, 'observed_value': 0.12599700286677529,
+                            'details': {
                                 'observed_partition': {
                                     'weights': [0.54, 0.32, 0.14],
                                     'values': [u'A', u'B', u'C']},
-                                'missing_percent': 0.0,
-                                'element_count': 1000,
-                                'missing_count': 0,
                                 'expected_partition': {
                                     'weights': [0.3333333333333333, 0.3333333333333333, 0.3333333333333333],
                                     'values': [u'A', u'B', u'C']
@@ -121,9 +115,9 @@ class TestDistributionalExpectations(unittest.TestCase):
         for t in T:
             out = self.D.expect_column_kl_divergence_to_be_less_than(*t['args'], **t['kwargs'])
             self.assertTrue(np.allclose(out['success'], t['out']['success']))
-            self.assertTrue(np.allclose(out['true_value'], t['out']['true_value']))
+            self.assertTrue(np.allclose(out['result_obj']['observed_value'], t['out']['observed_value']))
             if 'output_format' in t['kwargs'] and t['kwargs']['output_format'] == 'SUMMARY':
-                self.assertDictEqual(out['summary_obj'], t['out']['summary_obj'])
+                self.assertDictEqual(out['result_obj']['details'], t['out']['details'])
 
     def test_expect_column_kl_divergence_to_be_less_than_discrete_holdout(self):
         df = ge.dataset.PandasDataSet({'a': ['a', 'a', 'b', 'c']})
@@ -132,89 +126,89 @@ class TestDistributionalExpectations(unittest.TestCase):
                                                              threshold=0.1,
                                                              tail_weight_holdout=0.1)
         self.assertEqual(out['success'], True)
-        self.assertTrue(np.allclose(out['true_value'], [0.099431384003497381]))
+        self.assertTrue(np.allclose(out['result_obj']['observed_value'], [0.099431384003497381]))
 
         out = df.expect_column_kl_divergence_to_be_less_than('a',
                                                              {'values': ['a', 'b'], 'weights': [0.6, 0.4]},
                                                              threshold=0.1,
                                                              tail_weight_holdout=0.05)
         self.assertEqual(out['success'], False)
-        self.assertTrue(np.isclose(out['true_value'], [0.23216776319077681]))
+        self.assertTrue(np.isclose(out['result_obj']['observed_value'], [0.23216776319077681]))
 
         out = df.expect_column_kl_divergence_to_be_less_than('a',
                                                              {'values': ['a', 'b'], 'weights': [0.6, 0.4]},
                                                              threshold=0.1)
         self.assertEqual(out['success'], False)
-        self.assertTrue(np.isclose(out['true_value'], [np.inf]))
+        self.assertTrue(np.isclose(out['result_obj']['observed_value'], [np.inf]))
 
     def test_expect_column_bootstrapped_ks_test_p_value_to_be_greater_than(self):
         T = [
                 {
                     'args': ['norm_0_1'],
                     'kwargs': {'partition_object': self.test_partitions['norm_0_1_auto'], "p": 0.05},
-                    'out': {'success': True, 'true_value': "RANDOMIZED"}
+                    'out': {'success': True, 'observed_value': "RANDOMIZED"}
                 },
                 {
                     'args': ['norm_0_1'],
                     'kwargs':{'partition_object': self.test_partitions['norm_0_1_uniform'], "p": 0.05},
-                    'out':{'success':True, 'true_value': "RANDOMIZED"}
+                    'out':{'success':True, 'observed_value': "RANDOMIZED"}
                 },
                 {
                     'args': ['norm_0_1'],
                     'kwargs':{'partition_object': self.test_partitions['norm_0_1_ntile'], "p": 0.05},
-                    'out':{'success':True, 'true_value': "RANDOMIZED"}
+                    'out':{'success':True, 'observed_value': "RANDOMIZED"}
                 },
                 {
                     'args': ['norm_0_1'],
                     'kwargs':{'partition_object': self.test_partitions['norm_0_1_kde'], "p": 0.05},
-                    'out':{'success':True, 'true_value': "RANDOMIZED"}
+                    'out':{'success':True, 'observed_value': "RANDOMIZED"}
                 },
                 {
                     'args': ['norm_1_1'],
                     'kwargs':{'partition_object': self.test_partitions['norm_0_1_auto'], "p": 0.05},
-                    'out':{'success':False, 'true_value': "RANDOMIZED"}
+                    'out':{'success':False, 'observed_value': "RANDOMIZED"}
                 },
                 {
                     'args': ['norm_1_1'],
                     'kwargs':{'partition_object': self.test_partitions['norm_0_1_uniform'], "p": 0.05},
-                    'out':{'success':False, 'true_value': "RANDOMIZED"}
+                    'out':{'success':False, 'observed_value': "RANDOMIZED"}
                 },
                 {
                     'args': ['norm_1_1'],
                     'kwargs':{'partition_object': self.test_partitions['norm_0_1_ntile'], "p": 0.05},
-                    'out':{'success':False, 'true_value': "RANDOMIZED"}
+                    'out':{'success':False, 'observed_value': "RANDOMIZED"}
                 },
                 {
                     'args': ['norm_1_1'],
                     'kwargs':{'partition_object': self.test_partitions['norm_0_1_kde'], "p": 0.05},
-                    'out':{'success':False, 'true_value': "RANDOMIZED"}
+                    'out':{'success':False, 'observed_value': "RANDOMIZED"}
                 },
                 {
                     'args': ['bimodal'],
                     'kwargs':{'partition_object': self.test_partitions['bimodal_auto'], "p": 0.05},
-                    'out':{'success':True, 'true_value': "RANDOMIZED"}
+                    'out':{'success':True, 'observed_value': "RANDOMIZED"}
                 },
                 {
                     'args': ['bimodal'],
                     'kwargs':{'partition_object': self.test_partitions['bimodal_kde'], "p": 0.05},
-                    'out':{'success':True, 'true_value': "RANDOMIZED"}
+                    'out':{'success':True, 'observed_value': "RANDOMIZED"}
                 },
                 {
                     'args': ['bimodal'],
                     'kwargs':{'partition_object': self.test_partitions['norm_0_1_auto'], "p": 0.05,
                               'include_config': True},
-                    'out':{'success':False, 'true_value': "RANDOMIZED"}
+                    'out':{'success':False, 'observed_value': "RANDOMIZED"}
                 },
                 {
                     'args': ['bimodal'],
                     'kwargs':{'partition_object': self.test_partitions['norm_0_1_uniform'], "p": 0.05},
-                    'out':{'success':False, 'true_value': "RANDOMIZED"}
+                    'out':{'success':False, 'observed_value': "RANDOMIZED"}
                 },
                 {
                     'args': ['bimodal'],
                     'kwargs': {'partition_object': self.test_partitions['norm_0_1_uniform'], "p": 0.05, 'output_format': 'SUMMARY'},
-                    'out': {'success': False, 'true_value': "RANDOMIZED",
-                            'summary_obj': {
+                    'out': {'success': False, 'observed_value': "RANDOMIZED",
+                            'details': {
                                 'expected_cdf': {
                                     'cdf_values': [0.0, 0.001, 0.009000000000000001, 0.056, 0.184, 0.429, 0.6779999999999999, 0.8899999999999999, 0.9689999999999999, 0.9929999999999999, 0.9999999999999999],
                                     'x': [-3.721835843971108, -3.02304158492966, -2.324247325888213, -1.625453066846767, -0.926658807805319, -0.227864548763872, 0.470929710277574, 1.169723969319022, 1.868518228360469, 2.567312487401916, 3.266106746443364]
@@ -232,10 +226,7 @@ class TestDistributionalExpectations(unittest.TestCase):
                                     'weights': [0.001, 0.008, 0.047, 0.128, 0.245, 0.249, 0.212, 0.079, 0.024, 0.007],
                                     'bins': [-3.721835843971108, -3.02304158492966, -2.324247325888213, -1.625453066846767, -0.926658807805319, -0.227864548763872, 0.470929710277574, 1.169723969319022, 1.868518228360469, 2.567312487401916, 3.266106746443364]
                                 },
-                                'element_count': 1000,
-                                'bootstrap_sample_size': 20,
-                                'missing_percent': 0.0,
-                                'missing_count': 0
+                                'bootstrap_sample_size': 20
                             }
                     }
                 }
@@ -248,39 +239,39 @@ class TestDistributionalExpectations(unittest.TestCase):
                 print(out)
             self.assertEqual(out['success'], t['out']['success'])
             if 'output_format' in t['kwargs'] and t['kwargs']['output_format'] == 'SUMMARY':
-                self.assertTrue(np.allclose(out['summary_obj']['observed_cdf']['x'],t['out']['summary_obj']['observed_cdf']['x']))
-                self.assertTrue(np.allclose(out['summary_obj']['observed_cdf']['cdf_values'],t['out']['summary_obj']['observed_cdf']['cdf_values']))
-                self.assertTrue(np.allclose(out['summary_obj']['expected_cdf']['x'],t['out']['summary_obj']['expected_cdf']['x']))
-                self.assertTrue(np.allclose(out['summary_obj']['expected_cdf']['cdf_values'],t['out']['summary_obj']['expected_cdf']['cdf_values']))
-                self.assertTrue(np.allclose(out['summary_obj']['observed_partition']['bins'],t['out']['summary_obj']['observed_partition']['bins']))
-                self.assertTrue(np.allclose(out['summary_obj']['observed_partition']['weights'],t['out']['summary_obj']['observed_partition']['weights']))
-                self.assertTrue(np.allclose(out['summary_obj']['expected_partition']['bins'],t['out']['summary_obj']['expected_partition']['bins']))
-                self.assertTrue(np.allclose(out['summary_obj']['expected_partition']['weights'],t['out']['summary_obj']['expected_partition']['weights']))
+                self.assertTrue(np.allclose(out['result_obj']['details']['observed_cdf']['x'],t['out']['details']['observed_cdf']['x']))
+                self.assertTrue(np.allclose(out['result_obj']['details']['observed_cdf']['cdf_values'],t['out']['details']['observed_cdf']['cdf_values']))
+                self.assertTrue(np.allclose(out['result_obj']['details']['expected_cdf']['x'],t['out']['details']['expected_cdf']['x']))
+                self.assertTrue(np.allclose(out['result_obj']['details']['expected_cdf']['cdf_values'],t['out']['details']['expected_cdf']['cdf_values']))
+                self.assertTrue(np.allclose(out['result_obj']['details']['observed_partition']['bins'],t['out']['details']['observed_partition']['bins']))
+                self.assertTrue(np.allclose(out['result_obj']['details']['observed_partition']['weights'],t['out']['details']['observed_partition']['weights']))
+                self.assertTrue(np.allclose(out['result_obj']['details']['expected_partition']['bins'],t['out']['details']['expected_partition']['bins']))
+                self.assertTrue(np.allclose(out['result_obj']['details']['expected_partition']['weights'],t['out']['details']['expected_partition']['weights']))
 
     def test_expect_column_bootstrapped_ks_test_p_value_to_be_greater_than_expanded_partitions(self):
         # Extend observed above and below expected
         out = self.D.expect_column_bootstrapped_ks_test_p_value_to_be_greater_than('norm_0_1', {'bins': np.linspace(-1, 1, 11), 'weights': [0.1] * 10},
                                                                                    output_format='SUMMARY')
-        self.assertTrue(out['summary_obj']['observed_cdf']['x'][0] < -1)
-        self.assertTrue(out['summary_obj']['observed_cdf']['x'][-1] > 1)
+        self.assertTrue(out['result_obj']['details']['observed_cdf']['x'][0] < -1)
+        self.assertTrue(out['result_obj']['details']['observed_cdf']['x'][-1] > 1)
         # Extend observed below expected
         out = self.D.expect_column_bootstrapped_ks_test_p_value_to_be_greater_than('norm_0_1',
                                                                                    {'bins': np.linspace(-10, 1, 11), 'weights': [0.1] * 10},
                                                                                    output_format='SUMMARY')
-        self.assertTrue(out['summary_obj']['observed_cdf']['x'][0] == -10)
-        self.assertTrue(out['summary_obj']['observed_cdf']['x'][-1] > 1)
+        self.assertTrue(out['result_obj']['details']['observed_cdf']['x'][0] == -10)
+        self.assertTrue(out['result_obj']['details']['observed_cdf']['x'][-1] > 1)
         # Extend observed above expected
         out = self.D.expect_column_bootstrapped_ks_test_p_value_to_be_greater_than('norm_0_1',
                                                                                    {'bins': np.linspace(-1, 10, 11), 'weights': [0.1] * 10},
                                                                                    output_format='SUMMARY')
-        self.assertTrue(out['summary_obj']['observed_cdf']['x'][0] < -1)
-        self.assertTrue(out['summary_obj']['observed_cdf']['x'][-1] == 10)
+        self.assertTrue(out['result_obj']['details']['observed_cdf']['x'][0] < -1)
+        self.assertTrue(out['result_obj']['details']['observed_cdf']['x'][-1] == 10)
         # Extend expected above and below observed
         out = self.D.expect_column_bootstrapped_ks_test_p_value_to_be_greater_than('norm_0_1',
                                                                                    {'bins': np.linspace(-10, 10, 11), 'weights': [0.1] * 10},
                                                                                    output_format='SUMMARY')
-        self.assertTrue(out['summary_obj']['observed_cdf']['x'][0] == -10)
-        self.assertTrue(out['summary_obj']['observed_cdf']['x'][-1] == 10)
+        self.assertTrue(out['result_obj']['details']['observed_cdf']['x'][0] == -10)
+        self.assertTrue(out['result_obj']['details']['observed_cdf']['x'][-1] == 10)
 
     def test_expect_column_bootstrapped_ks_test_p_value_to_be_greater_than_bad_partition(self):
         with self.assertRaises(ValueError):
@@ -317,8 +308,8 @@ class TestDistributionalExpectations(unittest.TestCase):
         # This should succeed: our data match the partition
         out = test_df.expect_column_kl_divergence_to_be_less_than('x', test_partition, 0.5, output_format='SUMMARY')
         self.assertTrue(out['success'])
-        self.assertDictEqual(out['summary_obj']['observed_partition'], summary_observed_partition)
-        self.assertDictEqual(out['summary_obj']['expected_partition'], summary_expected_partition)
+        self.assertDictEqual(out['result_obj']['details']['observed_partition'], summary_observed_partition)
+        self.assertDictEqual(out['result_obj']['details']['expected_partition'], summary_expected_partition)
 
         # Build one-sided to infinity test partitions
         test_partition = {
@@ -338,8 +329,8 @@ class TestDistributionalExpectations(unittest.TestCase):
         out = test_df.expect_column_kl_divergence_to_be_less_than('x', test_partition, 0.5, output_format='SUMMARY')
         # This should fail: we expect zero weight less than 0
         self.assertFalse(out['success'])
-        self.assertDictEqual(out['summary_obj']['observed_partition'], summary_observed_partition)
-        self.assertDictEqual(out['summary_obj']['expected_partition'], summary_expected_partition)
+        self.assertDictEqual(out['result_obj']['details']['observed_partition'], summary_observed_partition)
+        self.assertDictEqual(out['result_obj']['details']['expected_partition'], summary_expected_partition)
 
         # Build two-sided to infinity test partition
         test_partition = {
@@ -359,8 +350,8 @@ class TestDistributionalExpectations(unittest.TestCase):
         # This should succeed: our data match the partition
         out = test_df.expect_column_kl_divergence_to_be_less_than('x', test_partition, 0.5, output_format='SUMMARY')
         self.assertTrue(out['success'])
-        self.assertDictEqual(out['summary_obj']['observed_partition'], summary_observed_partition)
-        self.assertDictEqual(out['summary_obj']['expected_partition'], summary_expected_partition)
+        self.assertDictEqual(out['result_obj']['details']['observed_partition'], summary_observed_partition)
+        self.assertDictEqual(out['result_obj']['details']['expected_partition'], summary_expected_partition)
 
         # Tail weight holdout is not defined for partitions already extending to infinity:
         with self.assertRaises(ValueError):
@@ -383,8 +374,8 @@ class TestDistributionalExpectations(unittest.TestCase):
         # This should succeed: our data match the partition
         out = test_df.expect_column_kl_divergence_to_be_less_than('x', test_partition, 0.5, output_format='SUMMARY')
         self.assertTrue(out['success'])
-        self.assertDictEqual(out['summary_obj']['observed_partition'], summary_observed_partition)
-        self.assertDictEqual(out['summary_obj']['expected_partition'], summary_expected_partition)
+        self.assertDictEqual(out['result_obj']['details']['observed_partition'], summary_observed_partition)
+        self.assertDictEqual(out['result_obj']['details']['expected_partition'], summary_expected_partition)
 
         # Confirm serialization of resulting expectations config
         expectation_config = test_df.get_expectations_config()
@@ -406,7 +397,7 @@ class TestDistributionalExpectations(unittest.TestCase):
                               "threshold": 0.1,
                               "tail_weight_holdout": 0.01,
                               "internal_weight_holdout": 0.01},
-                    'out':{'success':True, 'true_value': 'NOTTESTED'}
+                    'out':{'success':True, 'observed_value': 'NOTTESTED'}
                 },
                 {
                     'args': ['norm_0_1'],
@@ -414,7 +405,7 @@ class TestDistributionalExpectations(unittest.TestCase):
                               "threshold": 0.1,
                               "tail_weight_holdout": 0.01,
                               "internal_weight_holdout": 0.01},
-                    'out':{'success':True, 'true_value': 'NOTTESTED'}
+                    'out':{'success':True, 'observed_value': 'NOTTESTED'}
                 },
                 {
                     'args': ['norm_0_1'],
@@ -422,7 +413,7 @@ class TestDistributionalExpectations(unittest.TestCase):
                               "threshold": 0.1,
                               "tail_weight_holdout": 0.01,
                               "internal_weight_holdout": 0.01},
-                    'out':{'success':True, 'true_value': 'NOTTESTED'}
+                    'out':{'success':True, 'observed_value': 'NOTTESTED'}
                 },
                 ## Note higher threshold example for kde
                 {
@@ -431,7 +422,7 @@ class TestDistributionalExpectations(unittest.TestCase):
                               "threshold": 0.3,
                               "tail_weight_holdout": 0.01,
                               "internal_weight_holdout": 0.01},
-                    'out':{'success':True, 'true_value': 'NOTTESTED'}
+                    'out':{'success':True, 'observed_value': 'NOTTESTED'}
                 },
                 {
                     'args': ['norm_1_1'],
@@ -439,7 +430,7 @@ class TestDistributionalExpectations(unittest.TestCase):
                               "threshold": 0.1,
                               "tail_weight_holdout": 0.01,
                               "internal_weight_holdout": 0.01},
-                    'out':{'success':False, 'true_value': 'NOTTESTED'}
+                    'out':{'success':False, 'observed_value': 'NOTTESTED'}
                 },
                 {
                     'args': ['norm_1_1'],
@@ -447,7 +438,7 @@ class TestDistributionalExpectations(unittest.TestCase):
                               "threshold": 0.1,
                               "tail_weight_holdout": 1e-5,
                               "internal_weight_holdout": 1e-5},
-                    'out':{'success':False, 'true_value': 'NOTTESTED'}
+                    'out':{'success':False, 'observed_value': 'NOTTESTED'}
                 },
                 {
                     'args': ['norm_1_1'],
@@ -455,7 +446,7 @@ class TestDistributionalExpectations(unittest.TestCase):
                               "threshold": 0.1,
                               "tail_weight_holdout": 0.01,
                               "internal_weight_holdout": 0.01},
-                    'out':{'success':False, 'true_value': 'NOTTESTED'}
+                    'out':{'success':False, 'observed_value': 'NOTTESTED'}
                 },
                 {
                     'args': ['norm_1_1'],
@@ -463,7 +454,7 @@ class TestDistributionalExpectations(unittest.TestCase):
                               "threshold": 0.1,
                               "tail_weight_holdout": 0.01,
                               "internal_weight_holdout": 0.01},
-                    'out':{'success':False, 'true_value': 'NOTTESTED'}
+                    'out':{'success':False, 'observed_value': 'NOTTESTED'}
                 },
                 {
                     'args': ['bimodal'],
@@ -471,7 +462,7 @@ class TestDistributionalExpectations(unittest.TestCase):
                               "threshold": 0.1,
                               "tail_weight_holdout": 0.01,
                               "internal_weight_holdout": 0.01},
-                    'out':{'success':True, 'true_value': 'NOTTESTED'}
+                    'out':{'success':True, 'observed_value': 'NOTTESTED'}
                 },
                 {
                     'args': ['bimodal'],
@@ -479,7 +470,7 @@ class TestDistributionalExpectations(unittest.TestCase):
                               "threshold": 0.1,
                               "tail_weight_holdout": 0.01,
                               "internal_weight_holdout": 0.01},
-                    'out':{'success':False, 'true_value': "NOTTESTED"}
+                    'out':{'success':False, 'observed_value': "NOTTESTED"}
                 },
                 {
                     'args': ['bimodal'],
@@ -487,7 +478,7 @@ class TestDistributionalExpectations(unittest.TestCase):
                               "threshold": 0.1,
                               "tail_weight_holdout": 0.01,
                               "internal_weight_holdout": 0.01},
-                    'out':{'success':False, 'true_value': "NOTTESTED"}
+                    'out':{'success':False, 'observed_value': "NOTTESTED"}
                 },
                 {
                     'args': ['bimodal'],
@@ -496,8 +487,8 @@ class TestDistributionalExpectations(unittest.TestCase):
                                "tail_weight_holdout": 0.01,
                                "internal_weight_holdout": 0.01,
                                "output_format": "SUMMARY"},
-                    'out': {'success': False, 'true_value': "NOTTESTED",
-                            'summary_obj':
+                    'out': {'success': False, 'observed_value': "NOTTESTED",
+                            'details':
                                 {'observed_partition':
                                      {'weights': [0.0, 0.001, 0.006, 0.022, 0.07, 0.107, 0.146, 0.098, 0.04, 0.01, 0.0, 0.5],
                                       'bins': [-np.inf, -3.721835843971108, -3.02304158492966, -2.324247325888213, -1.625453066846767, -0.926658807805319, -0.227864548763872, 0.470929710277574, 1.169723969319022, 1.868518228360469, 2.567312487401916, 3.266106746443364, np.inf]
@@ -514,17 +505,17 @@ class TestDistributionalExpectations(unittest.TestCase):
         ]
         for t in T:
             out = self.D.expect_column_kl_divergence_to_be_less_than(*t['args'], **t['kwargs'])
-            if t['out']['true_value'] != 'NOTTESTED':
-                if not np.allclose(out['true_value'],t['out']['true_value']):
+            if t['out']['observed_value'] != 'NOTTESTED':
+                if not np.allclose(out['observed_value'],t['out']['observed_value']):
                     print("Test case error:")
                     print(t)
                     print(out)
-                self.assertTrue(np.allclose(out['true_value'],t['out']['true_value']))
+                self.assertTrue(np.allclose(out['observed_value'],t['out']['observed_value']))
             if 'output_format' in t['kwargs'] and t['kwargs']['output_format'] == 'SUMMARY':
-                self.assertTrue(np.allclose(out['summary_obj']['observed_partition']['bins'],t['out']['summary_obj']['observed_partition']['bins']))
-                self.assertTrue(np.allclose(out['summary_obj']['observed_partition']['weights'],t['out']['summary_obj']['observed_partition']['weights']))
-                self.assertTrue(np.allclose(out['summary_obj']['expected_partition']['bins'],t['out']['summary_obj']['expected_partition']['bins']))
-                self.assertTrue(np.allclose(out['summary_obj']['expected_partition']['weights'],t['out']['summary_obj']['expected_partition']['weights']))
+                self.assertTrue(np.allclose(out['result_obj']['details']['observed_partition']['bins'],t['out']['details']['observed_partition']['bins']))
+                self.assertTrue(np.allclose(out['result_obj']['details']['observed_partition']['weights'],t['out']['details']['observed_partition']['weights']))
+                self.assertTrue(np.allclose(out['result_obj']['details']['expected_partition']['bins'],t['out']['details']['expected_partition']['bins']))
+                self.assertTrue(np.allclose(out['result_obj']['details']['expected_partition']['weights'],t['out']['details']['expected_partition']['weights']))
 
             if not out['success'] == t['out']['success']:
                 print("Test case error:")
