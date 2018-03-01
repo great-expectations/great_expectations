@@ -774,7 +774,9 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
                 ((min_value is None) or (min_value <= unique_value_count)) and
                 ((max_value is None) or (unique_value_count <= max_value))
             ),
-            "observed_value": unique_value_count
+            "result_obj": {
+                "observed_value": unique_value_count
+            }
         }
 
     @DocInherit
