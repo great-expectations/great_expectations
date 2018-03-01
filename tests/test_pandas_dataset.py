@@ -696,7 +696,11 @@ class TestPandasDataset(unittest.TestCase):
             # print(json.dumps(out, indent=2))
 
             if 'out' in t:
-                self.assertEqual(out, t['out'])
+                self.assertEqual(t['out']['success'], out['success'])
+                if 'unexpected_index_list' in t['out']:
+                    self.assertEqual(t['out']['unexpected_index_list'], out['result_obj']['unexpected_index_list'])
+                if 'unexpected_list' in t['out']:
+                    self.assertEqual(t['out']['unexpected_list'], out['result_obj']['unexpected_list'])
 
             if 'error' in t:
                 self.assertEqual(out['raised_exception'], True)
@@ -857,8 +861,11 @@ class TestPandasDataset(unittest.TestCase):
 
         for t in T:
             out = D.expect_column_values_to_match_regex_list(**t['in'])
-            self.assertEqual(out, t['out'])
-
+            self.assertEqual(t['out']['success'], out['success'])
+            if 'unexpected_index_list' in t['out']:
+                self.assertEqual(t['out']['unexpected_index_list'], out['result_obj']['unexpected_index_list'])
+            if 'unexpected_list' in t['out']:
+                self.assertEqual(t['out']['unexpected_list'], out['result_obj']['unexpected_list'])
 
     def test_expect_column_values_to_match_strftime_format(self):
         """
@@ -1012,9 +1019,11 @@ class TestPandasDataset(unittest.TestCase):
 
         for t in T:
             out = D.expect_column_values_to_match_json_schema(**t['in'])#, **t['kwargs'])
-            self.assertEqual(out, t['out'])
-
-
+            self.assertEqual(t['out']['success'], out['success'])
+            if 'unexpected_index_list' in t['out']:
+                self.assertEqual(t['out']['unexpected_index_list'], out['result_obj']['unexpected_index_list'])
+            if 'unexpected_list' in t['out']:
+                self.assertEqual(t['out']['unexpected_list'], out['result_obj']['unexpected_list'])
 
     def test_expect_column_mean_to_be_between(self):
         """
@@ -1219,7 +1228,11 @@ class TestPandasDataset(unittest.TestCase):
         for t in T:
             print(t)
             out = D.expect_column_values_to_be_increasing(**t['in'])#, **t['kwargs'])
-            self.assertEqual(out, t['out'])
+            self.assertEqual(t['out']['success'], out['success'])
+            if 'unexpected_index_list' in t['out']:
+                self.assertEqual(t['out']['unexpected_index_list'], out['result_obj']['unexpected_index_list'])
+            if 'unexpected_list' in t['out']:
+                self.assertEqual(t['out']['unexpected_list'], out['result_obj']['unexpected_list'])
 
     def test_expect_column_values_to_be_decreasing(self):
         print("=== test_expect_column_values_to_be_decreasing ===")
@@ -1234,7 +1247,11 @@ class TestPandasDataset(unittest.TestCase):
         for t in T:
             print(t)
             out = D.expect_column_values_to_be_decreasing(**t['in'])
-            self.assertEqual(out, t['out'])
+            self.assertEqual(t['out']['success'], out['success'])
+            if 'unexpected_index_list' in t['out']:
+                self.assertEqual(t['out']['unexpected_index_list'], out['result_obj']['unexpected_index_list'])
+            if 'unexpected_list' in t['out']:
+                self.assertEqual(t['out']['unexpected_list'], out['result_obj']['unexpected_list'])
 
     def test_expect_column_most_common_value_to_be_in_set(self):
 
@@ -1288,7 +1305,11 @@ class TestPandasDataset(unittest.TestCase):
             print(out)
 
             if "out" in t:
-                self.assertEqual(out, t['out'])
+                self.assertEqual(t['out']['success'], out['success'])
+                if 'unexpected_index_list' in t['out']:
+                    self.assertEqual(t['out']['unexpected_index_list'], out['result_obj']['unexpected_index_list'])
+                if 'unexpected_list' in t['out']:
+                    self.assertEqual(t['out']['unexpected_list'], out['result_obj']['unexpected_list'])
 
             if "error" in t:
                 self.assertEqual(out['raised_exception'], True)
@@ -1309,7 +1330,11 @@ class TestPandasDataset(unittest.TestCase):
             print(out)
 
             if "out" in t:
-                self.assertEqual(out, t['out'])
+                self.assertEqual(t['out']['success'], out['success'])
+                if 'unexpected_index_list' in t['out']:
+                    self.assertEqual(t['out']['unexpected_index_list'], out['result_obj']['unexpected_index_list'])
+                if 'unexpected_list' in t['out']:
+                    self.assertEqual(t['out']['unexpected_list'], out['result_obj']['unexpected_list'])
 
             if "error" in t:
                 self.assertEqual(out['raised_exception'], True)
@@ -1330,7 +1355,11 @@ class TestPandasDataset(unittest.TestCase):
             print(out)
 
             if "out" in t:
-                self.assertEqual(out, t['out'])
+                self.assertEqual(t['out']['success'], out['success'])
+                if 'unexpected_index_list' in t['out']:
+                    self.assertEqual(t['out']['unexpected_index_list'], out['result_obj']['unexpected_index_list'])
+                if 'unexpected_list' in t['out']:
+                    self.assertEqual(t['out']['unexpected_list'], out['result_obj']['unexpected_list'])
 
             if "error" in t:
                 self.assertEqual(out['raised_exception'], True)
