@@ -174,7 +174,7 @@ class TestExpectationDecorators(unittest.TestCase):
 
             @PandasDataSet.column_aggregate_expectation
             def expect_column_median_to_be_odd(self, column):
-                return {"success": column.median() % 2, "true_value": column.median(), "summary_obj": None}
+                return {"success": column.median() % 2, "result_obj": {"observed_value": column.median()}}
 
         df = CustomPandasDataSet({
             'all_odd' : [1,3,5,7,9],
@@ -189,7 +189,7 @@ class TestExpectationDecorators(unittest.TestCase):
         self.assertEqual(
             df.expect_column_median_to_be_odd("all_odd"),
             {
-                'true_value': 5,
+                'result_obj': {'observed_value': 5, 'element_count': 5, 'missing_count': 0, 'missing_percent': 0},
                 'success': True
             }
         )
@@ -197,7 +197,7 @@ class TestExpectationDecorators(unittest.TestCase):
         self.assertEqual(
             df.expect_column_median_to_be_odd("all_even"),
             {
-                'true_value': 6,
+                'result_obj': {'observed_value': 6, 'element_count': 5, 'missing_count': 0, 'missing_percent': 0},
                 'success': False
             }
         )
@@ -205,27 +205,26 @@ class TestExpectationDecorators(unittest.TestCase):
         self.assertEqual(
             df.expect_column_median_to_be_odd("all_even", output_format="SUMMARY"),
             {
-                'true_value': 6,
-                'success': False,
-                'summary_obj': {'element_count': 5, 'missing_count': 0, 'missing_percent': 0}
+                'result_obj': {'observed_value': 6, 'element_count': 5, 'missing_count': 0, 'missing_percent': 0},
+                'success': False
             }
         )
 
         self.assertEqual(
             df.expect_column_median_to_be_odd("all_even", output_format="BOOLEAN_ONLY"),
-            False
+            {'success': False}
         )
 
         df.default_expectation_args["output_format"] = "BOOLEAN_ONLY"
         self.assertEqual(
             df.expect_column_median_to_be_odd("all_even"),
-            False
+            {'success': False}
         )
 
         self.assertEqual(
             df.expect_column_median_to_be_odd("all_even", output_format="BASIC"),
             {
-                'true_value': 6,
+                'result_obj': {'observed_value': 6, 'element_count': 5, 'missing_count': 0, 'missing_percent': 0},
                 'success': False
             }
         )
