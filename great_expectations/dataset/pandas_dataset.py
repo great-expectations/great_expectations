@@ -740,7 +740,9 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
                 ((min_value or None) or (min_value <= column_median)) and
                 ((max_value or None) or (column_median <= max_value))
             ),
-            "observed_value": column_median
+            "result_obj":{
+                "observed_value": column_median
+            }
         }
 
     @DocInherit
