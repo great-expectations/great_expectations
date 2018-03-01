@@ -188,12 +188,11 @@ class SqlDataSet(MetaSqlDataSet, Table):
             })
 
     ### Expectation methods ###
-    """
     @DocInherit
     @DataSet.expectation(['column'])
     def expect_column_to_exist(self, column,
                                output_format=None, include_config=False, catch_exceptions=None, meta=None):
-        if column in self:
+        if column in [c.name for c in self.columns]:
             return {
                 "success" : True
             }
@@ -201,7 +200,8 @@ class SqlDataSet(MetaSqlDataSet, Table):
             return {
                 "success": False
             }
-
+    
+    """
     @DocInherit
     @DataSet.expectation(['min_value', 'max_value'])
     def expect_table_row_count_to_be_between(self,
