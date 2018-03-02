@@ -10,7 +10,7 @@ class TestConnections(unittest.TestCase):
 
     def test_SqlConnection(self):
 
-        my_conn = SqlConnection("sqlite:////Users/abe/Downloads/chinook.db")
+        my_conn = SqlConnection("sqlite:///tests/test_fixtures/chinook.db")
 
         print(my_conn.get_table_list())
 
