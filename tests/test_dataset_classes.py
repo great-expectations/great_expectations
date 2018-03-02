@@ -11,15 +11,15 @@ class TestSparkSqlDataFrame(unittest.TestCase):
         #FIXME: Unsuppress.
         return
 
-		my_df = ge.read_csv(
-		    "my_file.csv",
-		    SparkSqlDataSet,
-		    schema
-		)
-		# my_df.expect...
+        my_df = ge.read_csv(
+            "my_file.csv",
+            SparkSqlDataSet,
+            schema
+        )
+        # my_df.expect...
 
 
-		my_df.validate()
+        my_df.validate()
 
 
 class TestSqlDataFrame(unittest.TestCase):
@@ -28,5 +28,5 @@ class TestSqlDataFrame(unittest.TestCase):
         #FIXME: Unsuppress.
         return
 
-    	raise NotImplementedError()
+        raise NotImplementedError()
 
