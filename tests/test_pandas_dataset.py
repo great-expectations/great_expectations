@@ -1416,6 +1416,18 @@ class TestPandasDataset(unittest.TestCase):
     def test_expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than(self):
         df = ge.read_csv("./tests/test_sets/fixed_distributional_test_dataset.csv")
 
+        ## Code used to create test data
+        #fixed = ge.dataset.PandasDataSet({
+        #    'norm': stats.norm.rvs(-2, 5, 500),
+        #    'beta': stats.beta.rvs(0.5, 10, 500),
+        #    'gamma': stats.gamma.rvs(2, 20, 500),
+        #    'poisson': stats.poisson.rvs(8.2, 40, 500),
+        #    'uniform': stats.uniform.rvs(-5, 11, 500),
+        #    'chi2': stats.chi2.rvs(df=30, size=500),
+        #    'exponential': stats.expon.rvs(loc=4.2, scale=1, size=500)
+        #})
+        # fixed.to_csv("./tests/test_sets/fixed_distributional_test_dataset.csv")
+
         # Test specified mean and variance and p-value
         self.assertTrue(
             df.expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than(column='norm',
