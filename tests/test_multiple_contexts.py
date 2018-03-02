@@ -15,14 +15,10 @@ class TestConnections(unittest.TestCase):
         print(my_conn.get_table_list())
 
         my_df = my_conn.get_table("albums")
-        print json.dumps(
-            my_df.expect_column_to_exist("AlbumId", catch_exceptions=True),
-            indent=2
-        )
+        my_df.expect_column_to_exist("AlbumId", catch_exceptions=True),
 
         print my_df.validate()
 
-        # assert False
 
     def test_SparkSqlConnection(self):
         #FIXME: Unsuppress.
