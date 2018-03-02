@@ -10,14 +10,22 @@ class TestConnections(unittest.TestCase):
 
     def test_SqlConnection(self):
 
+        #Instantiate a connection
         my_conn = SqlConnection("sqlite:///tests/test_fixtures/chinook.db")
 
+        #List tables
         print(my_conn.get_table_list())
 
-        my_df = my_conn.get_table("albums")
-        my_df.expect_column_to_exist("AlbumId", catch_exceptions=True),
+        #Use the connection to fetch a dataset
+        #FIXME: We should probably be consistent and call this `get_dataset`
+        my_dataset = my_conn.get_table("albums")
 
-        print my_df.validate()
+        #This dataset is subclassed from sqlalchemy.sql.schema.Table, instead of pandas.DataFrame
+        #It's also subclassed from ge.DataSet, so we can invoke expectations:
+        my_dataset.expect_column_to_exist("AlbumId")
+
+        #...and validation.
+        print my_dataset.validate()
 
 
     def test_SparkSqlConnection(self):
