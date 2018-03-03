@@ -49,8 +49,8 @@ class TestPandasDataset(unittest.TestCase):
                 self.assertEqual(out, t['out'])
 
             if 'error' in t:
-                self.assertEqual(out['raised_exception'], True)
-                self.assertIn(t['error']['traceback_substring'], out['exception_traceback'])
+                self.assertEqual(out['exception_info']['raised_exception'], True)
+                self.assertIn(t['error']['traceback_substring'], out['exception_info']['exception_traceback'])
 
 
     def test_expect_table_row_count_to_equal(self):
@@ -639,8 +639,8 @@ class TestPandasDataset(unittest.TestCase):
                     self.assertEqual(t['out']['unexpected_list'], out['result_obj']['unexpected_list'])
 
             if 'error' in t:
-                self.assertEqual(out['raised_exception'], True)
-                self.assertIn(t['error']['traceback_substring'], out['exception_traceback'])
+                self.assertEqual(out['exception_info']['raised_exception'], True)
+                self.assertIn(t['error']['traceback_substring'], out['exception_info']['exception_traceback'])
 
     def test_expect_column_value_lengths_to_be_between(self):
         D = ge.dataset.PandasDataSet({
@@ -859,8 +859,8 @@ class TestPandasDataset(unittest.TestCase):
                 if 'unexpected_list' in t['out']:
                     self.assertEqual(t['out']['unexpected_list'], out['result_obj']['unexpected_list'])
             elif 'error' in t:
-                self.assertEqual(out['raised_exception'], True)
-                self.assertIn(t['error']['traceback_substring'], out['exception_traceback'])
+                self.assertEqual(out['exception_info']['raised_exception'], True)
+                self.assertIn(t['error']['traceback_substring'], out['exception_info']['exception_traceback'])
 
     def test_expect_column_values_to_be_dateutil_parseable(self):
 
@@ -906,8 +906,8 @@ class TestPandasDataset(unittest.TestCase):
                 self.assertEqual(t['out']['unexpected_index_list'], out['result_obj']['unexpected_index_list'])
                 self.assertEqual(t['out']['unexpected_list'], out['result_obj']['unexpected_list'])
             elif 'error' in t:
-                self.assertEqual(out['raised_exception'], True)
-                self.assertIn(t['error']['traceback_substring'], out['exception_traceback'])
+                self.assertEqual(out['exception_info']['raised_exception'], True)
+                self.assertIn(t['error']['traceback_substring'], out['exception_info']['exception_traceback'])
 
 
     def test_expect_column_values_to_be_json_parseable(self):
@@ -1271,8 +1271,8 @@ class TestPandasDataset(unittest.TestCase):
                     self.assertEqual(t['out']['unexpected_list'], out['result_obj']['unexpected_list'])
 
             if "error" in t:
-                self.assertEqual(out['raised_exception'], True)
-                self.assertIn(t['error']['traceback_substring'], out['exception_traceback'])
+                self.assertEqual(out['exception_info']['raised_exception'], True)
+                self.assertIn(t['error']['traceback_substring'], out['exception_info']['exception_traceback'])
 
     def test_expect_column_min_to_be_between(self):
         with open("./tests/test_sets/expect_column_min_to_be_between_test_set.json") as f:
@@ -1296,8 +1296,8 @@ class TestPandasDataset(unittest.TestCase):
                     self.assertEqual(t['out']['unexpected_list'], out['result_obj']['unexpected_list'])
 
             if "error" in t:
-                self.assertEqual(out['raised_exception'], True)
-                self.assertIn(t['error']['traceback_substring'], out['exception_traceback'])
+                self.assertEqual(out['exception_info']['raised_exception'], True)
+                self.assertIn(t['error']['traceback_substring'], out['exception_info']['exception_traceback'])
 
     def test_expect_column_max_to_be_between(self):
         with open("./tests/test_sets/expect_column_max_to_be_between_test_set.json") as f:
