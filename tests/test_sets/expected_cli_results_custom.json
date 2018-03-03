@@ -1,13 +1,13 @@
 { "results": [
     {
-      "exception_traceback": null,
-      "expectation_type": "expect_column_values_to_have_odd_lengths",
-      "success": false,
-      "raised_exception": false,
-      "kwargs": {
-        "column": "Name",
-        "result_format": "SUMMARY"
+      "expectation_config": {
+        "expectation_type": "expect_column_values_to_have_odd_lengths",
+        "kwargs": {
+          "column": "Name",
+          "result_format": "SUMMARY"
+        }
       },
+      "success": false,
       "result_obj": {
         "partial_unexpected_index_list": [
           0,

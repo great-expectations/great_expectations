@@ -135,7 +135,7 @@ class DataSet(object):
                 if include_config:
                     return_obj["expectation_config"] = copy.deepcopy(expectation_config)
 
-                if catch_exceptions:
+                if raised_exception:
                     return_obj["exception_info"] = {
                         "raised_exception": raised_exception,
                         "exception_message": exception_message,
@@ -585,7 +585,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         expectation_config_str = json.dumps(expectations_config, indent=2)
         open(filepath, 'w').write(expectation_config_str)
 
-    def validate(self, expectations_config=None, catch_exceptions=True, result_format=None, include_config=None, only_return_failures=False):
+    def validate(self, expectations_config=None, catch_exceptions=True, result_format=None, only_return_failures=False):
         results = []
 
         if expectations_config is None:
@@ -609,11 +609,6 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
                 if result_format is not None:
                     expectation['kwargs'].update({"result_format": result_format})
-
-                # When validating, config *must* be returned so that each result can be matched to a config
-                if include_config is not None:
-                    warnings.warn("INCLUDE_CONFIG IS IGNORED. OPTION WILL BE REMOVED.")
-                    #expectation['kwargs'].update({"include_config": include_config})
 
                 result = expectation_method(
                     catch_exceptions=catch_exceptions,
