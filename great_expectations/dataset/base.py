@@ -127,32 +127,25 @@ class DataSet(object):
                     else:
                         raise(err)
 
-                #Add a "success" object to the config
-                expectation_config["success_on_last_run"] = return_obj["success"]
-
-                #Append the expectation to the config.
+                # Append the expectation to the config.
                 self.append_expectation(expectation_config)
-
-                # if result_format != 'BOOLEAN_ONLY':
 
                 if include_config:
                     return_obj["expectation_config"] = copy.deepcopy(expectation_config)
-                    # return_obj["expectation_type"] = expectation_config["expectation_type"]
-                    # return_obj["expectation_kwargs"] = copy.deepcopy(dict(expectation_config["kwargs"]))
 
                 if catch_exceptions:
                     return_obj["exception_info"] = {
                         "raised_exception": raised_exception,
+                        "exception_message": exception_message,
                         "exception_traceback": exception_traceback
                     }
-                    # return_obj["raised_exception"] = raised_exception
-                    # return_obj["exception_traceback"] = exception_traceback
+
+                # Add a "success" object to the config
+                expectation_config["success_on_last_run"] = return_obj["success"]
 
                 return_obj = recursively_convert_to_json_serializable(return_obj)
                 return return_obj
 
-            # wrapper.__name__ = func.__name__
-            # wrapper.__doc__ = func.__doc__
             return wrapper
 
         return outer_wrapper
