@@ -207,8 +207,7 @@ class TestValidation(unittest.TestCase):
             self,
             validation_results,
             {"results": [
-                {"exception_info": {"exception_traceback": None, "raised_exception": False, "exception_message": None},
-                 "expectation_config": {
+                {"expectation_config": {
                      "expectation_type": "expect_column_values_to_be_in_set",
                      "kwargs": {"column": "PClass", "values_set": ["1st", "2nd", "3rd"], "result_format": "COMPLETE"}
                  },
@@ -260,19 +259,18 @@ class TestValidation(unittest.TestCase):
                 "expectation_type" : "expect_column_values_to_be_between",
                 "kwargs" : {
                     "column" : "x",
-                    "min_value" : 'a',
+                    "min_value" : 6,
                     "max_value" : 5
                 }
             }]
         }
 
         results = df.validate(expectations_config=validation_config_invalid_parameter)['results']
-
+        print(results[0]['exception_info'])
         self.assertIn(
-            "object has no attribute 'non_existent_expectation'",
+            "min_value is greater than max_value",
             results[0]['exception_info']['exception_message']
         )
-
 
     def test_top_level_validate(self):
         my_df = pd.DataFrame({
@@ -302,10 +300,6 @@ class TestValidation(unittest.TestCase):
             {
               "results": [
                 {
-                  "exception_info": {
-                    "raised_exception": False,
-                    "exception_traceback": None,
-                  },
                   "expectation_config": {
                       "kwargs": {
                           "column": "x"
@@ -315,10 +309,6 @@ class TestValidation(unittest.TestCase):
                   "success": True
                 },
                 {
-                    "exception_info": {
-                        "raised_exception": False,
-                        "exception_traceback": None
-                    },
                     "expectation_config": {
                         "expectation_type": "expect_column_values_to_be_between",
                         "kwargs": {
