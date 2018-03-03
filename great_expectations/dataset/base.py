@@ -610,8 +610,10 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                 if result_format is not None:
                     expectation['kwargs'].update({"result_format": result_format})
 
+                # When validating, config *must* be returned so that each result can be matched to a config
                 if include_config is not None:
-                    expectation['kwargs'].update({"include_config": include_config})
+                    warnings.warn("INCLUDE_CONFIG IS IGNORED. OPTION WILL BE REMOVED.")
+                    #expectation['kwargs'].update({"include_config": include_config})
 
                 result = expectation_method(
                     catch_exceptions=catch_exceptions,
@@ -635,8 +637,8 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                 else:
                     raise(err)
 
-            if include_config:
-                result["expectation_config"] = copy.deepcopy(expectation)
+            #if include_config:
+            result["expectation_config"] = copy.deepcopy(expectation)
 
             results.append(result)
 
