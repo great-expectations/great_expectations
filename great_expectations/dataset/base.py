@@ -128,10 +128,7 @@ class DataSet(object):
                         raise(err)
 
                 #Add a "success" object to the config
-                if result_format == "BOOLEAN_ONLY":
-                    expectation_config["success_on_last_run"] = return_obj
-                else:
-                    expectation_config["success_on_last_run"] = return_obj["success"]
+                expectation_config["success_on_last_run"] = return_obj["success"]
 
                 #Append the expectation to the config.
                 self.append_expectation(expectation_config)
@@ -139,12 +136,17 @@ class DataSet(object):
                 if result_format != 'BOOLEAN_ONLY':
 
                     if include_config:
-                        return_obj["expectation_type"] = expectation_config["expectation_type"]
-                        return_obj["expectation_kwargs"] = copy.deepcopy(dict(expectation_config["kwargs"]))
+                        return_obj["expectation_config"] = copy.deepcopy(expectation_config)
+                        # return_obj["expectation_type"] = expectation_config["expectation_type"]
+                        # return_obj["expectation_kwargs"] = copy.deepcopy(dict(expectation_config["kwargs"]))
 
-                    if catch_exceptions:
-                        return_obj["raised_exception"] = raised_exception
-                        return_obj["exception_traceback"] = exception_traceback
+                if catch_exceptions:
+                    return_obj["exception_info"] = {
+                        "raised_exception": raised_exception,
+                        "exception_traceback": exception_traceback
+                    }
+                    # return_obj["raised_exception"] = raised_exception
+                    # return_obj["exception_traceback"] = exception_traceback
 
                 return_obj = recursively_convert_to_json_serializable(return_obj)
                 return return_obj
