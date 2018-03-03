@@ -4,7 +4,7 @@ import pandas as pd
 from .util import *
 from great_expectations import dataset
 
-from .connections import GreatExpectationsConnection, SqlAlchemyConnection, SparkSqlConnection
+from .connections import GreatExpectationsConnection, SqlAlchemyConnection, FilepathConnection, SparkSqlConnection
 
 from .version import __version__
 
@@ -12,6 +12,10 @@ def get_connection(connection_type, *args, **kwargs):
     if connection_type == "SqlAlchemy":
         #FIXME: provide an additional API that allows connection strings to be generated from arguments.
         return SqlAlchemyConnection(kwargs['connection_string'])
+
+    if connection_type == "Filepath":
+        #FIXME: provide an additional API that allows connection strings to be generated from arguments.
+        return FilepathConnection(**kwargs)
 
     # elif connection_type == "pandas_directory":
     #     PandasDataContext(args, kwargs)

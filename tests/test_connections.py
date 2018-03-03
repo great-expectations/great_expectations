@@ -30,6 +30,63 @@ class TestConnections(unittest.TestCase):
         print my_dataset.validate()
 
 
+    def test_FilepathConnection(self):
+
+        #Instantiate a connection, with is_recursive=False
+        my_conn = ge.get_connection(
+            "Filepath",
+            filepath="examples/data",
+            is_recursive=False,
+        )
+        self.assertEqual(
+            my_conn.get_dataset_list(),
+            ['Titanic.csv', 'FAO-Rice-Production-Asia.csv']
+        )
+
+
+        #Instantiate a connection, with is_recursive=True
+        my_conn = ge.get_connection(
+            "Filepath",
+            filepath="examples/data",
+            is_recursive=True,
+        )
+        self.assertEqual(
+            my_conn.get_dataset_list(),
+            ['Titanic.csv', 'FAO-Rice-Production-Asia.csv']
+        )
+
+
+        #Instantiate a connection, with is_recursive=True
+        my_conn = ge.get_connection(
+            "Filepath",
+            filepath="examples",
+            is_recursive=True,
+        )
+        self.assertEqual(
+            my_conn.get_dataset_list(),
+            ['data/Titanic.csv', 'data/FAO-Rice-Production-Asia.csv']
+        )
+
+        # with self.assertRaises:
+
+
+        #Use the connection to fetch a dataset
+        my_dataset = my_conn.get_dataset("data/Titanic.csv")
+
+        self.assertEqual(
+            my_dataset.expect_column_to_exist("AlbumId")['success'],
+            False
+        )
+
+        self.assertEqual(
+            my_dataset.expect_column_to_exist("Age")['success'],
+            True
+        )
+
+        #...and validation.
+        print my_dataset.validate()
+
+
     def test_SparkSqlConnection(self):
         #FIXME: Unsuppress.
         return
