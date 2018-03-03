@@ -57,8 +57,8 @@ class TestCLI(unittest.TestCase):
           print(ve)
           json_result = {}
 
-        print("^"*80)
-        print(json.dumps(json_result, indent=2))
+        # print("^"*80)
+        # print(json.dumps(json_result, indent=2))
         self.maxDiff = None
 
         with open(filepath + '/test_sets/expected_cli_results_default.json', 'r') as f:
@@ -118,7 +118,7 @@ class TestCLI(unittest.TestCase):
           json_result = {}
 
         self.maxDiff = None
-        print(json.dumps(json_result, indent=2))
+        # print(json.dumps(json_result, indent=2))
 
         #Remove partial unexpected counts, because we can't guarantee that they'll be the same every time.
         del json_result["results"][0]["result_obj"]['partial_unexpected_counts']

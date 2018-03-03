@@ -1,76 +1,76 @@
 {
   "results": [
     {
-      "success": true,
-      "exception_traceback": null,
-      "expectation_type": "expect_column_to_exist",
-      "raised_exception": false,
-      "kwargs": {
-        "column": "Name",
-        "result_format": "SUMMARY"
-      }
-    },
-    {
-      "success": true,
-      "exception_traceback": null,
-      "expectation_type": "expect_column_to_exist",
-      "raised_exception": false,
-      "kwargs": {
-        "column": "PClass",
-        "result_format": "SUMMARY"
-      }
-    },
-    {
-      "success": true,
-      "exception_traceback": null,
-      "expectation_type": "expect_column_to_exist",
-      "raised_exception": false,
-      "kwargs": {
-        "column": "Age",
-        "result_format": "SUMMARY"
-      }
-    },
-    {
-      "success": true,
-      "exception_traceback": null,
-      "expectation_type": "expect_column_to_exist",
-      "raised_exception": false,
-      "kwargs": {
-        "column": "Sex",
-        "result_format": "SUMMARY"
-      }
-    },
-    {
-      "success": true,
-      "exception_traceback": null,
-      "expectation_type": "expect_column_to_exist",
-      "raised_exception": false,
-      "kwargs": {
-        "column": "Survived",
-        "result_format": "SUMMARY"
-      }
-    },
-    {
-      "success": true,
-      "exception_traceback": null,
-      "expectation_type": "expect_column_to_exist",
-      "raised_exception": false,
-      "kwargs": {
-        "column": "SexCode",
-        "result_format": "SUMMARY"
-      }
-    },
-    {
-      "exception_traceback": null,
-      "expectation_type": "expect_column_mean_to_be_between",
-      "success": true,
-      "raised_exception": false,
-      "kwargs": {
-        "column": "Age",
-        "max_value": 40,
-        "result_format": "SUMMARY",
-        "min_value": 20
+      "expectation_config": {
+        "expectation_type": "expect_column_to_exist",
+        "kwargs": {
+          "column": "Name",
+          "result_format": "SUMMARY"
+        }
       },
+      "success": true
+    },
+    {
+      "expectation_config": {
+        "expectation_type": "expect_column_to_exist",
+        "kwargs": {
+          "column": "PClass",
+          "result_format": "SUMMARY"
+        }
+      },
+      "success": true
+    },
+    {
+      "expectation_config": {
+        "expectation_type": "expect_column_to_exist",
+        "kwargs": {
+          "column": "Age",
+          "result_format": "SUMMARY"
+        }
+      },
+      "success": true
+    },
+    {
+      "expectation_config": {
+        "expectation_type": "expect_column_to_exist",
+        "kwargs": {
+          "column": "Sex",
+          "result_format": "SUMMARY"
+        }
+      },
+      "success": true
+    },
+    {
+      "expectation_config": {
+        "expectation_type": "expect_column_to_exist",
+        "kwargs": {
+          "column": "Survived",
+          "result_format": "SUMMARY"
+        }
+      },
+      "success": true
+    },
+    {
+      "expectation_config": {
+        "expectation_type": "expect_column_to_exist",
+        "kwargs": {
+          "column": "SexCode",
+          "result_format": "SUMMARY"
+        }
+      },
+      "success": true
+    },
+    {
+      "expectation_config": {
+        "expectation_type": "expect_column_mean_to_be_between",
+        "kwargs": {
+          "column": "Age",
+          "max_value": 40,
+          "min_value": 20,
+          "result_format": "SUMMARY"
+        }
+      },
+      "success": true,
       "result_obj": {
         "observed_value": 30.397989417989418,
         "element_count": 1313,
@@ -79,16 +79,16 @@
       }
     },
     {
-      "exception_traceback": null,
-      "expectation_type": "expect_column_values_to_be_between",
-      "success": true,
-      "raised_exception": false,
-      "kwargs": {
-        "column": "Age",
-        "max_value": 80,
-        "result_format": "SUMMARY",
-        "min_value": 0
+      "expectation_config": {
+        "expectation_type": "expect_column_values_to_be_between",
+        "kwargs": {
+          "column": "Age",
+          "max_value": 80,
+          "min_value": 0,
+          "result_format": "SUMMARY"
+        }
       },
+      "success": true,
       "result_obj": {
         "partial_unexpected_index_list": [],
         "unexpected_count": 0,
@@ -102,16 +102,16 @@
       }
     },
     {
-      "exception_traceback": null,
-      "expectation_type": "expect_column_values_to_match_regex",
-      "success": true,
-      "raised_exception": false,
-      "kwargs": {
-        "regex": "[A-Z][a-z]+(?: \\([A-Z][a-z]+\\))?, ",
-        "column": "Name",
-        "result_format": "SUMMARY",
-        "mostly": 0.95
+      "expectation_config": {
+        "expectation_type": "expect_column_values_to_match_regex",
+        "kwargs": {
+          "regex": "[A-Z][a-z]+(?: \\([A-Z][a-z]+\\))?, ",
+          "column": "Name",
+          "result_format": "SUMMARY",
+          "mostly": 0.95
+        }
       },
+      "success": true,
       "result_obj": {
         "partial_unexpected_index_list": [
           394,
@@ -146,19 +146,19 @@
       }
     },
     {
-      "exception_traceback": null,
-      "expectation_type": "expect_column_values_to_be_in_set",
-      "success": false,
-      "raised_exception": false,
-      "kwargs": {
-        "column": "PClass",
-        "values_set": [
-          "1st",
-          "2nd",
-          "3rd"
-        ],
-        "result_format": "SUMMARY"
+      "expectation_config": {
+        "expectation_type": "expect_column_values_to_be_in_set",
+        "kwargs": {
+          "column": "PClass",
+          "values_set": [
+            "1st",
+            "2nd",
+            "3rd"
+          ],
+          "result_format": "SUMMARY"
+        }
       },
+      "success": false,
       "result_obj": {
         "partial_unexpected_index_list": [
           456
