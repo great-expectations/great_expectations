@@ -10,18 +10,16 @@ import great_expectations as ge
 
 class GreatExpectationsConnection(object):
 	
-	def list_tables(self):
+	def get_dataset_list(self):
 		raise NotImplementedError()
 
-	def get_table(self, table_name):
+	def get_datasets(self, table_name):
 		raise NotImplementedError()
 
 
-class SqlConnection(GreatExpectationsConnection):
+class LocalFilePathConnection(GreatExpectationsConnection):
 	def __init__(self, connection_string=None):
-		#FIXME: provide an additional API that allows connection strings to be generated from arguments.
-
-		super(SqlConnection, self).__init__()
+		super(LocalFilePathConnection, self).__init__()
 
 		if connection_string:
 			self.engine = create_engine(connection_string)
@@ -30,10 +28,31 @@ class SqlConnection(GreatExpectationsConnection):
 			self.metadata = MetaData(self.engine)
 			self.metadata.reflect()
 
-	def get_table_list(self):
+	def get_dataset_list(self):
 		return self.engine.table_names()
 
-	def get_table(self, table_name, expectations_config=None):
+	def get_dataset(self, table_name, expectations_config=None):
+		table = self.metadata.tables[table_name]
+		table.__class__ = SqlDataSet
+		table.initialize_expectations(expectations_config)
+
+		return table
+
+
+class SqlAlchemyConnection(GreatExpectationsConnection):
+	def __init__(self, connection_string):
+		super(SqlAlchemyConnection, self).__init__()
+
+		self.engine = create_engine(connection_string)
+		self.conn = self.engine.connect()
+
+		self.metadata = MetaData(self.engine)
+		self.metadata.reflect()
+
+	def get_dataset_list(self):
+		return self.engine.table_names()
+
+	def get_dataset(self, table_name, expectations_config=None):
 		table = self.metadata.tables[table_name]
 		table.__class__ = SqlDataSet
 		table.initialize_expectations(expectations_config)

@@ -4,9 +4,21 @@ import pandas as pd
 from .util import *
 from great_expectations import dataset
 
-from .connections import GreatExpectationsConnection, SqlConnection, SparkSqlConnection
+from .connections import GreatExpectationsConnection, SqlAlchemyConnection, SparkSqlConnection
 
 from .version import __version__
+
+def get_connection(connection_type, *args, **kwargs):
+    if connection_type == "SqlAlchemy":
+        #FIXME: provide an additional API that allows connection strings to be generated from arguments.
+        return SqlAlchemyConnection(kwargs['connection_string'])
+
+    # elif connection_type == "pandas_directory":
+    #     PandasDataContext(args, kwargs)
+    # elif ...
+
+    else:
+        raise ValueError("Unknown connection_type: %s" % (connection_type,))
 
 def _convert_to_dataset_class(df, dataset_class, expectations_config=None):
     """
