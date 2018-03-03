@@ -207,9 +207,13 @@ class TestValidation(unittest.TestCase):
             self,
             validation_results,
             {"results": [
-                {"exception_traceback": None, "expectation_type": "expect_column_values_to_be_in_set", "success": False,
-                 "raised_exception": False,
-                 "kwargs": {"column": "PClass", "values_set": ["1st", "2nd", "3rd"], "result_format": "COMPLETE"},
+                {"exception_info": {"exception_traceback": None, "raised_exception": False},
+                 "expectation_config": {
+                     "expectation_type": "expect_column_values_to_be_in_set",
+                     "kwargs": {"column": "PClass", "values_set": ["1st", "2nd", "3rd"], "result_format": "COMPLETE"},
+                     "success_on_last_run": False
+                 },
+                 "success": False,
                  "result_obj": {"partial_unexpected_index_list": [456], "unexpected_count": 1, "unexpected_list": ["*"],
                                 "unexpected_percent": 0.0007616146230007616, "element_count": 1313,
                                 "missing_percent": 0.0, "partial_unexpected_counts": [{"count": 1, "value": "*"}],
@@ -218,6 +222,58 @@ class TestValidation(unittest.TestCase):
                                 "unexpected_index_list": [456]}}]}
 
         )
+
+    def test_validate_catch_non_existent_expectation(self):
+        df = ge.dataset.PandasDataSet({
+            "x" : [1,2,3,4,5]
+        })
+
+        validation_config_non_existent_expectation = {
+            "dataset_name" : None,
+            "meta": {
+                "great_expectations.__version__": ge.__version__
+            },
+            "expectations" : [{
+                "expectation_type" : "non_existent_expectation",
+                "kwargs" : {
+                    "column" : "x"
+                }
+            }]
+        }
+        results = df.validate(expectations_config=validation_config_non_existent_expectation)['results']
+
+        self.assertIn(
+            "object has no attribute 'non_existent_expectation'",
+            results[0]['exception_info']['exception_message']
+        )
+
+    def test_validate_catch_invalid_parameter(self):
+        df = ge.dataset.PandasDataSet({
+            "x": [1, 2, 3, 4, 5]
+        })
+
+        validation_config_invalid_parameter = {
+            "dataset_name" : None,
+            "meta": {
+                "great_expectations.__version__": ge.__version__
+            },
+            "expectations" : [{
+                "expectation_type" : "expect_column_values_to_be_between",
+                "kwargs" : {
+                    "column" : "x",
+                    "min_value" : 'a',
+                    "max_value" : 5
+                }
+            }]
+        }
+
+        results = df.validate(expectations_config=validation_config_invalid_parameter)['results']
+
+        self.assertIn(
+            "object has no attribute 'non_existent_expectation'",
+            results[0]['exception_info']['exception_message']
+        )
+
 
     def test_top_level_validate(self):
         my_df = pd.DataFrame({
@@ -247,25 +303,33 @@ class TestValidation(unittest.TestCase):
             {
               "results": [
                 {
-                  "raised_exception": False, 
-                  "exception_traceback": None, 
-                  "expectation_type": "expect_column_to_exist", 
-                  "success": True,
-                  "kwargs": {
-                    "column": "x"
-                  }
-                }, 
-                {
-                  "exception_traceback": None,
-                  "expectation_type": "expect_column_values_to_be_between", 
-                  "success": False, 
-                  "raised_exception": False, 
-                  "kwargs": {
-                    "column": "x", 
-                    "max_value": 5, 
-                    "min_value": 3
+                  "exception_info": {
+                    "raised_exception": False,
+                    "exception_traceback": None,
                   },
-                  'result_obj': {'element_count': 5,
+                  "expectation_config": {
+                      "kwargs": {
+                          "column": "x"
+                      },
+                      "expectation_type": "expect_column_to_exist",
+                  },
+                  "success": True
+                },
+                {
+                    "exception_info": {
+                        "raised_exception": False,
+                        "exception_traceback": None
+                    },
+                    "expectation_config": {
+                        "expectation_type": "expect_column_values_to_be_between",
+                        "kwargs": {
+                            "column": "x",
+                            "max_value": 5,
+                            "min_value": 3
+                        }
+                    },
+                    "success": False,
+                    "result_obj": {'element_count': 5,
                                  'missing_count': 0,
                                  'missing_percent': 0.0,
                                  "unexpected_percent": 0.4,
@@ -275,7 +339,7 @@ class TestValidation(unittest.TestCase):
                                  ],
                                  "unexpected_percent_nonmissing": 0.4,
                                  "unexpected_count": 2
-                  }
+                    }
                 }
               ]
             }
