@@ -41,8 +41,7 @@ class TestExpectationDecorators(unittest.TestCase):
         out = eds.no_op_value_expectation('a', include_config=True)
 
         self.assertEqual({'expectation_type': 'no_op_value_expectation',
-                          'kwargs': {'value': 'a', 'result_format': 'BASIC'},
-                          'success_on_last_run': True
+                          'kwargs': {'value': 'a', 'result_format': 'BASIC'}
                           },
                          out['expectation_config'])
 
@@ -67,7 +66,8 @@ class TestExpectationDecorators(unittest.TestCase):
 
         # Check that enabling catch_expectations when no expectation is thrown produces no traceback.
         out = eds.no_op_expectation(catch_exceptions=True)
-        self.assertEqual({'raised_exception': False, 'exception_traceback': None}, out['exception_info'])
+        self.assertEqual({'raised_exception': False, 'exception_traceback': None, 'exception_message': None}, out['exception_info'])
+
     def test_pandas_column_map_decorator_partial_exception_counts(self):
         df = PandasDataSet({'a': [0,1,2,3,4]})
         out = df.expect_column_values_to_be_between('a', 3, 4,
@@ -219,8 +219,7 @@ class TestExpectationDecorators(unittest.TestCase):
                     "kwargs": {
                         "column": "mostly_odd",
                         "result_format": "BASIC"
-                    },
-                    "success_on_last_run": False
+                    }
                 },
                 'result_obj': {'element_count': 10,
                                'missing_count': 0,
