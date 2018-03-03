@@ -5,10 +5,48 @@ import unittest
 from great_expectations.dataset import PandasDataSet, MetaPandasDataSet
 
 
-# from ge.decorators import expectation, column_map_expectation, column_aggregate_expectation
+#TODO: convert to a fixture yielding this test dataset
+class ExpectationOnlyDataSet(DataSet):
+
+    @DataSet.expectation([])
+    def no_op_expectation(self, result_format=None, include_config=False, catch_exceptions=None, meta=None):
+        return {"success": True}
+
+    @DataSet.expectation(['value'])
+    def no_op_value_expectation(self, value=None,
+                                result_format=None, include_config=False, catch_exceptions=None, meta=None):
+        return {"success": True}
+
+    @DataSet.expectation([])
+    def exception_expectation(self,
+                                result_format=None, include_config=False, catch_exceptions=None, meta=None):
+        raise ValueError("Gotcha!")
+
 
 class TestExpectationDecorators(unittest.TestCase):
     
+    def test_expectation_decorator_catch_exceptions(self):
+        eds = ExpectationOnlyDataSet()
+
+        # Confirm that we would raise an error without catching exceptions
+        with self.assertRaises(ValueError):
+            eds.exception_expectation(catch_exceptions=False)
+
+        # Catch exceptions and validate results
+        out = eds.exception_expectation(catch_exceptions=True)
+        print(out)
+        self.assertEqual(True,
+                         out['exception_info']['raised_exception'])
+
+        # Check only the first and last line of the traceback, since formatting can be platform dependent.
+        self.assertEqual('Traceback (most recent call last):',
+                         out['exception_info']['exception_traceback'].split('\n')[0])
+        self.assertEqual('ValueError: Gotcha!',
+                         out['exception_info']['exception_traceback'].split('\n')[-2])
+
+        # Check that enabling catch_expectations when no expectation is thrown produces no traceback.
+        out = eds.no_op_expectation(catch_exceptions=True)
+        self.assertEqual({'raised_exception': False, 'exception_traceback': None}, out['exception_info'])
     def test_column_map_expectation_decorator(self):
 
         # Create a new CustomPandasDataSet to 
@@ -229,116 +267,6 @@ class TestExpectationDecorators(unittest.TestCase):
             }
         )
 
-    def test_expectation_decorator_catch_exceptions(self):
-
-        class CustomPandasDataSet(PandasDataSet):
-
-            @PandasDataSet.column_map_expectation
-            def expect_column_values_to_be_odd(self, column):
-                return column.map(lambda x: x % 2 )
-
-            @PandasDataSet.column_map_expectation
-            def expectation_that_crashes_on_sixes(self, column):
-                return column.map(lambda x: 1/(x-6) != "duck")
-
-
-        df = CustomPandasDataSet({
-            'all_odd' : [1,3,5,5,5,7,9,9,9,11],
-            'mostly_odd' : [1,3,5,7,9,2,4,1,3,5],
-            'all_even' : [2,4,4,6,6,6,8,8,8,8],
-            'odd_missing' : [1,3,5,None,None,None,None,1,3,None],
-            'mixed_missing' : [1,3,5,None,None,2,4,1,3,None],
-            'all_missing' : [None,None,None,None,None,None,None,None,None,None]
-        })
-        df.set_default_expectation_argument("result_format", "COMPLETE")
-
-        self.assertEqual(
-            df.expectation_that_crashes_on_sixes("all_odd", catch_exceptions=False),
-            {'result_obj': {'element_count': 10,
-                            'missing_count': 0,
-                            'missing_percent': 0.0,
-                            'partial_unexpected_counts': [],
-                            'partial_unexpected_index_list': [],
-                            'partial_unexpected_list': [],
-                            'unexpected_count': 0,
-                            'unexpected_index_list': [],
-                            'unexpected_list': [],
-                            'unexpected_percent': 0.0,
-                            'unexpected_percent_nonmissing': 0.0},
-             'success': True}
-        )
-
-        self.assertEqual(
-            df.expectation_that_crashes_on_sixes("all_odd", catch_exceptions=True),
-            {'result_obj': {'element_count': 10,
-                            'missing_count': 0,
-                            'missing_percent': 0.0,
-                            'partial_unexpected_counts': [],
-                            'partial_unexpected_index_list': [],
-                            'partial_unexpected_list': [],
-                            'unexpected_count': 0,
-                            'unexpected_index_list': [],
-                            'unexpected_list': [],
-                            'unexpected_percent': 0.0,
-                            'unexpected_percent_nonmissing': 0.0},
-                'success': True,
-                'raised_exception': False,
-                'exception_traceback': None,
-            }
-        )
-
-        with self.assertRaises(ZeroDivisionError):
-            df.expectation_that_crashes_on_sixes("all_even", catch_exceptions=False)
-
-        result_obj = df.expectation_that_crashes_on_sixes("all_even", catch_exceptions=True)
-        comparison_obj = {
-            'success': False,
-            'raised_exception': True,
-        }
-
-        self.assertEqual(
-            set(result_obj.keys()),
-            set(list(comparison_obj.keys())+['exception_traceback']),
-        )
-
-        for k,v in comparison_obj.items():
-            self.assertEqual(result_obj[k], v)
-
-        self.assertEqual(
-            result_obj["exception_traceback"].split('\n')[-1],
-            "",
-        )
-
-        if sys.version_info[0] == 3:
-            self.assertEqual(
-                result_obj["exception_traceback"].split('\n')[-2],
-                "ZeroDivisionError: division by zero"
-            )
-
-        else:
-            self.assertEqual(
-                result_obj["exception_traceback"].split('\n')[-2].split(':')[0],
-                "ZeroDivisionError"
-            )
-
-        self.assertEqual(
-            result_obj["exception_traceback"].split('\n')[-3],
-            "    return column.map(lambda x: 1/(x-6) != \"duck\")",
-        )
-
-
-        self.assertEqual(
-            df.expectation_that_crashes_on_sixes("all_odd", result_format="BOOLEAN_ONLY", catch_exceptions=True),
-            {'success': True}
-        )
-
-        self.assertEqual(
-            df.expectation_that_crashes_on_sixes("all_even", result_format="BOOLEAN_ONLY", catch_exceptions=True),
-            {'success': False}
-        )
-
-        # with self.assertRaises(ZeroDivisionError):
-        #     df.expectation_that_crashes_on_sixes("all_even", catch_exceptions=False)
 
 if __name__ == "__main__":
     unittest.main()
