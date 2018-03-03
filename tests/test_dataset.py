@@ -1044,10 +1044,10 @@ class TestDataset(unittest.TestCase):
         result = my_df.validate(catch_exceptions=True)
 
         self.assertEqual(result["results"][1]["success"], False)
-        self.assertEqual(result["results"][1]["expectation_type"], "foobar")
-        self.assertEqual(result["results"][1]["kwargs"], {})
-        self.assertEqual(result["results"][1]["raised_exception"], True)
-        assert "AttributeError: \'PandasDataSet\' object has no attribute \'foobar\'" in result["results"][1]["exception_traceback"]
+        self.assertEqual(result["results"][1]["expectation_config"]["expectation_type"], "foobar")
+        self.assertEqual(result["results"][1]["expectation_config"]["kwargs"], {})
+        self.assertEqual(result["results"][1]["exception_info"]["raised_exception"], True)
+        assert "AttributeError: \'PandasDataSet\' object has no attribute \'foobar\'" in result["results"][1]["exception_info"]["exception_traceback"]
 
         with self.assertRaises(AttributeError) as context:
             result = my_df.validate(catch_exceptions=False)
