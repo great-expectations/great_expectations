@@ -1,11 +1,9 @@
 from __future__ import division
 
-import sys
 import unittest
-from great_expectations.dataset import PandasDataSet, MetaPandasDataSet
+from great_expectations.dataset import DataSet, PandasDataSet, MetaPandasDataSet
 
 
-#TODO: convert to a fixture yielding this test dataset
 class ExpectationOnlyDataSet(DataSet):
 
     @DataSet.expectation([])
@@ -24,7 +22,30 @@ class ExpectationOnlyDataSet(DataSet):
 
 
 class TestExpectationDecorators(unittest.TestCase):
-    
+
+    def test_expectation_decorator_build_config(self):
+        eds = ExpectationOnlyDataSet()
+        eds.no_op_expectation()
+        eds.no_op_value_expectation('a')
+
+        config = eds.get_expectations_config()
+        self.assertEqual({'expectation_type': 'no_op_expectation', 'kwargs': {}},
+                         config['expectations'][0])
+
+        self.assertEqual({'expectation_type': 'no_op_value_expectation', 'kwargs': {'value': 'a'}},
+                         config['expectations'][1])
+
+
+    def test_expectation_decorator_include_config(self):
+        eds = ExpectationOnlyDataSet()
+        out = eds.no_op_value_expectation('a', include_config=True)
+
+        self.assertEqual({'expectation_type': 'no_op_value_expectation',
+                          'kwargs': {'value': 'a', 'result_format': 'BASIC'},
+                          'success_on_last_run': True
+                          },
+                         out['expectation_config'])
+
     def test_expectation_decorator_catch_exceptions(self):
         eds = ExpectationOnlyDataSet()
 
@@ -47,6 +68,7 @@ class TestExpectationDecorators(unittest.TestCase):
         # Check that enabling catch_expectations when no expectation is thrown produces no traceback.
         out = eds.no_op_expectation(catch_exceptions=True)
         self.assertEqual({'raised_exception': False, 'exception_traceback': None}, out['exception_info'])
+
     def test_column_map_expectation_decorator(self):
 
         # Create a new CustomPandasDataSet to 
@@ -185,9 +207,13 @@ class TestExpectationDecorators(unittest.TestCase):
         self.assertEqual(
             df.expect_column_values_to_be_odd("mostly_odd", include_config=True),
             {
-                "expectation_kwargs": {
-                    "column": "mostly_odd", 
-                    "result_format": "BASIC"
+                "expectation_config": {
+                    "expectation_type": "expect_column_values_to_be_odd",
+                    "kwargs": {
+                        "column": "mostly_odd",
+                        "result_format": "BASIC"
+                    },
+                    "success_on_last_run": False
                 },
                 'result_obj': {'element_count': 10,
                                'missing_count': 0,
@@ -197,7 +223,6 @@ class TestExpectationDecorators(unittest.TestCase):
                                'unexpected_percent': 0.2,
                                'unexpected_percent_nonmissing': 0.2},
                 'success': False,
-                "expectation_type": "expect_column_values_to_be_odd"
             }
         )
 

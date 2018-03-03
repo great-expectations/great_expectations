@@ -133,12 +133,12 @@ class DataSet(object):
                 #Append the expectation to the config.
                 self.append_expectation(expectation_config)
 
-                if result_format != 'BOOLEAN_ONLY':
+                # if result_format != 'BOOLEAN_ONLY':
 
-                    if include_config:
-                        return_obj["expectation_config"] = copy.deepcopy(expectation_config)
-                        # return_obj["expectation_type"] = expectation_config["expectation_type"]
-                        # return_obj["expectation_kwargs"] = copy.deepcopy(dict(expectation_config["kwargs"]))
+                if include_config:
+                    return_obj["expectation_config"] = copy.deepcopy(expectation_config)
+                    # return_obj["expectation_type"] = expectation_config["expectation_type"]
+                    # return_obj["expectation_kwargs"] = copy.deepcopy(dict(expectation_config["kwargs"]))
 
                 if catch_exceptions:
                     return_obj["exception_info"] = {
