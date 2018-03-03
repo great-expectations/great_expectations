@@ -110,8 +110,9 @@ class DataSet(object):
 
                 raised_exception = False
                 exception_traceback = None
+                exception_message = None
 
-                #Finally, execute the expectation method itself
+                # Finally, execute the expectation method itself
                 try:
                     return_obj = func(self, **expectation_args)
 
@@ -119,6 +120,7 @@ class DataSet(object):
                     if catch_exceptions:
                         raised_exception = True
                         exception_traceback = traceback.format_exc()
+                        exception_message = err.message
 
                         return_obj = {
                             "success": False
@@ -616,33 +618,27 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                     **expectation['kwargs']
                 )
 
-            except AttributeError as err:
+            except Exception as err:
                 if catch_exceptions:
                     raised_exception = True
                     exception_traceback = traceback.format_exc()
 
-                    if result_format != "BOOLEAN_ONLY":
-                        result = {
-                            "success": False, 
-                            "expectation_type": expectation['expectation_type'],
-                            "kwargs": expectation['kwargs'],
-                            "raised_exception": raised_exception, 
+                    result = {
+                        "success": False,
+                        "exception_info": {
+                            "raised_exception": raised_exception,
                             "exception_traceback": exception_traceback,
+                            "exception_message": err.message
                         }
-                    else:
-                        result = False
+                    }
 
                 else:
                     raise(err)
 
-            if result_format != "BOOLEAN_ONLY":
-                results.append(
-                    dict(list(expectation.items()) + list(result.items()))
-                )
-            else:
-                results.append(
-                    dict(list(expectation.items()) + [("success", result)])
-                )
+            if include_config:
+                result["expectation_config"] = copy.deepcopy(expectation)
+
+            results.append(result)
 
         if only_return_failures:
             abbrev_results = []
