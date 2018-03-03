@@ -68,6 +68,13 @@ class TestExpectationDecorators(unittest.TestCase):
         # Check that enabling catch_expectations when no expectation is thrown produces no traceback.
         out = eds.no_op_expectation(catch_exceptions=True)
         self.assertEqual({'raised_exception': False, 'exception_traceback': None}, out['exception_info'])
+    def test_pandas_column_map_decorator_partial_exception_counts(self):
+        df = PandasDataSet({'a': [0,1,2,3,4]})
+        out = df.expect_column_values_to_be_between('a', 3, 4,
+                                              result_format={'result_obj_format': 'COMPLETE', 'partial_unexpected_count': 1})
+
+        self.assertTrue(1, len(out['result_obj']['partial_unexpected_counts']))
+        self.assertTrue(3, len(out['result_obj']['unexpected_list']))
 
     def test_column_map_expectation_decorator(self):
 
