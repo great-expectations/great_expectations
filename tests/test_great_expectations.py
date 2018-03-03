@@ -182,9 +182,9 @@ class TestValidation(unittest.TestCase):
         my_df.set_default_expectation_argument("result_format", "COMPLETE")
 
         results = my_df.validate(catch_exceptions=False)
-        #print json.dumps(results, indent=2)
+        # print json.dumps(results, indent=2)
 
-        with open('./tests/test_sets/expected_results_20180228.json') as f:
+        with open('./tests/test_sets/expected_results_20180303.json') as f:
             expected_results = json.load(f)
             #print json.dumps(expected_results, indent=2)
 
@@ -194,24 +194,23 @@ class TestValidation(unittest.TestCase):
                               expected_results
                               )
 
-        #Now, change the results and ensure they are no longer equal
+        # Now, change the results and ensure they are no longer equal
         results[0] = {}
         self.assertNotEqual(results,
                             expected_results
                             )
 
-
+        # Finally, confirm that only_return_failures works
         validation_results = my_df.validate(only_return_failures=True)
         #print json.dumps(validation_results)
         assertDeepAlmostEqual(
             self,
             validation_results,
             {"results": [
-                {"exception_info": {"exception_traceback": None, "raised_exception": False},
+                {"exception_info": {"exception_traceback": None, "raised_exception": False, "exception_message": None},
                  "expectation_config": {
                      "expectation_type": "expect_column_values_to_be_in_set",
-                     "kwargs": {"column": "PClass", "values_set": ["1st", "2nd", "3rd"], "result_format": "COMPLETE"},
-                     "success_on_last_run": False
+                     "kwargs": {"column": "PClass", "values_set": ["1st", "2nd", "3rd"], "result_format": "COMPLETE"}
                  },
                  "success": False,
                  "result_obj": {"partial_unexpected_index_list": [456], "unexpected_count": 1, "unexpected_list": ["*"],
