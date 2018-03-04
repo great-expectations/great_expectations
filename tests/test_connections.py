@@ -27,7 +27,7 @@ class TestConnections(unittest.TestCase):
         my_dataset.expect_column_to_exist("AlbumId")
 
         #...and validation.
-        print my_dataset.validate()
+        print(my_dataset.validate())
 
 
     def test_FilepathConnection(self):
@@ -39,8 +39,8 @@ class TestConnections(unittest.TestCase):
             is_recursive=False,
         )
         self.assertEqual(
-            my_conn.get_dataset_list(),
-            ['Titanic.csv', 'FAO-Rice-Production-Asia.csv']
+            set(my_conn.get_dataset_list()),
+            set(['Titanic.csv', 'FAO-Rice-Production-Asia.csv'])
         )
 
 
@@ -51,8 +51,8 @@ class TestConnections(unittest.TestCase):
             is_recursive=True,
         )
         self.assertEqual(
-            my_conn.get_dataset_list(),
-            ['Titanic.csv', 'FAO-Rice-Production-Asia.csv']
+            set(my_conn.get_dataset_list()),
+            set(['Titanic.csv', 'FAO-Rice-Production-Asia.csv'])
         )
 
 
@@ -63,8 +63,8 @@ class TestConnections(unittest.TestCase):
             is_recursive=True,
         )
         self.assertEqual(
-            my_conn.get_dataset_list(),
-            ['data/Titanic.csv', 'data/FAO-Rice-Production-Asia.csv']
+            set(my_conn.get_dataset_list()),
+            set(['data/Titanic.csv', 'data/FAO-Rice-Production-Asia.csv'])
         )
 
         # with self.assertRaises:
@@ -84,7 +84,7 @@ class TestConnections(unittest.TestCase):
         )
 
         #...and validation.
-        print my_dataset.validate()
+        print(my_dataset.validate())
 
 
     def test_SparkSqlConnection(self):
