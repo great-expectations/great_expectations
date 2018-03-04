@@ -1,0 +1,21 @@
+version: '3.2'
+services:
+  great-expectations:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8888"
+    links:
+      - postgres:postgres
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres
+    environment:
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test
+      POSTGRES_DB: test
+    ports:
+      - "5432:5432"
