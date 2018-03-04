@@ -8,5 +8,3 @@ RUN pip install jupyter
 
 COPY . ./
 RUN pip install .
-
-RUN pytest

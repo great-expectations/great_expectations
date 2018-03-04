@@ -9,3 +9,4 @@ jsonschema>=2.5.1
 SQLAlchemy>=1.1.13
 psycopg2>=2.7.3.2
 pytest==3.2.5
+watchdog==0.8.3

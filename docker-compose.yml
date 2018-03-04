@@ -19,3 +19,17 @@ services:
       POSTGRES_DB: test
     ports:
       - "5432:5432"
+
+  watchdog:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - type: bind
+        source: .
+        target: /home/jovyan/work/great_expectations
+    links:
+      - postgres:postgres
+    depends_on:
+      - postgres
+    command: watchmedo shell-command --patterns="*.py;*.txt;*.json" --recursive --command='pytest' .
