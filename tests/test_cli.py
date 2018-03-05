@@ -118,6 +118,10 @@ class TestCLI(unittest.TestCase):
           json_result = {}
 
         self.maxDiff = None
+        # print(json.dumps(json_result, indent=2))
+
+        #Remove partial unexpected counts, because we can't guarantee that they'll be the same every time.
+        del json_result["results"][0]["result_obj"]['partial_unexpected_counts']
 
         with open(filepath + '/test_sets/expected_cli_results_custom.json', 'r') as f:
             expected_cli_results = json.load(f)
