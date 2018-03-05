@@ -54,7 +54,6 @@ class TestExpectationDecorators(unittest.TestCase):
 
         # Catch exceptions and validate results
         out = eds.exception_expectation(catch_exceptions=True)
-        print(out)
         self.assertEqual(True,
                          out['exception_info']['raised_exception'])
 
@@ -64,9 +63,9 @@ class TestExpectationDecorators(unittest.TestCase):
         self.assertEqual('ValueError: Gotcha!',
                          out['exception_info']['exception_traceback'].split('\n')[-2])
 
-        # Check that enabling catch_expectations when no expectation is thrown produces no traceback.
+        # Check that enabling catch_expectations when no expectation is thrown produces no exception_info object.
         out = eds.no_op_expectation(catch_exceptions=True)
-        self.assertEqual({'raised_exception': False, 'exception_traceback': None, 'exception_message': None}, out['exception_info'])
+        self.assertFalse('exception_info' in out)
 
     def test_pandas_column_map_decorator_partial_exception_counts(self):
         df = PandasDataSet({'a': [0,1,2,3,4]})
