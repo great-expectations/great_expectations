@@ -8,7 +8,10 @@
           "result_format": "SUMMARY"
         }
       },
-      "success": true
+      "success": true,
+      "exception_info": {"exception_message": null,
+         "exception_traceback": null,
+         "raised_exception": false}
     },
     {
       "expectation_config": {
@@ -18,7 +21,10 @@
           "result_format": "SUMMARY"
         }
       },
-      "success": true
+      "success": true,
+      "exception_info": {"exception_message": null,
+         "exception_traceback": null,
+         "raised_exception": false}
     },
     {
       "expectation_config": {
@@ -28,7 +34,10 @@
           "result_format": "SUMMARY"
         }
       },
-      "success": true
+      "success": true,
+      "exception_info": {"exception_message": null,
+         "exception_traceback": null,
+         "raised_exception": false}
     },
     {
       "expectation_config": {
@@ -38,7 +47,10 @@
           "result_format": "SUMMARY"
         }
       },
-      "success": true
+      "success": true,
+      "exception_info": {"exception_message": null,
+         "exception_traceback": null,
+         "raised_exception": false}
     },
     {
       "expectation_config": {
@@ -48,7 +60,10 @@
           "result_format": "SUMMARY"
         }
       },
-      "success": true
+      "success": true,
+      "exception_info": {"exception_message": null,
+         "exception_traceback": null,
+         "raised_exception": false}
     },
     {
       "expectation_config": {
@@ -58,7 +73,10 @@
           "result_format": "SUMMARY"
         }
       },
-      "success": true
+      "success": true,
+      "exception_info": {"exception_message": null,
+         "exception_traceback": null,
+         "raised_exception": false}
     },
     {
       "expectation_config": {
@@ -71,6 +89,9 @@
         }
       },
       "success": true,
+      "exception_info": {"exception_message": null,
+         "exception_traceback": null,
+         "raised_exception": false},
       "result_obj": {
         "observed_value": 30.397989417989418,
         "element_count": 1313,
@@ -89,6 +110,9 @@
         }
       },
       "success": true,
+      "exception_info": {"exception_message": null,
+         "exception_traceback": null,
+         "raised_exception": false},
       "result_obj": {
         "partial_unexpected_index_list": [],
         "unexpected_count": 0,
@@ -111,7 +135,13 @@
           "mostly": 0.95
         }
       },
+      "exception_info": {"exception_message": null,
+         "exception_traceback": null,
+         "raised_exception": false},
       "success": true,
+      "exception_info": {"exception_message": null,
+               "exception_traceback": null,
+               "raised_exception": false},
       "result_obj": {
         "partial_unexpected_index_list": [
           394,
@@ -158,6 +188,9 @@
           "result_format": "SUMMARY"
         }
       },
+      "exception_info": {"exception_message": null,
+               "exception_traceback": null,
+               "raised_exception": false},
       "success": false,
       "result_obj": {
         "partial_unexpected_index_list": [

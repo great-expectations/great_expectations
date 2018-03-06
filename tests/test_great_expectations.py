@@ -212,6 +212,9 @@ class TestValidation(unittest.TestCase):
                      "kwargs": {"column": "PClass", "values_set": ["1st", "2nd", "3rd"], "result_format": "COMPLETE"}
                  },
                  "success": False,
+                 "exception_info": {"exception_message": None,
+                                    "exception_traceback": None,
+                                    "raised_exception": False},
                  "result_obj": {"partial_unexpected_index_list": [456], "unexpected_count": 1, "unexpected_list": ["*"],
                                 "unexpected_percent": 0.0007616146230007616, "element_count": 1313,
                                 "missing_percent": 0.0, "partial_unexpected_counts": [{"count": 1, "value": "*"}],
@@ -306,6 +309,9 @@ class TestValidation(unittest.TestCase):
                       },
                       "expectation_type": "expect_column_to_exist",
                   },
+                  "exception_info": {"exception_message": None,
+                                    "exception_traceback": None,
+                                    "raised_exception": False},
                   "success": True
                 },
                 {
@@ -317,6 +323,9 @@ class TestValidation(unittest.TestCase):
                             "min_value": 3
                         }
                     },
+                    "exception_info": {"exception_message": None,
+                                        "exception_traceback": None,
+                                        "raised_exception": False},
                     "success": False,
                     "result_obj": {'element_count': 5,
                                  'missing_count': 0,
