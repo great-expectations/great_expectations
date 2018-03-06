@@ -324,52 +324,87 @@ def infer_distribution_parameters(column, distribution, params=None):
     elif params['std_dev'] < 0:
         raise ValueError("std_dev cannot be less than zero")
 
-    if distribution == "norm":
-        return params['mean'], params['std_dev']
+    if 'loc' not in params.keys():
+        params['loc'] = 0
+    if 'scale' not in params.keys():
+        params['scale'] = 1
 
-    if distribution == "beta":
+    if distribution == "norm":
+        # scipy cdf(x, loc=0, scale=1)
+        pass
+        #return params['mean'], params['std_dev']
+
+    elif distribution == "beta":
+        # scipy cdf(x, a, b, loc=0, scale=1)
         if 'alpha' not in params.keys():
             # from https://stats.stackexchange.com/questions/12232/calculating-the-parameters-of-a-beta-distribution-using-the-mean-and-variance
             params['alpha'] = (params['mean'] ** 2) * (
                         ((1 - params['mean']) / params['std_dev'] ** 2) - (1 / params['mean']))
         if 'beta' not in params.keys():
             params['beta'] = params['alpha'] * ((1 / params['mean']) - 1)
-        return params['alpha'], params['beta']
 
-    if distribution == 'gamma':
+        #return params['alpha'], params['beta'], params['loc'], params['scale']
+
+    elif distribution == 'gamma':
+        # scipy cdf(x, a, loc=0, scale=1)
         if 'alpha' not in params.keys():
-            # from https://www.rocscience.com/help/swedge/webhelp/swedge/Gamma_Distribution.htm
-            params['alpha'] = (params['mean'] / params['std_dev']) ** 2
-        if 'beta' not in params.keys():
-            params['beta'] = params['std_dev'] ** 2 / params['mean']
-        return params['alpha'], params['beta']
+            if 'a' in params.keys():
+                params['alpha'] = params['a']
+            else:
+                # Using https://en.wikipedia.org/wiki/Gamma_distribution
+                params['alpha'] = (params['mean'] / params['scale'])
+        elif params['alpha'] <= 0:
+            raise ValueError("Gamma distribution requires its `alpha` shape parameter to be greater than 0")
+        #return params['alpha'], params['loc'], params['scale']
 
-    if distribution == 'poisson':
+    elif distribution == 'poisson':
         if 'lambda' not in params.keys():
             params['lambda'] = params['mean']
-        return params['lambda']
+        #return params['lambda'], params['loc']
 
-    if distribution == 'uniform':
+    elif distribution == 'uniform':
+        # scipy cdf(x, loc=0, scale=1)
         if 'min' not in params.keys():
-            params['min'] = min(column)
+            if 'loc' in params.keys():
+                params['min'] = params['loc']
+            else:
+                params['min'] = min(column)
         if 'max' not in params.keys():
-            params['scale'] = max(column) - params['min']
-        return params['min'], params['scale']
+            if 'scale' in params.keys():
+                params['max'] = params['scale']
+            else:
+                params['max'] = max(column) - params['min']
+        #return params['min'], params['max']
 
-    if distribution == 'chi2':
+    elif distribution == 'chi2':
+        # scipy cdf(x, df, loc=0, scale=1)
         if 'df' not in params.keys():
             # from https://en.wikipedia.org/wiki/Chi-squared_distribution
             params['df'] = params['mean']
-        return [params['df']]
+        #return params['df'], params['loc'], params['scale']
 
-    if distribution == 'expon':
-        # Let's see how to incorporate lambda
-            #  If user specifies, use as rate paramater? How do we use that rate parameter in the cdf?
-        #if 'lambda' not in params.keys():
-            # from https://en.wikipedia.org/wiki/Exponential_distribution
-            #params['lambda'] = 1 / params['mean']
-        if 'loc' not in params.keys() or 'scale' not in params.keys():
-            raise KeyError("Exponential Distribution requires a loc and scale distribution.\nSee CDF doc https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.expon.html#scipy.stats.expon")
-        return params['loc'], params['scale']
+    elif distribution == 'expon':
+        # scipy cdf(x, loc=0, scale=1)
+        if 'lambda' in params.keys():
+            params['scale'] = 1 / params['lambda']
+        #return params['loc'], params['scale']
     else:
         raise AttributeError("Unsupported distribution type. Please refer to Great Expectations Documentation")
+
+    return params
+
+def scipy_distribution_positional_args_from_dict(distribution, params):
+    if distribution == 'norm':
+        return params['mean'], params['std_dev']
+    elif distribution == 'beta':
+        return params['alpha'], params['beta'], params['loc'], params['scale']
+    elif distribution == 'gamma':
+        return params['alpha'], params['loc'], params['scale']
+    elif distribution == 'poisson':
+        return params['lambda'], params['loc']
+    elif distribution == 'uniform':
+        return params['min'], params['max']
+    elif distribution == 'chi2':
+        return params['df'], params['loc'], params['scale']
+    elif distribution == 'expon':
+        return params['loc'], params['scale']

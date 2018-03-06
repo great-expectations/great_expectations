@@ -16,7 +16,7 @@ from six import string_types
 from .base import DataSet
 from .util import DocInherit, recursively_convert_to_json_serializable, \
         is_valid_partition_object, is_valid_categorical_partition_object, is_valid_continuous_partition_object, \
-        infer_distribution_parameters
+        infer_distribution_parameters, scipy_distribution_positional_args_from_dict
 
 class MetaPandasDataSet(DataSet):
     """
@@ -717,19 +717,27 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
                                                                                     output_format=None,
                                                                                     include_config=False,
                                                                                     catch_exceptions=None, meta=None):
-        if p_value <= 0.:
-            raise ValueError("p_value cannot be 0 or less")
+        if 0 >= p_value >= 1:
+            raise ValueError("p_value must be between 0 and 1 exclusive")
 
-        ks_result = stats.kstest(column, distribution, args=infer_distribution_parameters(column, distribution, params))
+        # Validate params
+        if params is None:
+            raise ValueError("params must be a dictionary or use ge.dataset.util,infer_distribution_parameters(df.column, distribution)")
+
+        # Frozen Scipy Params test
+
+        ks_result = stats.kstest(column, distribution,
+                                 args=scipy_distribution_positional_args_from_dict(distribution, params))
 
         return {
             "success": ks_result[1] >= p_value,
-            "true_value": ks_result[1],
-            "summary_obj": {
-                "distribution": distribution,
-                "p_value": p_value,
-                "params": params,
-                "ks_result": ks_result
+            "true_value": 0,
+            "result_obj": {
+                "observed_value": ks_result[1],
+                "details": {
+                    "expected_params": params,
+                    "observed_ks_result": ks_result
+                }
             }
         }
 
