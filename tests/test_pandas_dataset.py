@@ -2,6 +2,7 @@ import unittest
 import json
 import numpy as np
 import datetime
+import scipy.stats as stats
 
 import great_expectations as ge
 
@@ -1414,36 +1415,82 @@ class TestPandasDataset(unittest.TestCase):
             df.expect_column_mean_to_be_between('x',4,6, output_format="QUACK")
 
     def test_expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than(self):
+        std_loc, std_scale = 0, 1
+        norm_mean, norm_std = -2, 5
+        beta_a, beta_b, beta_loc, beta_scale = 0.5, 10, 5, 11
+        gamma_a, gamma_loc, gamma_scale = 2, 20, 3
+        poisson_lambda, poisson_loc = 8.2, 40
+        uniform_loc, uniform_scale = -5, 11
+        chi2_df, chi2_loc, chi2_scale = 30, 3, 5
+        expon_loc, expon_scale = 4.2, 10
+
+        ## Code used to create reproducible and static test data
+        #np.random.seed(12345)
+        #fixed = ge.dataset.PandasDataSet({
+        #    'norm': stats.norm.rvs(loc=norm_mean, scale=norm_std, size=500),
+        #    'norm_std': stats.norm.rvs(size=500),
+        #    'beta': stats.beta.rvs(a=beta_a, b=beta_b, loc=beta_loc, scale=beta_scale, size=500),
+        #    'beta_std': stats.beta.rvs(a=beta_a, b=beta_b),
+        #    'gamma': stats.gamma.rvs(a=gamma_a, loc=gamma_loc, scale=gamma_scale, size=500),
+        #    'gamma_std': stats.gamma.rvs(a=gamma_a, size=500),
+        #    'poisson': stats.poisson.rvs(mu=poisson_lambda, loc=poisson_loc, size=500),
+        #    'poisson_std': stats.poisson.rvs(mu=poisson_lambda, size=500),
+        #    'uniform': stats.uniform.rvs(loc=uniform_loc, scale=uniform_scale, size=500),
+        #    'uniform_std': stats.uniform.rvs(size=500),
+        #    'chi2': stats.chi2.rvs(df=chi2_df, loc=chi2_loc, scale=chi2_scale, size=500),
+        #    'chi2_std': stats.chi2.rvs(df=chi2_df, size=500),
+        #    'exponential': stats.expon.rvs(loc=expon_loc, scale=expon_scale, size=500),
+        #    'exponential_std': stats.expon.rvs(size=500)
+        #})
+        #fixed.to_csv("./tests/test_sets/fixed_distributional_test_dataset.csv")
+
+        # Reset random seed
+        np.random.seed(None)
+
+        # Get test data
         df = ge.read_csv("./tests/test_sets/fixed_distributional_test_dataset.csv")
 
-        ## Code used to create test data
-        #fixed = ge.dataset.PandasDataSet({
-        #    'norm': stats.norm.rvs(-2, 5, 500),
-        #    'beta': stats.beta.rvs(0.5, 10, 500),
-        #    'gamma': stats.gamma.rvs(2, 20, 500),
-        #    'poisson': stats.poisson.rvs(8.2, 40, 500),
-        #    'uniform': stats.uniform.rvs(-5, 11, 500),
-        #    'chi2': stats.chi2.rvs(df=30, size=500),
-        #    'exponential': stats.expon.rvs(loc=4.2, scale=1, size=500)
-        #})
-        # fixed.to_csv("./tests/test_sets/fixed_distributional_test_dataset.csv")
-
-        # Test specified mean and variance and p-value
+        # Test "norm" distribution specified mean and variance and p-value
         self.assertTrue(
             df.expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than(column='norm',
                                                                                            distribution='norm',
                                                                                            p_value=0.05,
-                                                                                           params = {
-                                                                                                'mean': -2,
-                                                                                                'std_dev': 5
+                                                                                           params={
+                                                                                                'mean': norm_mean,
+                                                                                                'std_dev': norm_std
                                                                                            })['success']
         )
 
         # Test non-specified mean and variance
         self.assertTrue(
             df.expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than(column='norm',
-                                                                                           distribution='norm')['success']
+                                                                                           distribution='norm',
+                                                                                           params=ge.util.infer_distribution_parameters(column='norm',
+                                                                                                                                        distribution='norm'
+                                                                                                                                        )
+                                                                                           )['success']
         )
+
+        # Test non-matching mean
+        self.assertFalse(
+            df.expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than(column='norm',
+                                                                                           distribution='norm',
+                                                                                           params={
+                                                                                               'mean': norm_mean*1000,
+                                                                                               'std_dev': norm_std
+                                                                                           })['success']
+        )
+
+        # Test non-matching std
+        self.assertFalse(
+            df.expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than(column='norm',
+                                                                                           distribution='norm',
+                                                                                           params={
+                                                                                               'mean': norm_mean,
+                                                                                               'std_dev': norm_std * 1000
+                                                                                           })['success']
+        )
+
 
         # Test negative p value not allowed
         with self.assertRaises(ValueError):
@@ -1456,8 +1503,8 @@ class TestPandasDataset(unittest.TestCase):
             df.expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than(column='norm',
                                                                                            distribution='norm',
                                                                                            params={
-                                                                                               'mean': 0,
-                                                                                               'std_dev': -1
+                                                                                               'mean': norm_mean,
+                                                                                               'std_dev': norm_std * -1
                                                                                            })['success']
 
         # Test a non-existent distribution
@@ -1466,36 +1513,90 @@ class TestPandasDataset(unittest.TestCase):
 
         # Test a legit beta distribution
         self.assertTrue(
-            df.expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than('beta', 'beta')
+            df.expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than('beta', 'beta',
+                                                                                           params={
+                                                                                               'alpha': beta_a,
+                                                                                               'beta': beta_b,
+                                                                                               'loc': beta_loc,
+                                                                                               'scale': beta_scale
+                                                                                           })['success']
+        )
+
+        # Test a standard beta distribution
+        self.assertTrue(
+            df.expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than('beta_std', 'beta',
+                                                                                           params={
+                                                                                               'alpha': beta_a,
+                                                                                               'beta': beta_b,
+                                                                                           })['success']
         )
 
         # Test a gamma distribution
-        #self.assertTrue(
-        #    df.expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than('gamma', 'gamma')['success']
-       # )
+        self.assertTrue(
+            df.expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than('gamma', 'gamma',
+                                                                                           params={
+                                                                                               'a': gamma_a,
+                                                                                               'loc': gamma_loc,
+                                                                                               'scale': gamma_scale
+                                                                                           })['success']
+        )
 
+        # Test a standard gamma distribution
+        self.assertTrue(
+            df.expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than('gamma_std', 'gamma',
+                                                                                           params={
+                                                                                               'a': gamma_a,
+                                                                                           })['success']
+        )
 
         # Test a uniform distribution
         self.assertTrue(
-            df.expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than('uniform', 'uniform')['success']
+            df.expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than('uniform', 'uniform',
+                                                                                           params={
+                                                                                               'loc': uniform_loc,
+                                                                                               'scale': uniform_scale
+                                                                                           })['success']
+        )
+
+        # Test a standard uniform distribution
+        self.assertTrue(
+            df.expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than('uniform_std', 'uniform'
+                                                                                           )['success']
         )
 
         # Test a chi-squared distribution
         self.assertTrue(
-            df.expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than('chi2', 'chi2')['success']
+            df.expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than('chi2', 'chi2',
+                                                                                           params={
+                                                                                               'df': chi2_df,
+                                                                                               'loc': chi2_loc,
+                                                                                               'scale': chi2_scale
+                                                                                           })['success']
         )
 
-        with self.assertRaises(KeyError):
-            df.expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than('exponential', 'expon')
-
+        # Test a standard chi-squared distribution
+        self.assertTrue(
+            df.expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than('chi2', 'chi2',
+                                                                                           params={
+                                                                                               'df': chi2_df,
+                                                                                           })['success']
+        )
 
         # Test an exponential distribution
         self.assertTrue(
             df.expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than('exponential', 'expon',
-                                                                                           params=({
-                                                                                               'loc': 4.2,
-                                                                                               'scale': 1
-                                                                                           }))['success']
+                                                                                           params={
+                                                                                               'loc': expon_loc,
+                                                                                               'scale': expon_scale
+                                                                                           })
+        )
+
+        # Test a standard exponential distribution
+        self.assertTrue(
+            df.expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than('exponential_std',
+                                                                                           'expon',
+                                                                                           output_format="COMPLETE")['success']
+
         )
 if __name__ == "__main__":
     unittest.main()
