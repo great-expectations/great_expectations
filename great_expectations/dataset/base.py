@@ -120,7 +120,7 @@ class DataSet(object):
                     if catch_exceptions:
                         raised_exception = True
                         exception_traceback = traceback.format_exc()
-                        exception_message = err.message
+                        exception_message = str(err)
 
                         return_obj = {
                             "success": False
@@ -135,7 +135,7 @@ class DataSet(object):
                 if include_config:
                     return_obj["expectation_config"] = copy.deepcopy(expectation_config)
 
-                if raised_exception:
+                if catch_exceptions:
                     return_obj["exception_info"] = {
                         "raised_exception": raised_exception,
                         "exception_message": exception_message,
@@ -625,7 +625,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                         "exception_info": {
                             "raised_exception": raised_exception,
                             "exception_traceback": exception_traceback,
-                            "exception_message": err.message
+                            "exception_message": str(err)
                         }
                     }
 
@@ -634,6 +634,14 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
             #if include_config:
             result["expectation_config"] = copy.deepcopy(expectation)
+
+            # Add an empty exception_info object if no exception was caught
+            if catch_exceptions and ('exception_info' not in result):
+                result["exception_info"] = {
+                    "raised_exception": False,
+                    "exception_traceback": None,
+                    "exception_message": None
+                }
 
             results.append(result)
 
