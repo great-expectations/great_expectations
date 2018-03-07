@@ -1,0 +1,35 @@
+version: '3.2'
+services:
+  great-expectations:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8888:8888"
+    links:
+      - postgres:postgres
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres
+    environment:
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test
+      POSTGRES_DB: test
+    ports:
+      - "5432:5432"
+
+  watchdog:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - type: bind
+        source: .
+        target: /home/jovyan/work/great_expectations
+    links:
+      - postgres:postgres
+    depends_on:
+      - postgres
+    command: watchmedo shell-command --patterns="*.py;*.txt;*.json" --recursive --command='pytest' .
