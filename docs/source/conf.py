@@ -52,7 +52,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'great_expectations'
-copyright = u'2017, The Great Expectations Team'
+copyright = u'2018, The Great Expectations Team'
 author = u'The Great Expectations Team'
 
 # The version info for the project you're documenting, acts as replacement for

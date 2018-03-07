@@ -13,6 +13,7 @@ Welcome to Great Expectations!
    :maxdepth: 2
 
    intro
+   data_contexts
    expectations
    distributional_expectations
    validation
