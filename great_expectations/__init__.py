@@ -4,16 +4,25 @@ import pandas as pd
 from .util import *
 from great_expectations import dataset
 
+from .connections import GreatExpectationsConnection, SqlAlchemyConnection, FilepathConnection, SparkSqlConnection
+
 from .version import __version__
 
-def list_sources():
-    raise NotImplementedError
+def get_connection(connection_type, *args, **kwargs):
+    if connection_type == "SqlAlchemy":
+        #FIXME: provide an additional API that allows connection strings to be generated from arguments.
+        return SqlAlchemyConnection(kwargs['connection_string'])
 
-def connect_to_datasource():
-    raise NotImplementedError
+    if connection_type == "Filepath":
+        #FIXME: provide an additional API that allows connection strings to be generated from arguments.
+        return FilepathConnection(**kwargs)
 
-def connect_to_dataset():
-    raise NotImplementedError
+    # elif connection_type == "pandas_directory":
+    #     PandasDataContext(args, kwargs)
+    # elif ...
+
+    else:
+        raise ValueError("Unknown connection_type: %s" % (connection_type,))
 
 def _convert_to_dataset_class(df, dataset_class, expectations_config=None):
     """
@@ -28,6 +37,7 @@ def _convert_to_dataset_class(df, dataset_class, expectations_config=None):
         try:
             df = dataset_class(df)
         except:
+            #FIXME: This error message says the wrong thing. It references read_csv, but we're in a different function.
             raise NotImplementedError("read_csv requires a DataSet class that can be instantiated from a Pandas DataFrame")
 
     return df
