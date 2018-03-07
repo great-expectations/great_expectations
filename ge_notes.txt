@@ -1,0 +1,47 @@
+When entering the PandaDataSet __finalize__,
+
+  concatentation
+    - method='concat'
+    - type(other)=_Concatenator
+    - type(self)=PandaDataSet
+    - self only has the default expectations
+
+  join (left)
+    - method='merge'
+    - type(other)=_MergeOperation
+    - type(self)=PandaDataSet
+    - self only has the default expectations
+
+  merge (inner)
+    1st pass
+    - method=None
+    - type(other)=PandaDataSet
+    - type(self)=PandaDataSet
+    - self (left) only has the default expectations
+    - other (right) has ALL user specified expectations
+    2nd pass
+    - method=None
+    - type(other)=PandaDataSet
+    - type(self)=PandaDataSet
+    - self (left) only has the default expectations
+    - other (right) has ALL user specified expectations
+    3rd pass
+    - method=merge
+    - type(other)=_MergeOperation
+    - type(self)=PandaDataSet
+    - self (left) only has the default expectations
+
+  sample
+    - method=None
+    - type(other)=PandaDataSet
+    - type(self)=PandaDataSet
+    - self only has the default expectations
+    - other has ALL user specified expectations
+
+  subset
+    - method=None
+    - type(other)=PandaDataSet
+    - type(self)=PandaDataSet
+    - self only has the default expectations
+    - other has ALL user specified expectations
+  
