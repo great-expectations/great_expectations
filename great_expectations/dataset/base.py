@@ -444,6 +444,13 @@ class DataSet(object):
                 else:
                     return expectation
 
+    def remove_false_expectations(self):
+        res = self.validate(only_return_failures=True).get('results')
+        if any(res):
+            for item in res:
+                self.remove_expectation(expectation_type=item['expectation_type'], expectation_kwargs=item['kwargs'])
+            print("WARNING: Removed %s expectations that were 'False'" % len(res))
+
     def get_default_expectation_arguments(self):
         """Fetch default expectation arguments for this DataSet
 
