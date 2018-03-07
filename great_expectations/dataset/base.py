@@ -659,12 +659,10 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
     ##### Output generation #####
     def _format_column_map_output(self,
-                                  result_format, success,
-                                  element_count,
-                                  nonnull_values, nonnull_count,
-                                  boolean_mapped_success_values, success_count,
-                                  unexpected_list, unexpected_index_list
-                                  ):
+        result_format, success,
+        element_count, nonnull_count,
+        unexpected_list, unexpected_index_list
+    ):
         """Helper function to construct expectation result objects for column_map_expectations.
 
         Expectations support four result_formats: BOOLEAN_ONLY, BASIC, SUMMARY, and COMPLETE.
@@ -691,7 +689,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         if result_format['result_obj_format'] == 'BOOLEAN_ONLY':
             return return_obj
 
-        missing_count = element_count - int(len(nonnull_values))
+        missing_count = element_count - nonnull_count
         unexpected_count = len(unexpected_list)
 
         if element_count > 0:
@@ -2310,7 +2308,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         """Expect the column to sum to be between an min and max value
 
         expect_column_sum_to_be_between is a :func:`column_aggregate_expectation <great_expectations.dataset.base.DataSet.column_aggregate_expectation>`.
-        
+
         Args:
             column (str): \
                 The column name
@@ -2366,7 +2364,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         """Expect the column to sum to be between an min and max value
 
         expect_column_min_to_be_between is a :func:`column_aggregate_expectation <great_expectations.dataset.base.DataSet.column_aggregate_expectation>`.
-        
+
         Args:
             column (str): \
                 The column name
@@ -2374,7 +2372,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                 The minimum number of unique values allowed.
             max_value (comparable type or None): \
                 The maximum number of unique values allowed.
-        
+
         Keyword Args:
             parse_strings_as_datetimes (Boolean or None): \
                 If True, parse min_value, max_values, and all non-null column values to datetimes before making comparisons.
@@ -2428,7 +2426,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         """Expect the column max to be between an min and max value
 
         expect_column_sum_to_be_between is a :func:`column_aggregate_expectation <great_expectations.dataset.base.DataSet.column_aggregate_expectation>`.
-        
+
         Args:
             column (str): \
                 The column name
@@ -2436,7 +2434,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                 The minimum number of unique values allowed.
             max_value (comparable type or None): \
                 The maximum number of unique values allowed.
-        
+
         Keyword Args:
             parse_strings_as_datetimes (Boolean or None): \
                 If True, parse min_value, max_values, and all non-null column values to datetimes before making comparisons.

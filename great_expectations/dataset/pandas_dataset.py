@@ -67,9 +67,7 @@ class MetaPandasDataSet(DataSet):
 
             return_obj = self._format_column_map_output(
                 result_format, success,
-                element_count,
-                nonnull_values, nonnull_count,
-                boolean_mapped_success_values, success_count,
+                element_count, nonnull_count,
                 unexpected_list, unexpected_index_list
             )
 
@@ -283,9 +281,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
         return_obj = self._format_column_map_output(
             result_format, success,
-            element_count,
-            nonnull_values, nonnull_count,
-            boolean_mapped_success_values, success_count,
+            element_count, nonnull_count,
             unexpected_list, unexpected_index_list
         )
 
@@ -318,9 +314,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
         return_obj = self._format_column_map_output(
             result_format, success,
-            element_count,
-            nonnull_values, nonnull_count,
-            boolean_mapped_success_values, success_count,
+            element_count, nonnull_count,
             unexpected_list, unexpected_index_list
         )
 
@@ -562,7 +556,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
             if max_value is not None and not float(max_value).is_integer():
                 raise ValueError("min_value and max_value must be integers")
-        
+
         except ValueError:
             raise ValueError("min_value and max_value must be integers")
 
