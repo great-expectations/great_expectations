@@ -162,6 +162,18 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
     For the full API reference, please see :func:`DataSet <great_expectations.dataset.base.DataSet>`
     """
 
+    @property
+    def _constructor(self):
+        return PandasDataSet
+
+# Do we need to define _constructor_sliced and/or _constructor_expanddim? See http://pandas.pydata.org/pandas-docs/stable/internals.html#subclassing-pandas-data-structures
+
+    def __finalize__(self, other, method=None, **kwargs):
+        if isinstance(other, PandasDataSet):
+            self.initialize_expectations(other.get_expectations_config())
+        super(PandasDataSet, self).__finalize__(other, **kwargs)
+        return self
+
     def __init__(self, *args, **kwargs):
         super(PandasDataSet, self).__init__(*args, **kwargs)
         self.add_default_expectations()
