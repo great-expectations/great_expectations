@@ -1,3 +1,5 @@
+from __future__ import division
+
 import unittest
 import json
 import numpy as np
@@ -13,7 +15,7 @@ class TestPandasDataset(unittest.TestCase):
         with open("./tests/test_sets/expect_column_to_exist_test_set.json") as f:
             J = json.load(f)
             D = ge.dataset.PandasDataSet(J["dataset"])
-            D.set_default_expectation_argument("output_format", "COMPLETE")
+            D.set_default_expectation_argument("result_format", "COMPLETE")
             T = J["tests"]
 
             self.maxDiff = None
@@ -30,76 +32,11 @@ class TestPandasDataset(unittest.TestCase):
                 self.assertIn(t['error']['traceback_substring'], out['exception_traceback'])
 
     def test_expect_table_row_count_to_be_between(self):
-
-        # Pulled out into expect_table_row_count_to_be_between_test_set.json
-        # Data for testing
-        # D = ge.dataset.PandasDataSet({
-        #     'c1' : [4,5,6,7],
-        #     'c2' : ['a','b','c','d'],
-        #     'c3' : [None,None,None,None]
-        # })
-        # D.set_default_expectation_argument("output_format", "COMPLETE")
-
-        # # Tests
-        # T = [
-        #         {
-        #             'in':[3,5],
-        #             'kwargs':{},
-        #             'out':{'success':True, 'true_value':4}},
-        #         {
-        #             'in':[0,1],
-        #             'kwargs':{},
-        #             'out':{'success':False, 'true_value':4}},
-        #         {
-        #             'in':[4,4],
-        #             'kwargs':{},
-        #             'out':{'success':True, 'true_value':4}},
-        #         {
-        #             'in':[1,0],
-        #             'kwargs':{},
-        #             'out':{'success':False, 'true_value':4}}
-        # ]
-
-        # for t in T:
-        #     out = D.expect_table_row_count_to_be_between(*t['in'], **t['kwargs'])
-        #     self.assertEqual(out, t['out'])
-
-        D = ge.dataset.PandasDataSet({
-            'c1':[1,None,3,None,5],
-            'c2':[None,4,5,None,None],
-            'c3':[None,None,None,None,None]
-        })
-        D.set_default_expectation_argument("output_format", "COMPLETE")
-
-        T = [
-                {
-                    'in':[5,6],
-                    'kwargs':{},
-                    'out':{'success':True, 'true_value':5}},
-                {
-                    'in':[2,4],
-                    'kwargs':{},
-                    'out':{'success':False, 'true_value':5}},
-                {
-                    'in':[5,5],
-                    'kwargs':{},
-                    'out':{'success':True, 'true_value':5}},
-                {
-                    'in':[2,1],
-                    'kwargs':{},
-                    'out':{'success':False, 'true_value':5}}
-        ]
-
-        for t in T:
-            out = D.expect_table_row_count_to_be_between(*t['in'], **t['kwargs'])
-            self.assertEqual(out, t['out'])
-
-    def test_expect_table_row_count_to_be_between(self):
         print("=== test_expect_table_row_count_to_be_between ===")
         with open("./tests/test_sets/expect_table_row_count_to_be_between_test_set.json") as f:
             J = json.load(f)
             D = ge.dataset.PandasDataSet(J["dataset"])
-            D.set_default_expectation_argument("output_format", "COMPLETE")
+            D.set_default_expectation_argument("result_format", "COMPLETE")
             T = J["tests"]
 
             self.maxDiff = None
@@ -112,8 +49,8 @@ class TestPandasDataset(unittest.TestCase):
                 self.assertEqual(out, t['out'])
 
             if 'error' in t:
-                self.assertEqual(out['raised_exception'], True)
-                self.assertIn(t['error']['traceback_substring'], out['exception_traceback'])
+                self.assertEqual(out['exception_info']['raised_exception'], True)
+                self.assertIn(t['error']['traceback_substring'], out['exception_info']['exception_traceback'])
 
 
     def test_expect_table_row_count_to_equal(self):
@@ -123,26 +60,26 @@ class TestPandasDataset(unittest.TestCase):
             'c2':['a','b','c','d'],
             'c3':[None,None,None,None]
         })
-        D.set_default_expectation_argument("output_format", "COMPLETE")
+        D.set_default_expectation_argument("result_format", "COMPLETE")
 
         # Tests
         T = [
                 {
                     'in':[4],
                     'kwargs':{},
-                    'out':{'success':True, 'true_value':4}},
+                    'out':{'success':True, "result_obj": { "observed_value": 4}}},
                 {
                     'in':[5],
                     'kwargs':{},
-                    'out':{'success':False, 'true_value':4}},
+                    'out':{'success':False, "result_obj": { "observed_value": 4}}},
                 {
                     'in':[3],
                     'kwargs':{},
-                    'out':{'success':False, 'true_value':4}},
+                    'out':{'success':False, "result_obj": { "observed_value": 4}}},
                 {
                     'in':[0],
                     'kwargs':{},
-                    'out':{'success':False, 'true_value':4}}
+                    'out':{'success':False, "result_obj": { "observed_value": 4}}}
         ]
 
         for t in T:
@@ -154,17 +91,18 @@ class TestPandasDataset(unittest.TestCase):
             'c2':[None,4,5,None,None],
             'c3':[None,None,None,None,None]
         })
-        D.set_default_expectation_argument("output_format", "COMPLETE")
+        D.set_default_expectation_argument("result_format", "COMPLETE")
 
         T = [
                 {
                     'in':[5],
                     'kwargs':{},
-                    'out':{'success':True, 'true_value':5}},
+                    'out':{'success':True, 'result_obj': {'observed_value': 5}}},
                 {
                     'in':[3],
                     'kwargs':{},
-                    'out':{'success':False, 'true_value':5}}
+                    'out':{'success':False, 'result_obj': {'observed_value': 5}}
+                }
         ]
 
         for t in T:
@@ -184,67 +122,69 @@ class TestPandasDataset(unittest.TestCase):
             'd' : [1, '1'],
             'n' : [None, np.nan]
         })
-        D.set_default_expectation_argument("output_format", "COMPLETE")
+        D.set_default_expectation_argument("result_format", "COMPLETE")
 
         # Tests for D
         T = [
                 {
                     'in':{'column':'a'},
-                    'out':{'success':False, 'exception_index_list':[0,1], 'exception_list':['2','2']}},
+                    'out':{'success':False, 'unexpected_index_list':[0,1], 'unexpected_list':['2','2']}},
                 {
                     'in':{'column':'b'},
-                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}},
+                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}},
                 {
                     'in':{'column':'c'},
-                    'out':{'success':False, 'exception_index_list':[0,1], 'exception_list':[1,1]}},
+                    'out':{'success':False, 'unexpected_index_list':[0,1], 'unexpected_list':[1,1]}},
                 {
                     'in':{'column':'d'},
-                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}},
+                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}},
                 {
                     'in':{'column':'n'},
-                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}}
+                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}}
         ]
 
         for t in T:
             out = D.expect_column_values_to_be_unique(**t['in'])
-            self.assertEqual(out, t['out'])
-
+            self.assertEqual(t['out']['success'], out['success'])
+            self.assertEqual(t['out']['unexpected_index_list'], out['result_obj']['unexpected_index_list'])
+            self.assertEqual(t['out']['unexpected_list'], out['result_obj']['unexpected_list'])
 
         df = ge.dataset.PandasDataSet({
             'a' : ['2', '2', '2', '2'],
             'b' : [1, '2', '2', '3'],
             'n' : [None, None, np.nan, None],
         })
-        df.set_default_expectation_argument("output_format", "COMPLETE")
+        df.set_default_expectation_argument("result_format", "COMPLETE")
 
         # Tests for df
         T = [
                 {
                     'in':['a'],
                     'kwargs':{},
-                    'out':{'success':False, 'exception_index_list':[0,1,2,3], 'exception_list':['2','2','2','2']}},
+                    'out':{'success':False, 'unexpected_index_list':[0,1,2,3], 'unexpected_list':['2','2','2','2']}},
                 {
                     'in':['b'],
                     'kwargs':{'mostly':.25},
-                    'out':{'success':True, 'exception_index_list':[1,2], 'exception_list':['2','2']}},
+                    'out':{'success':True, 'unexpected_index_list':[1,2], 'unexpected_list':['2','2']}},
                 {
                     'in':['b'],
                     'kwargs':{'mostly':.75},
-                    'out':{'success':False, 'exception_index_list':[1,2], 'exception_list':['2','2']}},
+                    'out':{'success':False, 'unexpected_index_list':[1,2], 'unexpected_list':['2','2']}},
                 {
                     'in':['a'],
                     'kwargs':{'mostly':1},
-                    'out':{'success':False, 'exception_index_list':[0,1,2,3], 'exception_list':['2','2','2','2']}},
+                    'out':{'success':False, 'unexpected_index_list':[0,1,2,3], 'unexpected_list':['2','2','2','2']}},
                 {
                     'in':['n'],
                     'kwargs':{'mostly':.2},
-                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}}
+                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}}
         ]
 
         for t in T:
             out = df.expect_column_values_to_be_unique(*t['in'], **t['kwargs'])
-            self.assertEqual(out, t['out'])
-
+            self.assertEqual(t['out']['success'], out['success'])
+            self.assertEqual(t['out']['unexpected_index_list'], out['result_obj']['unexpected_index_list'])
+            self.assertEqual(t['out']['unexpected_list'], out['result_obj']['unexpected_list'])
 
 
     def test_expect_column_values_to_not_be_null(self):
@@ -262,97 +202,100 @@ class TestPandasDataset(unittest.TestCase):
             'n' : [None, np.nan],
             'z' : [2, 5],
         })
-        D.set_default_expectation_argument("output_format", "COMPLETE")
+        D.set_default_expectation_argument("result_format", "COMPLETE")
 
         T = [
                 {
                     'in':{'column':'y'},
-                    'out':{'success':False, 'exception_index_list':[1], 'exception_list':[None]}},
+                    'out':{'success':False, 'unexpected_index_list':[1], 'unexpected_list':[None]}},
                 {
                     'in':{'column':'n'},
-                    'out':{'success':False, 'exception_index_list':[0,1], 'exception_list':[None, None]}},
+                    'out':{'success':False, 'unexpected_index_list':[0,1], 'unexpected_list':[None, None]}},
                 # {
                 #     'in':{'column':'y'},
-                #     'out':{'success':False, 'exception_index_list':[1], 'exception_list':[np.nan]}},
+                #     'out':{'success':False, 'unexpected_index_list':[1], 'unexpected_list':[np.nan]}},
                 # {
                 #     'in':{'column':'n'},
-                #     'out':{'success':False, 'exception_index_list':[0,1], 'exception_list':[None, np.nan]}},
+                #     'out':{'success':False, 'unexpected_index_list':[0,1], 'unexpected_list':[None, np.nan]}},
                 {
                     'in':{'column':'x'},
-                    'out':{'success':False, 'exception_index_list':[1], 'exception_list':[None]}},
+                    'out':{'success':False, 'unexpected_index_list':[1], 'unexpected_list':[None]}},
                 {
                     'in':{'column':'z'},
-                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}}
+                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}}
         ]
 
 
         for t in T:
             out = D.expect_column_values_to_not_be_null(**t['in'])
-            self.assertEqual(out, t['out'])
-
+            self.assertEqual(t['out']['success'], out['success'])
+            self.assertEqual(t['out']['unexpected_index_list'], out['result_obj']['unexpected_index_list'])
+            self.assertEqual(t['out']['unexpected_list'], out['result_obj']['unexpected_list'])
 
         D2 = ge.dataset.PandasDataSet({
             'a' : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
             'b' : [1, 2, 3, 4, 5, 6, 7, 8, 9, None],
         })
-        D2.set_default_expectation_argument("output_format", "COMPLETE")
+        D2.set_default_expectation_argument("result_format", "COMPLETE")
 
         #assert_equal(
         #    D.expect_column_values_to_not_be_null('x'),
-        #    {'success':False, 'exception_list':[None]}
+        #    {'success':False, 'unexpected_list':[None]}
         #)
 
         T = [
                 {
                     'in':['a'],
                     'kwargs':{},
-                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}},
+                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}},
                 {
                     'in':['a'],
                     'kwargs':{'mostly':.90},
-                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}},
+                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}},
                 {
                     'in':['b'],
                     'kwargs':{},
-                    'out':{'success':False, 'exception_index_list':[9], 'exception_list':[None]}},
+                    'out':{'success':False, 'unexpected_index_list':[9], 'unexpected_list':[None]}},
                 {
                     'in':['b'],
                     'kwargs':{'mostly':.95},
-                    'out':{'success':False, 'exception_index_list':[9], 'exception_list':[None]}},
+                    'out':{'success':False, 'unexpected_index_list':[9], 'unexpected_list':[None]}},
                 {
                     'in':['b'],
                     'kwargs':{'mostly':.90},
-                    'out':{'success':True, 'exception_index_list':[9], 'exception_list':[None]}}
+                    'out':{'success':True, 'unexpected_index_list':[9], 'unexpected_list':[None]}}
         ]
 
         for t in T:
             out = D2.expect_column_values_to_not_be_null(*t['in'], **t['kwargs'])
-            self.assertEqual(out, t['out'])
-
+            self.assertEqual(t['out']['success'], out['success'])
+            self.assertEqual(t['out']['unexpected_index_list'], out['result_obj']['unexpected_index_list'])
+            self.assertEqual(t['out']['unexpected_list'], out['result_obj']['unexpected_list'])
 
         D3 = ge.dataset.PandasDataSet({
             'a' : [None, None, None, None],
         })
-        D3.set_default_expectation_argument("output_format", "COMPLETE")
+        D3.set_default_expectation_argument("result_format", "COMPLETE")
 
         T = [
                 {
                     'in':['a'],
                     'kwargs':{},
-                    'out':{'success':False, 'exception_index_list':[0,1,2,3], 'exception_list':[None,None,None,None]}
+                    'out':{'success':False, 'unexpected_index_list':[0,1,2,3], 'unexpected_list':[None,None,None,None]}
                 },
                 {
                     'in':['a'],
                     'kwargs':{"mostly":.95},
-                    'out':{'success':False, 'exception_index_list':[0,1,2,3], 'exception_list':[None,None,None,None]}
+                    'out':{'success':False, 'unexpected_index_list':[0,1,2,3], 'unexpected_list':[None,None,None,None]}
                 },
         ]
 
         for t in T:
             out = D3.expect_column_values_to_not_be_null(*t['in'], **t['kwargs'])
             # out = D3.expect_column_values_to_be_null(*t['in'], **t['kwargs'])
-            self.assertEqual(out, t['out'])
-
+            self.assertEqual(t['out']['success'], out['success'])
+            self.assertEqual(t['out']['unexpected_index_list'], out['result_obj']['unexpected_index_list'])
+            self.assertEqual(t['out']['unexpected_list'], out['result_obj']['unexpected_list'])
 
     def test_expect_column_values_to_be_null(self):
         """
@@ -370,72 +313,74 @@ class TestPandasDataset(unittest.TestCase):
             'z' : [2, 5, 7],
             'a' : [None, np.nan, None],
         })
-        D.set_default_expectation_argument("output_format", "COMPLETE")
+        D.set_default_expectation_argument("result_format", "COMPLETE")
 
         T = [
                 {
                     'in':{'column':'x'},
-                    'out':{'success':False, 'exception_index_list':[0,2], 'exception_list':[2,2]}},
+                    'out':{'success':False, 'unexpected_index_list':[0,2], 'unexpected_list':[2,2]}},
                 {
                     'in':{'column':'y'},
-                    'out':{'success':False, 'exception_index_list':[0,2], 'exception_list':[2,2]}},
+                    'out':{'success':False, 'unexpected_index_list':[0,2], 'unexpected_list':[2,2]}},
                 {
                     'in':{'column':'z'},
-                    'out':{'success':False, 'exception_index_list':[0,1,2], 'exception_list':[2,5,7]}},
+                    'out':{'success':False, 'unexpected_index_list':[0,1,2], 'unexpected_list':[2,5,7]}},
                 {
                     'in':{'column':'a'},
-                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}},
+                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}},
                 {
                     'in':{'column':'x', 'mostly':.2},
-                    'out':{'success':True, 'exception_index_list':[0,2], 'exception_list':[2,2]}},
+                    'out':{'success':True, 'unexpected_index_list':[0,2], 'unexpected_list':[2,2]}},
                 {
                     'in':{'column':'x', 'mostly':.8},
-                    'out':{'success':False, 'exception_index_list':[0,2], 'exception_list':[2,2]}
+                    'out':{'success':False, 'unexpected_index_list':[0,2], 'unexpected_list':[2,2]}
                     },
                 {
                     'in':{'column':'a', 'mostly':.5},
-                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}}
+                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}}
         ]
 
         for t in T:
             out = D.expect_column_values_to_be_null(**t['in'])
-            self.assertEqual(out, t['out'])
-
+            self.assertEqual(t['out']['success'], out['success'])
+            self.assertEqual(t['out']['unexpected_index_list'], out['result_obj']['unexpected_index_list'])
+            self.assertEqual(t['out']['unexpected_list'], out['result_obj']['unexpected_list'])
 
         D3 = ge.dataset.PandasDataSet({
             'a' : [None, None, None, None],
             'b' : [np.nan, np.nan, np.nan, np.nan],
         })
-        D3.set_default_expectation_argument("output_format", "COMPLETE")
+        D3.set_default_expectation_argument("result_format", "COMPLETE")
 
         T = [
                 {
                     'in':['a'],
                     'kwargs':{},
-                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}
+                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}
                 },
                 {
                     'in':['a'],
                     'kwargs':{"mostly":.95},
-                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}
+                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}
                 },
                 {
                     'in':['b'],
                     'kwargs':{},
-                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}
+                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}
                 },
                 {
                     'in':['b'],
                     'kwargs':{"mostly":.95},
-                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}
+                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}
                 },
         ]
 
         for t in T:
             # out = D3.expect_column_values_to_not_be_null(*t['in'], **t['kwargs'])
             out = D3.expect_column_values_to_be_null(*t['in'], **t['kwargs'])
-            self.assertEqual(out, t['out'])
-
+            self.assertEqual(t['out']['success'], out['success'])
+            self.assertEqual(t['out']['unexpected_index_list'], out['result_obj']['unexpected_index_list'])
+            self.assertEqual(t['out']['unexpected_list'], out['result_obj']['unexpected_list'])
 
     def test_expect_column_values_to_be_of_type(self):
 
@@ -448,40 +393,42 @@ class TestPandasDataset(unittest.TestCase):
             's' : ['hello', 'jello', 1],
             's1' : ['hello', 2.0, 1],
         })
-        D.set_default_expectation_argument("output_format", "COMPLETE")
+        D.set_default_expectation_argument("result_format", "COMPLETE")
 
         T = [
                 {
                     'in':{"column":"x","type_":"int","target_datasource":"python"},
-                    'out':{'success':True, 'exception_list':[], 'exception_index_list':[]}},
+                    'out':{'success':True, 'unexpected_list':[], 'unexpected_index_list':[]}},
                 {
                     'in':{"column":"x","type_":"string","target_datasource":"numpy"},
-                    'out':{'success':False, 'exception_list':[1,2,4], 'exception_index_list':[0,1,2]}},
+                    'out':{'success':False, 'unexpected_list':[1,2,4], 'unexpected_index_list':[0,1,2]}},
                 {
                     'in':{"column":"y","type_":"float","target_datasource":"python"},
-                    'out':{'success':True, 'exception_list':[], 'exception_index_list':[]}},
+                    'out':{'success':True, 'unexpected_list':[], 'unexpected_index_list':[]}},
                 {
                     'in':{"column":"y","type_":"float","target_datasource":"numpy"},
-                    'out':{'success':False, 'exception_list':[1.0,2.2,5.3], 'exception_index_list':[0,1,2]}},
+                    'out':{'success':False, 'unexpected_list':[1.0,2.2,5.3], 'unexpected_index_list':[0,1,2]}},
                 {
                     'in':{"column":"z","type_":"string","target_datasource":"python"},
-                    'out':{'success':True, 'exception_list':[], 'exception_index_list':[]}},
+                    'out':{'success':True, 'unexpected_list':[], 'unexpected_index_list':[]}},
                 {
                     'in':{"column":"b","type_":"boolean","target_datasource":"python"},
-                    'out':{'success':True, 'exception_list':[], 'exception_index_list':[]}}
+                    'out':{'success':True, 'unexpected_list':[], 'unexpected_index_list':[]}}
                 #{
                 #    'in':['n','null','python'],
                 #    'kwargs':{},
-                #    'out':{'success':False, 'exception_list':[np.nan]}},
+                #    'out':{'success':False, 'unexpected_list':[np.nan]}},
                 #{
                 #    'in':['n','null','python'],
                 #    'kwargs':{'mostly':.5},
-                #    'out':{'success':True, 'exception_list':[np.nan]}}
+                #    'out':{'success':True, 'unexpected_list':[np.nan]}}
         ]
 
         for t in T:
             out = D.expect_column_values_to_be_of_type(**t['in'])
-            self.assertEqual(out, t['out'])
+            self.assertEqual(t['out']['success'], out['success'])
+            self.assertEqual(t['out']['unexpected_index_list'], out['result_obj']['unexpected_index_list'])
+            self.assertEqual(t['out']['unexpected_list'], out['result_obj']['unexpected_list'])
 
     def test_expect_column_values_to_be_in_type_list(self):
 
@@ -494,40 +441,41 @@ class TestPandasDataset(unittest.TestCase):
             's' : ['hello', 'jello', 1],
             's1' : ['hello', 2.0, 1],
         })
-        D.set_default_expectation_argument("output_format", "COMPLETE")
+        D.set_default_expectation_argument("result_format", "COMPLETE")
 
         T = [
                 {
                     'in':{"column":"x","type_list":["int"],"target_datasource":"python"},
-                    'out':{'success':True, 'exception_list':[], 'exception_index_list':[]}},
+                    'out':{'success':True, 'unexpected_list':[], 'unexpected_index_list':[]}},
                 {
                     'in':{"column":"x","type_list":["string"],"target_datasource":"numpy"},
-                    'out':{'success':False, 'exception_list':[1,2,4], 'exception_index_list':[0,1,2]}},
+                    'out':{'success':False, 'unexpected_list':[1,2,4], 'unexpected_index_list':[0,1,2]}},
                 {
                     'in':{"column":"y","type_list":["float"],"target_datasource":"python"},
-                    'out':{'success':True, 'exception_list':[], 'exception_index_list':[]}},
+                    'out':{'success':True, 'unexpected_list':[], 'unexpected_index_list':[]}},
                 {
                     'in':{"column":"y","type_list":["float"],"target_datasource":"numpy"},
-                    'out':{'success':False, 'exception_list':[1.0,2.2,5.3], 'exception_index_list':[0,1,2]}},
+                    'out':{'success':False, 'unexpected_list':[1.0,2.2,5.3], 'unexpected_index_list':[0,1,2]}},
                 {
                     'in':{"column":"z","type_list":["string"],"target_datasource":"python"},
-                    'out':{'success':True, 'exception_list':[], 'exception_index_list':[]}},
+                    'out':{'success':True, 'unexpected_list':[], 'unexpected_index_list':[]}},
                 {
                     'in':{"column":"b","type_list":["boolean"],"target_datasource":"python"},
-                    'out':{'success':True, 'exception_list':[], 'exception_index_list':[]}},
+                    'out':{'success':True, 'unexpected_list':[], 'unexpected_index_list':[]}},
                 {
                    'in':{"column":"s", "type_list":["string", "int"], "target_datasource":"python"},
-                   'out':{'success':True, 'exception_list':[], 'exception_index_list':[]}},
+                   'out':{'success':True, 'unexpected_list':[], 'unexpected_index_list':[]}},
                 #{
                 #    'in':['n','null','python'],
                 #    'kwargs':{'mostly':.5},
-                #    'out':{'success':True, 'exception_list':[np.nan]}}
+                #    'out':{'success':True, 'unexpected_list':[np.nan]}}
         ]
 
         for t in T:
             out = D.expect_column_values_to_be_in_type_list(**t['in'])
-            self.assertEqual(out, t['out'])
-
+            self.assertEqual(t['out']['success'], out['success'])
+            self.assertEqual(t['out']['unexpected_index_list'], out['result_obj']['unexpected_index_list'])
+            self.assertEqual(t['out']['unexpected_list'], out['result_obj']['unexpected_list'])
 
     def test_expect_column_values_to_be_in_set(self):
         """
@@ -540,29 +488,31 @@ class TestPandasDataset(unittest.TestCase):
             'y' : [1,2,5],
             'z' : ['hello', 'jello', 'mello'],
         })
-        D.set_default_expectation_argument("output_format", "COMPLETE")
+        D.set_default_expectation_argument("result_format", "COMPLETE")
 
         T = [
                 {
                     'in':['x', [1,2,4]],
-                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}},
+                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}},
                 {
                     'in':['x', [4,2]],
-                    'out':{'success':False, 'exception_index_list':[0], 'exception_list':[1]}},
+                    'out':{'success':False, 'unexpected_index_list':[0], 'unexpected_list':[1]}},
                 {
                     'in':['y', []],
-                    'out':{'success':False, 'exception_index_list':[0,1,2], 'exception_list':[1,2,5]}},
+                    'out':{'success':False, 'unexpected_index_list':[0,1,2], 'unexpected_list':[1,2,5]}},
                 {
                     'in':['z', ['hello','jello','mello']],
-                    'out': {'success':True, 'exception_index_list':[], 'exception_list':[]}},
+                    'out': {'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}},
                 {
                     'in':['z', ['hello']],
-                    'out': {'success':False, 'exception_index_list':[1,2], 'exception_list':['jello','mello']}}
+                    'out': {'success':False, 'unexpected_index_list':[1,2], 'unexpected_list':['jello','mello']}}
         ]
 
         for t in T:
             out = D.expect_column_values_to_be_in_set(*t['in'])
-            self.assertEqual(out,t['out'])
+            self.assertEqual(t['out']['success'], out['success'])
+            self.assertEqual(t['out']['unexpected_index_list'], out['result_obj']['unexpected_index_list'])
+            self.assertEqual(t['out']['unexpected_list'], out['result_obj']['unexpected_list'])
 
         self.assertRaises(
             TypeError,
@@ -573,33 +523,34 @@ class TestPandasDataset(unittest.TestCase):
             'x' : [1,1,2,None],
             'y' : [None,None,None,None],
         })
-        D2.set_default_expectation_argument("output_format", "COMPLETE")
+        D2.set_default_expectation_argument("result_format", "COMPLETE")
 
         T = [
                 {
                     'in':{'column':'x', 'values_set':[1,2]},
-                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}},
+                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}},
                 {
                     'in':{'column':'x', 'values_set':[1]},
-                    'out':{'success':False, 'exception_index_list':[2], 'exception_list':[2]}},
+                    'out':{'success':False, 'unexpected_index_list':[2], 'unexpected_list':[2]}},
                 {
                     'in':{'column':'x', 'values_set':[1], 'mostly':.66},
-                    'out':{'success':True, 'exception_index_list':[2], 'exception_list':[2]}},
+                    'out':{'success':True, 'unexpected_index_list':[2], 'unexpected_list':[2]}},
                 {
                     'in':{'column':'x', 'values_set':[2], 'mostly':.66},
-                    'out':{'success':False, 'exception_index_list':[0,1], 'exception_list':[1,1]}},
+                    'out':{'success':False, 'unexpected_index_list':[0,1], 'unexpected_list':[1,1]}},
                 {
                     'in':{'column':'y', 'values_set':[]},
-                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}},
+                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}},
                 {
                     'in':{'column':'y', 'values_set':[2], 'mostly':.5},
-                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}}
+                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}}
         ]
 
         for t in T:
             out = D2.expect_column_values_to_be_in_set(**t['in'])
-            self.assertEqual(out, t['out'])
-
+            self.assertEqual(t['out']['success'], out['success'])
+            self.assertEqual(t['out']['unexpected_index_list'], out['result_obj']['unexpected_index_list'])
+            self.assertEqual(t['out']['unexpected_list'], out['result_obj']['unexpected_list'])
 
     def test_expect_column_values_to_not_be_in_set(self):
         """
@@ -614,46 +565,47 @@ class TestPandasDataset(unittest.TestCase):
             'a' : [1,1,2],
             'n' : [None,None,2],
         })
-        D.set_default_expectation_argument("output_format", "COMPLETE")
+        D.set_default_expectation_argument("result_format", "COMPLETE")
 
         T = [
                 {
                     'in':['x', [1,2]],'kwargs':{},
-                    'out':{'success':False, 'exception_index_list':[0,1], 'exception_list':[1,2]}},
+                    'out':{'success':False, 'unexpected_index_list':[0,1], 'unexpected_list':[1,2]}},
                 {
                     'in':['x',[5,6]],'kwargs':{},
-                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}},
+                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}},
                 {
                     'in':['z',['hello', 'jello']],'kwargs':{},
-                    'out':{'success':False, 'exception_index_list':[0,1], 'exception_list':['hello', 'jello']}},
+                    'out':{'success':False, 'unexpected_index_list':[0,1], 'unexpected_list':['hello', 'jello']}},
                 {
                     'in':['z',[]],'kwargs':{},
-                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}},
+                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}},
                 {
                     'in':['a', [1]],'kwargs':{},
-                    'out':{'success':False, 'exception_index_list':[0,1], 'exception_list':[1, 1]}},
+                    'out':{'success':False, 'unexpected_index_list':[0,1], 'unexpected_list':[1, 1]}},
                 {
                     'in':['n', [2]],
                     'kwargs':{},
-                    'out':{'success':False, 'exception_index_list':[2], 'exception_list':[2]}},
+                    'out':{'success':False, 'unexpected_index_list':[2], 'unexpected_list':[2]}},
                 {
                     'in':['n', []],
                     'kwargs':{},
-                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}},
+                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}},
                 {
                     'in':['a', [1]], 
                     'kwargs':{'mostly':.1},
-                    'out':{'success':True, 'exception_index_list':[0,1], 'exception_list':[1, 1]}},
+                    'out':{'success':True, 'unexpected_index_list':[0,1], 'unexpected_list':[1, 1]}},
                 {
                     'in':['n', [2]],
                     'kwargs':{'mostly':.9},
-                    'out':{'success':False, 'exception_index_list':[2], 'exception_list':[2]}}
+                    'out':{'success':False, 'unexpected_index_list':[2], 'unexpected_list':[2]}}
         ]
 
         for t in T:
             out = D.expect_column_values_to_not_be_in_set(*t['in'],**t['kwargs'])
-            self.assertEqual(out, t['out'])
-
+            self.assertEqual(t['out']['success'], out['success'])
+            self.assertEqual(t['out']['unexpected_index_list'], out['result_obj']['unexpected_index_list'])
+            self.assertEqual(t['out']['unexpected_list'], out['result_obj']['unexpected_list'])
 
 
     def test_expect_column_values_to_be_between(self):
@@ -661,14 +613,14 @@ class TestPandasDataset(unittest.TestCase):
 
         """
 
-        with open("./tests/test_sets/expect_column_values_to_be_between_test_set_ADJ.json") as f:
+        with open("./tests/test_sets/expect_column_values_to_be_between_test_set.json") as f:
             fixture = json.load(f)
 
         dataset = fixture["dataset"]
         tests = fixture["tests"]
 
         D = ge.dataset.PandasDataSet(dataset)
-        D.set_default_expectation_argument("output_format", "COMPLETE")
+        D.set_default_expectation_argument("result_format", "COMPLETE")
 
         self.maxDiff = None
 
@@ -680,11 +632,15 @@ class TestPandasDataset(unittest.TestCase):
             # print(json.dumps(out, indent=2))
 
             if 'out' in t:
-                self.assertEqual(out, t['out'])
+                self.assertEqual(t['out']['success'], out['success'])
+                if 'unexpected_index_list' in t['out']:
+                    self.assertEqual(t['out']['unexpected_index_list'], out['result_obj']['unexpected_index_list'])
+                if 'unexpected_list' in t['out']:
+                    self.assertEqual(t['out']['unexpected_list'], out['result_obj']['unexpected_list'])
 
             if 'error' in t:
-                self.assertEqual(out['raised_exception'], True)
-                self.assertIn(t['error']['traceback_substring'], out['exception_traceback'])
+                self.assertEqual(out['exception_info']['raised_exception'], True)
+                self.assertIn(t['error']['traceback_substring'], out['exception_info']['exception_traceback'])
 
     def test_expect_column_value_lengths_to_be_between(self):
         D = ge.dataset.PandasDataSet({
@@ -693,26 +649,29 @@ class TestPandasDataset(unittest.TestCase):
             's3':['cool','calm','collected','casual',None],
             's4':[1,2,3,4,5]
         })
-        D.set_default_expectation_argument("output_format", "COMPLETE")
+        D.set_default_expectation_argument("result_format", "COMPLETE")
 
         T = [
                 {
                     'in':{'column':'s1', 'min_value':3, 'max_value':5},
-                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}},
+                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}},
                 {
                     'in':{'column':'s2', 'min_value':4, 'max_value':6},
-                    'out':{'success':False, 'exception_index_list':[2], 'exception_list':['collected']}},
+                    'out':{'success':False, 'unexpected_index_list':[2], 'unexpected_list':['collected']}},
                 {
                     'in':{'column':'s2', 'min_value':None, 'max_value':10},
-                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}},
+                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}},
                 {
                     'in':{'column':'s3', 'min_value':None, 'max_value':10},
-                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}}
+                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}}
         ]
 
         for t in T:
             out = D.expect_column_value_lengths_to_be_between(**t['in'])
-            self.assertEqual(out, t['out'])
+            self.assertEqual(t['out']['success'], out['success'])
+            self.assertEqual(t['out']['unexpected_index_list'], out['result_obj']['unexpected_index_list'])
+            self.assertEqual(t['out']['unexpected_list'], out['result_obj']['unexpected_list'])
+
 
         with self.assertRaises(TypeError):
             D.expect_column_value_lengths_to_be_between(**{'column':'s4', 'min_value':None, 'max_value':10})
@@ -731,7 +690,7 @@ class TestPandasDataset(unittest.TestCase):
             'x' : ['aa', 'ab', 'ac', 'a1', None],
             'y' : ['aa', 'ab', 'ac', 'ba', 'ca'],
         })
-        D.set_default_expectation_argument("output_format", "COMPLETE")
+        D.set_default_expectation_argument("result_format", "COMPLETE")
 
 
         D2 = ge.dataset.PandasDataSet({
@@ -739,61 +698,64 @@ class TestPandasDataset(unittest.TestCase):
             'b' : ['aaa', 'abb', 'acc', 'bdd', None],
             'c' : [ None,  None,  None,  None, None],
         })
-        D2.set_default_expectation_argument("output_format", "COMPLETE")
+        D2.set_default_expectation_argument("result_format", "COMPLETE")
 
         T = [
                 {
                     'in':{'column':'x', 'regex':'^a'},
-                    'out':{'success':True, 'exception_list':[], 'exception_index_list':[]}},
+                    'out':{'success':True, 'unexpected_list':[], 'unexpected_index_list':[]}},
                 {
                     'in':{'column':'x', 'regex':'aa'},
-                    'out':{'success':False, 'exception_list':['ab', 'ac', 'a1'], 'exception_index_list':[1,2,3]}},
+                    'out':{'success':False, 'unexpected_list':['ab', 'ac', 'a1'], 'unexpected_index_list':[1,2,3]}},
                 {
                     'in':{'column':'x', 'regex':'a[a-z]'},
-                    'out':{'success':False, 'exception_list':['a1'], 'exception_index_list':[3]}},
+                    'out':{'success':False, 'unexpected_list':['a1'], 'unexpected_index_list':[3]}},
                 {
                     'in':{'column':'y', 'regex':'[abc]{2}'},
-                    'out':{'success':True, 'exception_list':[], 'exception_index_list':[]}},
+                    'out':{'success':True, 'unexpected_list':[], 'unexpected_index_list':[]}},
                 {
                     'in':{'column':'y', 'regex':'[z]'},
-                    'out':{'success':False, 'exception_list':['aa', 'ab', 'ac', 'ba', 'ca'], 'exception_index_list':[0,1,2,3,4]}}
+                    'out':{'success':False, 'unexpected_list':['aa', 'ab', 'ac', 'ba', 'ca'], 'unexpected_index_list':[0,1,2,3,4]}}
         ]
 
         for t in T:
             out = D.expect_column_values_to_match_regex(**t['in'])
-            self.assertEqual(out, t['out'])
+            self.assertEqual(t['out']['success'], out['success'])
+            self.assertEqual(t['out']['unexpected_index_list'], out['result_obj']['unexpected_index_list'])
+            self.assertEqual(t['out']['unexpected_list'], out['result_obj']['unexpected_list'])
 
         T = [
                 {
                     'in':{'column':'a', 'regex':'^a', 'mostly':.9},
-                    'out':{'success':False, 'exception_list':['bee'], 'exception_index_list':[4]}},
+                    'out':{'success':False, 'unexpected_list':['bee'], 'unexpected_index_list':[4]}},
                 {
                     'in':{'column':'a', 'regex':'^a', 'mostly':.8},
-                    'out':{'success':True, 'exception_list':['bee'], 'exception_index_list':[4]}},
+                    'out':{'success':True, 'unexpected_list':['bee'], 'unexpected_index_list':[4]}},
                 {
                     'in':{'column':'a', 'regex':'^a', 'mostly':.7},
-                    'out':{'success':True, 'exception_list':['bee'], 'exception_index_list':[4]}},
+                    'out':{'success':True, 'unexpected_list':['bee'], 'unexpected_index_list':[4]}},
                 {
                     'in':{'column':'b', 'regex':'^a', 'mostly':.9},
-                    'out':{'success':False, 'exception_list':['bdd'], 'exception_index_list':[3]}},
+                    'out':{'success':False, 'unexpected_list':['bdd'], 'unexpected_index_list':[3]}},
                 {
                     'in':{'column':'b', 'regex':'^a', 'mostly':.75},
-                    'out':{'success':True, 'exception_list':['bdd'], 'exception_index_list':[3]}},
+                    'out':{'success':True, 'unexpected_list':['bdd'], 'unexpected_index_list':[3]}},
                 {
                     'in':{'column':'b', 'regex':'^a', 'mostly':.5},
-                    'out':{'success':True, 'exception_list':['bdd'], 'exception_index_list':[3]}},
+                    'out':{'success':True, 'unexpected_list':['bdd'], 'unexpected_index_list':[3]}},
                 {
                     'in':{'column':'c', 'regex':'^a'},
-                    'out':{'success':True, 'exception_list':[], 'exception_index_list':[]}},
+                    'out':{'success':True, 'unexpected_list':[], 'unexpected_index_list':[]}},
                 {
                     'in':{'column':'c', 'regex':'^a', 'mostly':.5},
-                    'out':{'success':True, 'exception_list':[], 'exception_index_list':[]}}
+                    'out':{'success':True, 'unexpected_list':[], 'unexpected_index_list':[]}}
         ]
 
         for t in T:
             out = D2.expect_column_values_to_match_regex(**t['in'])
-            self.assertEqual(out, t['out'])
-
+            self.assertEqual(t['out']['success'], out['success'])
+            self.assertEqual(t['out']['unexpected_index_list'], out['result_obj']['unexpected_index_list'])
+            self.assertEqual(t['out']['unexpected_list'], out['result_obj']['unexpected_list'])
 
 
     def test_expect_column_values_to_not_match_regex(self):
@@ -804,38 +766,42 @@ class TestPandasDataset(unittest.TestCase):
             'y' : ['axxx', 'exxxx', 'ixxxx', 'oxxxxx', 'uxxxxx', 'yxxxxx', 'zxxxx'],
             'z' : [None, None, None, None, None, None, None]
         })
-        D.set_default_expectation_argument("output_format", "COMPLETE")
+        D.set_default_expectation_argument("result_format", "COMPLETE")
 
         T = [
                 {
                     'in':{'column':'x', 'regex':'^a'},
-                    'out':{'success':False, 'exception_index_list':[0,1,2,3], 'exception_list':['aa', 'ab', 'ac', 'a1']}},
+                    'out':{'success':False, 'unexpected_index_list':[0,1,2,3], 'unexpected_list':['aa', 'ab', 'ac', 'a1']}},
                 {
                     'in':{'column':'x', 'regex':'^b'},
-                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}},
+                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}},
                 {
                     'in':{'column':'y', 'regex':'^z'},
-                    'out':{'success':False, 'exception_index_list':[6], 'exception_list':['zxxxx']}}
+                    'out':{'success':False, 'unexpected_index_list':[6], 'unexpected_list':['zxxxx']}}
         ]
 
         for t in T:
             out = D.expect_column_values_to_not_match_regex(**t['in'])
-            self.assertEqual(out, t['out'])
-
+            self.assertEqual(t['out']['success'], out['success'])
+            self.assertEqual(t['out']['unexpected_index_list'], out['result_obj']['unexpected_index_list'])
+            self.assertEqual(t['out']['unexpected_list'], out['result_obj']['unexpected_list'])
 
     def test_expect_column_values_to_match_regex_list(self):
         with open("./tests/test_sets/expect_column_values_to_match_regex_list_test_set.json") as f:
             J = json.load(f)
             D = ge.dataset.PandasDataSet(J["dataset"])
-            D.set_default_expectation_argument("output_format", "COMPLETE")
+            D.set_default_expectation_argument("result_format", "COMPLETE")
             T = J["tests"]
 
             self.maxDiff = None
 
         for t in T:
             out = D.expect_column_values_to_match_regex_list(**t['in'])
-            self.assertEqual(out, t['out'])
-
+            self.assertEqual(t['out']['success'], out['success'])
+            if 'unexpected_index_list' in t['out']:
+                self.assertEqual(t['out']['unexpected_index_list'], out['result_obj']['unexpected_index_list'])
+            if 'unexpected_list' in t['out']:
+                self.assertEqual(t['out']['unexpected_list'], out['result_obj']['unexpected_list'])
 
     def test_expect_column_values_to_match_strftime_format(self):
         """
@@ -849,16 +815,16 @@ class TestPandasDataset(unittest.TestCase):
             'almost_iso8601_val_error' : ['1977-05-55T00:00:00', '1980-05-21T13:47:59', '2017-06-12T23:57:59'],
             'already_datetime' : [datetime.datetime(2015,1,1), datetime.datetime(2016,1,1), datetime.datetime(2017,1,1)]
         })
-        D.set_default_expectation_argument("output_format", "COMPLETE")
+        D.set_default_expectation_argument("result_format", "COMPLETE")
 
         T = [
                 {
                     'in':{'column':'us_dates', 'strftime_format':'%m/%d/%Y'},
-                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}
+                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}
                 },
                 {
                     'in':{'column':'us_dates_type_error','strftime_format':'%m/%d/%Y', 'mostly': 0.5, 'catch_exceptions': True},
-                    # 'out':{'success':True, 'exception_index_list':[2], 'exception_list':[5]}},
+                    # 'out':{'success':True, 'unexpected_index_list':[2], 'unexpected_list':[5]}},
                     'error':{
                         'traceback_substring' : 'TypeError'
                     },
@@ -871,13 +837,13 @@ class TestPandasDataset(unittest.TestCase):
                 },
                 {
                     'in':{'column':'almost_iso8601','strftime_format':'%Y-%m-%dT%H:%M:%S'},
-                    'out':{'success':True,'exception_index_list':[], 'exception_list':[]}},
+                    'out':{'success':True,'unexpected_index_list':[], 'unexpected_list':[]}},
                 {
                     'in':{'column':'almost_iso8601_val_error','strftime_format':'%Y-%m-%dT%H:%M:%S'},
-                    'out':{'success':False,'exception_index_list':[0], 'exception_list':['1977-05-55T00:00:00']}},
+                    'out':{'success':False,'unexpected_index_list':[0], 'unexpected_list':['1977-05-55T00:00:00']}},
                 {
                     'in':{'column':'already_datetime','strftime_format':'%Y-%m-%d', 'catch_exceptions':True},
-                    # 'out':{'success':False,'exception_index_list':[0], 'exception_list':['1977-05-55T00:00:00']},
+                    # 'out':{'success':False,'unexpected_index_list':[0], 'unexpected_list':['1977-05-55T00:00:00']},
                     'error':{
                         'traceback_substring' : 'TypeError: Values passed to expect_column_values_to_match_strftime_format must be of type string.'
                     },
@@ -887,10 +853,14 @@ class TestPandasDataset(unittest.TestCase):
         for t in T:
             out = D.expect_column_values_to_match_strftime_format(**t['in'])
             if 'out' in t:
-                self.assertEqual(out, t['out'])
+                self.assertEqual(t['out']['success'], out['success'])
+                if 'unexpected_index_list' in t['out']:
+                    self.assertEqual(t['out']['unexpected_index_list'], out['result_obj']['unexpected_index_list'])
+                if 'unexpected_list' in t['out']:
+                    self.assertEqual(t['out']['unexpected_list'], out['result_obj']['unexpected_list'])
             elif 'error' in t:
-                self.assertEqual(out['raised_exception'], True)
-                self.assertIn(t['error']['traceback_substring'], out['exception_traceback'])
+                self.assertEqual(out['exception_info']['raised_exception'], True)
+                self.assertIn(t['error']['traceback_substring'], out['exception_info']['exception_traceback'])
 
     def test_expect_column_values_to_be_dateutil_parseable(self):
 
@@ -901,27 +871,27 @@ class TestPandasDataset(unittest.TestCase):
             'c4':['1', '2', '49000004632'],
             'already_datetime' : [datetime.datetime(2015,1,1), datetime.datetime(2016,1,1), datetime.datetime(2017,1,1)],
         })
-        D.set_default_expectation_argument("output_format", "COMPLETE")
+        D.set_default_expectation_argument("result_format", "COMPLETE")
 
         T = [
                 {
                     'in':{'column': 'c1'},
-                    'out':{'success':True, 'exception_list':[], 'exception_index_list': []}},
+                    'out':{'success':True, 'unexpected_list':[], 'unexpected_index_list': []}},
                 {
                     'in':{"column":'c2', "catch_exceptions":True},
-                    # 'out':{'success':False, 'exception_list':['covfefe', 25], 'exception_index_list': [1, 2]}},
+                    # 'out':{'success':False, 'unexpected_list':['covfefe', 25], 'unexpected_index_list': [1, 2]}},
                     'error':{ 'traceback_substring' : 'TypeError: Values passed to expect_column_values_to_be_dateutil_parseable must be of type string' },
                 },
                 {
                     'in':{"column":'c3'},
-                    'out':{'success':False, 'exception_list':['Jared'], 'exception_index_list': [0]}},
+                    'out':{'success':False, 'unexpected_list':['Jared'], 'unexpected_index_list': [0]}},
                 {
                     'in':{'column': 'c3', 'mostly':.5},
-                    'out':{'success':True, 'exception_list':['Jared'], 'exception_index_list': [0]}
+                    'out':{'success':True, 'unexpected_list':['Jared'], 'unexpected_index_list': [0]}
                 },
                 {
                     'in':{'column': 'c4'},
-                    'out':{'success':False, 'exception_list':['49000004632'], 'exception_index_list': [2]}
+                    'out':{'success':False, 'unexpected_list':['49000004632'], 'unexpected_index_list': [2]}
                 },
                 {
                     'in':{'column':'already_datetime', 'catch_exceptions':True},
@@ -932,10 +902,12 @@ class TestPandasDataset(unittest.TestCase):
         for t in T:
             out = D.expect_column_values_to_be_dateutil_parseable(**t['in'])
             if 'out' in t:
-                self.assertEqual(out, t['out'])
+                self.assertEqual(t['out']['success'], out['success'])
+                self.assertEqual(t['out']['unexpected_index_list'], out['result_obj']['unexpected_index_list'])
+                self.assertEqual(t['out']['unexpected_list'], out['result_obj']['unexpected_list'])
             elif 'error' in t:
-                self.assertEqual(out['raised_exception'], True)
-                self.assertIn(t['error']['traceback_substring'], out['exception_traceback'])
+                self.assertEqual(out['exception_info']['raised_exception'], True)
+                self.assertIn(t['error']['traceback_substring'], out['exception_info']['exception_traceback'])
 
 
     def test_expect_column_values_to_be_json_parseable(self):
@@ -949,49 +921,53 @@ class TestPandasDataset(unittest.TestCase):
             'py_dict':[{'a':1, 'out':1},{'b':2, 'out':4},{'c':3, 'out':9},{'d':4, 'out':16}],
             'most':[d1,d2,d3,'d4']
         })
-        D.set_default_expectation_argument("output_format", "COMPLETE")
+        D.set_default_expectation_argument("result_format", "COMPLETE")
 
         T = [
                 {
                     'in':{'column':'json_col'},
-                    'out':{'success':True, 'exception_index_list':[], 'exception_list':[]}},
+                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}},
                 {
                     'in':{'column':'not_json'},
-                    'out':{'success':False, 'exception_index_list':[0,1,2,3], 'exception_list':[4,5,6,7]}},
+                    'out':{'success':False, 'unexpected_index_list':[0,1,2,3], 'unexpected_list':[4,5,6,7]}},
                 {
                     'in':{'column':'py_dict'},
-                    'out':{'success':False, 'exception_index_list':[0,1,2,3], 'exception_list':[{'a':1, 'out':1},{'b':2, 'out':4},{'c':3, 'out':9},{'d':4, 'out':16}]}},
+                    'out':{'success':False, 'unexpected_index_list':[0,1,2,3], 'unexpected_list':[{'a':1, 'out':1},{'b':2, 'out':4},{'c':3, 'out':9},{'d':4, 'out':16}]}},
                 {
                     'in':{'column':'most'},
-                    'out':{'success':False, 'exception_index_list':[3], 'exception_list':['d4']}},
+                    'out':{'success':False, 'unexpected_index_list':[3], 'unexpected_list':['d4']}},
                 {
                     'in':{'column':'most', 'mostly':.75},
-                    'out':{'success':True, 'exception_index_list':[3], 'exception_list':['d4']}}
+                    'out':{'success':True, 'unexpected_index_list':[3], 'unexpected_list':['d4']}}
         ]
 
         for t in T:
             out = D.expect_column_values_to_be_json_parseable(**t['in'])
-            self.assertEqual(out, t['out'])
+            self.assertEqual(t['out']['success'], out['success'])
+            self.assertEqual(t['out']['unexpected_index_list'], out['result_obj']['unexpected_index_list'])
+            self.assertEqual(t['out']['unexpected_list'], out['result_obj']['unexpected_list'])
 
     def test_expect_column_values_to_match_json_schema(self):
 
         with open("./tests/test_sets/expect_column_values_to_match_json_schema_test_set.json") as f:
             J = json.load(f)
             D = ge.dataset.PandasDataSet(J["dataset"])
-            D.set_default_expectation_argument("output_format", "COMPLETE")
+            D.set_default_expectation_argument("result_format", "COMPLETE")
             T = J["tests"]
 
             self.maxDiff = None
 
         for t in T:
             out = D.expect_column_values_to_match_json_schema(**t['in'])#, **t['kwargs'])
-            self.assertEqual(out, t['out'])
-
-
+            self.assertEqual(t['out']['success'], out['success'])
+            if 'unexpected_index_list' in t['out']:
+                self.assertEqual(t['out']['unexpected_index_list'], out['result_obj']['unexpected_index_list'])
+            if 'unexpected_list' in t['out']:
+                self.assertEqual(t['out']['unexpected_list'], out['result_obj']['unexpected_list'])
 
     def test_expect_column_mean_to_be_between(self):
         """
-        #!!! Ignores null (None and np.nan) values. If all null values, return {'success':False, 'exception_list':None)
+        #!!! Ignores null (None and np.nan) values. If all null values, return {'success':False, 'unexpected_list':None)
         Cases Tested:
             Tested with float - float
             Tested with float - int
@@ -1005,30 +981,31 @@ class TestPandasDataset(unittest.TestCase):
             'n' : [0, None],
             'b' : [True, False],
         })
-        D.set_default_expectation_argument("output_format", "BASIC")
+        D.set_default_expectation_argument("result_format", "BASIC")
 
         T = [
                 {
                     'in':{'column':'x', 'min_value':2, 'max_value':5},
-                    'out':{'success':True, 'true_value':3.5}},
+                    'out':{'success':True, 'result_obj': {'observed_value': 3.5, 'element_count': 2, 'missing_count': 0, 'missing_percent': 0}}},
                 {
                     'in':{'column':'x', 'min_value':1, 'max_value':2},
-                    'out':{'success':False, 'true_value':3.5}},
+                    'out':{'success':False, 'result_obj': {'observed_value': 3.5, 'element_count': 2, 'missing_count': 0, 'missing_percent': 0}}},
                 {
                     'in':{'column':'y', 'min_value':5, 'max_value':5},
-                    'out':{'success':True, 'true_value':5}},
+                    'out':{'success':True, 'result_obj': {'observed_value': 5, 'element_count': 2, 'missing_count': 0, 'missing_percent': 0}}},
                 {
                     'in':{'column':'y', 'min_value':4, 'max_value':4},
-                    'out':{'success':False, 'true_value':5}},
+                    'out':{'success':False, 'result_obj': {'observed_value': 5, 'element_count': 2, 'missing_count': 0, 'missing_percent': 0}}},
                 {
                     'in':{'column':'z', 'min_value':5, 'max_value':5},
-                    'out':{'success':True, 'true_value':5}},
+                    'out':{'success':True, 'result_obj': {'observed_value': 5, 'element_count': 2, 'missing_count': 0, 'missing_percent': 0}}},
                 {
                     'in':{'column':'z', 'min_value':13, 'max_value':14},
-                    'out':{'success':False, 'true_value':5}},
+                    'out':{'success':False, 'result_obj': {'observed_value': 5, 'element_count': 2, 'missing_count': 0, 'missing_percent': 0}}},
                 {
                     'in':{'column':'n', 'min_value':0, 'max_value':0},
-                    'out':{'success':True, 'true_value':0.0}}
+                    'out':{'success':True, 'result_obj': {'observed_value': 0.0, 'element_count': 2, 'missing_count': 1, 'missing_percent': 0.5}}
+                }
         ]
 
         for t in T:
@@ -1041,18 +1018,18 @@ class TestPandasDataset(unittest.TestCase):
             'b' : [True, False, False, True],
             'x' : [True, None, False, None],
         })
-        typedf.set_default_expectation_argument("output_format", "BASIC")
+        typedf.set_default_expectation_argument("result_format", "BASIC")
 
         T = [
                 {
                     'in':{'column':'s', 'min_value':0, 'max_value':0},
-                    'out':{'success':False, 'true_value':None}},
+                    'out':{'success':False, 'result_obj': {'observed_value':None, 'element_count': 4, 'missing_count': 3, 'missing_percent': 0.75}}},
                 {
                     'in':{'column':'b', 'min_value':0, 'max_value':1},
-                    'out':{'success':True, 'true_value':0.5}},
+                    'out':{'success':True, 'result_obj': {'observed_value':0.5, 'element_count': 4, 'missing_count': 0, 'missing_percent': 0}}},
                 {
                     'in':{'column':'x', 'min_value':0, 'max_value':1},
-                    'out':{'success':True, 'true_value':0.5}}
+                    'out':{'success':True, 'result_obj': {'observed_value':0.5, 'element_count': 4, 'missing_count': 2, 'missing_percent': 0.5}}}
         ]
 
         for t in T[1:]:
@@ -1065,7 +1042,26 @@ class TestPandasDataset(unittest.TestCase):
         with self.assertRaises(ValueError):
             typedf.expect_column_mean_to_be_between("s")
 
+    def test_expect_column_median_to_be_between(self):
+        ds = ge.dataset.PandasDataSet({
+            'a': [0,1,2,3],
+            'b': [0,1,1,2]
+        })
 
+        self.assertEqual(
+            True,
+            ds.expect_column_median_to_be_between('a', 1, 2)['success']
+        )
+
+        self.assertEqual(
+            1.5,
+            ds.expect_column_median_to_be_between('a', 1, 2)['result_obj']['observed_value']
+        )
+
+        self.assertEqual(
+            1,
+            ds.expect_column_median_to_be_between('b', 1, 1)['result_obj']['observed_value']
+        )
 
     def test_expect_column_stdev_to_be_between(self):
 
@@ -1073,21 +1069,21 @@ class TestPandasDataset(unittest.TestCase):
             'dist1' : [1,1,3],
             'dist2' : [-1,0,1]
         })
-        D.set_default_expectation_argument("output_format", "COMPLETE")
+        D.set_default_expectation_argument("result_format", "COMPLETE")
 
         T = [
                 {
                     'in':{'column':'dist1', 'min_value':.5, 'max_value':1.5},
-                    'out':{'success':True, 'true_value':D['dist1'].std()}},
+                    'out':{'success':True, "result_obj": { "observed_value": D['dist1'].std(), "element_count": 3, "missing_count": 0, "missing_percent": 0}}},
                 {
                     'in':{'column':'dist1', 'min_value':2, 'max_value':3},
-                    'out':{'success':False, 'true_value':D['dist1'].std()}},
+                    'out':{'success':False, "result_obj": { "observed_value": D['dist1'].std(), "element_count": 3, "missing_count": 0, "missing_percent": 0}}},
                 {
                     'in':{'column':'dist2', 'min_value':2, 'max_value':3},
-                    'out':{'success':False, 'true_value':1.0}},
+                    'out':{'success':False, "result_obj": { "observed_value": 1, "element_count": 3, "missing_count": 0, "missing_percent": 0}}},
                 {
                     'in':{'column':'dist2', 'min_value':0, 'max_value':1},
-                    'out':{'success':True, 'true_value':1.0}}
+                    'out':{'success':True, "result_obj": { "observed_value": 1, "element_count": 3, "missing_count": 0, "missing_percent": 0}}}
         ]
 
         for t in T:
@@ -1106,7 +1102,7 @@ class TestPandasDataset(unittest.TestCase):
             'dist3' : [2,2,2,2,5,6,7,8],
             'dist4' : [1,1,1,1,None,None,None,None]
         })
-        D.set_default_expectation_argument("output_format", "COMPLETE")
+        D.set_default_expectation_argument("result_format", "COMPLETE")
 
         T = [
                 {
@@ -1116,7 +1112,7 @@ class TestPandasDataset(unittest.TestCase):
                         'max_value': 10
                     },
                     'kwargs':{},
-                    'out':{'success':True, 'true_value': 8}
+                    'out':{'success':True, "result_obj": { "observed_value": 8, "element_count": 8, "missing_count": 0, "missing_percent": 0}}
                 },{
                     'in':{
                         "column" : 'dist2',
@@ -1124,7 +1120,7 @@ class TestPandasDataset(unittest.TestCase):
                         "max_value" : None
                     },
                     'kwargs':{},
-                    'out':{'success':True, 'true_value': 5}
+                    'out':{'success':True, "result_obj": { "observed_value": 5, "element_count": 8, "missing_count": 3, "missing_percent": 3/8}}
                 },{
                     'in':{
                         "column": 'dist3',
@@ -1132,7 +1128,7 @@ class TestPandasDataset(unittest.TestCase):
                         "max_value": 5
                     },
                     'kwargs':{},
-                    'out':{'success':True, 'true_value': 5}
+                    'out':{'success':True, "result_obj": { "observed_value": 5, "element_count": 8, "missing_count": 0, "missing_percent": 0}}
                 },{
                     'in':{
                         "column": 'dist4',
@@ -1140,7 +1136,7 @@ class TestPandasDataset(unittest.TestCase):
                         "max_value": None
                     },
                     'kwargs':{},
-                    'out':{'success':False, 'true_value': 1}
+                    'out':{'success':False, "result_obj": { "observed_value": 1, "element_count": 8, "missing_count": 4, "missing_percent": 0.5}}
                 }
         ]
 
@@ -1157,21 +1153,21 @@ class TestPandasDataset(unittest.TestCase):
             'dist1' : [1,1,3],
             'dist2' : [-1,0,1]
         })
-        D.set_default_expectation_argument("output_format", "COMPLETE")
+        D.set_default_expectation_argument("result_format", "COMPLETE")
 
         T = [
                 {
                     'in':{'column':'dist1', 'min_value':.5, 'max_value':1.5},
-                    'out':{'success':True, 'true_value': 2./3}},
+                    'out':{'success':True, "result_obj": { "observed_value": 2/3, "element_count": 3, "missing_count": 0, "missing_percent": 0}}},
                 {
                     'in':{'column':'dist1', 'min_value':2, 'max_value':3},
-                    'out':{'success':False, 'true_value': 2./3}},
+                    'out':{'success':False, "result_obj": { "observed_value": 2/3, "element_count": 3, "missing_count": 0, "missing_percent": 0}}},
                 {
                     'in':{'column':'dist2', 'min_value':2, 'max_value':3},
-                    'out':{'success':False, 'true_value':1.0}},
+                    'out':{'success':False, "result_obj": { "observed_value": 1, "element_count": 3, "missing_count": 0, "missing_percent": 0}}},
                 {
                     'in':{'column':'dist2', 'min_value':0, 'max_value':1},
-                    'out':{'success':True, 'true_value':1.0}}
+                    'out':{'success':True, "result_obj": { "observed_value": 1, "element_count": 3, "missing_count": 0, "missing_percent": 0}}}
         ]
 
         for t in T:
@@ -1183,7 +1179,7 @@ class TestPandasDataset(unittest.TestCase):
         with open("./tests/test_sets/expect_column_values_to_be_increasing_test_set.json") as f:
             J = json.load(f)
             D = ge.dataset.PandasDataSet(J["dataset"])
-            D.set_default_expectation_argument("output_format", "COMPLETE")
+            D.set_default_expectation_argument("result_format", "COMPLETE")
             T = J["tests"]
 
             self.maxDiff = None
@@ -1191,14 +1187,18 @@ class TestPandasDataset(unittest.TestCase):
         for t in T:
             print(t)
             out = D.expect_column_values_to_be_increasing(**t['in'])#, **t['kwargs'])
-            self.assertEqual(out, t['out'])
+            self.assertEqual(t['out']['success'], out['success'])
+            if 'unexpected_index_list' in t['out']:
+                self.assertEqual(t['out']['unexpected_index_list'], out['result_obj']['unexpected_index_list'])
+            if 'unexpected_list' in t['out']:
+                self.assertEqual(t['out']['unexpected_list'], out['result_obj']['unexpected_list'])
 
     def test_expect_column_values_to_be_decreasing(self):
         print("=== test_expect_column_values_to_be_decreasing ===")
         with open("./tests/test_sets/expect_column_values_to_be_decreasing_test_set.json") as f:
             J = json.load(f)
             D = ge.dataset.PandasDataSet(J["dataset"])
-            D.set_default_expectation_argument("output_format", "COMPLETE")
+            D.set_default_expectation_argument("result_format", "COMPLETE")
             T = J["tests"]
 
             self.maxDiff = None
@@ -1206,7 +1206,11 @@ class TestPandasDataset(unittest.TestCase):
         for t in T:
             print(t)
             out = D.expect_column_values_to_be_decreasing(**t['in'])
-            self.assertEqual(out, t['out'])
+            self.assertEqual(t['out']['success'], out['success'])
+            if 'unexpected_index_list' in t['out']:
+                self.assertEqual(t['out']['unexpected_index_list'], out['result_obj']['unexpected_index_list'])
+            if 'unexpected_list' in t['out']:
+                self.assertEqual(t['out']['unexpected_list'], out['result_obj']['unexpected_list'])
 
     def test_expect_column_most_common_value_to_be_in_set(self):
 
@@ -1215,27 +1219,27 @@ class TestPandasDataset(unittest.TestCase):
             'y' : ['hello', 'jello', 'mello', 'hello', 'jello', 'mello', 'hello', 'jello', 'mello', 'jello'],
             'z' : [1,2,2,3,3,3,4,4,4,4],
         })
-        D.set_default_expectation_argument("output_format", "COMPLETE")
+        D.set_default_expectation_argument("result_format", "COMPLETE")
 
         T = [
                 {
                     'in':{"column":"x","value_set":[1]},
-                    'out':{"success":False, "true_value":[1,2]},
+                    'out':{"success":False, "result_obj": { "observed_value": [1,2], "element_count": 10, "missing_count": 5, "missing_percent": 0.5}},
                 },{
                     'in':{"column":"x", "value_set":[1], "ties_okay":True},
-                    'out':{"success":True, "true_value":[1,2]},
+                    'out':{"success":True, "result_obj": { "observed_value": [1,2], "element_count": 10, "missing_count": 5, "missing_percent": 0.5}},
                 },{
                     'in':{"column":"x","value_set":[3]},
-                    'out':{"success":False, "true_value":[1,2]},
+                    'out':{"success":False, "result_obj": { "observed_value": [1,2], "element_count": 10, "missing_count": 5, "missing_percent": 0.5}},
                 },{
                     'in':{"column":"y","value_set":["jello", "hello"]},
-                    'out':{'success':True, "true_value":["jello"]},
+                    'out':{'success':True, "result_obj": { "observed_value": ["jello"], "element_count": 10, "missing_count": 0, "missing_percent": 0}},
                 },{
                     'in':{"column":"y","value_set":["hello", "mello"]},
-                    'out':{'success':False, "true_value":["jello"]},
+                    'out':{'success':False, "result_obj": { "observed_value": ["jello"], "element_count": 10, "missing_count": 0, "missing_percent": 0}},
                 },{
                     'in':{"column":"z","value_set":[4]},
-                    'out':{'success':True, "true_value":[4]},
+                    'out':{'success':True, "result_obj": { "observed_value": [4], "element_count": 10, "missing_count": 0, "missing_percent": 0}},
                 }
         ]
 
@@ -1249,7 +1253,7 @@ class TestPandasDataset(unittest.TestCase):
         with open("./tests/test_sets/expect_column_sum_to_be_between_test_set.json") as f:
             J = json.load(f)
             D = ge.dataset.PandasDataSet(J["dataset"])
-            D.set_default_expectation_argument("output_format", "COMPLETE")
+            D.set_default_expectation_argument("result_format", "COMPLETE")
             T = J["tests"]
 
             self.maxDiff = None
@@ -1260,17 +1264,21 @@ class TestPandasDataset(unittest.TestCase):
             print(out)
 
             if "out" in t:
-                self.assertEqual(out, t['out'])
+                self.assertEqual(t['out']['success'], out['success'])
+                if 'unexpected_index_list' in t['out']:
+                    self.assertEqual(t['out']['unexpected_index_list'], out['result_obj']['unexpected_index_list'])
+                if 'unexpected_list' in t['out']:
+                    self.assertEqual(t['out']['unexpected_list'], out['result_obj']['unexpected_list'])
 
             if "error" in t:
-                self.assertEqual(out['raised_exception'], True)
-                self.assertIn(t['error']['traceback_substring'], out['exception_traceback'])
+                self.assertEqual(out['exception_info']['raised_exception'], True)
+                self.assertIn(t['error']['traceback_substring'], out['exception_info']['exception_traceback'])
 
     def test_expect_column_min_to_be_between(self):
         with open("./tests/test_sets/expect_column_min_to_be_between_test_set.json") as f:
             J = json.load(f)
             D = ge.dataset.PandasDataSet(J["dataset"])
-            D.set_default_expectation_argument("output_format", "COMPLETE")
+            D.set_default_expectation_argument("result_format", "COMPLETE")
             T = J["tests"]
 
             self.maxDiff = None
@@ -1281,17 +1289,21 @@ class TestPandasDataset(unittest.TestCase):
             print(out)
 
             if "out" in t:
-                self.assertEqual(out, t['out'])
+                self.assertEqual(t['out']['success'], out['success'])
+                if 'unexpected_index_list' in t['out']:
+                    self.assertEqual(t['out']['unexpected_index_list'], out['result_obj']['unexpected_index_list'])
+                if 'unexpected_list' in t['out']:
+                    self.assertEqual(t['out']['unexpected_list'], out['result_obj']['unexpected_list'])
 
             if "error" in t:
-                self.assertEqual(out['raised_exception'], True)
-                self.assertIn(t['error']['traceback_substring'], out['exception_traceback'])
+                self.assertEqual(out['exception_info']['raised_exception'], True)
+                self.assertIn(t['error']['traceback_substring'], out['exception_info']['exception_traceback'])
 
     def test_expect_column_max_to_be_between(self):
         with open("./tests/test_sets/expect_column_max_to_be_between_test_set.json") as f:
             J = json.load(f)
             D = ge.dataset.PandasDataSet(J["dataset"])
-            D.set_default_expectation_argument("output_format", "COMPLETE")
+            D.set_default_expectation_argument("result_format", "COMPLETE")
             T = J["tests"]
 
             self.maxDiff = None
@@ -1302,7 +1314,11 @@ class TestPandasDataset(unittest.TestCase):
             print(out)
 
             if "out" in t:
-                self.assertEqual(out, t['out'])
+                self.assertEqual(t['out']['success'], out['success'])
+                if 'unexpected_index_list' in t['out']:
+                    self.assertEqual(t['out']['unexpected_index_list'], out['result_obj']['unexpected_index_list'])
+                if 'unexpected_list' in t['out']:
+                    self.assertEqual(t['out']['unexpected_list'], out['result_obj']['unexpected_list'])
 
             if "error" in t:
                 self.assertEqual(out['raised_exception'], True)
@@ -1313,41 +1329,41 @@ class TestPandasDataset(unittest.TestCase):
         df = ge.dataset.PandasDataSet({
             'x' : [1,2,3,4,5,6,7,7,None,None],
         })
-        df.set_default_expectation_argument("output_format", "COMPLETE")
+        df.set_default_expectation_argument("result_format", "COMPLETE")
 
         # print '&'*80
-        # print json.dumps(df.expect_column_values_to_be_between('x', min_value=1, max_value=5, output_format="SUMMARY"), indent=2)
+        # print json.dumps(df.expect_column_values_to_be_between('x', min_value=1, max_value=5, result_format="SUMMARY"), indent=2)
 
         self.maxDiff = None
         self.assertEqual(
-            df.expect_column_values_to_be_between('x', min_value=1, max_value=5, output_format="SUMMARY"),
+            df.expect_column_values_to_be_between('x', min_value=1, max_value=5, result_format="SUMMARY"),
             {
                 "success" : False,
-                "summary_obj" : {
+                "result_obj" : {
                     "element_count" : 10,
                     "missing_count" : 2,
                     "missing_percent" : .2,
-                    "exception_count" : 3,
-                    "partial_exception_counts": [
+                    "unexpected_count" : 3,
+                    "partial_unexpected_counts": [
                         {"value": 7.0,
                          "count": 2},
                         {"value": 6.0,
                          "count": 1}
                     ],
-                    "exception_percent": 0.3,
-                    "exception_percent_nonmissing": 0.375,
-                    "partial_exception_list" : [6.0,7.0,7.0],
-                    "partial_exception_index_list": [5,6,7],
+                    "unexpected_percent": 0.3,
+                    "unexpected_percent_nonmissing": 0.375,
+                    "partial_unexpected_list" : [6.0,7.0,7.0],
+                    "partial_unexpected_index_list": [5,6,7],
                 }
             }
         )
 
         self.assertEqual(
-            df.expect_column_mean_to_be_between("x", 3, 7, output_format="SUMMARY"),
+            df.expect_column_mean_to_be_between("x", 3, 7, result_format="SUMMARY"),
             {
                 'success': True,
-                'true_value': 4.375,
-                'summary_obj': {
+                'result_obj': {
+                    'observed_value': 4.375,
                     'element_count': 10,
                     'missing_count': 2,
                     'missing_percent': .2
@@ -1362,58 +1378,91 @@ class TestPandasDataset(unittest.TestCase):
             'y':[2,4,6,8,10],
             'z':[None,'a','b','c','abc']
         })
-        df.set_default_expectation_argument('output_format', 'COMPLETE')
+        df.set_default_expectation_argument('result_format', 'COMPLETE')
 
         self.assertEqual(
             df.expect_column_mean_to_be_between('x',4,6),
-            {'success':True, 'true_value':5}
+            {'success':True, 'result_obj': {'observed_value': 5, 'element_count': 5,
+                'missing_count': 0,
+                'missing_percent': 0.0}}
         )
 
-        self.assertEqual(
-            df.expect_column_values_to_be_between('y',1,6),
-            {'success':False, 'exception_list':[8,10], 'exception_index_list':[3,4]}
-        )
+        out = df.expect_column_values_to_be_between('y',1,6)
+        t = {'out': {'success':False, 'unexpected_list':[8,10], 'unexpected_index_list': [3,4]}}
+        if 'out' in t:
+            self.assertEqual(t['out']['success'], out['success'])
+            if 'unexpected_index_list' in t['out']:
+                self.assertEqual(t['out']['unexpected_index_list'], out['result_obj']['unexpected_index_list'])
+            if 'unexpected_list' in t['out']:
+                self.assertEqual(t['out']['unexpected_list'], out['result_obj']['unexpected_list'])
 
-        self.assertEqual(
-            df.expect_column_values_to_be_between('y',1,6,mostly=.5),
-            {'success':True, 'exception_list':[8,10], 'exception_index_list':[3,4]}
-        )
+        out = df.expect_column_values_to_be_between('y',1,6,mostly=.5)
+        t = {'out': {'success':True, 'unexpected_list':[8,10], 'unexpected_index_list':[3,4]}}
+        if 'out' in t:
+            self.assertEqual(t['out']['success'], out['success'])
+            if 'unexpected_index_list' in t['out']:
+                self.assertEqual(t['out']['unexpected_index_list'], out['result_obj']['unexpected_index_list'])
+            if 'unexpected_list' in t['out']:
+                self.assertEqual(t['out']['unexpected_list'], out['result_obj']['unexpected_list'])
 
-        self.assertEqual(
-            df.expect_column_values_to_be_in_set('z',['a','b','c']),
-            {'success':False, 'exception_list':['abc'], 'exception_index_list':[4]}
-        )
+        out = df.expect_column_values_to_be_in_set('z',['a','b','c'])
+        t = {'out': {'success':False, 'unexpected_list':['abc'], 'unexpected_index_list':[4]}}
+        if 'out' in t:
+            self.assertEqual(t['out']['success'], out['success'])
+            if 'unexpected_index_list' in t['out']:
+                self.assertEqual(t['out']['unexpected_index_list'], out['result_obj']['unexpected_index_list'])
+            if 'unexpected_list' in t['out']:
+                self.assertEqual(t['out']['unexpected_list'], out['result_obj']['unexpected_list'])
 
-        self.assertEqual(
-            df.expect_column_values_to_be_in_set('z',['a','b','c'],mostly=.5),
-            {'success':True, 'exception_list':['abc'], 'exception_index_list':[4]}
-        )
+        out = df.expect_column_values_to_be_in_set('z',['a','b','c'],mostly=.5)
+        t = {'out': {'success':True, 'unexpected_list':['abc'], 'unexpected_index_list':[4]}}
+        if 'out' in t:
+            self.assertEqual(t['out']['success'], out['success'])
+            if 'unexpected_index_list' in t['out']:
+                self.assertEqual(t['out']['unexpected_index_list'], out['result_obj']['unexpected_index_list'])
+            if 'unexpected_list' in t['out']:
+                self.assertEqual(t['out']['unexpected_list'], out['result_obj']['unexpected_list'])
 
-    def test_output_format_argument_in_decorators(self):
+    def test_result_format_argument_in_decorators(self):
         df = ge.dataset.PandasDataSet({
             'x':[1,3,5,7,9],
             'y':[2,4,6,8,10],
             'z':[None,'a','b','c','abc']
         })
-        df.set_default_expectation_argument('output_format', 'COMPLETE')
+        df.set_default_expectation_argument('result_format', 'COMPLETE')
 
-        #Test explicit Nones in output_format
+        #Test explicit Nones in result_format
         self.assertEqual(
-            df.expect_column_mean_to_be_between('x',4,6, output_format=None),
-            {'success':True, 'true_value':5}
+            df.expect_column_mean_to_be_between('x',4,6, result_format=None),
+            {'success':True, 'result_obj': {'observed_value': 5, 'element_count': 5,
+                'missing_count': 0,
+                'missing_percent': 0.0
+                }}
         )
 
         self.assertEqual(
-            df.expect_column_values_to_be_between('y',1,6, output_format=None),
-            {'success':False, 'exception_list':[8,10], 'exception_index_list':[3,4]}
+            df.expect_column_values_to_be_between('y',1,6, result_format=None),
+            {'result_obj': {'element_count': 5,
+                            'missing_count': 0,
+                            'missing_percent': 0.0,
+                            'partial_unexpected_counts': [{'count': 1, 'value': 8},
+                                                          {'count': 1, 'value': 10}],
+                            'partial_unexpected_index_list': [3, 4],
+                            'partial_unexpected_list': [8, 10],
+                            'unexpected_count': 2,
+                            'unexpected_index_list': [3, 4],
+                            'unexpected_list': [8, 10],
+                            'unexpected_percent': 0.4,
+                            'unexpected_percent_nonmissing': 0.4},
+             'success': False}
         )
 
         #Test unknown output format
         with self.assertRaises(ValueError):
-            df.expect_column_values_to_be_between('y',1,6, output_format="QUACK")
+            df.expect_column_values_to_be_between('y',1,6, result_format="QUACK")
 
         with self.assertRaises(ValueError):
-            df.expect_column_mean_to_be_between('x',4,6, output_format="QUACK")
+            df.expect_column_mean_to_be_between('x',4,6, result_format="QUACK")
 
 if __name__ == "__main__":
     unittest.main()

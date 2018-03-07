@@ -26,7 +26,7 @@ Advanced
    :maxdepth: 2
 
    standard_arguments
-   output_format
+   result_format
    custom_expectations
    conventions
    roadmap
