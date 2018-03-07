@@ -138,42 +138,42 @@ class TestDataset(unittest.TestCase):
         output_config = {
           "expectations": [
             {
-              "expectation_type": "expect_column_to_exist", 
+              "expectation_type": "expect_column_to_exist",
               "kwargs": {
                 "column": "x"
               }
-            }, 
+            },
             {
-              "expectation_type": "expect_column_to_exist", 
+              "expectation_type": "expect_column_to_exist",
               "kwargs": {
                 "column": "y"
               }
-            }, 
+            },
             {
-              "expectation_type": "expect_column_to_exist", 
+              "expectation_type": "expect_column_to_exist",
               "kwargs": {
                 "column": "z"
               }
-            }, 
+            },
             {
-              "expectation_type": "expect_column_values_to_be_in_set", 
+              "expectation_type": "expect_column_values_to_be_in_set",
               "kwargs": {
-                "column": "x", 
+                "column": "x",
                 "values_set": [
-                  1, 
-                  2, 
+                  1,
+                  2,
                   4
                 ]
               }
-            }, 
+            },
             {
-              "expectation_type": "expect_column_values_to_match_regex", 
+              "expectation_type": "expect_column_values_to_match_regex",
               "kwargs": {
-                "column": "z", 
+                "column": "z",
                 "regex": "ello"
               }
             }
-          ], 
+          ],
           "dataset_name": None,
           "meta": {
             "great_expectations.__version__": ge.__version__
@@ -198,53 +198,53 @@ class TestDataset(unittest.TestCase):
         output_config = {
           "expectations": [
             {
-              "expectation_type": "expect_column_to_exist", 
+              "expectation_type": "expect_column_to_exist",
               "kwargs": {
                 "column": "x"
               }
-            }, 
+            },
             {
-              "expectation_type": "expect_column_to_exist", 
+              "expectation_type": "expect_column_to_exist",
               "kwargs": {
                 "column": "y"
               }
-            }, 
+            },
             {
-              "expectation_type": "expect_column_to_exist", 
+              "expectation_type": "expect_column_to_exist",
               "kwargs": {
                 "column": "z"
               }
-            }, 
+            },
             {
-              "expectation_type": "expect_column_values_to_be_in_set", 
+              "expectation_type": "expect_column_values_to_be_in_set",
               "kwargs": {
-                "column": "x", 
+                "column": "x",
                 "values_set": [
-                  1, 
-                  2, 
+                  1,
+                  2,
                   4
                 ]
               }
-            }, 
+            },
             {
-              "expectation_type": "expect_column_values_to_be_in_set", 
+              "expectation_type": "expect_column_values_to_be_in_set",
               "kwargs": {
-                "column": "y", 
+                "column": "y",
                 "values_set": [
-                  1, 
-                  2, 
+                  1,
+                  2,
                   4
                 ]
               }
-            }, 
+            },
             {
-              "expectation_type": "expect_column_values_to_match_regex", 
+              "expectation_type": "expect_column_values_to_match_regex",
               "kwargs": {
-                "column": "z", 
+                "column": "z",
                 "regex": "ello"
               }
             }
-          ], 
+          ],
           "dataset_name": None,
           "meta": {
             "great_expectations.__version__": ge.__version__
@@ -274,44 +274,44 @@ class TestDataset(unittest.TestCase):
         output_config = {
           "expectations": [
             {
-              "expectation_type": "expect_column_to_exist", 
+              "expectation_type": "expect_column_to_exist",
               "kwargs": {
                 "column": "x"
               }
-            }, 
+            },
             {
-              "expectation_type": "expect_column_to_exist", 
+              "expectation_type": "expect_column_to_exist",
               "kwargs": {
                 "column": "y"
               }
-            }, 
+            },
             {
-              "expectation_type": "expect_column_to_exist", 
+              "expectation_type": "expect_column_to_exist",
               "kwargs": {
                 "column": "z"
               }
-            }, 
+            },
             {
-              "expectation_type": "expect_column_values_to_be_in_set", 
+              "expectation_type": "expect_column_values_to_be_in_set",
               "kwargs": {
-                "column": "x", 
+                "column": "x",
                 "values_set": [
-                  1, 
-                  2, 
+                  1,
+                  2,
                   4
-                ], 
+                ],
                 "result_format": "BASIC"
               }
-            }, 
+            },
             {
-              "expectation_type": "expect_column_values_to_match_regex", 
+              "expectation_type": "expect_column_values_to_match_regex",
               "kwargs": {
-                "column": "z", 
-                "regex": "ello", 
+                "column": "z",
+                "regex": "ello",
                 "result_format": "BASIC"
               }
             }
-          ], 
+          ],
           "dataset_name": None,
           "meta": {
             "great_expectations.__version__": ge.__version__
@@ -364,9 +364,7 @@ class TestDataset(unittest.TestCase):
             df._format_column_map_output(
                 "BOOLEAN_ONLY",
                 success,
-                element_count,
-                nonnull_values, nonnull_count,
-                boolean_mapped_success_values, success_count,
+                element_count, nonnull_count,
                 unexpected_list, unexpected_index_list
             ),
             {'success': True}
@@ -376,9 +374,7 @@ class TestDataset(unittest.TestCase):
             df._format_column_map_output(
                 "BASIC",
                 success,
-                element_count,
-                nonnull_values, nonnull_count,
-                boolean_mapped_success_values, success_count,
+                element_count, nonnull_count,
                 unexpected_list, unexpected_index_list
             ),
             {
@@ -400,8 +396,7 @@ class TestDataset(unittest.TestCase):
                 "SUMMARY",
                 success,
                 element_count,
-                nonnull_values, nonnull_count,
-                boolean_mapped_success_values, success_count,
+                nonnull_count,
                 unexpected_list, unexpected_index_list
             ),
             {
@@ -425,8 +420,7 @@ class TestDataset(unittest.TestCase):
                 "COMPLETE",
                 success,
                 element_count,
-                nonnull_values, nonnull_count,
-                boolean_mapped_success_values, success_count,
+                nonnull_count,
                 unexpected_list, unexpected_index_list
             ),
             {
@@ -464,8 +458,7 @@ class TestDataset(unittest.TestCase):
                 "BOOLEAN_ONLY",
                 success,
                 element_count,
-                nonnull_values, nonnull_count,
-                boolean_mapped_success_values, success_count,
+                nonnull_count,
                 unexpected_list, unexpected_index_list
             ),
             {'success': True}
@@ -476,8 +469,7 @@ class TestDataset(unittest.TestCase):
                 "BASIC",
                 success,
                 element_count,
-                nonnull_values, nonnull_count,
-                boolean_mapped_success_values, success_count,
+                nonnull_count,
                 unexpected_list, unexpected_index_list
             ),
             {
@@ -499,8 +491,7 @@ class TestDataset(unittest.TestCase):
                 "SUMMARY",
                 success,
                 element_count,
-                nonnull_values, nonnull_count,
-                boolean_mapped_success_values, success_count,
+                nonnull_count,
                 unexpected_list, unexpected_index_list
             ),
             {
@@ -524,8 +515,7 @@ class TestDataset(unittest.TestCase):
                 "COMPLETE",
                 success,
                 element_count,
-                nonnull_values, nonnull_count,
-                boolean_mapped_success_values, success_count,
+                nonnull_count,
                 unexpected_list, unexpected_index_list
             ),
             {
@@ -562,8 +552,7 @@ class TestDataset(unittest.TestCase):
                 "BOOLEAN_ONLY",
                 success,
                 element_count,
-                nonnull_values, nonnull_count,
-                boolean_mapped_success_values, success_count,
+                nonnull_count,
                 unexpected_list, unexpected_index_list
             ),
             {'success': False}
@@ -574,8 +563,7 @@ class TestDataset(unittest.TestCase):
                 "BASIC",
                 success,
                 element_count,
-                nonnull_values, nonnull_count,
-                boolean_mapped_success_values, success_count,
+                nonnull_count,
                 unexpected_list, unexpected_index_list
             ),
             {
@@ -597,8 +585,7 @@ class TestDataset(unittest.TestCase):
                 "SUMMARY",
                 success,
                 element_count,
-                nonnull_values, nonnull_count,
-                boolean_mapped_success_values, success_count,
+                nonnull_count,
                 unexpected_list, unexpected_index_list
             ),
             {
@@ -622,8 +609,7 @@ class TestDataset(unittest.TestCase):
                 "COMPLETE",
                 success,
                 element_count,
-                nonnull_values, nonnull_count,
-                boolean_mapped_success_values, success_count,
+                nonnull_count,
                 unexpected_list, unexpected_index_list
             ),
             {
@@ -722,7 +708,7 @@ class TestDataset(unittest.TestCase):
         self.assertEqual(
             my_df.find_expectations("expect_column_to_exist", "x", expectation_kwargs={}),
             [{
-              "expectation_type": "expect_column_to_exist", 
+              "expectation_type": "expect_column_to_exist",
               "kwargs": {
                 "column": "x"
               }
@@ -732,7 +718,7 @@ class TestDataset(unittest.TestCase):
         self.assertEqual(
             my_df.find_expectations("expect_column_to_exist", expectation_kwargs={"column": "y"}),
             [{
-              "expectation_type": "expect_column_to_exist", 
+              "expectation_type": "expect_column_to_exist",
               "kwargs": {
                 "column": "y"
               }
@@ -742,23 +728,23 @@ class TestDataset(unittest.TestCase):
         self.assertEqual(
             my_df.find_expectations("expect_column_to_exist"),
             [{
-              "expectation_type": "expect_column_to_exist", 
+              "expectation_type": "expect_column_to_exist",
               "kwargs": {
                 "column": "x"
               }
             },{
-              "expectation_type": "expect_column_to_exist", 
+              "expectation_type": "expect_column_to_exist",
               "kwargs": {
                 "column": "y"
               }
             },{
-              "expectation_type": "expect_column_to_exist", 
+              "expectation_type": "expect_column_to_exist",
               "kwargs": {
                 "column": "z"
               }
             }]
         )
-        
+
         with self.assertRaises(Exception) as context:
             my_df.find_expectations("expect_column_to_exist", "x", {"column": "y"})
 
@@ -770,19 +756,19 @@ class TestDataset(unittest.TestCase):
         self.assertEqual(
             my_df.find_expectations(column="x"),
             [{
-              "expectation_type": "expect_column_to_exist", 
+              "expectation_type": "expect_column_to_exist",
               "kwargs": {
                 "column": "x"
               }
             },{
-              "expectation_type": "expect_column_values_to_be_of_type", 
+              "expectation_type": "expect_column_values_to_be_of_type",
               "kwargs": {
                 "column": "x",
                 "type_": "int",
                 "target_datasource": "python",
               }
             },{
-              "expectation_type": "expect_column_values_to_be_increasing", 
+              "expectation_type": "expect_column_values_to_be_increasing",
               "kwargs": {
                 "column": "x"
               }
@@ -811,7 +797,7 @@ class TestDataset(unittest.TestCase):
         self.assertEqual(
             my_df.remove_expectation("expect_column_to_exist", "x", expectation_kwargs={}, dry_run=True),
             {
-              "expectation_type": "expect_column_to_exist", 
+              "expectation_type": "expect_column_to_exist",
               "kwargs": {
                 "column": "x"
               }
@@ -821,7 +807,7 @@ class TestDataset(unittest.TestCase):
         self.assertEqual(
             my_df.remove_expectation("expect_column_to_exist", expectation_kwargs={"column": "y"}, dry_run=True),
             {
-              "expectation_type": "expect_column_to_exist", 
+              "expectation_type": "expect_column_to_exist",
               "kwargs": {
                 "column": "y"
               }
@@ -831,7 +817,7 @@ class TestDataset(unittest.TestCase):
         self.assertEqual(
             my_df.remove_expectation("expect_column_to_exist", expectation_kwargs={"column": "y"}, remove_multiple_matches=True, dry_run=True),
             [{
-              "expectation_type": "expect_column_to_exist", 
+              "expectation_type": "expect_column_to_exist",
               "kwargs": {
                 "column": "y"
               }
@@ -847,23 +833,23 @@ class TestDataset(unittest.TestCase):
         self.assertEqual(
             my_df.remove_expectation("expect_column_to_exist", remove_multiple_matches=True, dry_run=True),
             [{
-              "expectation_type": "expect_column_to_exist", 
+              "expectation_type": "expect_column_to_exist",
               "kwargs": {
                 "column": "x"
               }
             },{
-              "expectation_type": "expect_column_to_exist", 
+              "expectation_type": "expect_column_to_exist",
               "kwargs": {
                 "column": "y"
               }
             },{
-              "expectation_type": "expect_column_to_exist", 
+              "expectation_type": "expect_column_to_exist",
               "kwargs": {
                 "column": "z"
               }
             }]
         )
-        
+
         with self.assertRaises(Exception) as context:
             my_df.remove_expectation("expect_column_to_exist", "x", {"column": "y"}, dry_run=True)
 
@@ -875,19 +861,19 @@ class TestDataset(unittest.TestCase):
         self.assertEqual(
             my_df.remove_expectation(column="x", remove_multiple_matches=True, dry_run=True),
             [{
-              "expectation_type": "expect_column_to_exist", 
+              "expectation_type": "expect_column_to_exist",
               "kwargs": {
                 "column": "x"
               }
             },{
-              "expectation_type": "expect_column_values_to_be_of_type", 
+              "expectation_type": "expect_column_values_to_be_of_type",
               "kwargs": {
                 "column": "x",
                 "type_": "int",
                 "target_datasource": "python",
               }
             },{
-              "expectation_type": "expect_column_values_to_be_increasing", 
+              "expectation_type": "expect_column_values_to_be_increasing",
               "kwargs": {
                 "column": "x"
               }
@@ -956,7 +942,7 @@ class TestDataset(unittest.TestCase):
             return {
                 "success": bool((self==7).sum().sum() > 0)
             }
-        
+
         self.assertEqual(
             D.test_expectation_function(expect_dataframe_to_contain_7),
             {'success': True}
@@ -991,7 +977,7 @@ class TestDataset(unittest.TestCase):
         self.assertEqual(
             D.test_column_map_expectation_function(is_odd, column='y', result_format="BOOLEAN_ONLY", mostly=.7),
             {'success': True}
-        )        
+        )
 
     def test_test_column_aggregate_expectation_function(self):
         D = ge.dataset.PandasDataSet({
