@@ -150,11 +150,36 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
     """
     PandasDataset instantiates the great_expectations Expectations API as a subclass of a pandas.DataFrame.
 
-    For the full API reference, please see :func:`Dataset <great_expectations.Dataset.base.Dataset>`
+    For the full API reference, please see :func:`DataSet <great_expectations.dataset.base.DataSet>`
+
+    NB
+    1. Subsets of PandaDataSet have ALL the expectations of the original
+       data frame unless the user specifies the discard_subset_failing_expectations=True
+       property on the original data frame.
+    2. Samples of PandaDataSet have ALL the non-failing expectations of the original
+       data frame.
+    3. Concatenations, joins, and merges of PandaDataSets ONLY contain the
+       default_expectations (see :func: `add_default_expectations`)
     """
 
+    @property
+    def _constructor(self):
+        return PandasDataSet
+
+# Do we need to define _constructor_sliced and/or _constructor_expanddim? See http://pandas.pydata.org/pandas-docs/stable/internals.html#subclassing-pandas-data-structures
+
+    def __finalize__(self, other, method=None, **kwargs):
+        if isinstance(other, PandasDataSet):
+            self.initialize_expectations(other.get_expectations_config())
+            self.discard_subset_failing_expectations = other.discard_subset_failing_expectations
+            if self.discard_subset_failing_expectations:
+                self.discard_failing_expectations()
+        super(PandasDataSet, self).__finalize__(other, method, **kwargs)
+        return self
+
     def __init__(self, *args, **kwargs):
-        super(PandasDataset, self).__init__(*args, **kwargs)
+        super(PandasDataSet, self).__init__(*args, **kwargs)
+        self.discard_subset_failing_expectations = kwargs.get('discard_subset_failing_expectations', False)
         self.add_default_expectations()
 
     def add_default_expectations(self):
