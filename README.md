@@ -43,6 +43,18 @@ You can also clone the repository, which includes examples of using great_expect
     $ git clone https://github.com/great-expectations/great_expectations.git
     $ pip install great_expectations/
 
+What expectations are available?
+--------------------------------------------------------------------------------
+
+Expectations include:
+- `expect_table_row_count_to_equal`
+- `expect_column_values_to_be_unique`
+- `expect_column_values_to_be_in_set`
+- `expect_column_mean_to_be_between`
+- ...and many more
+
+Visit the [glossary of expectations](http://great-expectations.readthedocs.io/en/latest/glossary.html) for a complete list of expectations that are currently part of the great expectations vocabulary.
+
 How do I learn more?
 --------------------------------------------------------------------------------
 
