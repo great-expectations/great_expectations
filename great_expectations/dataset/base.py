@@ -7,8 +7,10 @@ from functools import wraps
 import traceback
 import warnings
 
-import pandas as pd
-from collections import defaultdict
+from collections import (
+    Counter,
+    defaultdict
+)
 
 from ..version import __version__
 from .util import DotDict, recursively_convert_to_json_serializable, DocInherit
@@ -442,6 +444,13 @@ class DataSet(object):
                 else:
                     return expectation
 
+    def remove_false_expectations(self):
+        res = self.validate(only_return_failures=True).get('results')
+        if any(res):
+            for item in res:
+                self.remove_expectation(expectation_type=item['expectation_type'], expectation_kwargs=item['kwargs'])
+            print("WARNING: Removed %s expectations that were 'False'" % len(res))
+
     def get_default_expectation_arguments(self):
         """Fetch default expectation arguments for this DataSet
 
@@ -606,18 +615,38 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             warnings.warn("WARNING: No great_expectations version found in configuration object.")
 
         for expectation in expectations_config['expectations']:
-            expectation_method = getattr(self, expectation['expectation_type'])
+            try:
+                expectation_method = getattr(self, expectation['expectation_type'])
 
-            if output_format is not None:
-                expectation['kwargs'].update({"output_format": output_format})
+                if output_format is not None:
+                    expectation['kwargs'].update({"output_format": output_format})
 
-            if include_config is not None:
-                expectation['kwargs'].update({"include_config": include_config})
+                if include_config is not None:
+                    expectation['kwargs'].update({"include_config": include_config})
 
-            result = expectation_method(
-                catch_exceptions=catch_exceptions,
-                **expectation['kwargs']
-            )
+                result = expectation_method(
+                    catch_exceptions=catch_exceptions,
+                    **expectation['kwargs']
+                )
+
+            except AttributeError as err:
+                if catch_exceptions:
+                    raised_exception = True
+                    exception_traceback = traceback.format_exc()
+
+                    if output_format != "BOOLEAN_ONLY":
+                        result = {
+                            "success": False, 
+                            "expectation_type": expectation['expectation_type'],
+                            "kwargs": expectation['kwargs'],
+                            "raised_exception": raised_exception, 
+                            "exception_traceback": exception_traceback,
+                        }
+                    else:
+                        result = False
+
+                else:
+                    raise(err)
 
             if output_format != "BOOLEAN_ONLY":
                 results.append(
@@ -696,11 +725,13 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             missing_count = element_count-int(len(nonnull_values))#int(null_indexes.sum())
             exception_count = len(exception_list)
 
-            exception_value_series = pd.Series(exception_list).value_counts().iloc[:20]
-            partial_exception_counts = dict(zip(
-                list(exception_value_series.index),
-                list(exception_value_series.values),
-            ))
+            partial_exception_counts = [
+                {'value': key, 'count': value}
+                for key, value
+                in sorted(
+                    Counter(exception_list).most_common(20),
+                    key=lambda x: (-x[1], x[0]))
+            ]
 
             if element_count > 0:
                 missing_percent = float(missing_count) / element_count

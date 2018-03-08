@@ -154,7 +154,7 @@ class TestCLI(unittest.TestCase):
                     "missing_percent": 0.4242193450114242, 
                     "exception_percent": 0.0, 
                     "partial_exception_list": [], 
-                    "partial_exception_counts": {}
+                    "partial_exception_counts": []
                   }, 
                   "success": True, 
                   "raised_exception": False, 
@@ -185,11 +185,14 @@ class TestCLI(unittest.TestCase):
                       "Jacobsohn Mr Samuel", 
                       "Seman Master Betros"
                     ], 
-                    "partial_exception_counts": {
-                      "Seman Master Betros": 1, 
-                      "Downton (?Douton), Mr William James": 1, 
-                      "Jacobsohn Mr Samuel": 1
-                    }
+                    "partial_exception_counts": [
+                      {"value": "Downton (?Douton), Mr William James",
+                       "count": 1},
+                      {"value": "Jacobsohn Mr Samuel",
+                       "count": 1},
+                      {"value": "Seman Master Betros",
+                       "count": 1}
+                    ]
                   }, 
                   "success": True, 
                   "raised_exception": False, 
@@ -216,9 +219,10 @@ class TestCLI(unittest.TestCase):
                     "partial_exception_list": [
                       "*"
                     ], 
-                    "partial_exception_counts": {
-                      "*": 1
-                    }
+                    "partial_exception_counts": [
+                      {"value": "*",
+                       "count": 1}
+                    ]
                   }, 
                   "success": False, 
                   "raised_exception": False, 

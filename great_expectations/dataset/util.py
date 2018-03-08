@@ -30,51 +30,50 @@ class DotDict(dict):
         return DotDict([(copy.deepcopy(k, memo), copy.deepcopy(v, memo)) for k, v in self.items()])
 
 
+"""Docstring inheriting descriptor. Note that this is not a docstring so that this is not added to @DocInherit-\
+decorated functions' hybrid docstrings.
+
+Usage::
+
+    class Foo(object):
+        def foo(self):
+            "Frobber"
+            pass
+
+    class Bar(Foo):
+        @doc_inherit
+        def foo(self):
+            pass
+
+    Now, Bar.foo.__doc__ == Bar().foo.__doc__ == Foo.foo.__doc__ == "Frobber"
+
+    Original implementation cribbed from:
+    https://stackoverflow.com/questions/2025562/inherit-docstrings-in-python-class-inheritance,
+    following a discussion on comp.lang.python that resulted in:
+    http://code.activestate.com/recipes/576862/. Unfortunately, the
+    original authors did not anticipate deep inheritance hierarchies, and
+    we ran into a recursion issue when implementing custom subclasses of
+    PandasDataSet:
+    https://github.com/great-expectations/great_expectations/issues/177.
+
+    Our new homegrown implementation directly searches the MRO, instead
+    of relying on super, and concatenates documentation together.
+"""
 class DocInherit(object):
-    """Docstring inheriting method descriptor
 
-    The class itself is also used as a decorator
-    doc_inherit decorator
-
-    Usage::
-
-        class Foo(object):
-            def foo(self):
-                "Frobber"
-                pass
-
-        class Bar(Foo):
-            @doc_inherit
-            def foo(self):
-                pass
-
-        Now, Bar.foo.__doc__ == Bar().foo.__doc__ == Foo.foo.__doc__ == "Frobber"
-
-        Original implementation cribbed from:
-        https://stackoverflow.com/questions/2025562/inherit-docstrings-in-python-class-inheritance,
-        following a discussion on comp.lang.python that resulted in:
-        http://code.activestate.com/recipes/576862/. Unfortunately, the
-        original authors did not anticipate deep inheritance hierarchies, and
-        we ran into a recursion issue when implementing custom subclasses of
-        PandasDataSet:
-        https://github.com/great-expectations/great_expectations/issues/177.
-
-        Our new homegrown implementation directly searches the MRO, instead
-        of relying on super.
-    """
     def __init__(self, mthd):
         self.mthd = mthd
         self.name = mthd.__name__
+        self.mthd_doc = mthd.__doc__
 
     def __get__(self, obj, cls):
-        doc = None
+        doc = self.mthd_doc if self.mthd_doc is not None else ''
 
         for parent in cls.mro():
             if self.name not in parent.__dict__:
                 continue
-            doc = parent.__dict__[self.name].__doc__
-            if doc is not None:
-                break
+            if parent.__dict__[self.name].__doc__ is not None:
+                doc = doc + '\n' + parent.__dict__[self.name].__doc__
 
         @wraps(self.mthd, assigned=('__name__', '__module__'))
         def f(*args, **kwargs):
