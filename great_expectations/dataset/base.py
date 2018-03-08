@@ -1954,12 +1954,15 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         """
         Expect the column values to be distributed similarly to the provided scipy distribution. \
 
-        This expectation compares continuous distributions with a parameteric Kolmogorov-Smirnov test. The K-S test \
-        uses the column's mean and standard deviation, if not provided, to construct a cumulative density \
-        function (CDF) of the provided scipy distribution. It returns 'success'=True if the p-value from the \
-        K-S test is greater than or equal to the provided p-value.
+        This expectation compares the provided column values to the specified distribution with a parameteric \
+        Kolmogorov-Smirnov test. The K-S test compares the provided column to the cumulative density function (CDF) of \
+        the specified scipy distribution. If you don't know the distribution shape parameters, use the \
+        `ge.dataset.util.infer_distribution_parameters()` utility function to estimate them automatically.
 
-        expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than is a :func:`column_aggregate_expectation <great_expectations.dataset.base.DataSet.column_aggregate_expectation>`.
+        It returns 'success'=True if the p-value from the K-S test is greater than or equal to the provided p-value.
+
+        expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than is a \
+        :func:`column_aggregate_expectation <great_expectations.dataset.base.DataSet.column_aggregate_expectation>`.
 
         Args:
             column (str): \
@@ -1970,8 +1973,9 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                 The threshold p-value for a passing test. Default is 0.05
             params (dict) : \
                 A dictionary of shape parameters that describe the disrtibution you want to test the data against.\
-                If not provided, the parameters will be attempted to be constructed from the column data. Include \
-                key values specific to the distribution from the appropriate scipy distribution CDF function \
+                If not provided, the parameters will be attempted to be constructed using the column data and \
+                the specified distribution. Include key values specific to the distribution from the appropriate scipy \
+                distribution CDF function. \
                 See https://docs.scipy.org/doc/scipy/reference/stats.html#continuous-distributions
 
         Other Parameters:

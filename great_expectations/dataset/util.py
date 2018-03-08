@@ -332,7 +332,6 @@ def infer_distribution_parameters(column, distribution, params=None):
     if distribution == "norm":
         # scipy cdf(x, loc=0, scale=1)
         pass
-        #return params['mean'], params['std_dev']
 
     elif distribution == "beta":
         # scipy cdf(x, a, b, loc=0, scale=1)
@@ -342,8 +341,6 @@ def infer_distribution_parameters(column, distribution, params=None):
                         ((1 - params['mean']) / params['std_dev'] ** 2) - (1 / params['mean']))
         if 'beta' not in params.keys():
             params['beta'] = params['alpha'] * ((1 / params['mean']) - 1)
-
-        #return params['alpha'], params['beta'], params['loc'], params['scale']
 
     elif distribution == 'gamma':
         # scipy cdf(x, a, loc=0, scale=1)
@@ -355,12 +352,10 @@ def infer_distribution_parameters(column, distribution, params=None):
                 params['alpha'] = (params['mean'] / params['scale'])
         elif params['alpha'] <= 0:
             raise ValueError("Gamma distribution requires its `alpha` shape parameter to be greater than 0")
-        #return params['alpha'], params['loc'], params['scale']
 
     elif distribution == 'poisson':
         if 'lambda' not in params.keys():
             params['lambda'] = params['mean']
-        #return params['lambda'], params['loc']
 
     elif distribution == 'uniform':
         # scipy cdf(x, loc=0, scale=1)
@@ -374,26 +369,29 @@ def infer_distribution_parameters(column, distribution, params=None):
                 params['max'] = params['scale']
             else:
                 params['max'] = max(column) - params['min']
-        #return params['min'], params['max']
 
     elif distribution == 'chi2':
         # scipy cdf(x, df, loc=0, scale=1)
         if 'df' not in params.keys():
             # from https://en.wikipedia.org/wiki/Chi-squared_distribution
             params['df'] = params['mean']
-        #return params['df'], params['loc'], params['scale']
 
     elif distribution == 'expon':
         # scipy cdf(x, loc=0, scale=1)
         if 'lambda' in params.keys():
+            # Lambda is optional
             params['scale'] = 1 / params['lambda']
-        #return params['loc'], params['scale']
     else:
         raise AttributeError("Unsupported distribution type. Please refer to Great Expectations Documentation")
 
     return params
 
 def scipy_distribution_positional_args_from_dict(distribution, params):
+    if 'loc' not in params:
+        params['loc'] = 0
+    if 'scale' not in params:
+        params['scale'] = 1
+
     if distribution == 'norm':
         return params['mean'], params['std_dev']
     elif distribution == 'beta':
@@ -408,3 +406,5 @@ def scipy_distribution_positional_args_from_dict(distribution, params):
         return params['df'], params['loc'], params['scale']
     elif distribution == 'expon':
         return params['loc'], params['scale']
+    else:
+        raise AttributeError("Unsupported  distribution provided: %s" % distribution)

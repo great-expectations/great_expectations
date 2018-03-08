@@ -724,8 +724,21 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         if params is None:
             raise ValueError("params must be a dictionary or use ge.dataset.util,infer_distribution_parameters(df.column, distribution)")
 
-        # Frozen Scipy Params test
 
+
+        positional_parameters = scipy_distribution_positional_args_from_dict(distribution,
+                                                                             infer_distribution_parameters(column, distribution, params))
+
+        # Try to detect bad parameters
+        try:
+            # Frozen Scipy Params test - test if any errors are thrown when we try to create this distribution
+            dist = eval("stats." + distribution + str(positional_parameters))
+            #if dist.moment(0) == 'Fnan':
+            #    raise ValueError("It appears you are using bad parameters, see scipy.stats documentation")
+        except Exception as e:
+            raise e
+
+        # K-S Test
         ks_result = stats.kstest(column, distribution,
                                  args=scipy_distribution_positional_args_from_dict(distribution, params))
 
