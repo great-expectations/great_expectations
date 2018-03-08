@@ -12,7 +12,28 @@ from .test_utils import assertDeepAlmostEqual
 
 class TestPandasDataset(unittest.TestCase):
 
-    def test_expect_column_values_to_be_unique(self):
+    def test_expect_columns_to_be(self):
+        print("=== test_expect_columns_to_be ===")
+        with open("./tests/test_sets/expect_columns_to_be_test_set.json") as f:
+            J = json.load(f)
+            D = ge.dataset.PandasDataSet(J["dataset"])
+            D.set_default_expectation_argument("output_format", "COMPLETE")
+            T = J["tests"]
+
+            self.maxDiff = None
+
+        for t in T:
+            print(t)
+            out = D.expect_columns_to_be(**t['in'])
+
+            if 'out' in t:
+                self.assertEqual(out, t['out'])
+
+            if 'error' in t:
+                self.assertEqual(out['raised_exception'], True)
+                self.assertIn(t['error']['traceback_substring'], out['exception_traceback'])
+
+def test_expect_column_values_to_be_unique(self):
 
         D = ge.dataset.PandasDataset({
             'a' : ['2', '2'],
@@ -491,7 +512,7 @@ class TestPandasDataset(unittest.TestCase):
                     'kwargs':{},
                     'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}},
                 {
-                    'in':['a', [1]], 
+                    'in':['a', [1]],
                     'kwargs':{'mostly':.1},
                     'out':{'success':True, 'unexpected_index_list':[0,1], 'unexpected_list':[1, 1]}},
                 {
