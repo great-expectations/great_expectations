@@ -2,6 +2,7 @@ import json
 import datetime
 import numpy as np
 import unittest
+from functools import wraps
 
 import great_expectations as ge
 
@@ -137,7 +138,89 @@ class TestUtilMethods(unittest.TestCase):
         except NameError:
             pass
 
+    def test_expect_file_hash_to_equal(self):
+        test_file = './tests/test_sets/Titanic.csv'
+        # Test for non-existent file
+        try:
+            ge.expect_file_hash_to_equal('abc', value='abc')
+        except IOError:
+            pass
+        # Test for non-existent hash algorithm
+        try:
+            ge.expect_file_hash_to_equal(test_file,
+                                         hash_alg='md51',
+                                         value='abc')
+        except ValueError:
+            pass
+        # Test non-matching hash value
+        self.assertFalse(ge.expect_file_hash_to_equal(test_file,
+                                                      value='abc'))
+        # Test matching hash value with default algorithm
+        self.assertTrue(ge.expect_file_hash_to_equal(test_file,
+                                                     value='63188432302f3a6e8c9e9c500ff27c8a'))
+        # Test matching hash value with specified algorithm
+        self.assertTrue(ge.expect_file_hash_to_equal(test_file,
+                                                     value='f89f46423b017a1fc6a4059d81bddb3ff64891e3c81250fafad6f3b3113ecc9b',
+                                                     hash_alg='sha256'))
 
+
+"""
+The following Parent and Child classes are used for testing documentation inheritance.
+"""
+class Parent(object):
+    """Parent class docstring
+    """
+
+    @classmethod
+    def expectation(cls, func):
+        """Manages configuration and running of expectation objects.
+        """
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            # wrapper logic
+            func(*args, **kwargs)
+
+        return wrapper
+
+
+    def override_me(self):
+        """Parent method docstring
+        Returns:
+            Unattainable abiding satisfaction.
+        """
+        raise NotImplementedError
+
+
+class Child(Parent):
+    """
+    Child class docstring
+    """
+
+    @ge.dataset.util.DocInherit
+    @Parent.expectation
+    def override_me(self):
+        """Child method docstring
+        Returns:
+            Real, instantiable, abiding satisfaction.
+        """
+
+
+class TestDocumentation(unittest.TestCase):
+
+    def test_doc_inheritance(self):
+        c = Child()
+
+        self.assertEqual(
+            c.__getattribute__('override_me').__doc__,
+        """Child method docstring
+        Returns:
+            Real, instantiable, abiding satisfaction.
+        """ + '\n' +
+        """Parent method docstring
+        Returns:
+            Unattainable abiding satisfaction.
+        """
+        )
 
 if __name__ == "__main__":
     unittest.main()

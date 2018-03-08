@@ -1328,10 +1328,12 @@ class TestPandasDataset(unittest.TestCase):
                     "missing_count" : 2,
                     "missing_percent" : .2,
                     "exception_count" : 3,
-                    "partial_exception_counts": {
-                        6.0 : 1,
-                        7.0 : 2,
-                    },
+                    "partial_exception_counts": [
+                        {"value": 7.0,
+                         "count": 2},
+                        {"value": 6.0,
+                         "count": 1}
+                    ],
                     "exception_percent": 0.3,
                     "exception_percent_nonmissing": 0.375,
                     "partial_exception_list" : [6.0,7.0,7.0],
@@ -1412,6 +1414,60 @@ class TestPandasDataset(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             df.expect_column_mean_to_be_between('x',4,6, output_format="QUACK")
+
+    def test_ge_pandas_subsetting(self):
+        df = ge.dataset.PandasDataSet({
+            'A':[1,2,3,4],
+            'B':[5,6,7,8],
+            'C':['a','b','c','d'],
+            'D':['e','f','g','h']
+        })
+
+        # Put some simple expectations on the data frame
+        df.expect_column_values_to_be_in_set("A", [1, 2, 3, 4])
+        df.expect_column_values_to_be_in_set("B", [5, 6, 7, 8])
+        df.expect_column_values_to_be_in_set("C", ['a', 'b', 'c', 'd'])
+        df.expect_column_values_to_be_in_set("D", ['e', 'f', 'g', 'h'])
+
+        # The subsetted data frame should:
+        #
+        #   1. Be a ge.dataset.PandaDataSet
+        #   2. Inherit ALL the expectations of the parent data frame
+        #
+        exp1 = df.find_expectations()
+
+        sub1 = df[['A', 'D']]
+        self.assertIsInstance(sub1, ge.dataset.PandasDataSet)
+        self.assertEqual(sub1.find_expectations(), exp1)
+
+        sub1 = df[['A']]
+        self.assertIsInstance(sub1, ge.dataset.PandasDataSet)
+        self.assertEqual(sub1.find_expectations(), exp1)
+
+        sub1 = df[:3]
+        self.assertIsInstance(sub1, ge.dataset.PandasDataSet)
+        self.assertEqual(sub1.find_expectations(), exp1)
+
+        sub1 = df[1:2]
+        self.assertIsInstance(sub1, ge.dataset.PandasDataSet)
+        self.assertEqual(sub1.find_expectations(), exp1)
+
+        sub1 = df[:-1]
+        self.assertIsInstance(sub1, ge.dataset.PandasDataSet)
+        self.assertEqual(sub1.find_expectations(), exp1)
+
+        sub1 = df[-1:]
+        self.assertIsInstance(sub1, ge.dataset.PandasDataSet)
+        self.assertEqual(sub1.find_expectations(), exp1)
+
+        sub1 = df.iloc[:3, 1:4]
+        self.assertIsInstance(sub1, ge.dataset.PandasDataSet)
+        self.assertEqual(sub1.find_expectations(), exp1)
+
+        sub1 = df.loc[0:, 'A':'B']
+        self.assertIsInstance(sub1, ge.dataset.PandasDataSet)
+        self.assertEqual(sub1.find_expectations(), exp1)
+
 
 if __name__ == "__main__":
     unittest.main()
