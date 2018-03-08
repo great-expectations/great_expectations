@@ -1,7 +1,6 @@
 from __future__ import division
 
 import pandas as pd
-import numpy as np
 from sqlalchemy import create_engine
 
 
@@ -36,7 +35,7 @@ def get_dataset(dataset_type, data):
         df.to_sql(name='test_data', con=engine)
 
         # Build a SqlAlchemyDataSet using that database
-        yield SqlAlchemyDataSet('test_data', engine)
+        yield SqlAlchemyDataSet(engine, 'test_data')
         engine.close()
     else:
         raise ValueError("Unknown dataset_type " + str(dataset_type))
@@ -47,40 +46,37 @@ def get_dataset(dataset_type, data):
                 params=dataset_implementations)
 def test_expect_column_values_to_be_in_set_dataset(request):
     data_dict = {
-        'a': ['2', '2'],
-        'b': [1, '2'],
-        'c': [1, 1],
-        'd': [1, '1'],
-        'n': [None, np.nan]
-    }
+            'x' : [1,2,4],
+            'y' : [1,2,5],
+            'z' : ['hello', 'jello', 'mello'],
+        }
     dataset = get_dataset(request.param, data_dict)
     yield dataset
 
-def test_expect_column_values_to_be_unique(test_expect_column_values_to_be_unique_dataset):
-    dataset = next(test_expect_column_values_to_be_unique_dataset)
+def test_expect_column_values_to_be_in_set(test_expect_column_values_to_be_in_set_dataset):
+    dataset = next(test_expect_column_values_to_be_in_set_dataset)
     dataset.set_default_expectation_argument("result_format", "COMPLETE")
 
-    # Tests for D
-    T = [
+    test_cases = [
         {
-            'in': {'column': 'a'},
-            'out': {'success': False, 'unexpected_index_list': [0, 1], 'unexpected_list': ['2', '2']}},
-        {
-            'in': {'column': 'b'},
+            'in': ['x', [1, 2, 4]],
             'out': {'success': True, 'unexpected_index_list': [], 'unexpected_list': []}},
         {
-            'in': {'column': 'c'},
-            'out': {'success': False, 'unexpected_index_list': [0, 1], 'unexpected_list': [1, 1]}},
+            'in': ['x', [4, 2]],
+            'out': {'success': False, 'unexpected_index_list': [0], 'unexpected_list': [1]}},
         {
-            'in': {'column': 'd'},
+            'in': ['y', []],
+            'out': {'success': False, 'unexpected_index_list': [0, 1, 2], 'unexpected_list': [1, 2, 5]}},
+        {
+            'in': ['z', ['hello', 'jello', 'mello']],
             'out': {'success': True, 'unexpected_index_list': [], 'unexpected_list': []}},
         {
-            'in': {'column': 'n'},
-            'out': {'success': True, 'unexpected_index_list': [], 'unexpected_list': []}}
+            'in': ['z', ['hello']],
+            'out': {'success': False, 'unexpected_index_list': [1, 2], 'unexpected_list': ['jello', 'mello']}}
     ]
 
-    for t in T:
-        out = dataset.expect_column_values_to_be_unique(**t['in'])
-        assert t['out']['success'] == out['success']
-        assert t['out']['unexpected_index_list'] == out['result_obj']['unexpected_index_list']
-        assert t['out']['unexpected_list'] == out['result_obj']['unexpected_list']
+    for test in test_cases:
+        out = dataset.expect_column_values_to_be_in_set(*test['in'])
+        assert test['out']['success'] == out['success']
+        # assert test['out']['unexpected_index_list'] == out['result_obj']['unexpected_index_list']
+        assert test['out']['unexpected_list'] == out['result_obj']['unexpected_list']
