@@ -185,6 +185,24 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
             }
 
     @DocInherit
+    @DataSet.expectation(['column_list'])
+    def expect_columns_to_be(self, column_list,
+                               result_format=None, include_config=False, catch_exceptions=None, meta=None):
+        if len(list(self.columns)) != len(column_list):
+            return {
+                "success" : False
+            }
+
+        if list(self.columns) == column_list:
+            return {
+                "success" : True
+            }
+        else:
+            return {
+                "success": False
+            }
+
+    @DocInherit
     @DataSet.expectation(['min_value', 'max_value'])
     def expect_table_row_count_to_be_between(self,
         min_value=0,
