@@ -1,5 +1,9 @@
 Great Expectations Changelog
 
+* Major refactor of output_format to new result_obj_format parameter. See docs for full details.
+  * exception_list and related uses of the term exception have been renamed to unexpected
+  * the output formats are explicitly hierarchical now, with BOOLEAN_ONLY < BASIC < SUMMARY < COMPLETE. `column_aggregate_expectation`s now return element count and related information included at the BASIC level or higher.
+
 v.0.3.2
 -----
 * Include requirements file in source dist to support conda

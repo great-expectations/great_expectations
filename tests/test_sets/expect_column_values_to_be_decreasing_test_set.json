@@ -11,8 +11,8 @@
       "mostly": 0.6
     },
     "out": {
-      "exception_list": [2,3,7],
-      "exception_index_list": [1,2,3],
+      "unexpected_list": [2,3,7],
+      "unexpected_index_list": [1,2,3],
       "success": true
     }
   },{
@@ -20,8 +20,8 @@
       "column": "y"
     },
     "out": {
-      "exception_list": [2,3,4],
-      "exception_index_list": [3,6,9],
+      "unexpected_list": [2,3,4],
+      "unexpected_index_list": [3,6,9],
       "success": false
     }
   },{
@@ -30,8 +30,8 @@
       "strictly": true
     },
     "out": {
-      "exception_list": [1,1,2,2,2,3,3,3,4],
-      "exception_index_list": [1,2,3,4,5,6,7,8,9],
+      "unexpected_list": [1,1,2,2,2,3,3,3,4],
+      "unexpected_index_list": [1,2,3,4,5,6,7,8,9],
       "success": false
     }
   },{
@@ -39,8 +39,8 @@
       "column": "x"
     },
     "out": {
-      "exception_list": [],
-      "exception_index_list": [],
+      "unexpected_list": [],
+      "unexpected_index_list": [],
       "success": true
     }
   },{
@@ -49,8 +49,8 @@
       "parse_strings_as_datetimes" : true
     },
     "out": {
-      "exception_list": [],
-      "exception_index_list": [],
+      "unexpected_list": [],
+      "unexpected_index_list": [],
       "success": true
     }
   },{
@@ -60,8 +60,8 @@
       "strictly": true
     },
     "out": {
-      "exception_list": ["10/2/2016"],
-      "exception_index_list": [3],
+      "unexpected_list": ["10/2/2016"],
+      "unexpected_index_list": [3],
       "success": false
     }
   }]

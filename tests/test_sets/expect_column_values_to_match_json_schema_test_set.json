@@ -9,8 +9,8 @@
       "json_schema": {}
     },
     "out": {
-      "exception_list": [],
-      "exception_index_list": [],
+      "unexpected_list": [],
+      "unexpected_index_list": [],
       "success": true
     }
   },{
@@ -26,8 +26,8 @@
       }
     },
     "out": {
-      "exception_list": [],
-      "exception_index_list": [],
+      "unexpected_list": [],
+      "unexpected_index_list": [],
       "success": true
     }
   },{
@@ -43,8 +43,8 @@
       }
     },
     "out": {
-      "exception_list": ["{\"a\":1}", "{\"a\":2}", "{\"a\":3}", "{\"a\":4}", "{\"a\":5}"],
-      "exception_index_list": [0,1,2,3,4],
+      "unexpected_list": ["{\"a\":1}", "{\"a\":2}", "{\"a\":3}", "{\"a\":4}", "{\"a\":5}"],
+      "unexpected_index_list": [0,1,2,3,4],
       "success": false
     }
   }]
