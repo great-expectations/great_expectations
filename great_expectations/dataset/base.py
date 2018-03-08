@@ -745,7 +745,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         return_obj['result_obj'].update(
             {
-                'partial_unexpected_index_list': unexpected_index_list[:count],
+                'partial_unexpected_index_list': unexpected_index_list[:count] if unexpected_index_list is not None else None,
                 'partial_unexpected_counts': partial_unexpected_counts
             }
         )
