@@ -9,8 +9,8 @@
       "regex_list": ["\\d+"]
     },
     "out": {
-      "exception_list": [],
-      "exception_index_list": [],
+      "unexpected_list": [],
+      "unexpected_index_list": [],
       "success": true
     }
   },{
@@ -20,8 +20,8 @@
       "match_on": "any"
     },
     "out": {
-      "exception_list": [],
-      "exception_index_list": [],
+      "unexpected_list": [],
+      "unexpected_index_list": [],
       "success": true
     }
   },{
@@ -31,8 +31,8 @@
       "match_on": "all"
     },
     "out": {
-      "exception_list": ["111", "222", "333", "123", "321", "444", "456", "654", "555"],
-      "exception_index_list": [0,1,2,3,4,5,6,7,8],
+      "unexpected_list": ["111", "222", "333", "123", "321", "444", "456", "654", "555"],
+      "unexpected_index_list": [0,1,2,3,4,5,6,7,8],
       "success": false
     }
   },{
@@ -41,8 +41,8 @@
       "regex_list": ["^.*a.*$"]
     },
     "out": {
-      "exception_list": ["bit", "bot", "but", "bet"],
-      "exception_index_list": [6,7,8,9],
+      "unexpected_list": ["bit", "bot", "but", "bet"],
+      "unexpected_index_list": [6,7,8,9],
       "success": false
     }
   },{
@@ -52,8 +52,8 @@
       "match_on": "any"
     },
     "out": {
-      "exception_list": [],
-      "exception_index_list": [],
+      "unexpected_list": [],
+      "unexpected_index_list": [],
       "success": true
     }
   }]

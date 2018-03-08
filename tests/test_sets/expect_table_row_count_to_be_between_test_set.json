@@ -9,25 +9,25 @@
       "min_value": 3,
       "max_value": 5
     },
-    "out":{"success":true, "true_value":4}
+    "out":{"success":true, "result_obj": {"observed_value": 4}}
   },{
     "in":{
       "min_value": 0,
       "max_value": 1
     },
-    "out":{"success":false, "true_value":4}
+    "out":{"success":false, "result_obj": {"observed_value": 4}}
   },{
     "in":{
       "min_value": null,
       "max_value": 4
     },
-    "out":{"success":true, "true_value":4}
+    "out":{"success":true, "result_obj": {"observed_value": 4}}
   },{
     "in":{
       "min_value": 1,
       "max_value": 0
     },
-    "out":{"success":false, "true_value":4}
+    "out":{"success":false, "result_obj": {"observed_value": 4}}
   },{
     "in":{
       "min_value": null,
@@ -35,7 +35,9 @@
     },
     "out":{
       "success": true,
-      "true_value": 4
+      "result_obj": {
+        "observed_value": 4
+      }
     }
   },{
     "notes": "Test error handling for non-int min_value",

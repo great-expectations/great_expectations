@@ -29,15 +29,15 @@ Note: following Great Expectations :ref:`naming_conventions` is highly recommend
 
 .. code-block:: bash
 
-    from great_expectations.dataset import PandasDataSet, column_expectation, elementwise_expectation
+    from great_expectations.dataset import PandasDataSet, MetaPandasDataSet
 
-    class CustomPandasDataSet(ge.dataset.PandasDataSet):
+    class CustomPandasDataSet(PandasDataSet):
 
-        @column_map_expectation
+        @MetaPandasDataSet.column_map_expectation
         def expect_column_values_to_equal_2(self, series):
             return series.map(lambda x: x==2)
 
-        @column_aggregate_expectation
+        @MetaPandasDataSet.column_aggregate_expectation
         def expect_column_mode_to_equal_0(self, series):
             mode = series.mode[0]
             return {
@@ -46,7 +46,7 @@ Note: following Great Expectations :ref:`naming_conventions` is highly recommend
                 "summary_obj" : {}
             }
 
-`@column_map_expectation` decorates a custom function, wrapping it with all the business logic required to turn it into a fully-fledged Expectation. This spares you the hassle of defining logic to handle required arguments like `mostly` and `output_format`. Your custom function can focus exclusively on the business logic of passing or failing the expectation.
+`@column_map_expectation` decorates a custom function, wrapping it with all the business logic required to turn it into a fully-fledged Expectation. This spares you the hassle of defining logic to handle required arguments like `mostly` and `result_format`. Your custom function can focus exclusively on the business logic of passing or failing the expectation.
 
 To work with these decorators, your custom function must accept two arguments: `self` and `series`. When your function is called, `series` will contain all the non-null values in the given column. Your function must return a series of boolean values in the same order, with the same index.
 
@@ -60,38 +60,41 @@ The hard way
 2. Write the whole expectation yourself
 3. Decorate it with the `@expectation` decorator
 
-This is more complicated, since you have to handle all the logic of additional parameters and output formats. Pay special attention to proper formatting of :ref:`output_format`. Malformed result objects can break Great Expectations in subtle and unanticipated ways.
+This is more complicated, since you have to handle all the logic of additional parameters and output formats. Pay special attention to proper formatting of :ref:`result_format`. Malformed result objects can break Great Expectations in subtle and unanticipated ways.
 
 .. code-block:: bash
 
-    from great_expectations.dataset import PandasDataSet, expectation
+    from great_expectations.dataset import PandasDataSet, MetaPandasDataSet
 
-    class CustomPandasDataSet(ge.dataset.PandasDataSet):
+    class CustomPandasDataSet(PandasDataSet):
 
-        @expectation
-        def expect_column_values_to_equal_1(self, column, mostly=None, suppress_expectations=False):
-            notnull = self[column].notnull()
-            
-            result = self[column][notnull] == 1
-            exceptions = list(self[column][notnull][result==False])
-            
+        @MetaPandasDataSet.expectation(["column", "mostly"])
+        def expect_column_values_to_equal_1(self, column, mostly=None):
+            not_null = self[column].notnull()
+
+            result = self[column][not_null] == 1
+            unexpected_values = list(self[column][not_null][result==False])
+
             if mostly:
                 #Prevent division-by-zero errors
-                if len(not_null_values) == 0:
+                if len(not_null) == 0:
                     return {
                         'success':True,
-                        'exception_list':exceptions
+                        'unexpected_list':unexpected_values,
+                        'unexpected_index_list':self.index[result],
                     }
 
-                percent_properly_formatted = float(sum(properly_formatted))/len(not_null_values)
+                percent_equaling_1 = float(sum(result))/len(not_null)
                 return {
-                    "success" : percent_properly_formatted >= mostly,
-                    "exception_list" : exceptions
+                    "success" : percent_equaling_1 >= mostly,
+                    "unexpected_list" : unexpected_values[:20],
+                    "unexpected_index_list" : list(self.index[result==False])[:20],
                 }
             else:
                 return {
-                    "success" : len(exceptions) == 0,
-                    "exception_list" : exceptions
+                    "success" : len(unexpected_values) == 0,
+                    "unexpected_list" : unexpected_values[:20],
+                    "unexpected_index_list" : list(self.index[result==False])[:20],
                 }
 
 The quick way
@@ -127,7 +130,7 @@ Once you do this, all the functionality of your new expectations will be availab
     >> my_df.expect_column_values_to_equal_1("all_twos")
     {
         "success": False,
-        "exception_list": [2,2,2,2,2,2,2,2]
+        "unexpected_list": [2,2,2,2,2,2,2,2]
     }
 
 A similar approach works for the command-line tool.
