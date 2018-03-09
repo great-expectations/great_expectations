@@ -169,3 +169,118 @@ def evaluate_json_test(test_configuration, dataset_type):
 
     else:
         raise Exception("Malformed test: no 'out' or 'exception' section found.")
+
+
+def evaluate_json_test_alternate(dataset, test):
+    dataset.set_default_expectation_argument('result_format', 'COMPLETE')
+    expectation_type = test['expectation_type']
+
+    if 'exception' in test:
+        with pytest.raises(Exception) as exception_info:
+            if isinstance(test['in'], list):
+                getattr(dataset, expectation_type)(*test['in'])
+            else:
+                result = getattr(dataset, expectation_type)(**test['in'])
+        assert test['exception'] in str(exception_info)
+
+    elif 'error' in test:
+        # Support tests with positional arguments
+        if isinstance(test['in'], list):
+            result = getattr(dataset, expectation_type)(*test['in'])
+        # As well as keyword arguments
+        else:
+            result = getattr(dataset, expectation_type)(**test['in'])
+
+        assert result['exception_info']['raised_exception'] == True
+        assert test['error']['traceback_substring'] in result['exception_info']['exception_traceback']
+
+    elif 'out' in test:
+        # Support tests with positional arguments
+        if isinstance(test['in'], list):
+            result = getattr(dataset, expectation_type)(*test['in'])
+        # As well as keyword arguments
+        else:
+            result = getattr(dataset, expectation_type)(**test['in'])
+
+        # Check results
+        if 'exact_compare_out' in test and (test['exact_compare_out'] == True):
+            assert test['out'] == result
+
+        else:
+            assert result['success'] == test['out']['success']
+
+            if 'result_obj' in test['out']:
+                if 'observed_value' in test['out']['result_obj']:
+                    assert result['result_obj']['observed_value'] == test['out']['result_obj']
+
+                if 'details' in test['out']['result_obj']:
+                    assert test['out']['result_obj']['details'] == result['result_obj']['details']
+
+            # Handle dataset-specific implementation differences here
+            if 'unexpected_index_list' in test['out']:
+                if isinstance(dataset, SqlAlchemyDataSet):
+                    pass
+                else:
+                    assert result['result_obj']['unexpected_index_list'] == test['out']['unexpected_index_list']
+
+            if 'unexpected_list' in test['out']:
+                assert result['result_obj']['unexpected_list'] == test['out']['unexpected_list']
+
+    else:
+        raise Exception("Malformed test: no 'out' or 'exception' section found.")
+
+def evaluate_test(dataset, expectation_name, test):
+    if 'exception' in test:
+        with pytest.raises(Exception) as exception_info:
+            # Support tests with positional arguments
+            if isinstance(test['in'], list):
+                result = getattr(dataset, expectation_name)(*test['in'])
+            # As well as keyword arguments
+            else:
+                result = getattr(dataset, expectation_name)(**test['in'])
+        assert test['exception'] in str(exception_info)
+
+    else:
+        # Support tests with positional arguments
+        if isinstance(test['in'], list):
+            result = getattr(dataset, expectation_name)(*test['in'])
+        # As well as keyword arguments
+        else:
+            result = getattr(dataset, expectation_name)(**test['in'])
+
+    return result
+
+
+def make_test_assertions(test, result, dataset_type):
+
+    if 'error' in test:
+        assert result['exception_info']['raised_exception'] == True
+        assert test['error']['traceback_substring'] in result['exception_info']['exception_traceback']
+
+    if 'out' in test:
+        # Check results
+        if 'exact_compare_out' in test and (test['exact_compare_out'] == True):
+            assert test['out'] == result
+
+        else:
+            assert result['success'] == test['out']['success']
+
+            if 'result_obj' in test['out']:
+                if 'observed_value' in test['out']['result_obj']:
+                    assert result['result_obj']['observed_value'] == test['out']['result_obj']
+
+                if 'details' in test['out']['result_obj']:
+                    assert test['out']['result_obj']['details'] == result['result_obj']['details']
+
+            # Handle dataset-specific implementation differences here
+            if 'unexpected_index_list' in test['out']:
+                if dataset_type == 'SqlAlchemyDataSet':
+                    pass
+                else:
+                    assert result['result_obj']['unexpected_index_list'] == test['out']['unexpected_index_list']
+
+            if 'unexpected_list' in test['out']:
+                assert result['result_obj']['unexpected_list'] == test['out']['unexpected_list']
+
+    else:
+        raise Exception("Malformed test: no 'out' or 'exception' section found.")
