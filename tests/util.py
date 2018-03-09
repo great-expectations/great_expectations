@@ -178,4 +178,4 @@ def evaluate_json_test(test_configuration, dataset_type):
 
         if 'error' in test:
             assert result['exception_info']['raised_exception'] == True
-            assert test['error']['traceback_substring'] in result['excpetion_info']['exception_traceback']
+            assert test['error']['traceback_substring'] in result['exception_info']['exception_traceback']
