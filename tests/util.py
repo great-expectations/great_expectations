@@ -171,9 +171,9 @@ def evaluate_json_test(test_configuration, dataset_type):
         raise Exception("Malformed test: no 'out' or 'exception' section found.")
 
 
-def evaluate_json_test_alternate(dataset, test):
+def evaluate_json_test_alternate(dataset, expectation_type, test):
     dataset.set_default_expectation_argument('result_format', 'COMPLETE')
-    expectation_type = test['expectation_type']
+    #expectation_type = test['expectation_type']
 
     if 'exception' in test:
         with pytest.raises(Exception) as exception_info:
