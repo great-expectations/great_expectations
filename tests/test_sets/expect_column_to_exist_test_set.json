@@ -20,5 +20,23 @@
     "out":{
       "success":false
     }
+  },{
+    "notes": "Positive test with column order",
+    "in":{
+      "column": "c2",
+      "column_idx": 1
+    },
+    "out":{
+        "success": true
+    }
+  },{
+    "notes": "Column exists but wrong index",
+    "in": {
+      "column": "c3",
+      "column_idx": 4
+    },
+    "out":{
+      "success": false 
+    }
   }]
 }
