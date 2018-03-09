@@ -4,7 +4,7 @@
     "y" : [1,2,5],
     "z" : ["hello", "jello", "mello"]
   },
-  "expectation": "expect_column_values_to_be_in_set",
+  "expectation_type": "expect_column_values_to_be_in_set",
   "tests" : [
     {
       "title": "Basic positive test case",

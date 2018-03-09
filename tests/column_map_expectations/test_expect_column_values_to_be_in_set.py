@@ -1,12 +1,24 @@
+###
+###
+#
+# This file should not be modified. To adjust test cases, edit the related json file.
+#
+###
+###
+
+
 import pytest
+
+import os
 import json
 
-from tests.util import get_dataset, evaluate_json_test_alternate
+from tests.util import get_dataset, evaluate_json_test
 
-file = open('./expect_column_values_to_be_in_set.json')
+file = open(os.path.basename(__file__)[5:-3] + '.json')
 test_configurations = json.load(file)
 
 dataset = test_configurations['dataset']
+expectation_name = test_configurations['expectation_type']
 test_cases = test_configurations['tests']
 test_case_ids = [test['title'] for test in test_cases]
 
@@ -23,5 +35,5 @@ def test_case(request):
     return request.param
 
 
-def test_expect_column_values_to_be_in_set(test_data, test_case):
-    evaluate_json_test_alternate(test_data, "expect_column_values_to_be_in_set", test_case)
+def test_case_runner(test_data, test_case):
+    evaluate_json_test(test_data, expectation_name, test_case)
