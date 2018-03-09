@@ -173,12 +173,16 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
     ### Expectation methods ###
     @DocInherit
     @DataSet.expectation(['column'])
-    def expect_column_to_exist(self, column,
-                               result_format=None, include_config=False, catch_exceptions=None, meta=None):
+    def expect_column_to_exist(
+            self, column, column_index=None, result_format=None, include_config=False, 
+            catch_exceptions=None, meta=None
+    ):
+
         if column in self:
             return {
-                "success" : True
+                "success": (column_index is None) or (self.columns.get_loc(column) == column_index)
             }
+
         else:
             return {
                 "success": False
