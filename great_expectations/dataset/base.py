@@ -852,7 +852,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
     ##### Table shape expectations #####
 
     def expect_column_to_exist(
-            self, column, column_idx=None, result_format=None, include_config=False, 
+            self, column, column_index=None, result_format=None, include_config=False, 
             catch_exceptions=None, meta=None
         ):
         """Expect the specified column to exist.
@@ -865,9 +865,9 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                 The column name.
 
         Other Parameters:
-            column_idx (int or None): \
+            column_index (int or None): \
                 If not None, checks the order of the columns. The expectation will fail if the \
-                column is not in location column_idx.
+                column is not in location column_index.
             result_format (str or None): \
                 Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
                 For more detail, see :ref:`result_format <result_format>`.
