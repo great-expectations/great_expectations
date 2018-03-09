@@ -223,12 +223,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
     def expect_table_columns_to_match_ordered_list(self, column_list,
                                result_format=None, include_config=False, catch_exceptions=None, meta=None):
 
-        if len(list(self.columns)) != len(column_list):
-            return {
-                "success" : False
-            }
-
-        if list(self.columns) == column_list:
+        if list(self.columns) == list(column_list):
             return {
                 "success" : True
             }
