@@ -10,7 +10,7 @@ env:
   - PANDAS=0.20.3
   - PANDAS=latest
 install:
-  - pip install --only-binary=numpy,scipy numpy scipy
+  - pip install --only-binary=numpy,scipy numpy scipy sqlalchemy
   - if [ $PANDAS=latest ]; then pip install pandas; else pip install pandas==$PANDAS; fi
   - pip install coverage coveralls
   - pip install -r requirements.txt
