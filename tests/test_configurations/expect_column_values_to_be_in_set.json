@@ -1,10 +1,10 @@
 {
-  "expectation": "expect_column_values_to_be_in_set",
   "dataset" : {
     "x" : [1,2,4],
     "y" : [1,2,5],
     "z" : ["hello", "jello", "mello"]
   },
+  "expectation": "expect_column_values_to_be_in_set",
   "tests" : [
     {
       "notes": "Basic positive test case",
@@ -49,6 +49,11 @@
       "out": {
         "success": true
       }
+    },
+    {
+      "notes": "Missing required parameters",
+      "in": {},
+      "raises_exception": "TypeError"
     }
   ]
 }

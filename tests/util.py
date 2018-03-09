@@ -107,7 +107,28 @@ def get_dataset(dataset_type, data):
 
 
 def discover_json_test_configurations(test_config_dir):
-    return [test_config for test_config in os.listdir(test_config_dir) if test_config.endswith('.json')]
+    files = [test_config for test_config in os.listdir(test_config_dir) if test_config.endswith('.json')]
+    test_configurations = []
+    for file in files:
+        with open(test_config_dir + file) as configuration_file:
+            test_configuration = json.load(configuration_file)
+        dataset = test_configuration['dataset']
+        expectation = test_configuration['expectation']
+        for test in test_configuration['tests']:
+            test_configurations.append({'dataset': dataset,
+                                        'expectation': expectation,
+                                        'test': test})
+
+    def build_configuration_id(test_configuration):
+        if 'notes' in test_configuration['test']:
+            return str(test_configuration['expectation']) + '_' + str(test_configuration['test']['notes'])
+        else:
+            return str(test_configuration['expectation'])
+
+    test_configuration_ids = [build_configuration_id(test_configuration) for test_configuration in test_configurations]
+    return test_configurations, test_configuration_ids
+
+
 
 def get_tests(test_name):
     with open("./tests/test_sets/" + test_name + ".json") as f:
