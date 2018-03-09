@@ -15,5 +15,5 @@ install:
   - pip install coverage coveralls
   - pip install -r requirements.txt
 script:
-  - coverage run --source great_expectations -m unittest tests
+  - coverage run --source great_expectations -m pytest tests
   - coveralls
