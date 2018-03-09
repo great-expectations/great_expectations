@@ -433,7 +433,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
             temp_column = column
 
         if min_value > max_value:
-            raise ValueError("min_value is greater than max_value")
+            raise ValueError("min_value cannot be greater than max_value")
 
         def is_between(val):
             # TODO Might be worth explicitly defining comparisons between types (for example, between strings and ints).

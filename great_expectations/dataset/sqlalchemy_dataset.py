@@ -3,7 +3,7 @@ from great_expectations.dataset import DataSet
 from functools import wraps
 import inspect
 
-from sqlalchemy import select, table, column
+from sqlalchemy import MetaData, select, table, or_, and_
 from sqlalchemy import func as sa_func
 from sqlalchemy import column as sa_column
 from sqlalchemy.engine import create_engine
@@ -65,26 +65,22 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
         self.table_name = table_name
         # self.engine = create_engine(connection_string)
         self.engine = engine
+        self.unexpected_count_limit = 20
 
     @MetaSqlAlchemyDataSet.column_map_expectation
     def expect_column_values_to_be_in_set(self,
-                                          column,
-                                          values_set,
-                                          mostly=None,
-                                          result_format=None, include_config=False, catch_exceptions=None, meta=None
-                                          ):
-        # This is my first expectation
-
-        # Set our limit
-        unexpected_count_limit = 20
-
+        column,
+        values_set,
+        mostly=None,
+        result_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
         test = select([sa_column(column)]).select_from(table(self.table_name)).where(
             sa_column(column).notin_(tuple(values_set)))
 
         test_count = select([sa_func.count()]).select_from(table(self.table_name)).where(
             sa_column(column).notin_(tuple(values_set)))
 
-        test_results = self.engine.execute(test.limit(unexpected_count_limit))
+        test_results = self.engine.execute(test.limit(self.unexpected_count_limit))
 
         unexpected_count = self.engine.execute(test_count).scalar()
         partial_unexpected_list = [x[column] for x in test_results.fetchall()]
@@ -105,4 +101,39 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
             # We will NOT support:
             # - partial_unexpected_index_list (no index concept guaranteed in sql)
             # - unexpected_index_list (no index concept guaranteed in sql)
+        }
+
+    @MetaSqlAlchemyDataSet.column_map_expectation
+    def expect_column_values_to_be_between(self,
+        column,
+        min_value=None,
+        max_value=None,
+        allow_cross_type_comparisons=None,
+        parse_strings_as_datetimes=None,
+        mostly=None,
+        result_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
+        if min_value > max_value:
+            raise ValueError("min_value cannot be greater than max_value")
+
+        if min_value is None and max_value is None:
+            raise ValueError("min_value and max_value cannot both be None")
+
+        unexpected = select([sa_column(column)]).select_from(table(self.table_name)).where(or_(
+            min_value > sa_column(column),
+            sa_column(column) > max_value
+            ))
+
+        unexpected_count = select([sa_func.count()]).select_from(table(self.table_name)).where(or_(
+            min_value > sa_column(column),
+            sa_column(column) > max_value
+            ))
+
+        unexpected_limited = self.engine.execute(unexpected.limit(self.unexpected_count_limit))
+        unexpected_count = self.engine.execute(unexpected_count).scalar()
+        partial_unexpected_list = [x[column] for x in unexpected_limited.fetchall()]
+
+        return {
+            'unexpected_count': unexpected_count,
+            'partial_unexpected_list': partial_unexpected_list
         }

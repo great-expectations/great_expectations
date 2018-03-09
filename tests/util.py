@@ -6,11 +6,10 @@ import os
 import json
 import pytest
 
+import sqlalchemy.types
 from sqlalchemy import create_engine
 
 from great_expectations.dataset import PandasDataSet, SqlAlchemyDataSet
-
-
 
 ## Taken from the following stackoverflow: https://stackoverflow.com/questions/23549419/assert-that-two-dictionaries-are-almost-equal
 def assertDeepAlmostEqual(test_case, expected, actual, *args, **kwargs):
@@ -55,31 +54,6 @@ def assertDeepAlmostEqual(test_case, expected, actual, *args, **kwargs):
         raise exc
 
 
-
-def parse_expectation_result(result, test_value):
-    """This method takes an expectation result from great expectations and returns a dictionary with keys in standard
-    locations to reduce brittleness in tests.
-    """
-    if test_value == 'success':
-        if 'success' in result:
-            return result['success']
-        else:
-            return None
-
-    if test_value == 'unexpected_list':
-        if 'result_obj' in result:
-            return result['result_obj']
-
-    if 'success' in expected:
-        assert expected['success'] == result['success']
-    # assert test['out']['unexpected_index_list'] == out['result_obj']['unexpected_index_list']
-    assert test['out']['unexpected_list'] == out['result_obj']['unexpected_list']
-    return {
-        'success': result['success'],
-        'raw': result
-    }
-
-
 def get_dataset(dataset_type, data):
     """For Pandas, data should be either a DataFrame or a dictionary that can be instantiated as a DataFrame
     For SQL, data should have the following shape:
@@ -121,8 +95,8 @@ def discover_json_test_configurations(test_config_dir):
                                         'test': test})
 
     def build_configuration_id(test_configuration):
-        if 'notes' in test_configuration['test']:
-            return str(test_configuration['expectation']) + '_' + str(test_configuration['test']['notes'])
+        if 'title' in test_configuration['test']:
+            return str(test_configuration['expectation']) + '_' + str(test_configuration['test']['title'])
         else:
             return str(test_configuration['expectation'])
 
@@ -131,10 +105,6 @@ def discover_json_test_configurations(test_config_dir):
 
 
 def evaluate_json_test(test_configuration, dataset_type):
-    # Get the test configuration
-    # with open(test_config_dir + test_configuration_file) as configuration_file:
-    #     test_configuration = json.load(configuration_file)
-
     # Build the required dataset
     dataset = get_dataset(dataset_type, test_configuration['dataset'])
     dataset.set_default_expectation_argument('result_format', 'COMPLETE')
@@ -154,7 +124,18 @@ def evaluate_json_test(test_configuration, dataset_type):
                 result = getattr(dataset, expectation_name)(**test['in'])
         assert test['exception'] in str(exception_info)
 
-    else:
+    elif 'error' in test:
+        # Support tests with positional arguments
+        if isinstance(test['in'], list):
+            result = getattr(dataset, expectation_name)(*test['in'])
+        # As well as keyword arguments
+        else:
+            result = getattr(dataset, expectation_name)(**test['in'])
+
+        assert result['exception_info']['raised_exception'] == True
+        assert test['error']['traceback_substring'] in result['exception_info']['exception_traceback']
+
+    elif 'out' in test:
         # Support tests with positional arguments
         if isinstance(test['in'], list):
             result = getattr(dataset, expectation_name)(*test['in'])
@@ -163,8 +144,18 @@ def evaluate_json_test(test_configuration, dataset_type):
             result = getattr(dataset, expectation_name)(**test['in'])
 
         # Check results
-        if 'out' in test:
+        if 'exact_compare_out' in test and (test['exact_compare_out'] == True):
+            assert test['out'] == result
+
+        else:
             assert result['success'] == test['out']['success']
+
+            if 'result_obj' in test['out']:
+                if 'observed_value' in test['out']['result_obj']:
+                    assert result['result_obj']['observed_value'] == test['out']['result_obj']
+
+                if 'details' in test['out']['result_obj']:
+                    assert test['out']['result_obj']['details'] == result['result_obj']['details']
 
             # Handle dataset-specific implementation differences here
             if 'unexpected_index_list' in test['out']:
@@ -176,6 +167,5 @@ def evaluate_json_test(test_configuration, dataset_type):
             if 'unexpected_list' in test['out']:
                 assert result['result_obj']['unexpected_list'] == test['out']['unexpected_list']
 
-        if 'error' in test:
-            assert result['exception_info']['raised_exception'] == True
-            assert test['error']['traceback_substring'] in result['exception_info']['exception_traceback']
+    else:
+        raise Exception("Malformed test: no 'out' or 'exception' section found.")

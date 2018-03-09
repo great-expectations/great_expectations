@@ -272,7 +272,7 @@
       }
     },
     {
-      "note" : "Test 'min_value is greater than max_value'",
+      "title" : "Test 'min_value is greater than max_value'",
       "in": {
         "column": "x",
         "min_value": 10,
@@ -280,11 +280,11 @@
         "catch_exceptions": true
       },
       "error":{
-        "traceback_substring" : "ValueError: min_value is greater than max_value"
+        "traceback_substring" : "ValueError: min_value cannot be greater than max_value"
       }
     },
     {
-      "note": "Test allow_cross_type_comparisons",
+      "title": "Test allow_cross_type_comparisons",
       "in": {
         "column": "y",
         "min_value": 0,
@@ -302,7 +302,7 @@
       }
     },
     {
-      "note": "Test allow_cross_type_comparisons",
+      "title": "Test allow_cross_type_comparisons",
       "in": {
         "column": "numeric",
         "min_value": 0,
@@ -318,7 +318,7 @@
       }
     },
     {
-      "notes": "Verify that min_value=max_value=None raises an error",
+      "title": "Verify that min_value=max_value=None raises an error",
       "in": {
         "column": "y",
         "max_value": null,

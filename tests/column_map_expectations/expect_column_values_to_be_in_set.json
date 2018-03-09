@@ -7,7 +7,7 @@
   "expectation": "expect_column_values_to_be_in_set",
   "tests" : [
     {
-      "notes": "Basic positive test case",
+      "title": "Basic positive test case",
       "in": {
         "column": "x",
         "values_set": [1,2,4]
@@ -17,7 +17,7 @@
       }
     },
     {
-      "notes": "Negative test case",
+      "title": "Negative test case",
       "in": {
         "column": "x",
         "values_set": [2, 4]
@@ -29,7 +29,7 @@
       }
     },
     {
-      "notes": "Empty values_set",
+      "title": "Empty values_set",
       "in": {
         "column": "x",
         "values_set": []
@@ -41,7 +41,7 @@
       }
     },
     {
-      "notes": "Basic strings set",
+      "title": "Basic strings set",
       "in": {
         "column": "z",
         "values_set": ["hello", "jello", "mello"]
@@ -51,7 +51,7 @@
       }
     },
     {
-      "notes": "Missing required parameters",
+      "title": "Missing required parameters",
       "in": {},
       "exception": "TypeError"
     }
