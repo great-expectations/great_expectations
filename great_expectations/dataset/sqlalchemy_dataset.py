@@ -137,3 +137,76 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
             'unexpected_count': unexpected_count,
             'partial_unexpected_list': partial_unexpected_list
         }
+
+    @MetaSqlAlchemyDataSet.column_map_expectation
+    def expect_column_values_to_be_null(self,
+        column,
+        mostly=None,
+        result_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
+
+        unexpected = select([sa_column(column)]).select_from(table(self.table_name)).where(
+            sa_column(column) != None
+        )
+        unexpected_count = select([sa_func.count()]).select_from(table(self.table_name)).where(
+            sa_column(column) != None
+        )
+
+        unexpected_limited = self.engine.execute(unexpected.limit(self.unexpected_count_limit))
+        unexpected_count = self.engine.execute(unexpected_count).scalar()
+
+        partial_unexpected_list = [x[column] for x in unexpected_limited.fetchall()]
+
+        return {
+            'unexpected_count': unexpected_count,
+            'partial_unexpected_list': partial_unexpected_list
+        }
+
+    @MetaSqlAlchemyDataSet.column_map_expectation
+    def expect_column_values_to_not_be_null(self,
+        column,
+        mostly=None,
+        result_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
+
+        unexpected = select([sa_column(column)]).select_from(table(self.table_name)).where(
+            sa_column(column) == None
+        )
+        unexpected_count = select([sa_func.count()]).select_from(table(self.table_name)).where(
+            sa_column(column) == None
+        )
+
+        unexpected_limited = self.engine.execute(unexpected.limit(self.unexpected_count_limit))
+        unexpected_count = self.engine.execute(unexpected_count).scalar()
+
+        partial_unexpected_list = [x[column] for x in unexpected_limited.fetchall()]
+
+        return {
+            'unexpected_count': unexpected_count,
+            'partial_unexpected_list': partial_unexpected_list
+        }
+
+
+    @MetaSqlAlchemyDataSet.column_map_expectation
+    def expect_column_values_to_not_be_null(self,
+        column,
+        mostly=None,
+        result_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
+
+        unexpected = select([sa_column(column)]).select_from(table(self.table_name)).where(
+            sa_column(column) == None
+        )
+        unexpected_count = select([sa_func.count()]).select_from(table(self.table_name)).where(
+            sa_column(column) == None
+        )
+
+        unexpected_limited = self.engine.execute(unexpected.limit(self.unexpected_count_limit))
+        unexpected_count = self.engine.execute(unexpected_count).scalar()
+
+        partial_unexpected_list = [x[column] for x in unexpected_limited.fetchall()]
+
+        return {
+            'unexpected_count': unexpected_count,
+            'partial_unexpected_list': partial_unexpected_list
+        }
