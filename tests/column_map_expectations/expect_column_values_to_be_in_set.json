@@ -53,7 +53,7 @@
     {
       "notes": "Missing required parameters",
       "in": {},
-      "raises_exception": "TypeError"
+      "exception": "TypeError"
     }
   ]
 }
