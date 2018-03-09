@@ -888,13 +888,13 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         raise NotImplementedError
 
-    def expect_columns_to_be(self,
+    def expect_table_columns_to_match_ordered_list(self,
             column_list,
             result_format=None, include_config=False, catch_exceptions=None, meta=None
         ):
         """Expect the columns to exactly match a specified list.
 
-        expect_columns_to_be is a :func:`expectation <great_expectations.dataset.base.DataSet.expectation>`, not a \
+        expect_table_columns_to_match_ordered_list is a :func:`expectation <great_expectations.dataset.base.DataSet.expectation>`, not a \
         `column_map_expectation` or `column_aggregate_expectation`.
 
         Args:
