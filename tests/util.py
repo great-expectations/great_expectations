@@ -1,4 +1,14 @@
+from __future__ import division
+
+import pandas as pd
 import numpy as np
+import os
+import json
+
+from sqlalchemy import create_engine
+
+from great_expectations.dataset import PandasDataSet, SqlAlchemyDataSet
+
 
 
 ## Taken from the following stackoverflow: https://stackoverflow.com/questions/23549419/assert-that-two-dictionaries-are-almost-equal
@@ -42,3 +52,63 @@ def assertDeepAlmostEqual(test_case, expected, actual, *args, **kwargs):
             trace = ' -> '.join(reversed(exc.traces))
             exc = AssertionError("%s\nTRACE: %s" % (str(exc), trace))
         raise exc
+
+
+
+def parse_expectation_result(result, test_value):
+    """This method takes an expectation result from great expectations and returns a dictionary with keys in standard
+    locations to reduce brittleness in tests.
+    """
+    if test_value == 'success':
+        if 'success' in result:
+            return result['success']
+        else:
+            return None
+
+    if test_value == 'unexpected_list':
+        if 'result_obj' in result:
+            return result['result_obj']
+
+    if 'success' in expected:
+        assert expected['success'] == result['success']
+    # assert test['out']['unexpected_index_list'] == out['result_obj']['unexpected_index_list']
+    assert test['out']['unexpected_list'] == out['result_obj']['unexpected_list']
+    return {
+        'success': result['success'],
+        'raw': result
+    }
+
+
+def get_dataset(dataset_type, data):
+    """For Pandas, data should be either a DataFrame or a dictionary that can be instantiated as a DataFrame
+    For SQL, data should have the following shape:
+        {
+            'table':
+                'table': SqlAlchemy Table object
+                named_column: [list of values]
+        }
+
+    """
+    if dataset_type == 'PandasDataSet':
+        return PandasDataSet(data)
+    elif dataset_type == 'SqlAlchemyDataSet':
+        # Create a new database
+
+        engine = create_engine('sqlite://')
+
+        # Add the data to the database as a new table
+        df = pd.DataFrame(data)
+        df.to_sql(name='test_data', con=engine)
+
+        # Build a SqlAlchemyDataSet using that database
+        return SqlAlchemyDataSet(engine, 'test_data')
+    else:
+        raise ValueError("Unknown dataset_type " + str(dataset_type))
+
+
+def discover_json_test_configurations(test_config_dir):
+    return [test_config for test_config in os.listdir(test_config_dir) if test_config.endswith('.json')]
+
+def get_tests(test_name):
+    with open("./tests/test_sets/" + test_name + ".json") as f:
+        yield json.load(f)

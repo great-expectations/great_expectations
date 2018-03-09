@@ -4,6 +4,7 @@
     "c2" : ["a","b","c","d"],
     "c3" : [null,null,null,null]
   },
+  "expectation": "expect_column_to_exist",
   "tests": [{
     "notes": "Basic positive test",
     "in":{
