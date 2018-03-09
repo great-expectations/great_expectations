@@ -1,13 +1,14 @@
 from __future__ import division
 import pytest
 
-from .util import get_dataset, parse_expectation_result
+from .util import get_dataset
 
 dataset_implementations = ['PandasDataSet', 'SqlAlchemyDataSet']
+test_configuration_files = ['expect_column_values_to_be_between_test_set.json']
 
 @pytest.fixture(scope="module",
                 params=dataset_implementations)
-def test_expect_column_values_to_be_in_set_dataset(request):
+def dataset_builder(request):
     data_dict = {
             'x' : [1,2,4],
             'y' : [1,2,5],
@@ -16,18 +17,16 @@ def test_expect_column_values_to_be_in_set_dataset(request):
     dataset = get_dataset(request.param, data_dict)
     yield dataset
 
+@pytest.fixture(scope="module", params=test_configuration_files)
+def test_runner(request, dataset_builder):
+    with open("./tests/test_sets/" + request.param + ".json") as f:
+
+    with open(request.param) as test_configuration:
+        dataset = dataset_builder
+
+
 def test_expect_column_values_to_be_in_set(test_expect_column_values_to_be_in_set_dataset):
     dataset = next(test_expect_column_values_to_be_in_set_dataset)
-
-    # Basic positive case:
-    positive = dataset.expect_column_values_to_be_in_set('x', [1, 2, 4])
-    assert parse_expectation_result(positive, 'success') == True
-
-    # Basic negative case:
-    negative = dataset.expect_column_values_to_be_in_set('x', [4, 2])
-    assert negative['success'] is False
-    assert negative['']
-
     dataset.set_default_expectation_argument("result_format", "COMPLETE")
 
     test_cases = [

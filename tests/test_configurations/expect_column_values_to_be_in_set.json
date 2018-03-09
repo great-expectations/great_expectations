@@ -1,0 +1,54 @@
+{
+  "expectation": "expect_column_values_to_be_in_set",
+  "dataset" : {
+    "x" : [1,2,4],
+    "y" : [1,2,5],
+    "z" : ["hello", "jello", "mello"]
+  },
+  "tests" : [
+    {
+      "notes": "Basic positive test case",
+      "in": {
+        "column": "x",
+        "values_set": [1,2,4]
+      },
+      "out": {
+        "success": true
+      }
+    },
+    {
+      "notes": "Negative test case",
+      "in": {
+        "column": "x",
+        "values_set": [2, 4]
+      },
+      "out": {
+        "success": false,
+        "unexpected_index_list": [0],
+        "unexpected_list": [1]
+      }
+    },
+    {
+      "notes": "Empty values_set",
+      "in": {
+        "column": "x",
+        "values_set": []
+      },
+      "out": {
+        "success": false,
+        "unexpected_index_list": [0, 1, 2],
+        "unexpected_list": [1, 2, 4]
+      }
+    },
+    {
+      "notes": "Basic strings set",
+      "in": {
+        "column": "z",
+        "values_set": ["hello", "jello", "mello"]
+      },
+      "out": {
+        "success": true
+      }
+    }
+  ]
+}

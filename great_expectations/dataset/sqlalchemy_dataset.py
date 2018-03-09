@@ -80,8 +80,10 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
 
         test = select([sa_column(column)]).select_from(table(self.table_name)).where(
             sa_column(column).notin_(tuple(values_set)))
+
         test_count = select([sa_func.count()]).select_from(table(self.table_name)).where(
             sa_column(column).notin_(tuple(values_set)))
+
         test_results = self.engine.execute(test.limit(unexpected_count_limit))
 
         unexpected_count = self.engine.execute(test_count).scalar()
