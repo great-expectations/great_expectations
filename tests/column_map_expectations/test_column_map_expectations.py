@@ -19,6 +19,7 @@ contexts = ['PandasDataSet', 'SqlAlchemyDataSet']
 
 def pytest_generate_tests(metafunc):
 
+    #Load all the JSON files in the directory
     dir_path = os.path.dirname(os.path.realpath(__file__))
     test_configuration_files = glob.glob(dir_path+'/*.json')
 
@@ -28,7 +29,7 @@ def pytest_generate_tests(metafunc):
         for filename in test_configuration_files:
             file = open(filename)
             test_configuration = json.load(file)
-            # print test_configuration["expectation_type"]
+
             for d in test_configuration['datasets']:            
                 my_dataset = get_dataset(c, d["data"])
 
@@ -38,10 +39,7 @@ def pytest_generate_tests(metafunc):
                         "dataset": my_dataset,
                         "test": test,
                     })
-                    #FIXME: title should be required.
-                    #If it's not present, then what?
-                    if not "title" in test:
-                        test["title"] = "BLANK"
+
                     ids.append(c+":"+test_configuration["expectation_type"]+":"+test["title"])
 
     metafunc.parametrize(
@@ -58,3 +56,4 @@ def test_case_runner(test_case):
         test_case["expectation_type"],
         test_case["test"]
     )
+
