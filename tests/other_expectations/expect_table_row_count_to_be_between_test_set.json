@@ -1,62 +1,65 @@
 {
-  "dataset" : {
-    "c1" : [4,5,6,7],
-    "c2" : ["a","b","c","d"],
-    "c3" : [null,null,null,null]
-  },
-  "tests": [{
-    "in":{
-      "min_value": 3,
-      "max_value": 5
+  "expectation_type" : "expect_table_row_count_to_be_between",
+  "datasets" : [{
+    "data" : {
+      "c1" : [4,5,6,7],
+      "c2" : ["a","b","c","d"],
+      "c3" : [null,null,null,null]
     },
-    "out":{"success":true, "result_obj": {"observed_value": 4}}
-  },{
-    "in":{
-      "min_value": 0,
-      "max_value": 1
-    },
-    "out":{"success":false, "result_obj": {"observed_value": 4}}
-  },{
-    "in":{
-      "min_value": null,
-      "max_value": 4
-    },
-    "out":{"success":true, "result_obj": {"observed_value": 4}}
-  },{
-    "in":{
-      "min_value": 1,
-      "max_value": 0
-    },
-    "out":{"success":false, "result_obj": {"observed_value": 4}}
-  },{
-    "in":{
-      "min_value": null,
-      "max_value": 10
-    },
-    "out":{
-      "success": true,
-      "result_obj": {
-        "observed_value": 4
+    "tests": [{
+      "in":{
+        "min_value": 3,
+        "max_value": 5
+      },
+      "out":{"success":true, "result_obj": {"observed_value": 4}}
+    },{
+      "in":{
+        "min_value": 0,
+        "max_value": 1
+      },
+      "out":{"success":false, "result_obj": {"observed_value": 4}}
+    },{
+      "in":{
+        "min_value": null,
+        "max_value": 4
+      },
+      "out":{"success":true, "result_obj": {"observed_value": 4}}
+    },{
+      "in":{
+        "min_value": 1,
+        "max_value": 0
+      },
+      "out":{"success":false, "result_obj": {"observed_value": 4}}
+    },{
+      "in":{
+        "min_value": null,
+        "max_value": 10
+      },
+      "out":{
+        "success": true,
+        "result_obj": {
+          "observed_value": 4
+        }
       }
-    }
-  },{
-    "notes": "Test error handling for non-int min_value",
-    "in":{
-      "min_value": "quack",
-      "max_value": 0,
-      "catch_exceptions": true
-    },
-    "error":{
-      "traceback_substring": "must be integers"
-    }
-  },{
-    "notes": "Test error handling for non-int max_value",
-    "in":{
-      "max_value": "quack",
-      "catch_exceptions": true
-    },
-    "error":{
-      "traceback_substring": "must be integers"
-    }
+    },{
+      "notes": "Test error handling for non-int min_value",
+      "in":{
+        "min_value": "quack",
+        "max_value": 0,
+        "catch_exceptions": true
+      },
+      "error":{
+        "traceback_substring": "must be integers"
+      }
+    },{
+      "notes": "Test error handling for non-int max_value",
+      "in":{
+        "max_value": "quack",
+        "catch_exceptions": true
+      },
+      "error":{
+        "traceback_substring": "must be integers"
+      }
+    }]
   }]
 }
