@@ -1,115 +1,118 @@
 {
-  "dataset" : {
-    "w" : [1, 2, 3, 4, 5, 5, 4, 3, 2, 1],
-    "x" : [2, 3, 4, 5, 6, 7, 8, 9, null, null],
-    "y" : [1, 1, 1, 2, 2, 2, 3, 3, 3, 4],
-    "z" : ["a", "b", "c", "d", "e", null, null, null, null, null],
-    "zz" : ["1/1/2016", "1/2/2016", "2/2/2016", "2/2/2016", "3/1/2016", null, null, null, null, null],
-    "a" : [null, 0, null, null, 1, null, null, 2, null, null],
-    "b" : [null, 0, null, null, 2, null, null, 1, null, null]
-  },
-  "tests" : [{
-    "notes": "Basic positive test case",
-    "in": {
-      "column": "w",
-      "result_format": "BASIC",
-      "min_value": 30,
-      "max_value": 30
+  "expectation_type" : "expect_column_sum_to_be_between",
+  "datasets" : [{
+    "data" : {
+      "w" : [1, 2, 3, 4, 5, 5, 4, 3, 2, 1],
+      "x" : [2, 3, 4, 5, 6, 7, 8, 9, null, null],
+      "y" : [1, 1, 1, 2, 2, 2, 3, 3, 3, 4],
+      "z" : ["a", "b", "c", "d", "e", null, null, null, null, null],
+      "zz" : ["1/1/2016", "1/2/2016", "2/2/2016", "2/2/2016", "3/1/2016", null, null, null, null, null],
+      "a" : [null, 0, null, null, 1, null, null, 2, null, null],
+      "b" : [null, 0, null, null, 2, null, null, 1, null, null]
     },
-    "out": {
-      "success": true,
-      "result_obj": {
-        "observed_value": 30,
-        "element_count": 10,
-        "missing_count": 0,
-        "missing_percent": 0
+    "tests" : [{
+      "notes": "Basic positive test case",
+      "in": {
+        "column": "w",
+        "result_format": "BASIC",
+        "min_value": 30,
+        "max_value": 30
+      },
+      "out": {
+        "success": true,
+        "result_obj": {
+          "observed_value": 30,
+          "element_count": 10,
+          "missing_count": 0,
+          "missing_percent": 0
+        }
       }
-    }
-  },{
-    "notes": "Basic negative test case",
-    "in": {
-      "column": "w",
-      "result_format": "BASIC",
-      "min_value": 40,
-      "max_value": 50
-    },
-    "out": {
-      "success": false,
-      "result_obj": {
-        "observed_value": 30,
-        "element_count": 10,
-        "missing_count": 0,
-        "missing_percent": 0
-      }    }
-  },{
-    "notes": "Test case with result_format=SUMMARY",
-    "in": {
-      "column": "w",
-      "result_format": "SUMMARY",
-      "min_value": 20,
-      "max_value": 40
-    },
-    "out": {
-      "success": true,
-      "result_obj": {
-        "observed_value": 30,
-        "element_count": 10,
-        "missing_count": 0,
-        "missing_percent": 0
+    },{
+      "notes": "Basic negative test case",
+      "in": {
+        "column": "w",
+        "result_format": "BASIC",
+        "min_value": 40,
+        "max_value": 50
+      },
+      "out": {
+        "success": false,
+        "result_obj": {
+          "observed_value": 30,
+          "element_count": 10,
+          "missing_count": 0,
+          "missing_percent": 0
+        }    }
+    },{
+      "notes": "Test case with result_format=SUMMARY",
+      "in": {
+        "column": "w",
+        "result_format": "SUMMARY",
+        "min_value": 20,
+        "max_value": 40
+      },
+      "out": {
+        "success": true,
+        "result_obj": {
+          "observed_value": 30,
+          "element_count": 10,
+          "missing_count": 0,
+          "missing_percent": 0
+        }
       }
-    }
-  },{
-    "notes": "Test case with only a lower bound, and a missing value",
-    "in": {
-      "column": "x",
-      "min_value": 30
-    },
-    "out": {
-      "success": true,
-      "result_obj": {
-        "observed_value": 44,
-        "element_count": 10,
-        "missing_count": 2,
-        "missing_percent": 0.2
-      }    }
-  },{
-    "notes": "Negative test case with only a lower bound",
-    "in": {
-      "column": "w",
-      "min_value": 50
-    },
-    "out": {
-      "success": false,
-      "result_obj": {
-        "observed_value": 30,
-        "element_count": 10,
-        "missing_count": 0,
-        "missing_percent": 0
+    },{
+      "notes": "Test case with only a lower bound, and a missing value",
+      "in": {
+        "column": "x",
+        "min_value": 30
+      },
+      "out": {
+        "success": true,
+        "result_obj": {
+          "observed_value": 44,
+          "element_count": 10,
+          "missing_count": 2,
+          "missing_percent": 0.2
+        }    }
+    },{
+      "notes": "Negative test case with only a lower bound",
+      "in": {
+        "column": "w",
+        "min_value": 50
+      },
+      "out": {
+        "success": false,
+        "result_obj": {
+          "observed_value": 30,
+          "element_count": 10,
+          "missing_count": 0,
+          "missing_percent": 0
+        }
       }
-    }
-  },{
-    "notes": "Negative test case with only a max",
-    "in": {
-      "column": "y",
-      "max_value": 20
-    },
-    "out": {
-      "success": false,
-      "result_obj": {
-        "observed_value": 22,
-        "element_count": 10,
-        "missing_count": 0,
-        "missing_percent": 0
+    },{
+      "notes": "Negative test case with only a max",
+      "in": {
+        "column": "y",
+        "max_value": 20
+      },
+      "out": {
+        "success": false,
+        "result_obj": {
+          "observed_value": 22,
+          "element_count": 10,
+          "missing_count": 0,
+          "missing_percent": 0
+        }
       }
-    }
-  },{
-    "notes": "Raise ValueError with both max and min are missing",
-    "in": {
-      "column": "y",
-      "catch_exceptions": true
-    },
-    "error": {
-      "traceback_substring": "cannot both be None"
-    }
+    },{
+      "notes": "Raise ValueError with both max and min are missing",
+      "in": {
+        "column": "y",
+        "catch_exceptions": true
+      },
+      "error": {
+        "traceback_substring": "cannot both be None"
+      }
+    }]
   }]
 }
