@@ -7,6 +7,7 @@
     },
     "tests" : [{
       "title" : "Basic positive test",
+      "exact_match_out" : false,
       "in": {
         "column": "x",
         "json_schema": {}
@@ -18,6 +19,7 @@
       }
     },{
       "title" : "Positive test with a more complex schema",
+      "exact_match_out" : false,
       "in": {
         "column": "x",
         "json_schema": {
@@ -36,6 +38,7 @@
       }
     },{
       "title" : "Basic negative test",
+      "exact_match_out" : false,
       "in": {
         "column": "x",
         "json_schema": {

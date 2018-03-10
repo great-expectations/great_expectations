@@ -12,6 +12,7 @@
     },
     "tests" : [{
       "title" : "Basic positive test",
+      "exact_match_out" : false,
       "in": {
         "column": "x"
       },
@@ -22,6 +23,7 @@
       }
     },{
       "title" : "2nd basic positive test",
+      "exact_match_out" : false,
       "in": {
         "column": "y"
       },
@@ -32,6 +34,7 @@
       }
     },{
       "title" : "Positive test with strictly",
+      "exact_match_out" : false,
       "in": {
         "column": "y",
         "strictly": true
@@ -43,6 +46,7 @@
       }
     },{
       "title" : "Basic negative test",
+      "exact_match_out" : false,
       "in": {
         "column": "w"
       },
@@ -53,6 +57,7 @@
       }
     },{
       "title" : "Positive test with parse_strings_as_datetimes",
+      "exact_match_out" : false,
       "in": {
         "column": "zz",
         "parse_strings_as_datetimes": true
@@ -64,6 +69,7 @@
       }
     },{
       "title" : "Positive test with interspersed nulls",
+      "exact_match_out" : false,
       "in": {
         "column": "a"
       },
@@ -74,6 +80,7 @@
       }
     },{
       "title" : "Negative test with interspersed nulls",
+      "exact_match_out" : false,
       "in": {
         "column": "b"
       },

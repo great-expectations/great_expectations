@@ -9,6 +9,7 @@
     },
     "tests" : [{
       "title" : "Positive test with mostly",
+      "exact_match_out" : false,
       "in": {
         "column": "w",
         "mostly": 0.6
@@ -20,6 +21,7 @@
       }
     },{
       "title" : "Basic negative test",
+      "exact_match_out" : false,
       "in": {
         "column": "y"
       },
@@ -30,6 +32,7 @@
       }
     },{
       "title" : "Basic negative test with strictly",
+      "exact_match_out" : false,
       "in": {
         "column": "y",
         "strictly": true
@@ -41,6 +44,7 @@
       }
     },{
       "title" : "Basic positive test",
+      "exact_match_out" : false,
       "in": {
         "column": "x"
       },
@@ -51,6 +55,7 @@
       }
     },{
       "title" : "Positive test with parse_strings_as_datetimes",
+      "exact_match_out" : false,
       "in": {
         "column": "z",
         "parse_strings_as_datetimes" : true
@@ -62,6 +67,7 @@
       }
     },{
       "title" : "Negative test with parse_strings_as_datetimes",
+      "exact_match_out" : false,
       "in": {
         "column": "z",
         "parse_strings_as_datetimes" : true,

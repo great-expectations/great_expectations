@@ -7,6 +7,7 @@
     },
     "tests" : [{
       "title" : "Basic positive test",
+      "exact_match_out" : false,
       "in": {
         "column": "w",
         "regex_list": ["\\d+"]
@@ -18,6 +19,7 @@
       }
     },{
       "title" : "Positive test with multiple regexes",
+      "exact_match_out" : false,
       "in": {
         "column": "w",
         "regex_list": ["[123]+", "[456]+"],
@@ -30,6 +32,7 @@
       }
     },{
       "title" : "Basic negative test",
+      "exact_match_out" : false,
       "in": {
         "column": "w",
         "regex_list": ["[123]+", "[456]+"],
@@ -42,6 +45,7 @@
       }
     },{
       "title" : "Negative test with more string-ish strings",
+      "exact_match_out" : false,
       "in": {
         "column": "x",
         "regex_list": ["^.*a.*$"]
@@ -53,6 +57,7 @@
       }
     },{
       "title" : "Positive test with match_on=any",
+      "exact_match_out" : false,
       "in": {
         "column": "x",
         "regex_list": ["^.*a.*$", "b.t"],
