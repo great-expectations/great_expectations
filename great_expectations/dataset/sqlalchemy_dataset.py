@@ -113,6 +113,9 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
         mostly=None,
         result_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
+        if parse_strings_as_datetimes is not None:
+            raise ValueError("parse_strings_as_datetimes is not currently supported in SqlAlchemy.")
+
         if min_value > max_value:
             raise ValueError("min_value cannot be greater than max_value")
 
