@@ -58,5 +58,3 @@ def test_case_runner(test_case):
         test_case["expectation_type"],
         test_case["test"]
     )
-
-
