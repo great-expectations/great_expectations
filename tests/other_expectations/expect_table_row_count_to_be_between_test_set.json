@@ -13,7 +13,10 @@
         "min_value": 3,
         "max_value": 5
       },
-      "out":{"success":true, "result_obj": {"observed_value": 4}}
+      "out":{
+        "success":true,
+        "observed_value": 4
+      }
     },{
       "title": "Basic negative test",
       "exact_match_out" : false,
@@ -21,7 +24,10 @@
         "min_value": 0,
         "max_value": 1
       },
-      "out":{"success":false, "result_obj": {"observed_value": 4}}
+      "out":{
+        "success":false,
+        "observed_value": 4
+      }
     },{
       "title": "Positive test with null min_value",
       "exact_match_out" : false,
@@ -29,7 +35,10 @@
         "min_value": null,
         "max_value": 4
       },
-      "out":{"success":true, "result_obj": {"observed_value": 4}}
+      "out":{
+        "success":true,
+        "observed_value": 4
+      }
     },{
       "title": "Negative test with max < min",
       "exact_match_out" : false,
@@ -37,7 +46,10 @@
         "min_value": 1,
         "max_value": 0
       },
-      "out":{"success":false, "result_obj": {"observed_value": 4}}
+      "out":{
+        "success":false,
+        "observed_value": 4
+      }
     },{
       "title": "Positive test with null min",
       "exact_match_out" : false,
@@ -47,9 +59,7 @@
       },
       "out":{
         "success": true,
-        "result_obj": {
-          "observed_value": 4
-        }
+        "observed_value": 4
       }
     },{
       "title": "Test error handling for non-int min_value",
@@ -59,6 +69,7 @@
         "max_value": 0,
         "catch_exceptions": true
       },
+      "out" : {},
       "error":{
         "traceback_substring": "must be integers"
       }
@@ -69,6 +80,7 @@
         "max_value": "quack",
         "catch_exceptions": true
       },
+      "out" : {},
       "error":{
         "traceback_substring": "must be integers"
       }
