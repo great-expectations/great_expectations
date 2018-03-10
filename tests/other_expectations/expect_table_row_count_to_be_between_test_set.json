@@ -7,30 +7,35 @@
       "c3" : [null,null,null,null]
     },
     "tests": [{
+      "title": "Basic positive test",
       "in":{
         "min_value": 3,
         "max_value": 5
       },
       "out":{"success":true, "result_obj": {"observed_value": 4}}
     },{
+      "title": "Basic negative test",
       "in":{
         "min_value": 0,
         "max_value": 1
       },
       "out":{"success":false, "result_obj": {"observed_value": 4}}
     },{
+      "title": "Positive test with null min_value",
       "in":{
         "min_value": null,
         "max_value": 4
       },
       "out":{"success":true, "result_obj": {"observed_value": 4}}
     },{
+      "title": "Negative test with max < min",
       "in":{
         "min_value": 1,
         "max_value": 0
       },
       "out":{"success":false, "result_obj": {"observed_value": 4}}
     },{
+      "title": "Positive test with null min",
       "in":{
         "min_value": null,
         "max_value": 10
@@ -42,7 +47,7 @@
         }
       }
     },{
-      "notes": "Test error handling for non-int min_value",
+      "title": "Test error handling for non-int min_value",
       "in":{
         "min_value": "quack",
         "max_value": 0,
@@ -52,7 +57,7 @@
         "traceback_substring": "must be integers"
       }
     },{
-      "notes": "Test error handling for non-int max_value",
+      "title": "Test error handling for non-int max_value",
       "in":{
         "max_value": "quack",
         "catch_exceptions": true
