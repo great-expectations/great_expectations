@@ -11,6 +11,7 @@
       "b" : [null, 0, null, null, 2, null, null, 1, null, null]
     },
     "tests" : [{
+      "title" : "Basic positive test",
       "in": {
         "column": "x"
       },
@@ -20,6 +21,7 @@
         "success": true
       }
     },{
+      "title" : "2nd basic positive test",
       "in": {
         "column": "y"
       },
@@ -29,6 +31,7 @@
         "success": true
       }
     },{
+      "title" : "Positive test with strictly",
       "in": {
         "column": "y",
         "strictly": true
@@ -39,6 +42,7 @@
         "success": false
       }
     },{
+      "title" : "Basic negative test",
       "in": {
         "column": "w"
       },
@@ -48,6 +52,7 @@
         "success": false
       }
     },{
+      "title" : "Positive test with parse_strings_as_datetimes",
       "in": {
         "column": "zz",
         "parse_strings_as_datetimes": true
@@ -58,6 +63,7 @@
         "success": true
       }
     },{
+      "title" : "Positive test with interspersed nulls",
       "in": {
         "column": "a"
       },
@@ -67,6 +73,7 @@
         "success": true
       }
     },{
+      "title" : "Negative test with interspersed nulls",
       "in": {
         "column": "b"
       },
