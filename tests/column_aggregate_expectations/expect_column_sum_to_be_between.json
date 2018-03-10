@@ -21,10 +21,7 @@
       },
       "out": {
         "success": true,
-        "observed_value": 30,
-        "element_count": 10,
-        "missing_count": 0,
-        "missing_percent": 0
+        "observed_value": 30
       }
     },{
       "title": "Basic negative test case",
@@ -37,10 +34,7 @@
       },
       "out": {
         "success": false,
-        "observed_value": 30,
-        "element_count": 10,
-        "missing_count": 0,
-        "missing_percent": 0
+        "observed_value": 30
       }
     },{
       "title": "Test case with result_format=SUMMARY",
@@ -53,10 +47,7 @@
       },
       "out": {
         "success": true,
-        "observed_value": 30,
-        "element_count": 10,
-        "missing_count": 0,
-        "missing_percent": 0
+        "observed_value": 30
       }
     },{
       "title": "Test case with only a lower bound, and a missing value",
@@ -67,10 +58,7 @@
       },
       "out": {
         "success": true,
-          "observed_value": 44,
-          "element_count": 10,
-          "missing_count": 2,
-          "missing_percent": 0.2
+          "observed_value": 44
         }
     },{
       "title": "Negative test case with only a lower bound",
@@ -81,10 +69,7 @@
       },
       "out": {
         "success": false,
-        "observed_value": 30,
-        "element_count": 10,
-        "missing_count": 0,
-        "missing_percent": 0
+        "observed_value": 30
       }
     },{
       "title": "Negative test case with only a max",
@@ -95,10 +80,7 @@
       },
       "out": {
         "success": false,
-        "observed_value": 22,
-        "element_count": 10,
-        "missing_count": 0,
-        "missing_percent": 0
+        "observed_value": 22
       }
     },{
       "title": "Raise ValueError with both max and min are missing",

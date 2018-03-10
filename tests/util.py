@@ -189,7 +189,8 @@ def evaluate_json_test(dataset, expectation_type, test):
                 assert result['success'] == value
 
             elif key == 'observed_value':
-                assert np.all(result['result_obj']['observed_value'], value)
+                # assert np.all(result['result_obj']['observed_value'], value)
+                assert result['result_obj']['observed_value'] == value
 
             elif key == 'unexpected_index_list':
                 if isinstance(dataset, SqlAlchemyDataSet):
