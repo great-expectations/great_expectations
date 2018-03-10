@@ -14,7 +14,10 @@ import json
 
 from tests.util import get_dataset, evaluate_json_test
 
-file = open(os.path.basename(__file__)[5:-3] + '.json')
+dir_path = os.path.dirname(os.path.realpath(__file__))
+filename = dir_path+"/"+os.path.basename(__file__)[5:-3] + '.json'
+print(filename)
+file = open(filename)
 test_configurations = json.load(file)
 
 dataset = test_configurations['dataset']

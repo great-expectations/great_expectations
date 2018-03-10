@@ -1,58 +1,60 @@
 {
-  "dataset" : {
-    "x" : [1,2,4],
-    "y" : [1,2,5],
-    "z" : ["hello", "jello", "mello"]
-  },
   "expectation_type": "expect_column_values_to_be_in_set",
-  "tests" : [
-    {
-      "title": "Basic positive test case",
-      "exact_match_out": false,
-      "in": {
-        "column": "x",
-        "values_set": [1,2,4]
-      },
-      "out": {
-        "success": true
-      }
+  "datasets" : [{
+    "data" : {
+      "x" : [1,2,4],
+      "y" : [1,2,5],
+      "z" : ["hello", "jello", "mello"]
     },
-    {
-      "title": "Negative test case",
-      "exact_match_out": false,
-      "in": {
-        "column": "x",
-        "values_set": [2, 4]
+    "tests" : [
+      {
+        "title": "Basic positive test case",
+        "exact_match_out": false,
+        "in": {
+          "column": "x",
+          "values_set": [1,2,4]
+        },
+        "out": {
+          "success": true
+        }
       },
-      "out": {
-        "success": false,
-        "unexpected_index_list": [0],
-        "unexpected_list": [1]
-      }
-    },
-    {
-      "title": "Empty values_set",
-      "exact_match_out": false,
-      "in": {
-        "column": "x",
-        "values_set": []
+      {
+        "title": "Negative test case",
+        "exact_match_out": false,
+        "in": {
+          "column": "x",
+          "values_set": [2, 4]
+        },
+        "out": {
+          "success": false,
+          "unexpected_index_list": [0],
+          "unexpected_list": [1]
+        }
       },
-      "out": {
-        "success": false,
-        "unexpected_index_list": [0, 1, 2],
-        "unexpected_list": [1, 2, 4]
-      }
-    },
-    {
-      "title": "Basic strings set",
-      "exact_match_out": false,
-      "in": {
-        "column": "z",
-        "values_set": ["hello", "jello", "mello"]
+      {
+        "title": "Empty values_set",
+        "exact_match_out": false,
+        "in": {
+          "column": "x",
+          "values_set": []
+        },
+        "out": {
+          "success": false,
+          "unexpected_index_list": [0, 1, 2],
+          "unexpected_list": [1, 2, 4]
+        }
       },
-      "out": {
-        "success": true
+      {
+        "title": "Basic strings set",
+        "exact_match_out": false,
+        "in": {
+          "column": "z",
+          "values_set": ["hello", "jello", "mello"]
+        },
+        "out": {
+          "success": true
+        }
       }
-    }
-  ]
+    ]
+  }]
 }
