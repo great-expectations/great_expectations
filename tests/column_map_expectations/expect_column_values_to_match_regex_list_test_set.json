@@ -6,6 +6,7 @@
       "x" : ["man", "plan", "canal", "panama", "hat", "bat", "bit", "bot", "but", "bet"]
     },
     "tests" : [{
+      "title" : "Basic positive test",
       "in": {
         "column": "w",
         "regex_list": ["\\d+"]
@@ -16,6 +17,7 @@
         "success": true
       }
     },{
+      "title" : "Positive test with multiple regexes",
       "in": {
         "column": "w",
         "regex_list": ["[123]+", "[456]+"],
@@ -27,6 +29,7 @@
         "success": true
       }
     },{
+      "title" : "Basic negative test",
       "in": {
         "column": "w",
         "regex_list": ["[123]+", "[456]+"],
@@ -38,6 +41,7 @@
         "success": false
       }
     },{
+      "title" : "Negative test with more string-ish strings",
       "in": {
         "column": "x",
         "regex_list": ["^.*a.*$"]
@@ -48,6 +52,7 @@
         "success": false
       }
     },{
+      "title" : "Positive test with match_on=any",
       "in": {
         "column": "x",
         "regex_list": ["^.*a.*$", "b.t"],

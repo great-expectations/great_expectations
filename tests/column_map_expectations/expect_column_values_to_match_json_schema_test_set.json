@@ -6,6 +6,7 @@
       "x" : ["{\"a\":1}", "{\"a\":2}", "{\"a\":3}", "{\"a\":4}", "{\"a\":5}", null, null, null, null, null]
     },
     "tests" : [{
+      "title" : "Basic positive test",
       "in": {
         "column": "x",
         "json_schema": {}
@@ -16,6 +17,7 @@
         "success": true
       }
     },{
+      "title" : "Positive test with a more complex schema",
       "in": {
         "column": "x",
         "json_schema": {
@@ -33,6 +35,7 @@
         "success": true
       }
     },{
+      "title" : "Basic negative test",
       "in": {
         "column": "x",
         "json_schema": {
