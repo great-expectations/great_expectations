@@ -30,7 +30,7 @@ def pytest_generate_tests(metafunc):
             file = open(filename)
             test_configuration = json.load(file)
 
-            for d in test_configuration['datasets']:
+            for d in test_configuration['datasets']:            
                 my_dataset = get_dataset(c, d["data"])
 
                 for test in d["tests"]:
@@ -41,7 +41,7 @@ def pytest_generate_tests(metafunc):
                     })
 
                     ids.append(c+":"+test_configuration["expectation_type"]+":"+test["title"])
-            
+
     metafunc.parametrize(
         "test_case",
         parametrized_tests,
@@ -56,3 +56,4 @@ def test_case_runner(test_case):
         test_case["expectation_type"],
         test_case["test"]
     )
+
