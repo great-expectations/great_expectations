@@ -271,7 +271,7 @@ class TestValidation(unittest.TestCase):
         results = df.validate(expectations_config=validation_config_invalid_parameter)['results']
         print(results[0]['exception_info'])
         self.assertIn(
-            "min_value is greater than max_value",
+            "min_value cannot be greater than max_value",
             results[0]['exception_info']['exception_message']
         )
 
