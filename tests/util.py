@@ -101,7 +101,7 @@ def evaluate_json_test(dataset, expectation_type, test):
               - unexpected_list
               - details
               - traceback_substring (if present, the string value will be expected as a substring of the exception_traceback)
-    :return:
+    :return: None. asserts correctness of results.
     """
 
     dataset.set_default_expectation_argument('result_format', 'COMPLETE')
@@ -117,6 +117,12 @@ def evaluate_json_test(dataset, expectation_type, test):
 
     if 'out' not in test:
         raise ValueError("Invalid test configuration detected: 'out' is required.")
+
+    # Pass the test if we are in a test condition that is a known exception
+
+    # Known condition: SqlAlchemy does not support parse_strings_as_datetimes
+    if 'parse_strings_as_datetimes' in test['in'] and isinstance(dataset,SqlAlchemyDataSet):
+        return
 
     # Support tests with positional arguments
     if isinstance(test['in'], list):
@@ -153,7 +159,7 @@ def evaluate_json_test(dataset, expectation_type, test):
 
             elif key == 'traceback_substring':
                 assert result['exception_info']['raised_exception']
-                assert value in result['exception_info']
+                assert value in result['exception_info']['exception_traceback'], "expected to find " + value + " in " + result['exception_info']
 
             else:
                 raise ValueError("Invalid test specification: unknown key " + key + " in 'out'")
