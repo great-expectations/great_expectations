@@ -1,5 +1,7 @@
 from __future__ import division
 
+from six import string_types
+
 import pandas as pd
 import numpy as np
 import os
@@ -82,58 +84,75 @@ def get_dataset(dataset_type, data):
 
 
 def evaluate_json_test(dataset, expectation_type, test):
+    """
+    This method will evaluate the result of a test build using the Great Expectations json test format.
+
+    :param dataset: (DataSet) A great expectations DataSet
+    :param expectation_type: (string) the name of the expectation to be run using the test input
+    :param test: (dict) a dictionary containing information for the test to be run. The dictionary must include:
+        - title: (string) the name of the test
+        - exact_match_out: (boolean) If true, match the 'out' dictionary exactly against the result of the expectation
+        - in: (dict or list) a dictionary of keyword arguments to use to evaluate the expectation or a list of positional arguments
+        - out: (dict) the dictionary keys against which to make assertions. Unless exact_match_out is true, keys must\
+            come from the following list:
+              - success
+              - observed_value
+              - unexpected_index_list
+              - unexpected_list
+              - details
+              - traceback_substring (if present, the string value will be expected as a substring of the exception_traceback)
+    :return:
+    """
     dataset.set_default_expectation_argument('result_format', 'COMPLETE')
 
-    if 'exception' in test:
-        with pytest.raises(Exception) as exception_info:
-            if isinstance(test['in'], list):
-                getattr(dataset, expectation_type)(*test['in'])
-            else:
-                result = getattr(dataset, expectation_type)(**test['in'])
-        assert test['exception'] in str(exception_info)
+    if 'title' not in test:
+        raise ValueError("Invalid test configuration detected: 'title' is required.")
 
-    elif 'error' in test:
-        # Support tests with positional arguments
-        if isinstance(test['in'], list):
-            result = getattr(dataset, expectation_type)(*test['in'])
-        # As well as keyword arguments
-        else:
-            result = getattr(dataset, expectation_type)(**test['in'])
+    if 'exact_match_out' not in test:
+        raise ValueError("Invalid test configuration detected: 'exact_match_out' is required.")
 
-        assert result['exception_info']['raised_exception'] == True
-        assert test['error']['traceback_substring'] in result['exception_info']['exception_traceback']
+    if 'in' not in test:
+        raise ValueError("Invalid test configuration detected: 'in' is required.")
 
-    elif 'out' in test:
-        # Support tests with positional arguments
-        if isinstance(test['in'], list):
-            result = getattr(dataset, expectation_type)(*test['in'])
-        # As well as keyword arguments
-        else:
-            result = getattr(dataset, expectation_type)(**test['in'])
+    if 'out' not in test:
+        raise ValueError("Invalid test configuration detected: 'out' is required.")
 
-        # Check results
-        if 'exact_compare_out' in test and (test['exact_compare_out'] == True):
-            assert test['out'] == result
+    # Support tests with positional arguments
+    if isinstance(test['in'], list):
+        result = getattr(dataset, expectation_type)(*test['in'])
+    # As well as keyword arguments
+    else:
+        result = getattr(dataset, expectation_type)(**test['in'])
 
-        else:
-            assert result['success'] == test['out']['success']
+    # Check results
+    if test['exact_match_out'] is True:
+        assert test['out'] == result
 
-            if 'result_obj' in test['out']:
-                if 'observed_value' in test['out']['result_obj']:
-                    assert result['result_obj']['observed_value'] == test['out']['result_obj']
+    else:
+        for key, value in test['out'].items():
+            # Apply our great expectations-specific test logic
 
-                if 'details' in test['out']['result_obj']:
-                    assert test['out']['result_obj']['details'] == result['result_obj']['details']
+            if key == 'success':
+                assert result['success'] == value
 
-            # Handle dataset-specific implementation differences here
-            if 'unexpected_index_list' in test['out']:
+            elif key == 'observed_value':
+                assert np.all(result['result_obj']['observed_value'], value)
+
+            elif key == 'unexpected_index_list':
                 if isinstance(dataset, SqlAlchemyDataSet):
                     pass
                 else:
-                    assert result['result_obj']['unexpected_index_list'] == test['out']['unexpected_index_list']
+                    assert result['result_obj']['unexpected_index_list'] == value
 
-            if 'unexpected_list' in test['out']:
-                assert result['result_obj']['unexpected_list'] == test['out']['unexpected_list']
+            elif key == 'unexpected_list':
+                assert result['result_obj']['unexpected_list'] == value
 
-    else:
-        raise Exception("Malformed test: no 'out' or 'exception' section found.")
+            elif key == 'details':
+                assert result['result_obj']['details'] == value
+
+            elif key == 'traceback_substring':
+                assert result['exception_info']['raised_exception']
+                assert value in result['exception_info']
+
+            else:
+                raise ValueError("Invalid test specification: unknown key " + key + " in 'out'")
