@@ -11,7 +11,7 @@
       "b" : [null, 0, null, null, 2, null, null, 1, null, null]
     },
     "tests" : [{
-      "notes": "Basic positive test case",
+      "title": "Basic positive test case",
       "in": {
         "column": "w",
         "result_format": "BASIC",
@@ -28,7 +28,7 @@
         }
       }
     },{
-      "notes": "Basic negative test case",
+      "title": "Basic negative test case",
       "in": {
         "column": "w",
         "result_format": "BASIC",
@@ -44,7 +44,7 @@
           "missing_percent": 0
         }    }
     },{
-      "notes": "Test case with result_format=SUMMARY",
+      "title": "Test case with result_format=SUMMARY",
       "in": {
         "column": "w",
         "result_format": "SUMMARY",
@@ -61,7 +61,7 @@
         }
       }
     },{
-      "notes": "Test case with only a lower bound, and a missing value",
+      "title": "Test case with only a lower bound, and a missing value",
       "in": {
         "column": "x",
         "min_value": 30
@@ -75,7 +75,7 @@
           "missing_percent": 0.2
         }    }
     },{
-      "notes": "Negative test case with only a lower bound",
+      "title": "Negative test case with only a lower bound",
       "in": {
         "column": "w",
         "min_value": 50
@@ -90,7 +90,7 @@
         }
       }
     },{
-      "notes": "Negative test case with only a max",
+      "title": "Negative test case with only a max",
       "in": {
         "column": "y",
         "max_value": 20
@@ -105,7 +105,7 @@
         }
       }
     },{
-      "notes": "Raise ValueError with both max and min are missing",
+      "title": "Raise ValueError with both max and min are missing",
       "in": {
         "column": "y",
         "catch_exceptions": true
