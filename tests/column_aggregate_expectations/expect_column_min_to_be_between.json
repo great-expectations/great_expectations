@@ -21,12 +21,10 @@
       },
       "out": {
         "success": true,
-        "result_obj": {
-          "observed_value": 1,
-          "element_count": 10,
-          "missing_count": 0,
-          "missing_percent": 0
-        }
+        "observed_value": 1,
+        "element_count": 10,
+        "missing_count": 0,
+        "missing_percent": 0
       }
     },{
       "title": "Negative test case, with max_value=None",
@@ -39,12 +37,11 @@
       },
       "out": {
         "success": false,
-        "result_obj": {
           "observed_value": 1,
           "element_count": 10,
           "missing_count": 0,
           "missing_percent": 0
-        }    }
+        }
     },{
       "title": "Test case with result_format=SUMMARY. Also verifies that max_value is inclusive",
       "exact_match_out" : false,
@@ -56,12 +53,10 @@
       },
       "out": {
         "success": true,
-        "result_obj": {
-          "observed_value": 1,
-          "element_count": 10,
-          "missing_count": 0,
-          "missing_percent": 0
-        }
+        "observed_value": 1,
+        "element_count": 10,
+        "missing_count": 0,
+        "missing_percent": 0
       }
     },{
       "title": "Test case with only a lower bound, and a missing value",
@@ -72,12 +67,11 @@
       },
       "out": {
         "success": true,
-        "result_obj": {
-          "observed_value": 2.0,
-          "element_count": 10,
-          "missing_count": 2,
-          "missing_percent": 0.2
-        }    }
+        "observed_value": 2.0,
+        "element_count": 10,
+        "missing_count": 2,
+        "missing_percent": 0.2
+        }
     },{
       "title": "Negative test case with only a lower bound",
       "exact_match_out" : false,
@@ -87,12 +81,10 @@
       },
       "out": {
         "success": false,
-        "result_obj": {
-          "observed_value": 1,
-          "element_count": 10,
-          "missing_count": 0,
-          "missing_percent": 0
-        }
+        "observed_value": 1,
+        "element_count": 10,
+        "missing_count": 0,
+        "missing_percent": 0
       }
     },{
       "title": "Test on a series with mostly nulls",
@@ -104,12 +96,10 @@
       },
       "out": {
         "success": false,
-        "result_obj": {
-          "observed_value": 0,
-          "element_count": 10,
-          "missing_count": 7,
-          "missing_percent": 0.7
-        }
+        "observed_value": 0,
+        "element_count": 10,
+        "missing_count": 7,
+        "missing_percent": 0.7
       }
     },{
       "title": "Test on a series containing dates",
@@ -122,12 +112,10 @@
       },
       "out": {
         "success": true,
-        "result_obj": {
-          "observed_value": "2016-02-01 00:00:00",
-          "element_count": 10,
-          "missing_count": 4,
-          "missing_percent": 0.4
-        }
+        "observed_value": "2016-02-01 00:00:00",
+        "element_count": 10,
+        "missing_count": 4,
+        "missing_percent": 0.4
       }
     },{
       "title": "Test on a series containing dates, with an output_strftime_format value",
@@ -141,12 +129,10 @@
       },
       "out": {
         "success": true,
-        "result_obj": {
-          "observed_value": "02/01/2016",
-          "element_count": 10,
-          "missing_count": 4,
-          "missing_percent": 0.4
-        }
+        "observed_value": "02/01/2016",
+        "element_count": 10,
+        "missing_count": 4,
+        "missing_percent": 0.4
       }
     },{
       "title": "Negative test case with only a max",
@@ -157,12 +143,10 @@
       },
       "out": {
         "success": false,
-        "result_obj": {
-          "observed_value": 1,
-          "element_count": 10,
-          "missing_count": 0,
-          "missing_percent": 0
-        }
+        "observed_value": 1,
+        "element_count": 10,
+        "missing_count": 0,
+        "missing_percent": 0
       }
     },{
       "title": "Raise ValueError with both max and min are missing",
