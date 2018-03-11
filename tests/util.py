@@ -159,6 +159,10 @@ def evaluate_json_test(dataset, expectation_type, test):
     if 'parse_strings_as_datetimes' in test['in'] and isinstance(dataset, SqlAlchemyDataSet):
         return
 
+    # Known condition: SqlAlchemy does not support allow_cross_type_comparisons
+    if 'allow_cross_type_comparisons' in test['in'] and isinstance(dataset, SqlAlchemyDataSet):
+        return
+
     try:
         # Support tests with positional arguments
         if isinstance(test['in'], list):
@@ -194,7 +198,7 @@ def evaluate_json_test(dataset, expectation_type, test):
                     assert result['result_obj']['unexpected_index_list'] == value
 
             elif key == 'unexpected_list':
-                assert result['result_obj']['unexpected_list'] == value
+                assert result['result_obj']['unexpected_list'] == value, "expected " + str(value) + " but got " + str(result['result_obj']['unexpected_list'])
 
             elif key == 'details':
                 assert result['result_obj']['details'] == value
