@@ -12,8 +12,9 @@ import pytest
 import os
 import json
 import glob
+import warnings
 
-from tests.util import get_dataset, evaluate_json_test
+from tests.util import get_dataset, candidate_test_is_on_temporary_notimplemented_list, evaluate_json_test
 
 contexts = ['PandasDataSet', 'SqlAlchemyDataSet']
 
@@ -30,17 +31,21 @@ def pytest_generate_tests(metafunc):
             file = open(filename)
             test_configuration = json.load(file)
 
-            for d in test_configuration['datasets']:
-                my_dataset = get_dataset(c, d["data"])
+            if candidate_test_is_on_temporary_notimplemented_list(c, test_configuration["expectation_type"]):
+                warnings.warn("Skipping generation of tests for expectation " + test_configuration["expectation_type"] +
+                              " and context " + c)
+            else:
+                for d in test_configuration['datasets']:
+                    my_dataset = get_dataset(c, d["data"])
 
-                for test in d["tests"]:
-                    parametrized_tests.append({
-                        "expectation_type": test_configuration["expectation_type"],
-                        "dataset": my_dataset,
-                        "test": test,
-                    })
+                    for test in d["tests"]:
+                        parametrized_tests.append({
+                            "expectation_type": test_configuration["expectation_type"],
+                            "dataset": my_dataset,
+                            "test": test,
+                        })
 
-                    ids.append(c+":"+test_configuration["expectation_type"]+":"+test["title"])
+                        ids.append(c+":"+test_configuration["expectation_type"]+":"+test["title"])
             
     metafunc.parametrize(
         "test_case",
