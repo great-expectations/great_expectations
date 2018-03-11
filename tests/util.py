@@ -1,14 +1,8 @@
 from __future__ import division
 
-from six import string_types
-
 import pandas as pd
 import numpy as np
-import os
-import json
-import pytest
 
-import sqlalchemy.types
 from sqlalchemy import create_engine
 
 from great_expectations.dataset import PandasDataSet, SqlAlchemyDataSet
@@ -83,8 +77,8 @@ def get_dataset(dataset_type, data):
         raise ValueError("Unknown dataset_type " + str(dataset_type))
 
 
-def test_is_on_temporary_notimplemented_list(dataset, expectation_type):
-    if dataset.__class__.__name__ == "SqlAlchemyDataSet":
+def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type):
+    if context == "SqlAlchemyDataSet":
         return expectation_type in [
             "expect_column_to_exist",
             "expect_table_row_count_to_be_between",
@@ -122,6 +116,7 @@ def test_is_on_temporary_notimplemented_list(dataset, expectation_type):
             "expect_column_kl_divergence_to_be_less_than",
         ]
     return False
+
 
 def evaluate_json_test(dataset, expectation_type, test):
     """
@@ -161,7 +156,7 @@ def evaluate_json_test(dataset, expectation_type, test):
     # Pass the test if we are in a test condition that is a known exception
 
     # Known condition: SqlAlchemy does not support parse_strings_as_datetimes
-    if 'parse_strings_as_datetimes' in test['in'] and isinstance(dataset,SqlAlchemyDataSet):
+    if 'parse_strings_as_datetimes' in test['in'] and isinstance(dataset, SqlAlchemyDataSet):
         return
 
     try:
@@ -174,7 +169,7 @@ def evaluate_json_test(dataset, expectation_type, test):
 
     except NotImplementedError:
         #Note: This method of checking does not look for false negatives: tests that are incorrectly on the notimplemented_list
-        assert test_is_on_temporary_notimplemented_list(dataset, expectation_type), "Error: this test was supposed to return NotImplementedError"
+        assert candidate_test_is_on_temporary_notimplemented_list(dataset.__class__.__name__, expectation_type), "Error: this test was supposed to return NotImplementedError"
         return
 
     # Check results
