@@ -3,7 +3,7 @@ from great_expectations.dataset import DataSet
 from functools import wraps
 import inspect
 
-from sqlalchemy import MetaData, select, table, or_, and_
+from sqlalchemy import MetaData, select, table, or_, and_, not_
 from sqlalchemy import func as sa_func
 from sqlalchemy import column as sa_column
 from sqlalchemy.engine import create_engine
@@ -36,16 +36,21 @@ class MetaSqlAlchemyDataSet(DataSet):
 
             nonnull_count = element_count - null_count
 
-            result = func(self, column, *args, **kwargs)
+            unexpected_query, unexpected_count_query = func(self, column, *args, **kwargs)
 
-            success_count = nonnull_count - result['unexpected_count']
+            unexpected_query_results = self.engine.execute(unexpected_query.limit(self.unexpected_count_limit))
+
+            unexpected_count = self.engine.execute(unexpected_count_query).scalar()
+            partial_unexpected_list = [x[column] for x in unexpected_query_results.fetchall()]
+
+            success_count = nonnull_count - unexpected_count
 
             success, percent_success = self._calc_map_expectation_success(success_count, nonnull_count, mostly)
 
             return_obj = self._format_column_map_output(
                 result_format, success,
                 element_count, nonnull_count,
-                result['partial_unexpected_list'], None
+                partial_unexpected_list, None
             )
 
             return return_obj
@@ -74,34 +79,16 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
         mostly=None,
         result_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
-        test = select([sa_column(column)]).select_from(table(self.table_name)).where(
-            sa_column(column).notin_(tuple(values_set)))
 
-        test_count = select([sa_func.count()]).select_from(table(self.table_name)).where(
-            sa_column(column).notin_(tuple(values_set)))
+        unexpected_query = select([sa_column(column)]).select_from(table(self.table_name)).where(
+            not_(sa_column(column).in_(tuple(values_set))))
 
-        test_results = self.engine.execute(test.limit(self.unexpected_count_limit))
+        unexpected_count_query = select([sa_func.count()]).select_from(table(self.table_name)).where(
+            not_(sa_column(column).in_(tuple(values_set))))
 
-        unexpected_count = self.engine.execute(test_count).scalar()
-        partial_unexpected_list = [x[column] for x in test_results.fetchall()]
+        return unexpected_query, unexpected_count_query
 
-        return {
-            'unexpected_count': unexpected_count,
-            # element_count (above)
-            # missing_count (above)
-            # missing_percent (above)
-            # unexpected_percent (computable)
-            # unexpected_percent_nonmissing (computable)
-            'partial_unexpected_list': partial_unexpected_list
-            # partial_unexpected_index_list
-            # partial_unexpected_counts
-            # unexpected_index_list
-            # unexpected_list
 
-            # We will NOT support:
-            # - partial_unexpected_index_list (no index concept guaranteed in sql)
-            # - unexpected_index_list (no index concept guaranteed in sql)
-        }
 
     @MetaSqlAlchemyDataSet.column_map_expectation
     def expect_column_values_to_be_between(self,
@@ -122,24 +109,19 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
 
-        unexpected = select([sa_column(column)]).select_from(table(self.table_name)).where(or_(
-            min_value > sa_column(column),
-            sa_column(column) > max_value
-            ))
+        unexpected_query = select([sa_column(column)]).select_from(table(self.table_name)).where(
+            not_(and_(
+                min_value <= sa_column(column),
+                sa_column(column) <= max_value
+            )))
 
-        unexpected_count = select([sa_func.count()]).select_from(table(self.table_name)).where(or_(
-            min_value > sa_column(column),
-            sa_column(column) > max_value
-            ))
+        unexpected_count_query = select([sa_func.count()]).select_from(table(self.table_name)).where(
+            not_(and_(
+                min_value <= sa_column(column),
+                sa_column(column) <= max_value
+            )))
 
-        unexpected_limited = self.engine.execute(unexpected.limit(self.unexpected_count_limit))
-        unexpected_count = self.engine.execute(unexpected_count).scalar()
-        partial_unexpected_list = [x[column] for x in unexpected_limited.fetchall()]
-
-        return {
-            'unexpected_count': unexpected_count,
-            'partial_unexpected_list': partial_unexpected_list
-        }
+        return unexpected_query, unexpected_count_query
 
     @MetaSqlAlchemyDataSet.column_map_expectation
     def expect_column_values_to_be_null(self,
@@ -148,22 +130,18 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
         result_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
 
-        unexpected = select([sa_column(column)]).select_from(table(self.table_name)).where(
-            sa_column(column) != None
-        )
-        unexpected_count = select([sa_func.count()]).select_from(table(self.table_name)).where(
-            sa_column(column) != None
-        )
+        unexpected_query = select([sa_column(column)]).select_from(table(self.table_name)).where(
+            not_(
+                sa_column(column) == None
+            ))
 
-        unexpected_limited = self.engine.execute(unexpected.limit(self.unexpected_count_limit))
-        unexpected_count = self.engine.execute(unexpected_count).scalar()
+        unexpected_count_query = select([sa_func.count()]).select_from(table(self.table_name)).where(
+            not_(
+                sa_column(column) == None
+            ))
 
-        partial_unexpected_list = [x[column] for x in unexpected_limited.fetchall()]
+        return unexpected_query, unexpected_count_query
 
-        return {
-            'unexpected_count': unexpected_count,
-            'partial_unexpected_list': partial_unexpected_list
-        }
 
     @MetaSqlAlchemyDataSet.column_map_expectation
     def expect_column_values_to_not_be_null(self,
@@ -172,44 +150,14 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
         result_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
 
-        unexpected = select([sa_column(column)]).select_from(table(self.table_name)).where(
-            sa_column(column) == None
-        )
-        unexpected_count = select([sa_func.count()]).select_from(table(self.table_name)).where(
-            sa_column(column) == None
-        )
+        unexpected_query = select([sa_column(column)]).select_from(table(self.table_name)).where(
+            not_(
+                sa_column(column) != None
+            ))
 
-        unexpected_limited = self.engine.execute(unexpected.limit(self.unexpected_count_limit))
-        unexpected_count = self.engine.execute(unexpected_count).scalar()
+        unexpected_count_query = select([sa_func.count()]).select_from(table(self.table_name)).where(
+            not_(
+                sa_column(column) != None
+            ))
 
-        partial_unexpected_list = [x[column] for x in unexpected_limited.fetchall()]
-
-        return {
-            'unexpected_count': unexpected_count,
-            'partial_unexpected_list': partial_unexpected_list
-        }
-
-    #FIXME: Duplicate expectation
-    @MetaSqlAlchemyDataSet.column_map_expectation
-    def expect_column_values_to_not_be_null(self,
-        column,
-        mostly=None,
-        result_format=None, include_config=False, catch_exceptions=None, meta=None
-    ):
-
-        unexpected = select([sa_column(column)]).select_from(table(self.table_name)).where(
-            sa_column(column) == None
-        )
-        unexpected_count = select([sa_func.count()]).select_from(table(self.table_name)).where(
-            sa_column(column) == None
-        )
-
-        unexpected_limited = self.engine.execute(unexpected.limit(self.unexpected_count_limit))
-        unexpected_count = self.engine.execute(unexpected_count).scalar()
-
-        partial_unexpected_list = [x[column] for x in unexpected_limited.fetchall()]
-
-        return {
-            'unexpected_count': unexpected_count,
-            'partial_unexpected_list': partial_unexpected_list
-        }
+        return unexpected_query, unexpected_count_query
