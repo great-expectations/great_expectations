@@ -209,22 +209,34 @@ class DataSet(object):
             #!!! Should validate the incoming config with jsonschema here
 
             # Copy the original so that we don't overwrite it by accident
-            self._expectations_config = DotDict(copy.deepcopy(config))
+            ## Pandas incorrectly interprets this as an attempt to create a column and throws up a warning. Suppress it
+            ## since we are subclassing.
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", category=UserWarning)
+                self._expectations_config = DotDict(copy.deepcopy(config))
 
         else:
-            self._expectations_config = DotDict({
-                "dataset_name" : name,
-                "meta": {
-                    "great_expectations.__version__": __version__
-                },
-                "expectations" : []
-            })
+            ## Pandas incorrectly interprets this as an attempt to create a column and throws up a warning. Suppress it
+            ## since we are subclassing.
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", category=UserWarning)
+                self._expectations_config = DotDict({
+                    "dataset_name" : name,
+                    "meta": {
+                        "great_expectations.__version__": __version__
+                    },
+                    "expectations" : []
+                })
 
-        self.default_expectation_args = {
-            "include_config" : False,
-            "catch_exceptions" : False,
-            "result_format" : 'BASIC',
-        }
+        ## Pandas incorrectly interprets this as an attempt to create a column and throws up a warning. Suppress it
+        ## since we are subclassing.
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=UserWarning)
+            self.default_expectation_args = {
+                "include_config" : False,
+                "catch_exceptions" : False,
+                "result_format" : 'BASIC',
+            }
 
     def append_expectation(self, expectation_config):
         expectation_type = expectation_config['expectation_type']
