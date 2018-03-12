@@ -78,7 +78,70 @@ class MetaSqlAlchemyDataSet(DataSet):
         return inner_wrapper
 
 
+    @classmethod
+    def column_aggregate_expectation(cls, func):
+        """Constructs an expectation using column-aggregate semantics.
+        """
+        @cls.expectation(inspect.getargspec(func)[0][1:])
+        @wraps(func)
+        def inner_wrapper(self, column, result_format = None, *args, **kwargs):
 
+            if result_format is None:
+                result_format = self.default_expectation_args["result_format"]
+            else:
+                result_format = parse_result_format(result_format)
+
+            if 'partial_unexpected_count' in result_format:
+                unexpected_count_limit = result_format['partial_unexpected_count']
+            else:
+                if result_format['result_obj_format'] == 'COMPLETE':
+                    unexpected_count_limit = None
+                else:
+                    unexpected_count_limit = 20
+
+
+            evaluation_result = func(self, column, *args, **kwargs)
+
+            if ('success' not in evaluation_result) or \
+                ('result_obj' not in evaluation_result) or \
+                ('observed_value' not in evaluation_result['result_obj']):
+                raise ValueError("Column aggregate expectation failed to return required return information.")
+
+            return_obj = {
+                'success': bool(evaluation_result['success'])
+            }
+
+            if result_format['result_obj_format'] == 'BOOLEAN_ONLY':
+                return return_obj
+
+            count_query = select([
+                sa_func.count().label('element_count'),
+                sa_func.sum(
+                    case([(sa_column(column) == None, 1)], else_=0)
+                ).label('null_count'),
+            ]).select_from(table(self.table_name))
+
+            count_results = self.engine.execute(count_query).fetchone()
+
+            return_obj['result_obj'] = {
+                'observed_value': evaluation_result['result_obj']['observed_value'],
+                "element_count": count_results['element_count'],
+                "missing_count": count_results['null_count'],
+                "missing_percent": count_results['null_count'] * 1.0 / count_results['element_count'] if count_results['element_count'] > 0 else None
+            }
+
+            if result_format['result_obj_format'] == 'BASIC':
+                return return_obj
+
+            if 'details' in evaluation_result['result_obj']:
+                return_obj['result_obj']['details'] = evaluation_result['result_obj']['details']
+
+            if result_format['result_obj_format'] in ["SUMMARY", "COMPLETE"]:
+                return return_obj
+
+            raise ValueError("Unknown result_format %s." % (result_format['result_obj_format'],))
+
+        return inner_wrapper
 
 class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
 
@@ -259,7 +322,7 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
     ###
     ###
     @DocInherit
-    @DataSet.expectation(['column', 'min_value', 'max_value', 'parse_strings_as_datetimes', 'output_strftime_format'])
+    @MetaSqlAlchemyDataSet.column_aggregate_expectation
     def expect_column_max_to_be_between(self,
         column,
         min_value=None,
