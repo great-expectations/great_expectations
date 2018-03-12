@@ -13,7 +13,7 @@ import os
 import json
 import glob
 
-from tests.util import get_dataset, evaluate_json_test
+from tests.test_utils import get_dataset, evaluate_json_test
 
 contexts = ['PandasDataSet', 'SqlAlchemyDataSet']
 

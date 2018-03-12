@@ -8,7 +8,7 @@ import pandas as pd
 
 import great_expectations as ge
 from great_expectations.dataset import PandasDataSet, MetaPandasDataSet
-from .util import assertDeepAlmostEqual
+from .test_utils import assertDeepAlmostEqual
 
 def isprime(n):
     #https://stackoverflow.com/questions/18833759/python-prime-number-checker
