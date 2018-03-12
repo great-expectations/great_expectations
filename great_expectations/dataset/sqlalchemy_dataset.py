@@ -193,15 +193,6 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
         mostly=None,
         result_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
-
-        # unexpected_query = select([sa_column(column)]).select_from(table(self.table_name)).where(
-        #     not_(sa_column(column).in_(tuple(values_set))))
-        #
-        # unexpected_count_query = select([sa_func.count()]).select_from(table(self.table_name)).where(
-        #     not_(sa_column(column).in_(tuple(values_set))))
-        #
-        # return unexpected_query, unexpected_count_query
-
         return not_(sa_column(column).in_(tuple(values_set)))
 
     @DocInherit
@@ -223,26 +214,6 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
 
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
-
-        # unexpected_query = select([sa_column(column)]).select_from(table(self.table_name)).where(
-        #     # and_(
-        #     #     sa_column != None,
-        #         not_(and_(
-        #             min_value <= sa_column(column),
-        #             sa_column(column) <= max_value
-        #         )))
-        #     # )
-        #
-        # unexpected_count_query = select([sa_func.count()]).select_from(table(self.table_name)).where(
-        #     # and_(
-        #     #     sa_column != None,
-        #         not_(and_(
-        #             min_value <= sa_column(column),
-        #             sa_column(column) <= max_value
-        #         )))
-        #     # )
-        #
-        # return unexpected_query, unexpected_count_query
 
         return not_(and_(
                     min_value <= sa_column(column),
