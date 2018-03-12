@@ -237,6 +237,8 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         except ValueError:
             raise ValueError("value must be an integer")
 
+        if value is None:
+            raise ValueError("value must be provided")
 
         if self.shape[0] == value:
             outcome = True
