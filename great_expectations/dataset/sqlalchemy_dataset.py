@@ -18,9 +18,11 @@ class MetaSqlAlchemyDataSet(DataSet):
 
     @classmethod
     def column_map_expectation(cls, func):
-        """TBD: How should this work?
+        """For SqlAlchemy, this decorator allows individual column_map_expectations to simply return the filter
+        that describes the expected condition on their data.
 
-        Firstly, of course, the full unexpected list is expensive and should only be gathered if really needed
+        The decorator will then use that filter to obtain unexpected elements, relevant counts, and return the formatted
+        object.
         """
 
         @cls.expectation(inspect.getargspec(func)[0][1:])
@@ -51,20 +53,20 @@ class MetaSqlAlchemyDataSet(DataSet):
                 ).label('unexpected_count')
             ]).select_from(table(self.table_name))
 
-            results = self.engine.execute(count_query).fetchone()
+            count_results = self.engine.execute(count_query).fetchone()
 
             unexpected_query_results = self.engine.execute(
                 select([sa_column(column)]).select_from(table(self.table_name)).where(unexpected_condition).limit(unexpected_count_limit)
             )
 
-            nonnull_count = results['element_count'] - results['null_count']
+            nonnull_count = count_results['element_count'] - count_results['null_count']
             partial_unexpected_list = [x[column] for x in unexpected_query_results.fetchall()]
-            success_count = nonnull_count - results['unexpected_count']
+            success_count = nonnull_count - count_results['unexpected_count']
             success, percent_success = self._calc_map_expectation_success(success_count, nonnull_count, mostly)
 
             return_obj = self._format_column_map_output(
                 result_format, success,
-                results['element_count'], nonnull_count,
+                count_results['element_count'], nonnull_count,
                 partial_unexpected_list, None
             )
 
@@ -97,6 +99,33 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
     ###
     ###
     ###
+
+    @DocInherit
+    @DataSet.expectation(['value'])
+    def expect_table_row_count_to_equal(self,
+        value=None,
+        result_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
+        # Assert that min_value and max_value are integers
+        try:
+            if value is not None:
+                float(value).is_integer()
+
+        except ValueError:
+            raise ValueError("value must an integer")
+
+        if value is None:
+            raise ValueError("value must be provided")
+
+        count_query = select([sa_func.count()]).select_from(table(self.table_name))
+        row_count = self.engine.execute(count_query).scalar()
+
+        return {
+            'success': row_count == value,
+            'result_obj': {
+                'observed_value': row_count
+            }
+        }
 
     @DocInherit
     @DataSet.expectation(['min_value', 'max_value'])
@@ -135,45 +164,6 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
             }
         }
 
-    @DocInherit
-    @MetaSqlAlchemyDataSet.column_map_expectation
-    def expect_column_values_to_be_null(self,
-        column,
-        mostly=None,
-        result_format=None, include_config=False, catch_exceptions=None, meta=None
-    ):
-
-        unexpected_query = select([sa_column(column)]).select_from(table(self.table_name)).where(
-            not_(
-                sa_column(column) == None
-            ))
-
-        unexpected_count_query = select([sa_func.count()]).select_from(table(self.table_name)).where(
-            not_(
-                sa_column(column) == None
-            ))
-
-        return unexpected_query, unexpected_count_query
-
-    @DocInherit
-    @MetaSqlAlchemyDataSet.column_map_expectation
-    def expect_column_values_to_not_be_null(self,
-        column,
-        mostly=None,
-        result_format=None, include_config=False, catch_exceptions=None, meta=None
-    ):
-
-        unexpected_query = select([sa_column(column)]).select_from(table(self.table_name)).where(
-            not_(
-                sa_column(column) != None
-            ))
-
-        unexpected_count_query = select([sa_func.count()]).select_from(table(self.table_name)).where(
-            not_(
-                sa_column(column) != None
-            ))
-
-        return unexpected_query, unexpected_count_query
 
     ###
     ###
@@ -184,6 +174,27 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
     ###
     ###
     ###
+
+    @DocInherit
+    @MetaSqlAlchemyDataSet.column_map_expectation
+    def expect_column_values_to_be_null(self,
+        column,
+        mostly=None,
+        result_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
+
+        return sa_column(column) != None
+
+    @DocInherit
+    @MetaSqlAlchemyDataSet.column_map_expectation
+    def expect_column_values_to_not_be_null(self,
+        column,
+        mostly=None,
+        result_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
+
+        return sa_column(column) == None
+
 
     @DocInherit
     @MetaSqlAlchemyDataSet.column_map_expectation
