@@ -1,17 +1,24 @@
 # Utility methods for dealing with DataSet objects
 
 from __future__ import division
+
+from six import string_types
+
 import numpy as np
 from scipy import stats
 import pandas as pd
 import warnings
 import sys
 import copy
-import json
 import datetime
 
 from functools import wraps
 
+
+def parse_result_format(result_format):
+    if isinstance(result_format, string_types):
+        result_format = { 'result_obj_format': result_format }
+    return result_format
 
 class DotDict(dict):
     """dot.notation access to dictionary attributes"""
