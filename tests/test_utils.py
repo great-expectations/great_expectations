@@ -80,8 +80,8 @@ def get_dataset(dataset_type, data):
 def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type):
     if context == "SqlAlchemyDataSet":
         return expectation_type in [
-            "expect_column_to_exist",
-            "expect_table_row_count_to_be_between",
+            #"expect_column_to_exist",
+            #"expect_table_row_count_to_be_between",
             #"expect_table_row_count_to_equal",
             "expect_column_values_to_be_unique",
             # "expect_column_values_to_not_be_null",
