@@ -42,7 +42,7 @@ class MetaSqlAlchemyDataSet(DataSet):
             unexpected_condition = func(self, column, *args, **kwargs)
 
             count_query = select([
-                sa_func.count().label('all_count'),
+                sa_func.count().label('element_count'),
                 sa_func.sum(
                     case([(sa_column(column) == None, 1)], else_=0)
                 ).label('null_count'),
@@ -51,21 +51,20 @@ class MetaSqlAlchemyDataSet(DataSet):
                 ).label('unexpected_count')
             ]).select_from(table(self.table_name))
 
-            results = self.engine.execute(count_query).fetchall()
-            element_count = results[0][0]
-            null_count = results[0][1]
-            unexpected_count = results[0][2]
+            results = self.engine.execute(count_query).fetchone()
 
-            unexpected_query_results = self.engine.execute(select([sa_column(column)]).select_from(table(self.table_name)).where(unexpected_condition))
+            unexpected_query_results = self.engine.execute(
+                select([sa_column(column)]).select_from(table(self.table_name)).where(unexpected_condition).limit(unexpected_count_limit)
+            )
 
-            nonnull_count = element_count - null_count
+            nonnull_count = results['element_count'] - results['null_count']
             partial_unexpected_list = [x[column] for x in unexpected_query_results.fetchall()]
-            success_count = nonnull_count - unexpected_count
+            success_count = nonnull_count - results['unexpected_count']
             success, percent_success = self._calc_map_expectation_success(success_count, nonnull_count, mostly)
 
             return_obj = self._format_column_map_output(
                 result_format, success,
-                element_count, nonnull_count,
+                results['element_count'], nonnull_count,
                 partial_unexpected_list, None
             )
 
