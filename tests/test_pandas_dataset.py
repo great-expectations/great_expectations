@@ -53,66 +53,6 @@ class TestPandasDataset(unittest.TestCase):
     #             self.assertIn(t['error']['traceback_substring'], out['exception_info']['exception_traceback'])
 
 
-    def test_expect_table_row_count_to_equal(self):
-
-        D = ge.dataset.PandasDataSet({
-            'c1':[4,5,6,7],
-            'c2':['a','b','c','d'],
-            'c3':[None,None,None,None]
-        })
-        D.set_default_expectation_argument("result_format", "COMPLETE")
-
-        # Tests
-        T = [
-                {
-                    'in':[4],
-                    'kwargs':{},
-                    'out':{'success':True, "result_obj": { "observed_value": 4}}},
-                {
-                    'in':[5],
-                    'kwargs':{},
-                    'out':{'success':False, "result_obj": { "observed_value": 4}}},
-                {
-                    'in':[3],
-                    'kwargs':{},
-                    'out':{'success':False, "result_obj": { "observed_value": 4}}},
-                {
-                    'in':[0],
-                    'kwargs':{},
-                    'out':{'success':False, "result_obj": { "observed_value": 4}}}
-        ]
-
-        for t in T:
-            out = D.expect_table_row_count_to_equal(*t['in'], **t['kwargs'])
-            self.assertEqual(out, t['out'])
-
-        D = ge.dataset.PandasDataSet({
-            'c1':[1,None,3,None,5],
-            'c2':[None,4,5,None,None],
-            'c3':[None,None,None,None,None]
-        })
-        D.set_default_expectation_argument("result_format", "COMPLETE")
-
-        T = [
-                {
-                    'in':[5],
-                    'kwargs':{},
-                    'out':{'success':True, 'result_obj': {'observed_value': 5}}},
-                {
-                    'in':[3],
-                    'kwargs':{},
-                    'out':{'success':False, 'result_obj': {'observed_value': 5}}
-                }
-        ]
-
-        for t in T:
-            out = D.expect_table_row_count_to_equal(*t['in'], **t['kwargs'])
-            self.assertEqual(out, t['out'])
-
-        with self.assertRaises(ValueError):
-            D.expect_table_row_count_to_equal("c1", value="hello")
-
-
     def test_expect_column_values_to_be_unique(self):
 
         D = ge.dataset.PandasDataSet({

@@ -82,7 +82,7 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
         return expectation_type in [
             "expect_column_to_exist",
             "expect_table_row_count_to_be_between",
-            "expect_table_row_count_to_equal",
+            #"expect_table_row_count_to_equal",
             "expect_column_values_to_be_unique",
             # "expect_column_values_to_not_be_null",
             # "expect_column_values_to_be_null",
@@ -205,7 +205,7 @@ def evaluate_json_test(dataset, expectation_type, test):
 
             elif key == 'traceback_substring':
                 assert result['exception_info']['raised_exception']
-                assert value in result['exception_info']['exception_traceback'], "expected to find " + value + " in " + result['exception_info']
+                assert value in result['exception_info']['exception_traceback'], "expected to find " + value + " in " + result['exception_info']['exception_traceback']
 
             else:
                 raise ValueError("Invalid test specification: unknown key " + key + " in 'out'")
