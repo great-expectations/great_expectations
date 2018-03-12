@@ -31,28 +31,6 @@ class TestPandasDataset(unittest.TestCase):
     #             self.assertEqual(out['raised_exception'], True)
     #             self.assertIn(t['error']['traceback_substring'], out['exception_traceback'])
 
-    # def test_expect_table_row_count_to_be_between(self):
-    #     print("=== test_expect_table_row_count_to_be_between ===")
-    #     with open("./tests/test_sets/expect_table_row_count_to_be_between_test_set.json") as f:
-    #         J = json.load(f)
-    #         D = ge.dataset.PandasDataSet(J["dataset"])
-    #         D.set_default_expectation_argument("result_format", "COMPLETE")
-    #         T = J["tests"]
-
-    #         self.maxDiff = None
-
-    #     for t in T:
-    #         print(t)
-    #         out = D.expect_table_row_count_to_be_between(**t['in'])
-
-    #         if 'out' in t:
-    #             self.assertEqual(out, t['out'])
-
-    #         if 'error' in t:
-    #             self.assertEqual(out['exception_info']['raised_exception'], True)
-    #             self.assertIn(t['error']['traceback_substring'], out['exception_info']['exception_traceback'])
-
-
     def test_expect_column_values_to_be_unique(self):
 
         D = ge.dataset.PandasDataSet({

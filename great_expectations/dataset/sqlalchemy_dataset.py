@@ -8,7 +8,7 @@ from .util import DocInherit, parse_result_format
 from sqlalchemy import MetaData, select, table, or_, and_, not_, case
 from sqlalchemy import func as sa_func
 from sqlalchemy import column as sa_column
-from sqlalchemy.engine import create_engine
+from sqlalchemy.engine import reflection
 
 
 class MetaSqlAlchemyDataSet(DataSet):
@@ -88,6 +88,9 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
         # self.engine = create_engine(connection_string)
         self.engine = engine
 
+        insp = reflection.Inspector.from_engine(engine)
+        self.columns = insp.get_columns(self.table_name)
+
 
 
     ###
@@ -164,6 +167,18 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
             }
         }
 
+    @DocInherit
+    @DataSet.expectation(['column'])
+    def expect_column_to_exist(self,
+            column,
+            result_format=None, include_config=False, catch_exceptions=None, meta=None
+        ):
+
+        col_names = [col['name'] for col in self.columns]
+
+        return {
+            'success': column in col_names
+        }
 
     ###
     ###
