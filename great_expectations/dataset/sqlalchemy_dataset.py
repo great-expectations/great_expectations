@@ -78,6 +78,8 @@ class MetaSqlAlchemyDataSet(DataSet):
         return inner_wrapper
 
 
+
+
 class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
 
     # def __init__(self, connection_string, table_name):
@@ -245,3 +247,50 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
                     min_value <= sa_column(column),
                     sa_column(column) <= max_value
             ))
+
+
+    ###
+    ###
+    ###
+    #
+    # Column Aggregate Expectation Implementations
+    #
+    ###
+    ###
+    ###
+    @DocInherit
+    @DataSet.expectation(['column', 'min_value', 'max_value', 'parse_strings_as_datetimes', 'output_strftime_format'])
+    def expect_column_max_to_be_between(self,
+        column,
+        min_value=None,
+        max_value=None,
+        parse_strings_as_datetimes=None,
+        output_strftime_format=None,
+        result_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
+
+        if min_value is None and max_value is None:
+            raise ValueError("min_value and max_value cannot both be None")
+
+        if parse_strings_as_datetimes:
+            raise ValueError("parse_strings_as_datetimes is not supported in SqlAlchemy")
+
+        col_max = self.engine.execute(
+            select([sa_func.max(sa_column(column))]).select_from(table(self.table_name))
+        ).scalar()
+
+        if min_value != None and max_value != None:
+            success = (min_value <= col_max) and (col_max <= max_value)
+
+        elif min_value == None and max_value != None:
+            success = (col_max <= max_value)
+
+        elif min_value != None and max_value == None:
+            success = (min_value <= col_max)
+
+        return {
+            'success' : success,
+            'result_obj': {
+                'observed_value' : col_max
+            }
+        }
