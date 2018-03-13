@@ -246,14 +246,23 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
     @DocInherit
     @DataSet.expectation(['column'])
     def expect_column_to_exist(self,
-            column,
-            result_format=None, include_config=False, catch_exceptions=None, meta=None
+            column, column_index=None, result_format=None, include_config=False,
+            catch_exceptions=None, meta=None
         ):
 
         col_names = [col['name'] for col in self.columns]
 
+        if column_index is None:
+            success = column in col_names
+        else:
+            try:
+                col_index = col_names.index(column)
+                success = (column_index == col_index)
+            except ValueError:
+                success = False
+
         return {
-            'success': column in col_names
+            'success': success
         }
 
     ###
