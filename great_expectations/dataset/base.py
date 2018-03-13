@@ -2317,7 +2317,6 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         column,
         min_value=None,
         max_value=None,
-        ties_okay=None,
         result_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
         """Expect the column to sum to be between an min and max value
