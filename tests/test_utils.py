@@ -69,7 +69,7 @@ def get_dataset(dataset_type, data):
 
         # Add the data to the database as a new table
         df = pd.DataFrame(data)
-        df.to_sql(name='test_data', con=engine)
+        df.to_sql(name='test_data', con=engine, index=False)
 
         # Build a SqlAlchemyDataSet using that database
         return SqlAlchemyDataSet(engine, 'test_data')
