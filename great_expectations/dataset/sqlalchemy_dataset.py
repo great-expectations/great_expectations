@@ -395,3 +395,36 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
                 'observed_value' : col_min
             }
         }
+
+    @DocInherit
+    @MetaSqlAlchemyDataSet.column_aggregate_expectation
+    def expect_column_sum_to_be_between(self,
+        column,
+        min_value=None,
+        max_value=None,
+        result_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
+
+        if min_value is None and max_value is None:
+            raise ValueError("min_value and max_value cannot both be None")
+
+        col_sum = self.engine.execute(
+            select([sa_func.sum(sa_column(column))]).select_from(table(self.table_name))
+        ).scalar()
+
+        if min_value != None and max_value != None:
+            success = (min_value <= col_sum) and (col_sum <= max_value)
+
+        elif min_value == None and max_value != None:
+            success = (col_sum <= max_value)
+
+        elif min_value != None and max_value == None:
+            success = (min_value <= col_sum)
+
+        return {
+            'success' : success,
+            'result_obj': {
+                'observed_value' : col_sum
+            }
+        }
+        }
