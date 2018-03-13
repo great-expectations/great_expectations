@@ -55,6 +55,11 @@ Expectations include:
 
 Visit the [glossary of expectations](http://great-expectations.readthedocs.io/en/latest/glossary.html) for a complete list of expectations that are currently part of the great expectations vocabulary.
 
+Can I contribute?
+--------------------------------------------------------------------------------
+Absolutely. Yes, please. Start [here](https://github.com/great-expectations/great_expectations/blob/docs/contributor_docs/CONTRIBUTING), and don't be shy with questions!
+
+
 How do I learn more?
 --------------------------------------------------------------------------------
 
