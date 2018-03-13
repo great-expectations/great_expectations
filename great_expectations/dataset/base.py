@@ -903,6 +903,43 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         raise NotImplementedError
 
+    def expect_table_columns_to_match_ordered_list(self,
+            column_list,
+            result_format=None, include_config=False, catch_exceptions=None, meta=None
+        ):
+        """Expect the columns to exactly match a specified list.
+
+        expect_table_columns_to_match_ordered_list is a :func:`expectation <great_expectations.dataset.base.DataSet.expectation>`, not a \
+        `column_map_expectation` or `column_aggregate_expectation`.
+
+        Args:
+            column_list (list of str): \
+                The column names, in the correct order.
+
+        Other Parameters:
+            result_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`result_format <result_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
+
+        Returns:
+            A JSON-serializable expectation result object.
+
+            Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+        """
+
+        raise NotImplementedError
+
     def expect_table_row_count_to_be_between(self,
         min_value=0,
         max_value=None,
