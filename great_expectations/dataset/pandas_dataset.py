@@ -7,6 +7,8 @@ from datetime import datetime
 from functools import wraps
 import jsonschema
 
+from numbers import Number
+
 import numpy as np
 import pandas as pd
 from dateutil.parser import parse
@@ -710,6 +712,12 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
+
+        if min_value is not None and not isinstance(min_value, (Number)):
+            raise ValueError("min_value must be a number")
+
+        if max_value is not None and not isinstance(max_value, (Number)):
+            raise ValueError("max_value must be a number")
 
         column_mean = column.mean()
 

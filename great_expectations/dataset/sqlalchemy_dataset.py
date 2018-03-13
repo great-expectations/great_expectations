@@ -12,6 +12,8 @@ from sqlalchemy import func as sa_func
 from sqlalchemy import column as sa_column
 from sqlalchemy.engine import reflection
 
+from numbers import Number
+
 
 class MetaSqlAlchemyDataSet(DataSet):
 
@@ -471,6 +473,12 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
 
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
+
+        if min_value is not None and not isinstance(min_value, (Number)):
+            raise ValueError("min_value must be a number")
+
+        if max_value is not None and not isinstance(max_value, (Number)):
+            raise ValueError("max_value must be a number")
 
         if not self._is_numeric_column(column):
             raise ValueError("column is not numeric")
