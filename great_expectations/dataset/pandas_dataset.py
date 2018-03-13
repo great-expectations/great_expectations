@@ -158,8 +158,6 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
     def add_default_expectations(self):
         """
         The default behavior for PandasDataSet is to explicitly include expectations that every column present upon initialization exists.
-
-        FIXME: This should probably live in the grandparent class, DataSet, instead.
         """
 
         for col in self.columns:

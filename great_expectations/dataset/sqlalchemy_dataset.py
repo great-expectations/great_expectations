@@ -158,6 +158,18 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
         insp = reflection.Inspector.from_engine(engine)
         self.columns = insp.get_columns(self.table_name)
 
+    def add_default_expectations(self):
+        """
+        The default behavior for PandasDataSet is to explicitly include expectations that every column present upon initialization exists.
+        """
+        for col in self.columns:
+            self.append_expectation({
+                "expectation_type": "expect_column_to_exist",
+                "kwargs": {
+                    "column": col["name"]
+                }
+            })
+
     def _is_numeric_column(self, column):
         for col in self.columns:
             if (col['name'] == column and
