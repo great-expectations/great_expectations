@@ -102,7 +102,7 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
             "expect_column_values_to_be_dateutil_parseable",
             "expect_column_values_to_be_json_parseable",
             "expect_column_values_to_match_json_schema",
-            "expect_column_mean_to_be_between",
+            #"expect_column_mean_to_be_between",
             "expect_column_median_to_be_between",
             "expect_column_stdev_to_be_between",
             "expect_column_unique_value_count_to_be_between",
@@ -188,8 +188,8 @@ def evaluate_json_test(dataset, expectation_type, test):
                 assert result['success'] == value
 
             elif key == 'observed_value':
-                # assert np.all(result['result_obj']['observed_value'], value)
-                assert result['result_obj']['observed_value'] == value
+                # assert np.allclose(result['result_obj']['observed_value'], value)
+                assert value == result['result_obj']['observed_value']
 
             elif key == 'unexpected_index_list':
                 if isinstance(dataset, SqlAlchemyDataSet):

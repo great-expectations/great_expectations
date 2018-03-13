@@ -3,6 +3,8 @@ from great_expectations.dataset import DataSet
 from functools import wraps
 import inspect
 
+import sqlalchemy as sa
+
 from .util import DocInherit, parse_result_format
 
 from sqlalchemy import MetaData, select, table, or_, and_, not_, case
@@ -156,7 +158,16 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
         insp = reflection.Inspector.from_engine(engine)
         self.columns = insp.get_columns(self.table_name)
 
+    def _is_numeric_column(self, column):
+        for col in self.columns:
+            if (col['name'] == column and
+                isinstance(col['type'],
+                           (sa.types.Integer, sa.types.BigInteger, sa.types.Float, sa.types.Numeric, sa.types.SmallInteger, sa.types.Boolean)
+                           )
+            ):
+                return True
 
+        return False
 
     ###
     ###
@@ -427,4 +438,38 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
                 'observed_value' : col_sum
             }
         }
+
+    @DocInherit
+    @MetaSqlAlchemyDataSet.column_aggregate_expectation
+    def expect_column_mean_to_be_between(self,
+        column,
+        min_value=None,
+        max_value=None,
+        result_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
+
+        if min_value is None and max_value is None:
+            raise ValueError("min_value and max_value cannot both be None")
+
+        if not self._is_numeric_column(column):
+            raise ValueError("column is not numeric")
+
+        col_avg = self.engine.execute(
+            select([sa_func.avg(sa_column(column))]).select_from(table(self.table_name))
+        ).scalar()
+
+        if min_value != None and max_value != None:
+            success = (min_value <= col_avg) and (col_avg <= max_value)
+
+        elif min_value == None and max_value != None:
+            success = (col_avg <= max_value)
+
+        elif min_value != None and max_value == None:
+            success = (min_value <= col_avg)
+
+        return {
+            'success': success,
+            'result_obj': {
+                'observed_value': col_avg
+            }
         }
