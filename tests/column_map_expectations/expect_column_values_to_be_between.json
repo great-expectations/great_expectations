@@ -1,7 +1,7 @@
 {
   "expectation_type": "expect_column_values_to_be_between",
   "datasets": [{
-    "dataset": {
+    "data": {
       "x": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
       "y": [1, 2, 3, 4, 5, 6, 7, 8, 9, "abc"],
       "z": [1, 2, 3, 4, 5, null, null, null, null, null],

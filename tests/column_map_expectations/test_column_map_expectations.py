@@ -46,7 +46,7 @@ def pytest_generate_tests(metafunc):
                         })
 
                         ids.append(c+":"+test_configuration["expectation_type"]+":"+test["title"])
-            
+
     metafunc.parametrize(
         "test_case",
         parametrized_tests,
