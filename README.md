@@ -69,8 +69,8 @@ For full documentation, visit [Great Expectations on readthedocs.io](http://grea
 
 For quick, hands-on introductions to Great Expectations' key features, check out our walkthrough videos:
 
-* [Introduction to Great Expectations](https://www.useloom.com/share/3eb1d429823744288c99ea26e2c4d443)
-* [Using Distributional Expectations](https://www.useloom.com/share/c74b3e9c8dd349e9b8c4aa230cc4bedc)
+* [Introduction to Great Expectations](https://www.youtube.com/watch?v=-_0tG7ACNU4)
+* [Using Distributional Expectations](https://www.youtube.com/watch?v=l3DYPVZAUmw&t=20s)
 
 
 What's the best way to get in touch with the Great Expectations team?
