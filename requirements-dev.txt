@@ -8,3 +8,4 @@ argh>=0.26.2
 jsonschema>=2.5.1
 sphinxcontrib-napoleon>=0.6.1
 pypandoc>=1.4
+pytest>=3.2.5
