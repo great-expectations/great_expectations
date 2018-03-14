@@ -30,16 +30,13 @@ class MetaSqlAlchemyDataSet(DataSet):
         def inner_wrapper(self, column, mostly=None, result_format=None, *args, **kwargs):
             if result_format is None:
                 result_format = self.default_expectation_args["result_format"]
-            else:
-                result_format = parse_result_format(result_format)
 
-            if 'partial_unexpected_count' in result_format:
-                unexpected_count_limit = result_format['partial_unexpected_count']
+            result_format = parse_result_format(result_format)
+
+            if result_format['result_obj_format'] == 'COMPLETE':
+                unexpected_count_limit = None
             else:
-                if result_format['result_obj_format'] == 'COMPLETE':
-                    unexpected_count_limit = None
-                else:
-                    unexpected_count_limit = 20
+                unexpected_count_limit = result_format['partial_unexpected_count']
 
             expected_condition = func(self, column, *args, **kwargs)
 
@@ -60,14 +57,14 @@ class MetaSqlAlchemyDataSet(DataSet):
             )
 
             nonnull_count = count_results['element_count'] - count_results['null_count']
-            partial_unexpected_list = [x[column] for x in unexpected_query_results.fetchall()]
+            maybe_limited_unexpected_list = [x[column] for x in unexpected_query_results.fetchall()]
             success_count = nonnull_count - count_results['unexpected_count']
             success, percent_success = self._calc_map_expectation_success(success_count, nonnull_count, mostly)
 
             return_obj = self._format_column_map_output(
                 result_format, success,
                 count_results['element_count'], nonnull_count,
-                partial_unexpected_list, None
+                maybe_limited_unexpected_list, None
             )
 
             return return_obj
@@ -88,16 +85,8 @@ class MetaSqlAlchemyDataSet(DataSet):
 
             if result_format is None:
                 result_format = self.default_expectation_args["result_format"]
-            else:
-                result_format = parse_result_format(result_format)
 
-            if 'partial_unexpected_count' in result_format:
-                unexpected_count_limit = result_format['partial_unexpected_count']
-            else:
-                if result_format['result_obj_format'] == 'COMPLETE':
-                    unexpected_count_limit = None
-                else:
-                    unexpected_count_limit = 20
+            result_format = parse_result_format(result_format)
 
             evaluation_result = func(self, column, *args, **kwargs)
 
