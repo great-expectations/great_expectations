@@ -7,6 +7,8 @@ from datetime import datetime
 from functools import wraps
 import jsonschema
 
+from numbers import Number
+
 import numpy as np
 import pandas as pd
 from dateutil.parser import parse
@@ -14,7 +16,7 @@ from scipy import stats
 from six import string_types
 
 from .base import DataSet
-from .util import DocInherit, recursively_convert_to_json_serializable, \
+from .util import DocInherit, parse_result_format, \
         is_valid_partition_object, is_valid_categorical_partition_object, is_valid_continuous_partition_object
 
 class MetaPandasDataSet(DataSet):
@@ -107,14 +109,14 @@ class MetaPandasDataSet(DataSet):
 
             evaluation_result = func(self, nonnull_values, *args, **kwargs)
 
-            if ('success' not in evaluation_result) or \
-                ('result_obj' not in evaluation_result) or \
-                ('observed_value' not in evaluation_result['result_obj']):
-                raise ValueError("Column aggregate expectation failed to return required return information.")
+            if 'success' not in evaluation_result:
+                raise ValueError("Column aggregate expectation failed to return required information: success")
+
+            if ('result_obj' not in evaluation_result) or ('observed_value' not in evaluation_result['result_obj']):
+                raise ValueError("Column aggregate expectation failed to return required information: observed_value")
 
             # Retain support for string-only output formats:
-            if isinstance(result_format, string_types):
-                result_format = {'result_obj_format': result_format}
+            result_format = parse_result_format(result_format)
 
             return_obj = {
                 'success': bool(evaluation_result['success'])
@@ -158,8 +160,6 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
     def add_default_expectations(self):
         """
         The default behavior for PandasDataSet is to explicitly include expectations that every column present upon initialization exists.
-
-        FIXME: This should probably live in the grandparent class, DataSet, instead.
         """
 
         for col in self.columns:
@@ -237,6 +237,8 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         except ValueError:
             raise ValueError("value must be an integer")
 
+        if value is None:
+            raise ValueError("value must be provided")
 
         if self.shape[0] == value:
             outcome = True
@@ -432,8 +434,8 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         else:
             temp_column = column
 
-        if min_value > max_value:
-            raise ValueError("min_value is greater than max_value")
+        if min_value != None and max_value != None and min_value > max_value:
+            raise ValueError("min_value cannot be greater than max_value")
 
         def is_between(val):
             # TODO Might be worth explicitly defining comparisons between types (for example, between strings and ints).
@@ -710,6 +712,12 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
+
+        if min_value is not None and not isinstance(min_value, (Number)):
+            raise ValueError("min_value must be a number")
+
+        if max_value is not None and not isinstance(max_value, (Number)):
+            raise ValueError("max_value must be a number")
 
         column_mean = column.mean()
 

@@ -9,7 +9,7 @@ import os
 import subprocess
 
 import great_expectations as ge
-from .util import assertDeepAlmostEqual
+from .test_utils import assertDeepAlmostEqual
 
 def get_system_command_result(command_str):
     p = subprocess.Popen(
