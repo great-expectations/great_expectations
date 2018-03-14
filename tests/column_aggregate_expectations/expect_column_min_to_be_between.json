@@ -1,0 +1,137 @@
+{
+  "expectation_type" : "expect_column_min_to_be_between",
+  "datasets" : [{
+    "data" : {
+      "w" : [1, 2, 3, 4, 5, 5, 4, 3, 2, 1],
+      "x" : [2, 3, 4, 5, 6, 7, 8, 9, null, null],
+      "y" : [1, 1, 1, 2, 2, 2, 3, 3, 3, 4],
+      "z" : ["a", "b", "c", "d", "e", null, null, null, null, null],
+      "zz" : ["2/1/2016", "2/2/2016", "2/2/2016", "10/1/2016", "1/2/2017", "10/1/2017", null, null, null, null],
+      "a" : [null, 0, null, null, 1, null, null, 2, null, null],
+      "b" : [null, 0, null, null, 2, null, null, 1, null, null]
+    },
+    "tests" : [{
+      "title": "Basic positive test case",
+      "exact_match_out" : false,
+      "in": {
+        "column": "w",
+        "result_format": "BASIC",
+        "min_value": -10,
+        "max_value": 5
+      },
+      "out": {
+        "success": true,
+        "observed_value": 1
+      }
+    },{
+      "title": "Negative test case, with max_value=None",
+      "exact_match_out" : false,
+      "in": {
+        "column": "w",
+        "result_format": "BASIC",
+        "min_value": 4,
+        "max_value": null
+      },
+      "out": {
+        "success": false,
+        "observed_value": 1
+        }
+    },{
+      "title": "Test case with result_format=SUMMARY. Also verifies that max_value is inclusive",
+      "exact_match_out" : false,
+      "in": {
+        "column": "w",
+        "result_format": "SUMMARY",
+        "min_value": 0,
+        "max_value": 1
+      },
+      "out": {
+        "success": true,
+        "observed_value": 1
+      }
+    },{
+      "title": "Test case with only a lower bound, and a missing value",
+      "exact_match_out" : false,
+      "in": {
+        "column": "x",
+        "min_value": 1
+      },
+      "out": {
+        "success": true,
+        "observed_value": 2.0
+        }
+    },{
+      "title": "Negative test case with only a lower bound",
+      "exact_match_out" : false,
+      "in": {
+        "column": "w",
+        "min_value": 50
+      },
+      "out": {
+        "success": false,
+        "observed_value": 1
+      }
+    },{
+      "title": "Test on a series with mostly nulls",
+      "exact_match_out" : false,
+      "in": {
+        "column": "a",
+        "min_value": 1,
+        "max_value": 2
+      },
+      "out": {
+        "success": false,
+        "observed_value": 0
+      }
+    },{
+      "title": "Test on a series containing dates",
+      "exact_match_out" : false,
+      "in": {
+        "column": "zz",
+        "min_value": "2/1/2016",
+        "max_value": "3/1/2016",
+        "parse_strings_as_datetimes": true
+      },
+      "out": {
+        "success": true,
+        "observed_value": "2016-02-01 00:00:00"
+      }
+    },{
+      "title": "Test on a series containing dates, with an output_strftime_format value",
+      "exact_match_out" : false,
+      "in": {
+        "column": "zz",
+        "min_value": "2/1/2016",
+        "max_value": "3/1/2016",
+        "parse_strings_as_datetimes": true,
+        "output_strftime_format" : "%m/%d/%Y"
+      },
+      "out": {
+        "success": true,
+        "observed_value": "02/01/2016"
+      }
+    },{
+      "title": "Negative test case with only a max",
+      "exact_match_out" : false,
+      "in": {
+        "column": "y",
+        "max_value": 0
+      },
+      "out": {
+        "success": false,
+        "observed_value": 1
+      }
+    },{
+      "title": "Raise ValueError with both max and min are missing",
+      "exact_match_out" : false,
+      "in": {
+        "column": "y",
+        "catch_exceptions": true
+      },
+      "out": {},
+      "error": {
+        "traceback_substring": "cannot both be None"
+      }
+    }]
+  }]
+}

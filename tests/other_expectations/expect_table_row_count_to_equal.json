@@ -1,0 +1,87 @@
+{
+  "expectation_type": "expect_table_row_count_to_equal",
+  "datasets": [
+    {
+      "data": {
+        "c1": [
+          4,
+          5,
+          null,
+          7
+        ],
+        "c2": [
+          "a",
+          null,
+          "c",
+          "d"
+        ],
+        "c3": [
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "tests": [
+        {
+          "title": "Basic positive case",
+                    "exact_match_out": false,
+
+          "in": [
+            4
+          ],
+          "kwargs": {},
+          "out": {
+            "success": true,
+            "observed_value": 4
+          }
+        },
+        {
+          "title": "Basic negative case - upper error",
+          "exact_match_out": false,
+          "in": [
+            5
+          ],
+          "out": {
+            "success": false,
+            "observed_value": 4
+          }
+        },
+        {
+          "title": "Basic negative case - lower error",
+          "exact_match_out": false,
+          "in": [
+            0
+          ],
+          "out": {
+            "success": false,
+            "observed_value": 4
+          }
+        },
+        {
+          "title": "Basic negative case - kwargs args",
+          "exact_match_out": false,
+          "in": {
+            "value": 3
+          },
+          "out": {
+            "success": false,
+            "observed_value": 4
+          }
+        },
+        {
+          "title": "Invalid arguments-throws exception",
+          "exact_match_out": false,
+          "in": {
+            "value": "hello",
+            "catch_exceptions": true
+          },
+          "out": {
+            "success": false,
+            "traceback_substring": "ValueError"
+          }
+        }
+      ]
+    }
+  ]
+}

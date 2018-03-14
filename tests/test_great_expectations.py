@@ -8,7 +8,7 @@ import pandas as pd
 
 import great_expectations as ge
 from great_expectations.dataset import PandasDataSet, MetaPandasDataSet
-from .util import assertDeepAlmostEqual
+from .test_utils import assertDeepAlmostEqual
 
 def isprime(n):
     #https://stackoverflow.com/questions/18833759/python-prime-number-checker
@@ -271,7 +271,7 @@ class TestValidation(unittest.TestCase):
         results = df.validate(expectations_config=validation_config_invalid_parameter)['results']
         print(results[0]['exception_info'])
         self.assertIn(
-            "min_value is greater than max_value",
+            "min_value cannot be greater than max_value",
             results[0]['exception_info']['exception_message']
         )
 
