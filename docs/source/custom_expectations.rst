@@ -23,34 +23,68 @@ The easy way
 
 1. Create a subclass from the DataSet class of your choice
 2. Define custom functions containing your business logic
-3. Use the `@column_map_expectation` and `@column_aggregate_expectation` decorators to turn them into full Expectations
+3. Use the `column_map_expectation` and `column_aggregate_expectation` decorators to turn them into full Expectations. Note that each DataSet class implements its own versions of `@column_map_expectation` and `@column_aggregate_expectation`, so you should consult the documentation of each class to ensure you
+are returning the correct information to the decorator.
 
 Note: following Great Expectations :ref:`naming_conventions` is highly recommended, but not strictly required. If you want to confuse yourself with bad names, the package won't stop you.
 
-.. code-block:: bash
+For example, in Pandas:
+
+`@MetaPandasDataSet.column_map_expectation` decorates a custom function, wrapping it with all the business logic required to turn it into a fully-fledged Expectation. This spares you the hassle of defining logic to handle required arguments like `mostly` and `result_format`. Your custom function can focus exclusively on the business logic of passing or failing the expectation.
+
+To work with these decorators, your custom function must accept two arguments: `self` and `column`. When your function is called, `column` will contain all the non-null values in the given column. Your function must return a series of boolean values in the same order, with the same index.
+
+`@MetaPandasDataSet.column_aggregate_expectation` accepts `self` and `column`. It must return a dictionary containing a boolean `success` value, and a nested dictionary called `result_obj` which contains an `observed_value` argument.
+
+
+.. code-block:: python
 
     from great_expectations.dataset import PandasDataSet, MetaPandasDataSet
 
     class CustomPandasDataSet(PandasDataSet):
 
         @MetaPandasDataSet.column_map_expectation
-        def expect_column_values_to_equal_2(self, series):
-            return series.map(lambda x: x==2)
+        def expect_column_values_to_equal_2(self, column):
+            return column.map(lambda x: x==2)
 
         @MetaPandasDataSet.column_aggregate_expectation
-        def expect_column_mode_to_equal_0(self, series):
-            mode = series.mode[0]
+        def expect_column_mode_to_equal_0(self, column):
+            mode = column.mode[0]
             return {
                 "success" : mode == 0,
-                "true_value" : mode,
-                "summary_obj" : {}
+                "result_obj": {
+                    "observed_value": mode,
+                }
             }
 
-`@column_map_expectation` decorates a custom function, wrapping it with all the business logic required to turn it into a fully-fledged Expectation. This spares you the hassle of defining logic to handle required arguments like `mostly` and `result_format`. Your custom function can focus exclusively on the business logic of passing or failing the expectation.
+For SqlAlchemyDataSet, the decorators work slightly differently. See the MetaSqlAlchemy class docstrings for more information.
 
-To work with these decorators, your custom function must accept two arguments: `self` and `series`. When your function is called, `series` will contain all the non-null values in the given column. Your function must return a series of boolean values in the same order, with the same index.
+.. code-block:: python
 
-`@column_aggregate_expectation` accepts `self` and `series`. It must return a dictionary containing a boolean `success` value, and a `true_value` argument.
+    import sqlalchemy as sa
+    from great_expectations.dataset import SqlAlchemyDataSet, MetaSqlAlchemyDataSet
+
+    class CustomSqlAlchemyDataSet(SqlAlchemyDataSet):
+
+        @MetaSqlAlchemyDataSet.column_map_expectation
+        def expect_column_values_to_equal_2(self, column):
+            return (sa.column(column) == 2)
+
+        @MetaSqlAlchemyDataSet.column_aggregate_expectation
+        def expect_column_mode_to_equal_0(self, column):
+            mode_query = sa.select([
+                sa.column(column).label('value'),
+                sa.func.count(sa.column(column)).label('frequency')
+            ]).select_from(sa.table(self.table_name)).group_by(sa.column(column)).order_by(sa.desc(sa.column('frequency')))
+
+            mode = self.engine.execute(mode_query).scalar()
+            return {
+                "success": mode == 0,
+                "result_obj": {
+                    "observed_value": mode,
+                }
+            }
+
 
 
 The hard way
@@ -64,11 +98,11 @@ This is more complicated, since you have to handle all the logic of additional p
 
 .. code-block:: bash
 
-    from great_expectations.dataset import PandasDataSet, MetaPandasDataSet
+    from great_expectations.dataset import PandasDataSet
 
     class CustomPandasDataSet(PandasDataSet):
 
-        @MetaPandasDataSet.expectation(["column", "mostly"])
+        @DataSet.expectation(["column", "mostly"])
         def expect_column_values_to_equal_1(self, column, mostly=None):
             not_null = self[column].notnull()
 
