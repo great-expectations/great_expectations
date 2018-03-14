@@ -435,7 +435,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         else:
             temp_column = column
 
-        if min_value > max_value:
+        if min_value != None and max_value != None and min_value > max_value:
             raise ValueError("min_value cannot be greater than max_value")
 
         def is_between(val):

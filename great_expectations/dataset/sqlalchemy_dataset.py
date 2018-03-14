@@ -330,16 +330,24 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
         if parse_strings_as_datetimes is not None:
             raise ValueError("parse_strings_as_datetimes is not currently supported in SqlAlchemy.")
 
-        if min_value > max_value:
+        if min_value != None and max_value != None and min_value > max_value:
             raise ValueError("min_value cannot be greater than max_value")
 
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
 
-        return sa.and_(
-                    min_value <= sa.column(column),
-                    sa.column(column) <= max_value
-            )
+
+        if min_value is None:
+            return sa.column(column) <= max_value
+
+        elif max_value is None:
+            return min_value <= sa.column(column)
+
+        else:
+            return sa.and_(
+                        min_value <= sa.column(column),
+                        sa.column(column) <= max_value
+                )
 
 
     ###
