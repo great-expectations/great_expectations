@@ -50,6 +50,60 @@
         }
       },
       {
+        "title" : "Missing min_value",
+        "exact_match_out": false,
+        "out": {
+          "unexpected_list": [],
+          "unexpected_index_list": [],
+          "success": true
+        },
+        "in": {
+          "column": "x",
+          "max_value": 20
+        }
+      },
+      {
+        "title" : "Null min_value",
+        "exact_match_out": false,
+        "out": {
+          "unexpected_list": [],
+          "unexpected_index_list": [],
+          "success": true
+        },
+        "in": {
+          "column": "x",
+          "min_value": null,
+          "max_value": 20
+        }
+      },
+      {
+        "title" : "Missing max_value",
+        "exact_match_out": false,
+        "out": {
+          "unexpected_list": [],
+          "unexpected_index_list": [],
+          "success": true
+        },
+        "in": {
+          "column": "x",
+          "min_value": 0
+        }
+      },
+      {
+        "title" : "Null max_value",
+        "exact_match_out": false,
+        "out": {
+          "unexpected_list": [],
+          "unexpected_index_list": [],
+          "success": true
+        },
+        "in": {
+          "column": "x",
+          "min_value": 0,
+          "max_value": null
+        }
+      },
+      {
         "title" : "Basic negative test",
         "exact_match_out": false,
         "out": {
