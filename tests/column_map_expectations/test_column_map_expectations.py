@@ -1,7 +1,7 @@
 ###
 ###
 #
-# This file should not be modified. To adjust test cases, edit the related json file.
+# This file should not be modified. To adjust test cases, edit the related json file(s).
 #
 ###
 ###
@@ -54,8 +54,9 @@ def pytest_generate_tests(metafunc):
     )
 
 def test_case_runner(test_case):
-    #FIXME:
-    # test_case["dataset"].remove_all_expectations()
+    # Note: this should never be done in practice, but we are wiping expectations to reuse datasets during testing.
+    test_case["dataset"].initialize_expectations()
+
     evaluate_json_test(
         test_case["dataset"],
         test_case["expectation_type"],
