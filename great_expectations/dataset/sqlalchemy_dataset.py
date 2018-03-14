@@ -41,7 +41,7 @@ class MetaSqlAlchemyDataSet(DataSet):
                 else:
                     unexpected_count_limit = 20
 
-            unexpected_condition = func(self, column, *args, **kwargs)
+            expected_condition = func(self, column, *args, **kwargs)
 
             count_query = sa.select([
                 sa.func.count().label('element_count'),
@@ -49,14 +49,14 @@ class MetaSqlAlchemyDataSet(DataSet):
                     sa.case([(sa.column(column) == None, 1)], else_=0)
                 ).label('null_count'),
                 sa.func.sum(
-                    sa.case([(unexpected_condition, 1)], else_=0)
+                    sa.case([(sa.not_(expected_condition), 1)], else_=0)
                 ).label('unexpected_count')
             ]).select_from(sa.table(self.table_name))
 
             count_results = self.engine.execute(count_query).fetchone()
 
             unexpected_query_results = self.engine.execute(
-                sa.select([sa.column(column)]).select_from(sa.table(self.table_name)).where(unexpected_condition).limit(unexpected_count_limit)
+                sa.select([sa.column(column)]).select_from(sa.table(self.table_name)).where(sa.not_(expected_condition)).limit(unexpected_count_limit)
             )
 
             nonnull_count = count_results['element_count'] - count_results['null_count']
@@ -293,7 +293,7 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
         result_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
 
-        return sa.column(column) != None
+        return sa.column(column) == None
 
     @DocInherit
     @MetaSqlAlchemyDataSet.column_map_expectation
@@ -303,7 +303,7 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
         result_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
 
-        return sa.column(column) == None
+        return sa.column(column) != None
 
 
     @DocInherit
@@ -314,7 +314,7 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
         mostly=None,
         result_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
-        return sa.not_(sa.column(column).in_(tuple(values_set)))
+        return sa.column(column).in_(tuple(values_set))
 
     @DocInherit
     @MetaSqlAlchemyDataSet.column_map_expectation
@@ -336,10 +336,10 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
 
-        return sa.not_(sa.and_(
+        return sa.and_(
                     min_value <= sa.column(column),
                     sa.column(column) <= max_value
-            ))
+            )
 
 
     ###
@@ -351,7 +351,7 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
     ###
     ###
     ###
-    
+
     @DocInherit
     @MetaSqlAlchemyDataSet.column_aggregate_expectation
     def expect_column_max_to_be_between(self,
