@@ -4,9 +4,11 @@ import unittest
 import json
 import numpy as np
 import datetime
+import pandas as pd
 
 import great_expectations as ge
 
+from .test_utils import assertDeepAlmostEqual
 
 class TestPandasDataset(unittest.TestCase):
 
@@ -1171,6 +1173,41 @@ class TestPandasDataset(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             df.expect_column_mean_to_be_between('x',4,6, result_format="QUACK")
+
+    def test_from_pandas(self):
+        pd_df = pd.DataFrame({
+            'x':[1,3,5,7,9],
+            'y':[2,4,6,8,10],
+            'z':[None,'a','b','c','abc']
+        })
+
+        ge_df = ge.from_pandas(pd_df)
+        self.assertIsInstance(ge_df, ge.dataset.DataSet)
+        self.assertEquals(list(ge_df.columns), ['x', 'y', 'z'])
+        self.assertEquals(list(ge_df['x']), list(pd_df['x']))
+        self.assertEquals(list(ge_df['y']), list(pd_df['y']))
+        self.assertEquals(list(ge_df['z']), list(pd_df['z']))
+
+
+    def test_from_pandas_expectations_config(self):
+        # Logic mostly copied from TestValidation.test_validate
+        def load_ge_config(file):
+            with open(file) as f:
+                return json.load(f)
+
+        my_expectations_config = load_ge_config("./tests/test_sets/titanic_expectations.json")
+
+        pd_df = pd.read_csv("./tests/test_sets/Titanic.csv")
+        my_df = ge.from_pandas(pd_df, expectations_config=my_expectations_config)
+
+        my_df.set_default_expectation_argument("result_format", "COMPLETE")
+
+        results = my_df.validate(catch_exceptions=False)
+
+        expected_results = load_ge_config("./tests/test_sets/expected_results_20180303.json")
+
+        self.maxDiff = None
+        assertDeepAlmostEqual(self, results, expected_results)
 
 if __name__ == "__main__":
     unittest.main()
