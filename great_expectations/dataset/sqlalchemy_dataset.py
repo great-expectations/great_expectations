@@ -3,13 +3,9 @@ from great_expectations.dataset import DataSet
 from functools import wraps
 import inspect
 
-import sqlalchemy as sa
-
 from .util import DocInherit, parse_result_format
 
-from sqlalchemy import MetaData, select, table, or_, and_, not_, case
-from sqlalchemy import func as sa_func
-from sqlalchemy import column as sa_column
+import sqlalchemy as sa
 from sqlalchemy.engine import reflection
 
 from numbers import Number
@@ -47,20 +43,20 @@ class MetaSqlAlchemyDataSet(DataSet):
 
             unexpected_condition = func(self, column, *args, **kwargs)
 
-            count_query = select([
-                sa_func.count().label('element_count'),
-                sa_func.sum(
-                    case([(sa_column(column) == None, 1)], else_=0)
+            count_query = sa.select([
+                sa.func.count().label('element_count'),
+                sa.func.sum(
+                    sa.case([(sa.column(column) == None, 1)], else_=0)
                 ).label('null_count'),
-                sa_func.sum(
-                    case([(unexpected_condition, 1)], else_=0)
+                sa.func.sum(
+                    sa.case([(unexpected_condition, 1)], else_=0)
                 ).label('unexpected_count')
-            ]).select_from(table(self.table_name))
+            ]).select_from(sa.table(self.table_name))
 
             count_results = self.engine.execute(count_query).fetchone()
 
             unexpected_query_results = self.engine.execute(
-                select([sa_column(column)]).select_from(table(self.table_name)).where(unexpected_condition).limit(unexpected_count_limit)
+                sa.select([sa.column(column)]).select_from(sa.table(self.table_name)).where(unexpected_condition).limit(unexpected_count_limit)
             )
 
             nonnull_count = count_results['element_count'] - count_results['null_count']
@@ -118,12 +114,12 @@ class MetaSqlAlchemyDataSet(DataSet):
             if result_format['result_obj_format'] == 'BOOLEAN_ONLY':
                 return return_obj
 
-            count_query = select([
-                sa_func.count().label('element_count'),
-                sa_func.sum(
-                    case([(sa_column(column) == None, 1)], else_=0)
+            count_query = sa.select([
+                sa.func.count().label('element_count'),
+                sa.func.sum(
+                    sa.case([(sa.column(column) == None, 1)], else_=0)
                 ).label('null_count'),
-            ]).select_from(table(self.table_name))
+            ]).select_from(sa.table(self.table_name))
 
             count_results = self.engine.execute(count_query).fetchone()
 
@@ -210,7 +206,7 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
         if value is None:
             raise ValueError("value must be provided")
 
-        count_query = select([sa_func.count()]).select_from(table(self.table_name))
+        count_query = sa.select([sa.func.count()]).select_from(sa.table(self.table_name))
         row_count = self.engine.execute(count_query).scalar()
 
         return {
@@ -238,7 +234,7 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
         except ValueError:
             raise ValueError("min_value and max_value must be integers")
 
-        count_query = select([sa_func.count()]).select_from(table(self.table_name))
+        count_query = sa.select([sa.func.count()]).select_from(sa.table(self.table_name))
         row_count = self.engine.execute(count_query).scalar()
 
         if min_value != None and max_value != None:
@@ -297,7 +293,7 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
         result_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
 
-        return sa_column(column) != None
+        return sa.column(column) != None
 
     @DocInherit
     @MetaSqlAlchemyDataSet.column_map_expectation
@@ -307,7 +303,7 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
         result_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
 
-        return sa_column(column) == None
+        return sa.column(column) == None
 
 
     @DocInherit
@@ -318,7 +314,7 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
         mostly=None,
         result_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
-        return not_(sa_column(column).in_(tuple(values_set)))
+        return sa.not_(sa.column(column).in_(tuple(values_set)))
 
     @DocInherit
     @MetaSqlAlchemyDataSet.column_map_expectation
@@ -340,9 +336,9 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
 
-        return not_(and_(
-                    min_value <= sa_column(column),
-                    sa_column(column) <= max_value
+        return sa.not_(sa.and_(
+                    min_value <= sa.column(column),
+                    sa.column(column) <= max_value
             ))
 
 
@@ -355,6 +351,7 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
     ###
     ###
     ###
+    
     @DocInherit
     @MetaSqlAlchemyDataSet.column_aggregate_expectation
     def expect_column_max_to_be_between(self,
@@ -373,7 +370,7 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
             raise ValueError("parse_strings_as_datetimes is not supported in SqlAlchemy")
 
         col_max = self.engine.execute(
-            select([sa_func.max(sa_column(column))]).select_from(table(self.table_name))
+            sa.select([sa.func.max(sa.column(column))]).select_from(sa.table(self.table_name))
         ).scalar()
 
         if min_value != None and max_value != None:
@@ -411,7 +408,7 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
             raise ValueError("parse_strings_as_datetimes is not supported in SqlAlchemy")
 
         col_min = self.engine.execute(
-            select([sa_func.min(sa_column(column))]).select_from(table(self.table_name))
+            sa.select([sa.func.min(sa.column(column))]).select_from(sa.table(self.table_name))
         ).scalar()
 
         if min_value != None and max_value != None:
@@ -443,7 +440,7 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
             raise ValueError("min_value and max_value cannot both be None")
 
         col_sum = self.engine.execute(
-            select([sa_func.sum(sa_column(column))]).select_from(table(self.table_name))
+            sa.select([sa.func.sum(sa.column(column))]).select_from(sa.table(self.table_name))
         ).scalar()
 
         if min_value != None and max_value != None:
@@ -484,7 +481,7 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
             raise ValueError("column is not numeric")
 
         col_avg = self.engine.execute(
-            select([sa_func.avg(sa_column(column))]).select_from(table(self.table_name))
+            sa.select([sa.func.avg(sa.column(column))]).select_from(sa.table(self.table_name))
         ).scalar()
 
         if min_value != None and max_value != None:
