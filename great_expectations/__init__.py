@@ -60,6 +60,13 @@ def read_json(
     df = _convert_to_dataset_class(df, dataset_class, expectations_config)
     return df
 
+def from_pandas(pandas_df, expectations_config=None):
+    return _convert_to_dataset_class(
+        pandas_df,
+        dataset.pandas_dataset.PandasDataSet,
+        expectations_config
+    )
+
 def validate(df, expectations_config, *args, **kwargs):
     #FIXME: I'm not sure that this should always default to PandasDataSet
     dataset_ = _convert_to_dataset_class(df,
