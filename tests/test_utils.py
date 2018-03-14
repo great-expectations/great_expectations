@@ -72,7 +72,7 @@ def get_dataset(dataset_type, data):
         df.to_sql(name='test_data', con=engine, index=False)
 
         # Build a SqlAlchemyDataSet using that database
-        return SqlAlchemyDataSet(engine, 'test_data')
+        return SqlAlchemyDataSet('test_data', engine=engine)
     else:
         raise ValueError("Unknown dataset_type " + str(dataset_type))
 

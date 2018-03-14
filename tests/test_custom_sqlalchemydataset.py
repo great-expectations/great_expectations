@@ -34,7 +34,7 @@ def test_custom_sqlalchemydataset():
 
     data.to_sql(name='test_data', con=engine, index=False)
 
-    custom_dataset = CustomSqlAlchemyDataSet(engine, 'test_data')
+    custom_dataset = CustomSqlAlchemyDataSet('test_data', engine=engine)
     custom_dataset.set_default_expectation_argument("result_format", "COMPLETE")
 
     result = custom_dataset.expect_column_values_to_equal_2('c1')
