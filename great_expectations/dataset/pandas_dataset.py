@@ -162,6 +162,8 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
        default_expectations (see :func: `add_default_expectations`)
     """
 
+    discard_failed_expectations = False
+
     @property
     def _constructor(self):
         return PandasDataSet
