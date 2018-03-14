@@ -143,15 +143,29 @@ class MetaSqlAlchemyDataSet(DataSet):
 
         return inner_wrapper
 
+
 class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
 
-    # def __init__(self, connection_string, table_name):
-    def __init__(self, engine, table_name):
+    def __init__(self, table_name=None, engine=None, connection_string=None):
         super(SqlAlchemyDataSet, self).__init__()
-        # We are intentionally not adding default expectations here, thinking about the future of non-tabular datasets
+
+        if table_name is None:
+            raise ValueError("No table_name provided.")
+
         self.table_name = table_name
-        # self.engine = create_engine(connection_string)
-        self.engine = engine
+
+        if engine is None and connection_string is None:
+            raise ValueError("Engine or connection_string must be provided.")
+
+        if engine is not None:
+            self.engine = engine
+
+        else:
+            try:
+                self.engine = sa.create_engine(connection_string)
+            except Exception as err:
+                # Currently we do no error handling if the engine doesn't work out of the box.
+                raise err
 
         insp = reflection.Inspector.from_engine(engine)
         self.columns = insp.get_columns(self.table_name)
