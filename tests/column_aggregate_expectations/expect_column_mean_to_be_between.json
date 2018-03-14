@@ -149,11 +149,36 @@
           }
         },
         {
-          "title": "TypeError: catch exceptions",
+          "title": "TypeError: catch exceptions. Non-number min-value",
           "exact_match_out": false,
           "in": {
             "column": "x",
             "min_value": "s",
+            "catch_exceptions": true
+          },
+          "out": {
+            "traceback_substring": "ValueError"
+          }
+        },
+        {
+          "title": "TypeError: catch exceptions. Non-number max-value",
+          "exact_match_out": false,
+          "in": {
+            "column": "x",
+            "max_value": "s",
+            "catch_exceptions": true
+          },
+          "out": {
+            "traceback_substring": "ValueError"
+          }
+        },
+        {
+          "title": "TypeError: missing min and max",
+          "exact_match_out": false,
+          "in": {
+            "column": "x",
+            "min_value": null,
+            "max_value": null,
             "catch_exceptions": true
           },
           "out": {
