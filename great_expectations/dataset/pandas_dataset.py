@@ -109,10 +109,11 @@ class MetaPandasDataSet(DataSet):
 
             evaluation_result = func(self, nonnull_values, *args, **kwargs)
 
-            if ('success' not in evaluation_result) or \
-                ('result_obj' not in evaluation_result) or \
-                ('observed_value' not in evaluation_result['result_obj']):
-                raise ValueError("Column aggregate expectation failed to return required return information.")
+            if 'success' not in evaluation_result:
+                raise ValueError("Column aggregate expectation failed to return required information: success")
+
+            if ('result_obj' not in evaluation_result) or ('observed_value' not in evaluation_result['result_obj']):
+                raise ValueError("Column aggregate expectation failed to return required information: observed_value")
 
             # Retain support for string-only output formats:
             if isinstance(result_format, string_types):

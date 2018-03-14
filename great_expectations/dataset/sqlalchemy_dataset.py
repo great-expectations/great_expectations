@@ -103,13 +103,13 @@ class MetaSqlAlchemyDataSet(DataSet):
                 else:
                     unexpected_count_limit = 20
 
-
             evaluation_result = func(self, column, *args, **kwargs)
 
-            if ('success' not in evaluation_result) or \
-                ('result_obj' not in evaluation_result) or \
-                ('observed_value' not in evaluation_result['result_obj']):
-                raise ValueError("Column aggregate expectation failed to return required return information.")
+            if 'success' not in evaluation_result:
+                raise ValueError("Column aggregate expectation failed to return required information: success")
+
+            if ('result_obj' not in evaluation_result) or ('observed_value' not in evaluation_result['result_obj']):
+                raise ValueError("Column aggregate expectation failed to return required information: observed_value")
 
             return_obj = {
                 'success': bool(evaluation_result['success'])
