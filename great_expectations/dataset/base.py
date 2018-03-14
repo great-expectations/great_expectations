@@ -606,6 +606,8 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                 discard_include_configs_kwargs=False,
                 discard_catch_exceptions_kwargs=False,
             )
+        elif isinstance(expectations_config, string_types):
+            expectations_config = json.load(open(expectations_config, 'r'))
 
         # Warn if our version is different from the version in the configuration
         try:
