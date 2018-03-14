@@ -16,7 +16,7 @@ from scipy import stats
 from six import string_types
 
 from .base import DataSet
-from .util import DocInherit, recursively_convert_to_json_serializable, \
+from .util import DocInherit, parse_result_format, \
         is_valid_partition_object, is_valid_categorical_partition_object, is_valid_continuous_partition_object
 
 class MetaPandasDataSet(DataSet):
@@ -116,8 +116,7 @@ class MetaPandasDataSet(DataSet):
                 raise ValueError("Column aggregate expectation failed to return required information: observed_value")
 
             # Retain support for string-only output formats:
-            if isinstance(result_format, string_types):
-                result_format = {'result_obj_format': result_format}
+            result_format = parse_result_format(result_format)
 
             return_obj = {
                 'success': bool(evaluation_result['success'])
