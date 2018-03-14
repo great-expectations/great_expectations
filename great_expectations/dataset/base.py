@@ -1,4 +1,3 @@
-from .util import DotDict, recursively_convert_to_json_serializable
 
 import json
 import inspect
@@ -14,7 +13,7 @@ from collections import (
 )
 
 from ..version import __version__
-from .util import DotDict, recursively_convert_to_json_serializable, DocInherit
+from .util import DotDict, recursively_convert_to_json_serializable, parse_result_format
 
 class DataSet(object):
 
@@ -685,13 +684,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         """
 
         # Retain support for string-only output formats:
-        if isinstance(result_format, string_types):
-            result_format = {'result_obj_format': result_format}
-
-        if 'partial_unexpected_count' in result_format:
-            count = result_format['partial_unexpected_count']
-        else:
-            count = 20
+        result_format = parse_result_format(result_format)
 
         # Incrementally add to result_obj and return when all values for the specified level are present
         return_obj = {
@@ -725,7 +718,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             'unexpected_count': unexpected_count,
             'unexpected_percent': unexpected_percent,
             'unexpected_percent_nonmissing': unexpected_percent_nonmissing,
-            'partial_unexpected_list': unexpected_list[:count]
+            'partial_unexpected_list': unexpected_list[:result_format['partial_unexpected_count']]
         }
 
         if result_format['result_obj_format'] == 'BASIC':
@@ -737,7 +730,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                 {'value': key, 'count': value}
                 for key, value
                 in sorted(
-                    Counter(unexpected_list).most_common(count),
+                    Counter(unexpected_list).most_common(result_format['partial_unexpected_count']),
                     key=lambda x: (-x[1], x[0]))
             ]
         except TypeError:
@@ -745,7 +738,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         return_obj['result_obj'].update(
             {
-                'partial_unexpected_index_list': unexpected_index_list[:count] if unexpected_index_list is not None else None,
+                'partial_unexpected_index_list': unexpected_index_list[:result_format['partial_unexpected_count']] if unexpected_index_list is not None else None,
                 'partial_unexpected_counts': partial_unexpected_counts
             }
         )
