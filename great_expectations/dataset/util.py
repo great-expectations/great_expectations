@@ -2,7 +2,7 @@
 
 from __future__ import division
 
-from six import string_types
+from six import string_types, integer_types
 
 import numpy as np
 from scipy import stats
@@ -113,12 +113,9 @@ def recursively_convert_to_json_serializable(test_obj):
     Warning:
         test_obj may also be converted in place.
 
-    FIXME: Somebody else must have already written this function. Can we use a fully-baked version instead?
     """
     # Validate that all aruguments are of approved types, coerce if it's easy, else exception
-    # print(type(test_obj), test_obj)
-
-    if isinstance(test_obj, (str, int, float, bool)):
+    if isinstance(test_obj, (string_types, integer_types, float, bool)):
         # No problem to encode json
         return test_obj
 
@@ -155,16 +152,8 @@ def recursively_convert_to_json_serializable(test_obj):
     elif isinstance(test_obj, (datetime.datetime, datetime.date)):
         return str(test_obj)
 
-
     else:
-        try:
-            # In Python 2, unicode and long should still be valid.
-            # This will break in Python 3 and throw the exception instead.
-            if isinstance(test_obj, (long, unicode)):
-                # No problem to encode json
-                return test_obj
-        except:
-            raise TypeError('%s is of type %s which cannot be serialized.' % (str(test_obj), type(test_obj).__name__))
+        raise TypeError('%s is of type %s which cannot be serialized.' % (str(test_obj), type(test_obj).__name__))
 
 
 def is_valid_partition_object(partition_object):
