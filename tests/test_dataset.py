@@ -379,7 +379,7 @@ class TestDataset(unittest.TestCase):
             ),
             {
                 'success': True,
-                'result_obj': {
+                'result': {
                     'element_count': 20,
                     'missing_count': 5,
                     'missing_percent': 0.25,
@@ -401,7 +401,7 @@ class TestDataset(unittest.TestCase):
             ),
             {
                 'success': True,
-                'result_obj': {
+                'result': {
                     'element_count': 20,
                     'missing_count': 5,
                     'missing_percent': 0.25,
@@ -425,7 +425,7 @@ class TestDataset(unittest.TestCase):
             ),
             {
                 'success': True,
-                'result_obj':
+                'result':
                     {
                         'element_count': 20,
                         'missing_count': 5,
@@ -474,7 +474,7 @@ class TestDataset(unittest.TestCase):
             ),
             {
                 'success': True,
-                'result_obj': {
+                'result': {
                     'element_count': 20,
                     'missing_count': 20,
                     'missing_percent': 1,
@@ -496,7 +496,7 @@ class TestDataset(unittest.TestCase):
             ),
             {
                 'success': True,
-                'result_obj': {
+                'result': {
                     'element_count': 20,
                     'missing_count': 20,
                     'missing_percent': 1,
@@ -520,7 +520,7 @@ class TestDataset(unittest.TestCase):
             ),
             {
                 'success': True,
-                'result_obj': {
+                'result': {
                     'element_count': 20,
                     'missing_count': 20,
                     'missing_percent': 1,
@@ -568,7 +568,7 @@ class TestDataset(unittest.TestCase):
             ),
             {
                 'success': False,
-                'result_obj': {
+                'result': {
                     'element_count': 0,
                     'missing_count': 0,
                     'missing_percent': None,
@@ -590,7 +590,7 @@ class TestDataset(unittest.TestCase):
             ),
             {
                 'success': False,
-                'result_obj': {
+                'result': {
                     'element_count': 0,
                     'missing_count': 0,
                     'missing_percent': None,
@@ -614,7 +614,7 @@ class TestDataset(unittest.TestCase):
             ),
             {
                 'success': False,
-                'result_obj': {
+                'result': {
                     'element_count': 0,
                     'missing_count': 0,
                     'missing_percent': None,
@@ -964,7 +964,7 @@ class TestDataset(unittest.TestCase):
 
         self.assertEqual(
             D.test_column_map_expectation_function(is_odd, column='x'),
-            {'result_obj': {'element_count': 5, 'missing_count': 0, 'missing_percent': 0, 'unexpected_percent': 0.0, 'partial_unexpected_list': [], 'unexpected_percent_nonmissing': 0.0, 'unexpected_count': 0}, 'success': True}
+            {'result': {'element_count': 5, 'missing_count': 0, 'missing_percent': 0, 'unexpected_percent': 0.0, 'partial_unexpected_list': [], 'unexpected_percent_nonmissing': 0.0, 'unexpected_count': 0}, 'success': True}
         )
         self.assertEqual(
             D.test_column_map_expectation_function(is_odd, 'x', result_format="BOOLEAN_ONLY"),
@@ -987,18 +987,18 @@ class TestDataset(unittest.TestCase):
         def expect_second_value_to_be(self, column, value, result_format=None, include_config=False, catch_exceptions=None, meta=None):
             return {
                 "success": column.ix[1] == value,
-                "result_obj": {
+                "result": {
                     "observed_value": column.ix[1],
                 }
             }
 
         self.assertEqual(
             D.test_column_aggregate_expectation_function(expect_second_value_to_be, 'x', 2),
-            {'result_obj': {'observed_value': 3.0, 'element_count': 5, 'missing_count': 0, 'missing_percent': 0.0}, 'success': False}
+            {'result': {'observed_value': 3.0, 'element_count': 5, 'missing_count': 0, 'missing_percent': 0.0}, 'success': False}
         )
         self.assertEqual(
             D.test_column_aggregate_expectation_function(expect_second_value_to_be, column='x', value=3),
-            {'result_obj': {'observed_value': 3.0, 'element_count': 5, 'missing_count': 0, 'missing_percent': 0.0}, 'success': True}
+            {'result': {'observed_value': 3.0, 'element_count': 5, 'missing_count': 0, 'missing_percent': 0.0}, 'success': True}
         )
         self.assertEqual(
             D.test_column_aggregate_expectation_function(expect_second_value_to_be, 'y', value=3, result_format="BOOLEAN_ONLY"),

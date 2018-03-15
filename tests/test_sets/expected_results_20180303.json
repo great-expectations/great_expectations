@@ -64,7 +64,7 @@
         }
       },
       "success": true,
-      "result_obj": {
+      "result": {
         "observed_value": 30.397989417989418,
         "element_count": 1313,
         "missing_count": 557,
@@ -81,7 +81,7 @@
         }
       },
       "success": true,
-      "result_obj": {
+      "result": {
         "partial_unexpected_index_list": [],
         "unexpected_count": 0,
         "unexpected_list": [],
@@ -105,7 +105,7 @@
         }
       },
       "success": true,
-      "result_obj": {
+      "result": {
         "partial_unexpected_index_list": [
           394,
           456,
@@ -161,7 +161,7 @@
         }
       },
       "success": false,
-      "result_obj": {
+      "result": {
         "partial_unexpected_index_list": [
           456
         ],

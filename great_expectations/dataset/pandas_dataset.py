@@ -112,7 +112,7 @@ class MetaPandasDataSet(DataSet):
             if 'success' not in evaluation_result:
                 raise ValueError("Column aggregate expectation failed to return required information: success")
 
-            if ('result_obj' not in evaluation_result) or ('observed_value' not in evaluation_result['result_obj']):
+            if ('result' not in evaluation_result) or ('observed_value' not in evaluation_result['result']):
                 raise ValueError("Column aggregate expectation failed to return required information: observed_value")
 
             # Retain support for string-only output formats:
@@ -122,26 +122,26 @@ class MetaPandasDataSet(DataSet):
                 'success': bool(evaluation_result['success'])
             }
 
-            if result_format['result_obj_format'] == 'BOOLEAN_ONLY':
+            if result_format['result_format'] == 'BOOLEAN_ONLY':
                 return return_obj
 
-            return_obj['result_obj'] = {
-                'observed_value': evaluation_result['result_obj']['observed_value'],
+            return_obj['result'] = {
+                'observed_value': evaluation_result['result']['observed_value'],
                 "element_count": element_count,
                 "missing_count": null_count,
                 "missing_percent": null_count * 1.0 / element_count if element_count > 0 else None
             }
 
-            if result_format['result_obj_format'] == 'BASIC':
+            if result_format['result_format'] == 'BASIC':
                 return return_obj
 
-            if 'details' in evaluation_result['result_obj']:
-                return_obj['result_obj']['details'] = evaluation_result['result_obj']['details']
+            if 'details' in evaluation_result['result']:
+                return_obj['result']['details'] = evaluation_result['result']['details']
 
-            if result_format['result_obj_format'] in ["SUMMARY", "COMPLETE"]:
+            if result_format['result_format'] in ["SUMMARY", "COMPLETE"]:
                 return return_obj
 
-            raise ValueError("Unknown result_format %s." % (result_format['result_obj_format'],))
+            raise ValueError("Unknown result_format %s." % (result_format['result_format'],))
 
         return inner_wrapper
 
@@ -219,7 +219,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
         return {
             'success': outcome,
-            'result_obj': {
+            'result': {
                 'observed_value': row_count
             }
         }
@@ -247,7 +247,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
         return {
             'success':outcome,
-            'result_obj': {
+            'result': {
                 'observed_value':self.shape[0]
             }
         }
@@ -726,7 +726,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
                 ((min_value is None) or (min_value <= column_mean)) and
                 ((max_value is None) or (column_mean <= max_value))
             ),
-            'result_obj': {
+            'result': {
                 'observed_value': column_mean
             }
         }
@@ -746,7 +746,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
                 ((min_value or None) or (min_value <= column_median)) and
                 ((max_value or None) or (column_median <= max_value))
             ),
-            "result_obj":{
+            "result":{
                 "observed_value": column_median
             }
         }
@@ -766,7 +766,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
                 ((min_value is None) or (min_value <= column_stdev)) and
                 ((max_value is None) or (column_stdev <= max_value))
             ),
-            "result_obj": {
+            "result": {
                 "observed_value": column_stdev
             }
         }
@@ -786,7 +786,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
                 ((min_value is None) or (min_value <= unique_value_count)) and
                 ((max_value is None) or (unique_value_count <= max_value))
             ),
-            "result_obj": {
+            "result": {
                 "observed_value": unique_value_count
             }
         }
@@ -808,7 +808,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
                 ((min_value is None) or (min_value <= proportion_unique)) and
                 ((max_value is None) or (proportion_unique <= max_value))
             ),
-            "result_obj": {
+            "result": {
                 "observed_value": proportion_unique
             }
         }
@@ -831,7 +831,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
         return {
             'success' : success,
-            'result_obj': {
+            'result': {
                 'observed_value': mode_list
             }
         }
@@ -860,7 +860,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
         return {
             "success" : success,
-            "result_obj": {
+            "result": {
                 "observed_value" : col_sum
             }
         }
@@ -908,7 +908,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
                 col_min = str(col_min)
         return {
             'success' : success,
-            'result_obj': {
+            'result': {
                 'observed_value' : col_min
             }
         }
@@ -959,7 +959,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
         return {
             "success" : success,
-            "result_obj": {
+            "result": {
                 "observed_value" : col_max
             }
         }
@@ -991,9 +991,9 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
         test_result = stats.chisquare(test_df[column.name], test_df['expected'])[1]
 
-        result_obj = {
+        return_obj = {
                 "success": test_result > p,
-                "result_obj": {
+                "result": {
                     "observed_value": test_result,
                     "details": {
                         "observed_partition": {
@@ -1008,7 +1008,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
                 }
             }
 
-        return result_obj
+        return return_obj
 
     @DocInherit
     @MetaPandasDataSet.column_aggregate_expectation
@@ -1063,9 +1063,9 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
         observed_cdf_values = np.cumsum(observed_weights)
 
-        result_obj = {
+        return_obj = {
                 "success" : test_result > p,
-                "result_obj": {
+                "result": {
                     "observed_value": test_result,
                     "details": {
                         "bootstrap_samples": bootstrap_samples,
@@ -1090,7 +1090,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
                 }
             }
 
-        return result_obj
+        return return_obj
 
     @DocInherit
     @MetaPandasDataSet.column_aggregate_expectation
@@ -1133,9 +1133,9 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
             kl_divergence = stats.entropy(pk, qk)
 
-            result_obj = {
+            return_obj = {
                 "success": kl_divergence <= threshold,
-                "result_obj": {
+                "result": {
                     "observed_value": kl_divergence,
                     "details": {
                         "observed_partition": {
@@ -1197,9 +1197,9 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
                 expected_weights = np.concatenate(([tail_weight_holdout / 2], expected_weights, [tail_weight_holdout / 2]))
 
             kl_divergence = stats.entropy(observed_weights, expected_weights)
-            result_obj = {
+            return_obj = {
                     "success": kl_divergence <= threshold,
-                    "result_obj": {
+                    "result": {
                         "observed_value": kl_divergence,
                         "details": {
                             "observed_partition": {
@@ -1216,4 +1216,4 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
                 }
 
 
-        return result_obj
+        return return_obj

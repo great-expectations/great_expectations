@@ -21,7 +21,7 @@ def parse_result_format(result_format):
     there is no need to specify a custom partial_unexpected_count."""
     if isinstance(result_format, string_types):
         result_format = {
-            'result_obj_format': result_format,
+            'result_format': result_format,
             'partial_unexpected_count': 20
         }
     else:

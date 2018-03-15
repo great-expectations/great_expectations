@@ -688,12 +688,12 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         # Retain support for string-only output formats:
         result_format = parse_result_format(result_format)
 
-        # Incrementally add to result_obj and return when all values for the specified level are present
+        # Incrementally add to result and return when all values for the specified level are present
         return_obj = {
             'success': success
         }
 
-        if result_format['result_obj_format'] == 'BOOLEAN_ONLY':
+        if result_format['result_format'] == 'BOOLEAN_ONLY':
             return return_obj
 
         missing_count = element_count - nonnull_count
@@ -713,7 +713,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             unexpected_percent = None
             unexpected_percent_nonmissing = None
 
-        return_obj['result_obj'] = {
+        return_obj['result'] = {
             'element_count': element_count,
             'missing_count': missing_count,
             'missing_percent': missing_percent,
@@ -723,7 +723,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             'partial_unexpected_list': unexpected_list[:result_format['partial_unexpected_count']]
         }
 
-        if result_format['result_obj_format'] == 'BASIC':
+        if result_format['result_format'] == 'BASIC':
             return return_obj
 
         # Try to return the most common values, if possible.
@@ -738,27 +738,27 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         except TypeError:
             partial_unexpected_counts = ['partial_exception_counts requires a hashable type']
 
-        return_obj['result_obj'].update(
+        return_obj['result'].update(
             {
                 'partial_unexpected_index_list': unexpected_index_list[:result_format['partial_unexpected_count']] if unexpected_index_list is not None else None,
                 'partial_unexpected_counts': partial_unexpected_counts
             }
         )
 
-        if result_format['result_obj_format'] == 'SUMMARY':
+        if result_format['result_format'] == 'SUMMARY':
             return return_obj
 
-        return_obj['result_obj'].update(
+        return_obj['result'].update(
             {
                 'unexpected_list': unexpected_list,
                 'unexpected_index_list': unexpected_index_list
             }
         )
 
-        if result_format['result_obj_format'] == 'COMPLETE':
+        if result_format['result_format'] == 'COMPLETE':
             return return_obj
 
-        raise ValueError("Unknown result_format %s." % (result_format['result_obj_format'],))
+        raise ValueError("Unknown result_format %s." % (result_format['result_format'],))
 
     def _calc_map_expectation_success(self, success_count, nonnull_count, mostly):
         """Calculate success and percent_success for column_map_expectations
@@ -993,7 +993,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         This expectation detects duplicates. All duplicated values are counted as exceptions.
 
-        For example, `[1, 2, 3, 3, 3]` will return `[3, 3, 3]` in `result_obj.exceptions_list`, with `unexpected_percent=0.6.`
+        For example, `[1, 2, 3, 3, 3]` will return `[3, 3, 3]` in `result.exceptions_list`, with `unexpected_percent=0.6.`
 
         expect_column_values_to_be_unique is a :func:`column_map_expectation <great_expectations.dataset.base.DataSet.column_map_expectation>`.
 
@@ -1257,7 +1257,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             )
             {
               "success": false
-              "result_obj": {
+              "result": {
                 "unexpected_count": 1
                 "unexpected_percent": 0.16666666666666666,
                 "unexpected_percent_nonmissing": 0.16666666666666666,
@@ -1324,7 +1324,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             )
             {
               "success": false
-              "result_obj": {
+              "result": {
                 "unexpected_count": 3
                 "unexpected_percent": 0.5,
                 "unexpected_percent_nonmissing": 0.5,

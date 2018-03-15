@@ -34,7 +34,7 @@ For example, in Pandas:
 
 To work with these decorators, your custom function must accept two arguments: `self` and `column`. When your function is called, `column` will contain all the non-null values in the given column. Your function must return a series of boolean values in the same order, with the same index.
 
-`@MetaPandasDataSet.column_aggregate_expectation` accepts `self` and `column`. It must return a dictionary containing a boolean `success` value, and a nested dictionary called `result_obj` which contains an `observed_value` argument.
+`@MetaPandasDataSet.column_aggregate_expectation` accepts `self` and `column`. It must return a dictionary containing a boolean `success` value, and a nested dictionary called `result` which contains an `observed_value` argument.
 
 
 .. code-block:: python
@@ -52,7 +52,7 @@ To work with these decorators, your custom function must accept two arguments: `
             mode = column.mode[0]
             return {
                 "success" : mode == 0,
-                "result_obj": {
+                "result": {
                     "observed_value": mode,
                 }
             }
@@ -80,7 +80,7 @@ For SqlAlchemyDataSet, the decorators work slightly differently. See the MetaSql
             mode = self.engine.execute(mode_query).scalar()
             return {
                 "success": mode == 0,
-                "result_obj": {
+                "result": {
                     "observed_value": mode,
                 }
             }

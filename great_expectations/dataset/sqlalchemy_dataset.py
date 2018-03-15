@@ -33,7 +33,7 @@ class MetaSqlAlchemyDataSet(DataSet):
 
             result_format = parse_result_format(result_format)
 
-            if result_format['result_obj_format'] == 'COMPLETE':
+            if result_format['result_format'] == 'COMPLETE':
                 unexpected_count_limit = None
             else:
                 unexpected_count_limit = result_format['partial_unexpected_count']
@@ -93,14 +93,14 @@ class MetaSqlAlchemyDataSet(DataSet):
             if 'success' not in evaluation_result:
                 raise ValueError("Column aggregate expectation failed to return required information: success")
 
-            if ('result_obj' not in evaluation_result) or ('observed_value' not in evaluation_result['result_obj']):
+            if ('result' not in evaluation_result) or ('observed_value' not in evaluation_result['result']):
                 raise ValueError("Column aggregate expectation failed to return required information: observed_value")
 
             return_obj = {
                 'success': bool(evaluation_result['success'])
             }
 
-            if result_format['result_obj_format'] == 'BOOLEAN_ONLY':
+            if result_format['result_format'] == 'BOOLEAN_ONLY':
                 return return_obj
 
             count_query = sa.select([
@@ -112,23 +112,23 @@ class MetaSqlAlchemyDataSet(DataSet):
 
             count_results = self.engine.execute(count_query).fetchone()
 
-            return_obj['result_obj'] = {
-                'observed_value': evaluation_result['result_obj']['observed_value'],
+            return_obj['result'] = {
+                'observed_value': evaluation_result['result']['observed_value'],
                 "element_count": count_results['element_count'],
                 "missing_count": count_results['null_count'],
                 "missing_percent": count_results['null_count'] * 1.0 / count_results['element_count'] if count_results['element_count'] > 0 else None
             }
 
-            if result_format['result_obj_format'] == 'BASIC':
+            if result_format['result_format'] == 'BASIC':
                 return return_obj
 
-            if 'details' in evaluation_result['result_obj']:
-                return_obj['result_obj']['details'] = evaluation_result['result_obj']['details']
+            if 'details' in evaluation_result['result']:
+                return_obj['result']['details'] = evaluation_result['result']['details']
 
-            if result_format['result_obj_format'] in ["SUMMARY", "COMPLETE"]:
+            if result_format['result_format'] in ["SUMMARY", "COMPLETE"]:
                 return return_obj
 
-            raise ValueError("Unknown result_format %s." % (result_format['result_obj_format'],))
+            raise ValueError("Unknown result_format %s." % (result_format['result_format'],))
 
         return inner_wrapper
 
@@ -214,7 +214,7 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
 
         return {
             'success': row_count == value,
-            'result_obj': {
+            'result': {
                 'observed_value': row_count
             }
         }
@@ -251,7 +251,7 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
 
         return {
             'success': outcome,
-            'result_obj': {
+            'result': {
                 'observed_value': row_count
             }
         }
@@ -395,7 +395,7 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
 
         return {
             'success' : success,
-            'result_obj': {
+            'result': {
                 'observed_value' : col_max
             }
         }
@@ -433,7 +433,7 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
 
         return {
             'success' : success,
-            'result_obj': {
+            'result': {
                 'observed_value' : col_min
             }
         }
@@ -465,7 +465,7 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
 
         return {
             'success' : success,
-            'result_obj': {
+            'result': {
                 'observed_value' : col_sum
             }
         }
@@ -506,7 +506,7 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
 
         return {
             'success': success,
-            'result_obj': {
+            'result': {
                 'observed_value': col_avg
             }
         }
