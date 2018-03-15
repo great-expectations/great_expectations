@@ -17,8 +17,13 @@ v.0.4.0
 * Major refactor of output_format to new result_obj_format parameter. See docs for full details.
   * exception_list and related uses of the term exception have been renamed to unexpected
   * the output formats are explicitly hierarchical now, with BOOLEAN_ONLY < BASIC < SUMMARY < COMPLETE. `column_aggregate_expectation`s now return element count and related information included at the BASIC level or higher.
+* ge.from_pandas() utility (thanks @shrockn)
+* Pandas operations on a PandasDataSet now return another PandasDataSet (thanks @dlwhite5)
+* expect_column_to_exist now takes a column_index parameter to specify column order (thanks @louispotok)
+* Top-level validate option (ge.validate())
+* ge.read_json() helper (thanks @rjurney)
 * Behind-the-scenes improvements to testing framework to ensure parity across data contexts.
-
+* Documentation improvements, bug-fixes, and internal api improvements
 
 v.0.3.2
 -----
