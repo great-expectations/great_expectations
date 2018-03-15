@@ -1,9 +1,15 @@
 from .base import DataContext
-from great_expectations import read_csv
+from .. import read_csv
 
 import glob
 
 class PandasCSVDataContext(DataContext):
+    """
+    A PandasCSVDataContext makes it easy to get a list of files available in the list_datasets
+    method. Its get_dataset method returns a new Pandas dataset with the provided name.
+
+    Warning: this feature is new in v0.4 and may change based on community feedback.
+    """
 
     def __init__(self, *args, **kwargs):
         super(PandasCSVDataContext, self).__init__(*args, **kwargs)

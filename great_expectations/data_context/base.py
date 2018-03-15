@@ -2,6 +2,7 @@ class DataContext(object):
     """A generic DataContext, exposing the base API including constructor with `options` parameter, list_datasets,
     and get_dataset.
 
+    Warning: this feature is new in v0.4 and may change based on community feedback.
     """
     def __init__(self, options):
         self.connect(self, options)
