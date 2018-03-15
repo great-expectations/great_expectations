@@ -23,7 +23,7 @@ def custom_dataset():
             mode = self.engine.execute(mode_query).scalar()
             return {
                 "success": mode == 0,
-                "result_obj": {
+                "result": {
                     "observed_value": mode,
                 }
             }
@@ -38,7 +38,7 @@ def custom_dataset():
         def another_broken_aggregate_expectation(self, column):
             return {
                 "success": True,
-                "result_obj": {
+                "result": {
                     "no_observed_value": True
                 }
             }
@@ -60,20 +60,20 @@ def custom_dataset():
 
 def test_custom_sqlalchemydataset(custom_dataset):
     custom_dataset.initialize_expectations()
-    custom_dataset.set_default_expectation_argument("result_format", {"result_obj_format": "COMPLETE"})
+    custom_dataset.set_default_expectation_argument("result_format", {"result_format": "COMPLETE"})
 
     result = custom_dataset.expect_column_values_to_equal_2('c1')
     assert result['success'] == False
-    assert result['result_obj']['unexpected_list'] == [0]
+    assert result['result']['unexpected_list'] == [0]
 
     result = custom_dataset.expect_column_mode_to_equal_0('c2')
     assert result['success'] == False
-    assert result['result_obj']['observed_value'] == 4
+    assert result['result']['observed_value'] == 4
 
 
 def test_broken_decorator_errors(custom_dataset):
     custom_dataset.initialize_expectations()
-    custom_dataset.set_default_expectation_argument("result_format", {"result_obj_format": "COMPLETE"})
+    custom_dataset.set_default_expectation_argument("result_format", {"result_format": "COMPLETE"})
 
     with pytest.raises(ValueError) as err:
         custom_dataset.broken_aggregate_expectation('c1')

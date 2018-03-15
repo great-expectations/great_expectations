@@ -66,10 +66,10 @@ class TestExpectationDecorators(unittest.TestCase):
     def test_pandas_column_map_decorator_partial_exception_counts(self):
         df = PandasDataSet({'a': [0,1,2,3,4]})
         out = df.expect_column_values_to_be_between('a', 3, 4,
-                                              result_format={'result_obj_format': 'COMPLETE', 'partial_unexpected_count': 1})
+                                              result_format={'result_format': 'COMPLETE', 'partial_unexpected_count': 1})
 
-        self.assertTrue(1, len(out['result_obj']['partial_unexpected_counts']))
-        self.assertTrue(3, len(out['result_obj']['unexpected_list']))
+        self.assertTrue(1, len(out['result']['partial_unexpected_counts']))
+        self.assertTrue(3, len(out['result']['unexpected_list']))
 
     def test_column_map_expectation_decorator(self):
 
@@ -98,7 +98,7 @@ class TestExpectationDecorators(unittest.TestCase):
 
         self.assertEqual(
             df.expect_column_values_to_be_odd("all_odd"),
-            {'result_obj': {'element_count': 10,
+            {'result': {'element_count': 10,
                             'missing_count': 0,
                             'missing_percent': 0.0,
                             'partial_unexpected_counts': [],
@@ -114,7 +114,7 @@ class TestExpectationDecorators(unittest.TestCase):
 
         self.assertEqual(
             df.expect_column_values_to_be_odd("all_missing"),
-            {'result_obj': {'element_count': 10,
+            {'result': {'element_count': 10,
                             'missing_count': 10,
                             'missing_percent': 1,
                             'partial_unexpected_counts': [],
@@ -130,7 +130,7 @@ class TestExpectationDecorators(unittest.TestCase):
 
         self.assertEqual(
             df.expect_column_values_to_be_odd("odd_missing"),
-            {'result_obj': {'element_count': 10,
+            {'result': {'element_count': 10,
                             'missing_count': 5,
                             'missing_percent': 0.5,
                             'partial_unexpected_counts': [],
@@ -146,7 +146,7 @@ class TestExpectationDecorators(unittest.TestCase):
 
         self.assertEqual(
             df.expect_column_values_to_be_odd("mixed_missing"),
-            {'result_obj': {'element_count': 10,
+            {'result': {'element_count': 10,
                             'missing_count': 3,
                             'missing_percent': 0.3,
                             'partial_unexpected_counts': [{'value': 2., 'count': 1}, {'value': 4., 'count': 1}],
@@ -162,7 +162,7 @@ class TestExpectationDecorators(unittest.TestCase):
 
         self.assertEqual(
             df.expect_column_values_to_be_odd("mostly_odd"),
-            {'result_obj': {'element_count': 10,
+            {'result': {'element_count': 10,
                             'missing_count': 0,
                             'missing_percent': 0,
                             'partial_unexpected_counts': [{'value': 2., 'count': 1}, {'value': 4., 'count': 1}],
@@ -178,7 +178,7 @@ class TestExpectationDecorators(unittest.TestCase):
 
         self.assertEqual(
             df.expect_column_values_to_be_odd("mostly_odd", mostly=.6),
-            {'result_obj': {'element_count': 10,
+            {'result': {'element_count': 10,
                             'missing_count': 0,
                             'missing_percent': 0,
                             'partial_unexpected_counts': [{'value': 2., 'count': 1}, {'value': 4., 'count': 1}],
@@ -216,7 +216,7 @@ class TestExpectationDecorators(unittest.TestCase):
                         "result_format": "BASIC"
                     }
                 },
-                'result_obj': {'element_count': 10,
+                'result': {'element_count': 10,
                                'missing_count': 0,
                                'missing_percent': 0,
                                'partial_unexpected_list': [2., 4.],
@@ -238,7 +238,7 @@ class TestExpectationDecorators(unittest.TestCase):
 
             @PandasDataSet.column_aggregate_expectation
             def expect_column_median_to_be_odd(self, column):
-                return {"success": column.median() % 2, "result_obj": {"observed_value": column.median()}}
+                return {"success": column.median() % 2, "result": {"observed_value": column.median()}}
 
         df = CustomPandasDataSet({
             'all_odd' : [1,3,5,7,9],
@@ -253,7 +253,7 @@ class TestExpectationDecorators(unittest.TestCase):
         self.assertEqual(
             df.expect_column_median_to_be_odd("all_odd"),
             {
-                'result_obj': {'observed_value': 5, 'element_count': 5, 'missing_count': 0, 'missing_percent': 0},
+                'result': {'observed_value': 5, 'element_count': 5, 'missing_count': 0, 'missing_percent': 0},
                 'success': True
             }
         )
@@ -261,7 +261,7 @@ class TestExpectationDecorators(unittest.TestCase):
         self.assertEqual(
             df.expect_column_median_to_be_odd("all_even"),
             {
-                'result_obj': {'observed_value': 6, 'element_count': 5, 'missing_count': 0, 'missing_percent': 0},
+                'result': {'observed_value': 6, 'element_count': 5, 'missing_count': 0, 'missing_percent': 0},
                 'success': False
             }
         )
@@ -269,7 +269,7 @@ class TestExpectationDecorators(unittest.TestCase):
         self.assertEqual(
             df.expect_column_median_to_be_odd("all_even", result_format="SUMMARY"),
             {
-                'result_obj': {'observed_value': 6, 'element_count': 5, 'missing_count': 0, 'missing_percent': 0},
+                'result': {'observed_value': 6, 'element_count': 5, 'missing_count': 0, 'missing_percent': 0},
                 'success': False
             }
         )
@@ -288,7 +288,7 @@ class TestExpectationDecorators(unittest.TestCase):
         self.assertEqual(
             df.expect_column_median_to_be_odd("all_even", result_format="BASIC"),
             {
-                'result_obj': {'observed_value': 6, 'element_count': 5, 'missing_count': 0, 'missing_percent': 0},
+                'result': {'observed_value': 6, 'element_count': 5, 'missing_count': 0, 'missing_percent': 0},
                 'success': False
             }
         )

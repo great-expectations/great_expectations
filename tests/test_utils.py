@@ -188,20 +188,20 @@ def evaluate_json_test(dataset, expectation_type, test):
                 assert result['success'] == value
 
             elif key == 'observed_value':
-                # assert np.allclose(result['result_obj']['observed_value'], value)
-                assert value == result['result_obj']['observed_value']
+                # assert np.allclose(result['result']['observed_value'], value)
+                assert value == result['result']['observed_value']
 
             elif key == 'unexpected_index_list':
                 if isinstance(dataset, SqlAlchemyDataSet):
                     pass
                 else:
-                    assert result['result_obj']['unexpected_index_list'] == value
+                    assert result['result']['unexpected_index_list'] == value
 
             elif key == 'unexpected_list':
-                assert result['result_obj']['unexpected_list'] == value, "expected " + str(value) + " but got " + str(result['result_obj']['unexpected_list'])
+                assert result['result']['unexpected_list'] == value, "expected " + str(value) + " but got " + str(result['result']['unexpected_list'])
 
             elif key == 'details':
-                assert result['result_obj']['details'] == value
+                assert result['result']['details'] == value
 
             elif key == 'traceback_substring':
                 assert result['exception_info']['raised_exception']
