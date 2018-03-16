@@ -299,19 +299,32 @@ def infer_distribution_parameters(column, distribution, params=None):
     Args:
         column (list-like): The data to build shape parameters out of
         distribution (string): Scipy distribution, determines which shape parameters to return
-        params (dict): The known parameters of desired distribution (even if it conflicts with `column`)
+        params (dict): The known parameters of desired distribution (`column`)
                        Keep as None to infer necessary parameters from the data column
 
     Returns:
-        Tuple of arguments that match scipy.kstest `args` for the specified distribution
+        A dictionary of named parameters::
+
+        {
+            "mean": (float),
+            "std_dev": (float),
+            "loc": (float),
+            "scale": (float),
+            "alpha": (float),
+            "beta": (float),
+            "lambda": (float),
+            "min": (float),
+            "max": (float),
+            "df": (float)
+        }
+
+
 
         See: https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.kstest.html#scipy.stats.kstest
     """
 
     if params is None:
         params = dict()
-        params['mean'] = column.mean()
-        params['std_dev'] = column.std()
     elif not isinstance(params, dict):
         raise TypeError("params must be a dictionary object, see great_expectations documentation")
 
@@ -320,17 +333,11 @@ def infer_distribution_parameters(column, distribution, params=None):
 
     if 'std_dev' not in params.keys():
         params['std_dev'] = column.std()
-    elif params['std_dev'] < 0:
-        raise ValueError("std_dev cannot be less than zero")
 
     if 'loc' not in params.keys():
         params['loc'] = 0
     if 'scale' not in params.keys():
         params['scale'] = 1
-
-    if distribution == "norm":
-        # scipy cdf(x, loc=0, scale=1)
-        pass
 
     elif distribution == "beta":
         # scipy cdf(x, a, b, loc=0, scale=1)
@@ -349,13 +356,12 @@ def infer_distribution_parameters(column, distribution, params=None):
             else:
                 # Using https://en.wikipedia.org/wiki/Gamma_distribution
                 params['alpha'] = (params['mean'] / params['scale'])
-        elif params['alpha'] <= 0:
-            raise ValueError("Gamma distribution requires its `alpha` shape parameter to be greater than 0")
 
     elif distribution == 'poisson':
         if 'lambda' not in params.keys():
             params['lambda'] = params['mean']
 
+    # FIXME  INFER MAX OR USE STANDARD SCALE??
     elif distribution == 'uniform':
         # scipy cdf(x, loc=0, scale=1)
         if 'min' not in params.keys():
