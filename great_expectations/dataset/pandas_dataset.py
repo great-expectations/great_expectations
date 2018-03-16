@@ -16,7 +16,7 @@ from six import string_types
 from .base import DataSet
 from .util import DocInherit, recursively_convert_to_json_serializable, \
         is_valid_partition_object, is_valid_categorical_partition_object, is_valid_continuous_partition_object, \
-        infer_distribution_parameters, scipy_distribution_positional_args_from_dict
+        infer_distribution_parameters, _scipy_distribution_positional_args_from_dict, validate_distribution_parameters
 
 class MetaPandasDataSet(DataSet):
     """
@@ -710,34 +710,20 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
             raise ValueError("p_value must be between 0 and 1 exclusive")
 
         # Validate params
-        if params is None:
-            raise ValueError("params must be a dictionary or use ge.dataset.util,infer_distribution_parameters(df.column, distribution)")
 
-
-
-        positional_parameters = scipy_distribution_positional_args_from_dict(distribution,
-                                                                             infer_distribution_parameters(column, distribution, params))
-
-        # Try to detect bad parameters
-        try:
-            # Frozen Scipy Params test - test if any errors are thrown when we try to create this distribution
-            dist = eval("stats." + distribution + str(positional_parameters))
-            #if dist.moment(0) == 'Fnan':
-            #    raise ValueError("It appears you are using bad parameters, see scipy.stats documentation")
-        except Exception as e:
-            raise e
+        validate_distribution_parameters(distribution=distribution, params=params)
+        positional_parameters = _scipy_distribution_positional_args_from_dict(distribution, params)
 
         # K-S Test
         ks_result = stats.kstest(column, distribution,
-                                 args=scipy_distribution_positional_args_from_dict(distribution, params))
+                                 args=positional_parameters)
 
         return {
             "success": ks_result[1] >= p_value,
-            "true_value": 0,
             "result_obj": {
                 "observed_value": ks_result[1],
                 "details": {
-                    "expected_params": params,
+                    "expected_params": positional_parameters,
                     "observed_ks_result": ks_result
                 }
             }
