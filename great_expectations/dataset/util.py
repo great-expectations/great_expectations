@@ -385,7 +385,19 @@ def infer_distribution_parameters(column, distribution, params=None):
 
     return params
 
-def scipy_distribution_positional_args_from_dict(distribution, params):
+def _scipy_distribution_positional_args_from_dict(distribution, params):
+    """Helper function that returns positional arguments for a scipy distribution using a dictionary of parameters.
+
+       Args:
+           distribution (string): \
+               The scipy distribution name.
+           params (dict): \
+               A dict of named parameters.
+
+       Raises:
+           AttributeError: \
+               If an unsupported distribution is provided.
+    """
     if 'loc' not in params:
         params['loc'] = 0
     if 'scale' not in params:
@@ -407,3 +419,117 @@ def scipy_distribution_positional_args_from_dict(distribution, params):
         return params['loc'], params['scale']
     else:
         raise AttributeError("Unsupported  distribution provided: %s" % distribution)
+
+
+def validate_distribution_parameters(distribution, params):
+    """Ensures that necessary parameters for a distribution are present and that all parameters are sensical.
+
+       If parameters necessary to construct a distribution are missing or invalid, this function raises ValueError\
+       with an informative description. Note that 'loc' and 'scale' are always optional arguments, and that 'scale'\
+       cannot be 0.
+
+       Args:
+           distribution (string): \
+               The scipy distribution name, e.g. normal distribution is 'norm'.
+           params (dict or tuple): \
+               The distribution shape parameters in a named dictionary or positional tuple form following the scipy \
+               cdf argument scheme.
+
+               params={'mean': 40, 'std_dev': 5} or params=(40, 5)
+
+       Exceptions:
+           ValueError: \
+               With an informative description, usually when necessary parameters are omitted or are invalid.
+
+    """
+
+    norm_msg = "norm distributions require 0 parameters and optionally 'mean', 'std_dev'."
+    beta_msg = "beta distributions require 2 positive parameters 'alpha', 'beta' and optionally 'loc', 'scale'.)"
+    gamma_msg = "gamma distributions require 1 positive parameter 'alpha' and optionally 'loc','scale'."
+    poisson_msg = "poisson distributions require 1 positive parameter 'lambda'. and optionally 'loc'."
+    uniform_msg = "uniform distributions require 0 parameters and optionally 'loc', 'scale'."
+    chi2_msg = "chi2 distributions require 1 positive parameter 'df' and optionally 'loc', 'scale'."
+    expon_msg = "expon distributions require 0 parameters and optionally 'loc', 'scale'."
+
+    if params is None:
+        raise ValueError(
+            "params must be a dict, or use ge.dataset.util.infer_distribution_parameters(df.column, distribution)")
+
+    if isinstance(params, dict):
+        # `params` is a dictionary
+        if params.get("std_dev", 1) <= 0 or params.get('scale', 1) <= 0:
+            raise ValueError("std_dev and scale must be positive.")
+
+        # alpha and beta are required and positive
+        if distribution == 'beta' and (params.get('alpha', -1) <= 0 or params.get('beta', -1) <= 0):
+            raise ValueError("Invalid parameters: %s" %beta_msg)
+
+        # alpha is required and positive
+        elif distribution == 'gamma' and params.get('alpha', -1) <= 0:
+            raise ValueError("Invalid parameters: %s" %gamma_msg)
+
+        # lambda is a required and positive
+        elif distribution == 'poisson' and params.get('lambda', -1) <= 0:
+            raise ValueError("Invalid parameters: %s" %poisson_msg)
+
+        # df is necessary and required to be positve
+        elif distribution == 'chi2' and params.get('df', -1) <= 0:
+            raise ValueError("Invalid parameters: %s:" %chi2_msg)
+
+    if isinstance(params, tuple) or isinstance(params, list):
+        # `params` is a tuple or a list
+        if distribution == 'beta':
+            if len(params) < 2:
+                raise ValueError("Missing required parameters: %s" %beta_msg)
+            if params[0] <= 0 or params[1] <= 0:
+                raise ValueError("Invalid parameters: %s" %beta_msg)
+            if len(params) == 4:
+                scale = params[3]
+            elif len(params) > 4:
+                raise ValueError("Too many parameters provided: %s" %beta_msg)
+
+        elif distribution == 'norm':
+            if len(params) > 2:
+                raise ValueError("Too many parameters provided: %s" %norm_msg)
+            if len(params) == 2:
+                scale = params[1]
+
+        elif distribution == 'gamma':
+            if len(params) < 1:
+                raise ValueError("Missing required parameters: %s" %gamma_msg)
+            if len(params) == 3:
+                scale = params[2]
+            if len(params) > 3:
+                raise ValueError("Too many parameters provided: %s" % gamma_msg)
+
+        elif distribution == 'poisson':
+            if len(params) < 1:
+                raise ValueError("Missing required parameters: %s" %poisson_msg)
+            if len(params) > 2:
+                raise ValueError("Too many parameters provided: %s" %poisson_msg)
+
+        elif distribution == 'uniform':
+            if len(params) == 2:
+                scale = params[1]
+            if len(params) > 2:
+                raise ValueError("Too many arguments provided: %s" %uniform_msg)
+
+        elif distribution == 'chi2':
+            if len(params) < 1:
+                raise ValueError("Missing required parameters: %s" %chi2_msg)
+            elif len(params) == 3:
+                scale = params[2]
+            elif len(params) > 3:
+                raise ValueError("Too many arguments provided: %s" %chi2_msg)
+
+        elif distribution == 'expon':
+
+            if len(params) == 2:
+                scale = params[2]
+            if len(params) > 2:
+                raise ValueError("Too many arguments provided: %s" %expon_msg)
+
+        if scale is not None and scale <= 0:
+            raise ValueError("std_dev and scale must be positive.")
+
+        return
