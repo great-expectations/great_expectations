@@ -14,12 +14,15 @@ class SqlAlchemyDataContext(DataContext):
 
     def __init__(self, *args, **kwargs):
         super(SqlAlchemyDataContext, self).__init__(*args, **kwargs)
+        self.meta = MetaData()
 
     def connect(self, options):
         self.engine = create_engine(options)
 
     def list_datasets(self):
-        return MetaData.reflect(engine=self.engine).sorted_tables
+        self.meta.reflect(bind=self.engine)
+        tables = [str(table) for table in self.meta.sorted_tables]
+        return tables
 
     def get_dataset(self, dataset_name):
         return SqlAlchemyDataSet(table_name=dataset_name, engine=self.engine)
