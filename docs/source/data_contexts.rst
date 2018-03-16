@@ -18,8 +18,8 @@ To get a data context, simply call `get_data_context()` on the ge object:
 
 
 There are currently two types of data contexts:
-  - :ref:`PandasCSVDataContext`: The PandasCSVDataContext ('pandas_csv_context') exposes a local directory containing files as datasets.
-  - :ref:`SqlAlchemyDataContext`: The SqlAlchemyDataContext ('sqlalchemy_context') exposes tables from a SQL-compliant database as datasets.
+  - :ref:`PandasCSVDataContext`: The PandasCSVDataContext ('PandasCSV') exposes a local directory containing files as datasets.
+  - :ref:`SqlAlchemyDataContext`: The SqlAlchemyDataContext ('SqlAlchemy') exposes tables from a SQL-compliant database as datasets.
 
 All data contexts expose the following methods:
   - list_datasets(): lists datasets available in current context
