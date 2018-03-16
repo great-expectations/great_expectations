@@ -3,17 +3,9 @@ import pandas as pd
 
 from .util import *
 from great_expectations import dataset
+from great_expectations.data_context import get_data_context
 
 from .version import __version__
-
-def list_sources():
-    raise NotImplementedError
-
-def connect_to_datasource():
-    raise NotImplementedError
-
-def connect_to_dataset():
-    raise NotImplementedError
 
 def _convert_to_dataset_class(df, dataset_class, expectations_config=None):
     """

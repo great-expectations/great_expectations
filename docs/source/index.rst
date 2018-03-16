@@ -13,6 +13,7 @@ Welcome to Great Expectations!
    :maxdepth: 2
 
    intro
+   data_contexts
    expectations
    distributional_expectations
    validation
@@ -30,6 +31,14 @@ Advanced
    custom_expectations
    conventions
    roadmap_changelog
+
+Module Docs
+-------------
+.. toctree::
+   :maxdepth: 2
+
+   dataset_module
+   data_context_module
 
 Indices and tables
 ------------------
