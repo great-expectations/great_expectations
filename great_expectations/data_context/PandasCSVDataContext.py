@@ -1,7 +1,8 @@
-from .base import DataContext
-from .. import read_csv
+import pandas as pd
+import os
 
-import glob
+from .base import DataContext
+from ..dataset.pandas_dataset import PandasDataSet
 
 class PandasCSVDataContext(DataContext):
     """
@@ -18,8 +19,8 @@ class PandasCSVDataContext(DataContext):
         self.directory = options
 
     def list_datasets(self):
-        return glob.glob(self.directory)
+        return os.listdir(self.directory)
 
-    def get_dataset(self, dataset_name):
-        df = read_csv(dataset_name)
-        return df
+    def get_dataset(self, dataset_name, *args, **kwargs):
+        df = pd.read_csv(os.path.join(self.directory, dataset_name), *args, **kwargs)
+        return PandasDataSet(df)
