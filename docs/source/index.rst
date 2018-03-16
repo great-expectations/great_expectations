@@ -29,7 +29,7 @@ Advanced
    result_format
    custom_expectations
    conventions
-   roadmap
+   roadmap_changelog
 
 Indices and tables
 ------------------
