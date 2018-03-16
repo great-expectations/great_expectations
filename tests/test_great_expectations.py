@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 
 import great_expectations as ge
-from great_expectations.dataset import PandasDataSet, MetaPandasDataSet
+from great_expectations.dataset import PandasDataset, MetaPandasDataset
 from .test_utils import assertDeepAlmostEqual
 
 def isprime(n):
@@ -38,13 +38,13 @@ def isprime(n):
     return True
 
 
-class CustomPandasDataSet(PandasDataSet):
+class CustomPandasDataset(PandasDataset):
 
-    @MetaPandasDataSet.column_map_expectation
+    @MetaPandasDataset.column_map_expectation
     def expect_column_values_to_be_prime(self, column):
         return column.map(isprime)
 
-    @MetaPandasDataSet.expectation(["column", "mostly"])
+    @MetaPandasDataset.expectation(["column", "mostly"])
     def expect_column_values_to_equal_1(self, column, mostly=None):
         not_null = self[column].notnull()
         
@@ -85,7 +85,7 @@ class TestCustomClass(unittest.TestCase):
         script_path = os.path.dirname(os.path.realpath(__file__))
         df = ge.read_csv(
             script_path+'/test_sets/Titanic.csv',
-            dataset_class=CustomPandasDataSet
+            dataset_class=CustomPandasDataset
         )
         df.set_default_expectation_argument("result_format", "COMPLETE")
         self.assertEqual(
@@ -135,7 +135,7 @@ class TestCustomClass(unittest.TestCase):
         )
 
     def test_custom_expectation(self):
-        df = CustomPandasDataSet({'x': [1,1,1,1,2]})
+        df = CustomPandasDataset({'x': [1,1,1,1,2]})
         df.set_default_expectation_argument("result_format", "COMPLETE")
 
         out = df.expect_column_values_to_be_prime('x')
@@ -157,7 +157,7 @@ class TestCustomClass(unittest.TestCase):
 
    # Ensure that Custom Data Set classes can properly call non-overridden methods from their parent class
     def test_base_class_expectation(self):
-        df = CustomPandasDataSet({
+        df = CustomPandasDataset({
             "aaa": [1, 2, 3, 4, 5],
             "bbb": [10, 20, 30, 40, 50],
             "ccc": [9, 10, 11, 12, 13],
@@ -225,7 +225,7 @@ class TestValidation(unittest.TestCase):
         )
 
     def test_validate_catch_non_existent_expectation(self):
-        df = ge.dataset.PandasDataSet({
+        df = ge.dataset.PandasDataset({
             "x" : [1,2,3,4,5]
         })
 
@@ -249,7 +249,7 @@ class TestValidation(unittest.TestCase):
         )
 
     def test_validate_catch_invalid_parameter(self):
-        df = ge.dataset.PandasDataSet({
+        df = ge.dataset.PandasDataset({
             "x": [1, 2, 3, 4, 5]
         })
 

@@ -106,7 +106,7 @@ class TestCLI(unittest.TestCase):
         command_str = 'python ' + filepath + '/../bin/great_expectations validate ' \
                       + filepath + '/test_sets/Titanic.csv '\
                       + filepath + '/test_sets/titanic_custom_expectations.json -f -m='\
-                      + filepath + '/test_fixtures/custom_dataset.py -c=CustomPandasDataSet'
+                      + filepath + '/test_fixtures/custom_dataset.py -c=CustomPandasDataset'
         try:
           result = get_system_command_result(command_str)
           json_result = json.loads(result["output"])

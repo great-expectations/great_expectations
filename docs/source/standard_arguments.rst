@@ -150,10 +150,10 @@ Expectations with `mostly` return exception lists even if they succeed:
     }
 
 
-DataSet defaults
+Dataset defaults
 ------------------------------------------------------------------------------
 
-This default behavior for `result_format`, `include_config`, `catch_exceptions` can be overridden at the DataSet level:
+This default behavior for `result_format`, `include_config`, `catch_exceptions` can be overridden at the Dataset level:
 
 .. code-block:: bash
 

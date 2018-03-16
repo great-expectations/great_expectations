@@ -1,4 +1,4 @@
-from great_expectations.dataset import DataSet
+from great_expectations.dataset import Dataset
 
 from functools import wraps
 import inspect
@@ -11,10 +11,10 @@ from sqlalchemy.engine import reflection
 from numbers import Number
 
 
-class MetaSqlAlchemyDataSet(DataSet):
+class MetaSqlAlchemyDataset(Dataset):
 
     def __init__(self, *args, **kwargs):
-        super(MetaSqlAlchemyDataSet, self).__init__(*args, **kwargs)
+        super(MetaSqlAlchemyDataset, self).__init__(*args, **kwargs)
 
     @classmethod
     def column_map_expectation(cls, func):
@@ -133,10 +133,10 @@ class MetaSqlAlchemyDataSet(DataSet):
         return inner_wrapper
 
 
-class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
+class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
     def __init__(self, table_name=None, engine=None, connection_string=None):
-        super(SqlAlchemyDataSet, self).__init__()
+        super(SqlAlchemyDataset, self).__init__()
 
         if table_name is None:
             raise ValueError("No table_name provided.")
@@ -161,7 +161,7 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
 
     def add_default_expectations(self):
         """
-        The default behavior for PandasDataSet is to explicitly include expectations that every column present upon initialization exists.
+        The default behavior for PandasDataset is to explicitly include expectations that every column present upon initialization exists.
         """
         for col in self.columns:
             self.append_expectation({
@@ -193,7 +193,7 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
     ###
 
     @DocInherit
-    @DataSet.expectation(['value'])
+    @Dataset.expectation(['value'])
     def expect_table_row_count_to_equal(self,
         value=None,
         result_format=None, include_config=False, catch_exceptions=None, meta=None
@@ -220,7 +220,7 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
         }
 
     @DocInherit
-    @DataSet.expectation(['min_value', 'max_value'])
+    @Dataset.expectation(['min_value', 'max_value'])
     def expect_table_row_count_to_be_between(self,
         min_value=0,
         max_value=None,
@@ -257,7 +257,7 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
         }
 
     @DocInherit
-    @DataSet.expectation(['column'])
+    @Dataset.expectation(['column'])
     def expect_column_to_exist(self,
             column, column_index=None, result_format=None, include_config=False,
             catch_exceptions=None, meta=None
@@ -289,7 +289,7 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
     ###
 
     @DocInherit
-    @MetaSqlAlchemyDataSet.column_map_expectation
+    @MetaSqlAlchemyDataset.column_map_expectation
     def expect_column_values_to_be_null(self,
         column,
         mostly=None,
@@ -299,7 +299,7 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
         return sa.column(column) == None
 
     @DocInherit
-    @MetaSqlAlchemyDataSet.column_map_expectation
+    @MetaSqlAlchemyDataset.column_map_expectation
     def expect_column_values_to_not_be_null(self,
         column,
         mostly=None,
@@ -310,7 +310,7 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
 
 
     @DocInherit
-    @MetaSqlAlchemyDataSet.column_map_expectation
+    @MetaSqlAlchemyDataset.column_map_expectation
     def expect_column_values_to_be_in_set(self,
         column,
         values_set,
@@ -320,7 +320,7 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
         return sa.column(column).in_(tuple(values_set))
 
     @DocInherit
-    @MetaSqlAlchemyDataSet.column_map_expectation
+    @MetaSqlAlchemyDataset.column_map_expectation
     def expect_column_values_to_be_between(self,
         column,
         min_value=None,
@@ -364,7 +364,7 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
     ###
 
     @DocInherit
-    @MetaSqlAlchemyDataSet.column_aggregate_expectation
+    @MetaSqlAlchemyDataset.column_aggregate_expectation
     def expect_column_max_to_be_between(self,
         column,
         min_value=None,
@@ -402,7 +402,7 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
 
 
     @DocInherit
-    @MetaSqlAlchemyDataSet.column_aggregate_expectation
+    @MetaSqlAlchemyDataset.column_aggregate_expectation
     def expect_column_min_to_be_between(self,
         column,
         min_value=None,
@@ -439,7 +439,7 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
         }
 
     @DocInherit
-    @MetaSqlAlchemyDataSet.column_aggregate_expectation
+    @MetaSqlAlchemyDataset.column_aggregate_expectation
     def expect_column_sum_to_be_between(self,
         column,
         min_value=None,
@@ -471,7 +471,7 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
         }
 
     @DocInherit
-    @MetaSqlAlchemyDataSet.column_aggregate_expectation
+    @MetaSqlAlchemyDataset.column_aggregate_expectation
     def expect_column_mean_to_be_between(self,
         column,
         min_value=None,
