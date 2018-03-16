@@ -4,7 +4,7 @@
 Data Contexts
 ================================================================================
 
-Data Contexts manage connections to Great Expectations DataSets.
+Data Contexts manage connections to Great Expectations Datasets.
 
 To get a data context, simply call `get_data_context()` on the ge object:
 

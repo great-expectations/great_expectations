@@ -1,18 +1,18 @@
 import pytest
 
-from great_expectations.dataset import MetaSqlAlchemyDataSet, SqlAlchemyDataSet
+from great_expectations.dataset import MetaSqlAlchemyDataset, SqlAlchemyDataset
 import sqlalchemy as sa
 import pandas as pd
 
 @pytest.fixture
 def custom_dataset():
-    class CustomSqlAlchemyDataSet(SqlAlchemyDataSet):
+    class CustomSqlAlchemyDataset(SqlAlchemyDataset):
 
-        @MetaSqlAlchemyDataSet.column_map_expectation
+        @MetaSqlAlchemyDataset.column_map_expectation
         def expect_column_values_to_equal_2(self, column):
             return (sa.column(column) == 2)
 
-        @MetaSqlAlchemyDataSet.column_aggregate_expectation
+        @MetaSqlAlchemyDataset.column_aggregate_expectation
         def expect_column_mode_to_equal_0(self, column):
             mode_query = sa.select([
                 sa.column(column).label('value'),
@@ -28,13 +28,13 @@ def custom_dataset():
                 }
             }
 
-        @MetaSqlAlchemyDataSet.column_aggregate_expectation
+        @MetaSqlAlchemyDataset.column_aggregate_expectation
         def broken_aggregate_expectation(self, column):
             return {
                 "not_a_success_value": True,
             }
 
-        @MetaSqlAlchemyDataSet.column_aggregate_expectation
+        @MetaSqlAlchemyDataset.column_aggregate_expectation
         def another_broken_aggregate_expectation(self, column):
             return {
                 "success": True,
@@ -53,7 +53,7 @@ def custom_dataset():
     })
 
     data.to_sql(name='test_data', con=engine, index=False)
-    custom_dataset = CustomSqlAlchemyDataSet('test_data', engine=engine)
+    custom_dataset = CustomSqlAlchemyDataset('test_data', engine=engine)
 
     return custom_dataset
 

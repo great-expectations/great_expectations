@@ -21,33 +21,33 @@ Side note: in future versions, Great Expectations will probably grow to include 
 The easy way
 --------------------------------------------------------------------------------
 
-1. Create a subclass from the DataSet class of your choice
+1. Create a subclass from the dataset class of your choice
 2. Define custom functions containing your business logic
-3. Use the `column_map_expectation` and `column_aggregate_expectation` decorators to turn them into full Expectations. Note that each DataSet class implements its own versions of `@column_map_expectation` and `@column_aggregate_expectation`, so you should consult the documentation of each class to ensure you
+3. Use the `column_map_expectation` and `column_aggregate_expectation` decorators to turn them into full Expectations. Note that each dataset class implements its own versions of `@column_map_expectation` and `@column_aggregate_expectation`, so you should consult the documentation of each class to ensure you
 are returning the correct information to the decorator.
 
 Note: following Great Expectations :ref:`naming_conventions` is highly recommended, but not strictly required. If you want to confuse yourself with bad names, the package won't stop you.
 
 For example, in Pandas:
 
-`@MetaPandasDataSet.column_map_expectation` decorates a custom function, wrapping it with all the business logic required to turn it into a fully-fledged Expectation. This spares you the hassle of defining logic to handle required arguments like `mostly` and `result_format`. Your custom function can focus exclusively on the business logic of passing or failing the expectation.
+`@MetaPandasDataset.column_map_expectation` decorates a custom function, wrapping it with all the business logic required to turn it into a fully-fledged Expectation. This spares you the hassle of defining logic to handle required arguments like `mostly` and `result_format`. Your custom function can focus exclusively on the business logic of passing or failing the expectation.
 
 To work with these decorators, your custom function must accept two arguments: `self` and `column`. When your function is called, `column` will contain all the non-null values in the given column. Your function must return a series of boolean values in the same order, with the same index.
 
-`@MetaPandasDataSet.column_aggregate_expectation` accepts `self` and `column`. It must return a dictionary containing a boolean `success` value, and a nested dictionary called `result` which contains an `observed_value` argument.
+`@MetaPandasDataset.column_aggregate_expectation` accepts `self` and `column`. It must return a dictionary containing a boolean `success` value, and a nested dictionary called `result` which contains an `observed_value` argument.
 
 
 .. code-block:: python
 
-    from great_expectations.dataset import PandasDataSet, MetaPandasDataSet
+    from great_expectations.Dataset import PandasDataset, MetaPandasDataset
 
-    class CustomPandasDataSet(PandasDataSet):
+    class CustomPandasDataset(PandasDataset):
 
-        @MetaPandasDataSet.column_map_expectation
+        @MetaPandasDataset.column_map_expectation
         def expect_column_values_to_equal_2(self, column):
             return column.map(lambda x: x==2)
 
-        @MetaPandasDataSet.column_aggregate_expectation
+        @MetaPandasDataset.column_aggregate_expectation
         def expect_column_mode_to_equal_0(self, column):
             mode = column.mode[0]
             return {
@@ -57,20 +57,20 @@ To work with these decorators, your custom function must accept two arguments: `
                 }
             }
 
-For SqlAlchemyDataSet, the decorators work slightly differently. See the MetaSqlAlchemy class docstrings for more information.
+For SqlAlchemyDataset, the decorators work slightly differently. See the MetaSqlAlchemy class docstrings for more information.
 
 .. code-block:: python
 
     import sqlalchemy as sa
-    from great_expectations.dataset import SqlAlchemyDataSet, MetaSqlAlchemyDataSet
+    from great_expectations.Dataset import SqlAlchemyDataset, MetaSqlAlchemyDataset
 
-    class CustomSqlAlchemyDataSet(SqlAlchemyDataSet):
+    class CustomSqlAlchemyDataset(SqlAlchemyDataset):
 
-        @MetaSqlAlchemyDataSet.column_map_expectation
+        @MetaSqlAlchemyDataset.column_map_expectation
         def expect_column_values_to_equal_2(self, column):
             return (sa.column(column) == 2)
 
-        @MetaSqlAlchemyDataSet.column_aggregate_expectation
+        @MetaSqlAlchemyDataset.column_aggregate_expectation
         def expect_column_mode_to_equal_0(self, column):
             mode_query = sa.select([
                 sa.column(column).label('value'),
@@ -90,7 +90,7 @@ For SqlAlchemyDataSet, the decorators work slightly differently. See the MetaSql
 The hard way
 --------------------------------------------------------------------------------
 
-1. Create a subclass from the DataSet class of your choice
+1. Create a subclass from the dataset class of your choice
 2. Write the whole expectation yourself
 3. Decorate it with the `@expectation` decorator
 
@@ -98,11 +98,11 @@ This is more complicated, since you have to handle all the logic of additional p
 
 .. code-block:: bash
 
-    from great_expectations.dataset import PandasDataSet
+    from great_expectations.Dataset import PandasDataset
 
-    class CustomPandasDataSet(PandasDataSet):
+    class CustomPandasDataset(PandasDataset):
 
-        @DataSet.expectation(["column", "mostly"])
+        @Dataset.expectation(["column", "mostly"])
         def expect_column_values_to_equal_1(self, column, mostly=None):
             not_null = self[column].notnull()
 
@@ -138,11 +138,11 @@ For rapid prototyping, you can use the following syntax to quickly iterate on th
 
 .. code-block:: bash
 
-    >> dataset.test_expectation_function(my_func)
+    >> Dataset.test_expectation_function(my_func)
     
-    >> dataset.test_column_map_expectation_function(my_map_func, column='my_column')
+    >> Dataset.test_column_map_expectation_function(my_map_func, column='my_column')
     
-    >> dataset.test_column_aggregate_expectation_function(my_agg_func, column='my_column')
+    >> Dataset.test_column_aggregate_expectation_function(my_agg_func, column='my_column')
 
 These functions will return output just like regular expectations. However, they will NOT save a copy of the expectation to the config.
 
@@ -150,16 +150,16 @@ These functions will return output just like regular expectations. However, they
 Using custom expectations
 --------------------------------------------------------------------------------
 
-Let's suppose you've defined `CustomPandasDataSet` in a module called `custom_dataset.py`. You can instantiate a DataSet with your custom expectations simply by adding `dataset_class=CustomPandasDataSet` in `ge.read_csv`.
+Let's suppose you've defined `CustomPandasDataset` in a module called `custom_dataset.py`. You can instantiate a dataset with your custom expectations simply by adding `dataset_class=CustomPandasDataset` in `ge.read_csv`.
 
 Once you do this, all the functionality of your new expectations will be available for uses.
 
 .. code-block:: bash
 
     >> import great_expectations as ge
-    >> from custom_dataset import CustomPandasDataSet
+    >> from custom_dataset import CustomPandasDataset
 
-    >> my_df = ge.read_csv("my_data_file.csv", dataset_class=CustomPandasDataSet)
+    >> my_df = ge.read_csv("my_data_file.csv", dataset_class=CustomPandasDataset)
 
     >> my_df.expect_column_values_to_equal_1("all_twos")
     {
@@ -174,7 +174,7 @@ A similar approach works for the command-line tool.
     >> great_expectations validate \
         my_data_file.csv \
         my_expectations.json \
-        dataset_class=custom_dataset.CustomPandasDataSet
+        dataset_class=custom_dataset.CustomPandasDataset
 
 
 
