@@ -32,6 +32,14 @@ Advanced
    conventions
    roadmap
 
+Module Docs
+-------------
+.. toctree::
+   :maxdepth: 2
+
+   dataset_module
+   data_context_module
+
 Indices and tables
 ------------------
 
