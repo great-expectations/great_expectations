@@ -15,17 +15,17 @@ from collections import (
 from ..version import __version__
 from .util import DotDict, recursively_convert_to_json_serializable, parse_result_format
 
-class DataSet(object):
+class Dataset(object):
 
     def __init__(self, *args, **kwargs):
-        super(DataSet, self).__init__(*args, **kwargs)
+        super(Dataset, self).__init__(*args, **kwargs)
         self.initialize_expectations()
 
     @classmethod
     def expectation(cls, method_arg_names):
         """Manages configuration and running of expectation objects.
 
-        Expectation builds and saves a new expectation configuration to the DataSet object. It is the core decorator \
+        Expectation builds and saves a new expectation configuration to the Dataset object. It is the core decorator \
         used by great expectations to manage expectation configurations.
 
         Args:
@@ -35,8 +35,8 @@ class DataSet(object):
 
         Notes:
             Intermediate decorators that call the core @expectation decorator will most likely need to pass their \
-            decorated methods' signature up to the expectation decorator. For example, the MetaPandasDataSet \
-            column_map_expectation decorator relies on the DataSet expectation decorator, but will pass through the \
+            decorated methods' signature up to the expectation decorator. For example, the MetaPandasDataset \
+            column_map_expectation decorator relies on the Dataset expectation decorator, but will pass through the \
             signature from the implementing method.
 
             @expectation intercepts and takes action based on the following parameters:
@@ -174,10 +174,10 @@ class DataSet(object):
 
             Depending on the `result_format` selected, column_map_expectation can additional data to a return object, \
             including `element_count`, `nonnull_values`, `nonnull_count`, `success_count`, `unexpected_list`, and \
-            `unexpected_index_list`. See :func:`_format_column_map_output <great_expectations.dataset.base.DataSet._format_column_map_output>`
+            `unexpected_index_list`. See :func:`_format_column_map_output <great_expectations.dataset.base.Dataset._format_column_map_output>`
 
         See also:
-            :func:`expect_column_values_to_be_unique <great_expectations.dataset.base.DataSet.expect_column_values_to_be_unique>` \
+            :func:`expect_column_values_to_be_unique <great_expectations.dataset.base.Dataset.expect_column_values_to_be_unique>` \
             for an example of a column_map_expectation
         """
         raise NotImplementedError
@@ -198,7 +198,7 @@ class DataSet(object):
             column_aggregate_expectation *excludes null values* from being passed to the function
 
         See also:
-            :func:`expect_column_mean_to_be_between <great_expectations.dataset.base.DataSet.expect_column_mean_to_be_between>` \
+            :func:`expect_column_mean_to_be_between <great_expectations.dataset.base.Dataset.expect_column_mean_to_be_between>` \
             for an example of a column_aggregate_expectation
         """
         raise NotImplementedError
@@ -452,10 +452,10 @@ class DataSet(object):
                     return expectation
 
     def get_default_expectation_arguments(self):
-        """Fetch default expectation arguments for this DataSet
+        """Fetch default expectation arguments for this dataset
 
         Returns:
-            A dictionary containing all the current default expectation arguments for a DataSet
+            A dictionary containing all the current default expectation arguments for a dataset
 
             Ex::
 
@@ -471,7 +471,7 @@ class DataSet(object):
         return self.default_expectation_args
 
     def set_default_expectation_argument(self, argument, value):
-        """Set a default expectation argument for this DataSet
+        """Set a default expectation argument for this dataset
 
         Args:
             argument (string): The argument to be replaced
@@ -688,12 +688,12 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         # Retain support for string-only output formats:
         result_format = parse_result_format(result_format)
 
-        # Incrementally add to result_obj and return when all values for the specified level are present
+        # Incrementally add to result and return when all values for the specified level are present
         return_obj = {
             'success': success
         }
 
-        if result_format['result_obj_format'] == 'BOOLEAN_ONLY':
+        if result_format['result_format'] == 'BOOLEAN_ONLY':
             return return_obj
 
         missing_count = element_count - nonnull_count
@@ -713,7 +713,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             unexpected_percent = None
             unexpected_percent_nonmissing = None
 
-        return_obj['result_obj'] = {
+        return_obj['result'] = {
             'element_count': element_count,
             'missing_count': missing_count,
             'missing_percent': missing_percent,
@@ -723,7 +723,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             'partial_unexpected_list': unexpected_list[:result_format['partial_unexpected_count']]
         }
 
-        if result_format['result_obj_format'] == 'BASIC':
+        if result_format['result_format'] == 'BASIC':
             return return_obj
 
         # Try to return the most common values, if possible.
@@ -738,27 +738,27 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         except TypeError:
             partial_unexpected_counts = ['partial_exception_counts requires a hashable type']
 
-        return_obj['result_obj'].update(
+        return_obj['result'].update(
             {
                 'partial_unexpected_index_list': unexpected_index_list[:result_format['partial_unexpected_count']] if unexpected_index_list is not None else None,
                 'partial_unexpected_counts': partial_unexpected_counts
             }
         )
 
-        if result_format['result_obj_format'] == 'SUMMARY':
+        if result_format['result_format'] == 'SUMMARY':
             return return_obj
 
-        return_obj['result_obj'].update(
+        return_obj['result'].update(
             {
                 'unexpected_list': unexpected_list,
                 'unexpected_index_list': unexpected_index_list
             }
         )
 
-        if result_format['result_obj_format'] == 'COMPLETE':
+        if result_format['result_format'] == 'COMPLETE':
             return return_obj
 
-        raise ValueError("Unknown result_format %s." % (result_format['result_obj_format'],))
+        raise ValueError("Unknown result_format %s." % (result_format['result_format'],))
 
     def _calc_map_expectation_success(self, success_count, nonnull_count, mostly):
         """Calculate success and percent_success for column_map_expectations
@@ -864,7 +864,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         ):
         """Expect the specified column to exist.
 
-        expect_column_to_exist is a :func:`expectation <great_expectations.dataset.base.DataSet.expectation>`, not a \
+        expect_column_to_exist is a :func:`expectation <great_expectations.dataset.base.Dataset.expectation>`, not a \
         `column_map_expectation` or `column_aggregate_expectation`.
 
         Args:
@@ -905,7 +905,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
     ):
         """Expect the number of rows to be between two values.
 
-        expect_table_row_count_to_be_between is a :func:`expectation <great_expectations.dataset.base.DataSet.expectation>`, \
+        expect_table_row_count_to_be_between is a :func:`expectation <great_expectations.dataset.base.Dataset.expectation>`, \
         not a `column_map_expectation` or `column_aggregate_expectation`.
 
         Keyword Args:
@@ -950,7 +950,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
     ):
         """Expect the number of rows to equal a value.
 
-        expect_table_row_count_to_equal is a basic :func:`expectation <great_expectations.dataset.base.DataSet.expectation>`, \
+        expect_table_row_count_to_equal is a basic :func:`expectation <great_expectations.dataset.base.Dataset.expectation>`, \
         not a `column_map_expectation` or `column_aggregate_expectation`.
 
         Args:
@@ -993,9 +993,9 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         This expectation detects duplicates. All duplicated values are counted as exceptions.
 
-        For example, `[1, 2, 3, 3, 3]` will return `[3, 3, 3]` in `result_obj.exceptions_list`, with `unexpected_percent=0.6.`
+        For example, `[1, 2, 3, 3, 3]` will return `[3, 3, 3]` in `result.exceptions_list`, with `unexpected_percent=0.6.`
 
-        expect_column_values_to_be_unique is a :func:`column_map_expectation <great_expectations.dataset.base.DataSet.column_map_expectation>`.
+        expect_column_values_to_be_unique is a :func:`column_map_expectation <great_expectations.dataset.base.Dataset.column_map_expectation>`.
 
         Args:
             column (str): \
@@ -1038,7 +1038,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         To be counted as an exception, values must be explicitly null or missing, such as a NULL in PostgreSQL or an np.NaN in pandas.
         Empty strings don't count as null unless they have been coerced to a null type.
 
-        expect_column_values_to_not_be_null is a :func:`column_map_expectation <great_expectations.dataset.base.DataSet.column_map_expectation>`.
+        expect_column_values_to_not_be_null is a :func:`column_map_expectation <great_expectations.dataset.base.Dataset.column_map_expectation>`.
 
         Args:
             column (str): \
@@ -1082,7 +1082,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
     ):
         """Expect column values to be null.
 
-        expect_column_values_to_be_null is a :func:`column_map_expectation <great_expectations.dataset.base.DataSet.column_map_expectation>`.
+        expect_column_values_to_be_null is a :func:`column_map_expectation <great_expectations.dataset.base.Dataset.column_map_expectation>`.
 
         Args:
             column (str): \
@@ -1129,7 +1129,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
     ):
         """Expect each column entry to be a specified data type.
 
-        expect_column_values_to_be_of_type is a :func:`column_map_expectation <great_expectations.dataset.base.DataSet.column_map_expectation>`.
+        expect_column_values_to_be_of_type is a :func:`column_map_expectation <great_expectations.dataset.base.Dataset.column_map_expectation>`.
 
         Args:
             column (str): \
@@ -1170,7 +1170,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             expect_column_values_to_be_of_type is slated for major changes in future versions of great_expectations.
 
             As of v0.3, great_expectations is exclusively based on pandas, which handles typing in its own peculiar way.
-            Future versions of great_expectations will allow for datasets in SQL, spark, etc.
+            Future versions of great_expectations will allow for Datasets in SQL, spark, etc.
             When we make that change, we expect some breaking changes in parts of the codebase that are based strongly on pandas notions of typing.
 
         See also:
@@ -1188,7 +1188,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
     ):
         """Expect each column entry to match a list of specified data types.
 
-        expect_column_values_to_be_in_type_list is a :func:`column_map_expectation <great_expectations.dataset.base.DataSet.column_map_expectation>`.
+        expect_column_values_to_be_in_type_list is a :func:`column_map_expectation <great_expectations.dataset.base.Dataset.column_map_expectation>`.
 
         Args:
             column (str): \
@@ -1229,7 +1229,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             expect_column_values_to_be_in_type_list is slated for major changes in future versions of great_expectations.
 
             As of v0.3, great_expectations is exclusively based on pandas, which handles typing in its own peculiar way.
-            Future versions of great_expectations will allow for datasets in SQL, spark, etc.
+            Future versions of great_expectations will allow for Datasets in SQL, spark, etc.
             When we make that change, we expect some breaking changes in parts of the codebase that are based strongly on pandas notions of typing.
 
         See also:
@@ -1257,7 +1257,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             )
             {
               "success": false
-              "result_obj": {
+              "result": {
                 "unexpected_count": 1
                 "unexpected_percent": 0.16666666666666666,
                 "unexpected_percent_nonmissing": 0.16666666666666666,
@@ -1267,7 +1267,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
               },
             }
 
-        expect_column_values_to_be_in_set is a :func:`column_map_expectation <great_expectations.dataset.base.DataSet.column_map_expectation>`.
+        expect_column_values_to_be_in_set is a :func:`column_map_expectation <great_expectations.dataset.base.Dataset.column_map_expectation>`.
 
 
         Args:
@@ -1324,7 +1324,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             )
             {
               "success": false
-              "result_obj": {
+              "result": {
                 "unexpected_count": 3
                 "unexpected_percent": 0.5,
                 "unexpected_percent_nonmissing": 0.5,
@@ -1334,7 +1334,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
               },
             }
 
-        expect_column_values_to_not_be_in_set is a :func:`column_map_expectation <great_expectations.dataset.base.DataSet.column_map_expectation>`.
+        expect_column_values_to_not_be_in_set is a :func:`column_map_expectation <great_expectations.dataset.base.Dataset.column_map_expectation>`.
 
         Args:
             column (str): \
@@ -1383,7 +1383,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
     ):
         """Expect column entries to be between a minimum value and a maximum value (inclusive).
 
-        expect_column_values_to_be_between is a :func:`column_map_expectation <great_expectations.dataset.base.DataSet.column_map_expectation>`.
+        expect_column_values_to_be_between is a :func:`column_map_expectation <great_expectations.dataset.base.Dataset.column_map_expectation>`.
 
         Args:
             column (str): \
@@ -1446,7 +1446,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         If `strictly=True`, then this expectation is only satisfied if each consecutive value
         is strictly increasing--equal values are treated as failures.
 
-        expect_column_values_to_be_increasing is a :func:`column_map_expectation <great_expectations.dataset.base.DataSet.column_map_expectation>`.
+        expect_column_values_to_be_increasing is a :func:`column_map_expectation <great_expectations.dataset.base.Dataset.column_map_expectation>`.
 
         Args:
             column (str): \
@@ -1501,7 +1501,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         If `strictly=True`, then this expectation is only satisfied if each consecutive value
         is strictly decreasing--equal values are treated as failures.
 
-        expect_column_values_to_be_decreasing is a :func:`column_map_expectation <great_expectations.dataset.base.DataSet.column_map_expectation>`.
+        expect_column_values_to_be_decreasing is a :func:`column_map_expectation <great_expectations.dataset.base.Dataset.column_map_expectation>`.
 
         Args:
             column (str): \
@@ -1556,7 +1556,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         This expectation only works for string-type values. Invoking it on ints or floats will raise a TypeError.
 
-        expect_column_value_lengths_to_be_between is a :func:`column_map_expectation <great_expectations.dataset.base.DataSet.column_map_expectation>`.
+        expect_column_value_lengths_to_be_between is a :func:`column_map_expectation <great_expectations.dataset.base.Dataset.column_map_expectation>`.
 
         Args:
             column (str): \
@@ -1611,7 +1611,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         This expectation only works for string-type values. Invoking it on ints or floats will raise a TypeError.
 
-        expect_column_values_to_be_between is a :func:`column_map_expectation <great_expectations.dataset.base.DataSet.column_map_expectation>`.
+        expect_column_values_to_be_between is a :func:`column_map_expectation <great_expectations.dataset.base.Dataset.column_map_expectation>`.
 
         Args:
             column (str): \
@@ -1656,7 +1656,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
     ):
         """Expect column entries to be strings that match a given regular expression.
 
-        expect_column_values_to_match_regex is a :func:`column_map_expectation <great_expectations.dataset.base.DataSet.column_map_expectation>`.
+        expect_column_values_to_match_regex is a :func:`column_map_expectation <great_expectations.dataset.base.Dataset.column_map_expectation>`.
 
         Args:
             column (str): \
@@ -1703,7 +1703,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
     ):
         """Expect column entries to be strings that do NOT match a given regular expression.
 
-        expect_column_values_to_not_match_regex is a :func:`column_map_expectation <great_expectations.dataset.base.DataSet.column_map_expectation>`.
+        expect_column_values_to_not_match_regex is a :func:`column_map_expectation <great_expectations.dataset.base.Dataset.column_map_expectation>`.
 
         Args:
             column (str): \
@@ -1751,7 +1751,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
     ):
         """Expect the column entries to be strings that match either any of or all of a list of regular expressions.
 
-        expect_column_values_to_match_regex_list is a :func:`column_map_expectation <great_expectations.dataset.base.DataSet.column_map_expectation>`.
+        expect_column_values_to_match_regex_list is a :func:`column_map_expectation <great_expectations.dataset.base.Dataset.column_map_expectation>`.
 
         Args:
             column (str): \
@@ -1804,7 +1804,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
     ):
         """Expect column entries to be strings representing a date or time with a given format.
 
-        expect_column_values_to_match_strftime_format is a :func:`column_map_expectation <great_expectations.dataset.base.DataSet.column_map_expectation>`.
+        expect_column_values_to_match_strftime_format is a :func:`column_map_expectation <great_expectations.dataset.base.Dataset.column_map_expectation>`.
 
         Args:
             column (str): \
@@ -1847,7 +1847,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
     ):
         """Expect column entries to be parseable using dateutil.
 
-        expect_column_values_to_be_dateutil_parseable is a :func:`column_map_expectation <great_expectations.dataset.base.DataSet.column_map_expectation>`.
+        expect_column_values_to_be_dateutil_parseable is a :func:`column_map_expectation <great_expectations.dataset.base.Dataset.column_map_expectation>`.
 
         Args:
             column (str): \
@@ -1887,7 +1887,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
     ):
         """Expect column entries to be data written in JavaScript Object Notation.
 
-        expect_column_values_to_be_json_parseable is a :func:`column_map_expectation <great_expectations.dataset.base.DataSet.column_map_expectation>`.
+        expect_column_values_to_be_json_parseable is a :func:`column_map_expectation <great_expectations.dataset.base.Dataset.column_map_expectation>`.
 
         Args:
             column (str): \
@@ -1931,7 +1931,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
     ):
         """Expect column entries to be JSON objects matching a given JSON schema.
 
-        expect_column_values_to_match_json_schema is a :func:`column_map_expectation <great_expectations.dataset.base.DataSet.column_map_expectation>`.
+        expect_column_values_to_match_json_schema is a :func:`column_map_expectation <great_expectations.dataset.base.Dataset.column_map_expectation>`.
 
         Args:
             column (str): \
@@ -1979,7 +1979,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
     ):
         """Expect the column mean to be between a minimum value and a maximum value (inclusive).
 
-        expect_column_mean_to_be_between is a :func:`column_aggregate_expectation <great_expectations.dataset.base.DataSet.column_aggregate_expectation>`.
+        expect_column_mean_to_be_between is a :func:`column_aggregate_expectation <great_expectations.dataset.base.Dataset.column_aggregate_expectation>`.
 
         Args:
             column (str): \
@@ -2035,7 +2035,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
     ):
         """Expect the column median to be between a minimum value and a maximum value.
 
-        expect_column_median_to_be_between is a :func:`column_aggregate_expectation <great_expectations.dataset.base.DataSet.column_aggregate_expectation>`.
+        expect_column_median_to_be_between is a :func:`column_aggregate_expectation <great_expectations.dataset.base.Dataset.column_aggregate_expectation>`.
 
         Args:
             column (str): \
@@ -2092,7 +2092,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
     ):
         """Expect the column standard deviation to be between a minimum value and a maximum value.
 
-        expect_column_stdev_to_be_between is a :func:`column_aggregate_expectation <great_expectations.dataset.base.DataSet.column_aggregate_expectation>`.
+        expect_column_stdev_to_be_between is a :func:`column_aggregate_expectation <great_expectations.dataset.base.Dataset.column_aggregate_expectation>`.
 
         Args:
             column (str): \
@@ -2148,7 +2148,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
     ):
         """Expect the number of unique values to be between a minimum value and a maximum value.
 
-        expect_column_unique_value_count_to_be_between is a :func:`column_aggregate_expectation <great_expectations.dataset.base.DataSet.column_aggregate_expectation>`.
+        expect_column_unique_value_count_to_be_between is a :func:`column_aggregate_expectation <great_expectations.dataset.base.Dataset.column_aggregate_expectation>`.
 
         Args:
             column (str): \
@@ -2214,7 +2214,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             max_value (float or None): \
                 The maximum proportion of unique values. (Proportions are on the range 0 to 1)
 
-        expect_column_unique_value_count_to_be_between is a :func:`column_aggregate_expectation <great_expectations.dataset.base.DataSet.column_aggregate_expectation>`.
+        expect_column_unique_value_count_to_be_between is a :func:`column_aggregate_expectation <great_expectations.dataset.base.Dataset.column_aggregate_expectation>`.
 
         Other Parameters:
             result_format (str or None): \
@@ -2261,7 +2261,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
     ):
         """Expect the most common value to be within the designated value set
 
-        expect_column_most_common_value_to_be_in_set is a :func:`column_aggregate_expectation <great_expectations.dataset.base.DataSet.column_aggregate_expectation>`.
+        expect_column_most_common_value_to_be_in_set is a :func:`column_aggregate_expectation <great_expectations.dataset.base.Dataset.column_aggregate_expectation>`.
 
         Args:
             column (str): \
@@ -2316,7 +2316,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
     ):
         """Expect the column to sum to be between an min and max value
 
-        expect_column_sum_to_be_between is a :func:`column_aggregate_expectation <great_expectations.dataset.base.DataSet.column_aggregate_expectation>`.
+        expect_column_sum_to_be_between is a :func:`column_aggregate_expectation <great_expectations.dataset.base.Dataset.column_aggregate_expectation>`.
 
         Args:
             column (str): \
@@ -2372,7 +2372,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
     ):
         """Expect the column to sum to be between an min and max value
 
-        expect_column_min_to_be_between is a :func:`column_aggregate_expectation <great_expectations.dataset.base.DataSet.column_aggregate_expectation>`.
+        expect_column_min_to_be_between is a :func:`column_aggregate_expectation <great_expectations.dataset.base.Dataset.column_aggregate_expectation>`.
 
         Args:
             column (str): \
@@ -2434,7 +2434,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
     ):
         """Expect the column max to be between an min and max value
 
-        expect_column_sum_to_be_between is a :func:`column_aggregate_expectation <great_expectations.dataset.base.DataSet.column_aggregate_expectation>`.
+        expect_column_sum_to_be_between is a :func:`column_aggregate_expectation <great_expectations.dataset.base.Dataset.column_aggregate_expectation>`.
 
         Args:
             column (str): \
@@ -2499,7 +2499,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         This expectation compares categorical distributions using a Chi-squared test. \
         It returns `success=True` if values in the column match the distribution of the provided partition.
 
-        expect_column_chisquare_test_p_value_to_be_greater_than is a :func:`column_aggregate_expectation <great_expectations.dataset.base.DataSet.column_aggregate_expectation>`.
+        expect_column_chisquare_test_p_value_to_be_greater_than is a :func:`column_aggregate_expectation <great_expectations.dataset.base.Dataset.column_aggregate_expectation>`.
 
         Args:
             column (str): \
@@ -2572,7 +2572,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         using the provided weights. Consequently the test expects a piecewise uniform distribution using the bins from \
         the provided partition object.
 
-        expect_column_bootstrapped_ks_test_p_value_to_be_greater_than is a :func:`column_aggregate_expectation <great_expectations.dataset.base.DataSet.column_aggregate_expectation>`.
+        expect_column_bootstrapped_ks_test_p_value_to_be_greater_than is a :func:`column_aggregate_expectation <great_expectations.dataset.base.Dataset.column_aggregate_expectation>`.
 
         Args:
             column (str): \
@@ -2659,7 +2659,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         This expectation works on both categorical and continuous partitions. See notes below for details.
 
-        expect_column_kl_divergence_to_be_less_than is a :func:`column_aggregate_expectation <great_expectations.dataset.base.DataSet.column_aggregate_expectation>`.
+        expect_column_kl_divergence_to_be_less_than is a :func:`column_aggregate_expectation <great_expectations.dataset.base.Dataset.column_aggregate_expectation>`.
 
         Args:
             column (str): \

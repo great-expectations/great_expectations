@@ -1,4 +1,4 @@
-from great_expectations.dataset import DataSet
+from great_expectations.dataset import Dataset
 
 from functools import wraps
 import inspect
@@ -11,10 +11,10 @@ from sqlalchemy.engine import reflection
 from numbers import Number
 
 
-class MetaSqlAlchemyDataSet(DataSet):
+class MetaSqlAlchemyDataset(Dataset):
 
     def __init__(self, *args, **kwargs):
-        super(MetaSqlAlchemyDataSet, self).__init__(*args, **kwargs)
+        super(MetaSqlAlchemyDataset, self).__init__(*args, **kwargs)
 
     @classmethod
     def column_map_expectation(cls, func):
@@ -33,7 +33,7 @@ class MetaSqlAlchemyDataSet(DataSet):
 
             result_format = parse_result_format(result_format)
 
-            if result_format['result_obj_format'] == 'COMPLETE':
+            if result_format['result_format'] == 'COMPLETE':
                 unexpected_count_limit = None
             else:
                 unexpected_count_limit = result_format['partial_unexpected_count']
@@ -93,14 +93,14 @@ class MetaSqlAlchemyDataSet(DataSet):
             if 'success' not in evaluation_result:
                 raise ValueError("Column aggregate expectation failed to return required information: success")
 
-            if ('result_obj' not in evaluation_result) or ('observed_value' not in evaluation_result['result_obj']):
+            if ('result' not in evaluation_result) or ('observed_value' not in evaluation_result['result']):
                 raise ValueError("Column aggregate expectation failed to return required information: observed_value")
 
             return_obj = {
                 'success': bool(evaluation_result['success'])
             }
 
-            if result_format['result_obj_format'] == 'BOOLEAN_ONLY':
+            if result_format['result_format'] == 'BOOLEAN_ONLY':
                 return return_obj
 
             count_query = sa.select([
@@ -112,31 +112,31 @@ class MetaSqlAlchemyDataSet(DataSet):
 
             count_results = self.engine.execute(count_query).fetchone()
 
-            return_obj['result_obj'] = {
-                'observed_value': evaluation_result['result_obj']['observed_value'],
+            return_obj['result'] = {
+                'observed_value': evaluation_result['result']['observed_value'],
                 "element_count": count_results['element_count'],
                 "missing_count": count_results['null_count'],
                 "missing_percent": count_results['null_count'] * 1.0 / count_results['element_count'] if count_results['element_count'] > 0 else None
             }
 
-            if result_format['result_obj_format'] == 'BASIC':
+            if result_format['result_format'] == 'BASIC':
                 return return_obj
 
-            if 'details' in evaluation_result['result_obj']:
-                return_obj['result_obj']['details'] = evaluation_result['result_obj']['details']
+            if 'details' in evaluation_result['result']:
+                return_obj['result']['details'] = evaluation_result['result']['details']
 
-            if result_format['result_obj_format'] in ["SUMMARY", "COMPLETE"]:
+            if result_format['result_format'] in ["SUMMARY", "COMPLETE"]:
                 return return_obj
 
-            raise ValueError("Unknown result_format %s." % (result_format['result_obj_format'],))
+            raise ValueError("Unknown result_format %s." % (result_format['result_format'],))
 
         return inner_wrapper
 
 
-class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
+class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
     def __init__(self, table_name=None, engine=None, connection_string=None):
-        super(SqlAlchemyDataSet, self).__init__()
+        super(SqlAlchemyDataset, self).__init__()
 
         if table_name is None:
             raise ValueError("No table_name provided.")
@@ -161,7 +161,7 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
 
     def add_default_expectations(self):
         """
-        The default behavior for PandasDataSet is to explicitly include expectations that every column present upon initialization exists.
+        The default behavior for PandasDataset is to explicitly include expectations that every column present upon initialization exists.
         """
         for col in self.columns:
             self.append_expectation({
@@ -193,7 +193,7 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
     ###
 
     @DocInherit
-    @DataSet.expectation(['value'])
+    @Dataset.expectation(['value'])
     def expect_table_row_count_to_equal(self,
         value=None,
         result_format=None, include_config=False, catch_exceptions=None, meta=None
@@ -214,13 +214,13 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
 
         return {
             'success': row_count == value,
-            'result_obj': {
+            'result': {
                 'observed_value': row_count
             }
         }
 
     @DocInherit
-    @DataSet.expectation(['min_value', 'max_value'])
+    @Dataset.expectation(['min_value', 'max_value'])
     def expect_table_row_count_to_be_between(self,
         min_value=0,
         max_value=None,
@@ -251,13 +251,13 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
 
         return {
             'success': outcome,
-            'result_obj': {
+            'result': {
                 'observed_value': row_count
             }
         }
 
     @DocInherit
-    @DataSet.expectation(['column'])
+    @Dataset.expectation(['column'])
     def expect_column_to_exist(self,
             column, column_index=None, result_format=None, include_config=False,
             catch_exceptions=None, meta=None
@@ -289,7 +289,7 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
     ###
 
     @DocInherit
-    @MetaSqlAlchemyDataSet.column_map_expectation
+    @MetaSqlAlchemyDataset.column_map_expectation
     def expect_column_values_to_be_null(self,
         column,
         mostly=None,
@@ -299,7 +299,7 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
         return sa.column(column) == None
 
     @DocInherit
-    @MetaSqlAlchemyDataSet.column_map_expectation
+    @MetaSqlAlchemyDataset.column_map_expectation
     def expect_column_values_to_not_be_null(self,
         column,
         mostly=None,
@@ -310,7 +310,7 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
 
 
     @DocInherit
-    @MetaSqlAlchemyDataSet.column_map_expectation
+    @MetaSqlAlchemyDataset.column_map_expectation
     def expect_column_values_to_be_in_set(self,
         column,
         values_set,
@@ -320,7 +320,7 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
         return sa.column(column).in_(tuple(values_set))
 
     @DocInherit
-    @MetaSqlAlchemyDataSet.column_map_expectation
+    @MetaSqlAlchemyDataset.column_map_expectation
     def expect_column_values_to_be_between(self,
         column,
         min_value=None,
@@ -364,7 +364,7 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
     ###
 
     @DocInherit
-    @MetaSqlAlchemyDataSet.column_aggregate_expectation
+    @MetaSqlAlchemyDataset.column_aggregate_expectation
     def expect_column_max_to_be_between(self,
         column,
         min_value=None,
@@ -395,14 +395,14 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
 
         return {
             'success' : success,
-            'result_obj': {
+            'result': {
                 'observed_value' : col_max
             }
         }
 
 
     @DocInherit
-    @MetaSqlAlchemyDataSet.column_aggregate_expectation
+    @MetaSqlAlchemyDataset.column_aggregate_expectation
     def expect_column_min_to_be_between(self,
         column,
         min_value=None,
@@ -433,13 +433,13 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
 
         return {
             'success' : success,
-            'result_obj': {
+            'result': {
                 'observed_value' : col_min
             }
         }
 
     @DocInherit
-    @MetaSqlAlchemyDataSet.column_aggregate_expectation
+    @MetaSqlAlchemyDataset.column_aggregate_expectation
     def expect_column_sum_to_be_between(self,
         column,
         min_value=None,
@@ -465,13 +465,13 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
 
         return {
             'success' : success,
-            'result_obj': {
+            'result': {
                 'observed_value' : col_sum
             }
         }
 
     @DocInherit
-    @MetaSqlAlchemyDataSet.column_aggregate_expectation
+    @MetaSqlAlchemyDataset.column_aggregate_expectation
     def expect_column_mean_to_be_between(self,
         column,
         min_value=None,
@@ -506,7 +506,7 @@ class SqlAlchemyDataSet(MetaSqlAlchemyDataSet):
 
         return {
             'success': success,
-            'result_obj': {
+            'result': {
                 'observed_value': col_avg
             }
         }

@@ -5,7 +5,7 @@ import numpy as np
 
 from sqlalchemy import create_engine
 
-from great_expectations.dataset import PandasDataSet, SqlAlchemyDataSet
+from great_expectations.dataset import PandasDataset, SqlAlchemyDataset
 
 ## Taken from the following stackoverflow: https://stackoverflow.com/questions/23549419/assert-that-two-dictionaries-are-almost-equal
 def assertDeepAlmostEqual(test_case, expected, actual, *args, **kwargs):
@@ -60,9 +60,9 @@ def get_dataset(dataset_type, data):
         }
 
     """
-    if dataset_type == 'PandasDataSet':
-        return PandasDataSet(data)
-    elif dataset_type == 'SqlAlchemyDataSet':
+    if dataset_type == 'PandasDataset':
+        return PandasDataset(data)
+    elif dataset_type == 'SqlAlchemyDataset':
         # Create a new database
 
         engine = create_engine('sqlite://')
@@ -71,14 +71,14 @@ def get_dataset(dataset_type, data):
         df = pd.DataFrame(data)
         df.to_sql(name='test_data', con=engine, index=False)
 
-        # Build a SqlAlchemyDataSet using that database
-        return SqlAlchemyDataSet('test_data', engine=engine)
+        # Build a SqlAlchemyDataset using that database
+        return SqlAlchemyDataset('test_data', engine=engine)
     else:
         raise ValueError("Unknown dataset_type " + str(dataset_type))
 
 
 def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type):
-    if context == "SqlAlchemyDataSet":
+    if context == "SqlAlchemyDataset":
         return expectation_type in [
             #"expect_column_to_exist",
             #"expect_table_row_count_to_be_between",
@@ -122,7 +122,7 @@ def evaluate_json_test(dataset, expectation_type, test):
     """
     This method will evaluate the result of a test build using the Great Expectations json test format.
 
-    :param dataset: (DataSet) A great expectations DataSet
+    :param dataset: (Dataset) A great expectations Dataset
     :param expectation_type: (string) the name of the expectation to be run using the test input
     :param test: (dict) a dictionary containing information for the test to be run. The dictionary must include:
         - title: (string) the name of the test
@@ -156,11 +156,11 @@ def evaluate_json_test(dataset, expectation_type, test):
     # Pass the test if we are in a test condition that is a known exception
 
     # Known condition: SqlAlchemy does not support parse_strings_as_datetimes
-    if 'parse_strings_as_datetimes' in test['in'] and isinstance(dataset, SqlAlchemyDataSet):
+    if 'parse_strings_as_datetimes' in test['in'] and isinstance(dataset, SqlAlchemyDataset):
         return
 
     # Known condition: SqlAlchemy does not support allow_cross_type_comparisons
-    if 'allow_cross_type_comparisons' in test['in'] and isinstance(dataset, SqlAlchemyDataSet):
+    if 'allow_cross_type_comparisons' in test['in'] and isinstance(dataset, SqlAlchemyDataset):
         return
 
     try:
@@ -188,20 +188,20 @@ def evaluate_json_test(dataset, expectation_type, test):
                 assert result['success'] == value
 
             elif key == 'observed_value':
-                # assert np.allclose(result['result_obj']['observed_value'], value)
-                assert value == result['result_obj']['observed_value']
+                # assert np.allclose(result['result']['observed_value'], value)
+                assert value == result['result']['observed_value']
 
             elif key == 'unexpected_index_list':
-                if isinstance(dataset, SqlAlchemyDataSet):
+                if isinstance(dataset, SqlAlchemyDataset):
                     pass
                 else:
-                    assert result['result_obj']['unexpected_index_list'] == value
+                    assert result['result']['unexpected_index_list'] == value
 
             elif key == 'unexpected_list':
-                assert result['result_obj']['unexpected_list'] == value, "expected " + str(value) + " but got " + str(result['result_obj']['unexpected_list'])
+                assert result['result']['unexpected_list'] == value, "expected " + str(value) + " but got " + str(result['result']['unexpected_list'])
 
             elif key == 'details':
-                assert result['result_obj']['details'] == value
+                assert result['result']['details'] == value
 
             elif key == 'traceback_substring':
                 assert result['exception_info']['raised_exception']

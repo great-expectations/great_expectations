@@ -1,6 +1,6 @@
-from great_expectations.dataset.pandas_dataset import PandasDataSet
+from great_expectations.dataset.pandas_dataset import PandasDataset
 
-class CustomPandasDataSet(PandasDataSet):
+class CustomPandasDataset(PandasDataset):
 
     drg_codes = [
         194, 690, 292, 392, 641, 871, 603, 470, 191, 190, 291,
@@ -15,10 +15,10 @@ class CustomPandasDataSet(PandasDataSet):
         #885
     ]
     
-    @PandasDataSet.column_map_expectation
+    @PandasDataset.column_map_expectation
     def expect_column_to_start_with_valid_drg(self, column):
         return column.map(lambda x: int(x[:3]) in self.drg_codes)
 
-    @PandasDataSet.column_map_expectation
+    @PandasDataset.column_map_expectation
     def expect_column_values_to_have_odd_lengths(self, column):
         return column.map(lambda x: len(x) % 2 == 1)

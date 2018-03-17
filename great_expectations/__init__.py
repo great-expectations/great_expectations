@@ -16,17 +16,17 @@ def _convert_to_dataset_class(df, dataset_class, expectations_config=None):
         df.__class__ = dataset_class
         df.initialize_expectations(expectations_config)
     else:
-        # Instantiate the new DataSet with default expectations
+        # Instantiate the new Dataset with default expectations
         try:
             df = dataset_class(df)
         except:
-            raise NotImplementedError("read_csv requires a DataSet class that can be instantiated from a Pandas DataFrame")
+            raise NotImplementedError("read_csv requires a Dataset class that can be instantiated from a Pandas DataFrame")
 
     return df
 
 def read_csv(
     filename,
-    dataset_class=dataset.pandas_dataset.PandasDataSet,
+    dataset_class=dataset.pandas_dataset.PandasDataset,
     expectations_config=None,
     *args, **kwargs
 ):
@@ -36,7 +36,7 @@ def read_csv(
 
 def read_json(
     filename,
-    dataset_class=dataset.pandas_dataset.PandasDataSet,
+    dataset_class=dataset.pandas_dataset.PandasDataset,
     expectations_config=None,
     accessor_func=None,
     *args, **kwargs
@@ -55,14 +55,14 @@ def read_json(
 def from_pandas(pandas_df, expectations_config=None):
     return _convert_to_dataset_class(
         pandas_df,
-        dataset.pandas_dataset.PandasDataSet,
+        dataset.pandas_dataset.PandasDataset,
         expectations_config
     )
 
 def validate(df, expectations_config, *args, **kwargs):
-    #FIXME: I'm not sure that this should always default to PandasDataSet
+    #FIXME: I'm not sure that this should always default to PandasDataset
     dataset_ = _convert_to_dataset_class(df,
-        dataset.pandas_dataset.PandasDataSet,
+        dataset.pandas_dataset.PandasDataset,
         expectations_config
     )
     return dataset_.validate(*args, **kwargs)

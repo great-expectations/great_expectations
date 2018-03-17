@@ -1,4 +1,4 @@
-# Utility methods for dealing with DataSet objects
+# Utility methods for dealing with Dataset objects
 
 from __future__ import division
 
@@ -21,7 +21,7 @@ def parse_result_format(result_format):
     there is no need to specify a custom partial_unexpected_count."""
     if isinstance(result_format, string_types):
         result_format = {
-            'result_obj_format': result_format,
+            'result_format': result_format,
             'partial_unexpected_count': 20
         }
     else:
@@ -70,7 +70,7 @@ Usage::
     http://code.activestate.com/recipes/576862/. Unfortunately, the
     original authors did not anticipate deep inheritance hierarchies, and
     we ran into a recursion issue when implementing custom subclasses of
-    PandasDataSet:
+    PandasDataset:
     https://github.com/great-expectations/great_expectations/issues/177.
 
     Our new homegrown implementation directly searches the MRO, instead
