@@ -11,7 +11,7 @@
                                  "exception_traceback": null,
                                  "raised_exception": false},
       "success": false,
-      "result_obj": {
+      "result": {
         "partial_unexpected_index_list": [
           0,
           5,

@@ -106,7 +106,7 @@ class TestCLI(unittest.TestCase):
         command_str = 'python ' + filepath + '/../bin/great_expectations validate ' \
                       + filepath + '/test_sets/Titanic.csv '\
                       + filepath + '/test_sets/titanic_custom_expectations.json -f -m='\
-                      + filepath + '/test_fixtures/custom_dataset.py -c=CustomPandasDataSet'
+                      + filepath + '/test_fixtures/custom_dataset.py -c=CustomPandasDataset'
         try:
           result = get_system_command_result(command_str)
           json_result = json.loads(result["output"])
@@ -121,7 +121,7 @@ class TestCLI(unittest.TestCase):
         # print(json.dumps(json_result, indent=2))
 
         #Remove partial unexpected counts, because we can't guarantee that they'll be the same every time.
-        del json_result["results"][0]["result_obj"]['partial_unexpected_counts']
+        del json_result["results"][0]["result"]['partial_unexpected_counts']
 
         with open(filepath + '/test_sets/expected_cli_results_custom.json', 'r') as f:
             expected_cli_results = json.load(f)

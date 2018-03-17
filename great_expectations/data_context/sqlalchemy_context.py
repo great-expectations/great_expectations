@@ -1,5 +1,5 @@
 from .base import DataContext
-from ..dataset.sqlalchemy_dataset import SqlAlchemyDataSet
+from ..dataset.sqlalchemy_dataset import SqlAlchemyDataset
 
 from sqlalchemy import create_engine, MetaData
 
@@ -25,4 +25,4 @@ class SqlAlchemyDataContext(DataContext):
         return tables
 
     def get_dataset(self, dataset_name):
-        return SqlAlchemyDataSet(table_name=dataset_name, engine=self.engine)
+        return SqlAlchemyDataset(table_name=dataset_name, engine=self.engine)
