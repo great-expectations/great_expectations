@@ -31,7 +31,7 @@ great_expectations.data_context.PandasCSVDataContext
     :show-inheritance:
     :exclude-members: PandasCSVDataContext
 
-    .. autoclass:: great_expectations.data_context.PandasCSVDataContext.PandasCSVDataContext
+    .. autoclass:: great_expectations.data_context.pandas_context.PandasCSVDataContext
         :members:
         :undoc-members:
         :show-inheritance:
@@ -45,7 +45,7 @@ great_expectations.data_context.SqlAlchemyDataContext
     :show-inheritance:
     :exclude-members: SqlAlchemyDataContext
 
-    .. autoclass:: great_expectations.data_context.SqlAlchemyDataContext.SqlAlchemyDataContext
+    .. autoclass:: great_expectations.data_context.sqlalchemy_context.SqlAlchemyDataContext
         :members:
         :undoc-members:
         :show-inheritance:
