@@ -1210,7 +1210,7 @@ class TestPandasDataset(unittest.TestCase):
         assertDeepAlmostEqual(self, results, expected_results)
 
     def test_ge_pandas_concatenating(self):
-        df1 = ge.dataset.PandasDataSet({
+        df1 = ge.dataset.PandasDataset({
             'A': ['A0', 'A1', 'A2'],
             'B': ['B0', 'B1', 'B2']
         })
@@ -1218,7 +1218,7 @@ class TestPandasDataset(unittest.TestCase):
         df1.expect_column_values_to_match_regex('A', '^A[0-2]$')
         df1.expect_column_values_to_match_regex('B', '^B[0-2]$')
 
-        df2 = ge.dataset.PandasDataSet({
+        df2 = ge.dataset.PandasDataset({
             'A': ['A3', 'A4', 'A5'],
             'B': ['B3', 'B4', 'B5']
         })
@@ -1240,11 +1240,11 @@ class TestPandasDataset(unittest.TestCase):
         #   1. Be a ge.dataset.PandaDataSet
         #   2. Only have the default expectations
 
-        self.assertIsInstance(df, ge.dataset.PandasDataSet)
+        self.assertIsInstance(df, ge.dataset.PandasDataset)
         self.assertEqual(df.find_expectations(), exp_c)
 
     def test_ge_pandas_joining(self):
-        df1 = ge.dataset.PandasDataSet({
+        df1 = ge.dataset.PandasDataset({
             'A': ['A0', 'A1', 'A2'],
             'B': ['B0', 'B1', 'B2']},
             index=['K0', 'K1', 'K2'])
@@ -1252,7 +1252,7 @@ class TestPandasDataset(unittest.TestCase):
         df1.expect_column_values_to_match_regex('A', '^A[0-2]$')
         df1.expect_column_values_to_match_regex('B', '^B[0-2]$')
 
-        df2 = ge.dataset.PandasDataSet({
+        df2 = ge.dataset.PandasDataset({
             'C': ['C0', 'C2', 'C3'],
             'D': ['C0', 'D2', 'D3']},
             index=['K0', 'K2', 'K3'])
@@ -1278,18 +1278,18 @@ class TestPandasDataset(unittest.TestCase):
         #   1. Be a ge.dataset.PandaDataSet
         #   2. Only have the default expectations
 
-        self.assertIsInstance(df, ge.dataset.PandasDataSet)
+        self.assertIsInstance(df, ge.dataset.PandasDataset)
         self.assertEqual(df.find_expectations(), exp_j)
 
     def test_ge_pandas_merging(self):
-        df1 = ge.dataset.PandasDataSet({
+        df1 = ge.dataset.PandasDataset({
             'id': [1, 2, 3, 4],
             'name': ['a', 'b', 'c', 'd']
         })
 
         df1.expect_column_values_to_match_regex('name', '^[A-Za-z ]+$')
 
-        df2 = ge.dataset.PandasDataSet({
+        df2 = ge.dataset.PandasDataset({
             'id': [1, 2, 3, 4],
             'salary': [57000, 52000, 59000, 65000]
         })
@@ -1312,11 +1312,11 @@ class TestPandasDataset(unittest.TestCase):
         #   1. Be a ge.dataset.PandaDataSet
         #   2. Only have the default expectations
 
-        self.assertIsInstance(df, ge.dataset.PandasDataSet)
+        self.assertIsInstance(df, ge.dataset.PandasDataset)
         self.assertEqual(df.find_expectations(), exp_m)
 
     def test_ge_pandas_sampling(self):
-        df = ge.dataset.PandasDataSet({
+        df = ge.dataset.PandasDataset({
             'A': [1, 2, 3, 4],
             'B': [5, 6, 7, 8],
             'C': ['a', 'b', 'c', 'd'],
@@ -1337,11 +1337,11 @@ class TestPandasDataset(unittest.TestCase):
         #   2. Inherit ALL the non-failing expectations of the parent data frame
 
         samp1 = df.sample(n=2)
-        self.assertIsInstance(samp1, ge.dataset.PandasDataSet)
+        self.assertIsInstance(samp1, ge.dataset.PandasDataset)
         self.assertEqual(samp1.find_expectations(), exp1)
 
         samp1 = df.sample(frac=0.25, replace=True)
-        self.assertIsInstance(samp1, ge.dataset.PandasDataSet)
+        self.assertIsInstance(samp1, ge.dataset.PandasDataset)
         self.assertEqual(samp1.find_expectations(), exp1)
 
         # Change expectation on column "D", sample, and check expectations.
@@ -1369,7 +1369,7 @@ class TestPandasDataset(unittest.TestCase):
 
 
     def test_ge_pandas_concatenating(self):
-        df1 = ge.dataset.PandasDataSet({
+        df1 = ge.dataset.PandasDataset({
             'A': ['A0', 'A1', 'A2'],
             'B': ['B0', 'B1', 'B2']
         })
@@ -1377,7 +1377,7 @@ class TestPandasDataset(unittest.TestCase):
         df1.expect_column_values_to_match_regex('A', '^A[0-2]$')
         df1.expect_column_values_to_match_regex('B', '^B[0-2]$')
 
-        df2 = ge.dataset.PandasDataSet({
+        df2 = ge.dataset.PandasDataset({
             'A': ['A3', 'A4', 'A5'],
             'B': ['B3', 'B4', 'B5']
         })
@@ -1399,11 +1399,11 @@ class TestPandasDataset(unittest.TestCase):
         #   1. Be a ge.dataset.PandaDataSet
         #   2. Only have the default expectations
 
-        self.assertIsInstance(df, ge.dataset.PandasDataSet)
+        self.assertIsInstance(df, ge.dataset.PandasDataset)
         self.assertEqual(df.find_expectations(), exp_c)
 
     def test_ge_pandas_joining(self):
-        df1 = ge.dataset.PandasDataSet({
+        df1 = ge.dataset.PandasDataset({
             'A': ['A0', 'A1', 'A2'],
             'B': ['B0', 'B1', 'B2']},
             index=['K0', 'K1', 'K2'])
@@ -1411,7 +1411,7 @@ class TestPandasDataset(unittest.TestCase):
         df1.expect_column_values_to_match_regex('A', '^A[0-2]$')
         df1.expect_column_values_to_match_regex('B', '^B[0-2]$')
 
-        df2 = ge.dataset.PandasDataSet({
+        df2 = ge.dataset.PandasDataset({
             'C': ['C0', 'C2', 'C3'],
             'D': ['C0', 'D2', 'D3']},
             index=['K0', 'K2', 'K3'])
@@ -1437,18 +1437,18 @@ class TestPandasDataset(unittest.TestCase):
         #   1. Be a ge.dataset.PandaDataSet
         #   2. Only have the default expectations
 
-        self.assertIsInstance(df, ge.dataset.PandasDataSet)
+        self.assertIsInstance(df, ge.dataset.PandasDataset)
         self.assertEqual(df.find_expectations(), exp_j)
 
     def test_ge_pandas_merging(self):
-        df1 = ge.dataset.PandasDataSet({
+        df1 = ge.dataset.PandasDataset({
             'id': [1, 2, 3, 4],
             'name': ['a', 'b', 'c', 'd']
         })
 
         df1.expect_column_values_to_match_regex('name', '^[A-Za-z ]+$')
 
-        df2 = ge.dataset.PandasDataSet({
+        df2 = ge.dataset.PandasDataset({
             'id': [1, 2, 3, 4],
             'salary': [57000, 52000, 59000, 65000]
         })
@@ -1471,11 +1471,11 @@ class TestPandasDataset(unittest.TestCase):
         #   1. Be a ge.dataset.PandaDataSet
         #   2. Only have the default expectations
 
-        self.assertIsInstance(df, ge.dataset.PandasDataSet)
+        self.assertIsInstance(df, ge.dataset.PandasDataset)
         self.assertEqual(df.find_expectations(), exp_m)
 
     def test_ge_pandas_sampling(self):
-        df = ge.dataset.PandasDataSet({
+        df = ge.dataset.PandasDataset({
             'A': [1, 2, 3, 4],
             'B': [5, 6, 7, 8],
             'C': ['a', 'b', 'c', 'd'],
@@ -1496,11 +1496,11 @@ class TestPandasDataset(unittest.TestCase):
         #   2. Inherit ALL the expectations of the parent data frame
 
         samp1 = df.sample(n=2)
-        self.assertIsInstance(samp1, ge.dataset.PandasDataSet)
+        self.assertIsInstance(samp1, ge.dataset.PandasDataset)
         self.assertEqual(samp1.find_expectations(), exp1)
 
         samp1 = df.sample(frac=0.25, replace=True)
-        self.assertIsInstance(samp1, ge.dataset.PandasDataSet)
+        self.assertIsInstance(samp1, ge.dataset.PandasDataset)
         self.assertEqual(samp1.find_expectations(), exp1)
 
         # Change expectation on column "D", sample, and check expectations.
@@ -1530,7 +1530,7 @@ class TestPandasDataset(unittest.TestCase):
 
 
     def test_ge_pandas_subsetting(self):
-        df = ge.dataset.PandasDataSet({
+        df = ge.dataset.PandasDataset({
             'A':[1,2,3,4],
             'B':[5,6,7,8],
             'C':['a','b','c','d'],
@@ -1551,39 +1551,39 @@ class TestPandasDataset(unittest.TestCase):
         exp1 = df.find_expectations()
 
         sub1 = df[['A', 'D']]
-        self.assertIsInstance(sub1, ge.dataset.PandasDataSet)
+        self.assertIsInstance(sub1, ge.dataset.PandasDataset)
         self.assertEqual(sub1.find_expectations(), exp1)
 
         sub1 = df[['A']]
-        self.assertIsInstance(sub1, ge.dataset.PandasDataSet)
+        self.assertIsInstance(sub1, ge.dataset.PandasDataset)
         self.assertEqual(sub1.find_expectations(), exp1)
 
         sub1 = df[:3]
-        self.assertIsInstance(sub1, ge.dataset.PandasDataSet)
+        self.assertIsInstance(sub1, ge.dataset.PandasDataset)
         self.assertEqual(sub1.find_expectations(), exp1)
 
         sub1 = df[1:2]
-        self.assertIsInstance(sub1, ge.dataset.PandasDataSet)
+        self.assertIsInstance(sub1, ge.dataset.PandasDataset)
         self.assertEqual(sub1.find_expectations(), exp1)
 
         sub1 = df[:-1]
-        self.assertIsInstance(sub1, ge.dataset.PandasDataSet)
+        self.assertIsInstance(sub1, ge.dataset.PandasDataset)
         self.assertEqual(sub1.find_expectations(), exp1)
 
         sub1 = df[-1:]
-        self.assertIsInstance(sub1, ge.dataset.PandasDataSet)
+        self.assertIsInstance(sub1, ge.dataset.PandasDataset)
         self.assertEqual(sub1.find_expectations(), exp1)
 
         sub1 = df.iloc[:3, 1:4]
-        self.assertIsInstance(sub1, ge.dataset.PandasDataSet)
+        self.assertIsInstance(sub1, ge.dataset.PandasDataset)
         self.assertEqual(sub1.find_expectations(), exp1)
 
         sub1 = df.loc[0:, 'A':'B']
-        self.assertIsInstance(sub1, ge.dataset.PandasDataSet)
+        self.assertIsInstance(sub1, ge.dataset.PandasDataset)
         self.assertEqual(sub1.find_expectations(), exp1)
 
     def test_ge_pandas_automatic_failure_removal(self):
-        df = ge.dataset.PandasDataSet({
+        df = ge.dataset.PandasDataset({
             'A': [1, 2, 3, 4],
             'B': [5, 6, 7, 8],
             'C': ['a', 'b', 'c', 'd'],

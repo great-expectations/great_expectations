@@ -930,7 +930,7 @@ class TestDataset(unittest.TestCase):
         )
 
     def test_discard_failing_expectations(self):
-        df = ge.dataset.PandasDataSet({
+        df = ge.dataset.PandasDataset({
             'A':[1,2,3,4],
             'B':[5,6,7,8],
             'C':['a','b','c','d'],

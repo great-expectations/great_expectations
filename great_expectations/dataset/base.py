@@ -455,7 +455,8 @@ class Dataset(object):
         res = self.validate(only_return_failures=True).get('results')
         if any(res):
             for item in res:
-                self.remove_expectation(expectation_type=item['expectation_type'], expectation_kwargs=item['kwargs'])
+                self.remove_expectation(expectation_type=item['expectation_config']['expectation_type'],
+                                        expectation_kwargs=item['expectation_config']['kwargs'])
 #            print("WARNING: Removed %s expectations that were 'False'" % len(res))
             warnings.warn("Removed %s expectations that were 'False'" % len(res))
 
