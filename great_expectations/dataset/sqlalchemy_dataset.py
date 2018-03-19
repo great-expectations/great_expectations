@@ -105,21 +105,32 @@ class MetaSqlAlchemyDataset(Dataset):
             if result_format['result_format'] == 'BOOLEAN_ONLY':
                 return return_obj
 
-            count_query = sa.select([
-                sa.func.count().label('element_count'),
-                sa.func.sum(
-                    sa.case([(sa.column(column) == None, 1)], else_=0)
-                ).label('null_count'),
-            ]).select_from(sa.table(self.table_name))
+            # Use the element and null count information from a column_map_expectation if it needed
+            # it anyway to avoid an extra trip to the database
 
-            count_results = self.engine.execute(count_query).fetchone()
+            if 'element_count' not in evaluation_result and 'null_count' not in evaluation_result:
+                count_query = sa.select([
+                    sa.func.count().label('element_count'),
+                    sa.func.sum(
+                        sa.case([(sa.column(column) == None, 1)], else_=0)
+                    ).label('null_count'),
+                ]).select_from(sa.table(self.table_name))
 
-            return_obj['result'] = {
-                'observed_value': evaluation_result['result']['observed_value'],
-                "element_count": count_results['element_count'],
-                "missing_count": count_results['null_count'],
-                "missing_percent": count_results['null_count'] * 1.0 / count_results['element_count'] if count_results['element_count'] > 0 else None
-            }
+                count_results = self.engine.execute(count_query).fetchone()
+
+                return_obj['result'] = {
+                    'observed_value': evaluation_result['result']['observed_value'],
+                    "element_count": count_results['element_count'],
+                    "missing_count": count_results['null_count'],
+                    "missing_percent": count_results['null_count'] / count_results['element_count'] if count_results['element_count'] > 0 else None
+                }
+            else:
+                return_obj['result'] = {
+                    'observed_value': evaluation_result['result']['observed_value'],
+                    "element_count": evaluation_result["element_count"],
+                    "missing_count": evaluation_result["null_count"],
+                    "missing_percent": evaluation_result['null_count'] / evaluation_result['element_count'] if evaluation_result['element_count'] > 0 else None
+                }
 
             if result_format['result_format'] == 'BASIC':
                 return return_obj
@@ -544,7 +555,6 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
 
-        # FIXME: Optimize this by avoiding repeat computation of element_count and null_count in decorator.
         count_query = self.engine.execute(
             sa.select([
                 sa.func.count().label('element_count'),
@@ -567,6 +577,8 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 ((min_value is None) or (min_value <= proportion_unique)) and
                 ((max_value is None) or (proportion_unique <= max_value))
             ),
+            "element_count": counts["element_count"],
+            "null_count": counts["null_count"],
             "result": {
                 "observed_value": proportion_unique
             }
