@@ -153,12 +153,10 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
     For the full API reference, please see :func:`DataSet <great_expectations.dataset.base.DataSet>`
 
     NB
-    1. Subsets of PandaDataSet have ALL the expectations of the original
+    1. Samples and Subsets of PandaDataSet have ALL the expectations of the original
        data frame unless the user specifies the discard_subset_failing_expectations=True
        property on the original data frame.
-    2. Samples of PandaDataSet have ALL the non-failing expectations of the original
-       data frame.
-    3. Concatenations, joins, and merges of PandaDataSets ONLY contain the
+    2. Concatenations, joins, and merges of PandaDataSets ONLY contain the
        default_expectations (see :func: `add_default_expectations`)
     """
 
@@ -172,7 +170,11 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
     def __finalize__(self, other, method=None, **kwargs):
         if isinstance(other, PandasDataSet):
-            self.initialize_expectations(other.get_expectations_config())
+            self.initialize_expectations(other.get_expectations_config(
+                discard_failed_expectations=False,
+                discard_output_format_kwargs=False,
+                discard_include_configs_kwargs=False,
+                discard_catch_exceptions_kwargs=False))
             self.discard_subset_failing_expectations = other.discard_subset_failing_expectations
             if self.discard_subset_failing_expectations:
                 self.discard_failing_expectations()
