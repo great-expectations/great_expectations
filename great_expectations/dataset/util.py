@@ -293,14 +293,14 @@ def continuous_partition_data(data, bins='auto', n_bins=10):
     }
 
 
-def infer_distribution_parameters(column, distribution, params=None):
+def infer_distribution_parameters(data, distribution, params=None):
     """Convenience method for determining the shape parameters of a given distribution
 
     Args:
-        column (list-like): The data to build shape parameters out of
+        data (list-like): The data to build shape parameters out of
         distribution (string): Scipy distribution, determines which shape parameters to return
-        params (dict): The known parameters of desired distribution (`column`)
-                       Keep as None to infer necessary parameters from the data column
+        params (dict): The known parameters of desired distribution (`data`)
+                       Keep as None to infer necessary parameters from the data data
 
     Returns:
         A dictionary of named parameters::
@@ -329,10 +329,10 @@ def infer_distribution_parameters(column, distribution, params=None):
         raise TypeError("params must be a dictionary object, see great_expectations documentation")
 
     if 'mean' not in params.keys():
-        params['mean'] = column.mean()
+        params['mean'] = data.mean()
 
     if 'std_dev' not in params.keys():
-        params['std_dev'] = column.std()
+        params['std_dev'] = data.std()
 
     if 'loc' not in params.keys():
         params['loc'] = 0
@@ -368,12 +368,12 @@ def infer_distribution_parameters(column, distribution, params=None):
             if 'loc' in params.keys():
                 params['min'] = params['loc']
             else:
-                params['min'] = min(column)
+                params['min'] = min(data)
         if 'max' not in params.keys():
             if 'scale' in params.keys():
                 params['max'] = params['scale']
             else:
-                params['max'] = max(column) - params['min']
+                params['max'] = max(data) - params['min']
 
     elif distribution == 'chi2':
         # scipy cdf(x, df, loc=0, scale=1)
@@ -450,16 +450,16 @@ def validate_distribution_parameters(distribution, params):
     """
 
     norm_msg = "norm distributions require 0 parameters and optionally 'mean', 'std_dev'."
-    beta_msg = "beta distributions require 2 positive parameters 'alpha', 'beta' and optionally 'loc', 'scale'.)"
+    beta_msg = "beta distributions require 2 positive parameters 'alpha', 'beta' and optionally 'loc', 'scale'."
     gamma_msg = "gamma distributions require 1 positive parameter 'alpha' and optionally 'loc','scale'."
-    poisson_msg = "poisson distributions require 1 positive parameter 'lambda'. and optionally 'loc'."
+    poisson_msg = "poisson distributions require 1 positive parameter 'lambda' and optionally 'loc'."
     uniform_msg = "uniform distributions require 0 parameters and optionally 'loc', 'scale'."
     chi2_msg = "chi2 distributions require 1 positive parameter 'df' and optionally 'loc', 'scale'."
     expon_msg = "expon distributions require 0 parameters and optionally 'loc', 'scale'."
 
     if params is None:
         raise ValueError(
-            "params must be a dict, or use ge.dataset.util.infer_distribution_parameters(df.column, distribution)")
+            "params must be a dict, or use ge.dataset.util.infer_distribution_parameters(data, distribution)")
 
     if isinstance(params, dict):
         # `params` is a dictionary
@@ -507,12 +507,16 @@ def validate_distribution_parameters(distribution, params):
                 scale = params[2]
             if len(params) > 3:
                 raise ValueError("Too many parameters provided: %s" % gamma_msg)
+            elif params[0] <= 0:
+                raise ValueError("Invalid parameters: %s" %gamma_msg)
 
         elif distribution == 'poisson':
             if len(params) < 1:
                 raise ValueError("Missing required parameters: %s" %poisson_msg)
             if len(params) > 2:
                 raise ValueError("Too many parameters provided: %s" %poisson_msg)
+            elif params[0] <= 0:
+                raise ValueError("Invalid parameters: %s" %poisson_msg)
 
         elif distribution == 'uniform':
             if len(params) == 2:
@@ -527,6 +531,8 @@ def validate_distribution_parameters(distribution, params):
                 scale = params[2]
             elif len(params) > 3:
                 raise ValueError("Too many arguments provided: %s" %chi2_msg)
+            if params[0] <= 0:
+                raise ValueError("Invalid parameters: %s" %chi2_msg)
 
         elif distribution == 'expon':
 

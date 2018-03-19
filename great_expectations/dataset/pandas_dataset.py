@@ -720,7 +720,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
         return {
             "success": ks_result[1] >= p_value,
-            "result_obj": {
+            "result": {
                 "observed_value": ks_result[1],
                 "details": {
                     "expected_params": positional_parameters,

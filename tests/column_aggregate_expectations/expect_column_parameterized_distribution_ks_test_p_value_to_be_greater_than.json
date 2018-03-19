@@ -1,0 +1,1140 @@
+{
+  "expectation_type" : "expect_column_bootstrapped_ks_test_p_value_to_be_greater_than",
+  "datasets" : [{
+    "data" : {
+      // FIXME copy data
+    },
+    "tests" : [{
+        "title": "Positive standard norm distribution",
+        "exact_match_out": false,
+        "in": {
+          "column": "norm_std",
+          "result_format": "BASIC",
+          "params": "{'mean':0, 'std_dev':1}",
+          "distribution": "norm",
+          "p_value": 0.05
+        },
+        "out": {
+          "success": true
+        }
+      },
+      {
+        "title": "Negative standard norm distribution",
+        "exact_match_out": false,
+        "in": {
+          "column": "norm_std",
+          "result_format": "BASIC",
+          "params": "{'mean':100, 'std_dev':100}",
+          "distribution": "norm",
+          "p_value": 0.05
+        },
+        "out": {
+          "success": false
+        }
+      },
+      {
+        "title": "Raise ValueError when p_value is Zero",
+        "exact_match_out": false,
+        "in": {
+          "column": "norm_std",
+          "result_format": "BASIC",
+          "params": "{'mean':0, 'std_dev':1}",
+          "distribution": "norm",
+          "p_value": 0.0
+        },
+        "out": {},
+        "error": {
+          "traceback_substring": "p_value must be between 0 and 1 exclusive"
+        }
+      },
+      {
+        "title": "Raise ValueError when p_value is negative",
+        "exact_match_out": false,
+        "in": {
+          "column": "norm_std",
+          "result_format": "BASIC",
+          "params": "{'mean':0, 'std_dev':1}",
+          "distribution": "norm",
+          "p_value": -0.1
+        },
+        "out": {},
+        "error": {
+          "traceback_substring": "p_value must be between 0 and 1 exclusive"
+        }
+      },
+      {
+        "title": "Raise ValueError when p_value is 1",
+        "exact_match_out": false,
+        "in": {
+          "column": "norm_std",
+          "result_format": "BASIC",
+          "params": "{'mean':0, 'std_dev':1}",
+          "distribution": "norm",
+          "p_value": 1.0
+        },
+        "out": {},
+        "error": {
+          "traceback_substring": "p_value must be between 0 and 1 exclusive"
+        }
+      },
+      {
+        "title": "Raise ValueError when p_value is greater than 1",
+        "exact_match_out": false,
+        "in": {
+          "column": "norm_std",
+          "result_format": "BASIC",
+          "params": "{'mean':0, 'std_dev':1}",
+          "distribution": "norm",
+          "p_value": 1.1
+        },
+        "out": {},
+        "error": {
+          "traceback_substring": "p_value must be between 0 and 1 exclusive"
+        }
+      },
+      {
+        "title": "Raise ValueError when params is None",
+        "exact_match_out": false,
+        "in": {
+          "column": "norm_std",
+          "result_format": "BASIC",
+          "params": "",
+          // FIXME none value in JSON?
+          "distribution": "norm",
+          "p_value": 0.05
+        },
+        "out": {},
+        "error": {
+          "traceback_substring": "params must be a dict, or use ge.dataset.util.infer_distribution_parameters(data, distribution)"
+        }
+      },
+      {
+        "title": "Raise ValueError when params is a dict and std_dev is 0",
+        "exact_match_out": false,
+        "in": {
+          "column": "norm_std",
+          "result_format": "BASIC",
+          "params": "{'mean':0, 'std_dev':0}",
+          "distribution": "norm",
+          "p_value": 0.05
+        },
+        "out": {},
+        "error": {
+          "traceback_substring": "std_dev and scale must be positive."
+        }
+      },
+      {
+        "title": "Raise ValueError when params is a dict and std_dev is negative",
+        "exact_match_out": false,
+        "in": {
+          "column": "norm_std",
+          "result_format": "BASIC",
+          "params": "{'mean': 0, 'std_dev': -0.1}",
+          "distribution": "norm",
+          "p_value": 0.05
+        },
+        "out": {},
+        "error": {
+          "traceback_substring": "std_dev and scale must be positive."
+        }
+      },
+      {
+        "title": "Raise ValueError when params is a dict and scale is 0",
+        "exact_match_out": false,
+        "in": {
+          "column": "norm_std",
+          "result_format": "BASIC",
+          "params": "{'mean':0, 'scale':0}",
+          "distribution": "norm",
+          "p_value": 0.05
+        },
+        "out": {},
+        "error": {
+          "traceback_substring": "std_dev and scale must be positive."
+        }
+      },
+      {
+        "title": "Raise ValueError when params is a dict and scale is negative",
+        "exact_match_out": false,
+        "in": {
+          "column": "norm_std",
+          "result_format": "BASIC",
+          "params": "{'mean':0, 'scale':-0.1}",
+          "distribution": "norm",
+          "p_value": 0.05
+        },
+        "out": {},
+        "error": {
+          "traceback_substring": "std_dev and scale must be positive."
+        }
+      },
+      {
+        "title": "Raise ValueError when distribution=beta, params is a dict, and alpha is 0",
+        "exact_match_out": false,
+        "in": {
+          "column": "beta",
+          "result_format": "BASIC",
+          "params": "{'alpha':0, 'beta':0.5}",
+          "distribution": "beta",
+          "p_value": 0.05
+        },
+        "out": {},
+        "error": {
+          "traceback_substring": "Invalid parameters: beta distributions require 2 positive parameters 'alpha', 'beta' and optionally 'loc', 'scale'."
+        }
+      },
+      {
+        "title": "Raise ValueError when distribution=beta, params is a dict, and alpha is negative",
+        "exact_match_out": false,
+        "in": {
+          "column": "beta",
+          "result_format": "BASIC",
+          "params": "{'alpha':-0.1, 'beta': 0.5",
+          "distribution": "beta",
+          "p_value": 0.05
+        },
+        "out": {},
+        "error": {
+          "traceback_substring": "Invalid parameters: beta distributions require 2 positive parameters 'alpha', 'beta' and optionally 'loc', 'scale'."
+        }
+      },
+      {
+        "title": "Raise ValueError when distribution=beta, params is a dict, and beta is 0",
+        "exact_match_out": false,
+        "in": {
+          "column": "beta",
+          "result_format": "BASIC",
+          "params": "{'alpha':0.5, 'beta':0",
+          "distribution": "beta",
+          "p_value": 0.05
+        },
+        "out": {},
+        "error": {
+          "traceback_substring": "Invalid parameters: beta distributions require 2 positive parameters 'alpha', 'beta' and optionally 'loc', 'scale'."
+        }
+      },
+      {
+        "title": "Raise ValueError when distribution=beta, params is a dict, and beta is negative",
+        "exact_match_out": false,
+        "in": {
+          "column": "beta",
+          "result_format": "BASIC",
+          "params": "{'alpha':0.5, 'beta':-0.1}",
+          "distribution": "beta",
+          "p_value": 0.05
+        },
+        "out": {},
+        "error": {
+          "traceback_substring": "Invalid parameters: beta distributions require 2 positive parameters 'alpha', 'beta' and optionally 'loc', 'scale'."
+        }
+      },
+      {
+        "title": "Raise ValueError when distribution=beta, params is a dict, and required alpha parameter is missing",
+        "exact_match_out": false,
+        "in": {
+          "column": "beta",
+          "result_format": "BASIC",
+          "params": "{'beta': 0.5}",
+          "distribution": "beta",
+          "p_value": 0.05
+        },
+        "out": {},
+        "error": {
+          "traceback_substring": "Invalid parameters: beta distributions require 2 positive parameters 'alpha', 'beta' and optionally 'loc', 'scale'."
+        }
+      },
+      {
+        "title": "Raise ValueError when distribution=beta, params is a dict, and required beta parameter is missing",
+        "exact_match_out": false,
+        "in": {
+          "column": "beta",
+          "result_format": "BASIC",
+          "params": "{'alpha':0.5}",
+          "distribution": "beta",
+          "p_value": 0.05
+        },
+        "out": {},
+        "error": {
+          "traceback_substring": "Invalid parameters: beta distributions require 2 positive parameters 'alpha', 'beta' and optionally 'loc', 'scale'."
+        }
+      },
+      {
+        "title": "Raise ValueError when distribution=gamma, params is a dict, and alpha is 0",
+        "exact_match_out": false,
+        "in": {
+          "column": "gamma",
+          "result_format": "BASIC",
+          "params": "{'alpha': 0}'",
+          "distribution": "gamma",
+          "p_value": 0.05
+        },
+        "out": {},
+        "error": {
+          "traceback_substring": "Invalid parameters: gamma distributions require 1 positive parameter 'alpha' and optionally 'loc','scale'."
+        }
+      },
+      {
+        "title": "Raise ValueError when distribution=gamma, params is a dict, and alpha is negative",
+        "exact_match_out": false,
+        "in": {
+          "column": "gamma",
+          "result_format": "BASIC",
+          "params": "{'alpha':-0.1}",
+          "distribution": "gamma",
+          "p_value": 0.05
+        },
+        "out": {},
+        "error": {
+          "traceback_substring": "Invalid parameters: gamma distributions require 1 positive parameter 'alpha' and optionally 'loc','scale'."
+        }
+      },
+      {
+        "title": "Raise ValueError when distribution=gamma, params is a dict, and alpha is missing",
+        "exact_match_out": false,
+        "in": {
+          "column": "gamma",
+          "result_format": "BASIC",
+          "params": "{}",
+          "distribution": "gamma",
+          "p_value": 0.05
+        },
+        "out": {},
+        "error": {
+          "traceback_substring": "Invalid parameters: gamma distributions require 1 positive parameter 'alpha' and optionally 'loc','scale'."
+        }
+      },
+      {
+        "title": "Raise ValueError when distribution=poisson, params is a dict, and lambda is 0",
+        "exact_match_out": false,
+        "in": {
+          "column": "poisson",
+          "result_format": "BASIC",
+          "params": "{'lambda':0}",
+          "distribution": "poisson",
+          "p_value": 0.05
+        },
+        "out": {},
+        "error": {
+          "traceback_substring": "Invalid parameters: poisson distributions require 1 positive parameter 'lambda' and optionally 'loc'."
+        }
+      },
+      {
+        "title": "Raise ValueError when distribution=poisson, params is a dict, and lambda is negative",
+        "exact_match_out": false,
+        "in": {
+          "column": "poisson",
+          "result_format": "BASIC",
+          "params": "{'lambda':-0.1}",
+          "distribution": "poisson",
+          "p_value": 0.05
+        },
+        "out": {},
+        "error": {
+          "traceback_substring": "Invalid parameters: poisson distributions require 1 positive parameter 'lambda' and optionally 'loc'."
+        }
+      },
+      {
+        "title": "Raise ValueError when distribution=poisson, params is a dict, and lambda is missing",
+        "exact_match_out": false,
+        "in": {
+          "column": "poisson",
+          "result_format": "BASIC",
+          "params": "{}",
+          "distribution": "poisson",
+          "p_value": 0.05
+        },
+        "out": {},
+        "error": {
+          "traceback_substring": "Invalid parameters: poisson distributions require 1 positive parameter 'lambda' and optionally 'loc'."
+        }
+      },
+      {
+        "title": "Raise ValueError when distribution=chi2, params is a dict, and df is 0",
+        "exact_match_out": false,
+        "in": {
+          "column": "chi2",
+          "result_format": "BASIC",
+          "params": "{'df':0}",
+          "distribution": "chi2",
+          "p_value": 0.05
+        },
+        "out": {},
+        "error": {
+          "traceback_substring": "Invalid parameters: chi2 distributions require 1 positive parameter 'df' and optionally 'loc', 'scale'."
+        }
+      },
+      {
+        "title": "Raise ValueError when distribution=chi2, params is a dict, and df is 0",
+        "exact_match_out": false,
+        "in": {
+          "column": "chi2",
+          "result_format": "BASIC",
+          "params": "{'df':-0.1}",
+          "distribution": "chi2",
+          "p_value": 0.05
+        },
+        "out": {},
+        "error": {
+          "traceback_substring": "Invalid parameters: chi2 distributions require 1 positive parameter 'df' and optionally 'loc', 'scale'."
+        }
+      },
+      {
+        "title": "Raise ValueError when distribution=chi2, params is a dict, and required parameter df is missing ",
+        "exact_match_out": false,
+        "in": {
+          "column": "chi2",
+          "result_format": "BASIC",
+          "params": "{}",
+          "distribution": "chi2",
+          "p_value": 0.05
+        },
+        "out": {},
+        "error": {
+          "traceback_substring": "Invalid parameters: chi2 distributions require 1 positive parameter 'df' and optionally 'loc', 'scale'."
+        }
+      },
+      {
+        "title": "Raise ValueError when distribution=beta, params is a tuple, and there is 1 of 2 required parameters",
+        "exact_match_out": false,
+        "in": {
+          "column": "beta",
+          "result_format": "BASIC",
+          "params": "(1.0)",
+          "distribution": "beta",
+          "p_value": 0.05
+        },
+        "out": {},
+        "error": {
+          "traceback_substring": "Missing required parameters: beta distributions require 2 positive parameters 'alpha', 'beta' and optionally 'loc', 'scale'."
+        }
+      },
+      {
+        "title": "Raise ValueError when distribution=beta, params is a tuple, and alpha parameter is 0",
+        "exact_match_out": false,
+        "in": {
+          "column": "beta",
+          "result_format": "BASIC",
+          "params": "(0, 0.5)",
+          "distribution": "beta",
+          "p_value": 0.05
+        },
+        "out": {},
+        "error": {
+          "traceback_substring": "Invalid parameters: beta distributions require 2 positive parameters 'alpha', 'beta' and optionally 'loc', 'scale'."
+        }
+      },
+      {
+        "title": "Raise ValueError when distribution=beta, params is a tuple, and alpha parameter is negative",
+        "exact_match_out": false,
+        "in": {
+          "column": "beta",
+          "result_format": "BASIC",
+          "params": "(-0.5, 0.5)",
+          "distribution": "beta",
+          "p_value": 0.05
+        },
+        "out": {},
+        "error": {
+          "traceback_substring": "Invalid parameters: beta distributions require 2 positive parameters 'alpha', 'beta' and optionally 'loc', 'scale'."
+        }
+      },
+      {
+        "title": "Raise ValueError when distribution=beta, params is a tuple, and beta parameter is 0",
+        "exact_match_out": false,
+        "in": {
+          "column": "beta",
+          "result_format": "BASIC",
+          "params": "(0.5, 0)",
+          "distribution": "beta",
+          "p_value": 0.05
+        },
+        "out": {},
+        "error": {
+          "traceback_substring": "Invalid parameters: beta distributions require 2 positive parameters 'alpha', 'beta' and optionally 'loc', 'scale'."
+        }
+      },
+      {
+        "title": "Raise ValueError when distribution=beta, params is a tuple, and beta parameter is negative",
+        "exact_match_out": false,
+        "in": {
+          "column": "beta",
+          "result_format": "BASIC",
+          "params": "(0.5, -0.5)",
+          "distribution": "beta",
+          "p_value": 0.05
+        },
+        "out": {},
+        "error": {
+          "traceback_substring": "Invalid parameters: beta distributions require 2 positive parameters 'alpha', 'beta' and optionally 'loc', 'scale'.)"
+        }
+      },
+      {
+        "title": "Raise ValueError when distribution=beta, params is a tuple, and more than 4 params are passed",
+        "exact_match_out": false,
+        "in": {
+          "column": "beta",
+          "result_format": "BASIC",
+          "params": "(0.5, 0.5, 0.5, 0.5, 1)",
+          "distribution": "beta",
+          "p_value": 0.05
+        },
+        "out": {},
+        "error": {
+          "traceback_substring": "Too many parameters provided: beta distributions require 2 positive parameters 'alpha', 'beta' and optionally 'loc', 'scale'.)"
+        }
+      },
+      {
+        "title": "Raise ValueError when distribution=norm, params is a tuple, and more than 2 params are passed",
+        "exact_match_out": false,
+        "in": {
+          "column": "norm",
+          "result_format": "BASIC",
+          "params": "(0,1,5)",
+          "distribution": "norm",
+          "p_value": 0.05
+        },
+        "out": {},
+        "error": {
+          "traceback_substring": "Too many parameters provided: norm distributions require 0 parameters and optionally 'mean', 'std_dev'."
+        }
+      },
+      {
+        "title": "Raise ValueError when distribution=norm, params is a tuple, and std_dev is 0",
+        "exact_match_out": false,
+        "in": {
+          "column": "norm",
+          "result_format": "BASIC",
+          "params": "(0,0)",
+          "distribution": "norm",
+          "p_value": 0.05
+        },
+        "out": {},
+        "error": {
+          "traceback_substring": "std_dev and scale must be positive."
+        }
+      },
+      {
+        "title": "Raise ValueError when distribution=norm, params is a tuple, and std_dev is negative",
+        "exact_match_out": false,
+        "in": {
+          "column": "norm",
+          "result_format": "BASIC",
+          "params": "(0, -1)",
+          "distribution": "norm",
+          "p_value": 0.05
+        },
+        "out": {},
+        "error": {
+          "traceback_substring": "std_dev and scale must be positive."
+        }
+      },
+      {
+        "title": "Raise ValueError when distribution=gamma, params is a tuple, and required alpha parameter is missing",
+        "exact_match_out": false,
+        "in": {
+          "column": "gamma",
+          "result_format": "BASIC",
+          "params": "tuple()",
+          "distribution": "gamma",
+          "p_value": 0.05
+        },
+        "out": {},
+        "error": {
+          "traceback_substring": "Missing required parameters: gamma distributions require 1 positive parameter 'alpha' and optionally 'loc','scale'."
+        }
+      },
+      {
+        "title": "Raise ValueError when distribution=gamma, params is a tuple, and alpha parameter is 0",
+        "exact_match_out": false,
+        "in": {
+          "column": "gamma",
+          "result_format": "BASIC",
+          "params": "(-1)",
+          "distribution": "gamma",
+          "p_value": 0.05
+        },
+        "out": {},
+        "error": {
+          "traceback_substring": "Invalid parameters: gamma distributions require 1 positive parameter 'alpha' and optionally 'loc','scale'."
+        }
+      },
+      {
+        "title": "Raise ValueError when distribution=gamma, params is a tuple, and more than 3 parameters are provided",
+        "exact_match_out": false,
+        "in": {
+          "column": "gamma",
+          "result_format": "BASIC",
+          "params": "(0.5, 1, 1, 5)",
+          "distribution": "gamma",
+          "p_value": 0.05
+        },
+        "out": {},
+        "error": {
+          "traceback_substring": "Too many parameters provided: gamma distributions require 1 positive parameter 'alpha' and optionally 'loc','scale'."
+        }
+      },
+      {
+        "title": "Raise ValueError when distribution=poisson, params is a tuple, and required parameter lambda is missing",
+        "exact_match_out": false,
+        "in": {
+          "column": "poisson",
+          "result_format": "BASIC",
+          "params": "tuple()",
+          "distribution": "poisson",
+          "p_value": 0.05
+        },
+        "out": {},
+        "error": {
+          "traceback_substring": "Missing required parameters: poisson distributions require 1 positive parameter 'lambda' and optionally 'loc'."
+        }
+      },
+      {
+        "title": "Raise ValueError when distribution=poisson, params is a tuple, and lambda is 0",
+        "exact_match_out": false,
+        "in": {
+          "column": "poisson",
+          "result_format": "BASIC",
+          "params": "(0)",
+          "distribution": "lambda",
+          "p_value": 0.05
+        },
+        "out": {},
+        "error": {
+          "traceback_substring": "Invalid parameters: poisson distributions require 1 positive parameter 'lambda' and optionally 'loc'."
+        }
+      },
+      {
+        "title": "Raise ValueError when distribution=poisson, params is a tuple, and lambda is negative",
+        "exact_match_out": false,
+        "in": {
+          "column": "poisson",
+          "result_format": "BASIC",
+          "params": "(-1)",
+          "distribution": "poisson",
+          "p_value": 0.05
+        },
+        "out": {},
+        "error": {
+          "traceback_substring": "Invalid parameters: poisson distributions require 1 positive parameter 'lambda' and optionally 'loc'."
+        }
+      },
+      {
+        "title": "Raise ValueError when distribution=poisson, params is a tuple, and more than 2 parameters are provided",
+        "exact_match_out": false,
+        "in": {
+          "column": "poisson",
+          "result_format": "BASIC",
+          "params": "(1, 1, 5)",
+          "distribution": "poisson",
+          "p_value": 0.05
+        },
+        "out": {},
+        "error": {
+          "traceback_substring": "Too many parameters provided: poisson distributions require 1 positive parameter 'lambda' and optionally 'loc'."
+        }
+      },
+      {
+        "title": "Raise ValueError when distribution=uniform, params is a tuple, and scale is 0",
+        "exact_match_out": false,
+        "in": {
+          "column": "params",
+          "result_format": "BASIC",
+          "params": "(0,0)",
+          "distribution": "uniform",
+          "p_value": 0.05
+        },
+        "out": {},
+        "error": {
+          "traceback_substring": "std_dev and scale must be positive."
+        }
+      },
+      {
+        "title": "Raise ValueError when distribution=uniform, params is a tuple, and more than 2 parameters are provided",
+        "exact_match_out": false,
+        "in": {
+          "column": "uniform",
+          "result_format": "BASIC",
+          "params": "(0,1,5)",
+          "distribution": "uniform",
+          "p_value": 0.05
+        },
+        "out": {},
+        "error": {
+          "traceback_substring": "Too many parameters provided: uniform distributions require 0 parameters and optionally 'loc', 'scale'."
+        }
+      },
+      {
+        "title": "Raise ValueError when distribution=chi2, params is a tuple, and is missing required parameter df",
+        "exact_match_out": false,
+        "in": {
+          "column": "chi2",
+          "result_format": "BASIC",
+          "params": "tuple()",
+          "distribution": "chi2",
+          "p_value": 0.05
+        },
+        "out": {},
+        "error": {
+          "traceback_substring": "Missing required parameters: chi2 distributions require 1 positive parameter 'df' and optionally 'loc', 'scale'."
+        }
+      },
+      {
+        "title": "Raise ValueError when distribution=chi2, params is a tuple, and too many parameters, more than 3, are provided",
+        "exact_match_out": false,
+        "in": {
+          "column": "chi2",
+          "result_format": "BASIC",
+          "params": "(1, 0, 1, 5)",
+          "distribution": "chi2",
+          "p_value": 0.05
+        },
+        "out": {},
+        "error": {
+          "traceback_substring": "Too many parameters provided: chi2 distributions require 1 positive parameter 'df' and optionally 'loc', 'scale'."
+        }
+      },
+      {
+        "title": "Raise ValueError when distribution=chi2, params is a tuple, and df is 0",
+        "exact_match_out": false,
+        "in": {
+          "column": "chi2",
+          "result_format": "BASIC",
+          "params": "(0)",
+          "distribution": "chi2",
+          "p_value": 0.05
+        },
+        "out": {},
+        "error": {
+          "traceback_substring": "Invalid parameters: chi2 distributions require 1 positive parameter 'df' and optionally 'loc', 'scale'."
+        }
+      },
+      {
+        "title": "Raise ValueError when distribution=chi2, params is a tuple, and df is negative",
+        "exact_match_out": false,
+        "in": {
+          "column": "chi2",
+          "result_format": "BASIC",
+          "params": "(-1)",
+          "distribution": "chi2",
+          "p_value": 0.05
+        },
+        "out": {},
+        "error": {
+          "traceback_substring": "Invalid parameters: chi2 distributions require 1 positive parameter 'df' and optionally 'loc', 'scale'."
+        }
+      },
+      {
+        "title": "Raise ValueError when distribution=chi2, params is a tuple, and scale is 0",
+        "exact_match_out": false,
+        "in": {
+          "column": "chi2",
+          "result_format": "BASIC",
+          "params": "(1, 0, 0)",
+          "distribution": "chi2",
+          "p_value": 0.05
+        },
+        "out": {},
+        "error": {
+          "traceback_substring": "std_dev and scale must be positive."
+        }
+      },
+      {
+        "title": "Raise ValueError when distribution=expon, params is a tuple, and scale is 0",
+        "exact_match_out": false,
+        "in": {
+          "column": "expon",
+          "result_format": "BASIC",
+          "params": "(0, 0)",
+          "distribution": "expon",
+          "p_value": 0.05
+        },
+        "out": {},
+        "error": {
+          "traceback_substring": "std_dev and scale must be positive."
+        }
+      },
+      {
+        "title": "Raise ValueError when distribution=expon, params is a tuple, and scale is negative",
+        "exact_match_out": false,
+        "in": {
+          "column": "expon",
+          "result_format": "BASIC",
+          "params": "(0, -1)",
+          "distribution": "expon",
+          "p_value": 0.05
+        },
+        "out": {},
+        "error": {
+          "traceback_substring": "std_dev and scale must be positive."
+        }
+      },
+      {
+        "title": "Raise ValueError when distribution=expon, params is a tuple, and more than 2 parameters are provided",
+        "exact_match_out": false,
+        "in": {
+          "column": "expon",
+          "result_format": "BASIC",
+          "params": "(0, 1, 5)",
+          "distribution": "expon",
+          "p_value": 0.05
+        },
+        "out": {},
+        "error": {
+          "traceback_substring": "Too many parameters provided: expon distributions require 0 parameters and optionally 'loc', 'scale'."
+        }
+      },
+      {
+        "title": "Raise ValueError, unsupported distribution",
+        "exact_match_out": false,
+        "in": {
+          "column": "norm",
+          "result_format": "BASIC",
+          "params": "(0, 1)",
+          "distribution": "fakedistribution",
+          "p_value": 0.05
+        },
+        "out": {},
+        "error": {
+          "traceback_substring": "Unsupported  distribution provided: fakedistribution"
+        }
+      },
+      {
+        "title": "Positive beta distribution, params is a dict",
+        "exact_match_out": false,
+        "in": {
+          "column": "beta",
+          "result_format": "BASIC",
+          "params": "{'alpha': 0.5,'beta': 10,'loc': 5,'scale': 11}",
+          "distribution": "beta",
+          "p_value": 0.05
+        },
+        "out": {
+          "success": true
+        }
+      },
+      {
+        "title": "Positive beta distribution, params is a tuple",
+        "exact_match_out": false,
+        "in": {
+          "column": "",
+          "result_format": "BASIC",
+          "params": "(0.5, 10, 5, 11)",
+          "distribution": "",
+          "p_value": 0.05
+        },
+        "out": {},
+        "error": {
+          "traceback_substring": ""
+        }
+      },
+      {
+        "title": "Negative beta distribution, params is a dict",
+        "exact_match_out": false,
+        "in": {
+          "column": "beta",
+          "result_format": "BASIC",
+          "params": "{'alpha': 500,'beta': 1000,'loc': 500,'scale': 1100}",
+          "distribution": "beta",
+          "p_value": 0.05
+        },
+        "out": {
+          "success": false
+        }
+      },
+      {
+        "title": "Negative beta distribution, params is a tuple",
+        "exact_match_out": false,
+        "in": {
+          "column": "beta",
+          "result_format": "BASIC",
+          "params": "(500, 1000, 500, 1100)",
+          "distribution": "beta",
+          "p_value": 0.05
+        },
+        "out": {
+          "success": false
+        }
+      },
+      {
+        "title": "Positive gamma distribution, params is a dict",
+        "exact_match_out": false,
+        "in": {
+          "column": "gamma",
+          "result_format": "BASIC",
+          "params": "{'alpha': 2, 'loc': 20, 'scale': 3}",
+          "distribution": "gamma",
+          "p_value": 0.05
+        },
+        "out": {
+          "success": true
+        }
+      },
+      {
+        "title": "Positive gamma distribution, params is a tuple",
+        "exact_match_out": false,
+        "in": {
+          "column": "gamma",
+          "result_format": "BASIC",
+          "params": "(2, 20, 3)",
+          "distribution": "gamma",
+          "p_value": 0.05
+        },
+        "out": {
+          "success": true
+        }
+      },
+      {
+        "title": "Negative gamma distribution, params is a dict",
+        "exact_match_out": false,
+        "in": {
+          "column": "gamma",
+          "result_format": "BASIC",
+          "params": "{'alpha': 0.002, 'loc': 200, 'scale': 0.3}",
+          "distribution": "gamma",
+          "p_value": 0.05
+        },
+        "out": {
+          "success": false
+        }
+      },
+      {
+        "title": "Negative gamma distribution, params is a tuple",
+        "exact_match_out": false,
+        "in": {
+          "column": "gamma",
+          "result_format": "BASIC",
+          "params": "(0.002, 200, 0.3)",
+          "distribution": "gamma",
+          "p_value": 0.05
+        },
+        "out": {
+          "success": false
+        }
+      },
+      {
+        "title": "Positive poisson distribution, params is a dict",
+        "exact_match_out": false,
+        "in": {
+          "column": "poisson",
+          "result_format": "BASIC",
+          "params": "{'lambda': 8.2, 'loc': 40}",
+          "distribution": "poisson",
+          "p_value": 0.05
+        },
+        "out": {
+          "success": true
+        }
+      },
+      {
+        "title": "Positive poisson distribution, params is a tuple",
+        "exact_match_out": false,
+        "in": {
+          "column": "poisson",
+          "result_format": "BASIC",
+          "params": "(8.2, 40)",
+          "distribution": "poisson",
+          "p_value": 0.05
+        },
+        "out": {
+          "success": true
+        }
+      },
+      {
+        "title": "Negative poisson distribution, params is a dict",
+        "exact_match_out": false,
+        "in": {
+          "column": "poisson",
+          "result_format": "BASIC",
+          "params": "{'lambda': 0.2, 'loc': 400}",
+          "distribution": "poisson",
+          "p_value": 0.05
+        },
+        "out": {
+          "success": false
+        }
+      },
+      {
+        "title": "Negative poisson distribution, params is a tuple",
+        "exact_match_out": false,
+        "in": {
+          "column": "poisson",
+          "result_format": "BASIC",
+          "params": "(0.2, 400)",
+          "distribution": "poisson",
+          "p_value": 0.05
+        },
+        "out": {
+          "success": false
+        }
+      },
+      {
+        "title": "Positive uniform distribution, params is a dict",
+        "exact_match_out": false,
+        "in": {
+          "column": "uniform",
+          "result_format": "BASIC",
+          "params": "{'min': -5, 'max': 11}",
+          "distribution": "uniform",
+          "p_value": 0.05
+        },
+        "out": {
+          "success": true
+        }
+      },
+      {
+        "title": "Positive uniform distribution, params is a tuple",
+        "exact_match_out": false,
+        "in": {
+          "column": "uniform",
+          "result_format": "BASIC",
+          "params": "(-5, 11)",
+          "distribution": "unfirom",
+          "p_value": 0.05
+        },
+        "out": {
+          "success": true
+        }
+      },
+      {
+        "title": "Negative uniform distribution, params is a dict",
+        "exact_match_out": false,
+        "in": {
+          "column": "uniform",
+          "result_format": "BASIC",
+          "params": "{'min': -500, 'max': 1}",
+          "distribution": "uniform",
+          "p_value": 0.05
+        },
+        "out": {
+          "success": false
+        }
+      },
+      {
+        "title": "Negative uniform distribution, params is a tuple",
+        "exact_match_out": false,
+        "in": {
+          "column": "uniform",
+          "result_format": "BASIC",
+          "params": "(-500, 1)",
+          "distribution": "uniform",
+          "p_value": 0.05
+        },
+        "out": {
+          "success": false
+        }
+      },
+      {
+        "title": "Positive chi2, params is a dict",
+        "exact_match_out": false,
+        "in": {
+          "column": "chi2",
+          "result_format": "BASIC",
+          "params": "{'df': 30, 'loc': 3, 'scale': 5}",
+          "distribution": "chi2",
+          "p_value": 0.05
+        },
+        "out": {
+          "success": true
+        }
+      },
+      {
+        "title": "Positive chi2, params is a tuple",
+        "exact_match_out": false,
+        "in": {
+          "column": "chi2",
+          "result_format": "BASIC",
+          "params": "(30, 3, 5)",
+          "distribution": "chi2",
+          "p_value": 0.05
+        },
+        "out": {
+          "success": false
+        }
+      },
+      {
+        "title": "Negative chi2, params is a dict",
+        "exact_match_out": false,
+        "in": {
+          "column": "chi2",
+          "result_format": "BASIC",
+          "params": "{'df': 0.3, 'loc': 300, 'scale': 500}",
+          "distribution": "chi2",
+          "p_value": 0.05
+        },
+        "out": {
+          "success": false
+        }
+      },
+      {
+        "title": "Negative chi2, params is a tuple",
+        "exact_match_out": false,
+        "in": {
+          "column": "chi2",
+          "result_format": "BASIC",
+          "params": "(0.3, 300, 500)",
+          "distribution": "chi2",
+          "p_value": 0.05
+        },
+        "out": {
+          "success": false
+        }
+      },
+      {
+        "title": "Positive expon distribution, params is a dict",
+        "exact_match_out": false,
+        "in": {
+          "column": "expon",
+          "result_format": "BASIC",
+          "params": "{'loc': 4.2, 'scale': 10}",
+          "distribution": "expon",
+          "p_value": 0.05
+        },
+        "out": {
+          "success": true
+        }
+      },
+      {
+        "title": "Positive expon distribution, params is a tuple",
+        "exact_match_out": false,
+        "in": {
+          "column": "expon",
+          "result_format": "BASIC",
+          "params": "(4.2, 10)",
+          "distribution": "expon",
+          "p_value": 0.05
+        },
+        "out": {
+          "success": true
+        }
+      },
+      {
+        "title": "Negative expon distribution, params is a dict",
+        "exact_match_out": false,
+        "in": {
+          "column": "expon",
+          "result_format": "BASIC",
+          "params": "{'loc': -400, 'scale': 0.1}",
+          "distribution": "expon",
+          "p_value": 0.05
+        },
+        "out": {
+          "success": false
+        }
+      },
+      {
+        "title": "Negative expon distribution, params is a tuple",
+        "exact_match_out": false,
+        "in": {
+          "column": "expon",
+          "result_format": "BASIC",
+          "params": "(-400, 0.1)",
+          "distribution": "expon",
+          "p_value": 0.05
+        },
+        "out": {
+          "success": false
+        }
+      }]
+    }]
+  }
+
