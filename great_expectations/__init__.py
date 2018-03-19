@@ -3,17 +3,9 @@ import pandas as pd
 
 from .util import *
 from great_expectations import dataset
+from great_expectations.data_context import get_data_context
 
 from .version import __version__
-
-def list_sources():
-    raise NotImplementedError
-
-def connect_to_datasource():
-    raise NotImplementedError
-
-def connect_to_dataset():
-    raise NotImplementedError
 
 def _convert_to_dataset_class(df, dataset_class, expectations_config=None):
     """
@@ -24,17 +16,17 @@ def _convert_to_dataset_class(df, dataset_class, expectations_config=None):
         df.__class__ = dataset_class
         df.initialize_expectations(expectations_config)
     else:
-        # Instantiate the new DataSet with default expectations
+        # Instantiate the new Dataset with default expectations
         try:
             df = dataset_class(df)
         except:
-            raise NotImplementedError("read_csv requires a DataSet class that can be instantiated from a Pandas DataFrame")
+            raise NotImplementedError("read_csv requires a Dataset class that can be instantiated from a Pandas DataFrame")
 
     return df
 
 def read_csv(
     filename,
-    dataset_class=dataset.pandas_dataset.PandasDataSet,
+    dataset_class=dataset.pandas_dataset.PandasDataset,
     expectations_config=None,
     *args, **kwargs
 ):
@@ -44,7 +36,7 @@ def read_csv(
 
 def read_json(
     filename,
-    dataset_class=dataset.pandas_dataset.PandasDataSet,
+    dataset_class=dataset.pandas_dataset.PandasDataset,
     expectations_config=None,
     accessor_func=None,
     *args, **kwargs
@@ -60,10 +52,17 @@ def read_json(
     df = _convert_to_dataset_class(df, dataset_class, expectations_config)
     return df
 
+def from_pandas(pandas_df, expectations_config=None):
+    return _convert_to_dataset_class(
+        pandas_df,
+        dataset.pandas_dataset.PandasDataset,
+        expectations_config
+    )
+
 def validate(df, expectations_config, *args, **kwargs):
-    #FIXME: I'm not sure that this should always default to PandasDataSet
+    #FIXME: I'm not sure that this should always default to PandasDataset
     dataset_ = _convert_to_dataset_class(df,
-        dataset.pandas_dataset.PandasDataSet,
+        dataset.pandas_dataset.PandasDataset,
         expectations_config
     )
     return dataset_.validate(*args, **kwargs)
