@@ -1,3 +1,5 @@
+from __future__ import division
+
 from great_expectations.dataset import Dataset
 
 from functools import wraps
@@ -103,21 +105,32 @@ class MetaSqlAlchemyDataset(Dataset):
             if result_format['result_format'] == 'BOOLEAN_ONLY':
                 return return_obj
 
-            count_query = sa.select([
-                sa.func.count().label('element_count'),
-                sa.func.sum(
-                    sa.case([(sa.column(column) == None, 1)], else_=0)
-                ).label('null_count'),
-            ]).select_from(sa.table(self.table_name))
+            # Use the element and null count information from a column_map_expectation if it needed
+            # it anyway to avoid an extra trip to the database
 
-            count_results = self.engine.execute(count_query).fetchone()
+            if 'element_count' not in evaluation_result and 'null_count' not in evaluation_result:
+                count_query = sa.select([
+                    sa.func.count().label('element_count'),
+                    sa.func.sum(
+                        sa.case([(sa.column(column) == None, 1)], else_=0)
+                    ).label('null_count'),
+                ]).select_from(sa.table(self.table_name))
 
-            return_obj['result'] = {
-                'observed_value': evaluation_result['result']['observed_value'],
-                "element_count": count_results['element_count'],
-                "missing_count": count_results['null_count'],
-                "missing_percent": count_results['null_count'] * 1.0 / count_results['element_count'] if count_results['element_count'] > 0 else None
-            }
+                count_results = self.engine.execute(count_query).fetchone()
+
+                return_obj['result'] = {
+                    'observed_value': evaluation_result['result']['observed_value'],
+                    "element_count": count_results['element_count'],
+                    "missing_count": count_results['null_count'],
+                    "missing_percent": count_results['null_count'] / count_results['element_count'] if count_results['element_count'] > 0 else None
+                }
+            else:
+                return_obj['result'] = {
+                    'observed_value': evaluation_result['result']['observed_value'],
+                    "element_count": evaluation_result["element_count"],
+                    "missing_count": evaluation_result["null_count"],
+                    "missing_percent": evaluation_result['null_count'] / evaluation_result['element_count'] if evaluation_result['element_count'] > 0 else None
+                }
 
             if result_format['result_format'] == 'BASIC':
                 return return_obj
@@ -161,7 +174,8 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
     def add_default_expectations(self):
         """
-        The default behavior for PandasDataset is to explicitly include expectations that every column present upon initialization exists.
+        The default behavior for SqlAlchemyDataset is to explicitly include expectations that every column present upon
+        initialization exists.
         """
         for col in self.columns:
             self.append_expectation({
@@ -508,5 +522,64 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             'success': success,
             'result': {
                 'observed_value': col_avg
+            }
+        }
+
+    @DocInherit
+    @MetaSqlAlchemyDataset.column_aggregate_expectation
+    def expect_column_unique_value_count_to_be_between(self, column, min_value=None, max_value=None,
+                                                       result_format=None, include_config=False, catch_exceptions=None, meta=None):
+
+        if min_value is None and max_value is None:
+            raise ValueError("min_value and max_value cannot both be None")
+
+        unique_value_count = self.engine.execute(
+            sa.select([sa.func.count(sa.func.distinct(sa.column(column)))]).select_from(sa.table(self.table_name))
+        ).scalar()
+
+        return {
+            "success" : (
+                ((min_value is None) or (min_value <= unique_value_count)) and
+                ((max_value is None) or (unique_value_count <= max_value))
+            ),
+            "result": {
+                "observed_value": unique_value_count
+            }
+        }
+
+    @DocInherit
+    @MetaSqlAlchemyDataset.column_aggregate_expectation
+    def expect_column_proportion_of_unique_values_to_be_between(self, column, min_value=0, max_value=1,
+                                                                result_format=None, include_config=False, catch_exceptions=None, meta=None):
+
+        if min_value is None and max_value is None:
+            raise ValueError("min_value and max_value cannot both be None")
+
+        count_query = self.engine.execute(
+            sa.select([
+                sa.func.count().label('element_count'),
+                sa.func.sum(
+                    sa.case([(sa.column(column) == None, 1)], else_=0)
+                ).label('null_count'),
+                sa.func.count(sa.func.distinct(sa.column(column))).label('unique_value_count')
+            ]).select_from(sa.table(self.table_name))
+        )
+
+        counts = count_query.fetchone()
+
+        if counts['element_count'] - counts['null_count'] > 0:
+            proportion_unique = counts['unique_value_count'] / (counts['element_count'] - counts['null_count'])
+        else:
+            proportion_unique = None
+
+        return {
+            "success": (
+                ((min_value is None) or (min_value <= proportion_unique)) and
+                ((max_value is None) or (proportion_unique <= max_value))
+            ),
+            "element_count": counts["element_count"],
+            "null_count": counts["null_count"],
+            "result": {
+                "observed_value": proportion_unique
             }
         }
