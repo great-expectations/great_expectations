@@ -7,27 +7,29 @@ from datetime import datetime
 from functools import wraps
 import jsonschema
 
+from numbers import Number
+
 import numpy as np
 import pandas as pd
 from dateutil.parser import parse
 from scipy import stats
 from six import string_types
 
-from .base import DataSet
-from .util import DocInherit, recursively_convert_to_json_serializable, \
+from .base import Dataset
+from .util import DocInherit, parse_result_format, \
         is_valid_partition_object, is_valid_categorical_partition_object, is_valid_continuous_partition_object
 
-class MetaPandasDataSet(DataSet):
+class MetaPandasDataset(Dataset):
     """
-    MetaPandasDataSet is a thin layer between DataSet and PandasDataSet. This two-layer inheritance is required to make @classmethod decorators work.
+    MetaPandasDataset is a thin layer between Dataset and PandasDataset. This two-layer inheritance is required to make @classmethod decorators work.
 
-    Practically speaking, that means that MetaPandasDataSet implements
+    Practically speaking, that means that MetaPandasDataset implements
     expectation decorators, like `column_map_expectation` and `column_aggregate_expectation`,
     and PandasDataset implements the expectation methods themselves.
     """
 
     def __init__(self, *args, **kwargs):
-        super(MetaPandasDataSet, self).__init__(*args, **kwargs)
+        super(MetaPandasDataset, self).__init__(*args, **kwargs)
 
 
     @classmethod
@@ -35,20 +37,20 @@ class MetaPandasDataSet(DataSet):
         """Constructs an expectation using column-map semantics.
 
 
-        The MetaPandasDataSet implementation replaces the "column" parameter supplied by the user with a pandas Series
+        The MetaPandasDataset implementation replaces the "column" parameter supplied by the user with a pandas Series
         object containing the actual column from the relevant pandas dataframe. This simplifies the implementing expectation
-        logic while preserving the standard DataSet signature and expected behavior.
+        logic while preserving the standard Dataset signature and expected behavior.
 
-        See :func:`column_map_expectation <great_expectations.dataset.base.DataSet.column_map_expectation>` \
+        See :func:`column_map_expectation <great_expectations.Dataset.base.Dataset.column_map_expectation>` \
         for full documentation of this function.
         """
 
         @cls.expectation(inspect.getargspec(func)[0][1:])
         @wraps(func)
-        def inner_wrapper(self, column, mostly=None, output_format=None, *args, **kwargs):
+        def inner_wrapper(self, column, mostly=None, result_format=None, *args, **kwargs):
 
-            if output_format is None:
-                output_format = self.default_expectation_args["output_format"]
+            if result_format is None:
+                result_format = self.default_expectation_args["result_format"]
 
             series = self[column]
             boolean_mapped_null_values = series.isnull()
@@ -60,18 +62,15 @@ class MetaPandasDataSet(DataSet):
             boolean_mapped_success_values = func(self, nonnull_values, *args, **kwargs)
             success_count = boolean_mapped_success_values.sum()
 
-            exception_list = list(series[(boolean_mapped_success_values==False)&(boolean_mapped_null_values==False)])
-            exception_index_list = list(series[(boolean_mapped_success_values==False)&(boolean_mapped_null_values==False)].index)
-            exception_count = len(exception_list)
+            unexpected_list = list(series[(boolean_mapped_success_values==False)&(boolean_mapped_null_values==False)])
+            unexpected_index_list = list(series[(boolean_mapped_success_values==False)&(boolean_mapped_null_values==False)].index)
 
             success, percent_success = self._calc_map_expectation_success(success_count, nonnull_count, mostly)
 
             return_obj = self._format_column_map_output(
-                output_format, success,
-                element_count,
-                nonnull_values, nonnull_count,
-                boolean_mapped_success_values, success_count,
-                exception_list, exception_index_list
+                result_format, success,
+                element_count, nonnull_count,
+                unexpected_list, unexpected_index_list
             )
 
             return return_obj
@@ -86,19 +85,19 @@ class MetaPandasDataSet(DataSet):
     def column_aggregate_expectation(cls, func):
         """Constructs an expectation using column-aggregate semantics.
 
-        The MetaPandasDataSet implementation replaces the "column" parameter supplied by the user with a pandas
+        The MetaPandasDataset implementation replaces the "column" parameter supplied by the user with a pandas
         Series object containing the actual column from the relevant pandas dataframe. This simplifies the implementing
-        expectation logic while preserving the standard DataSet signature and expected behavior.
+        expectation logic while preserving the standard Dataset signature and expected behavior.
 
-        See :func:`column_aggregate_expectation <great_expectations.dataset.base.DataSet.column_aggregate_expectation>` \
+        See :func:`column_aggregate_expectation <great_expectations.Dataset.base.Dataset.column_aggregate_expectation>` \
         for full documentation of this function.
         """
         @cls.expectation(inspect.getargspec(func)[0][1:])
         @wraps(func)
-        def inner_wrapper(self, column, output_format = None, *args, **kwargs):
+        def inner_wrapper(self, column, result_format = None, *args, **kwargs):
 
-            if output_format is None:
-                output_format = self.default_expectation_args["output_format"]
+            if result_format is None:
+                result_format = self.default_expectation_args["result_format"]
 
             series = self[column]
             null_indexes = series.isnull()
@@ -108,81 +107,86 @@ class MetaPandasDataSet(DataSet):
             nonnull_count = int((null_indexes == False).sum())
             null_count = element_count - nonnull_count
 
-            result_obj = func(self, nonnull_values, *args, **kwargs)
+            evaluation_result = func(self, nonnull_values, *args, **kwargs)
 
-            #!!! This would be the right place to validate result_obj
-            #!!! It should contain:
-            #!!!    success: bool
-            #!!!    true_value: int or float
-            #!!!    summary_obj: json-serializable dict
+            if 'success' not in evaluation_result:
+                raise ValueError("Column aggregate expectation failed to return required information: success")
 
-            # if not output_format in ["BASIC", "COMPLETE", "SUMMARY", "BOOLEAN_ONLY"]:
-            #     print ("Warning: Unknown output_format %s. Defaulting to %s." % (output_format, self.default_expectation_args["output_format"]))
+            if ('result' not in evaluation_result) or ('observed_value' not in evaluation_result['result']):
+                raise ValueError("Column aggregate expectation failed to return required information: observed_value")
 
+            # Retain support for string-only output formats:
+            result_format = parse_result_format(result_format)
 
-            if output_format in ["BASIC", "COMPLETE"]:
-                return_obj = {
-                    "success" : bool(result_obj["success"]),
-                    "true_value" : result_obj["true_value"],
-                }
+            return_obj = {
+                'success': bool(evaluation_result['success'])
+            }
 
-            elif (output_format == "SUMMARY"):
-                new_summary_obj = {
-                    "element_count": element_count,
-                    "missing_count": null_count,
-                    "missing_percent": null_count*1.0 / element_count if element_count > 0 else None
-                }
+            if result_format['result_format'] == 'BOOLEAN_ONLY':
+                return return_obj
 
-                if "summary_obj" in result_obj and result_obj["summary_obj"] is not None:
-                    result_obj["summary_obj"].update(new_summary_obj)
-                else:
-                    result_obj["summary_obj"] = new_summary_obj
+            return_obj['result'] = {
+                'observed_value': evaluation_result['result']['observed_value'],
+                "element_count": element_count,
+                "missing_count": null_count,
+                "missing_percent": null_count * 1.0 / element_count if element_count > 0 else None
+            }
 
-                return_obj = {
-                    "success" : bool(result_obj["success"]),
-                    "true_value" : result_obj["true_value"],
-                    "summary_obj" : result_obj["summary_obj"]
-                }
+            if result_format['result_format'] == 'BASIC':
+                return return_obj
 
-            elif output_format=="BOOLEAN_ONLY":
-                return_obj = bool(result_obj["success"])
+            if 'details' in evaluation_result['result']:
+                return_obj['result']['details'] = evaluation_result['result']['details']
 
-            else:
-                raise ValueError("Unknown output_format %s." % (output_format,))
+            if result_format['result_format'] in ["SUMMARY", "COMPLETE"]:
+                return return_obj
 
-            return return_obj
+            raise ValueError("Unknown result_format %s." % (result_format['result_format'],))
 
         return inner_wrapper
 
 
-class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
+class PandasDataset(MetaPandasDataset, pd.DataFrame):
     """
     PandasDataset instantiates the great_expectations Expectations API as a subclass of a pandas.DataFrame.
 
-    For the full API reference, please see :func:`DataSet <great_expectations.dataset.base.DataSet>`
+    For the full API reference, please see :func:`Dataset <great_expectations.Dataset.base.Dataset>`
+
+    NB
+    1. Samples and Subsets of PandaDataSet have ALL the expectations of the original
+       data frame unless the user specifies the discard_subset_failing_expectations=True
+       property on the original data frame.
+    2. Concatenations, joins, and merges of PandaDataSets ONLY contain the
+       default_expectations (see :func: `add_default_expectations`)
     """
 
     @property
     def _constructor(self):
-        return PandasDataSet
+        return PandasDataset
 
 # Do we need to define _constructor_sliced and/or _constructor_expanddim? See http://pandas.pydata.org/pandas-docs/stable/internals.html#subclassing-pandas-data-structures
 
     def __finalize__(self, other, method=None, **kwargs):
-        if isinstance(other, PandasDataSet):
-            self.initialize_expectations(other.get_expectations_config())
-        super(PandasDataSet, self).__finalize__(other, **kwargs)
+        if isinstance(other, PandasDataset):
+            self.initialize_expectations(other.get_expectations_config(
+                discard_failed_expectations=False,
+                discard_result_format_kwargs=False,
+                discard_include_configs_kwargs=False,
+                discard_catch_exceptions_kwargs=False))
+            self.discard_subset_failing_expectations = other.discard_subset_failing_expectations
+            if self.discard_subset_failing_expectations:
+                self.discard_failing_expectations()
+        super(PandasDataset, self).__finalize__(other, method, **kwargs)
         return self
 
     def __init__(self, *args, **kwargs):
-        super(PandasDataSet, self).__init__(*args, **kwargs)
+        super(PandasDataset, self).__init__(*args, **kwargs)
+        self.discard_subset_failing_expectations = kwargs.get('discard_subset_failing_expectations', False)
         self.add_default_expectations()
 
     def add_default_expectations(self):
         """
-        The default behavior for PandasDataSet is to explicitly include expectations that every column present upon initialization exists.
-
-        FIXME: This should probably live in the grandparent class, DataSet, instead.
+        The default behavior for PandasDataset is to explicitly include expectations that every column present upon initialization exists.
         """
 
         for col in self.columns:
@@ -195,24 +199,28 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
     ### Expectation methods ###
     @DocInherit
-    @DataSet.expectation(['column'])
-    def expect_column_to_exist(self, column,
-                               output_format=None, include_config=False, catch_exceptions=None, meta=None):
+    @Dataset.expectation(['column'])
+    def expect_column_to_exist(
+            self, column, column_index=None, result_format=None, include_config=False, 
+            catch_exceptions=None, meta=None
+    ):
+
         if column in self:
             return {
-                "success" : True
+                "success": (column_index is None) or (self.columns.get_loc(column) == column_index)
             }
+
         else:
             return {
                 "success": False
             }
 
     @DocInherit
-    @DataSet.expectation(['min_value', 'max_value'])
+    @Dataset.expectation(['min_value', 'max_value'])
     def expect_table_row_count_to_be_between(self,
         min_value=0,
         max_value=None,
-        output_format=None, include_config=False, catch_exceptions=None, meta=None
+        result_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
         # Assert that min_value and max_value are integers
         try:
@@ -238,14 +246,16 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
         return {
             'success': outcome,
-            'true_value': row_count
+            'result': {
+                'observed_value': row_count
+            }
         }
 
     @DocInherit
-    @DataSet.expectation(['value'])
+    @Dataset.expectation(['value'])
     def expect_table_row_count_to_equal(self,
         value,
-        output_format=None, include_config=False, catch_exceptions=None, meta=None
+        result_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
         try:
             if value is not None:
@@ -254,6 +264,8 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         except ValueError:
             raise ValueError("value must be an integer")
 
+        if value is None:
+            raise ValueError("value must be provided")
 
         if self.shape[0] == value:
             outcome = True
@@ -262,24 +274,26 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
         return {
             'success':outcome,
-            'true_value':self.shape[0]
+            'result': {
+                'observed_value':self.shape[0]
+            }
         }
 
     @DocInherit
-    @MetaPandasDataSet.column_map_expectation
+    @MetaPandasDataset.column_map_expectation
     def expect_column_values_to_be_unique(self, column,
                                           mostly=None,
-                                          output_format=None, include_config=False, catch_exceptions=None, meta=None):
+                                          result_format=None, include_config=False, catch_exceptions=None, meta=None):
         dupes = set(column[column.duplicated()])
         return column.map(lambda x: x not in dupes)
 
     @DocInherit
-    @DataSet.expectation(['column', 'mostly', 'output_format'])
+    @Dataset.expectation(['column', 'mostly', 'result_format'])
     def expect_column_values_to_not_be_null(self, column,
                                             mostly=None,
-                                            output_format=None, include_config=False, catch_exceptions=None, meta=None):
-        if output_format is None:
-            output_format = self.default_expectation_args["output_format"]
+                                            result_format=None, include_config=False, catch_exceptions=None, meta=None):
+        if result_format is None:
+            result_format = self.default_expectation_args["result_format"]
 
         series = self[column]
         boolean_mapped_null_values = series.isnull()
@@ -291,30 +305,28 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         boolean_mapped_success_values = boolean_mapped_null_values==False
         success_count = boolean_mapped_success_values.sum()
 
-        exception_list = [None for i in list(series[(boolean_mapped_success_values==False)])]
-        exception_index_list = list(series[(boolean_mapped_success_values==False)].index)
-        exception_count = len(exception_list)
+        unexpected_list = [None for i in list(series[(boolean_mapped_success_values==False)])]
+        unexpected_index_list = list(series[(boolean_mapped_success_values==False)].index)
+        unexpected_count = len(unexpected_list)
 
         # Pass element_count instead of nonnull_count, because that's the right denominator for this expectation
         success, percent_success = self._calc_map_expectation_success(success_count, element_count, mostly)
 
         return_obj = self._format_column_map_output(
-            output_format, success,
-            element_count,
-            nonnull_values, nonnull_count,
-            boolean_mapped_success_values, success_count,
-            exception_list, exception_index_list
+            result_format, success,
+            element_count, nonnull_count,
+            unexpected_list, unexpected_index_list
         )
 
         return return_obj
 
     @DocInherit
-    @DataSet.expectation(['column', 'mostly', 'output_format'])
+    @Dataset.expectation(['column', 'mostly', 'result_format'])
     def expect_column_values_to_be_null(self, column,
                                         mostly=None,
-                                        output_format=None, include_config=False, catch_exceptions=None, meta=None):
-        if output_format is None:
-            output_format = self.default_expectation_args["output_format"]
+                                        result_format=None, include_config=False, catch_exceptions=None, meta=None):
+        if result_format is None:
+            result_format = self.default_expectation_args["result_format"]
 
         series = self[column]
         boolean_mapped_null_values = series.isnull()
@@ -326,28 +338,26 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         boolean_mapped_success_values = boolean_mapped_null_values
         success_count = boolean_mapped_success_values.sum()
 
-        exception_list = list(series[(boolean_mapped_success_values==False)])
-        exception_index_list = list(series[(boolean_mapped_success_values==False)].index)
-        exception_count = len(exception_list)
+        unexpected_list = list(series[(boolean_mapped_success_values==False)])
+        unexpected_index_list = list(series[(boolean_mapped_success_values==False)].index)
+        unexpected_count = len(unexpected_list)
 
         # Pass element_count instead of nonnull_count, because that's the right denominator for this expectation
         success, percent_success = self._calc_map_expectation_success(success_count, element_count, mostly)
 
         return_obj = self._format_column_map_output(
-            output_format, success,
-            element_count,
-            nonnull_values, nonnull_count,
-            boolean_mapped_success_values, success_count,
-            exception_list, exception_index_list
+            result_format, success,
+            element_count, nonnull_count,
+            unexpected_list, unexpected_index_list
         )
 
         return return_obj
 
     @DocInherit
-    @MetaPandasDataSet.column_map_expectation
+    @MetaPandasDataset.column_map_expectation
     def expect_column_values_to_be_of_type(self, column, type_, target_datasource="numpy",
                                            mostly=None,
-                                           output_format=None, include_config=False, catch_exceptions=None, meta=None):
+                                           result_format=None, include_config=False, catch_exceptions=None, meta=None):
         python_avro_types = {
                 "null":type(None),
                 "boolean":bool,
@@ -378,10 +388,10 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         return result
 
     @DocInherit
-    @MetaPandasDataSet.column_map_expectation
+    @MetaPandasDataset.column_map_expectation
     def expect_column_values_to_be_in_type_list(self, column, type_list, target_datasource="numpy",
                                                 mostly=None,
-                                                output_format=None, include_config=False, catch_exceptions=None, meta=None):
+                                                result_format=None, include_config=False, catch_exceptions=None, meta=None):
 
         python_avro_types = {
                 "null":type(None),
@@ -413,28 +423,28 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         return result
 
     @DocInherit
-    @MetaPandasDataSet.column_map_expectation
+    @MetaPandasDataset.column_map_expectation
     def expect_column_values_to_be_in_set(self, column, values_set,
                                           mostly=None,
-                                          output_format=None, include_config=False, catch_exceptions=None, meta=None):
+                                          result_format=None, include_config=False, catch_exceptions=None, meta=None):
         return column.map(lambda x: x in values_set)
 
     @DocInherit
-    @MetaPandasDataSet.column_map_expectation
+    @MetaPandasDataset.column_map_expectation
     def expect_column_values_to_not_be_in_set(self, column, values_set,
                                               mostly=None,
-                                              output_format=None, include_config=False, catch_exceptions=None, meta=None):
+                                              result_format=None, include_config=False, catch_exceptions=None, meta=None):
         return column.map(lambda x: x not in values_set)
 
     @DocInherit
-    @MetaPandasDataSet.column_map_expectation
+    @MetaPandasDataset.column_map_expectation
     def expect_column_values_to_be_between(self,
         column,
         min_value=None, max_value=None,
         parse_strings_as_datetimes=None,
         allow_cross_type_comparisons=None,
         mostly=None,
-        output_format=None, include_config=False, catch_exceptions=None, meta=None
+        result_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
@@ -451,8 +461,8 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         else:
             temp_column = column
 
-        if min_value > max_value:
-            raise ValueError("min_value is greater than max_value")
+        if min_value != None and max_value != None and min_value > max_value:
+            raise ValueError("min_value cannot be greater than max_value")
 
         def is_between(val):
             # TODO Might be worth explicitly defining comparisons between types (for example, between strings and ints).
@@ -508,10 +518,10 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         return temp_column.map(is_between)
 
     @DocInherit
-    @MetaPandasDataSet.column_map_expectation
+    @MetaPandasDataset.column_map_expectation
     def expect_column_values_to_be_increasing(self, column, strictly=None, parse_strings_as_datetimes=None,
                                               mostly=None,
-                                              output_format=None, include_config=False, catch_exceptions=None, meta=None):
+                                              result_format=None, include_config=False, catch_exceptions=None, meta=None):
         if parse_strings_as_datetimes:
             temp_column = column.map(parse)
 
@@ -536,10 +546,10 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
                 return col_diff >= 0
 
     @DocInherit
-    @MetaPandasDataSet.column_map_expectation
+    @MetaPandasDataset.column_map_expectation
     def expect_column_values_to_be_decreasing(self, column, strictly=None, parse_strings_as_datetimes=None,
                                               mostly=None,
-                                              output_format=None, include_config=False, catch_exceptions=None, meta=None):
+                                              result_format=None, include_config=False, catch_exceptions=None, meta=None):
         if parse_strings_as_datetimes:
             temp_column = column.map(parse)
 
@@ -564,10 +574,10 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
                 return col_diff <= 0
 
     @DocInherit
-    @MetaPandasDataSet.column_map_expectation
+    @MetaPandasDataset.column_map_expectation
     def expect_column_value_lengths_to_be_between(self, column, min_value=None, max_value=None,
                                                   mostly=None,
-                                                  output_format=None, include_config=False, catch_exceptions=None, meta=None):
+                                                  result_format=None, include_config=False, catch_exceptions=None, meta=None):
 
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
@@ -579,7 +589,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
             if max_value is not None and not float(max_value).is_integer():
                 raise ValueError("min_value and max_value must be integers")
-        
+
         except ValueError:
             raise ValueError("min_value and max_value must be integers")
 
@@ -600,33 +610,33 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         return column.map(length_is_between)
 
     @DocInherit
-    @MetaPandasDataSet.column_map_expectation
+    @MetaPandasDataset.column_map_expectation
     def expect_column_value_lengths_to_equal(self, column, value,
                                              mostly=None,
-                                             output_format=None, include_config=False, catch_exceptions=None, meta=None):
+                                             result_format=None, include_config=False, catch_exceptions=None, meta=None):
         return column.map(lambda x : len(x) == value)
 
     @DocInherit
-    @MetaPandasDataSet.column_map_expectation
+    @MetaPandasDataset.column_map_expectation
     def expect_column_values_to_match_regex(self, column, regex,
                                             mostly=None,
-                                            output_format=None, include_config=False, catch_exceptions=None, meta=None):
+                                            result_format=None, include_config=False, catch_exceptions=None, meta=None):
         return column.map(
             lambda x: re.findall(regex, str(x)) != []
         )
 
     @DocInherit
-    @MetaPandasDataSet.column_map_expectation
+    @MetaPandasDataset.column_map_expectation
     def expect_column_values_to_not_match_regex(self, column, regex,
                                                 mostly=None,
-                                                output_format=None, include_config=False, catch_exceptions=None, meta=None):
+                                                result_format=None, include_config=False, catch_exceptions=None, meta=None):
         return column.map(lambda x: re.findall(regex, str(x)) == [])
 
     @DocInherit
-    @MetaPandasDataSet.column_map_expectation
+    @MetaPandasDataset.column_map_expectation
     def expect_column_values_to_match_regex_list(self, column, regex_list, match_on="any",
                                                  mostly=None,
-                                                 output_format=None, include_config=False, catch_exceptions=None, meta=None):
+                                                 result_format=None, include_config=False, catch_exceptions=None, meta=None):
 
         if match_on=="any":
 
@@ -647,10 +657,10 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         return column.map(match_in_list)
 
     @DocInherit
-    @MetaPandasDataSet.column_map_expectation
+    @MetaPandasDataset.column_map_expectation
     def expect_column_values_to_match_strftime_format(self, column, strftime_format,
                                                       mostly=None,
-                                                      output_format=None, include_config=False, catch_exceptions=None,
+                                                      result_format=None, include_config=False, catch_exceptions=None,
                                                       meta=None):
         ## Below is a simple validation that the provided format can both format and parse a datetime object.
         ## %D is an example of a format that can format but not parse, e.g.
@@ -673,10 +683,10 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         return column.map(is_parseable_by_format)
 
     @DocInherit
-    @MetaPandasDataSet.column_map_expectation
+    @MetaPandasDataset.column_map_expectation
     def expect_column_values_to_be_dateutil_parseable(self, column,
                                                       mostly=None,
-                                                      output_format=None, include_config=False, catch_exceptions=None, meta=None):
+                                                      result_format=None, include_config=False, catch_exceptions=None, meta=None):
         def is_parseable(val):
             try:
                 if type(val) != str:
@@ -691,10 +701,10 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         return column.map(is_parseable)
 
     @DocInherit
-    @MetaPandasDataSet.column_map_expectation
+    @MetaPandasDataset.column_map_expectation
     def expect_column_values_to_be_json_parseable(self, column,
                                                   mostly=None,
-                                                  output_format=None, include_config=False, catch_exceptions=None, meta=None):
+                                                  result_format=None, include_config=False, catch_exceptions=None, meta=None):
         def is_json(val):
             try:
                 json.loads(val)
@@ -705,10 +715,10 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         return column.map(is_json)
 
     @DocInherit
-    @MetaPandasDataSet.column_map_expectation
+    @MetaPandasDataset.column_map_expectation
     def expect_column_values_to_match_json_schema(self, column, json_schema,
                                                   mostly=None,
-                                                  output_format=None, include_config=False, catch_exceptions=None, meta=None):
+                                                  result_format=None, include_config=False, catch_exceptions=None, meta=None):
         def matches_json_schema(val):
             try:
                 val_json = json.loads(val)
@@ -723,28 +733,35 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
 
     @DocInherit
-    @MetaPandasDataSet.column_aggregate_expectation
+    @MetaPandasDataset.column_aggregate_expectation
     def expect_column_mean_to_be_between(self, column, min_value=None, max_value=None,
-                                         output_format=None, include_config=False, catch_exceptions=None, meta=None):
+                                         result_format=None, include_config=False, catch_exceptions=None, meta=None):
 
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
 
+        if min_value is not None and not isinstance(min_value, (Number)):
+            raise ValueError("min_value must be a number")
+
+        if max_value is not None and not isinstance(max_value, (Number)):
+            raise ValueError("max_value must be a number")
+
         column_mean = column.mean()
 
         return {
-            "success": (
+            'success': (
                 ((min_value is None) or (min_value <= column_mean)) and
                 ((max_value is None) or (column_mean <= max_value))
             ),
-            "true_value": column_mean,
-            "summary_obj": {}
+            'result': {
+                'observed_value': column_mean
+            }
         }
 
     @DocInherit
-    @MetaPandasDataSet.column_aggregate_expectation
+    @MetaPandasDataset.column_aggregate_expectation
     def expect_column_median_to_be_between(self, column, min_value=None, max_value=None,
-                                           output_format=None, include_config=False, catch_exceptions=None, meta=None):
+                                           result_format=None, include_config=False, catch_exceptions=None, meta=None):
 
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
@@ -756,14 +773,15 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
                 ((min_value or None) or (min_value <= column_median)) and
                 ((max_value or None) or (column_median <= max_value))
             ),
-            "true_value": column_median,
-            "summary_obj": {}
+            "result":{
+                "observed_value": column_median
+            }
         }
 
     @DocInherit
-    @MetaPandasDataSet.column_aggregate_expectation
+    @MetaPandasDataset.column_aggregate_expectation
     def expect_column_stdev_to_be_between(self, column, min_value=None, max_value=None,
-                                          output_format=None, include_config=False, catch_exceptions=None, meta=None):
+                                          result_format=None, include_config=False, catch_exceptions=None, meta=None):
 
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
@@ -775,14 +793,15 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
                 ((min_value is None) or (min_value <= column_stdev)) and
                 ((max_value is None) or (column_stdev <= max_value))
             ),
-            "true_value": column_stdev,
-            "summary_obj": {}
+            "result": {
+                "observed_value": column_stdev
+            }
         }
 
     @DocInherit
-    @MetaPandasDataSet.column_aggregate_expectation
+    @MetaPandasDataset.column_aggregate_expectation
     def expect_column_unique_value_count_to_be_between(self, column, min_value=None, max_value=None,
-                                                       output_format=None, include_config=False, catch_exceptions=None, meta=None):
+                                                       result_format=None, include_config=False, catch_exceptions=None, meta=None):
 
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
@@ -794,14 +813,19 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
                 ((min_value is None) or (min_value <= unique_value_count)) and
                 ((max_value is None) or (unique_value_count <= max_value))
             ),
-            "true_value": unique_value_count,
-            "summary_obj": {}
+            "result": {
+                "observed_value": unique_value_count
+            }
         }
 
     @DocInherit
-    @MetaPandasDataSet.column_aggregate_expectation
+    @MetaPandasDataset.column_aggregate_expectation
     def expect_column_proportion_of_unique_values_to_be_between(self, column, min_value=0, max_value=1,
-                                                                output_format=None, include_config=False, catch_exceptions=None, meta=None):
+                                                                result_format=None, include_config=False, catch_exceptions=None, meta=None):
+
+        if min_value is None and max_value is None:
+            raise ValueError("min_value and max_value cannot both be None")
+
         unique_value_count = column.value_counts().shape[0]
         total_value_count = int(len(column))#.notnull().sum()
 
@@ -815,14 +839,15 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
                 ((min_value is None) or (min_value <= proportion_unique)) and
                 ((max_value is None) or (proportion_unique <= max_value))
             ),
-            "true_value": proportion_unique,
-            "summary_obj": {}
+            "result": {
+                "observed_value": proportion_unique
+            }
         }
 
     @DocInherit
-    @MetaPandasDataSet.column_aggregate_expectation
+    @MetaPandasDataset.column_aggregate_expectation
     def expect_column_most_common_value_to_be_in_set(self, column, value_set, ties_okay=None,
-                                                     output_format=None, include_config=False, catch_exceptions=None, meta=None):
+                                                     result_format=None, include_config=False, catch_exceptions=None, meta=None):
 
         mode_list = list(column.mode().values)
         intersection_count = len(set(value_set).intersection(mode_list))
@@ -836,18 +861,19 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
                 success = intersection_count==1
 
         return {
-            "success" : success,
-            "true_value": mode_list,
-            "summary_obj": {},
+            'success' : success,
+            'result': {
+                'observed_value': mode_list
+            }
         }
 
     @DocInherit
-    @MetaPandasDataSet.column_aggregate_expectation
+    @MetaPandasDataset.column_aggregate_expectation
     def expect_column_sum_to_be_between(self,
         column,
         min_value=None,
         max_value=None,
-        output_format=None, include_config=False, catch_exceptions=None, meta=None
+        result_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
@@ -865,19 +891,20 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
         return {
             "success" : success,
-            "true_value" : col_sum,
-            "summary_obj" : {}
+            "result": {
+                "observed_value" : col_sum
+            }
         }
 
     @DocInherit
-    @MetaPandasDataSet.column_aggregate_expectation
+    @MetaPandasDataset.column_aggregate_expectation
     def expect_column_min_to_be_between(self,
         column,
         min_value=None,
         max_value=None,
         parse_strings_as_datetimes=None,
         output_strftime_format=None,
-        output_format=None, include_config=False, catch_exceptions=None, meta=None
+        result_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
@@ -910,22 +937,23 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
                 col_min = datetime.strftime(col_min, output_strftime_format)
             else:
                 col_min = str(col_min)
-
         return {
-            "success" : success,
-            "true_value" : col_min,
-            "summary_obj" : {}
+            'success' : success,
+            'result': {
+                'observed_value' : col_min
+            }
         }
 
+
     @DocInherit
-    @MetaPandasDataSet.column_aggregate_expectation
+    @MetaPandasDataset.column_aggregate_expectation
     def expect_column_max_to_be_between(self,
         column,
         min_value=None,
         max_value=None,
         parse_strings_as_datetimes=None,
         output_strftime_format=None,
-        output_format=None, include_config=False, catch_exceptions=None, meta=None
+        result_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
@@ -962,14 +990,16 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
         return {
             "success" : success,
-            "true_value" : col_max,
-            "summary_obj" : {}
+            "result": {
+                "observed_value" : col_max
+            }
         }
 
+
     @DocInherit
-    @MetaPandasDataSet.column_aggregate_expectation
+    @MetaPandasDataset.column_aggregate_expectation
     def expect_column_chisquare_test_p_value_to_be_greater_than(self, column, partition_object=None, p=0.05, tail_weight_holdout=0,
-                                                                output_format=None, include_config=False, catch_exceptions=None, meta=None):
+                                                                result_format=None, include_config=False, catch_exceptions=None, meta=None):
         if not is_valid_categorical_partition_object(partition_object):
             raise ValueError("Invalid partition object.")
 
@@ -992,27 +1022,29 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
         test_result = stats.chisquare(test_df[column.name], test_df['expected'])[1]
 
-        result_obj = {
+        return_obj = {
                 "success": test_result > p,
-                "true_value": test_result,
-                "summary_obj": {
-                    "observed_partition": {
-                        "values": test_df.index.tolist(),
-                        "weights": test_df[column.name].tolist()
-                    },
-                    "expected_partition": {
-                        "values": test_df.index.tolist(),
-                        "weights": test_df['expected'].tolist()
+                "result": {
+                    "observed_value": test_result,
+                    "details": {
+                        "observed_partition": {
+                            "values": test_df.index.tolist(),
+                            "weights": test_df[column.name].tolist()
+                        },
+                        "expected_partition": {
+                            "values": test_df.index.tolist(),
+                            "weights": test_df['expected'].tolist()
+                        }
                     }
                 }
             }
 
-        return result_obj
+        return return_obj
 
     @DocInherit
-    @MetaPandasDataSet.column_aggregate_expectation
+    @MetaPandasDataset.column_aggregate_expectation
     def expect_column_bootstrapped_ks_test_p_value_to_be_greater_than(self, column, partition_object=None, p=0.05, bootstrap_samples=None, bootstrap_sample_size=None,
-                                                                      output_format=None, include_config=False, catch_exceptions=None, meta=None):
+                                                                      result_format=None, include_config=False, catch_exceptions=None, meta=None):
         if not is_valid_continuous_partition_object(partition_object):
             raise ValueError("Invalid continuous partition object.")
 
@@ -1062,38 +1094,40 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
         observed_cdf_values = np.cumsum(observed_weights)
 
-        result_obj = {
+        return_obj = {
                 "success" : test_result > p,
-                "true_value": test_result,
-                "summary_obj": {
-                    "bootstrap_samples": bootstrap_samples,
-                    "bootstrap_sample_size": bootstrap_sample_size,
-                    "observed_partition": {
-                        "bins": observed_bins,
-                        "weights": observed_weights.tolist()
-                    },
-                    "expected_partition": {
-                        "bins": partition_object['bins'],
-                        "weights": partition_object['weights']
-                    },
-                    "observed_cdf": {
-                        "x": observed_bins,
-                        "cdf_values": [0] + observed_cdf_values.tolist()
-                    },
-                    "expected_cdf": {
-                        "x": partition_object['bins'],
-                        "cdf_values": test_cdf.tolist()
+                "result": {
+                    "observed_value": test_result,
+                    "details": {
+                        "bootstrap_samples": bootstrap_samples,
+                        "bootstrap_sample_size": bootstrap_sample_size,
+                        "observed_partition": {
+                            "bins": observed_bins,
+                            "weights": observed_weights.tolist()
+                        },
+                        "expected_partition": {
+                            "bins": partition_object['bins'],
+                            "weights": partition_object['weights']
+                        },
+                        "observed_cdf": {
+                            "x": observed_bins,
+                            "cdf_values": [0] + observed_cdf_values.tolist()
+                        },
+                        "expected_cdf": {
+                            "x": partition_object['bins'],
+                            "cdf_values": test_cdf.tolist()
+                        }
                     }
                 }
             }
 
-        return result_obj
+        return return_obj
 
     @DocInherit
-    @MetaPandasDataSet.column_aggregate_expectation
+    @MetaPandasDataset.column_aggregate_expectation
     def expect_column_kl_divergence_to_be_less_than(self, column, partition_object=None, threshold=None,
                                                     tail_weight_holdout=0, internal_weight_holdout=0,
-                                                    output_format=None, include_config=False, catch_exceptions=None, meta=None):
+                                                    result_format=None, include_config=False, catch_exceptions=None, meta=None):
         if not is_valid_partition_object(partition_object):
             raise ValueError("Invalid partition object.")
 
@@ -1130,17 +1164,19 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
             kl_divergence = stats.entropy(pk, qk)
 
-            result_obj = {
+            return_obj = {
                 "success": kl_divergence <= threshold,
-                "true_value": kl_divergence,
-                "summary_obj": {
-                    "observed_partition": {
-                        "values": test_df.index.tolist(),
-                        "weights": pk.tolist()
-                    },
-                    "expected_partition": {
-                        "values": test_df.index.tolist(),
-                        "weights": qk.tolist()
+                "result": {
+                    "observed_value": kl_divergence,
+                    "details": {
+                        "observed_partition": {
+                            "values": test_df.index.tolist(),
+                            "weights": pk.tolist()
+                        },
+                        "expected_partition": {
+                            "values": test_df.index.tolist(),
+                            "weights": qk.tolist()
+                        }
                     }
                 }
             }
@@ -1192,21 +1228,23 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
                 expected_weights = np.concatenate(([tail_weight_holdout / 2], expected_weights, [tail_weight_holdout / 2]))
 
             kl_divergence = stats.entropy(observed_weights, expected_weights)
-
-            result_obj = {
+            return_obj = {
                     "success": kl_divergence <= threshold,
-                    "true_value": kl_divergence,
-                    "summary_obj": {
-                        "observed_partition": {
-                            # return expected_bins, since we used those bins to compute the observed_weights
-                            "bins": expected_bins,
-                            "weights": observed_weights.tolist()
-                        },
-                        "expected_partition": {
-                            "bins": expected_bins,
-                            "weights": expected_weights.tolist()
+                    "result": {
+                        "observed_value": kl_divergence,
+                        "details": {
+                            "observed_partition": {
+                                # return expected_bins, since we used those bins to compute the observed_weights
+                                "bins": expected_bins,
+                                "weights": observed_weights.tolist()
+                            },
+                            "expected_partition": {
+                                "bins": expected_bins,
+                                "weights": expected_weights.tolist()
+                            }
                         }
                     }
                 }
 
-        return result_obj
+
+        return return_obj
