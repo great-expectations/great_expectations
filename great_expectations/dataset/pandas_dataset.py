@@ -822,6 +822,10 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
     @MetaPandasDataset.column_aggregate_expectation
     def expect_column_proportion_of_unique_values_to_be_between(self, column, min_value=0, max_value=1,
                                                                 result_format=None, include_config=False, catch_exceptions=None, meta=None):
+
+        if min_value is None and max_value is None:
+            raise ValueError("min_value and max_value cannot both be None")
+
         unique_value_count = column.value_counts().shape[0]
         total_value_count = int(len(column))#.notnull().sum()
 
