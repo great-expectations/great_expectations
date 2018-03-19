@@ -1493,7 +1493,7 @@ class TestPandasDataset(unittest.TestCase):
         # The sampled data frame should:
         #
         #   1. Be a ge.dataset.PandaDataSet
-        #   2. Inherit ALL the non-failing expectations of the parent data frame
+        #   2. Inherit ALL the expectations of the parent data frame
 
         samp1 = df.sample(n=2)
         self.assertIsInstance(samp1, ge.dataset.PandasDataSet)
@@ -1504,8 +1504,8 @@ class TestPandasDataset(unittest.TestCase):
         self.assertEqual(samp1.find_expectations(), exp1)
 
         # Change expectation on column "D", sample, and check expectations.
-        # The failing expectation on column "D" is automatically dropped in
-        # the sample.
+        # The failing expectation on column "D" is NOT automatically dropped
+        # in the sample.
         df.expect_column_values_to_be_in_set("D", ['e', 'f', 'g', 'x'])
         samp1 = df.sample(n=2)
         exp1 = [
@@ -1522,7 +1522,9 @@ class TestPandasDataset(unittest.TestCase):
             {'expectation_type': 'expect_column_values_to_be_in_set',
              'kwargs': {'column': 'B', 'values_set': [5, 6, 7, 8]}},
             {'expectation_type': 'expect_column_values_to_be_in_set',
-             'kwargs': {'column': 'C', 'values_set': ['a', 'b', 'c', 'd']}}
+             'kwargs': {'column': 'C', 'values_set': ['a', 'b', 'c', 'd']}},
+            {'expectation_type': 'expect_column_values_to_be_in_set',
+             'kwargs': {'column': 'D', 'values_set': ['e', 'f', 'g', 'x']}}
         ]
         self.assertEqual(samp1.find_expectations(), exp1)
 
@@ -1594,7 +1596,8 @@ class TestPandasDataset(unittest.TestCase):
         df.expect_column_values_to_be_in_set("C", ['w', 'x', 'y', 'z'])
         df.expect_column_values_to_be_in_set("D", ['e', 'f', 'g', 'h'])
 
-        # First check that failing expectations are dropped when sampling.
+        # First check that failing expectations are NOT automatically
+        # dropped when sampling.
         # For this data frame, the expectation on column "C" above fails.
         exp1 = [
             {'expectation_type': 'expect_column_to_exist',
@@ -1610,20 +1613,47 @@ class TestPandasDataset(unittest.TestCase):
             {'expectation_type': 'expect_column_values_to_be_in_set',
              'kwargs': {'column': 'B', 'values_set': [5, 6, 7, 8]}},
             {'expectation_type': 'expect_column_values_to_be_in_set',
-             'kwargs': {'column': 'D', 'values_set': ['e', 'f', 'g', 'h']}}        ]
-
+             'kwargs': {'column': 'C', 'values_set': ['w', 'x', 'y', 'z']}},
+            {'expectation_type': 'expect_column_values_to_be_in_set',
+             'kwargs': {'column': 'D', 'values_set': ['e', 'f', 'g', 'h']}}
+        ]
         samp1 = df.sample(n=2)
         self.assertEqual(samp1.find_expectations(), exp1)
 
+        # Now check subsetting to verify that failing expectations are NOT
+        # automatically dropped when subsetting.
+        sub1 = df[['A', 'D']]
+        self.assertEqual(sub1.find_expectations(), exp1)
+
         # Set property/attribute so that failing expectations are
-        # automatically removed when subsetting.
+        # automatically removed when sampling or subsetting.
         df.discard_subset_failing_expectations = True
+
+        exp_samp = [
+            {'expectation_type': 'expect_column_to_exist',
+             'kwargs': {'column': 'A'}},
+            {'expectation_type': 'expect_column_to_exist',
+             'kwargs': {'column': 'B'}},
+            {'expectation_type': 'expect_column_to_exist',
+             'kwargs': {'column': 'C'}},
+            {'expectation_type': 'expect_column_to_exist',
+             'kwargs': {'column': 'D'}},
+            {'expectation_type': 'expect_column_values_to_be_in_set',
+             'kwargs': {'column': 'A', 'values_set': [1, 2, 3, 4]}},
+            {'expectation_type': 'expect_column_values_to_be_in_set',
+             'kwargs': {'column': 'B', 'values_set': [5, 6, 7, 8]}},
+            {'expectation_type': 'expect_column_values_to_be_in_set',
+             'kwargs': {'column': 'D', 'values_set': ['e', 'f', 'g', 'h']}}
+        ]
+
+        samp2 = df.sample(n=2)
+        self.assertEqual(samp2.find_expectations(), exp_samp)
 
         # Now check subsetting. In additional to the failure on column "C",
         # the expectations on column "B" now fail since column "B" doesn't
         # exist in the subset.
-        sub1 = df[['A', 'D']]
-        exp1 = [
+        sub2 = df[['A', 'D']]
+        exp_sub = [
             {'expectation_type': 'expect_column_to_exist',
              'kwargs': {'column': 'A'}},
             {'expectation_type': 'expect_column_to_exist',
@@ -1633,7 +1663,7 @@ class TestPandasDataset(unittest.TestCase):
             {'expectation_type': 'expect_column_values_to_be_in_set',
              'kwargs': {'column': 'D', 'values_set': ['e', 'f', 'g', 'h']}}
         ]
-        self.assertEqual(sub1.find_expectations(), exp1)
+        self.assertEqual(sub2.find_expectations(), exp_sub)
 
 
 if __name__ == "__main__":
