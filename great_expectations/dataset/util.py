@@ -1,17 +1,34 @@
-# Utility methods for dealing with DataSet objects
+# Utility methods for dealing with Dataset objects
 
 from __future__ import division
+
+from six import string_types, integer_types
+
 import numpy as np
 from scipy import stats
 import pandas as pd
 import warnings
 import sys
 import copy
-import json
 import datetime
 
 from functools import wraps
 
+
+def parse_result_format(result_format):
+    """This is a simple helper utility that can be used to parse a string result_format into the dict format used
+    internally by great_expectations. It is not necessary but allows shorthand for result_format in cases where
+    there is no need to specify a custom partial_unexpected_count."""
+    if isinstance(result_format, string_types):
+        result_format = {
+            'result_format': result_format,
+            'partial_unexpected_count': 20
+        }
+    else:
+        if 'partial_unexpected_count' not in result_format:
+            result_format['partial_unexpected_count'] = 20
+
+    return result_format
 
 class DotDict(dict):
     """dot.notation access to dictionary attributes"""
@@ -53,7 +70,7 @@ Usage::
     http://code.activestate.com/recipes/576862/. Unfortunately, the
     original authors did not anticipate deep inheritance hierarchies, and
     we ran into a recursion issue when implementing custom subclasses of
-    PandasDataSet:
+    PandasDataset:
     https://github.com/great-expectations/great_expectations/issues/177.
 
     Our new homegrown implementation directly searches the MRO, instead
@@ -96,12 +113,9 @@ def recursively_convert_to_json_serializable(test_obj):
     Warning:
         test_obj may also be converted in place.
 
-    FIXME: Somebody else must have already written this function. Can we use a fully-baked version instead?
     """
     # Validate that all aruguments are of approved types, coerce if it's easy, else exception
-    # print(type(test_obj), test_obj)
-
-    if isinstance(test_obj, (str, int, float, bool)):
+    if isinstance(test_obj, (string_types, integer_types, float, bool)):
         # No problem to encode json
         return test_obj
 
@@ -138,16 +152,8 @@ def recursively_convert_to_json_serializable(test_obj):
     elif isinstance(test_obj, (datetime.datetime, datetime.date)):
         return str(test_obj)
 
-
     else:
-        try:
-            # In Python 2, unicode and long should still be valid.
-            # This will break in Python 3 and throw the exception instead.
-            if isinstance(test_obj, (long, unicode)):
-                # No problem to encode json
-                return test_obj
-        except:
-            raise TypeError('%s is of type %s which cannot be serialized.' % (str(test_obj), type(test_obj).__name__))
+        raise TypeError('%s is of type %s which cannot be serialized.' % (str(test_obj), type(test_obj).__name__))
 
 
 def is_valid_partition_object(partition_object):

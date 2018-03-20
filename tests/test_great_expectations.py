@@ -7,8 +7,8 @@ import numpy as np
 import pandas as pd
 
 import great_expectations as ge
-from great_expectations.dataset import PandasDataSet, MetaPandasDataSet
-from .util import assertDeepAlmostEqual
+from great_expectations.dataset import PandasDataset, MetaPandasDataset
+from .test_utils import assertDeepAlmostEqual
 
 def isprime(n):
     #https://stackoverflow.com/questions/18833759/python-prime-number-checker
@@ -38,13 +38,13 @@ def isprime(n):
     return True
 
 
-class CustomPandasDataSet(PandasDataSet):
+class CustomPandasDataset(PandasDataset):
 
-    @MetaPandasDataSet.column_map_expectation
+    @MetaPandasDataset.column_map_expectation
     def expect_column_values_to_be_prime(self, column):
         return column.map(isprime)
 
-    @MetaPandasDataSet.expectation(["column", "mostly"])
+    @MetaPandasDataset.expectation(["column", "mostly"])
     def expect_column_values_to_equal_1(self, column, mostly=None):
         not_null = self[column].notnull()
         
@@ -56,7 +56,7 @@ class CustomPandasDataSet(PandasDataSet):
             if len(not_null) == 0:
                 return {
                     'success':True,
-                    'result_obj': {
+                    'result': {
                         'unexpected_list':unexpected_values,
                         'unexpected_index_list':self.index[result],
                     }
@@ -65,7 +65,7 @@ class CustomPandasDataSet(PandasDataSet):
             percent_equaling_1 = float(sum(result))/len(not_null)
             return {
                 "success" : percent_equaling_1 >= mostly,
-                'result_obj': {
+                'result': {
                     "unexpected_list" : unexpected_values[:20],
                     "unexpected_index_list" : list(self.index[result==False])[:20],
                 }
@@ -73,7 +73,7 @@ class CustomPandasDataSet(PandasDataSet):
         else:
             return {
                 "success" : len(unexpected_values) == 0,
-                'result_obj': {
+                'result': {
                     "unexpected_list" : unexpected_values[:20],
                     "unexpected_index_list" : list(self.index[result==False])[:20],
                 }
@@ -85,11 +85,11 @@ class TestCustomClass(unittest.TestCase):
         script_path = os.path.dirname(os.path.realpath(__file__))
         df = ge.read_csv(
             script_path+'/test_sets/Titanic.csv',
-            dataset_class=CustomPandasDataSet
+            dataset_class=CustomPandasDataset
         )
         df.set_default_expectation_argument("result_format", "COMPLETE")
         self.assertEqual(
-            df.expect_column_values_to_be_prime('Age')['result_obj']['unexpected_list'],
+            df.expect_column_values_to_be_prime('Age')['result']['unexpected_list'],
             [30.0, 25.0, 0.92000000000000004, 63.0, 39.0, 58.0, 50.0, 24.0, 36.0, 26.0, 25.0, 25.0, 28.0, 45.0, 39.0,
              30.0, 58.0, 45.0, 22.0, 48.0, 44.0, 60.0, 45.0, 58.0, 36.0, 33.0, 36.0, 36.0, 14.0, 49.0, 36.0, 46.0, 27.0,
              27.0, 26.0, 64.0, 39.0, 55.0, 70.0, 69.0, 36.0, 39.0, 38.0, 27.0, 27.0, 4.0, 27.0, 50.0, 48.0, 49.0, 48.0,
@@ -130,34 +130,34 @@ class TestCustomClass(unittest.TestCase):
         primes = [3,5,7,11,13,17,23,31]
         df["primes"] = df.Age.map(lambda x: random.choice(primes))
         self.assertEqual(
-            df.expect_column_values_to_be_prime("primes")['result_obj']['unexpected_list'],
+            df.expect_column_values_to_be_prime("primes")['result']['unexpected_list'],
             []
         )
 
     def test_custom_expectation(self):
-        df = CustomPandasDataSet({'x': [1,1,1,1,2]})
+        df = CustomPandasDataset({'x': [1,1,1,1,2]})
         df.set_default_expectation_argument("result_format", "COMPLETE")
 
         out = df.expect_column_values_to_be_prime('x')
         t = {'out': {'unexpected_list':[1,1,1,1],'unexpected_index_list':[0,1,2,3], 'success':False}}
         self.assertEqual(t['out']['success'], out['success'])
         if 'unexpected_index_list' in t['out']:
-            self.assertEqual(t['out']['unexpected_index_list'], out['result_obj']['unexpected_index_list'])
+            self.assertEqual(t['out']['unexpected_index_list'], out['result']['unexpected_index_list'])
         if 'unexpected_list' in t['out']:
-            self.assertEqual(t['out']['unexpected_list'], out['result_obj']['unexpected_list'])
+            self.assertEqual(t['out']['unexpected_list'], out['result']['unexpected_list'])
 
         out = df.expect_column_values_to_equal_1('x', mostly=.8)
         print(out)
         t = {'out': {'unexpected_list':[2],'unexpected_index_list':[4],'success':True}}
         self.assertEqual(t['out']['success'], out['success'])
         if 'unexpected_index_list' in t['out']:
-            self.assertEqual(t['out']['unexpected_index_list'], out['result_obj']['unexpected_index_list'])
+            self.assertEqual(t['out']['unexpected_index_list'], out['result']['unexpected_index_list'])
         if 'unexpected_list' in t['out']:
-            self.assertEqual(t['out']['unexpected_list'], out['result_obj']['unexpected_list'])
+            self.assertEqual(t['out']['unexpected_list'], out['result']['unexpected_list'])
 
    # Ensure that Custom Data Set classes can properly call non-overridden methods from their parent class
     def test_base_class_expectation(self):
-        df = CustomPandasDataSet({
+        df = CustomPandasDataset({
             "aaa": [1, 2, 3, 4, 5],
             "bbb": [10, 20, 30, 40, 50],
             "ccc": [9, 10, 11, 12, 13],
@@ -215,7 +215,7 @@ class TestValidation(unittest.TestCase):
                  "exception_info": {"exception_message": None,
                                     "exception_traceback": None,
                                     "raised_exception": False},
-                 "result_obj": {"partial_unexpected_index_list": [456], "unexpected_count": 1, "unexpected_list": ["*"],
+                 "result": {"partial_unexpected_index_list": [456], "unexpected_count": 1, "unexpected_list": ["*"],
                                 "unexpected_percent": 0.0007616146230007616, "element_count": 1313,
                                 "missing_percent": 0.0, "partial_unexpected_counts": [{"count": 1, "value": "*"}],
                                 "partial_unexpected_list": ["*"],
@@ -225,7 +225,7 @@ class TestValidation(unittest.TestCase):
         )
 
     def test_validate_catch_non_existent_expectation(self):
-        df = ge.dataset.PandasDataSet({
+        df = ge.dataset.PandasDataset({
             "x" : [1,2,3,4,5]
         })
 
@@ -249,7 +249,7 @@ class TestValidation(unittest.TestCase):
         )
 
     def test_validate_catch_invalid_parameter(self):
-        df = ge.dataset.PandasDataSet({
+        df = ge.dataset.PandasDataset({
             "x": [1, 2, 3, 4, 5]
         })
 
@@ -271,7 +271,7 @@ class TestValidation(unittest.TestCase):
         results = df.validate(expectations_config=validation_config_invalid_parameter)['results']
         print(results[0]['exception_info'])
         self.assertIn(
-            "min_value is greater than max_value",
+            "min_value cannot be greater than max_value",
             results[0]['exception_info']['exception_message']
         )
 
@@ -327,7 +327,7 @@ class TestValidation(unittest.TestCase):
                                         "exception_traceback": None,
                                         "raised_exception": False},
                     "success": False,
-                    "result_obj": {'element_count': 5,
+                    "result": {'element_count': 5,
                                  'missing_count': 0,
                                  'missing_percent': 0.0,
                                  "unexpected_percent": 0.4,

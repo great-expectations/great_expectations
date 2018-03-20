@@ -34,7 +34,7 @@ def validate(data_set, expectations_config_file, **kwargs):
 		dataset_class = getattr(custom_module, kwargs["custom_dataset_class"])
 
 	else:
-		dataset_class = ge.dataset.PandasDataSet
+		dataset_class = ge.dataset.PandasDataset
 
 	df = ge.read_csv(data_set, expectations_config=expectations_config, dataset_class=dataset_class)
 
