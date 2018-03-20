@@ -1585,7 +1585,7 @@ class TestPandasDataset(unittest.TestCase):
 
 
     def test_ge_pandas_subsetting(self):
-        df = ge.dataset.PandasDataSet({
+        df = ge.dataset.PandasDataset({
             'A':[1,2,3,4],
             'B':[5,6,7,8],
             'C':['a','b','c','d'],
