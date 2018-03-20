@@ -15,7 +15,7 @@ from dateutil.parser import parse
 from scipy import stats
 from six import string_types
 
-from .base import DataSet
+from .base import Dataset
 from .util import DocInherit, recursively_convert_to_json_serializable, \
         is_valid_partition_object, is_valid_categorical_partition_object, is_valid_continuous_partition_object, \
         infer_distribution_parameters, _scipy_distribution_positional_args_from_dict, validate_distribution_parameters
@@ -734,7 +734,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         return column.map(matches_json_schema)
 
     @DocInherit
-    @MetaPandasDataSet.column_aggregate_expectation
+    @MetaPandasDataset.column_aggregate_expectation
     def expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than(self, column, distribution,
                                                                                     p_value=0.05, params=None,
                                                                                     output_format=None,
