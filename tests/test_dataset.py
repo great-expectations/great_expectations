@@ -14,7 +14,7 @@ class TestDataset(unittest.TestCase):
 
     def test_dataset(self):
 
-        D = ge.dataset.PandasDataSet({
+        D = ge.dataset.PandasDataset({
             'x' : [1,2,4],
             'y' : [1,2,5],
             'z' : ['hello', 'jello', 'mello'],
@@ -65,7 +65,7 @@ class TestDataset(unittest.TestCase):
         )
 
     def test_expectation_meta(self):
-        df = ge.dataset.PandasDataSet({
+        df = ge.dataset.PandasDataset({
             'x' : [1,2,4],
             'y' : [1,2,5],
             'z' : ['hello', 'jello', 'mello'],
@@ -95,7 +95,7 @@ class TestDataset(unittest.TestCase):
     #TODO: !!! Add tests for save_expectation
 
     def test_set_default_expectation_argument(self):
-        df = ge.dataset.PandasDataSet({
+        df = ge.dataset.PandasDataset({
             'x' : [1,2,4],
             'y' : [1,2,5],
             'z' : ['hello', 'jello', 'mello'],
@@ -124,7 +124,7 @@ class TestDataset(unittest.TestCase):
     def test_get_and_save_expectation_config(self):
         directory_name = tempfile.mkdtemp()
 
-        df = ge.dataset.PandasDataSet({
+        df = ge.dataset.PandasDataset({
             'x' : [1,2,4],
             'y' : [1,2,5],
             'z' : ['hello', 'jello', 'mello'],
@@ -344,7 +344,7 @@ class TestDataset(unittest.TestCase):
         shutil.rmtree(directory_name)
 
     def test_format_column_map_output(self):
-        df = ge.dataset.PandasDataSet({
+        df = ge.dataset.PandasDataset({
             "x" : list("abcdefghijklmnopqrstuvwxyz"),
         })
         self.maxDiff = None
@@ -379,7 +379,7 @@ class TestDataset(unittest.TestCase):
             ),
             {
                 'success': True,
-                'result_obj': {
+                'result': {
                     'element_count': 20,
                     'missing_count': 5,
                     'missing_percent': 0.25,
@@ -401,7 +401,7 @@ class TestDataset(unittest.TestCase):
             ),
             {
                 'success': True,
-                'result_obj': {
+                'result': {
                     'element_count': 20,
                     'missing_count': 5,
                     'missing_percent': 0.25,
@@ -425,7 +425,7 @@ class TestDataset(unittest.TestCase):
             ),
             {
                 'success': True,
-                'result_obj':
+                'result':
                     {
                         'element_count': 20,
                         'missing_count': 5,
@@ -474,7 +474,7 @@ class TestDataset(unittest.TestCase):
             ),
             {
                 'success': True,
-                'result_obj': {
+                'result': {
                     'element_count': 20,
                     'missing_count': 20,
                     'missing_percent': 1,
@@ -496,7 +496,7 @@ class TestDataset(unittest.TestCase):
             ),
             {
                 'success': True,
-                'result_obj': {
+                'result': {
                     'element_count': 20,
                     'missing_count': 20,
                     'missing_percent': 1,
@@ -520,7 +520,7 @@ class TestDataset(unittest.TestCase):
             ),
             {
                 'success': True,
-                'result_obj': {
+                'result': {
                     'element_count': 20,
                     'missing_count': 20,
                     'missing_percent': 1,
@@ -568,7 +568,7 @@ class TestDataset(unittest.TestCase):
             ),
             {
                 'success': False,
-                'result_obj': {
+                'result': {
                     'element_count': 0,
                     'missing_count': 0,
                     'missing_percent': None,
@@ -590,7 +590,7 @@ class TestDataset(unittest.TestCase):
             ),
             {
                 'success': False,
-                'result_obj': {
+                'result': {
                     'element_count': 0,
                     'missing_count': 0,
                     'missing_percent': None,
@@ -614,7 +614,7 @@ class TestDataset(unittest.TestCase):
             ),
             {
                 'success': False,
-                'result_obj': {
+                'result': {
                     'element_count': 0,
                     'missing_count': 0,
                     'missing_percent': None,
@@ -631,7 +631,7 @@ class TestDataset(unittest.TestCase):
         )
 
     def test_calc_map_expectation_success(self):
-        df = ge.dataset.PandasDataSet({
+        df = ge.dataset.PandasDataset({
             "x" : list("abcdefghijklmnopqrstuvwxyz")
         })
         self.assertEqual(
@@ -689,7 +689,7 @@ class TestDataset(unittest.TestCase):
         )
 
     def test_find_expectations(self):
-        my_df = ge.dataset.PandasDataSet({
+        my_df = ge.dataset.PandasDataset({
             'x' : [1,2,3,4,5,6,7,8,9,10],
             'y' : [1,2,None,4,None,6,7,8,9,None],
             'z' : ['cello', 'hello', 'jello', 'bellow', 'fellow', 'mellow', 'wellow', 'xello', 'yellow', 'zello'],
@@ -777,7 +777,7 @@ class TestDataset(unittest.TestCase):
 
 
     def test_remove_expectation(self):
-        my_df = ge.dataset.PandasDataSet({
+        my_df = ge.dataset.PandasDataset({
             'x' : [1,2,3,4,5,6,7,8,9,10],
             'y' : [1,2,None,4,None,6,7,8,9,None],
             'z' : ['cello', 'hello', 'jello', 'bellow', 'fellow', 'mellow', 'wellow', 'xello', 'yellow', 'zello'],
@@ -929,12 +929,117 @@ class TestDataset(unittest.TestCase):
             }
         )
 
+    def test_discard_failing_expectations(self):
+        df = ge.dataset.PandasDataset({
+            'A':[1,2,3,4],
+            'B':[5,6,7,8],
+            'C':['a','b','c','d'],
+            'D':['e','f','g','h']
+        })
+
+        # Put some simple expectations on the data frame
+        df.expect_column_values_to_be_in_set("A", [1, 2, 3, 4])
+        df.expect_column_values_to_be_in_set("B", [5, 6, 7, 8])
+        df.expect_column_values_to_be_in_set("C", ['a', 'b', 'c', 'd'])
+        df.expect_column_values_to_be_in_set("D", ['e', 'f', 'g', 'h'])
+
+        exp1 = [
+            {'expectation_type': 'expect_column_to_exist',
+             'kwargs': {'column': 'A'}},
+            {'expectation_type': 'expect_column_to_exist',
+             'kwargs': {'column': 'B'}},
+            {'expectation_type': 'expect_column_to_exist',
+             'kwargs': {'column': 'C'}},
+            {'expectation_type': 'expect_column_to_exist',
+             'kwargs': {'column': 'D'}},
+            {'expectation_type': 'expect_column_values_to_be_in_set',
+             'kwargs': {'column': 'A', 'values_set': [1, 2, 3, 4]}},
+            {'expectation_type': 'expect_column_values_to_be_in_set',
+             'kwargs': {'column': 'B', 'values_set': [5, 6, 7, 8]}},
+            {'expectation_type': 'expect_column_values_to_be_in_set',
+             'kwargs': {'column': 'C', 'values_set': ['a', 'b', 'c', 'd']}},
+            {'expectation_type': 'expect_column_values_to_be_in_set',
+             'kwargs': {'column': 'D', 'values_set': ['e', 'f', 'g', 'h']}}
+        ]
+
+        sub1 = df[:3]
+        sub1.discard_failing_expectations()
+        self.assertEqual(sub1.find_expectations(), exp1)
+
+        sub1 = df[1:2]
+        sub1.discard_failing_expectations()
+        self.assertEqual(sub1.find_expectations(), exp1)
+
+        sub1 = df[:-1]
+        sub1.discard_failing_expectations()
+        self.assertEqual(sub1.find_expectations(), exp1)
+
+        sub1 = df[-1:]
+        sub1.discard_failing_expectations()
+        self.assertEqual(sub1.find_expectations(), exp1)
+
+        sub1 = df[['A', 'D']]
+        exp1 = [
+            {'expectation_type': 'expect_column_to_exist',
+             'kwargs': {'column': 'A'}},
+            {'expectation_type': 'expect_column_to_exist',
+             'kwargs': {'column': 'D'}},
+            {'expectation_type': 'expect_column_values_to_be_in_set',
+             'kwargs': {'column': 'A', 'values_set': [1, 2, 3, 4]}},
+            {'expectation_type': 'expect_column_values_to_be_in_set',
+             'kwargs': {'column': 'D', 'values_set': ['e', 'f', 'g', 'h']}}
+        ]
+        sub1.discard_failing_expectations()
+        self.assertEqual(sub1.find_expectations(), exp1)
+
+        sub1 = df[['A']]
+        exp1 = [
+            {'expectation_type': 'expect_column_to_exist',
+             'kwargs': {'column': 'A'}},
+            {'expectation_type': 'expect_column_values_to_be_in_set',
+             'kwargs': {'column': 'A', 'values_set': [1, 2, 3, 4]}}
+        ]
+        sub1.discard_failing_expectations()
+        self.assertEqual(sub1.find_expectations(), exp1)
+
+        sub1 = df.iloc[:3, 1:4]
+        exp1 = [
+            {'expectation_type': 'expect_column_to_exist',
+             'kwargs': {'column': 'B'}},
+            {'expectation_type': 'expect_column_to_exist',
+             'kwargs': {'column': 'C'}},
+            {'expectation_type': 'expect_column_to_exist',
+             'kwargs': {'column': 'D'}},
+            {'expectation_type': 'expect_column_values_to_be_in_set',
+             'kwargs': {'column': 'B', 'values_set': [5, 6, 7, 8]}},
+            {'expectation_type': 'expect_column_values_to_be_in_set',
+             'kwargs': {'column': 'C', 'values_set': ['a', 'b', 'c', 'd']}},
+            {'expectation_type': 'expect_column_values_to_be_in_set',
+             'kwargs': {'column': 'D', 'values_set': ['e', 'f', 'g', 'h']}}
+        ]
+        sub1.discard_failing_expectations()
+        self.assertEqual(sub1.find_expectations(), exp1)
+
+        sub1 = df.loc[0:, 'A':'B']
+        exp1 = [
+            {'expectation_type': 'expect_column_to_exist',
+             'kwargs': {'column': 'A'}},
+            {'expectation_type': 'expect_column_to_exist',
+             'kwargs': {'column': 'B'}},
+            {'expectation_type': 'expect_column_values_to_be_in_set',
+             'kwargs': {'column': 'A', 'values_set': [1, 2, 3, 4]}},
+            {'expectation_type': 'expect_column_values_to_be_in_set',
+             'kwargs': {'column': 'B', 'values_set': [5, 6, 7, 8]}}
+        ]
+        sub1.discard_failing_expectations()
+        self.assertEqual(sub1.find_expectations(), exp1)
+
     def test_test_expectation_function(self):
-        D = ge.dataset.PandasDataSet({
+        D = ge.dataset.PandasDataset({
             'x' : [1,3,5,7,9],
             'y' : [1,2,None,7,9],
         })
-        D2 = ge.dataset.PandasDataSet({
+        D2 = ge.dataset.PandasDataset({
             'x' : [1,3,5,6,9],
             'y' : [1,2,None,6,9],
         })
@@ -955,7 +1060,7 @@ class TestDataset(unittest.TestCase):
 
     def test_test_column_map_expectation_function(self):
 
-        D = ge.dataset.PandasDataSet({
+        D = ge.dataset.PandasDataset({
             'x' : [1,3,5,7,9],
             'y' : [1,2,None,7,9],
         })
@@ -964,7 +1069,7 @@ class TestDataset(unittest.TestCase):
 
         self.assertEqual(
             D.test_column_map_expectation_function(is_odd, column='x'),
-            {'result_obj': {'element_count': 5, 'missing_count': 0, 'missing_percent': 0, 'unexpected_percent': 0.0, 'partial_unexpected_list': [], 'unexpected_percent_nonmissing': 0.0, 'unexpected_count': 0}, 'success': True}
+            {'result': {'element_count': 5, 'missing_count': 0, 'missing_percent': 0, 'unexpected_percent': 0.0, 'partial_unexpected_list': [], 'unexpected_percent_nonmissing': 0.0, 'unexpected_count': 0}, 'success': True}
         )
         self.assertEqual(
             D.test_column_map_expectation_function(is_odd, 'x', result_format="BOOLEAN_ONLY"),
@@ -980,25 +1085,25 @@ class TestDataset(unittest.TestCase):
         )
 
     def test_test_column_aggregate_expectation_function(self):
-        D = ge.dataset.PandasDataSet({
+        D = ge.dataset.PandasDataset({
             'x' : [1,3,5,7,9],
             'y' : [1,2,None,7,9],
         })
         def expect_second_value_to_be(self, column, value, result_format=None, include_config=False, catch_exceptions=None, meta=None):
             return {
                 "success": column.ix[1] == value,
-                "result_obj": {
+                "result": {
                     "observed_value": column.ix[1],
                 }
             }
 
         self.assertEqual(
             D.test_column_aggregate_expectation_function(expect_second_value_to_be, 'x', 2),
-            {'result_obj': {'observed_value': 3.0, 'element_count': 5, 'missing_count': 0, 'missing_percent': 0.0}, 'success': False}
+            {'result': {'observed_value': 3.0, 'element_count': 5, 'missing_count': 0, 'missing_percent': 0.0}, 'success': False}
         )
         self.assertEqual(
             D.test_column_aggregate_expectation_function(expect_second_value_to_be, column='x', value=3),
-            {'result_obj': {'observed_value': 3.0, 'element_count': 5, 'missing_count': 0, 'missing_percent': 0.0}, 'success': True}
+            {'result': {'observed_value': 3.0, 'element_count': 5, 'missing_count': 0, 'missing_percent': 0.0}, 'success': True}
         )
         self.assertEqual(
             D.test_column_aggregate_expectation_function(expect_second_value_to_be, 'y', value=3, result_format="BOOLEAN_ONLY"),
@@ -1010,7 +1115,7 @@ class TestDataset(unittest.TestCase):
         )
 
     def test_meta_version_warning(self):
-        D = ge.dataset.DataSet();
+        D = ge.dataset.Dataset();
 
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
@@ -1025,7 +1130,7 @@ class TestDataset(unittest.TestCase):
                              "WARNING: This configuration object was built using a different version of great_expectations than is currently validating it.")
 
     def test_catch_exceptions_with_bad_expectation_type(self):
-        my_df = ge.dataset.PandasDataSet({"x":range(10)})
+        my_df = ge.dataset.PandasDataset({"x":range(10)})
         my_df.append_expectation({'expectation_type':'foobar', 'kwargs':{}})
         result = my_df.validate(catch_exceptions=True)
 
@@ -1033,7 +1138,7 @@ class TestDataset(unittest.TestCase):
         self.assertEqual(result["results"][1]["expectation_config"]["expectation_type"], "foobar")
         self.assertEqual(result["results"][1]["expectation_config"]["kwargs"], {})
         self.assertEqual(result["results"][1]["exception_info"]["raised_exception"], True)
-        assert "AttributeError: \'PandasDataSet\' object has no attribute \'foobar\'" in result["results"][1]["exception_info"]["exception_traceback"]
+        assert "AttributeError: \'PandasDataset\' object has no attribute \'foobar\'" in result["results"][1]["exception_info"]["exception_traceback"]
 
         with self.assertRaises(AttributeError) as context:
             result = my_df.validate(catch_exceptions=False)
