@@ -49,9 +49,17 @@ def generate_data():
 
 if __name__ == "__main__":
     # Set precision we'll use:
-    precision = sys.float_info.dig
-    print("Setting pandas float_format to use " + str(precision) + " digits of precision.")
+    #precision = sys.float_info.dig
+    #print("Setting pandas float_format to use " + str(precision) + " digits of precision.")
 
 
     df = generate_data()
-    df.to_csv('../test_sets/fixed_distributional_test_dataset.csv', float_format='%.' + str(precision) + 'g')
+    with open('../test_sets/fixed_distributional_test_dataset.json', 'a') as data_file:
+        for column in list(df):
+            data_file.write("\"" + str(column) + "\" : [")
+            data_file.write(str(df.iloc[0][column]))
+            for data_point in range(1, len(df[column])):
+                data_file.write("," + str(df.iloc[data_point][column]))
+
+            data_file.write("],\n")
+    #df.to_csv('../test_sets/fixed_distributional_test_dataset.csv', index=None, header=True)
