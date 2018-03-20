@@ -1202,8 +1202,8 @@ class TestPandasDataset(unittest.TestCase):
         self.assertFalse(
             df.expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than('beta', 'beta',
                                                                                            params={
-                                                                                               'a': beta_a,
-                                                                                               'b': beta_b,
+                                                                                               'alpha': beta_a,
+                                                                                               'beta': beta_b,
                                                                                                'loc': std_loc,
                                                                                                'scale': std_scale
                                                                                            })['success']
@@ -1214,7 +1214,7 @@ class TestPandasDataset(unittest.TestCase):
         self.assertTrue(
             df.expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than('gamma', 'gamma',
                                                                                            params={
-                                                                                               'a': gamma_a,
+                                                                                               'alpha': gamma_a,
                                                                                                'loc': gamma_loc,
                                                                                                'scale': gamma_scale
                                                                                            })['success']
@@ -1224,7 +1224,7 @@ class TestPandasDataset(unittest.TestCase):
         self.assertTrue(
             df.expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than('gamma_std', 'gamma',
                                                                                            params={
-                                                                                               'a': gamma_a,
+                                                                                               'alpha': gamma_a,
                                                                                            })['success']
         )
 
@@ -1241,15 +1241,18 @@ class TestPandasDataset(unittest.TestCase):
         self.assertTrue(
             df.expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than('uniform', 'uniform',
                                                                                            params={
-                                                                                               'loc': uniform_loc,
-                                                                                               'scale': uniform_scale
+                                                                                               'min': uniform_loc,
+                                                                                               'max': uniform_scale
                                                                                            })['success']
         )
 
         # Test a standard uniform distribution
         self.assertTrue(
             df.expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than('uniform_std', 'uniform',
-                                                                                           params={})['success']
+                                                                                           params={
+                                                                                               'min': std_loc,
+                                                                                               'max': std_scale
+                                                                                           })['success']
         )
 
         # Test an inferred standard uniform distribution
