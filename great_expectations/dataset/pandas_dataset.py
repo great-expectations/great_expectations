@@ -738,14 +738,17 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
     @MetaPandasDataset.column_aggregate_expectation
     def expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than(self, column, distribution,
                                                                                     p_value=0.05, params=None,
-                                                                                    output_format=None,
+                                                                                    result_format=None,
                                                                                     include_config=False,
                                                                                     catch_exceptions=None, meta=None):
         if 0 >= p_value >= 1:
             raise ValueError("p_value must be between 0 and 1 exclusive")
 
         # Validate params
-        validate_distribution_parameters(distribution=distribution, params=params)
+        try:
+            validate_distribution_parameters(distribution=distribution, params=params)
+        except ValueError as e:
+            raise e
 
         # Format arguments for scipy.kstest
         if (isinstance(params, dict)):
