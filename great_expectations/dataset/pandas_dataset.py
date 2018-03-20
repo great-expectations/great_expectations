@@ -741,7 +741,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                                                                                     result_format=None,
                                                                                     include_config=False,
                                                                                     catch_exceptions=None, meta=None):
-        if 0 >= p_value >= 1:
+        if p_value <= 0 or p_value >= 1:
             raise ValueError("p_value must be between 0 and 1 exclusive")
 
         # Validate params
