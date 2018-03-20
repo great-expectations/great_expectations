@@ -747,7 +747,10 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         validate_distribution_parameters(distribution=distribution, params=params)
 
         # Format arguments for scipy.kstest
-        positional_parameters = _scipy_distribution_positional_args_from_dict(distribution, params)
+        if (isinstance(dict, params)):
+            positional_parameters = _scipy_distribution_positional_args_from_dict(distribution, params)
+        else:
+            positional_parameters = params
 
         # K-S Test
         ks_result = stats.kstest(column, distribution,
