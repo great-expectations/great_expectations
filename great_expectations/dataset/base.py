@@ -1981,12 +1981,11 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
     ##### Aggregate functions #####
 
     def expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than(self,
-        column,
-        distribution,
-        p_value=0.05,
-        mean=None,
-        std_dev=None
-    ):
+                                                                                    column, distribution,
+                                                                                    p_value=0.05, params=None,
+                                                                                    result_format=None,
+                                                                                    include_config=False,
+                                                                                    catch_exceptions=None, meta=None):
         """
         Expect the column values to be distributed similarly to the provided scipy distribution. \
 
@@ -2054,24 +2053,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                 -expon
 
         """
-        if p_value <= 0.:
-            raise ValueError("p_value cannot be 0 or less")
-
-        if mean is None:
-            mean = column.mean()
-
-        if std_dev is None:
-            std_dev = column.std()
-        elif std_dev < 0:
-            raise ValueError("std_dev cannot be less than zero")
-
-        results = stats.kstest(column, distribution, args=(mean, std_dev))
-
-        return {
-            "success": results[1] > p_value,
-            "true_value": results[1],
-            "summary_obj": {results}
-        }
+        raise NotImplementedError
 
     def expect_column_mean_to_be_between(self,
         column,
