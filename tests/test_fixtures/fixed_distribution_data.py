@@ -54,6 +54,7 @@ if __name__ == "__main__":
 
 
     df = generate_data()
+    df.to_csv("../test_sets/fixed_distributional_test_dataset.csv", header=True, index=None)
     with open('../test_sets/fixed_distributional_test_dataset.json', 'a') as data_file:
         for column in list(df):
             data_file.write("\"" + str(column) + "\" : [")
