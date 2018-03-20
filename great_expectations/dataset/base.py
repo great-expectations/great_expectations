@@ -1990,10 +1990,10 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         """
         Expect the column values to be distributed similarly to the provided scipy distribution. \
 
-        This expectation compares the provided column values to the specified distribution with a parameteric \
+        This expectation compares the provided column to the specified continuous distribution with a parameteric \
         Kolmogorov-Smirnov test. The K-S test compares the provided column to the cumulative density function (CDF) of \
-        the specified scipy distribution. If you don't know the distribution shape parameters, use the \
-        `ge.dataset.util.infer_distribution_parameters()` utility function to estimate them automatically.
+        the specified scipy distribution. If you don't know the desired distribution shape parameters, use the \
+        `ge.dataset.util.infer_distribution_parameters()` utility function to estimate them.
 
         It returns 'success'=True if the p-value from the K-S test is greater than or equal to the provided p-value.
 
@@ -2039,21 +2039,17 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             ::
 
                 {
-                    "true_value": (float) The true p-value from the Kolmogorov-Smirnov test
-                    "summary_obj":
-                        "distribution" (string): The distribution compared to the given column
-                        "p_value" (float): The p-value threshold for a passing test
-                        "params" (dict): The specified and inferred parameters of the distribution to test for
-                        "ks_results" (dict): The raw result object returned by stats.kstest()
+                    "details":
+                        "expected_params" (dict): The specified or inferred parameters of the distribution to test against
+                        "ks_results" (dict): The raw result of stats.kstest()
                 }
 
             * The Kolmogorov-Smirnov test's null hypothesis is that the column is similar to the provided distribution.
             * Supported scipy distributions:
                 -norm
                 -beta
-                -*gamma (in the works)
+                -gamma
                 -uniform
-                -poisson
                 -chi2
                 -expon
 
