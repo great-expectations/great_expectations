@@ -410,8 +410,8 @@ def _scipy_distribution_positional_args_from_dict(distribution, params):
            AttributeError: \
                If an unsupported distribution is provided.
     """
-    if 'loc' not in params:
-        params['loc'] = 0
+
+    params['loc'] = params.get('loc', 0)
     if 'scale' not in params:
         params['scale'] = 1
 
@@ -467,7 +467,7 @@ def validate_distribution_parameters(distribution, params):
         raise ValueError(
             "params must be a dict, or use ge.dataset.util.infer_distribution_parameters(data, distribution)")
 
-    if isinstance(params, dict):
+    elif isinstance(params, dict):
         # `params` is a dictionary
         if params.get("std_dev", 1) <= 0 or params.get('scale', 1) <= 0:
             raise ValueError("std_dev and scale must be positive.")
@@ -488,7 +488,7 @@ def validate_distribution_parameters(distribution, params):
         elif distribution == 'chi2' and params.get('df', -1) <= 0:
             raise ValueError("Invalid parameters: %s:" %chi2_msg)
 
-    if isinstance(params, tuple) or isinstance(params, list):
+    elif isinstance(params, tuple) or isinstance(params, list):
         # `params` is a tuple or a list
         if distribution == 'beta':
             if len(params) < 2:
@@ -549,5 +549,7 @@ def validate_distribution_parameters(distribution, params):
 
         if scale is not None and scale <= 0:
             raise ValueError("std_dev and scale must be positive.")
+    else:
+        raise ValueError("params must be a dict, or use ge.dataset.util.infer_distribution_parameters(data, distribution)")
 
-        return
+    return
