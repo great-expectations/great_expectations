@@ -18,7 +18,8 @@ from six import string_types
 from .base import Dataset
 from .util import DocInherit, recursively_convert_to_json_serializable, \
         is_valid_partition_object, is_valid_categorical_partition_object, is_valid_continuous_partition_object, \
-        infer_distribution_parameters, _scipy_distribution_positional_args_from_dict, validate_distribution_parameters
+        infer_distribution_parameters, _scipy_distribution_positional_args_from_dict, validate_distribution_parameters,\
+        parse_result_format
 
 
 class MetaPandasDataset(Dataset):
@@ -747,7 +748,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         validate_distribution_parameters(distribution=distribution, params=params)
 
         # Format arguments for scipy.kstest
-        if (isinstance(dict, params)):
+        if (isinstance(params, dict)):
             positional_parameters = _scipy_distribution_positional_args_from_dict(distribution, params)
         else:
             positional_parameters = params
