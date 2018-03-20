@@ -318,13 +318,10 @@ def infer_distribution_parameters(data, distribution, params=None):
             "scale": (float),
             "alpha": (float),
             "beta": (float),
-            "lambda": (float),
             "min": (float),
             "max": (float),
             "df": (float)
         }
-
-
 
         See: https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.kstest.html#scipy.stats.kstest
     """
@@ -340,10 +337,6 @@ def infer_distribution_parameters(data, distribution, params=None):
     if 'std_dev' not in params.keys():
         params['std_dev'] = data.std()
 
-    params['loc'] = params.get('loc', 0)
-    params['scale'] = params.get('scale', 1)
-
-
     if distribution == "beta":
         # scipy cdf(x, a, b, loc=0, scale=1)
         if 'alpha' not in params.keys():
@@ -356,17 +349,14 @@ def infer_distribution_parameters(data, distribution, params=None):
     elif distribution == 'gamma':
         # scipy cdf(x, a, loc=0, scale=1)
         if 'alpha' not in params.keys():
-            if 'a' in params.keys():
-                params['alpha'] = params['a']
-            else:
-                # Using https://en.wikipedia.org/wiki/Gamma_distribution
-                params['alpha'] = (params['mean'] / params['scale'])
+            # Using https://en.wikipedia.org/wiki/Gamma_distribution
+            params['alpha'] = (params['mean'] / params.get('scale', 1))
+
 
     #elif distribution == 'poisson':
     #    if 'lambda' not in params.keys():
     #       params['lambda'] = params['mean']
 
-    # FIXME  INFER MAX OR USE STANDARD SCALE??
     elif distribution == 'uniform':
         # scipy cdf(x, loc=0, scale=1)
         if 'min' not in params.keys():
@@ -386,13 +376,17 @@ def infer_distribution_parameters(data, distribution, params=None):
             # from https://en.wikipedia.org/wiki/Chi-squared_distribution
             params['df'] = params['mean']
 
-    elif distribution == 'expon':
+    #  Expon only uses loc and scale, use default
+    #elif distribution == 'expon':
         # scipy cdf(x, loc=0, scale=1)
-        if 'lambda' in params.keys():
+    #    if 'lambda' in params.keys():
             # Lambda is optional
-            params['scale'] = 1 / params['lambda']
+    #        params['scale'] = 1 / params['lambda']
     elif distribution is not 'norm':
         raise AttributeError("Unsupported distribution type. Please refer to Great Expectations Documentation")
+
+    params['loc'] = params.get('loc', 0)
+    params['scale'] = params.get('scale', 1)
 
     return params
 
@@ -455,7 +449,7 @@ def validate_distribution_parameters(distribution, params):
     norm_msg = "norm distributions require 0 parameters and optionally 'mean', 'std_dev'."
     beta_msg = "beta distributions require 2 positive parameters 'alpha', 'beta' and optionally 'loc', 'scale'."
     gamma_msg = "gamma distributions require 1 positive parameter 'alpha' and optionally 'loc','scale'."
-    poisson_msg = "poisson distributions require 1 positive parameter 'lambda' and optionally 'loc'."
+    # poisson_msg = "poisson distributions require 1 positive parameter 'lambda' and optionally 'loc'."
     uniform_msg = "uniform distributions require 0 parameters and optionally 'loc', 'scale'."
     chi2_msg = "chi2 distributions require 1 positive parameter 'df' and optionally 'loc', 'scale'."
     expon_msg = "expon distributions require 0 parameters and optionally 'loc', 'scale'."
@@ -549,7 +543,6 @@ def validate_distribution_parameters(distribution, params):
             raise ValueError("std_dev and scale must be positive.")
 
     else:
-        # Norm and expon are excluded because they do not have required parameters
         raise ValueError(
                 "params must be a dict, or use ge.dataset.util.infer_distribution_parameters(data, distribution)")
 
