@@ -345,6 +345,10 @@ def infer_distribution_parameters(data, distribution, params=None):
     if 'scale' not in params.keys():
         params['scale'] = 1
 
+    if distribution == "norm":
+        # We will use already computed mean/std_dev
+        pass
+    
     elif distribution == "beta":
         # scipy cdf(x, a, b, loc=0, scale=1)
         if 'alpha' not in params.keys():
@@ -353,6 +357,8 @@ def infer_distribution_parameters(data, distribution, params=None):
                         ((1 - params['mean']) / params['std_dev'] ** 2) - (1 / params['mean']))
         if 'beta' not in params.keys():
             params['beta'] = params['alpha'] * ((1 / params['mean']) - 1)
+        # FIXME temp
+        print(str(params['alpha']) + " " + str(params['beta']) )
 
     elif distribution == 'gamma':
         # scipy cdf(x, a, loc=0, scale=1)
