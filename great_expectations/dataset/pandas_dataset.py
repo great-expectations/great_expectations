@@ -710,8 +710,9 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
             raise ValueError("p_value must be between 0 and 1 exclusive")
 
         # Validate params
-
         validate_distribution_parameters(distribution=distribution, params=params)
+
+        # Format arguments for scipy.kstest
         positional_parameters = _scipy_distribution_positional_args_from_dict(distribution, params)
 
         # K-S Test
