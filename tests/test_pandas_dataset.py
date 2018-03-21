@@ -4,7 +4,6 @@ import unittest
 import json
 import numpy as np
 import datetime
-import scipy.stats as stats
 import pandas as pd
 
 import great_expectations as ge
