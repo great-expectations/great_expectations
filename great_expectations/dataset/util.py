@@ -303,10 +303,10 @@ def infer_distribution_parameters(data, distribution, params=None):
     """Convenience method for determining the shape parameters of a given distribution
 
     Args:
-        data (list-like): The data to build shape parameters out of
-        distribution (string): Scipy distribution, determines which shape parameters to return
-        params (dict or None): The known parameters of desired distribution (`data`)
-                       Keep as None to infer necessary parameters from the data data
+        data (list-like): The data to build shape parameters from.
+        distribution (string): Scipy distribution, determines which parameters to build.
+        params (dict or None): The known parameters. Parameters given here will not be altered. \
+                               Keep as None to infer all necessary parameters from the data data.
 
     Returns:
         A dictionary of named parameters::
