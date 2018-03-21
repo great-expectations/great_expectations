@@ -391,7 +391,11 @@ def infer_distribution_parameters(data, distribution, params=None):
     return params
 
 def _scipy_distribution_positional_args_from_dict(distribution, params):
-    """Helper function that returns positional arguments for a scipy distribution using a dictionary of parameters.
+    """Helper function that returns positional arguments for a scipy distribution using a dict of parameters.
+
+       See the `cdf()` function here https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.beta.html#Methods\
+       to see an example of scipy's positional arguments. This function returns the arguments specified by the \
+       scipy.stat.distribution.cdf() for tha distribution.
 
        Args:
            distribution (string): \
@@ -428,17 +432,17 @@ def validate_distribution_parameters(distribution, params):
     """Ensures that necessary parameters for a distribution are present and that all parameters are sensical.
 
        If parameters necessary to construct a distribution are missing or invalid, this function raises ValueError\
-       with an informative description. Note that 'loc' and 'scale' are always optional arguments, and that 'scale'\
-       cannot be 0.
+       with an informative description. Note that 'loc' and 'scale' are optional arguments, and that 'scale'\
+       must be positive.
 
        Args:
            distribution (string): \
                The scipy distribution name, e.g. normal distribution is 'norm'.
-           params (dict or tuple): \
-               The distribution shape parameters in a named dictionary or positional tuple form following the scipy \
+           params (dict or list): \
+               The distribution shape parameters in a named dictionary or positional list form following the scipy \
                cdf argument scheme.
 
-               params={'mean': 40, 'std_dev': 5} or params=(40, 5)
+               params={'mean': 40, 'std_dev': 5} or params=[40, 5]
 
        Exceptions:
            ValueError: \
@@ -544,6 +548,6 @@ def validate_distribution_parameters(distribution, params):
 
     else:
         raise ValueError(
-                "params must be a dict, or use ge.dataset.util.infer_distribution_parameters(data, distribution)")
+                "params must be a dict or list, or use ge.dataset.util.infer_distribution_parameters(data, distribution)")
 
     return

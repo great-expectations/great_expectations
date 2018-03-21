@@ -1987,7 +1987,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                                                                                     include_config=False,
                                                                                     catch_exceptions=None, meta=None):
         """
-        Expect the column values to be distributed similarly to the provided scipy distribution. \
+        Expect the column values to be distributed similarly to a scipy distribution. \
 
         This expectation compares the provided column to the specified continuous distribution with a parameteric \
         Kolmogorov-Smirnov test. The K-S test compares the provided column to the cumulative density function (CDF) of \
@@ -2005,18 +2005,17 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             distribution (str): \
                 The scipy distribution name. See: https://docs.scipy.org/doc/scipy/reference/stats.html
             p_value (float): \
-                The threshold p-value for a passing test. Default is 0.05
-            params (dict) : \
-                A dictionary of shape parameters that describe the disrtibution you want to test the data against.\
-                If not provided, the parameters will be attempted to be constructed using the column data and \
-                the specified distribution. Include key values specific to the distribution from the appropriate scipy \
-                distribution CDF function. \
+                The threshold p-value for a passing test. Default is 0.05.
+            params (dict or list) : \
+                A dictionary or positional list of shape parameters that describe the distribution you want to test the\
+                data against. Include key values specific to the distribution from the appropriate scipy \
+                distribution CDF function. 'loc' and 'scale' are used as translational parameters.\
                 See https://docs.scipy.org/doc/scipy/reference/stats.html#continuous-distributions
 
         Other Parameters:
-            output_format (str or None): \
+            result_format (str or None): \
                 Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
-                For more detail, see :ref:`output_format <output_format>`.
+                For more detail, see :ref:`result_format <result_format>`.
             include_config (boolean): \
                 If True, then include the expectation config as part of the result object. \
                 For more detail, see :ref:`include_config`.
@@ -2030,7 +2029,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         Returns:
             A JSON-serializable expectation result object.
 
-            Exact fields vary depending on the values passed to :ref:`output_format <output_format>` and
+            Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
 
         Notes:
