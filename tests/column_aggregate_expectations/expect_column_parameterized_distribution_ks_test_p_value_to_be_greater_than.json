@@ -35,7 +35,7 @@
         "in": {
           "column": "norm_std",
           "result_format": "BASIC",
-          "params": {"mean":100, "std_dev":100},
+          "params": {"mean":1, "std_dev":1},
           "distribution": "norm",
           "p_value": 0.05
         },
@@ -43,8 +43,6 @@
           "success": false
         }
       },
-
-
       {
         "title": "Positive beta distribution, params is a dict",
         "exact_match_out": false,
@@ -79,7 +77,7 @@
         "in": {
           "column": "beta",
           "result_format": "BASIC",
-          "params": {"alpha": 500,"beta": 1000,"loc": 500,"scale": 1100},
+          "params": {"alpha": 1,"beta": 11,"loc": 5,"scale": 11},
           "distribution": "beta",
           "p_value": 0.05
         },
@@ -93,7 +91,7 @@
         "in": {
           "column": "beta",
           "result_format": "BASIC",
-          "params": [500, 1000, 500, 1100],
+          "params": [1, 11, 5, 11],
           "distribution": "beta",
           "p_value": 0.05
         },
@@ -135,7 +133,7 @@
         "in": {
           "column": "gamma",
           "result_format": "BASIC",
-          "params": {"alpha": 0.002, "loc": 200, "scale": 0.3},
+          "params": {"alpha": 3, "loc": 20, "scale": 3},
           "distribution": "gamma",
           "p_value": 0.05
         },
@@ -149,7 +147,7 @@
         "in": {
           "column": "gamma",
           "result_format": "BASIC",
-          "params": [0.002, 200, 0.3],
+          "params": [3, 20, 3],
           "distribution": "gamma",
           "p_value": 0.05
         },
@@ -191,7 +189,7 @@
         "in": {
           "column": "uniform",
           "result_format": "BASIC",
-          "params": {"min": -500, "max": 1},
+          "params": {"min": -4, "max": 12},
           "distribution": "uniform",
           "p_value": 0.05
         },
@@ -205,7 +203,7 @@
         "in": {
           "column": "uniform",
           "result_format": "BASIC",
-          "params": [-500, 1],
+          "params": [-4, 12],
           "distribution": "uniform",
           "p_value": 0.05
         },
@@ -247,7 +245,7 @@
         "in": {
           "column": "chi2",
           "result_format": "BASIC",
-          "params": {"df": 0.3, "loc": 300, "scale": 500},
+          "params": {"df": 33, "loc": 3, "scale": 5},
           "distribution": "chi2",
           "p_value": 0.05
         },
@@ -261,7 +259,7 @@
         "in": {
           "column": "chi2",
           "result_format": "BASIC",
-          "params": [0.3, 300, 500],
+          "params": [33, 3, 5],
           "distribution": "chi2",
           "p_value": 0.05
         },
@@ -303,7 +301,7 @@
         "in": {
           "column": "exponential",
           "result_format": "BASIC",
-          "params": {"loc": -400, "scale": 0.1},
+          "params": {"loc": 5, "scale": 10},
           "distribution": "expon",
           "p_value": 0.05
         },
@@ -317,7 +315,7 @@
         "in": {
           "column": "exponential",
           "result_format": "BASIC",
-          "params": [-400, 0.1],
+          "params": [5, 10],
           "distribution": "expon",
           "p_value": 0.05
         },
