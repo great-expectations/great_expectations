@@ -605,7 +605,25 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         expectation_config_str = json.dumps(expectations_config, indent=2)
         open(filepath, 'w').write(expectation_config_str)
 
-    def validate(self, expectations_config=None, catch_exceptions=True, result_format=None, only_return_failures=False):
+    def validate(self,
+                 expectations_config=None,
+                 catch_exceptions=True,
+                 result_format=None,
+                 only_return_failures=False,
+                 return_affected_rows=False,
+                 include_index_in_affected_rows=False):
+        """
+        Great Expectations v0.4 added a feature to this method to return a
+        list of rows that had failed expectations by setting
+        return_affected_rows=True. The failed rows are accessed with the
+        'affected_rows' key. The user also has the option of specifying
+        whether or not the row index is included in the rows with failed
+        expectations by setting include_index_in_affected_rows appropriately.
+
+        WARNING: This feature may change in the future. If you have feedback,
+        please share it under `issue 150
+        <https://github.com/great-expectations/great_expectations/issues/150>`_.
+        """
         results = []
 
         if expectations_config is None:
@@ -674,10 +692,23 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                     abbrev_results.append(exp)
             results = abbrev_results
 
-        return {
-            "results" : results
+        retVal = {
+            "results": results
         }
 
+        if return_affected_rows:
+            results = self.validate(result_format='COMPLETE')['results']
+            rows = []
+            for res in results:
+                if not res['success']:
+                    rows.extend(res['result']['unexpected_index_list'])
+            rows = sorted(set(rows))
+            df = self.loc[rows]
+            retVal.update({
+                "affected_rows" : list(df.to_records(index=include_index_in_affected_rows))
+            })
+
+        return retVal
 
     ##### Output generation #####
     def _format_column_map_output(self,

@@ -1143,6 +1143,57 @@ class TestDataset(unittest.TestCase):
         with self.assertRaises(AttributeError) as context:
             result = my_df.validate(catch_exceptions=False)
 
+    def test_validate_affected_rows(self):
+        df = ge.dataset.PandasDataset({
+            'A': [1, 2, 3, 4],
+            'B': [5, 6, 7, 8],
+            'C': ['a', 'b', 'c', 'd'],
+            'D': ['e', 'f', 'g', 'h']
+        })
+
+        df.expect_column_values_to_be_in_set("A", [1, 2, 3, 4])
+        df.expect_column_values_to_be_in_set("B", [5, 6, 7, 8])
+        df.expect_column_values_to_be_in_set("C", ['a', 'b', 'c', 'd'])
+        df.expect_column_values_to_be_in_set("D", ['e', 'f', 'g', 'h'])
+
+        # This expectation fails on row 3
+        df.expect_column_values_to_match_regex("A", '^[0-3]$')
+        # This expectation fails on row 0
+        df.expect_column_values_to_match_regex("B", '^[6-8]$')
+
+        v1 = df.validate()
+        self.assertNotIn('affected_rows', v1)
+
+        v2 = df.validate(return_affected_rows=True)
+        self.assertIn('affected_rows', v2)
+
+        v3 = df.validate(return_affected_rows=True, include_index_in_affected_rows=True)
+        self.assertIn('affected_rows', v2)
+
+        failed_rows = df.iloc[[0,3], ]
+        failed_exp_wo_index = list(failed_rows.to_records(index=False))
+        failed_exp_w_index = list(failed_rows.to_records(index=True))
+
+        self.assertEquals(v2['affected_rows'], failed_exp_wo_index)
+        self.assertNotEqual(v2['affected_rows'], failed_exp_w_index)
+
+        self.assertNotEqual(v3['affected_rows'], failed_exp_wo_index)
+        self.assertEquals(v3['affected_rows'], failed_exp_w_index)
+
+        df = ge.dataset.PandasDataset({
+            'A': ['A0', 'A1', 'A2', 'A3'],
+            'B': ['B0', 'B1', 'B2', 'B3']},
+            index=['K0', 'K1', 'K2', 'K3'])
+
+        df.expect_column_values_to_match_regex('A', '^A[0-3]$')
+        # This expectation fails on rows 2 & 3
+        df.expect_column_values_to_match_regex('B', '^B[0-1]$')
+
+        failed_rows = df.iloc[[2,3], ]
+        failed_exp_w_index = list(failed_rows.to_records(index=True))
+        v = df.validate(return_affected_rows=True, include_index_in_affected_rows=True)
+        self.assertEquals(v['affected_rows'], failed_exp_w_index)
+
 
 if __name__ == "__main__":
     unittest.main()
