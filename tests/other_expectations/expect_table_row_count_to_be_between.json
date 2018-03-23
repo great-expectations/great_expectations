@@ -1,0 +1,89 @@
+{
+  "expectation_type" : "expect_table_row_count_to_be_between",
+  "datasets" : [{
+    "data" : {
+      "c1" : [4,5,6,7],
+      "c2" : ["a","b","c","d"],
+      "c3" : [null,null,null,null]
+    },
+    "tests": [{
+      "title": "Basic positive test",
+      "exact_match_out" : false,
+      "in":{
+        "min_value": 3,
+        "max_value": 5
+      },
+      "out":{
+        "success":true,
+        "observed_value": 4
+      }
+    },{
+      "title": "Basic negative test",
+      "exact_match_out" : false,
+      "in":{
+        "min_value": 0,
+        "max_value": 1
+      },
+      "out":{
+        "success":false,
+        "observed_value": 4
+      }
+    },{
+      "title": "Positive test with null min_value",
+      "exact_match_out" : false,
+      "in":{
+        "min_value": null,
+        "max_value": 4
+      },
+      "out":{
+        "success":true,
+        "observed_value": 4
+      }
+    },{
+      "title": "Negative test with max < min",
+      "exact_match_out" : false,
+      "in":{
+        "min_value": 1,
+        "max_value": 0
+      },
+      "out":{
+        "success":false,
+        "observed_value": 4
+      }
+    },{
+      "title": "Positive test with null min",
+      "exact_match_out" : false,
+      "in":{
+        "min_value": null,
+        "max_value": 10
+      },
+      "out":{
+        "success": true,
+        "observed_value": 4
+      }
+    },{
+      "title": "Test error handling for non-int min_value",
+      "exact_match_out" : false,
+      "in":{
+        "min_value": "quack",
+        "max_value": 0,
+        "catch_exceptions": true
+      },
+      "out" : {},
+      "error":{
+        "traceback_substring": "must be integers"
+      }
+    },{
+      "title": "Test error handling for non-int max_value",
+      "exact_match_out" : false,
+      "in":{
+        "max_value": "quack",
+        "catch_exceptions": true
+      },
+      "out" : {},
+      "error":{
+        "traceback_substring": "must be integers"
+      }
+    }]
+  }]
+}

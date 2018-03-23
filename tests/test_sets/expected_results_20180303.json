@@ -1,0 +1,192 @@
+{
+  "results": [
+    {
+      "expectation_config": {
+        "expectation_type": "expect_column_to_exist",
+        "kwargs": {
+          "column": "Name"
+        }
+      },
+      "success": true
+    },
+    {
+      "expectation_config": {
+        "expectation_type": "expect_column_to_exist",
+        "kwargs": {
+          "column": "PClass"
+        }
+      },
+      "success": true
+    },
+    {
+      "expectation_config": {
+        "expectation_type": "expect_column_to_exist",
+        "kwargs": {
+          "column": "Age"
+        }
+      },
+      "success": true
+    },
+    {
+      "expectation_config": {
+        "expectation_type": "expect_column_to_exist",
+        "kwargs": {
+          "column": "Sex"
+        }
+      },
+      "success": true
+    },
+    {
+      "expectation_config": {
+        "expectation_type": "expect_column_to_exist",
+        "kwargs": {
+          "column": "Survived"
+        }
+      },
+      "success": true
+    },
+    {
+      "expectation_config": {
+        "expectation_type": "expect_column_to_exist",
+        "kwargs": {
+          "column": "SexCode"
+        }
+      },
+      "success": true
+    },
+    {
+      "expectation_config": {
+        "expectation_type": "expect_column_mean_to_be_between",
+        "kwargs": {
+          "column": "Age",
+          "max_value": 40,
+          "min_value": 20
+        }
+      },
+      "success": true,
+      "result": {
+        "observed_value": 30.397989417989418,
+        "element_count": 1313,
+        "missing_count": 557,
+        "missing_percent": 0.4242193450114242
+      }
+    },
+    {
+      "expectation_config": {
+        "expectation_type": "expect_column_values_to_be_between",
+        "kwargs": {
+          "column": "Age",
+          "max_value": 80,
+          "min_value": 0
+        }
+      },
+      "success": true,
+      "result": {
+        "partial_unexpected_index_list": [],
+        "unexpected_count": 0,
+        "unexpected_list": [],
+        "unexpected_percent": 0.0,
+        "element_count": 1313,
+        "missing_percent": 0.4242193450114242,
+        "partial_unexpected_counts": [],
+        "partial_unexpected_list": [],
+        "unexpected_percent_nonmissing": 0.0,
+        "missing_count": 557,
+        "unexpected_index_list": []
+      }
+    },
+    {
+      "expectation_config": {
+        "expectation_type": "expect_column_values_to_match_regex",
+        "kwargs": {
+          "regex": "[A-Z][a-z]+(?: \\([A-Z][a-z]+\\))?, ",
+          "column": "Name",
+          "mostly": 0.95
+        }
+      },
+      "success": true,
+      "result": {
+        "partial_unexpected_index_list": [
+          394,
+          456,
+          1195
+        ],
+        "unexpected_count": 3,
+        "unexpected_list": [
+          "Downton (?Douton), Mr William James",
+          "Jacobsohn Mr Samuel",
+          "Seman Master Betros"
+        ],
+        "unexpected_percent": 0.002284843869002285,
+        "element_count": 1313,
+        "missing_percent": 0.0,
+        "partial_unexpected_counts": [
+          {
+            "count": 1,
+            "value": "Downton (?Douton), Mr William James"
+          },
+          {
+            "count": 1,
+            "value": "Jacobsohn Mr Samuel"
+          },
+          {
+            "count": 1,
+            "value": "Seman Master Betros"
+          }
+        ],
+        "partial_unexpected_list": [
+          "Downton (?Douton), Mr William James",
+          "Jacobsohn Mr Samuel",
+          "Seman Master Betros"
+        ],
+        "unexpected_percent_nonmissing": 0.002284843869002285,
+        "missing_count": 0,
+        "unexpected_index_list": [
+          394,
+          456,
+          1195
+        ]
+      }
+    },
+    {
+      "expectation_config": {
+        "expectation_type": "expect_column_values_to_be_in_set",
+        "kwargs": {
+          "column": "PClass",
+          "values_set": [
+            "1st",
+            "2nd",
+            "3rd"
+          ]
+        }
+      },
+      "success": false,
+      "result": {
+        "partial_unexpected_index_list": [
+          456
+        ],
+        "unexpected_count": 1,
+        "unexpected_list": [
+          "*"
+        ],
+        "unexpected_percent": 0.0007616146230007616,
+        "element_count": 1313,
+        "missing_percent": 0.0,
+        "partial_unexpected_counts": [
+          {
+            "count": 1,
+            "value": "*"
+          }
+        ],
+        "partial_unexpected_list": [
+          "*"
+        ],
+        "unexpected_percent_nonmissing": 0.0007616146230007616,
+        "missing_count": 0,
+        "unexpected_index_list": [
+          456
+        ]
+      }
+    }
+  ]
+}

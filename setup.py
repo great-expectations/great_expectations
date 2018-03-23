@@ -7,8 +7,11 @@ except ImportError:
 with open('requirements.txt') as f:
     required = f.read().splitlines()
 
-with open('docs/source/intro.rst') as f:
-    long_description = f.read()
+try:
+    import pypandoc
+    long_description = pypandoc.convert('README.md', 'rst')
+except (IOError, ImportError):
+    long_description = ''
 
 exec(open('great_expectations/version.py').read())
 
@@ -16,7 +19,7 @@ config = {
     'description': 'Always know what to expect from your data.',
     'author': 'The Great Expectations Team',
     'url': 'https://github.com/great-expectations/great_expectations',
-    'author_email': 'great_expectations@superconductivehealth.com',
+    'author_email': 'team@greatexpectations.io',
     'version': __version__,
     'install_requires': required,
     'packages': [
