@@ -12,27 +12,6 @@ from .test_utils import assertDeepAlmostEqual
 
 class TestPandasDataset(unittest.TestCase):
 
-    def test_expect_table_columns_to_match_ordered_list(self):
-        print("=== test_expect_columns_to_be ===")
-        with open("./tests/test_sets/expect_table_columns_to_match_ordered_list_test_set.json") as f:
-            J = json.load(f)
-            D = ge.dataset.PandasDataset(J["dataset"])
-            D.set_default_expectation_argument("output_format", "COMPLETE")
-            T = J["tests"]
-
-            self.maxDiff = None
-
-        for t in T:
-            print(t)
-            out = D.expect_table_columns_to_match_ordered_list(**t['in'])
-
-            if 'out' in t:
-                self.assertEqual(out, t['out'])
-
-            if 'error' in t:
-                self.assertEqual(out['raised_exception'], True)
-                self.assertIn(t['error']['traceback_substring'], out['exception_traceback'])
-
     def test_expect_column_values_to_be_unique(self):
 
         D = ge.dataset.PandasDataset({
