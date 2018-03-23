@@ -7,9 +7,10 @@ Glossary of Expectations
 Table shape
 --------------------------------------------------------------------------------
 
-* :func:`expect_column_to_exist <great_expectations.Dataset.base.Dataset.expect_column_to_exist>`
-* :func:`expect_table_row_count_to_be_between <great_expectations.Dataset.base.Dataset.expect_table_row_count_to_be_between>`
-* :func:`expect_table_row_count_to_equal <great_expectations.Dataset.base.Dataset.expect_table_row_count_to_equal>`
+* :func:`expect_column_to_exist <great_expectations.dataset.base.DataSet.expect_column_to_exist>`
+* :func:`expect_columns_to_be <great_expectations.dataset.base.DataSet.expect_columns_to_be>`
+* :func:`expect_table_row_count_to_be_between <great_expectations.dataset.base.DataSet.expect_table_row_count_to_be_between>`
+* :func:`expect_table_row_count_to_equal <great_expectations.dataset.base.DataSet.expect_table_row_count_to_equal>`
 
 Missing values, unique values, and types
 --------------------------------------------------------------------------------

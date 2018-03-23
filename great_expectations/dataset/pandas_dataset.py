@@ -204,7 +204,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
     @DocInherit
     @Dataset.expectation(['column'])
     def expect_column_to_exist(
-            self, column, column_index=None, result_format=None, include_config=False, 
+            self, column, column_index=None, result_format=None, include_config=False,
             catch_exceptions=None, meta=None
     ):
 
@@ -213,6 +213,20 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                 "success": (column_index is None) or (self.columns.get_loc(column) == column_index)
             }
 
+        else:
+            return {
+                "success": False
+            }
+
+    @DocInherit
+    @Dataset.expectation(['column_list'])
+    def expect_table_columns_to_match_ordered_list(self, column_list,
+                               result_format=None, include_config=False, catch_exceptions=None, meta=None):
+
+        if list(self.columns) == list(column_list):
+            return {
+                "success" : True
+            }
         else:
             return {
                 "success": False

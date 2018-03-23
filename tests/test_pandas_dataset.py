@@ -491,7 +491,7 @@ class TestPandasDataset(unittest.TestCase):
                     'kwargs':{},
                     'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}},
                 {
-                    'in':['a', [1]], 
+                    'in':['a', [1]],
                     'kwargs':{'mostly':.1},
                     'out':{'success':True, 'unexpected_index_list':[0,1], 'unexpected_list':[1, 1]}},
                 {
