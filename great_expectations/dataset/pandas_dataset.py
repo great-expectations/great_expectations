@@ -219,7 +219,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             }
 
     @DocInherit
-    @DataSet.expectation(['column_list'])
+    @Dataset.expectation(['column_list'])
     def expect_table_columns_to_match_ordered_list(self, column_list,
                                result_format=None, include_config=False, catch_exceptions=None, meta=None):
 
@@ -233,7 +233,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             }
 
     @DocInherit
-    @DataSet.expectation(['min_value', 'max_value'])
+    @Dataset.expectation(['min_value', 'max_value'])
     def expect_table_row_count_to_be_between(self,
         min_value=0,
         max_value=None,
