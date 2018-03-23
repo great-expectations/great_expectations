@@ -1,0 +1,48 @@
+{
+  "expectation_type" : "expect_table_columns_to_match_ordered_list",
+  "datasets" : [
+    {
+      "data": {
+        "c1" : [4,5,6,7],
+        "c2" : ["a","b","c","d"],
+        "c3" : [null,null,null,null]
+      },
+    "tests": [{
+      "title": "Basic positive test",
+      "exact_match_out": false,
+      "in":{
+        "column_list": ["c1", "c2", "c3"]
+      },
+      "out":{
+        "success":true
+      }
+    },{
+      "title": "Negative test: column is missing",
+      "exact_match_out": false,
+      "in":{
+        "column_list": ["c1", "c2"]
+      },
+      "out":{
+        "success":false
+      }
+    },{
+      "title": "Negative test: column is misnamed",
+      "exact_match_out": false,
+      "in":{
+        "column_list": ["b1", "c2", "c3"]
+      },
+      "out":{
+        "success":false
+      }
+    },{
+      "title": "Negative test: Columns are right, but ordering wrong",
+      "exact_match_out": false,
+      "in":{
+        "column_list": ["c3", "c2", "c1"]
+      },
+      "out":{
+        "success":false
+      }
+    }]
+  }]
+}
