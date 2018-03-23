@@ -141,7 +141,6 @@ def evaluate_json_test(dataset, expectation_type, test):
     """
 
     dataset.set_default_expectation_argument('result_format', 'COMPLETE')
-    dataset.set_default_expectation_argument('catch_exceptions', True)
 
     if 'title' not in test:
         raise ValueError("Invalid test configuration detected: 'title' is required.")
