@@ -16,8 +16,11 @@ from scipy import stats
 from six import string_types
 
 from .base import Dataset
-from .util import DocInherit, parse_result_format, \
-        is_valid_partition_object, is_valid_categorical_partition_object, is_valid_continuous_partition_object
+from .util import DocInherit, recursively_convert_to_json_serializable, \
+        is_valid_partition_object, is_valid_categorical_partition_object, is_valid_continuous_partition_object, \
+        infer_distribution_parameters, _scipy_distribution_positional_args_from_dict, validate_distribution_parameters,\
+        parse_result_format
+
 
 class MetaPandasDataset(Dataset):
     """
@@ -731,6 +734,42 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
         return column.map(matches_json_schema)
 
+    @DocInherit
+    @MetaPandasDataset.column_aggregate_expectation
+    def expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than(self, column, distribution,
+                                                                                    p_value=0.05, params=None,
+                                                                                    result_format=None,
+                                                                                    include_config=False,
+                                                                                    catch_exceptions=None, meta=None):
+        if p_value <= 0 or p_value >= 1:
+            raise ValueError("p_value must be between 0 and 1 exclusive")
+
+        # Validate params
+        try:
+            validate_distribution_parameters(distribution=distribution, params=params)
+        except ValueError as e:
+            raise e
+
+        # Format arguments for scipy.kstest
+        if (isinstance(params, dict)):
+            positional_parameters = _scipy_distribution_positional_args_from_dict(distribution, params)
+        else:
+            positional_parameters = params
+
+        # K-S Test
+        ks_result = stats.kstest(column, distribution,
+                                 args=positional_parameters)
+
+        return {
+            "success": ks_result[1] >= p_value,
+            "result": {
+                "observed_value": ks_result[1],
+                "details": {
+                    "expected_params": positional_parameters,
+                    "observed_ks_result": ks_result
+                }
+            }
+        }
 
     @DocInherit
     @MetaPandasDataset.column_aggregate_expectation
