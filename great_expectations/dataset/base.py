@@ -104,8 +104,12 @@ class Dataset(object):
                     "kwargs": expectation_args
                 })
 
+                # Patch in meta args
                 if meta is not None:
                     expectation_config["meta"] = meta
+                    meta_kwargs = self._get_meta_kwargs(meta, method_name, method_arg_names)
+                    evaluation_args = dict(expectation_args)
+                    evaluation_args.update(meta_kwargs)
 
                 raised_exception = False
                 exception_traceback = None
@@ -113,7 +117,7 @@ class Dataset(object):
 
                 # Finally, execute the expectation method itself
                 try:
-                    return_obj = func(self, **expectation_args)
+                    return_obj = func(self, **evaluation_args)
 
                 except Exception as err:
                     if catch_exceptions:
@@ -315,6 +319,27 @@ class Dataset(object):
             )
 
         return rval
+
+
+    def _get_meta_kwargs(self, meta, expectation_type, expectation_kwarg_keys):
+        """
+        This helper extracts kwargs specified in meta and allows them to be applied at expectation-evaluation-time to
+        supply expectation values.
+        :param meta:
+        :return:
+        """
+
+        meta_kwargs = {}
+
+        for key in expectation_kwarg_keys:
+            if key in meta:
+                meta_kwargs.update({key: meta[key]})
+            elif expectation_type in self._expectations_config['meta'] and \
+                    key in self._expectations_config['meta'][expectation_type]:
+                meta_kwargs.update({key: self._expectations_config['meta'][expectation_type][key]})
+
+        return meta_kwargs
+
 
     def find_expectation_indexes(self,
         expectation_type=None,
