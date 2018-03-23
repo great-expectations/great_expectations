@@ -1980,6 +1980,80 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
     ##### Aggregate functions #####
 
+    def expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than(self,
+                                                                                    column, distribution,
+                                                                                    p_value=0.05, params=None,
+                                                                                    result_format=None,
+                                                                                    include_config=False,
+                                                                                    catch_exceptions=None, meta=None):
+        """
+        Expect the column values to be distributed similarly to a scipy distribution. \
+
+        This expectation compares the provided column to the specified continuous distribution with a parameteric \
+        Kolmogorov-Smirnov test. The K-S test compares the provided column to the cumulative density function (CDF) of \
+        the specified scipy distribution. If you don't know the desired distribution shape parameters, use the \
+        `ge.dataset.util.infer_distribution_parameters()` utility function to estimate them.
+
+        It returns 'success'=True if the p-value from the K-S test is greater than or equal to the provided p-value.
+
+        expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than is a \
+        :func:`column_aggregate_expectation <great_expectations.dataset.base.DataSet.column_aggregate_expectation>`.
+
+        Args:
+            column (str): \
+                The column name.
+            distribution (str): \
+                The scipy distribution name. See: https://docs.scipy.org/doc/scipy/reference/stats.html
+            p_value (float): \
+                The threshold p-value for a passing test. Default is 0.05.
+            params (dict or list) : \
+                A dictionary or positional list of shape parameters that describe the distribution you want to test the\
+                data against. Include key values specific to the distribution from the appropriate scipy \
+                distribution CDF function. 'loc' and 'scale' are used as translational parameters.\
+                See https://docs.scipy.org/doc/scipy/reference/stats.html#continuous-distributions
+
+        Other Parameters:
+            result_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`result_format <result_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
+
+        Returns:
+            A JSON-serializable expectation result object.
+
+            Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+        Notes:
+            These fields in the result object are customized for this expectation:
+            ::
+
+                {
+                    "details":
+                        "expected_params" (dict): The specified or inferred parameters of the distribution to test against
+                        "ks_results" (dict): The raw result of stats.kstest()
+                }
+
+            * The Kolmogorov-Smirnov test's null hypothesis is that the column is similar to the provided distribution.
+            * Supported scipy distributions:
+                -norm
+                -beta
+                -gamma
+                -uniform
+                -chi2
+                -expon
+
+        """
+        raise NotImplementedError
+
     def expect_column_mean_to_be_between(self,
         column,
         min_value=None,
