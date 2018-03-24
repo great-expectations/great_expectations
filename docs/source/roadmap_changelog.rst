@@ -13,6 +13,10 @@ Planned Features
 * Support for non-tabular datasources (e.g. JSON, XML, AVRO)
 * Real-time/streaming and adaption of distributional expectations
 
+v 0.4.1
+-------
+* Correct inclusion of new data_context module in source distribution
+
 v.0.4.0
 -------
 * Initial implementation of data context API and SqlAlchemyDataset including implementations of the following expectations:
