@@ -32,8 +32,8 @@ v.0.4.0
 * Major refactor of output_format to new result_format parameter. See docs for full details.
   * exception_list and related uses of the term exception have been renamed to unexpected
   * the output formats are explicitly hierarchical now, with BOOLEAN_ONLY < BASIC < SUMMARY < COMPLETE. `column_aggregate_expectation`s now return element count and related information included at the BASIC level or higher.
-* New expectation available for parameterized distributions--expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than (what a name! :) -- (@ccnobbli)
-* ge.from_pandas() utility (thanks @shrockn)
+* New expectation available for parameterized distributions--expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than (what a name! :) -- (thanks @ccnobbli)
+* ge.from_pandas() utility (thanks @schrockn)
 * Pandas operations on a PandasDataset now return another PandasDataset (thanks @dlwhite5)
 * expect_column_to_exist now takes a column_index parameter to specify column order (thanks @louispotok)
 * Top-level validate option (ge.validate())
