@@ -707,14 +707,13 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         missing_count = element_count - nonnull_count
         unexpected_count = len(unexpected_list)
-        non_missing_unexpected_count = sum([x is not None for x in unexpected_list])
 
         if element_count > 0:
             unexpected_percent = float(unexpected_count) / element_count
             missing_percent = float(missing_count) / element_count
 
             if nonnull_count > 0:
-                unexpected_percent_nonmissing = float(non_missing_unexpected_count) / nonnull_count
+                unexpected_percent_nonmissing = float(unexpected_count) / nonnull_count
             else:
                 unexpected_percent_nonmissing = None
 

@@ -301,27 +301,31 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         series = self[column]
         boolean_mapped_null_values = series.isnull()
 
-        element_count = int(len(series))
-        nonnull_values = series[boolean_mapped_null_values==False]
-        nonnull_count = int((boolean_mapped_null_values==False).sum())
+        element_count = len(series)
+        success_count = sum(~boolean_mapped_null_values)
+        unexpected_count = element_count - success_count
 
-        boolean_mapped_success_values = boolean_mapped_null_values==False
-        success_count = boolean_mapped_success_values.sum()
-
-        unexpected_list = [None for i in list(series[(boolean_mapped_success_values==False)])]
-        unexpected_index_list = list(series[(boolean_mapped_success_values==False)].index)
-        unexpected_count = len(unexpected_list)
+        unexpected_list = [None for i in range(unexpected_count)]
+        unexpected_index_list = boolean_mapped_null_values[boolean_mapped_null_values].index
 
         # Pass element_count instead of nonnull_count, because that's the right denominator for this expectation
         success, percent_success = self._calc_map_expectation_success(success_count, element_count, mostly)
 
-        return_obj = self._format_column_map_output(
-            result_format, success,
-            element_count, nonnull_count,
-            unexpected_list, unexpected_index_list
-        )
+        return {
+            "success": success,
+            "result": {
+                "element_count": element_count,
+                "missing_count": unexpected_count,
+                "missing_percent": float(unexpected_count) / element_count,
+                "unexpected_count": unexpected_count,
+                "unexpected_percent": float(unexpected_count) / element_count,
+                "partial_unexpected_list": unexpected_list[:min(5, len(unexpected_list))],
+                "partial_unexpected_index_list": unexpected_index_list[:min(5, len(unexpected_index_list))],
+                "unexpected_list": unexpected_list,
+                "unexpected_index_list": unexpected_index_list
+            }
+        }
 
-        return return_obj
 
     @DocInherit
     @Dataset.expectation(['column', 'mostly', 'result_format'])
@@ -334,27 +338,30 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         series = self[column]
         boolean_mapped_null_values = series.isnull()
 
-        element_count = int(len(series))
-        nonnull_values = series[boolean_mapped_null_values==False]
-        nonnull_count = (boolean_mapped_null_values==False).sum()
+        element_count = len(series)
+        success_count = sum(boolean_mapped_null_values)
+        unexpected_count = element_count - success_count
 
-        boolean_mapped_success_values = boolean_mapped_null_values
-        success_count = boolean_mapped_success_values.sum()
-
-        unexpected_list = list(series[(boolean_mapped_success_values==False)])
-        unexpected_index_list = list(series[(boolean_mapped_success_values==False)].index)
-        unexpected_count = len(unexpected_list)
+        unexpected_list = list(series[~boolean_mapped_null_values])
+        unexpected_index_list = boolean_mapped_null_values[~boolean_mapped_null_values].index
 
         # Pass element_count instead of nonnull_count, because that's the right denominator for this expectation
         success, percent_success = self._calc_map_expectation_success(success_count, element_count, mostly)
 
-        return_obj = self._format_column_map_output(
-            result_format, success,
-            element_count, nonnull_count,
-            unexpected_list, unexpected_index_list
-        )
-
-        return return_obj
+        return {
+            "success": success,
+            "result": {
+                "element_count": element_count,
+                "missing_count": unexpected_count,
+                "missing_percent": float(unexpected_count) / element_count,
+                "unexpected_count": unexpected_count,
+                "unexpected_percent": float(unexpected_count) / element_count,
+                "partial_unexpected_list": unexpected_list[:min(5, len(unexpected_list))],
+                "partial_unexpected_index_list": unexpected_index_list[:min(5, len(unexpected_index_list))],
+                "unexpected_list": unexpected_list,
+                "unexpected_index_list": unexpected_index_list
+            }
+        }
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
