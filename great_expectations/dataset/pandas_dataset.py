@@ -297,6 +297,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                                             result_format=None, include_config=False, catch_exceptions=None, meta=None):
         if result_format is None:
             result_format = self.default_expectation_args["result_format"]
+        result_format = parse_result_format(result_format)
 
         series = self[column]
         boolean_mapped_null_values = series.isnull()
@@ -306,7 +307,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         unexpected_count = element_count - success_count
 
         unexpected_list = [None for i in range(unexpected_count)]
-        unexpected_index_list = boolean_mapped_null_values[boolean_mapped_null_values].index
+        unexpected_index_list = series[boolean_mapped_null_values].index
 
         # Pass element_count instead of nonnull_count, because that's the right denominator for this expectation
         success, percent_success = self._calc_map_expectation_success(success_count, element_count, mostly)
@@ -319,8 +320,10 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                 "missing_percent": float(unexpected_count) / element_count,
                 "unexpected_count": unexpected_count,
                 "unexpected_percent": float(unexpected_count) / element_count,
-                "partial_unexpected_list": unexpected_list[:min(5, len(unexpected_list))],
-                "partial_unexpected_index_list": unexpected_index_list[:min(5, len(unexpected_index_list))],
+                "partial_unexpected_list":
+                    unexpected_list[:result_format['partial_unexpected_count']],
+                "partial_unexpected_index_list":
+                    unexpected_index_list[:result_format['partial_unexpected_count']],
                 "unexpected_list": unexpected_list,
                 "unexpected_index_list": unexpected_index_list
             }
@@ -334,6 +337,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                                         result_format=None, include_config=False, catch_exceptions=None, meta=None):
         if result_format is None:
             result_format = self.default_expectation_args["result_format"]
+        result_format = parse_result_format(result_format)
 
         series = self[column]
         boolean_mapped_null_values = series.isnull()
@@ -342,8 +346,8 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         success_count = sum(boolean_mapped_null_values)
         unexpected_count = element_count - success_count
 
-        unexpected_list = list(series[~boolean_mapped_null_values])
-        unexpected_index_list = boolean_mapped_null_values[~boolean_mapped_null_values].index
+        unexpected_list = [x for x in series[~boolean_mapped_null_values]]
+        unexpected_index_list = series[~boolean_mapped_null_values].index
 
         # Pass element_count instead of nonnull_count, because that's the right denominator for this expectation
         success, percent_success = self._calc_map_expectation_success(success_count, element_count, mostly)
@@ -356,8 +360,10 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                 "missing_percent": float(unexpected_count) / element_count,
                 "unexpected_count": unexpected_count,
                 "unexpected_percent": float(unexpected_count) / element_count,
-                "partial_unexpected_list": unexpected_list[:min(5, len(unexpected_list))],
-                "partial_unexpected_index_list": unexpected_index_list[:min(5, len(unexpected_index_list))],
+                "partial_unexpected_list":
+                    unexpected_list[:result_format['partial_unexpected_count']],
+                "partial_unexpected_index_list":
+                    unexpected_index_list[:result_format['partial_unexpected_count']],
                 "unexpected_list": unexpected_list,
                 "unexpected_index_list": unexpected_index_list
             }
