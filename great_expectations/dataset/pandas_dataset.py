@@ -16,8 +16,11 @@ from scipy import stats
 from six import string_types
 
 from .base import Dataset
-from .util import DocInherit, parse_result_format, \
-        is_valid_partition_object, is_valid_categorical_partition_object, is_valid_continuous_partition_object
+from .util import DocInherit, recursively_convert_to_json_serializable, \
+        is_valid_partition_object, is_valid_categorical_partition_object, is_valid_continuous_partition_object, \
+        infer_distribution_parameters, _scipy_distribution_positional_args_from_dict, validate_distribution_parameters,\
+        parse_result_format
+
 
 class MetaPandasDataset(Dataset):
     """
@@ -201,7 +204,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
     @DocInherit
     @Dataset.expectation(['column'])
     def expect_column_to_exist(
-            self, column, column_index=None, result_format=None, include_config=False, 
+            self, column, column_index=None, result_format=None, include_config=False,
             catch_exceptions=None, meta=None
     ):
 
@@ -210,6 +213,20 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                 "success": (column_index is None) or (self.columns.get_loc(column) == column_index)
             }
 
+        else:
+            return {
+                "success": False
+            }
+
+    @DocInherit
+    @Dataset.expectation(['column_list'])
+    def expect_table_columns_to_match_ordered_list(self, column_list,
+                               result_format=None, include_config=False, catch_exceptions=None, meta=None):
+
+        if list(self.columns) == list(column_list):
+            return {
+                "success" : True
+            }
         else:
             return {
                 "success": False
@@ -294,31 +311,38 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                                             result_format=None, include_config=False, catch_exceptions=None, meta=None):
         if result_format is None:
             result_format = self.default_expectation_args["result_format"]
+        result_format = parse_result_format(result_format)
 
         series = self[column]
         boolean_mapped_null_values = series.isnull()
 
-        element_count = int(len(series))
-        nonnull_values = series[boolean_mapped_null_values==False]
-        nonnull_count = int((boolean_mapped_null_values==False).sum())
+        element_count = len(series)
+        success_count = sum(~boolean_mapped_null_values)
+        unexpected_count = element_count - success_count
 
-        boolean_mapped_success_values = boolean_mapped_null_values==False
-        success_count = boolean_mapped_success_values.sum()
-
-        unexpected_list = [None for i in list(series[(boolean_mapped_success_values==False)])]
-        unexpected_index_list = list(series[(boolean_mapped_success_values==False)].index)
-        unexpected_count = len(unexpected_list)
+        unexpected_list = [None for i in range(unexpected_count)]
+        unexpected_index_list = series[boolean_mapped_null_values].index
 
         # Pass element_count instead of nonnull_count, because that's the right denominator for this expectation
         success, percent_success = self._calc_map_expectation_success(success_count, element_count, mostly)
 
-        return_obj = self._format_column_map_output(
-            result_format, success,
-            element_count, nonnull_count,
-            unexpected_list, unexpected_index_list
-        )
+        return {
+            "success": success,
+            "result": {
+                "element_count": element_count,
+                "missing_count": unexpected_count,
+                "missing_percent": float(unexpected_count) / element_count,
+                "unexpected_count": unexpected_count,
+                "unexpected_percent": float(unexpected_count) / element_count,
+                "partial_unexpected_list":
+                    unexpected_list[:result_format['partial_unexpected_count']],
+                "partial_unexpected_index_list":
+                    unexpected_index_list[:result_format['partial_unexpected_count']],
+                "unexpected_list": unexpected_list,
+                "unexpected_index_list": unexpected_index_list
+            }
+        }
 
-        return return_obj
 
     @DocInherit
     @Dataset.expectation(['column', 'mostly', 'result_format'])
@@ -327,31 +351,37 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                                         result_format=None, include_config=False, catch_exceptions=None, meta=None):
         if result_format is None:
             result_format = self.default_expectation_args["result_format"]
+        result_format = parse_result_format(result_format)
 
         series = self[column]
         boolean_mapped_null_values = series.isnull()
 
-        element_count = int(len(series))
-        nonnull_values = series[boolean_mapped_null_values==False]
-        nonnull_count = (boolean_mapped_null_values==False).sum()
+        element_count = len(series)
+        success_count = sum(boolean_mapped_null_values)
+        unexpected_count = element_count - success_count
 
-        boolean_mapped_success_values = boolean_mapped_null_values
-        success_count = boolean_mapped_success_values.sum()
-
-        unexpected_list = list(series[(boolean_mapped_success_values==False)])
-        unexpected_index_list = list(series[(boolean_mapped_success_values==False)].index)
-        unexpected_count = len(unexpected_list)
+        unexpected_list = [x for x in series[~boolean_mapped_null_values]]
+        unexpected_index_list = series[~boolean_mapped_null_values].index
 
         # Pass element_count instead of nonnull_count, because that's the right denominator for this expectation
         success, percent_success = self._calc_map_expectation_success(success_count, element_count, mostly)
 
-        return_obj = self._format_column_map_output(
-            result_format, success,
-            element_count, nonnull_count,
-            unexpected_list, unexpected_index_list
-        )
-
-        return return_obj
+        return {
+            "success": success,
+            "result": {
+                "element_count": element_count,
+                "missing_count": unexpected_count,
+                "missing_percent": float(unexpected_count) / element_count,
+                "unexpected_count": unexpected_count,
+                "unexpected_percent": float(unexpected_count) / element_count,
+                "partial_unexpected_list":
+                    unexpected_list[:result_format['partial_unexpected_count']],
+                "partial_unexpected_index_list":
+                    unexpected_index_list[:result_format['partial_unexpected_count']],
+                "unexpected_list": unexpected_list,
+                "unexpected_index_list": unexpected_index_list
+            }
+        }
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
@@ -731,6 +761,42 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
         return column.map(matches_json_schema)
 
+    @DocInherit
+    @MetaPandasDataset.column_aggregate_expectation
+    def expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than(self, column, distribution,
+                                                                                    p_value=0.05, params=None,
+                                                                                    result_format=None,
+                                                                                    include_config=False,
+                                                                                    catch_exceptions=None, meta=None):
+        if p_value <= 0 or p_value >= 1:
+            raise ValueError("p_value must be between 0 and 1 exclusive")
+
+        # Validate params
+        try:
+            validate_distribution_parameters(distribution=distribution, params=params)
+        except ValueError as e:
+            raise e
+
+        # Format arguments for scipy.kstest
+        if (isinstance(params, dict)):
+            positional_parameters = _scipy_distribution_positional_args_from_dict(distribution, params)
+        else:
+            positional_parameters = params
+
+        # K-S Test
+        ks_result = stats.kstest(column, distribution,
+                                 args=positional_parameters)
+
+        return {
+            "success": ks_result[1] >= p_value,
+            "result": {
+                "observed_value": ks_result[1],
+                "details": {
+                    "expected_params": positional_parameters,
+                    "observed_ks_result": ks_result
+                }
+            }
+        }
 
     @DocInherit
     @MetaPandasDataset.column_aggregate_expectation

@@ -271,6 +271,20 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         }
 
     @DocInherit
+    @Dataset.expectation(['column_list'])
+    def expect_table_columns_to_match_ordered_list(self, column_list,
+                               result_format=None, include_config=False, catch_exceptions=None, meta=None):
+
+        if [col['name'] for col in self.columns] == list(column_list):
+            return {
+                "success" : True
+            }
+        else:
+            return {
+                "success": False
+            }
+
+    @DocInherit
     @Dataset.expectation(['column'])
     def expect_column_to_exist(self,
             column, column_index=None, result_format=None, include_config=False,

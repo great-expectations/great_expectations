@@ -13,6 +13,10 @@ Planned Features
 * Support for non-tabular datasources (e.g. JSON, XML, AVRO)
 * Real-time/streaming and adaption of distributional expectations
 
+v 0.4.1
+-------
+* Correct inclusion of new data_context module in source distribution
+
 v.0.4.0
 -------
 * Initial implementation of data context API and SqlAlchemyDataset including implementations of the following expectations:
@@ -32,7 +36,8 @@ v.0.4.0
 * Major refactor of output_format to new result_format parameter. See docs for full details.
   * exception_list and related uses of the term exception have been renamed to unexpected
   * the output formats are explicitly hierarchical now, with BOOLEAN_ONLY < BASIC < SUMMARY < COMPLETE. `column_aggregate_expectation`s now return element count and related information included at the BASIC level or higher.
-* ge.from_pandas() utility (thanks @shrockn)
+* New expectation available for parameterized distributions--expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than (what a name! :) -- (thanks @ccnobbli)
+* ge.from_pandas() utility (thanks @schrockn)
 * Pandas operations on a PandasDataset now return another PandasDataset (thanks @dlwhite5)
 * expect_column_to_exist now takes a column_index parameter to specify column order (thanks @louispotok)
 * Top-level validate option (ge.validate())
