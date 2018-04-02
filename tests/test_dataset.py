@@ -929,13 +929,8 @@ class TestDataset(unittest.TestCase):
             }
         )
 
-<<<<<<< HEAD
-    def test_remove_false_expectations(self):
-        df = ge.dataset.PandasDataSet({
-=======
     def test_discard_failing_expectations(self):
         df = ge.dataset.PandasDataset({
->>>>>>> 3a487e35782aa5bd0977477efa8ea95ea25255ad
             'A':[1,2,3,4],
             'B':[5,6,7,8],
             'C':['a','b','c','d'],
@@ -968,21 +963,7 @@ class TestDataset(unittest.TestCase):
         ]
 
         sub1 = df[:3]
-<<<<<<< HEAD
-        sub1.remove_false_expectations()
-        self.assertEqual(sub1.find_expectations(), exp1)
 
-        sub1 = df[1:2]
-        sub1.remove_false_expectations()
-        self.assertEqual(sub1.find_expectations(), exp1)
-
-        sub1 = df[:-1]
-        sub1.remove_false_expectations()
-        self.assertEqual(sub1.find_expectations(), exp1)
-
-        sub1 = df[-1:]
-        sub1.remove_false_expectations()
-=======
         sub1.discard_failing_expectations()
         self.assertEqual(sub1.find_expectations(), exp1)
 
@@ -996,7 +977,6 @@ class TestDataset(unittest.TestCase):
 
         sub1 = df[-1:]
         sub1.discard_failing_expectations()
->>>>>>> 3a487e35782aa5bd0977477efa8ea95ea25255ad
         self.assertEqual(sub1.find_expectations(), exp1)
 
         sub1 = df[['A', 'D']]
@@ -1010,11 +990,7 @@ class TestDataset(unittest.TestCase):
             {'expectation_type': 'expect_column_values_to_be_in_set',
              'kwargs': {'column': 'D', 'values_set': ['e', 'f', 'g', 'h']}}
         ]
-<<<<<<< HEAD
-        sub1.remove_false_expectations()
-=======
         sub1.discard_failing_expectations()
->>>>>>> 3a487e35782aa5bd0977477efa8ea95ea25255ad
         self.assertEqual(sub1.find_expectations(), exp1)
 
         sub1 = df[['A']]
@@ -1024,11 +1000,7 @@ class TestDataset(unittest.TestCase):
             {'expectation_type': 'expect_column_values_to_be_in_set',
              'kwargs': {'column': 'A', 'values_set': [1, 2, 3, 4]}}
         ]
-<<<<<<< HEAD
-        sub1.remove_false_expectations()
-=======
         sub1.discard_failing_expectations()
->>>>>>> 3a487e35782aa5bd0977477efa8ea95ea25255ad
         self.assertEqual(sub1.find_expectations(), exp1)
 
         sub1 = df.iloc[:3, 1:4]
@@ -1046,11 +1018,7 @@ class TestDataset(unittest.TestCase):
             {'expectation_type': 'expect_column_values_to_be_in_set',
              'kwargs': {'column': 'D', 'values_set': ['e', 'f', 'g', 'h']}}
         ]
-<<<<<<< HEAD
-        sub1.remove_false_expectations()
-=======
         sub1.discard_failing_expectations()
->>>>>>> 3a487e35782aa5bd0977477efa8ea95ea25255ad
         self.assertEqual(sub1.find_expectations(), exp1)
 
         sub1 = df.loc[0:, 'A':'B']
@@ -1064,11 +1032,7 @@ class TestDataset(unittest.TestCase):
             {'expectation_type': 'expect_column_values_to_be_in_set',
              'kwargs': {'column': 'B', 'values_set': [5, 6, 7, 8]}}
         ]
-<<<<<<< HEAD
-        sub1.remove_false_expectations()
-=======
         sub1.discard_failing_expectations()
->>>>>>> 3a487e35782aa5bd0977477efa8ea95ea25255ad
         self.assertEqual(sub1.find_expectations(), exp1)
 
     def test_test_expectation_function(self):
