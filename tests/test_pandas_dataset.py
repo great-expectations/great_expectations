@@ -1606,35 +1606,35 @@ class TestPandasDataset(unittest.TestCase):
         exp1 = df.find_expectations()
 
         sub1 = df[['A', 'D']]
-        self.assertIsInstance(sub1, ge.dataset.PandasDataSet)
+        self.assertIsInstance(sub1, ge.dataset.PandasDataset)
         self.assertEqual(sub1.find_expectations(), exp1)
 
         sub1 = df[['A']]
-        self.assertIsInstance(sub1, ge.dataset.PandasDataSet)
+        self.assertIsInstance(sub1, ge.dataset.PandasDataset)
         self.assertEqual(sub1.find_expectations(), exp1)
 
         sub1 = df[:3]
-        self.assertIsInstance(sub1, ge.dataset.PandasDataSet)
+        self.assertIsInstance(sub1, ge.dataset.PandasDataset)
         self.assertEqual(sub1.find_expectations(), exp1)
 
         sub1 = df[1:2]
-        self.assertIsInstance(sub1, ge.dataset.PandasDataSet)
+        self.assertIsInstance(sub1, ge.dataset.PandasDataset)
         self.assertEqual(sub1.find_expectations(), exp1)
 
         sub1 = df[:-1]
-        self.assertIsInstance(sub1, ge.dataset.PandasDataSet)
+        self.assertIsInstance(sub1, ge.dataset.PandasDataset)
         self.assertEqual(sub1.find_expectations(), exp1)
 
         sub1 = df[-1:]
-        self.assertIsInstance(sub1, ge.dataset.PandasDataSet)
+        self.assertIsInstance(sub1, ge.dataset.PandasDataset)
         self.assertEqual(sub1.find_expectations(), exp1)
 
         sub1 = df.iloc[:3, 1:4]
-        self.assertIsInstance(sub1, ge.dataset.PandasDataSet)
+        self.assertIsInstance(sub1, ge.dataset.PandasDataset)
         self.assertEqual(sub1.find_expectations(), exp1)
 
         sub1 = df.loc[0:, 'A':'B']
-        self.assertIsInstance(sub1, ge.dataset.PandasDataSet)
+        self.assertIsInstance(sub1, ge.dataset.PandasDataset)
         self.assertEqual(sub1.find_expectations(), exp1)
 
 
