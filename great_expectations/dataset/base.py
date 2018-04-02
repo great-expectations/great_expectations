@@ -205,7 +205,6 @@ class Dataset(object):
 
     def _initialize_expectations(self, config=None, name=None):
         """Instantiates `_expectations_config` as empty by default or with a specified expectation `config`.
-
         In addition, this always sets the `default_expectation_args` to:
             `include_config`: False,
             `catch_exceptions`: False,
@@ -268,6 +267,7 @@ class Dataset(object):
 
            Notes:
                May raise future errors once json-serializable tests are implemented to check for correct arg formatting
+
         """
         expectation_type = expectation_config['expectation_type']
 
