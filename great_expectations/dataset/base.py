@@ -19,7 +19,7 @@ class Dataset(object):
 
     def __init__(self, *args, **kwargs):
         super(Dataset, self).__init__(*args, **kwargs)
-        self.initialize_expectations()
+        self._initialize_expectations()
 
     @classmethod
     def expectation(cls, method_arg_names):
@@ -203,10 +203,9 @@ class Dataset(object):
         """
         raise NotImplementedError
 
-    def initialize_expectations(self, config=None, name=None):
+    def _initialize_expectations(self, config=None, name=None):
         """Instantiates `_expectations_config` as empty by default or with a specified expectation `config`.
 
-        # FIXME Should be a private function
         In addition, this always sets the `default_expectation_args` to:
             `include_config`: False,
             `catch_exceptions`: False,
