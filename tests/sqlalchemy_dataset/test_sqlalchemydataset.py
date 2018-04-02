@@ -59,7 +59,7 @@ def custom_dataset():
 
 
 def test_custom_sqlalchemydataset(custom_dataset):
-    custom_dataset.initialize_expectations()
+    custom_dataset._initialize_expectations()
     custom_dataset.set_default_expectation_argument("result_format", {"result_format": "COMPLETE"})
 
     result = custom_dataset.expect_column_values_to_equal_2('c1')
@@ -72,7 +72,7 @@ def test_custom_sqlalchemydataset(custom_dataset):
 
 
 def test_broken_decorator_errors(custom_dataset):
-    custom_dataset.initialize_expectations()
+    custom_dataset._initialize_expectations()
     custom_dataset.set_default_expectation_argument("result_format", {"result_format": "COMPLETE"})
 
     with pytest.raises(ValueError) as err:
