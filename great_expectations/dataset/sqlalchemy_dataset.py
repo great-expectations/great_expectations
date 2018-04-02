@@ -178,7 +178,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         initialization exists.
         """
         for col in self.columns:
-            self.append_expectation({
+            self._append_expectation({
                 "expectation_type": "expect_column_to_exist",
                 "kwargs": {
                     "column": col["name"]

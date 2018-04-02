@@ -129,7 +129,7 @@ class Dataset(object):
                         raise(err)
 
                 # Append the expectation to the config.
-                self.append_expectation(expectation_config)
+                self._append_expectation(expectation_config)
 
                 if include_config:
                     return_obj["expectation_config"] = copy.deepcopy(expectation_config)
@@ -254,7 +254,7 @@ class Dataset(object):
                 "result_format" : 'BASIC',
             }
 
-    def append_expectation(self, expectation_config):
+    def _append_expectation(self, expectation_config):
         """Appends an expectation to `DataSet._expectations_config` and drops existing expectations of the same type.
 
            If `expectation_config` is a column expectation, this drops existing expectations that are specific to \
@@ -268,7 +268,6 @@ class Dataset(object):
 
            Notes:
                May raise future errors once json-serializable tests are implemented to check for correct arg formatting
-               # FIXME Should be a private method
         """
         expectation_type = expectation_config['expectation_type']
 
@@ -279,7 +278,7 @@ class Dataset(object):
         json.dumps(expectation_config)
 
         #Drop existing expectations with the same expectation_type.
-        #For column_expectations, append_expectation should only replace expectations
+        #For column_expectations, _append_expectation should only replace expectations
         # where the expectation_type AND the column match
         #!!! This is good default behavior, but
         #!!!    it needs to be documented, and

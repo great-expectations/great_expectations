@@ -1132,7 +1132,7 @@ class TestDataset(unittest.TestCase):
 
     def test_catch_exceptions_with_bad_expectation_type(self):
         my_df = ge.dataset.PandasDataset({"x":range(10)})
-        my_df.append_expectation({'expectation_type':'foobar', 'kwargs':{}})
+        my_df._append_expectation({'expectation_type':'foobar', 'kwargs':{}})
         result = my_df.validate(catch_exceptions=True)
 
         self.assertEqual(result["results"][1]["success"], False)
