@@ -39,7 +39,7 @@ To work with these decorators, your custom function must accept two arguments: `
 
 .. code-block:: python
 
-    from great_expectations.Dataset import PandasDataset, MetaPandasDataset
+    from great_expectations.dataset import PandasDataset, MetaPandasDataset
 
     class CustomPandasDataset(PandasDataset):
 
@@ -62,7 +62,7 @@ For SqlAlchemyDataset, the decorators work slightly differently. See the MetaSql
 .. code-block:: python
 
     import sqlalchemy as sa
-    from great_expectations.Dataset import SqlAlchemyDataset, MetaSqlAlchemyDataset
+    from great_expectations.dataset import SqlAlchemyDataset, MetaSqlAlchemyDataset
 
     class CustomSqlAlchemyDataset(SqlAlchemyDataset):
 
@@ -98,7 +98,7 @@ This is more complicated, since you have to handle all the logic of additional p
 
 .. code-block:: bash
 
-    from great_expectations.Dataset import PandasDataset
+    from great_expectations.dataset import Dataset, PandasDataset
 
     class CustomPandasDataset(PandasDataset):
 
