@@ -85,8 +85,7 @@ def test_broken_decorator_errors(custom_dataset):
         assert "Column aggregate expectation failed to return required information: observed_value" in str(err)
 
 
-@pytest.fixture
-def custom_sql_dataset():
+def test_sqlalchemydataset_with_custom_sql():
     engine = sa.create_engine('sqlite://')
 
     data = pd.DataFrame({
@@ -100,10 +99,6 @@ def custom_sql_dataset():
     custom_sql = "SELECT name, pet FROM test_sql_data WHERE age > 12"
     custom_sql_dataset = SqlAlchemyDataset('test_sql_data', engine=engine, custom_sql=custom_sql)
 
-    return custom_sql_dataset
-
-
-def test_sqlalchemydataset_with_custom_sql(custom_sql_dataset):
     custom_sql_dataset.initialize_expectations()
     custom_sql_dataset.set_default_expectation_argument("result_format", {"result_format": "COMPLETE"})
 
@@ -112,5 +107,3 @@ def test_sqlalchemydataset_with_custom_sql(custom_sql_dataset):
 
     result = custom_sql_dataset.expect_column_to_exist("age")
     assert result['success'] == False
-
-
