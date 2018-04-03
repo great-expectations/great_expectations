@@ -554,7 +554,22 @@ def validate_distribution_parameters(distribution, params):
 
 
 def create_multiple_expectations(df, columns, expectation_type, *args, **kwargs):
+    """Creates an identical expectation for each of the given columns with the specified arguments, if any.
 
+    Args:
+        df (great_expectations.dataset): A great expectations dataset object.
+        columns (list): A list of column names represented as strings.
+        expectation_type (string): The expectation type.
+
+    Raises:
+        KeyError if the provided column does not exist.
+        AttributeError if the provided expectation type does not exist or df is not a valid great expectations dataset.
+
+    Returns:
+        A list of expectation results.
+
+
+    """
     expectation = getattr(df, expectation_type)
     results = list()
 
