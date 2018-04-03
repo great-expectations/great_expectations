@@ -171,7 +171,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
     def __finalize__(self, other, method=None, **kwargs):
         if isinstance(other, PandasDataset):
-            self.initialize_expectations(other.get_expectations_config(
+            self._initialize_expectations(other.get_expectations_config(
                 discard_failed_expectations=False,
                 discard_result_format_kwargs=False,
                 discard_include_configs_kwargs=False,
@@ -193,7 +193,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         """
 
         for col in self.columns:
-            self.append_expectation({
+            self._append_expectation({
                 "expectation_type": "expect_column_to_exist",
                 "kwargs": {
                     "column": col
