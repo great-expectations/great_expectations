@@ -180,7 +180,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         Create Temporary table based on sql query. This will be used as a basis for executing expectations.
         :param custom_sql:
         """
-        stmt = "CREATE TEMPORARY TABLE IF NOT EXISTS {table_name} ({custom_sql})".format(
+        stmt = "CREATE TEMPORARY TABLE IF NOT EXISTS {table_name} AS {custom_sql}".format(
             table_name=table_name, custom_sql=custom_sql)
         self.engine.execute(stmt)
 
