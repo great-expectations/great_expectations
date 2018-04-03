@@ -511,6 +511,58 @@ class TestUtilMethods(unittest.TestCase):
         t = ge.dataset.util.infer_distribution_parameters(data=D.chi2, distribution='chi2')
         self.assertEqual(t['df'], D.chi2.mean())
 
+    def test_create_multiple_expectations(self):
+        D = ge.dataset.PandasDataset({
+            'x' : [1,2,3,4,5,6],
+            'y' : [0,2,4,6,8,10],
+            'z' : ['hi', 'hello', 'hey', 'howdy', 'hola', 'holy smokes'],
+            'zz': ['a', 'b', 'c', 'hi', 'howdy', 'hola']
+        })
+
+        # Test kwarg
+        results = ge.dataset.util.create_multiple_expectations(D,
+                                                     ['x', 'y'],
+                                                     'expect_column_values_to_be_in_set',
+                                                     values_set=[1, 2, 3, 4, 5, 6])
+        self.assertTrue(results[0]['success'])
+        self.assertFalse(results[1]['success'])
+
+        # Test positional argument
+        results = ge.dataset.util.create_multiple_expectations(D,
+                                                     ['x', 'y'],
+                                                     'expect_column_values_to_be_in_set',
+                                                     [1, 2, 3, 4, 5, 6])
+        self.assertTrue(results[0]['success'])
+        self.assertFalse(results[1]['success'])
+
+        results = ge.dataset.util.create_multiple_expectations(D,
+                                                     ['z', 'zz'],
+                                                     'expect_column_values_to_match_regex',
+                                                     'h')
+        self.assertTrue(results[0]['success'])
+        self.assertFalse(results[1]['success'])
+
+        # Non-argumentative expectation
+        results = ge.dataset.util.create_multiple_expectations(D,
+                                                               ['z', 'zz'],
+                                                               'expect_column_values_to_not_be_null')
+        self.assertTrue(results[0]['success'])
+        self.assertTrue(results[1]['success'])
+
+
+        # Key error when non-existant column is called
+        with self.assertRaises(KeyError):
+            ge.dataset.util.create_multiple_expectations(D,
+                                                         ['p'],
+                                                         'expect_column_values_to_be_in_set',
+                                                         ['hi'])
+        # Attribute error when non-existant expectation is called
+        with self.assertRaises(AttributeError):
+            ge.dataset.util.create_multiple_expectations(D,
+                                                         ['z'],
+                                                         'expect_column_values_to_be_fake_news')
+
+
 """
 The following Parent and Child classes are used for testing documentation inheritance.
 """
