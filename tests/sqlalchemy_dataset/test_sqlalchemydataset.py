@@ -4,6 +4,7 @@ from great_expectations.dataset import MetaSqlAlchemyDataset, SqlAlchemyDataset
 import sqlalchemy as sa
 import pandas as pd
 
+
 @pytest.fixture
 def custom_dataset():
     class CustomSqlAlchemyDataset(SqlAlchemyDataset):
@@ -82,3 +83,34 @@ def test_broken_decorator_errors(custom_dataset):
     with pytest.raises(ValueError) as err:
         custom_dataset.another_broken_aggregate_expectation('c1')
         assert "Column aggregate expectation failed to return required information: observed_value" in str(err)
+
+
+@pytest.fixture
+def custom_sql_dataset():
+    engine = sa.create_engine('sqlite://')
+
+    data = pd.DataFrame({
+        "name": ["Frank", "Steve", "Jane", "Frank", "Michael"],
+        "age": [16, 21, 38, 22, 10],
+        "pet": ["fish", "python", "cat", "python", "frog"]
+    })
+
+    data.to_sql(name='test_sql_data', con=engine, index=False)
+
+    custom_sql = "SELECT name, pet FROM test_sql_data WHERE age > 12"
+    custom_sql_dataset = SqlAlchemyDataset('test_sql_data', engine=engine, custom_sql=custom_sql)
+
+    return custom_sql_dataset
+
+
+def test_sqlalchemydataset_with_custom_sql(custom_sql_dataset):
+    custom_sql_dataset.initialize_expectations()
+    custom_sql_dataset.set_default_expectation_argument("result_format", {"result_format": "COMPLETE"})
+
+    result = custom_sql_dataset.expect_column_values_to_be_in_set("pet", ["fish", "cat", "python"])
+    assert result['success'] == True
+
+    result = custom_sql_dataset.expect_column_to_exist("age")
+    assert result['success'] == False
+
+
