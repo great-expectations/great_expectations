@@ -148,7 +148,7 @@ class MetaSqlAlchemyDataset(Dataset):
 
 class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
-    def __init__(self, table_name=None, engine=None, connection_string=None):
+    def __init__(self, table_name=None, engine=None, connection_string=None, custom_sql=None):
         super(SqlAlchemyDataset, self).__init__()
 
         if table_name is None:
@@ -169,8 +169,22 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 # Currently we do no error handling if the engine doesn't work out of the box.
                 raise err
 
+        if custom_sql:
+            self.create_temporary_table(self.table_name, custom_sql)
+
         insp = reflection.Inspector.from_engine(engine)
         self.columns = insp.get_columns(self.table_name)
+
+    def create_temporary_table(self, table_name, custom_sql):
+        """
+        Create Temporary table based on sql query. This will be used as a basis for executing expectations.
+        WARNING: this feature is new in v0.4.
+        It hasn't been tested in all SQL dialects, and may change based on community feedback.
+        :param custom_sql:
+        """
+        stmt = "CREATE TEMPORARY TABLE IF NOT EXISTS {table_name} AS {custom_sql}".format(
+            table_name=table_name, custom_sql=custom_sql)
+        self.engine.execute(stmt)
 
     def add_default_expectations(self):
         """
