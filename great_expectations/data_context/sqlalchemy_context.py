@@ -24,5 +24,5 @@ class SqlAlchemyDataContext(DataContext):
         tables = [str(table) for table in self.meta.sorted_tables]
         return tables
 
-    def get_dataset(self, dataset_name):
-        return SqlAlchemyDataset(table_name=dataset_name, engine=self.engine)
+    def get_dataset(self, dataset_name, custom_sql=None):
+        return SqlAlchemyDataset(table_name=dataset_name, engine=self.engine, custom_sql=custom_sql)
