@@ -55,7 +55,7 @@ def pytest_generate_tests(metafunc):
 
 def test_case_runner(test_case):
     # Note: this should never be done in practice, but we are wiping expectations to reuse datasets during testing.
-    test_case["dataset"].initialize_expectations()
+    test_case["dataset"]._initialize_expectations()
 
     evaluate_json_test(
         test_case["dataset"],
