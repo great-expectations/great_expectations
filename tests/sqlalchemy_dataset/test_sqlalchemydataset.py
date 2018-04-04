@@ -99,7 +99,7 @@ def test_sqlalchemydataset_with_custom_sql():
     custom_sql = "SELECT name, pet FROM test_sql_data WHERE age > 12"
     custom_sql_dataset = SqlAlchemyDataset('test_sql_data', engine=engine, custom_sql=custom_sql)
 
-    custom_sql_dataset.initialize_expectations()
+    custom_sql_dataset._initialize_expectations()
     custom_sql_dataset.set_default_expectation_argument("result_format", {"result_format": "COMPLETE"})
 
     result = custom_sql_dataset.expect_column_values_to_be_in_set("pet", ["fish", "cat", "python"])
