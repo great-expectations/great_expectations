@@ -51,10 +51,12 @@ great\_expectations.
 What expectations are available?
 --------------------------------
 
-Expectations include: - ``expect_table_row_count_to_equal`` -
-``expect_column_values_to_be_unique`` -
-``expect_column_values_to_be_in_set`` -
-``expect_column_mean_to_be_between`` - ...and many more
+Expectations include:
+- ``expect_table_row_count_to_equal``
+- ``expect_column_values_to_be_unique``
+- ``expect_column_values_to_be_in_set``
+- ``expect_column_mean_to_be_between``
+- ...and many more
 
 Visit the `glossary of
 expectations <http://great-expectations.readthedocs.io/en/latest/glossary.html>`__
