@@ -1,4 +1,6 @@
-Great Expectations
+.. _intro:
+
+Introduction
 ==================
 
 *Always know what to expect from your data.*
