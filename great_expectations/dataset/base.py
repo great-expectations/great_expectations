@@ -1326,11 +1326,11 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         Args:
             column (str): \
                 The column name.
-            type_ (str): \
+            type\_ (str): \
                 A string representing the data type that each column should have as entries.
                 For example, "double integer" refers to an integer with double precision.
             target_datasource (str): \
-                The data source that specifies the implementation in the type_ parameter.
+                The data source that specifies the implementation in the type\_ parameter.
                 For example, options include "numpy", "sql", or "spark".
 
         Keyword Args:
@@ -1389,7 +1389,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                 A list of strings representing the data type that each column should have as entries.
                 For example, "double integer" refers to an integer with double precision.
             target_datasource (str): \
-                The data source that specifies the implementation in the type_ parameter.
+                The data source that specifies the implementation in the type_list parameter.
                 For example, options include "numpy", "sql", or "spark".
 
         Keyword Args:
