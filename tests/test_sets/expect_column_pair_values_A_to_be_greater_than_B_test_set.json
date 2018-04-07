@@ -1,0 +1,78 @@
+{
+  "dataset" : {
+    "w" : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    "x" : [2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+    "y" : [1, 2, 3, 4, 5, 6, 7, 8, 9, null],
+    "z" : [1, 2, 3, 4, 5, null, null, null, null, null],
+    "a" : ["1/1/2016", "2/2/2016", "3/3/2016", "4/4/2016", "5/5/2016", null, null, null, null, null],
+    "b" : ["1/1/2016", "2/1/2016", "3/1/2016", "4/1/2016", "5/1/2020", null, null, null, null, null]
+  },
+  "tests" : [{
+    "title" : "Basic positive test",
+    "in": {
+      "column_A": "x",
+      "column_B": "w"
+    },
+    "out": {
+      "exception_list": [],
+      "exception_index_list": [],
+      "success": true
+    }
+  },{
+    "title" : "Basic positive test with missing values and ignore_row_if=either_value_is_missing",
+    "in": {
+      "column_A": "x",
+      "column_B": "z",
+      "ignore_row_if": "either_value_is_missing"
+    },
+    "out" : {
+      "exception_list": [],
+      "exception_index_list": [],
+      "success": true
+    }
+  },{
+    "title" : "Test ties",
+    "in": {
+      "column_A": "w",
+      "column_B": "z",
+      "ignore_row_if": "either_value_is_missing"
+    },
+    "out" : {
+      "exception_list": [
+        [1.0,1.0],
+        [2.0,2.0],
+        [3.0,3.0],
+        [4.0,4.0],
+        [5.0,5.0]
+      ],
+      "exception_index_list": [0,1,2,3,4],
+      "success": false
+    }
+  },{
+    "title" : "Test ties with or_equal",
+    "in": {
+      "column_A": "w",
+      "column_B": "z",
+      "or_equal": true,
+      "ignore_row_if": "either_value_is_missing"
+    },
+    "out" : {
+      "exception_list": [],
+      "exception_index_list": [],
+      "success": true
+    }
+  },{
+    "title" : "Test parse_strings_as_datetimes and mostly",
+    "in": {
+      "column_A": "a",
+      "column_B": "b",
+      "parse_strings_as_datetimes": true,
+      "mostly": 0.6
+    },
+    "out" : {
+      "exception_list": [["1/1/2016", "1/1/2016"], ["5/5/2016", "5/1/2020"]],
+      "exception_index_list": [0,4],
+      "success": true
+    }
+  }]
+}
