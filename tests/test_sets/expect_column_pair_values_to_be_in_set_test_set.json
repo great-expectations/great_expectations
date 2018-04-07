@@ -20,11 +20,11 @@
       "success": true
     }
   },{
-    "title": "Positive test with nulls and keep_missing='both'",
+    "title": "Positive test with nulls and ignore_row_if='either_value_is_missing'",
     "in": {
       "column_A": "x",
       "column_B": "z",
-      "keep_missing": "both",
+      "ignore_row_if": "either_value_is_missing",
       "value_pairs_set": [[1,1], [2,2], [3,3], [4,4], [5,5]]
     },
     "out": {
@@ -49,7 +49,7 @@
     "in": {
       "column_A": "a",
       "column_B": "b",
-      "keep_missing": "both",
+      "ignore_row_if": "both_values_are_missing",
       "value_pairs_set": [[1,1], [2,2], [2,1], [1,2]]
     },
     "out": {

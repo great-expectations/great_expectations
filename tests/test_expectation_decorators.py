@@ -330,5 +330,6 @@ class TestExpectationDecorators(unittest.TestCase):
         # with self.assertRaises(ZeroDivisionError):
         #     df.expectation_that_crashes_on_sixes("all_even", catch_exceptions=False)
 
+
 if __name__ == "__main__":
     unittest.main()

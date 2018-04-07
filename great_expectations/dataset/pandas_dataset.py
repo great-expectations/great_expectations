@@ -90,7 +90,7 @@ class MetaPandasDataSet(DataSet):
 
         @cls.expectation(inspect.getargspec(func)[0][1:])
         @wraps(func)
-        def inner_wrapper(self, column_A, column_B, mostly=None, keep_missing="either", output_format=None, *args, **kwargs):
+        def inner_wrapper(self, column_A, column_B, mostly=None, ignore_row_if="both_values_are_missing", output_format=None, *args, **kwargs):
 
             if output_format is None:
                 output_format = self.default_expectation_args["output_format"]
@@ -98,10 +98,14 @@ class MetaPandasDataSet(DataSet):
             series_A = self[column_A]
             series_B = self[column_B]
 
-            if keep_missing=="both":
-                boolean_mapped_null_values = series_A.isnull() | series_B.isnull()
-            else:
+            if ignore_row_if=="both_values_are_missing":
                 boolean_mapped_null_values = series_A.isnull() & series_B.isnull()
+            elif ignore_row_if=="either_value_is_missing":
+                boolean_mapped_null_values = series_A.isnull() | series_B.isnull()
+            elif ignore_row_if=="never":
+                boolean_mapped_null_values = series_A.map(lambda x: False)
+            else:
+                raise ValueError("Unknown value of ignore_row_if: %s", (ignore_row_if,))
 
 
             #This next row assumes that series_A and _B are the same length
@@ -1270,7 +1274,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
     def expect_column_pair_values_to_be_equal(self,
         column_A,
         column_B,
-        keep_missing="either",
+        ignore_row_if="both_values_are_missing",
         output_format=None, include_config=False, catch_exceptions=None
     ):
         return column_A == column_B
@@ -1283,7 +1287,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         or_equal=None,
         parse_strings_as_datetimes=None,
         allow_cross_type_comparisons=None,
-        keep_missing="either",
+        ignore_row_if="both_values_are_missing",
         output_format=None, include_config=False, catch_exceptions=None
     ):
         #FIXME: Implement allow_cross_type_comparisons
@@ -1308,7 +1312,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
         column_A,
         column_B,
         value_pairs_set,
-        keep_missing="either",
+        ignore_row_if="both_values_are_missing",
         output_format=None, include_config=False, catch_exceptions=None
     ):
         temp_df = pd.DataFrame({"A": column_A, "B": column_B})

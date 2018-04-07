@@ -1456,7 +1456,7 @@ class TestPandasDataset(unittest.TestCase):
     def test_expect_column_pair_values_A_to_be_greater_than_B(self):
         self.run_encapsulated_test(
             "expect_column_pair_values_A_to_be_greater_than_B",
-            "./tests/test_sets/expect_column_A_values_to_be_greater_than_column_B_test_set.json",
+            "./tests/test_sets/expect_column_pair_values_A_to_be_greater_than_B_test_set.json",
         )
 
     def test_expect_column_pair_values_to_be_in_set(self):
