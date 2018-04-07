@@ -663,11 +663,11 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         discard_catch_exceptions_kwargs=True,
         suppress_warnings=False
     ):
-        """Writes `_expectation_config` to a JSON file.
+        """Writes ``_expectation_config`` to a JSON file.
 
-           Writes the DataSet's expectation config to the specified JSON `filepath`. Failing expectations \
-           can be excluded from the JSON expectations config with `discard_failed_expectations`. The kwarg key-value \
-           pairs `output_format`, `include_configs`, and `catch_exceptions` are optionally excluded from the JSON \
+           Writes the DataSet's expectation config to the specified JSON ``filepath``. Failing expectations \
+           can be excluded from the JSON expectations config with ``discard_failed_expectations``. The kwarg key-value \
+           pairs :ref:`result_format`, :ref:`include_config`, and :ref:`catch_exceptions` are optionally excluded from the JSON \
            expectations config.
 
            Args:
@@ -679,10 +679,10 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                discard_result_format_kwargs (boolean): \
                    If True, the :ref:`result_format` attribute for each expectation is not written to the JSON config file. \
                discard_include_configs_kwargs (boolean): \
-                   If True, the `include_config` attribute for each expectation is not written to the JSON config file.\
+                   If True, the :ref:`include_config` attribute for each expectation is not written to the JSON config file.\
                discard_catch_exceptions_kwargs (boolean): \
-                   If True, the `catch_exceptions` attribute for each expectation is not written to the JSON config \
-                   file. \
+                   If True, the :ref:`catch_exceptions` attribute for each expectation is not written to the JSON config \
+                   file.
                suppress_warnings (boolean): \
                   It True, all warnings raised by Great Expectations, as a result of dropped expectations, are \
                   suppressed.
@@ -716,7 +716,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                result_format (string or None): \
                    If None, uses the default value ('BASIC' or as specified). \
                    If string, the returned expectation output follows the specified format ('BOOLEAN_ONLY','BASIC', etc.).
-               include_config (boolean):
+               include_config (boolean): \
                    If True, the returned results include the config information associated with each expectation, if \
                    it exists.
                only_return_failures (boolean): \
