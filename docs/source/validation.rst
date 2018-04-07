@@ -28,7 +28,7 @@ Once you've constructed Expectations, you can use them to validate new data.
         }, 
         ...
         {
-          "exception_list": 30.397989417989415, 
+          "unexpected_list": 30.397989417989415,
           "expectation_type": "expect_column_mean_to_be_between", 
           "success": True, 
           "kwargs": {
@@ -38,7 +38,7 @@ Once you've constructed Expectations, you can use them to validate new data.
           }
         }, 
         {
-          "exception_list": [], 
+          "unexpected_list": [],
           "expectation_type": "expect_column_values_to_be_between", 
           "success": True, 
           "kwargs": {
@@ -48,7 +48,7 @@ Once you've constructed Expectations, you can use them to validate new data.
           }
         }, 
         {
-          "exception_list": [
+          "unexpected_list": [
             "Downton (?Douton), Mr William James", 
             "Jacobsohn Mr Samuel", 
             "Seman Master Betros"
@@ -62,7 +62,7 @@ Once you've constructed Expectations, you can use them to validate new data.
           }
         }, 
         {
-          "exception_list": [
+          "unexpected_list": [
             "*"
           ], 
           "expectation_type": "expect_column_values_to_be_in_set", 
@@ -101,7 +101,7 @@ This is especially powerful when combined with great_expectations's command line
         }, 
         ...
         {
-          "exception_list": 30.397989417989415, 
+          "unexpected_list": 30.397989417989415,
           "expectation_type": "expect_column_mean_to_be_between", 
           "success": True, 
           "kwargs": {
@@ -111,7 +111,7 @@ This is especially powerful when combined with great_expectations's command line
           }
         }, 
         {
-          "exception_list": [], 
+          "unexpected_list": [],
           "expectation_type": "expect_column_values_to_be_between", 
           "success": True, 
           "kwargs": {
@@ -121,7 +121,7 @@ This is especially powerful when combined with great_expectations's command line
           }
         }, 
         {
-          "exception_list": [
+          "unexpected_list": [
             "Downton (?Douton), Mr William James", 
             "Jacobsohn Mr Samuel", 
             "Seman Master Betros"
@@ -135,7 +135,7 @@ This is especially powerful when combined with great_expectations's command line
           }
         }, 
         {
-          "exception_list": [
+          "unexpected_list": [
             "*"
           ], 
           "expectation_type": "expect_column_values_to_be_in_set", 

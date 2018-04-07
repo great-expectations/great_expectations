@@ -43,6 +43,23 @@ You can also clone the repository, which includes examples of using great_expect
     $ git clone https://github.com/great-expectations/great_expectations.git
     $ pip install great_expectations/
 
+What expectations are available?
+--------------------------------------------------------------------------------
+
+Expectations include:
+- `expect_table_row_count_to_equal`
+- `expect_column_values_to_be_unique`
+- `expect_column_values_to_be_in_set`
+- `expect_column_mean_to_be_between`
+- ...and many more
+
+Visit the [glossary of expectations](http://great-expectations.readthedocs.io/en/latest/glossary.html) for a complete list of expectations that are currently part of the great expectations vocabulary.
+
+Can I contribute?
+--------------------------------------------------------------------------------
+Absolutely. Yes, please. Start [here](https://github.com/great-expectations/great_expectations/blob/docs/contributor_docs/CONTRIBUTING), and don't be shy with questions!
+
+
 How do I learn more?
 --------------------------------------------------------------------------------
 
@@ -52,8 +69,8 @@ For full documentation, visit [Great Expectations on readthedocs.io](http://grea
 
 For quick, hands-on introductions to Great Expectations' key features, check out our walkthrough videos:
 
-* [Introduction to Great Expectations](https://www.useloom.com/share/3eb1d429823744288c99ea26e2c4d443)
-* [Using Distributional Expectations](https://www.useloom.com/share/c74b3e9c8dd349e9b8c4aa230cc4bedc)
+* [Introduction to Great Expectations](https://www.youtube.com/watch?v=-_0tG7ACNU4)
+* [Using Distributional Expectations](https://www.youtube.com/watch?v=l3DYPVZAUmw&t=20s)
 
 
 What's the best way to get in touch with the Great Expectations team?

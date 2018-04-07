@@ -1,6 +1,9 @@
-# Utility methods for dealing with DataSet objects
+# Utility methods for dealing with Dataset objects
 
 from __future__ import division
+
+from six import string_types, integer_types
+
 import numpy as np
 from scipy import stats
 import pandas as pd
@@ -8,11 +11,25 @@ import numpy as np
 import warnings
 import sys
 import copy
-import json
 import datetime
 
 from functools import wraps
 
+
+def parse_result_format(result_format):
+    """This is a simple helper utility that can be used to parse a string result_format into the dict format used
+    internally by great_expectations. It is not necessary but allows shorthand for result_format in cases where
+    there is no need to specify a custom partial_unexpected_count."""
+    if isinstance(result_format, string_types):
+        result_format = {
+            'result_format': result_format,
+            'partial_unexpected_count': 20
+        }
+    else:
+        if 'partial_unexpected_count' not in result_format:
+            result_format['partial_unexpected_count'] = 20
+
+    return result_format
 
 class DotDict(dict):
     """dot.notation access to dictionary attributes"""
@@ -54,7 +71,7 @@ Usage::
     http://code.activestate.com/recipes/576862/. Unfortunately, the
     original authors did not anticipate deep inheritance hierarchies, and
     we ran into a recursion issue when implementing custom subclasses of
-    PandasDataSet:
+    PandasDataset:
     https://github.com/great-expectations/great_expectations/issues/177.
 
     Our new homegrown implementation directly searches the MRO, instead
@@ -97,10 +114,10 @@ def recursively_convert_to_json_serializable(test_obj):
     Warning:
         test_obj may also be converted in place.
 
-    FIXME: Somebody else must have already written this function. Can we use a fully-baked version instead?
     """
     # Validate that all aruguments are of approved types, coerce if it's easy, else exception
     # print(type(test_obj), test_obj)
+    #Note: Not 100% sure I've resolved this correctly...
     try:
         if np.isnan(test_obj):
             return None
@@ -109,6 +126,9 @@ def recursively_convert_to_json_serializable(test_obj):
     except ValueError:
         pass
 
+    if isinstance(test_obj, (string_types, integer_types, float, bool)):
+        # No problem to encode json
+        return test_obj
 
     if isinstance(test_obj, (str, int, float, bool)):
         # No problem to encode json
@@ -149,16 +169,8 @@ def recursively_convert_to_json_serializable(test_obj):
     elif isinstance(test_obj, (datetime.datetime, datetime.date)):
         return str(test_obj)
 
-
     else:
-        try:
-            # In Python 2, unicode and long should still be valid.
-            # This will break in Python 3 and throw the exception instead.
-            if isinstance(test_obj, (long, unicode)):
-                # No problem to encode json
-                return test_obj
-        except:
-            raise TypeError('%s is of type %s which cannot be serialized.' % (str(test_obj), type(test_obj).__name__))
+        raise TypeError('%s is of type %s which cannot be serialized.' % (str(test_obj), type(test_obj).__name__))
 
 
 def is_valid_partition_object(partition_object):
@@ -302,3 +314,283 @@ def continuous_partition_data(data, bins='auto', n_bins=10):
         "bins": bin_edges,
         "weights": hist / len(data)
     }
+
+
+def infer_distribution_parameters(data, distribution, params=None):
+    """Convenience method for determining the shape parameters of a given distribution
+
+    Args:
+        data (list-like): The data to build shape parameters from.
+        distribution (string): Scipy distribution, determines which parameters to build.
+        params (dict or None): The known parameters. Parameters given here will not be altered. \
+                               Keep as None to infer all necessary parameters from the data data.
+
+    Returns:
+        A dictionary of named parameters::
+
+        {
+            "mean": (float),
+            "std_dev": (float),
+            "loc": (float),
+            "scale": (float),
+            "alpha": (float),
+            "beta": (float),
+            "min": (float),
+            "max": (float),
+            "df": (float)
+        }
+
+        See: https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.kstest.html#scipy.stats.kstest
+    """
+
+    if params is None:
+        params = dict()
+    elif not isinstance(params, dict):
+        raise TypeError("params must be a dictionary object, see great_expectations documentation")
+
+    if 'mean' not in params.keys():
+        params['mean'] = data.mean()
+
+    if 'std_dev' not in params.keys():
+        params['std_dev'] = data.std()
+
+    if distribution == "beta":
+        # scipy cdf(x, a, b, loc=0, scale=1)
+        if 'alpha' not in params.keys():
+            # from https://stats.stackexchange.com/questions/12232/calculating-the-parameters-of-a-beta-distribution-using-the-mean-and-variance
+            params['alpha'] = (params['mean'] ** 2) * (
+                        ((1 - params['mean']) / params['std_dev'] ** 2) - (1 / params['mean']))
+        if 'beta' not in params.keys():
+            params['beta'] = params['alpha'] * ((1 / params['mean']) - 1)
+
+    elif distribution == 'gamma':
+        # scipy cdf(x, a, loc=0, scale=1)
+        if 'alpha' not in params.keys():
+            # Using https://en.wikipedia.org/wiki/Gamma_distribution
+            params['alpha'] = (params['mean'] / params.get('scale', 1))
+
+
+    #elif distribution == 'poisson':
+    #    if 'lambda' not in params.keys():
+    #       params['lambda'] = params['mean']
+
+    elif distribution == 'uniform':
+        # scipy cdf(x, loc=0, scale=1)
+        if 'min' not in params.keys():
+            if 'loc' in params.keys():
+                params['min'] = params['loc']
+            else:
+                params['min'] = min(data)
+        if 'max' not in params.keys():
+            if 'scale' in params.keys():
+                params['max'] = params['scale']
+            else:
+                params['max'] = max(data) - params['min']
+
+    elif distribution == 'chi2':
+        # scipy cdf(x, df, loc=0, scale=1)
+        if 'df' not in params.keys():
+            # from https://en.wikipedia.org/wiki/Chi-squared_distribution
+            params['df'] = params['mean']
+
+    #  Expon only uses loc and scale, use default
+    #elif distribution == 'expon':
+        # scipy cdf(x, loc=0, scale=1)
+    #    if 'lambda' in params.keys():
+            # Lambda is optional
+    #        params['scale'] = 1 / params['lambda']
+    elif distribution is not 'norm':
+        raise AttributeError("Unsupported distribution type. Please refer to Great Expectations Documentation")
+
+    params['loc'] = params.get('loc', 0)
+    params['scale'] = params.get('scale', 1)
+
+    return params
+
+def _scipy_distribution_positional_args_from_dict(distribution, params):
+    """Helper function that returns positional arguments for a scipy distribution using a dict of parameters.
+
+       See the `cdf()` function here https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.beta.html#Methods\
+       to see an example of scipy's positional arguments. This function returns the arguments specified by the \
+       scipy.stat.distribution.cdf() for tha distribution.
+
+       Args:
+           distribution (string): \
+               The scipy distribution name.
+           params (dict): \
+               A dict of named parameters.
+
+       Raises:
+           AttributeError: \
+               If an unsupported distribution is provided.
+    """
+
+    params['loc'] = params.get('loc', 0)
+    if 'scale' not in params:
+        params['scale'] = 1
+
+    if distribution == 'norm':
+        return params['mean'], params['std_dev']
+    elif distribution == 'beta':
+        return params['alpha'], params['beta'], params['loc'], params['scale']
+    elif distribution == 'gamma':
+        return params['alpha'], params['loc'], params['scale']
+    #elif distribution == 'poisson':
+    #    return params['lambda'], params['loc']
+    elif distribution == 'uniform':
+        return params['min'], params['max']
+    elif distribution == 'chi2':
+        return params['df'], params['loc'], params['scale']
+    elif distribution == 'expon':
+        return params['loc'], params['scale']
+
+
+def validate_distribution_parameters(distribution, params):
+    """Ensures that necessary parameters for a distribution are present and that all parameters are sensical.
+
+       If parameters necessary to construct a distribution are missing or invalid, this function raises ValueError\
+       with an informative description. Note that 'loc' and 'scale' are optional arguments, and that 'scale'\
+       must be positive.
+
+       Args:
+           distribution (string): \
+               The scipy distribution name, e.g. normal distribution is 'norm'.
+           params (dict or list): \
+               The distribution shape parameters in a named dictionary or positional list form following the scipy \
+               cdf argument scheme.
+
+               params={'mean': 40, 'std_dev': 5} or params=[40, 5]
+
+       Exceptions:
+           ValueError: \
+               With an informative description, usually when necessary parameters are omitted or are invalid.
+
+    """
+
+    norm_msg = "norm distributions require 0 parameters and optionally 'mean', 'std_dev'."
+    beta_msg = "beta distributions require 2 positive parameters 'alpha', 'beta' and optionally 'loc', 'scale'."
+    gamma_msg = "gamma distributions require 1 positive parameter 'alpha' and optionally 'loc','scale'."
+    # poisson_msg = "poisson distributions require 1 positive parameter 'lambda' and optionally 'loc'."
+    uniform_msg = "uniform distributions require 0 parameters and optionally 'loc', 'scale'."
+    chi2_msg = "chi2 distributions require 1 positive parameter 'df' and optionally 'loc', 'scale'."
+    expon_msg = "expon distributions require 0 parameters and optionally 'loc', 'scale'."
+
+    if (distribution not in ['norm', 'beta', 'gamma', 'poisson', 'uniform', 'chi2', 'expon']):
+        raise AttributeError("Unsupported  distribution provided: %s" % distribution)
+
+    if isinstance(params, dict):
+        # `params` is a dictionary
+        if params.get("std_dev", 1) <= 0 or params.get('scale', 1) <= 0:
+            raise ValueError("std_dev and scale must be positive.")
+
+        # alpha and beta are required and positive
+        if distribution == 'beta' and (params.get('alpha', -1) <= 0 or params.get('beta', -1) <= 0):
+            raise ValueError("Invalid parameters: %s" %beta_msg)
+
+        # alpha is required and positive
+        elif distribution == 'gamma' and params.get('alpha', -1) <= 0:
+            raise ValueError("Invalid parameters: %s" %gamma_msg)
+
+        # lambda is a required and positive
+        #elif distribution == 'poisson' and params.get('lambda', -1) <= 0:
+        #    raise ValueError("Invalid parameters: %s" %poisson_msg)
+
+        # df is necessary and required to be positve
+        elif distribution == 'chi2' and params.get('df', -1) <= 0:
+            raise ValueError("Invalid parameters: %s:" %chi2_msg)
+
+    elif isinstance(params, tuple) or isinstance(params, list):
+        scale = None
+
+        # `params` is a tuple or a list
+        if distribution == 'beta':
+            if len(params) < 2:
+                raise ValueError("Missing required parameters: %s" %beta_msg)
+            if params[0] <= 0 or params[1] <= 0:
+                raise ValueError("Invalid parameters: %s" %beta_msg)
+            if len(params) == 4:
+                scale = params[3]
+            elif len(params) > 4:
+                raise ValueError("Too many parameters provided: %s" %beta_msg)
+
+        elif distribution == 'norm':
+            if len(params) > 2:
+                raise ValueError("Too many parameters provided: %s" %norm_msg)
+            if len(params) == 2:
+                scale = params[1]
+
+        elif distribution == 'gamma':
+            if len(params) < 1:
+                raise ValueError("Missing required parameters: %s" %gamma_msg)
+            if len(params) == 3:
+                scale = params[2]
+            if len(params) > 3:
+                raise ValueError("Too many parameters provided: %s" % gamma_msg)
+            elif params[0] <= 0:
+                raise ValueError("Invalid parameters: %s" %gamma_msg)
+
+        #elif distribution == 'poisson':
+        #    if len(params) < 1:
+        #        raise ValueError("Missing required parameters: %s" %poisson_msg)
+        #   if len(params) > 2:
+        #        raise ValueError("Too many parameters provided: %s" %poisson_msg)
+        #    elif params[0] <= 0:
+        #        raise ValueError("Invalid parameters: %s" %poisson_msg)
+
+        elif distribution == 'uniform':
+            if len(params) == 2:
+                scale = params[1]
+            if len(params) > 2:
+                raise ValueError("Too many arguments provided: %s" %uniform_msg)
+
+        elif distribution == 'chi2':
+            if len(params) < 1:
+                raise ValueError("Missing required parameters: %s" %chi2_msg)
+            elif len(params) == 3:
+                scale = params[2]
+            elif len(params) > 3:
+                raise ValueError("Too many arguments provided: %s" %chi2_msg)
+            if params[0] <= 0:
+                raise ValueError("Invalid parameters: %s" %chi2_msg)
+
+        elif distribution == 'expon':
+
+            if len(params) == 2:
+                scale = params[1]
+            if len(params) > 2:
+                raise ValueError("Too many arguments provided: %s" %expon_msg)
+
+        if scale is not None and scale <= 0:
+            raise ValueError("std_dev and scale must be positive.")
+
+    else:
+        raise ValueError(
+                "params must be a dict or list, or use ge.dataset.util.infer_distribution_parameters(data, distribution)")
+
+    return
+
+
+def create_multiple_expectations(df, columns, expectation_type, *args, **kwargs):
+    """Creates an identical expectation for each of the given columns with the specified arguments, if any.
+
+    Args:
+        df (great_expectations.dataset): A great expectations dataset object.
+        columns (list): A list of column names represented as strings.
+        expectation_type (string): The expectation type.
+
+    Raises:
+        KeyError if the provided column does not exist.
+        AttributeError if the provided expectation type does not exist or df is not a valid great expectations dataset.
+
+    Returns:
+        A list of expectation results.
+
+
+    """
+    expectation = getattr(df, expectation_type)
+    results = list()
+
+    for column in columns:
+        results.append(expectation(column, *args,  **kwargs))
+
+    return results
