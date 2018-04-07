@@ -12,8 +12,6 @@ The `result_format` parameter may be either a string or a dictionary which speci
     - partial_unexpected_count: Sets the number of results to include in partial_unexpected_count, if applicable.
 
 
-.. _result_format:
-
 `result_format`
 ------------------------------------------------------------------------------
 

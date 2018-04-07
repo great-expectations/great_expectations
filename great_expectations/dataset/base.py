@@ -742,7 +742,6 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                    {
                      ... (Second expectation results)
                    },
-
                    ... (More expectations results)
                }
 
