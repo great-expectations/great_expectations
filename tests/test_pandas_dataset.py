@@ -16,7 +16,7 @@ class TestPandasDataset(unittest.TestCase):
         with open(filename) as f:
             T = json.load(f)
 
-        D = ge.dataset.PandasDataSet(T["dataset"])
+        D = ge.dataset.PandasDataset(T["dataset"])
         D.set_default_expectation_argument("output_format", "COMPLETE")
 
         self.maxDiff = None

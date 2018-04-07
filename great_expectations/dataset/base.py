@@ -115,7 +115,8 @@ class Dataset(object):
                 try:
                     return_obj = func(self, **expectation_args)
 
-                    except Exception as err:
+                except Exception as err:
+                    if catch_exceptions:
                         raised_exception = True
                         exception_traceback = traceback.format_exc()
                         exception_message = str(err)
