@@ -25,7 +25,7 @@ great_expectations.data_context.base
 great_expectations.data_context.PandasCSVDataContext
 ----------------------------------------------------
 
-.. automodule:: great_expectations.data_context.PandasCSVDataContext
+.. automodule:: great_expectations.data_context.pandas_context
     :members:
     :undoc-members:
     :show-inheritance:
@@ -39,7 +39,7 @@ great_expectations.data_context.PandasCSVDataContext
 great_expectations.data_context.SqlAlchemyDataContext
 -----------------------------------------------------
 
-.. automodule:: great_expectations.data_context.SqlAlchemyDataContext
+.. automodule:: great_expectations.data_context.sqlalchemy_context
     :members:
     :undoc-members:
     :show-inheritance:
