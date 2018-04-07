@@ -93,10 +93,10 @@ class MetaPandasDataset(Dataset):
 
         @cls.expectation(inspect.getargspec(func)[0][1:])
         @wraps(func)
-        def inner_wrapper(self, column_A, column_B, mostly=None, ignore_row_if="both_values_are_missing", output_format=None, *args, **kwargs):
+        def inner_wrapper(self, column_A, column_B, mostly=None, ignore_row_if="both_values_are_missing", result_format=None, *args, **kwargs):
 
-            if output_format is None:
-                output_format = self.default_expectation_args["output_format"]
+            if result_format is None:
+                result_format = self.default_expectation_args["result_format"]
 
             series_A = self[column_A]
             series_B = self[column_B]
@@ -125,22 +125,27 @@ class MetaPandasDataset(Dataset):
             boolean_mapped_success_values = func(self, nonnull_values_A, nonnull_values_B, *args, **kwargs)
             success_count = boolean_mapped_success_values.sum()
 
-            exception_list = [value_pair for value_pair in zip(
+            unexpected_list = [value_pair for value_pair in zip(
                 list(series_A[(boolean_mapped_success_values==False)&(boolean_mapped_null_values==False)]),
                 list(series_B[(boolean_mapped_success_values==False)&(boolean_mapped_null_values==False)])
             )]
-            exception_index_list = list(series_A[(boolean_mapped_success_values==False)&(boolean_mapped_null_values==False)].index)
-            exception_count = len(exception_list)
+            unexpected_index_list = list(series_A[(boolean_mapped_success_values==False)&(boolean_mapped_null_values==False)].index)
 
             success, percent_success = self._calc_map_expectation_success(success_count, nonnull_count, mostly)
 
             return_obj = self._format_column_map_output(
-                output_format, success,
-                element_count,
-                nonnull_values, nonnull_count,
-                boolean_mapped_success_values, success_count,
-                exception_list, exception_index_list
+                result_format, success,
+                element_count, nonnull_count,
+                unexpected_list, unexpected_index_list
             )
+
+            # return_obj = self._format_column_map_output(
+            #     output_format, success,
+            #     element_count,
+            #     nonnull_values, nonnull_count,
+            #     boolean_mapped_success_values, success_count,
+            #     exception_list, exception_index_list
+            # )
             # print keep_missing
             # print column_A, series_A
             # print column_B, series_B
@@ -1382,11 +1387,11 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                     }
                 }
 
-        return result_obj
+        return return_obj
 
 
     @DocInherit
-    @MetaPandasDataSet.column_pair_map_expectation
+    @MetaPandasDataset.column_pair_map_expectation
     def expect_column_pair_values_to_be_equal(self,
         column_A,
         column_B,
@@ -1396,7 +1401,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         return column_A == column_B
 
     @DocInherit
-    @MetaPandasDataSet.column_pair_map_expectation
+    @MetaPandasDataset.column_pair_map_expectation
     def expect_column_pair_values_A_to_be_greater_than_B(self,
         column_A,
         column_B,
@@ -1423,7 +1428,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             return temp_column_A > temp_column_B
 
     @DocInherit
-    @MetaPandasDataSet.column_pair_map_expectation
+    @MetaPandasDataset.column_pair_map_expectation
     def expect_column_pair_values_to_be_in_set(self,
         column_A,
         column_B,
