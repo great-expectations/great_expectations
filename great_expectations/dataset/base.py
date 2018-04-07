@@ -313,7 +313,7 @@ class Dataset(object):
           Args:
               expectation (json): \
                   The expectation to copy and clean.
-              discard_output_format_kwargs (boolean): \
+              discard_result_format_kwargs (boolean): \
                   if True, will remove the kwarg `output_format` key-value pair from the copied expectation.
               discard_include_configs_kwargs (boolean):
                   if True, will remove the kwarg `include_configs` key-value pair from the copied expectation.
@@ -360,7 +360,7 @@ class Dataset(object):
            Args:
                match_indexes (List): \
                    Index numbers of the expectations from `expectation_config.expectations` to be copied and cleaned.
-               discard_output_format_kwargs (boolean): \
+               discard_result_format_kwargs (boolean): \
                    if True, will remove the kwarg `output_format` key-value pair from the copied expectation.
                discard_include_configs_kwargs (boolean):
                    if True, will remove the kwarg `include_configs` key-value pair from the copied expectation.
@@ -676,8 +676,8 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                discard_failed_expectations (boolean): \
                    If True, excludes expectations that do not return `success`=True. \
                    If False, all expectations are written to the JSON config file.
-               discard_output_format_kwargs (boolean): \
-                   If True, the `output_format` attribute for each expectation is not written to the JSON config file. \
+               discard_result_format_kwargs (boolean): \
+                   If True, the :ref:`result_format` attribute for each expectation is not written to the JSON config file. \
                discard_include_configs_kwargs (boolean): \
                    If True, the `include_config` attribute for each expectation is not written to the JSON config file.\
                discard_catch_exceptions_kwargs (boolean): \
@@ -713,7 +713,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                    If a JSON file, validates those expectations.
                catch_exceptions (boolean): \
                    If True, exceptions raised by tests will not end validation and will be described in the returned report.
-               output_format (string or None): \
+               result_format (string or None): \
                    If None, uses the default value ('BASIC' or as specified). \
                    If string, the returned expectation output follows the specified format ('BOOLEAN_ONLY','BASIC', etc.).
                include_config (boolean):
