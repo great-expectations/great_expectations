@@ -23,11 +23,12 @@ from .util import DocInherit, recursively_convert_to_json_serializable, \
 
 
 class MetaPandasDataset(Dataset):
-    """
-    MetaPandasDataset is a thin layer between Dataset and PandasDataset. This two-layer inheritance is required to make @classmethod decorators work.
+    """MetaPandasDataset is a thin layer between Dataset and PandasDataset.
 
-    Practically speaking, that means that MetaPandasDataset implements
-    expectation decorators, like `column_map_expectation` and `column_aggregate_expectation`,
+    This two-layer inheritance is required to make @classmethod decorators work.
+
+    Practically speaking, that means that MetaPandasDataset implements \
+    expectation decorators, like `column_map_expectation` and `column_aggregate_expectation`, \
     and PandasDataset implements the expectation methods themselves.
     """
 
