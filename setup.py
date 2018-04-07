@@ -19,12 +19,13 @@ config = {
     'description': 'Always know what to expect from your data.',
     'author': 'The Great Expectations Team',
     'url': 'https://github.com/great-expectations/great_expectations',
-    'author_email': 'great_expectations@superconductivehealth.com',
+    'author_email': 'team@greatexpectations.io',
     'version': __version__,
     'install_requires': required,
     'packages': [
         'great_expectations',
         'great_expectations.dataset',
+        'great_expectations.data_context'
     ],
     'scripts': [
         'bin/great_expectations',

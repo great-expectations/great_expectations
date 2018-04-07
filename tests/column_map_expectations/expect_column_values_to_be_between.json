@@ -1,0 +1,437 @@
+{
+  "expectation_type": "expect_column_values_to_be_between",
+  "datasets": [{
+    "data": {
+      "x": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+      "y": [1, 2, 3, 4, 5, 6, 7, 8, 9, "abc"],
+      "z": [1, 2, 3, 4, 5, null, null, null, null, null],
+      "ts": [
+        "Jan 01 1870 12:00:01",
+        "Dec 31 1999 12:00:01",
+        "Jan 01 2000 12:00:01",
+        "Feb 01 2000 12:00:01",
+        "Mar 01 2000 12:00:01",
+        "Apr 01 2000 12:00:01",
+        "May 01 2000 12:00:01",
+        "Jun 01 2000 12:00:01",
+        null,
+        "Jan 01 2001 12:00:01"
+      ],
+      "alpha": ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"],
+      "numeric": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
+    },
+    "tests": [
+      {
+        "title": "Basic positive test",
+        "exact_match_out": false,
+        "out": {
+          "unexpected_list": [],
+          "unexpected_index_list": [],
+          "success": true
+        },
+        "in": {
+          "column": "x",
+          "max_value": 10,
+          "min_value": 1
+        }
+      },
+      {
+        "title" : "Another basic positive test",
+        "exact_match_out": false,
+        "out": {
+          "unexpected_list": [],
+          "unexpected_index_list": [],
+          "success": true
+        },
+        "in": {
+          "column": "x",
+          "max_value": 20,
+          "min_value": 0
+        }
+      },
+      {
+        "title" : "Missing min_value",
+        "exact_match_out": false,
+        "out": {
+          "unexpected_list": [],
+          "unexpected_index_list": [],
+          "success": true
+        },
+        "in": {
+          "column": "x",
+          "max_value": 20
+        }
+      },
+      {
+        "title" : "Null min_value",
+        "exact_match_out": false,
+        "out": {
+          "unexpected_list": [],
+          "unexpected_index_list": [],
+          "success": true
+        },
+        "in": {
+          "column": "x",
+          "min_value": null,
+          "max_value": 20
+        }
+      },
+      {
+        "title" : "Missing max_value",
+        "exact_match_out": false,
+        "out": {
+          "unexpected_list": [],
+          "unexpected_index_list": [],
+          "success": true
+        },
+        "in": {
+          "column": "x",
+          "min_value": 0
+        }
+      },
+      {
+        "title" : "Null max_value",
+        "exact_match_out": false,
+        "out": {
+          "unexpected_list": [],
+          "unexpected_index_list": [],
+          "success": true
+        },
+        "in": {
+          "column": "x",
+          "min_value": 0,
+          "max_value": null
+        }
+      },
+      {
+        "title" : "Basic negative test",
+        "exact_match_out": false,
+        "out": {
+          "unexpected_list": [
+            10
+          ],
+          "unexpected_index_list": [9],
+          "success": false
+        },
+        "in": {
+          "column": "x",
+          "max_value": 9,
+          "min_value": 1
+        }
+      },
+      {
+        "title" : "Another negative test",
+        "exact_match_out": false,
+        "out": {
+          "unexpected_list": [
+            1,
+            2
+          ],
+          "unexpected_index_list": [0, 1],
+          "success": false
+        },
+        "in": {
+          "column": "x",
+          "max_value": 10,
+          "min_value": 3
+        }
+      },
+      {
+        "title" : "Positive test with result_format=BOOLEAN_ONLY",
+        "exact_match_out": false,
+        "out": {"success": true},
+        "in": {
+          "column": "x",
+          "max_value": 10,
+          "min_value": 1,
+          "result_format": "BOOLEAN_ONLY"
+        }
+      },
+      {
+        "title" : "Another positive test with result_format=BOOLEAN_ONLY",
+        "exact_match_out": false,
+        "out": {"success": true},
+        "in": {
+          "column": "x",
+          "max_value": 20,
+          "min_value": 0,
+          "result_format": "BOOLEAN_ONLY"
+        }
+      },
+      {
+        "title" : "Negative test with result_format=BOOLEAN_ONLY",
+        "exact_match_out": false,
+        "out": {"success": false},
+        "in": {
+          "column": "x",
+          "max_value": 9,
+          "min_value": 1,
+          "result_format": "BOOLEAN_ONLY"
+        }
+      },
+      {
+        "title" : "Another negative test with result_format=BOOLEAN_ONLY",
+        "exact_match_out": false,
+        "out": {"success": false},
+        "in": {
+          "column": "x",
+          "max_value": 10,
+          "min_value": 3,
+          "result_format": "BOOLEAN_ONLY"
+        }
+      },
+      {
+        "title" : "Positive test with mostly",
+        "exact_match_out": false,
+        "out": {
+          "unexpected_list": [],
+          "unexpected_index_list": [],
+          "success": true
+        },
+        "in": {
+          "column": "x",
+          "max_value": 10,
+          "min_value": 1,
+          "mostly": 0.9
+        }
+      },
+      {
+        "title" : "2nd positive test with mostly",
+        "exact_match_out": false,
+        "out": {
+          "unexpected_list": [],
+          "unexpected_index_list": [],
+          "success": true
+        },
+        "in": {
+          "column": "x",
+          "max_value": 20,
+          "min_value": 0,
+          "mostly": 0.9
+        }
+      },
+      {
+        "title" : "3rd positive test with mostly",
+        "exact_match_out": false,
+        "out": {
+          "unexpected_list": [
+            10
+          ],
+          "unexpected_index_list": [
+            9
+          ],
+          "success": true
+        },
+        "in": {
+          "column": "x",
+          "max_value": 9,
+          "min_value": 1,
+          "mostly": 0.9
+        }
+      },
+      {
+        "title" : "Negative test with mostly",
+        "exact_match_out": false,
+        "out": {
+          "unexpected_list": [
+            1,
+            2
+          ],
+          "unexpected_index_list": [
+            0,
+            1
+          ],
+          "success": false
+        },
+        "in": {
+          "column": "x",
+          "max_value": 10,
+          "min_value": 3,
+          "mostly": 0.9
+        }
+      },
+      {
+        "title" : "Error: improperly mixed types",
+        "exact_match_out": false,
+        "in": {
+          "column": "y",
+          "max_value": 10,
+          "min_value": 1,
+          "mostly": 0.95,
+          "catch_exceptions": true
+        },
+        "out": {},
+        "error":{
+          "traceback_substring" : "TypeError: Column values, min_value, and max_value must either be None or of the same type."
+        }
+      },
+      {
+        "title" : "Error: improperly mixed types again",
+        "exact_match_out": false,
+        "in": {
+          "column": "y",
+          "max_value": 10,
+          "min_value": 1,
+          "mostly": 0.9,
+          "catch_exceptions": true
+        },
+        "out": {},
+        "error":{
+          "traceback_substring" : "TypeError: Column values, min_value, and max_value must either be None or of the same type."
+        }
+      },
+      {
+        "title" : "Error: improperly mixed types once more",
+        "exact_match_out": false,
+        "in": {
+          "column": "y",
+          "max_value": 10,
+          "min_value": 1,
+          "mostly": 0.8,
+          "catch_exceptions": true
+        },
+        "out": {},
+        "error":{
+          "traceback_substring" : "TypeError: Column values, min_value, and max_value must either be None or of the same type."
+        }
+      },
+      {
+        "title" : "Negative test to verify that the denominator for mostly works with missing values",
+        "exact_match_out": false,
+        "out": {
+          "unexpected_list": [
+            5
+          ],
+          "unexpected_index_list": [
+            4
+          ],
+          "success": false
+        },
+        "in": {
+          "column": "z",
+          "max_value": 4,
+          "min_value": 1,
+          "mostly": 0.9
+        }
+      },
+      {
+        "title" : "Positive test to verify that the denominator for mostly works with missing values",
+        "exact_match_out": false,
+        "out": {
+          "unexpected_list": [
+            5
+          ],
+          "unexpected_index_list": [
+            4
+          ],
+          "success": true
+        },
+        "in": {
+          "column": "z",
+          "max_value": 4,
+          "min_value": 1,
+          "mostly": 0.8
+        }
+      },
+      {
+        "title" : "Negative test with parse_strings_as_datetimes",
+        "exact_match_out": false,
+        "out": {
+          "unexpected_list": [
+            "Jan 01 1870 12:00:01",
+            "Dec 31 1999 12:00:01",
+            "Jan 01 2001 12:00:01"
+          ],
+          "unexpected_index_list": [
+            0, 1, 9
+          ],
+          "success": false
+        },
+        "in": {
+          "column": "ts",
+          "max_value": "Dec 31 2000",
+          "min_value": "Jan 01 2000",
+          "parse_strings_as_datetimes": true
+        }
+      },
+      {
+        "title" : "Error on string-to-int comparisons",
+        "exact_match_out": false,
+        "in": {
+          "column": "numeric",
+          "max_value": 10,
+          "min_value": 0,
+          "catch_exceptions": true
+        },
+        "out":{},
+        "error":{
+          "traceback_substring" : "TypeError: Column values, min_value, and max_value must either be None or of the same type."
+        }
+      },
+      {
+        "title" : "Test 'min_value is greater than max_value'",
+        "exact_match_out": false,
+        "in": {
+          "column": "x",
+          "min_value": 10,
+          "max_value": 0,
+          "catch_exceptions": true
+        },
+        "out":{},
+        "error":{
+          "traceback_substring" : "ValueError: min_value cannot be greater than max_value"
+        }
+      },
+      {
+        "title": "Test allow_cross_type_comparisons",
+        "exact_match_out": false,
+        "in": {
+          "column": "y",
+          "min_value": 0,
+          "max_value": 10,
+          "allow_cross_type_comparisons": true
+        },
+        "out": {
+          "unexpected_list": [
+            "abc"
+          ],
+          "unexpected_index_list": [
+            9
+          ],
+          "success": false
+        }
+      },
+      {
+        "title": "Test allow_cross_type_comparisons again",
+        "exact_match_out": false,
+        "in": {
+          "column": "numeric",
+          "min_value": 0,
+          "max_value": 10,
+          "allow_cross_type_comparisons": true
+        },
+        "out": {
+          "unexpected_list": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
+          "unexpected_index_list": [
+            0, 1, 2, 3, 4, 5, 6, 7, 8, 9
+          ],
+          "success": false
+        }
+      },
+      {
+        "title": "Verify that min_value=max_value=None raises an error",
+        "exact_match_out": false,
+        "in": {
+          "column": "y",
+          "max_value": null,
+          "min_value": null,
+          "catch_exceptions": true
+        },
+        "out":{},
+        "error":{
+          "traceback_substring" : "cannot both be None"
+        }
+      }
+    ]
+  }]
+}

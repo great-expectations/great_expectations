@@ -4,12 +4,19 @@
 Standard arguments for expectations
 ================================================================================
 
-All expectations share four standard (optional) arguments:
+All Expectations return a json-serializable dictionary when evaluated, and share four standard (optional) arguments:
 
-* `include_config`
-* `catch_exceptions`
-* `meta`
-* `output_format`
+ - :ref:`result_format`: controls what information is returned from the evaluation of the expectation expectation.
+ - :ref:`include_config`: If true, then the expectation config itself is returned as part of the result object.
+ - :ref:`catch_exceptions`: If true, execution will not fail if the Expectation encounters an error. Instead, it will \
+   return success = False and provide an informative error message.
+ - :ref:`meta`: allows user-supplied meta-data to be stored with an expectation.
+
+
+`result_format`
+------------------------------------------------------------------------------
+
+See :ref:`result_format` for more information.
 
 .. _include_config:
 
@@ -23,7 +30,7 @@ All Expectations accept a boolean `include_config` parameter. If true, then the 
     >> expect_column_values_to_be_in_set(
         "my_var",
         ['B', 'C', 'D', 'F', 'G', 'H'],
-        output_format="COMPLETE",
+        result_format="COMPLETE",
         include_config=True,
     )
 
@@ -33,7 +40,7 @@ All Expectations accept a boolean `include_config` parameter. If true, then the 
         'expectation_type': 'expect_column_values_to_be_in_set',
         'expectation_kwargs': {
             'column': 'my_var',
-            'output_format': 'COMPLETE',
+            'result_format': 'COMPLETE',
             'value_set': ['B', 'C', 'D', 'F', 'G', 'H']
         },
         'success': False
@@ -82,10 +89,6 @@ All Expectations accept an optional `meta` parameter. If `meta` is a valid JSON-
         }
     }
 
-`output_format`
-------------------------------------------------------------------------------
-
-See :ref:`output_format` for more detail.
 
 .. _mostly:
 
@@ -132,32 +135,33 @@ Expectations with `mostly` return exception lists even if they succeed:
     {
       "success": true
       "summary_obj": {
-        "exception_percent": 0.2, 
-        "partial_exception_index_list": [
+        "unexpected_percent": 0.2,
+        "partial_unexpected_index_list": [
           8,
           9
-        ], 
-        "partial_exception_list": [
-          8, 
+        ],
+        "partial_unexpected_list": [
+          8,
           9
-        ], 
-        "exception_percent_nonmissing": 0.2, 
-        "exception_count": 2
+        ],
+        "unexpected_percent_nonmissing": 0.2,
+        "unexpected_count": 2
       }
     }
 
-DataSet defaults
+
+Dataset defaults
 ------------------------------------------------------------------------------
 
-This default behavior for `output_format`, `include_config`, `catch_exceptions` can be overridden at the DataSet level:
+This default behavior for `result_format`, `include_config`, `catch_exceptions` can be overridden at the Dataset level:
 
 .. code-block:: bash
 
-    my_dataset.set_default_expectation_argument("output_format", "SUMMARY")
+    my_dataset.set_default_expectation_argument("result_format", "SUMMARY")
 
 In validation mode, they can be overridden using flags:
 
 .. code-block:: bash
 
-    great_expectations my_dataset.csv my_expectations.json --output_format=BOOLEAN_ONLY --catch_exceptions=False --include_config=True
+    great_expectations my_dataset.csv my_expectations.json --result_format=BOOLEAN_ONLY --catch_exceptions=False --include_config=True
 
