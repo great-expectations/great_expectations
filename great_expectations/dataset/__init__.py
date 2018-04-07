@@ -1,2 +1,3 @@
-from .base import DataSet
-from .pandas_dataset import MetaPandasDataSet, PandasDataSet
+from .base import Dataset
+from .pandas_dataset import MetaPandasDataset, PandasDataset
+from .sqlalchemy_dataset import MetaSqlAlchemyDataset, SqlAlchemyDataset
