@@ -14,18 +14,18 @@ great_expectations.dataset.base
 great_expectations.dataset.pandas_dataset
 -----------------------------------------
 
-.. automodule:: great_expectations.dataset.pandas_Dataset
+.. automodule:: great_expectations.dataset.pandas_dataset
     :members:
     :undoc-members:
     :show-inheritance:
     :exclude-members: MetaPandasDataset, PandasDataset
 
-    .. autoclass:: great_expectations.Dataset.pandas_Dataset.MetaPandasDataset
+    .. autoclass:: great_expectations.dataset.pandas_dataset.MetaPandasDataset
         :members:
         :undoc-members:
         :show-inheritance:
 
-    .. autoclass:: great_expectations.Dataset.pandas_Dataset.PandasDataset
+    .. autoclass:: great_expectations.dataset.pandas_dataset.PandasDataset
         :members:
         :undoc-members:
         :show-inheritance:
