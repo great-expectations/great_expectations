@@ -313,7 +313,7 @@ class Dataset(object):
           Args:
               expectation (json): \
                   The expectation to copy and clean.
-              discard_output_format_kwargs (boolean): \
+              discard_result_format_kwargs (boolean): \
                   if True, will remove the kwarg `output_format` key-value pair from the copied expectation.
               discard_include_configs_kwargs (boolean):
                   if True, will remove the kwarg `include_configs` key-value pair from the copied expectation.
@@ -360,7 +360,7 @@ class Dataset(object):
            Args:
                match_indexes (List): \
                    Index numbers of the expectations from `expectation_config.expectations` to be copied and cleaned.
-               discard_output_format_kwargs (boolean): \
+               discard_result_format_kwargs (boolean): \
                    if True, will remove the kwarg `output_format` key-value pair from the copied expectation.
                discard_include_configs_kwargs (boolean):
                    if True, will remove the kwarg `include_configs` key-value pair from the copied expectation.
@@ -663,26 +663,26 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         discard_catch_exceptions_kwargs=True,
         suppress_warnings=False
     ):
-        """Writes `_expectation_config` to a JSON file.
+        """Writes ``_expectation_config`` to a JSON file.
 
-           Writes the DataSet's expectation config to the specified JSON `filepath`. Failing expectations \
-           can be excluded from the JSON expectations config with `discard_failed_expectations`. The kwarg key-value \
-           pairs `output_format`, `include_configs`, and `catch_exceptions` are optionally excluded from the JSON \
+           Writes the DataSet's expectation config to the specified JSON ``filepath``. Failing expectations \
+           can be excluded from the JSON expectations config with ``discard_failed_expectations``. The kwarg key-value \
+           pairs :ref:`result_format`, :ref:`include_config`, and :ref:`catch_exceptions` are optionally excluded from the JSON \
            expectations config.
 
            Args:
                filepath (string): \
                    The location and name to write the JSON config file to.
                discard_failed_expectations (boolean): \
-                   If True, excludes expectations that do not return `success`=True. \
+                   If True, excludes expectations that do not return ``success = True``. \
                    If False, all expectations are written to the JSON config file.
-               discard_output_format_kwargs (boolean): \
-                   If True, the `output_format` attribute for each expectation is not written to the JSON config file. \
+               discard_result_format_kwargs (boolean): \
+                   If True, the :ref:`result_format` attribute for each expectation is not written to the JSON config file. \
                discard_include_configs_kwargs (boolean): \
-                   If True, the `include_config` attribute for each expectation is not written to the JSON config file.\
+                   If True, the :ref:`include_config` attribute for each expectation is not written to the JSON config file.\
                discard_catch_exceptions_kwargs (boolean): \
-                   If True, the `catch_exceptions` attribute for each expectation is not written to the JSON config \
-                   file. \
+                   If True, the :ref:`catch_exceptions` attribute for each expectation is not written to the JSON config \
+                   file.
                suppress_warnings (boolean): \
                   It True, all warnings raised by Great Expectations, as a result of dropped expectations, are \
                   suppressed.
@@ -713,18 +713,18 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                    If a JSON file, validates those expectations.
                catch_exceptions (boolean): \
                    If True, exceptions raised by tests will not end validation and will be described in the returned report.
-               output_format (string or None): \
+               result_format (string or None): \
                    If None, uses the default value ('BASIC' or as specified). \
                    If string, the returned expectation output follows the specified format ('BOOLEAN_ONLY','BASIC', etc.).
-               include_config (boolean):
+               include_config (boolean): \
                    If True, the returned results include the config information associated with each expectation, if \
                    it exists.
                only_return_failures (boolean): \
-                   If True, expectation results are only returned when `success`=False.
+                   If True, expectation results are only returned when ``success = False``\.
 
            Returns:
                A JSON-formatted dictionary containing a list of the validation results. \
-               An example of the returned format:
+               An example of the returned format::
 
                {
                  "results": [
@@ -745,12 +745,12 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                    ... (More expectations results)
                }
 
-           Warnings:
-               If the configuration object was built with a different version of great expectations then the current environment.
+           Notes:
+               If the configuration object was built with a different version of great expectations then the current environment. \
                If no version was found in the configuration file.
 
-           Exceptions:
-               AttributeError - if `catch_exceptions`=None and an expectation throws an AttributeError
+           Raises:
+               AttributeError - if 'catch_exceptions'=None and an expectation throws an AttributeError
         """
         results = []
 
@@ -1326,11 +1326,11 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         Args:
             column (str): \
                 The column name.
-            type_ (str): \
+            type\_ (str): \
                 A string representing the data type that each column should have as entries.
                 For example, "double integer" refers to an integer with double precision.
             target_datasource (str): \
-                The data source that specifies the implementation in the type_ parameter.
+                The data source that specifies the implementation in the type\_ parameter.
                 For example, options include "numpy", "sql", or "spark".
 
         Keyword Args:
@@ -1389,7 +1389,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                 A list of strings representing the data type that each column should have as entries.
                 For example, "double integer" refers to an integer with double precision.
             target_datasource (str): \
-                The data source that specifies the implementation in the type_ parameter.
+                The data source that specifies the implementation in the type_list parameter.
                 For example, options include "numpy", "sql", or "spark".
 
         Keyword Args:
