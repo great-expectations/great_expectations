@@ -359,6 +359,7 @@ class TestExpectationDecorators(unittest.TestCase):
         self.assertEqual(
             df.expect_column_pair_values_to_be_different("all_odd", "all_even"),
             {
+                'success' : True,
                 'result': {
                     "unexpected_list" : [],
                     'unexpected_index_list': [],
@@ -379,6 +380,7 @@ class TestExpectationDecorators(unittest.TestCase):
                 ignore_row_if="both_values_are_missing",
             ),
             {
+                'success' : True,
                 'result': {
                     "unexpected_list" : [],
                     'unexpected_index_list': [],
@@ -395,6 +397,7 @@ class TestExpectationDecorators(unittest.TestCase):
         self.assertEqual(
             df.expect_column_pair_values_to_be_different("all_odd", "odd_missing"),
             {
+                'success' : False,
                 'result': {
                     "unexpected_list" : [1,3,5],
                     'unexpected_index_list': [0,1,2],
@@ -415,6 +418,7 @@ class TestExpectationDecorators(unittest.TestCase):
                 ignore_row_if="both_values_are_missing"
             ),
             {
+                'success' : False,
                 'result': {
                     "unexpected_list" : [1,3,5],
                     'unexpected_index_list': [0,1,2],
@@ -435,6 +439,7 @@ class TestExpectationDecorators(unittest.TestCase):
                 ignore_row_if="either_values_is_missing"
             ),
             {
+                'success' : False,
                 'result': {
                     "unexpected_list" : [1,3,5],
                     'unexpected_index_list': [0,1,2],
