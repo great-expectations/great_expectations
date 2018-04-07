@@ -724,7 +724,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
            Returns:
                A JSON-formatted dictionary containing a list of the validation results. \
-               An example of the returned format:
+               An example of the returned format::
 
                {
                  "results": [
