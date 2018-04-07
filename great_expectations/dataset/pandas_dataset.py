@@ -156,12 +156,12 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
     For the full API reference, please see :func:`Dataset <great_expectations.Dataset.base.Dataset>`
 
-    NB
-    1. Samples and Subsets of PandaDataSet have ALL the expectations of the original
-       data frame unless the user specifies the discard_subset_failing_expectations=True
-       property on the original data frame.
-    2. Concatenations, joins, and merges of PandaDataSets ONLY contain the
-       default_expectations (see :func: `add_default_expectations`)
+    Notes:
+        1. Samples and Subsets of PandaDataSet have ALL the expectations of the original \
+           data frame unless the user specifies the ``discard_subset_failing_expectations = True`` \
+           property on the original data frame.
+        2. Concatenations, joins, and merges of PandaDataSets ONLY contain the \
+           default_expectations (see :func:`add_default_expectations`)
     """
 
     @property
