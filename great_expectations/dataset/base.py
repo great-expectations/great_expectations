@@ -674,7 +674,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                filepath (string): \
                    The location and name to write the JSON config file to.
                discard_failed_expectations (boolean): \
-                   If True, excludes expectations that do not return `success`=True. \
+                   If True, excludes expectations that do not return ``success = True``. \
                    If False, all expectations are written to the JSON config file.
                discard_result_format_kwargs (boolean): \
                    If True, the :ref:`result_format` attribute for each expectation is not written to the JSON config file. \
@@ -720,7 +720,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                    If True, the returned results include the config information associated with each expectation, if \
                    it exists.
                only_return_failures (boolean): \
-                   If True, expectation results are only returned when `success`=False.
+                   If True, expectation results are only returned when ``success = False``\.
 
            Returns:
                A JSON-formatted dictionary containing a list of the validation results. \
