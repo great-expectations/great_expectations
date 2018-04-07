@@ -745,12 +745,12 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                    ... (More expectations results)
                }
 
-           Warnings:
-               If the configuration object was built with a different version of great expectations then the current environment.
+           Notes:
+               If the configuration object was built with a different version of great expectations then the current environment. \
                If no version was found in the configuration file.
 
-           Exceptions:
-               AttributeError - if `catch_exceptions`=None and an expectation throws an AttributeError
+           Raises:
+               AttributeError - if 'catch_exceptions'=None and an expectation throws an AttributeError
         """
         results = []
 
