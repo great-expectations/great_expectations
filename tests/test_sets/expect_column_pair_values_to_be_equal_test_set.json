@@ -54,12 +54,12 @@
       "success": true
     }
   }, {
-    "title" : "Positive example with mismatched null values and keep_missing=both",
+    "title" : "Positive example with mismatched null values and ignore_row_if=either_value_is_missing",
     "in": {
       "column_A": "y",
       "column_B": "z",
       "output_format": "BASIC",
-      "keep_missing": "both"
+      "ignore_row_if": "either_value_is_missing"
     },
     "out" : {
       "summary_obj": {
@@ -71,12 +71,12 @@
       "success": true
     }
   }, {
-    "title" : "A negative example with mismatched null values and `keep_missing=either` set explicitly",
+    "title" : "A negative example with mismatched null values and `ignore_row_if=both_values_are_missing` set explicitly",
     "in": {
       "column_A": "w",
       "column_B": "z",
       "output_format": "BASIC",
-      "keep_missing": "either"
+      "ignore_row_if": "both_values_are_missing"
     },
     "out" : {
       "summary_obj": {
@@ -90,7 +90,7 @@
       "success": false
     }
   }, {
-    "title" : "A negative example with mismatched null values and `keep_missing=either` set by default",
+    "title" : "A negative example with mismatched null values and `ignore_row_if=both_values_are_missing` set by default",
     "in": {
       "column_A": "w",
       "column_B": "z",
@@ -165,11 +165,11 @@
       "success": true
     }
   }, {
-    "title" : "A positive example with output_format=SUMMARY and keep_missing='both'",
+    "title" : "A positive example with output_format=SUMMARY and ignore_row_if=either_value_is_missing",
     "in": {
       "column_A": "w",
       "column_B": "z",
-      "keep_missing": "both",
+      "ignore_row_if": "either_value_is_missing",
       "output_format": "SUMMARY"
     },
     "out" : {
