@@ -1277,7 +1277,7 @@ class PandasDataSet(MetaPandasDataSet, pd.DataFrame):
 
     @DocInherit
     @MetaPandasDataSet.column_pair_map_expectation
-    def expect_column_A_values_to_be_greater_than_column_B(self,
+    def expect_column_pair_values_A_to_be_greater_than_B(self,
         column_A,
         column_B,
         or_equal=None,
