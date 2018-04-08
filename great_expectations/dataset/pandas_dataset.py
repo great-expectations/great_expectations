@@ -84,6 +84,67 @@ class MetaPandasDataset(Dataset):
 
         return inner_wrapper
 
+    @classmethod
+    def column_pair_map_expectation(cls, func):
+        """
+        The column_pair_map_expectation decorator handles boilerplate issues surrounding the common pattern of evaluating
+        truthiness of some condition on a per row basis across a pair of columns.
+        """
+
+        @cls.expectation(inspect.getargspec(func)[0][1:])
+        @wraps(func)
+        def inner_wrapper(self, column_A, column_B, mostly=None, ignore_row_if="both_values_are_missing", result_format=None, *args, **kwargs):
+
+            if result_format is None:
+                result_format = self.default_expectation_args["result_format"]
+
+            series_A = self[column_A]
+            series_B = self[column_B]
+
+            if ignore_row_if=="both_values_are_missing":
+                boolean_mapped_null_values = series_A.isnull() & series_B.isnull()
+            elif ignore_row_if=="either_value_is_missing":
+                boolean_mapped_null_values = series_A.isnull() | series_B.isnull()
+            elif ignore_row_if=="never":
+                boolean_mapped_null_values = series_A.map(lambda x: False)
+            else:
+                raise ValueError("Unknown value of ignore_row_if: %s", (ignore_row_if,))
+
+            assert len(series_A) == len(series_B), "Series A and B must be the same length"
+
+            #This next bit only works if series_A and _B are the same length
+            element_count = int(len(series_A)) 
+            nonnull_count = (boolean_mapped_null_values==False).sum()
+            
+            nonnull_values_A = series_A[boolean_mapped_null_values==False]
+            nonnull_values_B = series_B[boolean_mapped_null_values==False]
+            nonnull_values = [value_pair for value_pair in zip(
+                list(nonnull_values_A),
+                list(nonnull_values_B)
+            )]
+
+            boolean_mapped_success_values = func(self, nonnull_values_A, nonnull_values_B, *args, **kwargs)
+            success_count = boolean_mapped_success_values.sum()
+
+            unexpected_list = [value_pair for value_pair in zip(
+                list(series_A[(boolean_mapped_success_values==False)&(boolean_mapped_null_values==False)]),
+                list(series_B[(boolean_mapped_success_values==False)&(boolean_mapped_null_values==False)])
+            )]
+            unexpected_index_list = list(series_A[(boolean_mapped_success_values==False)&(boolean_mapped_null_values==False)].index)
+
+            success, percent_success = self._calc_map_expectation_success(success_count, nonnull_count, mostly)
+
+            return_obj = self._format_column_map_output(
+                result_format, success,
+                element_count, nonnull_count,
+                unexpected_list, unexpected_index_list
+            )
+
+            return return_obj
+
+        inner_wrapper.__name__ = func.__name__
+        inner_wrapper.__doc__ = func.__doc__
+        return inner_wrapper
 
     @classmethod
     def column_aggregate_expectation(cls, func):
@@ -1313,5 +1374,71 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                     }
                 }
 
-
         return return_obj
+
+
+    @DocInherit
+    @MetaPandasDataset.column_pair_map_expectation
+    def expect_column_pair_values_to_be_equal(self,
+        column_A,
+        column_B,
+        ignore_row_if="both_values_are_missing",
+        result_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
+        return column_A == column_B
+
+    @DocInherit
+    @MetaPandasDataset.column_pair_map_expectation
+    def expect_column_pair_values_A_to_be_greater_than_B(self,
+        column_A,
+        column_B,
+        or_equal=None,
+        parse_strings_as_datetimes=None,
+        allow_cross_type_comparisons=None,
+        ignore_row_if="both_values_are_missing",
+        result_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
+        #FIXME
+        if allow_cross_type_comparisons==True:
+            raise NotImplementedError
+        
+        if parse_strings_as_datetimes:
+            temp_column_A = column_A.map(parse)
+            temp_column_B = column_B.map(parse)
+
+        else:
+            temp_column_A = column_A
+            temp_column_B = column_B
+
+        if or_equal==True:
+            return temp_column_A >= temp_column_B
+        else:
+            return temp_column_A > temp_column_B
+
+    @DocInherit
+    @MetaPandasDataset.column_pair_map_expectation
+    def expect_column_pair_values_to_be_in_set(self,
+        column_A,
+        column_B,
+        value_pairs_set,
+        ignore_row_if="both_values_are_missing",
+        result_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
+        temp_df = pd.DataFrame({"A": column_A, "B": column_B})
+        value_pairs_set = {(x,y) for x,y in value_pairs_set}
+
+        results = []
+        for i, t in temp_df.iterrows():
+            if np.isnan(t["A"]):
+                a = None
+            else:
+                a = t["A"]
+                
+            if np.isnan(t["B"]):
+                b = None
+            else:
+                b = t["B"]
+                
+            results.append((a, b) in value_pairs_set)
+
+        return pd.Series(results, temp_df.index)

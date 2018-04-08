@@ -1,5 +1,6 @@
 from __future__ import division
 
+import json
 import unittest
 from great_expectations.dataset import Dataset, PandasDataset, MetaPandasDataset
 
@@ -293,6 +294,253 @@ class TestExpectationDecorators(unittest.TestCase):
             }
         )
 
+
+    def test_column_pair_map_expectation_decorator(self):
+
+        # Create a new CustomPandasDataset to 
+        # (1) Prove that custom subclassing works, AND
+        # (2) Test expectation business logic without dependencies on any other functions.
+        class CustomPandasDataset(PandasDataset):
+
+            @PandasDataset.column_pair_map_expectation
+            def expect_column_pair_values_to_be_different(self,
+                column_A,
+                column_B,
+                keep_missing="either",
+                output_format=None, include_config=False, catch_exceptions=None
+            ):
+                return column_A != column_B
+
+        df = CustomPandasDataset({
+            'all_odd' : [1,3,5,7,9],
+            'all_even' : [2,4,6,8,10],
+            'odd_missing' : [1,3,5,None,None],
+            'mixed_missing' : [1,2,None,None,6],
+            'mixed_missing_2' : [1,3,None,None,6],
+            'all_missing' : [None,None,None,None,None,],
+        })
+        df.set_default_expectation_argument("result_format", "COMPLETE")
+
+        self.assertEqual(
+            df.expect_column_pair_values_to_be_different("all_odd", "all_even"),
+            {
+                "success": True,
+                "result": {
+                    "element_count": 5,
+                    "missing_count": 0, 
+                    "unexpected_count": 0, 
+                    "missing_percent": 0.0, 
+                    "unexpected_percent": 0.0, 
+                    "unexpected_percent_nonmissing": 0.0, 
+                    "unexpected_list": [], 
+                    "unexpected_index_list": [],
+                    "partial_unexpected_list": [], 
+                    "partial_unexpected_index_list": [], 
+                    "partial_unexpected_counts": [], 
+                }
+            }
+        )
+
+        self.assertEqual(
+            df.expect_column_pair_values_to_be_different(
+                "all_odd",
+                "all_even",
+                ignore_row_if="both_values_are_missing",
+            ),
+            {
+                'success' : True,
+                'result': {
+                    "element_count": 5,
+                    "missing_count": 0, 
+                    "unexpected_count": 0, 
+                    "missing_percent": 0.0, 
+                    "unexpected_percent": 0.0, 
+                    "unexpected_percent_nonmissing": 0.0, 
+                    "unexpected_list": [], 
+                    "unexpected_index_list": [],
+                    "partial_unexpected_list": [], 
+                    "partial_unexpected_index_list": [], 
+                    "partial_unexpected_counts": [], 
+                }
+            }
+        )
+
+        self.maxDiff = None
+        self.assertEqual(
+            df.expect_column_pair_values_to_be_different("all_odd", "odd_missing"),
+            {
+                'success' : False,
+                'result': {
+                    "element_count": 5,
+                    "missing_count": 0, 
+                    "unexpected_count": 3, 
+                    "missing_percent": 0.0, 
+                    "unexpected_percent": 0.6,
+                    "unexpected_percent_nonmissing": 0.6,
+                    "unexpected_list": [[1,1],[3,3],[5,5]],
+                    "unexpected_index_list": [0,1,2],
+                    "partial_unexpected_list": [[1,1],[3,3],[5,5]],
+                    "partial_unexpected_index_list": [0,1,2],
+                    "partial_unexpected_counts": [
+                        {'count': 1, 'value': [1, 1.0]},
+                        {'count': 1, 'value': [3, 3.0]},
+                        {'count': 1, 'value': [5, 5.0]}
+                    ]
+                }
+            }
+        )
+
+        self.assertEqual(
+            df.expect_column_pair_values_to_be_different(
+                "all_odd",
+                "odd_missing",
+                ignore_row_if="both_values_are_missing"
+            ),
+            {
+                'success' : False,
+                'result': {
+                    "element_count": 5,
+                    "missing_count": 0, 
+                    "unexpected_count": 3, 
+                    "missing_percent": 0.0, 
+                    "unexpected_percent": 0.6,
+                    "unexpected_percent_nonmissing": 0.6,
+                    "unexpected_list": [[1,1],[3,3],[5,5]],
+                    "unexpected_index_list": [0,1,2],
+                    "partial_unexpected_list": [[1,1],[3,3],[5,5]],
+                    "partial_unexpected_index_list": [0,1,2],
+                    "partial_unexpected_counts": [
+                        {'count': 1, 'value': [1, 1.0]},
+                        {'count': 1, 'value': [3, 3.0]},
+                        {'count': 1, 'value': [5, 5.0]}
+                    ]
+                }
+            }
+        )
+
+        self.assertEqual(
+            df.expect_column_pair_values_to_be_different(
+                "all_odd",
+                "odd_missing",
+                ignore_row_if="either_value_is_missing"
+            ),
+            {
+                'success' : False,
+                'result': {
+                    "element_count": 5,
+                    "missing_count": 2,
+                    "unexpected_count": 3, 
+                    "missing_percent": 0.4,
+                    "unexpected_percent": 0.6,
+                    "unexpected_percent_nonmissing": 1.0,
+                    "unexpected_list": [[1,1],[3,3],[5,5]],
+                    "unexpected_index_list": [0,1,2],
+                    "partial_unexpected_list": [[1,1],[3,3],[5,5]],
+                    "partial_unexpected_index_list": [0,1,2],
+                    "partial_unexpected_counts": [
+                        {'count': 1, 'value': [1, 1.0]},
+                        {'count': 1, 'value': [3, 3.0]},
+                        {'count': 1, 'value': [5, 5.0]}
+                    ]
+                }
+            }
+        )
+
+        # print json.dumps(
+        #     df.expect_column_pair_values_to_be_different(
+        #         "all_missing",
+        #         "odd_missing",
+        #         ignore_row_if="never"
+        #     ),
+        #     indent=2
+        # )
+        # self.assertEqual(
+        #     df.expect_column_pair_values_to_be_different(
+        #         "all_missing",
+        #         "odd_missing",
+        #         ignore_row_if="never"
+        #     ),
+        #     {
+        #         'success' : True,
+        #         'result': {
+        #             "element_count": 5,
+        #             "missing_count": 0,
+        #             "unexpected_count": 2,
+        #             "missing_percent": 0.0,
+        #             "unexpected_percent": 0.4,
+        #             "unexpected_percent_nonmissing": 0.4,
+        #             "unexpected_list": [[None, None],[None, None]],
+        #             "unexpected_index_list": [3,4],
+        #             "partial_unexpected_list": [[None, None],[None, None]],
+        #             "partial_unexpected_index_list": [3,4],
+        #             "partial_unexpected_counts": [
+        #                 {'count': 2, 'value': [[None, None]]}
+        #             ]
+        #         }
+        #     }
+        # )
+
+
+        with self.assertRaises(ValueError):
+            df.expect_column_pair_values_to_be_different(
+                "all_odd",
+                "odd_missing",
+                ignore_row_if="blahblahblah"
+            )
+
+        #Test SUMMARY, BASIC, and BOOLEAN_ONLY output_formats
+        self.assertEqual(
+            df.expect_column_pair_values_to_be_different(
+                "all_odd",
+                "all_even",
+                result_format="SUMMARY"
+            ),
+            {
+                "success": True,
+                "result": {
+                    "element_count": 5,
+                    "missing_count": 0, 
+                    "unexpected_count": 0, 
+                    "missing_percent": 0.0, 
+                    "unexpected_percent": 0.0, 
+                    "unexpected_percent_nonmissing": 0.0, 
+                    "partial_unexpected_list": [], 
+                    "partial_unexpected_index_list": [], 
+                    "partial_unexpected_counts": [], 
+                }
+            }
+        )
+
+        self.assertEqual(
+            df.expect_column_pair_values_to_be_different(
+                "all_odd",
+                "all_even",
+                result_format="BASIC"
+            ),
+            {
+                "success": True,
+                "result": {
+                    "element_count": 5,
+                    "missing_count": 0, 
+                    "unexpected_count": 0, 
+                    "missing_percent": 0.0, 
+                    "unexpected_percent": 0.0, 
+                    "unexpected_percent_nonmissing": 0.0, 
+                    "partial_unexpected_list": [], 
+                }
+            }
+        )
+
+        self.assertEqual(
+            df.expect_column_pair_values_to_be_different(
+                "all_odd",
+                "all_even",
+                result_format="BOOLEAN_ONLY"
+            ),
+            {
+                "success": True,
+            }
+        )
 
 if __name__ == "__main__":
     unittest.main()

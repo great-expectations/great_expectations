@@ -7,6 +7,7 @@ from six import string_types, integer_types
 import numpy as np
 from scipy import stats
 import pandas as pd
+import numpy as np
 import warnings
 import sys
 import copy
@@ -115,11 +116,17 @@ def recursively_convert_to_json_serializable(test_obj):
 
     """
     # Validate that all aruguments are of approved types, coerce if it's easy, else exception
-    if isinstance(test_obj, (string_types, integer_types, float, bool)):
-        # No problem to encode json
-        return test_obj
+    # print(type(test_obj), test_obj)
+    #Note: Not 100% sure I've resolved this correctly...
+    try:
+        if np.isnan(test_obj):
+            return None
+    except TypeError:
+        pass
+    except ValueError:
+        pass
 
-    elif test_obj is None:
+    if isinstance(test_obj, (string_types, integer_types, float, bool)):
         # No problem to encode json
         return test_obj
 
@@ -142,6 +149,12 @@ def recursively_convert_to_json_serializable(test_obj):
         ## If we have an array or index, convert it first to a list--causing coercion to float--and then round
         ## to the number of digits for which the string representation will equal the float representation
         return [recursively_convert_to_json_serializable(x) for x in test_obj.tolist()]
+
+    #Note: This clause has to come after checking for np.ndarray or we get:
+    #      `ValueError: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()`
+    elif test_obj == None:
+        # No problem to encode json
+        return test_obj
 
     elif isinstance(test_obj, np.int64):
         return int(test_obj)
