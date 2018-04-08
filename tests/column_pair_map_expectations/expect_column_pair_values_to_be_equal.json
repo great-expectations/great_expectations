@@ -38,8 +38,7 @@
       "in": {
         "column_A": "x",
         "column_B": "y",
-        "mostly": 0.9,
-        "output_format": "BASIC"
+        "mostly": 0.9
       },
       "out" : {
         "unexpected_list": [
@@ -53,7 +52,6 @@
       "in": {
         "column_A": "y",
         "column_B": "z",
-        "output_format": "BASIC",
         "ignore_row_if": "either_value_is_missing"
       },
       "out" : {
@@ -66,7 +64,6 @@
       "in": {
         "column_A": "w",
         "column_B": "z",
-        "output_format": "BASIC",
         "ignore_row_if": "both_values_are_missing"
       },
       "out" : {
@@ -80,8 +77,7 @@
       "exact_match_out" : false,
       "in": {
         "column_A": "w",
-        "column_B": "z",
-        "output_format": "BASIC"
+        "column_B": "z"
       },
       "out" : {
         "unexpected_list": [
@@ -94,8 +90,7 @@
       "exact_match_out" : false,
       "in": {
         "column_A": "w",
-        "column_B": "z",
-        "output_format": "SUMMARY"
+        "column_B": "z"
       },
       "out" : {
         "unexpected_list": [
@@ -109,8 +104,7 @@
       "in": {
         "column_A": "w",
         "column_B": "z",
-        "mostly": 0.5,
-        "output_format": "SUMMARY"
+        "mostly": 0.5
       },
       "out" : {
         "unexpected_list": [
@@ -124,8 +118,7 @@
       "in": {
         "column_A": "w",
         "column_B": "z",
-        "ignore_row_if": "either_value_is_missing",
-        "output_format": "SUMMARY"
+        "ignore_row_if": "either_value_is_missing"
       },
       "out" : {
         "unexpected_list": [], 
