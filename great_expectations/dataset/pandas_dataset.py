@@ -1397,7 +1397,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         column_A,
         column_B,
         ignore_row_if="both_values_are_missing",
-        output_format=None, include_config=False, catch_exceptions=None
+        result_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
         return column_A == column_B
 
@@ -1410,7 +1410,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         parse_strings_as_datetimes=None,
         allow_cross_type_comparisons=None,
         ignore_row_if="both_values_are_missing",
-        output_format=None, include_config=False, catch_exceptions=None
+        result_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
         #FIXME: Implement allow_cross_type_comparisons
 
@@ -1435,7 +1435,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         column_B,
         value_pairs_set,
         ignore_row_if="both_values_are_missing",
-        output_format=None, include_config=False, catch_exceptions=None
+        result_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
         temp_df = pd.DataFrame({"A": column_A, "B": column_B})
         value_pairs_set = {(x,y) for x,y in value_pairs_set}

@@ -3016,8 +3016,8 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
     def expect_column_pair_values_to_be_equal(self,
         column_A,
         column_B,
-        keep_missing="either",
-        output_format=None, include_config=False, catch_exceptions=None
+        ignore_row_if="both_values_are_missing",
+        result_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
         """
         Expect the values in column A to be the same as column B.
@@ -3027,12 +3027,12 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             column_B (str): The second column name
 
         Keyword Args:
-            keep_missing (str): "either" or "both"
+            ignore_row_if (str): "both_values_are_missing", "either_value_is_missing", "neither
 
         Other Parameters:
-            output_format (str or None): \
+            result_format (str or None): \
                 Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
-                For more detail, see :ref:`output_format <output_format>`.
+                For more detail, see :ref:`result_format <result_format>`.
             include_config (boolean): \
                 If True, then include the expectation config as part of the result object. \
                 For more detail, see :ref:`include_config`.
@@ -3064,8 +3064,8 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         or_equal=None,
         parse_strings_as_datetimes=None,
         allow_cross_type_comparisons=None,
-        keep_missing="either",
-        output_format=None, include_config=False, catch_exceptions=None
+        ignore_row_if="both_values_are_missing",
+        result_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
         """
         Expect values in column A to be greater than column B.
@@ -3080,12 +3080,12 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                 string). Otherwise, attempting such comparisons will raise an exception.
 
         Keyword Args:
-            keep_missing (str): "either" or "both"
+            ignore_row_if (str): "both_values_are_missing", "either_value_is_missing", "neither
 
         Other Parameters:
-            output_format (str or None): \
+            result_format (str or None): \
                 Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
-                For more detail, see :ref:`output_format <output_format>`.
+                For more detail, see :ref:`result_format <result_format>`.
             include_config (boolean): \
                 If True, then include the expectation config as part of the result object. \
                 For more detail, see :ref:`include_config`.
@@ -3115,8 +3115,8 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         column_A,
         column_B,
         value_pairs_set,
-        keep_missing="both",
-        output_format=None, include_config=False, catch_exceptions=None
+        ignore_row_if="both_values_are_missing",
+        result_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
         """
         Expect paired values from columns A and B to belong to a set of valid pairs.
@@ -3127,12 +3127,12 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             value_pairs_set (list of lists): All the valid pairs to be matched
 
         Keyword Args:
-            keep_missing (str): "either" or "both"
+            ignore_row_if (str): "both_values_are_missing", "either_value_is_missing", "neither
 
         Other Parameters:
-            output_format (str or None): \
+            result_format (str or None): \
                 Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
-                For more detail, see :ref:`output_format <output_format>`.
+                For more detail, see :ref:`result_format <result_format>`.
             include_config (boolean): \
                 If True, then include the expectation config as part of the result object. \
                 For more detail, see :ref:`include_config`.
