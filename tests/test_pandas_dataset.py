@@ -1658,24 +1658,23 @@ class TestPandasDataset(unittest.TestCase):
         self.assertIsInstance(sub1, ge.dataset.PandasDataset)
         self.assertEqual(sub1.find_expectations(), exp1)
 
+    # def test_expect_column_pair_values_to_be_equal(self):
+    #     self.run_encapsulated_test(
+    #         "expect_column_pair_values_to_be_equal",
+    #         "./tests/test_sets/expect_column_pair_values_to_be_equal_test_set.json",
+    #     )
 
-    def test_expect_column_pair_values_to_be_equal(self):
-        self.run_encapsulated_test(
-            "expect_column_pair_values_to_be_equal",
-            "./tests/test_sets/expect_column_pair_values_to_be_equal_test_set.json",
-        )
+    # def test_expect_column_pair_values_A_to_be_greater_than_B(self):
+    #     self.run_encapsulated_test(
+    #         "expect_column_pair_values_A_to_be_greater_than_B",
+    #         "./tests/test_sets/expect_column_pair_values_A_to_be_greater_than_B_test_set.json",
+    #     )
 
-    def test_expect_column_pair_values_A_to_be_greater_than_B(self):
-        self.run_encapsulated_test(
-            "expect_column_pair_values_A_to_be_greater_than_B",
-            "./tests/test_sets/expect_column_pair_values_A_to_be_greater_than_B_test_set.json",
-        )
-
-    def test_expect_column_pair_values_to_be_in_set(self):
-        self.run_encapsulated_test(
-            "expect_column_pair_values_to_be_in_set",
-            "./tests/test_sets/expect_column_pair_values_to_be_in_set_test_set.json",
-        )
+    # def test_expect_column_pair_values_to_be_in_set(self):
+    #     self.run_encapsulated_test(
+    #         "expect_column_pair_values_to_be_in_set",
+    #         "./tests/test_sets/expect_column_pair_values_to_be_in_set_test_set.json",
+    #     )
 
 if __name__ == "__main__":
     unittest.main()
