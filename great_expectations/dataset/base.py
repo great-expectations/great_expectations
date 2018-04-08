@@ -3046,14 +3046,8 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         Returns:
             A JSON-serializable expectation result object.
 
-            Exact fields vary depending on the values passed to :ref:`output_format <output_format>` and
+            Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
-
-        Notes:
-            Missing values are tricky in `column_pair` expectations. By default, `expect_column_pair_values_to_be_equal` compares
-            values from column A and column B unless *both* values are missing. This is `keep_missing="either".` That means that
-            missing values will be compared to non-missing values and found to be not equal. You can override this behavior by
-            setting `keep_missing="both"`.
 
         """
         raise NotImplementedError
@@ -3099,14 +3093,9 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         Returns:
             A JSON-serializable expectation result object.
 
-            Exact fields vary depending on the values passed to :ref:`output_format <output_format>` and
+            Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
 
-        Notes:
-            Missing values are tricky in `column_pair` expectations. By default, `expect_column_pair_values_to_be_equal` compares
-            values from column A and column B unless *both* values are missing. This is `keep_missing="either".` That means that
-            missing values will be compared to non-missing values and found to be not equal. You can override this behavior by
-            setting `keep_missing="both"`.
         """
         raise NotImplementedError
 
@@ -3146,16 +3135,8 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         Returns:
             A JSON-serializable expectation result object.
 
-            Exact fields vary depending on the values passed to :ref:`output_format <output_format>` and
+            Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
 
-        Notes:
-            Missing values are tricky in `column_pair` expectations. By default, `expect_column_pair_values_to_be_equal` compares
-            values from column A and column B unless *both* values are missing. This is `keep_missing="either".` That means that
-            missing values will be compared to non-missing values and found to be not equal. You can override this behavior by
-            setting `keep_missing="both"`.
-
-        Warning:
-            `keep_missing="either"` has not yet been implemented for this expectation.
         """
         raise NotImplementedError
