@@ -453,8 +453,59 @@ class TestExpectationDecorators(unittest.TestCase):
                 ignore_row_if="blahblahblah"
             )
 
-        #FIXME: Test SUMMARY, BASIC, and BOOLEAN_ONLY output_formats
+        #Test SUMMARY, BASIC, and BOOLEAN_ONLY output_formats
+        self.assertEqual(
+            df.expect_column_pair_values_to_be_different(
+                "all_odd",
+                "all_even",
+                result_format="SUMMARY"
+            ),
+            {
+                "success": True,
+                "result": {
+                    "element_count": 5,
+                    "missing_count": 0, 
+                    "unexpected_count": 0, 
+                    "missing_percent": 0.0, 
+                    "unexpected_percent": 0.0, 
+                    "unexpected_percent_nonmissing": 0.0, 
+                    "partial_unexpected_list": [], 
+                    "partial_unexpected_index_list": [], 
+                    "partial_unexpected_counts": [], 
+                }
+            }
+        )
 
+        self.assertEqual(
+            df.expect_column_pair_values_to_be_different(
+                "all_odd",
+                "all_even",
+                result_format="BASIC"
+            ),
+            {
+                "success": True,
+                "result": {
+                    "element_count": 5,
+                    "missing_count": 0, 
+                    "unexpected_count": 0, 
+                    "missing_percent": 0.0, 
+                    "unexpected_percent": 0.0, 
+                    "unexpected_percent_nonmissing": 0.0, 
+                    "partial_unexpected_list": [], 
+                }
+            }
+        )
+
+        self.assertEqual(
+            df.expect_column_pair_values_to_be_different(
+                "all_odd",
+                "all_even",
+                result_format="BOOLEAN_ONLY"
+            ),
+            {
+                "success": True,
+            }
+        )
 
 if __name__ == "__main__":
     unittest.main()
