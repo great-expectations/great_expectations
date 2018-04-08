@@ -1,190 +1,136 @@
 {
-  "dataset" : {
-    "w" : [1, 2, 3, 4, 5, 6, 7, 8, 9, null],
-    "x" : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-    "y" : [1, 2, 3, 4, 5, 6, 7, 8, 9, "abc"],
-    "z" : [1, 2, 3, 4, 5, null, null, null, null, null]
-  },
-  "tests" : [{
-    "title" : "Trivial case: x=x",
-    "in": {
-      "column_A": "x",
-      "column_B": "x"
+  "expectation_type" : "expect_column_pair_values_to_be_equal",
+  "datasets" : [{
+    "data" : {
+      "w" : [1, 2, 3, 4, 5, 6, 7, 8, 9, null],
+      "x" : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+      "y" : [1, 2, 3, 4, 5, 6, 7, 8, 9, "abc"],
+      "z" : [1, 2, 3, 4, 5, null, null, null, null, null]
     },
-    "out": {
-      "exception_list": [],
-      "exception_index_list": [],
-      "success": true
-    }
-  },{
-    "title" : "Basic negative example",
-    "in": {
-      "column_A": "x",
-      "column_B": "y",
-      "output_format": "BASIC"
-    },
-    "out" : {
-      "summary_obj": {
-        "exception_percent": 0.1, 
-        "partial_exception_list": [
-          [10, "abc"]
-        ], 
-        "exception_percent_nonmissing": 0.1, 
-        "exception_count": 1
-      }, 
-      "success": false      
-    }
-  }, {
-    "title" : "Positive example with mostly",
-    "in": {
-      "column_A": "x",
-      "column_B": "y",
-      "mostly": 0.9,
-      "output_format": "BASIC"
-    },
-    "out" : {
-      "summary_obj": {
-        "exception_percent": 0.1, 
-        "partial_exception_list": [
-          [10, "abc"]
-        ], 
-        "exception_percent_nonmissing": 0.1, 
-        "exception_count": 1
-      }, 
-      "success": true
-    }
-  }, {
-    "title" : "Positive example with mismatched null values and ignore_row_if=either_value_is_missing",
-    "in": {
-      "column_A": "y",
-      "column_B": "z",
-      "output_format": "BASIC",
-      "ignore_row_if": "either_value_is_missing"
-    },
-    "out" : {
-      "summary_obj": {
-        "exception_percent": 0.0,
-        "partial_exception_list": [], 
-        "exception_percent_nonmissing": 0.0,
-        "exception_count": 0
-      }, 
-      "success": true
-    }
-  }, {
-    "title" : "A negative example with mismatched null values and `ignore_row_if=both_values_are_missing` set explicitly",
-    "in": {
-      "column_A": "w",
-      "column_B": "z",
-      "output_format": "BASIC",
-      "ignore_row_if": "both_values_are_missing"
-    },
-    "out" : {
-      "summary_obj": {
-        "exception_percent": 0.4,
-        "partial_exception_list": [
-          [6.0,null], [7.0,null], [8.0,null], [9.0,null]
-        ], 
-        "exception_percent_nonmissing": 0.4444444444444444,
-        "exception_count": 4
-      }, 
-      "success": false
-    }
-  }, {
-    "title" : "A negative example with mismatched null values and `ignore_row_if=both_values_are_missing` set by default",
-    "in": {
-      "column_A": "w",
-      "column_B": "z",
-      "output_format": "BASIC"
-    },
-    "out" : {
-      "summary_obj": {
-        "exception_percent": 0.4,
-        "partial_exception_list": [
-          [6.0,null], [7.0,null], [8.0,null], [9.0,null]
-        ], 
-        "exception_percent_nonmissing": 0.4444444444444444,
-        "exception_count": 4
-      }, 
-      "success": false
-    }
-  }, {
-    "title" : "A negative example with output_format=SUMMARY",
-    "in": {
-      "column_A": "w",
-      "column_B": "z",
-      "output_format": "SUMMARY"
-    },
-    "out" : {
-      "summary_obj": {
-        "element_count": 10,
-        "missing_count": 1,
-        "missing_percent": 0.1,
-        "exception_percent": 0.4,
-        "partial_exception_list": [
-          [6.0,null], [7.0,null], [8.0,null], [9.0,null]
-        ], 
-        "partial_exception_counts" : [
-          {"value" : [6.0,null], "count" : 1},
-          {"value" : [7.0,null], "count" : 1},
-          {"value" : [8.0,null], "count" : 1},
-          {"value" : [9.0,null], "count" : 1}
-        ],
-        "partial_exception_index_list": [5,6,7,8],
-        "exception_percent_nonmissing": 0.4444444444444444,
-        "exception_count": 4
-      }, 
-      "success": false
-    }
-  }, {
-    "title" : "A positive example with output_format=SUMMARY and mostly",
-    "in": {
-      "column_A": "w",
-      "column_B": "z",
-      "mostly": 0.5,
-      "output_format": "SUMMARY"
-    },
-    "out" : {
-      "summary_obj": {
-        "element_count": 10,
-        "missing_count": 1,
-        "missing_percent": 0.1,
-        "exception_percent": 0.4,
-        "partial_exception_list": [
-          [6.0,null], [7.0,null], [8.0,null], [9.0,null]
-        ], 
-        "partial_exception_counts" : [
-          {"value" : [6.0,null], "count" : 1},
-          {"value" : [7.0,null], "count" : 1},
-          {"value" : [8.0,null], "count" : 1},
-          {"value" : [9.0,null], "count" : 1}
-        ],
-        "partial_exception_index_list": [5,6,7,8],
-        "exception_percent_nonmissing": 0.4444444444444444,
-        "exception_count": 4
+    "tests" : [{
+      "title" : "Trivial case: x=x",
+      "exact_match_out" : false,
+      "in": {
+        "column_A": "x",
+        "column_B": "x"
       },
-      "success": true
-    }
-  }, {
-    "title" : "A positive example with output_format=SUMMARY and ignore_row_if=either_value_is_missing",
-    "in": {
-      "column_A": "w",
-      "column_B": "z",
-      "ignore_row_if": "either_value_is_missing",
-      "output_format": "SUMMARY"
-    },
-    "out" : {
-      "summary_obj": {
-        "element_count": 10,
-        "missing_count": 5,
-        "missing_percent": 0.5,
-        "exception_percent": 0.0,
-        "partial_exception_list": [], 
-        "partial_exception_counts" : [],
-        "partial_exception_index_list": [],
-        "exception_percent_nonmissing": 0.0,
-        "exception_count": 0
-      }, 
-      "success": true
-    }
+      "out": {
+        "unexpected_list": [],
+        "unexpected_index_list": [],
+        "success": true
+      }
+    },{
+      "title" : "Basic negative example",
+      "exact_match_out" : false,
+      "in": {
+        "column_A": "x",
+        "column_B": "y"
+      },
+      "out" : {
+        "unexpected_list": [
+          [10, "abc"]
+        ], 
+        "success": false      
+      }
+    }, {
+      "title" : "Positive example with mostly",
+      "exact_match_out" : false,
+      "in": {
+        "column_A": "x",
+        "column_B": "y",
+        "mostly": 0.9,
+        "output_format": "BASIC"
+      },
+      "out" : {
+        "unexpected_list": [
+          [10, "abc"]
+        ], 
+        "success": true
+      }
+    }, {
+      "title" : "Positive example with mismatched null values and ignore_row_if=either_value_is_missing",
+      "exact_match_out" : false,
+      "in": {
+        "column_A": "y",
+        "column_B": "z",
+        "output_format": "BASIC",
+        "ignore_row_if": "either_value_is_missing"
+      },
+      "out" : {
+        "unexpected_list": [], 
+        "success": true
+      }
+    }, {
+      "title" : "A negative example with mismatched null values and `ignore_row_if=both_values_are_missing` set explicitly",
+      "exact_match_out" : false,
+      "in": {
+        "column_A": "w",
+        "column_B": "z",
+        "output_format": "BASIC",
+        "ignore_row_if": "both_values_are_missing"
+      },
+      "out" : {
+        "unexpected_list": [
+          [6.0,null], [7.0,null], [8.0,null], [9.0,null]
+        ], 
+        "success": false
+      }
+    }, {
+      "title" : "A negative example with mismatched null values and `ignore_row_if=both_values_are_missing` set by default",
+      "exact_match_out" : false,
+      "in": {
+        "column_A": "w",
+        "column_B": "z",
+        "output_format": "BASIC"
+      },
+      "out" : {
+        "unexpected_list": [
+          [6.0,null], [7.0,null], [8.0,null], [9.0,null]
+        ], 
+        "success": false
+      }
+    }, {
+      "title" : "A negative example with output_format=SUMMARY",
+      "exact_match_out" : false,
+      "in": {
+        "column_A": "w",
+        "column_B": "z",
+        "output_format": "SUMMARY"
+      },
+      "out" : {
+        "unexpected_list": [
+          [6.0,null], [7.0,null], [8.0,null], [9.0,null]
+        ], 
+        "success": false
+      }
+    }, {
+      "title" : "A positive example with output_format=SUMMARY and mostly",
+      "exact_match_out" : false,
+      "in": {
+        "column_A": "w",
+        "column_B": "z",
+        "mostly": 0.5,
+        "output_format": "SUMMARY"
+      },
+      "out" : {
+        "unexpected_list": [
+          [6.0,null], [7.0,null], [8.0,null], [9.0,null]
+        ], 
+        "success": true
+      }
+    }, {
+      "title" : "A positive example with output_format=SUMMARY and ignore_row_if=either_value_is_missing",
+      "exact_match_out" : false,
+      "in": {
+        "column_A": "w",
+        "column_B": "z",
+        "ignore_row_if": "either_value_is_missing",
+        "output_format": "SUMMARY"
+      },
+      "out" : {
+        "unexpected_list": [], 
+        "success": true
+      }
+    }]
   }]
 }
