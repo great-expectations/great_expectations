@@ -140,20 +140,6 @@ class MetaPandasDataset(Dataset):
                 unexpected_list, unexpected_index_list
             )
 
-            # return_obj = self._format_column_map_output(
-            #     output_format, success,
-            #     element_count,
-            #     nonnull_values, nonnull_count,
-            #     boolean_mapped_success_values, success_count,
-            #     exception_list, exception_index_list
-            # )
-            # print keep_missing
-            # print column_A, series_A
-            # print column_B, series_B
-            # print boolean_mapped_success_values
-            # print boolean_mapped_null_values
-            # print return_obj
-
             return return_obj
 
         inner_wrapper.__name__ = func.__name__
@@ -1412,8 +1398,10 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         ignore_row_if="both_values_are_missing",
         result_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
-        #FIXME: Implement allow_cross_type_comparisons
-
+        #FIXME
+        if allow_cross_type_comparisons==True:
+            raise NotImplementedError
+        
         if parse_strings_as_datetimes:
             temp_column_A = column_A.map(parse)
             temp_column_B = column_B.map(parse)
@@ -1422,8 +1410,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             temp_column_A = column_A
             temp_column_B = column_B
 
-
-        if or_equal:
+        if or_equal==True:
             return temp_column_A >= temp_column_B
         else:
             return temp_column_A > temp_column_B
