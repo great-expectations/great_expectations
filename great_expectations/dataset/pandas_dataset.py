@@ -110,8 +110,9 @@ class MetaPandasDataset(Dataset):
             else:
                 raise ValueError("Unknown value of ignore_row_if: %s", (ignore_row_if,))
 
+            assert len(series_A) == len(series_B), "Series A and B must be the same length"
 
-            #This next row assumes that series_A and _B are the same length
+            #This next bit only works if series_A and _B are the same length
             element_count = int(len(series_A)) 
             nonnull_count = (boolean_mapped_null_values==False).sum()
             
