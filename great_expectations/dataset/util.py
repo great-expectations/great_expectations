@@ -130,10 +130,6 @@ def recursively_convert_to_json_serializable(test_obj):
         # No problem to encode json
         return test_obj
 
-    if isinstance(test_obj, (str, int, float, bool)):
-        # No problem to encode json
-        return test_obj
-
     elif isinstance(test_obj, dict):
         new_dict = {}
         for key in test_obj:
