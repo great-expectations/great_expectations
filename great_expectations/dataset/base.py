@@ -1585,9 +1585,9 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         Keyword Args:
             allow_cross_type_comparisons (boolean or None) : If True, allow comparisons between types (e.g. integer and\
-            string). Otherwise, attempting such comparisons will raise an exception.
+                string). Otherwise, attempting such comparisons will raise an exception.
             parse_strings_as_datetimes (boolean or None) : If True, parse min_value, max_value, and all non-null column\
-            values to datetimes before making comparisons.
+                values to datetimes before making comparisons.
             mostly (None or a float between 0 and 1): \
                 Return `"success": True` if the percentage of unexpected values is less than or equal to `mostly`. \
                 For more detail, see :ref:`mostly`.
@@ -3007,6 +3007,136 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         See also:
             expect_column_chisquare_test_p_value_to_be_greater_than
             expect_column_bootstrapped_ks_test_p_value_to_be_greater_than
+
+        """
+        raise NotImplementedError
+
+    ### Column pairs ###
+
+    def expect_column_pair_values_to_be_equal(self,
+        column_A,
+        column_B,
+        ignore_row_if="both_values_are_missing",
+        result_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
+        """
+        Expect the values in column A to be the same as column B.
+
+        Args:
+            column_A (str): The first column name
+            column_B (str): The second column name
+
+        Keyword Args:
+            ignore_row_if (str): "both_values_are_missing", "either_value_is_missing", "neither
+
+        Other Parameters:
+            result_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`result_format <result_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
+
+        Returns:
+            A JSON-serializable expectation result object.
+
+            Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+        """
+        raise NotImplementedError
+
+    def expect_column_pair_values_A_to_be_greater_than_B(self,
+        column_A,
+        column_B,
+        or_equal=None,
+        parse_strings_as_datetimes=None,
+        allow_cross_type_comparisons=None,
+        ignore_row_if="both_values_are_missing",
+        result_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
+        """
+        Expect values in column A to be greater than column B.
+
+        Args:
+            column_A (str): The first column name
+            column_B (str): The second column name
+            or_equal (boolean or None): If True, then values can be equal, not strictly greater
+
+        Keyword Args:
+            allow_cross_type_comparisons (boolean or None) : If True, allow comparisons between types (e.g. integer and\
+                string). Otherwise, attempting such comparisons will raise an exception.
+
+        Keyword Args:
+            ignore_row_if (str): "both_values_are_missing", "either_value_is_missing", "neither
+
+        Other Parameters:
+            result_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`result_format <result_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
+
+        Returns:
+            A JSON-serializable expectation result object.
+
+            Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+        """
+        raise NotImplementedError
+
+
+    def expect_column_pair_values_to_be_in_set(self,
+        column_A,
+        column_B,
+        value_pairs_set,
+        ignore_row_if="both_values_are_missing",
+        result_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
+        """
+        Expect paired values from columns A and B to belong to a set of valid pairs.
+
+        Args:
+            column_A (str): The first column name
+            column_B (str): The second column name
+            value_pairs_set (list of lists): All the valid pairs to be matched
+
+        Keyword Args:
+            ignore_row_if (str): "both_values_are_missing", "either_value_is_missing", "neither
+
+        Other Parameters:
+            result_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`result_format <result_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
+
+        Returns:
+            A JSON-serializable expectation result object.
+
+            Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
 
         """
         raise NotImplementedError
