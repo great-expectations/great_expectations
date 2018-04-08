@@ -1,5 +1,6 @@
 from __future__ import division
 
+import json
 import unittest
 from great_expectations.dataset import Dataset, PandasDataset, MetaPandasDataset
 
@@ -296,12 +297,12 @@ class TestExpectationDecorators(unittest.TestCase):
 
     def test_column_pair_map_expectation_decorator(self):
 
-        # Create a new CustomPandasDataSet to 
+        # Create a new CustomPandasDataset to 
         # (1) Prove that custom subclassing works, AND
         # (2) Test expectation business logic without dependencies on any other functions.
-        class CustomPandasDataSet(PandasDataSet):
+        class CustomPandasDataset(PandasDataset):
 
-            @PandasDataSet.column_pair_map_expectation
+            @PandasDataset.column_pair_map_expectation
             def expect_column_pair_values_to_be_different(self,
                 column_A,
                 column_B,
@@ -310,7 +311,7 @@ class TestExpectationDecorators(unittest.TestCase):
             ):
                 return column_A != column_B
 
-        df = CustomPandasDataSet({
+        df = CustomPandasDataset({
             'all_odd' : [1,3,5,7,9],
             'all_even' : [2,4,6,8,10],
             'odd_missing' : [1,3,5,None,None],
@@ -318,21 +319,24 @@ class TestExpectationDecorators(unittest.TestCase):
             'mixed_missing_2' : [1,3,None,None,6],
             'all_missing' : [None,None,None,None,None,],
         })
-        df.set_default_expectation_argument("output_format", "COMPLETE")
+        df.set_default_expectation_argument("result_format", "COMPLETE")
 
         self.assertEqual(
             df.expect_column_pair_values_to_be_different("all_odd", "all_even"),
             {
-                'success' : True,
-                'result': {
-                    "unexpected_list" : [],
-                    'unexpected_index_list': [],
-                    'element_count': 5,
-                    'unexpected_count': 0,
-                    'unexpected_percent': 0.0,
-                    'unexpected_percent_nonmissing': 0.0,
-                    'missing_count': 0,
-                    'missing_percent': 0.0,
+                "success": True,
+                "result": {
+                    "element_count": 5,
+                    "missing_count": 0, 
+                    "unexpected_count": 0, 
+                    "missing_percent": 0.0, 
+                    "unexpected_percent": 0.0, 
+                    "unexpected_percent_nonmissing": 0.0, 
+                    "unexpected_list": [], 
+                    "unexpected_index_list": [],
+                    "partial_unexpected_list": [], 
+                    "partial_unexpected_index_list": [], 
+                    "partial_unexpected_counts": [], 
                 }
             }
         )
@@ -346,31 +350,42 @@ class TestExpectationDecorators(unittest.TestCase):
             {
                 'success' : True,
                 'result': {
-                    "unexpected_list" : [],
-                    'unexpected_index_list': [],
-                    'element_count': 5,
-                    'unexpected_count': 0,
-                    'unexpected_percent': 0.0,
-                    'unexpected_percent_nonmissing': 0.0,
-                    'missing_count': 0,
-                    'missing_percent': 0.0,
+                    "element_count": 5,
+                    "missing_count": 0, 
+                    "unexpected_count": 0, 
+                    "missing_percent": 0.0, 
+                    "unexpected_percent": 0.0, 
+                    "unexpected_percent_nonmissing": 0.0, 
+                    "unexpected_list": [], 
+                    "unexpected_index_list": [],
+                    "partial_unexpected_list": [], 
+                    "partial_unexpected_index_list": [], 
+                    "partial_unexpected_counts": [], 
                 }
             }
         )
 
+        self.maxDiff = None
         self.assertEqual(
             df.expect_column_pair_values_to_be_different("all_odd", "odd_missing"),
             {
                 'success' : False,
                 'result': {
-                    "unexpected_list" : [1,3,5],
-                    'unexpected_index_list': [0,1,2],
-                    'element_count': 5,
-                    'unexpected_count': 3,
-                    'unexpected_percent': 0.6,
-                    'unexpected_percent_nonmissing': 0.6,
-                    'missing_count': 0,
-                    'missing_percent': 0.0,
+                    "element_count": 5,
+                    "missing_count": 0, 
+                    "unexpected_count": 3, 
+                    "missing_percent": 0.0, 
+                    "unexpected_percent": 0.6,
+                    "unexpected_percent_nonmissing": 0.6,
+                    "unexpected_list": [[1,1],[3,3],[5,5]],
+                    "unexpected_index_list": [0,1,2],
+                    "partial_unexpected_list": [[1,1],[3,3],[5,5]],
+                    "partial_unexpected_index_list": [0,1,2],
+                    "partial_unexpected_counts": [
+                        {'count': 1, 'value': [1, 1.0]},
+                        {'count': 1, 'value': [3, 3.0]},
+                        {'count': 1, 'value': [5, 5.0]}
+                    ]
                 }
             }
         )
@@ -384,14 +399,21 @@ class TestExpectationDecorators(unittest.TestCase):
             {
                 'success' : False,
                 'result': {
-                    "unexpected_list" : [1,3,5],
-                    'unexpected_index_list': [0,1,2],
-                    'element_count': 5,
-                    'unexpected_count': 3,
-                    'unexpected_percent': 0.6,
-                    'unexpected_percent_nonmissing': 0.6,
-                    'missing_count': 0,
-                    'missing_percent': 0.0,
+                    "element_count": 5,
+                    "missing_count": 0, 
+                    "unexpected_count": 3, 
+                    "missing_percent": 0.0, 
+                    "unexpected_percent": 0.6,
+                    "unexpected_percent_nonmissing": 0.6,
+                    "unexpected_list": [[1,1],[3,3],[5,5]],
+                    "unexpected_index_list": [0,1,2],
+                    "partial_unexpected_list": [[1,1],[3,3],[5,5]],
+                    "partial_unexpected_index_list": [0,1,2],
+                    "partial_unexpected_counts": [
+                        {'count': 1, 'value': [1, 1.0]},
+                        {'count': 1, 'value': [3, 3.0]},
+                        {'count': 1, 'value': [5, 5.0]}
+                    ]
                 }
             }
         )
@@ -400,22 +422,36 @@ class TestExpectationDecorators(unittest.TestCase):
             df.expect_column_pair_values_to_be_different(
                 "all_odd",
                 "odd_missing",
-                ignore_row_if="either_values_is_missing"
+                ignore_row_if="either_value_is_missing"
             ),
             {
                 'success' : False,
                 'result': {
-                    "unexpected_list" : [1,3,5],
-                    'unexpected_index_list': [0,1,2],
-                    'element_count': 5,
-                    'unexpected_count': 3,
-                    'unexpected_percent': 0.6,
-                    'unexpected_percent_nonmissing': 1.0,
-                    'missing_count': 2,
-                    'missing_percent': 0.4,
+                    "element_count": 5,
+                    "missing_count": 2,
+                    "unexpected_count": 3, 
+                    "missing_percent": 0.4,
+                    "unexpected_percent": 0.6,
+                    "unexpected_percent_nonmissing": 1.0,
+                    "unexpected_list": [[1,1],[3,3],[5,5]],
+                    "unexpected_index_list": [0,1,2],
+                    "partial_unexpected_list": [[1,1],[3,3],[5,5]],
+                    "partial_unexpected_index_list": [0,1,2],
+                    "partial_unexpected_counts": [
+                        {'count': 1, 'value': [1, 1.0]},
+                        {'count': 1, 'value': [3, 3.0]},
+                        {'count': 1, 'value': [5, 5.0]}
+                    ]
                 }
             }
         )
+
+        with self.assertRaises(ValueError):
+            df.expect_column_pair_values_to_be_different(
+                "all_odd",
+                "odd_missing",
+                ignore_row_if="blahblahblah"
+            )
 
         #FIXME: Test SUMMARY, BASIC, and BOOLEAN_ONLY output_formats
 
