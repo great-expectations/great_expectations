@@ -446,6 +446,41 @@ class TestExpectationDecorators(unittest.TestCase):
             }
         )
 
+        # print json.dumps(
+        #     df.expect_column_pair_values_to_be_different(
+        #         "all_missing",
+        #         "odd_missing",
+        #         ignore_row_if="never"
+        #     ),
+        #     indent=2
+        # )
+        # self.assertEqual(
+        #     df.expect_column_pair_values_to_be_different(
+        #         "all_missing",
+        #         "odd_missing",
+        #         ignore_row_if="never"
+        #     ),
+        #     {
+        #         'success' : True,
+        #         'result': {
+        #             "element_count": 5,
+        #             "missing_count": 0,
+        #             "unexpected_count": 2,
+        #             "missing_percent": 0.0,
+        #             "unexpected_percent": 0.4,
+        #             "unexpected_percent_nonmissing": 0.4,
+        #             "unexpected_list": [[None, None],[None, None]],
+        #             "unexpected_index_list": [3,4],
+        #             "partial_unexpected_list": [[None, None],[None, None]],
+        #             "partial_unexpected_index_list": [3,4],
+        #             "partial_unexpected_counts": [
+        #                 {'count': 2, 'value': [[None, None]]}
+        #             ]
+        #         }
+        #     }
+        # )
+
+
         with self.assertRaises(ValueError):
             df.expect_column_pair_values_to_be_different(
                 "all_odd",

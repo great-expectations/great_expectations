@@ -86,7 +86,7 @@
         "success": false
       }
     }, {
-      "title" : "A negative example with output_format=SUMMARY",
+      "title" : "A negative example",
       "exact_match_out" : false,
       "in": {
         "column_A": "w",
@@ -99,7 +99,7 @@
         "success": false
       }
     }, {
-      "title" : "A positive example with output_format=SUMMARY and mostly",
+      "title" : "A positive example with mostly",
       "exact_match_out" : false,
       "in": {
         "column_A": "w",
@@ -113,7 +113,7 @@
         "success": true
       }
     }, {
-      "title" : "A positive example with output_format=SUMMARY and ignore_row_if=either_value_is_missing",
+      "title" : "A positive example with ignore_row_if=either_value_is_missing",
       "exact_match_out" : false,
       "in": {
         "column_A": "w",
