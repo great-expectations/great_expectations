@@ -56,6 +56,8 @@ class MetaPandasDataset(Dataset):
             if result_format is None:
                 result_format = self.default_expectation_args["result_format"]
 
+            result_format = parse_result_format(result_format)
+        
             series = self[column]
             boolean_mapped_null_values = series.isnull()
 
