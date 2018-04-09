@@ -153,9 +153,17 @@ class TestUtilMethods(unittest.TestCase):
         self.assertEqual(type(x['np.int8'][0]), int)
         self.assertEqual(type(x['np.int16'][0]), int)
         self.assertEqual(type(x['np.int32'][0]), int)
-        self.assertEqual(type(x['np.uint'][0]), int)
-        self.assertEqual(type(x['np.uint8'][0]), int)
-        self.assertEqual(type(x['np.uint64'][0]), int)
+
+        # see option 1 in testing: http://python-future.org/compatible_idioms.html#long-integers
+        self.assertTrue(
+            isinstance(x['np.uint'][0], int)
+        )
+        self.assertTrue(
+            isinstance(x['np.uint8'][0], int)
+        )
+        self.assertTrue(
+            isinstance(x['np.uint64'][0], int)
+        )
         self.assertEqual(type(x['np.float32'][0]), float)
         self.assertEqual(type(x['np.float64'][0]), float)
         self.assertEqual(type(x['np.float128'][0]), float)
