@@ -164,7 +164,7 @@ def recursively_convert_to_json_serializable(test_obj):
     elif np.issubdtype(type(test_obj), np.bool_):
         return bool(test_obj)
 
-    elif np.issubdtype(type(test_obj), np.integer):
+    elif np.issubdtype(type(test_obj), np.integer) or np.issubdtype(type(test_obj), np.uint):
         return int(test_obj)
 
     elif np.issubdtype(type(test_obj), np.floating):
