@@ -126,10 +126,44 @@ class TestUtilMethods(unittest.TestCase):
             'zzz': [
                 datetime.datetime(2017,1,1),
                 datetime.date(2017,5,1),
-            ]
+            ],
+            'np.bool': np.bool_([True, False, True]),
+            'np.int_': np.int_([5,3,2]),
+            'np.int8': np.int8([5,3,2]),
+            'np.int16': np.int16([10,6, 4]),
+            'np.int32': np.int32([20, 12, 8]),
+            'np.float_': np.float_([3.2,5.6,7.8]),
+            'np.float32': np.float32([5.999999999, 5.6]),
+            'np.float64': np.float64([5.9999999999999999999, 10.2]),
+            'np.float128': np.float128([5.9999999999999999999, 20.4]),
+            'np.complex64': np.complex64([10.9999999 + 4.9999999j, 11.2+7.3j]),
+            'np.complex128': np.complex128([20.99999999+10.99999999j, 22.4+14.6j]),
+            'np.complex256': np.complex256([40.99999999 + 20.99999999j, 44.8+29.2j]),
+            'np.str': np.unicode(["hello"])
         }
         x = ge.dataset.util.recursively_convert_to_json_serializable(x)
         self.assertEqual(type(x['x']), list)
+
+        self.assertEqual(type(x['np.bool'][0]), bool)
+        self.assertEqual(type(x['np.int_'][0]), int)
+        self.assertEqual(type(x['np.int8'][0]), int)
+        self.assertEqual(type(x['np.int16'][0]), int)
+        self.assertEqual(type(x['np.int32'][0]), int)
+        self.assertEqual(type(x['np.float32'][0]), float)
+        self.assertEqual(type(x['np.float64'][0]), float)
+        self.assertEqual(type(x['np.float128'][0]), float)
+        self.assertEqual(type(x['np.complex64'][0]), complex)
+        self.assertEqual(type(x['np.complex128'][0]), complex)
+        self.assertEqual(type(x['np.complex256'][0]), complex)
+        self.assertEqual(type(x['np.str'][0]), str)
+        self.assertEqual(type(x['np.float_'][0]), float)
+
+    # TypeError when non-serializable numpy object is in dataset.
+        with self.assertRaises(TypeError):
+            y = {
+                'p': np.DataSource()
+            }
+            ge.dataset.util.recursively_convert_to_json_serializable(y)
 
         try:
             x = unicode("abcdefg")
@@ -137,6 +171,8 @@ class TestUtilMethods(unittest.TestCase):
             self.assertEqual(type(x), unicode)
         except NameError:
             pass
+
+
 
     def test_expect_file_hash_to_equal(self):
         test_file = './tests/test_sets/Titanic.csv'
