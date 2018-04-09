@@ -3,8 +3,7 @@ import datetime
 import numpy as np
 import unittest
 from functools import wraps
-from sys import float_info
-from builtins import int
+import sys
 
 import great_expectations as ge
 
@@ -155,28 +154,35 @@ class TestUtilMethods(unittest.TestCase):
         self.assertEqual(type(x['np.int16'][0]), int)
         self.assertEqual(type(x['np.int32'][0]), int)
 
-        # see option 1 in testing: http://python-future.org/compatible_idioms.html#long-integers
-        self.assertTrue(
-            isinstance(x['np.uint'][0], int)
-        )
-        self.assertTrue(
-            isinstance(x['np.uint8'][0], int)
-        )
-        self.assertTrue(
-            isinstance(x['np.uint64'][0], int)
-        )
+        # Integers in python 2.x can be of type int or of type long
+        if sys.version_info.major >= 3:
+            # Python 3.x
+            self.assertTrue(
+                isinstance(x['np.uint'][0], int))
+            self.assertTrue(
+                isinstance(x['np.uint8'][0], int))
+            self.assertTrue(
+                isinstance(x['np.uint64'][0], int))
+        elif sys.version_info.major >= 2:
+            # Python 2.x
+            self.assertTrue(
+                isinstance(x['np.uint'][0], (int, long)))
+            self.assertTrue(
+                isinstance(x['np.uint8'][0], (int, long)))
+            self.assertTrue(
+                isinstance(x['np.uint64'][0], (int, long)))
+
         self.assertEqual(type(x['np.float32'][0]), float)
         self.assertEqual(type(x['np.float64'][0]), float)
         self.assertEqual(type(x['np.float128'][0]), float)
         self.assertEqual(type(x['np.complex64'][0]), complex)
         self.assertEqual(type(x['np.complex128'][0]), complex)
         self.assertEqual(type(x['np.complex256'][0]), complex)
-        self.assertEqual(type(x['np.str'][0]), str)
         self.assertEqual(type(x['np.float_'][0]), float)
         
         # Make sure nothing is going wrong with precision rounding
-        self.assertAlmostEqual(x['np.complex128'][0].real, 20.999999999978335216827, places=float_info.dig)
-        self.assertAlmostEqual(x['np.float128'][0], 5.999999999998786324399999999, places=float_info.dig)
+        self.assertAlmostEqual(x['np.complex128'][0].real, 20.999999999978335216827, places=sys.float_info.dig)
+        self.assertAlmostEqual(x['np.float128'][0], 5.999999999998786324399999999, places=sys.float_info.dig)
 
     # TypeError when non-serializable numpy object is in dataset.
         with self.assertRaises(TypeError):

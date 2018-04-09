@@ -160,7 +160,6 @@ def recursively_convert_to_json_serializable(test_obj):
         return str(test_obj)
     # Use built in base type from numpy, https://docs.scipy.org/doc/numpy-1.13.0/user/basics.types.html
     # https://github.com/numpy/numpy/pull/9505
-
     elif np.issubdtype(type(test_obj), np.bool_):
         return bool(test_obj)
 
