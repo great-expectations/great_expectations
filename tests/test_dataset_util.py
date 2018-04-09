@@ -4,6 +4,7 @@ import numpy as np
 import unittest
 from functools import wraps
 from sys import float_info
+from builtins import int
 
 import great_expectations as ge
 
