@@ -3113,7 +3113,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         Args:
             column_A (str): The first column name
             column_B (str): The second column name
-            value_pairs_set (list of lists): All the valid pairs to be matched
+            value_pairs_set (list of tuples): All the valid pairs to be matched
 
         Keyword Args:
             ignore_row_if (str): "both_values_are_missing", "either_value_is_missing", "neither

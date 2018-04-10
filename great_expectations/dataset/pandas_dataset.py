@@ -1431,12 +1431,12 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
         results = []
         for i, t in temp_df.iterrows():
-            if np.isnan(t["A"]):
+            if pd.isnull(t["A"]):
                 a = None
             else:
                 a = t["A"]
                 
-            if np.isnan(t["B"]):
+            if pd.isnull(t["B"]):
                 b = None
             else:
                 b = t["B"]
