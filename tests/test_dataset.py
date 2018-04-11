@@ -1,3 +1,4 @@
+import decimal
 import json
 import tempfile
 import shutil
@@ -686,6 +687,11 @@ class TestDataset(unittest.TestCase):
                 mostly=None
             ),
             (False, 0.0)
+        )
+
+        self.assertEqual(
+            df._calc_map_expectation_success(success_count=decimal.Decimal(80), nonnull_count=100, mostly=.8),
+            (False, decimal.Decimal(80) / decimal.Decimal(100))
         )
 
     def test_find_expectations(self):
