@@ -1,3 +1,4 @@
+import decimal
 import json
 import datetime
 import numpy as np
@@ -126,7 +127,8 @@ class TestUtilMethods(unittest.TestCase):
             'zzz': [
                 datetime.datetime(2017,1,1),
                 datetime.date(2017,5,1),
-            ]
+            ],
+            'yyy': decimal.Decimal(123.456)
         }
         x = ge.dataset.util.recursively_convert_to_json_serializable(x)
         self.assertEqual(type(x['x']), list)

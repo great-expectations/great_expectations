@@ -2,6 +2,8 @@
 
 from __future__ import division
 
+import decimal
+
 from six import string_types, integer_types
 
 import numpy as np
@@ -164,6 +166,9 @@ def recursively_convert_to_json_serializable(test_obj):
 
     elif isinstance(test_obj, (datetime.datetime, datetime.date)):
         return str(test_obj)
+
+    elif isinstance(test_obj, decimal.Decimal):
+        return float(test_obj)
 
     else:
         raise TypeError('%s is of type %s which cannot be serialized.' % (str(test_obj), type(test_obj).__name__))

@@ -1,4 +1,4 @@
-
+from __future__ import division
 import json
 import inspect
 import copy
@@ -14,6 +14,7 @@ from collections import (
 
 from ..version import __version__
 from .util import DotDict, recursively_convert_to_json_serializable, parse_result_format
+
 
 class Dataset(object):
 
@@ -855,11 +856,11 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         unexpected_count = len(unexpected_list)
 
         if element_count > 0:
-            unexpected_percent = float(unexpected_count) / element_count
-            missing_percent = float(missing_count) / element_count
+            unexpected_percent = unexpected_count / element_count
+            missing_percent = missing_count / element_count
 
             if nonnull_count > 0:
-                unexpected_percent_nonmissing = float(unexpected_count) / nonnull_count
+                unexpected_percent_nonmissing = unexpected_count / nonnull_count
             else:
                 unexpected_percent_nonmissing = None
 
@@ -932,7 +933,8 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         """
 
         if nonnull_count > 0:
-            percent_success = float(success_count)/nonnull_count
+            # percent_success = float(success_count)/nonnull_count
+            percent_success = success_count / nonnull_count
 
             if mostly:
                 success = bool(percent_success >= mostly)
