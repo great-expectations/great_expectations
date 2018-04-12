@@ -158,6 +158,7 @@ def recursively_convert_to_json_serializable(test_obj):
 
     elif isinstance(test_obj, (datetime.datetime, datetime.date)):
         return str(test_obj)
+
     # Use built in base type from numpy, https://docs.scipy.org/doc/numpy-1.13.0/user/basics.types.html
     # https://github.com/numpy/numpy/pull/9505
     elif np.issubdtype(type(test_obj), np.bool_):
@@ -170,12 +171,12 @@ def recursively_convert_to_json_serializable(test_obj):
         # Note: Use np.floating to avoid FutureWarning from numpy
         return float(round(test_obj, sys.float_info.dig))
 
-    elif np.issubdtype(type(test_obj), np.complexfloating):
+    # elif np.issubdtype(type(test_obj), np.complexfloating):
         # Note: Use np.complexfloating to avoid Future Warning from numpy
         # Complex numbers consist of two floating point numbers
-        return complex(
-            float(round(test_obj.real, sys.float_info.dig)),
-            float(round(test_obj.imag, sys.float_info.dig)))
+        # return complex(
+        #     float(round(test_obj.real, sys.float_info.dig)),
+        #     float(round(test_obj.imag, sys.float_info.dig)))
 
     else:
         raise TypeError('%s is of type %s which cannot be serialized.' % (str(test_obj), type(test_obj).__name__))
