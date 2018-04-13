@@ -4,6 +4,7 @@ import unittest
 import os
 from pprint import pprint
 
+import pytest
 from airflow import DAG
 from airflow.models import TaskInstance
 
@@ -12,6 +13,7 @@ from great_expectations_airflow.operators.expectation_operator import Expectatio
 
 class TestGreatExpectationOperator(unittest.TestCase):
 
+    @pytest.mark.skip(reason="Not possible to execute without running airflow (database)")
     def test_execute(self):
         script_path = os.path.dirname(os.path.realpath(__file__))
         test_set = script_path + '/../test_sets/Titanic.csv'
