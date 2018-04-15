@@ -19,7 +19,7 @@ from .base import Dataset
 from .util import DocInherit, recursively_convert_to_json_serializable, \
         is_valid_partition_object, is_valid_categorical_partition_object, is_valid_continuous_partition_object, \
         infer_distribution_parameters, _scipy_distribution_positional_args_from_dict, validate_distribution_parameters,\
-        parse_result_format
+        parse_result_format, create_multiple_expectations
 
 
 class MetaPandasDataset(Dataset):
@@ -255,14 +255,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         """
         The default behavior for PandasDataset is to explicitly include expectations that every column present upon initialization exists.
         """
-
-        for col in self.columns:
-            self._append_expectation({
-                "expectation_type": "expect_column_to_exist",
-                "kwargs": {
-                    "column": col
-                }
-            })
+        create_multiple_expectations(self, self.columns, "expect_column_to_exist")
 
     ### Expectation methods ###
     @DocInherit

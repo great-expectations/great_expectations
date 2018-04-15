@@ -5,7 +5,7 @@ from great_expectations.dataset import Dataset
 from functools import wraps
 import inspect
 
-from .util import DocInherit, parse_result_format
+from .util import DocInherit, parse_result_format, create_multiple_expectations
 
 import sqlalchemy as sa
 from sqlalchemy.engine import reflection
@@ -191,13 +191,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         The default behavior for SqlAlchemyDataset is to explicitly include expectations that every column present upon
         initialization exists.
         """
-        for col in self.columns:
-            self._append_expectation({
-                "expectation_type": "expect_column_to_exist",
-                "kwargs": {
-                    "column": col["name"]
-                }
-            })
+        create_multiple_expectations(self, self.columns, "expect_column_to_exist")
 
     def _is_numeric_column(self, column):
         for col in self.columns:
