@@ -57,7 +57,7 @@ Visit the [glossary of expectations](http://great-expectations.readthedocs.io/en
 
 Can I contribute?
 --------------------------------------------------------------------------------
-Absolutely. Yes, please. Start [here](https://github.com/great-expectations/great_expectations/blob/docs/contributor_docs/CONTRIBUTING), and don't be shy with questions!
+Absolutely. Yes, please. Start [here](https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING), and don't be shy with questions!
 
 
 How do I learn more?
