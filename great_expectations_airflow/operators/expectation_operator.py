@@ -5,7 +5,7 @@ import os
 from airflow import AirflowException
 from airflow.hooks.S3_hook import S3Hook
 from airflow.hooks.base_hook import BaseHook
-from airflow.hooks.mysql_hook import MySqlHook
+from airflow.hooks.dbapi_hook import DbApiHook
 from airflow.models import BaseOperator
 import great_expectations as ge
 from great_expectations_airflow.hooks.s3_csv_hook import ExpectationS3CsvHook
@@ -92,7 +92,7 @@ class ExpectationOperator(BaseOperator):
                 raise AttributeError("Missing source bucket for s3 connection")
             self.source_bucket_name = source_bucket_name
 
-        if not isinstance(self.source_conn, MySqlHook) and not isinstance(self.source_conn, S3Hook):
+        if not isinstance(self.source_conn, DbApiHook) and not isinstance(self.source_conn, S3Hook):
             raise AttributeError(
                 "Only s3_csv, local and sql connection types are allowed, not {0}".format(type(self.source_conn)))
 
@@ -130,7 +130,7 @@ class ExpectationOperator(BaseOperator):
 
             return hook.get_ge_df(self.dataset_name, self.source_bucket_name, **self.dataset_params)
 
-        if isinstance(self.source_conn, MySqlHook):
+        if isinstance(self.source_conn, DbApiHook):
             hook = ExpectationMySQLHook(mysql_conn_id=self.source_conn_id)
 
             return hook.get_ge_df(self.dataset_name, **self.dataset_params)
