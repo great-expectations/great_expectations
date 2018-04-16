@@ -1,8 +1,8 @@
-from airflow.hooks.dbapi_hook import DbApiHook
 import great_expectations as ge
+from airflow.hooks.mysql_hook import MySqlHook
 
 
-class ExpectationMySQLHook(DbApiHook):
+class ExpectationMySQLHook(MySqlHook):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
