@@ -68,7 +68,7 @@ Can I contribute?
 -----------------
 
 Absolutely. Yes, please. Start
-`here <https://github.com/great-expectations/great_expectations/blob/docs/contributor_docs/CONTRIBUTING>`__,
+`here <https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING.md>`__,
 and don't be shy with questions!
 
 How do I learn more?
