@@ -191,7 +191,8 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         The default behavior for SqlAlchemyDataset is to explicitly include expectations that every column present upon
         initialization exists.
         """
-        create_multiple_expectations(self, self.columns, "expect_column_to_exist")
+        columns = [col['name'] for col in self.columns]
+        create_multiple_expectations(self, columns, "expect_column_to_exist")
 
     def _is_numeric_column(self, column):
         for col in self.columns:
