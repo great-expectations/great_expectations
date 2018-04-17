@@ -33,13 +33,16 @@ class TestDataset(unittest.TestCase):
                 },
                 "expectations" : [{
                     "expectation_type" : "expect_column_to_exist",
-                    "kwargs" : { "column" : "x" }
+                    "kwargs" : { "column" : "x", 'result_format': 'BASIC'},
+                    'success_on_last_run': True
                 },{
                     "expectation_type" : "expect_column_to_exist",
-                    "kwargs" : { "column" : "y" }
+                    "kwargs" : { "column" : "y", 'result_format': 'BASIC'},
+                    'success_on_last_run': True
                 },{
                     "expectation_type" : "expect_column_to_exist",
-                    "kwargs" : { "column" : "z" }
+                    "kwargs" : { "column" : "z", 'result_format': 'BASIC'},
+                    'success_on_last_run': True
                 }]
             }
         )
@@ -54,13 +57,13 @@ class TestDataset(unittest.TestCase):
                 },
                 "expectations" : [{
                     "expectation_type" : "expect_column_to_exist",
-                    "kwargs" : { "column" : "x" }
+                    "kwargs" : { "column" : "x"}
                 },{
                     "expectation_type" : "expect_column_to_exist",
-                    "kwargs" : { "column" : "y" }
+                    "kwargs" : { "column" : "y"}
                 },{
                     "expectation_type" : "expect_column_to_exist",
-                    "kwargs" : { "column" : "z" }
+                    "kwargs" : { "column" : "z"}
                 }]
             }
         )
@@ -277,19 +280,22 @@ class TestDataset(unittest.TestCase):
             {
               "expectation_type": "expect_column_to_exist",
               "kwargs": {
-                "column": "x"
+                "column": "x",
+                "result_format": "BASIC"
               }
             },
             {
               "expectation_type": "expect_column_to_exist",
               "kwargs": {
-                "column": "y"
+                "column": "y",
+                "result_format": "BASIC"
               }
             },
             {
               "expectation_type": "expect_column_to_exist",
               "kwargs": {
-                "column": "z"
+                "column": "z",
+                "result_format": "BASIC"
               }
             },
             {
@@ -325,7 +331,8 @@ class TestDataset(unittest.TestCase):
                 discard_include_configs_kwargs=False,
                 discard_catch_exceptions_kwargs=False,
             ),
-            output_config
+            output_config,
+            msg="Second Test Set"
         )
 
         df.save_expectations_config(
