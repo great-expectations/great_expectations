@@ -1,5 +1,5 @@
 import json
-from pprint import pformat, pprint
+from pprint import pformat
 
 import os
 from airflow import AirflowException
@@ -8,8 +8,8 @@ from airflow.hooks.base_hook import BaseHook
 from airflow.hooks.dbapi_hook import DbApiHook
 from airflow.models import BaseOperator
 import great_expectations as ge
-from great_expectations_airflow.hooks.s3_csv_hook import ExpectationS3CsvHook
-from great_expectations_airflow.hooks.db_hook import ExpectationMySQLHook
+from examples.integrations.airflow.hooks.s3_csv_hook import ExpectationS3CsvHook
+from examples.integrations.airflow.hooks.db_hook import ExpectationMySQLHook
 
 
 class ExpectationOperator(BaseOperator):
