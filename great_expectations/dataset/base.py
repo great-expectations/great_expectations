@@ -1988,6 +1988,49 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         """
         raise NotImplementedError
 
+    def expect_column_values_to_not_match_regex_list(self, column, regex_list,
+                                                mostly=None,
+                                                result_format=None, include_config=False, catch_exceptions=None, meta=None):
+        """Expect the column entries to be strings that do not match any of a list of regular expressions.
+
+        expect_column_values_to_not_match_regex_list is a :func:`column_map_expectation <great_expectations.dataset.base.Dataset.column_map_expectation>`.
+
+        Args:
+            column (str): \
+                The column name.
+            regex_list (list): \
+                The list of regular expressions which the column entries should not match
+
+        Keyword Args:
+            mostly (None or a float between 0 and 1): \
+                Return `"success": True` if the percentage of unexpected values is less than or equal to `mostly`. \
+                For more detail, see :ref:`mostly`.
+
+        Other Parameters:
+            result_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`result_format <result_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
+
+        Returns:
+            A JSON-serializable expectation result object.
+
+            Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+        See Also:
+            expect_column_values_to_match_regex_list
+        """
+        raise NotImplementedError
+
     ##### Datetime and JSON parsing #####
 
     def expect_column_values_to_match_strftime_format(self,
