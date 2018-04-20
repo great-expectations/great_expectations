@@ -16,7 +16,8 @@ Planned Features
 develop
 -------
 * Add new expectation expect_column_values_to_not_match_regex_list.
-  * Change behavior of expect_column_values_to_match_regex_list to use python re.findall in PandasDataset, relaxing matching of individuals expressions.
+  * Change behavior of expect_column_values_to_match_regex_list to use python re.findall in PandasDataset, relaxing \
+  matching of individuals expressions to allow matches anywhere in the string.
 
 v.0.4.1
 -------

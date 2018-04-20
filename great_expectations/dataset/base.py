@@ -1848,7 +1848,9 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         mostly=None,
         result_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
-        """Expect column entries to be strings that match against a given regular expression.
+        """Expect column entries to be strings that match a given regular expression. Valid matches can be found \
+        anywhere in the string, for example "[at]+" will identify the following strings as expected: "cat", "hat", \
+        "aa", "a", and "t", and the following strings as unexpected: "fish", "dog".
 
         expect_column_values_to_match_regex is a :func:`column_map_expectation <great_expectations.dataset.base.Dataset.column_map_expectation>`.
 
@@ -1895,7 +1897,9 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         mostly=None,
         result_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
-        """Expect column entries to be strings that do NOT match against a given regular expression.
+        """Expect column entries to be strings that do NOT match a given regular expression. The regex must not match \
+        any portion of the provided string. For example, "[at]+" would identify the following strings as expected: \
+        "fish", "dog", and the following as unexpected: "cat", "hat".
 
         expect_column_values_to_not_match_regex is a :func:`column_map_expectation <great_expectations.dataset.base.Dataset.column_map_expectation>`.
 
@@ -1944,6 +1948,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         result_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
         """Expect the column entries to be strings that can be matched to either any of or all of a list of regular expressions.
+        Matches can be anywhere in the string.
 
         expect_column_values_to_match_regex_list is a :func:`column_map_expectation <great_expectations.dataset.base.Dataset.column_map_expectation>`.
 
@@ -1991,7 +1996,9 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
     def expect_column_values_to_not_match_regex_list(self, column, regex_list,
                                                 mostly=None,
                                                 result_format=None, include_config=False, catch_exceptions=None, meta=None):
-        """Expect the column entries to be strings that do not match against any of a list of regular expressions.
+        """Expect the column entries to be strings that do not match any of a list of regular expressions. Matches can \
+        be anywhere in the string.
+
 
         expect_column_values_to_not_match_regex_list is a :func:`column_map_expectation <great_expectations.dataset.base.Dataset.column_map_expectation>`.
 
