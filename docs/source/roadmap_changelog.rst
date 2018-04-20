@@ -13,7 +13,12 @@ Planned Features
 * Support for non-tabular datasources (e.g. JSON, XML, AVRO)
 * Real-time/streaming and adaption of distributional expectations
 
-v 0.4.1
+develop
+-------
+* Add new expectation expect_column_values_to_not_match_regex_list.
+  * Change behavior of expect_column_values_to_match_regex_list to use python re.findall in PandasDataset, relaxing matching of individuals expressions.
+
+v.0.4.1
 -------
 * Correct inclusion of new data_context module in source distribution
 
