@@ -38,6 +38,7 @@ String matching
 * :func:`expect_column_values_to_match_regex <great_expectations.dataset.base.Dataset.expect_column_values_to_match_regex>`
 * :func:`expect_column_values_to_not_match_regex <great_expectations.dataset.base.Dataset.expect_column_values_to_not_match_regex>`
 * :func:`expect_column_values_to_match_regex_list <great_expectations.dataset.base.Dataset.expect_column_values_to_match_regex_list>`
+* :func:`expect_column_values_to_not_match_regex_list <great_expectations.dataset.base.Dataset.expect_column_values_to_not_match_regex_list>`
 
 Datetime and JSON parsing
 --------------------------------------------------------------------------------
