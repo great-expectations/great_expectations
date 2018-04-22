@@ -728,7 +728,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         if match_on=="any":
 
             def match_in_list(val):
-                if any(re.match(regex, str(val)) for regex in regex_list):
+                if any(re.findall(regex, str(val)) for regex in regex_list):
                     return True
                 else:
                     return False
@@ -736,12 +736,22 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         elif match_on=="all":
 
             def match_in_list(val):
-                if all(re.match(regex, str(val)) for regex in regex_list):
+                if all(re.findall(regex, str(val)) for regex in regex_list):
                     return True
                 else:
                     return False
 
         return column.map(match_in_list)
+
+    @DocInherit
+    @MetaPandasDataset.column_map_expectation
+    def expect_column_values_to_not_match_regex_list(self, column, regex_list,
+                                                 mostly=None,
+                                                 result_format=None, include_config=False, catch_exceptions=None, meta=None):
+        return column.map(
+            lambda x: not any([re.findall(regex, str(x)) for regex in regex_list])
+        )
+
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
