@@ -383,6 +383,13 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         # Pass element_count instead of nonnull_count, because that's the right denominator for this expectation
         success, percent_success = self._calc_map_expectation_success(success_count, element_count, mostly)
 
+        return_obj = self._format_column_map_output(result_format, success, element_count, success_count,
+                                                    unexpected_list, unexpected_index_list)
+
+        return_obj['result'].pop('unexpected_percent_nonmissing', None)
+        return_obj['result'].pop('partial_unexpected_counts', None)
+        return return_obj
+
         return {
             "success": success,
             "result": {
