@@ -3,12 +3,12 @@
   "datasets" : [{
     "data" : {
       "x" : [1,2,4],
-      "y" : [1,2,5],
+      "y" : [1.1,2.2,5.5],
       "z" : ["hello", "jello", "mello"]
     },
     "tests" : [
       {
-        "title": "Basic positive test case",
+        "title": "Basic positive test case, number set",
         "exact_match_out": false,
         "in": {
           "column": "x",
@@ -19,7 +19,7 @@
         }
       },
       {
-        "title": "Negative test case",
+        "title": "Negative test case, exclude existing column value",
         "exact_match_out": false,
         "in": {
           "column": "x",
@@ -32,7 +32,7 @@
         }
       },
       {
-        "title": "Empty values_set",
+        "title": "Negative, Empty values set",
         "exact_match_out": false,
         "in": {
           "column": "x",
@@ -45,7 +45,7 @@
         }
       },
       {
-        "title": "Basic strings set",
+        "title": "Basic Positive strings set",
         "exact_match_out": false,
         "in": {
           "column": "z",
@@ -54,6 +54,69 @@
         "out": {
           "success": true
         }
+      },
+      {
+        "title": "Negative test, strings set, extra value in column",
+        "exact_match_out": false,
+        "in": {
+          "column": "z",
+          "values_set": ["hello", "jello"]
+        },
+        "out": {
+          "success": false,
+          "unexpected_index_list": [2],
+          "unexpected_list": ["mello"]
+        }
+      },
+      {
+        "title": "Negative test,  numbers set, no matching values",
+        "exact_match_out": false,
+        "in": {
+          "column": "x",
+          "values_set": [3]
+        },
+        "out": {
+          "success": false,
+          "unexpected_index_list": [0, 1, 2],
+          "unexpected_list": [1, 2, 4]
+        }
+      },
+      {
+        "title": "Positive test, float set",
+        "exact_match_out": false,
+        "in": {
+          "column": "y",
+          "values_set": [1.1, 2.2, 5.5]
+        },
+        "out": {
+          "success": true
+        }
+      },
+      {
+        "title": "Negative test, float set",
+        "exact_match_out": false,
+        "in": {
+          "column": "y",
+          "values_set": [1.11, 2.22, 5.51]
+        },
+        "out": {
+          "success": false,
+          "unexpected_index_list": [0, 1, 2],
+          "unexpected_list": [1.1, 2.2, 5.5]
+        }
+      },
+      {
+        "title": "Raise TypeError when Values set is missing",
+        "exact_match_out": false,
+        "in": {
+          "column": "z",
+          "values_set": null,
+          "catch_exceptions": true
+        },
+        "out": {},
+        "error":{
+          "traceback_substring": "argument of type 'NoneType' is not iterable"
+          }
       }
     ]
   }]
