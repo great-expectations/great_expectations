@@ -322,62 +322,9 @@ class TestPandasDataset(unittest.TestCase):
             self.assertEqual(t['out']['success'], out['success'])
             self.assertEqual(t['out']['unexpected_index_list'], out['result']['unexpected_index_list'])
             self.assertEqual(t['out']['unexpected_list'], out['result']['unexpected_list'])
-            
 
-    def test_expect_column_values_to_not_be_in_set(self):
-        """
-        Cases Tested:
-        -Repeat values being returned
-        -Running expectations only on nonmissing values
-        """
 
-        D = ge.dataset.PandasDataset({
-            'x' : [1,2,4],
-            'z' : ['hello', 'jello', 'mello'],
-            'a' : [1,1,2],
-            'n' : [None,None,2],
-        })
-        D.set_default_expectation_argument("result_format", "COMPLETE")
 
-        T = [
-                {
-                    'in':['x', [1,2]],'kwargs':{},
-                    'out':{'success':False, 'unexpected_index_list':[0,1], 'unexpected_list':[1,2]}},
-                {
-                    'in':['x',[5,6]],'kwargs':{},
-                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}},
-                {
-                    'in':['z',['hello', 'jello']],'kwargs':{},
-                    'out':{'success':False, 'unexpected_index_list':[0,1], 'unexpected_list':['hello', 'jello']}},
-                {
-                    'in':['z',[]],'kwargs':{},
-                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}},
-                {
-                    'in':['a', [1]],'kwargs':{},
-                    'out':{'success':False, 'unexpected_index_list':[0,1], 'unexpected_list':[1, 1]}},
-                {
-                    'in':['n', [2]],
-                    'kwargs':{},
-                    'out':{'success':False, 'unexpected_index_list':[2], 'unexpected_list':[2]}},
-                {
-                    'in':['n', []],
-                    'kwargs':{},
-                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}},
-                {
-                    'in':['a', [1]],
-                    'kwargs':{'mostly':.1},
-                    'out':{'success':True, 'unexpected_index_list':[0,1], 'unexpected_list':[1, 1]}},
-                {
-                    'in':['n', [2]],
-                    'kwargs':{'mostly':.9},
-                    'out':{'success':False, 'unexpected_index_list':[2], 'unexpected_list':[2]}}
-        ]
-
-        for t in T:
-            out = D.expect_column_values_to_not_be_in_set(*t['in'],**t['kwargs'])
-            self.assertEqual(t['out']['success'], out['success'])
-            self.assertEqual(t['out']['unexpected_index_list'], out['result']['unexpected_index_list'])
-            self.assertEqual(t['out']['unexpected_list'], out['result']['unexpected_list'])
 
 
     # def test_expect_column_values_to_be_between(self):
