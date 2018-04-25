@@ -95,7 +95,9 @@ All Expectations accept an optional `meta` parameter. If `meta` is a valid JSON-
 `mostly`
 ------------------------------------------------------------------------------
 
-`mostly` is a special argument that is automatically available in all `column_map_expectations`. `mostly` must be a float between 0 and 1. Great Expectations evaluates it as a percentage, allowing some wiggle room when evaluating expectations: as long as `mostly` percent of rows evaluate to `True`, the expectation returns `"success": True`.
+`mostly` is a special argument that is automatically available in all `column_map_expectations`. `mostly` must be a \
+float between 0 and 1. Great Expectations evaluates it as a percentage, allowing some wiggle room when evaluating \
+expectations: as long as `mostly` percent of rows evaluate to `True`, the expectation returns `"success": True`.
 
 .. code-block:: bash
 
@@ -134,7 +136,7 @@ Expectations with `mostly` return exception lists even if they succeed:
     )
     {
       "success": true
-      "summary_obj": {
+      "result": {
         "unexpected_percent": 0.2,
         "partial_unexpected_index_list": [
           8,
