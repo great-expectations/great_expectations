@@ -542,43 +542,6 @@ class TestPandasDataset(unittest.TestCase):
     #             self.assertEqual(t['out']['unexpected_list'], out['result']['unexpected_list'])
 
 
-    def test_expect_column_most_common_value_to_be_in_set(self):
-
-        D = ge.dataset.PandasDataset({
-            'x' : [1,1,2,2,3,None, None, None, None, None],
-            'y' : ['hello', 'jello', 'mello', 'hello', 'jello', 'mello', 'hello', 'jello', 'mello', 'jello'],
-            'z' : [1,2,2,3,3,3,4,4,4,4],
-        })
-        D.set_default_expectation_argument("result_format", "COMPLETE")
-
-        T = [
-                {
-                    'in':{"column":"x","value_set":[1]},
-                    'out':{"success":False, "result": { "observed_value": [1,2], "element_count": 10, "missing_count": 5, "missing_percent": 0.5}},
-                },{
-                    'in':{"column":"x", "value_set":[1], "ties_okay":True},
-                    'out':{"success":True, "result": { "observed_value": [1,2], "element_count": 10, "missing_count": 5, "missing_percent": 0.5}},
-                },{
-                    'in':{"column":"x","value_set":[3]},
-                    'out':{"success":False, "result": { "observed_value": [1,2], "element_count": 10, "missing_count": 5, "missing_percent": 0.5}},
-                },{
-                    'in':{"column":"y","value_set":["jello", "hello"]},
-                    'out':{'success':True, "result": { "observed_value": ["jello"], "element_count": 10, "missing_count": 0, "missing_percent": 0}},
-                },{
-                    'in':{"column":"y","value_set":["hello", "mello"]},
-                    'out':{'success':False, "result": { "observed_value": ["jello"], "element_count": 10, "missing_count": 0, "missing_percent": 0}},
-                },{
-                    'in':{"column":"z","value_set":[4]},
-                    'out':{'success':True, "result": { "observed_value": [4], "element_count": 10, "missing_count": 0, "missing_percent": 0}},
-                }
-        ]
-
-
-        for t in T:
-            out = D.expect_column_most_common_value_to_be_in_set(**t['in'])
-            self.assertEqual(out, t['out'])
-
-
     def test_expectation_decorator_summary_mode(self):
 
         df = ge.dataset.PandasDataset({
