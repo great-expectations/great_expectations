@@ -542,36 +542,6 @@ class TestPandasDataset(unittest.TestCase):
     #             self.assertEqual(t['out']['unexpected_list'], out['result']['unexpected_list'])
 
 
-    def test_expect_column_stdev_to_be_between(self):
-
-        D = ge.dataset.PandasDataset({
-            'dist1' : [1,1,3],
-            'dist2' : [-1,0,1]
-        })
-        D.set_default_expectation_argument("result_format", "COMPLETE")
-
-        T = [
-                {
-                    'in':{'column':'dist1', 'min_value':.5, 'max_value':1.5},
-                    'out':{'success':True, "result": { "observed_value": D['dist1'].std(), "element_count": 3, "missing_count": 0, "missing_percent": 0}}},
-                {
-                    'in':{'column':'dist1', 'min_value':2, 'max_value':3},
-                    'out':{'success':False, "result": { "observed_value": D['dist1'].std(), "element_count": 3, "missing_count": 0, "missing_percent": 0}}},
-                {
-                    'in':{'column':'dist2', 'min_value':2, 'max_value':3},
-                    'out':{'success':False, "result": { "observed_value": 1, "element_count": 3, "missing_count": 0, "missing_percent": 0}}},
-                {
-                    'in':{'column':'dist2', 'min_value':0, 'max_value':1},
-                    'out':{'success':True, "result": { "observed_value": 1, "element_count": 3, "missing_count": 0, "missing_percent": 0}}}
-        ]
-
-        for t in T:
-            out = D.expect_column_stdev_to_be_between(**t['in'])
-            self.assertEqual(out, t['out'])
-
-        with self.assertRaises(ValueError):
-            D.expect_column_stdev_to_be_between("dist1")
-
     def test_expect_column_most_common_value_to_be_in_set(self):
 
         D = ge.dataset.PandasDataset({
