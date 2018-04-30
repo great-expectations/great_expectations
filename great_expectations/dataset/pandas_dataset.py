@@ -900,8 +900,8 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
         return {
             "success": (
-                ((min_value or None) or (min_value <= column_median)) and
-                ((max_value or None) or (column_median <= max_value))
+                ((min_value is None) or (min_value <= column_median)) and
+                ((max_value is None) or (column_median <= max_value))
             ),
             "result":{
                 "observed_value": column_median
