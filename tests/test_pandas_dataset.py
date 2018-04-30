@@ -361,43 +361,6 @@ class TestPandasDataset(unittest.TestCase):
     #             self.assertEqual(out['exception_info']['raised_exception'], True)
     #             self.assertIn(t['error']['traceback_substring'], out['exception_info']['exception_traceback'])
 
-    def test_expect_column_value_lengths_to_be_between(self):
-        D = ge.dataset.PandasDataset({
-            's1':['smart','silly','sassy','slimy','sexy'],
-            's2':['cool','calm','collected','casual','creepy'],
-            's3':['cool','calm','collected','casual',None],
-            's4':[1,2,3,4,5]
-        })
-        D.set_default_expectation_argument("result_format", "COMPLETE")
-
-        T = [
-                {
-                    'in':{'column':'s1', 'min_value':3, 'max_value':5},
-                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}},
-                {
-                    'in':{'column':'s2', 'min_value':4, 'max_value':6},
-                    'out':{'success':False, 'unexpected_index_list':[2], 'unexpected_list':['collected']}},
-                {
-                    'in':{'column':'s2', 'min_value':None, 'max_value':10},
-                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}},
-                {
-                    'in':{'column':'s3', 'min_value':None, 'max_value':10},
-                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}}
-        ]
-
-        for t in T:
-            out = D.expect_column_value_lengths_to_be_between(**t['in'])
-            self.assertEqual(t['out']['success'], out['success'])
-            self.assertEqual(t['out']['unexpected_index_list'], out['result']['unexpected_index_list'])
-            self.assertEqual(t['out']['unexpected_list'], out['result']['unexpected_list'])
-
-
-        with self.assertRaises(TypeError):
-            D.expect_column_value_lengths_to_be_between(**{'column':'s4', 'min_value':None, 'max_value':10})
-
-        with self.assertRaises(ValueError):
-            D.expect_column_value_lengths_to_be_between("s4", min_value=None, max_value=None)
-
 
     def test_expect_column_values_to_match_regex(self):
         """
