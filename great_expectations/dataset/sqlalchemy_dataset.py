@@ -42,20 +42,35 @@ class MetaSqlAlchemyDataset(Dataset):
 
             expected_condition = func(self, column, *args, **kwargs)
 
+            # FIXME Temporary Fix for counting missing values
+            ignore_values = [None]
+            if func.__name__ in ['expect_column_values_to_not_be_null', 'expect_column_values_to_be_null']:
+                ignore_values = []
+
             count_query = sa.select([
                 sa.func.count().label('element_count'),
                 sa.func.sum(
-                    sa.case([(sa.column(column) == None, 1)], else_=0)
+                    sa.case([(sa.or_(
+                        sa.column(column).in_(ignore_values),
+                        sa.column(column).is_(None) if None in ignore_values else False), 1)], else_=0)
                 ).label('null_count'),
                 sa.func.sum(
-                    sa.case([(sa.not_(expected_condition), 1)], else_=0)
+                    sa.case([(sa.and_(sa.not_(expected_condition),
+                                      sa.column(column).is_(None) == False if None in ignore_values else True),
+                              1)], else_=0)
                 ).label('unexpected_count')
             ]).select_from(sa.table(self.table_name))
 
             count_results = self.engine.execute(count_query).fetchone()
 
+            # Retrieve unexpected  values
             unexpected_query_results = self.engine.execute(
-                sa.select([sa.column(column)]).select_from(sa.table(self.table_name)).where(sa.not_(expected_condition)).limit(unexpected_count_limit)
+                sa.select([sa.column(column)]).select_from(sa.table(self.table_name)).where(
+                    sa.and_(sa.not_(expected_condition),
+                            sa.or_(
+                                sa.column(column).is_(None) == False if None in ignore_values else True,
+                                sa.column(column).in_(ignore_values) == False))
+                ).limit(unexpected_count_limit)
             )
 
             nonnull_count = count_results['element_count'] - count_results['null_count']
@@ -68,6 +83,10 @@ class MetaSqlAlchemyDataset(Dataset):
                 count_results['element_count'], nonnull_count,
                 maybe_limited_unexpected_list, None
             )
+
+            if func.__name__ in ['expect_column_values_to_not_be_null', 'expect_column_values_to_be_null']:
+                print("Deleting unneeded results")
+                del return_obj['result']['unexpected_percent_nonmissing']
 
             return return_obj
 
@@ -145,68 +164,6 @@ class MetaSqlAlchemyDataset(Dataset):
 
         return inner_wrapper
 
-    @classmethod
-    def null_map_expectation(cls, func):
-        """For SqlAlchemy, this decorator allows individual column_map_expectations to simply return the filter
-        that describes the expected condition on their data, when that condition involves missing values.
-
-        The decorator will then use that filter to obtain unexpected elements, relevant counts, and return the formatted
-        object.
-        """
-
-        @cls.expectation(inspect.getargspec(func)[0][1:])
-        @wraps(func)
-        def inner_wrapper(self, column, mostly=None, result_format=None, *args, **kwargs):
-            if result_format is None:
-                result_format = self.default_expectation_args["result_format"]
-
-            result_format = parse_result_format(result_format)
-
-            if result_format['result_format'] == 'COMPLETE':
-                unexpected_count_limit = None
-            else:
-                unexpected_count_limit = result_format['partial_unexpected_count']
-
-            expected_condition = func(self, column, *args, **kwargs)
-
-            count_query = sa.select([
-                sa.func.count().label('element_count'),
-                sa.func.sum(
-                    sa.case([(sa.column(column) == None, 1)], else_=0)
-                ).label('null_count'),
-                sa.func.sum(
-                    sa.case([(sa.not_(expected_condition), 1)], else_=0)
-                ).label('unexpected_count')
-            ]).select_from(sa.table(self.table_name))
-
-            count_results = self.engine.execute(count_query).fetchone()
-
-            unexpected_query_results = self.engine.execute(
-                sa.select([sa.column(column)]).select_from(sa.table(self.table_name)).where(sa.not_(expected_condition)).limit(unexpected_count_limit)
-            )
-
-            element_count = count_results['element_count']
-            nonnull_count = element_count - count_results['null_count']
-            maybe_limited_unexpected_list = [x[column] for x in unexpected_query_results.fetchall()]
-            success_count = element_count - count_results['unexpected_count']
-
-            success, percent_success = self._calc_map_expectation_success(success_count, element_count, mostly)
-
-            return_obj = self._format_column_map_output(
-                result_format, success,
-                count_results['element_count'], nonnull_count,
-                maybe_limited_unexpected_list, None
-            )
-
-            return_obj['result'].pop('unexpected_percent_nonmissing', None)
-            return_obj['result'].pop('partial_unexpected_counts', None)
-
-            return return_obj
-
-        inner_wrapper.__name__ = func.__name__
-        inner_wrapper.__doc__ = func.__doc__
-
-        return inner_wrapper
 
 class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
@@ -388,7 +345,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
     ###
 
     @DocInherit
-    @MetaSqlAlchemyDataset.null_map_expectation
+    @MetaSqlAlchemyDataset.column_map_expectation
     def expect_column_values_to_be_null(self,
         column,
         mostly=None,
@@ -398,7 +355,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         return sa.column(column) == None
 
     @DocInherit
-    @MetaSqlAlchemyDataset.null_map_expectation
+    @MetaSqlAlchemyDataset.column_map_expectation
     def expect_column_values_to_not_be_null(self,
         column,
         mostly=None,
