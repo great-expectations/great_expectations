@@ -1,5 +1,5 @@
 {
-  "expectation_type": "expect_column_values_to_not_be_null",
+  "expectation_type": "expect_column_values_to_be_null",
   "datasets": [
     {
       "data": {
@@ -11,10 +11,10 @@
       },
       "tests": [
         {
-          "title": "Basic positive case, COMPLETE result format",
+          "title": "Basic positive case, BASIC result format",
           "exact_match_out": true,
           "in": {
-            "column": "no_null",
+            "column": "all_null",
             "result_format": "BASIC"
           },
           "out": {
@@ -29,47 +29,45 @@
             }
           }
         },{
-          "title": "Negative, all missing values",
+          "title": "Negative, no missing values",
           "exact_match_out": false,
           "in": {
-            "column": "all_null",
-            "result_format": "COMPLETE"
+            "column": "no_null"
           },
           "out": {
             "success": false,
-            "unexpected_list": [null, null, null, null],
-            "unexpected_index_list": [0,1, 2, 3]
+            "unexpected_list": ["a", "b", "c", "d"],
+            "unexpected_index_list": [0, 1, 2, 3]
           }
         },{
           "title": "Positive, mostly",
           "exact_match_out": false,
           "in": {
-            "column": "one_null",
-            "mostly": 0.7,
-            "result_format": "COMPLETE"
+            "column": "three_null",
+            "mostly": 0.75
           },
           "out": {
             "success": true,
-            "unexpected_list": [null],
-            "unexpected_index_list": [2]
+            "unexpected_list": [5],
+            "unexpected_index_list": [3]
           }
         },{
           "title": "Negative, mostly",
           "exact_match_out": false,
           "in": {
-            "column": "one_null",
+            "column": "three_null",
             "mostly": 0.8
           },
           "out": {
             "success": false,
-            "unexpected_list": [null],
-            "unexpected_index_list": [2]
+            "unexpected_list": [5],
+            "unexpected_index_list": [3]
           }
         },{
           "title": "Positive case with mostly and no unexpected values",
           "exact_match_out": false,
           "in": {
-            "column": "no_null",
+            "column": "all_null",
             "mostly": 0.9
           },
           "out": {
@@ -77,19 +75,26 @@
             "unexpected_list": [],
             "unexpected_index_list": []
           }
-        },{
-          "title": "Negative case with 75% null values, no mostly",
+        },
+        {
+          "title": "Negative case with 75% non-null values, no mostly",
           "exact_match_out": false,
           "in": {
-            "column": "three_null"
+            "column": "one_null"
           },
           "out": {
             "success": false,
-            "unexpected_list": [null, null, null],
-            "unexpected_index_list": [0, 1, 2]
+            "unexpected_list": [
+              4,
+              5,
+              7
+            ],
+            "unexpected_index_list": [
+              0,
+              1,
+              3
+            ]
           }
-        }
-      ]
-    }
-  ]
+        }]
+    }]
 }
