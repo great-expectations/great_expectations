@@ -68,7 +68,7 @@ class MetaSqlAlchemyDataset(Dataset):
                 sa.select([sa.column(column)]).select_from(sa.table(self.table_name)).where(
                     sa.and_(sa.not_(expected_condition),
                             sa.or_(
-                                sa.column(column).is_(None) == False if None in ignore_values else True,
+                                sa.column(column).is_(None) == False if None in ignore_values else False,
                                 sa.column(column).in_(ignore_values) == False))
                 ).limit(unexpected_count_limit)
             )
@@ -86,6 +86,10 @@ class MetaSqlAlchemyDataset(Dataset):
 
             if func.__name__ in ['expect_column_values_to_not_be_null', 'expect_column_values_to_be_null']:
                 del return_obj['result']['unexpected_percent_nonmissing']
+                try:
+                    del return_obj['result']['partial_unexpected_counts']
+                except KeyError:
+                    pass
 
             return return_obj
 
