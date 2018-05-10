@@ -81,8 +81,8 @@ class MetaPandasDataset(Dataset):
             boolean_mapped_success_values = func(self, nonnull_values, *args, **kwargs)
             success_count = boolean_mapped_success_values.sum()
 
-            unexpected_list = list(nonnull_values[~boolean_mapped_success_values])
-            unexpected_index_list = list(nonnull_values[~boolean_mapped_success_values].index)
+            unexpected_list = list(nonnull_values[boolean_mapped_success_values==False])
+            unexpected_index_list = list(nonnull_values[boolean_mapped_success_values==False].index)
 
             success, percent_success = self._calc_map_expectation_success(success_count, nonnull_count, mostly)
 
