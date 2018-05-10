@@ -168,7 +168,7 @@ class Dataset(object):
         Notes:
             column_map_expectation intercepts and takes action based on the following parameters:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if the percentage of unexpected values is less than or equal to `mostly`. \
+                Return `"success": True` if at least mostly percent of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
             column_map_expectation *excludes null values* from being passed to the function
@@ -1197,7 +1197,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if the percentage of unexpected values is less than or equal to `mostly`. \
+                Return `"success": True` if at least mostly percent of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1240,7 +1240,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if the percentage of unexpected values is less than or equal to `mostly`. \
+                Return `"success": True` if at least mostly percent of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1284,7 +1284,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if the percentage of unexpected values is less than or equal to `mostly`. \
+                Return `"success": True` if at least mostly percent of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1337,7 +1337,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if the percentage of unexpected values is less than or equal to `mostly`. \
+                Return `"success": True` if at least mostly percent of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1396,7 +1396,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if the percentage of unexpected values is less than or equal to `mostly`. \
+                Return `"success": True` if at least mostly percent of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1472,7 +1472,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if the percentage of unexpected values is less than or equal to `mostly`. \
+                Return `"success": True` if at least mostly percent of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1538,7 +1538,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if the percentage of unexpected values is less than or equal to `mostly`. \
+                Return `"success": True` if at least mostly percent of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1591,7 +1591,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             parse_strings_as_datetimes (boolean or None) : If True, parse min_value, max_value, and all non-null column\
                 values to datetimes before making comparisons.
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if the percentage of unexpected values is less than or equal to `mostly`. \
+                Return `"success": True` if at least mostly percent of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1652,7 +1652,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             parse_strings_as_datetimes (boolean or None) : \
                 If True, all non-null column values to datetimes before making comparisons
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if the percentage of unexpected values is less than or equal to `mostly`. \
+                Return `"success": True` if at least mostly percent of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1707,7 +1707,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             parse_strings_as_datetimes (boolean or None) : \
                 If True, all non-null column values to datetimes before making comparisons
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if the percentage of unexpected values is less than or equal to `mostly`. \
+                Return `"success": True` if at least mostly percent of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1762,7 +1762,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             max_value (int or None): \
                 The maximum value for a column entry length.
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if the percentage of unexpected values is less than or equal to `mostly`. \
+                Return `"success": True` if at least mostly percent of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1815,7 +1815,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if the percentage of unexpected values is less than or equal to `mostly`. \
+                Return `"success": True` if at least mostly percent of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1862,7 +1862,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if the percentage of unexpected values is less than or equal to `mostly`. \
+                Return `"success": True` if at least mostly percent of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1911,7 +1911,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if the percentage of unexpected values is less than or equal to `mostly`. \
+                Return `"success": True` if at least mostly percent of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1964,7 +1964,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                 Use "any" if the value should match at least one regular expression in the list.
                 Use "all" if it should match each regular expression in the list.
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if the percentage of unexpected values is less than or equal to `mostly`. \
+                Return `"success": True` if at least mostly percent of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -2010,7 +2010,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if the percentage of unexpected values is less than or equal to `mostly`. \
+                Return `"success": True` if at least mostly percent of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -2058,7 +2058,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if the percentage of unexpected values is less than or equal to `mostly`. \
+                Return `"success": True` if at least mostly percent of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -2099,7 +2099,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if the percentage of unexpected values is less than or equal to `mostly`. \
+                Return `"success": True` if at least mostly percent of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -2139,7 +2139,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if the percentage of unexpected values is less than or equal to `mostly`. \
+                Return `"success": True` if at least mostly percent of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -2183,7 +2183,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if the percentage of unexpected values is less than or equal to `mostly`. \
+                Return `"success": True` if at least mostly percent of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:

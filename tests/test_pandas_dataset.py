@@ -65,6 +65,7 @@ class TestPandasDataset(unittest.TestCase):
 
         for t in T:
             out = D.expect_column_values_to_be_unique(**t['in'])
+
             self.assertEqual(t['out']['success'], out['success'])
             self.assertEqual(t['out']['unexpected_index_list'], out['result']['unexpected_index_list'])
             self.assertEqual(t['out']['unexpected_list'], out['result']['unexpected_list'])
@@ -77,6 +78,7 @@ class TestPandasDataset(unittest.TestCase):
         df.set_default_expectation_argument("result_format", "COMPLETE")
 
         # Tests for df
+
         T = [
                 {
                     'in':['a'],
@@ -102,6 +104,7 @@ class TestPandasDataset(unittest.TestCase):
 
         for t in T:
             out = df.expect_column_values_to_be_unique(*t['in'], **t['kwargs'])
+
             self.assertEqual(t['out']['success'], out['success'])
             self.assertEqual(t['out']['unexpected_index_list'], out['result']['unexpected_index_list'])
             self.assertEqual(t['out']['unexpected_list'], out['result']['unexpected_list'])
@@ -287,135 +290,8 @@ class TestPandasDataset(unittest.TestCase):
             self.assertEqual(t['out']['unexpected_index_list'], out['result']['unexpected_index_list'])
             self.assertEqual(t['out']['unexpected_list'], out['result']['unexpected_list'])
 
-    def test_expect_column_values_to_be_in_set(self):
-        """
-        Cases Tested:
 
-        """
 
-        D = ge.dataset.PandasDataset({
-            'x' : [1,2,4],
-            'y' : [1,2,5],
-            'z' : ['hello', 'jello', 'mello'],
-        })
-        D.set_default_expectation_argument("result_format", "COMPLETE")
-
-        T = [
-                {
-                    'in':['x', [1,2,4]],
-                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}},
-                {
-                    'in':['x', [4,2]],
-                    'out':{'success':False, 'unexpected_index_list':[0], 'unexpected_list':[1]}},
-                {
-                    'in':['y', []],
-                    'out':{'success':False, 'unexpected_index_list':[0,1,2], 'unexpected_list':[1,2,5]}},
-                {
-                    'in':['z', ['hello','jello','mello']],
-                    'out': {'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}},
-                {
-                    'in':['z', ['hello']],
-                    'out': {'success':False, 'unexpected_index_list':[1,2], 'unexpected_list':['jello','mello']}}
-        ]
-
-        for t in T:
-            out = D.expect_column_values_to_be_in_set(*t['in'])
-            self.assertEqual(t['out']['success'], out['success'])
-            self.assertEqual(t['out']['unexpected_index_list'], out['result']['unexpected_index_list'])
-            self.assertEqual(t['out']['unexpected_list'], out['result']['unexpected_list'])
-
-        self.assertRaises(
-            TypeError,
-            D.expect_column_values_to_be_in_set, 'x', None
-        )
-
-        D2 = ge.dataset.PandasDataset({
-            'x' : [1,1,2,None],
-            'y' : [None,None,None,None],
-        })
-        D2.set_default_expectation_argument("result_format", "COMPLETE")
-
-        T = [
-                {
-                    'in':{'column':'x', 'values_set':[1,2]},
-                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}},
-                {
-                    'in':{'column':'x', 'values_set':[1]},
-                    'out':{'success':False, 'unexpected_index_list':[2], 'unexpected_list':[2]}},
-                {
-                    'in':{'column':'x', 'values_set':[1], 'mostly':.66},
-                    'out':{'success':True, 'unexpected_index_list':[2], 'unexpected_list':[2]}},
-                {
-                    'in':{'column':'x', 'values_set':[2], 'mostly':.66},
-                    'out':{'success':False, 'unexpected_index_list':[0,1], 'unexpected_list':[1,1]}},
-                {
-                    'in':{'column':'y', 'values_set':[]},
-                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}},
-                {
-                    'in':{'column':'y', 'values_set':[2], 'mostly':.5},
-                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}}
-        ]
-
-        for t in T:
-            out = D2.expect_column_values_to_be_in_set(**t['in'])
-            self.assertEqual(t['out']['success'], out['success'])
-            self.assertEqual(t['out']['unexpected_index_list'], out['result']['unexpected_index_list'])
-            self.assertEqual(t['out']['unexpected_list'], out['result']['unexpected_list'])
-
-    def test_expect_column_values_to_not_be_in_set(self):
-        """
-        Cases Tested:
-        -Repeat values being returned
-        -Running expectations only on nonmissing values
-        """
-
-        D = ge.dataset.PandasDataset({
-            'x' : [1,2,4],
-            'z' : ['hello', 'jello', 'mello'],
-            'a' : [1,1,2],
-            'n' : [None,None,2],
-        })
-        D.set_default_expectation_argument("result_format", "COMPLETE")
-
-        T = [
-                {
-                    'in':['x', [1,2]],'kwargs':{},
-                    'out':{'success':False, 'unexpected_index_list':[0,1], 'unexpected_list':[1,2]}},
-                {
-                    'in':['x',[5,6]],'kwargs':{},
-                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}},
-                {
-                    'in':['z',['hello', 'jello']],'kwargs':{},
-                    'out':{'success':False, 'unexpected_index_list':[0,1], 'unexpected_list':['hello', 'jello']}},
-                {
-                    'in':['z',[]],'kwargs':{},
-                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}},
-                {
-                    'in':['a', [1]],'kwargs':{},
-                    'out':{'success':False, 'unexpected_index_list':[0,1], 'unexpected_list':[1, 1]}},
-                {
-                    'in':['n', [2]],
-                    'kwargs':{},
-                    'out':{'success':False, 'unexpected_index_list':[2], 'unexpected_list':[2]}},
-                {
-                    'in':['n', []],
-                    'kwargs':{},
-                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}},
-                {
-                    'in':['a', [1]],
-                    'kwargs':{'mostly':.1},
-                    'out':{'success':True, 'unexpected_index_list':[0,1], 'unexpected_list':[1, 1]}},
-                {
-                    'in':['n', [2]],
-                    'kwargs':{'mostly':.9},
-                    'out':{'success':False, 'unexpected_index_list':[2], 'unexpected_list':[2]}}
-        ]
-
-        for t in T:
-            out = D.expect_column_values_to_not_be_in_set(*t['in'],**t['kwargs'])
-            self.assertEqual(t['out']['success'], out['success'])
-            self.assertEqual(t['out']['unexpected_index_list'], out['result']['unexpected_index_list'])
-            self.assertEqual(t['out']['unexpected_list'], out['result']['unexpected_list'])
 
 
     # def test_expect_column_values_to_be_between(self):
@@ -452,149 +328,6 @@ class TestPandasDataset(unittest.TestCase):
     #             self.assertEqual(out['exception_info']['raised_exception'], True)
     #             self.assertIn(t['error']['traceback_substring'], out['exception_info']['exception_traceback'])
 
-    def test_expect_column_value_lengths_to_be_between(self):
-        D = ge.dataset.PandasDataset({
-            's1':['smart','silly','sassy','slimy','sexy'],
-            's2':['cool','calm','collected','casual','creepy'],
-            's3':['cool','calm','collected','casual',None],
-            's4':[1,2,3,4,5]
-        })
-        D.set_default_expectation_argument("result_format", "COMPLETE")
-
-        T = [
-                {
-                    'in':{'column':'s1', 'min_value':3, 'max_value':5},
-                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}},
-                {
-                    'in':{'column':'s2', 'min_value':4, 'max_value':6},
-                    'out':{'success':False, 'unexpected_index_list':[2], 'unexpected_list':['collected']}},
-                {
-                    'in':{'column':'s2', 'min_value':None, 'max_value':10},
-                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}},
-                {
-                    'in':{'column':'s3', 'min_value':None, 'max_value':10},
-                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}}
-        ]
-
-        for t in T:
-            out = D.expect_column_value_lengths_to_be_between(**t['in'])
-            self.assertEqual(t['out']['success'], out['success'])
-            self.assertEqual(t['out']['unexpected_index_list'], out['result']['unexpected_index_list'])
-            self.assertEqual(t['out']['unexpected_list'], out['result']['unexpected_list'])
-
-
-        with self.assertRaises(TypeError):
-            D.expect_column_value_lengths_to_be_between(**{'column':'s4', 'min_value':None, 'max_value':10})
-
-        with self.assertRaises(ValueError):
-            D.expect_column_value_lengths_to_be_between("s4", min_value=None, max_value=None)
-
-
-    def test_expect_column_values_to_match_regex(self):
-        """
-        Cases Tested:
-            Tested mostly alphabet regex
-        """
-
-        D = ge.dataset.PandasDataset({
-            'x' : ['aa', 'ab', 'ac', 'a1', None],
-            'y' : ['aa', 'ab', 'ac', 'ba', 'ca'],
-        })
-        D.set_default_expectation_argument("result_format", "COMPLETE")
-
-
-        D2 = ge.dataset.PandasDataset({
-            'a' : ['aaa', 'abb', 'acc', 'add', 'bee'],
-            'b' : ['aaa', 'abb', 'acc', 'bdd', None],
-            'c' : [ None,  None,  None,  None, None],
-        })
-        D2.set_default_expectation_argument("result_format", "COMPLETE")
-
-        T = [
-                {
-                    'in':{'column':'x', 'regex':'^a'},
-                    'out':{'success':True, 'unexpected_list':[], 'unexpected_index_list':[]}},
-                {
-                    'in':{'column':'x', 'regex':'aa'},
-                    'out':{'success':False, 'unexpected_list':['ab', 'ac', 'a1'], 'unexpected_index_list':[1,2,3]}},
-                {
-                    'in':{'column':'x', 'regex':'a[a-z]'},
-                    'out':{'success':False, 'unexpected_list':['a1'], 'unexpected_index_list':[3]}},
-                {
-                    'in':{'column':'y', 'regex':'[abc]{2}'},
-                    'out':{'success':True, 'unexpected_list':[], 'unexpected_index_list':[]}},
-                {
-                    'in':{'column':'y', 'regex':'[z]'},
-                    'out':{'success':False, 'unexpected_list':['aa', 'ab', 'ac', 'ba', 'ca'], 'unexpected_index_list':[0,1,2,3,4]}}
-        ]
-
-        for t in T:
-            out = D.expect_column_values_to_match_regex(**t['in'])
-            self.assertEqual(t['out']['success'], out['success'])
-            self.assertEqual(t['out']['unexpected_index_list'], out['result']['unexpected_index_list'])
-            self.assertEqual(t['out']['unexpected_list'], out['result']['unexpected_list'])
-
-        T = [
-                {
-                    'in':{'column':'a', 'regex':'^a', 'mostly':.9},
-                    'out':{'success':False, 'unexpected_list':['bee'], 'unexpected_index_list':[4]}},
-                {
-                    'in':{'column':'a', 'regex':'^a', 'mostly':.8},
-                    'out':{'success':True, 'unexpected_list':['bee'], 'unexpected_index_list':[4]}},
-                {
-                    'in':{'column':'a', 'regex':'^a', 'mostly':.7},
-                    'out':{'success':True, 'unexpected_list':['bee'], 'unexpected_index_list':[4]}},
-                {
-                    'in':{'column':'b', 'regex':'^a', 'mostly':.9},
-                    'out':{'success':False, 'unexpected_list':['bdd'], 'unexpected_index_list':[3]}},
-                {
-                    'in':{'column':'b', 'regex':'^a', 'mostly':.75},
-                    'out':{'success':True, 'unexpected_list':['bdd'], 'unexpected_index_list':[3]}},
-                {
-                    'in':{'column':'b', 'regex':'^a', 'mostly':.5},
-                    'out':{'success':True, 'unexpected_list':['bdd'], 'unexpected_index_list':[3]}},
-                {
-                    'in':{'column':'c', 'regex':'^a'},
-                    'out':{'success':True, 'unexpected_list':[], 'unexpected_index_list':[]}},
-                {
-                    'in':{'column':'c', 'regex':'^a', 'mostly':.5},
-                    'out':{'success':True, 'unexpected_list':[], 'unexpected_index_list':[]}}
-        ]
-
-        for t in T:
-            out = D2.expect_column_values_to_match_regex(**t['in'])
-            self.assertEqual(t['out']['success'], out['success'])
-            self.assertEqual(t['out']['unexpected_index_list'], out['result']['unexpected_index_list'])
-            self.assertEqual(t['out']['unexpected_list'], out['result']['unexpected_list'])
-
-
-    def test_expect_column_values_to_not_match_regex(self):
-        #!!! Need to test mostly and suppress_exceptions
-
-        D = ge.dataset.PandasDataset({
-            'x' : ['aa', 'ab', 'ac', 'a1', None, None, None],
-            'y' : ['axxx', 'exxxx', 'ixxxx', 'oxxxxx', 'uxxxxx', 'yxxxxx', 'zxxxx'],
-            'z' : [None, None, None, None, None, None, None]
-        })
-        D.set_default_expectation_argument("result_format", "COMPLETE")
-
-        T = [
-                {
-                    'in':{'column':'x', 'regex':'^a'},
-                    'out':{'success':False, 'unexpected_index_list':[0,1,2,3], 'unexpected_list':['aa', 'ab', 'ac', 'a1']}},
-                {
-                    'in':{'column':'x', 'regex':'^b'},
-                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}},
-                {
-                    'in':{'column':'y', 'regex':'^z'},
-                    'out':{'success':False, 'unexpected_index_list':[6], 'unexpected_list':['zxxxx']}}
-        ]
-
-        for t in T:
-            out = D.expect_column_values_to_not_match_regex(**t['in'])
-            self.assertEqual(t['out']['success'], out['success'])
-            self.assertEqual(t['out']['unexpected_index_list'], out['result']['unexpected_index_list'])
-            self.assertEqual(t['out']['unexpected_list'], out['result']['unexpected_list'])
 
     # def test_expect_column_values_to_match_regex_list(self):
     #     with open("./tests/test_sets/expect_column_values_to_match_regex_list_test_set.json") as f:
@@ -774,93 +507,6 @@ class TestPandasDataset(unittest.TestCase):
     #             self.assertEqual(t['out']['unexpected_index_list'], out['result']['unexpected_index_list'])
     #         if 'unexpected_list' in t['out']:
     #             self.assertEqual(t['out']['unexpected_list'], out['result']['unexpected_list'])
-
-    def test_expect_column_median_to_be_between(self):
-        ds = ge.dataset.PandasDataset({
-            'a': [0,1,2,3],
-            'b': [0,1,1,2]
-        })
-
-        self.assertEqual(
-            True,
-            ds.expect_column_median_to_be_between('a', 1, 2)['success']
-        )
-
-        self.assertEqual(
-            1.5,
-            ds.expect_column_median_to_be_between('a', 1, 2)['result']['observed_value']
-        )
-
-        self.assertEqual(
-            1,
-            ds.expect_column_median_to_be_between('b', 1, 1)['result']['observed_value']
-        )
-
-    def test_expect_column_stdev_to_be_between(self):
-
-        D = ge.dataset.PandasDataset({
-            'dist1' : [1,1,3],
-            'dist2' : [-1,0,1]
-        })
-        D.set_default_expectation_argument("result_format", "COMPLETE")
-
-        T = [
-                {
-                    'in':{'column':'dist1', 'min_value':.5, 'max_value':1.5},
-                    'out':{'success':True, "result": { "observed_value": D['dist1'].std(), "element_count": 3, "missing_count": 0, "missing_percent": 0}}},
-                {
-                    'in':{'column':'dist1', 'min_value':2, 'max_value':3},
-                    'out':{'success':False, "result": { "observed_value": D['dist1'].std(), "element_count": 3, "missing_count": 0, "missing_percent": 0}}},
-                {
-                    'in':{'column':'dist2', 'min_value':2, 'max_value':3},
-                    'out':{'success':False, "result": { "observed_value": 1, "element_count": 3, "missing_count": 0, "missing_percent": 0}}},
-                {
-                    'in':{'column':'dist2', 'min_value':0, 'max_value':1},
-                    'out':{'success':True, "result": { "observed_value": 1, "element_count": 3, "missing_count": 0, "missing_percent": 0}}}
-        ]
-
-        for t in T:
-            out = D.expect_column_stdev_to_be_between(**t['in'])
-            self.assertEqual(out, t['out'])
-
-        with self.assertRaises(ValueError):
-            D.expect_column_stdev_to_be_between("dist1")
-
-    def test_expect_column_most_common_value_to_be_in_set(self):
-
-        D = ge.dataset.PandasDataset({
-            'x' : [1,1,2,2,3,None, None, None, None, None],
-            'y' : ['hello', 'jello', 'mello', 'hello', 'jello', 'mello', 'hello', 'jello', 'mello', 'jello'],
-            'z' : [1,2,2,3,3,3,4,4,4,4],
-        })
-        D.set_default_expectation_argument("result_format", "COMPLETE")
-
-        T = [
-                {
-                    'in':{"column":"x","value_set":[1]},
-                    'out':{"success":False, "result": { "observed_value": [1,2], "element_count": 10, "missing_count": 5, "missing_percent": 0.5}},
-                },{
-                    'in':{"column":"x", "value_set":[1], "ties_okay":True},
-                    'out':{"success":True, "result": { "observed_value": [1,2], "element_count": 10, "missing_count": 5, "missing_percent": 0.5}},
-                },{
-                    'in':{"column":"x","value_set":[3]},
-                    'out':{"success":False, "result": { "observed_value": [1,2], "element_count": 10, "missing_count": 5, "missing_percent": 0.5}},
-                },{
-                    'in':{"column":"y","value_set":["jello", "hello"]},
-                    'out':{'success':True, "result": { "observed_value": ["jello"], "element_count": 10, "missing_count": 0, "missing_percent": 0}},
-                },{
-                    'in':{"column":"y","value_set":["hello", "mello"]},
-                    'out':{'success':False, "result": { "observed_value": ["jello"], "element_count": 10, "missing_count": 0, "missing_percent": 0}},
-                },{
-                    'in':{"column":"z","value_set":[4]},
-                    'out':{'success':True, "result": { "observed_value": [4], "element_count": 10, "missing_count": 0, "missing_percent": 0}},
-                }
-        ]
-
-
-        for t in T:
-            out = D.expect_column_most_common_value_to_be_in_set(**t['in'])
-            self.assertEqual(out, t['out'])
 
 
     def test_expectation_decorator_summary_mode(self):
