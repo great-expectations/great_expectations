@@ -85,7 +85,6 @@ class MetaSqlAlchemyDataset(Dataset):
             )
 
             if func.__name__ in ['expect_column_values_to_not_be_null', 'expect_column_values_to_be_null']:
-                print("Deleting unneeded results")
                 del return_obj['result']['unexpected_percent_nonmissing']
 
             return return_obj
