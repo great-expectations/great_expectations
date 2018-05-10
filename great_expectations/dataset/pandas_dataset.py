@@ -75,8 +75,8 @@ class MetaPandasDataset(Dataset):
             element_count = int(len(series))
 
             # FIXME rename nonnull to non_ignored?
-            nonnull_values = series[~boolean_mapped_null_values]
-            nonnull_count = int((~boolean_mapped_null_values).sum())
+            nonnull_values = series[boolean_mapped_null_values==False]
+            nonnull_count = int((boolean_mapped_null_values==False).sum())
 
             boolean_mapped_success_values = func(self, nonnull_values, *args, **kwargs)
             success_count = boolean_mapped_success_values.sum()
