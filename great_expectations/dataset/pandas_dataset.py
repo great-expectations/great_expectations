@@ -66,7 +66,7 @@ class MetaPandasDataset(Dataset):
         
             series = self[column]
 
-            # FIXME rename to mapped_ignore_values
+            # FIXME rename to mapped_ignore_values?
             if len(ignore_values) == 0:
                 boolean_mapped_null_values = np.array([False for value in series])
             else:
@@ -74,7 +74,7 @@ class MetaPandasDataset(Dataset):
 
             element_count = int(len(series))
 
-            # FIXME rename nonnull to non-ignored
+            # FIXME rename nonnull to non_ignored?
             nonnull_values = series[~boolean_mapped_null_values]
             nonnull_count = int((~boolean_mapped_null_values).sum())
 
