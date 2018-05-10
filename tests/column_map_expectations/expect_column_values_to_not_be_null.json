@@ -54,6 +54,18 @@
             "unexpected_index_list": [2]
           }
         },{
+          "title": "Negative, no mostly, one missing",
+          "exact_match_out": false,
+          "in": {
+            "column": "one_null",
+            "result_format": "COMPLETE"
+          },
+          "out": {
+            "success": false,
+            "unexpected_list": [null],
+            "unexpected_index_list": [2]
+          }
+        },{
           "title": "Negative, mostly",
           "exact_match_out": false,
           "in": {
