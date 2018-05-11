@@ -20,7 +20,6 @@ from .util import DocInherit, recursively_convert_to_json_serializable, \
         is_valid_partition_object, is_valid_categorical_partition_object, is_valid_continuous_partition_object, \
         infer_distribution_parameters, _scipy_distribution_positional_args_from_dict, validate_distribution_parameters,\
         parse_result_format, create_multiple_expectations
-from great_expectations.util import is_nan
 
 
 class MetaPandasDataset(Dataset):
@@ -70,7 +69,8 @@ class MetaPandasDataset(Dataset):
             if len(ignore_values) == 0:
                 boolean_mapped_null_values = np.array([False for value in series])
             else:
-                boolean_mapped_null_values = np.array([True if value in ignore_values or is_nan(value) else False for value in series])
+                boolean_mapped_null_values = np.array([True if (value in ignore_values) or (pd.isnull(value)) else False
+                                                       for value in series])
 
             element_count = int(len(series))
 
@@ -390,7 +390,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                                             mostly=None,
                                             result_format=None, include_config=False, catch_exceptions=None, meta=None, include_nulls=True):
 
-        return column.map(lambda x: x is not None and not is_nan(x))
+        return column.map(lambda x: x is not None and not pd.isnull(x))
 
 
     @DocInherit
@@ -399,7 +399,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                                         mostly=None,
                                         result_format=None, include_config=False, catch_exceptions=None, meta=None):
 
-        return column.map(lambda x: x is None or is_nan(x))
+        return column.map(lambda x: x is None or pd.isnull(x))
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
