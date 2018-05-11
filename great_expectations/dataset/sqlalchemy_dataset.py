@@ -43,6 +43,7 @@ class MetaSqlAlchemyDataset(Dataset):
             expected_condition = func(self, column, *args, **kwargs)
 
             # FIXME Temporary Fix for counting missing values
+            # Added to compensate when an ignore_values argument is added to the expectation
             ignore_values = [None]
             if func.__name__ in ['expect_column_values_to_not_be_null', 'expect_column_values_to_be_null']:
                 ignore_values = []
@@ -52,6 +53,8 @@ class MetaSqlAlchemyDataset(Dataset):
                 sa.func.sum(
                     sa.case([(sa.or_(
                         sa.column(column).in_(ignore_values),
+                        # Below is necessary b/c sa.in_() uses `==` but None != None
+                        # But we only consider this if None is actually in the list of ignore values
                         sa.column(column).is_(None) if None in ignore_values else False), 1)], else_=0)
                 ).label('null_count'),
                 sa.func.sum(
@@ -68,7 +71,9 @@ class MetaSqlAlchemyDataset(Dataset):
                 sa.select([sa.column(column)]).select_from(sa.table(self.table_name)).where(
                     sa.and_(sa.not_(expected_condition),
                             sa.or_(
+                                # None needs its own logic clause b/c sa.in_() uses `==` and None != None
                                 sa.column(column).is_(None) == False if None in ignore_values else False,
+                                # We want to ignore any values that are in the ignore list
                                 sa.column(column).in_(ignore_values) == False))
                 ).limit(unexpected_count_limit)
             )
@@ -85,6 +90,7 @@ class MetaSqlAlchemyDataset(Dataset):
             )
 
             if func.__name__ in ['expect_column_values_to_not_be_null', 'expect_column_values_to_be_null']:
+                # These results are unnecessary for the above expectations
                 del return_obj['result']['unexpected_percent_nonmissing']
                 try:
                     del return_obj['result']['partial_unexpected_counts']

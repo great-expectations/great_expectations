@@ -53,13 +53,3 @@ def expect_file_hash_to_equal(filename, value, hash_alg='md5'):
     except ValueError:
         raise
     return success
-
-
-def is_nan(item_a):
-    """Helper function that can recognize equality of np.nan values, because np.nan != np.nan.
-    """
-    try:
-        testing.assert_equal(item_a, nan)
-    except AssertionError:
-        return False
-    return True
