@@ -57,19 +57,32 @@ class MetaPandasDataset(Dataset):
                 result_format = self.default_expectation_args["result_format"]
 
             result_format = parse_result_format(result_format)
+
+            # FIXME temporary fix for missing/ignored value
+            ignore_values = [None, np.nan]
+            if func.__name__ in ['expect_column_values_to_not_be_null', 'expect_column_values_to_be_null']:
+                ignore_values = []
         
             series = self[column]
-            boolean_mapped_null_values = series.isnull()
+
+            # FIXME rename to mapped_ignore_values?
+            if len(ignore_values) == 0:
+                boolean_mapped_null_values = np.array([False for value in series])
+            else:
+                boolean_mapped_null_values = np.array([True if (value in ignore_values) or (pd.isnull(value)) else False
+                                                       for value in series])
 
             element_count = int(len(series))
+
+            # FIXME rename nonnull to non_ignored?
             nonnull_values = series[boolean_mapped_null_values==False]
             nonnull_count = int((boolean_mapped_null_values==False).sum())
 
             boolean_mapped_success_values = func(self, nonnull_values, *args, **kwargs)
             success_count = boolean_mapped_success_values.sum()
 
-            unexpected_list = list(series[(boolean_mapped_success_values==False)&(boolean_mapped_null_values==False)])
-            unexpected_index_list = list(series[(boolean_mapped_success_values==False)&(boolean_mapped_null_values==False)].index)
+            unexpected_list = list(nonnull_values[boolean_mapped_success_values==False])
+            unexpected_index_list = list(nonnull_values[boolean_mapped_success_values==False].index)
 
             success, percent_success = self._calc_map_expectation_success(success_count, nonnull_count, mostly)
 
@@ -78,6 +91,14 @@ class MetaPandasDataset(Dataset):
                 element_count, nonnull_count,
                 unexpected_list, unexpected_index_list
             )
+
+            # FIXME Temp fix for result format
+            if func.__name__ in ['expect_column_values_to_not_be_null', 'expect_column_values_to_be_null']:
+                del return_obj['result']['unexpected_percent_nonmissing']
+                try:
+                    del return_obj['result']['partial_unexpected_counts']
+                except KeyError:
+                    pass
 
             return return_obj
 
@@ -361,84 +382,24 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         dupes = set(column[column.duplicated()])
         return column.map(lambda x: x not in dupes)
 
+
+    # @Dataset.expectation(['column', 'mostly', 'result_format'])
     @DocInherit
-    @Dataset.expectation(['column', 'mostly', 'result_format'])
+    @MetaPandasDataset.column_map_expectation
     def expect_column_values_to_not_be_null(self, column,
                                             mostly=None,
-                                            result_format=None, include_config=False, catch_exceptions=None, meta=None):
-        if result_format is None:
-            result_format = self.default_expectation_args["result_format"]
-        result_format = parse_result_format(result_format)
+                                            result_format=None, include_config=False, catch_exceptions=None, meta=None, include_nulls=True):
 
-        series = self[column]
-        boolean_mapped_null_values = series.isnull()
-
-        element_count = len(series)
-        success_count = sum(~boolean_mapped_null_values)
-        unexpected_count = element_count - success_count
-
-        unexpected_list = [None for i in range(unexpected_count)]
-        unexpected_index_list = series[boolean_mapped_null_values].index
-
-        # Pass element_count instead of nonnull_count, because that's the right denominator for this expectation
-        success, percent_success = self._calc_map_expectation_success(success_count, element_count, mostly)
-
-        return {
-            "success": success,
-            "result": {
-                "element_count": element_count,
-                "missing_count": unexpected_count,
-                "missing_percent": float(unexpected_count) / element_count,
-                "unexpected_count": unexpected_count,
-                "unexpected_percent": float(unexpected_count) / element_count,
-                "partial_unexpected_list":
-                    unexpected_list[:result_format['partial_unexpected_count']],
-                "partial_unexpected_index_list":
-                    unexpected_index_list[:result_format['partial_unexpected_count']],
-                "unexpected_list": unexpected_list,
-                "unexpected_index_list": unexpected_index_list
-            }
-        }
+        return column.map(lambda x: x is not None and not pd.isnull(x))
 
 
     @DocInherit
-    @Dataset.expectation(['column', 'mostly', 'result_format'])
+    @MetaPandasDataset.column_map_expectation
     def expect_column_values_to_be_null(self, column,
                                         mostly=None,
                                         result_format=None, include_config=False, catch_exceptions=None, meta=None):
-        if result_format is None:
-            result_format = self.default_expectation_args["result_format"]
-        result_format = parse_result_format(result_format)
 
-        series = self[column]
-        boolean_mapped_null_values = series.isnull()
-
-        element_count = len(series)
-        success_count = sum(boolean_mapped_null_values)
-        unexpected_count = element_count - success_count
-
-        unexpected_list = [x for x in series[~boolean_mapped_null_values]]
-        unexpected_index_list = series[~boolean_mapped_null_values].index
-
-        # Pass element_count instead of nonnull_count, because that's the right denominator for this expectation
-        success, percent_success = self._calc_map_expectation_success(success_count, element_count, mostly)
-
-        return {
-            "success": success,
-            "result": {
-                "element_count": element_count,
-                "missing_count": unexpected_count,
-                "missing_percent": float(unexpected_count) / element_count,
-                "unexpected_count": unexpected_count,
-                "unexpected_percent": float(unexpected_count) / element_count,
-                "partial_unexpected_list":
-                    unexpected_list[:result_format['partial_unexpected_count']],
-                "partial_unexpected_index_list":
-                    unexpected_index_list[:result_format['partial_unexpected_count']],
-                "unexpected_list": unexpected_list,
-                "unexpected_index_list": unexpected_index_list
-            }
-        }
+        return column.map(lambda x: x is None or pd.isnull(x))
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
