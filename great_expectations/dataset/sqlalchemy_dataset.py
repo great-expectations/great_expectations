@@ -42,20 +42,41 @@ class MetaSqlAlchemyDataset(Dataset):
 
             expected_condition = func(self, column, *args, **kwargs)
 
+            # FIXME Temporary Fix for counting missing values
+            # Added to compensate when an ignore_values argument is added to the expectation
+            ignore_values = [None]
+            if func.__name__ in ['expect_column_values_to_not_be_null', 'expect_column_values_to_be_null']:
+                ignore_values = []
+
             count_query = sa.select([
                 sa.func.count().label('element_count'),
                 sa.func.sum(
-                    sa.case([(sa.column(column) == None, 1)], else_=0)
+                    sa.case([(sa.or_(
+                        sa.column(column).in_(ignore_values),
+                        # Below is necessary b/c sa.in_() uses `==` but None != None
+                        # But we only consider this if None is actually in the list of ignore values
+                        sa.column(column).is_(None) if None in ignore_values else False), 1)], else_=0)
                 ).label('null_count'),
                 sa.func.sum(
-                    sa.case([(sa.not_(expected_condition), 1)], else_=0)
+                    sa.case([(sa.and_(sa.not_(expected_condition),
+                                      sa.column(column).is_(None) == False if None in ignore_values else True),
+                              1)], else_=0)
                 ).label('unexpected_count')
             ]).select_from(sa.table(self.table_name))
 
             count_results = self.engine.execute(count_query).fetchone()
 
+            # Retrieve unexpected  values
             unexpected_query_results = self.engine.execute(
-                sa.select([sa.column(column)]).select_from(sa.table(self.table_name)).where(sa.not_(expected_condition)).limit(unexpected_count_limit)
+                sa.select([sa.column(column)]).select_from(sa.table(self.table_name)).where(
+                    sa.and_(sa.not_(expected_condition),
+                            sa.or_(
+                                # SA normally evaluates `== None` as `IS NONE`. However `sa.in_()`
+                                # replaces `None` as `NULL` in the list and incorrectly uses `== NULL`
+                                sa.column(column).is_(None) == False if None in ignore_values else False,
+                                # Ignore any other values that are in the ignore list
+                                sa.column(column).in_(ignore_values) == False))
+                ).limit(unexpected_count_limit)
             )
 
             nonnull_count = count_results['element_count'] - count_results['null_count']
@@ -68,6 +89,14 @@ class MetaSqlAlchemyDataset(Dataset):
                 count_results['element_count'], nonnull_count,
                 maybe_limited_unexpected_list, None
             )
+
+            if func.__name__ in ['expect_column_values_to_not_be_null', 'expect_column_values_to_be_null']:
+                # These results are unnecessary for the above expectations
+                del return_obj['result']['unexpected_percent_nonmissing']
+                try:
+                    del return_obj['result']['partial_unexpected_counts']
+                except KeyError:
+                    pass
 
             return return_obj
 
