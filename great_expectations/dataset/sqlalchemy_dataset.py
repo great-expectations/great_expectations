@@ -71,9 +71,10 @@ class MetaSqlAlchemyDataset(Dataset):
                 sa.select([sa.column(column)]).select_from(sa.table(self.table_name)).where(
                     sa.and_(sa.not_(expected_condition),
                             sa.or_(
-                                # None needs its own logic clause b/c sa.in_() uses `==` and None != None
+                                # SA normally evaluates `== None` as `IS NONE`. However `sa.in_()`
+                                # replaces `None` as `NULL` in the list and incorrectly uses `== NULL`
                                 sa.column(column).is_(None) == False if None in ignore_values else False,
-                                # We want to ignore any values that are in the ignore list
+                                # Ignore any other values that are in the ignore list
                                 sa.column(column).in_(ignore_values) == False))
                 ).limit(unexpected_count_limit)
             )
