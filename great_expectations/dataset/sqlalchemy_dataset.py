@@ -387,6 +387,16 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
     @DocInherit
     @MetaSqlAlchemyDataset.column_map_expectation
+    def expect_column_values_to_not_be_in_set(self,
+                                          column,
+                                          values_set,
+                                          mostly=None,
+                                          result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                          ):
+        return sa.column(column).notin_(tuple(values_set))
+
+    @DocInherit
+    @MetaSqlAlchemyDataset.column_map_expectation
     def expect_column_values_to_be_between(self,
         column,
         min_value=None,
