@@ -1032,5 +1032,30 @@ class TestPandasDataset(unittest.TestCase):
         self.assertIsInstance(sub1, ge.dataset.PandasDataset)
         self.assertEqual(sub1.find_expectations(), exp1)
 
+    def test_subclass_pandas_subset_retains_subclass(self):
+        """A subclass of PandasDataset should still be that subclass after a Pandas subsetting operation"""
+        class CustomPandasDataset(ge.dataset.PandasDataset):
+
+            @ge.dataset.MetaPandasDataset.column_map_expectation
+            def expect_column_values_to_be_odd(self, column):
+                return column.map(lambda x: x % 2 )
+
+            @ge.dataset.MetaPandasDataset.column_map_expectation
+            def expectation_that_crashes_on_sixes(self, column):
+                return column.map(lambda x: (x-6)/0 != "duck")
+
+        df = CustomPandasDataset({
+            'all_odd': [1, 3, 5, 5, 5, 7, 9, 9, 9, 11],
+            'mostly_odd': [1, 3, 5, 7, 9, 2, 4, 1, 3, 5],
+            'all_even': [2, 4, 4, 6, 6, 6, 8, 8, 8, 8],
+            'odd_missing': [1, 3, 5, None, None, None, None, 1, 3, None],
+            'mixed_missing': [1, 3, 5, None, None, 2, 4, 1, 3, None],
+            'all_missing': [None, None, None, None, None, None, None, None, None, None]
+        })
+
+        df2 = df.sample(frac=0.5)
+        self.assertTrue(type(df2) == type(df))
+
+
 if __name__ == "__main__":
     unittest.main()
