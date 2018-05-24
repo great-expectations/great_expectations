@@ -12,8 +12,6 @@ The `result_format` parameter may be either a string or a dictionary which speci
     - partial_unexpected_count: Sets the number of results to include in partial_unexpected_count, if applicable.
 
 
-.. _result_format:
-
 `result_format`
 ------------------------------------------------------------------------------
 
@@ -297,7 +295,7 @@ For example:
     }
 
 
-`column_aggregate_expectation` computes a single aggregate value for the column, and so returns a `true_value` \
+`column_aggregate_expectation` computes a single aggregate value for the column, and so returns a `observed_value` \
 to justify the expectation result. It also includes additional information regarding observed values and counts, \
 depending on the specific expectation.
 
@@ -310,7 +308,7 @@ The summary `result` includes:
     {
         'success': False,
         'result': {
-            'true_value': The aggregate statistic computed for the column (also in `BASIC`)
+            'observed_value': The aggregate statistic computed for the column (also in `BASIC`)
             'element_count': The total number of values in the column
             'missing_count':  The number of missing values in the column
             'missing_percent': The total percent of missing values in the column
@@ -329,7 +327,7 @@ For example:
     {
         "success" : Boolean,
         "result" : {
-            "true_value" : 1.5,
+            "observed_value" : 1.5,
             'element_count': 5,
             'missing_count: 1,
             'missing_percent: 0.2
@@ -385,7 +383,7 @@ For example:
     }
 
 
-`column_aggregate_expectation` computes a single aggregate value for the column, and so returns a `true_value` \
+`column_aggregate_expectation` computes a single aggregate value for the column, and so returns a `observed_value` \
 to justify the expectation result. It also includes additional information regarding observed values and counts, \
 depending on the specific expectation.
 
@@ -398,7 +396,7 @@ The complete `result` includes:
     {
         'success': False,
         'result': {
-            'true_value': The aggregate statistic computed for the column (also in `SUMMARY`)
+            'observed_value': The aggregate statistic computed for the column (also in `SUMMARY`)
             'element_count': The total number of values in the column (also in `SUMMARY`)
             'missing_count':  The number of missing values in the column (also in `SUMMARY`)
             'missing_percent': The total percent of missing values in the column (also in `SUMMARY`)
@@ -417,7 +415,7 @@ For example:
     {
         "success" : Boolean,
         "result" : {
-            "true_value" : 1.5,
+            "observed_value" : 1.5,
             'element_count': 5,
             'missing_count: 1,
             'missing_percent: 0.2

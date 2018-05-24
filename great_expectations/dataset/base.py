@@ -1,4 +1,4 @@
-
+from __future__ import division
 import json
 import inspect
 import copy
@@ -15,11 +15,12 @@ from collections import (
 from ..version import __version__
 from .util import DotDict, recursively_convert_to_json_serializable, parse_result_format
 
+
 class Dataset(object):
 
     def __init__(self, *args, **kwargs):
         super(Dataset, self).__init__(*args, **kwargs)
-        self.initialize_expectations()
+        self._initialize_expectations()
 
     @classmethod
     def expectation(cls, method_arg_names):
@@ -133,7 +134,7 @@ class Dataset(object):
                         raise(err)
 
                 # Append the expectation to the config.
-                self.append_expectation(expectation_config)
+                self._append_expectation(expectation_config)
 
                 if include_config:
                     return_obj["expectation_config"] = copy.deepcopy(expectation_config)
@@ -171,7 +172,7 @@ class Dataset(object):
         Notes:
             column_map_expectation intercepts and takes action based on the following parameters:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if the percentage of unexpected values is less than or equal to `mostly`. \
+                Return `"success": True` if at least mostly percent of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
             column_map_expectation *excludes null values* from being passed to the function
@@ -207,7 +208,23 @@ class Dataset(object):
         """
         raise NotImplementedError
 
-    def initialize_expectations(self, config=None, name=None):
+    def _initialize_expectations(self, config=None, name=None):
+        """Instantiates `_expectations_config` as empty by default or with a specified expectation `config`.
+        In addition, this always sets the `default_expectation_args` to:
+            `include_config`: False,
+            `catch_exceptions`: False,
+            `output_format`: 'BASIC'
+
+        Args:
+            config (json): \
+                A json-serializable expectation config. \
+                If None, creates default `_expectations_config` with an empty list of expectations and \
+                key value `dataset_name` as `name`.
+
+            name (string): \
+                The name to assign to `_expectations_config.dataset_name` if `config` is not provided.
+
+        """
         if config != None:
             #!!! Should validate the incoming config with jsonschema here
 
@@ -241,7 +258,22 @@ class Dataset(object):
                 "result_format" : 'BASIC',
             }
 
-    def append_expectation(self, expectation_config):
+    def _append_expectation(self, expectation_config):
+        """Appends an expectation to `DataSet._expectations_config` and drops existing expectations of the same type.
+
+           If `expectation_config` is a column expectation, this drops existing expectations that are specific to \
+           that column and only if it is the same expectation type as `expectation_config`. Otherwise, if it's not a \
+           column expectation, this drops existing expectations of the same type as `expectation config`. \
+           After expectations of the same type are dropped, `expectation_config` is appended to `DataSet._expectations_config`.
+
+           Args:
+               expectation_config (json): \
+                   The JSON-serializable expectation to be added to the DataSet expectations in `_expectations_config`.
+
+           Notes:
+               May raise future errors once json-serializable tests are implemented to check for correct arg formatting
+
+        """
         expectation_type = expectation_config['expectation_type']
 
         #Test to ensure the new expectation is serializable.
@@ -251,7 +283,7 @@ class Dataset(object):
         json.dumps(expectation_config)
 
         #Drop existing expectations with the same expectation_type.
-        #For column_expectations, append_expectation should only replace expectations
+        #For column_expectations, _append_expectation should only replace expectations
         # where the expectation_type AND the column match
         #!!! This is good default behavior, but
         #!!!    it needs to be documented, and
@@ -278,6 +310,24 @@ class Dataset(object):
         discard_include_configs_kwargs=True,
         discard_catch_exceptions_kwargs=True,
     ):
+        """Returns copy of `expectation` without `success_on_last_run` and other specified key-value pairs removed
+
+          Returns a copy of specified expectation will not have `success_on_last_run` key-value. The other key-value \
+          pairs will be removed by default but will remain in the copy if specified.
+
+          Args:
+              expectation (json): \
+                  The expectation to copy and clean.
+              discard_result_format_kwargs (boolean): \
+                  if True, will remove the kwarg `output_format` key-value pair from the copied expectation.
+              discard_include_configs_kwargs (boolean):
+                  if True, will remove the kwarg `include_configs` key-value pair from the copied expectation.
+              discard_catch_exceptions_kwargs (boolean):
+                  if True, will remove the kwarg `catch_exceptions` key-value pair from the copied expectation.
+
+          Returns:
+              A copy of the provided expectation with `success_on_last_run` and other specified key-value pairs removed
+        """
         new_expectation = copy.deepcopy(expectation)
 
         if "success_on_last_run" in new_expectation:
@@ -307,6 +357,28 @@ class Dataset(object):
         discard_include_configs_kwargs=True,
         discard_catch_exceptions_kwargs=True,
     ):
+        """Copies and cleans all expectations provided by their index in DataSet._expectations_config.expectations.
+
+           Applies the _copy_and_clean_up_expectation method to multiple expectations, provided by their index in \
+           `DataSet,_expectations_config.expectations`. Returns a list of the copied and cleaned expectations.
+
+           Args:
+               match_indexes (List): \
+                   Index numbers of the expectations from `expectation_config.expectations` to be copied and cleaned.
+               discard_result_format_kwargs (boolean): \
+                   if True, will remove the kwarg `output_format` key-value pair from the copied expectation.
+               discard_include_configs_kwargs (boolean):
+                   if True, will remove the kwarg `include_configs` key-value pair from the copied expectation.
+               discard_catch_exceptions_kwargs (boolean):
+                   if True, will remove the kwarg `catch_exceptions` key-value pair from the copied expectation.
+
+           Returns:
+               A list of the copied expectations with `success_on_last_run` and other specified \
+               key-value pairs removed.
+
+           See also:
+               _copy_and_clean_expectation
+        """
         rval = []
         for i in match_indexes:
             rval.append(
@@ -476,6 +548,7 @@ class Dataset(object):
                 else:
                     return expectation
 
+
     def discard_failing_expectations(self):
         res = self.validate(only_return_failures=True).get('results')
         if any(res):
@@ -616,6 +689,31 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         discard_catch_exceptions_kwargs=True,
         suppress_warnings=False
     ):
+        """Writes ``_expectation_config`` to a JSON file.
+
+           Writes the DataSet's expectation config to the specified JSON ``filepath``. Failing expectations \
+           can be excluded from the JSON expectations config with ``discard_failed_expectations``. The kwarg key-value \
+           pairs :ref:`result_format`, :ref:`include_config`, and :ref:`catch_exceptions` are optionally excluded from the JSON \
+           expectations config.
+
+           Args:
+               filepath (string): \
+                   The location and name to write the JSON config file to.
+               discard_failed_expectations (boolean): \
+                   If True, excludes expectations that do not return ``success = True``. \
+                   If False, all expectations are written to the JSON config file.
+               discard_result_format_kwargs (boolean): \
+                   If True, the :ref:`result_format` attribute for each expectation is not written to the JSON config file. \
+               discard_include_configs_kwargs (boolean): \
+                   If True, the :ref:`include_config` attribute for each expectation is not written to the JSON config file.\
+               discard_catch_exceptions_kwargs (boolean): \
+                   If True, the :ref:`catch_exceptions` attribute for each expectation is not written to the JSON config \
+                   file.
+               suppress_warnings (boolean): \
+                  It True, all warnings raised by Great Expectations, as a result of dropped expectations, are \
+                  suppressed.
+
+        """
         if filepath==None:
             #FIXME: Fetch the proper filepath from the project config
             pass
@@ -631,6 +729,55 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         open(filepath, 'w').write(expectation_config_str)
 
     def validate(self, expectations_config=None, catch_exceptions=True, result_format=None, only_return_failures=False):
+        """Generates a JSON-formatted report describing the outcome of all expectations.
+
+           Use the default expectations_config=None to validate the expectations config associated with the DataSet.
+
+           Args:
+               expectations_config (json or None): \
+                   If None, uses the expectations config generated with the DataSet during the current session. \
+                   If a JSON file, validates those expectations.
+               catch_exceptions (boolean): \
+                   If True, exceptions raised by tests will not end validation and will be described in the returned report.
+               result_format (string or None): \
+                   If None, uses the default value ('BASIC' or as specified). \
+                   If string, the returned expectation output follows the specified format ('BOOLEAN_ONLY','BASIC', etc.).
+               include_config (boolean): \
+                   If True, the returned results include the config information associated with each expectation, if \
+                   it exists.
+               only_return_failures (boolean): \
+                   If True, expectation results are only returned when ``success = False``\.
+
+           Returns:
+               A JSON-formatted dictionary containing a list of the validation results. \
+               An example of the returned format::
+
+               {
+                 "results": [
+                   {
+                     "unexpected_list": [unexpected_value_1, unexpected_value_2],
+                     "expectation_type": "expect_*",
+                     "kwargs": {
+                       "column": "Column_Name",
+                       "output_format": "SUMMARY"
+                     },
+                     "success": true,
+                     "raised_exception: false.
+                     "exception_traceback": null
+                   },
+                   {
+                     ... (Second expectation results)
+                   },
+                   ... (More expectations results)
+               }
+
+           Notes:
+               If the configuration object was built with a different version of great expectations then the current environment. \
+               If no version was found in the configuration file.
+
+           Raises:
+               AttributeError - if 'catch_exceptions'=None and an expectation throws an AttributeError
+        """
         results = []
 
         if expectations_config is None:
@@ -734,11 +881,11 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         unexpected_count = len(unexpected_list)
 
         if element_count > 0:
-            unexpected_percent = float(unexpected_count) / element_count
-            missing_percent = float(missing_count) / element_count
+            unexpected_percent = unexpected_count / element_count
+            missing_percent = missing_count / element_count
 
             if nonnull_count > 0:
-                unexpected_percent_nonmissing = float(unexpected_count) / nonnull_count
+                unexpected_percent_nonmissing = unexpected_count / nonnull_count
             else:
                 unexpected_percent_nonmissing = None
 
@@ -811,7 +958,8 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         """
 
         if nonnull_count > 0:
-            percent_success = float(success_count)/nonnull_count
+            # percent_success = float(success_count)/nonnull_count
+            percent_success = success_count / nonnull_count
 
             if mostly:
                 success = bool(percent_success >= mostly)
@@ -1074,7 +1222,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if the percentage of unexpected values is less than or equal to `mostly`. \
+                Return `"success": True` if at least mostly percent of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1117,7 +1265,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if the percentage of unexpected values is less than or equal to `mostly`. \
+                Return `"success": True` if at least mostly percent of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1161,7 +1309,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if the percentage of unexpected values is less than or equal to `mostly`. \
+                Return `"success": True` if at least mostly percent of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1205,16 +1353,16 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         Args:
             column (str): \
                 The column name.
-            type_ (str): \
+            type\_ (str): \
                 A string representing the data type that each column should have as entries.
                 For example, "double integer" refers to an integer with double precision.
             target_datasource (str): \
-                The data source that specifies the implementation in the type_ parameter.
+                The data source that specifies the implementation in the type\_ parameter.
                 For example, options include "numpy", "sql", or "spark".
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if the percentage of unexpected values is less than or equal to `mostly`. \
+                Return `"success": True` if at least mostly percent of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1268,12 +1416,12 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                 A list of strings representing the data type that each column should have as entries.
                 For example, "double integer" refers to an integer with double precision.
             target_datasource (str): \
-                The data source that specifies the implementation in the type_ parameter.
+                The data source that specifies the implementation in the type_list parameter.
                 For example, options include "numpy", "sql", or "spark".
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if the percentage of unexpected values is less than or equal to `mostly`. \
+                Return `"success": True` if at least mostly percent of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1349,7 +1497,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if the percentage of unexpected values is less than or equal to `mostly`. \
+                Return `"success": True` if at least mostly percent of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1415,7 +1563,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if the percentage of unexpected values is less than or equal to `mostly`. \
+                Return `"success": True` if at least mostly percent of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1464,11 +1612,11 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         Keyword Args:
             allow_cross_type_comparisons (boolean or None) : If True, allow comparisons between types (e.g. integer and\
-            string). Otherwise, attempting such comparisons will raise an exception.
+                string). Otherwise, attempting such comparisons will raise an exception.
             parse_strings_as_datetimes (boolean or None) : If True, parse min_value, max_value, and all non-null column\
-            values to datetimes before making comparisons.
+                values to datetimes before making comparisons.
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if the percentage of unexpected values is less than or equal to `mostly`. \
+                Return `"success": True` if at least mostly percent of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1529,7 +1677,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             parse_strings_as_datetimes (boolean or None) : \
                 If True, all non-null column values to datetimes before making comparisons
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if the percentage of unexpected values is less than or equal to `mostly`. \
+                Return `"success": True` if at least mostly percent of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1584,7 +1732,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             parse_strings_as_datetimes (boolean or None) : \
                 If True, all non-null column values to datetimes before making comparisons
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if the percentage of unexpected values is less than or equal to `mostly`. \
+                Return `"success": True` if at least mostly percent of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1639,7 +1787,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             max_value (int or None): \
                 The maximum value for a column entry length.
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if the percentage of unexpected values is less than or equal to `mostly`. \
+                Return `"success": True` if at least mostly percent of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1692,7 +1840,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if the percentage of unexpected values is less than or equal to `mostly`. \
+                Return `"success": True` if at least mostly percent of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1725,7 +1873,9 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         mostly=None,
         result_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
-        """Expect column entries to be strings that match a given regular expression.
+        """Expect column entries to be strings that match a given regular expression. Valid matches can be found \
+        anywhere in the string, for example "[at]+" will identify the following strings as expected: "cat", "hat", \
+        "aa", "a", and "t", and the following strings as unexpected: "fish", "dog".
 
         expect_column_values_to_match_regex is a :func:`column_map_expectation <great_expectations.dataset.base.Dataset.column_map_expectation>`.
 
@@ -1737,7 +1887,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if the percentage of unexpected values is less than or equal to `mostly`. \
+                Return `"success": True` if at least mostly percent of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1772,7 +1922,9 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         mostly=None,
         result_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
-        """Expect column entries to be strings that do NOT match a given regular expression.
+        """Expect column entries to be strings that do NOT match a given regular expression. The regex must not match \
+        any portion of the provided string. For example, "[at]+" would identify the following strings as expected: \
+        "fish", "dog", and the following as unexpected: "cat", "hat".
 
         expect_column_values_to_not_match_regex is a :func:`column_map_expectation <great_expectations.dataset.base.Dataset.column_map_expectation>`.
 
@@ -1784,7 +1936,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if the percentage of unexpected values is less than or equal to `mostly`. \
+                Return `"success": True` if at least mostly percent of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1820,7 +1972,8 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         mostly=None,
         result_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
-        """Expect the column entries to be strings that match either any of or all of a list of regular expressions.
+        """Expect the column entries to be strings that can be matched to either any of or all of a list of regular expressions.
+        Matches can be anywhere in the string.
 
         expect_column_values_to_match_regex_list is a :func:`column_map_expectation <great_expectations.dataset.base.Dataset.column_map_expectation>`.
 
@@ -1836,7 +1989,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                 Use "any" if the value should match at least one regular expression in the list.
                 Use "all" if it should match each regular expression in the list.
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if the percentage of unexpected values is less than or equal to `mostly`. \
+                Return `"success": True` if at least mostly percent of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1865,6 +2018,51 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         """
         raise NotImplementedError
 
+    def expect_column_values_to_not_match_regex_list(self, column, regex_list,
+                                                mostly=None,
+                                                result_format=None, include_config=False, catch_exceptions=None, meta=None):
+        """Expect the column entries to be strings that do not match any of a list of regular expressions. Matches can \
+        be anywhere in the string.
+
+
+        expect_column_values_to_not_match_regex_list is a :func:`column_map_expectation <great_expectations.dataset.base.Dataset.column_map_expectation>`.
+
+        Args:
+            column (str): \
+                The column name.
+            regex_list (list): \
+                The list of regular expressions which the column entries should not match
+
+        Keyword Args:
+            mostly (None or a float between 0 and 1): \
+                Return `"success": True` if at least mostly percent of values match the expectation. \
+                For more detail, see :ref:`mostly`.
+
+        Other Parameters:
+            result_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`result_format <result_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
+
+        Returns:
+            A JSON-serializable expectation result object.
+
+            Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+        See Also:
+            expect_column_values_to_match_regex_list
+        """
+        raise NotImplementedError
+
     ##### Datetime and JSON parsing #####
 
     def expect_column_values_to_match_strftime_format(self,
@@ -1885,7 +2083,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if the percentage of unexpected values is less than or equal to `mostly`. \
+                Return `"success": True` if at least mostly percent of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1926,7 +2124,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if the percentage of unexpected values is less than or equal to `mostly`. \
+                Return `"success": True` if at least mostly percent of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -1966,7 +2164,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if the percentage of unexpected values is less than or equal to `mostly`. \
+                Return `"success": True` if at least mostly percent of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -2010,7 +2208,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
-                Return `"success": True` if the percentage of unexpected values is less than or equal to `mostly`. \
+                Return `"success": True` if at least mostly percent of values match the expectation. \
                 For more detail, see :ref:`mostly`.
 
         Other Parameters:
@@ -2886,6 +3084,136 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         See also:
             expect_column_chisquare_test_p_value_to_be_greater_than
             expect_column_bootstrapped_ks_test_p_value_to_be_greater_than
+
+        """
+        raise NotImplementedError
+
+    ### Column pairs ###
+
+    def expect_column_pair_values_to_be_equal(self,
+        column_A,
+        column_B,
+        ignore_row_if="both_values_are_missing",
+        result_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
+        """
+        Expect the values in column A to be the same as column B.
+
+        Args:
+            column_A (str): The first column name
+            column_B (str): The second column name
+
+        Keyword Args:
+            ignore_row_if (str): "both_values_are_missing", "either_value_is_missing", "neither
+
+        Other Parameters:
+            result_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`result_format <result_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
+
+        Returns:
+            A JSON-serializable expectation result object.
+
+            Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+        """
+        raise NotImplementedError
+
+    def expect_column_pair_values_A_to_be_greater_than_B(self,
+        column_A,
+        column_B,
+        or_equal=None,
+        parse_strings_as_datetimes=None,
+        allow_cross_type_comparisons=None,
+        ignore_row_if="both_values_are_missing",
+        result_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
+        """
+        Expect values in column A to be greater than column B.
+
+        Args:
+            column_A (str): The first column name
+            column_B (str): The second column name
+            or_equal (boolean or None): If True, then values can be equal, not strictly greater
+
+        Keyword Args:
+            allow_cross_type_comparisons (boolean or None) : If True, allow comparisons between types (e.g. integer and\
+                string). Otherwise, attempting such comparisons will raise an exception.
+
+        Keyword Args:
+            ignore_row_if (str): "both_values_are_missing", "either_value_is_missing", "neither
+
+        Other Parameters:
+            result_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`result_format <result_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
+
+        Returns:
+            A JSON-serializable expectation result object.
+
+            Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+        """
+        raise NotImplementedError
+
+
+    def expect_column_pair_values_to_be_in_set(self,
+        column_A,
+        column_B,
+        value_pairs_set,
+        ignore_row_if="both_values_are_missing",
+        result_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
+        """
+        Expect paired values from columns A and B to belong to a set of valid pairs.
+
+        Args:
+            column_A (str): The first column name
+            column_B (str): The second column name
+            value_pairs_set (list of tuples): All the valid pairs to be matched
+
+        Keyword Args:
+            ignore_row_if (str): "both_values_are_missing", "either_value_is_missing", "neither
+
+        Other Parameters:
+            result_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`result_format <result_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
+
+        Returns:
+            A JSON-serializable expectation result object.
+
+            Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
 
         """
         raise NotImplementedError

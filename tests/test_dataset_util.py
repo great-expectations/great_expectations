@@ -1,8 +1,10 @@
+import decimal
 import json
 import datetime
 import numpy as np
 import unittest
 from functools import wraps
+import sys
 
 import great_expectations as ge
 
@@ -126,10 +128,70 @@ class TestUtilMethods(unittest.TestCase):
             'zzz': [
                 datetime.datetime(2017,1,1),
                 datetime.date(2017,5,1),
-            ]
+            ],
+            'np.bool': np.bool_([True, False, True]),
+            'np.int_': np.int_([5,3,2]),
+            'np.int8': np.int8([5,3,2]),
+            'np.int16': np.int16([10,6, 4]),
+            'np.int32': np.int32([20, 12, 8]),
+            'np.uint': np.uint([20,5,6]),
+            'np.uint8': np.uint8([40,10,12]),
+            'np.uint64': np.uint64([80,20,24]),
+            'np.float_': np.float_([3.2,5.6,7.8]),
+            'np.float32': np.float32([5.999999999, 5.6]),
+            'np.float64': np.float64([5.9999999999999999999, 10.2]),
+            'np.float128': np.float128([5.999999999998786324399999999, 20.4]),
+            # 'np.complex64': np.complex64([10.9999999 + 4.9999999j, 11.2+7.3j]),
+            # 'np.complex128': np.complex128([20.999999999978335216827+10.99999999j, 22.4+14.6j]),
+            # 'np.complex256': np.complex256([40.99999999 + 20.99999999j, 44.8+29.2j]),
+            'np.str': np.unicode_(["hello"]),
+            'yyy': decimal.Decimal(123.456)
         }
         x = ge.dataset.util.recursively_convert_to_json_serializable(x)
         self.assertEqual(type(x['x']), list)
+
+        self.assertEqual(type(x['np.bool'][0]), bool)
+        self.assertEqual(type(x['np.int_'][0]), int)
+        self.assertEqual(type(x['np.int8'][0]), int)
+        self.assertEqual(type(x['np.int16'][0]), int)
+        self.assertEqual(type(x['np.int32'][0]), int)
+
+        # Integers in python 2.x can be of type int or of type long
+        if sys.version_info.major >= 3:
+            # Python 3.x
+            self.assertTrue(
+                isinstance(x['np.uint'][0], int))
+            self.assertTrue(
+                isinstance(x['np.uint8'][0], int))
+            self.assertTrue(
+                isinstance(x['np.uint64'][0], int))
+        elif sys.version_info.major >= 2:
+            # Python 2.x
+            self.assertTrue(
+                isinstance(x['np.uint'][0], (int, long)))
+            self.assertTrue(
+                isinstance(x['np.uint8'][0], (int, long)))
+            self.assertTrue(
+                isinstance(x['np.uint64'][0], (int, long)))
+
+        self.assertEqual(type(x['np.float32'][0]), float)
+        self.assertEqual(type(x['np.float64'][0]), float)
+        self.assertEqual(type(x['np.float128'][0]), float)
+        # self.assertEqual(type(x['np.complex64'][0]), complex)
+        # self.assertEqual(type(x['np.complex128'][0]), complex)
+        # self.assertEqual(type(x['np.complex256'][0]), complex)
+        self.assertEqual(type(x['np.float_'][0]), float)
+        
+        # Make sure nothing is going wrong with precision rounding
+        # self.assertAlmostEqual(x['np.complex128'][0].real, 20.999999999978335216827, places=sys.float_info.dig)
+        self.assertAlmostEqual(x['np.float128'][0], 5.999999999998786324399999999, places=sys.float_info.dig)
+
+    # TypeError when non-serializable numpy object is in dataset.
+        with self.assertRaises(TypeError):
+            y = {
+                'p': np.DataSource()
+            }
+            ge.dataset.util.recursively_convert_to_json_serializable(y)
 
         try:
             x = unicode("abcdefg")
@@ -137,6 +199,8 @@ class TestUtilMethods(unittest.TestCase):
             self.assertEqual(type(x), unicode)
         except NameError:
             pass
+
+
 
     def test_expect_file_hash_to_equal(self):
         test_file = './tests/test_sets/Titanic.csv'
@@ -510,6 +574,58 @@ class TestUtilMethods(unittest.TestCase):
         # chi2
         t = ge.dataset.util.infer_distribution_parameters(data=D.chi2, distribution='chi2')
         self.assertEqual(t['df'], D.chi2.mean())
+
+    def test_create_multiple_expectations(self):
+        D = ge.dataset.PandasDataset({
+            'x' : [1,2,3,4,5,6],
+            'y' : [0,2,4,6,8,10],
+            'z' : ['hi', 'hello', 'hey', 'howdy', 'hola', 'holy smokes'],
+            'zz': ['a', 'b', 'c', 'hi', 'howdy', 'hola']
+        })
+
+        # Test kwarg
+        results = ge.dataset.util.create_multiple_expectations(D,
+                                                     ['x', 'y'],
+                                                     'expect_column_values_to_be_in_set',
+                                                     values_set=[1, 2, 3, 4, 5, 6])
+        self.assertTrue(results[0]['success'])
+        self.assertFalse(results[1]['success'])
+
+        # Test positional argument
+        results = ge.dataset.util.create_multiple_expectations(D,
+                                                     ['x', 'y'],
+                                                     'expect_column_values_to_be_in_set',
+                                                     [1, 2, 3, 4, 5, 6])
+        self.assertTrue(results[0]['success'])
+        self.assertFalse(results[1]['success'])
+
+        results = ge.dataset.util.create_multiple_expectations(D,
+                                                     ['z', 'zz'],
+                                                     'expect_column_values_to_match_regex',
+                                                     'h')
+        self.assertTrue(results[0]['success'])
+        self.assertFalse(results[1]['success'])
+
+        # Non-argumentative expectation
+        results = ge.dataset.util.create_multiple_expectations(D,
+                                                               ['z', 'zz'],
+                                                               'expect_column_values_to_not_be_null')
+        self.assertTrue(results[0]['success'])
+        self.assertTrue(results[1]['success'])
+
+
+        # Key error when non-existant column is called
+        with self.assertRaises(KeyError):
+            ge.dataset.util.create_multiple_expectations(D,
+                                                         ['p'],
+                                                         'expect_column_values_to_be_in_set',
+                                                         ['hi'])
+        # Attribute error when non-existant expectation is called
+        with self.assertRaises(AttributeError):
+            ge.dataset.util.create_multiple_expectations(D,
+                                                         ['z'],
+                                                         'expect_column_values_to_be_fake_news')
+
 
 """
 The following Parent and Child classes are used for testing documentation inheritance.

@@ -358,7 +358,7 @@ class TestRepeatedAppendExpectation(unittest.TestCase):
             7
         )
 
-        #For column_expectations, append_expectation should only replace expectations where the expetation_type AND the column match
+        #For column_expectations, _append_expectation should only replace expectations where the expetation_type AND the column match
         my_df.expect_column_to_exist("PClass")
         self.assertEqual(
             len(my_df.get_expectations_config()['expectations']),

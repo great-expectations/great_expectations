@@ -1,0 +1,125 @@
+{
+  "expectation_type" : "expect_column_values_to_not_match_regex",
+  "datasets" : [{
+    "data" : {
+      "a" : ["aaa", "abb", "acc", "add", "bee"],
+      "b" : ["aaa", "abb", "acc", "bdd", null],
+      "c" : [ null,  null,  null,  null, null]
+    },
+    "tests": [{
+      "title": "Negative test, insufficient Mostly + one non-matching value",
+      "exact_match_out" : false,
+      "in":{
+        "column": "a",
+        "regex": "^a",
+        "mostly": 0.3
+      },
+      "out":{
+        "success":false,
+        "unexpected_index_list": [0, 1, 2, 3],
+        "unexpected_list": ["aaa", "abb", "acc", "add"]
+      }
+    },{
+      "title": "Positive test, exact mostly w/ one non-matching value",
+      "exact_match_out" : false,
+      "in":{
+        "column": "a",
+        "regex": "^a",
+        "mostly": 0.2
+      },
+      "out":{
+        "success":true,
+        "unexpected_index_list": [0, 1, 2, 3],
+        "unexpected_list": ["aaa", "abb", "acc", "add"]
+      }
+    },{
+      "title": "Positive test, sufficient mostly w/ one non-matching value",
+      "exact_match_out" : false,
+      "in":{
+        "column": "a",
+        "regex": "^a",
+        "mostly": 0.1
+      },
+      "out":{
+        "success":true,
+        "unexpected_index_list": [0, 1, 2, 3],
+        "unexpected_list": ["aaa", "abb", "acc", "add"]
+      }
+    },{
+      "title": "Negative test, one missing value and insufficent mostly",
+      "exact_match_out" : false,
+      "in":{
+        "column": "b",
+        "regex": "^a",
+        "mostly": 0.5
+      },
+      "out":{
+        "success":false,
+        "unexpected_index_list": [0, 1, 2],
+        "unexpected_list": ["aaa", "abb", "acc"]
+      }
+    },{
+      "title": "Positive test, one missing value, no exceptions",
+      "exact_match_out" : false,
+      "in":{
+        "column": "b",
+        "regex": "^c"
+      },
+      "out":{
+        "success":true,
+        "unexpected_index_list": [],
+        "unexpected_list": []
+      }
+    },{
+      "title": "Positive test. all missing values",
+      "exact_match_out" : false,
+      "in":{
+        "column": "c",
+        "regex": "^a"
+      },
+      "out":{
+        "success": true,
+        "unexpected_index_list": [],
+        "unexpected_list": []
+      }
+    },{
+      "title": "Positive test. all missing values, mostly",
+      "exact_match_out" : false,
+      "in":{
+        "column": "c",
+        "regex": "^a",
+        "mostly": 0.2
+      },
+      "out":{
+        "success": true,
+        "unexpected_index_list": [],
+        "unexpected_list": []
+      }
+    },{
+      "title": "Negative test, Empty regex",
+      "exact_match_out" : false,
+      "in":{
+        "column": "b",
+        "regex": ""
+      },
+      "out":{
+        "success": false,
+        "unexpected_index_list": [0, 1, 2, 3],
+        "unexpected_list": ["aaa", "abb", "acc", "bdd"]
+      }
+    },{
+      "title": "Negative test, match characters not at the beginning of string, exact mostly",
+      "exact_match_out" : false,
+      "in":{
+        "column": "a",
+        "regex": "b",
+        "mostly": 0.6
+      },
+      "out":{
+        "success": true,
+        "unexpected_index_list": [1, 4],
+        "unexpected_list": ["abb", "bee"]
+      }
+    }]
+  }]
+}

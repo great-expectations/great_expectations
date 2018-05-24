@@ -2,11 +2,14 @@
 
 from __future__ import division
 
+import decimal
+
 from six import string_types, integer_types
 
 import numpy as np
 from scipy import stats
 import pandas as pd
+import numpy as np
 import warnings
 import sys
 import copy
@@ -115,11 +118,19 @@ def recursively_convert_to_json_serializable(test_obj):
 
     """
     # Validate that all aruguments are of approved types, coerce if it's easy, else exception
-    if isinstance(test_obj, (string_types, integer_types, float, bool)):
-        # No problem to encode json
-        return test_obj
+    # print(type(test_obj), test_obj)
+    #Note: Not 100% sure I've resolved this correctly...
+    try:
+        if not isinstance(test_obj, list) and np.isnan(test_obj):
+            # np.isnan is functionally vectorized, but we only want to apply this to single objects
+            # Hence, why we test for `not isinstance(list))`
+            return None
+    except TypeError:
+        pass
+    except ValueError:
+        pass
 
-    elif test_obj is None:
+    if isinstance(test_obj, (string_types, integer_types, float, bool)):
         # No problem to encode json
         return test_obj
 
@@ -143,14 +154,36 @@ def recursively_convert_to_json_serializable(test_obj):
         ## to the number of digits for which the string representation will equal the float representation
         return [recursively_convert_to_json_serializable(x) for x in test_obj.tolist()]
 
-    elif isinstance(test_obj, np.int64):
-        return int(test_obj)
-
-    elif isinstance(test_obj, np.float64):
-        return float(round(test_obj, sys.float_info.dig))
+    #Note: This clause has to come after checking for np.ndarray or we get:
+    #      `ValueError: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()`
+    elif test_obj == None:
+        # No problem to encode json
+        return test_obj
 
     elif isinstance(test_obj, (datetime.datetime, datetime.date)):
         return str(test_obj)
+
+    # Use built in base type from numpy, https://docs.scipy.org/doc/numpy-1.13.0/user/basics.types.html
+    # https://github.com/numpy/numpy/pull/9505
+    elif np.issubdtype(type(test_obj), np.bool_):
+        return bool(test_obj)
+
+    elif np.issubdtype(type(test_obj), np.integer) or np.issubdtype(type(test_obj), np.uint):
+        return int(test_obj)
+
+    elif np.issubdtype(type(test_obj), np.floating):
+        # Note: Use np.floating to avoid FutureWarning from numpy
+        return float(round(test_obj, sys.float_info.dig))
+
+    # elif np.issubdtype(type(test_obj), np.complexfloating):
+        # Note: Use np.complexfloating to avoid Future Warning from numpy
+        # Complex numbers consist of two floating point numbers
+        # return complex(
+        #     float(round(test_obj.real, sys.float_info.dig)),
+        #     float(round(test_obj.imag, sys.float_info.dig)))
+
+    elif isinstance(test_obj, decimal.Decimal):
+        return float(test_obj)
 
     else:
         raise TypeError('%s is of type %s which cannot be serialized.' % (str(test_obj), type(test_obj).__name__))
@@ -551,3 +584,29 @@ def validate_distribution_parameters(distribution, params):
                 "params must be a dict or list, or use ge.dataset.util.infer_distribution_parameters(data, distribution)")
 
     return
+
+
+def create_multiple_expectations(df, columns, expectation_type, *args, **kwargs):
+    """Creates an identical expectation for each of the given columns with the specified arguments, if any.
+
+    Args:
+        df (great_expectations.dataset): A great expectations dataset object.
+        columns (list): A list of column names represented as strings.
+        expectation_type (string): The expectation type.
+
+    Raises:
+        KeyError if the provided column does not exist.
+        AttributeError if the provided expectation type does not exist or df is not a valid great expectations dataset.
+
+    Returns:
+        A list of expectation results.
+
+
+    """
+    expectation = getattr(df, expectation_type)
+    results = list()
+
+    for column in columns:
+        results.append(expectation(column, *args,  **kwargs))
+
+    return results

@@ -5,7 +5,7 @@ from great_expectations.dataset import Dataset
 from functools import wraps
 import inspect
 
-from .util import DocInherit, parse_result_format
+from .util import DocInherit, parse_result_format, create_multiple_expectations
 
 import sqlalchemy as sa
 from sqlalchemy.engine import reflection
@@ -42,20 +42,41 @@ class MetaSqlAlchemyDataset(Dataset):
 
             expected_condition = func(self, column, *args, **kwargs)
 
+            # FIXME Temporary Fix for counting missing values
+            # Added to compensate when an ignore_values argument is added to the expectation
+            ignore_values = [None]
+            if func.__name__ in ['expect_column_values_to_not_be_null', 'expect_column_values_to_be_null']:
+                ignore_values = []
+
             count_query = sa.select([
                 sa.func.count().label('element_count'),
                 sa.func.sum(
-                    sa.case([(sa.column(column) == None, 1)], else_=0)
+                    sa.case([(sa.or_(
+                        sa.column(column).in_(ignore_values),
+                        # Below is necessary b/c sa.in_() uses `==` but None != None
+                        # But we only consider this if None is actually in the list of ignore values
+                        sa.column(column).is_(None) if None in ignore_values else False), 1)], else_=0)
                 ).label('null_count'),
                 sa.func.sum(
-                    sa.case([(sa.not_(expected_condition), 1)], else_=0)
+                    sa.case([(sa.and_(sa.not_(expected_condition),
+                                      sa.column(column).is_(None) == False if None in ignore_values else True),
+                              1)], else_=0)
                 ).label('unexpected_count')
             ]).select_from(sa.table(self.table_name))
 
             count_results = self.engine.execute(count_query).fetchone()
 
+            # Retrieve unexpected  values
             unexpected_query_results = self.engine.execute(
-                sa.select([sa.column(column)]).select_from(sa.table(self.table_name)).where(sa.not_(expected_condition)).limit(unexpected_count_limit)
+                sa.select([sa.column(column)]).select_from(sa.table(self.table_name)).where(
+                    sa.and_(sa.not_(expected_condition),
+                            sa.or_(
+                                # SA normally evaluates `== None` as `IS NONE`. However `sa.in_()`
+                                # replaces `None` as `NULL` in the list and incorrectly uses `== NULL`
+                                sa.column(column).is_(None) == False if None in ignore_values else False,
+                                # Ignore any other values that are in the ignore list
+                                sa.column(column).in_(ignore_values) == False))
+                ).limit(unexpected_count_limit)
             )
 
             nonnull_count = count_results['element_count'] - count_results['null_count']
@@ -68,6 +89,14 @@ class MetaSqlAlchemyDataset(Dataset):
                 count_results['element_count'], nonnull_count,
                 maybe_limited_unexpected_list, None
             )
+
+            if func.__name__ in ['expect_column_values_to_not_be_null', 'expect_column_values_to_be_null']:
+                # These results are unnecessary for the above expectations
+                del return_obj['result']['unexpected_percent_nonmissing']
+                try:
+                    del return_obj['result']['partial_unexpected_counts']
+                except KeyError:
+                    pass
 
             return return_obj
 
@@ -148,7 +177,7 @@ class MetaSqlAlchemyDataset(Dataset):
 
 class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
-    def __init__(self, table_name=None, engine=None, connection_string=None):
+    def __init__(self, table_name=None, engine=None, connection_string=None, custom_sql=None):
         super(SqlAlchemyDataset, self).__init__()
 
         if table_name is None:
@@ -169,21 +198,30 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 # Currently we do no error handling if the engine doesn't work out of the box.
                 raise err
 
+        if custom_sql:
+            self.create_temporary_table(self.table_name, custom_sql)
+
         insp = reflection.Inspector.from_engine(engine)
         self.columns = insp.get_columns(self.table_name)
+
+    def create_temporary_table(self, table_name, custom_sql):
+        """
+        Create Temporary table based on sql query. This will be used as a basis for executing expectations.
+        WARNING: this feature is new in v0.4.
+        It hasn't been tested in all SQL dialects, and may change based on community feedback.
+        :param custom_sql:
+        """
+        stmt = "CREATE TEMPORARY TABLE IF NOT EXISTS {table_name} AS {custom_sql}".format(
+            table_name=table_name, custom_sql=custom_sql)
+        self.engine.execute(stmt)
 
     def add_default_expectations(self):
         """
         The default behavior for SqlAlchemyDataset is to explicitly include expectations that every column present upon
         initialization exists.
         """
-        for col in self.columns:
-            self.append_expectation({
-                "expectation_type": "expect_column_to_exist",
-                "kwargs": {
-                    "column": col["name"]
-                }
-            })
+        columns = [col['name'] for col in self.columns]
+        create_multiple_expectations(self, columns, "expect_column_to_exist")
 
     def _is_numeric_column(self, column):
         for col in self.columns:
@@ -349,6 +387,16 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
     @DocInherit
     @MetaSqlAlchemyDataset.column_map_expectation
+    def expect_column_values_to_not_be_in_set(self,
+                                          column,
+                                          values_set,
+                                          mostly=None,
+                                          result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                          ):
+        return sa.column(column).notin_(tuple(values_set))
+
+    @DocInherit
+    @MetaSqlAlchemyDataset.column_map_expectation
     def expect_column_values_to_be_between(self,
         column,
         min_value=None,
@@ -380,6 +428,39 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                         sa.column(column) <= max_value
                 )
 
+    @DocInherit
+    @MetaSqlAlchemyDataset.column_map_expectation
+    def expect_column_value_lengths_to_be_between(self,
+        column,
+        min_value=None,
+        max_value=None,
+        mostly=None,
+        result_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
+
+        if min_value is None and max_value is None:
+            raise ValueError("min_value and max_value cannot both be None")
+
+        # Assert that min_value and max_value are integers
+        try:
+            if min_value is not None and not float(min_value).is_integer():
+                raise ValueError("min_value and max_value must be integers")
+
+            if max_value is not None and not float(max_value).is_integer():
+                raise ValueError("min_value and max_value must be integers")
+
+        except ValueError:
+            raise ValueError("min_value and max_value must be integers")
+
+        if min_value is not None and max_value is not None:
+            return sa.and_(sa.func.length(sa.column(column)) >= min_value,
+                           sa.func.length(sa.column(column)) <= max_value)
+
+        elif min_value is None and max_value is not None:
+            return sa.func.length(sa.column(column)) <= max_value
+
+        elif min_value is not None and max_value is None:
+            return sa.func.length(sa.column(column)) >= min_value
 
     ###
     ###
@@ -538,6 +619,62 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 'observed_value': col_avg
             }
         }
+
+    @DocInherit
+    @MetaSqlAlchemyDataset.column_aggregate_expectation
+    def expect_column_median_to_be_between(self,
+                                         column,
+                                         min_value=None,
+                                         max_value=None,
+                                         result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                         ):
+
+        if min_value is None and max_value is None:
+            raise ValueError("min_value and max_value cannot both be None")
+
+
+        # Inspiration from https://stackoverflow.com/questions/942620/missing-median-aggregate-function-in-django
+        count_query = self.engine.execute(
+            sa.select([
+                sa.func.count().label("element_count"),
+                sa.func.sum(
+                    sa.case([(sa.column(column) == None, 1)], else_=0)
+                ).label('null_count')
+            ]).
+            select_from(sa.table(self.table_name))
+        )
+
+        element_values = self.engine.execute(
+            sa.select(column).order_by(column).where(
+                sa.column(column) != None
+            ).select_from(sa.table(self.table_name))
+        )
+
+        # Fetch the Element count, null count, and sorted/null dropped column values
+        elements = count_query.fetchone()
+        column_values = list(element_values.fetchall())
+
+        # The number of non-null/non-ignored values
+        nonnull_count = elements['element_count'] - elements['null_count']
+
+        if nonnull_count % 2 == 0:
+            # An even number of column values: take the average of the two center values
+            column_median = (
+                column_values[nonnull_count // 2 - 1][0] +  # left center value
+                column_values[nonnull_count // 2][0]        # right center value
+            ) / 2.0  # Average center values
+        else:
+            # An odd number of column values, we can just take the center value
+            column_median = column_values[nonnull_count // 2][0]  # True center value
+
+        return {
+            'success':
+                ((min_value is None) or (min_value <= column_median)) and
+                ((max_value is None) or (column_median <= max_value)),
+            'result': {
+                'observed_value': column_median
+                }
+            }
 
     @DocInherit
     @MetaSqlAlchemyDataset.column_aggregate_expectation
