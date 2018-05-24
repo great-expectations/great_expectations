@@ -250,7 +250,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
     @property
     def _constructor(self):
-        return PandasDataset
+        return self.__class__
 
 # Do we need to define _constructor_sliced and/or _constructor_expanddim? See http://pandas.pydata.org/pandas-docs/stable/internals.html#subclassing-pandas-data-structures
 
