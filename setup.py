@@ -25,6 +25,7 @@ config = {
     'packages': [
         'great_expectations',
         'great_expectations.dataset',
+        'great_expectations.data_context'
     ],
     'scripts': [
         'bin/great_expectations',

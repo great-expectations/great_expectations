@@ -1,0 +1,108 @@
+{
+  "expectation_type" : "expect_column_most_common_value_to_be_in_set",
+  "datasets" : [{
+    "data" : {
+      "x" : [1,1,2,2,3,null, null, null, null, null],
+      "y" : ["hello", "jello", "mello", "hello", "jello", "mello", "hello", "jello", "mello", "jello"],
+      "z" : [1,2,2,3,3,3,4,4,4,4]
+    },
+    "tests" : [
+      {
+        "title": "Negative test - tie for most common, with missing values and COMPLETE result format",
+        "exact_match_out": true,
+        "in": {
+          "column": "x",
+          "value_set": [1]
+        },
+        "out": {
+          "success": false,
+          "result": {
+            "observed_value": [1, 2],
+            "element_count": 10,
+            "missing_count": 5,
+            "missing_percent": 0.5
+          }
+        }
+      },{
+      "title" : "Negative test, tie for most common, full values_set, ties_okay = FALSE",
+      "exact_match_out" : false,
+      "in": {
+        "column": "x",
+        "value_set": [1, 2]
+      },
+      "out": {
+        "success": false,
+        "observed_value": [1, 2]
+      }
+    },{
+        "title" : "Positive test, tie for most common, ties_okay = TRUE",
+        "exact_match_out" : false,
+        "in": {
+          "column": "x",
+          "value_set": [1],
+          "ties_okay": true
+        },
+        "out": {
+          "success": true,
+          "observed_value": [1, 2]
+        }
+      },{
+        "title" : "Positive test, tie for most common (but test for last value), ties_okay = TRUE",
+        "exact_match_out" : false,
+        "in": {
+          "column": "x",
+          "value_set": [2],
+          "ties_okay": true
+        },
+        "out": {
+          "success": true,
+          "observed_value": [1, 2]
+        }
+      },{
+        "title" : "Negative test, tie for most common, value set does not match, ties_okay = FALSE",
+        "exact_match_out" : false,
+        "in": {
+          "column": "x",
+          "value_set": [3]
+        },
+        "out": {
+          "success": false,
+          "observed_value": [1, 2]
+        }
+      },{
+        "title" : "Negative test, tie for most common, value set does not match, ties_okay = True",
+        "exact_match_out" : false,
+        "in": {
+          "column": "x",
+          "value_set": [3],
+          "ties_okay": true
+        },
+        "out": {
+          "success": false,
+          "observed_value": [1, 2]
+        }
+      },{
+        "title": "Positive test, string values, value set contains more than actual mode list",
+        "exact_match_out": false,
+        "in": {
+          "column": "y",
+          "value_set": ["jello", "hello"]
+        },
+        "out": {
+          "success": true,
+          "observed_value": ["jello"]
+        }
+      },{
+        "title": "Negative test, string values, value set contains more than actual mode list",
+        "exact_match_out": false,
+        "in": {
+          "column": "y",
+          "value_set": ["mello", "hello"]
+        },
+        "out": {
+          "success": false,
+          "observed_value": ["jello"]
+        }
+      }]
+  }]
+}

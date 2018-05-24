@@ -1,4 +1,6 @@
 import hashlib
+import numpy.testing as testing
+from numpy import nan as nan
 
 class DotDict(dict):
     """dot.notation access to dictionary attributes"""

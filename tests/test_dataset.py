@@ -1,3 +1,4 @@
+import decimal
 import json
 import tempfile
 import shutil
@@ -32,13 +33,16 @@ class TestDataset(unittest.TestCase):
                 },
                 "expectations" : [{
                     "expectation_type" : "expect_column_to_exist",
-                    "kwargs" : { "column" : "x" }
+                    "kwargs" : { "column" : "x", 'result_format': 'BASIC'},
+                    'success_on_last_run': True
                 },{
                     "expectation_type" : "expect_column_to_exist",
-                    "kwargs" : { "column" : "y" }
+                    "kwargs" : { "column" : "y", 'result_format': 'BASIC'},
+                    'success_on_last_run': True
                 },{
                     "expectation_type" : "expect_column_to_exist",
-                    "kwargs" : { "column" : "z" }
+                    "kwargs" : { "column" : "z", 'result_format': 'BASIC'},
+                    'success_on_last_run': True
                 }]
             }
         )
@@ -53,13 +57,13 @@ class TestDataset(unittest.TestCase):
                 },
                 "expectations" : [{
                     "expectation_type" : "expect_column_to_exist",
-                    "kwargs" : { "column" : "x" }
+                    "kwargs" : { "column" : "x"}
                 },{
                     "expectation_type" : "expect_column_to_exist",
-                    "kwargs" : { "column" : "y" }
+                    "kwargs" : { "column" : "y"}
                 },{
                     "expectation_type" : "expect_column_to_exist",
-                    "kwargs" : { "column" : "z" }
+                    "kwargs" : { "column" : "z"}
                 }]
             }
         )
@@ -276,19 +280,22 @@ class TestDataset(unittest.TestCase):
             {
               "expectation_type": "expect_column_to_exist",
               "kwargs": {
-                "column": "x"
+                "column": "x",
+                "result_format": "BASIC"
               }
             },
             {
               "expectation_type": "expect_column_to_exist",
               "kwargs": {
-                "column": "y"
+                "column": "y",
+                "result_format": "BASIC"
               }
             },
             {
               "expectation_type": "expect_column_to_exist",
               "kwargs": {
-                "column": "z"
+                "column": "z",
+                "result_format": "BASIC"
               }
             },
             {
@@ -324,7 +331,8 @@ class TestDataset(unittest.TestCase):
                 discard_include_configs_kwargs=False,
                 discard_catch_exceptions_kwargs=False,
             ),
-            output_config
+            output_config,
+            msg="Second Test Set"
         )
 
         df.save_expectations_config(
@@ -688,6 +696,11 @@ class TestDataset(unittest.TestCase):
             (False, 0.0)
         )
 
+        self.assertEqual(
+            df._calc_map_expectation_success(success_count=decimal.Decimal(80), nonnull_count=100, mostly=.8),
+            (False, decimal.Decimal(80) / decimal.Decimal(100))
+        )
+
     def test_find_expectations(self):
         my_df = ge.dataset.PandasDataset({
             'x' : [1,2,3,4,5,6,7,8,9,10],
@@ -963,6 +976,7 @@ class TestDataset(unittest.TestCase):
         ]
 
         sub1 = df[:3]
+
         sub1.discard_failing_expectations()
         self.assertEqual(sub1.find_expectations(), exp1)
 
@@ -1131,7 +1145,7 @@ class TestDataset(unittest.TestCase):
 
     def test_catch_exceptions_with_bad_expectation_type(self):
         my_df = ge.dataset.PandasDataset({"x":range(10)})
-        my_df.append_expectation({'expectation_type':'foobar', 'kwargs':{}})
+        my_df._append_expectation({'expectation_type':'foobar', 'kwargs':{}})
         result = my_df.validate(catch_exceptions=True)
 
         self.assertEqual(result["results"][1]["success"], False)
