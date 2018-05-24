@@ -7,5 +7,3 @@ six>=1.9.0
 argh>=0.26.2
 jsonschema>=2.5.1
 sqlalchemy>=1.2
-apache-airflow[s3]>=1.9.0
-boto3>=1.7.3
