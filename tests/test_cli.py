@@ -164,5 +164,21 @@ class TestCLI(unittest.TestCase):
         #     }
         # )
 
+    def test_cli_evaluation_parameters(self):
+        filepath = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+
+        command_str = 'python ' + filepath + '/../bin/great_expectations validate ' \
+                      + '--evaluation_parameters ' + filepath + '/test_sets/titanic_evaluation_parameters.json ' \
+                      + '--only_return_failures ' \
+                      + filepath + '/test_sets/Titanic.csv ' \
+                      + filepath + '/test_sets/titanic_parameterized_expectations.json'
+
+        expected_evaluation_parameters = json.load(open('./tests/test_sets/titanic_evaluation_parameters.json'))
+
+        result = get_system_command_result(command_str)
+        json_result = json.loads(result["output"])
+
+        self.assertEqual(json_result['evaluation_parameters'], expected_evaluation_parameters)
+
 if __name__ == "__main__":
     unittest.main()
