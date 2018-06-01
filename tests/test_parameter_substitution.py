@@ -85,3 +85,10 @@ def test_validation_substitution(single_expectation_custom_dataset):
     # Provide a run-time evaluation parameter
     validation_result = single_expectation_custom_dataset.validate(evaluation_parameters={"upstream_dag_key": "upstream_dag_value"})
     assert validation_result["results"][0]["result"]["details"]["expectation_argument"] == "upstream_dag_value"
+
+
+def test_validation_parameters_returned(single_expectation_custom_dataset):
+    result = single_expectation_custom_dataset.expect_nothing(expectation_argument={"$PARAMETER": "upstream_dag_key",
+                                                                                    "$PARAMETER.upstream_dag_key": "temporary_value"})
+    validation_result = single_expectation_custom_dataset.validate(evaluation_parameters={"upstream_dag_key": "upstream_dag_value"})
+    assert validation_result["evaluation_parameters"] == {"upstream_dag_key": "upstream_dag_value"}
