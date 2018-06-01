@@ -83,6 +83,7 @@ class Dataset(object):
                 else:
                     result_format = self.default_expectation_args["result_format"]
 
+                # Extract the meta object for use as a top-level expectation_config holder
                 if "meta" in kwargs:
                     meta = kwargs["meta"]
                     del all_args["meta"]
@@ -97,7 +98,15 @@ class Dataset(object):
                         del all_args["result_format"]
 
                 all_args = recursively_convert_to_json_serializable(all_args)
-                expectation_args = copy.deepcopy(all_args)
+
+                # Patch in PARAMETER args, and remove locally-supplied arguments
+                expectation_args = copy.deepcopy(all_args) # This will become the stored config
+
+                if "meta" in self._expectations_config and "evaluation_parameters" in self._expectations_config["meta"]:
+                    evaluation_args = self._build_evaluation_parameters(expectation_args,
+                                                                        self._expectations_config["meta"]["evaluation_parameters"]) # This will be passed to the evaluation
+                else:
+                    evaluation_args = self._build_evaluation_parameters(expectation_args, None)
 
                 #Construct the expectation_config object
                 expectation_config = DotDict({
@@ -105,12 +114,9 @@ class Dataset(object):
                     "kwargs": expectation_args
                 })
 
-                # Patch in meta args
+                # Add meta to our expectation_config
                 if meta is not None:
                     expectation_config["meta"] = meta
-                    meta_kwargs = self._get_meta_kwargs(meta, method_name, method_arg_names)
-                    evaluation_args = dict(expectation_args)
-                    evaluation_args.update(meta_kwargs)
 
                 raised_exception = False
                 exception_traceback = None
@@ -391,27 +397,6 @@ class Dataset(object):
             )
 
         return rval
-
-
-    def _get_meta_kwargs(self, meta, expectation_type, expectation_kwarg_keys):
-        """
-        This helper extracts kwargs specified in meta and allows them to be applied at expectation-evaluation-time to
-        supply expectation values.
-        :param meta:
-        :return:
-        """
-
-        meta_kwargs = {}
-
-        for key in expectation_kwarg_keys:
-            if key in meta:
-                meta_kwargs.update({key: meta[key]})
-            elif expectation_type in self._expectations_config['meta'] and \
-                    key in self._expectations_config['meta'][expectation_type]:
-                meta_kwargs.update({key: self._expectations_config['meta'][expectation_type][key]})
-
-        return meta_kwargs
-
 
     def find_expectation_indexes(self,
         expectation_type=None,
@@ -728,7 +713,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         expectation_config_str = json.dumps(expectations_config, indent=2)
         open(filepath, 'w').write(expectation_config_str)
 
-    def validate(self, expectations_config=None, catch_exceptions=True, result_format=None, only_return_failures=False):
+    def validate(self, expectations_config=None, evaluation_parameters=None, catch_exceptions=True, result_format=None, only_return_failures=False):
         """Generates a JSON-formatted report describing the outcome of all expectations.
 
            Use the default expectations_config=None to validate the expectations config associated with the DataSet.
@@ -790,6 +775,11 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         elif isinstance(expectations_config, string_types):
             expectations_config = json.load(open(expectations_config, 'r'))
 
+        if evaluation_parameters is None:
+            # Use evaluation parameters from the (maybe provided) config
+            if "meta" in expectations_config and "evaluation_parameters" in expectations_config["meta"]:
+                evaluation_parameters = expectations_config["meta"]["evaluation_parameters"]
+
         # Warn if our version is different from the version in the configuration
         try:
             if expectations_config['meta']['great_expectations.__version__'] != __version__:
@@ -804,9 +794,12 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                 if result_format is not None:
                     expectation['kwargs'].update({"result_format": result_format})
 
+                # A missing parameter should raise a KeyError
+                evaluation_args = self._build_evaluation_parameters(expectation['kwargs'], evaluation_parameters)
+
                 result = expectation_method(
                     catch_exceptions=catch_exceptions,
-                    **expectation['kwargs']
+                    **evaluation_args
                 )
 
             except Exception as err:
@@ -850,6 +843,75 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             "results" : results
         }
 
+    def get_evaluation_parameter(self, parameter_name, default_value=None):
+        """Get an evaluation parameter value that has been stored in meta.
+        
+        Args:
+            parameter_name (string): The name of the parameter to store.
+            default_value (any): The default value to be returned if the parameter is not found.
+
+        Returns:
+            The current value of the evaluation parameter.
+        """
+        if "meta" in self._expectations_config and \
+                "evaluation_parameters" in self._expectations_config["meta"] and \
+                parameter_name in self._expectations_config['meta']['evaluation_parameters']:
+            return self._expectations_config['meta']['evaluation_parameters'][parameter_name]
+        else:
+            return default_value
+
+    def set_evaluation_parameter(self, parameter_name, parameter_value):
+        """Provide a kwarg value to be stored in the dataset meta object and used to evaluate expectations with missing
+        parameters.
+
+        Args:
+            expectation_name (string): The name of the expectation for which this kwarg should be used
+            kwarg_name (string): The name of the kwarg to be replaced at evaluation time
+            kwarg_value (any): The value to be used
+        """
+        # if not callable(getattr(self, expectation_name, None)):
+        #     raise ValueError("The expectation " + expectation_name + " is not available in this dataset.")
+
+        if 'meta' not in self._expectations_config:
+            self._expectations_config['meta'] = { 'evaluation_parameters': {}}
+
+        if 'evaluation_parameters' not in self._expectations_config['meta']:
+            self._expectations_config['meta']['evaluation_parameters'] = {}
+
+        # if expectation_name in self._expectations_config['meta']:
+        #     self._expectations_config['meta'][expectation_name].update({
+        #             kwarg_name: kwarg_value
+        #         })
+        # else:
+        #     self._expectations_config['meta'][expectation_name] = {
+        #         kwarg_name: kwarg_value
+        #     }
+
+        self._expectations_config['meta']['evaluation_parameters'].update({parameter_name: parameter_value})
+
+    def _build_evaluation_parameters(self, expectation_args, evaluation_parameters):
+        """Build a dictionary of parameters to evaluate, using the provided evaluation_paramters,
+        AND mutate expectation_args by removing any parameter values passed in as temporary values during
+        exploratory work.
+        """
+
+        evaluation_args = copy.deepcopy(expectation_args)
+
+        # Iterate over arguments, and replace $PARAMETER-defined args with their
+        # specified parameters.
+        for key, value in evaluation_args.items():
+            if isinstance(value, dict) and '$PARAMETER' in value:
+                # First, check to see whether an argument was supplied at runtime
+                # If it was, use that one, but remove it from the stored config
+                if "$PARAMETER." + value["$PARAMETER"] in value:
+                    evaluation_args[key] = evaluation_args[key]["$PARAMETER." + value["$PARAMETER"]]
+                    del expectation_args[key]["$PARAMETER." + value["$PARAMETER"]]
+                elif evaluation_parameters is not None and value["$PARAMETER"] in evaluation_parameters:
+                    evaluation_args[key] = evaluation_parameters[value['$PARAMETER']]
+                else:
+                    raise KeyError("No value found for $PARAMETER " + value["$PARAMETER"])
+
+        return evaluation_args
 
     ##### Output generation #####
     def _format_column_map_output(self,
