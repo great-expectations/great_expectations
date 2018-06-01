@@ -839,9 +839,15 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                     abbrev_results.append(exp)
             results = abbrev_results
 
-        return {
-            "results" : results
-        }
+        if evaluation_parameters is not None:
+            return {
+                "results": results,
+                "evaluation_parameters": evaluation_parameters
+            }
+        else:
+            return {
+                "results": results
+            }
 
     def get_evaluation_parameter(self, parameter_name, default_value=None):
         """Get an evaluation parameter value that has been stored in meta.
