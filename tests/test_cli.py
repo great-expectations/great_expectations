@@ -35,7 +35,7 @@ class TestCLI(unittest.TestCase):
         #print(get_system_command_result('python '+filepath+'/../bin/great_expectations '))
         self.assertEqual(
             get_system_command_result('python '+filepath+'/../bin/great_expectations '),
-            {'output': '', 'errors': "usage: great_expectations [-h] {initialize,validate} ...\ngreat_expectations: error: invalid choice: '' (choose from 'initialize', 'validate')\n"}
+            {'output': '', 'errors': "usage: great_expectations [-h] {initialize,validate,version} ...\ngreat_expectations: error: invalid choice: '' (choose from 'initialize', 'validate', 'version')\n"}
         )
 
         # print get_system_command_result('python '+filepath+'/../bin/great_expectations validate')
