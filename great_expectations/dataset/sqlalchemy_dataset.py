@@ -430,6 +430,16 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
     @DocInherit
     @MetaSqlAlchemyDataset.column_map_expectation
+    def expect_column_value_lengths_to_equal(self,
+        column,
+        value,
+        mostly=None,
+        result_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
+        return sa.func.length(sa.column(column)) == value
+
+    @DocInherit
+    @MetaSqlAlchemyDataset.column_map_expectation
     def expect_column_value_lengths_to_be_between(self,
         column,
         min_value=None,
