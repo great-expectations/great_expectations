@@ -8,10 +8,12 @@ import json
 import sys
 import os
 import os.path
-import great_expectations as ge
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(dir_path+'/..')
+
+import great_expectations as ge
+
 
 def initialize():
     raise NotImplementedError()
