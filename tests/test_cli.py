@@ -1,14 +1,9 @@
 import unittest
 import json
-# import hashlib
-import datetime
-import time
-# import numpy as np
 import inspect
 import os
 import subprocess
 
-import great_expectations as ge
 from .test_utils import assertDeepAlmostEqual
 
 def get_system_command_result(command_str):
@@ -23,6 +18,7 @@ def get_system_command_result(command_str):
         "output" : output.decode('utf-8'),
         "errors" : errors.decode('utf-8')
     }
+
 
 class TestCLI(unittest.TestCase):
 
