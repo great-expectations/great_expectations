@@ -275,6 +275,20 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         }
 
     @DocInherit
+    @Dataset.expectation(['column'])
+    def expect_column_values_to_be_unique(self, column,
+                                          mostly=None,
+                                          result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                          ):
+        has_duplicates = self.engine.execute(
+            sa.select([sa.sql.expression.true()]).select_from(sa.table(self.table_name)).group_by(
+                sa.column(column)).having(sa.func.count() > 1)).scalar()
+
+        return {
+            'success': False if has_duplicates else True
+        }
+
+    @DocInherit
     @Dataset.expectation(['min_value', 'max_value'])
     def expect_table_row_count_to_be_between(self,
         min_value=0,
