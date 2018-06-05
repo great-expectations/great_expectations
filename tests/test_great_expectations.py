@@ -206,6 +206,7 @@ class TestValidation(unittest.TestCase):
                             )
 
         # Finally, confirm that only_return_failures works
+        # and does not affect the "statistics" field.
         validation_results = my_df.validate(only_return_failures=True)
         #print json.dumps(validation_results)
         assertDeepAlmostEqual(
@@ -225,8 +226,11 @@ class TestValidation(unittest.TestCase):
                                 "missing_percent": 0.0, "partial_unexpected_counts": [{"count": 1, "value": "*"}],
                                 "partial_unexpected_list": ["*"],
                                 "unexpected_percent_nonmissing": 0.0007616146230007616, "missing_count": 0,
-                                "unexpected_index_list": [456]}}]}
-
+                                "unexpected_index_list": [456]}}
+            ],
+            "success": expected_results["success"],  # unaffected
+            "statistics": expected_results["statistics"],  # unaffected
+            }
         )
 
     def test_validate_catch_non_existent_expectation(self):
@@ -344,7 +348,14 @@ class TestValidation(unittest.TestCase):
                                  "unexpected_count": 2
                     }
                 }
-              ]
+              ],
+              "success": False,
+              "statistics": {
+                  "evaluated_expectations": 2,
+                  "successful_expectations": 1,
+                  "unsuccessful_expectations": 1,
+                  "success_percent": 50,
+              }
             }
         )
 
