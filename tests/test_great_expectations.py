@@ -2,12 +2,17 @@ import json
 import os
 import random
 import unittest
+import math
 
 import numpy as np
 import pandas as pd
 
 import great_expectations as ge
 from great_expectations.dataset import PandasDataset, MetaPandasDataset
+from great_expectations.dataset.base import (
+    _calc_validation_statistics,
+    ValidationStatistics,
+)
 from .test_utils import assertDeepAlmostEqual
 
 def isprime(n):
@@ -343,6 +348,62 @@ class TestValidation(unittest.TestCase):
             }
         )
 
+
+class TestValidationStatisticsCalculation(unittest.TestCase):
+    def test_no_expectations(self):
+        expectation_results = []
+        actual = _calc_validation_statistics(expectation_results)
+
+        # pay attention to these two
+        self.assertTrue(math.isnan(actual.success_percent))
+        self.assertEqual(actual.success, True)
+        # the rest is boring
+        self.assertEqual(actual.successful_expectations, 0)
+        self.assertEqual(actual.evaluated_expectations, 0)
+        self.assertEqual(actual.unsuccessful_expectations, 0)
+
+    def test_no_succesful_expectations(self):
+        expectation_results = [
+            {"success": False},
+        ]
+        actual = _calc_validation_statistics(expectation_results)
+        expected = ValidationStatistics(1, 0, 1, 0., False)
+        assertDeepAlmostEqual(self, actual, expected)
+
+        expectation_results = [
+            {"success": False},
+            {"success": False},
+            {"success": False},
+        ]
+        actual = _calc_validation_statistics(expectation_results)
+        expected = ValidationStatistics(3, 0, 3, 0., False)
+        assertDeepAlmostEqual(self, actual, expected)
+
+    def test_all_succesful_expectations(self):
+        expectation_results = [
+            {"success": True},
+        ]
+        actual = _calc_validation_statistics(expectation_results)
+        expected = ValidationStatistics(1, 1, 0, 100.0, True)
+        assertDeepAlmostEqual(self, actual, expected)
+
+        expectation_results = [
+            {"success": True},
+            {"success": True},
+            {"success": True},
+        ]
+        actual = _calc_validation_statistics(expectation_results)
+        expected = ValidationStatistics(3, 3, 0, 100.0, True)
+        assertDeepAlmostEqual(self, actual, expected)
+
+    def test_mixed_expectations(self):
+        expectation_results = [
+            {"success": False},
+            {"success": True},
+        ]
+        actual = _calc_validation_statistics(expectation_results)
+        expected = ValidationStatistics(2, 1, 1, 50.0, False)
+        assertDeepAlmostEqual(self, actual, expected)
 
 
 class TestRepeatedAppendExpectation(unittest.TestCase):
