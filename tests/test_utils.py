@@ -9,6 +9,8 @@ from pyspark.sql import SQLContext
 from pyspark import SparkContext, SparkConf
 conf = SparkConf().setAppName("local").setMaster("local")
 sc = SparkContext(conf=conf)
+import pyspark.sql.types as pst
+from pyspark.sql.types import StructType, BooleanType, StructField, NullType
 
 from great_expectations.dataset import PandasDataset, SqlAlchemyDataset, SparkDFDataset
 
@@ -55,6 +57,28 @@ def assertDeepAlmostEqual(test_case, expected, actual, *args, **kwargs):
         raise exc
 
 
+def infer_spark_schema(data):
+    """Infers spark schema, replacing NullTypes with BooleanTypes
+
+    Like get_dataset, `data` should be either a DataFrame or a dictionary that can be instantiated as a DataFrame.
+    """
+    type_list = []
+    for k,v in data.items():
+        type_ = pst._infer_type(data[k]).elementType
+        if type_ == NullType:
+            type_ == BooleanType
+
+        type_list.append(
+            StructField(
+                k,
+                type_,
+                True
+            )
+        )
+        
+    schema = StructType(type_list)
+    return schema
+
 def get_dataset(dataset_type, data):
     """For Pandas, data should be either a DataFrame or a dictionary that can be instantiated as a DataFrame
     For SQL, data should have the following shape:
@@ -83,6 +107,7 @@ def get_dataset(dataset_type, data):
 
         # Add the data to the database as a new table
         df = pd.DataFrame(data)
+        #FIXME: This is reckless about typing
         df.to_sql(name='test_data', con=engine, index=False)
 
         # Build a SqlAlchemyDataset using that database
@@ -91,8 +116,14 @@ def get_dataset(dataset_type, data):
     elif dataset_type == 'SparkDFDataset':
         df = pd.DataFrame(data)
         sql_context = SQLContext(sc)
-        spark_df = sql_context.createDataFrame(df)
-        # Build a SqlAlchemyDataset using that database
+        schema = infer_spark_schema(data)
+        spark_df = sql_context.createDataFrame(df, schema=schema)
+        
+        #FIXME: This is here to force Spark's lazy execution to execute.
+        #FIXME: On my machine, it triggers a verion conflict error:
+        #Exception: Python in worker has different version 2.7 than that in driver 3.6, PySpark cannot run with different minor versions.Please check environment variables PYSPARK_PYTHON and PYSPARK_DRIVER_PYTHON are correctly set.
+        spark_df.describe()
+
         return SparkDFDataset(spark_df)
 
     else:
