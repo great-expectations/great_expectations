@@ -5,7 +5,12 @@ import numpy as np
 
 from sqlalchemy import create_engine
 
-from great_expectations.dataset import PandasDataset, SqlAlchemyDataset
+from pyspark.sql import SQLContext
+from pyspark import SparkContext, SparkConf
+conf = SparkConf().setAppName("local").setMaster("local")
+sc = SparkContext(conf=conf)
+
+from great_expectations.dataset import PandasDataset, SqlAlchemyDataset, SparkDFDataset
 
 ## Taken from the following stackoverflow: https://stackoverflow.com/questions/23549419/assert-that-two-dictionaries-are-almost-equal
 def assertDeepAlmostEqual(test_case, expected, actual, *args, **kwargs):
@@ -59,9 +64,18 @@ def get_dataset(dataset_type, data):
                 named_column: [list of values]
         }
 
+    #FIXME: (Abe, June 5, 2018) I believe this docstring is out of date. Should be this instead:
+    Data should be either a DataFrame or a dictionary that can be instantiated as a DataFrame.
+
+    Ex: {
+      "c1": [4, 5, 6, 7],
+      "c2": ["a", "b", "c", "d"],
+      "c3": [null, null, null, null]
+    }
     """
     if dataset_type == 'PandasDataset':
         return PandasDataset(data)
+
     elif dataset_type == 'SqlAlchemyDataset':
         # Create a new database
 
@@ -73,6 +87,14 @@ def get_dataset(dataset_type, data):
 
         # Build a SqlAlchemyDataset using that database
         return SqlAlchemyDataset('test_data', engine=engine)
+
+    elif dataset_type == 'SparkDFDataset':
+        df = pd.DataFrame(data)
+        sql_context = SQLContext(sc)
+        spark_df = sql_context.createDataFrame(df)
+        # Build a SqlAlchemyDataset using that database
+        return SparkDFDataset(spark_df)
+
     else:
         raise ValueError("Unknown dataset_type " + str(dataset_type))
 
@@ -113,6 +135,49 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
             #"expect_column_sum_to_be_between",
             #"expect_column_min_to_be_between",
             #"expect_column_max_to_be_between",
+            "expect_column_chisquare_test_p_value_to_be_greater_than",
+            "expect_column_bootstrapped_ks_test_p_value_to_be_greater_than",
+            "expect_column_kl_divergence_to_be_less_than",
+            "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",
+            "expect_column_pair_values_to_be_equal",
+            "expect_column_pair_values_A_to_be_greater_than_B",
+            "expect_column_pair_values_to_be_in_set",
+        ]
+    elif context == "SparkDFDataset":
+        return expectation_type in [
+            # "expect_column_to_exist",
+            "expect_table_row_count_to_be_between",
+            "expect_table_row_count_to_equal",
+            "expect_table_columns_to_match_ordered_list",
+            "expect_column_values_to_be_unique",
+            "expect_column_values_to_not_be_null",
+            "expect_column_values_to_be_null",
+            "expect_column_values_to_be_of_type",
+            "expect_column_values_to_be_in_type_list",
+            "expect_column_values_to_be_in_set",
+            "expect_column_values_to_not_be_in_set",
+            "expect_column_values_to_be_between",
+            "expect_column_values_to_be_increasing",
+            "expect_column_values_to_be_decreasing",
+            "expect_column_value_lengths_to_be_between",
+            "expect_column_value_lengths_to_equal",
+            "expect_column_values_to_match_regex",
+            "expect_column_values_to_not_match_regex",
+            "expect_column_values_to_match_regex_list",
+            "expect_column_values_to_not_match_regex_list",
+            "expect_column_values_to_match_strftime_format",
+            "expect_column_values_to_be_dateutil_parseable",
+            "expect_column_values_to_be_json_parseable",
+            "expect_column_values_to_match_json_schema",
+            "expect_column_mean_to_be_between",
+            "expect_column_median_to_be_between",
+            "expect_column_stdev_to_be_between",
+            "expect_column_unique_value_count_to_be_between",
+            "expect_column_proportion_of_unique_values_to_be_between",
+            "expect_column_most_common_value_to_be_in_set",
+            "expect_column_sum_to_be_between",
+            "expect_column_min_to_be_between",
+            "expect_column_max_to_be_between",
             "expect_column_chisquare_test_p_value_to_be_greater_than",
             "expect_column_bootstrapped_ks_test_p_value_to_be_greater_than",
             "expect_column_kl_divergence_to_be_less_than",
