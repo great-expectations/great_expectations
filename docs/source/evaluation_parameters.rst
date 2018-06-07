@@ -23,20 +23,19 @@ value that should be used during the initial evaluation of the expectation.
         'success': True
     }
 
-
-You can also store parameter values in the meta object to be available to multiple expectations or while declaring \
-additional expectations.
+You can also store parameter values in a special dictionary called evaluation_parameters that is stored in the \
+expectations_config to be available to multiple expectations or while declaring additional expectations.
 
 .. code-block:: python
 
     >> my_df.set_evaluation_parameter("upstream_row_count", 10)
     >> my_df.get_evaluation_parameter("upstream_row_count)
 
-
 If a parameter has been stored, then it does not need to be provided for a new expectation to be declared:
 
 .. code-block:: python
 
+    >> my_df.set_evaluation_parameter("upstream_row_count", 10)
     >> my_df.expect_table_row_count_to_be_between(max_value={"$PARAMETER": "upstream_row_count"})
 
 When validating expectations, you can provide evaluation parameters based on upstream results:
@@ -45,8 +44,12 @@ When validating expectations, you can provide evaluation parameters based on ups
 
     >> my_df.validate(expectations_config=my_dag_step_config, evaluation_parameters={"upstream_row_count": upstream_row_count})
 
-Finally, the command-line tool also allows you to provide a JSON file that contains paramters to use during evaluation:
+Finally, the command-line tool also allows you to provide a JSON file that contains parameters to use during evaluation:
 
 .. code-block:: bash
 
+    >> cat my_parameters_file.json
+    {
+        "upstream_row_count": 10
+    }
     >> great_expectations validate --evaluation_paramters=my_parameters_file.json dataset_file.csv expectations_config.json
