@@ -64,5 +64,12 @@
         "missing_count": 0
       }
     }
-  ]
+  ],
+  "success": false,
+  "statistics": {
+    "evaluated_expectations": 1,
+    "successful_expectations": 0,
+    "unsuccessful_expectations": 1,
+    "success_percent": 0
+  }
 }
