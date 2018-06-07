@@ -124,8 +124,11 @@ class MetaSqlAlchemyDataset(Dataset):
             if 'success' not in evaluation_result:
                 raise ValueError("Column aggregate expectation failed to return required information: success")
 
-            if ('result' not in evaluation_result) or ('observed_value' not in evaluation_result['result']):
-                raise ValueError("Column aggregate expectation failed to return required information: observed_value")
+            if 'result' not in evaluation_result:
+                raise ValueError("Column aggregate expectation failed to return required information: result")
+
+            if 'observed_value' not in evaluation_result['result']:
+                raise ValueError("Column aggregate expectation failed to return required information: result.observed_value")
 
             return_obj = {
                 'success': bool(evaluation_result['success'])
@@ -427,6 +430,16 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                         min_value <= sa.column(column),
                         sa.column(column) <= max_value
                 )
+
+    @DocInherit
+    @MetaSqlAlchemyDataset.column_map_expectation
+    def expect_column_value_lengths_to_equal(self,
+        column,
+        value,
+        mostly=None,
+        result_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
+        return sa.func.length(sa.column(column)) == value
 
     @DocInherit
     @MetaSqlAlchemyDataset.column_map_expectation

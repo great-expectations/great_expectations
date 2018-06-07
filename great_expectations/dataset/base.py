@@ -6,6 +6,7 @@ from functools import wraps
 import traceback
 import warnings
 from six import string_types
+from collections import namedtuple
 
 from collections import (
     Counter,
@@ -754,6 +755,14 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                      ... (Second expectation results)
                    },
                    ... (More expectations results)
+                 ],
+                 "success": true,
+                 "statistics": {
+                   "evaluated_expectations": n,
+                   "successful_expectations": m,
+                   "unsuccessful_expectations": n - m,
+                   "success_percent": m / n
+                 }
                }
 
            Notes:
@@ -832,6 +841,8 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
             results.append(result)
 
+        statistics = _calc_validation_statistics(results)
+
         if only_return_failures:
             abbrev_results = []
             for exp in results:
@@ -839,19 +850,21 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                     abbrev_results.append(exp)
             results = abbrev_results
 
-        if evaluation_parameters is not None:
-            return {
-                "results": results,
-                "evaluation_parameters": evaluation_parameters
-            }
-        else:
-            return {
-                "results": results
-            }
+        return {
+            "results": results,
+            "success": statistics.success,
+            "statistics": {
+                "evaluated_expectations": statistics.evaluated_expectations,
+                "successful_expectations": statistics.successful_expectations,
+                "unsuccessful_expectations": statistics.unsuccessful_expectations,
+                "success_percent": statistics.success_percent,
+            },
+            "evaluation_parameters": evaluation_parameters
+        }
 
     def get_evaluation_parameter(self, parameter_name, default_value=None):
         """Get an evaluation parameter value that has been stored in meta.
-        
+
         Args:
             parameter_name (string): The name of the parameter to store.
             default_value (any): The default value to be returned if the parameter is not found.
@@ -3269,3 +3282,36 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         """
         raise NotImplementedError
+
+
+ValidationStatistics = namedtuple("ValidationStatistics", [
+    "evaluated_expectations",
+    "successful_expectations",
+    "unsuccessful_expectations",
+    "success_percent",
+    "success",
+])
+
+
+def _calc_validation_statistics(validation_results):
+    """
+    Calculate summary statistics for the validation results and
+    return ``ExpectationStatistics``.
+    """
+    # calc stats
+    successful_expectations = sum(exp["success"] for exp in validation_results)
+    evaluated_expectations = len(validation_results)
+    unsuccessful_expectations = evaluated_expectations - successful_expectations
+    success = successful_expectations == evaluated_expectations
+    try:
+        success_percent = successful_expectations / evaluated_expectations * 100
+    except ZeroDivisionError:
+        success_percent = float("nan")
+
+    return ValidationStatistics(
+        successful_expectations=successful_expectations,
+        evaluated_expectations=evaluated_expectations,
+        unsuccessful_expectations=unsuccessful_expectations,
+        success=success,
+        success_percent=success_percent,
+    )
