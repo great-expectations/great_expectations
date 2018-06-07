@@ -29,23 +29,14 @@ class TestCLI(unittest.TestCase):
     def test_cli_arguments(self):
         filepath = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 
-        #!!! These tests require you to uninstall and re-install great_expectations.
-        #!!! Otherwise, they test the CLI, but not great_expectations itself.
+        # !!! These tests require you to uninstall and re-install great_expectations.
+        # !!! Otherwise, they test the CLI, but not great_expectations itself.
 
-        #print(get_system_command_result('python '+filepath+'/../bin/great_expectations '))
-        self.assertEqual(
-            get_system_command_result('python '+filepath+'/../bin/great_expectations '),
-            {'output': '', 'errors': "usage: great_expectations [-h] {initialize,validate} ...\ngreat_expectations: error: invalid choice: '' (choose from 'initialize', 'validate')\n"}
-        )
-
-        # print get_system_command_result('python '+filepath+'/../bin/great_expectations validate')
-        # self.assertEqual(
-        #     get_system_command_result('python '+filepath+'/../bin/great_expectations validate'),
-        #     {'output': '', 'errors': 'usage: great_expectations validate [-h] [--result_format result_format]\n                                   [--catch_exceptions]\n                                   [--include_config INCLUDE_CONFIG]\n                                   [--only_return_failures]\n                                   [--custom_dataset_module CUSTOM_DATASET_MODULE]\n                                   [--custom_dataset_class CUSTOM_DATASET_CLASS]\n                                   data_set expectations_config_file\ngreat_expectations validate: error: too few arguments\n'}
-        # )
+        command_result = get_system_command_result('python '+filepath+'/../bin/great_expectations ')
+        assert "usage: great_expectations [-h] {initialize,validate} ...\ngreat_expectations: error: invalid choice: '' (choose from 'initialize', 'validate')" in command_result['errors']
 
         command_str = 'python '+filepath+'/../bin/great_expectations validate '+filepath+'/test_sets/Titanic.csv '+filepath+'/test_sets/titanic_expectations.json'
-        print(command_str)
+        # print(command_str)
 
         try:
           result = get_system_command_result(command_str)
