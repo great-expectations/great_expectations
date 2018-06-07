@@ -84,6 +84,7 @@ class Dataset(object):
                 else:
                     result_format = self.default_expectation_args["result_format"]
 
+                # Extract the meta object for use as a top-level expectation_config holder
                 if "meta" in kwargs:
                     meta = kwargs["meta"]
                     del all_args["meta"]
@@ -98,7 +99,15 @@ class Dataset(object):
                         del all_args["result_format"]
 
                 all_args = recursively_convert_to_json_serializable(all_args)
-                expectation_args = copy.deepcopy(all_args)
+
+                # Patch in PARAMETER args, and remove locally-supplied arguments
+                expectation_args = copy.deepcopy(all_args) # This will become the stored config
+
+                if "evaluation_parameters" in self._expectations_config:
+                    evaluation_args = self._build_evaluation_parameters(expectation_args,
+                                                                        self._expectations_config["evaluation_parameters"]) # This will be passed to the evaluation
+                else:
+                    evaluation_args = self._build_evaluation_parameters(expectation_args, None)
 
                 #Construct the expectation_config object
                 expectation_config = DotDict({
@@ -106,6 +115,7 @@ class Dataset(object):
                     "kwargs": expectation_args
                 })
 
+                # Add meta to our expectation_config
                 if meta is not None:
                     expectation_config["meta"] = meta
 
@@ -115,7 +125,7 @@ class Dataset(object):
 
                 # Finally, execute the expectation method itself
                 try:
-                    return_obj = func(self, **expectation_args)
+                    return_obj = func(self, **evaluation_args)
 
                 except Exception as err:
                     if catch_exceptions:
@@ -704,56 +714,59 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         expectation_config_str = json.dumps(expectations_config, indent=2)
         open(filepath, 'w').write(expectation_config_str)
 
-    def validate(self, expectations_config=None, catch_exceptions=True, result_format=None, only_return_failures=False):
+    def validate(self, expectations_config=None, evaluation_parameters=None, catch_exceptions=True, result_format=None, only_return_failures=False):
         """Generates a JSON-formatted report describing the outcome of all expectations.
 
-           Use the default expectations_config=None to validate the expectations config associated with the DataSet.
+            Use the default expectations_config=None to validate the expectations config associated with the DataSet.
 
-           Args:
-               expectations_config (json or None): \
-                   If None, uses the expectations config generated with the DataSet during the current session. \
-                   If a JSON file, validates those expectations.
-               catch_exceptions (boolean): \
-                   If True, exceptions raised by tests will not end validation and will be described in the returned report.
-               result_format (string or None): \
-                   If None, uses the default value ('BASIC' or as specified). \
-                   If string, the returned expectation output follows the specified format ('BOOLEAN_ONLY','BASIC', etc.).
-               include_config (boolean): \
-                   If True, the returned results include the config information associated with each expectation, if \
-                   it exists.
-               only_return_failures (boolean): \
-                   If True, expectation results are only returned when ``success = False``\.
+            Args:
+                expectations_config (json or None): \
+                    If None, uses the expectations config generated with the Dataset during the current session. \
+                    If a JSON file, validates those expectations.
+                evaluation_parameters (dict or None): \
+                    If None, uses the evaluation_paramters from the expectations_config provided or as part of the dataset.
+                    If a dict, uses the evaluation parameters in the dictionary.
+                catch_exceptions (boolean): \
+                    If True, exceptions raised by tests will not end validation and will be described in the returned report.
+                result_format (string or None): \
+                    If None, uses the default value ('BASIC' or as specified). \
+                    If string, the returned expectation output follows the specified format ('BOOLEAN_ONLY','BASIC', etc.).
+                include_config (boolean): \
+                    If True, the returned results include the config information associated with each expectation, if \
+                    it exists.
+                only_return_failures (boolean): \
+                    If True, expectation results are only returned when ``success = False``\.
 
-           Returns:
-               A JSON-formatted dictionary containing a list of the validation results. \
-               An example of the returned format::
+            Returns:
+                A JSON-formatted dictionary containing a list of the validation results. \
+                An example of the returned format::
 
-               {
-                 "results": [
-                   {
-                     "unexpected_list": [unexpected_value_1, unexpected_value_2],
-                     "expectation_type": "expect_*",
-                     "kwargs": {
-                       "column": "Column_Name",
-                       "output_format": "SUMMARY"
-                     },
-                     "success": true,
-                     "raised_exception: false.
-                     "exception_traceback": null
-                   },
-                   {
-                     ... (Second expectation results)
-                   },
-                   ... (More expectations results)
-                 ],
-                 "success": true,
-                 "statistics": {
-                   "evaluated_expectations": n,
-                   "successful_expectations": m,
-                   "unsuccessful_expectations": n - m,
-                   "success_percent": m / n
-                 }
-               }
+                {
+                  "results": [
+                    {
+                      "unexpected_list": [unexpected_value_1, unexpected_value_2],
+                      "expectation_type": "expect_*",
+                      "kwargs": {
+                        "column": "Column_Name",
+                        "output_format": "SUMMARY"
+                      },
+                      "success": true,
+                      "raised_exception: false.
+                      "exception_traceback": null
+                    },
+                    {
+                      ... (Second expectation results)
+                    },
+                    ... (More expectations results)
+                  ],
+                  "success": true,
+                  "statistics": {
+                    "evaluated_expectations": n,
+                    "successful_expectations": m,
+                    "unsuccessful_expectations": n - m,
+                    "success_percent": m / n
+                  }
+                }
 
            Notes:
                If the configuration object was built with a different version of great expectations then the current environment. \
@@ -774,6 +787,11 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         elif isinstance(expectations_config, string_types):
             expectations_config = json.load(open(expectations_config, 'r'))
 
+        if evaluation_parameters is None:
+            # Use evaluation parameters from the (maybe provided) config
+            if "evaluation_parameters" in expectations_config:
+                evaluation_parameters = expectations_config["evaluation_parameters"]
+
         # Warn if our version is different from the version in the configuration
         try:
             if expectations_config['meta']['great_expectations.__version__'] != __version__:
@@ -788,9 +806,12 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                 if result_format is not None:
                     expectation['kwargs'].update({"result_format": result_format})
 
+                # A missing parameter should raise a KeyError
+                evaluation_args = self._build_evaluation_parameters(expectation['kwargs'], evaluation_parameters)
+
                 result = expectation_method(
                     catch_exceptions=catch_exceptions,
-                    **expectation['kwargs']
+                    **evaluation_args
                 )
 
             except Exception as err:
@@ -832,7 +853,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                     abbrev_results.append(exp)
             results = abbrev_results
 
-        return {
+        result = {
             "results": results,
             "success": statistics.success,
             "statistics": {
@@ -843,6 +864,64 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             }
         }
 
+        if evaluation_parameters is not None:
+            result.update({"evaluation_parameters": evaluation_parameters})
+
+        return result
+
+    def get_evaluation_parameter(self, parameter_name, default_value=None):
+        """Get an evaluation parameter value that has been stored in meta.
+
+        Args:
+            parameter_name (string): The name of the parameter to store.
+            default_value (any): The default value to be returned if the parameter is not found.
+
+        Returns:
+            The current value of the evaluation parameter.
+        """
+        if "evaluation_parameters" in self._expectations_config and \
+                parameter_name in self._expectations_config['evaluation_parameters']:
+            return self._expectations_config['evaluation_parameters'][parameter_name]
+        else:
+            return default_value
+
+    def set_evaluation_parameter(self, parameter_name, parameter_value):
+        """Provide a value to be stored in the dataset evaluation_parameters object and used to evaluate
+        parameterized expectations.
+
+        Args:
+            parameter_name (string): The name of the kwarg to be replaced at evaluation time
+            parameter_value (any): The value to be used
+        """
+
+        if 'evaluation_parameters' not in self._expectations_config:
+            self._expectations_config['evaluation_parameters'] = {}
+
+        self._expectations_config['evaluation_parameters'].update({parameter_name: parameter_value})
+
+    def _build_evaluation_parameters(self, expectation_args, evaluation_parameters):
+        """Build a dictionary of parameters to evaluate, using the provided evaluation_paramters,
+        AND mutate expectation_args by removing any parameter values passed in as temporary values during
+        exploratory work.
+        """
+
+        evaluation_args = copy.deepcopy(expectation_args)
+
+        # Iterate over arguments, and replace $PARAMETER-defined args with their
+        # specified parameters.
+        for key, value in evaluation_args.items():
+            if isinstance(value, dict) and '$PARAMETER' in value:
+                # First, check to see whether an argument was supplied at runtime
+                # If it was, use that one, but remove it from the stored config
+                if "$PARAMETER." + value["$PARAMETER"] in value:
+                    evaluation_args[key] = evaluation_args[key]["$PARAMETER." + value["$PARAMETER"]]
+                    del expectation_args[key]["$PARAMETER." + value["$PARAMETER"]]
+                elif evaluation_parameters is not None and value["$PARAMETER"] in evaluation_parameters:
+                    evaluation_args[key] = evaluation_parameters[value['$PARAMETER']]
+                else:
+                    raise KeyError("No value found for $PARAMETER " + value["$PARAMETER"])
+
+        return evaluation_args
 
     ##### Output generation #####
     def _format_column_map_output(self,

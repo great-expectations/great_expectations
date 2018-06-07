@@ -8,16 +8,19 @@ import json
 import sys
 import os
 import os.path
+
 dir_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(dir_path+'/..')
 
 import great_expectations as ge
 
+
 def initialize():
-	raise NotImplementedError()
+    raise NotImplementedError()
 
 @argh.arg('data_set')
 @argh.arg('expectations_config_file')
+@argh.arg('--evaluation_parameters', '-p', default=None)
 @argh.arg('--result_format', '-o', default="SUMMARY")
 @argh.arg('--catch_exceptions', '-e', default=True)
 @argh.arg('--only_return_failures', '-f', default=False)
@@ -25,28 +28,35 @@ def initialize():
 @argh.arg('--custom_dataset_class', '-c', default=None)
 def validate(data_set, expectations_config_file, **kwargs):
 
-	expectations_config = json.load(open(expectations_config_file))
+    expectations_config = json.load(open(expectations_config_file))
 
-	if kwargs["custom_dataset_module"]:
-		sys.path.insert(0, os.path.dirname(kwargs["custom_dataset_module"]))
-		module_name = os.path.basename(kwargs["custom_dataset_module"]).split('.')[0]
-		custom_module = __import__(module_name)
-		dataset_class = getattr(custom_module, kwargs["custom_dataset_class"])
+    if kwargs["evaluation_parameters"] is not None:
+        evaluation_parameters = json.load(open(kwargs["evaluation_parameters"]))
+    else:
+        evaluation_parameters = None
 
-	else:
-		dataset_class = ge.dataset.PandasDataset
+    if kwargs["custom_dataset_module"]:
+        sys.path.insert(0, os.path.dirname(kwargs["custom_dataset_module"]))
+        module_name = os.path.basename(kwargs["custom_dataset_module"]).split('.')[0]
+        custom_module = __import__(module_name)
+        dataset_class = getattr(custom_module, kwargs["custom_dataset_class"])
 
-	df = ge.read_csv(data_set, expectations_config=expectations_config, dataset_class=dataset_class)
+    else:
+        dataset_class = ge.dataset.PandasDataset
 
-	result = df.validate(
-		result_format=kwargs["result_format"],
-		catch_exceptions=kwargs["catch_exceptions"],
-		only_return_failures=kwargs["only_return_failures"],
-	)
+    df = ge.read_csv(data_set, expectations_config=expectations_config, dataset_class=dataset_class)
 
-	print(json.dumps(result, indent=2))
+    result = df.validate(
+        evaluation_parameters=evaluation_parameters,
+        result_format=kwargs["result_format"],
+        catch_exceptions=kwargs["catch_exceptions"],
+        only_return_failures=kwargs["only_return_failures"],
+    )
+
+    print(json.dumps(result, indent=2))
+
 
 argh.dispatch_commands([
-	initialize,
-	validate,
+    initialize,
+    validate,
 ])
