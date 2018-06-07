@@ -4,7 +4,7 @@
 Validation
 ================================================================================
 
-Once you've constructed Expectations, you can use them to validate new data.
+Once you've constructed and stored Expectations, you can use them to validate new data.
 
 .. code-block:: bash
 
@@ -76,10 +76,22 @@ Once you've constructed Expectations, you can use them to validate new data.
             ]
           }
         }
-      ]
+      ],
+      "success", False,
+      "statistics": {
+          "evaluated_expectations": 10,
+          "successful_expectations": 9,
+          "unsuccessful_expectations": 1,
+          "success_percent": 90.0,
+      }
     }
 
-Calling great_expectations's validation method generates a JSON-formatted report describing the outcome of all expectations.
+Calling great_expectations's ``validate`` method generates a JSON-formatted report.
+The report contains infos about
+- the overall sucess (the `success` field),
+- summary statistics of the expectations (the `statistics` field), and
+- the detailed results of each expectation (the `results` field).
+
 
 Command-line validation
 ------------------------------------------------------------------------------
@@ -150,6 +162,13 @@ This is especially powerful when combined with great_expectations's command line
           }
         }
       ]
+      "success", False,
+      "statistics": {
+          "evaluated_expectations": 10,
+          "successful_expectations": 9,
+          "unsuccessful_expectations": 1,
+          "success_percent": 90.0
+      }
     }
 
 Deployment patterns
