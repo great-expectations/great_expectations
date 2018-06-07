@@ -102,9 +102,9 @@ class Dataset(object):
                 # Patch in PARAMETER args, and remove locally-supplied arguments
                 expectation_args = copy.deepcopy(all_args) # This will become the stored config
 
-                if "meta" in self._expectations_config and "evaluation_parameters" in self._expectations_config["meta"]:
+                if "evaluation_parameters" in self._expectations_config:
                     evaluation_args = self._build_evaluation_parameters(expectation_args,
-                                                                        self._expectations_config["meta"]["evaluation_parameters"]) # This will be passed to the evaluation
+                                                                        self._expectations_config["evaluation_parameters"]) # This will be passed to the evaluation
                 else:
                     evaluation_args = self._build_evaluation_parameters(expectation_args, None)
 
@@ -777,8 +777,8 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         if evaluation_parameters is None:
             # Use evaluation parameters from the (maybe provided) config
-            if "meta" in expectations_config and "evaluation_parameters" in expectations_config["meta"]:
-                evaluation_parameters = expectations_config["meta"]["evaluation_parameters"]
+            if "evaluation_parameters" in expectations_config:
+                evaluation_parameters = expectations_config["evaluation_parameters"]
 
         # Warn if our version is different from the version in the configuration
         try:
@@ -859,41 +859,25 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         Returns:
             The current value of the evaluation parameter.
         """
-        if "meta" in self._expectations_config and \
-                "evaluation_parameters" in self._expectations_config["meta"] and \
-                parameter_name in self._expectations_config['meta']['evaluation_parameters']:
-            return self._expectations_config['meta']['evaluation_parameters'][parameter_name]
+        if "evaluation_parameters" in self._expectations_config and \
+                parameter_name in self._expectations_config['evaluation_parameters']:
+            return self._expectations_config['evaluation_parameters'][parameter_name]
         else:
             return default_value
 
     def set_evaluation_parameter(self, parameter_name, parameter_value):
-        """Provide a kwarg value to be stored in the dataset meta object and used to evaluate expectations with missing
-        parameters.
+        """Provide a value to be stored in the dataset evaluation_parameters object and used to evaluate
+        parameterized expectations.
 
         Args:
-            expectation_name (string): The name of the expectation for which this kwarg should be used
-            kwarg_name (string): The name of the kwarg to be replaced at evaluation time
-            kwarg_value (any): The value to be used
+            parameter_name (string): The name of the kwarg to be replaced at evaluation time
+            parameter_value (any): The value to be used
         """
-        # if not callable(getattr(self, expectation_name, None)):
-        #     raise ValueError("The expectation " + expectation_name + " is not available in this dataset.")
 
-        if 'meta' not in self._expectations_config:
-            self._expectations_config['meta'] = { 'evaluation_parameters': {}}
+        if 'evaluation_parameters' not in self._expectations_config:
+            self._expectations_config['evaluation_parameters'] = {}
 
-        if 'evaluation_parameters' not in self._expectations_config['meta']:
-            self._expectations_config['meta']['evaluation_parameters'] = {}
-
-        # if expectation_name in self._expectations_config['meta']:
-        #     self._expectations_config['meta'][expectation_name].update({
-        #             kwarg_name: kwarg_value
-        #         })
-        # else:
-        #     self._expectations_config['meta'][expectation_name] = {
-        #         kwarg_name: kwarg_value
-        #     }
-
-        self._expectations_config['meta']['evaluation_parameters'].update({parameter_name: parameter_value})
+        self._expectations_config['evaluation_parameters'].update({parameter_name: parameter_value})
 
     def _build_evaluation_parameters(self, expectation_args, evaluation_parameters):
         """Build a dictionary of parameters to evaluate, using the provided evaluation_paramters,

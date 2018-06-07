@@ -1,5 +1,5 @@
 """
-Test the expectation decorator's ability to substitute parameters at evaluation time, and store parameters in meta
+Test the expectation decorator's ability to substitute parameters at evaluation time, and store parameters in expectations_config
 """
 
 import pytest
@@ -52,7 +52,7 @@ def test_parameter_substitution(single_expectation_custom_dataset):
 
     # Ensure our value has been substituted during evaluation, and set properly in the config
     assert result["result"]["details"]["expectation_argument"] == "upstream_dag_value"
-    assert config["meta"]["evaluation_parameters"] == {"upstream_dag_key": "upstream_dag_value"}
+    assert config["evaluation_parameters"] == {"upstream_dag_key": "upstream_dag_value"}
     assert config["expectations"][0]["kwargs"] == {"expectation_argument": {"$PARAMETER": "upstream_dag_key"}}
 
 def test_exploratory_parameter_substitution(single_expectation_custom_dataset):
@@ -63,7 +63,7 @@ def test_exploratory_parameter_substitution(single_expectation_custom_dataset):
     config = single_expectation_custom_dataset.get_expectations_config()
     # Ensure our value has been substituted during evaluation, and NOT stored in the config
     assert result["result"]["details"]["expectation_argument"] == "temporary_value"
-    assert "evaluation_paramters" not in config["meta"] or config["meta"]["evaluation_parameters"] == {}
+    assert "evaluation_parameters" not in config or config["evaluation_parameters"] == {}
     assert config["expectations"][0]["kwargs"] == {"expectation_argument": {"$PARAMETER": "upstream_dag_key"}}
 
     # Evaluating the expectation without the parameter should now fail, because no parameters were set
