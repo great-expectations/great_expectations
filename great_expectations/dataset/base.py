@@ -717,53 +717,56 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
     def validate(self, expectations_config=None, evaluation_parameters=None, catch_exceptions=True, result_format=None, only_return_failures=False):
         """Generates a JSON-formatted report describing the outcome of all expectations.
 
-           Use the default expectations_config=None to validate the expectations config associated with the DataSet.
+            Use the default expectations_config=None to validate the expectations config associated with the DataSet.
 
-           Args:
-               expectations_config (json or None): \
-                   If None, uses the expectations config generated with the DataSet during the current session. \
-                   If a JSON file, validates those expectations.
-               catch_exceptions (boolean): \
-                   If True, exceptions raised by tests will not end validation and will be described in the returned report.
-               result_format (string or None): \
-                   If None, uses the default value ('BASIC' or as specified). \
-                   If string, the returned expectation output follows the specified format ('BOOLEAN_ONLY','BASIC', etc.).
-               include_config (boolean): \
-                   If True, the returned results include the config information associated with each expectation, if \
-                   it exists.
-               only_return_failures (boolean): \
-                   If True, expectation results are only returned when ``success = False``\.
+            Args:
+                expectations_config (json or None): \
+                    If None, uses the expectations config generated with the Dataset during the current session. \
+                    If a JSON file, validates those expectations.
+                evaluation_parameters (dict or None): \
+                    If None, uses the evaluation_paramters from the expectations_config provided or as part of the dataset.
+                    If a dict, uses the evaluation parameters in the dictionary.
+                catch_exceptions (boolean): \
+                    If True, exceptions raised by tests will not end validation and will be described in the returned report.
+                result_format (string or None): \
+                    If None, uses the default value ('BASIC' or as specified). \
+                    If string, the returned expectation output follows the specified format ('BOOLEAN_ONLY','BASIC', etc.).
+                include_config (boolean): \
+                    If True, the returned results include the config information associated with each expectation, if \
+                    it exists.
+                only_return_failures (boolean): \
+                    If True, expectation results are only returned when ``success = False``\.
 
-           Returns:
-               A JSON-formatted dictionary containing a list of the validation results. \
-               An example of the returned format::
+            Returns:
+                A JSON-formatted dictionary containing a list of the validation results. \
+                An example of the returned format::
 
-               {
-                 "results": [
-                   {
-                     "unexpected_list": [unexpected_value_1, unexpected_value_2],
-                     "expectation_type": "expect_*",
-                     "kwargs": {
-                       "column": "Column_Name",
-                       "output_format": "SUMMARY"
-                     },
-                     "success": true,
-                     "raised_exception: false.
-                     "exception_traceback": null
-                   },
-                   {
-                     ... (Second expectation results)
-                   },
-                   ... (More expectations results)
-                 ],
-                 "success": true,
-                 "statistics": {
-                   "evaluated_expectations": n,
-                   "successful_expectations": m,
-                   "unsuccessful_expectations": n - m,
-                   "success_percent": m / n
-                 }
-               }
+                {
+                  "results": [
+                    {
+                      "unexpected_list": [unexpected_value_1, unexpected_value_2],
+                      "expectation_type": "expect_*",
+                      "kwargs": {
+                        "column": "Column_Name",
+                        "output_format": "SUMMARY"
+                      },
+                      "success": true,
+                      "raised_exception: false.
+                      "exception_traceback": null
+                    },
+                    {
+                      ... (Second expectation results)
+                    },
+                    ... (More expectations results)
+                  ],
+                  "success": true,
+                  "statistics": {
+                    "evaluated_expectations": n,
+                    "successful_expectations": m,
+                    "unsuccessful_expectations": n - m,
+                    "success_percent": m / n
+                  }
+                }
 
            Notes:
                If the configuration object was built with a different version of great expectations then the current environment. \
@@ -850,7 +853,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                     abbrev_results.append(exp)
             results = abbrev_results
 
-        return {
+        result = {
             "results": results,
             "success": statistics.success,
             "statistics": {
@@ -858,9 +861,13 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                 "successful_expectations": statistics.successful_expectations,
                 "unsuccessful_expectations": statistics.unsuccessful_expectations,
                 "success_percent": statistics.success_percent,
-            },
-            "evaluation_parameters": evaluation_parameters
+            }
         }
+
+        if evaluation_parameters is not None:
+            result.update({"evaluation_parameters": evaluation_parameters})
+
+        return result
 
     def get_evaluation_parameter(self, parameter_name, default_value=None):
         """Get an evaluation parameter value that has been stored in meta.
