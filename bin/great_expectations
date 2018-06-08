@@ -56,7 +56,11 @@ def validate(data_set, expectations_config_file, **kwargs):
     print(json.dumps(result, indent=2))
 
 
+def version():
+	print(ge.version.__version__)
+
 argh.dispatch_commands([
-    initialize,
-    validate,
+	initialize,
+	validate,
+	version,
 ])
