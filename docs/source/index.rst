@@ -28,6 +28,7 @@ Advanced
 
    standard_arguments
    result_format
+   evaluation_parameters
    custom_expectations
    conventions
    roadmap_changelog

@@ -61,7 +61,7 @@ Usage::
             pass
 
     class Bar(Foo):
-        @doc_inherit
+        @DocInherit
         def foo(self):
             pass
 
@@ -230,10 +230,10 @@ def is_valid_continuous_partition_object(partition_object):
 
 def categorical_partition_data(data):
     """Convenience method for creating weights from categorical data.
-    
+
     Args:
         data (list-like): The data from which to construct the estimate.
-    
+
     Returns:
         A new partition object::
 
