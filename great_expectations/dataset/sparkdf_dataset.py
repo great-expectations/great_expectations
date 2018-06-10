@@ -234,7 +234,7 @@ class MetaSparkDFDataset(Dataset):
     #     return inner_wrapper
 
 
-class SparkDFDataset(MetaSparkDFDataset, pd.DataFrame):
+class SparkDFDataset(MetaSparkDFDataset):
     """
     PandasDataset instantiates the great_expectations Expectations API as a subclass of a pandas.DataFrame.
 
@@ -267,10 +267,11 @@ class SparkDFDataset(MetaSparkDFDataset, pd.DataFrame):
     #     super(PandasDataset, self).__finalize__(other, method, **kwargs)
     #     return self
 
-    # def __init__(self, *args, **kwargs):
-    #     super(SparkDFDataset, self).__init__(*args, **kwargs)
-    #     self.discard_subset_failing_expectations = kwargs.get('discard_subset_failing_expectations', False)
-    #     self.add_default_expectations()
+    def __init__(self, spark_df, *args, **kwargs):
+        super(SparkDFDataset, self).__init__(*args, **kwargs)
+        self.discard_subset_failing_expectations = kwargs.get('discard_subset_failing_expectations', False)
+        # self.add_default_expectations()
+        self.spark_df = spark_df
 
     # def add_default_expectations(self):
     #     """
@@ -279,22 +280,23 @@ class SparkDFDataset(MetaSparkDFDataset, pd.DataFrame):
     #     create_multiple_expectations(self, self.columns, "expect_column_to_exist")
 
     ### Expectation methods ###
-    # @DocInherit
-    # @Dataset.expectation(['column'])
-    # def expect_column_to_exist(
-    #         self, column, column_index=None, result_format=None, include_config=False,
-    #         catch_exceptions=None, meta=None
-    # ):
+    @DocInherit
+    @Dataset.expectation(['column'])
+    def expect_column_to_exist(
+            self, column, column_index=None, result_format=None, include_config=False,
+            catch_exceptions=None, meta=None
+    ):
 
-    #     if column in self:
-    #         return {
-    #             "success": (column_index is None) or (self.columns.get_loc(column) == column_index)
-    #         }
+        if column in self.spark_df.columns:
+            return {
+                #FIXME: list.index does not check for duplicate values.
+                "success": (column_index is None) or (self.spark_df.columns.index(column) == column_index)
+            }
 
-    #     else:
-    #         return {
-    #             "success": False
-    #         }
+        else:
+            return {
+                "success": False
+            }
 
     # @DocInherit
     # @Dataset.expectation(['column_list'])
