@@ -35,6 +35,7 @@ String matching
 --------------------------------------------------------------------------------
 
 * :func:`expect_column_value_lengths_to_be_between <great_expectations.dataset.base.Dataset.expect_column_value_lengths_to_be_between>`
+* :func:`expect_column_value_lengths_to_equal <great_expectations.dataset.base.Dataset.expect_column_value_lengths_to_equal>`
 * :func:`expect_column_values_to_match_regex <great_expectations.dataset.base.Dataset.expect_column_values_to_match_regex>`
 * :func:`expect_column_values_to_not_match_regex <great_expectations.dataset.base.Dataset.expect_column_values_to_not_match_regex>`
 * :func:`expect_column_values_to_match_regex_list <great_expectations.dataset.base.Dataset.expect_column_values_to_match_regex_list>`
@@ -56,9 +57,16 @@ Aggregate functions
 * :func:`expect_column_stdev_to_be_between <great_expectations.dataset.base.Dataset.expect_column_stdev_to_be_between>`
 * :func:`expect_column_unique_value_count_to_be_between <great_expectations.dataset.base.Dataset.expect_column_unique_value_count_to_be_between>`
 * :func:`expect_column_proportion_of_unique_values_to_be_between <great_expectations.dataset.base.Dataset.expect_column_proportion_of_unique_values_to_be_between>`
-* :func:`expect_column_most_common_value_to_be <great_expectations.dataset.base.Dataset.expect_column_most_common_value_to_be>`
 * :func:`expect_column_most_common_value_to_be_in_set <great_expectations.dataset.base.Dataset.expect_column_most_common_value_to_be_in_set>`
+* :func:`expect_column_max_to_be_between <great_expectations.dataset.base.Dataset.expect_column_max_to_be_between>`
+* :func:`expect_column_min_to_be_between <great_expectations.dataset.base.Dataset.expect_column_min_to_be_between>`
+* :func:`expect_column_sum_to_be_between <great_expectations.dataset.base.Dataset.expect_column_sum_to_be_between>`
 
+Column pairs
+--------------------------------------------------------------------------------
+* :func:`expect_column_pair_values_A_to_be_greater_than_B <great_expectations.dataset.base.Dataset.expect_column_pair_values_A_to_be_greater_than_B>`
+* :func:`expect_column_pair_values_to_be_equal <great_expectations.dataset.base.Dataset.expect_column_pair_values_to_be_equal>`
+* :func:`expect_column_pair_values_to_be_in_set <great_expectations.dataset.base.Dataset.expect_column_pair_values_to_be_in_set>`
 
 Distributional functions
 --------------------------------------------------------------------------------
@@ -66,14 +74,22 @@ Distributional functions
 * :func:`expect_column_kl_divergence_to_be_less_than <great_expectations.dataset.base.Dataset.expect_column_kl_divergence_to_be_less_than>`
 * :func:`expect_column_bootstrapped_ks_test_p_value_to_be_greater_than <great_expectations.dataset.base.Dataset.expect_column_bootstrapped_ks_test_p_value_to_be_greater_than>`
 * :func:`expect_column_chisquare_test_p_value_to_be_greater_than <great_expectations.dataset.base.Dataset.expect_column_chisquare_test_p_value_to_be_greater_than>`
-
+* :func:`expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than <great_expectations.dataset.base.Dataset.expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than>`
 
 Distributional function helpers
 --------------------------------------------------------------------------------
 
-* :func:`continuous_partition_data <great_expectations.Dataset.util.partition_data>`
-* :func:`categorical_partition_data <great_expectations.Dataset.util.categorical_partition_data>`
-* :func:`kde_partition_data <great_expectations.Dataset.util.kde_smooth_data>`
-* :func:`is_valid_partition_object <great_expectations.Dataset.util.is_valid_partition_object>`
-* :func:`is_valid_continuous_partition_object <great_expectations.Dataset.util.is_valid_partition_object>`
-* :func:`is_valid_categorical_partition_object <great_expectations.Dataset.util.is_valid_partition_object>`
+* :func:`continuous_partition_data <great_expectations.dataset.util.partition_data>`
+* :func:`categorical_partition_data <great_expectations.dataset.util.categorical_partition_data>`
+* :func:`kde_partition_data <great_expectations.dataset.util.kde_partition_data>`
+* :func:`is_valid_partition_object <great_expectations.dataset.util.is_valid_partition_object>`
+* :func:`is_valid_continuous_partition_object <great_expectations.dataset.util.is_valid_partition_object>`
+* :func:`is_valid_categorical_partition_object <great_expectations.dataset.util.is_valid_partition_object>`
+* :func:`infer_distribution_parameters <great_expectations.dataset.util.infer_distribution_parameters>`
+* :func:`validate_distribution_parameters <great_expectations.dataset.util.validate_distribution_parameters>`
+
+Other function helpers
+--------------------------------------------------------------------------------
+
+* :func:`create_multiple_expectations <great_expectations.dataset.util.create_multiple_expectations>`
+* :func:`expect_file_hash_to_equal <great_expectations.util.expect_file_hash_to_equal>`
