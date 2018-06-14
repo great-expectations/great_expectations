@@ -406,69 +406,46 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
     def expect_column_values_to_be_of_type(self, column, type_,
                                            mostly=None,
                                            result_format=None, include_config=False, catch_exceptions=None, meta=None):
-        python_avro_types = {
-                "null":type(None),
-                "boolean":bool,
-                "int":int,
-                "long":int,
-                "float":float,
-                "double":float,
-                "bytes":bytes,
-                "string":str
-                }
 
-        numpy_avro_types = {
-                "null":np.nan,
-                "boolean":np.bool_,
-                "int":np.int64,
-                "long":np.longdouble,
-                "float":np.float_,
-                "double":np.longdouble,
-                "bytes":np.bytes_,
-                "string":np.string_
-                }
+        # Target Datasource {numpy, python} was removed in favor of a simpler type mapping
+        type_map = {
+            "null": [type(None), np.nan],
+            "boolean": [bool, np.bool_],
+            "int": [int, np.int64],
+            "long": [int, np.longdouble],
+            "float": [float, np.float_],
+            "double": [float, np.longdouble],
+            "bytes": [bytes, np.bytes_],
+            "string": [str, np.string_]
+        }
 
-        datasource = {"python":python_avro_types, "numpy":numpy_avro_types}
+        target_type = type_map[type_]
 
-        target_type = datasource[target_datasource][type_]
-        result = column.map(lambda x: type(x) == target_type)
-
-        return result
+        return column.map(lambda x: type(x) in target_type)
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
     def expect_column_values_to_be_in_type_list(self, column, type_list,
                                                 mostly=None,
                                                 result_format=None, include_config=False, catch_exceptions=None, meta=None):
+        # Target Datasource {numpy, python} was removed in favor of a simpler type mapping
+        type_map = {
+            "null": [type(None), np.nan],
+            "boolean": [bool, np.bool_],
+            "int": [int, np.int64],
+            "long": [int, np.longdouble],
+            "float": [float, np.float_],
+            "double": [float, np.longdouble],
+            "bytes": [bytes, np.bytes_],
+            "string": [str, np.string_]
+        }
 
-        python_avro_types = {
-                "null":type(None),
-                "boolean":bool,
-                "int":int,
-                "long":int,
-                "float":float,
-                "double":float,
-                "bytes":bytes,
-                "string":str
-                }
+        # Build one type list with each specified type list from type_map
+        target_type_list = list()
+        for type_ in type_list:
+            target_type_list += type_map[type_]
 
-        numpy_avro_types = {
-                "null":np.nan,
-                "boolean":np.bool_,
-                "int":np.int64,
-                "long":np.longdouble,
-                "float":np.float_,
-                "double":np.longdouble,
-                "bytes":np.bytes_,
-                "string":np.string_
-                }
-
-        datasource = {"python":python_avro_types, "numpy":numpy_avro_types}
-
-        target_type_list = [datasource[target_datasource][t] for t in type_list]
-        result = column.map(lambda x: type(x) in target_type_list)
-
-        return result
+        return column.map(lambda x: type(x) in target_type_list)
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
