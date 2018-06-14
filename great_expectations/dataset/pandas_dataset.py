@@ -403,7 +403,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
-    def expect_column_values_to_be_of_type(self, column, type_, target_datasource="numpy",
+    def expect_column_values_to_be_of_type(self, column, type_,
                                            mostly=None,
                                            result_format=None, include_config=False, catch_exceptions=None, meta=None):
         python_avro_types = {
@@ -437,7 +437,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
-    def expect_column_values_to_be_in_type_list(self, column, type_list, target_datasource="numpy",
+    def expect_column_values_to_be_in_type_list(self, column, type_list,
                                                 mostly=None,
                                                 result_format=None, include_config=False, catch_exceptions=None, meta=None):
 
