@@ -1,0 +1,105 @@
+{
+  "expectation_type": "expect_column_values_to_be_in_type_list",
+  "datasets": [
+    {
+      "data": {
+        "x" : [1,2,4],
+        "y" : [1.0,2.2,5.3],
+        "z" : ["hello", "jello", "mello"],
+        "n" : [null, null, null],
+        "b" : [false, true, false],
+        "s" : ["hello", "jello", 1],
+        "s1" : ["hello", 2.0, 1]
+      },
+      "schemas": {
+        "pandas" : {
+          "x": "np.int_",
+          "y": "np.float_",
+          "z": "str",
+          "n": "null",
+          "b": "bool",
+          "s": ["string", "int"],
+          "s1": ["string", "np.int64", "int"]
+        },
+        "sql": {},
+        "spark": {}
+      },
+      "tests": [
+        {
+          "title": "Positive, integer column",
+          "exact_match_out": false,
+          "in":{
+            "column": "x",
+            "type_list": ["int"]
+          },
+          "out":{
+            "success":true,
+            "unexpected_list": [],
+            "unexpected_index_list": []}},
+        {
+          "title": "Negative, Float values are not strings",
+          "exact_match_out": false,
+          "in":{
+            "column": "x",
+            "type_list": ["string"]
+          },
+          "out":{
+            "success": false,
+            "unexpected_list": [1,2,4],
+            "unexpected_index_list": [0,1,2]
+          }
+        },
+        {
+          "title": "Positive, Float values",
+          "exact_match_out": false,
+          "in":{
+            "column": "y",
+            "type_list": ["float"]
+          },
+          "out":{
+            "success":true,
+            "unexpected_list":[],
+            "unexpected_index_list":[]
+          }
+        },
+        {
+          "title": "Positive, String values",
+          "exact_match_out": false,
+          "in":{
+            "column": "z",
+            "type_list": ["string"]
+          },
+          "out":{
+            "success": true,
+            "unexpected_list": [],
+            "unexpected_index_list": []
+          }
+        },
+        {
+          "title": "Positive, boolean values",
+          "exact_match_out": false,
+          "in":{
+            "column": "b",
+            "type_list": ["boolean"]
+          },
+          "out":{
+            "success": true,
+            "unexpected_list": [],
+            "unexpected_index_list": []
+          }
+        },
+        {
+          "title": "Positive, string and int values",
+          "exact_match_out": false,
+          "in":{
+            "column": "s",
+            "type_list": ["string", "int"]
+          },
+          "out":{
+            "success": true,
+            "unexpected_list": [],
+            "unexpected_index_list": []
+          }
+        }]
+    }]
+}
