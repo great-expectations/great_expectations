@@ -75,21 +75,3 @@ Distributional functions
 * :func:`expect_column_bootstrapped_ks_test_p_value_to_be_greater_than <great_expectations.dataset.base.Dataset.expect_column_bootstrapped_ks_test_p_value_to_be_greater_than>`
 * :func:`expect_column_chisquare_test_p_value_to_be_greater_than <great_expectations.dataset.base.Dataset.expect_column_chisquare_test_p_value_to_be_greater_than>`
 * :func:`expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than <great_expectations.dataset.base.Dataset.expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than>`
-
-Distributional function helpers
---------------------------------------------------------------------------------
-
-* :func:`continuous_partition_data <great_expectations.dataset.util.partition_data>`
-* :func:`categorical_partition_data <great_expectations.dataset.util.categorical_partition_data>`
-* :func:`kde_partition_data <great_expectations.dataset.util.kde_partition_data>`
-* :func:`is_valid_partition_object <great_expectations.dataset.util.is_valid_partition_object>`
-* :func:`is_valid_continuous_partition_object <great_expectations.dataset.util.is_valid_partition_object>`
-* :func:`is_valid_categorical_partition_object <great_expectations.dataset.util.is_valid_partition_object>`
-* :func:`infer_distribution_parameters <great_expectations.dataset.util.infer_distribution_parameters>`
-* :func:`validate_distribution_parameters <great_expectations.dataset.util.validate_distribution_parameters>`
-
-Other function helpers
---------------------------------------------------------------------------------
-
-* :func:`create_multiple_expectations <great_expectations.dataset.util.create_multiple_expectations>`
-* :func:`expect_file_hash_to_equal <great_expectations.util.expect_file_hash_to_equal>`
