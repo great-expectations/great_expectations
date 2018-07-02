@@ -13,7 +13,7 @@ import numpy as np
 import pandas as pd
 from dateutil.parser import parse
 from scipy import stats
-from six import string_types, integer_types
+from six import string_types, integer_types, text_type
 
 from .base import Dataset
 from .util import DocInherit, recursively_convert_to_json_serializable, \
@@ -411,12 +411,12 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         type_map = {
             "null": [type(None), np.nan],
             "boolean": [bool, np.bool_],
-            "int": [integer_types, int,  np.int64],
-            "long": [integer_types, int,  np.longdouble],
+            "int": [int, np.int64] + list(integer_types),
+            "long": [int, np.longdouble] + list(integer_types),
             "float": [float, np.float_],
             "double": [float, np.longdouble],
             "bytes": [bytes, np.bytes_],
-            "string": [string_types, str, np.string_]
+            "string": [str, np.string_, text_type] + list(string_types)
         }
 
         target_type = type_map[type_]
@@ -432,12 +432,12 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         type_map = {
             "null": [type(None), np.nan],
             "boolean": [bool, np.bool_],
-            "int": [integer_types, int, np.int64],
-            "long": [integer_types, int, np.longdouble],
+            "int": [int, np.int64] + list(integer_types),
+            "long": [int, np.longdouble] + list(integer_types),
             "float": [float, np.float_],
             "double": [float, np.longdouble],
             "bytes": [bytes, np.bytes_],
-            "string": [string_types, str, np.string_]
+            "string": [str, np.string_, text_type] + list(string_types)
         }
 
         # Build one type list with each specified type list from type_map
