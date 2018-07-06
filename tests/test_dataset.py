@@ -1157,6 +1157,10 @@ class TestDataset(unittest.TestCase):
         with self.assertRaises(AttributeError) as context:
             result = my_df.validate(catch_exceptions=False)
 
+    def test_get_datasource_names(self):
+        ds = ge.dataset.Dataset
+        self.assertTrue("float64" in ds.get_datasource_names()["numpy"])
+        self.assertFalse("float64" in ds.get_datasource_names()["python"])
 
 if __name__ == "__main__":
     unittest.main()

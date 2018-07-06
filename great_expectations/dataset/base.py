@@ -13,6 +13,8 @@ from collections import (
     defaultdict
 )
 
+import numpy as np
+
 from ..version import __version__
 from .util import DotDict, recursively_convert_to_json_serializable, parse_result_format
 
@@ -1113,7 +1115,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
     ##### Table shape expectations #####
 
     def expect_column_to_exist(
-            self, column, column_index=None, result_format=None, include_config=False, 
+            self, column, column_index=None, result_format=None, include_config=False,
             catch_exceptions=None, meta=None
         ):
         """Expect the specified column to exist.
@@ -1527,6 +1529,42 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             expect_column_values_to_be_of_type
         """
         raise NotImplementedError
+
+    _python_avro_types = {
+            "null":type(None),
+            "boolean":bool,
+            "int":int,
+            "long":int,
+            "float":float,
+            "double":float,
+            "bytes":bytes,
+            "string":str
+            }
+
+    _numpy_avro_types = {
+            "null":np.nan,
+            "boolean":np.bool_,
+            "int":np.int64,
+            "long":np.longdouble,
+            "float":np.float_,
+            "float64":np.float_,
+            "double":np.longdouble,
+            "bytes":np.bytes_,
+            "string":np.string_
+            }
+
+    datasources = {
+        "python":_python_avro_types,
+        "numpy":_numpy_avro_types,
+    }
+
+    @classmethod
+    def get_datasource_names(cls):
+        """Return a dictionary mapping target_datasource names to their type strings."""
+        names = {}
+        for source in cls.datasources:
+            names[source] = sorted(cls.datasources[source])
+        return names
 
     ##### Sets and ranges #####
 

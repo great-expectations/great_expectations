@@ -38,6 +38,7 @@ class TestPandasDataset(unittest.TestCase):
         D = ge.dataset.PandasDataset({
             'x' : [1,2,4],
             'y' : [1.0,2.2,5.3],
+            'y1' : [np.float64(f) for f in [1.0,2.2,5.3]],
             'z' : ['hello', 'jello', 'mello'],
             'n' : [None, np.nan, None],
             'b' : [False, True, False],
@@ -59,6 +60,9 @@ class TestPandasDataset(unittest.TestCase):
                 {
                     'in':{"column":"y","type_":"float","target_datasource":"numpy"},
                     'out':{'success':False, 'unexpected_list':[1.0,2.2,5.3], 'unexpected_index_list':[0,1,2]}},
+                {
+                    'in':{"column":"y1","type_":"float64","target_datasource":"numpy"},
+                    'out':{'success':True, 'unexpected_list':[], 'unexpected_index_list':[]}},
                 {
                     'in':{"column":"z","type_":"string","target_datasource":"python"},
                     'out':{'success':True, 'unexpected_list':[], 'unexpected_index_list':[]}},
