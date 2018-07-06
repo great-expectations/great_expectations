@@ -13,7 +13,7 @@ import numpy as np
 import pandas as pd
 from dateutil.parser import parse
 from scipy import stats
-from six import integer_types, string_types, text_type
+from six import integer_types, string_types
 
 from .base import Dataset
 from .util import DocInherit, recursively_convert_to_json_serializable, \
@@ -416,12 +416,12 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             "float": [float, np.float_],
             "double": [float, np.longdouble],
             "bytes": [bytes, np.bytes_],
-            "string": [str, np.string_, text_type]
+            "string": [string_types, np.string_]
         }
 
         target_type = type_map[type_]
 
-        return column.map(lambda x: type(x) in target_type)
+        return column.map(lambda x: isinstance(x, tuple(target_type)))
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
@@ -437,7 +437,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             "float": [float, np.float_],
             "double": [float, np.longdouble],
             "bytes": [bytes, np.bytes_],
-            "string": [str, np.string_, text_type]
+            "string": [string_types, np.string_]
         }
 
         # Build one type list with each specified type list from type_map
@@ -445,7 +445,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         for type_ in type_list:
             target_type_list += type_map[type_]
 
-        return column.map(lambda x: type(x) in target_type_list)
+        return column.map(lambda x: isinstance(x, tuple(target_type_list)))
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
