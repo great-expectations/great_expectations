@@ -1414,7 +1414,6 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         self,
         column,
         type_,
-        target_datasource="numpy",
         mostly=None,
         result_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
@@ -1428,9 +1427,6 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             type\_ (str): \
                 A string representing the data type that each column should have as entries.
                 For example, "double integer" refers to an integer with double precision.
-            target_datasource (str): \
-                The data source that specifies the implementation in the type\_ parameter.
-                For example, options include "numpy", "sql", or "spark".
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
@@ -1473,7 +1469,6 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         self,
         column,
         type_list,
-        target_datasource="numpy",
         mostly=None,
         result_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
@@ -1487,9 +1482,6 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             type_list (list of str): \
                 A list of strings representing the data type that each column should have as entries.
                 For example, "double integer" refers to an integer with double precision.
-            target_datasource (str): \
-                The data source that specifies the implementation in the type_list parameter.
-                For example, options include "numpy", "sql", or "spark".
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
