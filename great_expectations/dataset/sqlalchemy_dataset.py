@@ -653,12 +653,11 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 sa.func.sum(
                     sa.case([(sa.column(column) == None, 1)], else_=0)
                 ).label('null_count')
-            ]).
-            select_from(sa.table(self.table_name))
+            ]).select_from(sa.table(self.table_name))
         )
 
         element_values = self.engine.execute(
-            sa.select(column).order_by(column).where(
+            sa.select([sa.column(column)]).order_by(sa.column(column)).where(
                 sa.column(column) != None
             ).select_from(sa.table(self.table_name))
         )
