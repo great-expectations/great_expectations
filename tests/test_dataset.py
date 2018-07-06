@@ -707,9 +707,9 @@ class TestDataset(unittest.TestCase):
             'y' : [1,2,None,4,None,6,7,8,9,None],
             'z' : ['cello', 'hello', 'jello', 'bellow', 'fellow', 'mellow', 'wellow', 'xello', 'yellow', 'zello'],
         })
-        my_df.expect_column_values_to_be_of_type('x', 'int', 'python')
-        my_df.expect_column_values_to_be_of_type('y', 'int', 'python')
-        my_df.expect_column_values_to_be_of_type('z', 'int', 'python')
+        my_df.expect_column_values_to_be_of_type('x', 'int')
+        my_df.expect_column_values_to_be_of_type('y', 'int')
+        my_df.expect_column_values_to_be_of_type('z', 'int')
         my_df.expect_column_values_to_be_increasing('x')
         my_df.expect_column_values_to_match_regex('z', 'ello')
 
@@ -777,8 +777,7 @@ class TestDataset(unittest.TestCase):
               "expectation_type": "expect_column_values_to_be_of_type",
               "kwargs": {
                 "column": "x",
-                "type_": "int",
-                "target_datasource": "python",
+                "type_": "int"
               }
             },{
               "expectation_type": "expect_column_values_to_be_increasing",
@@ -795,9 +794,9 @@ class TestDataset(unittest.TestCase):
             'y' : [1,2,None,4,None,6,7,8,9,None],
             'z' : ['cello', 'hello', 'jello', 'bellow', 'fellow', 'mellow', 'wellow', 'xello', 'yellow', 'zello'],
         })
-        my_df.expect_column_values_to_be_of_type('x', 'int', 'python')
-        my_df.expect_column_values_to_be_of_type('y', 'int', 'python')
-        my_df.expect_column_values_to_be_of_type('z', 'int', 'python', include_config=True, catch_exceptions=True)
+        my_df.expect_column_values_to_be_of_type('x', 'int')
+        my_df.expect_column_values_to_be_of_type('y', 'int')
+        my_df.expect_column_values_to_be_of_type('z', 'int', include_config=True, catch_exceptions=True)
         my_df.expect_column_values_to_be_increasing('x')
         my_df.expect_column_values_to_match_regex('z', 'ello')
 
@@ -882,8 +881,7 @@ class TestDataset(unittest.TestCase):
               "expectation_type": "expect_column_values_to_be_of_type",
               "kwargs": {
                 "column": "x",
-                "type_": "int",
-                "target_datasource": "python",
+                "type_": "int"
               }
             },{
               "expectation_type": "expect_column_values_to_be_increasing",
@@ -932,7 +930,7 @@ class TestDataset(unittest.TestCase):
                     },
                     {
                         'expectation_type': 'expect_column_values_to_be_of_type',
-                        'kwargs': {'column': 'y', 'type_': 'int', 'target_datasource': 'python'}
+                        'kwargs': {'column': 'y', 'type_': 'int'}
                     }
                 ],
                 'dataset_name': None,
