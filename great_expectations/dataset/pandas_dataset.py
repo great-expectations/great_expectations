@@ -13,7 +13,7 @@ import numpy as np
 import pandas as pd
 from dateutil.parser import parse
 from scipy import stats
-from six import string_types, integer_types, text_type
+from six import integer_types, text_type
 
 from .base import Dataset
 from .util import DocInherit, recursively_convert_to_json_serializable, \
@@ -416,7 +416,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             "float": [float, np.float_],
             "double": [float, np.longdouble],
             "bytes": [bytes, np.bytes_],
-            "string": [str, np.string_, text_type] + list(string_types)
+            "string": [str, np.string_, text_type]
         }
 
         target_type = type_map[type_]
@@ -437,7 +437,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             "float": [float, np.float_],
             "double": [float, np.longdouble],
             "bytes": [bytes, np.bytes_],
-            "string": [str, np.string_, text_type] + list(string_types)
+            "string": [str, np.string_, text_type]
         }
 
         # Build one type list with each specified type list from type_map
