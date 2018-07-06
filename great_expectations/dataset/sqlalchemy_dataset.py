@@ -656,28 +656,27 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             ]).select_from(sa.table(self.table_name))
         )
 
+        elements = count_query.fetchone()
+        # The number of non-null/non-ignored values
+        nonnull_count = elements['element_count'] - elements['null_count']
+
         element_values = self.engine.execute(
             sa.select([sa.column(column)]).order_by(sa.column(column)).where(
                 sa.column(column) != None
-            ).select_from(sa.table(self.table_name))
+            ).offset(nonnull_count // 2 - 1).limit(2).select_from(sa.table(self.table_name))
         )
 
-        # Fetch the Element count, null count, and sorted/null dropped column values
-        elements = count_query.fetchone()
         column_values = list(element_values.fetchall())
-
-        # The number of non-null/non-ignored values
-        nonnull_count = elements['element_count'] - elements['null_count']
 
         if nonnull_count % 2 == 0:
             # An even number of column values: take the average of the two center values
             column_median = (
-                column_values[nonnull_count // 2 - 1][0] +  # left center value
-                column_values[nonnull_count // 2][0]        # right center value
+                column_values[0][0] +  # left center value
+                column_values[1][0]        # right center value
             ) / 2.0  # Average center values
         else:
             # An odd number of column values, we can just take the center value
-            column_median = column_values[nonnull_count // 2][0]  # True center value
+            column_median = column_values[1][0]  # True center value
 
         return {
             'success':
