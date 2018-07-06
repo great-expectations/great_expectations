@@ -13,7 +13,7 @@ import numpy as np
 import pandas as pd
 from dateutil.parser import parse
 from scipy import stats
-from six import integer_types, text_type
+from six import integer_types, string_types, text_type
 
 from .base import Dataset
 from .util import DocInherit, recursively_convert_to_json_serializable, \
