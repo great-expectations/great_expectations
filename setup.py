@@ -19,10 +19,10 @@ config = {
     'author_email': 'team@greatexpectations.io',
     'version': __version__,
     'install_requires': required,
-    'scripts': [
-        'bin/great_expectations',
-    ],
     'packages': find_packages(exclude=['docs', 'tests', 'examples']),
+    'entry_points': {
+        'console_scripts': ['great_expectations=great_expectations.cli:main']
+    },
     'name': 'great_expectations',
     'long_description': long_description,
     'license': 'Apache-2.0',
