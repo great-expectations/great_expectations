@@ -1,105 +1,89 @@
-import unittest
 import json
-import inspect
-import os
-import subprocess
+import pytest
 
-from .test_utils import assertDeepAlmostEqual
-
-
-def get_system_command_result(command_str):
-    p = subprocess.Popen(
-        command_str.split(' '),
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE
-    )
-    output, errors = p.communicate()
-
-    return {
-        "output" : output.decode('utf-8'),
-        "errors" : errors.decode('utf-8')
-    }
+import great_expectations.cli
+import great_expectations.version
 
 
-class TestCLI(unittest.TestCase):
+def test_cli_command_error(capsys):
+    with pytest.raises(SystemExit) as pytest_wrapped_e:
+        great_expectations.cli.dispatch([])
+    out, err = capsys.readouterr()
 
-    def test_cli_help_message(self):
-        filepath = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+    assert pytest_wrapped_e.type == SystemExit
+    assert out == ''
+    assert 'error: the following arguments are required: command' in err
 
-        # !!! These tests require you to uninstall and re-install great_expectations.
-        # !!! Otherwise, they test the CLI, but not great_expectations itself.
 
-        command_result = get_system_command_result('python '+filepath+'/../bin/great_expectations ')
-        assert "usage: great_expectations [-h] {initialize,validate,version} ...\ngreat_expectations: error: invalid choice: '' (choose from 'initialize', 'validate', 'version')" in command_result['errors']
+def test_cli_validate_help(capsys):
+    with pytest.raises(SystemExit) as pytest_wrapped_e:
+        great_expectations.cli.dispatch(["validate"])
 
-        command_str = 'python '+filepath+'/../bin/great_expectations validate '+filepath+'/test_sets/Titanic.csv '+filepath+'/test_sets/titanic_expectations.json'
-        # print(command_str)
+    out, err = capsys.readouterr()
 
-        try:
-            result = get_system_command_result(command_str)
-            json_result = json.loads(result["output"])
-        except ValueError as ve:
-            print ("=== Result ==================================================")
-            print (result)
-            print ("=== Error ===================================================")
-            print(ve)
-            json_result = {}
+    assert pytest_wrapped_e.type == SystemExit
+    assert out == ''
+    assert 'validate: error: the following arguments are required: dataset, expectations_config_file' in err
+    assert '[--evaluation_parameters EVALUATION_PARAMETERS]' in err
+    assert '[--result_format RESULT_FORMAT]' in err
+    assert '[--catch_exceptions CATCH_EXCEPTIONS]' in err
+    assert '[--only_return_failures ONLY_RETURN_FAILURES]' in err
+    assert '[--custom_dataset_module CUSTOM_DATASET_MODULE]' in err
+    assert '[--custom_dataset_class CUSTOM_DATASET_CLASS]' in err
 
-        self.maxDiff = None
 
-        with open(filepath + '/test_sets/expected_cli_results_default.json', 'r') as f:
-            expected_cli_results = json.load(f)
+def test_cli_version(capsys):
+    great_expectations.cli.dispatch(["version"])
+    out, err = capsys.readouterr()
 
-        assertDeepAlmostEqual(self,
-            json_result,
-            expected_cli_results
-        )
+    assert out == great_expectations.version.__version__ + '\n'
+    assert err == ''
 
-    def test_cli_custom_dataset(self):
-        filepath = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 
-        command_str = 'python ' + filepath + '/../bin/great_expectations validate ' \
-                      + filepath + '/test_sets/Titanic.csv '\
-                      + filepath + '/test_sets/titanic_custom_expectations.json -f -m='\
-                      + filepath + '/test_fixtures/custom_dataset.py -c=CustomPandasDataset'
-        try:
-          result = get_system_command_result(command_str)
-          json_result = json.loads(result["output"])
-        except ValueError as ve:
-          print ("=== Result ==================================================")
-          print (result)
-          print ("=== Error ===================================================")
-          print(ve)
-          json_result = {}
+def test_validate_basic_operation(capsys):
+    with pytest.warns(UserWarning, match="No great_expectations version found in configuration object."):
+        great_expectations.cli.dispatch(["validate",
+                                         "./tests/test_sets/Titanic.csv",
+                                         "./tests/test_sets/titanic_expectations.json"])
 
-        self.maxDiff = None
+    out, err = capsys.readouterr()
+    json_result = json.loads(out)
+    with open('./tests/test_sets/expected_cli_results_default.json', 'r') as f:
+        expected_cli_results = json.load(f)
 
-        #Remove partial unexpected counts, because we can't guarantee that they'll be the same every time.
-        del json_result["results"][0]["result"]['partial_unexpected_counts']
+    assert json_result == expected_cli_results
 
-        with open(filepath + '/test_sets/expected_cli_results_custom.json', 'r') as f:
-            expected_cli_results = json.load(f)
 
-        self.assertEqual(
-            json_result,
-            expected_cli_results
-        )
+def test_validate_custom_dataset(capsys):
+    with pytest.warns(UserWarning, match="No great_expectations version found in configuration object."):
+        great_expectations.cli.dispatch(["validate",
+                                         "./tests/test_sets/Titanic.csv",
+                                         "./tests/test_sets/titanic_custom_expectations.json",
+                                         "-f", "True",
+                                         "-m", "./tests/test_fixtures/custom_dataset.py",
+                                         "-c", "CustomPandasDataset"])
 
-    def test_cli_evaluation_parameters(self):
-        filepath = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+    out, err = capsys.readouterr()
+    json_result = json.loads(out)
+    del json_result["results"][0]["result"]['partial_unexpected_counts']
+    with open('./tests/test_sets/expected_cli_results_custom.json', 'r') as f:
+        expected_cli_results = json.load(f)
 
-        command_str = 'python ' + filepath + '/../bin/great_expectations validate ' \
-                      + '--evaluation_parameters ' + filepath + '/test_sets/titanic_evaluation_parameters.json ' \
-                      + '--only_return_failures ' \
-                      + filepath + '/test_sets/Titanic.csv ' \
-                      + filepath + '/test_sets/titanic_parameterized_expectations.json'
+    assert json_result == expected_cli_results
 
-        expected_evaluation_parameters = json.load(open('./tests/test_sets/titanic_evaluation_parameters.json'))
 
-        result = get_system_command_result(command_str)
-        json_result = json.loads(result["output"])
+def test_cli_evaluation_parameters(capsys):
+    with pytest.warns(UserWarning, match="No great_expectations version found in configuration object."):
+        great_expectations.cli.dispatch(["validate",
+                                         "./tests/test_sets/Titanic.csv",
+                                         "./tests/test_sets/titanic_parameterized_expectations.json",
+                                         "--evaluation_parameters",
+                                         "./tests/test_sets/titanic_evaluation_parameters.json",
+                                         "-f", "True"])
 
-        self.assertEqual(json_result['evaluation_parameters'], expected_evaluation_parameters)
+    out, err = capsys.readouterr()
+    with open('./tests/test_sets/titanic_evaluation_parameters.json', 'r') as f:
+        expected_evaluation_parameters = json.load(f)
 
-if __name__ == "__main__":
-    unittest.main()
+    json_result = json.loads(out)
+    assert json_result['evaluation_parameters'] == expected_evaluation_parameters
