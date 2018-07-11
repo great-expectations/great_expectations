@@ -1,7 +1,4 @@
-try:
-    from setuptools import setup
-except ImportError:
-    from distutils.core import setup
+from setuptools import setup, find_packages
 
 #Parse requirements.txt
 with open('requirements.txt') as f:
@@ -22,14 +19,10 @@ config = {
     'author_email': 'team@greatexpectations.io',
     'version': __version__,
     'install_requires': required,
-    'packages': [
-        'great_expectations',
-        'great_expectations.dataset',
-        'great_expectations.data_context'
-    ],
     'scripts': [
         'bin/great_expectations',
     ],
+    'packages': find_packages(exclude=['docs', 'tests', 'examples']),
     'name': 'great_expectations',
     'long_description': long_description,
     'license': 'Apache-2.0',
