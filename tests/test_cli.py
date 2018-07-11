@@ -12,7 +12,7 @@ def test_cli_command_error(capsys):
 
     assert pytest_wrapped_e.type == SystemExit
     assert out == ''
-    assert 'error: the following arguments are required: command' in err
+    assert ('error: the following arguments are required: command' in err) or ('error: too few arguments' in err)
 
 
 def test_cli_validate_help(capsys):
@@ -23,7 +23,8 @@ def test_cli_validate_help(capsys):
 
     assert pytest_wrapped_e.type == SystemExit
     assert out == ''
-    assert 'validate: error: the following arguments are required: dataset, expectations_config_file' in err
+    assert ('validate: error: the following arguments are required: dataset, expectations_config_file' in err) or \
+           ('error: too few arguments' in err)
     assert '[--evaluation_parameters EVALUATION_PARAMETERS]' in err
     assert '[--result_format RESULT_FORMAT]' in err
     assert '[--catch_exceptions CATCH_EXCEPTIONS]' in err
