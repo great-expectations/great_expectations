@@ -8,7 +8,7 @@ try:
     import pypandoc
     long_description = pypandoc.convert('README.md', 'rst')
 except (IOError, ImportError):
-    long_description = ''
+    long_description = 'Always know what to expect from your data. (See https://github.com/great-expectations/great_expectations for full description).'
 
 exec(open('great_expectations/version.py').read())
 
