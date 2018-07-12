@@ -16,7 +16,7 @@ Planned Features
 
 v.0.4.3__develop
 ----------------
-
+* Improve CLI help and set CLI return value to the number of unmet expectations
 
 v.0.4.3
 -------
