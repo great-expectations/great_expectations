@@ -41,7 +41,7 @@ def dispatch(args):
 
     parsed_args = parser.parse_args(args)
 
-    parsed_args.func(parsed_args)
+    return parsed_args.func(parsed_args)
 
 
 def validate(parsed_args):
@@ -75,7 +75,7 @@ def validate(parsed_args):
     )
 
     print(json.dumps(result, indent=2))
-    sys.exit(result['statistics']['unsuccessful_expectations'])
+    return result['statistics']['unsuccessful_expectations']
 
 
 def version(parsed_args):
@@ -83,7 +83,8 @@ def version(parsed_args):
 
 
 def main():
-    dispatch(sys.argv[1:])
+    return_value = dispatch(sys.argv[1:])
+    sys.exit(return_value)
 
 
 if __name__ == '__main__':
