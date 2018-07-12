@@ -1,7 +1,4 @@
-try:
-    from setuptools import setup
-except ImportError:
-    from distutils.core import setup
+from setuptools import setup, find_packages
 
 #Parse requirements.txt
 with open('requirements.txt') as f:
@@ -11,7 +8,7 @@ try:
     import pypandoc
     long_description = pypandoc.convert('README.md', 'rst')
 except (IOError, ImportError):
-    long_description = ''
+    long_description = 'Always know what to expect from your data. (See https://github.com/great-expectations/great_expectations for full description).'
 
 exec(open('great_expectations/version.py').read())
 
@@ -22,14 +19,10 @@ config = {
     'author_email': 'team@greatexpectations.io',
     'version': __version__,
     'install_requires': required,
-    'packages': [
-        'great_expectations',
-        'great_expectations.dataset',
-        'great_expectations.data_context'
-    ],
-    'scripts': [
-        'bin/great_expectations',
-    ],
+    'packages': find_packages(exclude=['docs', 'tests', 'examples']),
+    'entry_points': {
+        'console_scripts': ['great_expectations=great_expectations.cli:main']
+    },
     'name': 'great_expectations',
     'long_description': long_description,
     'license': 'Apache-2.0',

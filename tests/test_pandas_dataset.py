@@ -33,105 +33,6 @@ class TestPandasDataset(unittest.TestCase):
             out = json.loads(json.dumps(out))
             self.assertEqual(out, t['out'])
 
-    def test_expect_column_values_to_be_of_type(self):
-
-        D = ge.dataset.PandasDataset({
-            'x' : [1,2,4],
-            'y' : [1.0,2.2,5.3],
-            'z' : ['hello', 'jello', 'mello'],
-            'n' : [None, np.nan, None],
-            'b' : [False, True, False],
-            's' : ['hello', 'jello', 1],
-            's1' : ['hello', 2.0, 1],
-        })
-        D.set_default_expectation_argument("result_format", "COMPLETE")
-
-        T = [
-                {
-                    'in':{"column":"x","type_":"int","target_datasource":"python"},
-                    'out':{'success':True, 'unexpected_list':[], 'unexpected_index_list':[]}},
-                {
-                    'in':{"column":"x","type_":"string","target_datasource":"numpy"},
-                    'out':{'success':False, 'unexpected_list':[1,2,4], 'unexpected_index_list':[0,1,2]}},
-                {
-                    'in':{"column":"y","type_":"float","target_datasource":"python"},
-                    'out':{'success':True, 'unexpected_list':[], 'unexpected_index_list':[]}},
-                {
-                    'in':{"column":"y","type_":"float","target_datasource":"numpy"},
-                    'out':{'success':False, 'unexpected_list':[1.0,2.2,5.3], 'unexpected_index_list':[0,1,2]}},
-                {
-                    'in':{"column":"z","type_":"string","target_datasource":"python"},
-                    'out':{'success':True, 'unexpected_list':[], 'unexpected_index_list':[]}},
-                {
-                    'in':{"column":"b","type_":"boolean","target_datasource":"python"},
-                    'out':{'success':True, 'unexpected_list':[], 'unexpected_index_list':[]}}
-                #{
-                #    'in':['n','null','python'],
-                #    'kwargs':{},
-                #    'out':{'success':False, 'unexpected_list':[np.nan]}},
-                #{
-                #    'in':['n','null','python'],
-                #    'kwargs':{'mostly':.5},
-                #    'out':{'success':True, 'unexpected_list':[np.nan]}}
-        ]
-
-        for t in T:
-            out = D.expect_column_values_to_be_of_type(**t['in'])
-            self.assertEqual(t['out']['success'], out['success'])
-            self.assertEqual(t['out']['unexpected_index_list'], out['result']['unexpected_index_list'])
-            self.assertEqual(t['out']['unexpected_list'], out['result']['unexpected_list'])
-
-    def test_expect_column_values_to_be_in_type_list(self):
-
-        D = ge.dataset.PandasDataset({
-            'x' : [1,2,4],
-            'y' : [1.0,2.2,5.3],
-            'z' : ['hello', 'jello', 'mello'],
-            'n' : [None, np.nan, None],
-            'b' : [False, True, False],
-            's' : ['hello', 'jello', 1],
-            's1' : ['hello', 2.0, 1],
-        })
-        D.set_default_expectation_argument("result_format", "COMPLETE")
-
-        T = [
-                {
-                    'in':{"column":"x","type_list":["int"],"target_datasource":"python"},
-                    'out':{'success':True, 'unexpected_list':[], 'unexpected_index_list':[]}},
-                {
-                    'in':{"column":"x","type_list":["string"],"target_datasource":"numpy"},
-                    'out':{'success':False, 'unexpected_list':[1,2,4], 'unexpected_index_list':[0,1,2]}},
-                {
-                    'in':{"column":"y","type_list":["float"],"target_datasource":"python"},
-                    'out':{'success':True, 'unexpected_list':[], 'unexpected_index_list':[]}},
-                {
-                    'in':{"column":"y","type_list":["float"],"target_datasource":"numpy"},
-                    'out':{'success':False, 'unexpected_list':[1.0,2.2,5.3], 'unexpected_index_list':[0,1,2]}},
-                {
-                    'in':{"column":"z","type_list":["string"],"target_datasource":"python"},
-                    'out':{'success':True, 'unexpected_list':[], 'unexpected_index_list':[]}},
-                {
-                    'in':{"column":"b","type_list":["boolean"],"target_datasource":"python"},
-                    'out':{'success':True, 'unexpected_list':[], 'unexpected_index_list':[]}},
-                {
-                   'in':{"column":"s", "type_list":["string", "int"], "target_datasource":"python"},
-                   'out':{'success':True, 'unexpected_list':[], 'unexpected_index_list':[]}},
-                #{
-                #    'in':['n','null','python'],
-                #    'kwargs':{'mostly':.5},
-                #    'out':{'success':True, 'unexpected_list':[np.nan]}}
-        ]
-
-        for t in T:
-            out = D.expect_column_values_to_be_in_type_list(**t['in'])
-            self.assertEqual(t['out']['success'], out['success'])
-            self.assertEqual(t['out']['unexpected_index_list'], out['result']['unexpected_index_list'])
-            self.assertEqual(t['out']['unexpected_list'], out['result']['unexpected_list'])
-
-
-
-
-
     # def test_expect_column_values_to_be_between(self):
     #     """
 
@@ -1031,6 +932,31 @@ class TestPandasDataset(unittest.TestCase):
         sub1 = df.loc[0:, 'A':'B']
         self.assertIsInstance(sub1, ge.dataset.PandasDataset)
         self.assertEqual(sub1.find_expectations(), exp1)
+
+    def test_subclass_pandas_subset_retains_subclass(self):
+        """A subclass of PandasDataset should still be that subclass after a Pandas subsetting operation"""
+        class CustomPandasDataset(ge.dataset.PandasDataset):
+
+            @ge.dataset.MetaPandasDataset.column_map_expectation
+            def expect_column_values_to_be_odd(self, column):
+                return column.map(lambda x: x % 2 )
+
+            @ge.dataset.MetaPandasDataset.column_map_expectation
+            def expectation_that_crashes_on_sixes(self, column):
+                return column.map(lambda x: (x-6)/0 != "duck")
+
+        df = CustomPandasDataset({
+            'all_odd': [1, 3, 5, 5, 5, 7, 9, 9, 9, 11],
+            'mostly_odd': [1, 3, 5, 7, 9, 2, 4, 1, 3, 5],
+            'all_even': [2, 4, 4, 6, 6, 6, 8, 8, 8, 8],
+            'odd_missing': [1, 3, 5, None, None, None, None, 1, 3, None],
+            'mixed_missing': [1, 3, 5, None, None, 2, 4, 1, 3, None],
+            'all_missing': [None, None, None, None, None, None, None, None, None, None]
+        })
+
+        df2 = df.sample(frac=0.5)
+        self.assertTrue(type(df2) == type(df))
+
 
 if __name__ == "__main__":
     unittest.main()

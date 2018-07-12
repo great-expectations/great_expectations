@@ -124,8 +124,11 @@ class MetaSqlAlchemyDataset(Dataset):
             if 'success' not in evaluation_result:
                 raise ValueError("Column aggregate expectation failed to return required information: success")
 
-            if ('result' not in evaluation_result) or ('observed_value' not in evaluation_result['result']):
-                raise ValueError("Column aggregate expectation failed to return required information: observed_value")
+            if 'result' not in evaluation_result:
+                raise ValueError("Column aggregate expectation failed to return required information: result")
+
+            if 'observed_value' not in evaluation_result['result']:
+                raise ValueError("Column aggregate expectation failed to return required information: result.observed_value")
 
             return_obj = {
                 'success': bool(evaluation_result['success'])
@@ -387,6 +390,16 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
     @DocInherit
     @MetaSqlAlchemyDataset.column_map_expectation
+    def expect_column_values_to_not_be_in_set(self,
+                                          column,
+                                          values_set,
+                                          mostly=None,
+                                          result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                          ):
+        return sa.column(column).notin_(tuple(values_set))
+
+    @DocInherit
+    @MetaSqlAlchemyDataset.column_map_expectation
     def expect_column_values_to_be_between(self,
         column,
         min_value=None,
@@ -418,6 +431,49 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                         sa.column(column) <= max_value
                 )
 
+    @DocInherit
+    @MetaSqlAlchemyDataset.column_map_expectation
+    def expect_column_value_lengths_to_equal(self,
+        column,
+        value,
+        mostly=None,
+        result_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
+        return sa.func.length(sa.column(column)) == value
+
+    @DocInherit
+    @MetaSqlAlchemyDataset.column_map_expectation
+    def expect_column_value_lengths_to_be_between(self,
+        column,
+        min_value=None,
+        max_value=None,
+        mostly=None,
+        result_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
+
+        if min_value is None and max_value is None:
+            raise ValueError("min_value and max_value cannot both be None")
+
+        # Assert that min_value and max_value are integers
+        try:
+            if min_value is not None and not float(min_value).is_integer():
+                raise ValueError("min_value and max_value must be integers")
+
+            if max_value is not None and not float(max_value).is_integer():
+                raise ValueError("min_value and max_value must be integers")
+
+        except ValueError:
+            raise ValueError("min_value and max_value must be integers")
+
+        if min_value is not None and max_value is not None:
+            return sa.and_(sa.func.length(sa.column(column)) >= min_value,
+                           sa.func.length(sa.column(column)) <= max_value)
+
+        elif min_value is None and max_value is not None:
+            return sa.func.length(sa.column(column)) <= max_value
+
+        elif min_value is not None and max_value is None:
+            return sa.func.length(sa.column(column)) >= min_value
 
     ###
     ###
@@ -597,32 +653,30 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 sa.func.sum(
                     sa.case([(sa.column(column) == None, 1)], else_=0)
                 ).label('null_count')
-            ]).
-            select_from(sa.table(self.table_name))
+            ]).select_from(sa.table(self.table_name))
         )
 
-        element_values = self.engine.execute(
-            sa.select(column).order_by(column).where(
-                sa.column(column) != None
-            ).select_from(sa.table(self.table_name))
-        )
-
-        # Fetch the Element count, null count, and sorted/null dropped column values
         elements = count_query.fetchone()
-        column_values = list(element_values.fetchall())
-
         # The number of non-null/non-ignored values
         nonnull_count = elements['element_count'] - elements['null_count']
+
+        element_values = self.engine.execute(
+            sa.select([sa.column(column)]).order_by(sa.column(column)).where(
+                sa.column(column) != None
+            ).offset(nonnull_count // 2 - 1).limit(2).select_from(sa.table(self.table_name))
+        )
+
+        column_values = list(element_values.fetchall())
 
         if nonnull_count % 2 == 0:
             # An even number of column values: take the average of the two center values
             column_median = (
-                column_values[nonnull_count // 2 - 1][0] +  # left center value
-                column_values[nonnull_count // 2][0]        # right center value
+                column_values[0][0] +  # left center value
+                column_values[1][0]        # right center value
             ) / 2.0  # Average center values
         else:
             # An odd number of column values, we can just take the center value
-            column_median = column_values[nonnull_count // 2][0]  # True center value
+            column_median = column_values[1][0]  # True center value
 
         return {
             'success':
