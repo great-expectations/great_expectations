@@ -9,25 +9,32 @@ from great_expectations.dataset import PandasDataset
 
 
 def dispatch(args):
-    parser = argparse.ArgumentParser(description='Validate expectations for your dataset.')
+    parser = argparse.ArgumentParser(description='great_expectations command-line interface')
 
     subparsers = parser.add_subparsers(dest='command')
     subparsers.required = True
 
-    validate_parser = subparsers.add_parser('validate')
+    validate_parser = subparsers.add_parser('validate', description='Validate expectations for your dataset.')
     validate_parser.set_defaults(func=validate)
 
     validate_parser.add_argument('dataset')
     validate_parser.add_argument('expectations_config_file')
 
-    validate_parser.add_argument('--evaluation_parameters', '-p', default=None)
-    validate_parser.add_argument('--result_format', '-o', default="SUMMARY")
-    validate_parser.add_argument('--catch_exceptions', '-e', default=True)
-    validate_parser.add_argument('--only_return_failures', '-f', default=False)
+    validate_parser.add_argument('--evaluation_parameters', '-p', default=None,
+                                 help='Path to a file containing JSON object used to evaluate parameters in expectations config.')
+    validate_parser.add_argument('--result_format', '-o', default="SUMMARY",
+                                 help='Result format to use when building evaluation responses.')
+    validate_parser.add_argument('--catch_exceptions', '-e', default=True, type=bool,
+                                 help='Specify whether to catch exceptions raised during evaluation of expectations (defaults to True).')
+    validate_parser.add_argument('--only_return_failures', '-f', default=False, type=bool,
+                                 help='Specify whether to only return expectations that are not met during evaluation (defaults to False).')
     # validate_parser.add_argument('--no_catch_exceptions', '-e', default=True, action='store_false')
     # validate_parser.add_argument('--only_return_failures', '-f', default=False, action='store_true')
-    validate_parser.add_argument('--custom_dataset_module', '-m', default=None)
-    validate_parser.add_argument('--custom_dataset_class', '-c', default=None)
+    custom_dataset_group = validate_parser.add_argument_group('custom_dataset', description='Arguments defining a custom dataset to use for validation.')
+    custom_dataset_group.add_argument('--custom_dataset_module', '-m', default=None,
+                                 help='Path to a python module containing a custom dataset class.')
+    custom_dataset_group.add_argument('--custom_dataset_class', '-c', default=None,
+                                 help='Name of the custom dataset class to use during evaluation.')
 
     version_parser = subparsers.add_parser('version')
     version_parser.set_defaults(func=version)
@@ -68,6 +75,7 @@ def validate(parsed_args):
     )
 
     print(json.dumps(result, indent=2))
+    sys.exit(result['statistics']['unsuccessful_expectations'])
 
 
 def version(parsed_args):
