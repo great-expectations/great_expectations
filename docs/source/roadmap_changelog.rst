@@ -14,6 +14,10 @@ Planned Features
 * Real-time/streaming and adaption of distributional expectations
 
 
+v.0.4.3__develop
+----------------
+
+
 v.0.4.3
 -------
 * Improve type lists in expect_column_type_to_be[_in_list] (thanks @smontanaro and @ccnobbli)
