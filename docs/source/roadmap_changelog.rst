@@ -13,8 +13,14 @@ Planned Features
 * Support for non-tabular datasources (e.g. JSON, XML, AVRO)
 * Real-time/streaming and adaption of distributional expectations
 
-v.0.4.DEVELOP
-------
+
+v.0.4.3
+-------
+* Improve type lists in expect_column_type_to_be[_in_list] (thanks @smontanaro and @ccnobbli)
+* Update cli to use entry_points for conda compatibility, and add version option to cli
+* Remove extraneous development dependency to airflow
+* Address SQlAlchemy warnings in median computation
+* Improve glossary in documentation
 * Add 'statistics' section to validation report with overall validation results (thanks @sotte)
 * Add support for parameterized expectations
 * Improve support for custom expectations with better error messages (thanks @syk0saje)
