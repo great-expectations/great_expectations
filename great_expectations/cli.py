@@ -17,8 +17,10 @@ def dispatch(args):
     validate_parser = subparsers.add_parser('validate', description='Validate expectations for your dataset.')
     validate_parser.set_defaults(func=validate)
 
-    validate_parser.add_argument('dataset')
-    validate_parser.add_argument('expectations_config_file')
+    validate_parser.add_argument('dataset',
+                                 help='Path to a file containing a CSV file to validate using the provided expectations_config_file.')
+    validate_parser.add_argument('expectations_config_file',
+                                 help='Path to a file containing a valid great_expectations expectations config to use to validate the data.')
 
     validate_parser.add_argument('--evaluation_parameters', '-p', default=None,
                                  help='Path to a file containing JSON object used to evaluate parameters in expectations config.')
@@ -45,6 +47,13 @@ def dispatch(args):
 
 
 def validate(parsed_args):
+    """
+    Read a dataset file and validate it using a config saved in another file. Uses parameters defined in the dispatch
+    method.
+
+    :param parsed_args: A Namespace object containing parsed arguments from the dispatch method.
+    :return: The number of unsucessful expectations
+    """
     parsed_args = vars(parsed_args)
     data_set = parsed_args['dataset']
     expectations_config_file = parsed_args['expectations_config_file']
@@ -79,6 +88,9 @@ def validate(parsed_args):
 
 
 def version(parsed_args):
+    """
+    Print the currently-running version of great expectations
+    """
     print(__version__)
 
 
