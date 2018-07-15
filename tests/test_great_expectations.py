@@ -52,10 +52,10 @@ class CustomPandasDataset(PandasDataset):
     @MetaPandasDataset.expectation(["column", "mostly"])
     def expect_column_values_to_equal_1(self, column, mostly=None):
         not_null = self[column].notnull()
-        
+
         result = self[column][not_null] == 1
         unexpected_values = list(self[column][not_null][result==False])
-        
+
         if mostly:
             #Prevent division-by-zero errors
             if len(not_null) == 0:
@@ -454,6 +454,30 @@ class TestIO(unittest.TestCase):
         df = ge.read_json(
             script_path+'/test_sets/nested_test_json_data_file.json',
             accessor_func= lambda x: x["data"]
+        )
+
+    def test_read_excel(self):
+        script_path = os.path.dirname(os.path.realpath(__file__))
+        df = ge.read_excel(
+            script_path+'/test_sets/Titanic.excel',
+        )
+
+        df = ge.read_excel(
+            script_path+'/test_sets/Titanic.excel',
+            sheet_name=None
+        )
+
+    def test_read_table(self):
+        script_path = os.path.dirname(os.path.realpath(__file__))
+        df = ge.read_table(
+            script_path+'/test_sets/Titanic.csv',
+            sep=','
+        )
+
+    def test_read_parquet(self):
+        script_path = os.path.dirname(os.path.realpath(__file__))
+        df = ge.read_parquet(
+            script_path+'/test_sets/Titanic.parquet',
         )
 
 
