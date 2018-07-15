@@ -51,6 +51,40 @@ def read_json(
     df = _convert_to_dataset_class(df, dataset_class, expectations_config)
     return df
 
+def read_excel(
+    filename,
+    dataset_class=dataset.pandas_dataset.PandasDataset,
+    expectations_config=None,
+    *args, **kwargs
+):
+    df = pd.read_excel(filename, *args, **kwargs)
+    if isinstance(df, dict):
+        for key in df:
+            df[key] = _convert_to_dataset_class(df[key], dataset_class, expectations_config)
+    else:
+        df = _convert_to_dataset_class(df, dataset_class, expectations_config)
+    return df
+
+def read_table(
+    filename,
+    dataset_class=dataset.pandas_dataset.PandasDataset,
+    expectations_config=None,
+    *args, **kwargs
+):
+    df = pd.read_table(filename, *args, **kwargs)
+    df = _convert_to_dataset_class(df, dataset_class, expectations_config)
+    return df
+
+def read_parquet(
+    filename,
+    dataset_class=dataset.pandas_dataset.PandasDataset,
+    expectations_config=None,
+    *args, **kwargs
+):
+    df = pd.read_parquet(filename, *args, **kwargs)
+    df = _convert_to_dataset_class(df, dataset_class, expectations_config)
+    return df
+
 
 def from_pandas(pandas_df, expectations_config=None):
     return _convert_to_dataset_class(
