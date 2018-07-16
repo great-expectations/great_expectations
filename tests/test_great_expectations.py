@@ -464,13 +464,14 @@ class TestIO(unittest.TestCase):
         assert df['Name'][0] == 'Allen, Miss Elisabeth Walton'
         assert isinstance(df, PandasDataset)
 
-        df = ge.read_excel(
+        dfs_dict = ge.read_excel(
             script_path+'/test_sets/Titanic_multi_sheet.xlsx',
             sheet_name=None
         )
-        assert isinstance(df, dict)
-        assert isinstance(df['Titanic_1'], PandasDataset)
-        assert df['Titanic_1']['Name'][0] == 'Allen, Miss Elisabeth Walton'
+        assert isinstance(dfs_dict, dict)
+        assert list(dfs_dict.keys()) == ['Titanic_1', 'Titanic_2', 'Titanic_3']
+        assert isinstance(dfs_dict['Titanic_1'], PandasDataset)
+        assert dfs_dict['Titanic_1']['Name'][0] == 'Allen, Miss Elisabeth Walton'
 
     def test_read_table(self):
         script_path = os.path.dirname(os.path.realpath(__file__))
