@@ -118,6 +118,22 @@
           "traceback_substring": "argument of type 'NoneType' is not iterable"
           }
       }
-    ]
+    ]},
+    {
+      "data": {
+        "empty_column": []
+      },
+      "tests": [{
+        "title": "Test empty column; should be vacuously true",
+        "exact_match_out": false,
+        "in": {
+          "column": "empty_column",
+          "values_set": ["cat", "dog"],
+          "catch_exceptions": false
+        },
+        "out": {
+          "success": true
+        }
+      }]
   }]
 }

@@ -64,7 +64,15 @@ class MetaSqlAlchemyDataset(Dataset):
                 ).label('unexpected_count')
             ]).select_from(sa.table(self.table_name))
 
-            count_results = self.engine.execute(count_query).fetchone()
+            count_results = dict(self.engine.execute(count_query).fetchone())
+
+            # Handle case of empty table gracefully:
+            if "element_count" not in count_results or count_results["element_count"] is None:
+                count_results["element_count"] = 0
+            if "null_count" not in count_results or count_results["null_count"] is None:
+                count_results["null_count"] = 0
+            if "unexpected_count" not in count_results or count_results["unexpected_count"] is None:
+                count_results["unexpected_count"] = 0
 
             # Retrieve unexpected  values
             unexpected_query_results = self.engine.execute(
@@ -137,7 +145,7 @@ class MetaSqlAlchemyDataset(Dataset):
             if result_format['result_format'] == 'BOOLEAN_ONLY':
                 return return_obj
 
-            # Use the element and null count information from a column_map_expectation if it needed
+            # Use the element and null count information from a column_aggregate_expectation if it needed
             # it anyway to avoid an extra trip to the database
 
             if 'element_count' not in evaluation_result and 'null_count' not in evaluation_result:
@@ -148,7 +156,13 @@ class MetaSqlAlchemyDataset(Dataset):
                     ).label('null_count'),
                 ]).select_from(sa.table(self.table_name))
 
-                count_results = self.engine.execute(count_query).fetchone()
+                count_results = dict(self.engine.execute(count_query).fetchone())
+
+                # Handle case of empty table gracefully:
+                if "element_count" not in count_results or count_results["element_count"] is None:
+                    count_results["element_count"] = 0
+                if "null_count" not in count_results or count_results["null_count"] is None:
+                    count_results["null_count"] = 0
 
                 return_obj['result'] = {
                     'observed_value': evaluation_result['result']['observed_value'],
@@ -506,21 +520,30 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             sa.select([sa.func.max(sa.column(column))]).select_from(sa.table(self.table_name))
         ).scalar()
 
-        if min_value != None and max_value != None:
-            success = (min_value <= col_max) and (col_max <= max_value)
-
-        elif min_value == None and max_value != None:
-            success = (col_max <= max_value)
-
-        elif min_value != None and max_value == None:
-            success = (min_value <= col_max)
-
-        return {
-            'success' : success,
-            'result': {
-                'observed_value' : col_max
+        # Handle possible missing values
+        if col_max is None:
+            return {
+                'success': False,
+                'result': {
+                    'observed_value': col_max
+                }
             }
-        }
+        else:
+            if min_value is not None and max_value is not None:
+                success = (min_value <= col_max) and (col_max <= max_value)
+
+            elif min_value is None and max_value is not None:
+                success = (col_max <= max_value)
+
+            elif min_value is not None and max_value is None:
+                success = (min_value <= col_max)
+
+            return {
+                'success': success,
+                'result': {
+                    'observed_value': col_max
+                }
+            }
 
 
     @DocInherit
@@ -544,21 +567,30 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             sa.select([sa.func.min(sa.column(column))]).select_from(sa.table(self.table_name))
         ).scalar()
 
-        if min_value != None and max_value != None:
-            success = (min_value <= col_min) and (col_min <= max_value)
-
-        elif min_value == None and max_value != None:
-            success = (col_min <= max_value)
-
-        elif min_value != None and max_value == None:
-            success = (min_value <= col_min)
-
-        return {
-            'success' : success,
-            'result': {
-                'observed_value' : col_min
+        # Handle possible missing values
+        if col_min is None:
+            return {
+                'success': False,
+                'result': {
+                    'observed_value': col_min
+                }
             }
-        }
+        else:
+            if min_value is not None and max_value is not None:
+                success = (min_value <= col_min) and (col_min <= max_value)
+
+            elif min_value is None and max_value is not None:
+                success = (col_min <= max_value)
+
+            elif min_value is not None and max_value is None:
+                success = (min_value <= col_min)
+
+            return {
+                'success': success,
+                'result': {
+                    'observed_value': col_min
+                }
+            }
 
     @DocInherit
     @MetaSqlAlchemyDataset.column_aggregate_expectation
@@ -576,21 +608,30 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             sa.select([sa.func.sum(sa.column(column))]).select_from(sa.table(self.table_name))
         ).scalar()
 
-        if min_value != None and max_value != None:
-            success = (min_value <= col_sum) and (col_sum <= max_value)
-
-        elif min_value == None and max_value != None:
-            success = (col_sum <= max_value)
-
-        elif min_value != None and max_value == None:
-            success = (min_value <= col_sum)
-
-        return {
-            'success' : success,
-            'result': {
-                'observed_value' : col_sum
+        # Handle possible missing values
+        if col_sum is None:
+            return {
+                'success': False,
+                'result': {
+                    'observed_value': col_sum
+                }
             }
-        }
+        else:
+            if min_value is not None and max_value is not None:
+                success = (min_value <= col_sum) and (col_sum <= max_value)
+
+            elif min_value is None and max_value is not None:
+                success = (col_sum <= max_value)
+
+            elif min_value is not None and max_value is None:
+                success = (min_value <= col_sum)
+
+            return {
+                'success': success,
+                'result': {
+                    'observed_value': col_sum
+                }
+            }
 
     @DocInherit
     @MetaSqlAlchemyDataset.column_aggregate_expectation
@@ -617,21 +658,30 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             sa.select([sa.func.avg(sa.column(column))]).select_from(sa.table(self.table_name))
         ).scalar()
 
-        if min_value != None and max_value != None:
-            success = (min_value <= col_avg) and (col_avg <= max_value)
-
-        elif min_value == None and max_value != None:
-            success = (col_avg <= max_value)
-
-        elif min_value != None and max_value == None:
-            success = (min_value <= col_avg)
-
-        return {
-            'success': success,
-            'result': {
-                'observed_value': col_avg
+        # Handle possible missing values
+        if col_avg is None:
+            return {
+                'success': False,
+                'result': {
+                    'observed_value': col_avg
+                }
             }
-        }
+        else:
+            if min_value != None and max_value != None:
+                success = (min_value <= col_avg) and (col_avg <= max_value)
+
+            elif min_value == None and max_value != None:
+                success = (col_avg <= max_value)
+
+            elif min_value != None and max_value == None:
+                success = (min_value <= col_avg)
+
+            return {
+                'success': success,
+                'result': {
+                    'observed_value': col_avg
+                }
+            }
 
     @DocInherit
     @MetaSqlAlchemyDataset.column_aggregate_expectation
@@ -656,9 +706,16 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             ]).select_from(sa.table(self.table_name))
         )
 
-        elements = count_query.fetchone()
+        counts = dict(count_query.fetchone())
+
+        # Handle empty counts
+        if "element_count" not in counts or counts["element_count"] is None:
+            counts["element_count"] = 0
+        if "null_count" not in counts or counts["null_count"] is None:
+            counts["null_count"] = 0
+
         # The number of non-null/non-ignored values
-        nonnull_count = elements['element_count'] - elements['null_count']
+        nonnull_count = counts['element_count'] - counts['null_count']
 
         element_values = self.engine.execute(
             sa.select([sa.column(column)]).order_by(sa.column(column)).where(
@@ -668,24 +725,32 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         column_values = list(element_values.fetchall())
 
-        if nonnull_count % 2 == 0:
-            # An even number of column values: take the average of the two center values
-            column_median = (
-                column_values[0][0] +  # left center value
-                column_values[1][0]        # right center value
-            ) / 2.0  # Average center values
-        else:
-            # An odd number of column values, we can just take the center value
-            column_median = column_values[1][0]  # True center value
-
-        return {
-            'success':
-                ((min_value is None) or (min_value <= column_median)) and
-                ((max_value is None) or (column_median <= max_value)),
-            'result': {
-                'observed_value': column_median
-                }
+        if len(column_values) == 0:
+            return {
+                'success': False,
+                'result': {
+                    'observed_value': None
+                    }
             }
+        else:
+            if nonnull_count % 2 == 0:
+                # An even number of column values: take the average of the two center values
+                column_median = (
+                    column_values[0][0] +  # left center value
+                    column_values[1][0]        # right center value
+                ) / 2.0  # Average center values
+            else:
+                # An odd number of column values, we can just take the center value
+                column_median = column_values[1][0]  # True center value
+
+            return {
+                'success':
+                    ((min_value is None) or (min_value <= column_median)) and
+                    ((max_value is None) or (column_median <= max_value)),
+                'result': {
+                    'observed_value': column_median
+                    }
+                }
 
     @DocInherit
     @MetaSqlAlchemyDataset.column_aggregate_expectation
@@ -699,15 +764,24 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             sa.select([sa.func.count(sa.func.distinct(sa.column(column)))]).select_from(sa.table(self.table_name))
         ).scalar()
 
-        return {
-            "success" : (
-                ((min_value is None) or (min_value <= unique_value_count)) and
-                ((max_value is None) or (unique_value_count <= max_value))
-            ),
-            "result": {
-                "observed_value": unique_value_count
+        # Handle possible missing values
+        if unique_value_count is None:
+            return {
+                'success': False,
+                'result': {
+                    'observed_value': unique_value_count
+                }
             }
-        }
+        else:
+            return {
+                "success" : (
+                    ((min_value is None) or (min_value <= unique_value_count)) and
+                    ((max_value is None) or (unique_value_count <= max_value))
+                ),
+                "result": {
+                    "observed_value": unique_value_count
+                }
+            }
 
     @DocInherit
     @MetaSqlAlchemyDataset.column_aggregate_expectation
