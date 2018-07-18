@@ -52,10 +52,10 @@ class CustomPandasDataset(PandasDataset):
     @MetaPandasDataset.expectation(["column", "mostly"])
     def expect_column_values_to_equal_1(self, column, mostly=None):
         not_null = self[column].notnull()
-        
+
         result = self[column][not_null] == 1
         unexpected_values = list(self[column][not_null][result==False])
-        
+
         if mostly:
             #Prevent division-by-zero errors
             if len(not_null) == 0:
@@ -455,6 +455,41 @@ class TestIO(unittest.TestCase):
             script_path+'/test_sets/nested_test_json_data_file.json',
             accessor_func= lambda x: x["data"]
         )
+
+    def test_read_excel(self):
+        script_path = os.path.dirname(os.path.realpath(__file__))
+        df = ge.read_excel(
+            script_path+'/test_sets/Titanic_multi_sheet.xlsx',
+        )
+        assert df['Name'][0] == 'Allen, Miss Elisabeth Walton'
+        assert isinstance(df, PandasDataset)
+
+        dfs_dict = ge.read_excel(
+            script_path+'/test_sets/Titanic_multi_sheet.xlsx',
+            sheet_name=None
+        )
+        assert isinstance(dfs_dict, dict)
+        assert list(dfs_dict.keys()) == ['Titanic_1', 'Titanic_2', 'Titanic_3']
+        assert isinstance(dfs_dict['Titanic_1'], PandasDataset)
+        assert dfs_dict['Titanic_1']['Name'][0] == 'Allen, Miss Elisabeth Walton'
+
+    def test_read_table(self):
+        script_path = os.path.dirname(os.path.realpath(__file__))
+        df = ge.read_table(
+            script_path+'/test_sets/Titanic.csv',
+            sep=','
+        )
+        assert df['Name'][0] == 'Allen, Miss Elisabeth Walton'
+        assert isinstance(df, PandasDataset)
+
+    def test_read_parquet(self):
+        script_path = os.path.dirname(os.path.realpath(__file__))
+        df = ge.read_parquet(
+            script_path+'/test_sets/Titanic.parquet',
+        )
+        print(df.head())
+        assert df['Name'][1] == 'Allen, Miss Elisabeth Walton'
+        assert isinstance(df, PandasDataset)
 
 
 if __name__ == "__main__":
