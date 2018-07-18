@@ -110,6 +110,24 @@
         "success": true,
         "observed_value": "e"
       }
-    }]
+    }]},
+    {
+      "data": {
+        "empty_column": []
+      },
+      "tests": [{
+        "title": "Test empty column",
+        "exact_match_out": false,
+        "in": {
+          "column": "empty_column",
+          "min_value": 0,
+          "max_value": 0,
+          "catch_exceptions": false
+        },
+        "out": {
+          "success": false,
+          "observed_value": null
+        }
+      }]
   }]
 }
