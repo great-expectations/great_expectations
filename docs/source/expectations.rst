@@ -135,3 +135,12 @@ This is how you always know what to expect from your data.
 
 For more detail on how to control expectation output, please see :ref:`standard_arguments` and :ref:`result_format`.
 
+Types of Expectations
+------------------------------------------------------------------------------
+
+Under the hood, great_expectations evaluates similar kinds of expectations using standard logic, including:
+* `column_map_expectations`, which apply their condition to each value in a column independently of other values
+* `column_aggregate_expectations`, which apply their condition to an aggregate value or values from the column
+
+In general, if a column is empty, a column_map_expectation will return True (vacuously), whereas a column_aggregate_expectation will return False (since no aggregate value could be computed).
+Adding an expectation about element counts to a set of expectations is usually therefore very important to ensure the overall set of expectations captures the full set of constraints you expect.
