@@ -116,7 +116,7 @@
         "empty_column": []
       },
       "tests": [{
-        "title": "Test empty column",
+        "title": "Test empty column; should be false (no observed value with which to compare)",
         "exact_match_out": false,
         "in": {
           "column": "empty_column",

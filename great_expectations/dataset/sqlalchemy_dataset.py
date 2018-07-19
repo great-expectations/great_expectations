@@ -145,7 +145,7 @@ class MetaSqlAlchemyDataset(Dataset):
             if result_format['result_format'] == 'BOOLEAN_ONLY':
                 return return_obj
 
-            # Use the element and null count information from a column_aggregate_expectation if it needed
+            # Use the element and null count information from a column_aggregate_expectation if it is needed
             # it anyway to avoid an extra trip to the database
 
             if 'element_count' not in evaluation_result and 'null_count' not in evaluation_result:

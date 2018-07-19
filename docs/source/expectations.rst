@@ -142,5 +142,5 @@ Under the hood, great_expectations evaluates similar kinds of expectations using
 * `column_map_expectations`, which apply their condition to each value in a column independently of other values
 * `column_aggregate_expectations`, which apply their condition to an aggregate value or values from the column
 
-In general, if a column is empty, a column_map_expectation will return True (vacuously), whereas a column_aggregate_expectation will return false (since no aggregate value could be computed).
-Adding an expectation about element counts to a set of expectations is usually thereefore very important to ensure the overall set of expectations captures the full set of constraints you expect.
+In general, if a column is empty, a column_map_expectation will return True (vacuously), whereas a column_aggregate_expectation will return False (since no aggregate value could be computed).
+Adding an expectation about element counts to a set of expectations is usually therefore very important to ensure the overall set of expectations captures the full set of constraints you expect.
