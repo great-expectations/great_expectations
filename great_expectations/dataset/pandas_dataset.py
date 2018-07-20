@@ -264,8 +264,8 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                 discard_catch_exceptions_kwargs=False))
             # If other was coerced to be a PandasDataset (e.g. via _constructor call during self.copy() operation)
             # then it may not have discard_subset_failing_expectations set. Default to self value
-            self.discard_subset_failing_expectations = other.get("discard_subset_failing_expectations",
-                                                                 self.discard_subset_failing_expectations)
+            self.discard_subset_failing_expectations = getattr(other, "discard_subset_failing_expectations",
+                                                               self.discard_subset_failing_expectations)
             if self.discard_subset_failing_expectations:
                 self.discard_failing_expectations()
         super(PandasDataset, self).__finalize__(other, method, **kwargs)
