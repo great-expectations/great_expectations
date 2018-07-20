@@ -248,11 +248,12 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
            default_expectations (see :func:`add_default_expectations`)
     """
 
+    # We may want to expand or alter support for subclassing dataframes in the future:
+    # See http://pandas.pydata.org/pandas-docs/stable/extending.html#extending-subclassing-pandas
+
     @property
     def _constructor(self):
         return self.__class__
-
-# Do we need to define _constructor_sliced and/or _constructor_expanddim? See http://pandas.pydata.org/pandas-docs/stable/internals.html#subclassing-pandas-data-structures
 
     def __finalize__(self, other, method=None, **kwargs):
         if isinstance(other, PandasDataset):
@@ -261,7 +262,10 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                 discard_result_format_kwargs=False,
                 discard_include_configs_kwargs=False,
                 discard_catch_exceptions_kwargs=False))
-            self.discard_subset_failing_expectations = other.discard_subset_failing_expectations
+            # If other was coerced to be a PandasDataset (e.g. via _constructor call during self.copy() operation)
+            # then it may not have discard_subset_failing_expectations set. Default to self value
+            self.discard_subset_failing_expectations = other.get("discard_subset_failing_expectations",
+                                                                 self.discard_subset_failing_expectations)
             if self.discard_subset_failing_expectations:
                 self.discard_failing_expectations()
         super(PandasDataset, self).__finalize__(other, method, **kwargs)
