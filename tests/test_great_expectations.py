@@ -496,7 +496,7 @@ class TestIO(unittest.TestCase):
     def test_read_parquet(self):
         # Pass this test if the available version of pandas is less than 0.21.0, because prior
         # versions of pandas did not include the read_parquet function.
-        pandas_version = re.match(r'0\.(.*)\..*', pd.__version__)
+        pandas_version = re.match('0\.(.*)\..*', pd.__version__)
         if pandas_version is None:
             raise ValueError("Unrecognized pandas version!")
         else:
