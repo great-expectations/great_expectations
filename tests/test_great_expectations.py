@@ -493,15 +493,24 @@ class TestIO(unittest.TestCase):
         assert df['Name'][0] == 'Allen, Miss Elisabeth Walton'
         assert isinstance(df, PandasDataset)
 
-    # read_parquet is removed until pandas dependency is updated.
-    # def test_read_parquet(self):
-    #     script_path = os.path.dirname(os.path.realpath(__file__))
-    #     df = ge.read_parquet(
-    #         script_path+'/test_sets/Titanic.parquet',
-    #     )
-    #     print(df.head())
-    #     assert df['Name'][1] == 'Allen, Miss Elisabeth Walton'
-    #     assert isinstance(df, PandasDataset)
+    def test_read_parquet(self):
+        # Pass this test if the available version of pandas is less than 0.21.0, because prior
+        # versions of pandas did not include the read_parquet function.
+        pandas_version = re.match(r'0\.(.*)\..*', pd.__version__)
+        if pandas_version is None:
+            raise ValueError("Unrecognized pandas version!")
+        else:
+            pandas_version = int(pandas_version.group(1))
+            if pandas_version <= 21:
+                return
+
+        script_path = os.path.dirname(os.path.realpath(__file__))
+        df = ge.read_parquet(
+            script_path+'/test_sets/Titanic.parquet',
+        )
+        print(df.head())
+        assert df['Name'][1] == 'Allen, Miss Elisabeth Walton'
+        assert isinstance(df, PandasDataset)
 
 
 if __name__ == "__main__":
