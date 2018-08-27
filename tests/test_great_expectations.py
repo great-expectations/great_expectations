@@ -501,14 +501,13 @@ class TestIO(unittest.TestCase):
             raise ValueError("Unrecognized pandas version!")
         else:
             pandas_version = int(pandas_version.group(1))
-            if pandas_version <= 21:
+            if pandas_version < 21:
                 return
 
         script_path = os.path.dirname(os.path.realpath(__file__))
         df = ge.read_parquet(
             script_path+'/test_sets/Titanic.parquet',
         )
-        print(df.head())
         assert df['Name'][1] == 'Allen, Miss Elisabeth Walton'
         assert isinstance(df, PandasDataset)
 
