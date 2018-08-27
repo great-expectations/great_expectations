@@ -4,8 +4,8 @@ import random
 import unittest
 import math
 
-import numpy as np
 import pandas as pd
+import re
 
 import great_expectations as ge
 from great_expectations.dataset import PandasDataset, MetaPandasDataset
@@ -464,10 +464,21 @@ class TestIO(unittest.TestCase):
         assert df['Name'][0] == 'Allen, Miss Elisabeth Walton'
         assert isinstance(df, PandasDataset)
 
-        dfs_dict = ge.read_excel(
-            script_path+'/test_sets/Titanic_multi_sheet.xlsx',
-            sheet_name=None
-        )
+        # Note that pandas changed the parameter name from sheetname to sheet_name.
+        # We will test with both options to ensure that the versions are correct.
+        pandas_version = pd.__version__
+        if re.match('0\.2[012]\.', pandas_version) is not None:
+            dfs_dict = ge.read_excel(
+                script_path+'/test_sets/Titanic_multi_sheet.xlsx',
+                sheetname=None
+            )
+            print("pandas version is XXX " + pandas_version)
+        else:
+            dfs_dict = ge.read_excel(
+                script_path+'/test_sets/Titanic_multi_sheet.xlsx',
+                sheet_name=None
+            )
+            print("pandas version is YYY " + pandas_version)
         assert isinstance(dfs_dict, dict)
         assert list(dfs_dict.keys()) == ['Titanic_1', 'Titanic_2', 'Titanic_3']
         assert isinstance(dfs_dict['Titanic_1'], PandasDataset)
