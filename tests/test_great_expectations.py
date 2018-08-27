@@ -482,14 +482,15 @@ class TestIO(unittest.TestCase):
         assert df['Name'][0] == 'Allen, Miss Elisabeth Walton'
         assert isinstance(df, PandasDataset)
 
-    def test_read_parquet(self):
-        script_path = os.path.dirname(os.path.realpath(__file__))
-        df = ge.read_parquet(
-            script_path+'/test_sets/Titanic.parquet',
-        )
-        print(df.head())
-        assert df['Name'][1] == 'Allen, Miss Elisabeth Walton'
-        assert isinstance(df, PandasDataset)
+    # read_parquet is removed until pandas dependency is updated.
+    # def test_read_parquet(self):
+    #     script_path = os.path.dirname(os.path.realpath(__file__))
+    #     df = ge.read_parquet(
+    #         script_path+'/test_sets/Titanic.parquet',
+    #     )
+    #     print(df.head())
+    #     assert df['Name'][1] == 'Allen, Miss Elisabeth Walton'
+    #     assert isinstance(df, PandasDataset)
 
 
 if __name__ == "__main__":
