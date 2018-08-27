@@ -192,7 +192,9 @@ class MetaPandasDataset(Dataset):
 
             element_count = int(len(series))
             nonnull_values = series[null_indexes == False]
-            nonnull_count = int((null_indexes == False).sum())
+            # Simplify this expression because the old version fails under pandas 0.21 (but only that version)
+            # nonnull_count = int((null_indexes == False).sum())
+            nonnull_count = len(nonnull_values)
             null_count = element_count - nonnull_count
 
             evaluation_result = func(self, nonnull_values, *args, **kwargs)
