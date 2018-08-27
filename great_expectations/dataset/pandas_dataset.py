@@ -1082,7 +1082,8 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         # Convert to Series object to allow joining on index values
         expected_column = pd.Series(partition_object['weights'], index=partition_object['values'], name='expected') * len(column)
         # Join along the indices to allow proper comparison of both types of possible missing values
-        test_df = pd.concat([expected_column, observed_frequencies], axis=1, sort=True)
+        # test_df = pd.concat([expected_column, observed_frequencies], axis=1, sort=True) # Sort parameter not available before pandas 0.23.0
+        test_df = pd.concat([expected_column, observed_frequencies], axis=1)
 
         na_counts = test_df.isnull().sum()
 
@@ -1222,7 +1223,9 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             # Data are expected to be discrete, use value_counts
             observed_weights = column.value_counts() / len(column)
             expected_weights = pd.Series(partition_object['weights'], index=partition_object['values'], name='expected')
-            test_df = pd.concat([expected_weights, observed_weights], axis=1, sort=True)
+            # test_df = pd.concat([expected_weights, observed_weights], axis=1, sort=True) # Sort not available before pandas 0.23.0
+            test_df = pd.concat([expected_weights, observed_weights], axis=1)
+
 
             na_counts = test_df.isnull().sum()
 
