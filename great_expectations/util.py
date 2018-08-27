@@ -76,6 +76,7 @@ def read_excel(
         df = _convert_to_dataset_class(df, dataset_class, expectations_config)
     return df
 
+
 def read_table(
     filename,
     dataset_class=dataset.pandas_dataset.PandasDataset,
@@ -96,25 +97,27 @@ def read_table(
     df = _convert_to_dataset_class(df, dataset_class, expectations_config)
     return df
 
-def read_parquet(
-    filename,
-    dataset_class=dataset.pandas_dataset.PandasDataset,
-    expectations_config=None,
-    *args, **kwargs
-):
-    """Read a file using Pandas read_parquet and return a great_expectations dataset.
-
-    Args:
-        filename (string): path to file to read
-        dataset_class (Dataset class): class to which to convert resulting Pandas df
-        expectations_config (string): path to great_expectations config file
-
-    Returns:
-        great_expectations dataset
-    """
-    df = pd.read_parquet(filename, *args, **kwargs)
-    df = _convert_to_dataset_class(df, dataset_class, expectations_config)
-    return df
+# NOTE: read_parquet is not added until pandas 0.21.0, so remove for now until we are ready to require 0.21.0 or later
+#
+# def read_parquet(
+#     filename,
+#     dataset_class=dataset.pandas_dataset.PandasDataset,
+#     expectations_config=None,
+#     *args, **kwargs
+# ):
+#     """Read a file using Pandas read_parquet and return a great_expectations dataset.
+#
+#     Args:
+#         filename (string): path to file to read
+#         dataset_class (Dataset class): class to which to convert resulting Pandas df
+#         expectations_config (string): path to great_expectations config file
+#
+#     Returns:
+#         great_expectations dataset
+#     """
+#     df = pd.read_parquet(filename, *args, **kwargs)
+#     df = _convert_to_dataset_class(df, dataset_class, expectations_config)
+#     return df
 
 
 def from_pandas(pandas_df, expectations_config=None):
