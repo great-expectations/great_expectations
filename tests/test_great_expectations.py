@@ -504,6 +504,7 @@ class TestIO(unittest.TestCase):
             if pandas_version < 21:
                 return
 
+        print("Found pandas sub-version: " + str(pandas_version))
         script_path = os.path.dirname(os.path.realpath(__file__))
         df = ge.read_parquet(
             script_path+'/test_sets/Titanic.parquet',
