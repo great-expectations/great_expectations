@@ -492,6 +492,28 @@ class TestIO(unittest.TestCase):
         assert isinstance(df, PandasDataset)
 
     def test_read_parquet(self):
+        """
+        This test is unusual, because on travis (but only on travis), we have observed problems importing pyarrow,
+        which breaks this test (since it requires pyarrow available).
+
+        The issue seems to be related to a binary compatibility issue with the installed/available version of numpy.
+
+
+        >       import pyarrow
+        _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+        ../../../virtualenv/python2.7.14/lib/python2.7/site-packages/pyarrow/__init__.py:60: in <module>
+            from pyarrow.lib import cpu_count, set_cpu_count
+        _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+        >   ???
+        E   ImportError: numpy.core.multiarray failed to import
+        pyarrow/lib.pyx:36: ImportError
+        ----------------------------- Captured stderr call -----------------------------
+        RuntimeError: module compiled against API version 0xc but this version of numpy is 0xb
+
+        :return:
+        """
+
+
         # Pass this test if the available version of pandas is less than 0.21.0, because prior
         # versions of pandas did not include the read_parquet function.
         pandas_version = re.match('0\.(.*)\..*', pd.__version__)
@@ -502,11 +524,15 @@ class TestIO(unittest.TestCase):
             if pandas_version < 21:
                 return
 
+
         print("Found pandas sub-version: " + str(pandas_version))
+        import numpy as np
+        print("Numpy version is: " + np.__version__)
         import pyarrow
         print("First import worked.")
         import pyarrow.parquet
         print("Second import worked.")
+
         script_path = os.path.dirname(os.path.realpath(__file__))
         df = ge.read_parquet(
             script_path+'/test_sets/Titanic.parquet',
