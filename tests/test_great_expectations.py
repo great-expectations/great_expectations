@@ -503,6 +503,10 @@ class TestIO(unittest.TestCase):
                 return
 
         print("Found pandas sub-version: " + str(pandas_version))
+        import pyarrow
+        print("First import worked.")
+        import pyarrow.parquet
+        print("Second import worked.")
         script_path = os.path.dirname(os.path.realpath(__file__))
         df = ge.read_parquet(
             script_path+'/test_sets/Titanic.parquet',
