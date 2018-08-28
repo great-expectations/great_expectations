@@ -6,9 +6,14 @@ python:
   - "3.6"
 env:
   - PANDAS=0.17.1
-  - PANDAS=0.21.0
   - PANDAS=0.20.3
+  - PANDAS=0.21.0
+  - PANDAS=0.23.4
   - PANDAS=latest
+matrix:
+  exclude:
+  - python: "3.6"
+    env: PANDAS=0.17.1
 install:
   - pip install --only-binary=numpy,scipy numpy scipy
   - if [ "$PANDAS" = "latest" ]; then pip install pandas; else pip install pandas==$PANDAS; fi
