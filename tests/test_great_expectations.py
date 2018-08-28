@@ -472,13 +472,11 @@ class TestIO(unittest.TestCase):
                 script_path+'/test_sets/Titanic_multi_sheet.xlsx',
                 sheetname=None
             )
-            print("pandas version is XXX " + pandas_version)
         else:
             dfs_dict = ge.read_excel(
                 script_path+'/test_sets/Titanic_multi_sheet.xlsx',
                 sheet_name=None
             )
-            print("pandas version is YYY " + pandas_version)
         assert isinstance(dfs_dict, dict)
         assert list(dfs_dict.keys()) == ['Titanic_1', 'Titanic_2', 'Titanic_3']
         assert isinstance(dfs_dict['Titanic_1'], PandasDataset)
@@ -508,6 +506,7 @@ class TestIO(unittest.TestCase):
         script_path = os.path.dirname(os.path.realpath(__file__))
         df = ge.read_parquet(
             script_path+'/test_sets/Titanic.parquet',
+            engine='pyarrow'
         )
         assert df['Name'][1] == 'Allen, Miss Elisabeth Walton'
         assert isinstance(df, PandasDataset)
