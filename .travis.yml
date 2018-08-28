@@ -10,7 +10,7 @@ env:
   - PANDAS=0.23.4
   - PANDAS=latest
 install:
-  - pip install --only-binary=numpy,scipy numpy scipy
+#  - pip install --only-binary=numpy,scipy numpy scipy
   - if [ "$PANDAS" = "latest" ]; then pip install pandas; else pip install pandas==$PANDAS; fi
   - pip install -r requirements-dev.txt
 script:
