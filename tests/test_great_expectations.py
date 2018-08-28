@@ -496,23 +496,11 @@ class TestIO(unittest.TestCase):
         This test is unusual, because on travis (but only on travis), we have observed problems importing pyarrow,
         which breaks this test (since it requires pyarrow available).
 
-        The issue seems to be related to a binary compatibility issue with the installed/available version of numpy.
+        The issue seems to be related to a binary compatibility issue with the installed/available version of numpy:
+        pyarrow 0.10 requires numpy >= 1.14.
 
-
-        >       import pyarrow
-        _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-        ../../../virtualenv/python2.7.14/lib/python2.7/site-packages/pyarrow/__init__.py:60: in <module>
-            from pyarrow.lib import cpu_count, set_cpu_count
-        _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-        >   ???
-        E   ImportError: numpy.core.multiarray failed to import
-        pyarrow/lib.pyx:36: ImportError
-        ----------------------------- Captured stderr call -----------------------------
-        RuntimeError: module compiled against API version 0xc but this version of numpy is 0xb
-
-        :return:
+        Since pyarrow is not in our actual requirements, we are not going to adjust up the required numpy version.
         """
-
 
         # Pass this test if the available version of pandas is less than 0.21.0, because prior
         # versions of pandas did not include the read_parquet function.
@@ -524,19 +512,9 @@ class TestIO(unittest.TestCase):
             if pandas_version < 21:
                 return
 
-
-        print("Found pandas sub-version: " + str(pandas_version))
-        import numpy as np
-        print("Numpy version is: " + np.__version__)
-        import pyarrow
-        print("First import worked.")
-        import pyarrow.parquet
-        print("Second import worked.")
-
         script_path = os.path.dirname(os.path.realpath(__file__))
         df = ge.read_parquet(
-            script_path+'/test_sets/Titanic.parquet',
-            engine='pyarrow'
+            script_path+'/test_sets/Titanic.parquet'
         )
         assert df['Name'][1] == 'Allen, Miss Elisabeth Walton'
         assert isinstance(df, PandasDataset)
