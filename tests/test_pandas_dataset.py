@@ -2,7 +2,6 @@ from __future__ import division
 
 import unittest
 import json
-import numpy as np
 import datetime
 import pandas as pd
 
@@ -956,6 +955,20 @@ class TestPandasDataset(unittest.TestCase):
 
         df2 = df.sample(frac=0.5)
         self.assertTrue(type(df2) == type(df))
+
+
+def test_pandas_deepcopy():
+    import copy
+
+    df = ge.dataset.PandasDataset({"a": [1, 2, 3]})
+    df2 = copy.deepcopy(df)
+
+    df["a"] = [2, 3, 4]
+
+    # Our copied dataframe should not be affected
+    assert df2.expect_column_to_exist("a")["success"] == True
+    assert list(df["a"]) == [2, 3, 4]
+    assert list(df2["a"]) == [1, 2, 3]
 
 
 if __name__ == "__main__":

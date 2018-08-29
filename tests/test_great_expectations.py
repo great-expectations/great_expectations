@@ -4,8 +4,8 @@ import random
 import unittest
 import math
 
-import numpy as np
 import pandas as pd
+import re
 
 import great_expectations as ge
 from great_expectations.dataset import PandasDataset, MetaPandasDataset
@@ -52,10 +52,10 @@ class CustomPandasDataset(PandasDataset):
     @MetaPandasDataset.expectation(["column", "mostly"])
     def expect_column_values_to_equal_1(self, column, mostly=None):
         not_null = self[column].notnull()
-        
+
         result = self[column][not_null] == 1
         unexpected_values = list(self[column][not_null][result==False])
-        
+
         if mostly:
             #Prevent division-by-zero errors
             if len(not_null) == 0:
@@ -455,6 +455,69 @@ class TestIO(unittest.TestCase):
             script_path+'/test_sets/nested_test_json_data_file.json',
             accessor_func= lambda x: x["data"]
         )
+
+    def test_read_excel(self):
+        script_path = os.path.dirname(os.path.realpath(__file__))
+        df = ge.read_excel(
+            script_path+'/test_sets/Titanic_multi_sheet.xlsx',
+        )
+        assert df['Name'][0] == 'Allen, Miss Elisabeth Walton'
+        assert isinstance(df, PandasDataset)
+
+        # Note that pandas changed the parameter name from sheetname to sheet_name.
+        # We will test with both options to ensure that the versions are correct.
+        pandas_version = pd.__version__
+        if re.match('0\.2[012]\.', pandas_version) is not None:
+            dfs_dict = ge.read_excel(
+                script_path+'/test_sets/Titanic_multi_sheet.xlsx',
+                sheetname=None
+            )
+        else:
+            dfs_dict = ge.read_excel(
+                script_path+'/test_sets/Titanic_multi_sheet.xlsx',
+                sheet_name=None
+            )
+        assert isinstance(dfs_dict, dict)
+        assert list(dfs_dict.keys()) == ['Titanic_1', 'Titanic_2', 'Titanic_3']
+        assert isinstance(dfs_dict['Titanic_1'], PandasDataset)
+        assert dfs_dict['Titanic_1']['Name'][0] == 'Allen, Miss Elisabeth Walton'
+
+    def test_read_table(self):
+        script_path = os.path.dirname(os.path.realpath(__file__))
+        df = ge.read_table(
+            script_path+'/test_sets/Titanic.csv',
+            sep=','
+        )
+        assert df['Name'][0] == 'Allen, Miss Elisabeth Walton'
+        assert isinstance(df, PandasDataset)
+
+    def test_read_parquet(self):
+        """
+        This test is unusual, because on travis (but only on travis), we have observed problems importing pyarrow,
+        which breaks this test (since it requires pyarrow available).
+
+        The issue seems to be related to a binary compatibility issue with the installed/available version of numpy:
+        pyarrow 0.10 requires numpy >= 1.14.
+
+        Since pyarrow is not in our actual requirements, we are not going to adjust up the required numpy version.
+        """
+
+        # Pass this test if the available version of pandas is less than 0.21.0, because prior
+        # versions of pandas did not include the read_parquet function.
+        pandas_version = re.match('0\.(.*)\..*', pd.__version__)
+        if pandas_version is None:
+            raise ValueError("Unrecognized pandas version!")
+        else:
+            pandas_version = int(pandas_version.group(1))
+            if pandas_version < 21:
+                return
+
+        script_path = os.path.dirname(os.path.realpath(__file__))
+        df = ge.read_parquet(
+            script_path+'/test_sets/Titanic.parquet'
+        )
+        assert df['Name'][1] == 'Allen, Miss Elisabeth Walton'
+        assert isinstance(df, PandasDataset)
 
 
 if __name__ == "__main__":

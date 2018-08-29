@@ -51,6 +51,73 @@ def read_json(
     df = _convert_to_dataset_class(df, dataset_class, expectations_config)
     return df
 
+def read_excel(
+    filename,
+    dataset_class=dataset.pandas_dataset.PandasDataset,
+    expectations_config=None,
+    *args, **kwargs
+):
+    """Read a file using Pandas read_excel and return a great_expectations dataset.
+
+    Args:
+        filename (string): path to file to read
+        dataset_class (Dataset class): class to which to convert resulting Pandas df
+        expectations_config (string): path to great_expectations config file
+
+    Returns:
+        great_expectations dataset or ordered dict of great_expectations datasets,
+        if multiple worksheets are imported
+    """
+    df = pd.read_excel(filename, *args, **kwargs)
+    if isinstance(df, dict):
+        for key in df:
+            df[key] = _convert_to_dataset_class(df[key], dataset_class, expectations_config)
+    else:
+        df = _convert_to_dataset_class(df, dataset_class, expectations_config)
+    return df
+
+
+def read_table(
+    filename,
+    dataset_class=dataset.pandas_dataset.PandasDataset,
+    expectations_config=None,
+    *args, **kwargs
+):
+    """Read a file using Pandas read_table and return a great_expectations dataset.
+
+    Args:
+        filename (string): path to file to read
+        dataset_class (Dataset class): class to which to convert resulting Pandas df
+        expectations_config (string): path to great_expectations config file
+
+    Returns:
+        great_expectations dataset
+    """
+    df = pd.read_table(filename, *args, **kwargs)
+    df = _convert_to_dataset_class(df, dataset_class, expectations_config)
+    return df
+
+
+def read_parquet(
+    filename,
+    dataset_class=dataset.pandas_dataset.PandasDataset,
+    expectations_config=None,
+    *args, **kwargs
+):
+    """Read a file using Pandas read_parquet and return a great_expectations dataset.
+
+    Args:
+        filename (string): path to file to read
+        dataset_class (Dataset class): class to which to convert resulting Pandas df
+        expectations_config (string): path to great_expectations config file
+
+    Returns:
+        great_expectations dataset
+    """
+    df = pd.read_parquet(filename, *args, **kwargs)
+    df = _convert_to_dataset_class(df, dataset_class, expectations_config)
+    return df
+
 
 def from_pandas(pandas_df, expectations_config=None):
     return _convert_to_dataset_class(
