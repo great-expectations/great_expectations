@@ -76,6 +76,7 @@ def read_excel(
         df = _convert_to_dataset_class(df, dataset_class, expectations_config)
     return df
 
+
 def read_table(
     filename,
     dataset_class=dataset.pandas_dataset.PandasDataset,
@@ -95,6 +96,7 @@ def read_table(
     df = pd.read_table(filename, *args, **kwargs)
     df = _convert_to_dataset_class(df, dataset_class, expectations_config)
     return df
+
 
 def read_parquet(
     filename,

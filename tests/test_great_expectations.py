@@ -4,8 +4,8 @@ import random
 import unittest
 import math
 
-import numpy as np
 import pandas as pd
+import re
 
 import great_expectations as ge
 from great_expectations.dataset import PandasDataset, MetaPandasDataset
@@ -464,10 +464,19 @@ class TestIO(unittest.TestCase):
         assert df['Name'][0] == 'Allen, Miss Elisabeth Walton'
         assert isinstance(df, PandasDataset)
 
-        dfs_dict = ge.read_excel(
-            script_path+'/test_sets/Titanic_multi_sheet.xlsx',
-            sheet_name=None
-        )
+        # Note that pandas changed the parameter name from sheetname to sheet_name.
+        # We will test with both options to ensure that the versions are correct.
+        pandas_version = pd.__version__
+        if re.match('0\.2[012]\.', pandas_version) is not None:
+            dfs_dict = ge.read_excel(
+                script_path+'/test_sets/Titanic_multi_sheet.xlsx',
+                sheetname=None
+            )
+        else:
+            dfs_dict = ge.read_excel(
+                script_path+'/test_sets/Titanic_multi_sheet.xlsx',
+                sheet_name=None
+            )
         assert isinstance(dfs_dict, dict)
         assert list(dfs_dict.keys()) == ['Titanic_1', 'Titanic_2', 'Titanic_3']
         assert isinstance(dfs_dict['Titanic_1'], PandasDataset)
@@ -483,11 +492,30 @@ class TestIO(unittest.TestCase):
         assert isinstance(df, PandasDataset)
 
     def test_read_parquet(self):
+        """
+        This test is unusual, because on travis (but only on travis), we have observed problems importing pyarrow,
+        which breaks this test (since it requires pyarrow available).
+
+        The issue seems to be related to a binary compatibility issue with the installed/available version of numpy:
+        pyarrow 0.10 requires numpy >= 1.14.
+
+        Since pyarrow is not in our actual requirements, we are not going to adjust up the required numpy version.
+        """
+
+        # Pass this test if the available version of pandas is less than 0.21.0, because prior
+        # versions of pandas did not include the read_parquet function.
+        pandas_version = re.match('0\.(.*)\..*', pd.__version__)
+        if pandas_version is None:
+            raise ValueError("Unrecognized pandas version!")
+        else:
+            pandas_version = int(pandas_version.group(1))
+            if pandas_version < 21:
+                return
+
         script_path = os.path.dirname(os.path.realpath(__file__))
         df = ge.read_parquet(
-            script_path+'/test_sets/Titanic.parquet',
+            script_path+'/test_sets/Titanic.parquet'
         )
-        print(df.head())
         assert df['Name'][1] == 'Allen, Miss Elisabeth Walton'
         assert isinstance(df, PandasDataset)
 
