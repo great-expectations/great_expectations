@@ -6,17 +6,18 @@ Changelog and Roadmap
 Planned Features
 ----------------
 * More expectation coverage in SqlAlchemyDataset
-* Support for meta variables
-* Support for multi-column expectations
 * Improved variable typing
 * New Datasets (e.g. Spark)
 * Support for non-tabular datasources (e.g. JSON, XML, AVRO)
 * Real-time/streaming and adaption of distributional expectations
 
 
-v.0.4.3__develop
+v.0.4.4
 ----------------
 * Improve CLI help and set CLI return value to the number of unmet expectations
+* Add error handling for empty columns to SqlAlchemyDataset, and associated tests
+* Fix broken support for older pandas versions (#346)
+* Fix pandas deepcopy issue (#342)
 
 v.0.4.3
 -------
