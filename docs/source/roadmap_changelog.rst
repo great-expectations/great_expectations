@@ -12,6 +12,9 @@ Planned Features
 * Real-time/streaming and adaption of distributional expectations
 
 
+v.0.4.4__develop
+----------------
+
 v.0.4.4
 ----------------
 * Improve CLI help and set CLI return value to the number of unmet expectations
