@@ -192,7 +192,9 @@ class MetaPandasDataset(Dataset):
 
             element_count = int(len(series))
             nonnull_values = series[null_indexes == False]
-            nonnull_count = int((null_indexes == False).sum())
+            # Simplify this expression because the old version fails under pandas 0.21 (but only that version)
+            # nonnull_count = int((null_indexes == False).sum())
+            nonnull_count = len(nonnull_values)
             null_count = element_count - nonnull_count
 
             evaluation_result = func(self, nonnull_values, *args, **kwargs)
@@ -248,11 +250,12 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
            default_expectations (see :func:`add_default_expectations`)
     """
 
+    # We may want to expand or alter support for subclassing dataframes in the future:
+    # See http://pandas.pydata.org/pandas-docs/stable/extending.html#extending-subclassing-pandas
+
     @property
     def _constructor(self):
         return self.__class__
-
-# Do we need to define _constructor_sliced and/or _constructor_expanddim? See http://pandas.pydata.org/pandas-docs/stable/internals.html#subclassing-pandas-data-structures
 
     def __finalize__(self, other, method=None, **kwargs):
         if isinstance(other, PandasDataset):
@@ -261,7 +264,10 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                 discard_result_format_kwargs=False,
                 discard_include_configs_kwargs=False,
                 discard_catch_exceptions_kwargs=False))
-            self.discard_subset_failing_expectations = other.discard_subset_failing_expectations
+            # If other was coerced to be a PandasDataset (e.g. via _constructor call during self.copy() operation)
+            # then it may not have discard_subset_failing_expectations set. Default to self value
+            self.discard_subset_failing_expectations = getattr(other, "discard_subset_failing_expectations",
+                                                               self.discard_subset_failing_expectations)
             if self.discard_subset_failing_expectations:
                 self.discard_failing_expectations()
         super(PandasDataset, self).__finalize__(other, method, **kwargs)
@@ -1078,7 +1084,8 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         # Convert to Series object to allow joining on index values
         expected_column = pd.Series(partition_object['weights'], index=partition_object['values'], name='expected') * len(column)
         # Join along the indices to allow proper comparison of both types of possible missing values
-        test_df = pd.concat([expected_column, observed_frequencies], axis=1, sort=True)
+        # test_df = pd.concat([expected_column, observed_frequencies], axis=1, sort=True) # Sort parameter not available before pandas 0.23.0
+        test_df = pd.concat([expected_column, observed_frequencies], axis=1)
 
         na_counts = test_df.isnull().sum()
 
@@ -1218,7 +1225,9 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             # Data are expected to be discrete, use value_counts
             observed_weights = column.value_counts() / len(column)
             expected_weights = pd.Series(partition_object['weights'], index=partition_object['values'], name='expected')
-            test_df = pd.concat([expected_weights, observed_weights], axis=1, sort=True)
+            # test_df = pd.concat([expected_weights, observed_weights], axis=1, sort=True) # Sort not available before pandas 0.23.0
+            test_df = pd.concat([expected_weights, observed_weights], axis=1)
+
 
             na_counts = test_df.isnull().sum()
 
