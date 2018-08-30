@@ -13,6 +13,24 @@ Planned Features
 * Support for non-tabular datasources (e.g. JSON, XML, AVRO)
 * Real-time/streaming and adaption of distributional expectations
 
+
+v.0.4.3__develop
+----------------
+
+
+v.0.4.3
+-------
+* Improve type lists in expect_column_type_to_be[_in_list] (thanks @smontanaro and @ccnobbli)
+* Update cli to use entry_points for conda compatibility, and add version option to cli
+* Remove extraneous development dependency to airflow
+* Address SQlAlchemy warnings in median computation
+* Improve glossary in documentation
+* Add 'statistics' section to validation report with overall validation results (thanks @sotte)
+* Add support for parameterized expectations
+* Improve support for custom expectations with better error messages (thanks @syk0saje)
+* Implement expect_column_value_lenghts_to_[be_between|equal] for SQAlchemy (thanks @ccnobbli)
+* Fix PandasDataset subclasses to inherit child class
+
 v.0.4.2
 -------
 * Fix bugs in expect_column_values_to_[not]_be_null: computing unexpected value percentages and handling all-null (thanks @ccnobbli)

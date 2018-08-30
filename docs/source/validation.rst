@@ -4,7 +4,7 @@
 Validation
 ================================================================================
 
-Once you've constructed Expectations, you can use them to validate new data.
+Once you've constructed and stored Expectations, you can use them to validate new data.
 
 .. code-block:: bash
 
@@ -76,10 +76,23 @@ Once you've constructed Expectations, you can use them to validate new data.
             ]
           }
         }
-      ]
+      ],
+      "success", False,
+      "statistics": {
+          "evaluated_expectations": 10,
+          "successful_expectations": 9,
+          "unsuccessful_expectations": 1,
+          "success_percent": 90.0,
+      }
     }
 
-Calling great_expectations's validation method generates a JSON-formatted report describing the outcome of all expectations.
+Calling great_expectations's ``validate`` method generates a JSON-formatted report.
+The report contains information about:
+
+  - the overall sucess (the `success` field),
+  - summary statistics of the expectations (the `statistics` field), and
+  - the detailed results of each expectation (the `results` field).
+
 
 Command-line validation
 ------------------------------------------------------------------------------
@@ -150,6 +163,13 @@ This is especially powerful when combined with great_expectations's command line
           }
         }
       ]
+      "success", False,
+      "statistics": {
+          "evaluated_expectations": 10,
+          "successful_expectations": 9,
+          "unsuccessful_expectations": 1,
+          "success_percent": 90.0
+      }
     }
 
 Deployment patterns
@@ -163,4 +183,5 @@ Useful deployment patterns include:
 * Schedule database validation jobs using cron, then capture errors and warnings (if any) and post them to Slack.
 * Validate as part of an Airflow task: if Expectations are violated, raise an error and stop DAG propagation until the problem is resolved. Alternatively, you can implement expectations that raise warnings without halting the DAG.
 
+For certain deployment patterns, it may be useful to parameterize expectations, and supply evaluation parameters at validation time. See :ref:`evaluation_parameters` for more information.
 
