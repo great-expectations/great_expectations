@@ -689,6 +689,28 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 }
             }
 
+    @MetaSqlAlchemyDataset.column_map_expectation
+    def expect_column_values_to_be_unique(self, column, mostly=None,
+                                          result_format=None, include_config=False, catch_exceptions=None, meta=None):
+        # Duplicates are found by filtering a group by query
+        dup_query = self.engine.execute(
+            sa.select([sa.column(column)]).
+            select_from(sa.table(self.table_name)).
+            group_by(sa.column(column)).
+            having(sa.func.count(sa.column(column)) > 1)
+        )
+
+        # Execute query, returns a tuple of duplicate values
+        dup_query = dup_query.fetchone()
+
+        if dup_query is None:
+            # Column with all missing values
+            # Transform None into empty list so the following .notin_() call works as expected
+            dup_query = []
+
+        return sa.column(column).notin_(dup_query)
+
+
     @DocInherit
     @MetaSqlAlchemyDataset.column_aggregate_expectation
     def expect_column_unique_value_count_to_be_between(self, column, min_value=None, max_value=None,
