@@ -13,7 +13,7 @@ import numpy as np
 import pandas as pd
 from dateutil.parser import parse
 from scipy import stats
-from six import string_types
+from six import integer_types, string_types
 
 from .base import Dataset
 from .util import DocInherit, recursively_convert_to_json_serializable, \
@@ -403,72 +403,49 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
-    def expect_column_values_to_be_of_type(self, column, type_, target_datasource="numpy",
+    def expect_column_values_to_be_of_type(self, column, type_,
                                            mostly=None,
                                            result_format=None, include_config=False, catch_exceptions=None, meta=None):
-        python_avro_types = {
-                "null":type(None),
-                "boolean":bool,
-                "int":int,
-                "long":int,
-                "float":float,
-                "double":float,
-                "bytes":bytes,
-                "string":str
-                }
 
-        numpy_avro_types = {
-                "null":np.nan,
-                "boolean":np.bool_,
-                "int":np.int64,
-                "long":np.longdouble,
-                "float":np.float_,
-                "double":np.longdouble,
-                "bytes":np.bytes_,
-                "string":np.string_
-                }
+        # Target Datasource {numpy, python} was removed in favor of a simpler type mapping
+        type_map = {
+            "null": [type(None), np.nan],
+            "boolean": [bool, np.bool_],
+            "int": [int, np.int64] + list(integer_types),
+            "long": [int, np.longdouble] + list(integer_types),
+            "float": [float, np.float_],
+            "double": [float, np.longdouble],
+            "bytes": [bytes, np.bytes_],
+            "string": [string_types, np.string_]
+        }
 
-        datasource = {"python":python_avro_types, "numpy":numpy_avro_types}
+        target_type = type_map[type_]
 
-        target_type = datasource[target_datasource][type_]
-        result = column.map(lambda x: type(x) == target_type)
-
-        return result
+        return column.map(lambda x: isinstance(x, tuple(target_type)))
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
-    def expect_column_values_to_be_in_type_list(self, column, type_list, target_datasource="numpy",
+    def expect_column_values_to_be_in_type_list(self, column, type_list,
                                                 mostly=None,
                                                 result_format=None, include_config=False, catch_exceptions=None, meta=None):
+        # Target Datasource {numpy, python} was removed in favor of a simpler type mapping
+        type_map = {
+            "null": [type(None), np.nan],
+            "boolean": [bool, np.bool_],
+            "int": [int, np.int64] + list(integer_types),
+            "long": [int, np.longdouble] + list(integer_types),
+            "float": [float, np.float_],
+            "double": [float, np.longdouble],
+            "bytes": [bytes, np.bytes_],
+            "string": [string_types, np.string_]
+        }
 
-        python_avro_types = {
-                "null":type(None),
-                "boolean":bool,
-                "int":int,
-                "long":int,
-                "float":float,
-                "double":float,
-                "bytes":bytes,
-                "string":str
-                }
+        # Build one type list with each specified type list from type_map
+        target_type_list = list()
+        for type_ in type_list:
+            target_type_list += type_map[type_]
 
-        numpy_avro_types = {
-                "null":np.nan,
-                "boolean":np.bool_,
-                "int":np.int64,
-                "long":np.longdouble,
-                "float":np.float_,
-                "double":np.longdouble,
-                "bytes":np.bytes_,
-                "string":np.string_
-                }
-
-        datasource = {"python":python_avro_types, "numpy":numpy_avro_types}
-
-        target_type_list = [datasource[target_datasource][t] for t in type_list]
-        result = column.map(lambda x: type(x) in target_type_list)
-
-        return result
+        return column.map(lambda x: isinstance(x, tuple(target_type_list)))
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
@@ -1101,7 +1078,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         # Convert to Series object to allow joining on index values
         expected_column = pd.Series(partition_object['weights'], index=partition_object['values'], name='expected') * len(column)
         # Join along the indices to allow proper comparison of both types of possible missing values
-        test_df = pd.concat([expected_column, observed_frequencies], axis = 1)
+        test_df = pd.concat([expected_column, observed_frequencies], axis=1, sort=True)
 
         na_counts = test_df.isnull().sum()
 
@@ -1241,7 +1218,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             # Data are expected to be discrete, use value_counts
             observed_weights = column.value_counts() / len(column)
             expected_weights = pd.Series(partition_object['weights'], index=partition_object['values'], name='expected')
-            test_df = pd.concat([expected_weights, observed_weights], axis=1)
+            test_df = pd.concat([expected_weights, observed_weights], axis=1, sort=True)
 
             na_counts = test_df.isnull().sum()
 

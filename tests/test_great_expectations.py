@@ -2,12 +2,17 @@ import json
 import os
 import random
 import unittest
+import math
 
 import numpy as np
 import pandas as pd
 
 import great_expectations as ge
 from great_expectations.dataset import PandasDataset, MetaPandasDataset
+from great_expectations.dataset.base import (
+    _calc_validation_statistics,
+    ValidationStatistics,
+)
 from .test_utils import assertDeepAlmostEqual
 
 def isprime(n):
@@ -201,6 +206,7 @@ class TestValidation(unittest.TestCase):
                             )
 
         # Finally, confirm that only_return_failures works
+        # and does not affect the "statistics" field.
         validation_results = my_df.validate(only_return_failures=True)
         #print json.dumps(validation_results)
         assertDeepAlmostEqual(
@@ -220,8 +226,11 @@ class TestValidation(unittest.TestCase):
                                 "missing_percent": 0.0, "partial_unexpected_counts": [{"count": 1, "value": "*"}],
                                 "partial_unexpected_list": ["*"],
                                 "unexpected_percent_nonmissing": 0.0007616146230007616, "missing_count": 0,
-                                "unexpected_index_list": [456]}}]}
-
+                                "unexpected_index_list": [456]}}
+            ],
+            "success": expected_results["success"],  # unaffected
+            "statistics": expected_results["statistics"],  # unaffected
+            }
         )
 
     def test_validate_catch_non_existent_expectation(self):
@@ -339,10 +348,73 @@ class TestValidation(unittest.TestCase):
                                  "unexpected_count": 2
                     }
                 }
-              ]
+              ],
+              "success": False,
+              "statistics": {
+                  "evaluated_expectations": 2,
+                  "successful_expectations": 1,
+                  "unsuccessful_expectations": 1,
+                  "success_percent": 50,
+              }
             }
         )
 
+
+class TestValidationStatisticsCalculation(unittest.TestCase):
+    def test_no_expectations(self):
+        expectation_results = []
+        actual = _calc_validation_statistics(expectation_results)
+
+        # pay attention to these two
+        self.assertTrue(math.isnan(actual.success_percent))
+        self.assertEqual(actual.success, True)
+        # the rest is boring
+        self.assertEqual(actual.successful_expectations, 0)
+        self.assertEqual(actual.evaluated_expectations, 0)
+        self.assertEqual(actual.unsuccessful_expectations, 0)
+
+    def test_no_succesful_expectations(self):
+        expectation_results = [
+            {"success": False},
+        ]
+        actual = _calc_validation_statistics(expectation_results)
+        expected = ValidationStatistics(1, 0, 1, 0., False)
+        assertDeepAlmostEqual(self, actual, expected)
+
+        expectation_results = [
+            {"success": False},
+            {"success": False},
+            {"success": False},
+        ]
+        actual = _calc_validation_statistics(expectation_results)
+        expected = ValidationStatistics(3, 0, 3, 0., False)
+        assertDeepAlmostEqual(self, actual, expected)
+
+    def test_all_succesful_expectations(self):
+        expectation_results = [
+            {"success": True},
+        ]
+        actual = _calc_validation_statistics(expectation_results)
+        expected = ValidationStatistics(1, 1, 0, 100.0, True)
+        assertDeepAlmostEqual(self, actual, expected)
+
+        expectation_results = [
+            {"success": True},
+            {"success": True},
+            {"success": True},
+        ]
+        actual = _calc_validation_statistics(expectation_results)
+        expected = ValidationStatistics(3, 3, 0, 100.0, True)
+        assertDeepAlmostEqual(self, actual, expected)
+
+    def test_mixed_expectations(self):
+        expectation_results = [
+            {"success": False},
+            {"success": True},
+        ]
+        actual = _calc_validation_statistics(expectation_results)
+        expected = ValidationStatistics(2, 1, 1, 50.0, False)
+        assertDeepAlmostEqual(self, actual, expected)
 
 
 class TestRepeatedAppendExpectation(unittest.TestCase):
