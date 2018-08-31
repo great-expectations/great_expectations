@@ -3168,7 +3168,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             column_B (str): The second column name
 
         Keyword Args:
-            ignore_row_if (str): "both_values_are_missing", "either_value_is_missing", "neither
+            ignore_row_if (str): "both_values_are_missing", "either_value_is_missing", "neither"
 
         Other Parameters:
             result_format (str or None): \
