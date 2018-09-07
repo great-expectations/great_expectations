@@ -1033,7 +1033,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             # percent_success = float(success_count)/nonnull_count
             percent_success = success_count / nonnull_count
 
-            if mostly:
+            if mostly != None:
                 success = bool(percent_success >= mostly)
 
             else:
