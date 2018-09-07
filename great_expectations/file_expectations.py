@@ -1,3 +1,6 @@
+# This code is early and experimental. eventually it will live in a RawFileDataset class, per issue 321. In the
+# meantime, please use, enjoy, and share feedback.
+
 import csv
 import hashlib
 import json
@@ -46,6 +49,52 @@ def expect_file_hash_to_equal(filename, value, hash_alg='md5'):
     except ValueError:
         raise
     return success
+
+def expect_file_size_to_be_between(filename, minsize, maxsize):
+    """
+    Return True or False indicating whether the file size (in bytes) is (inclusively) between two values.
+
+    Parameters
+    ----------
+    filename : string
+        file to check file size
+    minsize : integer
+        minimum file size
+    maxsize : integer
+        maximum file size
+
+    Returns
+    -------
+    True if the computed hash matches the specified value; False otherwise
+
+    Raises
+    ------
+    OSError
+        if there is a problem reading the specified file
+    TypeError
+        if minsize or maxsize are not integers
+    ValueError
+        if there is a problem with the integer value of minsize or maxsize
+
+    """
+    try:
+        size = os.path.getsize(filename)
+    except OSError:
+        raise
+    if type(minsize) != int:
+        raise TypeError('minsize must be an integer')
+    if type(maxsize) != int:
+        raise TypeError('maxsize must be an integer')
+    if minsize < 0:
+        raise ValueError('minsize must be greater than of equal to 0')
+    if maxsize < 0:
+        raise ValueError('maxsize must be greater than of equal to 0')
+    if minsize > maxsize:
+        raise ValueError('maxsize must be greater than of equal to minsize')
+    if (size >= minsize) and (size <= maxsize):
+        return True
+    else:
+        return False
 
 def expect_file_to_exist(filename):
     """
