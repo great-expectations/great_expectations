@@ -30,6 +30,43 @@ class TestUtilMethods(unittest.TestCase):
                                                      value='f89f46423b017a1fc6a4059d81bddb3ff64891e3c81250fafad6f3b3113ecc9b',
                                                      hash_alg='sha256'))
 
+    def test_expect_file_size_to_be_between(self):
+        # Test for non-existent file
+        try:
+            ge.expect_file_size_to_be_between('abc', 0, 10000)
+        except OSError:
+            pass
+        test_file = './tests/test_sets/Titanic.csv'
+        # Test minsize not an integer
+        try:
+            ge.expect_file_size_to_be_between(test_file, '0', 10000)
+        except TypeError:
+            pass
+        # Test maxsize not an integer
+        try:
+            ge.expect_file_size_to_be_between(test_file, 0, '10000')
+        except TypeError:
+            pass
+        # Test minsize less than 0
+        try:
+            ge.expect_file_size_to_be_between(test_file, -1, 10000)
+        except ValueError:
+            pass
+        # Test maxsize less than 0
+        try:
+            ge.expect_file_size_to_be_between(test_file, 0, -1)
+        except ValueError:
+            pass
+        # Test minsize > maxsize
+        try:
+            ge.expect_file_size_to_be_between(test_file, 10000, 0)
+        except ValueError:
+            pass
+        # Test file size not in range
+        self.assertFalse(ge.expect_file_size_to_be_between(test_file, 0, 10000))
+        # Test file size in range
+        self.assertTrue(ge.expect_file_size_to_be_between(test_file, 70000, 71000))
+
     def test_expect_file_to_exist(self):
         # Test for non-existent file
         self.assertFalse(ge.expect_file_to_exist('abc'))
