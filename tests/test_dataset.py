@@ -701,6 +701,34 @@ class TestDataset(unittest.TestCase):
             (False, decimal.Decimal(80) / decimal.Decimal(100))
         )
 
+        self.assertEqual(
+            df._calc_map_expectation_success(
+                success_count=100,
+                nonnull_count=100,
+                mostly=0
+            ),
+            (True, 1.0)
+        )
+
+        self.assertEqual(
+            df._calc_map_expectation_success(
+                success_count=50,
+                nonnull_count=100,
+                mostly=0
+            ),
+            (True, 0.5)
+        )
+
+        self.assertEqual(
+            df._calc_map_expectation_success(
+                success_count=0,
+                nonnull_count=100,
+                mostly=0
+            ),
+            (True, 0.0)
+        )
+
+
     def test_find_expectations(self):
         my_df = ge.dataset.PandasDataset({
             'x' : [1,2,3,4,5,6,7,8,9,10],
