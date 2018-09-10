@@ -1,0 +1,18 @@
+{
+  "expectation_type": "expect_these_tests_to_be_suppressed",
+  "datasets":[
+    {
+      "data": {},
+      "tests":
+        {
+          "title": "This test should never run!",
+                    "exact_match_out": false,
+          "suppress_test_for": ["SQLAlchemy", "Pandas"],
+          "in": [],
+          "kwargs": {},
+          "out": {
+            "success": true
+          }
+        }
+      }
+    ]}
