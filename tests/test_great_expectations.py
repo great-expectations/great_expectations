@@ -215,7 +215,7 @@ class TestValidation(unittest.TestCase):
             {"results": [
                 {"expectation_config": {
                      "expectation_type": "expect_column_values_to_be_in_set",
-                     "kwargs": {"column": "PClass", "values_set": ["1st", "2nd", "3rd"], "result_format": "COMPLETE"}
+                     "kwargs": {"column": "PClass", "value_set": ["1st", "2nd", "3rd"], "result_format": "COMPLETE"}
                  },
                  "success": False,
                  "exception_info": {"exception_message": None,

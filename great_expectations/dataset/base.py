@@ -1113,7 +1113,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
     ##### Table shape expectations #####
 
     def expect_column_to_exist(
-            self, column, column_index=None, result_format=None, include_config=False, 
+            self, column, column_index=None, result_format=None, include_config=False,
             catch_exceptions=None, meta=None
         ):
         """Expect the specified column to exist.
@@ -1524,7 +1524,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
     def expect_column_values_to_be_in_set(self,
         column,
-        values_set,
+        value_set,
         mostly=None,
         result_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
@@ -1556,7 +1556,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         Args:
             column (str): \
                 The column name.
-            values_set (set-like): \
+            value_set (set-like): \
                 A set of objects used for comparison.
 
         Keyword Args:
@@ -1591,7 +1591,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
     def expect_column_values_to_not_be_in_set(self,
         column,
-        values_set,
+        value_set,
         mostly=None,
         result_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
@@ -1622,7 +1622,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         Args:
             column (str): \
                 The column name.
-            values_set (set-like): \
+            value_set (set-like): \
                 A set of objects used for comparison.
 
         Keyword Args:
