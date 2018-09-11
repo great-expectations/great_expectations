@@ -12,7 +12,7 @@
         "exact_match_out": false,
         "in": {
           "column": "x",
-          "values_set": [1,2,4]
+          "value_set": [1,2,4]
         },
         "out": {
           "success": true
@@ -23,7 +23,7 @@
         "exact_match_out": false,
         "in": {
           "column": "x",
-          "values_set": [2, 4]
+          "value_set": [2, 4]
         },
         "out": {
           "success": false,
@@ -36,7 +36,7 @@
         "exact_match_out": false,
         "in": {
           "column": "x",
-          "values_set": []
+          "value_set": []
         },
         "out": {
           "success": false,
@@ -49,7 +49,7 @@
         "exact_match_out": false,
         "in": {
           "column": "z",
-          "values_set": ["hello", "jello", "mello"]
+          "value_set": ["hello", "jello", "mello"]
         },
         "out": {
           "success": true
@@ -60,7 +60,7 @@
         "exact_match_out": false,
         "in": {
           "column": "z",
-          "values_set": ["hello", "jello"]
+          "value_set": ["hello", "jello"]
         },
         "out": {
           "success": false,
@@ -73,7 +73,7 @@
         "exact_match_out": false,
         "in": {
           "column": "x",
-          "values_set": [3]
+          "value_set": [3]
         },
         "out": {
           "success": false,
@@ -86,7 +86,7 @@
         "exact_match_out": false,
         "in": {
           "column": "y",
-          "values_set": [1.1, 2.2, 5.5]
+          "value_set": [1.1, 2.2, 5.5]
         },
         "out": {
           "success": true
@@ -97,7 +97,7 @@
         "exact_match_out": false,
         "in": {
           "column": "y",
-          "values_set": [1.11, 2.22, 5.51]
+          "value_set": [1.11, 2.22, 5.51]
         },
         "out": {
           "success": false,
@@ -110,7 +110,7 @@
         "exact_match_out": false,
         "in": {
           "column": "z",
-          "values_set": null,
+          "value_set": null,
           "catch_exceptions": true
         },
         "out": {},
@@ -128,7 +128,7 @@
         "exact_match_out": false,
         "in": {
           "column": "empty_column",
-          "values_set": ["cat", "dog"],
+          "value_set": ["cat", "dog"],
           "catch_exceptions": false
         },
         "out": {
