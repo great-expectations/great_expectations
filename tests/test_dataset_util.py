@@ -59,7 +59,7 @@ class TestUtilMethods(unittest.TestCase):
             self.assertEqual(len(val), len(test_partition[key]))
             self.assertTrue(np.allclose(test_partition[key], val))
 
-                    
+
     def test_categorical_data_fixed(self):
         test_partition = ge.dataset.util.categorical_partition_data(self.D.categorical_fixed)
         for k in self.test_partitions['categorical_fixed']['values']:
@@ -108,7 +108,7 @@ class TestUtilMethods(unittest.TestCase):
         part = ge.dataset.util.partition_data(D.x)
         D.expect_column_kl_divergence_to_be_less_than("x", part, .6)
 
-        #Dumping this JSON object verifies that everything is serializable        
+        #Dumping this JSON object verifies that everything is serializable
         json.dumps(D.get_expectations_config(), indent=2)
 
 
@@ -181,7 +181,7 @@ class TestUtilMethods(unittest.TestCase):
         # self.assertEqual(type(x['np.complex128'][0]), complex)
         # self.assertEqual(type(x['np.complex256'][0]), complex)
         self.assertEqual(type(x['np.float_'][0]), float)
-        
+
         # Make sure nothing is going wrong with precision rounding
         # self.assertAlmostEqual(x['np.complex128'][0].real, 20.999999999978335216827, places=sys.float_info.dig)
         self.assertAlmostEqual(x['np.float128'][0], 5.999999999998786324399999999, places=sys.float_info.dig)
@@ -560,7 +560,7 @@ class TestUtilMethods(unittest.TestCase):
         results = ge.dataset.util.create_multiple_expectations(D,
                                                      ['x', 'y'],
                                                      'expect_column_values_to_be_in_set',
-                                                     values_set=[1, 2, 3, 4, 5, 6])
+                                                     value_set=[1, 2, 3, 4, 5, 6])
         self.assertTrue(results[0]['success'])
         self.assertFalse(results[1]['success'])
 

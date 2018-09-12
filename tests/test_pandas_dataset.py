@@ -572,11 +572,11 @@ class TestPandasDataset(unittest.TestCase):
             {'expectation_type': 'expect_column_to_exist',
              'kwargs': {'column': 'D'}},
             {'expectation_type': 'expect_column_values_to_be_in_set',
-             'kwargs': {'column': 'A', 'values_set': [1, 2, 3, 4]}},
+             'kwargs': {'column': 'A', 'value_set': [1, 2, 3, 4]}},
             {'expectation_type': 'expect_column_values_to_be_in_set',
-             'kwargs': {'column': 'B', 'values_set': [5, 6, 7, 8]}},
+             'kwargs': {'column': 'B', 'value_set': [5, 6, 7, 8]}},
             {'expectation_type': 'expect_column_values_to_be_in_set',
-             'kwargs': {'column': 'C', 'values_set': ['a', 'b', 'c', 'd']}}
+             'kwargs': {'column': 'C', 'value_set': ['a', 'b', 'c', 'd']}}
         ]
         self.assertEqual(samp1.find_expectations(), exp1)
 
@@ -731,13 +731,13 @@ class TestPandasDataset(unittest.TestCase):
             {'expectation_type': 'expect_column_to_exist',
              'kwargs': {'column': 'D'}},
             {'expectation_type': 'expect_column_values_to_be_in_set',
-             'kwargs': {'column': 'A', 'values_set': [1, 2, 3, 4]}},
+             'kwargs': {'column': 'A', 'value_set': [1, 2, 3, 4]}},
             {'expectation_type': 'expect_column_values_to_be_in_set',
-             'kwargs': {'column': 'B', 'values_set': [5, 6, 7, 8]}},
+             'kwargs': {'column': 'B', 'value_set': [5, 6, 7, 8]}},
             {'expectation_type': 'expect_column_values_to_be_in_set',
-             'kwargs': {'column': 'C', 'values_set': ['a', 'b', 'c', 'd']}},
+             'kwargs': {'column': 'C', 'value_set': ['a', 'b', 'c', 'd']}},
             {'expectation_type': 'expect_column_values_to_be_in_set',
-             'kwargs': {'column': 'D', 'values_set': ['e', 'f', 'g', 'x']}}
+             'kwargs': {'column': 'D', 'value_set': ['e', 'f', 'g', 'x']}}
         ]
         self.assertEqual(samp1.find_expectations(), exp1)
 
@@ -822,13 +822,13 @@ class TestPandasDataset(unittest.TestCase):
             {'expectation_type': 'expect_column_to_exist',
              'kwargs': {'column': 'D'}},
             {'expectation_type': 'expect_column_values_to_be_in_set',
-             'kwargs': {'column': 'A', 'values_set': [1, 2, 3, 4]}},
+             'kwargs': {'column': 'A', 'value_set': [1, 2, 3, 4]}},
             {'expectation_type': 'expect_column_values_to_be_in_set',
-             'kwargs': {'column': 'B', 'values_set': [5, 6, 7, 8]}},
+             'kwargs': {'column': 'B', 'value_set': [5, 6, 7, 8]}},
             {'expectation_type': 'expect_column_values_to_be_in_set',
-             'kwargs': {'column': 'C', 'values_set': ['w', 'x', 'y', 'z']}},
+             'kwargs': {'column': 'C', 'value_set': ['w', 'x', 'y', 'z']}},
             {'expectation_type': 'expect_column_values_to_be_in_set',
-             'kwargs': {'column': 'D', 'values_set': ['e', 'f', 'g', 'h']}}
+             'kwargs': {'column': 'D', 'value_set': ['e', 'f', 'g', 'h']}}
         ]
         samp1 = df.sample(n=2)
         self.assertEqual(samp1.find_expectations(), exp1)
@@ -852,11 +852,11 @@ class TestPandasDataset(unittest.TestCase):
             {'expectation_type': 'expect_column_to_exist',
              'kwargs': {'column': 'D'}},
             {'expectation_type': 'expect_column_values_to_be_in_set',
-             'kwargs': {'column': 'A', 'values_set': [1, 2, 3, 4]}},
+             'kwargs': {'column': 'A', 'value_set': [1, 2, 3, 4]}},
             {'expectation_type': 'expect_column_values_to_be_in_set',
-             'kwargs': {'column': 'B', 'values_set': [5, 6, 7, 8]}},
+             'kwargs': {'column': 'B', 'value_set': [5, 6, 7, 8]}},
             {'expectation_type': 'expect_column_values_to_be_in_set',
-             'kwargs': {'column': 'D', 'values_set': ['e', 'f', 'g', 'h']}}
+             'kwargs': {'column': 'D', 'value_set': ['e', 'f', 'g', 'h']}}
         ]
 
         samp2 = df.sample(n=2)
@@ -872,9 +872,9 @@ class TestPandasDataset(unittest.TestCase):
             {'expectation_type': 'expect_column_to_exist',
              'kwargs': {'column': 'D'}},
             {'expectation_type': 'expect_column_values_to_be_in_set',
-             'kwargs': {'column': 'A', 'values_set': [1, 2, 3, 4]}},
+             'kwargs': {'column': 'A', 'value_set': [1, 2, 3, 4]}},
             {'expectation_type': 'expect_column_values_to_be_in_set',
-             'kwargs': {'column': 'D', 'values_set': ['e', 'f', 'g', 'h']}}
+             'kwargs': {'column': 'D', 'value_set': ['e', 'f', 'g', 'h']}}
         ]
         self.assertEqual(sub2.find_expectations(), exp_sub)
 
