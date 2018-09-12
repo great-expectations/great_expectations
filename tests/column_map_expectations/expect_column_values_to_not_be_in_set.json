@@ -13,7 +13,7 @@
         "exact_match_out": false,
         "in": {
           "column": "x",
-          "values_set": [0]
+          "value_set": [0]
         },
         "out": {
           "success": true
@@ -24,7 +24,7 @@
         "exact_match_out": false,
         "in": {
           "column": "x",
-          "values_set": [1]
+          "value_set": [1]
         },
         "out": {
           "success": false,
@@ -37,7 +37,7 @@
         "exact_match_out": false,
         "in": {
           "column": "x",
-          "values_set": []
+          "value_set": []
         },
         "out": {
           "success": true,
@@ -50,7 +50,7 @@
         "exact_match_out": false,
         "in": {
           "column": "z",
-          "values_set": ["hello", "jello", "mello"]
+          "value_set": ["hello", "jello", "mello"]
         },
         "out": {
           "success": false,
@@ -63,7 +63,7 @@
         "exact_match_out": false,
         "in": {
           "column": "z",
-          "values_set": ["ello"]
+          "value_set": ["ello"]
         },
         "out": {
           "success": true
@@ -74,7 +74,7 @@
         "exact_match_out": false,
         "in": {
           "column": "y",
-          "values_set": [1.1, 2.2],
+          "value_set": [1.1, 2.2],
           "mostly": 0.65
         },
         "out": {
@@ -88,7 +88,7 @@
         "exact_match_out": false,
         "in": {
           "column": "y",
-          "values_set": [1.1, 2.2],
+          "value_set": [1.1, 2.2],
           "mostly": 0.7
         },
         "out": {
@@ -102,7 +102,7 @@
         "exact_match_out": false,
         "in": {
           "column": "n",
-          "values_set": [null]
+          "value_set": [null]
         },
         "out": {
           "success": true
@@ -113,7 +113,7 @@
         "exact_match_out": false,
         "in": {
           "column": "z",
-          "values_set": null,
+          "value_set": null,
           "catch_exceptions": true
         },
         "out": {},
