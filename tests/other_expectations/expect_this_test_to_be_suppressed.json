@@ -11,7 +11,10 @@
           "in": ["a"],
           "kwargs": {},
           "out": {
-            "success": true
+            "success": true,
+            "meta":{
+              "notes": "If successful, this test will NOT be executed."
+            }
           }
         }]
       }
