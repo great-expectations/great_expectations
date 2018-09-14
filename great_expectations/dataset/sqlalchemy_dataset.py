@@ -396,21 +396,21 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
     @MetaSqlAlchemyDataset.column_map_expectation
     def expect_column_values_to_be_in_set(self,
         column,
-        values_set,
+        value_set,
         mostly=None,
         result_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
-        return sa.column(column).in_(tuple(values_set))
+        return sa.column(column).in_(tuple(value_set))
 
     @DocInherit
     @MetaSqlAlchemyDataset.column_map_expectation
     def expect_column_values_to_not_be_in_set(self,
                                           column,
-                                          values_set,
+                                          value_set,
                                           mostly=None,
                                           result_format=None, include_config=False, catch_exceptions=None, meta=None
                                           ):
-        return sa.column(column).notin_(tuple(values_set))
+        return sa.column(column).notin_(tuple(value_set))
 
     @DocInherit
     @MetaSqlAlchemyDataset.column_map_expectation
