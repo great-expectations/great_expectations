@@ -7,6 +7,7 @@
       "c" : [1, 1, 2],
       "d" : [1, "1", 2],
       "n" : [null, null, 2],
+      "unique" : [1, 2, 3],
       "null": [null, null, null]
     },
     "tests" : [
@@ -14,7 +15,7 @@
         "title": "Basic positive test case",
         "exact_match_out": false,
         "in": {
-          "column": "b"
+          "column": "unique"
         },
         "out": {
           "success": true,
@@ -31,6 +32,19 @@
           "success": false,
           "unexpected_list": ["2", "2", "2"],
           "unexpected_index_list": [0, 1, 2]
+        }
+      },{
+        "title": "Multi-type column, contains 2 and '2'. Suppressed for SQAlchemy ",
+        "exact_match_out": false,
+        "suppress_test_for": ["SQLAlchemy"],
+        "in": {
+          "column": "c",
+          "mostly": 0.3
+        },
+        "out": {
+          "success": true,
+          "unexpected_list": [1, 1],
+          "unexpected_index_list": [0, 1]
         }
       },{
         "title": "Positive Case, using Mostly",
