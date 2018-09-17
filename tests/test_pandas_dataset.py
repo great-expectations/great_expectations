@@ -603,39 +603,40 @@ class TestPandasDataset(unittest.TestCase):
         self.assertIsInstance(df, ge.dataset.PandasDataset)
         self.assertEqual(df.find_expectations(), exp_j)
 
-    def test_ge_pandas_merging(self):
-        df1 = ge.dataset.PandasDataset({
-            'id': [1, 2, 3, 4],
-            'name': ['a', 'b', 'c', 'd']
-        })
 
-        df1.expect_column_values_to_match_regex('name', '^[A-Za-z ]+$')
+def test_ge_pandas_merging():
+    df1 = ge.dataset.PandasDataset({
+        'id': [1, 2, 3, 4],
+        'name': ['a', 'b', 'c', 'd']
+    })
 
-        df2 = ge.dataset.PandasDataset({
-            'id': [1, 2, 3, 4],
-            'salary': [57000, 52000, 59000, 65000]
-        })
+    df1.expect_column_values_to_match_regex('name', '^[A-Za-z ]+$')
 
-        df2.expect_column_values_to_match_regex('salary', '^[0-9]{4,6]$')
+    df2 = ge.dataset.PandasDataset({
+        'id': [1, 2, 3, 4],
+        'salary': [57000, 52000, 59000, 65000]
+    })
 
-        df = df1.merge(df2, on='id')
+    df2.expect_column_values_to_match_regex('salary', '^[0-9]{4,6]$')
 
-        exp_m = [
-            {'expectation_type': 'expect_column_to_exist',
-             'kwargs': {'column': 'id'}},
-            {'expectation_type': 'expect_column_to_exist',
-             'kwargs': {'column': 'name'}},
-            {'expectation_type': 'expect_column_to_exist',
-             'kwargs': {'column': 'salary'}}
-        ]
+    df = df1.merge(df2, on='id')
 
-        # The merged data frame will:
-        #
-        #   1. Be a ge.dataset.PandaDataSet
-        #   2. Only have the default expectations
+    exp_m = [
+        {'expectation_type': 'expect_column_to_exist',
+         'kwargs': {'column': 'id'}},
+        {'expectation_type': 'expect_column_to_exist',
+         'kwargs': {'column': 'name'}},
+        {'expectation_type': 'expect_column_to_exist',
+         'kwargs': {'column': 'salary'}}
+    ]
 
-        self.assertIsInstance(df, ge.dataset.PandasDataset)
-        self.assertEqual(df.find_expectations(), exp_m)
+    # The merged data frame will:
+    #
+    #   1. Be a ge.dataset.PandaDataSet
+    #   2. Only have the default expectations
+
+    assert isinstance(df, ge.dataset.PandasDataset)
+    assert df.find_expectations()==exp_m
         
         
 def test_ge_pandas_sampling_drop():
