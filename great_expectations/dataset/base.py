@@ -588,11 +588,16 @@ class Dataset(object):
         suppress_warnings=False
     ):
         """Returns _expectation_config as a JSON object, and perform some cleaning along the way.
+
         Args:
-            discard_failed_expectations=True     : Only include expectations with success_on_last_run=True in the exported config.
-            discard_result_format_kwargs=True    : In returned expectation objects, suppress the `result_format` parameter.
-            discard_include_configs_kwargs=True  : In returned expectation objects, suppress the `include_configs` parameter.
-            discard_catch_exceptions_kwargs=True : In returned expectation objects, suppress the `catch_exceptions` parameter.
+            discard_failed_expectations (boolean): \
+                Only include expectations with success_on_last_run=True in the exported config.  Defaults to `True`.
+            discard_result_format_kwargs (boolean): \
+                In returned expectation objects, suppress the `result_format` parameter. Defaults to `True`.
+            discard_include_configs_kwargs (boolean): \
+                In returned expectation objects, suppress the `include_configs` parameter. Defaults to `True`.
+            discard_catch_exceptions_kwargs (boolean): \
+                In returned expectation objects, suppress the `catch_exceptions` parameter.  Defaults to `True`.
 
         Returns:
             An expectation config.
