@@ -280,9 +280,9 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
     def add_default_expectations(self):
         """
-        The default behavior for PandasDataset is to explicitly include expectations that every column present upon initialization exists.
+        No expectations are added by default, so simply pass.
         """
-        create_multiple_expectations(self, self.columns, "expect_column_to_exist")
+        pass
 
     ### Expectation methods ###
     @DocInherit
