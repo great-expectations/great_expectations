@@ -84,65 +84,64 @@ class TestPandasDataset(unittest.TestCase):
     #         if 'unexpected_list' in t['out']:
     #             self.assertEqual(t['out']['unexpected_list'], out['result']['unexpected_list'])
 
-    def test_expect_column_values_to_match_strftime_format(self):
-        """
-        """
+def test_expect_column_values_to_match_strftime_format():
+    """
+    """
 
-        D = ge.dataset.PandasDataset({
-            'x' : [1,2,4],
-            'us_dates' : ['4/30/2017','4/30/2017','7/4/1776'],
-            'us_dates_type_error' : ['4/30/2017','4/30/2017', 5],
-            'almost_iso8601' : ['1977-05-25T00:00:00', '1980-05-21T13:47:59', '2017-06-12T23:57:59'],
-            'almost_iso8601_val_error' : ['1977-05-55T00:00:00', '1980-05-21T13:47:59', '2017-06-12T23:57:59'],
-            'already_datetime' : [datetime.datetime(2015,1,1), datetime.datetime(2016,1,1), datetime.datetime(2017,1,1)]
-        })
-        D.set_default_expectation_argument("result_format", "COMPLETE")
+    D = ge.dataset.PandasDataset({
+        'x' : [1,2,4],
+        'us_dates' : ['4/30/2017','4/30/2017','7/4/1776'],
+        'us_dates_type_error' : ['4/30/2017','4/30/2017', 5],
+        'almost_iso8601' : ['1977-05-25T00:00:00', '1980-05-21T13:47:59', '2017-06-12T23:57:59'],
+        'almost_iso8601_val_error' : ['1977-05-55T00:00:00', '1980-05-21T13:47:59', '2017-06-12T23:57:59'],
+        'already_datetime' : [datetime.datetime(2015,1,1), datetime.datetime(2016,1,1), datetime.datetime(2017,1,1)]
+    })
+    D.set_default_expectation_argument("result_format", "COMPLETE")
 
-        T = [
-                {
-                    'in':{'column':'us_dates', 'strftime_format':'%m/%d/%Y'},
-                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}
+    T = [
+            {
+                'in':{'column':'us_dates', 'strftime_format':'%m/%d/%Y'},
+                'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}
+            },
+            {
+                'in':{'column':'us_dates_type_error','strftime_format':'%m/%d/%Y', 'mostly': 0.5, 'catch_exceptions': True},
+                # 'out':{'success':True, 'unexpected_index_list':[2], 'unexpected_list':[5]}},
+                'error':{
+                    'traceback_substring' : 'TypeError'
                 },
-                {
-                    'in':{'column':'us_dates_type_error','strftime_format':'%m/%d/%Y', 'mostly': 0.5, 'catch_exceptions': True},
-                    # 'out':{'success':True, 'unexpected_index_list':[2], 'unexpected_list':[5]}},
-                    'error':{
-                        'traceback_substring' : 'TypeError'
-                    },
-                },
-                {
-                    'in':{'column':'us_dates_type_error','strftime_format':'%m/%d/%Y', 'catch_exceptions': True},
-                    'error':{
-                        'traceback_substring' : 'TypeError'
-                    }
-                },
-                {
-                    'in':{'column':'almost_iso8601','strftime_format':'%Y-%m-%dT%H:%M:%S'},
-                    'out':{'success':True,'unexpected_index_list':[], 'unexpected_list':[]}},
-                {
-                    'in':{'column':'almost_iso8601_val_error','strftime_format':'%Y-%m-%dT%H:%M:%S'},
-                    'out':{'success':False,'unexpected_index_list':[0], 'unexpected_list':['1977-05-55T00:00:00']}},
-                {
-                    'in':{'column':'already_datetime','strftime_format':'%Y-%m-%d', 'catch_exceptions':True},
-                    # 'out':{'success':False,'unexpected_index_list':[0], 'unexpected_list':['1977-05-55T00:00:00']},
-                    'error':{
-                        'traceback_substring' : 'TypeError: Values passed to expect_column_values_to_match_strftime_format must be of type string.'
-                    },
+            },
+            {
+                'in':{'column':'us_dates_type_error','strftime_format':'%m/%d/%Y', 'catch_exceptions': True},
+                'error':{
+                    'traceback_substring' : 'TypeError'
                 }
-        ]
+            },
+            {
+                'in':{'column':'almost_iso8601','strftime_format':'%Y-%m-%dT%H:%M:%S'},
+                'out':{'success':True,'unexpected_index_list':[], 'unexpected_list':[]}},
+            {
+                'in':{'column':'almost_iso8601_val_error','strftime_format':'%Y-%m-%dT%H:%M:%S'},
+                'out':{'success':False,'unexpected_index_list':[0], 'unexpected_list':['1977-05-55T00:00:00']}},
+            {
+                'in':{'column':'already_datetime','strftime_format':'%Y-%m-%d', 'catch_exceptions':True},
+                # 'out':{'success':False,'unexpected_index_list':[0], 'unexpected_list':['1977-05-55T00:00:00']},
+                'error':{
+                    'traceback_substring' : 'TypeError: Values passed to expect_column_values_to_match_strftime_format must be of type string.'
+                },
+            }
+    ]
 
-        for t in T:
-            out = D.expect_column_values_to_match_strftime_format(**t['in'])
-            if 'out' in t:
-                self.assertEqual(t['out']['success'], out['success'])
-                if 'unexpected_index_list' in t['out']:
-                    self.assertEqual(t['out']['unexpected_index_list'], out['result']['unexpected_index_list'])
-                if 'unexpected_list' in t['out']:
-                    self.assertEqual(t['out']['unexpected_list'], out['result']['unexpected_list'])
-            elif 'error' in t:
-                self.assertEqual(out['exception_info']['raised_exception'], True)
-                self.assertIn(t['error']['traceback_substring'], out['exception_info']['exception_traceback'])
-
+    for t in T:
+        out = D.expect_column_values_to_match_strftime_format(**t['in'])
+        if 'out' in t:
+            assert t['out']['success']==out['success']
+            if 'unexpected_index_list' in t['out']:
+                assert t['out']['unexpected_index_list']==out['result']['unexpected_index_list']
+            if 'unexpected_list' in t['out']:
+                assert t['out']['unexpected_list']==out['result']['unexpected_list']
+        elif 'error' in t:
+            assert out['exception_info']['raised_exception']==True
+            assert t['error']['traceback_substring'] in out['exception_info']['exception_traceback']
 
 def test_expect_column_values_to_be_dateutil_parseable():
 
