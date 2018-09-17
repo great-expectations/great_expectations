@@ -191,42 +191,42 @@ class TestPandasDataset(unittest.TestCase):
                 self.assertIn(t['error']['traceback_substring'], out['exception_info']['exception_traceback'])
 
 
-    def test_expect_column_values_to_be_json_parseable(self):
-        d1 = json.dumps({'i':[1,2,3],'j':35,'k':{'x':'five','y':5,'z':'101'}})
-        d2 = json.dumps({'i':1,'j':2,'k':[3,4,5]})
-        d3 = json.dumps({'i':'a', 'j':'b', 'k':'c'})
-        d4 = json.dumps({'i':[4,5], 'j':[6,7], 'k':[8,9], 'l':{4:'x', 5:'y', 6:'z'}})
-        D = ge.dataset.PandasDataset({
-            'json_col':[d1,d2,d3,d4],
-            'not_json':[4,5,6,7],
-            'py_dict':[{'a':1, 'out':1},{'b':2, 'out':4},{'c':3, 'out':9},{'d':4, 'out':16}],
-            'most':[d1,d2,d3,'d4']
-        })
-        D.set_default_expectation_argument("result_format", "COMPLETE")
+def test_expect_column_values_to_be_json_parseable():
+    d1 = json.dumps({'i':[1,2,3],'j':35,'k':{'x':'five','y':5,'z':'101'}})
+    d2 = json.dumps({'i':1,'j':2,'k':[3,4,5]})
+    d3 = json.dumps({'i':'a', 'j':'b', 'k':'c'})
+    d4 = json.dumps({'i':[4,5], 'j':[6,7], 'k':[8,9], 'l':{4:'x', 5:'y', 6:'z'}})
+    D = ge.dataset.PandasDataset({
+        'json_col':[d1,d2,d3,d4],
+        'not_json':[4,5,6,7],
+        'py_dict':[{'a':1, 'out':1},{'b':2, 'out':4},{'c':3, 'out':9},{'d':4, 'out':16}],
+        'most':[d1,d2,d3,'d4']
+    })
+    D.set_default_expectation_argument("result_format", "COMPLETE")
 
-        T = [
-                {
-                    'in':{'column':'json_col'},
-                    'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}},
-                {
-                    'in':{'column':'not_json'},
-                    'out':{'success':False, 'unexpected_index_list':[0,1,2,3], 'unexpected_list':[4,5,6,7]}},
-                {
-                    'in':{'column':'py_dict'},
-                    'out':{'success':False, 'unexpected_index_list':[0,1,2,3], 'unexpected_list':[{'a':1, 'out':1},{'b':2, 'out':4},{'c':3, 'out':9},{'d':4, 'out':16}]}},
-                {
-                    'in':{'column':'most'},
-                    'out':{'success':False, 'unexpected_index_list':[3], 'unexpected_list':['d4']}},
-                {
-                    'in':{'column':'most', 'mostly':.75},
-                    'out':{'success':True, 'unexpected_index_list':[3], 'unexpected_list':['d4']}}
-        ]
+    T = [
+            {
+                'in':{'column':'json_col'},
+                'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}},
+            {
+                'in':{'column':'not_json'},
+                'out':{'success':False, 'unexpected_index_list':[0,1,2,3], 'unexpected_list':[4,5,6,7]}},
+            {
+                'in':{'column':'py_dict'},
+                'out':{'success':False, 'unexpected_index_list':[0,1,2,3], 'unexpected_list':[{'a':1, 'out':1},{'b':2, 'out':4},{'c':3, 'out':9},{'d':4, 'out':16}]}},
+            {
+                'in':{'column':'most'},
+                'out':{'success':False, 'unexpected_index_list':[3], 'unexpected_list':['d4']}},
+            {
+                'in':{'column':'most', 'mostly':.75},
+                'out':{'success':True, 'unexpected_index_list':[3], 'unexpected_list':['d4']}}
+    ]
 
-        for t in T:
-            out = D.expect_column_values_to_be_json_parseable(**t['in'])
-            self.assertEqual(t['out']['success'], out['success'])
-            self.assertEqual(t['out']['unexpected_index_list'], out['result']['unexpected_index_list'])
-            self.assertEqual(t['out']['unexpected_list'], out['result']['unexpected_list'])
+    for t in T:
+        out = D.expect_column_values_to_be_json_parseable(**t['in'])
+        assert t['out']['success']==out['success']
+        assert t['out']['unexpected_index_list']==out['result']['unexpected_index_list']
+        assert t['out']['unexpected_list']==out['result']['unexpected_list']
 
     # def test_expect_column_values_to_match_json_schema(self):
 
