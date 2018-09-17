@@ -494,40 +494,6 @@ class TestPandasDataset(unittest.TestCase):
         self.assertIsInstance(df, ge.dataset.PandasDataset)
         self.assertEqual(df.find_expectations(), exp_j)
 
-    def test_ge_pandas_merging(self):
-        df1 = ge.dataset.PandasDataset({
-            'id': [1, 2, 3, 4],
-            'name': ['a', 'b', 'c', 'd']
-        })
-
-        df1.expect_column_values_to_match_regex('name', '^[A-Za-z ]+$')
-
-        df2 = ge.dataset.PandasDataset({
-            'id': [1, 2, 3, 4],
-            'salary': [57000, 52000, 59000, 65000]
-        })
-
-        df2.expect_column_values_to_match_regex('salary', '^[0-9]{4,6]$')
-
-        df = df1.merge(df2, on='id')
-
-        exp_m = [
-            {'expectation_type': 'expect_column_to_exist',
-             'kwargs': {'column': 'id'}},
-            {'expectation_type': 'expect_column_to_exist',
-             'kwargs': {'column': 'name'}},
-            {'expectation_type': 'expect_column_to_exist',
-             'kwargs': {'column': 'salary'}}
-        ]
-
-        # The merged data frame will:
-        #
-        #   1. Be a ge.dataset.PandaDataSet
-        #   2. Only have the default expectations
-
-        self.assertIsInstance(df, ge.dataset.PandasDataset)
-        self.assertEqual(df.find_expectations(), exp_m)
-
 
 
 
