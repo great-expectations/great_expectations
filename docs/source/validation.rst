@@ -20,58 +20,58 @@ Once you've constructed and stored Expectations, you can use them to validate ne
     {
       "results" : [
         {
-          "expectation_type": "expect_column_to_exist", 
-          "success": True, 
+          "expectation_type": "expect_column_to_exist",
+          "success": True,
           "kwargs": {
             "column": "Unnamed: 0"
           }
-        }, 
+        },
         ...
         {
           "unexpected_list": 30.397989417989415,
-          "expectation_type": "expect_column_mean_to_be_between", 
-          "success": True, 
+          "expectation_type": "expect_column_mean_to_be_between",
+          "success": True,
           "kwargs": {
-            "column": "Age", 
-            "max_value": 40, 
+            "column": "Age",
+            "max_value": 40,
             "min_value": 20
           }
-        }, 
+        },
         {
           "unexpected_list": [],
-          "expectation_type": "expect_column_values_to_be_between", 
-          "success": True, 
+          "expectation_type": "expect_column_values_to_be_between",
+          "success": True,
           "kwargs": {
-            "column": "Age", 
-            "max_value": 80, 
+            "column": "Age",
+            "max_value": 80,
             "min_value": 0
           }
-        }, 
+        },
         {
           "unexpected_list": [
-            "Downton (?Douton), Mr William James", 
-            "Jacobsohn Mr Samuel", 
+            "Downton (?Douton), Mr William James",
+            "Jacobsohn Mr Samuel",
             "Seman Master Betros"
-          ], 
-          "expectation_type": "expect_column_values_to_match_regex", 
-          "success": True, 
+          ],
+          "expectation_type": "expect_column_values_to_match_regex",
+          "success": True,
           "kwargs": {
-            "regex": "[A-Z][a-z]+(?: \\([A-Z][a-z]+\\))?, ", 
-            "column": "Name", 
+            "regex": "[A-Z][a-z]+(?: \\([A-Z][a-z]+\\))?, ",
+            "column": "Name",
             "mostly": 0.95
           }
-        }, 
+        },
         {
           "unexpected_list": [
             "*"
-          ], 
-          "expectation_type": "expect_column_values_to_be_in_set", 
-          "success": False, 
+          ],
+          "expectation_type": "expect_column_values_to_be_in_set",
+          "success": False,
           "kwargs": {
-            "column": "PClass", 
-            "values_set": [
-              "1st", 
-              "2nd", 
+            "column": "PClass",
+            "value_set": [
+              "1st",
+              "2nd",
               "3rd"
             ]
           }
@@ -106,58 +106,58 @@ This is especially powerful when combined with great_expectations's command line
     {
       "results" : [
         {
-          "expectation_type": "expect_column_to_exist", 
-          "success": True, 
+          "expectation_type": "expect_column_to_exist",
+          "success": True,
           "kwargs": {
             "column": "Unnamed: 0"
           }
-        }, 
+        },
         ...
         {
           "unexpected_list": 30.397989417989415,
-          "expectation_type": "expect_column_mean_to_be_between", 
-          "success": True, 
+          "expectation_type": "expect_column_mean_to_be_between",
+          "success": True,
           "kwargs": {
-            "column": "Age", 
-            "max_value": 40, 
+            "column": "Age",
+            "max_value": 40,
             "min_value": 20
           }
-        }, 
+        },
         {
           "unexpected_list": [],
-          "expectation_type": "expect_column_values_to_be_between", 
-          "success": True, 
+          "expectation_type": "expect_column_values_to_be_between",
+          "success": True,
           "kwargs": {
-            "column": "Age", 
-            "max_value": 80, 
+            "column": "Age",
+            "max_value": 80,
             "min_value": 0
           }
-        }, 
+        },
         {
           "unexpected_list": [
-            "Downton (?Douton), Mr William James", 
-            "Jacobsohn Mr Samuel", 
+            "Downton (?Douton), Mr William James",
+            "Jacobsohn Mr Samuel",
             "Seman Master Betros"
-          ], 
-          "expectation_type": "expect_column_values_to_match_regex", 
-          "success": True, 
+          ],
+          "expectation_type": "expect_column_values_to_match_regex",
+          "success": True,
           "kwargs": {
-            "regex": "[A-Z][a-z]+(?: \\([A-Z][a-z]+\\))?, ", 
-            "column": "Name", 
+            "regex": "[A-Z][a-z]+(?: \\([A-Z][a-z]+\\))?, ",
+            "column": "Name",
             "mostly": 0.95
           }
-        }, 
+        },
         {
           "unexpected_list": [
             "*"
-          ], 
-          "expectation_type": "expect_column_values_to_be_in_set", 
-          "success": False, 
+          ],
+          "expectation_type": "expect_column_values_to_be_in_set",
+          "success": False,
           "kwargs": {
-            "column": "PClass", 
-            "values_set": [
-              "1st", 
-              "2nd", 
+            "column": "PClass",
+            "value_set": [
+              "1st",
+              "2nd",
               "3rd"
             ]
           }
@@ -184,4 +184,3 @@ Useful deployment patterns include:
 * Validate as part of an Airflow task: if Expectations are violated, raise an error and stop DAG propagation until the problem is resolved. Alternatively, you can implement expectations that raise warnings without halting the DAG.
 
 For certain deployment patterns, it may be useful to parameterize expectations, and supply evaluation parameters at validation time. See :ref:`evaluation_parameters` for more information.
-

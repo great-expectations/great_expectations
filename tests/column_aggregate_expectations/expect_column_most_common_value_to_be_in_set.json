@@ -24,7 +24,7 @@
           }
         }
       },{
-      "title" : "Negative test, tie for most common, full values_set, ties_okay = FALSE",
+      "title" : "Negative test, tie for most common, full value_set, ties_okay = FALSE",
       "exact_match_out" : false,
       "in": {
         "column": "x",

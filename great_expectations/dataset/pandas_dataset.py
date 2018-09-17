@@ -62,7 +62,7 @@ class MetaPandasDataset(Dataset):
             ignore_values = [None, np.nan]
             if func.__name__ in ['expect_column_values_to_not_be_null', 'expect_column_values_to_be_null']:
                 ignore_values = []
-        
+
             series = self[column]
 
             # FIXME rename to mapped_ignore_values?
@@ -136,9 +136,9 @@ class MetaPandasDataset(Dataset):
             assert len(series_A) == len(series_B), "Series A and B must be the same length"
 
             #This next bit only works if series_A and _B are the same length
-            element_count = int(len(series_A)) 
+            element_count = int(len(series_A))
             nonnull_count = (boolean_mapped_null_values==False).sum()
-            
+
             nonnull_values_A = series_A[boolean_mapped_null_values==False]
             nonnull_values_B = series_B[boolean_mapped_null_values==False]
             nonnull_values = [value_pair for value_pair in zip(
@@ -455,17 +455,17 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
-    def expect_column_values_to_be_in_set(self, column, values_set,
+    def expect_column_values_to_be_in_set(self, column, value_set,
                                           mostly=None,
                                           result_format=None, include_config=False, catch_exceptions=None, meta=None):
-        return column.map(lambda x: x in values_set)
+        return column.map(lambda x: x in value_set)
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
-    def expect_column_values_to_not_be_in_set(self, column, values_set,
+    def expect_column_values_to_not_be_in_set(self, column, value_set,
                                               mostly=None,
                                               result_format=None, include_config=False, catch_exceptions=None, meta=None):
-        return column.map(lambda x: x not in values_set)
+        return column.map(lambda x: x not in value_set)
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
@@ -1353,7 +1353,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         #FIXME
         if allow_cross_type_comparisons==True:
             raise NotImplementedError
-        
+
         if parse_strings_as_datetimes:
             temp_column_A = column_A.map(parse)
             temp_column_B = column_B.map(parse)
@@ -1385,12 +1385,12 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                 a = None
             else:
                 a = t["A"]
-                
+
             if pd.isnull(t["B"]):
                 b = None
             else:
                 b = t["B"]
-                
+
             results.append((a, b) in value_pairs_set)
 
         return pd.Series(results, temp_df.index)
