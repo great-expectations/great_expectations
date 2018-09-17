@@ -531,39 +531,41 @@ class TestPandasDataset(unittest.TestCase):
 
 
 
-    def test_ge_pandas_concatenating(self):
-        df1 = ge.dataset.PandasDataset({
-            'A': ['A0', 'A1', 'A2'],
-            'B': ['B0', 'B1', 'B2']
-        })
+def test_ge_pandas_concatenating():
+    df1 = ge.dataset.PandasDataset({
+        'A': ['A0', 'A1', 'A2'],
+        'B': ['B0', 'B1', 'B2']
+    })
 
-        df1.expect_column_values_to_match_regex('A', '^A[0-2]$')
-        df1.expect_column_values_to_match_regex('B', '^B[0-2]$')
+    df1.expect_column_values_to_match_regex('A', '^A[0-2]$')
+    df1.expect_column_values_to_match_regex('B', '^B[0-2]$')
 
-        df2 = ge.dataset.PandasDataset({
-            'A': ['A3', 'A4', 'A5'],
-            'B': ['B3', 'B4', 'B5']
-        })
+    df2 = ge.dataset.PandasDataset({
+        'A': ['A3', 'A4', 'A5'],
+        'B': ['B3', 'B4', 'B5']
+    })
 
-        df2.expect_column_values_to_match_regex('A', '^A[3-5]$')
-        df2.expect_column_values_to_match_regex('B', '^B[3-5]$')
+    df2.expect_column_values_to_match_regex('A', '^A[3-5]$')
+    df2.expect_column_values_to_match_regex('B', '^B[3-5]$')
 
-        df = pd.concat([df1, df2])
+    df = pd.concat([df1, df2])
 
-        exp_c = [
-            {'expectation_type': 'expect_column_to_exist',
-             'kwargs': {'column': 'A'}},
-            {'expectation_type': 'expect_column_to_exist',
-             'kwargs': {'column': 'B'}}
-        ]
+    exp_c = [
+        {'expectation_type': 'expect_column_to_exist',
+         'kwargs': {'column': 'A'}},
+        {'expectation_type': 'expect_column_to_exist',
+         'kwargs': {'column': 'B'}}
+    ]
 
-        # The concatenated data frame will:
-        #
-        #   1. Be a ge.dataset.PandaDataSet
-        #   2. Only have the default expectations
+    # The concatenated data frame will:
+    #
+    #   1. Be a ge.dataset.PandaDataSet
+    #   2. Only have the default expectations
 
-        self.assertIsInstance(df, ge.dataset.PandasDataset)
-        self.assertEqual(df.find_expectations(), exp_c)
+    assert isinstance(df, ge.dataset.PandasDataset)
+    assert df.find_expectations()==exp_c
+    
+    
 
 def test_ge_pandas_joining():
     df1 = ge.dataset.PandasDataset({
