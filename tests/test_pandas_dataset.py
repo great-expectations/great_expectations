@@ -456,43 +456,7 @@ class TestPandasDataset(unittest.TestCase):
         self.assertIsInstance(df, ge.dataset.PandasDataset)
         self.assertEqual(df.find_expectations(), exp_c)
 
-    def test_ge_pandas_joining(self):
-        df1 = ge.dataset.PandasDataset({
-            'A': ['A0', 'A1', 'A2'],
-            'B': ['B0', 'B1', 'B2']},
-            index=['K0', 'K1', 'K2'])
 
-        df1.expect_column_values_to_match_regex('A', '^A[0-2]$')
-        df1.expect_column_values_to_match_regex('B', '^B[0-2]$')
-
-        df2 = ge.dataset.PandasDataset({
-            'C': ['C0', 'C2', 'C3'],
-            'D': ['C0', 'D2', 'D3']},
-            index=['K0', 'K2', 'K3'])
-
-        df2.expect_column_values_to_match_regex('C', '^C[0-2]$')
-        df2.expect_column_values_to_match_regex('D', '^D[0-2]$')
-
-        df = df1.join(df2)
-
-        exp_j = [
-            {'expectation_type': 'expect_column_to_exist',
-             'kwargs': {'column': 'A'}},
-            {'expectation_type': 'expect_column_to_exist',
-             'kwargs': {'column': 'B'}},
-            {'expectation_type': 'expect_column_to_exist',
-             'kwargs': {'column': 'C'}},
-            {'expectation_type': 'expect_column_to_exist',
-             'kwargs': {'column': 'D'}}
-        ]
-
-        # The joined data frame will:
-        #
-        #   1. Be a ge.dataset.PandaDataSet
-        #   2. Only have the default expectations
-
-        self.assertIsInstance(df, ge.dataset.PandasDataset)
-        self.assertEqual(df.find_expectations(), exp_j)
 
 
 
