@@ -247,52 +247,53 @@ class TestPandasDataset(unittest.TestCase):
     #             self.assertEqual(t['out']['unexpected_list'], out['result']['unexpected_list'])
 
 
-    def test_expectation_decorator_summary_mode(self):
+def test_expectation_decorator_summary_mode():
 
-        df = ge.dataset.PandasDataset({
-            'x' : [1,2,3,4,5,6,7,7,None,None],
-        })
-        df.set_default_expectation_argument("result_format", "COMPLETE")
+    df = ge.dataset.PandasDataset({
+        'x' : [1,2,3,4,5,6,7,7,None,None],
+    })
+    df.set_default_expectation_argument("result_format", "COMPLETE")
 
-        # print '&'*80
-        # print json.dumps(df.expect_column_values_to_be_between('x', min_value=1, max_value=5, result_format="SUMMARY"), indent=2)
+    # print '&'*80
+    # print json.dumps(df.expect_column_values_to_be_between('x', min_value=1, max_value=5, result_format="SUMMARY"), indent=2)
 
-        self.maxDiff = None
-        self.assertEqual(
-            df.expect_column_values_to_be_between('x', min_value=1, max_value=5, result_format="SUMMARY"),
-            {
-                "success" : False,
-                "result" : {
-                    "element_count" : 10,
-                    "missing_count" : 2,
-                    "missing_percent" : .2,
-                    "unexpected_count" : 3,
-                    "partial_unexpected_counts": [
-                        {"value": 7.0,
-                         "count": 2},
-                        {"value": 6.0,
-                         "count": 1}
-                    ],
-                    "unexpected_percent": 0.3,
-                    "unexpected_percent_nonmissing": 0.375,
-                    "partial_unexpected_list" : [6.0,7.0,7.0],
-                    "partial_unexpected_index_list": [5,6,7],
-                }
-            }
-        )
+    
+    exp_output={
+        "success" : False,
+        "result" : {
+            "element_count" : 10,
+            "missing_count" : 2,
+            "missing_percent" : .2,
+            "unexpected_count" : 3,
+            "partial_unexpected_counts": [
+                {"value": 7.0,
+                    "count": 2},
+                 {"value": 6.0,
+                    "count": 1}
+            ],
+            "unexpected_percent": 0.3,
+            "unexpected_percent_nonmissing": 0.375,
+            "partial_unexpected_list" : [6.0,7.0,7.0],
+            "partial_unexpected_index_list": [5,6,7],
+        }
+    }
+    assert df.expect_column_values_to_be_between('x', min_value=1, max_value=5, result_format="SUMMARY")\
+    ==exp_output
+        
+        
+    exp_output={
+        'success': True,
+        'result': {
+            'observed_value': 4.375,
+            'element_count': 10,
+            'missing_count': 2,
+            'missing_percent': .2
+        },
+    }
+    
+    assert df.expect_column_mean_to_be_between("x", 3, 7, result_format="SUMMARY")\
+    ==exp_output
 
-        self.assertEqual(
-            df.expect_column_mean_to_be_between("x", 3, 7, result_format="SUMMARY"),
-            {
-                'success': True,
-                'result': {
-                    'observed_value': 4.375,
-                    'element_count': 10,
-                    'missing_count': 2,
-                    'missing_percent': .2
-                },
-            }
-        )
 
 def test_positional_arguments():
 
