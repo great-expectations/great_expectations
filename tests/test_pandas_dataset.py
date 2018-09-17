@@ -1,15 +1,13 @@
 from __future__ import division
 
-import unittest
+import pytest
 import json
 import datetime
 import pandas as pd
-
+import unittest
 import great_expectations as ge
 
 from .test_utils import assertDeepAlmostEqual
-
-class TestPandasDataset(unittest.TestCase):
 
 def run_encapsulated_test(expectation_name, filename):
     with open(filename) as f:
