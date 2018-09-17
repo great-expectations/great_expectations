@@ -11,26 +11,25 @@ from .test_utils import assertDeepAlmostEqual
 
 class TestPandasDataset(unittest.TestCase):
 
-    def run_encapsulated_test(self, expectation_name, filename):
-        with open(filename) as f:
-            T = json.load(f)
+def run_encapsulated_test(expectation_name, filename):
+    with open(filename) as f:
+        T = json.load(f)
 
-        D = ge.dataset.PandasDataset(T["dataset"])
-        D.set_default_expectation_argument("output_format", "COMPLETE")
+    D = ge.dataset.PandasDataset(T["dataset"])
+    D.set_default_expectation_argument("output_format", "COMPLETE")
 
-        self.maxDiff = None
 
-        for t in T["tests"]:
+    for t in T["tests"]:
 
-            if "title" in t:
-                print(t["title"])
-            else:
-                print("WARNING: test set has no `title` field. In future versions of Great Expectations, this will be required.")
+        if "title" in t:
+            print(t["title"])
+        else:
+            print("WARNING: test set has no `title` field. In future versions of Great Expectations, this will be required.")
 
-            expectation = getattr(D, expectation_name)
-            out = expectation(**t['in'])
-            out = json.loads(json.dumps(out))
-            self.assertEqual(out, t['out'])
+        expectation = getattr(D, expectation_name)
+        out = expectation(**t['in'])
+        out = json.loads(json.dumps(out))
+        assert out==t['out']
 
     # def test_expect_column_values_to_be_between(self):
     #     """
