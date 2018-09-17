@@ -143,52 +143,54 @@ class TestPandasDataset(unittest.TestCase):
                 self.assertEqual(out['exception_info']['raised_exception'], True)
                 self.assertIn(t['error']['traceback_substring'], out['exception_info']['exception_traceback'])
 
-    def test_expect_column_values_to_be_dateutil_parseable(self):
 
-        D = ge.dataset.PandasDataset({
-            'c1':['03/06/09','23 April 1973','January 9, 2016'],
-            'c2':['9/8/2012','covfefe',25],
-            'c3':['Jared','June 1, 2013','July 18, 1976'],
-            'c4':['1', '2', '49000004632'],
-            'already_datetime' : [datetime.datetime(2015,1,1), datetime.datetime(2016,1,1), datetime.datetime(2017,1,1)],
-        })
-        D.set_default_expectation_argument("result_format", "COMPLETE")
+def test_expect_column_values_to_be_dateutil_parseable():
 
-        T = [
-                {
-                    'in':{'column': 'c1'},
-                    'out':{'success':True, 'unexpected_list':[], 'unexpected_index_list': []}},
-                {
-                    'in':{"column":'c2', "catch_exceptions":True},
-                    # 'out':{'success':False, 'unexpected_list':['covfefe', 25], 'unexpected_index_list': [1, 2]}},
-                    'error':{ 'traceback_substring' : 'TypeError: Values passed to expect_column_values_to_be_dateutil_parseable must be of type string' },
-                },
-                {
-                    'in':{"column":'c3'},
-                    'out':{'success':False, 'unexpected_list':['Jared'], 'unexpected_index_list': [0]}},
-                {
-                    'in':{'column': 'c3', 'mostly':.5},
-                    'out':{'success':True, 'unexpected_list':['Jared'], 'unexpected_index_list': [0]}
-                },
-                {
-                    'in':{'column': 'c4'},
-                    'out':{'success':False, 'unexpected_list':['49000004632'], 'unexpected_index_list': [2]}
-                },
-                {
-                    'in':{'column':'already_datetime', 'catch_exceptions':True},
-                    'error':{ 'traceback_substring' : 'TypeError: Values passed to expect_column_values_to_be_dateutil_parseable must be of type string' },
-                }
-        ]
+    D = ge.dataset.PandasDataset({
+        'c1':['03/06/09','23 April 1973','January 9, 2016'],
+        'c2':['9/8/2012','covfefe',25],
+        'c3':['Jared','June 1, 2013','July 18, 1976'],
+        'c4':['1', '2', '49000004632'],
+        'already_datetime' : [datetime.datetime(2015,1,1), datetime.datetime(2016,1,1), datetime.datetime(2017,1,1)],
+    })
+    D.set_default_expectation_argument("result_format", "COMPLETE")
 
-        for t in T:
-            out = D.expect_column_values_to_be_dateutil_parseable(**t['in'])
-            if 'out' in t:
-                self.assertEqual(t['out']['success'], out['success'])
-                self.assertEqual(t['out']['unexpected_index_list'], out['result']['unexpected_index_list'])
-                self.assertEqual(t['out']['unexpected_list'], out['result']['unexpected_list'])
-            elif 'error' in t:
-                self.assertEqual(out['exception_info']['raised_exception'], True)
-                self.assertIn(t['error']['traceback_substring'], out['exception_info']['exception_traceback'])
+    T = [
+            {
+                'in':{'column': 'c1'},
+                'out':{'success':True, 'unexpected_list':[], 'unexpected_index_list': []}},
+            {
+                'in':{"column":'c2', "catch_exceptions":True},
+                # 'out':{'success':False, 'unexpected_list':['covfefe', 25], 'unexpected_index_list': [1, 2]}},
+                'error':{ 'traceback_substring' : 'TypeError: Values passed to expect_column_values_to_be_dateutil_parseable must be of type string' },
+            },
+            {
+                'in':{"column":'c3'},
+                'out':{'success':False, 'unexpected_list':['Jared'], 'unexpected_index_list': [0]}},
+            {
+                'in':{'column': 'c3', 'mostly':.5},
+                'out':{'success':True, 'unexpected_list':['Jared'], 'unexpected_index_list': [0]}
+            },
+            {
+                'in':{'column': 'c4'},
+                'out':{'success':False, 'unexpected_list':['49000004632'], 'unexpected_index_list': [2]}
+            },
+            {
+                'in':{'column':'already_datetime', 'catch_exceptions':True},
+                'error':{ 'traceback_substring' : 'TypeError: Values passed to expect_column_values_to_be_dateutil_parseable must be of type string' },
+            }
+    ]
+
+    for t in T:
+        out = D.expect_column_values_to_be_dateutil_parseable(**t['in'])
+        if 'out' in t:
+            assert t['out']['success']==out['success']
+            assert t['out']['unexpected_index_list']==out['result']['unexpected_index_list']
+            assert t['out']['unexpected_list']==out['result']['unexpected_list']
+        elif 'error' in t:
+            assert out['exception_info']['raised_exception']==True
+            assert t['error']['traceback_substring'] in out['exception_info']['exception_traceback']
+
 
 
 def test_expect_column_values_to_be_json_parseable():
