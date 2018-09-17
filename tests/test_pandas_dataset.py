@@ -346,46 +346,48 @@ class TestPandasDataset(unittest.TestCase):
             if 'unexpected_list' in t['out']:
                 self.assertEqual(t['out']['unexpected_list'], out['result']['unexpected_list'])
 
-    def test_result_format_argument_in_decorators(self):
-        df = ge.dataset.PandasDataset({
-            'x':[1,3,5,7,9],
-            'y':[2,4,6,8,10],
-            'z':[None,'a','b','c','abc']
-        })
-        df.set_default_expectation_argument('result_format', 'COMPLETE')
 
-        #Test explicit Nones in result_format
-        self.assertEqual(
-            df.expect_column_mean_to_be_between('x',4,6, result_format=None),
-            {'success':True, 'result': {'observed_value': 5, 'element_count': 5,
+def test_result_format_argument_in_decorators():
+    df = ge.dataset.PandasDataset({
+        'x':[1,3,5,7,9],
+        'y':[2,4,6,8,10],
+        'z':[None,'a','b','c','abc']
+    })
+    df.set_default_expectation_argument('result_format', 'COMPLETE')
+
+    #Test explicit Nones in result_format
+    
+    exp_output={'success':True, 'result': {'observed_value': 5, 'element_count': 5,
+        'missing_count': 0,
+        'missing_percent': 0.0
+        }}
+    assert df.expect_column_mean_to_be_between('x',4,6, result_format=None)\
+    ==exp_output
+        
+    exp_output={'result': {'element_count': 5,
                 'missing_count': 0,
-                'missing_percent': 0.0
-                }}
-        )
+                'missing_percent': 0.0,
+                'partial_unexpected_counts': [{'count': 1, 'value': 8},
+                                                      {'count': 1, 'value': 10}],
+                'partial_unexpected_index_list': [3, 4],
+                'partial_unexpected_list': [8, 10],
+                'unexpected_count': 2,
+                'unexpected_index_list': [3, 4],
+                'unexpected_list': [8, 10],
+                'unexpected_percent': 0.4,
+                'unexpected_percent_nonmissing': 0.4},
+         'success': False}
 
-        self.assertEqual(
-            df.expect_column_values_to_be_between('y',1,6, result_format=None),
-            {'result': {'element_count': 5,
-                            'missing_count': 0,
-                            'missing_percent': 0.0,
-                            'partial_unexpected_counts': [{'count': 1, 'value': 8},
-                                                          {'count': 1, 'value': 10}],
-                            'partial_unexpected_index_list': [3, 4],
-                            'partial_unexpected_list': [8, 10],
-                            'unexpected_count': 2,
-                            'unexpected_index_list': [3, 4],
-                            'unexpected_list': [8, 10],
-                            'unexpected_percent': 0.4,
-                            'unexpected_percent_nonmissing': 0.4},
-             'success': False}
-        )
+    assert df.expect_column_values_to_be_between('y',1,6, result_format=None)\
+    ==exp_output
 
-        #Test unknown output format
-        with self.assertRaises(ValueError):
-            df.expect_column_values_to_be_between('y',1,6, result_format="QUACK")
+    #Test unknown output format
+    with pytest.raises(ValueError):
+        df.expect_column_values_to_be_between('y',1,6, result_format="QUACK")
 
-        with self.assertRaises(ValueError):
-            df.expect_column_mean_to_be_between('x',4,6, result_format="QUACK")
+    with pytest.raises(ValueError):
+        df.expect_column_mean_to_be_between('x',4,6, result_format="QUACK")
+        
 
 def test_from_pandas():
     pd_df = pd.DataFrame({
