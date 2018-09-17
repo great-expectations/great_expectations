@@ -128,6 +128,9 @@ def evaluate_json_test(dataset, expectation_type, test):
     """
     This method will evaluate the result of a test build using the Great Expectations json test format.
 
+    NOTE: Tests can be suppressed for certain data types if the test contains the Key 'suppress_tests_for' with a list
+        of Dataset types to suppress, such as ['SQLAlchemy', 'Pandas'].
+
     :param dataset: (Dataset) A great expectations Dataset
     :param expectation_type: (string) the name of the expectation to be run using the test input
     :param test: (dict) a dictionary containing information for the test to be run. The dictionary must include:
@@ -181,6 +184,13 @@ def evaluate_json_test(dataset, expectation_type, test):
         #Note: This method of checking does not look for false negatives: tests that are incorrectly on the notimplemented_list
         assert candidate_test_is_on_temporary_notimplemented_list(dataset.__class__.__name__, expectation_type), "Error: this test was supposed to return NotImplementedError"
         return
+
+    if 'suppress_test_for' in test:
+        # Optionally suppress the test for specified Dataset types
+        if 'SQLAlchemy' in test['suppress_test_for'] and isinstance(dataset, SqlAlchemyDataset):
+            return
+        if 'Pandas' in test['suppress_test_for'] and isinstance(dataset, PandasDataset):
+            return
 
     # Check results
     if test['exact_match_out'] is True:
