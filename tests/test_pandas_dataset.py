@@ -742,59 +742,58 @@ class TestPandasDataset(unittest.TestCase):
         self.assertEqual(samp1.find_expectations(), exp1)
 
 
-    def test_ge_pandas_subsetting(self):
-        df = ge.dataset.PandasDataset({
-            'A':[1,2,3,4],
-            'B':[5,6,7,8],
-            'C':['a','b','c','d'],
-            'D':['e','f','g','h']
-        })
+def test_ge_pandas_subsetting():
+    df = ge.dataset.PandasDataset({
+        'A':[1,2,3,4],
+        'B':[5,6,7,8],
+        'C':['a','b','c','d'],
+        'D':['e','f','g','h']
+    })
 
-        # Put some simple expectations on the data frame
-        df.expect_column_values_to_be_in_set("A", [1, 2, 3, 4])
-        df.expect_column_values_to_be_in_set("B", [5, 6, 7, 8])
-        df.expect_column_values_to_be_in_set("C", ['a', 'b', 'c', 'd'])
-        df.expect_column_values_to_be_in_set("D", ['e', 'f', 'g', 'h'])
+    # Put some simple expectations on the data frame
+    df.expect_column_values_to_be_in_set("A", [1, 2, 3, 4])
+    df.expect_column_values_to_be_in_set("B", [5, 6, 7, 8])
+    df.expect_column_values_to_be_in_set("C", ['a', 'b', 'c', 'd'])
+    df.expect_column_values_to_be_in_set("D", ['e', 'f', 'g', 'h'])
 
-        # The subsetted data frame should:
-        #
-        #   1. Be a ge.dataset.PandaDataSet
-        #   2. Inherit ALL the expectations of the parent data frame
+    # The subsetted data frame should:
+    #
+    #   1. Be a ge.dataset.PandaDataSet
+    #   2. Inherit ALL the expectations of the parent data frame
 
-        exp1 = df.find_expectations()
+    exp1 = df.find_expectations()
 
-        sub1 = df[['A', 'D']]
-        self.assertIsInstance(sub1, ge.dataset.PandasDataset)
-        self.assertEqual(sub1.find_expectations(), exp1)
+    sub1 = df[['A', 'D']]
+    assert isinstance(sub1, ge.dataset.PandasDataset)
+    assert sub1.find_expectations()==exp1
 
-        sub1 = df[['A']]
-        self.assertIsInstance(sub1, ge.dataset.PandasDataset)
-        self.assertEqual(sub1.find_expectations(), exp1)
+    sub1 = df[['A']]
+    assert isinstance(sub1, ge.dataset.PandasDataset)
+    assert sub1.find_expectations()==exp1
 
-        sub1 = df[:3]
-        self.assertIsInstance(sub1, ge.dataset.PandasDataset)
-        self.assertEqual(sub1.find_expectations(), exp1)
+    sub1 = df[:3]
+    assert isinstance(sub1, ge.dataset.PandasDataset)
+    assert sub1.find_expectations()==exp1
 
-        sub1 = df[1:2]
-        self.assertIsInstance(sub1, ge.dataset.PandasDataset)
-        self.assertEqual(sub1.find_expectations(), exp1)
+    sub1 = df[1:2]
+    assert isinstance(sub1, ge.dataset.PandasDataset)
+    assert sub1.find_expectations()==exp1
 
-        sub1 = df[:-1]
-        self.assertIsInstance(sub1, ge.dataset.PandasDataset)
-        self.assertEqual(sub1.find_expectations(), exp1)
+    sub1 = df[:-1]
+    assert isinstance(sub1, ge.dataset.PandasDataset)
+    assert sub1.find_expectations()==exp1
 
-        sub1 = df[-1:]
-        self.assertIsInstance(sub1, ge.dataset.PandasDataset)
-        self.assertEqual(sub1.find_expectations(), exp1)
+    sub1 = df[-1:]
+    assert isinstance(sub1, ge.dataset.PandasDataset)
+    assert sub1.find_expectations()==exp1
 
-        sub1 = df.iloc[:3, 1:4]
-        self.assertIsInstance(sub1, ge.dataset.PandasDataset)
-        self.assertEqual(sub1.find_expectations(), exp1)
+    sub1 = df.iloc[:3, 1:4]
+    assert isinstance(sub1, ge.dataset.PandasDataset)
+    assert sub1.find_expectations()==exp1
 
-        sub1 = df.loc[0:, 'A':'B']
-        self.assertIsInstance(sub1, ge.dataset.PandasDataset)
-        self.assertEqual(sub1.find_expectations(), exp1)
-
+    sub1 = df.loc[0:, 'A':'B']
+    assert isinstance(sub1, ge.dataset.PandasDataset)
+    assert sub1.find_expectations()==exp1
 def test_ge_pandas_automatic_failure_removal():
     df = ge.dataset.PandasDataset({
         'A': [1, 2, 3, 4],
