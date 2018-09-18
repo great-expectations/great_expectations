@@ -562,7 +562,7 @@ def test_ge_pandas_sampling_drop():
     # the sample.
     
     df.expect_column_values_to_be_in_set("D", ['e', 'f', 'g', 'x'])
-    df.discard_subset_failing_expectations = True
+    #df.discard_subset_failing_expectations = True
     samp1 = df.sample(n=2)
     exp1 = [
         {'expectation_type': 'expect_column_to_exist',
