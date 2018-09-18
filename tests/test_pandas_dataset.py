@@ -528,7 +528,7 @@ def test_ge_pandas_merging():
     assert isinstance(df, ge.dataset.PandasDataset)
     assert df.find_expectations()==exp_m
 
-def test_ge_pandas_sampling_drop():
+def test_ge_pandas_sampling():
     df = ge.dataset.PandasDataset({
         'A': [1, 2, 3, 4],
         'B': [5, 6, 7, 8],
@@ -560,9 +560,7 @@ def test_ge_pandas_sampling_drop():
     # Change expectation on column "D", sample, and check expectations.
     # The failing expectation on column "D" is automatically dropped in
     # the sample.
-    
     df.expect_column_values_to_be_in_set("D", ['e', 'f', 'g', 'x'])
-    df.discard_subset_failing_expectations = True
     samp1 = df.sample(n=2)
     exp1 = [
         {'expectation_type': 'expect_column_to_exist',
