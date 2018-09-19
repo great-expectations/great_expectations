@@ -13,7 +13,7 @@ import numpy as np
 import pandas as pd
 from dateutil.parser import parse
 from scipy import stats
-from six import integer_types, string_types
+from six import PY3, integer_types, string_types
 
 from .base import Dataset
 from .util import DocInherit, \
@@ -48,8 +48,12 @@ class MetaPandasDataset(Dataset):
         See :func:`column_map_expectation <great_expectations.Dataset.base.Dataset.column_map_expectation>` \
         for full documentation of this function.
         """
+        if PY3:
+            argspec = inspect.getfullargspec(func)[0][1:]
+        else:
+            argspec = inspect.getargspec(func)[0][1:]
 
-        @cls.expectation(inspect.getfullargspec(func)[0][1:])
+        @cls.expectation(argspec)
         @wraps(func)
         def inner_wrapper(self, column, mostly=None, result_format=None, *args, **kwargs):
 
@@ -113,8 +117,12 @@ class MetaPandasDataset(Dataset):
         The column_pair_map_expectation decorator handles boilerplate issues surrounding the common pattern of evaluating
         truthiness of some condition on a per row basis across a pair of columns.
         """
+        if PY3:
+            argspec = inspect.getfullargspec(func)[0][1:]
+        else:
+            argspec = inspect.getargspec(func)[0][1:]
 
-        @cls.expectation(inspect.getfullargspec(func)[0][1:])
+        @cls.expectation(argspec)
         @wraps(func)
         def inner_wrapper(self, column_A, column_B, mostly=None, ignore_row_if="both_values_are_missing", result_format=None, *args, **kwargs):
 
@@ -180,8 +188,12 @@ class MetaPandasDataset(Dataset):
         See :func:`column_aggregate_expectation <great_expectations.Dataset.base.Dataset.column_aggregate_expectation>` \
         for full documentation of this function.
         """
+        if PY3:
+            argspec = inspect.getfullargspec(func)[0][1:]
+        else:
+            argspec = inspect.getargspec(func)[0][1:]
 
-        @cls.expectation(inspect.getfullargspec(func)[0][1:])
+        @cls.expectation(argspec)
         @wraps(func)
         def inner_wrapper(self, column, result_format = None, *args, **kwargs):
 

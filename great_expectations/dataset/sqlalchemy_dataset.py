@@ -4,6 +4,7 @@ from great_expectations.dataset import Dataset
 
 from functools import wraps
 import inspect
+from six import PY3
 
 from .util import DocInherit, parse_result_format, create_multiple_expectations
 
@@ -26,8 +27,12 @@ class MetaSqlAlchemyDataset(Dataset):
         The decorator will then use that filter to obtain unexpected elements, relevant counts, and return the formatted
         object.
         """
+        if PY3:
+            argspec = inspect.getfullargspec(func)[0][1:]
+        else:
+            argspec = inspect.getargspec(func)[0][1:]
 
-        @cls.expectation(inspect.getfullargspec(func)[0][1:])
+        @cls.expectation(argspec)
         @wraps(func)
         def inner_wrapper(self, column, mostly=None, result_format=None, *args, **kwargs):
             if result_format is None:
@@ -118,8 +123,12 @@ class MetaSqlAlchemyDataset(Dataset):
     def column_aggregate_expectation(cls, func):
         """Constructs an expectation using column-aggregate semantics.
         """
+        if PY3:
+            argspec = inspect.getfullargspec(func)[0][1:]
+        else:
+            argspec = inspect.getargspec(func)[0][1:]
 
-        @cls.expectation(inspect.getfullargspec(func)[0][1:])
+        @cls.expectation(argspec)
         @wraps(func)
         def inner_wrapper(self, column, result_format = None, *args, **kwargs):
 
