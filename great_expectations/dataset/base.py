@@ -91,8 +91,8 @@ class Dataset(object):
                 else:
                     meta = None
 
-                # This intends to get the signature of the inner wrapper, if there is one.
-                if "result_format" in inspect.getargspec(func)[0][1:]:
+                # Get the signature of the inner wrapper:
+                if "result_format" in inspect.getfullargspec(func)[0][1:]:
                     all_args["result_format"] = result_format
                 else:
                     if "result_format" in all_args:
@@ -780,6 +780,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
            Raises:
                AttributeError - if 'catch_exceptions'=None and an expectation throws an AttributeError
         """
+
         results = []
 
         if expectations_config is None:
@@ -1070,7 +1071,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             Check out :ref:`custom_expectations` for more information.
         """
 
-        new_function = self.expectation(inspect.getargspec(function)[0][1:])(function)
+        new_function = self.expectation(inspect.getfullargspec(function)[0][1:])(function)
         return new_function(self, *args, **kwargs)
 
     def test_column_map_expectation_function(self, function, *args, **kwargs):

@@ -27,7 +27,7 @@ class MetaSqlAlchemyDataset(Dataset):
         object.
         """
 
-        @cls.expectation(inspect.getargspec(func)[0][1:])
+        @cls.expectation(inspect.getfullargspec(func)[0][1:])
         @wraps(func)
         def inner_wrapper(self, column, mostly=None, result_format=None, *args, **kwargs):
             if result_format is None:
@@ -118,7 +118,8 @@ class MetaSqlAlchemyDataset(Dataset):
     def column_aggregate_expectation(cls, func):
         """Constructs an expectation using column-aggregate semantics.
         """
-        @cls.expectation(inspect.getargspec(func)[0][1:])
+
+        @cls.expectation(inspect.getfullargspec(func)[0][1:])
         @wraps(func)
         def inner_wrapper(self, column, result_format = None, *args, **kwargs):
 
