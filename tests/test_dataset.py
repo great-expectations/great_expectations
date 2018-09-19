@@ -1174,11 +1174,16 @@ class TestDataset(unittest.TestCase):
         my_df._append_expectation({'expectation_type':'foobar', 'kwargs':{}})
         result = my_df.validate(catch_exceptions=True)
 
-        self.assertEqual(result["results"][1]["success"], False)
-        self.assertEqual(result["results"][1]["expectation_config"]["expectation_type"], "foobar")
-        self.assertEqual(result["results"][1]["expectation_config"]["kwargs"], {})
-        self.assertEqual(result["results"][1]["exception_info"]["raised_exception"], True)
-        assert "AttributeError: \'PandasDataset\' object has no attribute \'foobar\'" in result["results"][1]["exception_info"]["exception_traceback"]
+        # Find the foobar result
+        for idx, val_result in enumerate(result["results"]):
+            if val_result["expectation_config"]["expectation_type"] == "foobar":
+                break
+
+        self.assertEqual(result["results"][idx]["success"], False)
+        self.assertEqual(result["results"][idx]["expectation_config"]["expectation_type"], "foobar")
+        self.assertEqual(result["results"][idx]["expectation_config"]["kwargs"], {})
+        self.assertEqual(result["results"][idx]["exception_info"]["raised_exception"], True)
+        assert "AttributeError: \'PandasDataset\' object has no attribute \'foobar\'" in result["results"][idx]["exception_info"]["exception_traceback"]
 
         with self.assertRaises(AttributeError) as context:
             result = my_df.validate(catch_exceptions=False)
