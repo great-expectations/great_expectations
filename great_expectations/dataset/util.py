@@ -6,7 +6,6 @@ import decimal
 
 from six import string_types, integer_types
 
-import numpy as np
 from scipy import stats
 import pandas as pd
 import numpy as np
@@ -610,3 +609,4 @@ def create_multiple_expectations(df, columns, expectation_type, *args, **kwargs)
         results.append(expectation(column, *args,  **kwargs))
 
     return results
+

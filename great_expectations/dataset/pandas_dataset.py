@@ -276,13 +276,6 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
     def __init__(self, *args, **kwargs):
         super(PandasDataset, self).__init__(*args, **kwargs)
         self.discard_subset_failing_expectations = kwargs.get('discard_subset_failing_expectations', False)
-        self.add_default_expectations()
-
-    def add_default_expectations(self):
-        """
-        No expectations are added by default, so simply pass.
-        """
-        pass
 
     ### Expectation methods ###
     @DocInherit
