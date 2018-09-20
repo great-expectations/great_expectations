@@ -2,19 +2,21 @@
   "expectation_type": "expect_column_values_to_be_unique",
   "datasets" : [{
     "data" : {
-      "a" : ["2", "2", "2"],
-      "b" : [1, "2", 2],
-      "c" : [1, 1, 2],
-      "d" : [1, "1", 2],
-      "n" : [null, null, 2],
-      "null": [null, null, null]
+      "a" : ["2", "2", "2", null],
+      "b" : [1, "2", 2, null],
+      "c" : [1, 1, 2, null],
+      "d" : [1, "1", 2, null],
+      "n" : [null, null, 2, null],
+      "unique" : [1, 2, 3, null],
+      "null": [null, null, null, null],
+      "mult_dup": ["1", "1", "2", "2"]
     },
     "tests" : [
       {
         "title": "Basic positive test case",
         "exact_match_out": false,
         "in": {
-          "column": "b"
+          "column": "unique"
         },
         "out": {
           "success": true,
@@ -31,6 +33,19 @@
           "success": false,
           "unexpected_list": ["2", "2", "2"],
           "unexpected_index_list": [0, 1, 2]
+        }
+      },{
+        "title": "Multi-type column, contains 2 and '2'. Suppressed for SQAlchemy ",
+        "exact_match_out": false,
+        "suppress_test_for": ["SQLAlchemy"],
+        "in": {
+          "column": "c",
+          "mostly": 0.3
+        },
+        "out": {
+          "success": true,
+          "unexpected_list": [1, 1],
+          "unexpected_index_list": [0, 1]
         }
       },{
         "title": "Positive Case, using Mostly",
@@ -88,6 +103,17 @@
           "success": true,
           "unexpected_list": [],
           "unexpected_index_list": []
+        }
+      },{
+        "title": "Negative, Multiple duplicate values",
+        "exact_match_out": false,
+        "in": {
+          "column": "mult_dup"
+        },
+        "out": {
+          "success": false,
+          "unexpected_list": ["1", "1", "2", "2"],
+          "unexpected_index_list": [0, 1, 2, 3]
         }
       }
     ]
