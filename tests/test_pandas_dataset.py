@@ -802,6 +802,21 @@ def test_subclass_pandas_subset_retains_subclass():
     assert type(df2) == type(df)
 
 
+    def test_validate_map_expectation_on_categorical_column(self):
+        """Map expectations should work on categorical columns"""
+
+        D = ge.dataset.PandasDataset({
+            'cat_column_1':['cat_one','cat_two','cat_one','cat_two', 'cat_one','cat_two', 'cat_one','cat_two'],
+        })
+
+        D['cat_column_1'] = D['cat_column_1'].astype('category')
+
+        D.set_default_expectation_argument("result_format", "COMPLETE")
+
+        out = D.expect_column_value_lengths_to_equal('cat_column_1', 7)
+
+        self.assertEqual(out['success'], True)
+
 def test_pandas_deepcopy():
     import copy
 
