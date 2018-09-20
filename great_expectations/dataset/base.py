@@ -15,13 +15,16 @@ from collections import (
 
 from ..version import __version__
 from .util import DotDict, recursively_convert_to_json_serializable, parse_result_format
+from .autoinspect import autoinspect_columns_exist
 
 
 class Dataset(object):
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, autoinspect_func=autoinspect_columns_exist, **kwargs):
         super(Dataset, self).__init__(*args, **kwargs)
         self._initialize_expectations()
+        if autoinspect_func is not None:
+            autoinspect_func(self)
 
     @classmethod
     def expectation(cls, method_arg_names):
