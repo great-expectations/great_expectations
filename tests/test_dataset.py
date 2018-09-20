@@ -7,6 +7,7 @@ import warnings
 import pandas as pd
 import numpy as np
 import great_expectations as ge
+from great_expectations.dataset.autoinspect import autoinspect_columns_exist
 
 import unittest
 
@@ -31,19 +32,21 @@ class TestDataset(unittest.TestCase):
                 "meta": {
                     "great_expectations.__version__": ge.__version__
                 },
-                "expectations" : [{
-                    "expectation_type" : "expect_column_to_exist",
-                    "kwargs" : { "column" : "x", 'result_format': 'BASIC'},
-                    'success_on_last_run': True
-                },{
-                    "expectation_type" : "expect_column_to_exist",
-                    "kwargs" : { "column" : "y", 'result_format': 'BASIC'},
-                    'success_on_last_run': True
-                },{
-                    "expectation_type" : "expect_column_to_exist",
-                    "kwargs" : { "column" : "z", 'result_format': 'BASIC'},
-                    'success_on_last_run': True
-                }]
+                "expectations" : []
+                # No longer expect autoinspection 20180920
+                # {
+                #     "expectation_type" : "expect_column_to_exist",
+                #     "kwargs" : { "column" : "x", 'result_format': 'BASIC'},
+                #     'success_on_last_run': True
+                # },{
+                #     "expectation_type" : "expect_column_to_exist",
+                #     "kwargs" : { "column" : "y", 'result_format': 'BASIC'},
+                #     'success_on_last_run': True
+                # },{
+                #     "expectation_type" : "expect_column_to_exist",
+                #     "kwargs" : { "column" : "z", 'result_format': 'BASIC'},
+                #     'success_on_last_run': True
+                # }]
             }
         )
 
@@ -55,16 +58,18 @@ class TestDataset(unittest.TestCase):
                 "meta": {
                     "great_expectations.__version__": ge.__version__
                 },
-                "expectations" : [{
-                    "expectation_type" : "expect_column_to_exist",
-                    "kwargs" : { "column" : "x"}
-                },{
-                    "expectation_type" : "expect_column_to_exist",
-                    "kwargs" : { "column" : "y"}
-                },{
-                    "expectation_type" : "expect_column_to_exist",
-                    "kwargs" : { "column" : "z"}
-                }]
+                "expectations" : []
+                # No longer expect autoinspection 20180920
+                # {
+                #     "expectation_type" : "expect_column_to_exist",
+                #     "kwargs" : { "column" : "x"}
+                # },{
+                #     "expectation_type" : "expect_column_to_exist",
+                #     "kwargs" : { "column" : "y"}
+                # },{
+                #     "expectation_type" : "expect_column_to_exist",
+                #     "kwargs" : { "column" : "z"}
+                # }]
             }
         )
 
@@ -141,24 +146,25 @@ class TestDataset(unittest.TestCase):
 
         output_config = {
           "expectations": [
-            {
-              "expectation_type": "expect_column_to_exist",
-              "kwargs": {
-                "column": "x"
-              }
-            },
-            {
-              "expectation_type": "expect_column_to_exist",
-              "kwargs": {
-                "column": "y"
-              }
-            },
-            {
-              "expectation_type": "expect_column_to_exist",
-              "kwargs": {
-                "column": "z"
-              }
-            },
+            # No longer expect autoinspection 20180920
+            # {
+            #   "expectation_type": "expect_column_to_exist",
+            #   "kwargs": {
+            #     "column": "x"
+            #   }
+            # },
+            # {
+            #   "expectation_type": "expect_column_to_exist",
+            #   "kwargs": {
+            #     "column": "y"
+            #   }
+            # },
+            # {
+            #   "expectation_type": "expect_column_to_exist",
+            #   "kwargs": {
+            #     "column": "z"
+            #   }
+            # },
             {
               "expectation_type": "expect_column_values_to_be_in_set",
               "kwargs": {
@@ -201,24 +207,25 @@ class TestDataset(unittest.TestCase):
 
         output_config = {
           "expectations": [
-            {
-              "expectation_type": "expect_column_to_exist",
-              "kwargs": {
-                "column": "x"
-              }
-            },
-            {
-              "expectation_type": "expect_column_to_exist",
-              "kwargs": {
-                "column": "y"
-              }
-            },
-            {
-              "expectation_type": "expect_column_to_exist",
-              "kwargs": {
-                "column": "z"
-              }
-            },
+            # No longer expect autoinspection 20180920
+            # {
+            #   "expectation_type": "expect_column_to_exist",
+            #   "kwargs": {
+            #     "column": "x"
+            #   }
+            # },
+            # {
+            #   "expectation_type": "expect_column_to_exist",
+            #   "kwargs": {
+            #     "column": "y"
+            #   }
+            # },
+            # {
+            #   "expectation_type": "expect_column_to_exist",
+            #   "kwargs": {
+            #     "column": "z"
+            #   }
+            # },
             {
               "expectation_type": "expect_column_values_to_be_in_set",
               "kwargs": {
@@ -277,27 +284,28 @@ class TestDataset(unittest.TestCase):
 
         output_config = {
           "expectations": [
-            {
-              "expectation_type": "expect_column_to_exist",
-              "kwargs": {
-                "column": "x",
-                "result_format": "BASIC"
-              }
-            },
-            {
-              "expectation_type": "expect_column_to_exist",
-              "kwargs": {
-                "column": "y",
-                "result_format": "BASIC"
-              }
-            },
-            {
-              "expectation_type": "expect_column_to_exist",
-              "kwargs": {
-                "column": "z",
-                "result_format": "BASIC"
-              }
-            },
+            # No longer expect autoinspection 20180920
+            # {
+            #   "expectation_type": "expect_column_to_exist",
+            #   "kwargs": {
+            #     "column": "x",
+            #     "result_format": "BASIC"
+            #   }
+            # },
+            # {
+            #   "expectation_type": "expect_column_to_exist",
+            #   "kwargs": {
+            #     "column": "y",
+            #     "result_format": "BASIC"
+            #   }
+            # },
+            # {
+            #   "expectation_type": "expect_column_to_exist",
+            #   "kwargs": {
+            #     "column": "z",
+            #     "result_format": "BASIC"
+            #   }
+            # },
             {
               "expectation_type": "expect_column_values_to_be_in_set",
               "kwargs": {
@@ -734,7 +742,7 @@ class TestDataset(unittest.TestCase):
             'x' : [1,2,3,4,5,6,7,8,9,10],
             'y' : [1,2,None,4,None,6,7,8,9,None],
             'z' : ['cello', 'hello', 'jello', 'bellow', 'fellow', 'mellow', 'wellow', 'xello', 'yellow', 'zello'],
-        })
+        }, autoinspect_func=autoinspect_columns_exist)
         my_df.expect_column_values_to_be_of_type('x', 'int')
         my_df.expect_column_values_to_be_of_type('y', 'int')
         my_df.expect_column_values_to_be_of_type('z', 'int')
@@ -821,7 +829,7 @@ class TestDataset(unittest.TestCase):
             'x' : [1,2,3,4,5,6,7,8,9,10],
             'y' : [1,2,None,4,None,6,7,8,9,None],
             'z' : ['cello', 'hello', 'jello', 'bellow', 'fellow', 'mellow', 'wellow', 'xello', 'yellow', 'zello'],
-        })
+        }, autoinspect_func=autoinspect_columns_exist)
         my_df.expect_column_values_to_be_of_type('x', 'int')
         my_df.expect_column_values_to_be_of_type('y', 'int')
         my_df.expect_column_values_to_be_of_type('z', 'int', include_config=True, catch_exceptions=True)
@@ -974,7 +982,7 @@ class TestDataset(unittest.TestCase):
             'B':[5,6,7,8],
             'C':['a','b','c','d'],
             'D':['e','f','g','h']
-        })
+        }, autoinspect_func=autoinspect_columns_exist)
 
         # Put some simple expectations on the data frame
         df.expect_column_values_to_be_in_set("A", [1, 2, 3, 4])
