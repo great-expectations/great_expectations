@@ -746,6 +746,18 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                     }
                 }
 
+    @MetaSqlAlchemyDataset.column_map_expectation
+    def expect_column_values_to_be_unique(self, column, mostly=None,
+                                          result_format=None, include_config=False, catch_exceptions=None, meta=None):
+        # Duplicates are found by filtering a group by query
+        dup_query = sa.select([sa.column(column)]).\
+            select_from(sa.table(self.table_name)).\
+            group_by(sa.column(column)).\
+            having(sa.func.count(sa.column(column)) > 1)
+
+        return sa.column(column).notin_(dup_query)
+
+
     @DocInherit
     @MetaSqlAlchemyDataset.column_aggregate_expectation
     def expect_column_unique_value_count_to_be_between(self, column, min_value=None, max_value=None,
