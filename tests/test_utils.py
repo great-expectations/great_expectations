@@ -80,7 +80,7 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
             #"expect_table_row_count_to_be_between",
             #"expect_table_row_count_to_equal",
             #"expect_table_columns_to_match_ordered_list",
-            "expect_column_values_to_be_unique",
+            #"expect_column_values_to_be_unique",
             # "expect_column_values_to_not_be_null",
             # "expect_column_values_to_be_null",
             "expect_column_values_to_be_of_type",
