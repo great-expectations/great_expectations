@@ -194,7 +194,7 @@ class TestValidation(unittest.TestCase):
             #print json.dumps(expected_results, indent=2)
 
         self.maxDiff = None
-        assertDeepAlmostEqual(self,
+        assertDeepAlmostEqual(
                               results,
                               expected_results
                               )
@@ -210,7 +210,6 @@ class TestValidation(unittest.TestCase):
         validation_results = my_df.validate(only_return_failures=True)
         #print json.dumps(validation_results)
         assertDeepAlmostEqual(
-            self,
             validation_results,
             {"results": [
                 {"expectation_config": {
@@ -379,7 +378,7 @@ class TestValidationStatisticsCalculation(unittest.TestCase):
         ]
         actual = _calc_validation_statistics(expectation_results)
         expected = ValidationStatistics(1, 0, 1, 0., False)
-        assertDeepAlmostEqual(self, actual, expected)
+        assertDeepAlmostEqual(actual, expected)
 
         expectation_results = [
             {"success": False},
@@ -388,7 +387,7 @@ class TestValidationStatisticsCalculation(unittest.TestCase):
         ]
         actual = _calc_validation_statistics(expectation_results)
         expected = ValidationStatistics(3, 0, 3, 0., False)
-        assertDeepAlmostEqual(self, actual, expected)
+        assertDeepAlmostEqual(actual, expected)
 
     def test_all_succesful_expectations(self):
         expectation_results = [
@@ -396,7 +395,7 @@ class TestValidationStatisticsCalculation(unittest.TestCase):
         ]
         actual = _calc_validation_statistics(expectation_results)
         expected = ValidationStatistics(1, 1, 0, 100.0, True)
-        assertDeepAlmostEqual(self, actual, expected)
+        assertDeepAlmostEqual(actual, expected)
 
         expectation_results = [
             {"success": True},
@@ -405,7 +404,7 @@ class TestValidationStatisticsCalculation(unittest.TestCase):
         ]
         actual = _calc_validation_statistics(expectation_results)
         expected = ValidationStatistics(3, 3, 0, 100.0, True)
-        assertDeepAlmostEqual(self, actual, expected)
+        assertDeepAlmostEqual(actual, expected)
 
     def test_mixed_expectations(self):
         expectation_results = [
@@ -414,7 +413,7 @@ class TestValidationStatisticsCalculation(unittest.TestCase):
         ]
         actual = _calc_validation_statistics(expectation_results)
         expected = ValidationStatistics(2, 1, 1, 50.0, False)
-        assertDeepAlmostEqual(self, actual, expected)
+        assertDeepAlmostEqual(actual, expected)
 
 
 class TestRepeatedAppendExpectation(unittest.TestCase):
