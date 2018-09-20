@@ -79,7 +79,7 @@ class MetaPandasDataset(Dataset):
             nonnull_count = int((boolean_mapped_null_values==False).sum())
 
             boolean_mapped_success_values = func(self, nonnull_values, *args, **kwargs)
-            success_count = boolean_mapped_success_values.sum()
+            success_count = np.count_nonzero(boolean_mapped_success_values)
 
             unexpected_list = list(nonnull_values[boolean_mapped_success_values==False])
             unexpected_index_list = list(nonnull_values[boolean_mapped_success_values==False].index)
