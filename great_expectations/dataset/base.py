@@ -2866,7 +2866,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
     ):
         """Expect the column max to be between an min and max value
 
-        expect_column_sum_to_be_between is a :func:`column_aggregate_expectation <great_expectations.dataset.base.Dataset.column_aggregate_expectation>`.
+        expect_column_max_to_be_between is a :func:`column_aggregate_expectation <great_expectations.dataset.base.Dataset.column_aggregate_expectation>`.
 
         Args:
             column (str): \
