@@ -16,11 +16,27 @@ def test_no_autoinspection():
     assert len(config["expectations"]) == 0
 
 
-def test_default_column_autoinspection():
+def test_default_no_autoinspection():
     df = ge.dataset.PandasDataset({"a": [1, 2, 3]})
     config = df.get_expectations_config()
 
-    assert len(config["expectations"]) == 1
+    assert len(config["expectations"]) == 0
+
+
+@pytest.mark.parametrize("dataset_type", ["PandasDataset", "SqlAlchemyDataset"])
+def test_autoinspect_existing_dataset(dataset_type):
+    # Get a basic dataset with no expectations
+    df = get_dataset(dataset_type, {"a": [1, 2, 3]}, autoinspect_func=None)
+    config = df.get_expectations_config()
+    assert len(config["expectations"]) == 0
+
+    # Run autoinspect
+    df.autoinspect(autoinspect.autoinspect_columns_exist)
+    config = df.get_expectations_config()
+
+    # Ensure that autoinspect worked
+    assert config["expectations"] == \
+        [{'expectation_type': 'expect_column_to_exist', 'kwargs': {'column': 'a'}}]
 
 
 @pytest.mark.parametrize("dataset_type", ["PandasDataset", "SqlAlchemyDataset"])
