@@ -2,46 +2,42 @@ from __future__ import division
 
 import pandas as pd
 import numpy as np
-
+import pytest
 from sqlalchemy import create_engine
 
 from great_expectations.dataset import PandasDataset, SqlAlchemyDataset
 
 ## Taken from the following stackoverflow: https://stackoverflow.com/questions/23549419/assert-that-two-dictionaries-are-almost-equal
-def assertDeepAlmostEqual(test_case, expected, actual, *args, **kwargs):
+def assertDeepAlmostEqual(expected, actual, *args, **kwargs):
     """
     Assert that two complex structures have almost equal contents.
 
     Compares lists, dicts and tuples recursively. Checks numeric values
-    using test_case's :py:meth:`unittest.TestCase.assertAlmostEqual` and
-    checks all other values with :py:meth:`unittest.TestCase.assertEqual`.
+    using pyteset.approx and checks all other values with an assertion equality statement
     Accepts additional positional and keyword arguments and pass those
-    intact to assertAlmostEqual() (that's how you specify comparison
+    intact to pytest.approx() (that's how you specify comparison
     precision).
 
-    :param test_case: TestCase object on which we can call all of the basic
-    'assert' methods.
-    :type test_case: :py:class:`unittest.TestCase` object
     """
     is_root = not '__trace' in kwargs
     trace = kwargs.pop('__trace', 'ROOT')
     try:
        # if isinstance(expected, (int, float, long, complex)):
         if isinstance(expected, (int, float, complex)):
-            test_case.assertAlmostEqual(expected, actual, *args, **kwargs)
+            assert expected==pytest.approx(actual, *args, **kwargs)
         elif isinstance(expected, (list, tuple, np.ndarray)):
-            test_case.assertEqual(len(expected), len(actual))
+            assert len(expected)==len(actual)
             for index in range(len(expected)):
                 v1, v2 = expected[index], actual[index]
-                assertDeepAlmostEqual(test_case, v1, v2,
+                assertDeepAlmostEqual(v1, v2,
                                       __trace=repr(index), *args, **kwargs)
         elif isinstance(expected, dict):
-            test_case.assertEqual(set(expected), set(actual))
+            assert set(expected)==set(actual)
             for key in expected:
-                assertDeepAlmostEqual(test_case, expected[key], actual[key],
+                assertDeepAlmostEqual(expected[key], actual[key],
                                       __trace=repr(key), *args, **kwargs)
         else:
-            test_case.assertEqual(expected, actual)
+            assert expected==actual
     except AssertionError as exc:
         exc.__dict__.setdefault('traces', []).append(trace)
         if is_root:
@@ -84,7 +80,7 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
             #"expect_table_row_count_to_be_between",
             #"expect_table_row_count_to_equal",
             #"expect_table_columns_to_match_ordered_list",
-            "expect_column_values_to_be_unique",
+            #"expect_column_values_to_be_unique",
             # "expect_column_values_to_not_be_null",
             # "expect_column_values_to_be_null",
             "expect_column_values_to_be_of_type",
