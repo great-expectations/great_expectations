@@ -27,10 +27,10 @@ class Dataset(object):
             establish baseline expectations.
 
         Note: Dataset is designed to support multiple inheritance (e.g. PandasDataset inherits from both a
-        Pandas DataFrame and Dataset, so it accepts generic *args and **kwargs arguments so that they can also be
+        Pandas DataFrame and Dataset), so it accepts generic *args and **kwargs arguments so that they can also be
         passed to other parent classes. In python 2, there isn't a clean way to include all of *args, **kwargs, and a
-        named kwarg...so we use the inelegant solution of popping from kwargs, leaving the support for kwargs not
-        obvious from the signature.
+        named kwarg...so we use the inelegant solution of popping from kwargs, leaving the support for the autoinspect_func
+        parameter not obvious from the signature.
 
         """
         autoinspect_func = kwargs.pop("autoinspect_func", None)
