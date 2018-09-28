@@ -8,7 +8,7 @@ import pandas as pd
 import re
 
 import great_expectations as ge
-from great_expectations.dataset.autoinspect import autoinspect_columns_exist
+from great_expectations.dataset.autoinspect import columns_exist
 from great_expectations.dataset import PandasDataset, MetaPandasDataset
 from great_expectations.dataset.base import (
     _calc_validation_statistics,
@@ -423,7 +423,7 @@ class TestRepeatedAppendExpectation(unittest.TestCase):
         with open("./tests/test_sets/titanic_expectations.json") as f:
             my_expectations_config = json.load(f)
 
-        my_df = ge.read_csv("./tests/test_sets/Titanic.csv", autoinspect_func=autoinspect_columns_exist)
+        my_df = ge.read_csv("./tests/test_sets/Titanic.csv", autoinspect_func=columns_exist)
 
         self.assertEqual(
             len(my_df.get_expectations_config()['expectations']),
