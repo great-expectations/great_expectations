@@ -1256,11 +1256,16 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                 qk = test_df['expected']
 
             kl_divergence = stats.entropy(pk, qk)
+            
+            if(np.isinf(kl_divergence) or np.isnan(kl_divergence)):
+                observed_value=None
+            else:
+                observed_value=kl_divergence
 
             return_obj = {
                 "success": kl_divergence <= threshold,
                 "result": {
-                    "observed_value": kl_divergence,
+                    "observed_value": observed_value,
                     "details": {
                         "observed_partition": {
                             "values": test_df.index.tolist(),
@@ -1320,11 +1325,18 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                 # No change to observed_weights in this case
                 expected_weights = np.concatenate(([tail_weight_holdout / 2], expected_weights, [tail_weight_holdout / 2]))
 
-            kl_divergence = stats.entropy(observed_weights, expected_weights)
+                
+            kl_divergence = stats.entropy(observed_weights, expected_weights) 
+            
+            if(np.isinf(kl_divergence) or np.isnan(kl_divergence)):
+                observed_value=None
+            else:
+                observed_value=kl_divergence
+            
             return_obj = {
                     "success": kl_divergence <= threshold,
                     "result": {
-                        "observed_value": kl_divergence,
+                        "observed_value": observed_value,
                         "details": {
                             "observed_partition": {
                                 # return expected_bins, since we used those bins to compute the observed_weights
