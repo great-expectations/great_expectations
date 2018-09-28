@@ -31,7 +31,7 @@ def test_autoinspect_existing_dataset(dataset_type):
     assert len(config["expectations"]) == 0
 
     # Run autoinspect
-    df.autoinspect(autoinspect.autoinspect_columns_exist)
+    df.autoinspect(autoinspect.columns_exist)
     config = df.get_expectations_config()
 
     # Ensure that autoinspect worked
@@ -41,7 +41,7 @@ def test_autoinspect_existing_dataset(dataset_type):
 
 @pytest.mark.parametrize("dataset_type", ["PandasDataset", "SqlAlchemyDataset"])
 def test_autoinspect_columns_exist(dataset_type):
-    df = get_dataset(dataset_type, {"a": [1, 2, 3]}, autoinspect_func=autoinspect.autoinspect_columns_exist)
+    df = get_dataset(dataset_type, {"a": [1, 2, 3]}, autoinspect_func=autoinspect.columns_exist)
     config = df.get_expectations_config()
 
     assert len(config["expectations"]) == 1
@@ -51,12 +51,12 @@ def test_autoinspect_columns_exist(dataset_type):
 
 def test_autoinspect_warning():
     with pytest.warns(UserWarning, match="No columns list found in dataset; no autoinspection performed."):
-        df = ge.dataset.Dataset(autoinspect_func=autoinspect.autoinspect_columns_exist)
+        df = ge.dataset.Dataset(autoinspect_func=autoinspect.columns_exist)
 
 
 def test_autoinspect_error():
     df = ge.dataset.Dataset()
     df.columns = [{"title": "nonstandard_columns"}]
     with pytest.raises(autoinspect.AutoInspectError) as autoinspect_error:
-        df.autoinspect(autoinspect.autoinspect_columns_exist)
+        df.autoinspect(autoinspect.columns_exist)
         assert autoinspect_error.message == "Unable to determine column names for this dataset."

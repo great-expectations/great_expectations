@@ -7,7 +7,7 @@ import warnings
 import pandas as pd
 import numpy as np
 import great_expectations as ge
-from great_expectations.dataset.autoinspect import autoinspect_columns_exist
+import great_expectations.dataset.autoinspect as autoinspect
 
 import unittest
 
@@ -742,7 +742,7 @@ class TestDataset(unittest.TestCase):
             'x' : [1,2,3,4,5,6,7,8,9,10],
             'y' : [1,2,None,4,None,6,7,8,9,None],
             'z' : ['cello', 'hello', 'jello', 'bellow', 'fellow', 'mellow', 'wellow', 'xello', 'yellow', 'zello'],
-        }, autoinspect_func=autoinspect_columns_exist)
+        }, autoinspect_func=autoinspect.columns_exist)
         my_df.expect_column_values_to_be_of_type('x', 'int')
         my_df.expect_column_values_to_be_of_type('y', 'int')
         my_df.expect_column_values_to_be_of_type('z', 'int')
@@ -829,7 +829,7 @@ class TestDataset(unittest.TestCase):
             'x' : [1,2,3,4,5,6,7,8,9,10],
             'y' : [1,2,None,4,None,6,7,8,9,None],
             'z' : ['cello', 'hello', 'jello', 'bellow', 'fellow', 'mellow', 'wellow', 'xello', 'yellow', 'zello'],
-        }, autoinspect_func=autoinspect_columns_exist)
+        }, autoinspect_func=autoinspect.columns_exist)
         my_df.expect_column_values_to_be_of_type('x', 'int')
         my_df.expect_column_values_to_be_of_type('y', 'int')
         my_df.expect_column_values_to_be_of_type('z', 'int', include_config=True, catch_exceptions=True)
@@ -982,7 +982,7 @@ class TestDataset(unittest.TestCase):
             'B':[5,6,7,8],
             'C':['a','b','c','d'],
             'D':['e','f','g','h']
-        }, autoinspect_func=autoinspect_columns_exist)
+        }, autoinspect_func=autoinspect.columns_exist)
 
         # Put some simple expectations on the data frame
         df.expect_column_values_to_be_in_set("A", [1, 2, 3, 4])

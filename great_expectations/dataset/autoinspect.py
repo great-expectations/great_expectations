@@ -20,7 +20,7 @@ class AutoInspectError(Exception):
         self.message = message
 
 
-def autoinspect_columns_exist(inspect_dataset):
+def columns_exist(inspect_dataset):
     """
     This function will take a dataset and add expectations that each column present exists.
     :param inspect_dataset:
