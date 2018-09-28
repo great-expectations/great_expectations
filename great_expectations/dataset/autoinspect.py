@@ -23,7 +23,9 @@ class AutoInspectError(Exception):
 def columns_exist(inspect_dataset):
     """
     This function will take a dataset and add expectations that each column present exists.
-    :param inspect_dataset:
+
+    Args:
+        inspect_dataset (great_expectations.dataset): The dataset to inspect and to which to add expectations.
     """
 
     # Attempt to get column names. For pandas, columns is just a list of strings
