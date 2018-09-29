@@ -548,7 +548,7 @@ class TestDistributionalExpectations(unittest.TestCase):
         discrete_out_json=json.dumps(discrete_out)
         self.assertEqual(discrete_out['result']['observed_value'],None)
         self.assertEqual(discrete_out_json,
-                         '{"result": {"observed_value": Infinity, "element_count": 10, "missing_count": 0, "missing_percent": 0.0}, "success": false}')
+                         '{"result": {"observed_value": null, "element_count": 10, "missing_count": 0, "missing_percent": 0.0}, "success": false}')
         
         
         #Test with continuous distribution
