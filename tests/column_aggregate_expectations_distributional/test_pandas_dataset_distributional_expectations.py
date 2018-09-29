@@ -139,7 +139,7 @@ class TestDistributionalExpectations(unittest.TestCase):
                                                              {'values': ['a', 'b'], 'weights': [0.6, 0.4]},
                                                              threshold=0.1)
         self.assertEqual(out['success'], False)
-        self.assertTrue(np.isclose(out['result']['observed_value'], [np.inf]))
+        self.assertEqual(out['result']['observed_value'], None)
 
     def test_expect_column_bootstrapped_ks_test_p_value_to_be_greater_than(self):
         T = [
