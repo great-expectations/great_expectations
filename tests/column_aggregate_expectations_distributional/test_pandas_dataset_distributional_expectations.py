@@ -534,6 +534,52 @@ class TestDistributionalExpectations(unittest.TestCase):
             self.D.expect_column_kl_divergence_to_be_less_than('norm_0_1', self.test_partitions['norm_0_1_auto'], threshold=0.1, internal_weight_holdout=2)
         with self.assertRaises(ValueError):
             self.D.expect_column_kl_divergence_to_be_less_than('categorical_fixed', self.test_partitions['categorical_fixed'], threshold=0.1, internal_weight_holdout=0.01)
+            
+            
+    def test_expect_column_kl_divergence_to_be_less_than_infinite_observed_value(self):
+    
+        #Test with discrete distribution
+        discrete_df = ge.dataset.PandasDataset({"x1":['a','a','a','a','b','b','b','b','c','c']})
+        discrete_partition_object={"weights":[0.5,0.5],
+                                   "values":["a","b"]}
+        discrete_out=discrete_df.expect_column_kl_divergence_to_be_less_than("x1",
+                                                                discrete_partition_object,
+                                                                0.05)
+        discrete_out_json=json.dumps(discrete_out)
+        self.assertEqual(discrete_out['result']['observed_value'],None)
+        self.assertEqual(discrete_out_json,
+                         '{"result": {"observed_value": Infinity, "element_count": 10, "missing_count": 0, "missing_percent": 0.0}, "success": false}')
+        
+        
+        #Test with continuous distribution
+        continuous_df=ge.dataset.PandasDataset({"x2":[-1.5,-1.5,-1.35,-1.2,-1.19,-1.12,-1.04,-1,0,0,0,0.25,
+                                                     0.34,1,1.1,1.13,1.22,1.34,1.4,1.46,1.5,1.5,1.5]})
+        
+        continuous_partition_object1={"weights":[0.1,0.4,0,0,0.4,0.1],
+            "bins":[-2,-1.5,-1,0,1,1.5,2]} #Partition sets weight to zero for to a non-empty bin 
+        
+        continuous_out1=continuous_df.expect_column_kl_divergence_to_be_less_than("x2",
+                                                                continuous_partition_object1,
+                                                                0.05)
+        continuous_out_json1=json.dumps(continuous_out1)
+        
+        self.assertEqual(continuous_out1['result']['observed_value'],None)
+        self.assertEqual(continuous_out_json1,
+                         '{"result": {"observed_value": null, "element_count": 23, "missing_count": 0, "missing_percent": 0.0}, "success": false}')
+        
+        
+        
+        continuous_partition_object2={"weights":[0.25,0.25,0.25,0.25],
+        "bins":[-1,0,1,1.5,2]} #Partition bins do not cover all of data set 
+        
+        continuous_out2=continuous_df.expect_column_kl_divergence_to_be_less_than("x2",
+                                                                continuous_partition_object2,
+                                                                0.05)
+        continuous_out_json2=json.dumps(continuous_out2)
+        
+        self.assertEqual(continuous_out2['result']['observed_value'],None)
+        self.assertEqual(continuous_out_json2,
+                         '{"result": {"observed_value": null, "element_count": 23, "missing_count": 0, "missing_percent": 0.0}, "success": false}')
 
 
     def test_expect_column_bootstrapped_ks_test_p_value_to_be_greater_than_bad_parameters(self):
