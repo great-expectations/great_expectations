@@ -545,10 +545,10 @@ class TestDistributionalExpectations(unittest.TestCase):
         discrete_out=discrete_df.expect_column_kl_divergence_to_be_less_than("x1",
                                                                 discrete_partition_object,
                                                                 0.05)
-        discrete_out_json=json.dumps(discrete_out)
+        discrete_out_json=json.dumps(discrete_out['result']['observed_value'])
         self.assertEqual(discrete_out['result']['observed_value'],None)
         self.assertEqual(discrete_out_json,
-                         '{"result": {"observed_value": null, "element_count": 10, "missing_count": 0, "missing_percent": 0.0}, "success": false}')
+                         'null')
         
         
         #Test with continuous distribution
@@ -561,11 +561,11 @@ class TestDistributionalExpectations(unittest.TestCase):
         continuous_out1=continuous_df.expect_column_kl_divergence_to_be_less_than("x2",
                                                                 continuous_partition_object1,
                                                                 0.05)
-        continuous_out_json1=json.dumps(continuous_out1)
+        continuous_out_json1=json.dumps(continuous_out1['result']['observed_value'])
         
         self.assertEqual(continuous_out1['result']['observed_value'],None)
         self.assertEqual(continuous_out_json1,
-                         '{"result": {"observed_value": null, "element_count": 23, "missing_count": 0, "missing_percent": 0.0}, "success": false}')
+                         'null')
         
         
         
@@ -575,11 +575,11 @@ class TestDistributionalExpectations(unittest.TestCase):
         continuous_out2=continuous_df.expect_column_kl_divergence_to_be_less_than("x2",
                                                                 continuous_partition_object2,
                                                                 0.05)
-        continuous_out_json2=json.dumps(continuous_out2)
+        continuous_out_json2=json.dumps(continuous_out2['result']['observed_value'])
         
         self.assertEqual(continuous_out2['result']['observed_value'],None)
         self.assertEqual(continuous_out_json2,
-                         '{"result": {"observed_value": null, "element_count": 23, "missing_count": 0, "missing_percent": 0.0}, "success": false}')
+                         'null')
 
 
     def test_expect_column_bootstrapped_ks_test_p_value_to_be_greater_than_bad_parameters(self):
