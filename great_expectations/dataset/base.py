@@ -15,13 +15,34 @@ from collections import (
 
 from ..version import __version__
 from .util import DotDict, recursively_convert_to_json_serializable, parse_result_format
+from .autoinspect import columns_exist
 
 
 class Dataset(object):
 
     def __init__(self, *args, **kwargs):
+        """
+        Initialize the Dataset.
+
+        :param autoinspect_func (function) = None: The autoinspection function that should be run on the dataset to
+            establish baseline expectations.
+
+        Note: Dataset is designed to support multiple inheritance (e.g. PandasDataset inherits from both a
+        Pandas DataFrame and Dataset), so it accepts generic *args and **kwargs arguments so that they can also be
+        passed to other parent classes. In python 2, there isn't a clean way to include all of *args, **kwargs, and a
+        named kwarg...so we use the inelegant solution of popping from kwargs, leaving the support for the autoinspect_func
+        parameter not obvious from the signature.
+
+        """
+        autoinspect_func = kwargs.pop("autoinspect_func", None)
+
         super(Dataset, self).__init__(*args, **kwargs)
         self._initialize_expectations()
+        if autoinspect_func is not None:
+            autoinspect_func(self)
+
+    def autoinspect(self, autoinspect_func=columns_exist):
+        autoinspect_func(self)
 
     @classmethod
     def expectation(cls, method_arg_names):

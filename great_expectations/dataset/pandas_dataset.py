@@ -259,8 +259,8 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         1. Samples and Subsets of PandaDataSet have ALL the expectations of the original \
            data frame unless the user specifies the ``discard_subset_failing_expectations = True`` \
            property on the original data frame.
-        2. Concatenations, joins, and merges of PandaDataSets ONLY contain the \
-           default_expectations (see :func:`add_default_expectations`)
+        2. Concatenations, joins, and merges of PandaDataSets contain NO expectations (since no autoinspection
+           is performed by default).
     """
 
     # We may want to expand or alter support for subclassing dataframes in the future:
@@ -289,13 +289,6 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
     def __init__(self, *args, **kwargs):
         super(PandasDataset, self).__init__(*args, **kwargs)
         self.discard_subset_failing_expectations = kwargs.get('discard_subset_failing_expectations', False)
-        self.add_default_expectations()
-
-    def add_default_expectations(self):
-        """
-        The default behavior for PandasDataset is to explicitly include expectations that every column present upon initialization exists.
-        """
-        create_multiple_expectations(self, self.columns, "expect_column_to_exist")
 
     ### Expectation methods ###
     @DocInherit
