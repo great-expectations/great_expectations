@@ -3154,7 +3154,8 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             ::
 
                 {
-                  "observed_value": (float) The true KL divergence (relative entropy)
+                  "observed_value": (float) The true KL divergence (relative entropy) or None if the value is calculated \
+                  as infinity, -infinity, or NaN
                   "details": {
                     "observed_partition": (dict) The partition observed in the data
                     "expected_partition": (dict) The partition against which the data were compared,
@@ -3181,6 +3182,10 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                 with weight zero in the partition_object.
                 * If tail_weight_holdout is specified, that value will be appended to the tails of the bins \
                 ((-Infinity, min(bins)) and (max(bins), Infinity).
+                
+          If relative entropy/kl divergence goes to infinity for any of the reasons mentioned above, the observed value\
+          will be set to None. This is because inf, -inf, Nan, are not json serializable and cause some json parsers to\
+          crash when encountered. The python None token will be serialized to null in json. 
 
         See also:
             expect_column_chisquare_test_p_value_to_be_greater_than
