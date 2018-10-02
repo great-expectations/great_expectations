@@ -6,6 +6,7 @@ import pytest
 from sqlalchemy import create_engine
 
 from great_expectations.dataset import PandasDataset, SqlAlchemyDataset
+import great_expectations.dataset.autoinspect as autoinspect
 
 ## Taken from the following stackoverflow: https://stackoverflow.com/questions/23549419/assert-that-two-dictionaries-are-almost-equal
 def assertDeepAlmostEqual(expected, actual, *args, **kwargs):
@@ -46,7 +47,7 @@ def assertDeepAlmostEqual(expected, actual, *args, **kwargs):
         raise exc
 
 
-def get_dataset(dataset_type, data):
+def get_dataset(dataset_type, data, autoinspect_func=autoinspect.columns_exist):
     """For Pandas, data should be either a DataFrame or a dictionary that can be instantiated as a DataFrame
     For SQL, data should have the following shape:
         {
@@ -57,7 +58,7 @@ def get_dataset(dataset_type, data):
 
     """
     if dataset_type == 'PandasDataset':
-        return PandasDataset(data)
+        return PandasDataset(data, autoinspect_func=autoinspect_func)
     elif dataset_type == 'SqlAlchemyDataset':
         # Create a new database
 
@@ -68,7 +69,7 @@ def get_dataset(dataset_type, data):
         df.to_sql(name='test_data', con=engine, index=False)
 
         # Build a SqlAlchemyDataset using that database
-        return SqlAlchemyDataset('test_data', engine=engine)
+        return SqlAlchemyDataset('test_data', engine=engine, autoinspect_func=autoinspect_func)
     else:
         raise ValueError("Unknown dataset_type " + str(dataset_type))
 

@@ -59,3 +59,12 @@ great_expectations.dataset.util
     :members:
     :undoc-members:
     :show-inheritance:
+
+
+great_expectations.dataset.autoinspect
+-------------------------------
+
+.. automodule:: great_expectations.dataset.autoinspect
+    :members:
+    :undoc-members:
+    :show-inheritance:
