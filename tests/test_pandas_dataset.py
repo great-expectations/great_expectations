@@ -4,82 +4,11 @@ import pytest
 import json
 import datetime
 import pandas as pd
-import unittest
 import great_expectations as ge
+import great_expectations.dataset.autoinspect as autoinspect
 
 from .test_utils import assertDeepAlmostEqual
 
-def run_encapsulated_test(expectation_name, filename):
-    with open(filename) as f:
-        T = json.load(f)
-
-    D = ge.dataset.PandasDataset(T["dataset"])
-    D.set_default_expectation_argument("output_format", "COMPLETE")
-
-
-    for t in T["tests"]:
-
-        if "title" in t:
-            print(t["title"])
-        else:
-            print("WARNING: test set has no `title` field. In future versions of Great Expectations, this will be required.")
-
-        expectation = getattr(D, expectation_name)
-        out = expectation(**t['in'])
-        out = json.loads(json.dumps(out))
-        assert out==t['out']
-
-    # def test_expect_column_values_to_be_between(self):
-    #     """
-
-    #     """
-
-    #     with open("./tests/test_sets/expect_column_values_to_be_between_test_set.json") as f:
-    #         fixture = json.load(f)
-
-    #     dataset = fixture["dataset"]
-    #     tests = fixture["tests"]
-
-    #     D = ge.dataset.PandasDataset(dataset)
-    #     D.set_default_expectation_argument("result_format", "COMPLETE")
-
-    #     self.maxDiff = None
-
-    #     for t in tests:
-    #         out = D.expect_column_values_to_be_between(**t['in'])
-
-    #         # print '-'*80
-    #         print(t)
-    #         # print(json.dumps(out, indent=2))
-
-    #         if 'out' in t:
-    #             self.assertEqual(t['out']['success'], out['success'])
-    #             if 'unexpected_index_list' in t['out']:
-    #                 self.assertEqual(t['out']['unexpected_index_list'], out['result']['unexpected_index_list'])
-    #             if 'unexpected_list' in t['out']:
-    #                 self.assertEqual(t['out']['unexpected_list'], out['result']['unexpected_list'])
-
-    #         if 'error' in t:
-    #             self.assertEqual(out['exception_info']['raised_exception'], True)
-    #             self.assertIn(t['error']['traceback_substring'], out['exception_info']['exception_traceback'])
-
-
-    # def test_expect_column_values_to_match_regex_list(self):
-    #     with open("./tests/test_sets/expect_column_values_to_match_regex_list_test_set.json") as f:
-    #         J = json.load(f)
-    #         D = ge.dataset.PandasDataset(J["dataset"])
-    #         D.set_default_expectation_argument("result_format", "COMPLETE")
-    #         T = J["tests"]
-
-    #         self.maxDiff = None
-
-    #     for t in T:
-    #         out = D.expect_column_values_to_match_regex_list(**t['in'])
-    #         self.assertEqual(t['out']['success'], out['success'])
-    #         if 'unexpected_index_list' in t['out']:
-    #             self.assertEqual(t['out']['unexpected_index_list'], out['result']['unexpected_index_list'])
-    #         if 'unexpected_list' in t['out']:
-    #             self.assertEqual(t['out']['unexpected_list'], out['result']['unexpected_list'])
 
 def test_expect_column_values_to_match_strftime_format():
     """
@@ -422,12 +351,15 @@ def test_from_pandas_expectations_config():
 
     assertDeepAlmostEqual(results, expected_results)
 
-def test_ge_pandas_concatenating():
+
+def test_ge_pandas_concatenating_no_autoinspect():
     df1 = ge.dataset.PandasDataset({
         'A': ['A0', 'A1', 'A2'],
         'B': ['B0', 'B1', 'B2']
     })
 
+    df1.expect_column_to_exist('A')
+    df1.expect_column_to_exist('B')
     df1.expect_column_values_to_match_regex('A', '^A[0-2]$')
     df1.expect_column_values_to_match_regex('B', '^B[0-2]$')
 
@@ -436,25 +368,24 @@ def test_ge_pandas_concatenating():
         'B': ['B3', 'B4', 'B5']
     })
 
+    df2.expect_column_to_exist('A')
+    df2.expect_column_to_exist('B')
     df2.expect_column_values_to_match_regex('A', '^A[3-5]$')
     df2.expect_column_values_to_match_regex('B', '^B[3-5]$')
 
     df = pd.concat([df1, df2])
 
-    exp_c = [
-        {'expectation_type': 'expect_column_to_exist',
-         'kwargs': {'column': 'A'}},
-        {'expectation_type': 'expect_column_to_exist',
-         'kwargs': {'column': 'B'}}
-    ]
+    exp_c = []
 
     # The concatenated data frame will:
     #
     #   1. Be a ge.dataset.PandaDataSet
-    #   2. Only have the default expectations
+    #   2. Have no expectations (since no default expectations are created), even expectations that were common
+    #      to the concatenated dataframes and still make sense (since no autoinspection happens).
 
     assert isinstance(df, ge.dataset.PandasDataset)
     assert df.find_expectations()==exp_c
+
 
 def test_ge_pandas_joining():
     df1 = ge.dataset.PandasDataset({
@@ -476,20 +407,21 @@ def test_ge_pandas_joining():
     df = df1.join(df2)
 
     exp_j = [
-        {'expectation_type': 'expect_column_to_exist',
-         'kwargs': {'column': 'A'}},
-        {'expectation_type': 'expect_column_to_exist',
-         'kwargs': {'column': 'B'}},
-        {'expectation_type': 'expect_column_to_exist',
-         'kwargs': {'column': 'C'}},
-        {'expectation_type': 'expect_column_to_exist',
-         'kwargs': {'column': 'D'}}
+        # No autoinspection is default 20180920
+        # {'expectation_type': 'expect_column_to_exist',
+        #  'kwargs': {'column': 'A'}},
+        # {'expectation_type': 'expect_column_to_exist',
+        #  'kwargs': {'column': 'B'}},
+        # {'expectation_type': 'expect_column_to_exist',
+        #  'kwargs': {'column': 'C'}},
+        # {'expectation_type': 'expect_column_to_exist',
+        #  'kwargs': {'column': 'D'}}
     ]
 
     # The joined data frame will:
     #
     #   1. Be a ge.dataset.PandaDataSet
-    #   2. Only have the default expectations
+    #   2. Have no expectations (no autoinspection)
 
     assert isinstance(df, ge.dataset.PandasDataset)
     assert df.find_expectations()==exp_j
@@ -512,18 +444,19 @@ def test_ge_pandas_merging():
     df = df1.merge(df2, on='id')
 
     exp_m = [
-        {'expectation_type': 'expect_column_to_exist',
-         'kwargs': {'column': 'id'}},
-        {'expectation_type': 'expect_column_to_exist',
-         'kwargs': {'column': 'name'}},
-        {'expectation_type': 'expect_column_to_exist',
-         'kwargs': {'column': 'salary'}}
+        # No autoinspection as of 20180920
+        # {'expectation_type': 'expect_column_to_exist',
+        #  'kwargs': {'column': 'id'}},
+        # {'expectation_type': 'expect_column_to_exist',
+        #  'kwargs': {'column': 'name'}},
+        # {'expectation_type': 'expect_column_to_exist',
+        #  'kwargs': {'column': 'salary'}}
     ]
 
     # The merged data frame will:
     #
     #   1. Be a ge.dataset.PandaDataSet
-    #   2. Only have the default expectations
+    #   2. Have no expectations (no autoinspection is now default)
 
     assert isinstance(df, ge.dataset.PandasDataset)
     assert df.find_expectations()==exp_m
@@ -592,6 +525,7 @@ def test_ge_pandas_sampling():
     })
 
     # Put some simple expectations on the data frame
+    df.autoinspect(autoinspect_func=autoinspect.columns_exist)
     df.expect_column_values_to_be_in_set("A", [1, 2, 3, 4])
     df.expect_column_values_to_be_in_set("B", [5, 6, 7, 8])
     df.expect_column_values_to_be_in_set("C", ['a', 'b', 'c', 'd'])
@@ -700,6 +634,7 @@ def test_ge_pandas_automatic_failure_removal():
     })
 
     # Put some simple expectations on the data frame
+    df.autoinspect(autoinspect.columns_exist)
     df.expect_column_values_to_be_in_set("A", [1, 2, 3, 4])
     df.expect_column_values_to_be_in_set("B", [5, 6, 7, 8])
     df.expect_column_values_to_be_in_set("C", ['w', 'x', 'y', 'z'])
@@ -829,7 +764,3 @@ def test_pandas_deepcopy():
     assert df2.expect_column_to_exist("a")["success"] == True
     assert list(df["a"]) == [2, 3, 4]
     assert list(df2["a"]) == [1, 2, 3]
-
-
-if __name__ == "__main__":
-    unittest.main()

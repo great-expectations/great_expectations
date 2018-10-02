@@ -28,6 +28,7 @@ Advanced
 
    standard_arguments
    result_format
+   autoinspection
    evaluation_parameters
    custom_expectations
    conventions

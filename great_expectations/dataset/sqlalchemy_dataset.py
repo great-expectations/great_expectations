@@ -204,9 +204,7 @@ class MetaSqlAlchemyDataset(Dataset):
 
 class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
-    def __init__(self, table_name=None, engine=None, connection_string=None, custom_sql=None):
-        super(SqlAlchemyDataset, self).__init__()
-
+    def __init__(self, table_name=None, engine=None, connection_string=None, custom_sql=None, *args, **kwargs):
         if table_name is None:
             raise ValueError("No table_name provided.")
 
@@ -231,6 +229,10 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         insp = reflection.Inspector.from_engine(engine)
         self.columns = insp.get_columns(self.table_name)
 
+        # Only call super once connection is established and table_name and columns known to allow autoinspection
+        super(SqlAlchemyDataset, self).__init__(*args, **kwargs)
+
+
     def create_temporary_table(self, table_name, custom_sql):
         """
         Create Temporary table based on sql query. This will be used as a basis for executing expectations.
@@ -241,14 +243,6 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         stmt = "CREATE TEMPORARY TABLE IF NOT EXISTS {table_name} AS {custom_sql}".format(
             table_name=table_name, custom_sql=custom_sql)
         self.engine.execute(stmt)
-
-    def add_default_expectations(self):
-        """
-        The default behavior for SqlAlchemyDataset is to explicitly include expectations that every column present upon
-        initialization exists.
-        """
-        columns = [col['name'] for col in self.columns]
-        create_multiple_expectations(self, columns, "expect_column_to_exist")
 
     def _is_numeric_column(self, column):
         for col in self.columns:
