@@ -29,9 +29,9 @@ including interactive exploratory work and automatic validation.
 +---------------------------------------+----------------+----------------+----------------+----------------+
 |    missing_percent                    |no              |yes             |yes             |yes             |
 +---------------------------------------+----------------+----------------+----------------+----------------+
-|    detail (dictionary)                |Defined on a per-expectation basis                                 |
+|    details (dictionary)               |Defined on a per-expectation basis                                 |
 +---------------------------------------+----------------+----------------+----------------+----------------+
-| Fields defined only for `column_map_expectation` type expectations:                                       |
+| Fields defined for `column_map_expectation` type expectations:                                       |
 +---------------------------------------+----------------+----------------+----------------+----------------+
 |    unexpected_count                   |no              |yes             |yes             |yes             |
 +---------------------------------------+----------------+----------------+----------------+----------------+
@@ -49,7 +49,7 @@ including interactive exploratory work and automatic validation.
 +---------------------------------------+----------------+----------------+----------------+----------------+
 |    unexpected_list                    |no              |no              |no              |yes             |
 +---------------------------------------+----------------+----------------+----------------+----------------+
-| Fields defined only for `column_aggregate_expectation` type expectations:                                 |
+| Fields defined for `column_aggregate_expectation` type expectations:                                 |
 +---------------------------------------+----------------+----------------+----------------+----------------+
 |    observed_value                     |no              |yes             |yes             |yes             |
 +---------------------------------------+----------------+----------------+----------------+----------------+
