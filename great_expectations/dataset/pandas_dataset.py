@@ -1283,9 +1283,9 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             above_partition = len(np.where(column > partition_object['bins'][-1])[0])
         
             #Observed Weights is just the histogram values divided by the total number of observations
-            observed_weights = np.array(hist)/(len(column)*1.0)
+            observed_weights = np.array(hist)/len(column)
             #Tail weights are just the number of observations above and below the partition divided by the number of observations
-            observed_tail_weights=np.concatenate(([below_partition],[above_partition]))/(len(column)*1.0)
+            observed_tail_weights=np.concatenate(([below_partition],[above_partition]))/len(column)
         
             #Adjust expected_weights to account for tail_weight and internal_weight
             expected_weights = np.array(partition_object['weights']) * (1 - tail_weight_holdout - internal_weight_holdout)
