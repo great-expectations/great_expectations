@@ -1,9 +1,12 @@
 import unittest
 import json
 import numpy as np
+import sys
 
 import great_expectations as ge
-from .test_utils import assertDeepAlmostEqual
+sys.path.append("./tests")
+from test_utils import assertDeepAlmostEqual
+
 
 
 class TestDistributionalExpectations(unittest.TestCase):
