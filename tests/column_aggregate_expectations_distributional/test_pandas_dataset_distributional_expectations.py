@@ -3,6 +3,7 @@ import json
 import numpy as np
 
 import great_expectations as ge
+from .test_utils import assertDeepAlmostEqual
 
 
 class TestDistributionalExpectations(unittest.TestCase):
@@ -580,6 +581,208 @@ class TestDistributionalExpectations(unittest.TestCase):
         self.assertEqual(continuous_out2['result']['observed_value'],None)
         self.assertEqual(continuous_out_json2,
                          'null')
+        
+        
+    def test_expect_column_kl_divergence_to_be_less_than_infinite_return_bins(self):
+        import great_expectations as ge
+        
+        
+        continuous_df=ge.dataset.PandasDataset({"x":[-1.95, 1.03, 1.00, 0.81, -2.27,  0.52, 2.45, -1.19,
+                                                     -0.17, -1.54, 2.20, -2.66,  1.71,  1.59, 2.19]})
+        
+        
+        #Both endpoints at infinity, no tail_holdout or internal_holdout
+        continuous_partition_object={"weights":[0.3,0.15,0.05,0.05,0.2,0.25],
+            "bins":[-np.inf,-2,-1,0,1,2,np.inf]}
+        
+        
+        expected_details={
+                            "observed_partition": {
+                                # return expected_bins, since we used those bins to compute the observed_weights
+                                "bins": [-2,-1,0,1,2],
+                                "weights": [3/15.0, 1/15.0, 2/15.0, 4/15.0],
+                                "tail_weights": [2/15.0,3/15.0]
+                            },
+                            "expected_partition": {
+                                "bins": [-2,-1,0,1,2],
+                                "weights": [0.15,0.05,0.05,0.2],
+                                "tail_weights":[0.3,0.25]
+                            }
+                        }
+                            
+        actual_details=continuous_df.expect_column_kl_divergence_to_be_less_than("x",
+                                                                                 continuous_partition_object,
+                                                                                 0.05,
+                                                                                 tail_weight_holdout=0, 
+                                                                                 internal_weight_holdout=0,
+                                                                                 result_format="COMPLETE")["result"]["details"]
+        assertDeepAlmostEqual(expected_details,actual_details)
+        
+        
+        
+        #Both endpoints bounded, no tail_holdout or internal_holdout
+        
+        continuous_partition_object={"weights":[0.3,0.15,0.05,0.05,0.2,0.25],
+            "bins":[-3,-2,-1,0,1,2,3]}
+        
+        
+        expected_details={
+                            "observed_partition": {
+                                # return expected_bins, since we used those bins to compute the observed_weights
+                                "bins": [-3,-2,-1,0,1,2,3],
+                                "weights": [2/15.0,3/15.0, 1/15.0, 2/15.0, 4/15.0,3/15.0],
+                                "tail_weights": [0,0]
+                            },
+                            "expected_partition": {
+                                "bins": [-3,-2,-1,0,1,2,3],
+                                "weights": [0.3,0.15,0.05,0.05,0.2,0.25],
+                                "tail_weights":[0,0]
+                            }
+                        }
+                            
+        actual_details=continuous_df.expect_column_kl_divergence_to_be_less_than("x",
+                                                                                 continuous_partition_object,
+                                                                                 0.05,
+                                                                                 tail_weight_holdout=0, 
+                                                                                 internal_weight_holdout=0,
+                                                                                 result_format="COMPLETE")["result"]["details"]
+        assertDeepAlmostEqual(expected_details,actual_details)
+        
+        
+        
+        #Infinite KL Divergence, no tail_holdout or internal_holdout
+        
+        continuous_partition_object={"weights":[0.45,0.05,0.05,0.2,0.25],
+            "bins":[-2,-1,0,1,2,3]}
+        
+        
+        expected_details={
+                            "observed_partition": {
+                                # return expected_bins, since we used those bins to compute the observed_weights
+                                "bins": [-2,-1,0,1,2,3],
+                                "weights": [3/15.0, 1/15.0, 2/15.0, 4/15.0,3/15.0],
+                                "tail_weights": [2/15.0,0]
+                            },
+                            "expected_partition": {
+                                "bins": [-2,-1,0,1,2,3],
+                                "weights": [0.45,0.05,0.05,0.2,0.25],
+                                "tail_weights":[0,0]
+                            }
+                        }
+                            
+        actual_details=continuous_df.expect_column_kl_divergence_to_be_less_than("x",
+                                                                                 continuous_partition_object,
+                                                                                 0.05,
+                                                                                 tail_weight_holdout=0, 
+                                                                                 internal_weight_holdout=0,
+                                                                                 result_format="COMPLETE")["result"]["details"]
+        assertDeepAlmostEqual(expected_details,actual_details)
+        
+        
+        
+    
+        #Both endpoints at infinity, non-zero tail hold_out
+        continuous_partition_object={"weights":[0.3,0.15,0.05,0.05,0.2,0.25],
+            "bins":[-np.inf,-2,-1,0,1,2,np.inf]}
+        
+        try:
+            actual_details=continuous_df.expect_column_kl_divergence_to_be_less_than("x",
+                                                                                 continuous_partition_object,
+                                                                                 0.05,
+                                                                                 tail_weight_holdout=0, 
+                                                                                 internal_weight_holdout=0,
+                                                                                 result_format="COMPLETE")["result"]["details"]
+        except ValueError:
+            pass
+            
+        
+        #Upper at infinity, non-zero tail hold_out
+        continuous_partition_object={"weights":[0.3,0.15,0.05,0.05,0.2,0.25],
+            "bins":[-3,-2,-1,0,1,2,np.inf]}
+        
+        
+        expected_details={
+                            "observed_partition": {
+                                # return expected_bins, since we used those bins to compute the observed_weights
+                                "bins": [-3,-2,-1,0,1,2],
+                                "weights": [2/15.0,3/15.0, 1/15.0, 2/15.0, 4/15.0],
+                                "tail_weights": [0,3/15.0]
+                            },
+                            "expected_partition": {
+                                "bins": [-3,-2,-1,0,1,2],
+                                "weights": [0.3*0.98,0.15*0.98,0.05*0.98,0.05*0.98,0.2*0.98],
+                                "tail_weights":[0.02,0.98*0.25]
+                            }
+                        }
+                            
+        actual_details=continuous_df.expect_column_kl_divergence_to_be_less_than("x",
+                                                                                 continuous_partition_object,
+                                                                                 0.05,
+                                                                                 tail_weight_holdout=0.02, 
+                                                                                 internal_weight_holdout=0,
+                                                                                 result_format="COMPLETE")["result"]["details"]
+        assertDeepAlmostEqual(expected_details,actual_details)
+        
+        
+        
+    
+            
+        
+        #Lower at infinity, non-zero tail holdout
+        continuous_partition_object={"weights":[0.3,0.15,0.05,0.05,0.45],
+            "bins":[-np.inf,-2,-1,0,1,2]}
+        
+        
+        expected_details={
+                            "observed_partition": {
+                                # return expected_bins, since we used those bins to compute the observed_weights
+                                "bins": [-2,-1,0,1,2],
+                                "weights": [3/15.0, 1/15.0, 2/15.0, 4/15.0],
+                                "tail_weights": [2/15.0,3/15.0]
+                            },
+                            "expected_partition": {
+                                "bins": [-2,-1,0,1,2],
+                                "weights": [0.15*0.95,0.05*0.95,0.05*0.95,0.45*0.95],
+                                "tail_weights":[0.3*0.95,0.05]
+                            }
+                        }
+                            
+        actual_details=continuous_df.expect_column_kl_divergence_to_be_less_than("x",
+                                                                                 continuous_partition_object,
+                                                                                 0.05,
+                                                                                 tail_weight_holdout=0.05, 
+                                                                                 internal_weight_holdout=0,
+                                                                                 result_format="COMPLETE")["result"]["details"]
+        assertDeepAlmostEqual(expected_details,actual_details)
+        
+        
+        #Bounded Endpoints, non-zero tail holdout, non-zero internal holdout
+        continuous_partition_object={"weights":[0.3,0.15,0.0,0.10,0.45],
+            "bins":[-3,-2,-1,0,1,2]}
+        
+        
+        expected_details= {
+                            "observed_partition": {
+                                # return expected_bins, since we used those bins to compute the observed_weights
+                                "bins": [-3,-2,-1,0,1,2],
+                                "weights": [2/15.0,3/15.0, 1/15.0, 2/15.0, 4/15.0],
+                                "tail_weights": [0.0,3/15.0]
+                            },
+                            "expected_partition": {
+                                "bins": [-3,-2,-1,0,1,2],
+                                "weights": [0.3*0.9,0.15*0.9,0.05,0.10*0.9,0.45*0.9],
+                                "tail_weights":[0.05/2,0.05/2]
+                            }
+                        }
+                            
+        actual_details=continuous_df.expect_column_kl_divergence_to_be_less_than("x",
+                                                                                 continuous_partition_object,
+                                                                                 0.05,
+                                                                                 tail_weight_holdout=0.05, 
+                                                                                 internal_weight_holdout=0.05,
+                                                                                 result_format="COMPLETE")["result"]["details"]
+        
+        assertDeepAlmostEqual(expected_details,actual_details)
 
 
     def test_expect_column_bootstrapped_ks_test_p_value_to_be_greater_than_bad_parameters(self):
