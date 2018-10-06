@@ -300,12 +300,14 @@ class TestDistributionalExpectations(unittest.TestCase):
             'weights': [0.25, 0.25, 0.25, 0.25]
         }
         summary_expected_partition = {
-            'bins': [-np.inf, 0, 1, 2, 3, np.inf],
-            'weights': [0.25, 0.25, 0.25, 0.25, 0]
+            'bins': [0, 1, 2, 3],
+            'weights': [0.25, 0.25, 0.25],
+            'tail_weights':[0.25,0]
         }
         summary_observed_partition = {
-            'bins': [-np.inf, 0, 1, 2, 3, np.inf],
-            'weights': [0.25, 0.25, 0.25, 0.25, 0]
+            'bins': [0, 1, 2, 3],
+            'weights': [0.25, 0.25, 0.25],
+            'tail_weights':[0.25,0]
         }
         test_df = ge.dataset.PandasDataset(
             {'x': [-0.5, 0.5, 1.5, 2.5]})
@@ -321,12 +323,14 @@ class TestDistributionalExpectations(unittest.TestCase):
             'weights': [0.25, 0.25, 0.25, 0.25]
         }
         summary_expected_partition = {
-            'bins': [-np.inf, 0, 1, 2, 3, np.inf],
-            'weights': [0, 0.25, 0.25, 0.25, 0.25]
+            'bins': [0, 1, 2, 3],
+            'weights': [0.25, 0.25, 0.25],
+            'tail_weights':[0,0.25]
         }
         summary_observed_partition = {
-            'bins': [-np.inf, 0, 1, 2, 3, np.inf],
-            'weights': [0.2, 0.2, 0.2, 0.2, 0.2]
+            'bins': [0, 1, 2, 3],
+            'weights': [0.2, 0.2, 0.2],
+            'tail_weights':[0.2,0.2]
         }
         test_df = ge.dataset.PandasDataset(
             {'x': [-0.5, 0.5, 1.5, 2.5, 3.5]})
@@ -342,12 +346,14 @@ class TestDistributionalExpectations(unittest.TestCase):
             'weights': [0.1, 0.2, 0.4, 0.2, 0.1]
         }
         summary_expected_partition = {
-            'bins': [-np.inf, 0, 1, 2, 3, np.inf],
-            'weights': [0.1, 0.2, 0.4, 0.2, 0.1]
+            'bins': [ 0, 1, 2, 3],
+            'weights': [0.2, 0.4, 0.2],
+            'tail_weights':[0.1,0.1]
         }
         summary_observed_partition = {
-            'bins': [-np.inf, 0, 1, 2, 3, np.inf],
-            'weights': [0.1, 0.2, 0.4, 0.2, 0.1]
+            'bins': [0, 1, 2, 3],
+            'weights': [0.2, 0.4, 0.2],
+            'tail_weights':[0.1,0.1]
         }
         test_df = ge.dataset.PandasDataset(
             {'x': [-0.5, 0.5, 0.5, 1.5, 1.5, 1.5, 1.5, 2.5, 2.5, 3.5]})
@@ -366,12 +372,14 @@ class TestDistributionalExpectations(unittest.TestCase):
             test_partition = json.loads(infile.read())['test_partition']
 
         summary_expected_partition = {
-            'bins': [-np.inf, 0, 1, 2, 3, np.inf],
-            'weights': [0.1, 0.2, 0.4, 0.2, 0.1]
+            'bins': [0, 1, 2, 3],
+            'weights': [0.2, 0.4, 0.2],
+            'tail_weights':[0.1,0.1]
         }
         summary_observed_partition = {
-            'bins': [-np.inf, 0, 1, 2, 3, np.inf],
-            'weights': [0.1, 0.2, 0.4, 0.2, 0.1]
+            'bins': [0, 1, 2, 3],
+            'weights': [0.2, 0.4, 0.2],
+            'tail_weights':[0.1,0.1]
         }
         test_df = ge.dataset.PandasDataset(
             {'x': [-0.5, 0.5, 0.5, 1.5, 1.5, 1.5, 1.5, 2.5, 2.5, 3.5]})
@@ -494,14 +502,16 @@ class TestDistributionalExpectations(unittest.TestCase):
                     'out': {'success': False, 'observed_value': "NOTTESTED",
                             'details':
                                 {'observed_partition':
-                                     {'weights': [0.0, 0.001, 0.006, 0.022, 0.07, 0.107, 0.146, 0.098, 0.04, 0.01, 0.0, 0.5],
-                                      'bins': [-np.inf, -3.721835843971108, -3.02304158492966, -2.324247325888213, -1.625453066846767, -0.926658807805319, -0.227864548763872, 0.470929710277574, 1.169723969319022, 1.868518228360469, 2.567312487401916, 3.266106746443364, np.inf]
+                                     {'weights': [0.001, 0.006, 0.022, 0.07, 0.107, 0.146, 0.098, 0.04, 0.01, 0.0],
+                                      'bins': [-3.721835843971108, -3.02304158492966, -2.324247325888213, -1.625453066846767, -0.926658807805319, -0.227864548763872, 0.470929710277574, 1.169723969319022, 1.868518228360469, 2.567312487401916, 3.266106746443364],
+                                      'tail_weights':[0.0,0.5]
                                      },
                                  'missing_percent': 0.0,
                                  'element_count': 1000,
                                  'missing_count': 0,
-                                 'expected_partition': {'bins': [-np.inf, -3.721835843971108, -3.02304158492966, -2.324247325888213, -1.625453066846767, -0.926658807805319, -0.227864548763872, 0.470929710277574, 1.169723969319022, 1.868518228360469, 2.567312487401916, 3.266106746443364, np.inf],
-                                                        'weights': [0.005, 0.00098, 0.00784, 0.04606, 0.12544, 0.24009999999999998, 0.24402, 0.20776, 0.07742, 0.02352, 0.00686, 0.005]
+                                 'expected_partition': {'bins': [-3.721835843971108, -3.02304158492966, -2.324247325888213, -1.625453066846767, -0.926658807805319, -0.227864548763872, 0.470929710277574, 1.169723969319022, 1.868518228360469, 2.567312487401916, 3.266106746443364],
+                                                        'weights': [0.00098, 0.00784, 0.04606, 0.12544, 0.24009999999999998, 0.24402, 0.20776, 0.07742, 0.02352, 0.00686],
+                                                        'tail_weights':[0.005,0.005]
                                                         }
                                  }
                     }
@@ -518,8 +528,10 @@ class TestDistributionalExpectations(unittest.TestCase):
             if 'result_format' in t['kwargs'] and t['kwargs']['result_format'] == 'SUMMARY':
                 self.assertTrue(np.allclose(out['result']['details']['observed_partition']['bins'],t['out']['details']['observed_partition']['bins']))
                 self.assertTrue(np.allclose(out['result']['details']['observed_partition']['weights'],t['out']['details']['observed_partition']['weights']))
+                self.assertTrue(np.allclose(out['result']['details']['observed_partition']['tail_weights'],t['out']['details']['observed_partition']['tail_weights']))
                 self.assertTrue(np.allclose(out['result']['details']['expected_partition']['bins'],t['out']['details']['expected_partition']['bins']))
                 self.assertTrue(np.allclose(out['result']['details']['expected_partition']['weights'],t['out']['details']['expected_partition']['weights']))
+                self.assertTrue(np.allclose(out['result']['details']['expected_partition']['tail_weights'],t['out']['details']['expected_partition']['tail_weights']))
 
             if not out['success'] == t['out']['success']:
                 print("Test case error:")
