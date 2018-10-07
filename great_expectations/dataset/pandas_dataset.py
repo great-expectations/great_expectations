@@ -5,6 +5,7 @@ import json
 import re
 from datetime import datetime
 from functools import wraps
+from itertools import zip_longest
 import jsonschema
 
 from numbers import Number
@@ -315,11 +316,19 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
         if list(self.columns) == list(column_list):
             return {
-                "success" : True
+                "success": True
             }
         else:
+            number_of_columns = max(len(column_list), len(self.columns))
+            column_index = range(number_of_columns)
+
+            compared_lists = list(zip_longest(column_index, list(column_list), list(self.columns)))
+            mismatched = [{"Expected Column Position": i,
+                           "Expected": k,
+                           "Found": v} for i, k, v in compared_lists if k != v]
             return {
-                "success": False
+                "success": False,
+                "details": {"mismatched": mismatched}
             }
 
     @DocInherit
