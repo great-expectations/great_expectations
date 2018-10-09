@@ -5,6 +5,7 @@ from great_expectations.dataset import Dataset
 from functools import wraps
 import inspect
 from six import PY3
+import warnings
 
 from .util import DocInherit, parse_result_format, create_multiple_expectations
 
@@ -204,11 +205,21 @@ class MetaSqlAlchemyDataset(Dataset):
 
 class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
-    def __init__(self, table_name=None, engine=None, connection_string=None, custom_sql=None, *args, **kwargs):
+    def __init__(self, table_name=None, engine=None, connection_string=None,
+                 custom_sql=None, schema=None, *args, **kwargs):
         if table_name is None:
             raise ValueError("No table_name provided.")
 
-        self.table_name = table_name
+        if schema is None:
+            # Implicitly use default schema
+            self.table_name = table_name
+        if schema is not None and custom_sql is not None:
+            # Ignore schema, since temporary tables are written to a temp schema
+            warnings.warn("schema argument will be ignored when custom_sql is specified.")
+            self.table_name = table_name
+        else:
+            # pass the schema with the table name from now on
+            self.table_name = '.'.join([schema, table_name])
 
         if engine is None and connection_string is None:
             raise ValueError("Engine or connection_string must be provided.")
@@ -223,11 +234,12 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 # Currently we do no error handling if the engine doesn't work out of the box.
                 raise err
 
+
         if custom_sql:
             self.create_temporary_table(self.table_name, custom_sql)
 
-        insp = reflection.Inspector.from_engine(engine)
-        self.columns = insp.get_columns(self.table_name)
+        select_all = sa.select('*').select_from(sa.table(self.table_name))
+        self.columns = select_all.keys()
 
         # Only call super once connection is established and table_name and columns known to allow autoinspection
         super(SqlAlchemyDataset, self).__init__(*args, **kwargs)
