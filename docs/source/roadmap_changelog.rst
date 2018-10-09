@@ -14,6 +14,8 @@ Planned Features
 
 v.0.4.4__develop
 ----------------
+* Remove `IF NOT EXISTS` check for custom sql temporary tables, for
+  Redshift compatibility (#372)
 
 v.0.4.4
 ----------------
