@@ -18,7 +18,7 @@ def custom_dataset():
             mode_query = sa.select([
                 sa.column(column).label('value'),
                 sa.func.count(sa.column(column)).label('frequency')
-            ]).select_from(sa.table(self.table_name)).group_by(sa.column(column)).order_by(
+            ]).select_from(self._table).group_by(sa.column(column)).order_by(
                 sa.desc(sa.column('frequency')))
 
             mode = self.engine.execute(mode_query).scalar()

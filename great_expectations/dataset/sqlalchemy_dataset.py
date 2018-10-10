@@ -68,7 +68,7 @@ class MetaSqlAlchemyDataset(Dataset):
                                       sa.column(column).is_(None) == False if None in ignore_values else True),
                               1)], else_=0)
                 ).label('unexpected_count')
-            ]).select_from(sa.table(self.table_name))
+            ]).select_from(self._table)
 
             count_results = dict(self.engine.execute(count_query).fetchone())
 
@@ -82,7 +82,7 @@ class MetaSqlAlchemyDataset(Dataset):
 
             # Retrieve unexpected  values
             unexpected_query_results = self.engine.execute(
-                sa.select([sa.column(column)]).select_from(sa.table(self.table_name)).where(
+                sa.select([sa.column(column)]).select_from(self._table).where(
                     sa.and_(sa.not_(expected_condition),
                             sa.or_(
                                 # SA normally evaluates `== None` as `IS NONE`. However `sa.in_()`
@@ -165,7 +165,7 @@ class MetaSqlAlchemyDataset(Dataset):
                     sa.func.sum(
                         sa.case([(sa.column(column) == None, 1)], else_=0)
                     ).label('null_count'),
-                ]).select_from(sa.table(self.table_name))
+                ]).select_from(self._table)
 
                 count_results = dict(self.engine.execute(count_query).fetchone())
 
@@ -210,16 +210,9 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         if table_name is None:
             raise ValueError("No table_name provided.")
 
-        if schema is None:
-            # Implicitly use default schema
-            self.table_name = table_name
-        if schema is not None and custom_sql is not None:
-            # Ignore schema, since temporary tables are written to a temp schema
-            warnings.warn("schema argument will be ignored when custom_sql is specified.")
-            self.table_name = table_name
-        else:
-            # pass the schema with the table name from now on
-            self.table_name = '.'.join([schema, table_name])
+        self.table_name = table_name
+        self.schema = schema
+        self._table = sa.Table(self.table_name, sa.MetaData(), schema=schema)
 
         if engine is None and connection_string is None:
             raise ValueError("Engine or connection_string must be provided.")
@@ -234,12 +227,17 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 # Currently we do no error handling if the engine doesn't work out of the box.
                 raise err
 
+        if schema is not None and custom_sql is not None:
+            # temporary table will be written to temp schema, so don't allow
+            # a user-defined schema
+            raise ValueError("Cannot specify both schema and custom_sql.")
+
 
         if custom_sql:
             self.create_temporary_table(self.table_name, custom_sql)
 
-        select_all = sa.select('*').select_from(sa.table(self.table_name))
-        self.columns = select_all.keys()
+        insp = reflection.Inspector.from_engine(engine)
+        self.columns = insp.get_columns(self.table_name, schema=self.schema)
 
         # Only call super once connection is established and table_name and columns known to allow autoinspection
         super(SqlAlchemyDataset, self).__init__(*args, **kwargs)
@@ -294,7 +292,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         if value is None:
             raise ValueError("value must be provided")
 
-        count_query = sa.select([sa.func.count()]).select_from(sa.table(self.table_name))
+        count_query = sa.select([sa.func.count()]).select_from(self._table)
         row_count = self.engine.execute(count_query).scalar()
 
         return {
@@ -322,7 +320,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         except ValueError:
             raise ValueError("min_value and max_value must be integers")
 
-        count_query = sa.select([sa.func.count()]).select_from(sa.table(self.table_name))
+        count_query = sa.select([sa.func.count()]).select_from(self._table)
         row_count = self.engine.execute(count_query).scalar()
 
         if min_value != None and max_value != None:
@@ -533,7 +531,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             raise ValueError("parse_strings_as_datetimes is not supported in SqlAlchemy")
 
         col_max = self.engine.execute(
-            sa.select([sa.func.max(sa.column(column))]).select_from(sa.table(self.table_name))
+            sa.select([sa.func.max(sa.column(column))]).select_from(self._table)
         ).scalar()
 
         # Handle possible missing values
@@ -580,7 +578,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             raise ValueError("parse_strings_as_datetimes is not supported in SqlAlchemy")
 
         col_min = self.engine.execute(
-            sa.select([sa.func.min(sa.column(column))]).select_from(sa.table(self.table_name))
+            sa.select([sa.func.min(sa.column(column))]).select_from(self._table)
         ).scalar()
 
         # Handle possible missing values
@@ -621,7 +619,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             raise ValueError("min_value and max_value cannot both be None")
 
         col_sum = self.engine.execute(
-            sa.select([sa.func.sum(sa.column(column))]).select_from(sa.table(self.table_name))
+            sa.select([sa.func.sum(sa.column(column))]).select_from(self._table)
         ).scalar()
 
         # Handle possible missing values
@@ -671,7 +669,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             raise ValueError("column is not numeric")
 
         col_avg = self.engine.execute(
-            sa.select([sa.func.avg(sa.column(column))]).select_from(sa.table(self.table_name))
+            sa.select([sa.func.avg(sa.column(column))]).select_from(self._table)
         ).scalar()
 
         # Handle possible missing values
@@ -719,7 +717,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 sa.func.sum(
                     sa.case([(sa.column(column) == None, 1)], else_=0)
                 ).label('null_count')
-            ]).select_from(sa.table(self.table_name))
+            ]).select_from(self._table)
         )
 
         counts = dict(count_query.fetchone())
@@ -736,7 +734,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         element_values = self.engine.execute(
             sa.select([sa.column(column)]).order_by(sa.column(column)).where(
                 sa.column(column) != None
-            ).offset(nonnull_count // 2 - 1).limit(2).select_from(sa.table(self.table_name))
+            ).offset(nonnull_count // 2 - 1).limit(2).select_from(self._table)
         )
 
         column_values = list(element_values.fetchall())
@@ -773,7 +771,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                                           result_format=None, include_config=False, catch_exceptions=None, meta=None):
         # Duplicates are found by filtering a group by query
         dup_query = sa.select([sa.column(column)]).\
-            select_from(sa.table(self.table_name)).\
+            select_from(self._table).\
             group_by(sa.column(column)).\
             having(sa.func.count(sa.column(column)) > 1)
 
@@ -789,7 +787,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             raise ValueError("min_value and max_value cannot both be None")
 
         unique_value_count = self.engine.execute(
-            sa.select([sa.func.count(sa.func.distinct(sa.column(column)))]).select_from(sa.table(self.table_name))
+            sa.select([sa.func.count(sa.func.distinct(sa.column(column)))]).select_from(self._table)
         ).scalar()
 
         # Handle possible missing values
@@ -826,7 +824,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                     sa.case([(sa.column(column) == None, 1)], else_=0)
                 ).label('null_count'),
                 sa.func.count(sa.func.distinct(sa.column(column))).label('unique_value_count')
-            ]).select_from(sa.table(self.table_name))
+            ]).select_from(self._table)
         )
 
         counts = count_query.fetchone()
