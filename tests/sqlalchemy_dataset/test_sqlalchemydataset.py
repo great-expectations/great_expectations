@@ -85,6 +85,21 @@ def test_broken_decorator_errors(custom_dataset):
         assert "Column aggregate expectation failed to return required information: observed_value" in str(err)
 
 
+def test_missing_engine_error():
+    with pytest.raises(ValueError) as err:
+        SqlAlchemyDataset('test_engine', schema='example')
+        assert "Engine or connection_string must be provided." in str(err)
+
+
+def test_schema_custom_sql_error():
+    engine = sa.create_engine('sqlite://')
+
+    with pytest.raises(ValueError) as err:
+        SqlAlchemyDataset('test_schema_custom', schema='example', engine=engine,
+                          custom_sql='SELECT * FROM example.fake')
+        assert "Cannot specify both schema and custom_sql." in str(err)
+
+
 def test_sqlalchemydataset_with_custom_sql():
     engine = sa.create_engine('sqlite://')
 
