@@ -14,6 +14,7 @@ Planned Features
 
 v.0.4.4__develop
 ----------------
+* Add support for custom schema in SqlAlchemyDataset (#370)
 
 v.0.4.4
 ----------------
