@@ -37,7 +37,7 @@ def test_invalid_data_context():
 
 
 def test_sqlalchemy_data_context(test_db_connection_string):
-    context = get_data_context('SqlAlchemy', test_db_connection_string)
+    context = get_data_context('SqlAlchemy', test_db_connection_string, echo=False)
 
     assert context.list_datasets() == ['table_1', 'table_2']
     dataset = context.get_dataset('table_1')

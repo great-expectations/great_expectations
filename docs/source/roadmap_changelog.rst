@@ -14,6 +14,8 @@ Planned Features
 
 v.0.4.4__develop
 ----------------
+* Allow users to pass args/kwargs for engine creation in
+  SqlAlchemyDataContext (#369)
 
 v.0.4.4
 ----------------
