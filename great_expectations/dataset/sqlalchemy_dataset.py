@@ -5,7 +5,6 @@ from great_expectations.dataset import Dataset
 from functools import wraps
 import inspect
 from six import PY3
-import warnings
 
 from .util import DocInherit, parse_result_format, create_multiple_expectations
 
