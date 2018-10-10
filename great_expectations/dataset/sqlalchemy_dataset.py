@@ -209,9 +209,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         if table_name is None:
             raise ValueError("No table_name provided.")
 
-        self.table_name = table_name
-        self.schema = schema
-        self._table = sa.Table(self.table_name, sa.MetaData(), schema=schema)
+        self._table = sa.Table(table_name, sa.MetaData(), schema=schema)
 
         if engine is None and connection_string is None:
             raise ValueError("Engine or connection_string must be provided.")
@@ -233,10 +231,10 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
 
         if custom_sql:
-            self.create_temporary_table(self.table_name, custom_sql)
+            self.create_temporary_table(table_name, custom_sql)
 
         insp = reflection.Inspector.from_engine(engine)
-        self.columns = insp.get_columns(self.table_name, schema=self.schema)
+        self.columns = insp.get_columns(table_name, schema=schema)
 
         # Only call super once connection is established and table_name and columns known to allow autoinspection
         super(SqlAlchemyDataset, self).__init__(*args, **kwargs)
