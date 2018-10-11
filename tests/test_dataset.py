@@ -1139,9 +1139,9 @@ class TestDataset(unittest.TestCase):
         })
         def expect_second_value_to_be(self, column, value, result_format=None, include_config=False, catch_exceptions=None, meta=None):
             return {
-                "success": column.ix[1] == value,
+                "success": column.iloc[1] == value,
                 "result": {
-                    "observed_value": column.ix[1],
+                    "observed_value": column.iloc[1],
                 }
             }
 
