@@ -16,6 +16,7 @@ v.0.4.4__develop
 ----------------
 * Remove `IF NOT EXISTS` check for custom sql temporary tables, for
   Redshift compatibility (#372)
+* Add support for custom schema in SqlAlchemyDataset (#370)
 
 v.0.4.4
 ----------------
