@@ -7,6 +7,7 @@ import json
 import jsonschema
 import os.path
 
+
 def expect_file_hash_to_equal(filename, value, hash_alg='md5'):
     """
     Return True or False indicating whether the hash matches the specified value for the default (md5) or user-specified hash algorithm
@@ -49,6 +50,7 @@ def expect_file_hash_to_equal(filename, value, hash_alg='md5'):
     except ValueError:
         raise
     return success
+
 
 def expect_file_size_to_be_between(filename, minsize, maxsize):
     """
@@ -96,6 +98,7 @@ def expect_file_size_to_be_between(filename, minsize, maxsize):
     else:
         return False
 
+
 def expect_file_to_exist(filename):
     """
     Return True or False indicating whether the specified file exists
@@ -114,6 +117,7 @@ def expect_file_to_exist(filename):
         return True
     else:
         return False
+
 
 def expect_file_unique_column_names_csv(filename,
                                         skipLines=0,
@@ -144,7 +148,7 @@ def expect_file_unique_column_names_csv(filename,
         when True, whitespace immediately following the delimiter is ignored
     escapeChar : string
         one-char string which removes any special meaning from the following character
-    
+
 
     Returns
     -------
@@ -161,10 +165,11 @@ def expect_file_unique_column_names_csv(filename,
     success = False
     try:
         with open(filename, 'r') as f:
-            reader = csv.reader(f, delimiter=sep, quotechar=quoteChar, quoting=quot, doublequote=doubleQuote, skipinitialspace=skipInitialSpace, escapechar=escapeChar, strict=True)
+            reader = csv.reader(f, delimiter=sep, quotechar=quoteChar, quoting=quot, doublequote=doubleQuote,
+                                skipinitialspace=skipInitialSpace, escapechar=escapeChar, strict=True)
             if skipLines > 0:
-              for i in range(0, skipLines):
-                  next(reader)
+                for i in range(0, skipLines):
+                    next(reader)
             colnames = next(reader)
             if len(set(colnames)) == len(colnames):
                 success = True
@@ -174,7 +179,7 @@ def expect_file_unique_column_names_csv(filename,
         raise
     return success
 
-    
+
 def expect_file_valid_json(filename, schema=None):
     """
     Return True or False indicating whether the specified file is valid JSON.

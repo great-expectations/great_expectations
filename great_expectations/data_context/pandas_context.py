@@ -4,6 +4,7 @@ import os
 from .base import DataContext
 from ..dataset.pandas_dataset import PandasDataset
 
+
 class PandasCSVDataContext(DataContext):
     """
     A PandasCSVDataContext makes it easy to get a list of files available in the list_datasets
@@ -22,5 +23,6 @@ class PandasCSVDataContext(DataContext):
         return os.listdir(self.directory)
 
     def get_dataset(self, dataset_name, *args, **kwargs):
-        df = pd.read_csv(os.path.join(self.directory, dataset_name), *args, **kwargs)
+        df = pd.read_csv(os.path.join(
+            self.directory, dataset_name), *args, **kwargs)
         return PandasDataset(df)
