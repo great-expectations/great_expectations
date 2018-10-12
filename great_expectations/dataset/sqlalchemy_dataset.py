@@ -5,7 +5,6 @@ from great_expectations.dataset import Dataset
 from functools import wraps
 import inspect
 from six import PY3
-import warnings
 
 from .util import DocInherit, parse_result_format, create_multiple_expectations
 
@@ -246,7 +245,9 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         try:
             insp = reflection.Inspector.from_engine(engine)
             self.columns = insp.get_columns(table_name, schema=schema)
-        except:
+        except KeyError:
+            # we will get a KeyError for temporary tables, since
+            # reflection will not find the temporary schema
             self.columns = self.column_reflection_fallback()
 
         # Only call super once connection is established and table_name and columns known to allow autoinspection
