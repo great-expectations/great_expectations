@@ -122,3 +122,22 @@ def test_sqlalchemydataset_with_custom_sql():
 
     result = custom_sql_dataset.expect_column_to_exist("age")
     assert result['success'] == False
+
+
+def test_column_fallback_error():
+    engine = sa.create_engine('sqlite://')
+
+    data = pd.DataFrame({
+        "name": ["Frank", "Steve", "Jane", "Frank", "Michael"],
+        "age": [16, 21, 38, 22, 10],
+        "pet": ["fish", "python", "cat", "python", "frog"]
+    })
+
+    data.to_sql(name='test_sql_data', con=engine, index=False)
+    fallback_dataset = SqlAlchemyDataset('test_sql_data', engine=engine)
+    # override columns attribute to test fallback
+    fallback_dataset.columns = fallback_dataset.column_reflection_fallback()
+
+    with pytest.raises(NotImplementedError) as err:
+        fallback_dataset.expect_column_mean_to_be_between('age', min_value=10, max_value=38)
+        assert "This method is not supported for tables which cannot be reflected." in str(err)

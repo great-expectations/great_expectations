@@ -5,6 +5,7 @@ from great_expectations.dataset import Dataset
 from functools import wraps
 import inspect
 from six import PY3
+import warnings
 
 from .util import DocInherit, parse_result_format, create_multiple_expectations
 
@@ -241,8 +242,13 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         if custom_sql:
             self.create_temporary_table(table_name, custom_sql)
 
-        insp = reflection.Inspector.from_engine(engine)
-        self.columns = insp.get_columns(table_name, schema=schema)
+
+        try:
+            insp = reflection.Inspector.from_engine(engine)
+            self.columns = insp.get_columns(table_name, schema=schema)
+        except:
+            self.columns = self.column_reflection_fallback()
+            warnings.warn("Unable to reflect this table. Expectations that require column type will not be supported.")
 
         # Only call super once connection is established and table_name and columns known to allow autoinspection
         super(SqlAlchemyDataset, self).__init__(*args, **kwargs)
@@ -259,15 +265,30 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             table_name=table_name, custom_sql=custom_sql)
         self.engine.execute(stmt)
 
+
+    def column_reflection_fallback(self):
+        """If we can't reflect the table, use a query to at least get column names."""
+        sql = sa.select([sa.text("*")]).select_from(self._table)
+        col_names = self.engine.execute(sql).keys()
+        col_dict = [{'name': col_name} for col_name in col_names]
+        return col_dict
+
+
     def _is_numeric_column(self, column):
         for col in self.columns:
-            if (col['name'] == column and
+            try:
+                if (col['name'] == column and
                     isinstance(col['type'],
                                (sa.types.Integer, sa.types.BigInteger, sa.types.Float,
                                 sa.types.Numeric, sa.types.SmallInteger, sa.types.Boolean)
-                               )
+                    )
                 ):
-                return True
+                    return True
+            except KeyError:
+                # The 'type' key will be missing from the elements of self.columns
+                # if we couldn't reflect the table during __init__
+                raise NotImplementedError(
+                    "This method is not supported for tables which cannot be reflected.")
 
         return False
 
