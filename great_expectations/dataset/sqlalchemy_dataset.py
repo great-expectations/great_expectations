@@ -248,7 +248,6 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             self.columns = insp.get_columns(table_name, schema=schema)
         except:
             self.columns = self.column_reflection_fallback()
-            warnings.warn("Unable to reflect this table. Expectations that require column type will not be supported.")
 
         # Only call super once connection is established and table_name and columns known to allow autoinspection
         super(SqlAlchemyDataset, self).__init__(*args, **kwargs)
@@ -273,24 +272,6 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         col_dict = [{'name': col_name} for col_name in col_names]
         return col_dict
 
-
-    def _is_numeric_column(self, column):
-        for col in self.columns:
-            try:
-                if (col['name'] == column and
-                    isinstance(col['type'],
-                               (sa.types.Integer, sa.types.BigInteger, sa.types.Float,
-                                sa.types.Numeric, sa.types.SmallInteger, sa.types.Boolean)
-                    )
-                ):
-                    return True
-            except KeyError:
-                # The 'type' key will be missing from the elements of self.columns
-                # if we couldn't reflect the table during __init__
-                raise NotImplementedError(
-                    "This method is not supported for tables which cannot be reflected.")
-
-        return False
 
     ###
     ###
@@ -696,9 +677,6 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         if max_value is not None and not isinstance(max_value, (Number)):
             raise ValueError("max_value must be a number")
-
-        if not self._is_numeric_column(column):
-            raise ValueError("column is not numeric")
 
         col_avg = self.engine.execute(
             sa.select([sa.func.avg(sa.column(column))]).select_from(
