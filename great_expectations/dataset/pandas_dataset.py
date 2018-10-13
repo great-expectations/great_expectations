@@ -1301,6 +1301,8 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             if (partition_object['bins'][0] == -np.inf) and (partition_object['bins'][-1]) == np.inf:
                 if tail_weight_holdout > 0:
                     raise ValueError("tail_weight_holdout cannot be used for partitions with infinite endpoints.")
+                if "tail_weights" in partition_object:
+                    raise ValueError("There can be no tail weights for partitions with one or both endpoints at infinity")
                 expected_bins = partition_object['bins'][1:-1] #Remove -inf and inf
                 
                 comb_expected_weights=expected_weights
@@ -1313,6 +1315,10 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                 
                 
             elif (partition_object['bins'][0] == -np.inf):
+                
+                if "tail_weights" in partition_object:
+                    raise ValueError("There can be no tail weights for partitions with one or both endpoints at infinity")
+                
                 expected_bins = partition_object['bins'][1:] #Remove -inf
                 
                 comb_expected_weights=np.concatenate((expected_weights,[tail_weight_holdout]))
@@ -1325,6 +1331,9 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         
             elif (partition_object['bins'][-1] == np.inf):
                 
+                if "tail_weights" in partition_object:
+                    raise ValueError("There can be no tail weights for partitions with one or both endpoints at infinity")
+                
                 expected_bins = partition_object['bins'][:-1] #Remove inf
                 
                 comb_expected_weights=np.concatenate(([tail_weight_holdout],expected_weights))
@@ -1335,7 +1344,13 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                 observed_tail_weights=np.concatenate(([below_partition/len(column)],[observed_weights[-1]])) #Set aside right tail weight and below partition weight
                 observed_weights=observed_weights[:-1] #Remove right tail weight from main observed_weights
             else:
+                
                 expected_bins = partition_object['bins'] #No need to remove -inf or inf
+                
+                if "tail_weights" in partition_object:
+                    tail_weights=partition_object["tail_weights"]
+                    comb_expected_weights=np.concatenate(([tail_weights[0]],expected_weights,[tail_weights[1]])) #Tack on tail weights
+                    expected_tail_weights=tail_weights #Tail weights are just tail_weights
                 comb_expected_weights=np.concatenate(([tail_weight_holdout / 2],expected_weights,[tail_weight_holdout / 2]))
                 expected_tail_weights=np.concatenate(([tail_weight_holdout / 2],[tail_weight_holdout / 2])) #Tail weights are just tail_weight holdout divided eaually to both tails
                 
