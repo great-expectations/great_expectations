@@ -704,15 +704,15 @@ class TestDistributionalExpectations(unittest.TestCase):
         continuous_partition_object={"weights":[0.3,0.15,0.05,0.05,0.2,0.25],
             "bins":[-np.inf,-2,-1,0,1,2,np.inf]}
         
-        try:
+        with self.assertRaises(ValueError):
+            
             actual_details=continuous_df.expect_column_kl_divergence_to_be_less_than("x",
                                                                                  continuous_partition_object,
                                                                                  0.05,
-                                                                                 tail_weight_holdout=0, 
+                                                                                 tail_weight_holdout=0.01, 
                                                                                  internal_weight_holdout=0,
                                                                                  result_format="COMPLETE")["result"]["details"]
-        except ValueError:
-            pass
+            
             
         
         #Upper at infinity, non-zero tail hold_out
@@ -809,6 +809,62 @@ class TestDistributionalExpectations(unittest.TestCase):
         
         self.assertTrue(is_valid_continuous_partition_object(actual_details["observed_partition"]))
         self.assertTrue(is_valid_continuous_partition_object(actual_details["expected_partition"]))
+        
+        
+    def test_expect_column_kl_divergence_to_be_less_than_user_tail_weights(self):
+    
+        continuous_df=ge.dataset.PandasDataset({"x":[-1.95, 1.03, 1.00, 0.81, -2.27,  0.52, 2.45, -1.19,
+                                                 -0.17, -1.54, 2.20, -2.66,  1.71,  1.59, 2.19]})
+    
+    
+    
+    #This should exit without error 
+    
+        continuous_partition_object={"weights":[0.3,0.15,0.0,0.10,0.15],
+        "bins":[-3,-2,-1,0,1,2], "tail_weights":[0.15,0.15]}
+        
+        continuous_df.expect_column_kl_divergence_to_be_less_than("x",
+                                                                  continuous_partition_object,
+                                                                  0.05)
+        
+            
+    #Error: Only one tail weight
+        continuous_partition_object={"weights":[0.3,0.15,0.0,0.10,0.30],
+                                     "bins":[-3,-2,-1,0,1,2], "tail_weights":[0.15]}
+    
+        self.assertFalse(is_valid_continuous_partition_object(continuous_partition_object))
+                                                                  
+
+        #Error: Use of tail_weights with infinite end points partition
+        continuous_partition_object={"weights":[0.3,0.15,0.0,0.10,0.15],
+        "bins":[-3,-2,-1,0,1,np.inf], "tail_weights":[0.15,0.15]}
+        
+        with self.assertRaises(ValueError):
+            continuous_df.expect_column_kl_divergence_to_be_less_than("x",
+                                                                      continuous_partition_object,
+                                                                      0.05) 
+        
+        
+        #Error: Use of tail_weights and tail_weight_holdout
+        
+        continuous_partition_object={"weights":[0.3,0.15,0.0,0.10,0.15],
+        "bins":[-3,-2,-1,0,1,2], "tail_weights":[0.15,0.15]}
+        
+        with self.assertRaises(ValueError):
+            continuous_df.expect_column_kl_divergence_to_be_less_than("x",
+                                                                      continuous_partition_object,
+                                                                      0.05,
+                                                                      tail_weight_holdout=0.01)
+        
+        #Error: Tail_weights and weights don't add to one
+        
+        continuous_partition_object={"weights":[0.3,0.15,0.0,0.10,0.16],
+        "bins":[-3,-2,-1,0,1,2], "tail_weights":[0.15,0.15]}
+        
+        self.assertFalse(is_valid_continuous_partition_object(continuous_partition_object))
+        
+        
+        
 
 
     def test_expect_column_bootstrapped_ks_test_p_value_to_be_greater_than_bad_parameters(self):
