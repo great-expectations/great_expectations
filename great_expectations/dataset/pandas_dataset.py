@@ -1223,6 +1223,9 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
         if (not isinstance(internal_weight_holdout, (int, float))) or (internal_weight_holdout < 0) or (internal_weight_holdout > 1):
             raise ValueError("internal_weight_holdout must be between zero and one.")
+            
+        if(tail_weight_holdout != 0 and "tail_weights" in partition_object):
+            raise ValueError("tail_weight_holdout must be 0 when using tail_weights in partition object")
 
         if is_valid_categorical_partition_object(partition_object):
             if internal_weight_holdout > 0:
