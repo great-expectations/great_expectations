@@ -6,7 +6,8 @@ import sys
 import great_expectations as ge
 sys.path.append("./tests")
 from test_utils import assertDeepAlmostEqual
-
+sys.path.append("./great_expectations/dataset")
+from util import is_valid_continuous_partition_object
 
 
 class TestDistributionalExpectations(unittest.TestCase):
@@ -599,9 +600,8 @@ class TestDistributionalExpectations(unittest.TestCase):
         
         
     def test_expect_column_kl_divergence_to_be_less_than_infinite_return_bins(self):
-        import great_expectations as ge
-        
-        
+    
+    
         continuous_df=ge.dataset.PandasDataset({"x":[-1.95, 1.03, 1.00, 0.81, -2.27,  0.52, 2.45, -1.19,
                                                      -0.17, -1.54, 2.20, -2.66,  1.71,  1.59, 2.19]})
         
@@ -632,6 +632,8 @@ class TestDistributionalExpectations(unittest.TestCase):
                                                                                  internal_weight_holdout=0,
                                                                                  result_format="COMPLETE")["result"]["details"]
         assertDeepAlmostEqual(expected_details,actual_details)
+        self.assertTrue(is_valid_continuous_partition_object(actual_details["observed_partition"]))
+        self.assertTrue(is_valid_continuous_partition_object(actual_details["expected_partition"]))
         
         
         
@@ -662,7 +664,8 @@ class TestDistributionalExpectations(unittest.TestCase):
                                                                                  internal_weight_holdout=0,
                                                                                  result_format="COMPLETE")["result"]["details"]
         assertDeepAlmostEqual(expected_details,actual_details)
-        
+        self.assertTrue(is_valid_continuous_partition_object(actual_details["observed_partition"]))
+        self.assertTrue(is_valid_continuous_partition_object(actual_details["expected_partition"]))
         
         
         #Infinite KL Divergence, no tail_holdout or internal_holdout
@@ -692,7 +695,8 @@ class TestDistributionalExpectations(unittest.TestCase):
                                                                                  internal_weight_holdout=0,
                                                                                  result_format="COMPLETE")["result"]["details"]
         assertDeepAlmostEqual(expected_details,actual_details)
-        
+        self.assertTrue(is_valid_continuous_partition_object(actual_details["observed_partition"]))
+        self.assertTrue(is_valid_continuous_partition_object(actual_details["expected_partition"]))
         
         
     
@@ -738,7 +742,8 @@ class TestDistributionalExpectations(unittest.TestCase):
                                                                                  result_format="COMPLETE")["result"]["details"]
         assertDeepAlmostEqual(expected_details,actual_details)
         
-        
+        self.assertTrue(is_valid_continuous_partition_object(actual_details["observed_partition"]))
+        self.assertTrue(is_valid_continuous_partition_object(actual_details["expected_partition"]))
         
     
             
@@ -770,6 +775,9 @@ class TestDistributionalExpectations(unittest.TestCase):
                                                                                  result_format="COMPLETE")["result"]["details"]
         assertDeepAlmostEqual(expected_details,actual_details)
         
+        self.assertTrue(is_valid_continuous_partition_object(actual_details["observed_partition"]))
+        self.assertTrue(is_valid_continuous_partition_object(actual_details["expected_partition"]))
+        
         
         #Bounded Endpoints, non-zero tail holdout, non-zero internal holdout
         continuous_partition_object={"weights":[0.3,0.15,0.0,0.10,0.45],
@@ -798,6 +806,9 @@ class TestDistributionalExpectations(unittest.TestCase):
                                                                                  result_format="COMPLETE")["result"]["details"]
         
         assertDeepAlmostEqual(expected_details,actual_details)
+        
+        self.assertTrue(is_valid_continuous_partition_object(actual_details["observed_partition"]))
+        self.assertTrue(is_valid_continuous_partition_object(actual_details["expected_partition"]))
 
 
     def test_expect_column_bootstrapped_ks_test_p_value_to_be_greater_than_bad_parameters(self):
