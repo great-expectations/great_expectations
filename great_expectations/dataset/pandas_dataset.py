@@ -5,8 +5,13 @@ import json
 import re
 from datetime import datetime
 from functools import wraps
-from itertools import zip_longest
 import jsonschema
+import sys
+
+if sys.version_info.major == 2:  # If python 2
+    from itertools import izip_longest as zip_longest
+elif sys.version_info.major == 3:  # If python 3
+    from itertools import zip_longest
 
 from numbers import Number
 
