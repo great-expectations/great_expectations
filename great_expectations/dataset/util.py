@@ -219,10 +219,16 @@ def is_valid_continuous_partition_object(partition_object):
     """
     if (partition_object is None) or ("weights" not in partition_object) or ("bins" not in partition_object):
         return False
+    if("tail_weights" in partition_object):
+        if (len(partition_object["tail_weights"])!=2):
+            return False
+        comb_weights=partition_object["tail_weights"]+partition_object["weights"]
+    else:
+        comb_weights=partition_object["weights"]
     # Expect one more bin edge than weight; all bin edges should be monotonically increasing; weights should sum to one
     if (len(partition_object['bins']) == (len(partition_object['weights']) + 1)) and \
             np.all(np.diff(partition_object['bins']) > 0) and \
-            np.allclose(np.sum(partition_object['weights']), 1):
+            np.allclose(np.sum(comb_weights), 1):
         return True
     return False
 
