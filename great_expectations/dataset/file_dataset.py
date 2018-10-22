@@ -132,7 +132,38 @@ class MetaFileDataset(Dataset):
         return inner_wrapper
     
     
+class FileDataset(MetaFileDataset,file):
+    """
+    FileDataset instantiates the great_expectations Expectations API as a subclass of a python file object.
+    For the full API reference, please see :func:`Dataset <great_expectations.Dataset.base.Dataset>`
+    """
 
+    # We may want to expand or alter support for subclassing dataframes in the future:
+    # See http://pandas.pydata.org/pandas-docs/stable/extending.html#extending-subclassing-pandas
+
+    @property
+    def _constructor(self):
+        return self.__class__
+
+    def __finalize__(self, other, method=None, **kwargs):
+        if isinstance(other, FileDataset):
+            self._initialize_expectations(other.get_expectations_config(
+                discard_failed_expectations=False,
+                discard_result_format_kwargs=False,
+                discard_include_configs_kwargs=False,
+                discard_catch_exceptions_kwargs=False))
+            # If other was coerced to be a PandasDataset (e.g. via _constructor call during self.copy() operation)
+            # then it may not have discard_subset_failing_expectations set. Default to self value
+            self.discard_subset_failing_expectations = getattr(other, "discard_subset_failing_expectations",
+                                                               self.discard_subset_failing_expectations)
+            if self.discard_subset_failing_expectations:
+                self.discard_failing_expectations()
+        super(FileDataset, self).__finalize__(other, method, **kwargs)
+        return self
+
+    def __init__(self, *args, **kwargs):
+        super(FileDataset, self).__init__(*args, **kwargs)
+        self.discard_subset_failing_expectations = kwargs.get('discard_subset_failing_expectations', False)
         
       
 
