@@ -220,7 +220,26 @@ def expect_file_line_regex_match_count_to_be_between(self,lines=None,regex, skip
     return truth_list
         
       
-
+@DocInherit
+@MetaFileDataset.file_map_expectation
+def expect_file_line_regex_match_count_to_equal(self,lines=None,regex,expected_count=0, skip=None,
+                                                mostly=None, result_format=None, 
+                                                include_config=False,catch_exceptions=None,meta=None):
+    
+    try:
+        comp_regex=re.compile(regex)
+    except:
+        raise ValueError("Must enter valid regular expression for regex")
+        
+    try:
+        assert float(expected_count).is_integer()
+        assert float(expected_count)>=0
+    
+    except:
+        raise ValueError("expected_count must be a non-negative integer")
+        
+    return [True if(comp_regex.findall(line) == expected_count) else False \
+                            for line in lines]
     
     
     
