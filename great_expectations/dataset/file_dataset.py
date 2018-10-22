@@ -51,18 +51,8 @@ class MetaFileDataset(Dataset):
             
             lines=self.readlines() #Read in file lines
 
-            # FIXME temporary fix for missing/ignored value
-#            if func.__name__ in ['expect_column_values_to_not_be_null', 'expect_column_values_to_be_null']:
-#                ignore_values = []
 
 
-
-            # FIXME rename to mapped_ignore_values?
-#            if len(ignore_values) == 0:
-#                boolean_mapped_null_values = np.array([False for value in series])
-#            else:
-#                boolean_mapped_null_values = np.array([True if (value in ignore_values) or (pd.isnull(value)) else False
-#                                                       for value in series])
             
             
             #Skip k initial lines designated by the user
@@ -116,13 +106,7 @@ class MetaFileDataset(Dataset):
                 unexpected_list, unexpected_index_list
             )
 
-            # FIXME Temp fix for result format
-#            if func.__name__ in ['expect_column_values_to_not_be_null', 'expect_column_values_to_be_null']:
-#                del return_obj['result']['unexpected_percent_nonmissing']
-#                try:
-#                    del return_obj['result']['partial_unexpected_counts']
-#                except KeyError:
-#                    pass
+
 
             return return_obj
 
@@ -138,8 +122,6 @@ class FileDataset(MetaFileDataset,file):
     For the full API reference, please see :func:`Dataset <great_expectations.Dataset.base.Dataset>`
     """
 
-    # We may want to expand or alter support for subclassing dataframes in the future:
-    # See http://pandas.pydata.org/pandas-docs/stable/extending.html#extending-subclassing-pandas
 
     @property
     def _constructor(self):
