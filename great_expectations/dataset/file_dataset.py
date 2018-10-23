@@ -147,80 +147,80 @@ class FileDataset(MetaFileDataset,file):
         self.discard_subset_failing_expectations = kwargs.get('discard_subset_failing_expectations', False)
         
         
-@DocInherit
-@MetaFileDataset.file_map_expectation
-        
-def expect_file_line_regex_match_count_to_be_between(self,regex,lines=None, skip=None,
-                                                     expected_min_count=0, expected_max_count=None,
-                                                     mostly=None, result_format=None, include_config=False, 
-                                                     catch_exceptions=None, meta=None):
-    
-    
-    try:
-        comp_regex=re.compile(regex)
-    except:
-        raise ValueError("Must enter valid regular expression for regex")
-    
-    if expected_min_count != None:
-        try:
-            assert float(expected_min_count).is_integer()
-            assert float(expected_min_count)>=0
-        except:
-            raise ValueError("expected_min_count must be a non-negative integer or None")
+    @DocInherit
+    @MetaFileDataset.file_map_expectation
             
-    
-    if expected_max_count != None:
+    def expect_file_line_regex_match_count_to_be_between(self,regex,lines=None, skip=None,
+                                                         expected_min_count=0, expected_max_count=None,
+                                                         mostly=None, result_format=None, include_config=False, 
+                                                         catch_exceptions=None, meta=None):
+        
+        
         try:
-            assert float(expected_max_count).is_integer()
-            assert float(expected_max_count)>=0
+            comp_regex=re.compile(regex)
         except:
-            raise ValueError("expected_max_count must be a non-negative integer or None")
+            raise ValueError("Must enter valid regular expression for regex")
+        
+        if expected_min_count != None:
+            try:
+                assert float(expected_min_count).is_integer()
+                assert float(expected_min_count)>=0
+            except:
+                raise ValueError("expected_min_count must be a non-negative integer or None")
+                
+        
+        if expected_max_count != None:
+            try:
+                assert float(expected_max_count).is_integer()
+                assert float(expected_max_count)>=0
+            except:
+                raise ValueError("expected_max_count must be a non-negative integer or None")
+                
+        if expected_max_count !=None and expected_min_count != None:
+            try:
+                assert (expected_max_count >= expected_min_count)
+            except:
+                raise ValueError("expected_max_count must be greater than or equal to expected_min_count")
+         
+        
+        if expected_max_count!=None and expected_min_count!=None: 
+            truth_list=[True if(comp_regex.findall(line)>= expected_min_count and \
+                                comp_regex.findall(line) <= expected_max_count) else False \
+                                for line in lines]
+        
+        elif(expected_max_count!=None):
+            truth_list=[True if(comp_regex.findall(line)>= expected_min_count) else False \
+                                for line in lines]
             
-    if expected_max_count !=None and expected_min_count != None:
+        elif(expected_min_count!=None):
+              truth_list=[True if(comp_regex.findall(line) <= expected_max_count) else False \
+                                for line in lines]
+        else:
+            truth_list=[True for line in lines]
+            
+        return truth_list
+            
+          
+    @DocInherit
+    @MetaFileDataset.file_map_expectation
+    def expect_file_line_regex_match_count_to_equal(self,regex, lines=None,expected_count=0, skip=None,
+                                                    mostly=None, result_format=None, 
+                                                    include_config=False,catch_exceptions=None,meta=None):
+        
         try:
-            assert (expected_max_count >= expected_min_count)
+            comp_regex=re.compile(regex)
         except:
-            raise ValueError("expected_max_count must be greater than or equal to expected_min_count")
-     
-    
-    if expected_max_count!=None and expected_min_count!=None: 
-        truth_list=[True if(comp_regex.findall(line)>= expected_min_count and \
-                            comp_regex.findall(line) <= expected_max_count) else False \
-                            for line in lines]
-    
-    elif(expected_max_count!=None):
-        truth_list=[True if(comp_regex.findall(line)>= expected_min_count) else False \
-                            for line in lines]
+            raise ValueError("Must enter valid regular expression for regex")
+            
+        try:
+            assert float(expected_count).is_integer()
+            assert float(expected_count)>=0
         
-    elif(expected_min_count!=None):
-          truth_list=[True if(comp_regex.findall(line) <= expected_max_count) else False \
-                            for line in lines]
-    else:
-        truth_list=[True for line in lines]
-        
-    return truth_list
-        
-      
-@DocInherit
-@MetaFileDataset.file_map_expectation
-def expect_file_line_regex_match_count_to_equal(self,regex, lines=None,expected_count=0, skip=None,
-                                                mostly=None, result_format=None, 
-                                                include_config=False,catch_exceptions=None,meta=None):
-    
-    try:
-        comp_regex=re.compile(regex)
-    except:
-        raise ValueError("Must enter valid regular expression for regex")
-        
-    try:
-        assert float(expected_count).is_integer()
-        assert float(expected_count)>=0
-    
-    except:
-        raise ValueError("expected_count must be a non-negative integer")
-        
-    return [True if(comp_regex.findall(line) == expected_count) else False \
-                            for line in lines]
+        except:
+            raise ValueError("expected_count must be a non-negative integer")
+            
+        return [True if(comp_regex.findall(line) == expected_count) else False \
+                                for line in lines]
     
     
     
