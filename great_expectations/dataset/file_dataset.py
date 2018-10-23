@@ -150,7 +150,7 @@ class FileDataset(MetaFileDataset,file):
 @DocInherit
 @MetaFileDataset.file_map_expectation
         
-def expect_file_line_regex_match_count_to_be_between(self,rexeg,lines=None, skip=None,
+def expect_file_line_regex_match_count_to_be_between(self,regex,lines=None, skip=None,
                                                      expected_min_count=0, expected_max_count=None,
                                                      mostly=None, result_format=None, include_config=False, 
                                                      catch_exceptions=None, meta=None):
