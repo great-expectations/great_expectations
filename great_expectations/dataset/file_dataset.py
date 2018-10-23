@@ -72,7 +72,7 @@ class MetaFileDataset(Dataset):
 
             element_count = int(len(lines))
 
-            # FIXME rename nonnull to non_ignored?
+
             nonnull_lines = lines[boolean_mapped_null_lines==False]
             nonnull_count = int((boolean_mapped_null_lines==False).sum())
 
@@ -134,8 +134,7 @@ class FileDataset(MetaFileDataset,file):
                 discard_result_format_kwargs=False,
                 discard_include_configs_kwargs=False,
                 discard_catch_exceptions_kwargs=False))
-            # If other was coerced to be a PandasDataset (e.g. via _constructor call during self.copy() operation)
-            # then it may not have discard_subset_failing_expectations set. Default to self value
+            
             self.discard_subset_failing_expectations = getattr(other, "discard_subset_failing_expectations",
                                                                self.discard_subset_failing_expectations)
             if self.discard_subset_failing_expectations:
@@ -151,7 +150,7 @@ class FileDataset(MetaFileDataset,file):
 @DocInherit
 @MetaFileDataset.file_map_expectation
         
-def expect_file_line_regex_match_count_to_be_between(self,lines=None,regex, skip=None,
+def expect_file_line_regex_match_count_to_be_between(self,rexeg,lines=None, skip=None,
                                                      expected_min_count=0, expected_max_count=None,
                                                      mostly=None, result_format=None, include_config=False, 
                                                      catch_exceptions=None, meta=None):
@@ -204,7 +203,7 @@ def expect_file_line_regex_match_count_to_be_between(self,lines=None,regex, skip
       
 @DocInherit
 @MetaFileDataset.file_map_expectation
-def expect_file_line_regex_match_count_to_equal(self,lines=None,regex,expected_count=0, skip=None,
+def expect_file_line_regex_match_count_to_equal(self,regex, lines=None,expected_count=0, skip=None,
                                                 mostly=None, result_format=None, 
                                                 include_config=False,catch_exceptions=None,meta=None):
     
