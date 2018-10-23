@@ -79,35 +79,35 @@ class MetaFileDataset(Dataset):
             boolean_mapped_success_lines = func(self, nonnull_lines, *args, **kwargs)
             success_count = np.count_nonzero(boolean_mapped_success_lines)
 
-            unexpected_list = list(nonnull_values[boolean_mapped_success_lines==False])
-            unexpected_index_list = list(nonnull_values[boolean_mapped_success_lines==False].index)
+            unexpected_list = list(nonnull_lines[boolean_mapped_success_lines==False])
+            unexpected_index_list = list(nonnull_lines[boolean_mapped_success_lines==False].index)
 
             #success, percent_success = self._calc_map_expectation_success(success_count, nonnull_count, mostly)
             
             
-        if nonnull_count > 0:
-            
-            percent_success = success_count / nonnull_count
-
-            if mostly != None:
-                success = bool(percent_success >= mostly)
-
+            if nonnull_count > 0:
+                
+                percent_success = success_count / nonnull_count
+    
+                if mostly != None:
+                    success = bool(percent_success >= mostly)
+    
+                else:
+                    success = bool(nonnull_count-success_count == 0)
+    
             else:
-                success = bool(nonnull_count-success_count == 0)
-
-        else:
-            success = True
-            percent_success = None
-            
-
-            return_obj = self._format_column_map_output(
-                result_format, success,
-                element_count, nonnull_count,
-                unexpected_list, unexpected_index_list
-            )
-
-
-
+                success = True
+                percent_success = None
+                
+    
+                return_obj = self._format_column_map_output(
+                    result_format, success,
+                    element_count, nonnull_count,
+                    unexpected_list, unexpected_index_list
+                )
+    
+    
+    
             return return_obj
 
         inner_wrapper.__name__ = func.__name__
