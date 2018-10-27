@@ -170,16 +170,16 @@ class FileDataset(MetaFileDataset):
          
         
         if expected_max_count!=None and expected_min_count!=None: 
-            truth_list=[True if(comp_regex.findall(line)>= expected_min_count and \
-                                comp_regex.findall(line) <= expected_max_count) else False \
+            truth_list=[True if(len(comp_regex.findall(line))>= expected_min_count and \
+                                len(comp_regex.findall(line)) <= expected_max_count) else False \
                                 for line in lines]
         
         elif(expected_max_count!=None):
-            truth_list=[True if(comp_regex.findall(line)>= expected_min_count) else False \
+            truth_list=[True if(len(comp_regex.findall(line))>= expected_min_count) else False \
                                 for line in lines]
             
         elif(expected_min_count!=None):
-              truth_list=[True if(comp_regex.findall(line) <= expected_max_count) else False \
+              truth_list=[True if(len(comp_regex.findall(line)) <= expected_max_count) else False \
                                 for line in lines]
         else:
             truth_list=[True for line in lines]
@@ -205,7 +205,7 @@ class FileDataset(MetaFileDataset):
         except:
             raise ValueError("expected_count must be a non-negative integer")
             
-        return [True if(comp_regex.findall(line) == expected_count) else False \
+        return [True if(len(comp_regex.findall(line)) == expected_count) else False \
                                 for line in lines]
     
     
