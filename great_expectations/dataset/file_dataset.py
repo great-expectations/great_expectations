@@ -10,7 +10,7 @@ from __future__ import division
 from .base import Dataset
 import re
 import numpy as np
-
+from itertools import compress
 from six import PY3
 from .util import DocInherit, parse_result_format
 import inspect
@@ -73,14 +73,16 @@ class MetaFileDataset(Dataset):
             element_count = int(len(lines))
 
 
-            nonnull_lines = lines[boolean_mapped_null_lines==False]
+            nonnull_lines = list(compress(lines,np.invert(boolean_mapped_null_lines)))
             nonnull_count = int((boolean_mapped_null_lines==False).sum())
 
-            boolean_mapped_success_lines = func(self, nonnull_lines, *args, **kwargs)
+            boolean_mapped_success_lines = np.array(func(self, nonnull_lines, *args, **kwargs))
             success_count = np.count_nonzero(boolean_mapped_success_lines)
 
-            unexpected_list = list(nonnull_lines[boolean_mapped_success_lines==False])
-            unexpected_index_list = list(nonnull_lines[boolean_mapped_success_lines==False].index)
+
+            unexpected_list = list(compress(nonnull_lines,np.invert(boolean_mapped_success_lines)))
+            nonnull_lines_index=list(xrange(len(nonnull_lines)))
+            unexpected_index_list = list(compress(nonnull_lines_index,np.invert(boolean_mapped_success_lines)))
 
             #success, percent_success = self._calc_map_expectation_success(success_count, nonnull_count, mostly)
             
@@ -131,7 +133,7 @@ class FileDataset(MetaFileDataset):
         
         
         
-    @DocInherit
+#    @DocInherit
     @MetaFileDataset.file_map_expectation
             
     def expect_file_line_regex_match_count_to_be_between(self,regex,lines=None, skip=None,
@@ -185,7 +187,7 @@ class FileDataset(MetaFileDataset):
         return truth_list
             
           
-    @DocInherit
+#    @DocInherit
     @MetaFileDataset.file_map_expectation
     def expect_file_line_regex_match_count_to_equal(self,regex, lines=None,expected_count=0, skip=None,
                                                     mostly=None, result_format=None, 
