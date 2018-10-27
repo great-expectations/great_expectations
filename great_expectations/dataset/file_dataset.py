@@ -84,24 +84,9 @@ class MetaFileDataset(Dataset):
             nonnull_lines_index=list(xrange(len(nonnull_lines)))
             unexpected_index_list = list(compress(nonnull_lines_index,np.invert(boolean_mapped_success_lines)))
 
-            #success, percent_success = self._calc_map_expectation_success(success_count, nonnull_count, mostly)
+            success, percent_success = self._calc_map_expectation_success(success_count, nonnull_count, mostly)
             
             
-            if nonnull_count > 0:
-                
-                percent_success = success_count / nonnull_count
-    
-                if mostly != None:
-                    success = bool(percent_success >= mostly)
-    
-                else:
-                    success = bool(nonnull_count-success_count == 0)
-    
-            else:
-                success = True
-                percent_success = None
-                
-    
             return_obj = self._format_column_map_output(
                 result_format, success,
                 element_count, nonnull_count,
@@ -175,11 +160,11 @@ class FileDataset(MetaFileDataset):
                                 for line in lines]
         
         elif(expected_max_count!=None):
-            truth_list=[True if(len(comp_regex.findall(line))>= expected_min_count) else False \
+            truth_list=[True if(len(comp_regex.findall(line))<= expected_max_count) else False \
                                 for line in lines]
             
         elif(expected_min_count!=None):
-              truth_list=[True if(len(comp_regex.findall(line)) <= expected_max_count) else False \
+              truth_list=[True if(len(comp_regex.findall(line)) >= expected_min_count) else False \
                                 for line in lines]
         else:
             truth_list=[True for line in lines]
