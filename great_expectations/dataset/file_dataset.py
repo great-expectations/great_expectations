@@ -12,7 +12,7 @@ import re
 import numpy as np
 
 from six import PY3
-from .util import DocInherit
+from .util import DocInherit, parse_result_format
 import inspect
 from functools import wraps
 
