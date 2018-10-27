@@ -50,7 +50,7 @@ class MetaFileDataset(Dataset):
             result_format = parse_result_format(result_format)
             
             lines=self.f.readlines() #Read in file lines
-
+            self.f.seek(0)
 
 
             
