@@ -116,7 +116,7 @@ class MetaFileDataset(Dataset):
         return inner_wrapper
     
     
-class FileDataset(MetaFileDataset,file):
+class FileDataset(MetaFileDataset):
     """
     FileDataset instantiates the great_expectations Expectations API as a subclass of a python file object.
     For the full API reference, please see :func:`Dataset <great_expectations.Dataset.base.Dataset>`
