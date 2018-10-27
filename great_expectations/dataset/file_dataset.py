@@ -123,9 +123,6 @@ class FileDataset(MetaFileDataset,file):
     """
 
 
-    @property
-    def _constructor(self):
-        return self.__class__
 
     def __finalize__(self, other, method=None, **kwargs):
         if isinstance(other, FileDataset):
