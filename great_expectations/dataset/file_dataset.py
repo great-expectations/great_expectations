@@ -76,7 +76,7 @@ class MetaFileDataset(Dataset):
             nonnull_lines = list(compress(lines,np.invert(boolean_mapped_null_lines)))
             nonnull_count = int((boolean_mapped_null_lines==False).sum())
 
-            boolean_mapped_success_lines = np.array(func(self, nonnull_lines, *args, **kwargs))
+            boolean_mapped_success_lines = np.array(func(self, lines=nonnull_lines, *args, **kwargs))
             success_count = np.count_nonzero(boolean_mapped_success_lines)
 
 
@@ -102,11 +102,11 @@ class MetaFileDataset(Dataset):
                 percent_success = None
                 
     
-                return_obj = self._format_column_map_output(
-                    result_format, success,
-                    element_count, nonnull_count,
-                    unexpected_list, unexpected_index_list
-                )
+            return_obj = self._format_column_map_output(
+                result_format, success,
+                element_count, nonnull_count,
+                unexpected_list, unexpected_index_list
+            )
     
     
     
