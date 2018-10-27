@@ -123,22 +123,6 @@ class FileDataset(MetaFileDataset,file):
     """
 
 
-
-    def __finalize__(self, other, method=None, **kwargs):
-        if isinstance(other, FileDataset):
-            self._initialize_expectations(other.get_expectations_config(
-                discard_failed_expectations=False,
-                discard_result_format_kwargs=False,
-                discard_include_configs_kwargs=False,
-                discard_catch_exceptions_kwargs=False))
-            
-            self.discard_subset_failing_expectations = getattr(other, "discard_subset_failing_expectations",
-                                                               self.discard_subset_failing_expectations)
-            if self.discard_subset_failing_expectations:
-                self.discard_failing_expectations()
-        super(FileDataset, self).__finalize__(other, method, **kwargs)
-        return self
-
     def __init__(self, *args, **kwargs):
         super(FileDataset, self).__init__(*args, **kwargs)
         self.discard_subset_failing_expectations = kwargs.get('discard_subset_failing_expectations', False)
