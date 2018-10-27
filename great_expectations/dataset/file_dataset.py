@@ -49,7 +49,7 @@ class MetaFileDataset(Dataset):
 
             result_format = parse_result_format(result_format)
             
-            lines=self.readlines() #Read in file lines
+            lines=self.f.readlines() #Read in file lines
 
 
 
@@ -123,9 +123,14 @@ class FileDataset(MetaFileDataset,file):
     """
 
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, file_path, *args, **kwargs):
         super(FileDataset, self).__init__(*args, **kwargs)
         self.discard_subset_failing_expectations = kwargs.get('discard_subset_failing_expectations', False)
+        self.f=open(file_path,"r")
+        
+    def __del__(self):
+        self.f.close()
+        
         
         
     @DocInherit
