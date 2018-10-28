@@ -5,6 +5,12 @@ from great_expectations.dataset import Dataset
 from functools import wraps
 import inspect
 from six import PY3
+import sys
+
+if sys.version_info.major == 2:  # If python 2
+    from itertools import izip_longest as zip_longest
+elif sys.version_info.major == 3:  # If python 3
+    from itertools import zip_longest
 
 from .util import DocInherit, parse_result_format, create_multiple_expectations
 
@@ -351,14 +357,31 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
     @Dataset.expectation(['column_list'])
     def expect_table_columns_to_match_ordered_list(self, column_list,
                                                    result_format=None, include_config=False, catch_exceptions=None, meta=None):
+        """
+        Checks if observed columns are in the expected order. The expectations will fail if columns are out of expected
+        order, columns are missing, or additional columns are present. On failure, details are provided on the location
+        of the unexpected column(s).
+        """
+        observed_columns = [col['name'] for col in self.columns]
 
-        if [col['name'] for col in self.columns] == list(column_list):
+        if observed_columns == list(column_list):
             return {
                 "success": True
             }
         else:
+            # In the case of differing column lengths between the defined expectation and the observed column set, the
+            # max is determined to generate the column_index.
+            number_of_columns = max(len(column_list), len(observed_columns))
+            column_index = range(number_of_columns)
+
+            # Create a list of the mismatched details
+            compared_lists = list(zip_longest(column_index, list(column_list), observed_columns))
+            mismatched = [{"Expected Column Position": i,
+                           "Expected": k,
+                           "Found": v} for i, k, v in compared_lists if k != v]
             return {
-                "success": False
+                "success": False,
+                "details": {"mismatched": mismatched}
             }
 
     @DocInherit
