@@ -118,7 +118,7 @@ class FileDataset(MetaFileDataset):
         
         
         
-#    @DocInherit
+    @DocInherit
     @MetaFileDataset.file_map_expectation
             
     def expect_file_line_regex_match_count_to_be_between(self,regex,lines=None, skip=None,
@@ -172,7 +172,7 @@ class FileDataset(MetaFileDataset):
         return truth_list
             
           
-#    @DocInherit
+    @DocInherit
     @MetaFileDataset.file_map_expectation
     def expect_file_line_regex_match_count_to_equal(self,regex, lines=None,expected_count=0, skip=None,
                                                     mostly=None, result_format=None, 
