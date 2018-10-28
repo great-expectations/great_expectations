@@ -318,15 +318,22 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
     @Dataset.expectation(['column_list'])
     def expect_table_columns_to_match_ordered_list(self, column_list,
                                result_format=None, include_config=False, catch_exceptions=None, meta=None):
-
+        """
+        Checks if observed columns are in the expected order. The expectations will fail if columns are out of expected
+        order, columns are missing, or additional columns are present. On failure, details are provided on the location
+        of the unexpected column(s).
+        """
         if list(self.columns) == list(column_list):
             return {
                 "success": True
             }
         else:
+            # In the case of differing column lengths between the defined expectation and the observed column set, the
+            # max is determined to generate the column_index.
             number_of_columns = max(len(column_list), len(self.columns))
             column_index = range(number_of_columns)
 
+            # Create a list of the mismatched details
             compared_lists = list(zip_longest(column_index, list(column_list), list(self.columns)))
             mismatched = [{"Expected Column Position": i,
                            "Expected": k,
