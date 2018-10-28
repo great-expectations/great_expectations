@@ -240,6 +240,30 @@ class Dataset(object):
             for an example of a column_aggregate_expectation
         """
         raise NotImplementedError
+        
+    @classmethod
+    def file_map_expectation(cls, func):
+        
+        """Constructs an expectation using file-map semantics.
+
+        The file_map_expectations decorator handles boilerplate issues surrounding the common pattern of \
+        evaluating truthiness of some condition on an line by line basis in a file.
+
+        Args:
+            func (function): \
+                The function implementing an expectation that will be applied line by line across a file \
+                The function should take a file and return information about how many lines met expectations.
+
+        Notes:
+            Users can specify skip value k that will cause the expectation function to disregard the first
+            k lines of the file
+
+        See also:
+            :func:`expect_file_line_regex_match_count_to_be_between <great_expectations.dataset.base.Dataset.expect_file_line_regex_match_count_to_be_between>` \
+            for an example of a file_map_expectation
+        """
+        raise NotImplementedError
+        
 
     def _initialize_expectations(self, config=None, name=None):
         """Instantiates `_expectations_config` as empty by default or with a specified expectation `config`.
