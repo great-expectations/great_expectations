@@ -3464,7 +3464,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
             
         """
-    raise NotImplementedError
+        raise NotImplementedError
         
 ValidationStatistics = namedtuple("ValidationStatistics", [
     "evaluated_expectations",
