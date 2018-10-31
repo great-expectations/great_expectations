@@ -3409,62 +3409,62 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         raise NotImplementedError
         
     
-        def expect_file_line_regex_match_count_to_equal(self,regex, lines=None,expected_count=0, skip=None,
-                                                    mostly=None, result_format=None, 
-                                                    include_config=False,catch_exceptions=None,meta=None):
-            
-
-            """
-            Expect the number of times a regular expression appears on each line of a file to equal some
-            expected count
-            
-            Args: regex: 
-                A string that can be compiled as valid regular expression 
-            
-            Keyword Args:
-                lines: \
-                    An empty variable that recieves the file lines from the file_map_expectation method.
-                    It doesn't matter what the user gives for this value as it will be replaced with the lines 
-                    of the file by file_map_expecation. It is recommended the user ignore this argument and leave
-                    it at its default.
-                
-                skip (nonnegative integer): \
-                    Integer specifying the first lines in the file the method should skip before assessing 
-                    expectations
-                
-                expected_count (None or nonnegative integer): \
-                    Specifies the number of times regex is expected to appear on each line of the 
-                    file
-                
-                
-                mostly (None or number between 0 and 1): \
-                
-                    Specifies an acceptable error for expectations. If the percentage of unexpected lines is 
-                    less than mostly, the method still returns true even if all lines don't match the 
-                    expectation criteria.
-                
-                result_format (str or None): \
-                    Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
-                    For more detail, see :ref:`result_format <result_format>`.
-                include_config (boolean): \
-                    If True, then include the expectation config as part of the result object. \
-                    For more detail, see :ref:`include_config`.
-                catch_exceptions (boolean or None): \
-                    If True, then catch exceptions and include them as part of the result object. \
-                    For more detail, see :ref:`catch_exceptions`.
-                meta (dict or None): \
-                    A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
-                    For more detail, see :ref:`meta`.
-                    
-            Returns:
-                
-                A JSON-serializable expectation result object.
+    def expect_file_line_regex_match_count_to_equal(self,regex, lines=None,expected_count=0, skip=None,
+                                                mostly=None, result_format=None, 
+                                                include_config=False,catch_exceptions=None,meta=None):
         
-                Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
-                :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+        """
+        Expect the number of times a regular expression appears on each line of a file to equal some
+        expected count
+        
+        Args: regex: 
+            A string that can be compiled as valid regular expression 
+        
+        Keyword Args:
+            lines: \
+                An empty variable that recieves the file lines from the file_map_expectation method.
+                It doesn't matter what the user gives for this value as it will be replaced with the lines 
+                of the file by file_map_expecation. It is recommended the user ignore this argument and leave
+                it at its default.
+            
+            skip (nonnegative integer): \
+                Integer specifying the first lines in the file the method should skip before assessing 
+                expectations
+            
+            expected_count (None or nonnegative integer): \
+                Specifies the number of times regex is expected to appear on each line of the 
+                file
+            
+            
+            mostly (None or number between 0 and 1): \
+            
+                Specifies an acceptable error for expectations. If the percentage of unexpected lines is 
+                less than mostly, the method still returns true even if all lines don't match the 
+                expectation criteria.
+            
+            result_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`result_format <result_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
                 
-            """
-        raise NotImplementedError
+        Returns:
+            
+            A JSON-serializable expectation result object.
+    
+            Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+            
+        """
+    raise NotImplementedError
         
 ValidationStatistics = namedtuple("ValidationStatistics", [
     "evaluated_expectations",
