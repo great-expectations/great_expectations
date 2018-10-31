@@ -81,7 +81,7 @@ class MetaFileDataset(Dataset):
 
 
             unexpected_list = list(compress(nonnull_lines,np.invert(boolean_mapped_success_lines)))
-            nonnull_lines_index=list(xrange(len(nonnull_lines)))
+            nonnull_lines_index=range(0, len(nonnull_lines)+1)
             unexpected_index_list = list(compress(nonnull_lines_index,np.invert(boolean_mapped_success_lines)))
 
             success, percent_success = self._calc_map_expectation_success(success_count, nonnull_count, mostly)
