@@ -12,7 +12,7 @@ import pytest
 
 
 
-def expect_file_line_regex_match_count_to_be_between_test():
+def test_expect_file_line_regex_match_count_to_be_between():
     
     complete_data=open('./tests/test_sets/Titanic.csv',"r")
     
@@ -101,7 +101,7 @@ def expect_file_line_regex_match_count_to_be_between_test():
     
   
     
-def expect_file_line_regex_match_count_to_equal_test():
+def test_expect_file_line_regex_match_count_to_equal():
     
     complete_data=open('./tests/test_sets/Titanic.csv',"r")
     incomplete_data=open('./tests/test_sets/Titanic_incomplete.csv')
