@@ -106,7 +106,34 @@ def test_expectation_config_filedataset():
 
 
     
+#Raise NotImplementedError when using FileDataset expectations from Dataset object
+def test_filedataset_expectations_NotImplementedError():
+   
+    #Create Dataset objects
     
+    f_dat=ge.dataset.Dataset() 
+    
+    #Test expect_file_line_regex+match_count_to_equal
+    
+    with pytest.raises(NotImplementedError):
+        
+        try:
+            f_dat.expect_file_line_regex_match_count_to_equal(regex=',\S',
+                                                            expected_count=3,
+                                                            skip=1,result_format="BASIC")
+        except:
+            raise
+   
+    #Test expect_file_line_regex+match_count_to_between
+    with pytest.raises(NotImplementedError):
+        
+        try:
+            f_dat.expect_file_line_regex_match_count_to_be_between(regex=',\S',
+                                                            max_expected_count=3,
+                                                            skip=1,result_format="BASIC")
+        except:
+            raise
+                
     
     
 
