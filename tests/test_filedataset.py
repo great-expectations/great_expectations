@@ -59,11 +59,7 @@ def test_expectation_config_filedataset():
     expected_config_expectations=[{'expectation_type': 'expect_file_line_regex_match_count_to_equal',
                                        'kwargs': {'expected_count': 3,
                                                   'regex': ',\\S',
-                                                  "skip":1}},
-                                      {'expectation_type':'expect_file_line_regex_match_count_to_be_between',
-                                       'kwargs':{'expected_max_count':4,
-                                                "regex":",\\S",
-                                                "skip":1}}]
+                                                  "skip":1}}]
     
     assertDeepAlmostEqual(complete_config["expectations"],expected_config_expectations)
     
@@ -129,7 +125,7 @@ def test_filedataset_expectations_NotImplementedError():
         
         try:
             f_dat.expect_file_line_regex_match_count_to_be_between(regex=',\S',
-                                                            max_expected_count=3,
+                                                            expected_max_count=3,
                                                             skip=1,result_format="BASIC")
         except:
             raise
