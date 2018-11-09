@@ -6,7 +6,7 @@ from functools import wraps
 import inspect
 from six import PY3
 
-from .util import DocInherit, parse_result_format, create_multiple_expectations
+from .util import DocInherit, parse_result_format
 
 import sqlalchemy as sa
 from sqlalchemy.engine import reflection
@@ -252,7 +252,6 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             # a user-defined schema
             raise ValueError("Cannot specify both schema and custom_sql.")
 
-
         if custom_sql:
             self.create_temporary_table(table_name, custom_sql)
 
@@ -261,7 +260,6 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         # Only call super once connection is established and table_name and columns known to allow autoinspection
         super(SqlAlchemyDataset, self).__init__(*args, **kwargs)
-
 
     def create_temporary_table(self, table_name, custom_sql):
         """
@@ -277,11 +275,11 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
     def _is_numeric_column(self, column):
         for col in self.columns:
             if (col['name'] == column and
-                    isinstance(col['type'],
-                               (sa.types.Integer, sa.types.BigInteger, sa.types.Float,
-                                sa.types.Numeric, sa.types.SmallInteger, sa.types.Boolean)
-                               )
-                ):
+                        isinstance(col['type'],
+                                   (sa.types.Integer, sa.types.BigInteger, sa.types.Float,
+                                    sa.types.Numeric, sa.types.SmallInteger, sa.types.Boolean)
+                                   )
+                    ):
                 return True
 
         return False
@@ -789,7 +787,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                     ((max_value is None) or (column_median <= max_value)),
                 'result': {
                     'observed_value': column_median
-                    }
+                }
             }
 
     @MetaSqlAlchemyDataset.column_map_expectation
@@ -802,7 +800,6 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             having(sa.func.count(sa.column(column)) > 1)
 
         return sa.column(column).notin_(dup_query)
-
 
     @DocInherit
     @MetaSqlAlchemyDataset.column_aggregate_expectation

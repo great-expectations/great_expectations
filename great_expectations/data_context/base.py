@@ -4,6 +4,7 @@ class DataContext(object):
 
     Warning: this feature is new in v0.4 and may change based on community feedback.
     """
+
     def __init__(self, options, *args, **kwargs):
         self.connect(options, *args, **kwargs)
 
