@@ -16,9 +16,9 @@ def test_autoinspect_filedataset():
     #Expect a warning to be raised since a file object doesn't have a columns attribute
     
     warnings.simplefilter('always', UserWarning)
-    f=open('./tests/test_sets/toy_data_complete.csv',"r")
+    file_path=('./tests/test_sets/toy_data_complete.csv')
     
-    my_file_data=ge.dataset.FileDataset(f)
+    my_file_data=ge.dataset.FileDataset(file_path)
     
     with pytest.raises(UserWarning):
         with warnings.catch_warnings(record=True):
@@ -28,17 +28,17 @@ def test_autoinspect_filedataset():
             except:
                 raise
     
-    f.close()
+    my_file_data.close()
     
     
 def test_expectation_config_filedataset():
    
     #Load in data files
-    f=open('./tests/test_sets/toy_data_complete.csv',"r")
+    file_path='./tests/test_sets/toy_data_complete.csv'
     
     #Create FileDataset objects
     
-    f_dat=ge.dataset.FileDataset(f)
+    f_dat=ge.dataset.FileDataset(file_path)
     
     
     #Set up expectations
@@ -97,7 +97,7 @@ def test_expectation_config_filedataset():
     
     assertDeepAlmostEqual(complete_config3["expectations"],expected_config_expectations3)
     
-    f.close()
+    f_dat.close()
     
 
 
