@@ -7,7 +7,7 @@ Created on Sat Oct 20 13:49:29 2018
 
 from __future__ import division
 
-from .base import Dataset
+from .base import DataFile
 import re
 import numpy as np
 from itertools import compress
@@ -17,7 +17,7 @@ import inspect
 from functools import wraps
 
 
-class MetaFileDataset(Dataset):
+class MetaFileDataset(DataFile):
     """MetaFileDataset is a thin layer between Dataset and FileDataset.
     This two-layer inheritance is required to make @classmethod decorators work.
     Practically speaking, that means that MetaFileDataset implements \
@@ -87,7 +87,7 @@ class MetaFileDataset(Dataset):
             success, percent_success = self._calc_map_expectation_success(success_count, nonnull_count, mostly)
             
             
-            return_obj = self._format_column_map_output(
+            return_obj = self._format_file_map_output(
                 result_format, success,
                 element_count, nonnull_count,
                 unexpected_list, unexpected_index_list

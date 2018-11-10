@@ -1,6 +1,6 @@
 from __future__ import division
 
-from great_expectations.dataset import Dataset
+from great_expectations.dataset import Dataset, DataTable
 
 from functools import wraps
 import inspect
@@ -14,7 +14,7 @@ from sqlalchemy.engine import reflection
 from numbers import Number
 
 
-class MetaSqlAlchemyDataset(Dataset):
+class MetaSqlAlchemyDataset(DataTable):
 
     def __init__(self, *args, **kwargs):
         super(MetaSqlAlchemyDataset, self).__init__(*args, **kwargs)
