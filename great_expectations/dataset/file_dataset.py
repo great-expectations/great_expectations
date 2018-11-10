@@ -110,14 +110,12 @@ class FileDataset(MetaFileDataset):
     """
 
 
-    def __init__(self, file_path, *args, **kwargs):
+    def __init__(self, file_object, *args, **kwargs):
         super(FileDataset, self).__init__(*args, **kwargs)
-        self.path=file_path
-        self.f=open(file_path,'r')
+        self.f=file_object
         
         
-    def close(self):
-        self.f.close()
+        
         
     @DocInherit
     @MetaFileDataset.file_map_expectation
