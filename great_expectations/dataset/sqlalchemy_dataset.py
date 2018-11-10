@@ -63,9 +63,20 @@ class MetaSqlAlchemyDataset(DataTable):
                         sa.column(column).is_(None) if None in ignore_values else False), 1)], else_=0)
                 ).label('null_count'),
                 sa.func.sum(
-                    sa.case([(sa.and_(sa.not_(expected_condition),
-                                      sa.column(column).is_(None) == False if None in ignore_values else True),
-                              1)], else_=0)
+                    sa.case([
+                        (
+                            sa.and_(
+                                sa.not_(expected_condition),
+                                sa.case([
+                                    (
+                                        sa.column(column).is_(None),
+                                        False
+                                    )
+                                ], else_=True) if None in ignore_values else True
+                            ),
+                            1
+                        )
+                    ], else_=0)
                 ).label('unexpected_count')
             ]).select_from(self._table)
 
@@ -86,8 +97,12 @@ class MetaSqlAlchemyDataset(DataTable):
                             sa.or_(
                                 # SA normally evaluates `== None` as `IS NONE`. However `sa.in_()`
                                 # replaces `None` as `NULL` in the list and incorrectly uses `== NULL`
-                                sa.column(column).is_(
-                                    None) == False if None in ignore_values else False,
+                                sa.case([
+                                    (
+                                        sa.column(column).is_(None),
+                                        False
+                                    )
+                                ], else_=True) if None in ignore_values else False,
                                 # Ignore any other values that are in the ignore list
                                 sa.column(column).in_(ignore_values) == False))
                 ).limit(unexpected_count_limit)
