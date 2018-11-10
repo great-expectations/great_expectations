@@ -14,9 +14,9 @@ import pytest
 
 def test_expect_file_line_regex_match_count_to_be_between():
     
-    complete_data=open('./tests/test_sets/toy_data_complete.csv',"r")
+    complete_file_path='./tests/test_sets/toy_data_complete.csv'
     
-    file_dat=ge.dataset.FileDataset(complete_data)
+    file_dat=ge.dataset.FileDataset(complete_file_path)
     
     
     #Invalid Skip Parameter
@@ -96,18 +96,17 @@ def test_expect_file_line_regex_match_count_to_be_between():
     
     
     
-    complete_data.close()
     
     
   
     
 def test_expect_file_line_regex_match_count_to_equal():
     
-    complete_data=open('./tests/test_sets/toy_data_complete.csv',"r")
-    incomplete_data=open('./tests/test_sets/toy_data_incomplete.csv')
+    complete_file_path='./tests/test_sets/toy_data_complete.csv'
+    incomplete_file_path='./tests/test_sets/toy_data_incomplete.csv'
     
-    file_dat=ge.dataset.FileDataset(complete_data)
-    file_incomplete_dat=ge.dataset.FileDataset(incomplete_data)
+    file_dat=ge.dataset.FileDataset(complete_file_path)
+    file_incomplete_dat=ge.dataset.FileDataset(incomplete_file_path)
     
     #Invalid Regex Value
     with pytest.raises(ValueError):
@@ -161,9 +160,7 @@ def test_expect_file_line_regex_match_count_to_equal():
     assert success_trial['result']['missing_percent']==0
     
     
-    
-    complete_data.close()
-    incomplete_data.close()
+
 
     
     
