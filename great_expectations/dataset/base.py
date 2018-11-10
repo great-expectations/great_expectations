@@ -188,81 +188,6 @@ class Dataset(object):
             return wrapper
 
         return outer_wrapper
-
-    @classmethod
-    def column_map_expectation(cls, func):
-        """Constructs an expectation using column-map semantics.
-
-        The column_map_expectation decorator handles boilerplate issues surrounding the common pattern of evaluating
-        truthiness of some condition on a per-row basis.
-
-        Args:
-            func (function): \
-                The function implementing a row-wise expectation. The function should take a column of data and \
-                return an equally-long column of boolean values corresponding to whether the truthiness of the \
-                underlying expectation.
-
-        Notes:
-            column_map_expectation intercepts and takes action based on the following parameters:
-            mostly (None or a float between 0 and 1): \
-                Return `"success": True` if at least mostly percent of values match the expectation. \
-                For more detail, see :ref:`mostly`.
-
-            column_map_expectation *excludes null values* from being passed to the function
-
-            Depending on the `result_format` selected, column_map_expectation can additional data to a return object, \
-            including `element_count`, `nonnull_values`, `nonnull_count`, `success_count`, `unexpected_list`, and \
-            `unexpected_index_list`. See :func:`_format_column_map_output <great_expectations.dataset.base.Dataset._format_column_map_output>`
-
-        See also:
-            :func:`expect_column_values_to_be_unique <great_expectations.dataset.base.Dataset.expect_column_values_to_be_unique>` \
-            for an example of a column_map_expectation
-        """
-        raise NotImplementedError
-
-    @classmethod
-    def column_aggregate_expectation(cls, func):
-        """Constructs an expectation using column-aggregate semantics.
-
-        The column_aggregate_expectation decorator handles boilerplate issues surrounding the common pattern of \
-        evaluating truthiness of some condition on an aggregated-column basis.
-
-        Args:
-            func (function): \
-                The function implementing an expectation using an aggregate property of a column. \
-                The function should take a column of data and return the aggregate value it computes.
-
-        Notes:
-            column_aggregate_expectation *excludes null values* from being passed to the function
-
-        See also:
-            :func:`expect_column_mean_to_be_between <great_expectations.dataset.base.Dataset.expect_column_mean_to_be_between>` \
-            for an example of a column_aggregate_expectation
-        """
-        raise NotImplementedError
-        
-    @classmethod
-    def file_map_expectation(cls, func):
-        
-        """Constructs an expectation using file-map semantics.
-
-        The file_map_expectations decorator handles boilerplate issues surrounding the common pattern of \
-        evaluating truthiness of some condition on an line by line basis in a file.
-
-        Args:
-            func (function): \
-                The function implementing an expectation that will be applied line by line across a file \
-                The function should take a file and return information about how many lines met expectations.
-
-        Notes:
-            Users can specify skip value k that will cause the expectation function to disregard the first
-            k lines of the file
-
-        See also:
-            :func:`expect_file_line_regex_match_count_to_be_between <great_expectations.dataset.base.Dataset.expect_file_line_regex_match_count_to_be_between>` \
-            for an example of a file_map_expectation
-        """
-        raise NotImplementedError
         
 
     def _initialize_expectations(self, config=None, name=None):
@@ -979,6 +904,67 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         return evaluation_args
 
+
+        
+
+
+        
+class DataTable(Dataset):
+    def __init__(self, *args, **kwargs):
+        super(DataTable, self).__init__(*args, **kwargs)
+    
+    @classmethod
+    def column_map_expectation(cls, func):
+        """Constructs an expectation using column-map semantics.
+
+        The column_map_expectation decorator handles boilerplate issues surrounding the common pattern of evaluating
+        truthiness of some condition on a per-row basis.
+
+        Args:
+            func (function): \
+                The function implementing a row-wise expectation. The function should take a column of data and \
+                return an equally-long column of boolean values corresponding to whether the truthiness of the \
+                underlying expectation.
+
+        Notes:
+            column_map_expectation intercepts and takes action based on the following parameters:
+            mostly (None or a float between 0 and 1): \
+                Return `"success": True` if at least mostly percent of values match the expectation. \
+                For more detail, see :ref:`mostly`.
+
+            column_map_expectation *excludes null values* from being passed to the function
+
+            Depending on the `result_format` selected, column_map_expectation can additional data to a return object, \
+            including `element_count`, `nonnull_values`, `nonnull_count`, `success_count`, `unexpected_list`, and \
+            `unexpected_index_list`. See :func:`_format_column_map_output <great_expectations.dataset.base.Dataset._format_column_map_output>`
+
+        See also:
+            :func:`expect_column_values_to_be_unique <great_expectations.dataset.base.Dataset.expect_column_values_to_be_unique>` \
+            for an example of a column_map_expectation
+        """
+        raise NotImplementedError
+
+    @classmethod
+    def column_aggregate_expectation(cls, func):
+        """Constructs an expectation using column-aggregate semantics.
+
+        The column_aggregate_expectation decorator handles boilerplate issues surrounding the common pattern of \
+        evaluating truthiness of some condition on an aggregated-column basis.
+
+        Args:
+            func (function): \
+                The function implementing an expectation using an aggregate property of a column. \
+                The function should take a column of data and return the aggregate value it computes.
+
+        Notes:
+            column_aggregate_expectation *excludes null values* from being passed to the function
+
+        See also:
+            :func:`expect_column_mean_to_be_between <great_expectations.dataset.base.Dataset.expect_column_mean_to_be_between>` \
+            for an example of a column_aggregate_expectation
+        """
+        raise NotImplementedError
+        
     ##### Output generation #####
     def _format_column_map_output(self,
         result_format, success,
@@ -3348,6 +3334,211 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         """
         raise NotImplementedError
         
+        
+    
+class DataFile(Dataset):
+    @classmethod
+    def file_map_expectation(cls, func):
+        
+        """Constructs an expectation using file-map semantics.
+
+        The file_map_expectations decorator handles boilerplate issues surrounding the common pattern of \
+        evaluating truthiness of some condition on an line by line basis in a file.
+
+        Args:
+            func (function): \
+                The function implementing an expectation that will be applied line by line across a file \
+                The function should take a file and return information about how many lines met expectations.
+
+        Notes:
+            Users can specify skip value k that will cause the expectation function to disregard the first
+            k lines of the file
+
+        See also:
+            :func:`expect_file_line_regex_match_count_to_be_between <great_expectations.dataset.base.Dataset.expect_file_line_regex_match_count_to_be_between>` \
+            for an example of a file_map_expectation
+        """
+        raise NotImplementedError
+        
+        
+        
+##### Output generation #####
+    def _format_file_map_output(self,
+        result_format, success,
+        element_count, nonnull_count,
+        unexpected_list, unexpected_index_list
+    ):
+        """Helper function to construct expectation result objects for column_map_expectations.
+
+        Expectations support four result_formats: BOOLEAN_ONLY, BASIC, SUMMARY, and COMPLETE.
+        In each case, the object returned has a different set of populated fields.
+        See :ref:`result_format` for more information.
+
+        This function handles the logic for mapping those fields for column_map_expectations.
+        """
+
+        # Retain support for string-only output formats:
+        result_format = parse_result_format(result_format)
+
+        # Incrementally add to result and return when all values for the specified level are present
+        return_obj = {
+            'success': success
+        }
+
+        if result_format['result_format'] == 'BOOLEAN_ONLY':
+            return return_obj
+
+        missing_count = element_count - nonnull_count
+        unexpected_count = len(unexpected_list)
+
+        if element_count > 0:
+            unexpected_percent = unexpected_count / element_count
+            missing_percent = missing_count / element_count
+
+            if nonnull_count > 0:
+                unexpected_percent_nonmissing = unexpected_count / nonnull_count
+            else:
+                unexpected_percent_nonmissing = None
+
+        else:
+            missing_percent = None
+            unexpected_percent = None
+            unexpected_percent_nonmissing = None
+
+        return_obj['result'] = {
+            'element_count': element_count,
+            'missing_count': missing_count,
+            'missing_percent': missing_percent,
+            'unexpected_count': unexpected_count,
+            'unexpected_percent': unexpected_percent,
+            'unexpected_percent_nonmissing': unexpected_percent_nonmissing,
+            'partial_unexpected_list': unexpected_list[:result_format['partial_unexpected_count']]
+        }
+
+        if result_format['result_format'] == 'BASIC':
+            return return_obj
+
+        # Try to return the most common values, if possible.
+        try:
+            partial_unexpected_counts = [
+                {'value': key, 'count': value}
+                for key, value
+                in sorted(
+                    Counter(unexpected_list).most_common(result_format['partial_unexpected_count']),
+                    key=lambda x: (-x[1], x[0]))
+            ]
+        except TypeError:
+            partial_unexpected_counts = ['partial_exception_counts requires a hashable type']
+
+        return_obj['result'].update(
+            {
+                'partial_unexpected_index_list': unexpected_index_list[:result_format['partial_unexpected_count']] if unexpected_index_list is not None else None,
+                'partial_unexpected_counts': partial_unexpected_counts
+            }
+        )
+
+        if result_format['result_format'] == 'SUMMARY':
+            return return_obj
+
+        return_obj['result'].update(
+            {
+                'unexpected_list': unexpected_list,
+                'unexpected_index_list': unexpected_index_list
+            }
+        )
+
+        if result_format['result_format'] == 'COMPLETE':
+            return return_obj
+
+        raise ValueError("Unknown result_format %s." % (result_format['result_format'],))
+
+    def _calc_map_expectation_success(self, success_count, nonnull_count, mostly):
+        """Calculate success and percent_success for column_map_expectations
+
+        Args:
+            success_count (int): \
+                The number of successful values in the column
+            nonnull_count (int): \
+                The number of nonnull values in the column
+            mostly (float or None): \
+                A value between 0 and 1 (or None), indicating the percentage of successes required to pass the expectation as a whole\
+                If mostly=None, then all values must succeed in order for the expectation as a whole to succeed.
+
+        Returns:
+            success (boolean), percent_success (float)
+        """
+
+        if nonnull_count > 0:
+            # percent_success = float(success_count)/nonnull_count
+            percent_success = success_count / nonnull_count
+
+            if mostly != None:
+                success = bool(percent_success >= mostly)
+
+            else:
+                success = bool(nonnull_count-success_count == 0)
+
+        else:
+            success = True
+            percent_success = None
+
+        return success, percent_success
+        
+    def expect_file_line_regex_match_count_to_equal(self,regex, lines=None,expected_count=0, skip=None,
+                                                mostly=None, result_format=None, 
+                                                include_config=False,catch_exceptions=None,meta=None):
+        """
+        Expect the number of times a regular expression appears on each line of a file to equal some
+        expected count
+        
+        Args: regex: 
+            A string that can be compiled as valid regular expression 
+        
+        Keyword Args:
+            lines: \
+                An empty variable that recieves the file lines from the file_map_expectation method.
+                It doesn't matter what the user gives for this value as it will be replaced with the lines 
+                of the file by file_map_expecation. It is recommended the user ignore this argument and leave
+                it at its default.
+            
+            skip (nonnegative integer): \
+                Integer specifying the first lines in the file the method should skip before assessing 
+                expectations
+            
+            expected_count (None or nonnegative integer): \
+                Specifies the number of times regex is expected to appear on each line of the 
+                file
+            
+            
+            mostly (None or number between 0 and 1): \
+            
+                Specifies an acceptable error for expectations. If the percentage of unexpected lines is 
+                less than mostly, the method still returns true even if all lines don't match the 
+                expectation criteria.
+            
+            result_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`result_format <result_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
+                
+        Returns:
+            
+            A JSON-serializable expectation result object.
+    
+            Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+            
+        """
+        raise NotImplementedError
+        
     def expect_file_line_regex_match_count_to_be_between(self,regex,lines=None, skip=None,
                                                          expected_min_count=0, expected_max_count=None,
                                                          mostly=None, result_format=None, include_config=False, 
@@ -3409,62 +3600,6 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         raise NotImplementedError
         
     
-    def expect_file_line_regex_match_count_to_equal(self,regex, lines=None,expected_count=0, skip=None,
-                                                mostly=None, result_format=None, 
-                                                include_config=False,catch_exceptions=None,meta=None):
-        
-
-        """
-        Expect the number of times a regular expression appears on each line of a file to equal some
-        expected count
-        
-        Args: regex: 
-            A string that can be compiled as valid regular expression 
-        
-        Keyword Args:
-            lines: \
-                An empty variable that recieves the file lines from the file_map_expectation method.
-                It doesn't matter what the user gives for this value as it will be replaced with the lines 
-                of the file by file_map_expecation. It is recommended the user ignore this argument and leave
-                it at its default.
-            
-            skip (nonnegative integer): \
-                Integer specifying the first lines in the file the method should skip before assessing 
-                expectations
-            
-            expected_count (None or nonnegative integer): \
-                Specifies the number of times regex is expected to appear on each line of the 
-                file
-            
-            
-            mostly (None or number between 0 and 1): \
-            
-                Specifies an acceptable error for expectations. If the percentage of unexpected lines is 
-                less than mostly, the method still returns true even if all lines don't match the 
-                expectation criteria.
-            
-            result_format (str or None): \
-                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
-                For more detail, see :ref:`result_format <result_format>`.
-            include_config (boolean): \
-                If True, then include the expectation config as part of the result object. \
-                For more detail, see :ref:`include_config`.
-            catch_exceptions (boolean or None): \
-                If True, then catch exceptions and include them as part of the result object. \
-                For more detail, see :ref:`catch_exceptions`.
-            meta (dict or None): \
-                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
-                For more detail, see :ref:`meta`.
-                
-        Returns:
-            
-            A JSON-serializable expectation result object.
-    
-            Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
-            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
-            
-        """
-        raise NotImplementedError
         
 ValidationStatistics = namedtuple("ValidationStatistics", [
     "evaluated_expectations",
