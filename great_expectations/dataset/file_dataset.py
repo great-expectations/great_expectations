@@ -112,7 +112,6 @@ class FileDataset(MetaFileDataset):
 
     def __init__(self, file_object, *args, **kwargs):
         super(FileDataset, self).__init__(*args, **kwargs)
-        self.discard_subset_failing_expectations = kwargs.get('discard_subset_failing_expectations', False)
         self.f=file_object
         
         
