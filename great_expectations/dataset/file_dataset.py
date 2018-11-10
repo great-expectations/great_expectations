@@ -44,13 +44,17 @@ class MetaFileDataset(DataFile):
         @wraps(func)
         def inner_wrapper(self, mostly=None, skip=None, result_format=None, *args, **kwargs):
 
+            try: 
+                f=open(self.path,"r")
+            except:
+                raise 
+            
             if result_format is None:
                 result_format = self.default_expectation_args["result_format"]
 
             result_format = parse_result_format(result_format)
             
-            lines=self.f.readlines() #Read in file lines
-            self.f.seek(0)
+            lines=f.readlines() #Read in file lines
 
 
             
@@ -92,9 +96,9 @@ class MetaFileDataset(DataFile):
                 element_count, nonnull_count,
                 unexpected_list, unexpected_index_list
             )
-    
-    
-    
+            
+            f.close()
+            
             return return_obj
 
         inner_wrapper.__name__ = func.__name__
@@ -110,9 +114,9 @@ class FileDataset(MetaFileDataset):
     """
 
 
-    def __init__(self, file_object, *args, **kwargs):
+    def __init__(self, file_path, *args, **kwargs):
         super(FileDataset, self).__init__(*args, **kwargs)
-        self.f=file_object
+        self.path=file_path
         
         
         
