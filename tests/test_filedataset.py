@@ -107,7 +107,8 @@ def test_filedataset_expectations_NotImplementedError():
    
     #Create Dataset objects
     
-    f_dat=ge.dataset.Dataset() 
+    
+    f_dat=ge.dataset.DataFile()
     
     #Test expect_file_line_regex+match_count_to_equal
     
