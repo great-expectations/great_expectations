@@ -129,6 +129,103 @@ def test_filedataset_expectations_NotImplementedError():
                                                             skip=1,result_format="BASIC")
         except:
             raise
+            
+            
+def test_file_format_map_output():
+    incomplete_file_path='./tests/test_sets/toy_data_incomplete.csv'
+    incomplete_file_dat=ge.dataset.FileDataset(incomplete_file_path) 
+    
+    null_file_path='./tests/test_sets/null_file.csv'
+    null_file_dat=ge.dataset.FileDataset(null_file_path) 
+    
+    white_space_path='./tests/test_sets/white_space.txt'
+    white_space_dat=ge.dataset.FileDataset(white_space_path) 
+    
+    
+    #Boolean Expectation Output
+    expectation=incomplete_file_dat.expect_file_line_regex_match_count_to_equal(regex=',\S',
+                                                                                expected_count=3,
+                                                                                skip=1,
+                                                                                result_format="BOOLEAN_ONLY")
+    expected_result={"success":False}
+    
+    assertDeepAlmostEqual(expected_result, expectation)
+    
+    
+    #Empty File Expectations
+    expectation=null_file_dat.expect_file_line_regex_match_count_to_equal(regex=',\S',
+                                                                                expected_count=3,
+                                                                                skip=1,
+                                                                                result_format="BASIC")
+    
+    expected_result={"success":None,
+                     "result":{"element_count":0, "missing_count":0,
+                               "missing_percent":None, "unexpected_count":0,
+                               "unexpected_percent":None,"unexpected_percent_nonmissing":None,
+                               "partial_unexpected_list":[]
+                             }
+                         }
+                     
+    assertDeepAlmostEqual(expected_result,expectation)
+    
+    
+    #White Space File
+    
+    expectation=white_space_dat.expect_file_line_regex_match_count_to_equal(regex=',\S',
+                                                                                expected_count=3,
+                                                                                result_format="BASIC")
+    
+    expected_result={"success":None,
+                     "result":{"element_count":11, "missing_count":11,
+                               "missing_percent":1, "unexpected_count":0,
+                               "unexpected_percent":0,"unexpected_percent_nonmissing":None,
+                               "partial_unexpected_list":[]
+                             }
+                         }
+                     
+    assertDeepAlmostEqual(expected_result,expectation)
+    
+    
+    
+    #Complete Result Format
+    expectation=incomplete_file_dat.expect_file_line_regex_match_count_to_equal(regex=',\S',
+                                                                                expected_count=3,
+                                                                                skip=1,
+                                                                                result_format="COMPLETE")
+    
+    
+    expected_result={"success":False,
+                     "result":{"element_count":9, "missing_count":2,
+                               "missing_percent":2/9, "unexpected_count":3,
+                               "unexpected_percent":3/9,"unexpected_percent_nonmissing":3/7,
+                               "partial_unexpected_list":['A,C,1\n', 'B,1,4\n', 'A,1,4\n'],
+                               "partial_unexpected_counts":[{"value":'A,C,1\n',"count":1},
+                                                            {"value":'B,1,4\n',"count":1},
+                                                            {"value":'A,1,4\n',"count":1}],
+                               "partial_unexpected_index_list":[0,3,5],
+                               "unexpected_list":['A,C,1\n', 'B,1,4\n', 'A,1,4\n'],
+                               "unexpected_index_list":[0,3,5]
+                             }
+                         }
+    
+    assertDeepAlmostEqual(expected_result,expectation)
+    
+    
+    #Invalid Result Format
+    with pytest.raises(ValueError):
+            expectation=incomplete_file_dat.expect_file_line_regex_match_count_to_equal(regex=',\S',
+                                                                                expected_count=3,
+                                                                                skip=1,
+                                                                                result_format="JOKE")
+            
+
+        
+    
+    
+    
+    
+    
+    
                 
     
     
