@@ -60,7 +60,7 @@ class MetaFileDataset(DataFile):
             
             
             #Skip k initial lines designated by the user
-            if skip is not None:
+            if skip is not None and skip <= len(lines):
                 try:
                     assert float(skip).is_integer()
                     assert float(skip) >= 0
@@ -70,32 +70,46 @@ class MetaFileDataset(DataFile):
                 for i in range(1,skip+1):
                     lines.pop(0)
                     
-            null_lines = re.compile("\s+") #Ignore lines with just white space
-            boolean_mapped_null_lines=np.array([bool(null_lines.match(line)) for line in lines])
             
-
-            element_count = int(len(lines))
-
-
-            nonnull_lines = list(compress(lines,np.invert(boolean_mapped_null_lines)))
-            nonnull_count = int((boolean_mapped_null_lines==False).sum())
-
-            boolean_mapped_success_lines = np.array(func(self, lines=nonnull_lines, *args, **kwargs))
-            success_count = np.count_nonzero(boolean_mapped_success_lines)
-
-
-            unexpected_list = list(compress(nonnull_lines,np.invert(boolean_mapped_success_lines)))
-            nonnull_lines_index=range(0, len(nonnull_lines)+1)
-            unexpected_index_list = list(compress(nonnull_lines_index,np.invert(boolean_mapped_success_lines)))
-
-            success, percent_success = self._calc_map_expectation_success(success_count, nonnull_count, mostly)
+            if(len(lines)>0):
+                
+                null_lines = re.compile("\s+") #Ignore lines with just white space
+                boolean_mapped_null_lines=np.array([bool(null_lines.match(line)) for line in lines])
+                element_count = int(len(lines))
+                
+                if(element_count > (len(boolean_mapped_null_lines)-sum(boolean_mapped_null_lines))):
+                    
+                    nonnull_lines = list(compress(lines,np.invert(boolean_mapped_null_lines)))
+                    nonnull_count = int((boolean_mapped_null_lines==False).sum())
+                    boolean_mapped_success_lines = np.array(func(self, lines=nonnull_lines, *args, **kwargs))
+                    success_count = np.count_nonzero(boolean_mapped_success_lines)
+                    
+                    unexpected_list = list(compress(nonnull_lines,np.invert(boolean_mapped_success_lines)))
+                    nonnull_lines_index=range(0, len(nonnull_lines)+1)
+                    unexpected_index_list = list(compress(nonnull_lines_index,np.invert(boolean_mapped_success_lines)))
+                    
+                    success, percent_success = self._calc_map_expectation_success(success_count, nonnull_count, mostly)
             
+                    return_obj = self._format_file_map_output(
+                        result_format, success,
+                        element_count, nonnull_count,
+                        unexpected_list, unexpected_index_list
+                    )
+                else:
+                    return_obj = self._format_file_map_output(
+                        result_format=result_format, success=None,
+                        element_count=element_count, nonnull_count=0,
+                        unexpected_list=[], unexpected_index_list=[]
+                    )
             
-            return_obj = self._format_file_map_output(
-                result_format, success,
-                element_count, nonnull_count,
-                unexpected_list, unexpected_index_list
-            )
+            else:
+                return_obj = self._format_file_map_output(
+                        result_format=result_format, success=None,
+                        element_count=0, nonnull_count=0,
+                        unexpected_list=[], unexpected_index_list=[]
+                    )
+            
+                    
             
             f.close()
             
