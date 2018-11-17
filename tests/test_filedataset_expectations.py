@@ -14,6 +14,19 @@ import pytest
 
 def test_expect_file_line_regex_match_count_to_be_between():
     
+    
+    #####Invlaid File Path######
+    joke_file_path="joke.txt"
+    joke_dat=ge.dataset.FileDataset(joke_file_path)
+    
+    with pytest.raises(IOError):
+        joke_dat.expect_file_line_regex_match_count_to_be_between(regex=",\S",
+                                                                  expected_min_count=0,
+                                                                  expected_max_count=4,
+                                                                  skip=1)
+    
+    
+    
     complete_file_path='./tests/test_sets/toy_data_complete.csv'
     
     file_dat=ge.dataset.FileDataset(complete_file_path)
