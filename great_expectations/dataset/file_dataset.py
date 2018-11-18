@@ -77,7 +77,7 @@ class MetaFileDataset(DataFile):
                 boolean_mapped_null_lines=np.array([bool(null_lines.match(line)) for line in lines])
                 element_count = int(len(lines))
                 
-                if(element_count > (len(boolean_mapped_null_lines)-sum(boolean_mapped_null_lines))):
+                if(element_count > sum(boolean_mapped_null_lines)):
                     
                     nonnull_lines = list(compress(lines,np.invert(boolean_mapped_null_lines)))
                     nonnull_count = int((boolean_mapped_null_lines==False).sum())
