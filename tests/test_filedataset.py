@@ -199,9 +199,9 @@ def test_file_format_map_output():
                                "missing_percent":2/9, "unexpected_count":3,
                                "unexpected_percent":3/9,"unexpected_percent_nonmissing":3/7,
                                "partial_unexpected_list":['A,C,1\n', 'B,1,4\n', 'A,1,4\n'],
-                               "partial_unexpected_counts":[{"value":'A,C,1\n',"count":1},
-                                                            {"value":'B,1,4\n',"count":1},
-                                                            {"value":'A,1,4\n',"count":1}],
+                               "partial_unexpected_counts":[{"value":'A,1,4\n',"count":1},
+                                                            {"value":'A,C,1\n',"count":1},
+                                                            {"value":'B,1,4\n',"count":1}],
                                "partial_unexpected_index_list":[0,3,5],
                                "unexpected_list":['A,C,1\n', 'B,1,4\n', 'A,1,4\n'],
                                "unexpected_index_list":[0,3,5]
