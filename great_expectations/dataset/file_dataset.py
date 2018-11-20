@@ -15,6 +15,7 @@ from six import PY3
 from .util import DocInherit, parse_result_format
 import inspect
 from functools import wraps
+import hashlib
 
 
 class MetaFileDataset(DataFile):
@@ -212,8 +213,29 @@ class FileDataset(MetaFileDataset):
     
     
     
+    @DocInherit
+    @Dataset.expectation
     
+    def expect_file_hash_to_equal(filename, value, hash_alg='md5', result_format=None, 
+                                                    include_config=False,catch_exceptions=None,meta=None):
+        success = False
+        try:
+            hash = hashlib.new(hash_alg)
         
+        # Limit file reads to 64 KB chunks at a time
+            BLOCKSIZE = 65536
+            try:
+                with open(filename, 'rb') as file:
+                    file_buffer = file.read(BLOCKSIZE)
+                    while len(file_buffer) > 0:
+                        hash.update(file_buffer)
+                        file_buffer = file.read(BLOCKSIZE)
+                    success = hash.hexdigest() == value
+            except IOError:
+                raise
+        except ValueError:
+            raise
+        return {"success":success}
     
     
     
