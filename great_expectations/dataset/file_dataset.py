@@ -216,7 +216,7 @@ class FileDataset(MetaFileDataset):
     @DocInherit
     @Dataset.expectation
     
-    def expect_file_hash_to_equal(filename, value, hash_alg='md5', result_format=None, 
+    def expect_file_hash_to_equal(self, value, hash_alg='md5', result_format=None, 
                                                     include_config=False,catch_exceptions=None,meta=None):
         success = False
         try:
@@ -225,7 +225,7 @@ class FileDataset(MetaFileDataset):
         # Limit file reads to 64 KB chunks at a time
             BLOCKSIZE = 65536
             try:
-                with open(filename, 'rb') as file:
+                with open(self.path, 'rb') as file:
                     file_buffer = file.read(BLOCKSIZE)
                     while len(file_buffer) > 0:
                         hash.update(file_buffer)
