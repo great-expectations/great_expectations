@@ -7,7 +7,7 @@ Created on Sat Oct 20 13:49:29 2018
 
 from __future__ import division
 
-from .base import DataFile
+from .base import DataFile, Dataset
 import re
 import numpy as np
 from itertools import compress
@@ -16,6 +16,7 @@ from .util import DocInherit, parse_result_format
 import inspect
 from functools import wraps
 import hashlib
+import os
 
 
 class MetaFileDataset(DataFile):
@@ -236,6 +237,43 @@ class FileDataset(MetaFileDataset):
         except ValueError:
             raise
         return {"success":success}
+    
+    def expect_file_size_to_be_between(self, minsize, maxsize,result_format=None, 
+                                                    include_config=False,catch_exceptions=None,
+                                                    meta=None):
+        
+       
+        
+        success=False
+        
+        try:
+            size = os.path.getsize(self.path)
+        except OSError:
+            raise
+            
+            
+        if type(minsize) != int:
+            raise TypeError('minsize must be an integer')
+            
+        if type(maxsize) != int:
+            raise TypeError('maxsize must be an integer')
+            
+        if minsize < 0:
+            raise ValueError('minsize must be greater than of equal to 0')
+                
+        if maxsize < 0:
+            raise ValueError('maxsize must be greater than of equal to 0')
+            
+        if minsize > maxsize:
+            raise ValueError('maxsize must be greater than of equal to minsize')
+            
+        if (size >= minsize) and (size <= maxsize):
+            success=True
+            return {"success":success}
+        
+        else:
+            return {"success":success} 
+        
     
     
     
