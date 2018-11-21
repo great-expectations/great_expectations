@@ -216,7 +216,7 @@ class FileDataset(MetaFileDataset):
     
     
     @DocInherit
-    @Dataset.expectation
+    @Dataset.expectation(["value"])
     
     def expect_file_hash_to_equal(self, value, hash_alg='md5', result_format=None, 
                                                     include_config=False,catch_exceptions=None,meta=None):
@@ -241,7 +241,7 @@ class FileDataset(MetaFileDataset):
     
     
     @DocInherit
-    @Dataset.expectation
+    @Dataset.expectation(["minsize","maxsize"])
     def expect_file_size_to_be_between(self, minsize, maxsize,result_format=None, 
                                                     include_config=False,catch_exceptions=None,
                                                     meta=None):
@@ -277,7 +277,7 @@ class FileDataset(MetaFileDataset):
     
         
     @DocInherit
-    @Dataset.expectation   
+    @Dataset.expectation([])   
     def expect_file_to_exist(self,result_format=None,include_config=False,
                              catch_exceptions=None, meta=None):
         
@@ -289,15 +289,10 @@ class FileDataset(MetaFileDataset):
     
     
     @DocInherit
-    @Dataset.expectation
-    def expect_file_unique_column_names(self,
-                                        skip=0,
-                                        sep=',',
-                                        quoteChar='"',
-                                        quot=csv.QUOTE_MINIMAL,
-                                        doubleQuote=True,
-                                        skipInitialSpace=False,
-                                        escapeChar=None):
+    @Dataset.expectation([])
+    def expect_file_unique_column_names(self, skip=0, sep=',', quoteChar='"',
+                                        quot=csv.QUOTE_MINIMAL, doubleQuote=True,
+                                        skipInitialSpace=False, escapeChar=None):
 
     
         success = False
@@ -317,6 +312,8 @@ class FileDataset(MetaFileDataset):
         except csv.Error:
             raise
         return {"success":success}
+    
+    
     
     
     
