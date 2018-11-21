@@ -17,6 +17,7 @@ import inspect
 from functools import wraps
 import hashlib
 import os
+import csv
 
 
 class MetaFileDataset(DataFile):
@@ -285,6 +286,43 @@ class FileDataset(MetaFileDataset):
             success=True
             
         return {"success":success}
+    
+    
+    @DocInherit
+    @Dataset.expectation
+    def expect_file_unique_column_names(self,
+                                        skip=0,
+                                        sep=',',
+                                        quoteChar='"',
+                                        quot=csv.QUOTE_MINIMAL,
+                                        doubleQuote=True,
+                                        skipInitialSpace=False,
+                                        escapeChar=None):
+
+    
+        success = False
+        try:
+            with open(self.path, 'r') as f:
+                reader = csv.reader(f, delimiter=sep, quotechar=quoteChar, quoting=quot, 
+                                    doublequote=doubleQuote, skipinitialspace=skipInitialSpace, 
+                                    escapechar=escapeChar, strict=True)
+                if skip > 0:
+                    for i in range(0, skip):
+                        next(reader)
+                colnames = next(reader)
+                if len(set(colnames)) == len(colnames):
+                    success = True
+        except IOError:
+            raise
+        except csv.Error:
+            raise
+        return {"success":success}
+    
+    
+    
+    
+    
+    
 
         
     
