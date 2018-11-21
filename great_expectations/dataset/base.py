@@ -3638,10 +3638,8 @@ class DataFile(Dataset):
     def expect_file_size_to_be_between(self, minsize, maxsize,result_format=None, 
                                                     include_config=False,catch_exceptions=None,
                                                     meta=None):
-       
-       
-       """
-       Expect file size to be between a user specified maxsize and minsize.
+        """
+        Expect file size to be between a user specified maxsize and minsize.
         
         Args:
             minsize(integer): minimum expected file size
@@ -3670,9 +3668,44 @@ class DataFile(Dataset):
 
         Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
         :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
-       """
+        """
        
-       return NotImplementedError
+        return NotImplementedError
+   
+    def expect_file_to_exist(self,result_format=None,include_config=False,
+                             catch_exceptions=None, meta=None):
+        
+        """
+        Checks to see if a file specified by the user actually exists
+        
+        
+        Keyword Args: 
+            
+            result_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`result_format <result_format>`.
+                
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+                
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+                
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
+                
+        Returns:
+            A JSON-serializable expectation result object.
+
+        Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
+        :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+        """
+        
+        raise NotImplementedError
+        
        
             
         
