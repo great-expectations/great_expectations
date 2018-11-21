@@ -238,6 +238,9 @@ class FileDataset(MetaFileDataset):
             raise
         return {"success":success}
     
+    
+    @DocInherit
+    @Dataset.expectation
     def expect_file_size_to_be_between(self, minsize, maxsize,result_format=None, 
                                                     include_config=False,catch_exceptions=None,
                                                     meta=None):
@@ -245,7 +248,6 @@ class FileDataset(MetaFileDataset):
        
         
         success=False
-        
         try:
             size = os.path.getsize(self.path)
         except OSError:
@@ -269,10 +271,21 @@ class FileDataset(MetaFileDataset):
             
         if (size >= minsize) and (size <= maxsize):
             success=True
-            return {"success":success}
+           
+        return {"success":success}
+    
         
-        else:
-            return {"success":success} 
+    @DocInherit
+    @Dataset.expectation   
+    def expect_file_to_exist(self,result_format=None,include_config=False,
+                             catch_exceptions=None, meta=None):
+        
+        success=False
+        if os.path.isfile(self.path):
+            success=True
+            
+        return {"success":success}
+
         
     
     
