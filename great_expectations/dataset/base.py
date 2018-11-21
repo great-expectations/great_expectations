@@ -2,6 +2,7 @@ from __future__ import division
 import json
 import inspect
 import copy
+import csv
 from functools import wraps
 import traceback
 import warnings
@@ -3705,6 +3706,63 @@ class DataFile(Dataset):
         """
         
         raise NotImplementedError
+        
+    def expect_file_unique_column_names(self, skip=0, sep=',', quoteChar='"',
+                                        quot=csv.QUOTE_MINIMAL, doubleQuote=True,
+                                        skipInitialSpace=False, escapeChar=None):
+        
+        """
+        Checks to see if table-like data file has unique column names
+        
+        
+        Keyword Args:
+            skip (int): 
+                Number of lines to skip before the line with column names
+            
+            sep (string): 
+                Specifies the character that divides columns in the file
+                
+            quoteChar (string):
+                one-character string used to quote fields containing special 
+                characters
+                
+            quot:
+                controls when quotes should be recognised by the reader
+                    
+            doubleQuote (boolean):
+                controls how instances of quotechar appearing inside a field should themselves be quoted
+                    
+            skipInitialSpace (boolean):
+                when True, whitespace immediately following the delimiter is ignored
+                    
+            escapeChar (string):
+                one-char string which removes any special meaning from the following character
+                    
+            result_format (str or None): 
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`result_format <result_format>`.
+                
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+                
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+                
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
+                
+        Returns:
+            A JSON-serializable expectation result object.
+
+        Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
+        :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+        """
+        return NotImplementedError
+        
+        
         
        
             
