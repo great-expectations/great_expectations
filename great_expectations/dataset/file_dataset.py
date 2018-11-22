@@ -18,6 +18,8 @@ from functools import wraps
 import hashlib
 import os
 import csv
+import json
+import jsonschema
 
 
 class MetaFileDataset(DataFile):
@@ -292,7 +294,9 @@ class FileDataset(MetaFileDataset):
     @Dataset.expectation([])
     def expect_file_unique_column_names(self, skip=0, sep=',', quoteChar='"',
                                         quot=csv.QUOTE_MINIMAL, doubleQuote=True,
-                                        skipInitialSpace=False, escapeChar=None):
+                                        skipInitialSpace=False, escapeChar=None,
+                                        result_format=None,include_config=False,
+                                        catch_exceptions=None, meta=None):
 
     
         success = False
@@ -311,6 +315,39 @@ class FileDataset(MetaFileDataset):
             raise
         except csv.Error:
             raise
+        return {"success":success}
+    
+    
+    @DocInherit
+    @Dataset.expectation([])
+    def expect_file_valid_json(self, schema=None,result_format=None,
+                               include_config=False,catch_exceptions=None, 
+                               meta=None ):
+        
+        success = False
+        if schema is None:
+            try:
+                with open(self.path, 'r') as f:
+                    json.load(f)
+                success = True
+            except ValueError:
+                success = False
+        else:
+            try:
+                with open(schema, 'r') as s:
+                    schema_data = s.read()
+                sdata = json.loads(schema_data)
+                with open(self.path, 'r') as f:
+                    json_data = f.read()
+                jdata = json.loads(json_data)
+                jsonschema.validate(jdata, sdata)
+                success = True
+            except jsonschema.ValidationError:
+                success = False
+            except jsonschema.SchemaError:
+                raise
+            except:
+                raise
         return {"success":success}
     
     
