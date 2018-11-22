@@ -3709,7 +3709,9 @@ class DataFile(Dataset):
         
     def expect_file_unique_column_names(self, skip=0, sep=',', quoteChar='"',
                                         quot=csv.QUOTE_MINIMAL, doubleQuote=True,
-                                        skipInitialSpace=False, escapeChar=None):
+                                        skipInitialSpace=False, escapeChar=None,
+                                        result_format=None,include_config=False,
+                                        catch_exceptions=None, meta=None):
         
         """
         Checks to see if table-like data file has unique column names
@@ -3761,6 +3763,41 @@ class DataFile(Dataset):
         :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
         """
         return NotImplementedError
+    
+    
+    def expect_file_valid_json(self, schema=None,result_format=None,
+                               include_config=False,catch_exceptions=None, 
+                               meta=None ):
+        
+        """
+        schema : string
+            optional JSON schema file on which JSON data file is validated against
+            
+        result_format (str or None): 
+            Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+            For more detail, see :ref:`result_format <result_format>`.
+                
+        include_config (boolean): 
+            If True, then include the expectation config as part of the result object. \
+            For more detail, see :ref:`include_config`.
+                
+        catch_exceptions (boolean or None): 
+            If True, then catch exceptions and include them as part of the result object. \
+            For more detail, see :ref:`catch_exceptions`.
+                
+        meta (dict or None): 
+            A JSON-serializable dictionary (nesting allowed) that will 
+            be included in the output without modification. \
+            
+        For more detail, see :ref:`meta`.
+                
+        Returns:
+            A JSON-serializable expectation result object.
+
+        Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
+        :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+        """
+        raise NotImplementedError
         
         
         
