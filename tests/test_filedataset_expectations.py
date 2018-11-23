@@ -246,6 +246,17 @@ def test_expect_file_size_to_be_between():
     # Test file size in range
     good_range=titanic_file.expect_file_size_to_be_between(70000, 71000)
     assert good_range["success"]
+  
+
+def test_expect_file_to_exist():
+    # Test for non-existent file
+    fake_file=ge.dataset.FileDataset("abc")
+    fake_file_existence=fake_file.expect_file_to_exist()
+    assert (not fake_file_existence["success"])
+    # Test for existing file
+    real_file=ge.dataset.FileDataset('./tests/test_sets/Titanic.csv')
+    real_file_existence=real_file.expect_file_to_exist()
+    assert real_file_existence["success"]
     
     
 
