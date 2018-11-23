@@ -211,7 +211,7 @@ def test_expect_file_hash_to_equal():
 def test_expect_file_size_to_be_between():
     fake_file=ge.dataset.FileDataset("abc")
     # Test for non-existent file
-    with pytest.raises(IOError):
+    with pytest.raises(OSError):
         fake_file.expect_file_size_to_be_between(0, 10000)
 
     titanic_path = './tests/test_sets/Titanic.csv'
@@ -269,7 +269,7 @@ def test_expect_file_unique_column_names():
     # Test for non-unique column names
     same_column_names=ge.dataset.FileDataset('./tests/test_sets/same_column_names.csv')
     same_column_names_expectation=same_column_names.expect_file_unique_column_names(sep='|',
-                                                            skipLines=2)
+                                                            skip=2)
     assert (not same_column_names_expectation["success"])
     
     # Test for unique column names
