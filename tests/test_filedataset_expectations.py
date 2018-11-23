@@ -279,4 +279,36 @@ def test_expect_file_unique_column_names():
     
     
 
+def test_expect_file_valid_json():
+    
+    # Test for non-existent file
+    fake_file=ge.dataset.FileDataset('abc')
+    with pytest.raises(IOError):
+        fake_file.expect_file_valid_json()
+        
+
+    # Test invalid JSON file
+    invalid_JSON_file=ge.dataset.FileDataset('./tests/test_sets/invalid_json_file.json')
+    invalid_JSON_expectation=invalid_JSON_file.expect_file_valid_json()
+    assert (not invalid_JSON_expectation["success"])
+
+    # Test valid JSON file
+    valid_JSON_file=ge.dataset.FileDataset('./tests/test_sets/titanic_expectations.json')
+    valid_JSON_expectation=valid_JSON_file.expect_file_valid_json()
+    assert valid_JSON_expectation["success"]
+
+    # Test valid JSON file with non-matching schema
+    schema_file = './tests/test_sets/sample_schema.json'
+    test_file=ge.dataset.FileDataset('./tests/test_sets/json_test1_against_schema.json')
+    test_file_expectation=test_file.expect_file_valid_json(schema=schema_file)
+    assert (not test_file_expectation["success"])
+
+    # Test valid JSON file with valid schema
+    test_file=ge.dataset.FileDataset('./tests/test_sets/json_test2_against_schema.json')
+    schema_file = './tests/test_sets/sample_schema.json'
+    test_file_expectation=test_file.expect_file_valid_json(schema=schema_file)
+    assert (test_file_expectation["success"])
+    
+    
+
 
