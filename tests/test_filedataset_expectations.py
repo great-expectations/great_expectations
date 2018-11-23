@@ -260,7 +260,22 @@ def test_expect_file_to_exist():
     
     
 
+def test_expect_file_unique_column_names():
+    # Test for non-existent file
+    fake_file=ge.dataset.FileDataset('abc')
+    with pytest.raises(IOError):
+        fake_file.expect_file_unique_column_names()
 
+    # Test for non-unique column names
+    same_column_names=ge.dataset.FileDataset('./tests/test_sets/same_column_names.csv')
+    same_column_names_expectation=same_column_names.expect_file_unique_column_names(sep='|',
+                                                            skipLines=2)
+    assert (not same_column_names_expectation["success"])
+    
+    # Test for unique column names
+    unique_column_names=ge.dataset.FileDataset('./tests/test_sets/Titanic.csv')
+    unique_column_names_expectation=unique_column_names.expect_file_unique_column_names()
+    assert unique_column_names_expectation["success"]
     
     
 
