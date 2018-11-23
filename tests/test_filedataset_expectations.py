@@ -173,6 +173,41 @@ def test_expect_file_line_regex_match_count_to_equal():
     assert success_trial['result']['missing_percent']==0
     
     
+    
+def test_expect_file_hash_to_equal():
+    # Test for non-existent file
+    fake_file=ge.dataset.FileDataset(file_path="abc")
+    
+    with pytest.raises(IOError):
+        fake_file.expect_file_hash_to_equal(value='abc')
+
+        
+    # Test for non-existent hash algorithm
+    titanic_path = './tests/test_sets/Titanic.csv'
+    titanic_file=ge.dataset.FileDataset(titanic_path)
+    
+    with pytest.raises(ValueError):
+        titanic_file.expect_file_hash_to_equal(hash_alg='md51',
+                                         value='abc')
+        
+    # Test non-matching hash value
+    
+    fake_hash_value=titanic_file.expect_file_hash_to_equal(value="abc")
+    
+    assert (not fake_hash_value["success"])
+    
+    # Test matching hash value with default algorithm
+    hash_value='63188432302f3a6e8c9e9c500ff27c8a'
+    good_hash_default_alg=titanic_file.expect_file_hash_to_equal(value=hash_value)
+    assert good_hash_default_alg["success"]
+    
+    # Test matching hash value with specified algorithm
+    hash_value='f89f46423b017a1fc6a4059d81bddb3ff64891e3c81250fafad6f3b3113ecc9b'
+    good_hash_new_alg=titanic_file.expect_file_hash_to_equal(value=hash_value,
+                                                     hash_alg='sha256')
+    assert good_hash_new_alg["success"]
+    
+    
 
 
     
