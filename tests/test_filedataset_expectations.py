@@ -208,6 +208,46 @@ def test_expect_file_hash_to_equal():
     assert good_hash_new_alg["success"]
     
     
+def test_expect_file_size_to_be_between():
+    fake_file=ge.dataset.FileDataset("abc")
+    # Test for non-existent file
+    with pytest.raises(IOError):
+        fake_file.expect_file_size_to_be_between(0, 10000)
+
+    titanic_path = './tests/test_sets/Titanic.csv'
+    titanic_file=ge.dataset.FileDataset(titanic_path)
+    
+    # Test minsize not an integer
+    with pytest.raises(TypeError):
+        titanic_file.expect_file_size_to_be_between('0', 10000)
+
+    # Test maxsize not an integer
+    with pytest.raises(TypeError):
+        titanic_file.expect_file_size_to_be_between(0, '10000')
+
+    # Test minsize less than 0
+    
+    with pytest.raises(ValueError):
+        titanic_file.expect_file_size_to_be_between(-1, 10000)
+
+    # Test maxsize less than 0
+    with pytest.raises(ValueError):
+        titanic_file.expect_file_size_to_be_between(0, -1)
+    
+    
+    # Test minsize > maxsize
+    with pytest.raises(ValueError):
+        titanic_file.expect_file_size_to_be_between(10000, 0)
+
+    # Test file size not in range
+    bad_range=titanic_file.expect_file_size_to_be_between(0, 10000)
+    assert (not bad_range["success"])
+    
+    # Test file size in range
+    good_range=titanic_file.expect_file_size_to_be_between(70000, 71000)
+    assert good_range["success"]
+    
+    
 
 
     
