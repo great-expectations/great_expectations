@@ -322,8 +322,8 @@ class Dataset(object):
                 # discards["result_format"] += 1
 
         if discard_include_configs_kwargs:
-            if "include_configs" in new_expectation["kwargs"]:
-                del new_expectation["kwargs"]["include_configs"]
+            if "include_config" in new_expectation["kwargs"]:
+                del new_expectation["kwargs"]["include_config"]
                 # discards["include_configs"] += 1
 
         if discard_catch_exceptions_kwargs:
@@ -613,8 +613,8 @@ class Dataset(object):
                     discards["result_format"] += 1
 
             if discard_include_configs_kwargs:
-                if "include_configs" in expectation["kwargs"]:
-                    del expectation["kwargs"]["include_configs"]
+                if "include_config" in expectation["kwargs"]:
+                    del expectation["kwargs"]["include_config"]
                     discards["include_configs"] += 1
 
             if discard_catch_exceptions_kwargs:
