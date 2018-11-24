@@ -43,12 +43,14 @@ def test_expectation_config_filedataset():
     #Set up expectations
     f_dat.expect_file_line_regex_match_count_to_equal(regex=',\S',
                                                             expected_count=3,
-                                                            skip=1,result_format="BASIC") 
+                                                            skip=1,result_format="BASIC",
+                                                            catch_exceptions=True) 
     
     
     f_dat.expect_file_line_regex_match_count_to_be_between(regex=',\S',
                                                             expected_max_count=2,
-                                                            skip=1,result_format="SUMMARY") 
+                                                            skip=1,result_format="SUMMARY",
+                                                            include_config=True) 
     
     
     
