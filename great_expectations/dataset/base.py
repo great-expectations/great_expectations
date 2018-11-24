@@ -3666,7 +3666,7 @@ class DataFile(Dataset):
         :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
         """
        
-        return NotImplementedError
+        raise NotImplementedError
    
     def expect_file_to_exist(self,result_format=None,include_config=False,
                              catch_exceptions=None, meta=None):
@@ -3757,7 +3757,7 @@ class DataFile(Dataset):
         Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
         :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
         """
-        return NotImplementedError
+        raise NotImplementedError
     
     
     def expect_file_valid_json(self, schema=None,result_format=None,
