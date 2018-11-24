@@ -132,6 +132,46 @@ def test_filedataset_expectations_NotImplementedError():
         except:
             raise
             
+    with pytest.raises(NotImplementedError):
+        
+        try:
+            f_dat.expect_file_hash_to_equal(value="abc")
+        except:
+            raise
+            
+    with pytest.raises(NotImplementedError):
+        
+        try:
+            f_dat.expect_file_size_to_be_between(minsize=0, maxsize=50000)
+        except:
+            raise
+            
+    with pytest.raises(NotImplementedError):
+        
+        try:
+            f_dat.expect_file_to_exist()
+        except:
+            raise
+    
+    with pytest.raises(NotImplementedError):
+        
+        try:
+            f_dat.expect_file_unique_column_names()
+        except:
+            raise
+        
+    with pytest.raises(NotImplementedError):
+        
+        try:
+            f_dat.expect_file_valid_json()
+        except:
+            raise
+            
+    
+            
+            
+            
+            
             
 def test_file_format_map_output():
     incomplete_file_path='./tests/test_sets/toy_data_incomplete.csv'
