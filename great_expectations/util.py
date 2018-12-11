@@ -123,10 +123,27 @@ def read_parquet(
     return df
 
 
-def from_pandas(pandas_df, expectations_config=None, autoinspect_func=None):
+def from_pandas(pandas_df, 
+                dataset_class=dataset.pandas_dataset.PandasDataset, 
+                expectations_config=None, 
+                autoinspect_func=None
+):
+    """Read a Pandas data frame and return a great_expectations dataset.
+
+    Args:
+        pandas_df (Pandas df): Pandas data frame
+        dataset_class (Dataset class) = dataset.pandas_dataset.PandasDataset: 
+            class to which to convert resulting Pandas df
+        expectations_config (string) = None: path to great_expectations config file
+        autoinspect_func (function) = None: The autoinspection function that should 
+            be run on the dataset to establish baseline expectations.
+
+    Returns:
+        great_expectations dataset
+    """
     return _convert_to_dataset_class(
         pandas_df,
-        dataset.pandas_dataset.PandasDataset,
+        dataset_class,
         expectations_config,
         autoinspect_func
     )
