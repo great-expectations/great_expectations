@@ -330,6 +330,19 @@ def test_from_pandas():
     assert list(ge_df['y'])==list(pd_df['y'])
     assert list(ge_df['z'])==list(pd_df['z'])
 
+    # make an empty subclass to test dataset_class argument
+    class CustomPandasDataset(ge.dataset.PandasDataset):
+        pass
+
+    ge_df_custom = ge.from_pandas(pd_df, dataset_class=CustomPandasDataset)
+
+    assert not isinstance(ge_df, CustomPandasDataset)
+    assert isinstance(ge_df_custom, CustomPandasDataset)
+    assert list(ge_df_custom.columns)==['x', 'y', 'z']
+    assert list(ge_df_custom['x'])==list(pd_df['x'])
+    assert list(ge_df_custom['y'])==list(pd_df['y'])
+    assert list(ge_df_custom['z'])==list(pd_df['z'])
+
 
 def test_from_pandas_expectations_config():
     # Logic mostly copied from TestValidation.test_validate
