@@ -14,6 +14,8 @@ Planned Features
 
 v.0.4.4__develop
 ----------------
+* Enable custom_sql datasets for databases with multiple schemas, by
+  adding a fallback for column reflection (#387)
 * Remove `IF NOT EXISTS` check for custom sql temporary tables, for
   Redshift compatibility (#372)
 * Allow users to pass args/kwargs for engine creation in
