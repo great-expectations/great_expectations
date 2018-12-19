@@ -255,8 +255,14 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         if custom_sql:
             self.create_temporary_table(table_name, custom_sql)
 
-        insp = reflection.Inspector.from_engine(engine)
-        self.columns = insp.get_columns(table_name, schema=schema)
+
+        try:
+            insp = reflection.Inspector.from_engine(engine)
+            self.columns = insp.get_columns(table_name, schema=schema)
+        except KeyError:
+            # we will get a KeyError for temporary tables, since
+            # reflection will not find the temporary schema
+            self.columns = self.column_reflection_fallback()
 
         # Only call super once connection is established and table_name and columns known to allow autoinspection
         super(SqlAlchemyDataset, self).__init__(*args, **kwargs)
@@ -272,17 +278,13 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             table_name=table_name, custom_sql=custom_sql)
         self.engine.execute(stmt)
 
-    def _is_numeric_column(self, column):
-        for col in self.columns:
-            if (col['name'] == column and
-                        isinstance(col['type'],
-                                   (sa.types.Integer, sa.types.BigInteger, sa.types.Float,
-                                    sa.types.Numeric, sa.types.SmallInteger, sa.types.Boolean)
-                                   )
-                    ):
-                return True
+    def column_reflection_fallback(self):
+        """If we can't reflect the table, use a query to at least get column names."""
+        sql = sa.select([sa.text("*")]).select_from(self._table)
+        col_names = self.engine.execute(sql).keys()
+        col_dict = [{'name': col_name} for col_name in col_names]
+        return col_dict
 
-        return False
 
     ###
     ###
@@ -688,9 +690,6 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         if max_value is not None and not isinstance(max_value, (Number)):
             raise ValueError("max_value must be a number")
-
-        if not self._is_numeric_column(column):
-            raise ValueError("column is not numeric")
 
         col_avg = self.engine.execute(
             sa.select([sa.func.avg(sa.column(column))]).select_from(
