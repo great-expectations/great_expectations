@@ -6,7 +6,6 @@ import decimal
 
 from six import string_types, integer_types
 
-import numpy as np
 from scipy import stats
 import pandas as pd
 import numpy as np
@@ -33,19 +32,20 @@ def parse_result_format(result_format):
 
     return result_format
 
+
 class DotDict(dict):
     """dot.notation access to dictionary attributes"""
 
     def __getattr__(self, attr):
         return self.get(attr)
 
-    __setattr__= dict.__setitem__
-    __delattr__= dict.__delitem__
+    __setattr__ = dict.__setitem__
+    __delattr__ = dict.__delitem__
 
     def __dir__(self):
         return self.keys()
 
-    #Cargo-cultishly copied from: https://github.com/spindlelabs/pyes/commit/d2076b385c38d6d00cebfe0df7b0d1ba8df934bc
+    # Cargo-cultishly copied from: https://github.com/spindlelabs/pyes/commit/d2076b385c38d6d00cebfe0df7b0d1ba8df934bc
     def __deepcopy__(self, memo):
         return DotDict([(copy.deepcopy(k, memo), copy.deepcopy(v, memo)) for k, v in self.items()])
 
@@ -79,6 +79,8 @@ Usage::
     Our new homegrown implementation directly searches the MRO, instead
     of relying on super, and concatenates documentation together.
 """
+
+
 class DocInherit(object):
 
     def __init__(self, mthd):
@@ -119,7 +121,7 @@ def recursively_convert_to_json_serializable(test_obj):
     """
     # Validate that all aruguments are of approved types, coerce if it's easy, else exception
     # print(type(test_obj), test_obj)
-    #Note: Not 100% sure I've resolved this correctly...
+    # Note: Not 100% sure I've resolved this correctly...
     try:
         if not isinstance(test_obj, list) and np.isnan(test_obj):
             # np.isnan is functionally vectorized, but we only want to apply this to single objects
@@ -137,7 +139,8 @@ def recursively_convert_to_json_serializable(test_obj):
     elif isinstance(test_obj, dict):
         new_dict = {}
         for key in test_obj:
-            new_dict[key] = recursively_convert_to_json_serializable(test_obj[key])
+            new_dict[key] = recursively_convert_to_json_serializable(
+                test_obj[key])
 
         return new_dict
 
@@ -150,11 +153,11 @@ def recursively_convert_to_json_serializable(test_obj):
 
     elif isinstance(test_obj, (np.ndarray, pd.Index)):
         #test_obj[key] = test_obj[key].tolist()
-        ## If we have an array or index, convert it first to a list--causing coercion to float--and then round
-        ## to the number of digits for which the string representation will equal the float representation
+        # If we have an array or index, convert it first to a list--causing coercion to float--and then round
+        # to the number of digits for which the string representation will equal the float representation
         return [recursively_convert_to_json_serializable(x) for x in test_obj.tolist()]
 
-    #Note: This clause has to come after checking for np.ndarray or we get:
+    # Note: This clause has to come after checking for np.ndarray or we get:
     #      `ValueError: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()`
     elif test_obj == None:
         # No problem to encode json
@@ -186,7 +189,8 @@ def recursively_convert_to_json_serializable(test_obj):
         return float(test_obj)
 
     else:
-        raise TypeError('%s is of type %s which cannot be serialized.' % (str(test_obj), type(test_obj).__name__))
+        raise TypeError('%s is of type %s which cannot be serialized.' % (
+            str(test_obj), type(test_obj).__name__))
 
 
 def is_valid_partition_object(partition_object):
@@ -220,10 +224,16 @@ def is_valid_continuous_partition_object(partition_object):
     """
     if (partition_object is None) or ("weights" not in partition_object) or ("bins" not in partition_object):
         return False
+    if("tail_weights" in partition_object):
+        if (len(partition_object["tail_weights"])!=2):
+            return False
+        comb_weights=partition_object["tail_weights"]+partition_object["weights"]
+    else:
+        comb_weights=partition_object["weights"]
     # Expect one more bin edge than weight; all bin edges should be monotonically increasing; weights should sum to one
     if (len(partition_object['bins']) == (len(partition_object['weights']) + 1)) and \
             np.all(np.diff(partition_object['bins']) > 0) and \
-            np.allclose(np.sum(partition_object['weights']), 1):
+            np.allclose(np.sum(comb_weights), 1):
         return True
     return False
 
@@ -275,8 +285,9 @@ def kde_partition_data(data, estimate_tails=True):
     """
     kde = stats.kde.gaussian_kde(data)
     evaluation_bins = np.linspace(start=np.min(data) - (kde.covariance_factor() / 2),
-                                  stop=np.max(data) + (kde.covariance_factor() / 2),
-                                  num=np.floor(((np.max(data) - np.min(data)) / kde.covariance_factor()) + 1 ).astype(int))
+                                  stop=np.max(data) +
+                                  (kde.covariance_factor() / 2),
+                                  num=np.floor(((np.max(data) - np.min(data)) / kde.covariance_factor()) + 1).astype(int))
     cdf_vals = [kde.integrate_box_1d(-np.inf, x) for x in evaluation_bins]
     evaluation_weights = np.diff(cdf_vals)
 
@@ -287,7 +298,8 @@ def kde_partition_data(data, estimate_tails=True):
     else:
         bins = np.concatenate(([-np.inf], evaluation_bins, [np.inf]))
 
-    weights = np.concatenate(([cdf_vals[0]], evaluation_weights, [1 - cdf_vals[-1]]))
+    weights = np.concatenate(
+        ([cdf_vals[0]], evaluation_weights, [1 - cdf_vals[-1]]))
 
     return {
         "bins": bins,
@@ -318,9 +330,10 @@ def continuous_partition_data(data, bins='auto', n_bins=10):
         }
     """
     if bins == 'uniform':
-        bins = np.linspace(start=np.min(data), stop=np.max(data), num = n_bins+1)
-    elif bins =='ntile':
-        bins = np.percentile(data, np.linspace(start=0, stop=100, num = n_bins+1))
+        bins = np.linspace(start=np.min(data), stop=np.max(data), num=n_bins+1)
+    elif bins == 'ntile':
+        bins = np.percentile(data, np.linspace(
+            start=0, stop=100, num=n_bins+1))
     elif bins != 'auto':
         raise ValueError("Invalid parameter for bins argument")
 
@@ -362,7 +375,8 @@ def infer_distribution_parameters(data, distribution, params=None):
     if params is None:
         params = dict()
     elif not isinstance(params, dict):
-        raise TypeError("params must be a dictionary object, see great_expectations documentation")
+        raise TypeError(
+            "params must be a dictionary object, see great_expectations documentation")
 
     if 'mean' not in params.keys():
         params['mean'] = data.mean()
@@ -375,7 +389,7 @@ def infer_distribution_parameters(data, distribution, params=None):
         if 'alpha' not in params.keys():
             # from https://stats.stackexchange.com/questions/12232/calculating-the-parameters-of-a-beta-distribution-using-the-mean-and-variance
             params['alpha'] = (params['mean'] ** 2) * (
-                        ((1 - params['mean']) / params['std_dev'] ** 2) - (1 / params['mean']))
+                ((1 - params['mean']) / params['std_dev'] ** 2) - (1 / params['mean']))
         if 'beta' not in params.keys():
             params['beta'] = params['alpha'] * ((1 / params['mean']) - 1)
 
@@ -385,8 +399,7 @@ def infer_distribution_parameters(data, distribution, params=None):
             # Using https://en.wikipedia.org/wiki/Gamma_distribution
             params['alpha'] = (params['mean'] / params.get('scale', 1))
 
-
-    #elif distribution == 'poisson':
+    # elif distribution == 'poisson':
     #    if 'lambda' not in params.keys():
     #       params['lambda'] = params['mean']
 
@@ -410,18 +423,20 @@ def infer_distribution_parameters(data, distribution, params=None):
             params['df'] = params['mean']
 
     #  Expon only uses loc and scale, use default
-    #elif distribution == 'expon':
+    # elif distribution == 'expon':
         # scipy cdf(x, loc=0, scale=1)
     #    if 'lambda' in params.keys():
             # Lambda is optional
     #        params['scale'] = 1 / params['lambda']
     elif distribution is not 'norm':
-        raise AttributeError("Unsupported distribution type. Please refer to Great Expectations Documentation")
+        raise AttributeError(
+            "Unsupported distribution type. Please refer to Great Expectations Documentation")
 
     params['loc'] = params.get('loc', 0)
     params['scale'] = params.get('scale', 1)
 
     return params
+
 
 def _scipy_distribution_positional_args_from_dict(distribution, params):
     """Helper function that returns positional arguments for a scipy distribution using a dict of parameters.
@@ -451,7 +466,7 @@ def _scipy_distribution_positional_args_from_dict(distribution, params):
         return params['alpha'], params['beta'], params['loc'], params['scale']
     elif distribution == 'gamma':
         return params['alpha'], params['loc'], params['scale']
-    #elif distribution == 'poisson':
+    # elif distribution == 'poisson':
     #    return params['lambda'], params['loc']
     elif distribution == 'uniform':
         return params['min'], params['max']
@@ -492,7 +507,8 @@ def validate_distribution_parameters(distribution, params):
     expon_msg = "expon distributions require 0 parameters and optionally 'loc', 'scale'."
 
     if (distribution not in ['norm', 'beta', 'gamma', 'poisson', 'uniform', 'chi2', 'expon']):
-        raise AttributeError("Unsupported  distribution provided: %s" % distribution)
+        raise AttributeError(
+            "Unsupported  distribution provided: %s" % distribution)
 
     if isinstance(params, dict):
         # `params` is a dictionary
@@ -501,19 +517,19 @@ def validate_distribution_parameters(distribution, params):
 
         # alpha and beta are required and positive
         if distribution == 'beta' and (params.get('alpha', -1) <= 0 or params.get('beta', -1) <= 0):
-            raise ValueError("Invalid parameters: %s" %beta_msg)
+            raise ValueError("Invalid parameters: %s" % beta_msg)
 
         # alpha is required and positive
         elif distribution == 'gamma' and params.get('alpha', -1) <= 0:
-            raise ValueError("Invalid parameters: %s" %gamma_msg)
+            raise ValueError("Invalid parameters: %s" % gamma_msg)
 
         # lambda is a required and positive
-        #elif distribution == 'poisson' and params.get('lambda', -1) <= 0:
+        # elif distribution == 'poisson' and params.get('lambda', -1) <= 0:
         #    raise ValueError("Invalid parameters: %s" %poisson_msg)
 
         # df is necessary and required to be positve
         elif distribution == 'chi2' and params.get('df', -1) <= 0:
-            raise ValueError("Invalid parameters: %s:" %chi2_msg)
+            raise ValueError("Invalid parameters: %s:" % chi2_msg)
 
     elif isinstance(params, tuple) or isinstance(params, list):
         scale = None
@@ -521,31 +537,32 @@ def validate_distribution_parameters(distribution, params):
         # `params` is a tuple or a list
         if distribution == 'beta':
             if len(params) < 2:
-                raise ValueError("Missing required parameters: %s" %beta_msg)
+                raise ValueError("Missing required parameters: %s" % beta_msg)
             if params[0] <= 0 or params[1] <= 0:
-                raise ValueError("Invalid parameters: %s" %beta_msg)
+                raise ValueError("Invalid parameters: %s" % beta_msg)
             if len(params) == 4:
                 scale = params[3]
             elif len(params) > 4:
-                raise ValueError("Too many parameters provided: %s" %beta_msg)
+                raise ValueError("Too many parameters provided: %s" % beta_msg)
 
         elif distribution == 'norm':
             if len(params) > 2:
-                raise ValueError("Too many parameters provided: %s" %norm_msg)
+                raise ValueError("Too many parameters provided: %s" % norm_msg)
             if len(params) == 2:
                 scale = params[1]
 
         elif distribution == 'gamma':
             if len(params) < 1:
-                raise ValueError("Missing required parameters: %s" %gamma_msg)
+                raise ValueError("Missing required parameters: %s" % gamma_msg)
             if len(params) == 3:
                 scale = params[2]
             if len(params) > 3:
-                raise ValueError("Too many parameters provided: %s" % gamma_msg)
+                raise ValueError(
+                    "Too many parameters provided: %s" % gamma_msg)
             elif params[0] <= 0:
-                raise ValueError("Invalid parameters: %s" %gamma_msg)
+                raise ValueError("Invalid parameters: %s" % gamma_msg)
 
-        #elif distribution == 'poisson':
+        # elif distribution == 'poisson':
         #    if len(params) < 1:
         #        raise ValueError("Missing required parameters: %s" %poisson_msg)
         #   if len(params) > 2:
@@ -557,31 +574,32 @@ def validate_distribution_parameters(distribution, params):
             if len(params) == 2:
                 scale = params[1]
             if len(params) > 2:
-                raise ValueError("Too many arguments provided: %s" %uniform_msg)
+                raise ValueError(
+                    "Too many arguments provided: %s" % uniform_msg)
 
         elif distribution == 'chi2':
             if len(params) < 1:
-                raise ValueError("Missing required parameters: %s" %chi2_msg)
+                raise ValueError("Missing required parameters: %s" % chi2_msg)
             elif len(params) == 3:
                 scale = params[2]
             elif len(params) > 3:
-                raise ValueError("Too many arguments provided: %s" %chi2_msg)
+                raise ValueError("Too many arguments provided: %s" % chi2_msg)
             if params[0] <= 0:
-                raise ValueError("Invalid parameters: %s" %chi2_msg)
+                raise ValueError("Invalid parameters: %s" % chi2_msg)
 
         elif distribution == 'expon':
 
             if len(params) == 2:
                 scale = params[1]
             if len(params) > 2:
-                raise ValueError("Too many arguments provided: %s" %expon_msg)
+                raise ValueError("Too many arguments provided: %s" % expon_msg)
 
         if scale is not None and scale <= 0:
             raise ValueError("std_dev and scale must be positive.")
 
     else:
         raise ValueError(
-                "params must be a dict or list, or use ge.dataset.util.infer_distribution_parameters(data, distribution)")
+            "params must be a dict or list, or use ge.dataset.util.infer_distribution_parameters(data, distribution)")
 
     return
 

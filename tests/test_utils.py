@@ -2,46 +2,45 @@ from __future__ import division
 
 import pandas as pd
 import numpy as np
-
+import pytest
 from sqlalchemy import create_engine
 
 from great_expectations.dataset import PandasDataset, SqlAlchemyDataset
+import great_expectations.dataset.autoinspect as autoinspect
 
-## Taken from the following stackoverflow: https://stackoverflow.com/questions/23549419/assert-that-two-dictionaries-are-almost-equal
-def assertDeepAlmostEqual(test_case, expected, actual, *args, **kwargs):
+
+# Taken from the following stackoverflow:
+# https://stackoverflow.com/questions/23549419/assert-that-two-dictionaries-are-almost-equal
+def assertDeepAlmostEqual(expected, actual, *args, **kwargs):
     """
     Assert that two complex structures have almost equal contents.
 
     Compares lists, dicts and tuples recursively. Checks numeric values
-    using test_case's :py:meth:`unittest.TestCase.assertAlmostEqual` and
-    checks all other values with :py:meth:`unittest.TestCase.assertEqual`.
+    using pyteset.approx and checks all other values with an assertion equality statement
     Accepts additional positional and keyword arguments and pass those
-    intact to assertAlmostEqual() (that's how you specify comparison
+    intact to pytest.approx() (that's how you specify comparison
     precision).
 
-    :param test_case: TestCase object on which we can call all of the basic
-    'assert' methods.
-    :type test_case: :py:class:`unittest.TestCase` object
     """
-    is_root = not '__trace' in kwargs
+    is_root = '__trace' not in kwargs
     trace = kwargs.pop('__trace', 'ROOT')
     try:
-       # if isinstance(expected, (int, float, long, complex)):
+        # if isinstance(expected, (int, float, long, complex)):
         if isinstance(expected, (int, float, complex)):
-            test_case.assertAlmostEqual(expected, actual, *args, **kwargs)
+            assert expected == pytest.approx(actual, *args, **kwargs)
         elif isinstance(expected, (list, tuple, np.ndarray)):
-            test_case.assertEqual(len(expected), len(actual))
+            assert len(expected) == len(actual)
             for index in range(len(expected)):
                 v1, v2 = expected[index], actual[index]
-                assertDeepAlmostEqual(test_case, v1, v2,
+                assertDeepAlmostEqual(v1, v2,
                                       __trace=repr(index), *args, **kwargs)
         elif isinstance(expected, dict):
-            test_case.assertEqual(set(expected), set(actual))
+            assert set(expected) == set(actual)
             for key in expected:
-                assertDeepAlmostEqual(test_case, expected[key], actual[key],
+                assertDeepAlmostEqual(expected[key], actual[key],
                                       __trace=repr(key), *args, **kwargs)
         else:
-            test_case.assertEqual(expected, actual)
+            assert expected == actual
     except AssertionError as exc:
         exc.__dict__.setdefault('traces', []).append(trace)
         if is_root:
@@ -50,8 +49,9 @@ def assertDeepAlmostEqual(test_case, expected, actual, *args, **kwargs):
         raise exc
 
 
-def get_dataset(dataset_type, data):
-    """For Pandas, data should be either a DataFrame or a dictionary that can be instantiated as a DataFrame
+def get_dataset(dataset_type, data, autoinspect_func=autoinspect.columns_exist):
+    """For Pandas, data should be either a DataFrame or a dictionary that can
+    be instantiated as a DataFrame.
     For SQL, data should have the following shape:
         {
             'table':
@@ -61,7 +61,7 @@ def get_dataset(dataset_type, data):
 
     """
     if dataset_type == 'PandasDataset':
-        return PandasDataset(data)
+        return PandasDataset(data, autoinspect_func=autoinspect_func)
     elif dataset_type == 'SqlAlchemyDataset':
         # Create a new database
 
@@ -72,7 +72,7 @@ def get_dataset(dataset_type, data):
         df.to_sql(name='test_data', con=engine, index=False)
 
         # Build a SqlAlchemyDataset using that database
-        return SqlAlchemyDataset('test_data', engine=engine)
+        return SqlAlchemyDataset('test_data', engine=engine, autoinspect_func=autoinspect_func)
     else:
         raise ValueError("Unknown dataset_type " + str(dataset_type))
 
@@ -84,7 +84,7 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
             #"expect_table_row_count_to_be_between",
             #"expect_table_row_count_to_equal",
             #"expect_table_columns_to_match_ordered_list",
-            "expect_column_values_to_be_unique",
+            #"expect_column_values_to_be_unique",
             # "expect_column_values_to_not_be_null",
             # "expect_column_values_to_be_null",
             "expect_column_values_to_be_of_type",
@@ -128,6 +128,9 @@ def evaluate_json_test(dataset, expectation_type, test):
     """
     This method will evaluate the result of a test build using the Great Expectations json test format.
 
+    NOTE: Tests can be suppressed for certain data types if the test contains the Key 'suppress_test_for' with a list
+        of Dataset types to suppress, such as ['SQLAlchemy', 'Pandas'].
+
     :param dataset: (Dataset) A great expectations Dataset
     :param expectation_type: (string) the name of the expectation to be run using the test input
     :param test: (dict) a dictionary containing information for the test to be run. The dictionary must include:
@@ -148,16 +151,20 @@ def evaluate_json_test(dataset, expectation_type, test):
     dataset.set_default_expectation_argument('result_format', 'COMPLETE')
 
     if 'title' not in test:
-        raise ValueError("Invalid test configuration detected: 'title' is required.")
+        raise ValueError(
+            "Invalid test configuration detected: 'title' is required.")
 
     if 'exact_match_out' not in test:
-        raise ValueError("Invalid test configuration detected: 'exact_match_out' is required.")
+        raise ValueError(
+            "Invalid test configuration detected: 'exact_match_out' is required.")
 
     if 'in' not in test:
-        raise ValueError("Invalid test configuration detected: 'in' is required.")
+        raise ValueError(
+            "Invalid test configuration detected: 'in' is required.")
 
     if 'out' not in test:
-        raise ValueError("Invalid test configuration detected: 'out' is required.")
+        raise ValueError(
+            "Invalid test configuration detected: 'out' is required.")
 
     # Pass the test if we are in a test condition that is a known exception
 
@@ -178,9 +185,17 @@ def evaluate_json_test(dataset, expectation_type, test):
             result = getattr(dataset, expectation_type)(**test['in'])
 
     except NotImplementedError:
-        #Note: This method of checking does not look for false negatives: tests that are incorrectly on the notimplemented_list
-        assert candidate_test_is_on_temporary_notimplemented_list(dataset.__class__.__name__, expectation_type), "Error: this test was supposed to return NotImplementedError"
+        # Note: This method of checking does not look for false negatives: tests that are incorrectly on the notimplemented_list
+        assert candidate_test_is_on_temporary_notimplemented_list(
+            dataset.__class__.__name__, expectation_type), "Error: this test was supposed to return NotImplementedError"
         return
+
+    if 'suppress_test_for' in test:
+        # Optionally suppress the test for specified Dataset types
+        if 'SQLAlchemy' in test['suppress_test_for'] and isinstance(dataset, SqlAlchemyDataset):
+            return
+        if 'Pandas' in test['suppress_test_for'] and isinstance(dataset, PandasDataset):
+            return
 
     # Check results
     if test['exact_match_out'] is True:
@@ -204,14 +219,19 @@ def evaluate_json_test(dataset, expectation_type, test):
                     assert result['result']['unexpected_index_list'] == value
 
             elif key == 'unexpected_list':
-                assert result['result']['unexpected_list'] == value, "expected " + str(value) + " but got " + str(result['result']['unexpected_list'])
+                assert result['result']['unexpected_list'] == value, "expected " + \
+                    str(value) + " but got " + \
+                    str(result['result']['unexpected_list'])
 
             elif key == 'details':
                 assert result['result']['details'] == value
 
             elif key == 'traceback_substring':
                 assert result['exception_info']['raised_exception']
-                assert value in result['exception_info']['exception_traceback'], "expected to find " + value + " in " + result['exception_info']['exception_traceback']
+                assert value in result['exception_info']['exception_traceback'], "expected to find " + \
+                    value + " in " + \
+                    result['exception_info']['exception_traceback']
 
             else:
-                raise ValueError("Invalid test specification: unknown key " + key + " in 'out'")
+                raise ValueError(
+                    "Invalid test specification: unknown key " + key + " in 'out'")

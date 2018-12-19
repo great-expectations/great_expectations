@@ -1,0 +1,21 @@
+{
+  "expectation_type": "expect_column_to_exist",
+  "datasets":[
+    {
+      "data": {"b": [1, 2, 3, 4]},
+      "tests":
+        [{
+          "title": "This test should never run!",
+          "exact_match_out": false,
+          "suppress_test_for": ["Pandas", "SQLAlchemy"],
+          "in": ["a"],
+          "kwargs": {},
+          "out": {
+            "success": true,
+            "meta":{
+              "notes": "If successful, this test will NOT be executed."
+            }
+          }
+        }]
+      }
+    ]}

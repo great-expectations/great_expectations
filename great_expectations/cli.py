@@ -9,12 +9,14 @@ from great_expectations.dataset import PandasDataset
 
 
 def dispatch(args):
-    parser = argparse.ArgumentParser(description='great_expectations command-line interface')
+    parser = argparse.ArgumentParser(
+        description='great_expectations command-line interface')
 
     subparsers = parser.add_subparsers(dest='command')
     subparsers.required = True
 
-    validate_parser = subparsers.add_parser('validate', description='Validate expectations for your dataset.')
+    validate_parser = subparsers.add_parser(
+        'validate', description='Validate expectations for your dataset.')
     validate_parser.set_defaults(func=validate)
 
     validate_parser.add_argument('dataset',
@@ -32,11 +34,12 @@ def dispatch(args):
                                  help='Specify whether to only return expectations that are not met during evaluation (defaults to False).')
     # validate_parser.add_argument('--no_catch_exceptions', '-e', default=True, action='store_false')
     # validate_parser.add_argument('--only_return_failures', '-f', default=False, action='store_true')
-    custom_dataset_group = validate_parser.add_argument_group('custom_dataset', description='Arguments defining a custom dataset to use for validation.')
+    custom_dataset_group = validate_parser.add_argument_group(
+        'custom_dataset', description='Arguments defining a custom dataset to use for validation.')
     custom_dataset_group.add_argument('--custom_dataset_module', '-m', default=None,
-                                 help='Path to a python module containing a custom dataset class.')
+                                      help='Path to a python module containing a custom dataset class.')
     custom_dataset_group.add_argument('--custom_dataset_class', '-c', default=None,
-                                 help='Name of the custom dataset class to use during evaluation.')
+                                      help='Name of the custom dataset class to use during evaluation.')
 
     version_parser = subparsers.add_parser('version')
     version_parser.set_defaults(func=version)
@@ -61,20 +64,25 @@ def validate(parsed_args):
     expectations_config = json.load(open(expectations_config_file))
 
     if parsed_args["evaluation_parameters"] is not None:
-        evaluation_parameters = json.load(open(parsed_args["evaluation_parameters"]))
+        evaluation_parameters = json.load(
+            open(parsed_args["evaluation_parameters"]))
     else:
         evaluation_parameters = None
 
     if parsed_args["custom_dataset_module"]:
-        sys.path.insert(0, os.path.dirname(parsed_args["custom_dataset_module"]))
-        module_name = os.path.basename(parsed_args["custom_dataset_module"]).split('.')[0]
+        sys.path.insert(0, os.path.dirname(
+            parsed_args["custom_dataset_module"]))
+        module_name = os.path.basename(
+            parsed_args["custom_dataset_module"]).split('.')[0]
         custom_module = __import__(module_name)
-        dataset_class = getattr(custom_module, parsed_args["custom_dataset_class"])
+        dataset_class = getattr(
+            custom_module, parsed_args["custom_dataset_class"])
 
     else:
         dataset_class = PandasDataset
 
-    df = read_csv(data_set, expectations_config=expectations_config, dataset_class=dataset_class)
+    df = read_csv(data_set, expectations_config=expectations_config,
+                  dataset_class=dataset_class)
 
     result = df.validate(
         evaluation_parameters=evaluation_parameters,
