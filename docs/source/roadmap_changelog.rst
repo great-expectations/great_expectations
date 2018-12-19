@@ -12,7 +12,7 @@ Planned Features
 * Real-time/streaming and adaption of distributional expectations
 
 
-v.0.4.4__develop
+v.0.4.5
 ----------------
 * Add a new autoinspect API and remove default expectations.
 * Improve details for expect_table_columns_to_match_ordered_list (#379, thanks @rlshuhart)
