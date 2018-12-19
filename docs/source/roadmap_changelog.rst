@@ -12,6 +12,9 @@ Planned Features
 * Real-time/streaming and adaption of distributional expectations
 
 
+v.0.4.5__develop
+----------------
+
 v.0.4.5
 ----------------
 * Add a new autoinspect API and remove default expectations.
