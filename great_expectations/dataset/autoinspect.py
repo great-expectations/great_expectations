@@ -30,13 +30,16 @@ def columns_exist(inspect_dataset):
 
     # Attempt to get column names. For pandas, columns is just a list of strings
     if not hasattr(inspect_dataset, "columns"):
-        warnings.warn("No columns list found in dataset; no autoinspection performed.")
+        warnings.warn(
+            "No columns list found in dataset; no autoinspection performed.")
         return
     elif isinstance(inspect_dataset.columns[0], string_types):
         columns = inspect_dataset.columns
     elif isinstance(inspect_dataset.columns[0], dict) and "name" in inspect_dataset.columns[0]:
         columns = [col['name'] for col in inspect_dataset.columns]
     else:
-        raise AutoInspectError("Unable to determine column names for this dataset.")
+        raise AutoInspectError(
+            "Unable to determine column names for this dataset.")
 
-    create_multiple_expectations(inspect_dataset, columns, "expect_column_to_exist")
+    create_multiple_expectations(
+        inspect_dataset, columns, "expect_column_to_exist")
