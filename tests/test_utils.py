@@ -128,7 +128,7 @@ def evaluate_json_test(dataset, expectation_type, test):
     """
     This method will evaluate the result of a test build using the Great Expectations json test format.
 
-    NOTE: Tests can be suppressed for certain data types if the test contains the Key 'suppress_tests_for' with a list
+    NOTE: Tests can be suppressed for certain data types if the test contains the Key 'suppress_test_for' with a list
         of Dataset types to suppress, such as ['SQLAlchemy', 'Pandas'].
 
     :param dataset: (Dataset) A great expectations Dataset
