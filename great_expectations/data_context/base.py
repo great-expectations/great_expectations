@@ -4,8 +4,9 @@ class DataContext(object):
 
     Warning: this feature is new in v0.4 and may change based on community feedback.
     """
-    def __init__(self, options):
-        self.connect(options)
+
+    def __init__(self, options, *args, **kwargs):
+        self.connect(options, *args, **kwargs)
 
     def connect(self, options):
         return NotImplementedError
