@@ -14,13 +14,25 @@ Planned Features
 
 v.0.4.4__develop
 ----------------
+* Add a new autoinspect API and remove default expectations.
+* Improve details for expect_table_columns_to_match_ordered_list (#379, thanks @rlshuhart)
+* Linting fixes (thanks @elsander)
+* Add support for dataset_class in from_pandas (thanks @jtilly)
+* Improve redshift compatibility by correcting faulty isnull operator (thanks @avanderm)
+* Adjust partitions to use tail_weight to improve JSON compatibility and
+  support special cases of KL Divergence (thanks @anhollis)
 * Enable custom_sql datasets for databases with multiple schemas, by
-  adding a fallback for column reflection (#387)
+  adding a fallback for column reflection (#387, thanks @elsander)
 * Remove `IF NOT EXISTS` check for custom sql temporary tables, for
-  Redshift compatibility (#372)
+  Redshift compatibility (#372, thanks @elsander)
 * Allow users to pass args/kwargs for engine creation in
-  SqlAlchemyDataContext (#369)
-* Add support for custom schema in SqlAlchemyDataset (#370)
+  SqlAlchemyDataContext (#369, thanks @elsander)
+* Add support for custom schema in SqlAlchemyDataset (#370, thanks @elsander)
+* Use getfullargspec to avoid deprecation warnings.
+* Add expect_column_values_to_be_unique to SqlAlchemyDataset
+* Fix map expectations for categorical columns (thanks @eugmandel)
+* Improve internal testing suite (thanks @anhollis and @ccnobbli)
+* Consistently use value_set instead of mixing value_set and values_set (thanks @njsmith8)
 
 v.0.4.4
 ----------------
