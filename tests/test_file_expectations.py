@@ -2,7 +2,6 @@ import unittest
 
 import great_expectations as ge
 
-import json
 
 class TestUtilMethods(unittest.TestCase):
     def test_expect_file_hash_to_equal(self):
@@ -63,16 +62,19 @@ class TestUtilMethods(unittest.TestCase):
         except ValueError:
             pass
         # Test file size not in range
-        self.assertFalse(ge.expect_file_size_to_be_between(test_file, 0, 10000))
+        self.assertFalse(
+            ge.expect_file_size_to_be_between(test_file, 0, 10000))
         # Test file size in range
-        self.assertTrue(ge.expect_file_size_to_be_between(test_file, 70000, 71000))
+        self.assertTrue(ge.expect_file_size_to_be_between(
+            test_file, 70000, 71000))
 
     def test_expect_file_to_exist(self):
         # Test for non-existent file
         self.assertFalse(ge.expect_file_to_exist('abc'))
         # Test for existing file
-        self.assertTrue(ge.expect_file_to_exist('./tests/test_sets/Titanic.csv'))
-                         
+        self.assertTrue(ge.expect_file_to_exist(
+            './tests/test_sets/Titanic.csv'))
+
     def test_expect_file_unique_column_names_csv(self):
         # Test for non-existent file
         try:
@@ -106,10 +108,11 @@ class TestUtilMethods(unittest.TestCase):
         # Test valid JSON file with non-matching schema
         test_file = './tests/test_sets/json_test1_against_schema.json'
         schema_file = './tests/test_sets/sample_schema.json'
-        self.assertFalse(ge.expect_file_valid_json(test_file, schema=schema_file))
+        self.assertFalse(ge.expect_file_valid_json(
+            test_file, schema=schema_file))
 
         # Test valid JSON file with valid schema
         test_file = './tests/test_sets/json_test2_against_schema.json'
         schema_file = './tests/test_sets/sample_schema.json'
-        self.assertTrue(ge.expect_file_valid_json(test_file, schema=schema_file))
-
+        self.assertTrue(ge.expect_file_valid_json(
+            test_file, schema=schema_file))

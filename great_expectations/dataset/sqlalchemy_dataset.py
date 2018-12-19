@@ -6,7 +6,7 @@ from functools import wraps
 import inspect
 from six import PY3
 
-from .util import DocInherit, parse_result_format, create_multiple_expectations
+from .util import DocInherit, parse_result_format
 
 import sqlalchemy as sa
 from sqlalchemy.engine import reflection
@@ -63,9 +63,20 @@ class MetaSqlAlchemyDataset(Dataset):
                         sa.column(column).is_(None) if None in ignore_values else False), 1)], else_=0)
                 ).label('null_count'),
                 sa.func.sum(
-                    sa.case([(sa.and_(sa.not_(expected_condition),
-                                      sa.column(column).is_(None) == False if None in ignore_values else True),
-                              1)], else_=0)
+                    sa.case([
+                        (
+                            sa.and_(
+                                sa.not_(expected_condition),
+                                sa.case([
+                                    (
+                                        sa.column(column).is_(None),
+                                        False
+                                    )
+                                ], else_=True) if None in ignore_values else True
+                            ),
+                            1
+                        )
+                    ], else_=0)
                 ).label('unexpected_count')
             ]).select_from(self._table)
 
@@ -86,8 +97,12 @@ class MetaSqlAlchemyDataset(Dataset):
                             sa.or_(
                                 # SA normally evaluates `== None` as `IS NONE`. However `sa.in_()`
                                 # replaces `None` as `NULL` in the list and incorrectly uses `== NULL`
-                                sa.column(column).is_(
-                                    None) == False if None in ignore_values else False,
+                                sa.case([
+                                    (
+                                        sa.column(column).is_(None),
+                                        False
+                                    )
+                                ], else_=True) if None in ignore_values else False,
                                 # Ignore any other values that are in the ignore list
                                 sa.column(column).in_(ignore_values) == False))
                 ).limit(unexpected_count_limit)
@@ -237,7 +252,6 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             # a user-defined schema
             raise ValueError("Cannot specify both schema and custom_sql.")
 
-
         if custom_sql:
             self.create_temporary_table(table_name, custom_sql)
 
@@ -246,7 +260,6 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         # Only call super once connection is established and table_name and columns known to allow autoinspection
         super(SqlAlchemyDataset, self).__init__(*args, **kwargs)
-
 
     def create_temporary_table(self, table_name, custom_sql):
         """
@@ -262,11 +275,11 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
     def _is_numeric_column(self, column):
         for col in self.columns:
             if (col['name'] == column and
-                    isinstance(col['type'],
-                               (sa.types.Integer, sa.types.BigInteger, sa.types.Float,
-                                sa.types.Numeric, sa.types.SmallInteger, sa.types.Boolean)
-                               )
-                ):
+                        isinstance(col['type'],
+                                   (sa.types.Integer, sa.types.BigInteger, sa.types.Float,
+                                    sa.types.Numeric, sa.types.SmallInteger, sa.types.Boolean)
+                                   )
+                    ):
                 return True
 
         return False
@@ -774,7 +787,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                     ((max_value is None) or (column_median <= max_value)),
                 'result': {
                     'observed_value': column_median
-                    }
+                }
             }
 
     @MetaSqlAlchemyDataset.column_map_expectation
@@ -787,7 +800,6 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             having(sa.func.count(sa.column(column)) > 1)
 
         return sa.column(column).notin_(dup_query)
-
 
     @DocInherit
     @MetaSqlAlchemyDataset.column_aggregate_expectation
