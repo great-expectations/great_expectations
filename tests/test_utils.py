@@ -22,10 +22,10 @@ def assertDeepAlmostEqual(expected, actual, *args, **kwargs):
     precision).
 
     """
-    is_root = not '__trace' in kwargs
+    is_root = '__trace' not in kwargs
     trace = kwargs.pop('__trace', 'ROOT')
     try:
-       # if isinstance(expected, (int, float, long, complex)):
+        # if isinstance(expected, (int, float, long, complex)):
         if isinstance(expected, (int, float, complex)):
             assert expected == pytest.approx(actual, *args, **kwargs)
         elif isinstance(expected, (list, tuple, np.ndarray)):
