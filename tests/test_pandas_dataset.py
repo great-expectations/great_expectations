@@ -477,59 +477,6 @@ def test_ge_pandas_sampling():
     })
 
     # Put some simple expectations on the data frame
-    df.expect_column_values_to_be_in_set("A", [1, 2, 3, 4])
-    df.expect_column_values_to_be_in_set("B", [5, 6, 7, 8])
-    df.expect_column_values_to_be_in_set("C", ['a', 'b', 'c', 'd'])
-    df.expect_column_values_to_be_in_set("D", ['e', 'f', 'g', 'h'])
-
-    exp1 = df.find_expectations()
-
-    # The sampled data frame should:
-    #
-    #   1. Be a ge.dataset.PandaDataSet
-    #   2. Inherit ALL the non-failing expectations of the parent data frame
-
-    samp1 = df.sample(n=2)
-    assert isinstance(samp1, ge.dataset.PandasDataset)
-    assert samp1.find_expectations() == exp1
-
-    samp1 = df.sample(frac=0.25, replace=True)
-    assert isinstance(samp1, ge.dataset.PandasDataset)
-    assert samp1.find_expectations() == exp1
-
-    # Change expectation on column "D", sample, and check expectations.
-    # The failing expectation on column "D" is automatically dropped in
-    # the sample.
-    df.expect_column_values_to_be_in_set("D", ['e', 'f', 'g', 'x'])
-    samp1 = df.sample(n=2)
-    exp1 = [
-        {'expectation_type': 'expect_column_to_exist',
-         'kwargs': {'column': 'A'}},
-        {'expectation_type': 'expect_column_to_exist',
-         'kwargs': {'column': 'B'}},
-        {'expectation_type': 'expect_column_to_exist',
-         'kwargs': {'column': 'C'}},
-        {'expectation_type': 'expect_column_to_exist',
-         'kwargs': {'column': 'D'}},
-        {'expectation_type': 'expect_column_values_to_be_in_set',
-         'kwargs': {'column': 'A', 'value_set': [1, 2, 3, 4]}},
-        {'expectation_type': 'expect_column_values_to_be_in_set',
-         'kwargs': {'column': 'B', 'value_set': [5, 6, 7, 8]}},
-        {'expectation_type': 'expect_column_values_to_be_in_set',
-         'kwargs': {'column': 'C', 'value_set': ['a', 'b', 'c', 'd']}}
-    ]
-    assert samp1.find_expectations() == exp1
-
-
-def test_ge_pandas_sampling():
-    df = ge.dataset.PandasDataset({
-        'A': [1, 2, 3, 4],
-        'B': [5, 6, 7, 8],
-        'C': ['a', 'b', 'c', 'd'],
-        'D': ['e', 'f', 'g', 'h']
-    })
-
-    # Put some simple expectations on the data frame
     df.autoinspect(autoinspect_func=autoinspect.columns_exist)
     df.expect_column_values_to_be_in_set("A", [1, 2, 3, 4])
     df.expect_column_values_to_be_in_set("B", [5, 6, 7, 8])
