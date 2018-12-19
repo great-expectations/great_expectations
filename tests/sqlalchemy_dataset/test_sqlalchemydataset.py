@@ -18,7 +18,7 @@ def custom_dataset():
             mode_query = sa.select([
                 sa.column(column).label('value'),
                 sa.func.count(sa.column(column)).label('frequency')
-            ]).select_from(sa.table(self.table_name)).group_by(sa.column(column)).order_by(
+            ]).select_from(self._table).group_by(sa.column(column)).order_by(
                 sa.desc(sa.column('frequency')))
 
             mode = self.engine.execute(mode_query).scalar()
@@ -61,7 +61,8 @@ def custom_dataset():
 
 def test_custom_sqlalchemydataset(custom_dataset):
     custom_dataset._initialize_expectations()
-    custom_dataset.set_default_expectation_argument("result_format", {"result_format": "COMPLETE"})
+    custom_dataset.set_default_expectation_argument(
+        "result_format", {"result_format": "COMPLETE"})
 
     result = custom_dataset.expect_column_values_to_equal_2('c1')
     assert result['success'] == False
@@ -74,15 +75,33 @@ def test_custom_sqlalchemydataset(custom_dataset):
 
 def test_broken_decorator_errors(custom_dataset):
     custom_dataset._initialize_expectations()
-    custom_dataset.set_default_expectation_argument("result_format", {"result_format": "COMPLETE"})
+    custom_dataset.set_default_expectation_argument(
+        "result_format", {"result_format": "COMPLETE"})
 
     with pytest.raises(ValueError) as err:
         custom_dataset.broken_aggregate_expectation('c1')
-        assert "Column aggregate expectation failed to return required information: success" in str(err)
+        assert "Column aggregate expectation failed to return required information: success" in str(
+            err)
 
     with pytest.raises(ValueError) as err:
         custom_dataset.another_broken_aggregate_expectation('c1')
-        assert "Column aggregate expectation failed to return required information: observed_value" in str(err)
+        assert "Column aggregate expectation failed to return required information: observed_value" in str(
+            err)
+
+
+def test_missing_engine_error():
+    with pytest.raises(ValueError) as err:
+        SqlAlchemyDataset('test_engine', schema='example')
+        assert "Engine or connection_string must be provided." in str(err)
+
+
+def test_schema_custom_sql_error():
+    engine = sa.create_engine('sqlite://')
+
+    with pytest.raises(ValueError) as err:
+        SqlAlchemyDataset('test_schema_custom', schema='example', engine=engine,
+                          custom_sql='SELECT * FROM example.fake')
+        assert "Cannot specify both schema and custom_sql." in str(err)
 
 
 def test_sqlalchemydataset_with_custom_sql():
@@ -97,12 +116,15 @@ def test_sqlalchemydataset_with_custom_sql():
     data.to_sql(name='test_sql_data', con=engine, index=False)
 
     custom_sql = "SELECT name, pet FROM test_sql_data WHERE age > 12"
-    custom_sql_dataset = SqlAlchemyDataset('test_sql_data', engine=engine, custom_sql=custom_sql)
+    custom_sql_dataset = SqlAlchemyDataset(
+        'test_sql_data', engine=engine, custom_sql=custom_sql)
 
     custom_sql_dataset._initialize_expectations()
-    custom_sql_dataset.set_default_expectation_argument("result_format", {"result_format": "COMPLETE"})
+    custom_sql_dataset.set_default_expectation_argument(
+        "result_format", {"result_format": "COMPLETE"})
 
-    result = custom_sql_dataset.expect_column_values_to_be_in_set("pet", ["fish", "cat", "python"])
+    result = custom_sql_dataset.expect_column_values_to_be_in_set(
+        "pet", ["fish", "cat", "python"])
     assert result['success'] == True
 
     result = custom_sql_dataset.expect_column_to_exist("age")

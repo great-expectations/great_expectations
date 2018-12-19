@@ -16,8 +16,8 @@ class SqlAlchemyDataContext(DataContext):
         super(SqlAlchemyDataContext, self).__init__(*args, **kwargs)
         self.meta = MetaData()
 
-    def connect(self, options):
-        self.engine = create_engine(options)
+    def connect(self, options, *args, **kwargs):
+        self.engine = create_engine(options, *args, **kwargs)
 
     def list_datasets(self):
         self.meta.reflect(bind=self.engine)

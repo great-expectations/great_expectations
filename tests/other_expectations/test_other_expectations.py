@@ -7,8 +7,6 @@
 ###
 
 
-import pytest
-
 import os
 import json
 import glob
@@ -45,7 +43,8 @@ def pytest_generate_tests(metafunc):
                             "test": test,
                         })
 
-                        ids.append(c + ":" + test_configuration["expectation_type"] + ":" + test["title"])
+                        ids.append(
+                            c + ":" + test_configuration["expectation_type"] + ":" + test["title"])
 
     metafunc.parametrize(
         "test_case",

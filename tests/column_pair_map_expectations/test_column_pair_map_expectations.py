@@ -7,8 +7,6 @@
 ###
 
 
-import pytest
-
 import os
 import json
 import glob
@@ -18,9 +16,10 @@ from tests.test_utils import get_dataset, candidate_test_is_on_temporary_notimpl
 
 contexts = ['PandasDataset', 'SqlAlchemyDataset']
 
+
 def pytest_generate_tests(metafunc):
 
-    #Load all the JSON files in the directory
+    # Load all the JSON files in the directory
     dir_path = os.path.dirname(os.path.realpath(__file__))
     test_configuration_files = glob.glob(dir_path+'/*.json')
 
@@ -45,13 +44,15 @@ def pytest_generate_tests(metafunc):
                             "test": test,
                         })
 
-                        ids.append(c+":"+test_configuration["expectation_type"]+":"+test["title"])
+                        ids.append(
+                            c+":"+test_configuration["expectation_type"]+":"+test["title"])
 
     metafunc.parametrize(
         "test_case",
         parametrized_tests,
         ids=ids
     )
+
 
 def test_case_runner(test_case):
     # Note: this should never be done in practice, but we are wiping expectations to reuse datasets during testing.
