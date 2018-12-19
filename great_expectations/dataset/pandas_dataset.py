@@ -6,6 +6,12 @@ import re
 from datetime import datetime
 from functools import wraps
 import jsonschema
+import sys
+
+if sys.version_info.major == 2:  # If python 2
+    from itertools import izip_longest as zip_longest
+elif sys.version_info.major == 3:  # If python 3
+    from itertools import zip_longest
 
 from numbers import Number
 
@@ -326,15 +332,30 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
     @DocInherit
     @Dataset.expectation(['column_list'])
     def expect_table_columns_to_match_ordered_list(self, column_list,
-                                                   result_format=None, include_config=False, catch_exceptions=None, meta=None):
-
+                                                  result_format=None, include_config=False, catch_exceptions=None, meta=None):
+        """
+        Checks if observed columns are in the expected order. The expectations will fail if columns are out of expected
+        order, columns are missing, or additional columns are present. On failure, details are provided on the location
+        of the unexpected column(s).
+        """
         if list(self.columns) == list(column_list):
             return {
                 "success": True
             }
         else:
+            # In the case of differing column lengths between the defined expectation and the observed column set, the
+            # max is determined to generate the column_index.
+            number_of_columns = max(len(column_list), len(self.columns))
+            column_index = range(number_of_columns)
+
+            # Create a list of the mismatched details
+            compared_lists = list(zip_longest(column_index, list(column_list), list(self.columns)))
+            mismatched = [{"Expected Column Position": i,
+                           "Expected": k,
+                           "Found": v} for i, k, v in compared_lists if k != v]
             return {
-                "success": False
+                "success": False,
+                "details": {"mismatched": mismatched}
             }
 
     @DocInherit
