@@ -12,7 +12,8 @@ def test_cli_command_error(capsys):
 
     assert pytest_wrapped_e.type == SystemExit
     assert out == ''
-    assert ('error: the following arguments are required: command' in err) or ('error: too few arguments' in err)
+    assert ('error: the following arguments are required: command' in err) or (
+        'error: too few arguments' in err)
 
 
 def test_cli_validate_help(capsys):
@@ -87,8 +88,8 @@ def test_cli_version(capsys):
 def test_validate_basic_operation(capsys):
     with pytest.warns(UserWarning, match="No great_expectations version found in configuration object."):
         return_value = great_expectations.cli.dispatch(["validate",
-                                         "./tests/test_sets/Titanic.csv",
-                                         "./tests/test_sets/titanic_expectations.json"])
+                                                        "./tests/test_sets/Titanic.csv",
+                                                        "./tests/test_sets/titanic_expectations.json"])
 
     out, err = capsys.readouterr()
     json_result = json.loads(out)
