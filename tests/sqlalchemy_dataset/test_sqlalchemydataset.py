@@ -129,3 +129,30 @@ def test_sqlalchemydataset_with_custom_sql():
 
     result = custom_sql_dataset.expect_column_to_exist("age")
     assert result['success'] == False
+
+
+def test_column_fallback():
+    engine = sa.create_engine('sqlite://')
+
+    data = pd.DataFrame({
+        "name": ["Frank", "Steve", "Jane", "Frank", "Michael"],
+        "age": [16, 21, 38, 22, 10],
+        "pet": ["fish", "python", "cat", "python", "frog"]
+    })
+
+    data.to_sql(name='test_sql_data', con=engine, index=False)
+    dataset = SqlAlchemyDataset('test_sql_data', engine=engine)
+    fallback_dataset = SqlAlchemyDataset('test_sql_data', engine=engine)
+    # override columns attribute to test fallback
+    fallback_dataset.columns = fallback_dataset.column_reflection_fallback()
+
+    # check that the results are the same for a few expectations
+    assert (dataset.expect_column_to_exist('age') == 
+            fallback_dataset.expect_column_to_exist('age'))
+
+    assert (dataset.expect_column_mean_to_be_between('age', min_value=10) == 
+            fallback_dataset.expect_column_mean_to_be_between('age', min_value=10))
+
+    # Test a failing expectation
+    assert (dataset.expect_table_row_count_to_equal(value=3) == 
+            fallback_dataset.expect_table_row_count_to_equal(value=3))
