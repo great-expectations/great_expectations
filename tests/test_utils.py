@@ -8,7 +8,9 @@ from sqlalchemy import create_engine
 from great_expectations.dataset import PandasDataset, SqlAlchemyDataset
 import great_expectations.dataset.autoinspect as autoinspect
 
-## Taken from the following stackoverflow: https://stackoverflow.com/questions/23549419/assert-that-two-dictionaries-are-almost-equal
+
+# Taken from the following stackoverflow:
+# https://stackoverflow.com/questions/23549419/assert-that-two-dictionaries-are-almost-equal
 def assertDeepAlmostEqual(expected, actual, *args, **kwargs):
     """
     Assert that two complex structures have almost equal contents.
@@ -20,25 +22,25 @@ def assertDeepAlmostEqual(expected, actual, *args, **kwargs):
     precision).
 
     """
-    is_root = not '__trace' in kwargs
+    is_root = '__trace' not in kwargs
     trace = kwargs.pop('__trace', 'ROOT')
     try:
-       # if isinstance(expected, (int, float, long, complex)):
+        # if isinstance(expected, (int, float, long, complex)):
         if isinstance(expected, (int, float, complex)):
-            assert expected==pytest.approx(actual, *args, **kwargs)
+            assert expected == pytest.approx(actual, *args, **kwargs)
         elif isinstance(expected, (list, tuple, np.ndarray)):
-            assert len(expected)==len(actual)
+            assert len(expected) == len(actual)
             for index in range(len(expected)):
                 v1, v2 = expected[index], actual[index]
                 assertDeepAlmostEqual(v1, v2,
                                       __trace=repr(index), *args, **kwargs)
         elif isinstance(expected, dict):
-            assert set(expected)==set(actual)
+            assert set(expected) == set(actual)
             for key in expected:
                 assertDeepAlmostEqual(expected[key], actual[key],
                                       __trace=repr(key), *args, **kwargs)
         else:
-            assert expected==actual
+            assert expected == actual
     except AssertionError as exc:
         exc.__dict__.setdefault('traces', []).append(trace)
         if is_root:
@@ -48,7 +50,8 @@ def assertDeepAlmostEqual(expected, actual, *args, **kwargs):
 
 
 def get_dataset(dataset_type, data, autoinspect_func=autoinspect.columns_exist):
-    """For Pandas, data should be either a DataFrame or a dictionary that can be instantiated as a DataFrame
+    """For Pandas, data should be either a DataFrame or a dictionary that can
+    be instantiated as a DataFrame.
     For SQL, data should have the following shape:
         {
             'table':
@@ -125,7 +128,7 @@ def evaluate_json_test(dataset, expectation_type, test):
     """
     This method will evaluate the result of a test build using the Great Expectations json test format.
 
-    NOTE: Tests can be suppressed for certain data types if the test contains the Key 'suppress_tests_for' with a list
+    NOTE: Tests can be suppressed for certain data types if the test contains the Key 'suppress_test_for' with a list
         of Dataset types to suppress, such as ['SQLAlchemy', 'Pandas'].
 
     :param dataset: (Dataset) A great expectations Dataset
@@ -148,16 +151,20 @@ def evaluate_json_test(dataset, expectation_type, test):
     dataset.set_default_expectation_argument('result_format', 'COMPLETE')
 
     if 'title' not in test:
-        raise ValueError("Invalid test configuration detected: 'title' is required.")
+        raise ValueError(
+            "Invalid test configuration detected: 'title' is required.")
 
     if 'exact_match_out' not in test:
-        raise ValueError("Invalid test configuration detected: 'exact_match_out' is required.")
+        raise ValueError(
+            "Invalid test configuration detected: 'exact_match_out' is required.")
 
     if 'in' not in test:
-        raise ValueError("Invalid test configuration detected: 'in' is required.")
+        raise ValueError(
+            "Invalid test configuration detected: 'in' is required.")
 
     if 'out' not in test:
-        raise ValueError("Invalid test configuration detected: 'out' is required.")
+        raise ValueError(
+            "Invalid test configuration detected: 'out' is required.")
 
     # Pass the test if we are in a test condition that is a known exception
 
@@ -178,8 +185,9 @@ def evaluate_json_test(dataset, expectation_type, test):
             result = getattr(dataset, expectation_type)(**test['in'])
 
     except NotImplementedError:
-        #Note: This method of checking does not look for false negatives: tests that are incorrectly on the notimplemented_list
-        assert candidate_test_is_on_temporary_notimplemented_list(dataset.__class__.__name__, expectation_type), "Error: this test was supposed to return NotImplementedError"
+        # Note: This method of checking does not look for false negatives: tests that are incorrectly on the notimplemented_list
+        assert candidate_test_is_on_temporary_notimplemented_list(
+            dataset.__class__.__name__, expectation_type), "Error: this test was supposed to return NotImplementedError"
         return
 
     if 'suppress_test_for' in test:
@@ -211,14 +219,19 @@ def evaluate_json_test(dataset, expectation_type, test):
                     assert result['result']['unexpected_index_list'] == value
 
             elif key == 'unexpected_list':
-                assert result['result']['unexpected_list'] == value, "expected " + str(value) + " but got " + str(result['result']['unexpected_list'])
+                assert result['result']['unexpected_list'] == value, "expected " + \
+                    str(value) + " but got " + \
+                    str(result['result']['unexpected_list'])
 
             elif key == 'details':
                 assert result['result']['details'] == value
 
             elif key == 'traceback_substring':
                 assert result['exception_info']['raised_exception']
-                assert value in result['exception_info']['exception_traceback'], "expected to find " + value + " in " + result['exception_info']['exception_traceback']
+                assert value in result['exception_info']['exception_traceback'], "expected to find " + \
+                    value + " in " + \
+                    result['exception_info']['exception_traceback']
 
             else:
-                raise ValueError("Invalid test specification: unknown key " + key + " in 'out'")
+                raise ValueError(
+                    "Invalid test specification: unknown key " + key + " in 'out'")

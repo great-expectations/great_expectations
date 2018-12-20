@@ -5,8 +5,14 @@ from great_expectations.dataset import Dataset, DataTable
 from functools import wraps
 import inspect
 from six import PY3
+import sys
 
-from .util import DocInherit, parse_result_format, create_multiple_expectations
+if sys.version_info.major == 2:  # If python 2
+    from itertools import izip_longest as zip_longest
+elif sys.version_info.major == 3:  # If python 3
+    from itertools import zip_longest
+
+from .util import DocInherit, parse_result_format
 
 import sqlalchemy as sa
 from sqlalchemy.engine import reflection
@@ -252,16 +258,20 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             # a user-defined schema
             raise ValueError("Cannot specify both schema and custom_sql.")
 
-
         if custom_sql:
             self.create_temporary_table(table_name, custom_sql)
 
-        insp = reflection.Inspector.from_engine(engine)
-        self.columns = insp.get_columns(table_name, schema=schema)
+
+        try:
+            insp = reflection.Inspector.from_engine(engine)
+            self.columns = insp.get_columns(table_name, schema=schema)
+        except KeyError:
+            # we will get a KeyError for temporary tables, since
+            # reflection will not find the temporary schema
+            self.columns = self.column_reflection_fallback()
 
         # Only call super once connection is established and table_name and columns known to allow autoinspection
         super(SqlAlchemyDataset, self).__init__(*args, **kwargs)
-
 
     def create_temporary_table(self, table_name, custom_sql):
         """
@@ -274,17 +284,13 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             table_name=table_name, custom_sql=custom_sql)
         self.engine.execute(stmt)
 
-    def _is_numeric_column(self, column):
-        for col in self.columns:
-            if (col['name'] == column and
-                    isinstance(col['type'],
-                               (sa.types.Integer, sa.types.BigInteger, sa.types.Float,
-                                sa.types.Numeric, sa.types.SmallInteger, sa.types.Boolean)
-                               )
-                ):
-                return True
+    def column_reflection_fallback(self):
+        """If we can't reflect the table, use a query to at least get column names."""
+        sql = sa.select([sa.text("*")]).select_from(self._table)
+        col_names = self.engine.execute(sql).keys()
+        col_dict = [{'name': col_name} for col_name in col_names]
+        return col_dict
 
-        return False
 
     ###
     ###
@@ -366,14 +372,31 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
     @Dataset.expectation(['column_list'])
     def expect_table_columns_to_match_ordered_list(self, column_list,
                                                    result_format=None, include_config=False, catch_exceptions=None, meta=None):
+        """
+        Checks if observed columns are in the expected order. The expectations will fail if columns are out of expected
+        order, columns are missing, or additional columns are present. On failure, details are provided on the location
+        of the unexpected column(s).
+        """
+        observed_columns = [col['name'] for col in self.columns]
 
-        if [col['name'] for col in self.columns] == list(column_list):
+        if observed_columns == list(column_list):
             return {
                 "success": True
             }
         else:
+            # In the case of differing column lengths between the defined expectation and the observed column set, the
+            # max is determined to generate the column_index.
+            number_of_columns = max(len(column_list), len(observed_columns))
+            column_index = range(number_of_columns)
+
+            # Create a list of the mismatched details
+            compared_lists = list(zip_longest(column_index, list(column_list), observed_columns))
+            mismatched = [{"Expected Column Position": i,
+                           "Expected": k,
+                           "Found": v} for i, k, v in compared_lists if k != v]
             return {
-                "success": False
+                "success": False,
+                "details": {"mismatched": mismatched}
             }
 
     @DocInherit
@@ -691,9 +714,6 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         if max_value is not None and not isinstance(max_value, (Number)):
             raise ValueError("max_value must be a number")
 
-        if not self._is_numeric_column(column):
-            raise ValueError("column is not numeric")
-
         col_avg = self.engine.execute(
             sa.select([sa.func.avg(sa.column(column))]).select_from(
                 self._table)
@@ -789,7 +809,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                     ((max_value is None) or (column_median <= max_value)),
                 'result': {
                     'observed_value': column_median
-                    }
+                }
             }
 
     @MetaSqlAlchemyDataset.column_map_expectation
@@ -802,7 +822,6 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             having(sa.func.count(sa.column(column)) > 1)
 
         return sa.column(column).notin_(dup_query)
-
 
     @DocInherit
     @MetaSqlAlchemyDataset.column_aggregate_expectation

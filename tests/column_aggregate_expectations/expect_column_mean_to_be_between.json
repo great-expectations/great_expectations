@@ -112,6 +112,7 @@
       "tests": [{
           "title": "type mismatch: null observed_value",
           "exact_match_out": false,
+	  "suppress_test_for": ["SQLAlchemy"],
           "in": {
             "column": "s",
             "min_value": 0,
