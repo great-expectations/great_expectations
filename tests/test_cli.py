@@ -106,7 +106,7 @@ def test_validate_custom_dataset(capsys):
                                          "./tests/test_sets/titanic_custom_expectations.json",
                                          "-f", "True",
                                          "-m", "./tests/test_fixtures/custom_dataset.py",
-                                         "-c", "CustomPandasDataset"])
+                                         "-c", "CustomPandasDataTable"])
 
     out, err = capsys.readouterr()
     json_result = json.loads(out)

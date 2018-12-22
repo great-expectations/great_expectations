@@ -2,7 +2,7 @@ from __future__ import division
 
 import json
 import unittest
-from great_expectations.dataset import Dataset, PandasDataset, MetaPandasDataset
+from great_expectations.dataset import Dataset, PandasDataTable, MetaPandasDataTable
 
 
 class ExpectationOnlyDataset(Dataset):
@@ -65,7 +65,7 @@ class TestExpectationDecorators(unittest.TestCase):
                          out['exception_info']['exception_traceback'].split('\n')[-2])
 
     def test_pandas_column_map_decorator_partial_exception_counts(self):
-        df = PandasDataset({'a': [0,1,2,3,4]})
+        df = PandasDataTable({'a': [0,1,2,3,4]})
         out = df.expect_column_values_to_be_between('a', 3, 4,
                                               result_format={'result_format': 'COMPLETE', 'partial_unexpected_count': 1})
 
@@ -74,20 +74,20 @@ class TestExpectationDecorators(unittest.TestCase):
 
     def test_column_map_expectation_decorator(self):
 
-        # Create a new CustomPandasDataset to 
+        # Create a new CustomPandasDataTable to 
         # (1) Prove that custom subclassing works, AND
         # (2) Test expectation business logic without dependencies on any other functions.
-        class CustomPandasDataset(PandasDataset):
+        class CustomPandasDataTable(PandasDataTable):
 
-            @MetaPandasDataset.column_map_expectation
+            @MetaPandasDataTable.column_map_expectation
             def expect_column_values_to_be_odd(self, column):
                 return column.map(lambda x: x % 2 )
 
-            @MetaPandasDataset.column_map_expectation
+            @MetaPandasDataTable.column_map_expectation
             def expectation_that_crashes_on_sixes(self, column):
                 return column.map(lambda x: (x-6)/0 != "duck")
 
-        df = CustomPandasDataset({
+        df = CustomPandasDataTable({
             'all_odd' : [1,3,5,5,5,7,9,9,9,11],
             'mostly_odd' : [1,3,5,7,9,2,4,1,3,5],
             'all_even' : [2,4,4,6,6,6,8,8,8,8],
@@ -232,16 +232,16 @@ class TestExpectationDecorators(unittest.TestCase):
 
     def test_column_aggregate_expectation_decorator(self):
 
-        # Create a new CustomPandasDataset to 
+        # Create a new CustomPandasDataTable to 
         # (1) Prove that custom subclassing works, AND
         # (2) Test expectation business logic without dependencies on any other functions.
-        class CustomPandasDataset(PandasDataset):
+        class CustomPandasDataTable(PandasDataTable):
 
-            @PandasDataset.column_aggregate_expectation
+            @PandasDataTable.column_aggregate_expectation
             def expect_column_median_to_be_odd(self, column):
                 return {"success": column.median() % 2, "result": {"observed_value": column.median()}}
 
-        df = CustomPandasDataset({
+        df = CustomPandasDataTable({
             'all_odd' : [1,3,5,7,9],
             'all_even' : [2,4,6,8,10],
             'odd_missing' : [1,3,5,None,None],
@@ -297,12 +297,12 @@ class TestExpectationDecorators(unittest.TestCase):
 
     def test_column_pair_map_expectation_decorator(self):
 
-        # Create a new CustomPandasDataset to 
+        # Create a new CustomPandasDataTable to 
         # (1) Prove that custom subclassing works, AND
         # (2) Test expectation business logic without dependencies on any other functions.
-        class CustomPandasDataset(PandasDataset):
+        class CustomPandasDataTable(PandasDataTable):
 
-            @PandasDataset.column_pair_map_expectation
+            @PandasDataTable.column_pair_map_expectation
             def expect_column_pair_values_to_be_different(self,
                 column_A,
                 column_B,
@@ -311,7 +311,7 @@ class TestExpectationDecorators(unittest.TestCase):
             ):
                 return column_A != column_B
 
-        df = CustomPandasDataset({
+        df = CustomPandasDataTable({
             'all_odd' : [1,3,5,7,9],
             'all_even' : [2,4,6,8,10],
             'odd_missing' : [1,3,5,None,None],

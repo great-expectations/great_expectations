@@ -14,10 +14,10 @@ from sqlalchemy.engine import reflection
 from numbers import Number
 
 
-class MetaSqlAlchemyDataset(DataTable):
+class MetaSqlAlchemyDataTable(DataTable):
 
     def __init__(self, *args, **kwargs):
-        super(MetaSqlAlchemyDataset, self).__init__(*args, **kwargs)
+        super(MetaSqlAlchemyDataTable, self).__init__(*args, **kwargs)
 
     @classmethod
     def column_map_expectation(cls, func):
@@ -225,7 +225,7 @@ class MetaSqlAlchemyDataset(DataTable):
         return inner_wrapper
 
 
-class SqlAlchemyDataset(MetaSqlAlchemyDataset):
+class SqlAlchemyDataTable(MetaSqlAlchemyDataTable):
 
     def __init__(self, table_name=None, engine=None, connection_string=None,
                  custom_sql=None, schema=None, *args, **kwargs):
@@ -260,7 +260,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         self.columns = insp.get_columns(table_name, schema=schema)
 
         # Only call super once connection is established and table_name and columns known to allow autoinspection
-        super(SqlAlchemyDataset, self).__init__(*args, **kwargs)
+        super(SqlAlchemyDataTable, self).__init__(*args, **kwargs)
 
 
     def create_temporary_table(self, table_name, custom_sql):
@@ -409,7 +409,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
     ###
 
     @DocInherit
-    @MetaSqlAlchemyDataset.column_map_expectation
+    @MetaSqlAlchemyDataTable.column_map_expectation
     def expect_column_values_to_be_null(self,
                                         column,
                                         mostly=None,
@@ -419,7 +419,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         return sa.column(column) == None
 
     @DocInherit
-    @MetaSqlAlchemyDataset.column_map_expectation
+    @MetaSqlAlchemyDataTable.column_map_expectation
     def expect_column_values_to_not_be_null(self,
                                             column,
                                             mostly=None,
@@ -429,7 +429,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         return sa.column(column) != None
 
     @DocInherit
-    @MetaSqlAlchemyDataset.column_map_expectation
+    @MetaSqlAlchemyDataTable.column_map_expectation
     def expect_column_values_to_be_in_set(self,
                                           column,
                                           value_set,
@@ -439,7 +439,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         return sa.column(column).in_(tuple(value_set))
 
     @DocInherit
-    @MetaSqlAlchemyDataset.column_map_expectation
+    @MetaSqlAlchemyDataTable.column_map_expectation
     def expect_column_values_to_not_be_in_set(self,
                                               column,
                                               value_set,
@@ -449,7 +449,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         return sa.column(column).notin_(tuple(value_set))
 
     @DocInherit
-    @MetaSqlAlchemyDataset.column_map_expectation
+    @MetaSqlAlchemyDataTable.column_map_expectation
     def expect_column_values_to_be_between(self,
                                            column,
                                            min_value=None,
@@ -482,7 +482,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             )
 
     @DocInherit
-    @MetaSqlAlchemyDataset.column_map_expectation
+    @MetaSqlAlchemyDataTable.column_map_expectation
     def expect_column_value_lengths_to_equal(self,
                                              column,
                                              value,
@@ -492,7 +492,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         return sa.func.length(sa.column(column)) == value
 
     @DocInherit
-    @MetaSqlAlchemyDataset.column_map_expectation
+    @MetaSqlAlchemyDataTable.column_map_expectation
     def expect_column_value_lengths_to_be_between(self,
                                                   column,
                                                   min_value=None,
@@ -536,7 +536,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
     ###
 
     @DocInherit
-    @MetaSqlAlchemyDataset.column_aggregate_expectation
+    @MetaSqlAlchemyDataTable.column_aggregate_expectation
     def expect_column_max_to_be_between(self,
                                         column,
                                         min_value=None,
@@ -584,7 +584,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             }
 
     @DocInherit
-    @MetaSqlAlchemyDataset.column_aggregate_expectation
+    @MetaSqlAlchemyDataTable.column_aggregate_expectation
     def expect_column_min_to_be_between(self,
                                         column,
                                         min_value=None,
@@ -632,7 +632,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             }
 
     @DocInherit
-    @MetaSqlAlchemyDataset.column_aggregate_expectation
+    @MetaSqlAlchemyDataTable.column_aggregate_expectation
     def expect_column_sum_to_be_between(self,
                                         column,
                                         min_value=None,
@@ -674,7 +674,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             }
 
     @DocInherit
-    @MetaSqlAlchemyDataset.column_aggregate_expectation
+    @MetaSqlAlchemyDataTable.column_aggregate_expectation
     def expect_column_mean_to_be_between(self,
                                          column,
                                          min_value=None,
@@ -725,7 +725,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             }
 
     @DocInherit
-    @MetaSqlAlchemyDataset.column_aggregate_expectation
+    @MetaSqlAlchemyDataTable.column_aggregate_expectation
     def expect_column_median_to_be_between(self,
                                            column,
                                            min_value=None,
@@ -792,7 +792,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                     }
             }
 
-    @MetaSqlAlchemyDataset.column_map_expectation
+    @MetaSqlAlchemyDataTable.column_map_expectation
     def expect_column_values_to_be_unique(self, column, mostly=None,
                                           result_format=None, include_config=False, catch_exceptions=None, meta=None):
         # Duplicates are found by filtering a group by query
@@ -805,7 +805,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
 
     @DocInherit
-    @MetaSqlAlchemyDataset.column_aggregate_expectation
+    @MetaSqlAlchemyDataTable.column_aggregate_expectation
     def expect_column_unique_value_count_to_be_between(self, column, min_value=None, max_value=None,
                                                        result_format=None, include_config=False, catch_exceptions=None, meta=None):
 
@@ -837,7 +837,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             }
 
     @DocInherit
-    @MetaSqlAlchemyDataset.column_aggregate_expectation
+    @MetaSqlAlchemyDataTable.column_aggregate_expectation
     def expect_column_proportion_of_unique_values_to_be_between(self, column, min_value=0, max_value=1,
                                                                 result_format=None, include_config=False, catch_exceptions=None, meta=None):
 

@@ -5,7 +5,7 @@ import numpy as np
 import pytest
 from sqlalchemy import create_engine
 
-from great_expectations.dataset import PandasDataset, SqlAlchemyDataset
+from great_expectations.dataset import PandasDataTable, SqlAlchemyDataTable
 import great_expectations.dataset.autoinspect as autoinspect
 
 ## Taken from the following stackoverflow: https://stackoverflow.com/questions/23549419/assert-that-two-dictionaries-are-almost-equal
@@ -57,9 +57,9 @@ def get_dataset(dataset_type, data, autoinspect_func=autoinspect.columns_exist):
         }
 
     """
-    if dataset_type == 'PandasDataset':
-        return PandasDataset(data, autoinspect_func=autoinspect_func)
-    elif dataset_type == 'SqlAlchemyDataset':
+    if dataset_type == 'PandasDataTable':
+        return PandasDataTable(data, autoinspect_func=autoinspect_func)
+    elif dataset_type == 'SqlAlchemyDataTable':
         # Create a new database
 
         engine = create_engine('sqlite://')
@@ -68,14 +68,14 @@ def get_dataset(dataset_type, data, autoinspect_func=autoinspect.columns_exist):
         df = pd.DataFrame(data)
         df.to_sql(name='test_data', con=engine, index=False)
 
-        # Build a SqlAlchemyDataset using that database
-        return SqlAlchemyDataset('test_data', engine=engine, autoinspect_func=autoinspect_func)
+        # Build a SqlAlchemyDataTable using that database
+        return SqlAlchemyDataTable('test_data', engine=engine, autoinspect_func=autoinspect_func)
     else:
         raise ValueError("Unknown dataset_type " + str(dataset_type))
 
 
 def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type):
-    if context == "SqlAlchemyDataset":
+    if context == "SqlAlchemyDataTable":
         return expectation_type in [
             #"expect_column_to_exist",
             #"expect_table_row_count_to_be_between",
@@ -162,11 +162,11 @@ def evaluate_json_test(dataset, expectation_type, test):
     # Pass the test if we are in a test condition that is a known exception
 
     # Known condition: SqlAlchemy does not support parse_strings_as_datetimes
-    if 'parse_strings_as_datetimes' in test['in'] and isinstance(dataset, SqlAlchemyDataset):
+    if 'parse_strings_as_datetimes' in test['in'] and isinstance(dataset, SqlAlchemyDataTable):
         return
 
     # Known condition: SqlAlchemy does not support allow_cross_type_comparisons
-    if 'allow_cross_type_comparisons' in test['in'] and isinstance(dataset, SqlAlchemyDataset):
+    if 'allow_cross_type_comparisons' in test['in'] and isinstance(dataset, SqlAlchemyDataTable):
         return
 
     try:
@@ -184,9 +184,9 @@ def evaluate_json_test(dataset, expectation_type, test):
 
     if 'suppress_test_for' in test:
         # Optionally suppress the test for specified Dataset types
-        if 'SQLAlchemy' in test['suppress_test_for'] and isinstance(dataset, SqlAlchemyDataset):
+        if 'SQLAlchemy' in test['suppress_test_for'] and isinstance(dataset, SqlAlchemyDataTable):
             return
-        if 'Pandas' in test['suppress_test_for'] and isinstance(dataset, PandasDataset):
+        if 'Pandas' in test['suppress_test_for'] and isinstance(dataset, PandasDataTable):
             return
 
     # Check results
@@ -205,7 +205,7 @@ def evaluate_json_test(dataset, expectation_type, test):
                 assert value == result['result']['observed_value']
 
             elif key == 'unexpected_index_list':
-                if isinstance(dataset, SqlAlchemyDataset):
+                if isinstance(dataset, SqlAlchemyDataTable):
                     pass
                 else:
                     assert result['result']['unexpected_index_list'] == value

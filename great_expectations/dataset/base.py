@@ -28,7 +28,7 @@ class Dataset(object):
         :param autoinspect_func (function) = None: The autoinspection function that should be run on the dataset to
             establish baseline expectations.
 
-        Note: Dataset is designed to support multiple inheritance (e.g. PandasDataset inherits from both a
+        Note: Dataset is designed to support multiple inheritance (e.g. PandasDataTable inherits from both a
         Pandas DataFrame and Dataset), so it accepts generic *args and **kwargs arguments so that they can also be
         passed to other parent classes. In python 2, there isn't a clean way to include all of *args, **kwargs, and a
         named kwarg...so we use the inelegant solution of popping from kwargs, leaving the support for the autoinspect_func
@@ -59,7 +59,7 @@ class Dataset(object):
 
         Notes:
             Intermediate decorators that call the core @expectation decorator will most likely need to pass their \
-            decorated methods' signature up to the expectation decorator. For example, the MetaPandasDataset \
+            decorated methods' signature up to the expectation decorator. For example, the MetaPandasDataTable \
             column_map_expectation decorator relies on the Dataset expectation decorator, but will pass through the \
             signature from the implementing method.
 

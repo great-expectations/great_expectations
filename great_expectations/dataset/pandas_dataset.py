@@ -22,18 +22,18 @@ from .util import DocInherit, \
         parse_result_format, create_multiple_expectations
 
 
-class MetaPandasDataset(DataTable):
-    """MetaPandasDataset is a thin layer between Dataset and PandasDataset.
+class MetaPandasDataTable(DataTable):
+    """MetaPandasDataTable is a thin layer between Dataset and PandasDataTable.
 
     This two-layer inheritance is required to make @classmethod decorators work.
 
-    Practically speaking, that means that MetaPandasDataset implements \
+    Practically speaking, that means that MetaPandasDataTable implements \
     expectation decorators, like `column_map_expectation` and `column_aggregate_expectation`, \
-    and PandasDataset implements the expectation methods themselves.
+    and PandasDataTable implements the expectation methods themselves.
     """
 
     def __init__(self, *args, **kwargs):
-        super(MetaPandasDataset, self).__init__(*args, **kwargs)
+        super(MetaPandasDataTable, self).__init__(*args, **kwargs)
 
 
     @classmethod
@@ -41,7 +41,7 @@ class MetaPandasDataset(DataTable):
         """Constructs an expectation using column-map semantics.
 
 
-        The MetaPandasDataset implementation replaces the "column" parameter supplied by the user with a pandas Series
+        The MetaPandasDataTable implementation replaces the "column" parameter supplied by the user with a pandas Series
         object containing the actual column from the relevant pandas dataframe. This simplifies the implementing expectation
         logic while preserving the standard Dataset signature and expected behavior.
 
@@ -181,7 +181,7 @@ class MetaPandasDataset(DataTable):
     def column_aggregate_expectation(cls, func):
         """Constructs an expectation using column-aggregate semantics.
 
-        The MetaPandasDataset implementation replaces the "column" parameter supplied by the user with a pandas
+        The MetaPandasDataTable implementation replaces the "column" parameter supplied by the user with a pandas
         Series object containing the actual column from the relevant pandas dataframe. This simplifies the implementing
         expectation logic while preserving the standard Dataset signature and expected behavior.
 
@@ -249,17 +249,17 @@ class MetaPandasDataset(DataTable):
         return inner_wrapper
 
 
-class PandasDataset(MetaPandasDataset, pd.DataFrame):
+class PandasDataTable(MetaPandasDataTable, pd.DataFrame):
     """
-    PandasDataset instantiates the great_expectations Expectations API as a subclass of a pandas.DataFrame.
+    PandasDataTable instantiates the great_expectations Expectations API as a subclass of a pandas.DataFrame.
 
     For the full API reference, please see :func:`Dataset <great_expectations.Dataset.base.Dataset>`
 
     Notes:
-        1. Samples and Subsets of PandaDataSet have ALL the expectations of the original \
+        1. Samples and Subsets of PandaDataTable have ALL the expectations of the original \
            data frame unless the user specifies the ``discard_subset_failing_expectations = True`` \
            property on the original data frame.
-        2. Concatenations, joins, and merges of PandaDataSets contain NO expectations (since no autoinspection
+        2. Concatenations, joins, and merges of PandaDataTables contain NO expectations (since no autoinspection
            is performed by default).
     """
 
@@ -271,23 +271,23 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         return self.__class__
 
     def __finalize__(self, other, method=None, **kwargs):
-        if isinstance(other, PandasDataset):
+        if isinstance(other, PandasDataTable):
             self._initialize_expectations(other.get_expectations_config(
                 discard_failed_expectations=False,
                 discard_result_format_kwargs=False,
                 discard_include_configs_kwargs=False,
                 discard_catch_exceptions_kwargs=False))
-            # If other was coerced to be a PandasDataset (e.g. via _constructor call during self.copy() operation)
+            # If other was coerced to be a PandasDataTable (e.g. via _constructor call during self.copy() operation)
             # then it may not have discard_subset_failing_expectations set. Default to self value
             self.discard_subset_failing_expectations = getattr(other, "discard_subset_failing_expectations",
                                                                self.discard_subset_failing_expectations)
             if self.discard_subset_failing_expectations:
                 self.discard_failing_expectations()
-        super(PandasDataset, self).__finalize__(other, method, **kwargs)
+        super(PandasDataTable, self).__finalize__(other, method, **kwargs)
         return self
 
     def __init__(self, *args, **kwargs):
-        super(PandasDataset, self).__init__(*args, **kwargs)
+        super(PandasDataTable, self).__init__(*args, **kwargs)
         self.discard_subset_failing_expectations = kwargs.get('discard_subset_failing_expectations', False)
 
     ### Expectation methods ###
@@ -387,7 +387,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         }
 
     @DocInherit
-    @MetaPandasDataset.column_map_expectation
+    @MetaPandasDataTable.column_map_expectation
     def expect_column_values_to_be_unique(self, column,
                                           mostly=None,
                                           result_format=None, include_config=False, catch_exceptions=None, meta=None):
@@ -397,7 +397,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
     # @Dataset.expectation(['column', 'mostly', 'result_format'])
     @DocInherit
-    @MetaPandasDataset.column_map_expectation
+    @MetaPandasDataTable.column_map_expectation
     def expect_column_values_to_not_be_null(self, column,
                                             mostly=None,
                                             result_format=None, include_config=False, catch_exceptions=None, meta=None, include_nulls=True):
@@ -406,7 +406,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
 
     @DocInherit
-    @MetaPandasDataset.column_map_expectation
+    @MetaPandasDataTable.column_map_expectation
     def expect_column_values_to_be_null(self, column,
                                         mostly=None,
                                         result_format=None, include_config=False, catch_exceptions=None, meta=None):
@@ -414,7 +414,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         return column.map(lambda x: x is None or pd.isnull(x))
 
     @DocInherit
-    @MetaPandasDataset.column_map_expectation
+    @MetaPandasDataTable.column_map_expectation
     def expect_column_values_to_be_of_type(self, column, type_,
                                            mostly=None,
                                            result_format=None, include_config=False, catch_exceptions=None, meta=None):
@@ -436,7 +436,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         return column.map(lambda x: isinstance(x, tuple(target_type)))
 
     @DocInherit
-    @MetaPandasDataset.column_map_expectation
+    @MetaPandasDataTable.column_map_expectation
     def expect_column_values_to_be_in_type_list(self, column, type_list,
                                                 mostly=None,
                                                 result_format=None, include_config=False, catch_exceptions=None, meta=None):
@@ -460,21 +460,21 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         return column.map(lambda x: isinstance(x, tuple(target_type_list)))
 
     @DocInherit
-    @MetaPandasDataset.column_map_expectation
+    @MetaPandasDataTable.column_map_expectation
     def expect_column_values_to_be_in_set(self, column, value_set,
                                           mostly=None,
                                           result_format=None, include_config=False, catch_exceptions=None, meta=None):
         return column.map(lambda x: x in value_set)
 
     @DocInherit
-    @MetaPandasDataset.column_map_expectation
+    @MetaPandasDataTable.column_map_expectation
     def expect_column_values_to_not_be_in_set(self, column, value_set,
                                               mostly=None,
                                               result_format=None, include_config=False, catch_exceptions=None, meta=None):
         return column.map(lambda x: x not in value_set)
 
     @DocInherit
-    @MetaPandasDataset.column_map_expectation
+    @MetaPandasDataTable.column_map_expectation
     def expect_column_values_to_be_between(self,
         column,
         min_value=None, max_value=None,
@@ -555,7 +555,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         return temp_column.map(is_between)
 
     @DocInherit
-    @MetaPandasDataset.column_map_expectation
+    @MetaPandasDataTable.column_map_expectation
     def expect_column_values_to_be_increasing(self, column, strictly=None, parse_strings_as_datetimes=None,
                                               mostly=None,
                                               result_format=None, include_config=False, catch_exceptions=None, meta=None):
@@ -583,7 +583,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                 return col_diff >= 0
 
     @DocInherit
-    @MetaPandasDataset.column_map_expectation
+    @MetaPandasDataTable.column_map_expectation
     def expect_column_values_to_be_decreasing(self, column, strictly=None, parse_strings_as_datetimes=None,
                                               mostly=None,
                                               result_format=None, include_config=False, catch_exceptions=None, meta=None):
@@ -611,7 +611,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                 return col_diff <= 0
 
     @DocInherit
-    @MetaPandasDataset.column_map_expectation
+    @MetaPandasDataTable.column_map_expectation
     def expect_column_value_lengths_to_be_between(self, column, min_value=None, max_value=None,
                                                   mostly=None,
                                                   result_format=None, include_config=False, catch_exceptions=None, meta=None):
@@ -647,14 +647,14 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         return column.map(length_is_between)
 
     @DocInherit
-    @MetaPandasDataset.column_map_expectation
+    @MetaPandasDataTable.column_map_expectation
     def expect_column_value_lengths_to_equal(self, column, value,
                                              mostly=None,
                                              result_format=None, include_config=False, catch_exceptions=None, meta=None):
         return column.map(lambda x : len(x) == value)
 
     @DocInherit
-    @MetaPandasDataset.column_map_expectation
+    @MetaPandasDataTable.column_map_expectation
     def expect_column_values_to_match_regex(self, column, regex,
                                             mostly=None,
                                             result_format=None, include_config=False, catch_exceptions=None, meta=None):
@@ -663,14 +663,14 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         )
 
     @DocInherit
-    @MetaPandasDataset.column_map_expectation
+    @MetaPandasDataTable.column_map_expectation
     def expect_column_values_to_not_match_regex(self, column, regex,
                                                 mostly=None,
                                                 result_format=None, include_config=False, catch_exceptions=None, meta=None):
         return column.map(lambda x: re.findall(regex, str(x)) == [])
 
     @DocInherit
-    @MetaPandasDataset.column_map_expectation
+    @MetaPandasDataTable.column_map_expectation
     def expect_column_values_to_match_regex_list(self, column, regex_list, match_on="any",
                                                  mostly=None,
                                                  result_format=None, include_config=False, catch_exceptions=None, meta=None):
@@ -694,7 +694,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         return column.map(match_in_list)
 
     @DocInherit
-    @MetaPandasDataset.column_map_expectation
+    @MetaPandasDataTable.column_map_expectation
     def expect_column_values_to_not_match_regex_list(self, column, regex_list,
                                                  mostly=None,
                                                  result_format=None, include_config=False, catch_exceptions=None, meta=None):
@@ -704,7 +704,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
 
     @DocInherit
-    @MetaPandasDataset.column_map_expectation
+    @MetaPandasDataTable.column_map_expectation
     def expect_column_values_to_match_strftime_format(self, column, strftime_format,
                                                       mostly=None,
                                                       result_format=None, include_config=False, catch_exceptions=None,
@@ -730,7 +730,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         return column.map(is_parseable_by_format)
 
     @DocInherit
-    @MetaPandasDataset.column_map_expectation
+    @MetaPandasDataTable.column_map_expectation
     def expect_column_values_to_be_dateutil_parseable(self, column,
                                                       mostly=None,
                                                       result_format=None, include_config=False, catch_exceptions=None, meta=None):
@@ -748,7 +748,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         return column.map(is_parseable)
 
     @DocInherit
-    @MetaPandasDataset.column_map_expectation
+    @MetaPandasDataTable.column_map_expectation
     def expect_column_values_to_be_json_parseable(self, column,
                                                   mostly=None,
                                                   result_format=None, include_config=False, catch_exceptions=None, meta=None):
@@ -762,7 +762,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         return column.map(is_json)
 
     @DocInherit
-    @MetaPandasDataset.column_map_expectation
+    @MetaPandasDataTable.column_map_expectation
     def expect_column_values_to_match_json_schema(self, column, json_schema,
                                                   mostly=None,
                                                   result_format=None, include_config=False, catch_exceptions=None, meta=None):
@@ -779,7 +779,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         return column.map(matches_json_schema)
 
     @DocInherit
-    @MetaPandasDataset.column_aggregate_expectation
+    @MetaPandasDataTable.column_aggregate_expectation
     def expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than(self, column, distribution,
                                                                                     p_value=0.05, params=None,
                                                                                     result_format=None,
@@ -816,7 +816,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         }
 
     @DocInherit
-    @MetaPandasDataset.column_aggregate_expectation
+    @MetaPandasDataTable.column_aggregate_expectation
     def expect_column_mean_to_be_between(self, column, min_value=None, max_value=None,
                                          result_format=None, include_config=False, catch_exceptions=None, meta=None):
 
@@ -842,7 +842,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         }
 
     @DocInherit
-    @MetaPandasDataset.column_aggregate_expectation
+    @MetaPandasDataTable.column_aggregate_expectation
     def expect_column_median_to_be_between(self, column, min_value=None, max_value=None,
                                            result_format=None, include_config=False, catch_exceptions=None, meta=None):
 
@@ -862,7 +862,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         }
 
     @DocInherit
-    @MetaPandasDataset.column_aggregate_expectation
+    @MetaPandasDataTable.column_aggregate_expectation
     def expect_column_stdev_to_be_between(self, column, min_value=None, max_value=None,
                                           result_format=None, include_config=False, catch_exceptions=None, meta=None):
 
@@ -882,7 +882,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         }
 
     @DocInherit
-    @MetaPandasDataset.column_aggregate_expectation
+    @MetaPandasDataTable.column_aggregate_expectation
     def expect_column_unique_value_count_to_be_between(self, column, min_value=None, max_value=None,
                                                        result_format=None, include_config=False, catch_exceptions=None, meta=None):
 
@@ -902,7 +902,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         }
 
     @DocInherit
-    @MetaPandasDataset.column_aggregate_expectation
+    @MetaPandasDataTable.column_aggregate_expectation
     def expect_column_proportion_of_unique_values_to_be_between(self, column, min_value=0, max_value=1,
                                                                 result_format=None, include_config=False, catch_exceptions=None, meta=None):
 
@@ -928,7 +928,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         }
 
     @DocInherit
-    @MetaPandasDataset.column_aggregate_expectation
+    @MetaPandasDataTable.column_aggregate_expectation
     def expect_column_most_common_value_to_be_in_set(self, column, value_set, ties_okay=None,
                                                      result_format=None, include_config=False, catch_exceptions=None, meta=None):
 
@@ -951,7 +951,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         }
 
     @DocInherit
-    @MetaPandasDataset.column_aggregate_expectation
+    @MetaPandasDataTable.column_aggregate_expectation
     def expect_column_sum_to_be_between(self,
         column,
         min_value=None,
@@ -980,7 +980,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         }
 
     @DocInherit
-    @MetaPandasDataset.column_aggregate_expectation
+    @MetaPandasDataTable.column_aggregate_expectation
     def expect_column_min_to_be_between(self,
         column,
         min_value=None,
@@ -1029,7 +1029,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
 
     @DocInherit
-    @MetaPandasDataset.column_aggregate_expectation
+    @MetaPandasDataTable.column_aggregate_expectation
     def expect_column_max_to_be_between(self,
         column,
         min_value=None,
@@ -1080,7 +1080,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
 
     @DocInherit
-    @MetaPandasDataset.column_aggregate_expectation
+    @MetaPandasDataTable.column_aggregate_expectation
     def expect_column_chisquare_test_p_value_to_be_greater_than(self, column, partition_object=None, p=0.05, tail_weight_holdout=0,
                                                                 result_format=None, include_config=False, catch_exceptions=None, meta=None):
         if not is_valid_categorical_partition_object(partition_object):
@@ -1126,7 +1126,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         return return_obj
 
     @DocInherit
-    @MetaPandasDataset.column_aggregate_expectation
+    @MetaPandasDataTable.column_aggregate_expectation
     def expect_column_bootstrapped_ks_test_p_value_to_be_greater_than(self, column, partition_object=None, p=0.05, bootstrap_samples=None, bootstrap_sample_size=None,
                                                                       result_format=None, include_config=False, catch_exceptions=None, meta=None):
         if not is_valid_continuous_partition_object(partition_object):
@@ -1208,7 +1208,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         return return_obj
 
     @DocInherit
-    @MetaPandasDataset.column_aggregate_expectation
+    @MetaPandasDataTable.column_aggregate_expectation
     def expect_column_kl_divergence_to_be_less_than(self, column, partition_object=None, threshold=None,
                                                     tail_weight_holdout=0, internal_weight_holdout=0,
                                                     result_format=None, include_config=False, catch_exceptions=None, meta=None):
@@ -1393,7 +1393,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
 
     @DocInherit
-    @MetaPandasDataset.column_pair_map_expectation
+    @MetaPandasDataTable.column_pair_map_expectation
     def expect_column_pair_values_to_be_equal(self,
         column_A,
         column_B,
@@ -1403,7 +1403,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         return column_A == column_B
 
     @DocInherit
-    @MetaPandasDataset.column_pair_map_expectation
+    @MetaPandasDataTable.column_pair_map_expectation
     def expect_column_pair_values_A_to_be_greater_than_B(self,
         column_A,
         column_B,
@@ -1431,7 +1431,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             return temp_column_A > temp_column_B
 
     @DocInherit
-    @MetaPandasDataset.column_pair_map_expectation
+    @MetaPandasDataTable.column_pair_map_expectation
     def expect_column_pair_values_to_be_in_set(self,
         column_A,
         column_B,

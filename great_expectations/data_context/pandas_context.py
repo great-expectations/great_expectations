@@ -2,7 +2,7 @@ import pandas as pd
 import os
 
 from .base import DataContext
-from ..dataset.pandas_dataset import PandasDataset
+from ..dataset.pandas_dataset import PandasDataTable
 
 class PandasCSVDataContext(DataContext):
     """
@@ -23,4 +23,4 @@ class PandasCSVDataContext(DataContext):
 
     def get_dataset(self, dataset_name, *args, **kwargs):
         df = pd.read_csv(os.path.join(self.directory, dataset_name), *args, **kwargs)
-        return PandasDataset(df)
+        return PandasDataTable(df)

@@ -1,19 +1,19 @@
 import pytest
 
-from great_expectations.dataset import MetaSqlAlchemyDataset, SqlAlchemyDataset
+from great_expectations.dataset import MetaSqlAlchemyDataTable, SqlAlchemyDataTable
 import sqlalchemy as sa
 import pandas as pd
 
 
 @pytest.fixture
 def custom_dataset():
-    class CustomSqlAlchemyDataset(SqlAlchemyDataset):
+    class CustomSqlAlchemyDataTable(SqlAlchemyDataTable):
 
-        @MetaSqlAlchemyDataset.column_map_expectation
+        @MetaSqlAlchemyDataTable.column_map_expectation
         def expect_column_values_to_equal_2(self, column):
             return (sa.column(column) == 2)
 
-        @MetaSqlAlchemyDataset.column_aggregate_expectation
+        @MetaSqlAlchemyDataTable.column_aggregate_expectation
         def expect_column_mode_to_equal_0(self, column):
             mode_query = sa.select([
                 sa.column(column).label('value'),
@@ -29,13 +29,13 @@ def custom_dataset():
                 }
             }
 
-        @MetaSqlAlchemyDataset.column_aggregate_expectation
+        @MetaSqlAlchemyDataTable.column_aggregate_expectation
         def broken_aggregate_expectation(self, column):
             return {
                 "not_a_success_value": True,
             }
 
-        @MetaSqlAlchemyDataset.column_aggregate_expectation
+        @MetaSqlAlchemyDataTable.column_aggregate_expectation
         def another_broken_aggregate_expectation(self, column):
             return {
                 "success": True,
@@ -54,12 +54,12 @@ def custom_dataset():
     })
 
     data.to_sql(name='test_data', con=engine, index=False)
-    custom_dataset = CustomSqlAlchemyDataset('test_data', engine=engine)
+    custom_dataset = CustomSqlAlchemyDataTable('test_data', engine=engine)
 
     return custom_dataset
 
 
-def test_custom_sqlalchemydataset(custom_dataset):
+def test_custom_sqlalchemyDataTable(custom_dataset):
     custom_dataset._initialize_expectations()
     custom_dataset.set_default_expectation_argument("result_format", {"result_format": "COMPLETE"})
 
@@ -87,7 +87,7 @@ def test_broken_decorator_errors(custom_dataset):
 
 def test_missing_engine_error():
     with pytest.raises(ValueError) as err:
-        SqlAlchemyDataset('test_engine', schema='example')
+        SqlAlchemyDataTable('test_engine', schema='example')
         assert "Engine or connection_string must be provided." in str(err)
 
 
@@ -95,12 +95,12 @@ def test_schema_custom_sql_error():
     engine = sa.create_engine('sqlite://')
 
     with pytest.raises(ValueError) as err:
-        SqlAlchemyDataset('test_schema_custom', schema='example', engine=engine,
+        SqlAlchemyDataTable('test_schema_custom', schema='example', engine=engine,
                           custom_sql='SELECT * FROM example.fake')
         assert "Cannot specify both schema and custom_sql." in str(err)
 
 
-def test_sqlalchemydataset_with_custom_sql():
+def test_sqlalchemyDataTable_with_custom_sql():
     engine = sa.create_engine('sqlite://')
 
     data = pd.DataFrame({
@@ -112,13 +112,13 @@ def test_sqlalchemydataset_with_custom_sql():
     data.to_sql(name='test_sql_data', con=engine, index=False)
 
     custom_sql = "SELECT name, pet FROM test_sql_data WHERE age > 12"
-    custom_sql_dataset = SqlAlchemyDataset('test_sql_data', engine=engine, custom_sql=custom_sql)
+    custom_sql_DataTable = SqlAlchemyDataTable('test_sql_data', engine=engine, custom_sql=custom_sql)
 
-    custom_sql_dataset._initialize_expectations()
-    custom_sql_dataset.set_default_expectation_argument("result_format", {"result_format": "COMPLETE"})
+    custom_sql_DataTable._initialize_expectations()
+    custom_sql_DataTable.set_default_expectation_argument("result_format", {"result_format": "COMPLETE"})
 
-    result = custom_sql_dataset.expect_column_values_to_be_in_set("pet", ["fish", "cat", "python"])
+    result = custom_sql_DataTable.expect_column_values_to_be_in_set("pet", ["fish", "cat", "python"])
     assert result['success'] == True
 
-    result = custom_sql_dataset.expect_column_to_exist("age")
+    result = custom_sql_DataTable.expect_column_to_exist("age")
     assert result['success'] == False

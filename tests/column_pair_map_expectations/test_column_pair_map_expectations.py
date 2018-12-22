@@ -16,7 +16,7 @@ import warnings
 
 from tests.test_utils import get_dataset, candidate_test_is_on_temporary_notimplemented_list, evaluate_json_test
 
-contexts = ['PandasDataset', 'SqlAlchemyDataset']
+contexts = ['PandasDataTable', 'SqlAlchemyDataTable']
 
 def pytest_generate_tests(metafunc):
 

@@ -66,7 +66,7 @@ class TestDistributionalExpectations(unittest.TestCase):
     def test_expect_column_chisquare_test_p_value_to_be_greater_than_new_categorical_val(self):
         # Note: Chisquare test with true zero expected could be treated subtly. Here, we tolerate a warning from stats.
         categorical_list = (['A'] * 25) + (['B'] * 25) + (['C'] * 25) + (['D'] * 25)
-        df = ge.dataset.PandasDataset({'categorical': categorical_list})
+        df = ge.dataset.PandasDataTable({'categorical': categorical_list})
 
         out = df.expect_column_chisquare_test_p_value_to_be_greater_than('categorical', self.test_partitions['categorical_fixed_alternate'])
         self.assertEqual(out['success'], False)
@@ -76,7 +76,7 @@ class TestDistributionalExpectations(unittest.TestCase):
 
     def test_expect_column_chisquare_test_p_value_to_be_greater_than_missing_categorical_val(self):
         categorical_list = (['A'] * 61) + (['B'] * 39)
-        df = ge.dataset.PandasDataset({'categorical': categorical_list})
+        df = ge.dataset.PandasDataTable({'categorical': categorical_list})
         out = df.expect_column_chisquare_test_p_value_to_be_greater_than('categorical', self.test_partitions['categorical_fixed'])
         self.assertEqual(out['success'], False)
 
@@ -125,7 +125,7 @@ class TestDistributionalExpectations(unittest.TestCase):
                 self.assertDictEqual(out['result']['details'], t['out']['details'])
 
     def test_expect_column_kl_divergence_to_be_less_than_discrete_holdout(self):
-        df = ge.dataset.PandasDataset({'a': ['a', 'a', 'b', 'c']})
+        df = ge.dataset.PandasDataTable({'a': ['a', 'a', 'b', 'c']})
         out = df.expect_column_kl_divergence_to_be_less_than('a',
                                                              {'values': ['a', 'b'], 'weights': [0.6, 0.4]},
                                                              threshold=0.1,
@@ -310,7 +310,7 @@ class TestDistributionalExpectations(unittest.TestCase):
             'weights': [0.25, 0.25, 0.25],
             'tail_weights':[0.25,0]
         }
-        test_df = ge.dataset.PandasDataset(
+        test_df = ge.dataset.PandasDataTable(
             {'x': [-0.5, 0.5, 1.5, 2.5]})
         # This should succeed: our data match the partition
         out = test_df.expect_column_kl_divergence_to_be_less_than('x', test_partition, 0.5, result_format='SUMMARY')
@@ -333,7 +333,7 @@ class TestDistributionalExpectations(unittest.TestCase):
             'weights': [0.2, 0.2, 0.2],
             'tail_weights':[0.2,0.2]
         }
-        test_df = ge.dataset.PandasDataset(
+        test_df = ge.dataset.PandasDataTable(
             {'x': [-0.5, 0.5, 1.5, 2.5, 3.5]})
         out = test_df.expect_column_kl_divergence_to_be_less_than('x', test_partition, 0.5, result_format='SUMMARY')
         # This should fail: we expect zero weight less than 0
@@ -356,7 +356,7 @@ class TestDistributionalExpectations(unittest.TestCase):
             'weights': [0.2, 0.4, 0.2],
             'tail_weights':[0.1,0.1]
         }
-        test_df = ge.dataset.PandasDataset(
+        test_df = ge.dataset.PandasDataTable(
             {'x': [-0.5, 0.5, 0.5, 1.5, 1.5, 1.5, 1.5, 2.5, 2.5, 3.5]})
         # This should succeed: our data match the partition
         out = test_df.expect_column_kl_divergence_to_be_less_than('x', test_partition, 0.5, result_format='SUMMARY')
@@ -382,7 +382,7 @@ class TestDistributionalExpectations(unittest.TestCase):
             'weights': [0.2, 0.4, 0.2],
             'tail_weights':[0.1,0.1]
         }
-        test_df = ge.dataset.PandasDataset(
+        test_df = ge.dataset.PandasDataTable(
             {'x': [-0.5, 0.5, 0.5, 1.5, 1.5, 1.5, 1.5, 2.5, 2.5, 3.5]})
         # This should succeed: our data match the partition
         out = test_df.expect_column_kl_divergence_to_be_less_than('x', test_partition, 0.5, result_format='SUMMARY')
@@ -556,7 +556,7 @@ class TestDistributionalExpectations(unittest.TestCase):
     def test_expect_column_kl_divergence_to_be_less_than_infinite_observed_value(self):
     
         #Test with discrete distribution
-        discrete_df = ge.dataset.PandasDataset({"x1":['a','a','a','a','b','b','b','b','c','c']})
+        discrete_df = ge.dataset.PandasDataTable({"x1":['a','a','a','a','b','b','b','b','c','c']})
         discrete_partition_object={"weights":[0.5,0.5],
                                    "values":["a","b"]}
         discrete_out=discrete_df.expect_column_kl_divergence_to_be_less_than("x1",
@@ -569,7 +569,7 @@ class TestDistributionalExpectations(unittest.TestCase):
         
         
         #Test with continuous distribution
-        continuous_df=ge.dataset.PandasDataset({"x2":[-1.5,-1.5,-1.35,-1.2,-1.19,-1.12,-1.04,-1,0,0,0,0.25,
+        continuous_df=ge.dataset.PandasDataTable({"x2":[-1.5,-1.5,-1.35,-1.2,-1.19,-1.12,-1.04,-1,0,0,0,0.25,
                                                      0.34,1,1.1,1.13,1.22,1.34,1.4,1.46,1.5,1.5,1.5]})
         
         continuous_partition_object1={"weights":[0.1,0.4,0,0,0.4,0.1],
@@ -602,7 +602,7 @@ class TestDistributionalExpectations(unittest.TestCase):
     def test_expect_column_kl_divergence_to_be_less_than_infinite_return_bins(self):
     
     
-        continuous_df=ge.dataset.PandasDataset({"x":[-1.95, 1.03, 1.00, 0.81, -2.27,  0.52, 2.45, -1.19,
+        continuous_df=ge.dataset.PandasDataTable({"x":[-1.95, 1.03, 1.00, 0.81, -2.27,  0.52, 2.45, -1.19,
                                                      -0.17, -1.54, 2.20, -2.66,  1.71,  1.59, 2.19]})
         
         
@@ -813,7 +813,7 @@ class TestDistributionalExpectations(unittest.TestCase):
         
     def test_expect_column_kl_divergence_to_be_less_than_user_tail_weights(self):
     
-        continuous_df=ge.dataset.PandasDataset({"x":[-1.95, 1.03, 1.00, 0.81, -2.27,  0.52, 2.45, -1.19,
+        continuous_df=ge.dataset.PandasDataTable({"x":[-1.95, 1.03, 1.00, 0.81, -2.27,  0.52, 2.45, -1.19,
                                                  -0.17, -1.54, 2.20, -2.66,  1.71,  1.59, 2.19]})
     
     
