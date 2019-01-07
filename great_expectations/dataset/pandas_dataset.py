@@ -275,7 +275,7 @@ class PandasDataTable(MetaPandasDataTable, pd.DataFrame):
             self._initialize_expectations(other.get_expectations_config(
                 discard_failed_expectations=False,
                 discard_result_format_kwargs=False,
-                discard_include_configs_kwargs=False,
+                discard_include_config_kwargs=False,
                 discard_catch_exceptions_kwargs=False))
             # If other was coerced to be a PandasDataTable (e.g. via _constructor call during self.copy() operation)
             # then it may not have discard_subset_failing_expectations set. Default to self value

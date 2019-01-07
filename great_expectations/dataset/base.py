@@ -290,7 +290,7 @@ class Dataset(object):
     def _copy_and_clean_up_expectation(self,
         expectation,
         discard_result_format_kwargs=True,
-        discard_include_configs_kwargs=True,
+        discard_include_config_kwargs=True,
         discard_catch_exceptions_kwargs=True,
     ):
         """Returns copy of `expectation` without `success_on_last_run` and other specified key-value pairs removed
@@ -303,8 +303,8 @@ class Dataset(object):
                   The expectation to copy and clean.
               discard_result_format_kwargs (boolean): \
                   if True, will remove the kwarg `output_format` key-value pair from the copied expectation.
-              discard_include_configs_kwargs (boolean):
-                  if True, will remove the kwarg `include_configs` key-value pair from the copied expectation.
+              discard_include_config_kwargs (boolean):
+                  if True, will remove the kwarg `include_config` key-value pair from the copied expectation.
               discard_catch_exceptions_kwargs (boolean):
                   if True, will remove the kwarg `catch_exceptions` key-value pair from the copied expectation.
 
@@ -321,10 +321,10 @@ class Dataset(object):
                 del new_expectation["kwargs"]["result_format"]
                 # discards["result_format"] += 1
 
-        if discard_include_configs_kwargs:
+        if discard_include_config_kwargs:
             if "include_config" in new_expectation["kwargs"]:
                 del new_expectation["kwargs"]["include_config"]
-                # discards["include_configs"] += 1
+                # discards["include_config"] += 1
 
         if discard_catch_exceptions_kwargs:
             if "catch_exceptions" in new_expectation["kwargs"]:
@@ -337,7 +337,7 @@ class Dataset(object):
         self,
         match_indexes,
         discard_result_format_kwargs=True,
-        discard_include_configs_kwargs=True,
+        discard_include_config_kwargs=True,
         discard_catch_exceptions_kwargs=True,
     ):
         """Copies and cleans all expectations provided by their index in DataSet._expectations_config.expectations.
@@ -350,8 +350,8 @@ class Dataset(object):
                    Index numbers of the expectations from `expectation_config.expectations` to be copied and cleaned.
                discard_result_format_kwargs (boolean): \
                    if True, will remove the kwarg `output_format` key-value pair from the copied expectation.
-               discard_include_configs_kwargs (boolean):
-                   if True, will remove the kwarg `include_configs` key-value pair from the copied expectation.
+               discard_include_config_kwargs (boolean):
+                   if True, will remove the kwarg `include_config` key-value pair from the copied expectation.
                discard_catch_exceptions_kwargs (boolean):
                    if True, will remove the kwarg `catch_exceptions` key-value pair from the copied expectation.
 
@@ -368,7 +368,7 @@ class Dataset(object):
                 self._copy_and_clean_up_expectation(
                     self._expectations_config.expectations[i],
                     discard_result_format_kwargs,
-                    discard_include_configs_kwargs,
+                    discard_include_config_kwargs,
                     discard_catch_exceptions_kwargs,
                 )
             )
@@ -421,7 +421,7 @@ class Dataset(object):
         column=None,
         expectation_kwargs=None,
         discard_result_format_kwargs=True,
-        discard_include_configs_kwargs=True,
+        discard_include_config_kwargs=True,
         discard_catch_exceptions_kwargs=True,
     ):
         """Find matching expectations within _expectation_config.
@@ -430,7 +430,7 @@ class Dataset(object):
             column=None                          : The name of the column to be matched.
             expectation_kwargs=None              : A dictionary of kwargs to match against.
             discard_result_format_kwargs=True    : In returned expectation object(s), suppress the `result_format` parameter.
-            discard_include_configs_kwargs=True  : In returned expectation object(s), suppress the `include_configs` parameter.
+            discard_include_config_kwargs=True  : In returned expectation object(s), suppress the `include_config` parameter.
             discard_catch_exceptions_kwargs=True : In returned expectation object(s), suppress the `catch_exceptions` parameter.
 
         Returns:
@@ -447,7 +447,7 @@ class Dataset(object):
         return self._copy_and_clean_up_expectations_from_indexes(
             match_indexes,
             discard_result_format_kwargs,
-            discard_include_configs_kwargs,
+            discard_include_config_kwargs,
             discard_catch_exceptions_kwargs,
         )
 
@@ -474,7 +474,7 @@ class Dataset(object):
         Note:
             If remove_expectation doesn't find any matches, it raises a ValueError.
             If remove_expectation finds more than one matches and remove_multiple_matches!=True, it raises a ValueError.
-            If dry_run=True, then `remove_expectation` acts as a thin layer to find_expectations, with the default values for discard_result_format_kwargs, discard_include_configs_kwargs, and discard_catch_exceptions_kwargs
+            If dry_run=True, then `remove_expectation` acts as a thin layer to find_expectations, with the default values for discard_result_format_kwargs, discard_include_config_kwargs, and discard_catch_exceptions_kwargs
         """
 
         match_indexes = self.find_expectation_indexes(
@@ -559,7 +559,7 @@ class Dataset(object):
     def get_expectations_config(self,
         discard_failed_expectations=True,
         discard_result_format_kwargs=True,
-        discard_include_configs_kwargs=True,
+        discard_include_config_kwargs=True,
         discard_catch_exceptions_kwargs=True,
         suppress_warnings=False
     ):
@@ -570,8 +570,8 @@ class Dataset(object):
                 Only include expectations with success_on_last_run=True in the exported config.  Defaults to `True`.
             discard_result_format_kwargs (boolean): \
                 In returned expectation objects, suppress the `result_format` parameter. Defaults to `True`.
-            discard_include_configs_kwargs (boolean): \
-                In returned expectation objects, suppress the `include_configs` parameter. Defaults to `True`.
+            discard_include_config_kwargs (boolean): \
+                In returned expectation objects, suppress the `include_config` parameter. Defaults to `True`.
             discard_catch_exceptions_kwargs (boolean): \
                 In returned expectation objects, suppress the `catch_exceptions` parameter.  Defaults to `True`.
 
@@ -612,10 +612,10 @@ class Dataset(object):
                     del expectation["kwargs"]["result_format"]
                     discards["result_format"] += 1
 
-            if discard_include_configs_kwargs:
+            if discard_include_config_kwargs:
                 if "include_config" in expectation["kwargs"]:
                     del expectation["kwargs"]["include_config"]
-                    discards["include_configs"] += 1
+                    discards["include_config"] += 1
 
             if discard_catch_exceptions_kwargs:
                 if "catch_exceptions" in expectation["kwargs"]:
@@ -630,19 +630,19 @@ WARNING: get_expectations_config discarded
     44 result_format kwargs
      0 include_config kwargs
      1 catch_exceptions kwargs
-If you wish to change this behavior, please set discard_failed_expectations, discard_result_format_kwargs, discard_include_configs_kwargs, and discard_catch_exceptions_kwargs appropirately.
+If you wish to change this behavior, please set discard_failed_expectations, discard_result_format_kwargs, discard_include_config_kwargs, and discard_catch_exceptions_kwargs appropirately.
             """
-            if any([discard_failed_expectations, discard_result_format_kwargs, discard_include_configs_kwargs, discard_catch_exceptions_kwargs]):
+            if any([discard_failed_expectations, discard_result_format_kwargs, discard_include_config_kwargs, discard_catch_exceptions_kwargs]):
                 print ("WARNING: get_expectations_config discarded")
                 if discard_failed_expectations:
                     print ("\t%d failing expectations" % discards["failed_expectations"])
                 if discard_result_format_kwargs:
                     print ("\t%d result_format kwargs" % discards["result_format"])
-                if discard_include_configs_kwargs:
-                    print ("\t%d include_configs kwargs" % discards["include_configs"])
+                if discard_include_config_kwargs:
+                    print ("\t%d include_config kwargs" % discards["include_config"])
                 if discard_catch_exceptions_kwargs:
                     print ("\t%d catch_exceptions kwargs" % discards["catch_exceptions"])
-                print ("If you wish to change this behavior, please set discard_failed_expectations, discard_result_format_kwargs, discard_include_configs_kwargs, and discard_catch_exceptions_kwargs appropirately.")
+                print ("If you wish to change this behavior, please set discard_failed_expectations, discard_result_format_kwargs, discard_include_config_kwargs, and discard_catch_exceptions_kwargs appropirately.")
 
         config["expectations"] = expectations
         return config
@@ -652,7 +652,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         filepath=None,
         discard_failed_expectations=True,
         discard_result_format_kwargs=True,
-        discard_include_configs_kwargs=True,
+        discard_include_config_kwargs=True,
         discard_catch_exceptions_kwargs=True,
         suppress_warnings=False
     ):
@@ -671,7 +671,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                    If False, all expectations are written to the JSON config file.
                discard_result_format_kwargs (boolean): \
                    If True, the :ref:`result_format` attribute for each expectation is not written to the JSON config file. \
-               discard_include_configs_kwargs (boolean): \
+               discard_include_config_kwargs (boolean): \
                    If True, the :ref:`include_config` attribute for each expectation is not written to the JSON config file.\
                discard_catch_exceptions_kwargs (boolean): \
                    If True, the :ref:`catch_exceptions` attribute for each expectation is not written to the JSON config \
@@ -688,7 +688,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         expectations_config = self.get_expectations_config(
             discard_failed_expectations,
             discard_result_format_kwargs,
-            discard_include_configs_kwargs,
+            discard_include_config_kwargs,
             discard_catch_exceptions_kwargs,
             suppress_warnings
         )
@@ -763,7 +763,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             expectations_config = self.get_expectations_config(
                 discard_failed_expectations=False,
                 discard_result_format_kwargs=False,
-                discard_include_configs_kwargs=False,
+                discard_include_config_kwargs=False,
                 discard_catch_exceptions_kwargs=False,
             )
         elif isinstance(expectations_config, string_types):

@@ -336,7 +336,7 @@ class TestDataset(unittest.TestCase):
         self.assertEqual(
             df.get_expectations_config(
                 discard_result_format_kwargs=False,
-                discard_include_configs_kwargs=False,
+                discard_include_config_kwargs=False,
                 discard_catch_exceptions_kwargs=False,
             ),
             output_config,
@@ -346,7 +346,7 @@ class TestDataset(unittest.TestCase):
         df.save_expectations_config(
           directory_name+'/temp3.json',
           discard_result_format_kwargs=False,
-          discard_include_configs_kwargs=False,
+          discard_include_config_kwargs=False,
           discard_catch_exceptions_kwargs=False,
         )
         temp_file = open(directory_name+'/temp3.json')
