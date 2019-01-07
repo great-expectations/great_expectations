@@ -95,20 +95,20 @@ class MetaFileDataset(DataFile):
                     
                     success, percent_success = self._calc_map_expectation_success(success_count, nonnull_count, mostly)
             
-                    return_obj = self._format_file_map_output(
+                    return_obj = self._format_map_output(
                         result_format, success,
                         element_count, nonnull_count,
                         unexpected_list, unexpected_index_list
                     )
                 else:
-                    return_obj = self._format_file_map_output(
+                    return_obj = self._format_map_output(
                         result_format=result_format, success=None,
                         element_count=element_count, nonnull_count=0,
                         unexpected_list=[], unexpected_index_list=[]
                     )
             
             else:
-                return_obj = self._format_file_map_output(
+                return_obj = self._format_map_output(
                         result_format=result_format, success=None,
                         element_count=0, nonnull_count=0,
                         unexpected_list=[], unexpected_index_list=[]
