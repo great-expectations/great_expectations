@@ -996,68 +996,6 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         raise ValueError("Unknown result_format %s." % (result_format['result_format'],))
 
 
-        
-
-
-        
-class DataTable(Dataset):
-    def __init__(self, *args, **kwargs):
-        super(DataTable, self).__init__(*args, **kwargs)
-    
-    @classmethod
-    def column_map_expectation(cls, func):
-        """Constructs an expectation using column-map semantics.
-
-        The column_map_expectation decorator handles boilerplate issues surrounding the common pattern of evaluating
-        truthiness of some condition on a per-row basis.
-
-        Args:
-            func (function): \
-                The function implementing a row-wise expectation. The function should take a column of data and \
-                return an equally-long column of boolean values corresponding to whether the truthiness of the \
-                underlying expectation.
-
-        Notes:
-            column_map_expectation intercepts and takes action based on the following parameters:
-            mostly (None or a float between 0 and 1): \
-                Return `"success": True` if at least mostly percent of values match the expectation. \
-                For more detail, see :ref:`mostly`.
-
-            column_map_expectation *excludes null values* from being passed to the function
-
-            Depending on the `result_format` selected, column_map_expectation can additional data to a return object, \
-            including `element_count`, `nonnull_values`, `nonnull_count`, `success_count`, `unexpected_list`, and \
-            `unexpected_index_list`. See :func:`_format_column_map_output <great_expectations.dataset.base.Dataset._format_column_map_output>`
-
-        See also:
-            :func:`expect_column_values_to_be_unique <great_expectations.dataset.base.Dataset.expect_column_values_to_be_unique>` \
-            for an example of a column_map_expectation
-        """
-        raise NotImplementedError
-
-    @classmethod
-    def column_aggregate_expectation(cls, func):
-        """Constructs an expectation using column-aggregate semantics.
-
-        The column_aggregate_expectation decorator handles boilerplate issues surrounding the common pattern of \
-        evaluating truthiness of some condition on an aggregated-column basis.
-
-        Args:
-            func (function): \
-                The function implementing an expectation using an aggregate property of a column. \
-                The function should take a column of data and return the aggregate value it computes.
-
-        Notes:
-            column_aggregate_expectation *excludes null values* from being passed to the function
-
-        See also:
-            :func:`expect_column_mean_to_be_between <great_expectations.dataset.base.Dataset.expect_column_mean_to_be_between>` \
-            for an example of a column_aggregate_expectation
-        """
-        raise NotImplementedError
-        
-    ##### Output generation #####
-
     def _calc_map_expectation_success(self, success_count, nonnull_count, mostly):
         """Calculate success and percent_success for column_map_expectations
 
@@ -1089,6 +1027,67 @@ class DataTable(Dataset):
             percent_success = None
 
         return success, percent_success
+
+
+
+        
+class DataTable(Dataset):
+    def __init__(self, *args, **kwargs):
+        super(DataTable, self).__init__(*args, **kwargs)
+    
+    @classmethod
+    def column_map_expectation(cls, func):
+        """Constructs an expectation using column-map semantics.
+
+        The column_map_expectation decorator handles boilerplate issues surrounding the common pattern of evaluating
+        truthiness of some condition on a per-row basis.
+
+        Args:
+            func (function): \
+                The function implementing a row-wise expectation. The function should take a column of data and \
+                return an equally-long column of boolean values corresponding to whether the truthiness of the \
+                underlying expectation.
+
+        Notes:
+            column_map_expectation intercepts and takes action based on the following parameters:
+            mostly (None or a float between 0 and 1): \
+                Return `"success": True` if at least mostly percent of values match the expectation. \
+                For more detail, see :ref:`mostly`.
+
+            column_map_expectation *excludes null values* from being passed to the function
+
+            Depending on the `result_format` selected, column_map_expectation can additional data to a return object, \
+            including `element_count`, `nonnull_values`, `nonnull_count`, `success_count`, `unexpected_list`, and \
+            `unexpected_index_list`. See :func:`_format_map_output <great_expectations.dataset.base.Dataset._format_map_output>`
+
+        See also:
+            :func:`expect_column_values_to_be_unique <great_expectations.dataset.base.Dataset.expect_column_values_to_be_unique>` \
+            for an example of a column_map_expectation
+        """
+        raise NotImplementedError
+
+    @classmethod
+    def column_aggregate_expectation(cls, func):
+        """Constructs an expectation using column-aggregate semantics.
+
+        The column_aggregate_expectation decorator handles boilerplate issues surrounding the common pattern of \
+        evaluating truthiness of some condition on an aggregated-column basis.
+
+        Args:
+            func (function): \
+                The function implementing an expectation using an aggregate property of a column. \
+                The function should take a column of data and return the aggregate value it computes.
+
+        Notes:
+            column_aggregate_expectation *excludes null values* from being passed to the function
+
+        See also:
+            :func:`expect_column_mean_to_be_between <great_expectations.dataset.base.Dataset.expect_column_mean_to_be_between>` \
+            for an example of a column_aggregate_expectation
+        """
+        raise NotImplementedError
+    
+
 
     ##### Iterative testing for custom expectations #####
 
@@ -3365,34 +3364,6 @@ class DataFile(Dataset):
         
         
         
-##### Output generation #####
-
-    def _calc_map_expectation_success(self, success_count, nonnull_count, mostly):
-        """Calculate success and percent_success for column_map_expectations
-
-        Args:
-            success_count (int): \
-                The number of successful values in the column
-            nonnull_count (int): \
-                The number of nonnull values in the column
-            mostly (float or None): \
-                A value between 0 and 1 (or None), indicating the percentage of successes required to pass the expectation as a whole\
-                If mostly=None, then all values must succeed in order for the expectation as a whole to succeed.
-
-        Returns:
-            success (boolean), percent_success (float)
-        """
-            # percent_success = float(success_count)/nonnull_count
-        percent_success = success_count / nonnull_count
-        
-        if mostly != None:
-            success = bool(percent_success >= mostly)
-            
-        else:
-            success = bool(nonnull_count-success_count == 0)
-                
-
-        return success, percent_success
         
     def expect_file_line_regex_match_count_to_equal(self,regex, lines=None,expected_count=0, skip=None,
                                                 mostly=None, result_format=None, 
