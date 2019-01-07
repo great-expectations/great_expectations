@@ -292,28 +292,28 @@ class FileDataset(MetaFileDataset):
     
     @DocInherit
     @Dataset.expectation([])
-    def expect_file_unique_column_names(self, skip=0, sep=',', quoteChar='"',
-                                        quot=csv.QUOTE_MINIMAL, doubleQuote=True,
-                                        skipInitialSpace=False, escapeChar=None,
-                                        result_format=None,include_config=False,
-                                        catch_exceptions=None, meta=None):
-
-    
+    def expect_file_has_valid_table_header(self,regex,skip=None,
+                                           result_format=None, 
+                                           include_config=False,
+                                           catch_exceptions=None,meta=None):
+        
+        try:
+            comp_regex=re.compile(regex)
+        except:
+            raise ValueError("Must enter valid regular expression for regex")
+        
         success = False
+        
         try:
             with open(self.path, 'r') as f:
-                reader = csv.reader(f, delimiter=sep, quotechar=quoteChar, quoting=quot, 
-                                    doublequote=doubleQuote, skipinitialspace=skipInitialSpace, 
-                                    escapechar=escapeChar, strict=True)
                 if skip > 0:
                     for i in range(0, skip):
-                        next(reader)
-                colnames = next(reader)
-                if len(set(colnames)) == len(colnames):
+                        line_holder=f.readline()
+                header_line = f.readline()
+                header_names=comp_regex.split(header_line)
+                if len(set(header_names)) == len(header_names):
                     success = True
         except IOError:
-            raise
-        except csv.Error:
             raise
         return {"success":success}
     
