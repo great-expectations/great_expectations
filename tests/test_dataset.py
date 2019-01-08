@@ -377,7 +377,7 @@ class TestDataset(unittest.TestCase):
         unexpected_index_list = []
 
         self.assertEqual(
-            df._format_column_map_output(
+            df._format_map_output(
                 "BOOLEAN_ONLY",
                 success,
                 element_count, nonnull_count,
@@ -387,7 +387,7 @@ class TestDataset(unittest.TestCase):
         )
 
         self.assertEqual(
-            df._format_column_map_output(
+            df._format_map_output(
                 "BASIC",
                 success,
                 element_count, nonnull_count,
@@ -408,7 +408,7 @@ class TestDataset(unittest.TestCase):
         )
 
         self.assertEqual(
-            df._format_column_map_output(
+            df._format_map_output(
                 "SUMMARY",
                 success,
                 element_count,
@@ -432,7 +432,7 @@ class TestDataset(unittest.TestCase):
         )
 
         self.assertEqual(
-            df._format_column_map_output(
+            df._format_map_output(
                 "COMPLETE",
                 success,
                 element_count,
@@ -470,7 +470,7 @@ class TestDataset(unittest.TestCase):
         unexpected_index_list = []
 
         self.assertEqual(
-            df._format_column_map_output(
+            df._format_map_output(
                 "BOOLEAN_ONLY",
                 success,
                 element_count,
@@ -481,7 +481,7 @@ class TestDataset(unittest.TestCase):
         )
 
         self.assertEqual(
-            df._format_column_map_output(
+            df._format_map_output(
                 "BASIC",
                 success,
                 element_count,
@@ -503,7 +503,7 @@ class TestDataset(unittest.TestCase):
         )
 
         self.assertEqual(
-            df._format_column_map_output(
+            df._format_map_output(
                 "SUMMARY",
                 success,
                 element_count,
@@ -527,7 +527,7 @@ class TestDataset(unittest.TestCase):
         )
 
         self.assertEqual(
-            df._format_column_map_output(
+            df._format_map_output(
                 "COMPLETE",
                 success,
                 element_count,
@@ -564,7 +564,7 @@ class TestDataset(unittest.TestCase):
         unexpected_index_list = []
 
         self.assertEqual(
-            df._format_column_map_output(
+            df._format_map_output(
                 "BOOLEAN_ONLY",
                 success,
                 element_count,
@@ -575,7 +575,7 @@ class TestDataset(unittest.TestCase):
         )
 
         self.assertEqual(
-            df._format_column_map_output(
+            df._format_map_output(
                 "BASIC",
                 success,
                 element_count,
@@ -597,7 +597,7 @@ class TestDataset(unittest.TestCase):
         )
 
         self.assertEqual(
-            df._format_column_map_output(
+            df._format_map_output(
                 "SUMMARY",
                 success,
                 element_count,
@@ -621,7 +621,7 @@ class TestDataset(unittest.TestCase):
         )
 
         self.assertEqual(
-            df._format_column_map_output(
+            df._format_map_output(
                 "COMPLETE",
                 success,
                 element_count,
