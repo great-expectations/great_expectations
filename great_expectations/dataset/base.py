@@ -3587,38 +3587,23 @@ class DataFile(Dataset):
         
         raise NotImplementedError
         
-    def expect_file_unique_column_names(self, skip=0, sep=',', quoteChar='"',
-                                        quot=csv.QUOTE_MINIMAL, doubleQuote=True,
-                                        skipInitialSpace=False, escapeChar=None,
-                                        result_format=None,include_config=False,
-                                        catch_exceptions=None, meta=None):
+    def expect_file_has_valid_table_header(self,regex,skip=None,
+                                           result_format=None, 
+                                           include_config=False,
+                                           catch_exceptions=None,meta=None):
         
         """
         Checks to see if table-like data file has unique column names
         
         
         Keyword Args:
-            skip (int): 
-                Number of lines to skip before the line with column names
+            skip (nonnegative integer): \
+                Integer specifying the first lines in the file the method should skip before assessing 
+                expectations
             
-            sep (string): 
-                Specifies the character that divides columns in the file
-                
-            quoteChar (string):
-                one-character string used to quote fields containing special 
-                characters
-                
-            quot:
-                controls when quotes should be recognised by the reader
-                    
-            doubleQuote (boolean):
-                controls how instances of quotechar appearing inside a field should themselves be quoted
-                    
-            skipInitialSpace (boolean):
-                when True, whitespace immediately following the delimiter is ignored
-                    
-            escapeChar (string):
-                one-char string which removes any special meaning from the following character
+            regex (string):
+                A string that can be compiled as valid regular expression. Used to specify the elements
+                of the table header (the column headers)
                     
             result_format (str or None): 
                 Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.

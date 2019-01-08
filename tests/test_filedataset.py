@@ -156,7 +156,7 @@ def test_filedataset_expectations_NotImplementedError():
     with pytest.raises(NotImplementedError):
         
         try:
-            f_dat.expect_file_unique_column_names()
+            f_dat.expect_file_has_valid_table_header(regex='')
         except:
             raise
         

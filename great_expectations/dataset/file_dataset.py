@@ -306,15 +306,27 @@ class FileDataset(MetaFileDataset):
         
         try:
             with open(self.path, 'r') as f:
-                if skip > 0:
-                    for i in range(0, skip):
-                        line_holder=f.readline()
-                header_line = f.readline()
-                header_names=comp_regex.split(header_line)
-                if len(set(header_names)) == len(header_names):
-                    success = True
+                lines=f.readlines() #Read in file lines
+        
         except IOError:
             raise
+
+            #Skip k initial lines designated by the user
+        if skip is not None and skip <= len(lines):
+            try:
+                assert float(skip).is_integer()
+                assert float(skip) >= 0
+            except:
+                raise ValueError("skip must be a positive integer")
+                    
+            for i in range(1,skip+1):
+                lines.pop(0)
+                    
+        header_line = lines[0].strip()
+        header_names=comp_regex.split(header_line)
+        if len(set(header_names)) == len(header_names):
+            success = True
+
         return {"success":success}
     
     
