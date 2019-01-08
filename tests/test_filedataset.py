@@ -1,9 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Oct 31 15:23:27 2018
-
-@author: anhol
-"""
 from __future__ import division
 
 import pytest

@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Oct 30 12:09:54 2018
-
-@author: anhol
-"""
-
 #Test File Expectations
 from __future__ import division
 import great_expectations as ge

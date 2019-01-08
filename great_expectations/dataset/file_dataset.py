@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Sat Oct 20 13:49:29 2018
-
-@author: anhol
-"""
-
 from __future__ import division
 
 from .base import DataFile, Dataset
