@@ -19,7 +19,7 @@ class MetaFileDataset(DataFile):
     """MetaFileDataset is a thin layer between Dataset and FileDataset.
     This two-layer inheritance is required to make @classmethod decorators work.
     Practically speaking, that means that MetaFileDataset implements \
-    expectation decorators, like `column_map_expectation` and `column_aggregate_expectation`, \
+    expectation decorators, like `file_lines_map_expectation` \
     and FileDataset implements the expectation methods themselves.
     """
 
@@ -29,8 +29,8 @@ class MetaFileDataset(DataFile):
         
     @classmethod
     
-    def file_map_expectation(cls, func):
-        """Constructs an expectation using file-map semantics.
+    def file_lines_map_expectation(cls, func):
+        """Constructs an expectation using file lines map semantics.
         
         """
         if PY3:
@@ -134,7 +134,7 @@ class FileDataset(MetaFileDataset):
         
         
     @DocInherit
-    @MetaFileDataset.file_map_expectation
+    @MetaFileDataset.file_lines_map_expectation
             
     def expect_file_line_regex_match_count_to_be_between(self,regex,lines=None, skip=None,
                                                          expected_min_count=0, expected_max_count=None,
@@ -188,7 +188,7 @@ class FileDataset(MetaFileDataset):
             
           
     @DocInherit
-    @MetaFileDataset.file_map_expectation
+    @MetaFileDataset.file_lines_map_expectation
     def expect_file_line_regex_match_count_to_equal(self,regex, lines=None,expected_count=0, skip=None,
                                                     mostly=None, result_format=None, 
                                                     include_config=False,catch_exceptions=None,meta=None):

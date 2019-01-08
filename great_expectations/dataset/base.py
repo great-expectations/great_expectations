@@ -911,13 +911,15 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         element_count, nonnull_count,
         unexpected_list, unexpected_index_list
     ):
-        """Helper function to construct expectation result objects for column_map_expectations.
+        """Helper function to construct expectation result objects for column_map_expectations or file_
+        lines_map_expectations.
 
         Expectations support four result_formats: BOOLEAN_ONLY, BASIC, SUMMARY, and COMPLETE.
         In each case, the object returned has a different set of populated fields.
         See :ref:`result_format` for more information.
 
-        This function handles the logic for mapping those fields for column_map_expectations.
+        This function handles the logic for mapping those fields for column_map_expectations or 
+        file_lines_map_expectations.
         """
 
         # Retain support for string-only output formats:
@@ -3340,11 +3342,11 @@ class DataTable(Dataset):
     
 class DataFile(Dataset):
     @classmethod
-    def file_map_expectation(cls, func):
+    def file_lines_map_expectation(cls, func):
         
-        """Constructs an expectation using file-map semantics.
+        """Constructs an expectation using file lines map semantics.
 
-        The file_map_expectations decorator handles boilerplate issues surrounding the common pattern of \
+        The file_lines_map_expectations decorator handles boilerplate issues surrounding the common pattern of \
         evaluating truthiness of some condition on an line by line basis in a file.
 
         Args:
@@ -3358,7 +3360,7 @@ class DataFile(Dataset):
 
         See also:
             :func:`expect_file_line_regex_match_count_to_be_between <great_expectations.dataset.base.Dataset.expect_file_line_regex_match_count_to_be_between>` \
-            for an example of a file_map_expectation
+            for an example of a file_lines_map_expectation
         """
         raise NotImplementedError
         
@@ -3377,9 +3379,9 @@ class DataFile(Dataset):
         
         Keyword Args:
             lines: \
-                An empty variable that recieves the file lines from the file_map_expectation method.
+                An empty variable that recieves the file lines from the file_lines_map_expectation method.
                 It doesn't matter what the user gives for this value as it will be replaced with the lines 
-                of the file by file_map_expecation. It is recommended the user ignore this argument and leave
+                of the file by file_lines_map_expecation. It is recommended the user ignore this argument and leave
                 it at its default.
             
             skip (nonnegative integer): \
@@ -3434,9 +3436,9 @@ class DataFile(Dataset):
         
         Keyword Args:
             lines: \
-                An empty variable that recieves the file lines from the file_map_expectation method.
+                An empty variable that recieves the file lines from the file_lines_map_expectation method.
                 It doesn't matter what the user gives for this value as it will be replaced with the lines 
-                of the file by file_map_expecation. It is recommended the user ignore this argument and leave
+                of the file by file_lines_map_expecation. It is recommended the user ignore this argument and leave
                 it at its default.
             
             skip (nonnegative integer): \
