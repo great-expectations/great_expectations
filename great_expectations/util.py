@@ -133,7 +133,7 @@ def read_parquet(
 
 
 def from_pandas(pandas_df,
-                dataset_class=dataset.pandas_dataset.PandasDataset,
+                dataset_class=dataset.pandas_dataset.PandasDataTable,
                 expectations_config=None,
                 autoinspect_func=None
 ):
@@ -141,7 +141,7 @@ def from_pandas(pandas_df,
 
     Args:
         pandas_df (Pandas df): Pandas data frame
-        dataset_class (Dataset class) = dataset.pandas_dataset.PandasDataset:
+        dataset_class (Dataset class) = dataset.pandas_dataset.PandasDataTable:
             class to which to convert resulting Pandas df
         expectations_config (string) = None: path to great_expectations config file
         autoinspect_func (function) = None: The autoinspection function that should

@@ -333,13 +333,13 @@ def test_from_pandas():
     assert list(ge_df['z']) == list(pd_df['z'])
 
     # make an empty subclass to test dataset_class argument
-    class CustomPandasDataset(ge.dataset.PandasDataset):
+    class CustomPandasDataTable(ge.dataset.PandasDataTable):
         pass
 
-    ge_df_custom = ge.from_pandas(pd_df, dataset_class=CustomPandasDataset)
+    ge_df_custom = ge.from_pandas(pd_df, dataset_class=CustomPandasDataTable)
 
-    assert not isinstance(ge_df, CustomPandasDataset)
-    assert isinstance(ge_df_custom, CustomPandasDataset)
+    assert not isinstance(ge_df, CustomPandasDataTable)
+    assert isinstance(ge_df_custom, CustomPandasDataTable)
     assert list(ge_df_custom.columns)==['x', 'y', 'z']
     assert list(ge_df_custom['x'])==list(pd_df['x'])
     assert list(ge_df_custom['y'])==list(pd_df['y'])

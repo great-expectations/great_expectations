@@ -138,8 +138,8 @@ def test_column_fallback():
     })
 
     data.to_sql(name='test_sql_data', con=engine, index=False)
-    dataset = SqlAlchemyDataset('test_sql_data', engine=engine)
-    fallback_dataset = SqlAlchemyDataset('test_sql_data', engine=engine)
+    dataset = SqlAlchemyDataTable('test_sql_data', engine=engine)
+    fallback_dataset = SqlAlchemyDataTable('test_sql_data', engine=engine)
     # override columns attribute to test fallback
     fallback_dataset.columns = fallback_dataset.column_reflection_fallback()
 
