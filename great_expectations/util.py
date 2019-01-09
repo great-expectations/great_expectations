@@ -152,7 +152,7 @@ def from_pandas(pandas_df,
     """
     return _convert_to_dataset_class(
         pandas_df,
-        dataset.pandas_dataset.PandasDataTable,
+        dataset_class,
         expectations_config,
         autoinspect_func
     )
