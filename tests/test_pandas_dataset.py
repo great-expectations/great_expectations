@@ -25,49 +25,50 @@ def test_expect_column_values_to_match_strftime_format():
     D.set_default_expectation_argument("result_format", "COMPLETE")
 
     T = [
-            {
-                'in':{'column':'us_dates', 'strftime_format':'%m/%d/%Y'},
-                'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}
+        {
+            'in': {'column': 'us_dates', 'strftime_format': '%m/%d/%Y'},
+            'out': {'success': True, 'unexpected_index_list': [], 'unexpected_list':[]}
+        },
+        {
+            'in': {'column': 'us_dates_type_error', 'strftime_format': '%m/%d/%Y', 'mostly': 0.5, 'catch_exceptions': True},
+            # 'out':{'success':True, 'unexpected_index_list':[2], 'unexpected_list':[5]}},
+            'error': {
+                'traceback_substring': 'TypeError'
             },
-            {
-                'in':{'column':'us_dates_type_error','strftime_format':'%m/%d/%Y', 'mostly': 0.5, 'catch_exceptions': True},
-                # 'out':{'success':True, 'unexpected_index_list':[2], 'unexpected_list':[5]}},
-                'error':{
-                    'traceback_substring' : 'TypeError'
-                },
-            },
-            {
-                'in':{'column':'us_dates_type_error','strftime_format':'%m/%d/%Y', 'catch_exceptions': True},
-                'error':{
-                    'traceback_substring' : 'TypeError'
-                }
-            },
-            {
-                'in':{'column':'almost_iso8601','strftime_format':'%Y-%m-%dT%H:%M:%S'},
-                'out':{'success':True,'unexpected_index_list':[], 'unexpected_list':[]}},
-            {
-                'in':{'column':'almost_iso8601_val_error','strftime_format':'%Y-%m-%dT%H:%M:%S'},
-                'out':{'success':False,'unexpected_index_list':[0], 'unexpected_list':['1977-05-55T00:00:00']}},
-            {
-                'in':{'column':'already_datetime','strftime_format':'%Y-%m-%d', 'catch_exceptions':True},
-                # 'out':{'success':False,'unexpected_index_list':[0], 'unexpected_list':['1977-05-55T00:00:00']},
-                'error':{
-                    'traceback_substring' : 'TypeError: Values passed to expect_column_values_to_match_strftime_format must be of type string.'
-                },
+        },
+        {
+            'in': {'column': 'us_dates_type_error', 'strftime_format': '%m/%d/%Y', 'catch_exceptions': True},
+            'error': {
+                'traceback_substring': 'TypeError'
             }
+        },
+        {
+            'in': {'column': 'almost_iso8601', 'strftime_format': '%Y-%m-%dT%H:%M:%S'},
+            'out': {'success': True, 'unexpected_index_list': [], 'unexpected_list':[]}},
+        {
+            'in': {'column': 'almost_iso8601_val_error', 'strftime_format': '%Y-%m-%dT%H:%M:%S'},
+            'out': {'success': False, 'unexpected_index_list': [0], 'unexpected_list':['1977-05-55T00:00:00']}},
+        {
+            'in': {'column': 'already_datetime', 'strftime_format': '%Y-%m-%d', 'catch_exceptions': True},
+            # 'out':{'success':False,'unexpected_index_list':[0], 'unexpected_list':['1977-05-55T00:00:00']},
+            'error': {
+                'traceback_substring': 'TypeError: Values passed to expect_column_values_to_match_strftime_format must be of type string.'
+            },
+        }
     ]
 
     for t in T:
         out = D.expect_column_values_to_match_strftime_format(**t['in'])
         if 'out' in t:
-            assert t['out']['success']==out['success']
+            assert t['out']['success'] == out['success']
             if 'unexpected_index_list' in t['out']:
-                assert t['out']['unexpected_index_list']==out['result']['unexpected_index_list']
+                assert t['out']['unexpected_index_list'] == out['result']['unexpected_index_list']
             if 'unexpected_list' in t['out']:
-                assert t['out']['unexpected_list']==out['result']['unexpected_list']
+                assert t['out']['unexpected_list'] == out['result']['unexpected_list']
         elif 'error' in t:
-            assert out['exception_info']['raised_exception']==True
+            assert out['exception_info']['raised_exception'] == True
             assert t['error']['traceback_substring'] in out['exception_info']['exception_traceback']
+
 
 def test_expect_column_values_to_be_dateutil_parseable():
 
@@ -81,39 +82,39 @@ def test_expect_column_values_to_be_dateutil_parseable():
     D.set_default_expectation_argument("result_format", "COMPLETE")
 
     T = [
-            {
-                'in':{'column': 'c1'},
-                'out':{'success':True, 'unexpected_list':[], 'unexpected_index_list': []}},
-            {
-                'in':{"column":'c2', "catch_exceptions":True},
-                # 'out':{'success':False, 'unexpected_list':['covfefe', 25], 'unexpected_index_list': [1, 2]}},
-                'error':{ 'traceback_substring' : 'TypeError: Values passed to expect_column_values_to_be_dateutil_parseable must be of type string' },
-            },
-            {
-                'in':{"column":'c3'},
-                'out':{'success':False, 'unexpected_list':['Jared'], 'unexpected_index_list': [0]}},
-            {
-                'in':{'column': 'c3', 'mostly':.5},
-                'out':{'success':True, 'unexpected_list':['Jared'], 'unexpected_index_list': [0]}
-            },
-            {
-                'in':{'column': 'c4'},
-                'out':{'success':False, 'unexpected_list':['49000004632'], 'unexpected_index_list': [2]}
-            },
-            {
-                'in':{'column':'already_datetime', 'catch_exceptions':True},
-                'error':{ 'traceback_substring' : 'TypeError: Values passed to expect_column_values_to_be_dateutil_parseable must be of type string' },
-            }
+        {
+            'in': {'column': 'c1'},
+            'out': {'success': True, 'unexpected_list': [], 'unexpected_index_list': []}},
+        {
+            'in': {"column": 'c2', "catch_exceptions": True},
+            # 'out':{'success':False, 'unexpected_list':['covfefe', 25], 'unexpected_index_list': [1, 2]}},
+            'error': {'traceback_substring': 'TypeError: Values passed to expect_column_values_to_be_dateutil_parseable must be of type string'},
+        },
+        {
+            'in': {"column": 'c3'},
+            'out': {'success': False, 'unexpected_list': ['Jared'], 'unexpected_index_list': [0]}},
+        {
+            'in': {'column': 'c3', 'mostly': .5},
+            'out': {'success': True, 'unexpected_list': ['Jared'], 'unexpected_index_list': [0]}
+        },
+        {
+            'in': {'column': 'c4'},
+            'out': {'success': False, 'unexpected_list': ['49000004632'], 'unexpected_index_list': [2]}
+        },
+        {
+            'in': {'column': 'already_datetime', 'catch_exceptions': True},
+            'error': {'traceback_substring': 'TypeError: Values passed to expect_column_values_to_be_dateutil_parseable must be of type string'},
+        }
     ]
 
     for t in T:
         out = D.expect_column_values_to_be_dateutil_parseable(**t['in'])
         if 'out' in t:
-            assert t['out']['success']==out['success']
-            assert t['out']['unexpected_index_list']==out['result']['unexpected_index_list']
-            assert t['out']['unexpected_list']==out['result']['unexpected_list']
+            assert t['out']['success'] == out['success']
+            assert t['out']['unexpected_index_list'] == out['result']['unexpected_index_list']
+            assert t['out']['unexpected_list'] == out['result']['unexpected_list']
         elif 'error' in t:
-            assert out['exception_info']['raised_exception']==True
+            assert out['exception_info']['raised_exception'] == True
             assert t['error']['traceback_substring'] in out['exception_info']['exception_traceback']
 
 
@@ -131,28 +132,28 @@ def test_expect_column_values_to_be_json_parseable():
     D.set_default_expectation_argument("result_format", "COMPLETE")
 
     T = [
-            {
-                'in':{'column':'json_col'},
-                'out':{'success':True, 'unexpected_index_list':[], 'unexpected_list':[]}},
-            {
-                'in':{'column':'not_json'},
-                'out':{'success':False, 'unexpected_index_list':[0,1,2,3], 'unexpected_list':[4,5,6,7]}},
-            {
-                'in':{'column':'py_dict'},
-                'out':{'success':False, 'unexpected_index_list':[0,1,2,3], 'unexpected_list':[{'a':1, 'out':1},{'b':2, 'out':4},{'c':3, 'out':9},{'d':4, 'out':16}]}},
-            {
-                'in':{'column':'most'},
-                'out':{'success':False, 'unexpected_index_list':[3], 'unexpected_list':['d4']}},
-            {
-                'in':{'column':'most', 'mostly':.75},
-                'out':{'success':True, 'unexpected_index_list':[3], 'unexpected_list':['d4']}}
+        {
+            'in': {'column': 'json_col'},
+            'out': {'success': True, 'unexpected_index_list': [], 'unexpected_list':[]}},
+        {
+            'in': {'column': 'not_json'},
+            'out': {'success': False, 'unexpected_index_list': [0, 1, 2, 3], 'unexpected_list':[4, 5, 6, 7]}},
+        {
+            'in': {'column': 'py_dict'},
+            'out': {'success': False, 'unexpected_index_list': [0, 1, 2, 3], 'unexpected_list':[{'a': 1, 'out': 1}, {'b': 2, 'out': 4}, {'c': 3, 'out': 9}, {'d': 4, 'out': 16}]}},
+        {
+            'in': {'column': 'most'},
+            'out': {'success': False, 'unexpected_index_list': [3], 'unexpected_list':['d4']}},
+        {
+            'in': {'column': 'most', 'mostly': .75},
+            'out': {'success': True, 'unexpected_index_list': [3], 'unexpected_list':['d4']}}
     ]
 
     for t in T:
         out = D.expect_column_values_to_be_json_parseable(**t['in'])
-        assert t['out']['success']==out['success']
-        assert t['out']['unexpected_index_list']==out['result']['unexpected_index_list']
-        assert t['out']['unexpected_list']==out['result']['unexpected_list']
+        assert t['out']['success'] == out['success']
+        assert t['out']['unexpected_index_list'] == out['result']['unexpected_index_list']
+        assert t['out']['unexpected_list'] == out['result']['unexpected_list']
 
 # def test_expect_column_values_to_match_json_schema(self):
 
@@ -183,31 +184,29 @@ def test_expectation_decorator_summary_mode():
     # print '&'*80
     # print json.dumps(df.expect_column_values_to_be_between('x', min_value=1, max_value=5, result_format="SUMMARY"), indent=2)
 
-    
-    exp_output={
-        "success" : False,
-        "result" : {
-            "element_count" : 10,
-            "missing_count" : 2,
-            "missing_percent" : .2,
-            "unexpected_count" : 3,
+    exp_output = {
+        "success": False,
+        "result": {
+            "element_count": 10,
+            "missing_count": 2,
+            "missing_percent": .2,
+            "unexpected_count": 3,
             "partial_unexpected_counts": [
                 {"value": 7.0,
                     "count": 2},
-                 {"value": 6.0,
+                {"value": 6.0,
                     "count": 1}
             ],
             "unexpected_percent": 0.3,
             "unexpected_percent_nonmissing": 0.375,
-            "partial_unexpected_list" : [6.0,7.0,7.0],
-            "partial_unexpected_index_list": [5,6,7],
+            "partial_unexpected_list": [6.0, 7.0, 7.0],
+            "partial_unexpected_index_list": [5, 6, 7],
         }
     }
     assert df.expect_column_values_to_be_between('x', min_value=1, max_value=5, result_format="SUMMARY")\
-    ==exp_output
-        
-        
-    exp_output={
+        == exp_output
+
+    exp_output = {
         'success': True,
         'result': {
             'observed_value': 4.375,
@@ -216,9 +215,10 @@ def test_expectation_decorator_summary_mode():
             'missing_percent': .2
         },
     }
-    
+
     assert df.expect_column_mean_to_be_between("x", 3, 7, result_format="SUMMARY")\
-    ==exp_output
+        == exp_output
+
 
 def test_positional_arguments():
 
@@ -228,50 +228,52 @@ def test_positional_arguments():
         'z':[None,'a','b','c','abc']
     })
     df.set_default_expectation_argument('result_format', 'COMPLETE')
-    
-    exp_output={'success':True, 'result': {'observed_value': 5, 'element_count': 5,
-            'missing_count': 0,
-            'missing_percent': 0.0}}
 
-    assert df.expect_column_mean_to_be_between('x',4,6)==exp_output
-        
+    exp_output = {'success': True, 'result': {'observed_value': 5, 'element_count': 5,
+                                              'missing_count': 0,
+                                              'missing_percent': 0.0}}
 
-    out = df.expect_column_values_to_be_between('y',1,6)
-    t = {'out': {'success':False, 'unexpected_list':[8,10], 'unexpected_index_list': [3,4]}}
+    assert df.expect_column_mean_to_be_between('x', 4, 6) == exp_output
+
+    out = df.expect_column_values_to_be_between('y', 1, 6)
+    t = {'out': {'success': False, 'unexpected_list': [
+        8, 10], 'unexpected_index_list': [3, 4]}}
     if 'out' in t:
-        assert t['out']['success']==out['success']
+        assert t['out']['success'] == out['success']
         if 'unexpected_index_list' in t['out']:
-            assert t['out']['unexpected_index_list']==out['result']['unexpected_index_list']
+            assert t['out']['unexpected_index_list'] == out['result']['unexpected_index_list']
         if 'unexpected_list' in t['out']:
-            assert t['out']['unexpected_list']==out['result']['unexpected_list']
+            assert t['out']['unexpected_list'] == out['result']['unexpected_list']
 
-    out = df.expect_column_values_to_be_between('y',1,6,mostly=.5)
-    t = {'out': {'success':True, 'unexpected_list':[8,10], 'unexpected_index_list':[3,4]}}
+    out = df.expect_column_values_to_be_between('y', 1, 6, mostly=.5)
+    t = {'out': {'success': True, 'unexpected_list': [
+        8, 10], 'unexpected_index_list': [3, 4]}}
     if 'out' in t:
-        assert t['out']['success']==out['success']
+        assert t['out']['success'] == out['success']
         if 'unexpected_index_list' in t['out']:
-            assert t['out']['unexpected_index_list']==out['result']['unexpected_index_list']
+            assert t['out']['unexpected_index_list'] == out['result']['unexpected_index_list']
         if 'unexpected_list' in t['out']:
-            assert t['out']['unexpected_list']==out['result']['unexpected_list']
+            assert t['out']['unexpected_list'] == out['result']['unexpected_list']
 
-    out = df.expect_column_values_to_be_in_set('z',['a','b','c'])
-    t = {'out': {'success':False, 'unexpected_list':['abc'], 'unexpected_index_list':[4]}}
+    out = df.expect_column_values_to_be_in_set('z', ['a', 'b', 'c'])
+    t = {'out': {'success': False, 'unexpected_list': [
+        'abc'], 'unexpected_index_list': [4]}}
     if 'out' in t:
-        assert t['out']['success']==out['success']
+        assert t['out']['success'] == out['success']
         if 'unexpected_index_list' in t['out']:
-            assert t['out']['unexpected_index_list']==out['result']['unexpected_index_list']
+            assert t['out']['unexpected_index_list'] == out['result']['unexpected_index_list']
         if 'unexpected_list' in t['out']:
-            assert t['out']['unexpected_list']==out['result']['unexpected_list']
+            assert t['out']['unexpected_list'] == out['result']['unexpected_list']
 
-    out = df.expect_column_values_to_be_in_set('z',['a','b','c'],mostly=.5)
-    t = {'out': {'success':True, 'unexpected_list':['abc'], 'unexpected_index_list':[4]}}
+    out = df.expect_column_values_to_be_in_set('z', ['a', 'b', 'c'], mostly=.5)
+    t = {'out': {'success': True, 'unexpected_list': [
+        'abc'], 'unexpected_index_list': [4]}}
     if 'out' in t:
-        assert t['out']['success']==out['success']
+        assert t['out']['success'] == out['success']
         if 'unexpected_index_list' in t['out']:
-            assert t['out']['unexpected_index_list']==out['result']['unexpected_index_list']
+            assert t['out']['unexpected_index_list'] == out['result']['unexpected_index_list']
         if 'unexpected_list' in t['out']:
-            assert t['out']['unexpected_list']==out['result']['unexpected_list']
-
+            assert t['out']['unexpected_list'] == out['result']['unexpected_list']
 
 
 def test_result_format_argument_in_decorators():
@@ -282,53 +284,66 @@ def test_result_format_argument_in_decorators():
     })
     df.set_default_expectation_argument('result_format', 'COMPLETE')
 
-    #Test explicit Nones in result_format
-    
-    exp_output={'success':True, 'result': {'observed_value': 5, 'element_count': 5,
-        'missing_count': 0,
-        'missing_percent': 0.0
-        }}
-    assert df.expect_column_mean_to_be_between('x',4,6, result_format=None)\
-    ==exp_output
-        
-    exp_output={'result': {'element_count': 5,
-                'missing_count': 0,
-                'missing_percent': 0.0,
-                'partial_unexpected_counts': [{'count': 1, 'value': 8},
-                                                      {'count': 1, 'value': 10}],
-                'partial_unexpected_index_list': [3, 4],
-                'partial_unexpected_list': [8, 10],
-                'unexpected_count': 2,
-                'unexpected_index_list': [3, 4],
-                'unexpected_list': [8, 10],
-                'unexpected_percent': 0.4,
-                'unexpected_percent_nonmissing': 0.4},
-         'success': False}
+    # Test explicit Nones in result_format
 
-    assert df.expect_column_values_to_be_between('y',1,6, result_format=None)\
-    ==exp_output
+    exp_output = {'success': True, 'result': {'observed_value': 5, 'element_count': 5,
+                                              'missing_count': 0,
+                                              'missing_percent': 0.0
+                                              }}
+    assert df.expect_column_mean_to_be_between('x', 4, 6, result_format=None)\
+        == exp_output
 
-    #Test unknown output format
+    exp_output = {'result': {'element_count': 5,
+                             'missing_count': 0,
+                             'missing_percent': 0.0,
+                             'partial_unexpected_counts': [{'count': 1, 'value': 8},
+                                                           {'count': 1, 'value': 10}],
+                             'partial_unexpected_index_list': [3, 4],
+                             'partial_unexpected_list': [8, 10],
+                             'unexpected_count': 2,
+                             'unexpected_index_list': [3, 4],
+                             'unexpected_list': [8, 10],
+                             'unexpected_percent': 0.4,
+                             'unexpected_percent_nonmissing': 0.4},
+                  'success': False}
+
+    assert df.expect_column_values_to_be_between('y', 1, 6, result_format=None)\
+        == exp_output
+
+    # Test unknown output format
     with pytest.raises(ValueError):
-        df.expect_column_values_to_be_between('y',1,6, result_format="QUACK")
+        df.expect_column_values_to_be_between('y', 1, 6, result_format="QUACK")
 
     with pytest.raises(ValueError):
-        df.expect_column_mean_to_be_between('x',4,6, result_format="QUACK")
-        
+        df.expect_column_mean_to_be_between('x', 4, 6, result_format="QUACK")
+
 
 def test_from_pandas():
     pd_df = pd.DataFrame({
-        'x':[1,3,5,7,9],
-        'y':[2,4,6,8,10],
-        'z':[None,'a','b','c','abc']
+        'x': [1, 3, 5, 7, 9],
+        'y': [2, 4, 6, 8, 10],
+        'z': [None, 'a', 'b', 'c', 'abc']
     })
 
     ge_df = ge.from_pandas(pd_df)
     assert isinstance(ge_df, ge.dataset.Dataset)
-    assert list(ge_df.columns)==['x', 'y', 'z']
-    assert list(ge_df['x'])==list(pd_df['x'])
-    assert list(ge_df['y'])==list(pd_df['y'])
-    assert list(ge_df['z'])==list(pd_df['z'])
+    assert list(ge_df.columns) == ['x', 'y', 'z']
+    assert list(ge_df['x']) == list(pd_df['x'])
+    assert list(ge_df['y']) == list(pd_df['y'])
+    assert list(ge_df['z']) == list(pd_df['z'])
+
+    # make an empty subclass to test dataset_class argument
+    class CustomPandasDataset(ge.dataset.PandasDataset):
+        pass
+
+    ge_df_custom = ge.from_pandas(pd_df, dataset_class=CustomPandasDataset)
+
+    assert not isinstance(ge_df, CustomPandasDataset)
+    assert isinstance(ge_df_custom, CustomPandasDataset)
+    assert list(ge_df_custom.columns)==['x', 'y', 'z']
+    assert list(ge_df_custom['x'])==list(pd_df['x'])
+    assert list(ge_df_custom['y'])==list(pd_df['y'])
+    assert list(ge_df_custom['z'])==list(pd_df['z'])
 
 
 def test_from_pandas_expectations_config():
@@ -337,7 +352,8 @@ def test_from_pandas_expectations_config():
         with open(file) as f:
             return json.load(f)
 
-    my_expectations_config = load_ge_config("./tests/test_sets/titanic_expectations.json")
+    my_expectations_config = load_ge_config(
+        "./tests/test_sets/titanic_expectations.json")
 
     pd_df = pd.read_csv("./tests/test_sets/Titanic.csv")
     my_df = ge.from_pandas(pd_df, expectations_config=my_expectations_config)
@@ -346,8 +362,8 @@ def test_from_pandas_expectations_config():
 
     results = my_df.validate(catch_exceptions=False)
 
-    expected_results = load_ge_config("./tests/test_sets/expected_results_20180303.json")
-
+    expected_results = load_ge_config(
+        "./tests/test_sets/expected_results_20180303.json")
 
     assertDeepAlmostEqual(results, expected_results)
 
@@ -569,7 +585,7 @@ def test_ge_pandas_sampling():
         {'expectation_type': 'expect_column_values_to_be_in_set',
          'kwargs': {'column': 'D', 'value_set': ['e', 'f', 'g', 'x']}}
     ]
-    assert samp1.find_expectations()==exp1
+    assert samp1.find_expectations() == exp1
 
 
 def test_ge_pandas_subsetting():
@@ -662,12 +678,12 @@ def test_ge_pandas_automatic_failure_removal():
          'kwargs': {'column': 'D', 'value_set': ['e', 'f', 'g', 'h']}}
     ]
     samp1 = df.sample(n=2)
-    assert samp1.find_expectations()==exp1
+    assert samp1.find_expectations() == exp1
 
     # Now check subsetting to verify that failing expectations are NOT
     # automatically dropped when subsetting.
     sub1 = df[['A', 'D']]
-    assert sub1.find_expectations()==exp1
+    assert sub1.find_expectations() == exp1
 
     # Set property/attribute so that failing expectations are
     # automatically removed when sampling or subsetting.
@@ -691,7 +707,7 @@ def test_ge_pandas_automatic_failure_removal():
     ]
 
     samp2 = df.sample(n=2)
-    assert samp2.find_expectations()==exp_samp
+    assert samp2.find_expectations() == exp_samp
 
     # Now check subsetting. In additional to the failure on column "C",
     # the expectations on column "B" now fail since column "B" doesn't
@@ -707,9 +723,7 @@ def test_ge_pandas_automatic_failure_removal():
         {'expectation_type': 'expect_column_values_to_be_in_set',
          'kwargs': {'column': 'D', 'value_set': ['e', 'f', 'g', 'h']}}
     ]
-    assert sub2.find_expectations()==exp_sub
-
-
+    assert sub2.find_expectations() == exp_sub
 
 
 def test_subclass_pandas_subset_retains_subclass():
@@ -718,7 +732,7 @@ def test_subclass_pandas_subset_retains_subclass():
 
         @ge.dataset.MetaPandasDataTable.column_map_expectation
         def expect_column_values_to_be_odd(self, column):
-            return column.map(lambda x: x % 2 )
+            return column.map(lambda x: x % 2)
 
         @ge.dataset.MetaPandasDataTable.column_map_expectation
         def expectation_that_crashes_on_sixes(self, column):
@@ -736,7 +750,6 @@ def test_subclass_pandas_subset_retains_subclass():
     df2 = df.sample(frac=0.5)
     assert type(df2) == type(df)
 
-
     def test_validate_map_expectation_on_categorical_column(self):
         """Map expectations should work on categorical columns"""
 
@@ -751,6 +764,7 @@ def test_subclass_pandas_subset_retains_subclass():
         out = D.expect_column_value_lengths_to_equal('cat_column_1', 7)
 
         self.assertEqual(out['success'], True)
+
 
 def test_pandas_deepcopy():
     import copy

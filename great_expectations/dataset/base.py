@@ -81,14 +81,14 @@ class Dataset(object):
             @wraps(func)
             def wrapper(self, *args, **kwargs):
 
-                #Get the name of the method
+                # Get the name of the method
                 method_name = func.__name__
 
                 # Combine all arguments into a single new "kwargs"
                 all_args = dict(zip(method_arg_names, args))
                 all_args.update(kwargs)
 
-                #Unpack display parameters; remove them from all_args if appropriate
+                # Unpack display parameters; remove them from all_args if appropriate
                 if "include_config" in kwargs:
                     include_config = kwargs["include_config"]
                     del all_args["include_config"]
@@ -128,15 +128,17 @@ class Dataset(object):
                 all_args = recursively_convert_to_json_serializable(all_args)
 
                 # Patch in PARAMETER args, and remove locally-supplied arguments
-                expectation_args = copy.deepcopy(all_args) # This will become the stored config
+                # This will become the stored config
+                expectation_args = copy.deepcopy(all_args)
 
                 if "evaluation_parameters" in self._expectations_config:
                     evaluation_args = self._build_evaluation_parameters(expectation_args,
-                                                                        self._expectations_config["evaluation_parameters"]) # This will be passed to the evaluation
+                                                                        self._expectations_config["evaluation_parameters"])  # This will be passed to the evaluation
                 else:
-                    evaluation_args = self._build_evaluation_parameters(expectation_args, None)
+                    evaluation_args = self._build_evaluation_parameters(
+                        expectation_args, None)
 
-                #Construct the expectation_config object
+                # Construct the expectation_config object
                 expectation_config = DotDict({
                     "expectation_type": method_name,
                     "kwargs": expectation_args
@@ -171,7 +173,8 @@ class Dataset(object):
                 self._append_expectation(expectation_config)
 
                 if include_config:
-                    return_obj["expectation_config"] = copy.deepcopy(expectation_config)
+                    return_obj["expectation_config"] = copy.deepcopy(
+                        expectation_config)
 
                 if catch_exceptions:
                     return_obj["exception_info"] = {
@@ -183,13 +186,14 @@ class Dataset(object):
                 # Add a "success" object to the config
                 expectation_config["success_on_last_run"] = return_obj["success"]
 
-                return_obj = recursively_convert_to_json_serializable(return_obj)
+                return_obj = recursively_convert_to_json_serializable(
+                    return_obj)
                 return return_obj
 
             return wrapper
 
         return outer_wrapper
-        
+
 
     def _initialize_expectations(self, config=None, name=None):
         """Instantiates `_expectations_config` as empty by default or with a specified expectation `config`.
@@ -212,33 +216,33 @@ class Dataset(object):
             #!!! Should validate the incoming config with jsonschema here
 
             # Copy the original so that we don't overwrite it by accident
-            ## Pandas incorrectly interprets this as an attempt to create a column and throws up a warning. Suppress it
-            ## since we are subclassing.
+            # Pandas incorrectly interprets this as an attempt to create a column and throws up a warning. Suppress it
+            # since we are subclassing.
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore", category=UserWarning)
                 self._expectations_config = DotDict(copy.deepcopy(config))
 
         else:
-            ## Pandas incorrectly interprets this as an attempt to create a column and throws up a warning. Suppress it
-            ## since we are subclassing.
+            # Pandas incorrectly interprets this as an attempt to create a column and throws up a warning. Suppress it
+            # since we are subclassing.
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore", category=UserWarning)
                 self._expectations_config = DotDict({
-                    "dataset_name" : name,
+                    "dataset_name": name,
                     "meta": {
                         "great_expectations.__version__": __version__
                     },
-                    "expectations" : []
+                    "expectations": []
                 })
 
-        ## Pandas incorrectly interprets this as an attempt to create a column and throws up a warning. Suppress it
-        ## since we are subclassing.
+        # Pandas incorrectly interprets this as an attempt to create a column and throws up a warning. Suppress it
+        # since we are subclassing.
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=UserWarning)
             self.default_expectation_args = {
-                "include_config" : False,
-                "catch_exceptions" : False,
-                "result_format" : 'BASIC',
+                "include_config": False,
+                "catch_exceptions": False,
+                "result_format": 'BASIC',
             }
 
     def _append_expectation(self, expectation_config):
@@ -259,14 +263,14 @@ class Dataset(object):
         """
         expectation_type = expectation_config['expectation_type']
 
-        #Test to ensure the new expectation is serializable.
-        #FIXME: If it's not, are we sure we want to raise an error?
-        #FIXME: Should we allow users to override the error?
-        #FIXME: Should we try to convert the object using something like recursively_convert_to_json_serializable?
+        # Test to ensure the new expectation is serializable.
+        # FIXME: If it's not, are we sure we want to raise an error?
+        # FIXME: Should we allow users to override the error?
+        # FIXME: Should we try to convert the object using something like recursively_convert_to_json_serializable?
         json.dumps(expectation_config)
 
-        #Drop existing expectations with the same expectation_type.
-        #For column_expectations, _append_expectation should only replace expectations
+        # Drop existing expectations with the same expectation_type.
+        # For column_expectations, _append_expectation should only replace expectations
         # where the expectation_type AND the column match
         #!!! This is good default behavior, but
         #!!!    it needs to be documented, and
@@ -276,7 +280,8 @@ class Dataset(object):
             column = expectation_config['kwargs']['column']
 
             self._expectations_config.expectations = [f for f in filter(
-                lambda exp: (exp['expectation_type'] != expectation_type) or ('column' in exp['kwargs'] and exp['kwargs']['column'] != column),
+                lambda exp: (exp['expectation_type'] != expectation_type) or (
+                    'column' in exp['kwargs'] and exp['kwargs']['column'] != column),
                 self._expectations_config.expectations
             )]
         else:
@@ -376,10 +381,10 @@ class Dataset(object):
         return rval
 
     def find_expectation_indexes(self,
-        expectation_type=None,
-        column=None,
-        expectation_kwargs=None
-    ):
+                                 expectation_type=None,
+                                 column=None,
+                                 expectation_kwargs=None
+                                 ):
         """Find matching expectations within _expectation_config.
         Args:
             expectation_type=None                : The name of the expectation type to be matched.
@@ -394,7 +399,8 @@ class Dataset(object):
             expectation_kwargs = {}
 
         if "column" in expectation_kwargs and column != None and column != expectation_kwargs["column"]:
-            raise ValueError("Conflicting column names in remove_expectation: %s and %s" % (column, expectation_kwargs["column"]))
+            raise ValueError("Conflicting column names in remove_expectation: %s and %s" % (
+                column, expectation_kwargs["column"]))
 
         if column != None:
             expectation_kwargs["column"] = column
@@ -405,7 +411,7 @@ class Dataset(object):
                 # if column == None or ('column' not in exp['kwargs']) or (exp['kwargs']['column'] == column) or (exp['kwargs']['column']==:
                 match = True
 
-                for k,v in expectation_kwargs.items():
+                for k, v in expectation_kwargs.items():
                     if k in exp['kwargs'] and exp['kwargs'][k] == v:
                         continue
                     else:
@@ -452,12 +458,12 @@ class Dataset(object):
         )
 
     def remove_expectation(self,
-        expectation_type=None,
-        column=None,
-        expectation_kwargs=None,
-        remove_multiple_matches=False,
-        dry_run=False,
-    ):
+                           expectation_type=None,
+                           column=None,
+                           expectation_kwargs=None,
+                           remove_multiple_matches=False,
+                           dry_run=False,
+                           ):
         """Remove matching expectation(s) from _expectation_config.
         Args:
             expectation_type=None                : The name of the expectation type to be matched.
@@ -488,15 +494,17 @@ class Dataset(object):
 
         elif len(match_indexes) > 1:
             if not remove_multiple_matches:
-                raise ValueError('Multiple expectations matched arguments. No expectations removed.')
+                raise ValueError(
+                    'Multiple expectations matched arguments. No expectations removed.')
             else:
 
                 if not dry_run:
-                    self._expectations_config.expectations = [i for j, i in enumerate(self._expectations_config.expectations) if j not in match_indexes]
+                    self._expectations_config.expectations = [i for j, i in enumerate(
+                        self._expectations_config.expectations) if j not in match_indexes]
                 else:
                     return self._copy_and_clean_up_expectations_from_indexes(match_indexes)
 
-        else: #Exactly one match
+        else:  # Exactly one match
             expectation = self._copy_and_clean_up_expectation(
                 self._expectations_config.expectations[match_indexes[0]]
             )
@@ -510,7 +518,6 @@ class Dataset(object):
                 else:
                     return expectation
 
-
     def discard_failing_expectations(self):
         res = self.validate(only_return_failures=True).get('results')
         if any(res):
@@ -518,7 +525,8 @@ class Dataset(object):
                 self.remove_expectation(expectation_type=item['expectation_config']['expectation_type'],
                                         expectation_kwargs=item['expectation_config']['kwargs'])
 #            print("WARNING: Removed %s expectations that were 'False'" % len(res))
-            warnings.warn("Removed %s expectations that were 'False'" % len(res))
+            warnings.warn(
+                "Removed %s expectations that were 'False'" % len(res))
 
     def get_default_expectation_arguments(self):
         """Fetch default expectation arguments for this dataset
@@ -591,10 +599,10 @@ class Dataset(object):
             new_expectations = []
 
             for expectation in expectations:
-                #Note: This is conservative logic.
-                #Instead of retaining expectations IFF success==True, it discard expectations IFF success==False.
-                #In cases where expectation["success"] is missing or None, expectations are *retained*.
-                #Such a case could occur if expectations were loaded from a config file and never run.
+                # Note: This is conservative logic.
+                # Instead of retaining expectations IFF success==True, it discard expectations IFF success==False.
+                # In cases where expectation["success"] is missing or None, expectations are *retained*.
+                # Such a case could occur if expectations were loaded from a config file and never run.
                 if "success_on_last_run" in expectation and expectation["success_on_last_run"] == False:
                     discards["failed_expectations"] += 1
                 else:
@@ -603,7 +611,7 @@ class Dataset(object):
             expectations = new_expectations
 
         for expectation in expectations:
-            #FIXME: Factor this out into a new function. The logic is duplicated in remove_expectation, which calls _copy_and_clean_up_expectation
+            # FIXME: Factor this out into a new function. The logic is duplicated in remove_expectation, which calls _copy_and_clean_up_expectation
             if "success_on_last_run" in expectation:
                 del expectation["success_on_last_run"]
 
@@ -622,7 +630,6 @@ class Dataset(object):
                     del expectation["kwargs"]["catch_exceptions"]
                     discards["catch_exceptions"] += 1
 
-
         if not suppress_warnings:
             """
 WARNING: get_expectations_config discarded
@@ -635,7 +642,8 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             if any([discard_failed_expectations, discard_result_format_kwargs, discard_include_config_kwargs, discard_catch_exceptions_kwargs]):
                 print ("WARNING: get_expectations_config discarded")
                 if discard_failed_expectations:
-                    print ("\t%d failing expectations" % discards["failed_expectations"])
+                    print("\t%d failing expectations" %
+                          discards["failed_expectations"])
                 if discard_result_format_kwargs:
                     print ("\t%d result_format kwargs" % discards["result_format"])
                 if discard_include_config_kwargs:
@@ -681,8 +689,8 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                   suppressed.
 
         """
-        if filepath==None:
-            #FIXME: Fetch the proper filepath from the project config
+        if filepath == None:
+            # FIXME: Fetch the proper filepath from the project config
             pass
 
         expectations_config = self.get_expectations_config(
@@ -777,19 +785,24 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         # Warn if our version is different from the version in the configuration
         try:
             if expectations_config['meta']['great_expectations.__version__'] != __version__:
-                warnings.warn("WARNING: This configuration object was built using a different version of great_expectations than is currently validating it.")
+                warnings.warn(
+                    "WARNING: This configuration object was built using a different version of great_expectations than is currently validating it.")
         except KeyError:
-            warnings.warn("WARNING: No great_expectations version found in configuration object.")
+            warnings.warn(
+                "WARNING: No great_expectations version found in configuration object.")
 
         for expectation in expectations_config['expectations']:
             try:
-                expectation_method = getattr(self, expectation['expectation_type'])
+                expectation_method = getattr(
+                    self, expectation['expectation_type'])
 
                 if result_format is not None:
-                    expectation['kwargs'].update({"result_format": result_format})
+                    expectation['kwargs'].update(
+                        {"result_format": result_format})
 
                 # A missing parameter should raise a KeyError
-                evaluation_args = self._build_evaluation_parameters(expectation['kwargs'], evaluation_parameters)
+                evaluation_args = self._build_evaluation_parameters(
+                    expectation['kwargs'], evaluation_parameters)
 
                 result = expectation_method(
                     catch_exceptions=catch_exceptions,
@@ -813,7 +826,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                 else:
                     raise(err)
 
-            #if include_config:
+            # if include_config:
             result["expectation_config"] = copy.deepcopy(expectation)
 
             # Add an empty exception_info object if no exception was caught
@@ -831,7 +844,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         if only_return_failures:
             abbrev_results = []
             for exp in results:
-                if exp["success"]==False:
+                if exp["success"] == False:
                     abbrev_results.append(exp)
             results = abbrev_results
 
@@ -879,7 +892,8 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         if 'evaluation_parameters' not in self._expectations_config:
             self._expectations_config['evaluation_parameters'] = {}
 
-        self._expectations_config['evaluation_parameters'].update({parameter_name: parameter_value})
+        self._expectations_config['evaluation_parameters'].update(
+            {parameter_name: parameter_value})
 
     def _build_evaluation_parameters(self, expectation_args, evaluation_parameters):
         """Build a dictionary of parameters to evaluate, using the provided evaluation_paramters,
@@ -896,16 +910,19 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                 # First, check to see whether an argument was supplied at runtime
                 # If it was, use that one, but remove it from the stored config
                 if "$PARAMETER." + value["$PARAMETER"] in value:
-                    evaluation_args[key] = evaluation_args[key]["$PARAMETER." + value["$PARAMETER"]]
-                    del expectation_args[key]["$PARAMETER." + value["$PARAMETER"]]
+                    evaluation_args[key] = evaluation_args[key]["$PARAMETER." +
+                                                                value["$PARAMETER"]]
+                    del expectation_args[key]["$PARAMETER." +
+                                              value["$PARAMETER"]]
                 elif evaluation_parameters is not None and value["$PARAMETER"] in evaluation_parameters:
                     evaluation_args[key] = evaluation_parameters[value['$PARAMETER']]
                 else:
-                    raise KeyError("No value found for $PARAMETER " + value["$PARAMETER"])
+                    raise KeyError(
+                        "No value found for $PARAMETER " + value["$PARAMETER"])
 
         return evaluation_args
-    
-    
+
+
     def _format_map_output(self,
         result_format, success,
         element_count, nonnull_count,
@@ -918,7 +935,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         In each case, the object returned has a different set of populated fields.
         See :ref:`result_format` for more information.
 
-        This function handles the logic for mapping those fields for column_map_expectations or 
+        This function handles the logic for mapping those fields for column_map_expectations or
         file_lines_map_expectations.
         """
 
@@ -969,11 +986,13 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                 {'value': key, 'count': value}
                 for key, value
                 in sorted(
-                    Counter(unexpected_list).most_common(result_format['partial_unexpected_count']),
+                    Counter(unexpected_list).most_common(
+                        result_format['partial_unexpected_count']),
                     key=lambda x: (-x[1], x[0]))
             ]
         except TypeError:
-            partial_unexpected_counts = ['partial_exception_counts requires a hashable type']
+            partial_unexpected_counts = [
+                'partial_exception_counts requires a hashable type']
 
         return_obj['result'].update(
             {
@@ -995,7 +1014,8 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         if result_format['result_format'] == 'COMPLETE':
             return return_obj
 
-        raise ValueError("Unknown result_format %s." % (result_format['result_format'],))
+        raise ValueError("Unknown result_format %s." %
+                         (result_format['result_format'],))
 
 
     def _calc_map_expectation_success(self, success_count, nonnull_count, mostly):
@@ -1032,11 +1052,11 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
 
 
-        
+
 class DataTable(Dataset):
     def __init__(self, *args, **kwargs):
         super(DataTable, self).__init__(*args, **kwargs)
-    
+
     @classmethod
     def column_map_expectation(cls, func):
         """Constructs an expectation using column-map semantics.
@@ -1088,7 +1108,7 @@ class DataTable(Dataset):
             for an example of a column_aggregate_expectation
         """
         raise NotImplementedError
-    
+
 
 
     ##### Iterative testing for custom expectations #####
@@ -1137,7 +1157,7 @@ class DataTable(Dataset):
             Check out :ref:`custom_expectations` for more information.
         """
 
-        new_function = self.column_map_expectation( function )
+        new_function = self.column_map_expectation(function)
         return new_function(self, *args, **kwargs)
 
     def test_column_aggregate_expectation_function(self, function, *args, **kwargs):
@@ -1158,15 +1178,15 @@ class DataTable(Dataset):
             Check out :ref:`custom_expectations` for more information.
         """
 
-        new_function = self.column_aggregate_expectation( function )
+        new_function = self.column_aggregate_expectation(function)
         return new_function(self, *args, **kwargs)
 
     ##### Table shape expectations #####
 
     def expect_column_to_exist(
-            self, column, column_index=None, result_format=None, include_config=False,
-            catch_exceptions=None, meta=None
-        ):
+        self, column, column_index=None, result_format=None, include_config=False,
+        catch_exceptions=None, meta=None
+    ):
         """Expect the specified column to exist.
 
         expect_column_to_exist is a :func:`expectation <great_expectations.dataset.base.Dataset.expectation>`, not a \
@@ -1204,9 +1224,9 @@ class DataTable(Dataset):
         raise NotImplementedError
 
     def expect_table_columns_to_match_ordered_list(self,
-            column_list,
-            result_format=None, include_config=False, catch_exceptions=None, meta=None
-        ):
+                                                   column_list,
+                                                   result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                                   ):
         """Expect the columns to exactly match a specified list.
 
         expect_table_columns_to_match_ordered_list is a :func:`expectation <great_expectations.dataset.base.DataSet.expectation>`, not a \
@@ -1241,10 +1261,10 @@ class DataTable(Dataset):
         raise NotImplementedError
 
     def expect_table_row_count_to_be_between(self,
-        min_value=0,
-        max_value=None,
-        result_format=None, include_config=False, catch_exceptions=None, meta=None
-    ):
+                                             min_value=0,
+                                             max_value=None,
+                                             result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                             ):
         """Expect the number of rows to be between two values.
 
         expect_table_row_count_to_be_between is a :func:`expectation <great_expectations.dataset.base.Dataset.expectation>`, \
@@ -1287,9 +1307,9 @@ class DataTable(Dataset):
         raise NotImplementedError
 
     def expect_table_row_count_to_equal(self,
-        value,
-        result_format=None, include_config=False, catch_exceptions=None, meta=None
-    ):
+                                        value,
+                                        result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                        ):
         """Expect the number of rows to equal a value.
 
         expect_table_row_count_to_equal is a basic :func:`expectation <great_expectations.dataset.base.Dataset.expectation>`, \
@@ -1327,10 +1347,10 @@ class DataTable(Dataset):
     ##### Missing values, unique values, and types #####
 
     def expect_column_values_to_be_unique(self,
-        column,
-        mostly=None,
-        result_format=None, include_config=False, catch_exceptions=None, meta=None
-    ):
+                                          column,
+                                          mostly=None,
+                                          result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                          ):
         """Expect each column value to be unique.
 
         This expectation detects duplicates. All duplicated values are counted as exceptions.
@@ -1371,10 +1391,10 @@ class DataTable(Dataset):
         raise NotImplementedError
 
     def expect_column_values_to_not_be_null(self,
-        column,
-        mostly=None,
-        result_format=None, include_config=False, catch_exceptions=None, meta=None
-    ):
+                                            column,
+                                            mostly=None,
+                                            result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                            ):
         """Expect column values to not be null.
 
         To be counted as an exception, values must be explicitly null or missing, such as a NULL in PostgreSQL or an np.NaN in pandas.
@@ -1418,10 +1438,10 @@ class DataTable(Dataset):
         raise NotImplementedError
 
     def expect_column_values_to_be_null(self,
-        column,
-        mostly=None,
-        result_format=None, include_config=False, catch_exceptions=None, meta=None
-    ):
+                                        column,
+                                        mostly=None,
+                                        result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                        ):
         """Expect column values to be null.
 
         expect_column_values_to_be_null is a :func:`column_map_expectation <great_expectations.dataset.base.Dataset.column_map_expectation>`.
@@ -1574,11 +1594,11 @@ class DataTable(Dataset):
     ##### Sets and ranges #####
 
     def expect_column_values_to_be_in_set(self,
-        column,
-        value_set,
-        mostly=None,
-        result_format=None, include_config=False, catch_exceptions=None, meta=None
-    ):
+                                          column,
+                                          value_set,
+                                          mostly=None,
+                                          result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                          ):
         """Expect each column value to be in a given set.
 
         For example:
@@ -1641,11 +1661,11 @@ class DataTable(Dataset):
         raise NotImplementedError
 
     def expect_column_values_to_not_be_in_set(self,
-        column,
-        value_set,
-        mostly=None,
-        result_format=None, include_config=False, catch_exceptions=None, meta=None
-    ):
+                                              column,
+                                              value_set,
+                                              mostly=None,
+                                              result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                              ):
         """Expect column entries to not be in the set.
 
         For example:
@@ -1707,14 +1727,14 @@ class DataTable(Dataset):
         raise NotImplementedError
 
     def expect_column_values_to_be_between(self,
-        column,
-        min_value=None,
-        max_value=None,
-        allow_cross_type_comparisons=None,
-        parse_strings_as_datetimes=None,
-        mostly=None,
-        result_format=None, include_config=False, catch_exceptions=None, meta=None
-    ):
+                                           column,
+                                           min_value=None,
+                                           max_value=None,
+                                           allow_cross_type_comparisons=None,
+                                           parse_strings_as_datetimes=None,
+                                           mostly=None,
+                                           result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                           ):
         """Expect column entries to be between a minimum value and a maximum value (inclusive).
 
         expect_column_values_to_be_between is a :func:`column_map_expectation <great_expectations.dataset.base.Dataset.column_map_expectation>`.
@@ -1766,12 +1786,12 @@ class DataTable(Dataset):
         raise NotImplementedError
 
     def expect_column_values_to_be_increasing(self,
-        column,
-        strictly=None,
-        parse_strings_as_datetimes=None,
-        mostly=None,
-        result_format=None, include_config=False, catch_exceptions=None, meta=None
-    ):
+                                              column,
+                                              strictly=None,
+                                              parse_strings_as_datetimes=None,
+                                              mostly=None,
+                                              result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                              ):
         """Expect column values to be increasing.
 
         By default, this expectation only works for numeric or datetime data.
@@ -1821,12 +1841,12 @@ class DataTable(Dataset):
         raise NotImplementedError
 
     def expect_column_values_to_be_decreasing(self,
-        column,
-        strictly=None,
-        parse_strings_as_datetimes=None,
-        mostly=None,
-        result_format=None, include_config=False, catch_exceptions=None, meta=None
-    ):
+                                              column,
+                                              strictly=None,
+                                              parse_strings_as_datetimes=None,
+                                              mostly=None,
+                                              result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                              ):
         """Expect column values to be decreasing.
 
         By default, this expectation only works for numeric or datetime data.
@@ -1876,16 +1896,15 @@ class DataTable(Dataset):
         """
         raise NotImplementedError
 
-
     ##### String matching #####
 
     def expect_column_value_lengths_to_be_between(self,
-        column,
-        min_value=None,
-        max_value=None,
-        mostly=None,
-        result_format=None, include_config=False, catch_exceptions=None, meta=None
-    ):
+                                                  column,
+                                                  min_value=None,
+                                                  max_value=None,
+                                                  mostly=None,
+                                                  result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                                  ):
         """Expect column entries to be strings with length between a minimum value and a maximum value (inclusive).
 
         This expectation only works for string-type values. Invoking it on ints or floats will raise a TypeError.
@@ -1936,11 +1955,11 @@ class DataTable(Dataset):
         raise NotImplementedError
 
     def expect_column_value_lengths_to_equal(self,
-        column,
-        value,
-        mostly=None,
-        result_format=None, include_config=False, catch_exceptions=None, meta=None
-    ):
+                                             column,
+                                             value,
+                                             mostly=None,
+                                             result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                             ):
         """Expect column entries to be strings with length equal to the provided value.
 
         This expectation only works for string-type values. Invoking it on ints or floats will raise a TypeError.
@@ -1983,11 +2002,11 @@ class DataTable(Dataset):
         """
 
     def expect_column_values_to_match_regex(self,
-        column,
-        regex,
-        mostly=None,
-        result_format=None, include_config=False, catch_exceptions=None, meta=None
-    ):
+                                            column,
+                                            regex,
+                                            mostly=None,
+                                            result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                            ):
         """Expect column entries to be strings that match a given regular expression. Valid matches can be found \
         anywhere in the string, for example "[at]+" will identify the following strings as expected: "cat", "hat", \
         "aa", "a", and "t", and the following strings as unexpected: "fish", "dog".
@@ -2032,11 +2051,11 @@ class DataTable(Dataset):
         raise NotImplementedError
 
     def expect_column_values_to_not_match_regex(self,
-        column,
-        regex,
-        mostly=None,
-        result_format=None, include_config=False, catch_exceptions=None, meta=None
-    ):
+                                                column,
+                                                regex,
+                                                mostly=None,
+                                                result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                                ):
         """Expect column entries to be strings that do NOT match a given regular expression. The regex must not match \
         any portion of the provided string. For example, "[at]+" would identify the following strings as expected: \
         "fish", "dog", and the following as unexpected: "cat", "hat".
@@ -2081,12 +2100,12 @@ class DataTable(Dataset):
         raise NotImplementedError
 
     def expect_column_values_to_match_regex_list(self,
-        column,
-        regex_list,
-        match_on="any",
-        mostly=None,
-        result_format=None, include_config=False, catch_exceptions=None, meta=None
-    ):
+                                                 column,
+                                                 regex_list,
+                                                 match_on="any",
+                                                 mostly=None,
+                                                 result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                                 ):
         """Expect the column entries to be strings that can be matched to either any of or all of a list of regular expressions.
         Matches can be anywhere in the string.
 
@@ -2134,8 +2153,8 @@ class DataTable(Dataset):
         raise NotImplementedError
 
     def expect_column_values_to_not_match_regex_list(self, column, regex_list,
-                                                mostly=None,
-                                                result_format=None, include_config=False, catch_exceptions=None, meta=None):
+                                                     mostly=None,
+                                                     result_format=None, include_config=False, catch_exceptions=None, meta=None):
         """Expect the column entries to be strings that do not match any of a list of regular expressions. Matches can \
         be anywhere in the string.
 
@@ -2181,11 +2200,11 @@ class DataTable(Dataset):
     ##### Datetime and JSON parsing #####
 
     def expect_column_values_to_match_strftime_format(self,
-        column,
-        strftime_format,
-        mostly=None,
-        result_format=None, include_config=False, catch_exceptions=None, meta=None
-    ):
+                                                      column,
+                                                      strftime_format,
+                                                      mostly=None,
+                                                      result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                                      ):
         """Expect column entries to be strings representing a date or time with a given format.
 
         expect_column_values_to_match_strftime_format is a :func:`column_map_expectation <great_expectations.dataset.base.Dataset.column_map_expectation>`.
@@ -2225,10 +2244,10 @@ class DataTable(Dataset):
         raise NotImplementedError
 
     def expect_column_values_to_be_dateutil_parseable(self,
-        column,
-        mostly=None,
-        result_format=None, include_config=False, catch_exceptions=None, meta=None
-    ):
+                                                      column,
+                                                      mostly=None,
+                                                      result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                                      ):
         """Expect column entries to be parseable using dateutil.
 
         expect_column_values_to_be_dateutil_parseable is a :func:`column_map_expectation <great_expectations.dataset.base.Dataset.column_map_expectation>`.
@@ -2265,10 +2284,10 @@ class DataTable(Dataset):
         raise NotImplementedError
 
     def expect_column_values_to_be_json_parseable(self,
-        column,
-        mostly=None,
-        result_format=None, include_config=False, catch_exceptions=None, meta=None
-    ):
+                                                  column,
+                                                  mostly=None,
+                                                  result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                                  ):
         """Expect column entries to be data written in JavaScript Object Notation.
 
         expect_column_values_to_be_json_parseable is a :func:`column_map_expectation <great_expectations.dataset.base.Dataset.column_map_expectation>`.
@@ -2308,11 +2327,11 @@ class DataTable(Dataset):
         raise NotImplementedError
 
     def expect_column_values_to_match_json_schema(self,
-        column,
-        json_schema,
-        mostly=None,
-        result_format=None, include_config=False, catch_exceptions=None, meta=None
-    ):
+                                                  column,
+                                                  json_schema,
+                                                  mostly=None,
+                                                  result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                                  ):
         """Expect column entries to be JSON objects matching a given JSON schema.
 
         expect_column_values_to_match_json_schema is a :func:`column_map_expectation <great_expectations.dataset.base.Dataset.column_map_expectation>`.
@@ -2430,11 +2449,11 @@ class DataTable(Dataset):
         raise NotImplementedError
 
     def expect_column_mean_to_be_between(self,
-        column,
-        min_value=None,
-        max_value=None,
-        result_format=None, include_config=False, catch_exceptions=None, meta=None
-    ):
+                                         column,
+                                         min_value=None,
+                                         max_value=None,
+                                         result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                         ):
         """Expect the column mean to be between a minimum value and a maximum value (inclusive).
 
         expect_column_mean_to_be_between is a :func:`column_aggregate_expectation <great_expectations.dataset.base.Dataset.column_aggregate_expectation>`.
@@ -2486,11 +2505,11 @@ class DataTable(Dataset):
         raise NotImplementedError
 
     def expect_column_median_to_be_between(self,
-        column,
-        min_value=None,
-        max_value=None,
-        result_format=None, include_config=False, catch_exceptions=None, meta=None
-    ):
+                                           column,
+                                           min_value=None,
+                                           max_value=None,
+                                           result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                           ):
         """Expect the column median to be between a minimum value and a maximum value.
 
         expect_column_median_to_be_between is a :func:`column_aggregate_expectation <great_expectations.dataset.base.Dataset.column_aggregate_expectation>`.
@@ -2543,11 +2562,11 @@ class DataTable(Dataset):
         raise NotImplementedError
 
     def expect_column_stdev_to_be_between(self,
-        column,
-        min_value=None,
-        max_value=None,
-        result_format=None, include_config=False, catch_exceptions=None, meta=None
-    ):
+                                          column,
+                                          min_value=None,
+                                          max_value=None,
+                                          result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                          ):
         """Expect the column standard deviation to be between a minimum value and a maximum value.
 
         expect_column_stdev_to_be_between is a :func:`column_aggregate_expectation <great_expectations.dataset.base.Dataset.column_aggregate_expectation>`.
@@ -2599,11 +2618,11 @@ class DataTable(Dataset):
         raise NotImplementedError
 
     def expect_column_unique_value_count_to_be_between(self,
-        column,
-        min_value=None,
-        max_value=None,
-        result_format=None, include_config=False, catch_exceptions=None, meta=None
-    ):
+                                                       column,
+                                                       min_value=None,
+                                                       max_value=None,
+                                                       result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                                       ):
         """Expect the number of unique values to be between a minimum value and a maximum value.
 
         expect_column_unique_value_count_to_be_between is a :func:`column_aggregate_expectation <great_expectations.dataset.base.Dataset.column_aggregate_expectation>`.
@@ -2654,11 +2673,11 @@ class DataTable(Dataset):
         raise NotImplementedError
 
     def expect_column_proportion_of_unique_values_to_be_between(self,
-        column,
-        min_value=0,
-        max_value=1,
-        result_format=None, include_config=False, catch_exceptions=None, meta=None
-    ):
+                                                                column,
+                                                                min_value=0,
+                                                                max_value=1,
+                                                                result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                                                ):
         """Expect the proportion of unique values to be between a minimum value and a maximum value.
 
         For example, in a column containing [1, 2, 2, 3, 3, 3, 4, 4, 4, 4], there are 4 unique values and 10 total \
@@ -2712,11 +2731,11 @@ class DataTable(Dataset):
         raise NotImplementedError
 
     def expect_column_most_common_value_to_be_in_set(self,
-        column,
-        value_set,
-        ties_okay=None,
-        result_format=None, include_config=False, catch_exceptions=None, meta=None
-    ):
+                                                     column,
+                                                     value_set,
+                                                     ties_okay=None,
+                                                     result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                                     ):
         """Expect the most common value to be within the designated value set
 
         expect_column_most_common_value_to_be_in_set is a :func:`column_aggregate_expectation <great_expectations.dataset.base.Dataset.column_aggregate_expectation>`.
@@ -2767,11 +2786,11 @@ class DataTable(Dataset):
         raise NotImplementedError
 
     def expect_column_sum_to_be_between(self,
-        column,
-        min_value=None,
-        max_value=None,
-        result_format=None, include_config=False, catch_exceptions=None, meta=None
-    ):
+                                        column,
+                                        min_value=None,
+                                        max_value=None,
+                                        result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                        ):
         """Expect the column to sum to be between an min and max value
 
         expect_column_sum_to_be_between is a :func:`column_aggregate_expectation <great_expectations.dataset.base.Dataset.column_aggregate_expectation>`.
@@ -2821,13 +2840,13 @@ class DataTable(Dataset):
         raise NotImplementedError
 
     def expect_column_min_to_be_between(self,
-        column,
-        min_value=None,
-        max_value=None,
-        parse_strings_as_datetimes=None,
-        output_strftime_format=None,
-        result_format=None, include_config=False, catch_exceptions=None, meta=None
-    ):
+                                        column,
+                                        min_value=None,
+                                        max_value=None,
+                                        parse_strings_as_datetimes=None,
+                                        output_strftime_format=None,
+                                        result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                        ):
         """Expect the column to sum to be between an min and max value
 
         expect_column_min_to_be_between is a :func:`column_aggregate_expectation <great_expectations.dataset.base.Dataset.column_aggregate_expectation>`.
@@ -2883,13 +2902,13 @@ class DataTable(Dataset):
         raise NotImplementedError
 
     def expect_column_max_to_be_between(self,
-        column,
-        min_value=None,
-        max_value=None,
-        parse_strings_as_datetimes=None,
-        output_strftime_format=None,
-        result_format=None, include_config=False, catch_exceptions=None, meta=None
-    ):
+                                        column,
+                                        min_value=None,
+                                        max_value=None,
+                                        parse_strings_as_datetimes=None,
+                                        output_strftime_format=None,
+                                        result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                        ):
         """Expect the column max to be between an min and max value
 
         expect_column_max_to_be_between is a :func:`column_aggregate_expectation <great_expectations.dataset.base.Dataset.column_aggregate_expectation>`.
@@ -2944,14 +2963,14 @@ class DataTable(Dataset):
         """
         raise NotImplementedError
 
-    ### Distributional expectations
+    # Distributional expectations
     def expect_column_chisquare_test_p_value_to_be_greater_than(self,
-        column,
-        partition_object=None,
-        p=0.05,
-        tail_weight_holdout=0,
-        result_format=None, include_config=False, catch_exceptions=None, meta=None
-    ):
+                                                                column,
+                                                                partition_object=None,
+                                                                p=0.05,
+                                                                tail_weight_holdout=0,
+                                                                result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                                                ):
         """Expect column values to be distributed similarly to the provided categorical partition. \
 
         This expectation compares categorical distributions using a Chi-squared test. \
@@ -3015,13 +3034,13 @@ class DataTable(Dataset):
         raise NotImplementedError
 
     def expect_column_bootstrapped_ks_test_p_value_to_be_greater_than(self,
-        column,
-        partition_object=None,
-        p=0.05,
-        bootstrap_samples=None,
-        bootstrap_sample_size=None,
-        result_format=None, include_config=False, catch_exceptions=None, meta=None
-    ):
+                                                                      column,
+                                                                      partition_object=None,
+                                                                      p=0.05,
+                                                                      bootstrap_samples=None,
+                                                                      bootstrap_sample_size=None,
+                                                                      result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                                                      ):
         """Expect column values to be distributed similarly to the provided continuous partition. This expectation \
         compares continuous distributions using a bootstrapped Kolmogorov-Smirnov test. It returns `success=True` if \
         values in the column match the distribution of the provided partition.
@@ -3100,12 +3119,12 @@ class DataTable(Dataset):
         raise NotImplementedError
 
     def expect_column_kl_divergence_to_be_less_than(self,
-        column,
-        partition_object=None,
-        threshold=None,
-        tail_weight_holdout=0,
-        internal_weight_holdout=0,
-        result_format=None, include_config=False, catch_exceptions=None, meta=None):
+                                                    column,
+                                                    partition_object=None,
+                                                    threshold=None,
+                                                    tail_weight_holdout=0,
+                                                    internal_weight_holdout=0,
+                                                    result_format=None, include_config=False, catch_exceptions=None, meta=None):
         """Expect the Kulback-Leibler (KL) divergence (relative entropy) of the specified column with respect to the \
         partition object to be lower than the provided threshold.
 
@@ -3196,10 +3215,10 @@ class DataTable(Dataset):
                 with weight zero in the partition_object.
                 * If tail_weight_holdout is specified, that value will be appended to the tails of the bins \
                 ((-Infinity, min(bins)) and (max(bins), Infinity).
-                
+
           If relative entropy/kl divergence goes to infinity for any of the reasons mentioned above, the observed value\
           will be set to None. This is because inf, -inf, Nan, are not json serializable and cause some json parsers to\
-          crash when encountered. The python None token will be serialized to null in json. 
+          crash when encountered. The python None token will be serialized to null in json.
 
         See also:
             expect_column_chisquare_test_p_value_to_be_greater_than
@@ -3211,11 +3230,11 @@ class DataTable(Dataset):
     ### Column pairs ###
 
     def expect_column_pair_values_to_be_equal(self,
-        column_A,
-        column_B,
-        ignore_row_if="both_values_are_missing",
-        result_format=None, include_config=False, catch_exceptions=None, meta=None
-    ):
+                                              column_A,
+                                              column_B,
+                                              ignore_row_if="both_values_are_missing",
+                                              result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                              ):
         """
         Expect the values in column A to be the same as column B.
 
@@ -3250,14 +3269,14 @@ class DataTable(Dataset):
         raise NotImplementedError
 
     def expect_column_pair_values_A_to_be_greater_than_B(self,
-        column_A,
-        column_B,
-        or_equal=None,
-        parse_strings_as_datetimes=None,
-        allow_cross_type_comparisons=None,
-        ignore_row_if="both_values_are_missing",
-        result_format=None, include_config=False, catch_exceptions=None, meta=None
-    ):
+                                                         column_A,
+                                                         column_B,
+                                                         or_equal=None,
+                                                         parse_strings_as_datetimes=None,
+                                                         allow_cross_type_comparisons=None,
+                                                         ignore_row_if="both_values_are_missing",
+                                                         result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                                         ):
         """
         Expect values in column A to be greater than column B.
 
@@ -3296,14 +3315,13 @@ class DataTable(Dataset):
         """
         raise NotImplementedError
 
-
     def expect_column_pair_values_to_be_in_set(self,
-        column_A,
-        column_B,
-        value_pairs_set,
-        ignore_row_if="both_values_are_missing",
-        result_format=None, include_config=False, catch_exceptions=None, meta=None
-    ):
+                                               column_A,
+                                               column_B,
+                                               value_pairs_set,
+                                               ignore_row_if="both_values_are_missing",
+                                               result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                               ):
         """
         Expect paired values from columns A and B to belong to a set of valid pairs.
 
@@ -3337,13 +3355,13 @@ class DataTable(Dataset):
 
         """
         raise NotImplementedError
-        
-        
-    
+
+
+
 class DataFile(Dataset):
     @classmethod
     def file_lines_map_expectation(cls, func):
-        
+
         """Constructs an expectation using file lines map semantics.
 
         The file_lines_map_expectations decorator handles boilerplate issues surrounding the common pattern of \
@@ -3363,42 +3381,42 @@ class DataFile(Dataset):
             for an example of a file_lines_map_expectation
         """
         raise NotImplementedError
-        
-        
-        
-        
+
+
+
+
     def expect_file_line_regex_match_count_to_equal(self,regex, lines=None,expected_count=0, skip=None,
-                                                mostly=None, result_format=None, 
+                                                mostly=None, result_format=None,
                                                 include_config=False,catch_exceptions=None,meta=None):
         """
         Expect the number of times a regular expression appears on each line of a file to equal some
         expected count
-        
-        Args: regex: 
-            A string that can be compiled as valid regular expression 
-        
+
+        Args: regex:
+            A string that can be compiled as valid regular expression
+
         Keyword Args:
             lines: \
                 An empty variable that recieves the file lines from the file_lines_map_expectation method.
-                It doesn't matter what the user gives for this value as it will be replaced with the lines 
+                It doesn't matter what the user gives for this value as it will be replaced with the lines
                 of the file by file_lines_map_expecation. It is recommended the user ignore this argument and leave
                 it at its default.
-            
+
             skip (nonnegative integer): \
-                Integer specifying the first lines in the file the method should skip before assessing 
+                Integer specifying the first lines in the file the method should skip before assessing
                 expectations
-            
+
             expected_count (None or nonnegative integer): \
-                Specifies the number of times regex is expected to appear on each line of the 
+                Specifies the number of times regex is expected to appear on each line of the
                 file
-            
-            
+
+
             mostly (None or number between 0 and 1): \
-            
-                Specifies an acceptable error for expectations. If the percentage of unexpected lines is 
-                less than mostly, the method still returns true even if all lines don't match the 
+
+                Specifies an acceptable error for expectations. If the percentage of unexpected lines is
+                less than mostly, the method still returns true even if all lines don't match the
                 expectation criteria.
-            
+
             result_format (str or None): \
                 Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
                 For more detail, see :ref:`result_format <result_format>`.
@@ -3411,218 +3429,218 @@ class DataFile(Dataset):
             meta (dict or None): \
                 A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
                 For more detail, see :ref:`meta`.
-                
+
         Returns:
-            
-            A JSON-serializable expectation result object.
-    
-            Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
-            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
-            
-        """
-        raise NotImplementedError
-        
-    def expect_file_line_regex_match_count_to_be_between(self,regex,lines=None, skip=None,
-                                                         expected_min_count=0, expected_max_count=None,
-                                                         mostly=None, result_format=None, include_config=False, 
-                                                         catch_exceptions=None, meta=None):
-        
-        """
-        Expect the number of times a regular expression appears on each line of a file to be between a
-        maximum and minimum value.
-        
-        Args: regex: 
-            A string that can be compiled as valid regular expression 
-        
-        Keyword Args:
-            lines: \
-                An empty variable that recieves the file lines from the file_lines_map_expectation method.
-                It doesn't matter what the user gives for this value as it will be replaced with the lines 
-                of the file by file_lines_map_expecation. It is recommended the user ignore this argument and leave
-                it at its default.
-            
-            skip (nonnegative integer): \
-                Integer specifying the first lines in the file the method should skip before assessing 
-                expectations
-            
-            expected_min_count (None or nonnegative integer): \
-                Specifies the minimum number of times regex is expected to appear on each line of the 
-                file
-            
-            expected_max_count (None or nonnegative integer): \
-               Specifies the maximum number of times regex is expected to appear on each line of the 
-               file
-            
-            mostly (None or number between 0 and 1): \
-            
-                Specifies an acceptable error for expectations. If the percentage of unexpected lines is 
-                less than mostly, the method still returns true even if all lines don't match the 
-                expectation criteria.
-            
-            result_format (str or None): \
-                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
-                For more detail, see :ref:`result_format <result_format>`.
-            include_config (boolean): \
-                If True, then include the expectation config as part of the result object. \
-                For more detail, see :ref:`include_config`.
-            catch_exceptions (boolean or None): \
-                If True, then catch exceptions and include them as part of the result object. \
-                For more detail, see :ref:`catch_exceptions`.
-            meta (dict or None): \
-                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
-                For more detail, see :ref:`meta`.
-                
-        Returns:
-            
+
             A JSON-serializable expectation result object.
 
             Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
-            
+
         """
         raise NotImplementedError
-        
-    def expect_file_hash_to_equal(self, value, hash_alg='md5', result_format=None, 
-                                                    include_config=False,catch_exceptions=None,meta=None):
+
+    def expect_file_line_regex_match_count_to_be_between(self,regex,lines=None, skip=None,
+                                                         expected_min_count=0, expected_max_count=None,
+                                                         mostly=None, result_format=None, include_config=False,
+                                                         catch_exceptions=None, meta=None):
+
         """
-        Expect computed file hash to equal some given value.
-        
-        Args:
-            value: A string to compare with the computed hash value
-        
-        Keyword Args: 
-            hash_alg (string):  Indicates the hash algorithm to use
-            
+        Expect the number of times a regular expression appears on each line of a file to be between a
+        maximum and minimum value.
+
+        Args: regex:
+            A string that can be compiled as valid regular expression
+
+        Keyword Args:
+            lines: \
+                An empty variable that recieves the file lines from the file_lines_map_expectation method.
+                It doesn't matter what the user gives for this value as it will be replaced with the lines
+                of the file by file_lines_map_expecation. It is recommended the user ignore this argument and leave
+                it at its default.
+
+            skip (nonnegative integer): \
+                Integer specifying the first lines in the file the method should skip before assessing
+                expectations
+
+            expected_min_count (None or nonnegative integer): \
+                Specifies the minimum number of times regex is expected to appear on each line of the
+                file
+
+            expected_max_count (None or nonnegative integer): \
+               Specifies the maximum number of times regex is expected to appear on each line of the
+               file
+
+            mostly (None or number between 0 and 1): \
+
+                Specifies an acceptable error for expectations. If the percentage of unexpected lines is
+                less than mostly, the method still returns true even if all lines don't match the
+                expectation criteria.
+
             result_format (str or None): \
                 Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
                 For more detail, see :ref:`result_format <result_format>`.
-                
             include_config (boolean): \
                 If True, then include the expectation config as part of the result object. \
                 For more detail, see :ref:`include_config`.
-                
             catch_exceptions (boolean or None): \
                 If True, then catch exceptions and include them as part of the result object. \
                 For more detail, see :ref:`catch_exceptions`.
-                
             meta (dict or None): \
                 A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
                 For more detail, see :ref:`meta`.
-                
+
+        Returns:
+
+            A JSON-serializable expectation result object.
+
+            Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+        """
+        raise NotImplementedError
+
+    def expect_file_hash_to_equal(self, value, hash_alg='md5', result_format=None,
+                                                    include_config=False,catch_exceptions=None,meta=None):
+        """
+        Expect computed file hash to equal some given value.
+
+        Args:
+            value: A string to compare with the computed hash value
+
+        Keyword Args:
+            hash_alg (string):  Indicates the hash algorithm to use
+
+            result_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`result_format <result_format>`.
+
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
+
         Returns:
             A JSON-serializable expectation result object.
 
         Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
         :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
-        
+
         """
         raise NotImplementedError
-        
-    def expect_file_size_to_be_between(self, minsize, maxsize,result_format=None, 
+
+    def expect_file_size_to_be_between(self, minsize, maxsize,result_format=None,
                                                     include_config=False,catch_exceptions=None,
                                                     meta=None):
         """
         Expect file size to be between a user specified maxsize and minsize.
-        
+
         Args:
             minsize(integer): minimum expected file size
             maxsize(integer): maximum expected file size
-        
-        Keyword Args: 
-            
+
+        Keyword Args:
+
             result_format (str or None): \
                 Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
                 For more detail, see :ref:`result_format <result_format>`.
-                
+
             include_config (boolean): \
                 If True, then include the expectation config as part of the result object. \
                 For more detail, see :ref:`include_config`.
-                
+
             catch_exceptions (boolean or None): \
                 If True, then catch exceptions and include them as part of the result object. \
                 For more detail, see :ref:`catch_exceptions`.
-                
+
             meta (dict or None): \
                 A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
                 For more detail, see :ref:`meta`.
-                
+
         Returns:
             A JSON-serializable expectation result object.
 
         Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
         :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
         """
-       
+
         raise NotImplementedError
-   
+
     def expect_file_to_exist(self,result_format=None,include_config=False,
                              catch_exceptions=None, meta=None):
-        
+
         """
         Checks to see if a file specified by the user actually exists
-        
-        
-        Keyword Args: 
-            
+
+
+        Keyword Args:
+
             result_format (str or None): \
                 Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
                 For more detail, see :ref:`result_format <result_format>`.
-                
+
             include_config (boolean): \
                 If True, then include the expectation config as part of the result object. \
                 For more detail, see :ref:`include_config`.
-                
+
             catch_exceptions (boolean or None): \
                 If True, then catch exceptions and include them as part of the result object. \
                 For more detail, see :ref:`catch_exceptions`.
-                
+
             meta (dict or None): \
                 A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
                 For more detail, see :ref:`meta`.
-                
+
         Returns:
             A JSON-serializable expectation result object.
 
         Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
         :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
         """
-        
+
         raise NotImplementedError
-        
+
     def expect_file_has_valid_table_header(self,regex,skip=None,
-                                           result_format=None, 
+                                           result_format=None,
                                            include_config=False,
                                            catch_exceptions=None,meta=None):
-        
+
         """
         Checks to see if table-like data file has unique column names
-        
-        
+
+
         Keyword Args:
             skip (nonnegative integer): \
-                Integer specifying the first lines in the file the method should skip before assessing 
+                Integer specifying the first lines in the file the method should skip before assessing
                 expectations
-            
+
             regex (string):
                 A string that can be compiled as valid regular expression. Used to specify the elements
                 of the table header (the column headers)
-                    
-            result_format (str or None): 
+
+            result_format (str or None):
                 Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
                 For more detail, see :ref:`result_format <result_format>`.
-                
+
             include_config (boolean): \
                 If True, then include the expectation config as part of the result object. \
                 For more detail, see :ref:`include_config`.
-                
+
             catch_exceptions (boolean or None): \
                 If True, then catch exceptions and include them as part of the result object. \
                 For more detail, see :ref:`catch_exceptions`.
-                
+
             meta (dict or None): \
                 A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
                 For more detail, see :ref:`meta`.
-                
+
         Returns:
             A JSON-serializable expectation result object.
 
@@ -3630,34 +3648,34 @@ class DataFile(Dataset):
         :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
         """
         raise NotImplementedError
-    
-    
+
+
     def expect_file_valid_json(self, schema=None,result_format=None,
-                               include_config=False,catch_exceptions=None, 
+                               include_config=False,catch_exceptions=None,
                                meta=None ):
-        
+
         """
         schema : string
             optional JSON schema file on which JSON data file is validated against
-            
-        result_format (str or None): 
+
+        result_format (str or None):
             Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
             For more detail, see :ref:`result_format <result_format>`.
-                
-        include_config (boolean): 
+
+        include_config (boolean):
             If True, then include the expectation config as part of the result object. \
             For more detail, see :ref:`include_config`.
-                
-        catch_exceptions (boolean or None): 
+
+        catch_exceptions (boolean or None):
             If True, then catch exceptions and include them as part of the result object. \
             For more detail, see :ref:`catch_exceptions`.
-                
-        meta (dict or None): 
-            A JSON-serializable dictionary (nesting allowed) that will 
+
+        meta (dict or None):
+            A JSON-serializable dictionary (nesting allowed) that will
             be included in the output without modification. \
-            
+
         For more detail, see :ref:`meta`.
-                
+
         Returns:
             A JSON-serializable expectation result object.
 
@@ -3665,14 +3683,14 @@ class DataFile(Dataset):
         :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
         """
         raise NotImplementedError
-        
-        
-        
-       
-            
-        
-    
-        
+
+
+
+
+
+
+
+
 ValidationStatistics = namedtuple("ValidationStatistics", [
     "evaluated_expectations",
     "successful_expectations",

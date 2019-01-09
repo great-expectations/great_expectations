@@ -28,11 +28,11 @@ class TestDataset(unittest.TestCase):
         self.assertEqual(
             D._expectations_config,
             {
-                "dataset_name" : None,
+                "dataset_name": None,
                 "meta": {
                     "great_expectations.__version__": ge.__version__
                 },
-                "expectations" : []
+                "expectations": []
                 # No longer expect autoinspection 20180920
                 # {
                 #     "expectation_type" : "expect_column_to_exist",
@@ -54,11 +54,11 @@ class TestDataset(unittest.TestCase):
         self.assertEqual(
             D.get_expectations_config(),
             {
-                "dataset_name" : None,
+                "dataset_name": None,
                 "meta": {
                     "great_expectations.__version__": ge.__version__
                 },
-                "expectations" : []
+                "expectations": []
                 # No longer expect autoinspection 20180920
                 # {
                 #     "expectation_type" : "expect_column_to_exist",
@@ -80,7 +80,8 @@ class TestDataset(unittest.TestCase):
             'z' : ['hello', 'jello', 'mello'],
         })
 
-        result = df.expect_column_median_to_be_between('x', 2, 2, meta={"notes": "This expectation is for lolz."})
+        result = df.expect_column_median_to_be_between(
+            'x', 2, 2, meta={"notes": "This expectation is for lolz."})
         k = 0
         self.assertEqual(result['success'], True)
         config = df.get_expectations_config()
@@ -92,16 +93,15 @@ class TestDataset(unittest.TestCase):
                     {"notes": "This expectation is for lolz."}
                 )
 
-        self.assertEqual(k,1)
+        self.assertEqual(k, 1)
 
-        #This should raise an error because meta isn't serializable.
+        # This should raise an error because meta isn't serializable.
         with self.assertRaises(Exception) as context:
-            df.expect_column_values_to_be_increasing("x", meta={"unserializable_array":np.array(range(10))})
+            df.expect_column_values_to_be_increasing(
+                "x", meta={"unserializable_array": np.array(range(10))})
 
-
-
-    #TODO: !!! Add tests for expectation and column_expectation
-    #TODO: !!! Add tests for save_expectation
+    # TODO: !!! Add tests for expectation and column_expectation
+    # TODO: !!! Add tests for save_expectation
 
     def test_set_default_expectation_argument(self):
         df = ge.dataset.PandasDataTable({
@@ -113,9 +113,9 @@ class TestDataset(unittest.TestCase):
         self.assertEqual(
             df.get_default_expectation_arguments(),
             {
-                "include_config" : False,
-                "catch_exceptions" : False,
-                "result_format" : 'BASIC',
+                "include_config": False,
+                "catch_exceptions": False,
+                "result_format": 'BASIC',
             }
         )
 
@@ -124,9 +124,9 @@ class TestDataset(unittest.TestCase):
         self.assertEqual(
             df.get_default_expectation_arguments(),
             {
-                "include_config" : False,
-                "catch_exceptions" : False,
-                "result_format" : 'SUMMARY',
+                "include_config": False,
+                "catch_exceptions": False,
+                "result_format": 'SUMMARY',
             }
         )
 
@@ -138,56 +138,57 @@ class TestDataset(unittest.TestCase):
             'y' : [1,2,5],
             'z' : ['hello', 'jello', 'mello'],
         })
-        df.expect_column_values_to_be_in_set('x', [1,2,4])
-        df.expect_column_values_to_be_in_set('y', [1,2,4], catch_exceptions=True, include_config=True)
+        df.expect_column_values_to_be_in_set('x', [1, 2, 4])
+        df.expect_column_values_to_be_in_set(
+            'y', [1, 2, 4], catch_exceptions=True, include_config=True)
         df.expect_column_values_to_match_regex('z', 'ello')
 
         ### First test set ###
 
         output_config = {
-          "expectations": [
-            # No longer expect autoinspection 20180920
-            # {
-            #   "expectation_type": "expect_column_to_exist",
-            #   "kwargs": {
-            #     "column": "x"
-            #   }
-            # },
-            # {
-            #   "expectation_type": "expect_column_to_exist",
-            #   "kwargs": {
-            #     "column": "y"
-            #   }
-            # },
-            # {
-            #   "expectation_type": "expect_column_to_exist",
-            #   "kwargs": {
-            #     "column": "z"
-            #   }
-            # },
-            {
-              "expectation_type": "expect_column_values_to_be_in_set",
-              "kwargs": {
-                "column": "x",
-                "value_set": [
-                  1,
-                  2,
-                  4
-                ]
-              }
-            },
-            {
-              "expectation_type": "expect_column_values_to_match_regex",
-              "kwargs": {
-                "column": "z",
-                "regex": "ello"
-              }
+            "expectations": [
+                # No longer expect autoinspection 20180920
+                # {
+                #   "expectation_type": "expect_column_to_exist",
+                #   "kwargs": {
+                #     "column": "x"
+                #   }
+                # },
+                # {
+                #   "expectation_type": "expect_column_to_exist",
+                #   "kwargs": {
+                #     "column": "y"
+                #   }
+                # },
+                # {
+                #   "expectation_type": "expect_column_to_exist",
+                #   "kwargs": {
+                #     "column": "z"
+                #   }
+                # },
+                {
+                    "expectation_type": "expect_column_values_to_be_in_set",
+                    "kwargs": {
+                        "column": "x",
+                        "value_set": [
+                            1,
+                            2,
+                            4
+                        ]
+                    }
+                },
+                {
+                    "expectation_type": "expect_column_values_to_match_regex",
+                    "kwargs": {
+                        "column": "z",
+                        "regex": "ello"
+                    }
+                }
+            ],
+            "dataset_name": None,
+            "meta": {
+                "great_expectations.__version__": ge.__version__
             }
-          ],
-          "dataset_name": None,
-          "meta": {
-            "great_expectations.__version__": ge.__version__
-          }
         }
 
         self.assertEqual(
@@ -206,60 +207,60 @@ class TestDataset(unittest.TestCase):
         ### Second test set ###
 
         output_config = {
-          "expectations": [
-            # No longer expect autoinspection 20180920
-            # {
-            #   "expectation_type": "expect_column_to_exist",
-            #   "kwargs": {
-            #     "column": "x"
-            #   }
-            # },
-            # {
-            #   "expectation_type": "expect_column_to_exist",
-            #   "kwargs": {
-            #     "column": "y"
-            #   }
-            # },
-            # {
-            #   "expectation_type": "expect_column_to_exist",
-            #   "kwargs": {
-            #     "column": "z"
-            #   }
-            # },
-            {
-              "expectation_type": "expect_column_values_to_be_in_set",
-              "kwargs": {
-                "column": "x",
-                "value_set": [
-                  1,
-                  2,
-                  4
-                ]
-              }
-            },
-            {
-              "expectation_type": "expect_column_values_to_be_in_set",
-              "kwargs": {
-                "column": "y",
-                "value_set": [
-                  1,
-                  2,
-                  4
-                ]
-              }
-            },
-            {
-              "expectation_type": "expect_column_values_to_match_regex",
-              "kwargs": {
-                "column": "z",
-                "regex": "ello"
-              }
+            "expectations": [
+                # No longer expect autoinspection 20180920
+                # {
+                #   "expectation_type": "expect_column_to_exist",
+                #   "kwargs": {
+                #     "column": "x"
+                #   }
+                # },
+                # {
+                #   "expectation_type": "expect_column_to_exist",
+                #   "kwargs": {
+                #     "column": "y"
+                #   }
+                # },
+                # {
+                #   "expectation_type": "expect_column_to_exist",
+                #   "kwargs": {
+                #     "column": "z"
+                #   }
+                # },
+                {
+                    "expectation_type": "expect_column_values_to_be_in_set",
+                    "kwargs": {
+                        "column": "x",
+                        "value_set": [
+                            1,
+                            2,
+                            4
+                        ]
+                    }
+                },
+                {
+                    "expectation_type": "expect_column_values_to_be_in_set",
+                    "kwargs": {
+                        "column": "y",
+                        "value_set": [
+                            1,
+                            2,
+                            4
+                        ]
+                    }
+                },
+                {
+                    "expectation_type": "expect_column_values_to_match_regex",
+                    "kwargs": {
+                        "column": "z",
+                        "regex": "ello"
+                    }
+                }
+            ],
+            "dataset_name": None,
+            "meta": {
+                "great_expectations.__version__": ge.__version__
             }
-          ],
-          "dataset_name": None,
-          "meta": {
-            "great_expectations.__version__": ge.__version__
-          }
         }
 
         self.assertEqual(
@@ -270,8 +271,8 @@ class TestDataset(unittest.TestCase):
         )
 
         df.save_expectations_config(
-          directory_name+'/temp2.json',
-          discard_failed_expectations=False
+            directory_name+'/temp2.json',
+            discard_failed_expectations=False
         )
         temp_file = open(directory_name+'/temp2.json')
         self.assertEqual(
@@ -283,54 +284,54 @@ class TestDataset(unittest.TestCase):
         ### Third test set ###
 
         output_config = {
-          "expectations": [
-            # No longer expect autoinspection 20180920
-            # {
-            #   "expectation_type": "expect_column_to_exist",
-            #   "kwargs": {
-            #     "column": "x",
-            #     "result_format": "BASIC"
-            #   }
-            # },
-            # {
-            #   "expectation_type": "expect_column_to_exist",
-            #   "kwargs": {
-            #     "column": "y",
-            #     "result_format": "BASIC"
-            #   }
-            # },
-            # {
-            #   "expectation_type": "expect_column_to_exist",
-            #   "kwargs": {
-            #     "column": "z",
-            #     "result_format": "BASIC"
-            #   }
-            # },
-            {
-              "expectation_type": "expect_column_values_to_be_in_set",
-              "kwargs": {
-                "column": "x",
-                "value_set": [
-                  1,
-                  2,
-                  4
-                ],
-                "result_format": "BASIC"
-              }
-            },
-            {
-              "expectation_type": "expect_column_values_to_match_regex",
-              "kwargs": {
-                "column": "z",
-                "regex": "ello",
-                "result_format": "BASIC"
-              }
+            "expectations": [
+                # No longer expect autoinspection 20180920
+                # {
+                #   "expectation_type": "expect_column_to_exist",
+                #   "kwargs": {
+                #     "column": "x",
+                #     "result_format": "BASIC"
+                #   }
+                # },
+                # {
+                #   "expectation_type": "expect_column_to_exist",
+                #   "kwargs": {
+                #     "column": "y",
+                #     "result_format": "BASIC"
+                #   }
+                # },
+                # {
+                #   "expectation_type": "expect_column_to_exist",
+                #   "kwargs": {
+                #     "column": "z",
+                #     "result_format": "BASIC"
+                #   }
+                # },
+                {
+                    "expectation_type": "expect_column_values_to_be_in_set",
+                    "kwargs": {
+                        "column": "x",
+                        "value_set": [
+                            1,
+                            2,
+                            4
+                        ],
+                        "result_format": "BASIC"
+                    }
+                },
+                {
+                    "expectation_type": "expect_column_values_to_match_regex",
+                    "kwargs": {
+                        "column": "z",
+                        "regex": "ello",
+                        "result_format": "BASIC"
+                    }
+                }
+            ],
+            "dataset_name": None,
+            "meta": {
+                "great_expectations.__version__": ge.__version__
             }
-          ],
-          "dataset_name": None,
-          "meta": {
-            "great_expectations.__version__": ge.__version__
-          }
         }
 
         self.assertEqual(
@@ -705,7 +706,8 @@ class TestDataset(unittest.TestCase):
         )
 
         self.assertEqual(
-            df._calc_map_expectation_success(success_count=decimal.Decimal(80), nonnull_count=100, mostly=.8),
+            df._calc_map_expectation_success(
+                success_count=decimal.Decimal(80), nonnull_count=100, mostly=.8),
             (False, decimal.Decimal(80) / decimal.Decimal(100))
         )
 
@@ -736,7 +738,6 @@ class TestDataset(unittest.TestCase):
             (True, 0.0)
         )
 
-
     def test_find_expectations(self):
         my_df = ge.dataset.PandasDataTable({
             'x' : [1,2,3,4,5,6,7,8,9,10],
@@ -755,49 +756,52 @@ class TestDataset(unittest.TestCase):
         )
 
         self.assertEqual(
-            my_df.find_expectations("expect_column_to_exist", "x", expectation_kwargs={}),
+            my_df.find_expectations(
+                "expect_column_to_exist", "x", expectation_kwargs={}),
             [{
-              "expectation_type": "expect_column_to_exist",
-              "kwargs": {
-                "column": "x"
-              }
+                "expectation_type": "expect_column_to_exist",
+                "kwargs": {
+                    "column": "x"
+                }
             }]
         )
 
         self.assertEqual(
-            my_df.find_expectations("expect_column_to_exist", expectation_kwargs={"column": "y"}),
+            my_df.find_expectations(
+                "expect_column_to_exist", expectation_kwargs={"column": "y"}),
             [{
-              "expectation_type": "expect_column_to_exist",
-              "kwargs": {
-                "column": "y"
-              }
+                "expectation_type": "expect_column_to_exist",
+                "kwargs": {
+                    "column": "y"
+                }
             }]
         )
 
         self.assertEqual(
             my_df.find_expectations("expect_column_to_exist"),
             [{
-              "expectation_type": "expect_column_to_exist",
-              "kwargs": {
-                "column": "x"
-              }
-            },{
-              "expectation_type": "expect_column_to_exist",
-              "kwargs": {
-                "column": "y"
-              }
-            },{
-              "expectation_type": "expect_column_to_exist",
-              "kwargs": {
-                "column": "z"
-              }
+                "expectation_type": "expect_column_to_exist",
+                "kwargs": {
+                    "column": "x"
+                }
+            }, {
+                "expectation_type": "expect_column_to_exist",
+                "kwargs": {
+                    "column": "y"
+                }
+            }, {
+                "expectation_type": "expect_column_to_exist",
+                "kwargs": {
+                    "column": "z"
+                }
             }]
         )
 
         with self.assertRaises(Exception) as context:
-            my_df.find_expectations("expect_column_to_exist", "x", {"column": "y"})
+            my_df.find_expectations(
+                "expect_column_to_exist", "x", {"column": "y"})
 
-        #FIXME: I don't understand why this test fails.
+        # FIXME: I don't understand why this test fails.
         # print context.exception
         # print 'Conflicting column names in remove_expectation' in context.exception
         # self.assertTrue('Conflicting column names in remove_expectation:' in context.exception)
@@ -805,24 +809,23 @@ class TestDataset(unittest.TestCase):
         self.assertEqual(
             my_df.find_expectations(column="x"),
             [{
-              "expectation_type": "expect_column_to_exist",
-              "kwargs": {
-                "column": "x"
-              }
-            },{
-              "expectation_type": "expect_column_values_to_be_of_type",
-              "kwargs": {
-                "column": "x",
-                "type_": "int"
-              }
-            },{
-              "expectation_type": "expect_column_values_to_be_increasing",
-              "kwargs": {
-                "column": "x"
-              }
+                "expectation_type": "expect_column_to_exist",
+                "kwargs": {
+                    "column": "x"
+                }
+            }, {
+                "expectation_type": "expect_column_values_to_be_of_type",
+                "kwargs": {
+                    "column": "x",
+                    "type_": "int"
+                }
+            }, {
+                "expectation_type": "expect_column_values_to_be_increasing",
+                "kwargs": {
+                    "column": "x"
+                }
             }]
         )
-
 
     def test_remove_expectation(self):
         my_df = ge.dataset.PandasDataTable({
@@ -832,98 +835,106 @@ class TestDataset(unittest.TestCase):
         }, autoinspect_func=autoinspect.columns_exist)
         my_df.expect_column_values_to_be_of_type('x', 'int')
         my_df.expect_column_values_to_be_of_type('y', 'int')
-        my_df.expect_column_values_to_be_of_type('z', 'int', include_config=True, catch_exceptions=True)
+        my_df.expect_column_values_to_be_of_type(
+            'z', 'int', include_config=True, catch_exceptions=True)
         my_df.expect_column_values_to_be_increasing('x')
         my_df.expect_column_values_to_match_regex('z', 'ello')
 
         with self.assertRaises(Exception) as context:
-            my_df.remove_expectation("expect_column_to_exist", "w", dry_run=True),
+            my_df.remove_expectation(
+                "expect_column_to_exist", "w", dry_run=True),
 
-        #FIXME: Python 3 doesn't like this. It would be nice to use assertRaisesRegex, but that's not available in python 2.7
+        # FIXME: Python 3 doesn't like this. It would be nice to use assertRaisesRegex, but that's not available in python 2.7
         # self.assertTrue('No matching expectation found.' in context.exception)
 
         self.assertEqual(
-            my_df.remove_expectation("expect_column_to_exist", "x", expectation_kwargs={}, dry_run=True),
+            my_df.remove_expectation(
+                "expect_column_to_exist", "x", expectation_kwargs={}, dry_run=True),
             {
-              "expectation_type": "expect_column_to_exist",
-              "kwargs": {
-                "column": "x"
-              }
+                "expectation_type": "expect_column_to_exist",
+                "kwargs": {
+                    "column": "x"
+                }
             }
         )
 
         self.assertEqual(
-            my_df.remove_expectation("expect_column_to_exist", expectation_kwargs={"column": "y"}, dry_run=True),
+            my_df.remove_expectation("expect_column_to_exist", expectation_kwargs={
+                                     "column": "y"}, dry_run=True),
             {
-              "expectation_type": "expect_column_to_exist",
-              "kwargs": {
-                "column": "y"
-              }
+                "expectation_type": "expect_column_to_exist",
+                "kwargs": {
+                    "column": "y"
+                }
             }
         )
 
         self.assertEqual(
-            my_df.remove_expectation("expect_column_to_exist", expectation_kwargs={"column": "y"}, remove_multiple_matches=True, dry_run=True),
+            my_df.remove_expectation("expect_column_to_exist", expectation_kwargs={
+                                     "column": "y"}, remove_multiple_matches=True, dry_run=True),
             [{
-              "expectation_type": "expect_column_to_exist",
-              "kwargs": {
-                "column": "y"
-              }
+                "expectation_type": "expect_column_to_exist",
+                "kwargs": {
+                    "column": "y"
+                }
             }]
         )
 
         with self.assertRaises(ValueError) as context:
             my_df.remove_expectation("expect_column_to_exist", dry_run=True)
 
-        #FIXME: Python 3 doesn't like this. It would be nice to use assertRaisesRegex, but that's not available in python 2.7
+        # FIXME: Python 3 doesn't like this. It would be nice to use assertRaisesRegex, but that's not available in python 2.7
         # self.assertTrue('Multiple expectations matched arguments. No expectations removed.' in context.exception)
 
         self.assertEqual(
-            my_df.remove_expectation("expect_column_to_exist", remove_multiple_matches=True, dry_run=True),
+            my_df.remove_expectation(
+                "expect_column_to_exist", remove_multiple_matches=True, dry_run=True),
             [{
-              "expectation_type": "expect_column_to_exist",
-              "kwargs": {
-                "column": "x"
-              }
-            },{
-              "expectation_type": "expect_column_to_exist",
-              "kwargs": {
-                "column": "y"
-              }
-            },{
-              "expectation_type": "expect_column_to_exist",
-              "kwargs": {
-                "column": "z"
-              }
+                "expectation_type": "expect_column_to_exist",
+                "kwargs": {
+                    "column": "x"
+                }
+            }, {
+                "expectation_type": "expect_column_to_exist",
+                "kwargs": {
+                    "column": "y"
+                }
+            }, {
+                "expectation_type": "expect_column_to_exist",
+                "kwargs": {
+                    "column": "z"
+                }
             }]
         )
 
         with self.assertRaises(Exception) as context:
-            my_df.remove_expectation("expect_column_to_exist", "x", {"column": "y"}, dry_run=True)
+            my_df.remove_expectation("expect_column_to_exist", "x", {
+                                     "column": "y"}, dry_run=True)
 
-        #FIXME: I don't understand why this test fails.
+        # FIXME: I don't understand why this test fails.
         # print context.exception
         # print 'Conflicting column names in remove_expectation' in context.exception
         # self.assertTrue('Conflicting column names in remove_expectation:' in context.exception)
 
         self.assertEqual(
-            my_df.remove_expectation(column="x", remove_multiple_matches=True, dry_run=True),
+            my_df.remove_expectation(
+                column="x", remove_multiple_matches=True, dry_run=True),
             [{
-              "expectation_type": "expect_column_to_exist",
-              "kwargs": {
-                "column": "x"
-              }
-            },{
-              "expectation_type": "expect_column_values_to_be_of_type",
-              "kwargs": {
-                "column": "x",
-                "type_": "int"
-              }
-            },{
-              "expectation_type": "expect_column_values_to_be_increasing",
-              "kwargs": {
-                "column": "x"
-              }
+                "expectation_type": "expect_column_to_exist",
+                "kwargs": {
+                    "column": "x"
+                }
+            }, {
+                "expectation_type": "expect_column_values_to_be_of_type",
+                "kwargs": {
+                    "column": "x",
+                    "type_": "int"
+                }
+            }, {
+                "expectation_type": "expect_column_values_to_be_increasing",
+                "kwargs": {
+                    "column": "x"
+                }
             }]
         )
 
@@ -1091,9 +1102,10 @@ class TestDataset(unittest.TestCase):
             'x' : [1,3,5,6,9],
             'y' : [1,2,None,6,9],
         })
+
         def expect_dataframe_to_contain_7(self):
             return {
-                "success": bool((self==7).sum().sum() > 0)
+                "success": bool((self == 7).sum().sum() > 0)
             }
 
         self.assertEqual(
@@ -1105,30 +1117,34 @@ class TestDataset(unittest.TestCase):
             {'success': False}
         )
 
-
     def test_test_column_map_expectation_function(self):
 
         D = ge.dataset.PandasDataTable({
             'x' : [1,3,5,7,9],
             'y' : [1,2,None,7,9],
         })
+
         def is_odd(self, column, mostly=None, result_format=None, include_config=False, catch_exceptions=None, meta=None):
             return column % 2 == 1
 
         self.assertEqual(
             D.test_column_map_expectation_function(is_odd, column='x'),
-            {'result': {'element_count': 5, 'missing_count': 0, 'missing_percent': 0, 'unexpected_percent': 0.0, 'partial_unexpected_list': [], 'unexpected_percent_nonmissing': 0.0, 'unexpected_count': 0}, 'success': True}
+            {'result': {'element_count': 5, 'missing_count': 0, 'missing_percent': 0, 'unexpected_percent': 0.0,
+                        'partial_unexpected_list': [], 'unexpected_percent_nonmissing': 0.0, 'unexpected_count': 0}, 'success': True}
         )
         self.assertEqual(
-            D.test_column_map_expectation_function(is_odd, 'x', result_format="BOOLEAN_ONLY"),
+            D.test_column_map_expectation_function(
+                is_odd, 'x', result_format="BOOLEAN_ONLY"),
             {'success': True}
         )
         self.assertEqual(
-            D.test_column_map_expectation_function(is_odd, column='y', result_format="BOOLEAN_ONLY"),
+            D.test_column_map_expectation_function(
+                is_odd, column='y', result_format="BOOLEAN_ONLY"),
             {'success': False}
         )
         self.assertEqual(
-            D.test_column_map_expectation_function(is_odd, column='y', result_format="BOOLEAN_ONLY", mostly=.7),
+            D.test_column_map_expectation_function(
+                is_odd, column='y', result_format="BOOLEAN_ONLY", mostly=.7),
             {'success': True}
         )
 
@@ -1137,6 +1153,7 @@ class TestDataset(unittest.TestCase):
             'x' : [1,3,5,7,9],
             'y' : [1,2,None,7,9],
         })
+
         def expect_second_value_to_be(self, column, value, result_format=None, include_config=False, catch_exceptions=None, meta=None):
             return {
                 "success": column.iloc[1] == value,
@@ -1146,24 +1163,30 @@ class TestDataset(unittest.TestCase):
             }
 
         self.assertEqual(
-            D.test_column_aggregate_expectation_function(expect_second_value_to_be, 'x', 2),
-            {'result': {'observed_value': 3.0, 'element_count': 5, 'missing_count': 0, 'missing_percent': 0.0}, 'success': False}
+            D.test_column_aggregate_expectation_function(
+                expect_second_value_to_be, 'x', 2),
+            {'result': {'observed_value': 3.0, 'element_count': 5,
+                        'missing_count': 0, 'missing_percent': 0.0}, 'success': False}
         )
         self.assertEqual(
-            D.test_column_aggregate_expectation_function(expect_second_value_to_be, column='x', value=3),
-            {'result': {'observed_value': 3.0, 'element_count': 5, 'missing_count': 0, 'missing_percent': 0.0}, 'success': True}
+            D.test_column_aggregate_expectation_function(
+                expect_second_value_to_be, column='x', value=3),
+            {'result': {'observed_value': 3.0, 'element_count': 5,
+                        'missing_count': 0, 'missing_percent': 0.0}, 'success': True}
         )
         self.assertEqual(
-            D.test_column_aggregate_expectation_function(expect_second_value_to_be, 'y', value=3, result_format="BOOLEAN_ONLY"),
+            D.test_column_aggregate_expectation_function(
+                expect_second_value_to_be, 'y', value=3, result_format="BOOLEAN_ONLY"),
             {'success': False}
         )
         self.assertEqual(
-            D.test_column_aggregate_expectation_function(expect_second_value_to_be, 'y', 2, result_format="BOOLEAN_ONLY"),
+            D.test_column_aggregate_expectation_function(
+                expect_second_value_to_be, 'y', 2, result_format="BOOLEAN_ONLY"),
             {'success': True}
         )
 
     def test_meta_version_warning(self):
-        D = ge.dataset.Dataset();
+        D = ge.dataset.Dataset()
 
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
@@ -1173,7 +1196,8 @@ class TestDataset(unittest.TestCase):
 
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
-            out = D.validate(expectations_config={"meta": {"great_expectations.__version__": "0.0.0"}, "expectations": []})
+            out = D.validate(expectations_config={
+                             "meta": {"great_expectations.__version__": "0.0.0"}, "expectations": []})
             self.assertEqual(str(w[0].message),
                              "WARNING: This configuration object was built using a different version of great_expectations than is currently validating it.")
 

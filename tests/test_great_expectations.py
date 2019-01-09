@@ -16,8 +16,9 @@ from great_expectations.dataset.base import (
 )
 from .test_utils import assertDeepAlmostEqual
 
+
 def isprime(n):
-    #https://stackoverflow.com/questions/18833759/python-prime-number-checker
+    # https://stackoverflow.com/questions/18833759/python-prime-number-checker
     '''check if integer n is a prime'''
 
     # make sure n is a positive integer
@@ -55,35 +56,36 @@ class CustomPandasDataTable(PandasDataTable):
         not_null = self[column].notnull()
 
         result = self[column][not_null] == 1
-        unexpected_values = list(self[column][not_null][result==False])
+        unexpected_values = list(self[column][not_null][result == False])
 
         if mostly:
-            #Prevent division-by-zero errors
+            # Prevent division-by-zero errors
             if len(not_null) == 0:
                 return {
-                    'success':True,
+                    'success': True,
                     'result': {
-                        'unexpected_list':unexpected_values,
-                        'unexpected_index_list':self.index[result],
+                        'unexpected_list': unexpected_values,
+                        'unexpected_index_list': self.index[result],
                     }
                 }
 
             percent_equaling_1 = float(sum(result))/len(not_null)
             return {
-                "success" : percent_equaling_1 >= mostly,
+                "success": percent_equaling_1 >= mostly,
                 'result': {
-                    "unexpected_list" : unexpected_values[:20],
-                    "unexpected_index_list" : list(self.index[result==False])[:20],
+                    "unexpected_list": unexpected_values[:20],
+                    "unexpected_index_list": list(self.index[result == False])[:20],
                 }
             }
         else:
             return {
-                "success" : len(unexpected_values) == 0,
+                "success": len(unexpected_values) == 0,
                 'result': {
-                    "unexpected_list" : unexpected_values[:20],
-                    "unexpected_index_list" : list(self.index[result==False])[:20],
+                    "unexpected_list": unexpected_values[:20],
+                    "unexpected_index_list": list(self.index[result == False])[:20],
                 }
             }
+
 
 class TestCustomClass(unittest.TestCase):
 
@@ -95,7 +97,8 @@ class TestCustomClass(unittest.TestCase):
         )
         df.set_default_expectation_argument("result_format", "COMPLETE")
         self.assertEqual(
-            df.expect_column_values_to_be_prime('Age')['result']['unexpected_list'],
+            df.expect_column_values_to_be_prime(
+                'Age')['result']['unexpected_list'],
             [30.0, 25.0, 0.92000000000000004, 63.0, 39.0, 58.0, 50.0, 24.0, 36.0, 26.0, 25.0, 25.0, 28.0, 45.0, 39.0,
              30.0, 58.0, 45.0, 22.0, 48.0, 44.0, 60.0, 45.0, 58.0, 36.0, 33.0, 36.0, 36.0, 14.0, 49.0, 36.0, 46.0, 27.0,
              27.0, 26.0, 64.0, 39.0, 55.0, 70.0, 69.0, 36.0, 39.0, 38.0, 27.0, 27.0, 4.0, 27.0, 50.0, 48.0, 49.0, 48.0,
@@ -133,10 +136,11 @@ class TestCustomClass(unittest.TestCase):
              27.0, 15.0, 27.0, 26.0, 22.0, 24.0]
         )
 
-        primes = [3,5,7,11,13,17,23,31]
+        primes = [3, 5, 7, 11, 13, 17, 23, 31]
         df["primes"] = df.Age.map(lambda x: random.choice(primes))
         self.assertEqual(
-            df.expect_column_values_to_be_prime("primes")['result']['unexpected_list'],
+            df.expect_column_values_to_be_prime(
+                "primes")['result']['unexpected_list'],
             []
         )
 
@@ -145,21 +149,27 @@ class TestCustomClass(unittest.TestCase):
         df.set_default_expectation_argument("result_format", "COMPLETE")
 
         out = df.expect_column_values_to_be_prime('x')
-        t = {'out': {'unexpected_list':[1,1,1,1],'unexpected_index_list':[0,1,2,3], 'success':False}}
+        t = {'out': {'unexpected_list': [1, 1, 1, 1], 'unexpected_index_list': [
+            0, 1, 2, 3], 'success': False}}
         self.assertEqual(t['out']['success'], out['success'])
         if 'unexpected_index_list' in t['out']:
-            self.assertEqual(t['out']['unexpected_index_list'], out['result']['unexpected_index_list'])
+            self.assertEqual(t['out']['unexpected_index_list'],
+                             out['result']['unexpected_index_list'])
         if 'unexpected_list' in t['out']:
-            self.assertEqual(t['out']['unexpected_list'], out['result']['unexpected_list'])
+            self.assertEqual(t['out']['unexpected_list'],
+                             out['result']['unexpected_list'])
 
         out = df.expect_column_values_to_equal_1('x', mostly=.8)
         print(out)
-        t = {'out': {'unexpected_list':[2],'unexpected_index_list':[4],'success':True}}
+        t = {'out': {'unexpected_list': [
+            2], 'unexpected_index_list': [4], 'success': True}}
         self.assertEqual(t['out']['success'], out['success'])
         if 'unexpected_index_list' in t['out']:
-            self.assertEqual(t['out']['unexpected_index_list'], out['result']['unexpected_index_list'])
+            self.assertEqual(t['out']['unexpected_index_list'],
+                             out['result']['unexpected_index_list'])
         if 'unexpected_list' in t['out']:
-            self.assertEqual(t['out']['unexpected_list'], out['result']['unexpected_list'])
+            self.assertEqual(t['out']['unexpected_list'],
+                             out['result']['unexpected_list'])
 
    # Ensure that Custom Data Set classes can properly call non-overridden methods from their parent class
     def test_base_class_expectation(self):
@@ -170,7 +180,8 @@ class TestCustomClass(unittest.TestCase):
         })
 
         self.assertEqual(
-            df.expect_column_values_to_be_between("aaa", min_value=1, max_value=5)['success'],
+            df.expect_column_values_to_be_between(
+                "aaa", min_value=1, max_value=5)['success'],
             True
         )
 
@@ -192,13 +203,13 @@ class TestValidation(unittest.TestCase):
 
         with open('./tests/test_sets/expected_results_20180303.json') as f:
             expected_results = json.load(f)
-            #print json.dumps(expected_results, indent=2)
+            # print json.dumps(expected_results, indent=2)
 
         self.maxDiff = None
         assertDeepAlmostEqual(
-                              results,
-                              expected_results
-                              )
+            results,
+            expected_results
+        )
 
         # Now, change the results and ensure they are no longer equal
         results[0] = {}
@@ -209,27 +220,27 @@ class TestValidation(unittest.TestCase):
         # Finally, confirm that only_return_failures works
         # and does not affect the "statistics" field.
         validation_results = my_df.validate(only_return_failures=True)
-        #print json.dumps(validation_results)
+        # print json.dumps(validation_results)
         assertDeepAlmostEqual(
             validation_results,
             {"results": [
                 {"expectation_config": {
-                     "expectation_type": "expect_column_values_to_be_in_set",
-                     "kwargs": {"column": "PClass", "value_set": ["1st", "2nd", "3rd"], "result_format": "COMPLETE"}
-                 },
-                 "success": False,
-                 "exception_info": {"exception_message": None,
-                                    "exception_traceback": None,
-                                    "raised_exception": False},
-                 "result": {"partial_unexpected_index_list": [456], "unexpected_count": 1, "unexpected_list": ["*"],
-                                "unexpected_percent": 0.0007616146230007616, "element_count": 1313,
-                                "missing_percent": 0.0, "partial_unexpected_counts": [{"count": 1, "value": "*"}],
-                                "partial_unexpected_list": ["*"],
-                                "unexpected_percent_nonmissing": 0.0007616146230007616, "missing_count": 0,
-                                "unexpected_index_list": [456]}}
+                    "expectation_type": "expect_column_values_to_be_in_set",
+                    "kwargs": {"column": "PClass", "value_set": ["1st", "2nd", "3rd"], "result_format": "COMPLETE"}
+                },
+                    "success": False,
+                    "exception_info": {"exception_message": None,
+                                       "exception_traceback": None,
+                                       "raised_exception": False},
+                    "result": {"partial_unexpected_index_list": [456], "unexpected_count": 1, "unexpected_list": ["*"],
+                               "unexpected_percent": 0.0007616146230007616, "element_count": 1313,
+                               "missing_percent": 0.0, "partial_unexpected_counts": [{"count": 1, "value": "*"}],
+                               "partial_unexpected_list": ["*"],
+                               "unexpected_percent_nonmissing": 0.0007616146230007616, "missing_count": 0,
+                               "unexpected_index_list": [456]}}
             ],
-            "success": expected_results["success"],  # unaffected
-            "statistics": expected_results["statistics"],  # unaffected
+                "success": expected_results["success"],  # unaffected
+                "statistics": expected_results["statistics"],  # unaffected
             }
         )
 
@@ -239,18 +250,19 @@ class TestValidation(unittest.TestCase):
         })
 
         validation_config_non_existent_expectation = {
-            "dataset_name" : None,
+            "dataset_name": None,
             "meta": {
                 "great_expectations.__version__": ge.__version__
             },
-            "expectations" : [{
-                "expectation_type" : "non_existent_expectation",
-                "kwargs" : {
-                    "column" : "x"
+            "expectations": [{
+                "expectation_type": "non_existent_expectation",
+                "kwargs": {
+                    "column": "x"
                 }
             }]
         }
-        results = df.validate(expectations_config=validation_config_non_existent_expectation)['results']
+        results = df.validate(
+            expectations_config=validation_config_non_existent_expectation)['results']
 
         self.assertIn(
             "object has no attribute 'non_existent_expectation'",
@@ -263,21 +275,22 @@ class TestValidation(unittest.TestCase):
         })
 
         validation_config_invalid_parameter = {
-            "dataset_name" : None,
+            "dataset_name": None,
             "meta": {
                 "great_expectations.__version__": ge.__version__
             },
-            "expectations" : [{
-                "expectation_type" : "expect_column_values_to_be_between",
-                "kwargs" : {
-                    "column" : "x",
-                    "min_value" : 6,
-                    "max_value" : 5
+            "expectations": [{
+                "expectation_type": "expect_column_values_to_be_between",
+                "kwargs": {
+                    "column": "x",
+                    "min_value": 6,
+                    "max_value": 5
                 }
             }]
         }
 
-        results = df.validate(expectations_config=validation_config_invalid_parameter)['results']
+        results = df.validate(expectations_config=validation_config_invalid_parameter)[
+            'results']
         print(results[0]['exception_info'])
         self.assertIn(
             "min_value cannot be greater than max_value",
@@ -286,76 +299,76 @@ class TestValidation(unittest.TestCase):
 
     def test_top_level_validate(self):
         my_df = pd.DataFrame({
-            "x" : [1,2,3,4,5]
+            "x": [1, 2, 3, 4, 5]
         })
         validation_result = ge.validate(my_df, {
-            "dataset_name" : None,
+            "dataset_name": None,
             "meta": {
                 "great_expectations.__version__": ge.__version__
             },
-            "expectations" : [{
-                "expectation_type" : "expect_column_to_exist",
-                "kwargs" : {
-                    "column" : "x"
+            "expectations": [{
+                "expectation_type": "expect_column_to_exist",
+                "kwargs": {
+                    "column": "x"
                 }
-            },{
-                "expectation_type" : "expect_column_values_to_be_between",
-                "kwargs" : {
-                    "column" : "x",
-                    "min_value" : 3,
-                    "max_value" : 5
+            }, {
+                "expectation_type": "expect_column_values_to_be_between",
+                "kwargs": {
+                    "column": "x",
+                    "min_value": 3,
+                    "max_value": 5
                 }
             }]
         })
         self.assertEqual(
             validation_result,
             {
-              "results": [
-                {
-                  "expectation_config": {
-                      "kwargs": {
-                          "column": "x"
-                      },
-                      "expectation_type": "expect_column_to_exist",
-                  },
-                  "exception_info": {"exception_message": None,
-                                    "exception_traceback": None,
-                                    "raised_exception": False},
-                  "success": True
-                },
-                {
-                    "expectation_config": {
-                        "expectation_type": "expect_column_values_to_be_between",
-                        "kwargs": {
-                            "column": "x",
-                            "max_value": 5,
-                            "min_value": 3
-                        }
+                "results": [
+                    {
+                        "expectation_config": {
+                            "kwargs": {
+                                "column": "x"
+                            },
+                            "expectation_type": "expect_column_to_exist",
+                        },
+                        "exception_info": {"exception_message": None,
+                                           "exception_traceback": None,
+                                           "raised_exception": False},
+                        "success": True
                     },
-                    "exception_info": {"exception_message": None,
-                                        "exception_traceback": None,
-                                        "raised_exception": False},
-                    "success": False,
-                    "result": {'element_count': 5,
-                                 'missing_count': 0,
-                                 'missing_percent': 0.0,
-                                 "unexpected_percent": 0.4,
-                                 "partial_unexpected_list": [
-                                      1,
-                                      2
-                                 ],
-                                 "unexpected_percent_nonmissing": 0.4,
-                                 "unexpected_count": 2
+                    {
+                        "expectation_config": {
+                            "expectation_type": "expect_column_values_to_be_between",
+                            "kwargs": {
+                                "column": "x",
+                                "max_value": 5,
+                                "min_value": 3
+                            }
+                        },
+                        "exception_info": {"exception_message": None,
+                                           "exception_traceback": None,
+                                           "raised_exception": False},
+                        "success": False,
+                        "result": {'element_count': 5,
+                                   'missing_count': 0,
+                                   'missing_percent': 0.0,
+                                   "unexpected_percent": 0.4,
+                                   "partial_unexpected_list": [
+                                       1,
+                                       2
+                                   ],
+                                   "unexpected_percent_nonmissing": 0.4,
+                                   "unexpected_count": 2
+                                   }
                     }
+                ],
+                "success": False,
+                "statistics": {
+                    "evaluated_expectations": 2,
+                    "successful_expectations": 1,
+                    "unsuccessful_expectations": 1,
+                    "success_percent": 50,
                 }
-              ],
-              "success": False,
-              "statistics": {
-                  "evaluated_expectations": 2,
-                  "successful_expectations": 1,
-                  "unsuccessful_expectations": 1,
-                  "success_percent": 50,
-              }
             }
         )
 
@@ -423,19 +436,21 @@ class TestRepeatedAppendExpectation(unittest.TestCase):
         with open("./tests/test_sets/titanic_expectations.json") as f:
             my_expectations_config = json.load(f)
 
-        my_df = ge.read_csv("./tests/test_sets/Titanic.csv", autoinspect_func=columns_exist)
+        my_df = ge.read_csv("./tests/test_sets/Titanic.csv",
+                            autoinspect_func=columns_exist)
 
         self.assertEqual(
             len(my_df.get_expectations_config()['expectations']),
             7
         )
 
-        #For column_expectations, _append_expectation should only replace expectations where the expetation_type AND the column match
+        # For column_expectations, _append_expectation should only replace expectations where the expetation_type AND the column match
         my_df.expect_column_to_exist("PClass")
         self.assertEqual(
             len(my_df.get_expectations_config()['expectations']),
             7
         )
+
 
 class TestIO(unittest.TestCase):
 
@@ -453,7 +468,7 @@ class TestIO(unittest.TestCase):
 
         df = ge.read_json(
             script_path+'/test_sets/nested_test_json_data_file.json',
-            accessor_func= lambda x: x["data"]
+            accessor_func=lambda x: x["data"]
         )
 
     def test_read_excel(self):

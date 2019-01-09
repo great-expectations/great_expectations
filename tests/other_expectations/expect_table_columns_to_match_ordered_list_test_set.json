@@ -43,6 +43,15 @@
       "out":{
         "success":false
       }
+    },{
+      "title": "Negative test: Extra column",
+      "exact_match_out": false,
+      "in":{
+        "column_list": ["c1", "c2", "c3", "c4"]
+      },
+      "out":{
+        "success": false
+      }
     }]
   }]
 }

@@ -41,7 +41,8 @@ def test_autoinspect_existing_dataset(dataset_type):
 
 @pytest.mark.parametrize("dataset_type", ["PandasDataTable", "SqlAlchemyDataTable"])
 def test_autoinspect_columns_exist(dataset_type):
-    df = get_dataset(dataset_type, {"a": [1, 2, 3]}, autoinspect_func=autoinspect.columns_exist)
+    df = get_dataset(
+        dataset_type, {"a": [1, 2, 3]}, autoinspect_func=autoinspect.columns_exist)
     config = df.get_expectations_config()
 
     assert len(config["expectations"]) == 1
@@ -51,7 +52,7 @@ def test_autoinspect_columns_exist(dataset_type):
 
 def test_autoinspect_warning():
     with pytest.warns(UserWarning, match="No columns list found in dataset; no autoinspection performed."):
-        df = ge.dataset.Dataset(autoinspect_func=autoinspect.columns_exist)
+        ge.dataset.Dataset(autoinspect_func=autoinspect.columns_exist)
 
 
 def test_autoinspect_error():
