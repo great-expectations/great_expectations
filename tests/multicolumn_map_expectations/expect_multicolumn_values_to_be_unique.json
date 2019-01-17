@@ -1,0 +1,50 @@
+{
+  "expectation_type" : "expect_multicolumn_values_to_be_unique",
+  "datasets" : [{
+    "data" : {
+      "w" : [2, 3, 4, 5, 6, 7, 8, 9, 10, null],
+      "x" : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+      "y" : [2, 3, 4, 5, 6, 7, 8, 9, 10, null],
+      "z" : [1, 2, 3, 4, 5, null, null, null, null, null],
+      "a" : [1, 1, 1, 1, 1, 2, 2, 2, 2, null],
+      "b" : [1, 2, 1, 2, 1, 2, 1, 2, 1, null]
+    },
+    "tests" : [{
+      "title": "Basic test; ignore if all are missing",
+      "exact_match_out" : false,
+      "in": {
+        "column_list": ["w", "x"],
+        "ignore_row_if": "all_values_are_missing"
+      },
+      "out": {
+        "unexpected_list": {"w": {}, "x": {}},
+        "unexpected_index_list": [],
+        "success": true
+      }
+    },{
+      "title": "Basic test; ignore if any are missing",
+      "exact_match_out" : false,
+      "in": {
+        "column_list": ["w", "x"],
+        "ignore_row_if": "any_value_is_missing"
+      },
+      "out": {
+        "unexpected_list": {"w": {}, "x": {}},
+        "unexpected_index_list": [],
+        "success": true
+      }
+    },{
+      "title": "Unexpected Values",
+      "exact_match_out" : false,
+      "in": {
+        "column_list": ["a", "b"]
+      },
+      "out": {
+        "unexpected_list": {"a": {"0": 1.0, "2": 1.0, "4": 1.0, "5": 2.0, "7": 2.0},
+                            "b": {"0": 1.0, "2": 1.0, "4": 1.0, "5": 2.0, "7": 2.0}},
+        "unexpected_index_list": [0,2,4,5,7],
+        "success": false
+      }
+    }]
+  }]
+}
