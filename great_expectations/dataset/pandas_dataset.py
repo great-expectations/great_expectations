@@ -195,6 +195,62 @@ class MetaPandasDataset(Dataset):
         return inner_wrapper
 
     @classmethod
+    def multicolumn_map_expectation(cls, func):
+        """
+        The multicolumn_map_expectation decorator handles boilerplate issues surrounding the common pattern of
+        evaluating truthiness of some condition on a per row basis across a set of columns.
+        """
+        if PY3:
+            argspec = inspect.getfullargspec(func)[0][1:]
+        else:
+            argspec = inspect.getargspec(func)[0][1:]
+
+        @cls.expectation(argspec)
+        @wraps(func)
+        def inner_wrapper(self, column_list, mostly=None, ignore_row_if="all_values_are_missing",
+                          result_format=None, *args, **kwargs):
+
+            if result_format is None:
+                result_format = self.default_expectation_args["result_format"]
+
+            test_df = self[column_list]
+
+            if ignore_row_if == "all_values_are_missing":
+                boolean_mapped_skip_values = test_df.isnull().all(axis=1)
+            elif ignore_row_if == "any_value_is_missing":
+                boolean_mapped_skip_values = test_df.isnull().any(axis=1)
+            elif ignore_row_if == "never":
+                boolean_mapped_skip_values = pd.Series([False] * len(test_df))
+            else:
+                raise ValueError(
+                    "Unknown value of ignore_row_if: %s", (ignore_row_if,))
+
+            boolean_mapped_success_values = func(
+                self, test_df[boolean_mapped_skip_values == False], *args, **kwargs)
+            success_count = boolean_mapped_success_values.sum()
+            nonnull_count = (~boolean_mapped_skip_values).sum()
+            element_count = len(test_df)
+
+            unexpected_list = test_df[(boolean_mapped_skip_values == False) & (boolean_mapped_success_values == False)]
+            unexpected_index_list = list(unexpected_list.index)
+
+            success, percent_success = self._calc_map_expectation_success(
+                success_count, nonnull_count, mostly)
+
+            return_obj = self._format_column_map_output(
+                result_format, success,
+                element_count, nonnull_count,
+                unexpected_list, unexpected_index_list
+            )
+
+            return return_obj
+
+        inner_wrapper.__name__ = func.__name__
+        inner_wrapper.__doc__ = func.__doc__
+        return inner_wrapper
+
+
+    @classmethod
     def column_aggregate_expectation(cls, func):
         """Constructs an expectation using column-aggregate semantics.
 
@@ -1513,3 +1569,14 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             results.append((a, b) in value_pairs_set)
 
         return pd.Series(results, temp_df.index)
+
+    @DocInherit
+    @MetaPandasDataset.multicolumn_map_expectation
+    def expect_multicolumn_values_to_be_unique(self,
+                                               column_list,
+                                               ignore_row_if="all_values_are_missing",
+                                               result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                               ):
+        threshold = len(column_list.columns)
+        # Do not dropna here, since we have separately dealt with na in decorator
+        return column_list.nunique(dropna=False, axis=1) >= threshold
