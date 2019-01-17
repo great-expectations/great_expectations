@@ -203,7 +203,7 @@ class Dataset(object):
         Args:
             func (function): \
                 The function implementing a row-wise expectation. The function should take a column of data and \
-                return an equally-long column of boolean values corresponding to whether the truthiness of the \
+                return an equally-long column of boolean values corresponding to the truthiness of the \
                 underlying expectation.
 
         Notes:
