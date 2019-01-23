@@ -253,21 +253,21 @@ def test_expect_file_to_exist():
     
     
 
-def test_expect_file_has_valid_table_header():
+def test_expect_file_to_have_valid_table_header():
     # Test for non-existent file
     fake_file=ge.dataset.FileDataset('abc')
     with pytest.raises(IOError):
-        fake_file.expect_file_has_valid_table_header(regex='' )
+        fake_file.expect_file_to_have_valid_table_header(regex='' )
 
     # Test for non-unique column names
     invalid_header_dat=ge.dataset.FileDataset('./tests/test_sets/same_column_names.csv')
-    invalid_header_dat_expectation=invalid_header_dat.expect_file_has_valid_table_header(regex='\|',
+    invalid_header_dat_expectation=invalid_header_dat.expect_file_to_have_valid_table_header(regex='\|',
                                                             skip=2)
     assert (not invalid_header_dat_expectation["success"])
     
     # Test for unique column names
     valid_header_dat=ge.dataset.FileDataset('./tests/test_sets/Titanic.csv')
-    valid_header_dat_expectation=valid_header_dat.expect_file_has_valid_table_header(regex=',')
+    valid_header_dat_expectation=valid_header_dat.expect_file_to_have_valid_table_header(regex=',')
     assert valid_header_dat_expectation["success"]
     
     

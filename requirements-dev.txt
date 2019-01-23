@@ -11,5 +11,9 @@ pyarrow==0.11.0
 sphinxcontrib-napoleon>=0.6.1
 pypandoc>=1.4
 pytest>=3.2.5
+<<<<<<< HEAD
 pytest-cov==2.6.0
+=======
+pytest-cov>=2.5
+>>>>>>> parent of df53cc6... Changed requirements for pytest_cov to pytest_cov >= 2.6
 coveralls>=1.3

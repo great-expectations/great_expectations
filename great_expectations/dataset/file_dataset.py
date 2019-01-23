@@ -285,7 +285,7 @@ class FileDataset(MetaFileDataset):
     
     @DocInherit
     @Dataset.expectation([])
-    def expect_file_has_valid_table_header(self,regex,skip=None,
+    def expect_file_to_have_valid_table_header(self,regex,skip=None,
                                            result_format=None, 
                                            include_config=False,
                                            catch_exceptions=None,meta=None):
