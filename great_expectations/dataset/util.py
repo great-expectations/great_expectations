@@ -73,7 +73,7 @@ Usage::
     http://code.activestate.com/recipes/576862/. Unfortunately, the
     original authors did not anticipate deep inheritance hierarchies, and
     we ran into a recursion issue when implementing custom subclasses of
-    PandasDataTable:
+    PandasDatatable:
     https://github.com/great-expectations/great_expectations/issues/177.
 
     Our new homegrown implementation directly searches the MRO, instead

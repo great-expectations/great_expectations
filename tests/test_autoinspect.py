@@ -10,20 +10,20 @@ import great_expectations.dataset.autoinspect as autoinspect
 
 
 def test_no_autoinspection():
-    df = ge.dataset.PandasDataTable({"a": [1, 2, 3]}, autoinspect_func=None)
+    df = ge.dataset.PandasDatatable({"a": [1, 2, 3]}, autoinspect_func=None)
     config = df.get_expectations_config()
 
     assert len(config["expectations"]) == 0
 
 
 def test_default_no_autoinspection():
-    df = ge.dataset.PandasDataTable({"a": [1, 2, 3]})
+    df = ge.dataset.PandasDatatable({"a": [1, 2, 3]})
     config = df.get_expectations_config()
 
     assert len(config["expectations"]) == 0
 
 
-@pytest.mark.parametrize("dataset_type", ["PandasDataTable", "SqlAlchemyDataTable"])
+@pytest.mark.parametrize("dataset_type", ["PandasDatatable", "SqlAlchemyDatatable"])
 def test_autoinspect_existing_dataset(dataset_type):
     # Get a basic dataset with no expectations
     df = get_dataset(dataset_type, {"a": [1, 2, 3]}, autoinspect_func=None)
@@ -39,7 +39,7 @@ def test_autoinspect_existing_dataset(dataset_type):
         [{'expectation_type': 'expect_column_to_exist', 'kwargs': {'column': 'a'}}]
 
 
-@pytest.mark.parametrize("dataset_type", ["PandasDataTable", "SqlAlchemyDataTable"])
+@pytest.mark.parametrize("dataset_type", ["PandasDatatable", "SqlAlchemyDatatable"])
 def test_autoinspect_columns_exist(dataset_type):
     df = get_dataset(
         dataset_type, {"a": [1, 2, 3]}, autoinspect_func=autoinspect.columns_exist)

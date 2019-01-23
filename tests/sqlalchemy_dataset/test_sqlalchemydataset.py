@@ -1,19 +1,19 @@
 import pytest
 
-from great_expectations.dataset import MetaSqlAlchemyDataTable, SqlAlchemyDataTable
+from great_expectations.dataset import MetaSqlAlchemyDatatable, SqlAlchemyDatatable
 import sqlalchemy as sa
 import pandas as pd
 
 
 @pytest.fixture
 def custom_dataset():
-    class CustomSqlAlchemyDataTable(SqlAlchemyDataTable):
+    class CustomSqlAlchemyDatatable(SqlAlchemyDatatable):
 
-        @MetaSqlAlchemyDataTable.column_map_expectation
+        @MetaSqlAlchemyDatatable.column_map_expectation
         def expect_column_values_to_equal_2(self, column):
             return (sa.column(column) == 2)
 
-        @MetaSqlAlchemyDataTable.column_aggregate_expectation
+        @MetaSqlAlchemyDatatable.column_aggregate_expectation
         def expect_column_mode_to_equal_0(self, column):
             mode_query = sa.select([
                 sa.column(column).label('value'),
@@ -29,13 +29,13 @@ def custom_dataset():
                 }
             }
 
-        @MetaSqlAlchemyDataTable.column_aggregate_expectation
+        @MetaSqlAlchemyDatatable.column_aggregate_expectation
         def broken_aggregate_expectation(self, column):
             return {
                 "not_a_success_value": True,
             }
 
-        @MetaSqlAlchemyDataTable.column_aggregate_expectation
+        @MetaSqlAlchemyDatatable.column_aggregate_expectation
         def another_broken_aggregate_expectation(self, column):
             return {
                 "success": True,
@@ -54,12 +54,12 @@ def custom_dataset():
     })
 
     data.to_sql(name='test_data', con=engine, index=False)
-    custom_dataset = CustomSqlAlchemyDataTable('test_data', engine=engine)
+    custom_dataset = CustomSqlAlchemyDatatable('test_data', engine=engine)
 
     return custom_dataset
 
 
-def test_custom_sqlalchemyDataTable(custom_dataset):
+def test_custom_sqlalchemyDatatable(custom_dataset):
     custom_dataset._initialize_expectations()
     custom_dataset.set_default_expectation_argument(
         "result_format", {"result_format": "COMPLETE"})
@@ -91,7 +91,7 @@ def test_broken_decorator_errors(custom_dataset):
 
 def test_missing_engine_error():
     with pytest.raises(ValueError) as err:
-        SqlAlchemyDataTable('test_engine', schema='example')
+        SqlAlchemyDatatable('test_engine', schema='example')
         assert "Engine or connection_string must be provided." in str(err)
 
 
@@ -99,12 +99,12 @@ def test_schema_custom_sql_error():
     engine = sa.create_engine('sqlite://')
 
     with pytest.raises(ValueError) as err:
-        SqlAlchemyDataTable('test_schema_custom', schema='example', engine=engine,
+        SqlAlchemyDatatable('test_schema_custom', schema='example', engine=engine,
                           custom_sql='SELECT * FROM example.fake')
         assert "Cannot specify both schema and custom_sql." in str(err)
 
 
-def test_sqlalchemyDataTable_with_custom_sql():
+def test_sqlalchemyDatatable_with_custom_sql():
     engine = sa.create_engine('sqlite://')
 
     data = pd.DataFrame({
@@ -116,15 +116,15 @@ def test_sqlalchemyDataTable_with_custom_sql():
     data.to_sql(name='test_sql_data', con=engine, index=False)
 
     custom_sql = "SELECT name, pet FROM test_sql_data WHERE age > 12"
-    custom_sql_DataTable = SqlAlchemyDataTable('test_sql_data', engine=engine, custom_sql=custom_sql)
+    custom_sql_Datatable = SqlAlchemyDatatable('test_sql_data', engine=engine, custom_sql=custom_sql)
 
-    custom_sql_DataTable._initialize_expectations()
-    custom_sql_DataTable.set_default_expectation_argument("result_format", {"result_format": "COMPLETE"})
+    custom_sql_Datatable._initialize_expectations()
+    custom_sql_Datatable.set_default_expectation_argument("result_format", {"result_format": "COMPLETE"})
 
-    result = custom_sql_DataTable.expect_column_values_to_be_in_set("pet", ["fish", "cat", "python"])
+    result = custom_sql_Datatable.expect_column_values_to_be_in_set("pet", ["fish", "cat", "python"])
     assert result['success'] == True
 
-    result = custom_sql_DataTable.expect_column_to_exist("age")
+    result = custom_sql_Datatable.expect_column_to_exist("age")
     assert result['success'] == False
 
 
@@ -138,8 +138,8 @@ def test_column_fallback():
     })
 
     data.to_sql(name='test_sql_data', con=engine, index=False)
-    dataset = SqlAlchemyDataTable('test_sql_data', engine=engine)
-    fallback_dataset = SqlAlchemyDataTable('test_sql_data', engine=engine)
+    dataset = SqlAlchemyDatatable('test_sql_data', engine=engine)
+    fallback_dataset = SqlAlchemyDatatable('test_sql_data', engine=engine)
     # override columns attribute to test fallback
     fallback_dataset.columns = fallback_dataset.column_reflection_fallback()
 

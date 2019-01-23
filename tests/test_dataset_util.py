@@ -75,7 +75,7 @@ class TestUtilMethods(unittest.TestCase):
                 test_partition['weights'][test_partition['values'].index(k)])
 
     def test_categorical_data_na(self):
-        df = ge.dataset.PandasDataTable({
+        df = ge.dataset.PandasDatatable({
             'my_column': ["A", "B", "A", "B", None]
         })
         partition = ge.dataset.util.categorical_partition_data(df['my_column'])
@@ -116,7 +116,7 @@ class TestUtilMethods(unittest.TestCase):
             ge.dataset.util.is_valid_partition_object({'bins': [0, 1, 2]}))
 
     def test_recursively_convert_to_json_serializable(self):
-        D = ge.dataset.PandasDataTable({
+        D = ge.dataset.PandasDatatable({
             'x' : [1,2,3,4,5,6,7,8,9,10],
         })
         D.expect_column_values_to_be_in_set(
@@ -574,7 +574,7 @@ class TestUtilMethods(unittest.TestCase):
         self.assertEqual(t['df'], D.chi2.mean())
 
     def test_create_multiple_expectations(self):
-        D = ge.dataset.PandasDataTable({
+        D = ge.dataset.PandasDatatable({
             'x' : [1,2,3,4,5,6],
             'y' : [0,2,4,6,8,10],
             'z' : ['hi', 'hello', 'hey', 'howdy', 'hola', 'holy smokes'],

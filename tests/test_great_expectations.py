@@ -9,7 +9,7 @@ import re
 
 import great_expectations as ge
 from great_expectations.dataset.autoinspect import columns_exist
-from great_expectations.dataset import PandasDataTable, MetaPandasDataTable
+from great_expectations.dataset import PandasDatatable, MetaPandasDatatable
 from great_expectations.dataset.base import (
     _calc_validation_statistics,
     ValidationStatistics,
@@ -45,13 +45,13 @@ def isprime(n):
     return True
 
 
-class CustomPandasDataTable(PandasDataTable):
+class CustomPandasDatatable(PandasDatatable):
 
-    @MetaPandasDataTable.column_map_expectation
+    @MetaPandasDatatable.column_map_expectation
     def expect_column_values_to_be_prime(self, column):
         return column.map(isprime)
 
-    @MetaPandasDataTable.expectation(["column", "mostly"])
+    @MetaPandasDatatable.expectation(["column", "mostly"])
     def expect_column_values_to_equal_1(self, column, mostly=None):
         not_null = self[column].notnull()
 
@@ -93,7 +93,7 @@ class TestCustomClass(unittest.TestCase):
         script_path = os.path.dirname(os.path.realpath(__file__))
         df = ge.read_csv(
             script_path+'/test_sets/Titanic.csv',
-            dataset_class=CustomPandasDataTable
+            dataset_class=CustomPandasDatatable
         )
         df.set_default_expectation_argument("result_format", "COMPLETE")
         self.assertEqual(
@@ -145,7 +145,7 @@ class TestCustomClass(unittest.TestCase):
         )
 
     def test_custom_expectation(self):
-        df = CustomPandasDataTable({'x': [1,1,1,1,2]})
+        df = CustomPandasDatatable({'x': [1,1,1,1,2]})
         df.set_default_expectation_argument("result_format", "COMPLETE")
 
         out = df.expect_column_values_to_be_prime('x')
@@ -173,7 +173,7 @@ class TestCustomClass(unittest.TestCase):
 
    # Ensure that Custom Data Set classes can properly call non-overridden methods from their parent class
     def test_base_class_expectation(self):
-        df = CustomPandasDataTable({
+        df = CustomPandasDatatable({
             "aaa": [1, 2, 3, 4, 5],
             "bbb": [10, 20, 30, 40, 50],
             "ccc": [9, 10, 11, 12, 13],
@@ -245,7 +245,7 @@ class TestValidation(unittest.TestCase):
         )
 
     def test_validate_catch_non_existent_expectation(self):
-        df = ge.dataset.PandasDataTable({
+        df = ge.dataset.PandasDatatable({
             "x" : [1,2,3,4,5]
         })
 
@@ -270,7 +270,7 @@ class TestValidation(unittest.TestCase):
         )
 
     def test_validate_catch_invalid_parameter(self):
-        df = ge.dataset.PandasDataTable({
+        df = ge.dataset.PandasDatatable({
             "x": [1, 2, 3, 4, 5]
         })
 
@@ -477,7 +477,7 @@ class TestIO(unittest.TestCase):
             script_path+'/test_sets/Titanic_multi_sheet.xlsx',
         )
         assert df['Name'][0] == 'Allen, Miss Elisabeth Walton'
-        assert isinstance(df, PandasDataTable)
+        assert isinstance(df, PandasDatatable)
 
         # Note that pandas changed the parameter name from sheetname to sheet_name.
         # We will test with both options to ensure that the versions are correct.
@@ -494,7 +494,7 @@ class TestIO(unittest.TestCase):
             )
         assert isinstance(dfs_dict, dict)
         assert list(dfs_dict.keys()) == ['Titanic_1', 'Titanic_2', 'Titanic_3']
-        assert isinstance(dfs_dict['Titanic_1'], PandasDataTable)
+        assert isinstance(dfs_dict['Titanic_1'], PandasDatatable)
         assert dfs_dict['Titanic_1']['Name'][0] == 'Allen, Miss Elisabeth Walton'
 
     def test_read_table(self):
@@ -504,7 +504,7 @@ class TestIO(unittest.TestCase):
             sep=','
         )
         assert df['Name'][0] == 'Allen, Miss Elisabeth Walton'
-        assert isinstance(df, PandasDataTable)
+        assert isinstance(df, PandasDatatable)
 
     def test_read_parquet(self):
         """
@@ -532,7 +532,7 @@ class TestIO(unittest.TestCase):
             script_path+'/test_sets/Titanic.parquet'
         )
         assert df['Name'][1] == 'Allen, Miss Elisabeth Walton'
-        assert isinstance(df, PandasDataTable)
+        assert isinstance(df, PandasDatatable)
 
 
 if __name__ == "__main__":
