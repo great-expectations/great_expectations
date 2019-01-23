@@ -325,7 +325,7 @@ class FileDataset(MetaFileDataset):
     
     @DocInherit
     @Dataset.expectation([])
-    def expect_file_valid_json(self, schema=None,result_format=None,
+    def expect_file_to_be_valid_json(self, schema=None,result_format=None,
                                include_config=False,catch_exceptions=None, 
                                meta=None ):
         
