@@ -29,7 +29,7 @@ from .util import DocInherit, \
 
 
 class MetaPandasDatatable(Datatable):
-    """MetaPandasDatatable is a thin layer between Dataset and PandasDatatable.
+    """MetaPandasDatatable is a thin layer between Datatable and PandasDatatable.
 
     This two-layer inheritance is required to make @classmethod decorators work.
 

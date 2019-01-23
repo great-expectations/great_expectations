@@ -16,7 +16,7 @@ import jsonschema
 
 
 class MetaFileDataset(DataFile):
-    """MetaFileDataset is a thin layer between Dataset and FileDataset.
+    """MetaFileDataset is a thin layer between DataFile and FileDataset.
     This two-layer inheritance is required to make @classmethod decorators work.
     Practically speaking, that means that MetaFileDataset implements \
     expectation decorators, like `file_lines_map_expectation` \
