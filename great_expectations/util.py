@@ -25,7 +25,7 @@ def _convert_to_dataset_class(df, dataset_class, expectations_config=None, autoi
 
 def read_csv(
     filename,
-    dataset_class=dataset.pandas_dataset.PandasDatatable,
+    dataset_class=dataset.pandas_datatable.PandasDatatable,
     expectations_config=None,
     autoinspect_func=None,
     *args, **kwargs
@@ -38,7 +38,7 @@ def read_csv(
 
 def read_json(
     filename,
-    dataset_class=dataset.pandas_dataset.PandasDatatable,
+    dataset_class=dataset.pandas_datatable.PandasDatatable,
     expectations_config=None,
     accessor_func=None,
     autoinspect_func=None,
@@ -59,7 +59,7 @@ def read_json(
 
 def read_excel(
     filename,
-    dataset_class=dataset.pandas_dataset.PandasDatatable,
+    dataset_class=dataset.pandas_datatable.PandasDatatable,
     expectations_config=None,
     autoinspect_func=None,
     *args, **kwargs
@@ -88,7 +88,7 @@ def read_excel(
 
 def read_table(
     filename,
-    dataset_class=dataset.pandas_dataset.PandasDatatable,
+    dataset_class=dataset.pandas_datatable.PandasDatatable,
     expectations_config=None,
     autoinspect_func=None,
     *args, **kwargs
@@ -111,7 +111,7 @@ def read_table(
 
 def read_parquet(
     filename,
-    dataset_class=dataset.pandas_dataset.PandasDatatable,
+    dataset_class=dataset.pandas_datatable.PandasDatatable,
     expectations_config=None,
     autoinspect_func=None,
     *args, **kwargs
@@ -133,7 +133,7 @@ def read_parquet(
 
 
 def from_pandas(pandas_df,
-                dataset_class=dataset.pandas_dataset.PandasDatatable,
+                dataset_class=dataset.pandas_datatable.PandasDatatable,
                 expectations_config=None,
                 autoinspect_func=None
 ):
@@ -141,7 +141,7 @@ def from_pandas(pandas_df,
 
     Args:
         pandas_df (Pandas df): Pandas data frame
-        dataset_class (Dataset class) = dataset.pandas_dataset.PandasDatatable:
+        dataset_class (Dataset class) = dataset.pandas_datatable.PandasDatatable:
             class to which to convert resulting Pandas df
         expectations_config (string) = None: path to great_expectations config file
         autoinspect_func (function) = None: The autoinspection function that should
@@ -161,7 +161,7 @@ def from_pandas(pandas_df,
 def validate(df, expectations_config, *args, **kwargs):
     # FIXME: I'm not sure that this should always default to PandasDataset
     dataset_ = _convert_to_dataset_class(df,
-        dataset.pandas_dataset.PandasDatatable,
+        dataset.pandas_datatable.PandasDatatable,
         expectations_config
     )
     return dataset_.validate(*args, **kwargs)

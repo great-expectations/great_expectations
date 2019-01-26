@@ -1,4 +1,4 @@
-from great_expectations.dataset.pandas_dataset import PandasDatatable
+from great_expectations.dataset.pandas_datatable import PandasDatatable
 
 class CustomPandasDatatable(PandasDatatable):
 

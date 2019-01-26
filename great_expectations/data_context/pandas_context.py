@@ -2,7 +2,7 @@ import pandas as pd
 import os
 
 from .base import DataContext
-from ..dataset.pandas_dataset import PandasDatatable
+from ..dataset.pandas_datatable import PandasDatatable
 
 
 class PandasCSVDataContext(DataContext):
