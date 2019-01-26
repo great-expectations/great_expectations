@@ -1,6 +1,6 @@
 from __future__ import division
 
-from .base import DataFile, Dataset
+from .base import Dataset
 import re
 import numpy as np
 from itertools import compress
@@ -10,13 +10,12 @@ import inspect
 from functools import wraps
 import hashlib
 import os
-import csv
 import json
 import jsonschema
 
 
-class MetaFileDataset(DataFile):
-    """MetaFileDataset is a thin layer between DataFile and FileDataset.
+class MetaFileDataset(Dataset):
+    """MetaFileDataset is a thin layer above FileDataset.
     This two-layer inheritance is required to make @classmethod decorators work.
     Practically speaking, that means that MetaFileDataset implements \
     expectation decorators, like `file_lines_map_expectation` \
@@ -28,10 +27,25 @@ class MetaFileDataset(DataFile):
         
         
     @classmethod
-    
     def file_lines_map_expectation(cls, func):
-        """Constructs an expectation using file lines map semantics.
         
+        """Constructs an expectation using file lines map semantics.
+
+        The file_lines_map_expectations decorator handles boilerplate issues surrounding the common pattern of \
+        evaluating truthiness of some condition on an line by line basis in a file.
+
+        Args:
+            func (function): \
+                The function implementing an expectation that will be applied line by line across a file \
+                The function should take a file and return information about how many lines met expectations.
+
+        Notes:
+            Users can specify skip value k that will cause the expectation function to disregard the first
+            k lines of the file
+
+        See also:
+            :func:`expect_file_line_regex_match_count_to_be_between <great_expectations.dataset.base.Dataset.expect_file_line_regex_match_count_to_be_between>` \
+            for an example of a file_lines_map_expectation
         """
         if PY3:
             argspec = inspect.getfullargspec(func)[0][1:]
@@ -135,13 +149,63 @@ class FileDataset(MetaFileDataset):
         
     @DocInherit
     @MetaFileDataset.file_lines_map_expectation
-            
     def expect_file_line_regex_match_count_to_be_between(self,regex,lines=None, skip=None,
                                                          expected_min_count=0, expected_max_count=None,
                                                          mostly=None, result_format=None, include_config=False, 
                                                          catch_exceptions=None, meta=None):
-        
-        
+        """
+        Expect the number of times a regular expression appears on each line of a file to be between a
+        maximum and minimum value.
+
+        Args: regex:
+            A string that can be compiled as valid regular expression
+
+        Keyword Args:
+            lines: \
+                An empty variable that recieves the file lines from the file_lines_map_expectation method.
+                It doesn't matter what the user gives for this value as it will be replaced with the lines
+                of the file by file_lines_map_expecation. It is recommended the user ignore this argument and leave
+                it at its default.
+
+            skip (nonnegative integer): \
+                Integer specifying the first lines in the file the method should skip before assessing
+                expectations
+
+            expected_min_count (None or nonnegative integer): \
+                Specifies the minimum number of times regex is expected to appear on each line of the
+                file
+
+            expected_max_count (None or nonnegative integer): \
+               Specifies the maximum number of times regex is expected to appear on each line of the
+               file
+
+            mostly (None or number between 0 and 1): \
+
+                Specifies an acceptable error for expectations. If the percentage of unexpected lines is
+                less than mostly, the method still returns true even if all lines don't match the
+                expectation criteria.
+
+            result_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`result_format <result_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
+
+        Returns:
+
+            A JSON-serializable expectation result object.
+
+            Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+        """
         try:
             comp_regex=re.compile(regex)
         except:
@@ -193,6 +257,57 @@ class FileDataset(MetaFileDataset):
                                                     mostly=None, result_format=None, 
                                                     include_config=False,catch_exceptions=None,meta=None):
         
+        """
+        Expect the number of times a regular expression appears on each line of a file to equal some
+        expected count
+
+        Args: regex:
+            A string that can be compiled as valid regular expression
+
+        Keyword Args:
+            lines: \
+                An empty variable that recieves the file lines from the file_lines_map_expectation method.
+                It doesn't matter what the user gives for this value as it will be replaced with the lines
+                of the file by file_lines_map_expecation. It is recommended the user ignore this argument and leave
+                it at its default.
+
+            skip (nonnegative integer): \
+                Integer specifying the first lines in the file the method should skip before assessing
+                expectations
+
+            expected_count (None or nonnegative integer): \
+                Specifies the number of times regex is expected to appear on each line of the
+                file
+
+
+            mostly (None or number between 0 and 1): \
+
+                Specifies an acceptable error for expectations. If the percentage of unexpected lines is
+                less than mostly, the method still returns true even if all lines don't match the
+                expectation criteria.
+
+            result_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`result_format <result_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
+
+        Returns:
+
+            A JSON-serializable expectation result object.
+
+            Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+        """
+        
         try:
             comp_regex=re.compile(regex)
         except:
@@ -215,6 +330,39 @@ class FileDataset(MetaFileDataset):
     
     def expect_file_hash_to_equal(self, value, hash_alg='md5', result_format=None, 
                                                     include_config=False,catch_exceptions=None,meta=None):
+        
+        """
+        Expect computed file hash to equal some given value.
+
+        Args:
+            value: A string to compare with the computed hash value
+
+        Keyword Args:
+            hash_alg (string):  Indicates the hash algorithm to use
+
+            result_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`result_format <result_format>`.
+
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
+
+        Returns:
+            A JSON-serializable expectation result object.
+
+        Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
+        :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+        """
         success = False
         try:
             hash = hashlib.new(hash_alg)
@@ -240,6 +388,38 @@ class FileDataset(MetaFileDataset):
     def expect_file_size_to_be_between(self, minsize, maxsize,result_format=None, 
                                                     include_config=False,catch_exceptions=None,
                                                     meta=None):
+        
+        """
+        Expect file size to be between a user specified maxsize and minsize.
+
+        Args:
+            minsize(integer): minimum expected file size
+            maxsize(integer): maximum expected file size
+
+        Keyword Args:
+
+            result_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`result_format <result_format>`.
+
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
+
+        Returns:
+            A JSON-serializable expectation result object.
+
+        Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
+        :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+        """
         
        
         
@@ -276,6 +456,35 @@ class FileDataset(MetaFileDataset):
     def expect_file_to_exist(self,result_format=None,include_config=False,
                              catch_exceptions=None, meta=None):
         
+        """
+        Checks to see if a file specified by the user actually exists
+
+
+        Keyword Args:
+
+            result_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`result_format <result_format>`.
+
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
+
+        Returns:
+            A JSON-serializable expectation result object.
+
+        Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
+        :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+        """
+        
         success=False
         if os.path.isfile(self.path):
             success=True
@@ -289,6 +498,43 @@ class FileDataset(MetaFileDataset):
                                            result_format=None, 
                                            include_config=False,
                                            catch_exceptions=None,meta=None):
+        
+        """
+        Checks to see if a file has a line with unique delimited values,
+        such a line may be used as a table header. 
+
+
+        Keyword Args:
+            skip (nonnegative integer): \
+                Integer specifying the first lines in the file the method should skip before assessing
+                expectations
+
+            regex (string):
+                A string that can be compiled as valid regular expression. Used to specify the elements
+                of the table header (the column headers)
+
+            result_format (str or None):
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`result_format <result_format>`.
+
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
+
+        Returns:
+            A JSON-serializable expectation result object.
+
+        Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
+        :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+        """
         
         try:
             comp_regex=re.compile(regex)
@@ -328,6 +574,35 @@ class FileDataset(MetaFileDataset):
     def expect_file_to_be_valid_json(self, schema=None,result_format=None,
                                include_config=False,catch_exceptions=None, 
                                meta=None ):
+        
+        """
+        schema : string
+            optional JSON schema file on which JSON data file is validated against
+
+        result_format (str or None):
+            Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+            For more detail, see :ref:`result_format <result_format>`.
+
+        include_config (boolean):
+            If True, then include the expectation config as part of the result object. \
+            For more detail, see :ref:`include_config`.
+
+        catch_exceptions (boolean or None):
+            If True, then catch exceptions and include them as part of the result object. \
+            For more detail, see :ref:`catch_exceptions`.
+
+        meta (dict or None):
+            A JSON-serializable dictionary (nesting allowed) that will
+            be included in the output without modification. \
+
+        For more detail, see :ref:`meta`.
+
+        Returns:
+            A JSON-serializable expectation result object.
+
+        Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
+        :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+        """
         
         success = False
         if schema is None:
