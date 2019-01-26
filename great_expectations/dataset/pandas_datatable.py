@@ -21,7 +21,8 @@ from dateutil.parser import parse
 from scipy import stats
 from six import PY3, integer_types, string_types
 
-from .base import Datatable, Dataset
+from .base import Dataset
+from .datatable import Datatable
 from .util import DocInherit, \
     is_valid_partition_object, is_valid_categorical_partition_object, is_valid_continuous_partition_object, \
     _scipy_distribution_positional_args_from_dict, validate_distribution_parameters,\
