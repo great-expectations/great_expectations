@@ -17,7 +17,7 @@ def test_db_connection_string(tmpdir_factory):
     path = tmpdir_factory.mktemp("db_context").join("test.db")
     engine = sa.create_engine('sqlite:///' + str(path))
     df1.to_sql('table_1', con=engine, index=True)
-    df2.to_sql('table_2', con=engine, index=True)
+    df2.to_sql('table_2', con=engine, index=True, schema='main')
 
     # Return a connection string to this newly-created db
     return 'sqlite:///' + str(path)
@@ -45,8 +45,15 @@ def test_sqlalchemy_data_context(test_db_connection_string):
         'SqlAlchemy', test_db_connection_string, echo=False)
 
     assert context.list_datasets() == ['table_1', 'table_2']
+<<<<<<< HEAD
     dataset = context.get_dataset('table_1')
     assert isinstance(dataset, SqlAlchemyDatatable)
+=======
+    dataset1 = context.get_dataset('table_1')
+    dataset2 = context.get_dataset('table_2', schema='main')
+    assert isinstance(dataset1, SqlAlchemyDataset)
+    assert isinstance(dataset2, SqlAlchemyDataset)
+>>>>>>> d4149205ba93a7f95f28d5cc512da726fb627cb6
 
 
 def test_pandas_data_context(test_folder_connection_path):
