@@ -193,15 +193,14 @@ class MetaPandasDataset(Dataset):
         inner_wrapper.__name__ = func.__name__
         inner_wrapper.__doc__ = func.__doc__
         return inner_wrapper
-
+    
+    
     @classmethod
     def column_aggregate_expectation(cls, func):
         """Constructs an expectation using column-aggregate semantics.
-
         The MetaPandasDataset implementation replaces the "column" parameter supplied by the user with a pandas
         Series object containing the actual column from the relevant pandas dataframe. This simplifies the implementing
         expectation logic while preserving the standard Dataset signature and expected behavior.
-
         See :func:`column_aggregate_expectation <great_expectations.Dataset.base.Dataset.column_aggregate_expectation>` \
         for full documentation of this function.
         """
@@ -267,7 +266,137 @@ class MetaPandasDataset(Dataset):
                              (result_format['result_format'],))
 
         return inner_wrapper
+    
+    @classmethod
+    def multicolumn_aggregate_expectation(cls, func):
+        """Constructs an expectation using multicolumn-aggregate semantics.
+        The MetaPandasDataTable implementation replaces the "column" parameter supplied by the user with a pandas
+        Series object containing the actual column from the relevant pandas dataframe. This simplifies the implementing
+        expectation logic while preserving the standard Dataset signature and expected behavior.
 
+        See :func:`column_aggregate_expectation <great_expectations.Dataset.base.Dataset.column_aggregate_expectation>` \
+        for full documentation of this function.
+        """
+        if PY3:
+            argspec = inspect.getfullargspec(func)[0][1:]
+        else:
+            argspec = inspect.getargspec(func)[0][1:]
+    
+        @cls.expectation(argspec)
+        @wraps(func)
+        def inner_wrapper(self, columns, result_format = None,
+                          ignore_row_if="all_values_are_missing",
+                          *args, **kwargs):
+    
+            if result_format is None:
+                result_format = self.default_expectation_args["result_format"]
+
+            df=self[columns]
+
+            if ignore_row_if == "all_values_are_missing":
+                boolean_mapped_skip_values = df.isnull().all(axis=1)
+            elif ignore_row_if == "any_value_is_missing":
+                boolean_mapped_skip_values = df.isnull().any(axis=1)
+            elif ignore_row_if == "never":
+                boolean_mapped_skip_values = pd.Series([False] * len(df))
+            else:
+                raise ValueError(
+                    "Unknown value of ignore_row_if: %s", (ignore_row_if,))
+
+            evaluation_result = func(
+                    self, df[boolean_mapped_skip_values == False], *args, **kwargs)
+
+            nonnull_count = (~boolean_mapped_skip_values).sum()
+            element_count = len(df)
+            null_count = element_count-nonnull_count
+            column_count = len(columns)
+
+            if 'success' not in evaluation_result:
+                raise ValueError(
+                    "Column aggregate expectation failed to return success")
+
+            if 'result' not in evaluation_result or\
+            'observed_value' not in evaluation_result['result']:
+                raise ValueError(
+                    "Column aggregate expectation failed to return observed_value")
+
+            if 'observed_boolean' not in evaluation_result['result']:
+                raise ValueError(
+                    "Column aggregate expectation failed to return observed_boolean")
+
+            if "observed_name" not in evaluation_result['result']:
+                raise ValueError(
+                    "Column aggregate expectation failed to return observed_name")
+
+            observed_boolean = np.array(evaluation_result['result']['observed_boolean'])
+
+            observed_value = np.array(evaluation_result['result']['observed_value'])
+
+            observed_name = np.array(evaluation_result['result']['observed_name'])
+
+            # Retain support for string-only output formats:
+            result_format = parse_result_format(result_format)
+
+            return_obj = {
+                'success': bool(evaluation_result['success'])
+            }
+
+            if result_format['result_format'] == 'BOOLEAN_ONLY' or \
+            len(evaluation_result['result']['observed_boolean']) == 1:
+                return return_obj
+
+            if element_count > 0:
+                missing_percent = null_count/element_count
+            else:
+                None
+
+            eval_count = len(observed_value)
+            unexpected_eval_count = eval_count-np.sum(observed_boolean)
+            return_obj['result'] = {
+                    "element_count": element_count,
+                    "missing_count": null_count,
+                    "missing_percent": missing_percent,
+                    "column_count": column_count,
+                    "evaluation_count":eval_count,
+                    "unexpected_evaluation_count": unexpected_eval_count,
+                    "unexpected_evaluation_percent":unexpected_eval_count/eval_count
+                    }
+
+            if result_format['result_format'] == 'BASIC':
+                return return_obj
+
+            if 'details' in evaluation_result['result']:
+                return_obj['result']['details'] = evaluation_result['result']['details']
+
+            if unexpected_eval_count > 0:
+                partial_unexpected_count = result_format['partial_unexpected_count']
+                unexpected_observed_name = observed_name[~observed_boolean]
+                unexpected_observed_value = observed_value[~observed_boolean]
+                partial_count = min(partial_unexpected_count, unexpected_eval_count)
+                unexpected_eval_list = []
+                for i in range(0, partial_count):
+                    unexpected_eval_list.append((unexpected_observed_name[i],
+                                                 unexpected_observed_value[i]))
+                partial_unexpected_eval_list = dict(unexpected_eval_list)
+                return_obj["result"]["partial_unexpected_eval_list"] = partial_unexpected_eval_list
+
+                if result_format['result_format'] == "SUMMARY":
+                    return return_obj
+
+                for i in range(partial_count, unexpected_eval_count):
+                    unexpected_eval_list.append((unexpected_observed_name[i],
+                                                 unexpected_observed_value[i]))
+
+                unexpected_eval_list = dict(unexpected_eval_list)
+                return_obj['result']['unexpected_eval_list'] = unexpected_eval_list
+                
+                if result_format['result_format'] == "COMPLETE":
+                    return return_obj
+
+            raise ValueError("Unknown result_format %s." %
+                             (result_format['result_format'],))
+
+        return inner_wrapper
 
 class PandasDataset(MetaPandasDataset, pd.DataFrame):
     """
@@ -1513,3 +1642,101 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             results.append((a, b) in value_pairs_set)
 
         return pd.Series(results, temp_df.index)
+
+    @MetaPandasDataset.multicolumn_aggregate_expectation
+    def expect_kl_divergence_between_columns_to_be_between(self, columns,
+                                                           expected_min=0,
+                                                           expected_max=None,
+                                                           bins=None,
+                                                           ignore_row_if="all_values_are_missing",
+                                                           result_format=None, 
+                                                           include_config=False, 
+                                                           catch_exceptions=None, 
+                                                           meta=None):
+
+        if expected_min == None and expected_max == None:
+            raise ValueError("expected_min and expected_max cannot both be None")
+        
+        if not (isinstance(expected_min,Number) and  
+               isinstance(expected_max,Number)):
+            raise ValueError("expected_min and expected_max must both be numbers")
+
+        if expected_min > expected_max:
+            raise ValueError("expected_min must be less than expected_max")
+
+        if len(columns.columns) == 0:
+            raise ValueError("columns must be non-empty")
+
+        observed_value = []
+        observed_boolean = []
+        observed_name = []
+        column_list = columns.columns
+        num_columns = len(column_list)
+
+        for i in range(0, num_columns):
+            column_A = columns[column_list[i]]
+            column_A_name = column_A.name
+            column_A_data_type = column_A.dtype
+
+            for j in range(i+1, num_columns):
+                column_B = columns[column_list[j]]
+                column_B_name = column_B.name
+                column_B_data_type = column_B.dtype
+                
+                if column_A_data_type == column_B_data_type:
+                    
+                    if column_A_data_type.name == "object" or \
+                       column_A_data_type.name == "bool" or \
+                       column_A_data_type.name == "category":
+                        column_A_dist = column_A.value_counts()/len(column_A)
+                        column_B_dist = column_B.value_counts()/len(column_B)
+
+                    else:
+
+                        if bins != None:
+
+                            if column_A_name in bins:
+                                column_A_bins = bins[column_A_name]
+                                column_A_dist = np.histogram(column_A,
+                                                             column_A_bins)[0]
+                            else:
+                                column_A_dist=np.histogram(column_A)[0]
+
+                            if column_B_name in bins:
+                                column_B_bins = bins[column_B_name]
+                                column_B_dist = np.histogram(column_B,
+                                                             column_B_bins)[0]
+                            else:
+                                column_B_dist = np.histogram(column_B)[0]
+
+                        else:
+                            column_A_dist = np.histogram(column_A)[0]
+                            column_B_dist = np.histogram(column_B)[0]
+
+                    try:
+                        kl_div = stats.entropy(column_A_dist, column_B_dist)
+                    except (ValueError):
+                        continue
+
+                    if expected_max != None and expected_min!=None:
+                        boolean_val = (kl_div >= expected_min and kl_div <= expected_max)
+
+                    elif expected_max != None:
+                        boolean_val = kl_div <= expected_max
+
+                    elif expected_min != None:
+                        boolean_val >= expected_min
+
+                    comparison_name = column_A_name + " v. " + column_B_name
+
+                    observed_value.append(kl_div)
+                    observed_boolean.append(boolean_val)
+                    observed_name.append(comparison_name)
+
+        success = all(observed_boolean)
+        evaluation_result = {"success":success,
+                             "result":{"observed_boolean":observed_boolean,
+                                       "observed_value":observed_value,
+                                       "observed_name":observed_name}}
+
+        return evaluation_result
