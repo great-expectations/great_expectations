@@ -227,21 +227,35 @@ class Dataset(object):
     @classmethod
     def column_aggregate_expectation(cls, func):
         """Constructs an expectation using column-aggregate semantics.
-
         The column_aggregate_expectation decorator handles boilerplate issues surrounding the common pattern of \
         evaluating truthiness of some condition on an aggregated-column basis.
-
         Args:
             func (function): \
                 The function implementing an expectation using an aggregate property of a column. \
                 The function should take a column of data and return the aggregate value it computes.
-
         Notes:
             column_aggregate_expectation *excludes null values* from being passed to the function
-
         See also:
             :func:`expect_column_mean_to_be_between <great_expectations.dataset.base.Dataset.expect_column_mean_to_be_between>` \
             for an example of a column_aggregate_expectation
+        """
+        raise NotImplementedError
+
+    @classmethod
+    def multicolumn_aggregate_expectation(cls, func):
+        """Constructs an expectation using multicolumn-aggregate semantics.
+
+        The multicolumn_aggregate_expectation decorator handles boilerplate issues surrounding the common pattern of \
+        evaluating truthiness of some condition for aggregated values across multiple columns.
+
+        Args:
+            func (function): \
+                The function implementing an expectation using an aggregate property of the columns. \
+                The function should take a list of columns from the data and return the aggregate value computed for each column.
+
+        See also:
+            :func:`expect_kl_divergence_between_columns_to_be_between <great_expectations.dataset.base.Dataset.expect_kl_divergence_between_columns_to_be_between>` \
+            for an example of a multicolumn_aggregate_expectation
         """
         raise NotImplementedError
 
@@ -3320,6 +3334,58 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             value_pairs_set (list of tuples): All the valid pairs to be matched
 
         Keyword Args:
+            ignore_row_if (str): "both_values_are_missing", "either_value_is_missing", "neither
+
+        Other Parameters:
+            result_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`result_format <result_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
+
+        Returns:
+            A JSON-serializable expectation result object.
+
+            Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+        """
+        raise NotImplementedError
+
+    def expect_kl_divergence_between_columns_to_be_between(self, columns,
+                                                           expected_min=0,
+                                                           expected_max=None,
+                                                           bins=None,
+                                                           ignore_row_if="all_values_are_missing",
+                                                           result_format=None,
+                                                           include_config=False,
+                                                           catch_exceptions=None,
+                                                           meta=None):
+        """
+        Expect the kl_divergence between two columns of the same type and same
+        number of unique values or bins to be between a specified max and min.
+        Computed for all pairs of comparable (same type/same number of bins) columns.
+
+        Args:
+            columns (str_list): List of names of columns to be analyzed
+
+            expected_min (int or None): Specifies minimum expected kl_divergence
+            between all comparable columns
+
+            expected_max (int or None): Specifies maximum expected kl_divergence
+            between all comparable columns
+
+            bins (dict): A dictionary that contains the bins to be used for discretizing
+            continuous columns so that kl_divergence can be computed. The dictionary
+            should be of the form {"column_name1": bins1, "column_name2": bins2,...}
+
             ignore_row_if (str): "both_values_are_missing", "either_value_is_missing", "neither
 
         Other Parameters:
