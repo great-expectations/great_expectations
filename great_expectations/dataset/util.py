@@ -180,7 +180,7 @@ def recursively_convert_to_json_serializable(test_obj):
         return float(round(test_obj, sys.float_info.dig))
 
     elif isinstance(test_obj, pd.DataFrame):
-        return recursively_convert_to_json_serializable(test_obj.to_dict())
+        return recursively_convert_to_json_serializable(test_obj.to_dict(orient='records'))
 
     # elif np.issubdtype(type(test_obj), np.complexfloating):
         # Note: Use np.complexfloating to avoid Future Warning from numpy

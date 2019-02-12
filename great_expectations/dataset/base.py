@@ -1032,23 +1032,19 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             return return_obj
 
         # Try to return the most common values, if possible.
-        # If we have a dict, we probably had a dataframe; punt
-        if isinstance(unexpected_list, list):
-            try:
-                partial_unexpected_counts = [
-                    {'value': key, 'count': value}
-                    for key, value
-                    in sorted(
-                        Counter(unexpected_list).most_common(
-                            result_format['partial_unexpected_count']),
-                        key=lambda x: (-x[1], x[0]))
-                ]
-            except TypeError:
-                partial_unexpected_counts = [
-                    'partial_exception_counts requires a hashable type']
-        else:
-            partial_unexpected_counts = ['partial_unexpected_counts requires a flattened type']
-
+        try:
+            partial_unexpected_counts = [
+                {'value': key, 'count': value}
+                for key, value
+                in sorted(
+                    Counter(unexpected_list).most_common(
+                        result_format['partial_unexpected_count']),
+                    key=lambda x: (-x[1], x[0]))
+            ]
+        except TypeError:
+            partial_unexpected_counts = [
+                'partial_exception_counts requires a hashable type']
+        
         return_obj['result'].update(
             {
                 'partial_unexpected_index_list': unexpected_index_list[:result_format['partial_unexpected_count']] if unexpected_index_list is not None else None,
