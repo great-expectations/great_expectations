@@ -420,10 +420,10 @@ class FileDataset(MetaFileDataset):
         except OSError:
             raise
 
-        if isinstance(minsize) != int:
+        if not isinstance(minsize,int):
             raise TypeError('minsize must be an integer')
 
-        if isinstance(maxsize) != int:
+        if not isinstance(maxsize,int):
             raise TypeError('maxsize must be an integer')
 
         if minsize < 0:
