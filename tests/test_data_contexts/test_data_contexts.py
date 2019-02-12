@@ -45,15 +45,10 @@ def test_sqlalchemy_data_context(test_db_connection_string):
         'SqlAlchemy', test_db_connection_string, echo=False)
 
     assert context.list_datasets() == ['table_1', 'table_2']
-<<<<<<< HEAD
-    dataset = context.get_dataset('table_1')
-    assert isinstance(dataset, SqlAlchemyDatatable)
-=======
     dataset1 = context.get_dataset('table_1')
     dataset2 = context.get_dataset('table_2', schema='main')
-    assert isinstance(dataset1, SqlAlchemyDataset)
-    assert isinstance(dataset2, SqlAlchemyDataset)
->>>>>>> d4149205ba93a7f95f28d5cc512da726fb627cb6
+    assert isinstance(dataset1, SqlAlchemyDatatable)
+    assert isinstance(dataset2, SqlAlchemyDatatable)
 
 
 def test_pandas_data_context(test_folder_connection_path):
