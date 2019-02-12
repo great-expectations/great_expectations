@@ -240,7 +240,7 @@ class MetaPandasDataset(Dataset):
             return_obj = self._format_column_map_output(
                 result_format, success,
                 element_count, nonnull_count,
-                unexpected_list, unexpected_index_list
+                unexpected_list.to_dict(orient='records'), unexpected_index_list
             )
 
             return return_obj
