@@ -10,11 +10,10 @@
       "b" : [1, 2, 1, 2, 1, 2, 1, 2, 1, null]
     },
     "tests" : [{
-      "title": "Basic test; ignore if all are missing",
+      "title": "Basic test; ignore if all are missing (the default behavior)",
       "exact_match_out" : false,
       "in": {
-        "column_list": ["w", "x"],
-        "ignore_row_if": "all_values_are_missing"
+        "column_list": ["w", "x"]
       },
       "out": {
         "unexpected_list": [],
