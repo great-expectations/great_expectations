@@ -289,28 +289,29 @@ class MetaPandasDataset(Dataset):
                           *args, **kwargs):
     
             if result_format is None:
-                result_format = self.default_expectation_args["result_format"]
+                result_format = self.default_expectation_args["result_format"] #Set default result_format
 
-            df=self[columns]
+            df=self[columns] #Subset data by user specified columns
 
-            if ignore_row_if == "all_values_are_missing":
-                boolean_mapped_skip_values = df.isnull().all(axis=1)
+            if ignore_row_if == "all_values_are_missing": 
+                boolean_mapped_skip_values = df.isnull().all(axis=1) #If all values for a row are missing, the row is null
             elif ignore_row_if == "any_value_is_missing":
-                boolean_mapped_skip_values = df.isnull().any(axis=1)
+                boolean_mapped_skip_values = df.isnull().any(axis=1) #If any values for a row are missing, the row is null
             elif ignore_row_if == "never":
-                boolean_mapped_skip_values = pd.Series([False] * len(df))
+                boolean_mapped_skip_values = pd.Series([False] * len(df)) #No rows are null
             else:
                 raise ValueError(
                     "Unknown value of ignore_row_if: %s", (ignore_row_if,))
 
             evaluation_result = func(
-                    self, df[boolean_mapped_skip_values == False], *args, **kwargs)
+                    self, df[boolean_mapped_skip_values == False], *args, **kwargs) #Evaluate multicol aggregate function
 
-            nonnull_count = (~boolean_mapped_skip_values).sum()
-            element_count = len(df)
-            null_count = element_count-nonnull_count
-            column_count = len(columns)
+            nonnull_count = (~boolean_mapped_skip_values).sum() #Nonnull rows
+            element_count = len(df) #Total rows
+            null_count = element_count-nonnull_count #Null rows
+            column_count = len(columns)  #number of columns
 
+            #Check of requisite data is returned
             if 'success' not in evaluation_result:
                 raise ValueError(
                     "Column aggregate expectation failed to return success")
@@ -328,17 +329,20 @@ class MetaPandasDataset(Dataset):
                 raise ValueError(
                     "Column aggregate expectation failed to return observed_name")
 
-            observed_boolean = np.array(evaluation_result['result']['observed_boolean'])
+            #An array where each element is the boolean result of the expectation applied to some subset (usually a pair) of columns
+            observed_boolean = np.array(evaluation_result['result']['observed_boolean']) 
 
+            #An array where each element is the functional value of the expectation applied to some subset (usually a pair) of columns
             observed_value = np.array(evaluation_result['result']['observed_value'])
 
+            #An array where each element is a string identifying the expectation applied to a particular subset (usually pair) of columns
             observed_name = np.array(evaluation_result['result']['observed_name'])
 
             # Retain support for string-only output formats:
             result_format = parse_result_format(result_format)
 
             return_obj = {
-                'success': bool(evaluation_result['success'])
+                'success': bool(evaluation_result['success']) #BOOLEAN ONLY retnrs the boolean success value
             }
 
             if result_format['result_format'] == 'BOOLEAN_ONLY' or \
@@ -346,20 +350,20 @@ class MetaPandasDataset(Dataset):
                 return return_obj
 
             if element_count > 0:
-                missing_percent = null_count/element_count
+                missing_percent = null_count/element_count #Percentage of null rows
             else:
                 None
 
             eval_count = len(observed_value)
             unexpected_eval_count = eval_count-np.sum(observed_boolean)
             return_obj['result'] = {
-                    "element_count": element_count,
-                    "missing_count": null_count,
-                    "missing_percent": missing_percent,
-                    "column_count": column_count,
-                    "evaluation_count":eval_count,
-                    "unexpected_evaluation_count": unexpected_eval_count,
-                    "unexpected_evaluation_percent":unexpected_eval_count/eval_count
+                    "element_count": element_count, #Row count
+                    "missing_count": null_count,   # Null row coutn
+                    "missing_percent": missing_percent, #Null row percentage
+                    "column_count": column_count,      #Number of columns 
+                    "evaluation_count":eval_count,    #Number of column subsets to which the expectation was applied  
+                    "unexpected_evaluation_count": unexpected_eval_count,  #Number of column subsets for which the expectation was not met
+                    "unexpected_evaluation_percent":unexpected_eval_count/eval_count  #Percentage of column subsets for which the expectation was not met
                     }
 
             if result_format['result_format'] == 'BASIC':
@@ -368,21 +372,23 @@ class MetaPandasDataset(Dataset):
             if 'details' in evaluation_result['result']:
                 return_obj['result']['details'] = evaluation_result['result']['details']
 
+            #Assemble list of column subsets not meeting the expectation
             if unexpected_eval_count > 0:
-                partial_unexpected_count = result_format['partial_unexpected_count']
-                unexpected_observed_name = observed_name[~observed_boolean]
-                unexpected_observed_value = observed_value[~observed_boolean]
-                partial_count = min(partial_unexpected_count, unexpected_eval_count)
-                unexpected_eval_list = []
+                partial_unexpected_count = result_format['partial_unexpected_count'] #Check if there is a specified partial_unexpected count
+                unexpected_observed_name = observed_name[~observed_boolean]  #Get the string identifiers for column subsets not meeting expectations
+                unexpected_observed_value = observed_value[~observed_boolean] #Get the function return value for column subsets not meeting expectations
+                partial_count = min(partial_unexpected_count, unexpected_eval_count) #Set the number of column subsets to be included in a partial_unexpected list
+                unexpected_eval_list = [] #Initialize list for column subsets not meeting expectations
+                #Assemble partial unexpected list and turn into dictionary
                 for i in range(0, partial_count):
                     unexpected_eval_list.append((unexpected_observed_name[i],
                                                  unexpected_observed_value[i]))
-                partial_unexpected_eval_list = dict(unexpected_eval_list)
+                partial_unexpected_eval_list = dict(unexpected_eval_list) #Create dictionary
                 return_obj["result"]["partial_unexpected_eval_list"] = partial_unexpected_eval_list
 
                 if result_format['result_format'] == "SUMMARY":
                     return return_obj
-
+                #Assemble full list of column subsets not meeting expectations and transform into dictionary
                 for i in range(partial_count, unexpected_eval_count):
                     unexpected_eval_list.append((unexpected_observed_name[i],
                                                  unexpected_observed_value[i]))
@@ -1667,72 +1673,77 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         if len(columns.columns) == 0:
             raise ValueError("columns must be non-empty")
 
-        observed_value = []
-        observed_boolean = []
-        observed_name = []
-        column_list = columns.columns
-        num_columns = len(column_list)
+        observed_value = [] #Initialize list for boolean values of expectation applied to subset of columns
+        observed_boolean = [] #Initialize list for return values of expectation applied to subset of columns
+        observed_name = []    #Initialize list for identifiers of expectation applied to subset of columns
+        column_list = columns.columns #List of names of columns under consideration
+        num_columns = len(column_list) #Total number of columns
 
-        for i in range(0, num_columns):
-            column_A = columns[column_list[i]]
-            column_A_name = column_A.name
-            column_A_data_type = column_A.dtype
+        #We consider the kl-divergence between each pair of comparable columns
+        for i in range(0, num_columns): 
+            column_A = columns[column_list[i]]  #Set aside ith column as column A
+            column_A_name = column_A.name       # Get column A name
+            column_A_data_type = column_A.dtype #Get column A datatype
 
-            for j in range(i+1, num_columns):
-                column_B = columns[column_list[j]]
-                column_B_name = column_B.name
-                column_B_data_type = column_B.dtype
+            for j in range(i+1, num_columns): 
+                column_B = columns[column_list[j]] #Set aside jth column as column B
+                column_B_name = column_B.name      #Get column B name
+                column_B_data_type = column_B.dtype #Get column B datatype
                 
-                if column_A_data_type == column_B_data_type:
+                if column_A_data_type == column_B_data_type: #Only compute kl-divervgence between columns of the same type
                     
+                    #If A and B are categorical...
                     if column_A_data_type.name == "object" or \
                        column_A_data_type.name == "bool" or \
                        column_A_data_type.name == "category":
                         column_A_dist = column_A.value_counts()/len(column_A)
                         column_B_dist = column_B.value_counts()/len(column_B)
 
+                    #If A and B are numeric...
                     else:
 
-                        if bins != None:
+                        if bins != None: #If there are user specified bins...
 
-                            if column_A_name in bins:
-                                column_A_bins = bins[column_A_name]
+                            if column_A_name in bins: #If there are user specified bins for column A...
+                                column_A_bins = bins[column_A_name] #Get the bins
                                 column_A_dist = np.histogram(column_A,
-                                                             column_A_bins)[0]
+                                                             column_A_bins)[0] #Build discretized distribution for column A
                             else:
-                                column_A_dist=np.histogram(column_A)[0]
+                                column_A_dist=np.histogram(column_A)[0] #If there are no specified bins for column A use the default 10 bins
 
-                            if column_B_name in bins:
+                            if column_B_name in bins: #Same process as above for column B...
                                 column_B_bins = bins[column_B_name]
                                 column_B_dist = np.histogram(column_B,
                                                              column_B_bins)[0]
                             else:
                                 column_B_dist = np.histogram(column_B)[0]
 
-                        else:
+                        else: #if there are no user specified bins, use the default 10 bins for both columns
                             column_A_dist = np.histogram(column_A)[0]
                             column_B_dist = np.histogram(column_B)[0]
 
                     try:
-                        kl_div = stats.entropy(column_A_dist, column_B_dist)
-                    except (ValueError):
+                        kl_div = stats.entropy(column_A_dist, column_B_dist) #Compute the kl-divergence if possible (if the discrete distributions have the same number of elements)
+                    except (ValueError): #If the kl-divergence is not computable, just skip this column pair
                         continue
 
-                    if expected_max != None and expected_min!=None:
+                    if expected_max != None and expected_min!=None: #Determine if expectation is met if max and min are specified
                         boolean_val = (kl_div >= expected_min and kl_div <= expected_max)
 
-                    elif expected_max != None:
+                    elif expected_max != None: #Determine if expectation is met if only max is specified
                         boolean_val = kl_div <= expected_max
 
-                    elif expected_min != None:
+                    elif expected_min != None: #Determine if expectation is met if only min is specified
                         boolean_val >= expected_min
 
-                    comparison_name = column_A_name + " v. " + column_B_name
+                    comparison_name = column_A_name + " v. " + column_B_name #Create name for column pair expectation
 
+                    #Append appropriate values to appropriate returns lists
                     observed_value.append(kl_div)
                     observed_boolean.append(boolean_val)
                     observed_name.append(comparison_name)
 
+        #Prepare return object
         success = all(observed_boolean)
         evaluation_result = {"success":success,
                              "result":{"observed_boolean":observed_boolean,

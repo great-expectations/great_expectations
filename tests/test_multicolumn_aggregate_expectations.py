@@ -6,28 +6,28 @@ import great_expectations as ge
 from .test_utils import assertDeepAlmostEqual
 
 def test_expect_kl_divergence_between_columns_to_be_between():
-    test_df = pd.read_csv("./tests/test_sets/car_data.csv")
-    column_list=["city_mpg", "highway_mpg", "num_doors", "engine_location", "price"]
+    test_df = pd.read_csv("./tests/test_sets/car_data.csv") #Read in dataset to test kl_divergence functionality
+    column_list=["city_mpg", "highway_mpg", "num_doors", "engine_location", "price"] # Create column subset list
     bins={"city_mpg":[0, 10, 20, 30, 40, 50],
-          "highway_mpg":[0, 10, 20, 30, 40, 50]}
+          "highway_mpg":[0, 10, 20, 30, 40, 50]} #Set up bins for numeric variables
 
-    test_df = ge.dataset.PandasDataset(test_df)
+    test_df = ge.dataset.PandasDataset(test_df) #Create pandas dataset object
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError): #Raise error when min and max are not specified
         test_df.expect_kl_divergence_between_columns_to_be_between(column_list,
                                                                    expected_min = None,
                                                                    expected_max = None)
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError): #Raise error when min and max are not numeric
         test_df.expect_kl_divergence_between_columns_to_be_between(column_list,
                                                                    expected_min = "0",
                                                                    expected_max = "2")
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError): #Raise error when min is more that max
         test_df.expect_kl_divergence_between_columns_to_be_between(column_list,
                                                                    expected_min = 4,
                                                                    expected_max = 2)
  
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError): #Raise error when there are no columns being examined
         test_df.expect_kl_divergence_between_columns_to_be_between([],
                                                                    expected_min = 0,
                                                                    expected_max = 3)
@@ -107,7 +107,7 @@ def test_expect_kl_divergence_between_columns_to_be_between():
                                                                                         ignore_row_if = "any_value_is_missing")
     assert result_object_successful["success"]
 
-    #Ignore if all are null
+    #Ignore if all are null instead of only some
     result_object_allmissing=test_df.expect_kl_divergence_between_columns_to_be_between(column_list,
                                                                                         expected_min = 0,
                                                                                         expected_max = 0.5,
