@@ -345,8 +345,7 @@ class MetaPandasDataset(Dataset):
                 'success': bool(evaluation_result['success']) #BOOLEAN ONLY retnrs the boolean success value
             }
 
-            if result_format['result_format'] == 'BOOLEAN_ONLY' or \
-            len(evaluation_result['result']['observed_boolean']) == 1:
+            if result_format['result_format'] == 'BOOLEAN_ONLY':
                 return return_obj
 
             if element_count > 0:
@@ -398,6 +397,12 @@ class MetaPandasDataset(Dataset):
                 
                 if result_format['result_format'] == "COMPLETE":
                     return return_obj
+            #If there are no unexpected evaluations but the result_format is still valid...
+            else:
+                if(result_format['result_format'] == "SUMMARY" or \
+                   result_format['result_format'] == "COMPLETE"):
+                    return return_obj
+            
 
             raise ValueError("Unknown result_format %s." %
                              (result_format['result_format'],))
@@ -1662,12 +1667,15 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
         if expected_min == None and expected_max == None:
             raise ValueError("expected_min and expected_max cannot both be None")
+            
+        if expected_min and not isinstance(expected_min,Number):
+            raise ValueError("expected_min must be a number")
         
-        if not (isinstance(expected_min,Number) and  
-               isinstance(expected_max,Number)):
-            raise ValueError("expected_min and expected_max must both be numbers")
+        if expected_max and not isinstance(expected_max,Number):
+            raise ValueError("expected_max must be a number")
+        
 
-        if expected_min > expected_max:
+        if (expected_min and expected_max) and expected_min > expected_max:
             raise ValueError("expected_min must be less than expected_max")
 
         if len(columns.columns) == 0:
@@ -1690,7 +1698,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                 column_B_name = column_B.name      #Get column B name
                 column_B_data_type = column_B.dtype #Get column B datatype
                 
-                if column_A_data_type == column_B_data_type: #Only compute kl-divervgence between columns of the same type
+                if column_A_data_type == column_B_data_type : #Only compute kl-divervgence between columns of the same type
                     
                     #If A and B are categorical...
                     if column_A_data_type.name == "object" or \
@@ -1734,7 +1742,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                         boolean_val = kl_div <= expected_max
 
                     elif expected_min != None: #Determine if expectation is met if only min is specified
-                        boolean_val >= expected_min
+                        boolean_val = kl_div >= expected_min
 
                     comparison_name = column_A_name + " v. " + column_B_name #Create name for column pair expectation
 
