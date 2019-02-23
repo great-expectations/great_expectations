@@ -1690,13 +1690,13 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         #We consider the kl-divergence between each pair of comparable columns
         for i in range(0, num_columns): 
             column_A = columns[column_list[i]]  #Set aside ith column as column A
-            column_A = column_A[pd.notna(column_A)] #Remove NaNs
+            column_A = column_A[~pd.isnull(column_A)] #Remove NaNs
             column_A_name = column_A.name       # Get column A name
             column_A_data_type = column_A.dtype.name #Get column A datatype
 
             for j in range(i+1, num_columns): 
                 column_B = columns[column_list[j]] #Set aside jth column as column B
-                column_B = column_B[pd.notna(column_B)] #Remove NaNs                
+                column_B = column_B[~pd.isnull(column_B)] #Remove NaNs                
                 column_B_name = column_B.name      #Get column B name
                 column_B_data_type = column_B.dtype.name #Get column B datatype
                 
