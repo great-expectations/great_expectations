@@ -1690,66 +1690,72 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         #We consider the kl-divergence between each pair of comparable columns
         for i in range(0, num_columns): 
             column_A = columns[column_list[i]]  #Set aside ith column as column A
+            column_A = column_A[pd.notna(column_A)] #Remove NaNs
             column_A_name = column_A.name       # Get column A name
-            column_A_data_type = column_A.dtype #Get column A datatype
+            column_A_data_type = column_A.dtype.name #Get column A datatype
 
             for j in range(i+1, num_columns): 
                 column_B = columns[column_list[j]] #Set aside jth column as column B
+                column_B = column_B[pd.notna(column_B)] #Remove NaNs                
                 column_B_name = column_B.name      #Get column B name
-                column_B_data_type = column_B.dtype #Get column B datatype
+                column_B_data_type = column_B.dtype.name #Get column B datatype
                 
-                if column_A_data_type == column_B_data_type : #Only compute kl-divervgence between columns of the same type
+                categorical_types = ["object","bool", "category"]
+                numeric_types = ["int64", "float64", "datetime64"]
                     
-                    #If A and B are categorical...
-                    if column_A_data_type.name == "object" or \
-                       column_A_data_type.name == "bool" or \
-                       column_A_data_type.name == "category":
-                        column_A_dist = column_A.value_counts()/len(column_A)
-                        column_B_dist = column_B.value_counts()/len(column_B)
+                #If A and B are categorical...
+                if column_A_data_type in categorical_types\
+                and column_B_data_type in categorical_types:
+                    column_A_dist = column_A.value_counts()/len(column_A)
+                    column_B_dist = column_B.value_counts()/len(column_B)
 
-                    #If A and B are numeric...
-                    else:
+                #If A and B are numeric...
+                elif column_A_data_type in numeric_types\
+                and column_B_data_type in numeric_types:
 
-                        if bins != None: #If there are user specified bins...
+                    if bins != None: #If there are user specified bins...
 
-                            if column_A_name in bins: #If there are user specified bins for column A...
-                                column_A_bins = bins[column_A_name] #Get the bins
-                                column_A_dist = np.histogram(column_A,
-                                                             column_A_bins)[0] #Build discretized distribution for column A
-                            else:
-                                column_A_dist=np.histogram(column_A)[0] #If there are no specified bins for column A use the default 10 bins
+                        if column_A_name in bins: #If there are user specified bins for column A...
+                            column_A_bins = bins[column_A_name] #Get the bins
+                            column_A_dist = np.histogram(column_A,
+                                                         column_A_bins)[0] #Build discretized distribution for column A
+                        else:
+                            column_A_dist=np.histogram(column_A)[0] #If there are no specified bins for column A use the default 10 bins
 
-                            if column_B_name in bins: #Same process as above for column B...
-                                column_B_bins = bins[column_B_name]
-                                column_B_dist = np.histogram(column_B,
-                                                             column_B_bins)[0]
-                            else:
-                                column_B_dist = np.histogram(column_B)[0]
-
-                        else: #if there are no user specified bins, use the default 10 bins for both columns
-                            column_A_dist = np.histogram(column_A)[0]
+                        if column_B_name in bins: #Same process as above for column B...
+                            column_B_bins = bins[column_B_name]
+                            column_B_dist = np.histogram(column_B,
+                                                         column_B_bins)[0]
+                        else:
                             column_B_dist = np.histogram(column_B)[0]
 
-                    try:
-                        kl_div = stats.entropy(column_A_dist, column_B_dist) #Compute the kl-divergence if possible (if the discrete distributions have the same number of elements)
-                    except (ValueError): #If the kl-divergence is not computable, just skip this column pair
-                        continue
+                    else: #if there are no user specified bins, use the default 10 bins for both columns
+                        column_A_dist = np.histogram(column_A)[0]
+                        column_B_dist = np.histogram(column_B)[0]
+                
+                else: #If A and B are not both numeric or both categorical or of an unrecognized type...
+                    continue #Skip the pair
 
-                    if expected_max != None and expected_min!=None: #Determine if expectation is met if max and min are specified
-                        boolean_val = (kl_div >= expected_min and kl_div <= expected_max)
+                try:
+                    kl_div = stats.entropy(column_A_dist, column_B_dist) #Compute the kl-divergence if possible (if the discrete distributions have the same number of elements)
+                except (ValueError): #If the kl-divergence is not computable, just skip this column pair
+                    continue
 
-                    elif expected_max != None: #Determine if expectation is met if only max is specified
-                        boolean_val = kl_div <= expected_max
+                if expected_max != None and expected_min!=None: #Determine if expectation is met if max and min are specified
+                    boolean_val = (kl_div >= expected_min and kl_div <= expected_max)
 
-                    elif expected_min != None: #Determine if expectation is met if only min is specified
-                        boolean_val = kl_div >= expected_min
+                elif expected_max != None: #Determine if expectation is met if only max is specified
+                    boolean_val = kl_div <= expected_max
 
-                    comparison_name = column_A_name + " v. " + column_B_name #Create name for column pair expectation
+                elif expected_min != None: #Determine if expectation is met if only min is specified
+                    boolean_val = kl_div >= expected_min
 
-                    #Append appropriate values to appropriate returns lists
-                    observed_value.append(kl_div)
-                    observed_boolean.append(boolean_val)
-                    observed_name.append(comparison_name)
+                comparison_name = column_A_name + " v. " + column_B_name #Create name for column pair expectation
+
+                #Append appropriate values to appropriate returns lists
+                observed_value.append(kl_div)
+                observed_boolean.append(boolean_val)
+                observed_name.append(comparison_name)
 
         #Prepare return object
         success = all(observed_boolean)
