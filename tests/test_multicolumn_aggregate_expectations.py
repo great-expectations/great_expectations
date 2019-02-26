@@ -65,9 +65,9 @@ def test_expect_kl_divergence_between_columns_to_be_between():
                                               "missing_count": 6,
                                               "missing_percent":6/205,
                                               "column_count": 5,
-                                              "evaluation_count":2,
+                                              "evaluation_count":4,
                                               "unexpected_evaluation_count":1,
-                                              "unexpected_evaluation_percent":0.5}}
+                                              "unexpected_evaluation_percent":0.25}}
 
     assertDeepAlmostEqual(expected_result_object_basic, result_object_basic)
 
@@ -83,9 +83,9 @@ def test_expect_kl_divergence_between_columns_to_be_between():
                                                 "missing_count": 6,
                                                 "missing_percent":6/205,
                                                 "column_count": 5,
-                                                "evaluation_count":2,
+                                                "evaluation_count":4,
                                                 "unexpected_evaluation_count":1,
-                                                "unexpected_evaluation_percent":0.5,
+                                                "unexpected_evaluation_percent":0.25,
                                                 "partial_unexpected_eval_list":{"num_doors v. engine_location":1.13749285}}}
 
     assertDeepAlmostEqual(expected_result_object_summary, result_object_summary)
@@ -102,9 +102,9 @@ def test_expect_kl_divergence_between_columns_to_be_between():
                                                  "missing_count": 6,
                                                  "missing_percent":6/205,
                                                  "column_count": 5,
-                                                 "evaluation_count":2,
+                                                 "evaluation_count":4,
                                                  "unexpected_evaluation_count":1,
-                                                 "unexpected_evaluation_percent":0.5,
+                                                 "unexpected_evaluation_percent":0.25,
                                                  "partial_unexpected_eval_list":{"num_doors v. engine_location": 1.13749285},
                                                  'unexpected_eval_list':{"num_doors v. engine_location": 1.13749285}}}
 
@@ -131,11 +131,13 @@ def test_expect_kl_divergence_between_columns_to_be_between():
                                                    "missing_count": 0,
                                                    "missing_percent":0,
                                                    "column_count": 5,
-                                                   "evaluation_count":2,
-                                                   "unexpected_evaluation_count":1,
+                                                   "evaluation_count":4,
+                                                   "unexpected_evaluation_count":2,
                                                    "unexpected_evaluation_percent":0.5,
-                                                   "partial_unexpected_eval_list":{"num_doors v. engine_location": 1.174810152},
-                                                   'unexpected_eval_list':{"num_doors v. engine_location": 1.1748101512}}}
+                                                   "partial_unexpected_eval_list":{"num_doors v. engine_location": 1.174810152,
+                                                                                   "engine_location v. num_doors":0.5042833953},
+                                                   'unexpected_eval_list':{"num_doors v. engine_location": 1.1748101512,
+                                                                           "engine_location v. num_doors":0.5042833953}}}
 
     assertDeepAlmostEqual(expected_result_object_allmissing, result_object_allmissing)
 
@@ -152,23 +154,31 @@ def test_expect_kl_divergence_between_columns_to_be_between():
                                                "missing_count": 6,
                                                "missing_percent":6/205,
                                                "column_count": 5,
-                                               "evaluation_count":4,
-                                               "unexpected_evaluation_count":4,
+                                               "evaluation_count":8,
+                                               "unexpected_evaluation_count":8,
                                                "unexpected_evaluation_percent":1,
                                                "partial_unexpected_eval_list":{"num_doors v. engine_location": 1.13749285,
+                                                                               "engine_location v. num_doors":0.49183545587,
                                                                                "city_mpg v. highway_mpg": 0.19327891,
+                                                                               "highway_mpg v. city_mpg": "infinity",
                                                                                "city_mpg v. price":0.707314078,
-                                                                               "highway_mpg v. price":0.8726913988},
+                                                                               "price v. city_mpg":"infinity",
+                                                                               "highway_mpg v. price":0.8726913988,
+                                                                               "price v. highway_mpg":0.988363088012},
                                                'unexpected_eval_list':{"num_doors v. engine_location": 1.13749285,
+                                                                       "engine_location v. num_doors":0.49183545587,
                                                                        "city_mpg v. highway_mpg": 0.19327891,
+                                                                       "highway_mpg v. city_mpg": "infinity",
                                                                        "city_mpg v. price":0.707314078,
-                                                                       "highway_mpg v. price":0.8726913988}}}
+                                                                       "price v. city_mpg":"infinity",
+                                                                       "highway_mpg v. price":0.8726913988,
+                                                                       "price v. highway_mpg":0.988363088012}}}
     assertDeepAlmostEqual(expected_result_object_nobins, result_object_nobins)
     city_bins = [0, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55]
     bins = {"city_mpg":city_bins}
     result_object_no_highway_bins = test_df.expect_kl_divergence_between_columns_to_be_between(column_list,
                                                                                                expected_min=0,
-                                                                                               expected_max=0.1,
+                                                                                               expected_max=0.5,
                                                                                                bins=bins,
                                                                                                ignore_row_if="any_value_is_missing",
                                                                                                result_format="COMPLETE")
@@ -177,17 +187,21 @@ def test_expect_kl_divergence_between_columns_to_be_between():
                                                         "missing_count": 6,
                                                         "missing_percent":6/205,
                                                         "column_count": 5,
-                                                        "evaluation_count":4,
-                                                        "unexpected_evaluation_count":4,
-                                                        "unexpected_evaluation_percent":1,
+                                                        "evaluation_count":8,
+                                                        "unexpected_evaluation_count":6,
+                                                        "unexpected_evaluation_percent":6/8,
                                                         "partial_unexpected_eval_list":{"num_doors v. engine_location": 1.13749285,
-                                                                                        "city_mpg v. highway_mpg": 0.120393878,
+                                                                                        "highway_mpg v. city_mpg":"infinity",
                                                                                         "city_mpg v. price":1.31507597058,
-                                                                                        "highway_mpg v. price":0.872691398786},
+                                                                                        "price v. city_mpg":"infinity",
+                                                                                        "highway_mpg v. price":0.872691398786,
+                                                                                        "price v. highway_mpg":0.988363088},
                                                         'unexpected_eval_list':{"num_doors v. engine_location": 1.13749285,
-                                                                                "city_mpg v. highway_mpg": 0.120393878,
+                                                                                "highway_mpg v. city_mpg":"infinity",
                                                                                 "city_mpg v. price":1.31507597058,
-                                                                                "highway_mpg v. price":0.872691398786}}}
+                                                                                "price v. city_mpg":"infinity",
+                                                                                "highway_mpg v. price":0.872691398786,
+                                                                                "price v. highway_mpg":0.988363088}}}
 
     assertDeepAlmostEqual(expected_result_object_no_highway_bins,
                           result_object_no_highway_bins)
@@ -197,26 +211,24 @@ def test_expect_kl_divergence_between_columns_to_be_between():
 
     result_object_no_city_bins = test_df.expect_kl_divergence_between_columns_to_be_between(column_list,
                                                                                             expected_min=0,
-                                                                                            expected_max=0.1,
+                                                                                            expected_max=0.5,
                                                                                             bins=bins,
                                                                                             ignore_row_if="any_value_is_missing",
-                                                                                            result_format="COMPLETE")
+                                                                                            result_format="SUMMARY")
     expected_result_object_no_city_bins = {"success":False,
                                            "result":{"element_count":205,
                                                      "missing_count": 6,
                                                      "missing_percent":6/205,
                                                      "column_count": 5,
-                                                     "evaluation_count":4,
-                                                     "unexpected_evaluation_count":4,
-                                                     "unexpected_evaluation_percent":1,
+                                                     "evaluation_count":8,
+                                                     "unexpected_evaluation_count":6,
+                                                     "unexpected_evaluation_percent":6/8,
                                                      "partial_unexpected_eval_list":{"num_doors v. engine_location": 1.13749285,
-                                                                                     "city_mpg v. highway_mpg": 0.4528340263,
+                                                                                     "highway_mpg v. city_mpg":"infinity",
                                                                                      "city_mpg v. price":0.70731407779,
-                                                                                     "highway_mpg v. price":1.213306964796},
-                                                     'unexpected_eval_list':{"num_doors v. engine_location": 1.13749285,
-                                                                             "city_mpg v. highway_mpg": 0.4528340263,
-                                                                             "city_mpg v. price":0.70731407779,
-                                                                             "highway_mpg v. price":1.213306964796}}}
+                                                                                     "price v. city_mpg":"infinity",
+                                                                                     "highway_mpg v. price":1.213306964796,
+                                                                                     "price v. highway_mpg":1.7490457462}}}        
 
     assertDeepAlmostEqual(expected_result_object_no_city_bins,
                           result_object_no_city_bins)
@@ -236,9 +248,9 @@ def test_expect_kl_divergence_between_columns_to_be_between():
                                                "missing_count": 6,
                                                "missing_percent":6/205,
                                                "column_count": 5,
-                                               "evaluation_count":2,
+                                               "evaluation_count":4,
                                                "unexpected_evaluation_count":1,
-                                               "unexpected_evaluation_percent":0.5,
+                                               "unexpected_evaluation_percent":0.25,
                                                "partial_unexpected_eval_list":{"num_doors v. engine_location": 1.13749285}}}
 
     assertDeepAlmostEqual(expected_result_object_no_min,
@@ -255,7 +267,7 @@ def test_expect_kl_divergence_between_columns_to_be_between():
                                                "missing_count": 0,
                                                "missing_percent":0,
                                                "column_count": 5,
-                                               "evaluation_count":2,
+                                               "evaluation_count":4,
                                                "unexpected_evaluation_count":0,
                                                "unexpected_evaluation_percent":0}}
 

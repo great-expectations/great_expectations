@@ -330,13 +330,13 @@ class MetaPandasDataset(Dataset):
                     "Column aggregate expectation failed to return observed_name")
 
             #An array where each element is the boolean result of the expectation applied to some subset (usually a pair) of columns
-            observed_boolean = np.array(evaluation_result['result']['observed_boolean']) 
+            observed_boolean = evaluation_result['result']['observed_boolean'] 
 
             #An array where each element is the functional value of the expectation applied to some subset (usually a pair) of columns
-            observed_value = np.array(evaluation_result['result']['observed_value'])
+            observed_value = evaluation_result['result']['observed_value']
 
             #An array where each element is a string identifying the expectation applied to a particular subset (usually pair) of columns
-            observed_name = np.array(evaluation_result['result']['observed_name'])
+            observed_name = evaluation_result['result']['observed_name']
 
             # Retain support for string-only output formats:
             result_format = parse_result_format(result_format)
@@ -374,8 +374,12 @@ class MetaPandasDataset(Dataset):
             #Assemble list of column subsets not meeting the expectation
             if unexpected_eval_count > 0:
                 partial_unexpected_count = result_format['partial_unexpected_count'] #Check if there is a specified partial_unexpected count
-                unexpected_observed_name = observed_name[~observed_boolean]  #Get the string identifiers for column subsets not meeting expectations
-                unexpected_observed_value = observed_value[~observed_boolean] #Get the function return value for column subsets not meeting expectations
+                unexpected_observed_name=[observed_name[i] for i in\
+                                          range(0,len(observed_boolean))\
+                                          if observed_boolean[i]==False] #Get the string identifiers for column subsets not meeting expectations
+                unexpected_observed_value=[observed_value[i] for i in\
+                                          range(0,len(observed_boolean))\
+                                          if observed_boolean[i]==False] #Get the function return value for column subsets not meeting expectations
                 partial_count = min(partial_unexpected_count, unexpected_eval_count) #Set the number of column subsets to be included in a partial_unexpected list
                 unexpected_eval_list = [] #Initialize list for column subsets not meeting expectations
                 #Assemble partial unexpected list and turn into dictionary
@@ -1668,10 +1672,10 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         if expected_min == None and expected_max == None:
             raise ValueError("expected_min and expected_max cannot both be None")
             
-        if expected_min and not isinstance(expected_min,Number):
+        if expected_min and not isinstance(expected_min, Number):
             raise ValueError("expected_min must be a number")
         
-        if expected_max and not isinstance(expected_max,Number):
+        if expected_max and not isinstance(expected_max, Number):
             raise ValueError("expected_max must be a number")
         
 
@@ -1694,68 +1698,72 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             column_A_name = column_A.name       # Get column A name
             column_A_data_type = column_A.dtype.name #Get column A datatype
 
-            for j in range(i+1, num_columns): 
-                column_B = columns[column_list[j]] #Set aside jth column as column B
-                column_B = column_B[~pd.isnull(column_B)] #Remove NaNs                
-                column_B_name = column_B.name      #Get column B name
-                column_B_data_type = column_B.dtype.name #Get column B datatype
-                
-                categorical_types = ["object","bool", "category"]
-                numeric_types = ["int64", "float64", "datetime64"]
+            for j in range(0, num_columns):
+                if i !=j:
+                    column_B = columns[column_list[j]] #Set aside jth column as column B
+                    column_B = column_B[~pd.isnull(column_B)] #Remove NaNs                
+                    column_B_name = column_B.name      #Get column B name
+                    column_B_data_type = column_B.dtype.name #Get column B datatype
                     
-                #If A and B are categorical...
-                if column_A_data_type in categorical_types\
-                and column_B_data_type in categorical_types:
-                    column_A_dist = column_A.value_counts()/len(column_A)
-                    column_B_dist = column_B.value_counts()/len(column_B)
-
-                #If A and B are numeric...
-                elif column_A_data_type in numeric_types\
-                and column_B_data_type in numeric_types:
-
-                    if bins != None: #If there are user specified bins...
-
-                        if column_A_name in bins: #If there are user specified bins for column A...
-                            column_A_bins = bins[column_A_name] #Get the bins
-                            column_A_dist = np.histogram(column_A,
-                                                         column_A_bins)[0] #Build discretized distribution for column A
-                        else:
-                            column_A_dist=np.histogram(column_A)[0] #If there are no specified bins for column A use the default 10 bins
-
-                        if column_B_name in bins: #Same process as above for column B...
-                            column_B_bins = bins[column_B_name]
-                            column_B_dist = np.histogram(column_B,
-                                                         column_B_bins)[0]
-                        else:
+                    categorical_types = ["object","bool", "category"]
+                    numeric_types = ["int64", "float64", "datetime64"]
+                        
+                    #If A and B are categorical...
+                    if column_A_data_type in categorical_types\
+                    and column_B_data_type in categorical_types:
+                        column_A_dist = column_A.value_counts()/len(column_A)
+                        column_B_dist = column_B.value_counts()/len(column_B)
+    
+                    #If A and B are numeric...
+                    elif column_A_data_type in numeric_types\
+                    and column_B_data_type in numeric_types:
+    
+                        if bins != None: #If there are user specified bins...
+    
+                            if column_A_name in bins: #If there are user specified bins for column A...
+                                column_A_bins = bins[column_A_name] #Get the bins
+                                column_A_dist = np.histogram(column_A,
+                                                             column_A_bins)[0] #Build discretized distribution for column A
+                            else:
+                                column_A_dist=np.histogram(column_A)[0] #If there are no specified bins for column A use the default 10 bins
+    
+                            if column_B_name in bins: #Same process as above for column B...
+                                column_B_bins = bins[column_B_name]
+                                column_B_dist = np.histogram(column_B,
+                                                             column_B_bins)[0]
+                            else:
+                                column_B_dist = np.histogram(column_B)[0]
+    
+                        else: #if there are no user specified bins, use the default 10 bins for both columns
+                            column_A_dist = np.histogram(column_A)[0]
                             column_B_dist = np.histogram(column_B)[0]
+                    
+                    else: #If A and B are not both numeric or both categorical or of an unrecognized type...
+                        continue #Skip the pair
+    
+                    try:
+                        kl_div = stats.entropy(column_A_dist, column_B_dist) #Compute the kl-divergence if possible (if the discrete distributions have the same number of elements)
+                    except (ValueError): #If the kl-divergence is not computable, just skip this column pair
+                        continue
+    
+                    if expected_max != None and expected_min!=None: #Determine if expectation is met if max and min are specified
+                        boolean_val = (kl_div >= expected_min and kl_div <= expected_max)
+    
+                    elif expected_max != None: #Determine if expectation is met if only max is specified
+                        boolean_val = kl_div <= expected_max
+    
+                    elif expected_min != None: #Determine if expectation is met if only min is specified
+                        boolean_val = kl_div >= expected_min
+    
+                    comparison_name = column_A_name + " v. " + column_B_name #Create name for column pair expectation
 
-                    else: #if there are no user specified bins, use the default 10 bins for both columns
-                        column_A_dist = np.histogram(column_A)[0]
-                        column_B_dist = np.histogram(column_B)[0]
-                
-                else: #If A and B are not both numeric or both categorical or of an unrecognized type...
-                    continue #Skip the pair
+                    if kl_div == np.inf:
+                        kl_div="infinity"
 
-                try:
-                    kl_div = stats.entropy(column_A_dist, column_B_dist) #Compute the kl-divergence if possible (if the discrete distributions have the same number of elements)
-                except (ValueError): #If the kl-divergence is not computable, just skip this column pair
-                    continue
-
-                if expected_max != None and expected_min!=None: #Determine if expectation is met if max and min are specified
-                    boolean_val = (kl_div >= expected_min and kl_div <= expected_max)
-
-                elif expected_max != None: #Determine if expectation is met if only max is specified
-                    boolean_val = kl_div <= expected_max
-
-                elif expected_min != None: #Determine if expectation is met if only min is specified
-                    boolean_val = kl_div >= expected_min
-
-                comparison_name = column_A_name + " v. " + column_B_name #Create name for column pair expectation
-
-                #Append appropriate values to appropriate returns lists
-                observed_value.append(kl_div)
-                observed_boolean.append(boolean_val)
-                observed_name.append(comparison_name)
+                    #Append appropriate values to appropriate returns lists
+                    observed_value.append(kl_div)
+                    observed_boolean.append(boolean_val)
+                    observed_name.append(comparison_name)
 
         #Prepare return object
         success = all(observed_boolean)
