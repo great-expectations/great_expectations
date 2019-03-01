@@ -139,7 +139,8 @@ def recursively_convert_to_json_serializable(test_obj):
     elif isinstance(test_obj, dict):
         new_dict = {}
         for key in test_obj:
-            new_dict[key] = recursively_convert_to_json_serializable(
+            # A pandas index can be numeric, and a dict key can be numeric, but a json key must be a string
+            new_dict[str(key)] = recursively_convert_to_json_serializable(
                 test_obj[key])
 
         return new_dict
@@ -159,7 +160,7 @@ def recursively_convert_to_json_serializable(test_obj):
 
     # Note: This clause has to come after checking for np.ndarray or we get:
     #      `ValueError: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()`
-    elif test_obj == None:
+    elif test_obj is None:
         # No problem to encode json
         return test_obj
 
@@ -177,6 +178,9 @@ def recursively_convert_to_json_serializable(test_obj):
     elif np.issubdtype(type(test_obj), np.floating):
         # Note: Use np.floating to avoid FutureWarning from numpy
         return float(round(test_obj, sys.float_info.dig))
+
+    elif isinstance(test_obj, pd.DataFrame):
+        return recursively_convert_to_json_serializable(test_obj.to_dict(orient='records'))
 
     # elif np.issubdtype(type(test_obj), np.complexfloating):
         # Note: Use np.complexfloating to avoid Future Warning from numpy
