@@ -1721,6 +1721,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                                            max_value=None,
                                            allow_cross_type_comparisons=None,
                                            parse_strings_as_datetimes=None,
+                                           output_strftime_format=None,
                                            mostly=None,
                                            result_format=None, include_config=False, catch_exceptions=None, meta=None
                                            ):

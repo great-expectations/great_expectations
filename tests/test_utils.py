@@ -4,10 +4,11 @@ import pandas as pd
 import numpy as np
 import pytest
 from sqlalchemy import create_engine
+from sqlalchemy import types
+from sqlalchemy.dialects.sqlite import DATETIME
 
 from great_expectations.dataset import PandasDataset, SqlAlchemyDataset
 import great_expectations.dataset.autoinspect as autoinspect
-
 
 # Taken from the following stackoverflow:
 # https://stackoverflow.com/questions/23549419/assert-that-two-dictionaries-are-almost-equal
@@ -49,7 +50,7 @@ def assertDeepAlmostEqual(expected, actual, *args, **kwargs):
         raise exc
 
 
-def get_dataset(dataset_type, data, autoinspect_func=autoinspect.columns_exist):
+def get_dataset(dataset_type, data, date_type_columns=None, autoinspect_func=autoinspect.columns_exist):
     """For Pandas, data should be either a DataFrame or a dictionary that can
     be instantiated as a DataFrame.
     For SQL, data should have the following shape:
@@ -69,7 +70,15 @@ def get_dataset(dataset_type, data, autoinspect_func=autoinspect.columns_exist):
 
         # Add the data to the database as a new table
         df = pd.DataFrame(data)
-        df.to_sql(name='test_data', con=engine, index=False)
+
+        sql_dtypes = {}
+        if date_type_columns:
+            for col in date_type_columns:
+                df[col] = pd.to_datetime(df[col])
+                sql_dtypes[col] = DATETIME(truncate_microseconds=True)
+
+        df.to_sql(name='test_data', con=engine, index=False, dtype=sql_dtypes)
+
 
         # Build a SqlAlchemyDataset using that database
         return SqlAlchemyDataset('test_data', engine=engine, autoinspect_func=autoinspect_func)
@@ -167,10 +176,6 @@ def evaluate_json_test(dataset, expectation_type, test):
             "Invalid test configuration detected: 'out' is required.")
 
     # Pass the test if we are in a test condition that is a known exception
-
-    # Known condition: SqlAlchemy does not support parse_strings_as_datetimes
-    if 'parse_strings_as_datetimes' in test['in'] and isinstance(dataset, SqlAlchemyDataset):
-        return
 
     # Known condition: SqlAlchemy does not support allow_cross_type_comparisons
     if 'allow_cross_type_comparisons' in test['in'] and isinstance(dataset, SqlAlchemyDataset):
