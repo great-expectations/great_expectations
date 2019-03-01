@@ -203,7 +203,7 @@ class Dataset(object):
         Args:
             func (function): \
                 The function implementing a row-wise expectation. The function should take a column of data and \
-                return an equally-long column of boolean values corresponding to whether the truthiness of the \
+                return an equally-long column of boolean values corresponding to the truthiness of the \
                 underlying expectation.
 
         Notes:
@@ -1044,7 +1044,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         except TypeError:
             partial_unexpected_counts = [
                 'partial_exception_counts requires a hashable type']
-
+        
         return_obj['result'].update(
             {
                 'partial_unexpected_index_list': unexpected_index_list[:result_format['partial_unexpected_count']] if unexpected_index_list is not None else None,
@@ -3320,7 +3320,46 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             value_pairs_set (list of tuples): All the valid pairs to be matched
 
         Keyword Args:
-            ignore_row_if (str): "both_values_are_missing", "either_value_is_missing", "neither
+            ignore_row_if (str): "both_values_are_missing", "either_value_is_missing", "never"
+
+        Other Parameters:
+            result_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`result_format <result_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
+
+        Returns:
+            A JSON-serializable expectation result object.
+
+            Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+        """
+        raise NotImplementedError
+
+    ### Multicolumn pairs ###
+
+    def expect_multicolumn_values_to_be_unique(self,
+                                              column_list,
+                                              ignore_row_if="all_values_are_missing",
+                                              result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                              ):
+        """
+        Expect the values for each row to be unique across the columns listed.
+
+        Args:
+            column_list (tuple or list): The first column name
+
+        Keyword Args:
+            ignore_row_if (str): "all_values_are_missing", "any_value_is_missing", "never"
 
         Other Parameters:
             result_format (str or None): \
