@@ -5,6 +5,7 @@ from great_expectations.dataset import Dataset
 from functools import wraps
 import inspect
 from six import PY3
+from six import string_types
 import sys
 
 if sys.version_info.major == 2:  # If python 2
@@ -122,7 +123,7 @@ class MetaSqlAlchemyDataset(Dataset):
                 output_strftime_format = kwargs["output_strftime_format"]
                 maybe_limited_unexpected_list = []
                 for x in unexpected_query_results.fetchall():
-                    if isinstance(x[column], str):
+                    if isinstance(x[column], string_types):
                         col = parse(x[column])
                     else:
                         col = x[column]
@@ -602,7 +603,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             if max_value:
                 max_value = parse(max_value)
 
-            if isinstance(col_max, str):
+            if isinstance(col_max, string_types):
                 col_max = parse(col_max)
 
             if output_strftime_format:
@@ -660,7 +661,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             if max_value:
                 max_value = parse(max_value)
 
-            if isinstance(col_min, str):
+            if isinstance(col_min, string_types):
                 col_min = parse(col_min)
 
             if output_strftime_format:
