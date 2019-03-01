@@ -37,7 +37,8 @@ def pytest_generate_tests(metafunc):
                               " and context " + c)
             else:
                 for d in test_configuration['datasets']:
-                    my_dataset = get_dataset(c, d["data"])
+                    date_type_columns = d["date_type_columns"] if "date_type_columns" in d else None
+                    my_dataset = get_dataset(c, d["data"], date_type_columns=date_type_columns)
 
                     for test in d["tests"]:
                         parametrized_tests.append({

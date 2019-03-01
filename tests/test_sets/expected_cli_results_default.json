@@ -93,7 +93,7 @@
          "exception_traceback": null,
          "raised_exception": false},
       "result": {
-        "observed_value": 30.397989417989418,
+        "observed_value": 30.397989417989415,
         "element_count": 1313,
         "missing_percent": 0.4242193450114242,
         "missing_count": 557
@@ -219,6 +219,6 @@
     "evaluated_expectations": 10,
     "successful_expectations": 9,
     "unsuccessful_expectations": 1,
-    "success_percent": 90
+    "success_percent": 90.0
   }
 }

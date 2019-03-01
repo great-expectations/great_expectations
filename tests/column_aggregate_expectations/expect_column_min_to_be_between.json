@@ -10,6 +10,7 @@
       "a" : [null, 0, null, null, 1, null, null, 2, null, null],
       "b" : [null, 0, null, null, 2, null, null, 1, null, null]
     },
+    "date_type_columns" : ["zz"],
     "tests" : [{
       "title": "Basic positive test case",
       "exact_match_out" : false,
