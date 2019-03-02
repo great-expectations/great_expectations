@@ -4,7 +4,7 @@ import sqlalchemy as sa
 import pandas as pd
 
 from great_expectations import get_data_context
-from great_expectations.dataset import PandasDatatable, SqlAlchemyDatatable
+from great_expectations.data_asset import PandasDataset, SqlAlchemyDataset
 
 
 @pytest.fixture(scope="module")
@@ -47,8 +47,8 @@ def test_sqlalchemy_data_context(test_db_connection_string):
     assert context.list_datasets() == ['table_1', 'table_2']
     dataset1 = context.get_dataset('table_1')
     dataset2 = context.get_dataset('table_2', schema='main')
-    assert isinstance(dataset1, SqlAlchemyDatatable)
-    assert isinstance(dataset2, SqlAlchemyDatatable)
+    assert isinstance(dataset1, SqlAlchemyDataset)
+    assert isinstance(dataset2, SqlAlchemyDataset)
 
 
 def test_pandas_data_context(test_folder_connection_path):
@@ -56,4 +56,4 @@ def test_pandas_data_context(test_folder_connection_path):
 
     assert context.list_datasets() == ['test.csv']
     dataset = context.get_dataset('test.csv')
-    assert isinstance(dataset, PandasDatatable)
+    assert isinstance(dataset, PandasDataset)

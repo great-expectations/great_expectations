@@ -4,13 +4,13 @@ Created on Sat Jan 26 12:34:50 2019
 
 @author: anhol
 """
-from .base import Dataset
+from .base import DataAsset
 from six import PY3
 import inspect
 
-class Datatable(Dataset):
+class Dataset(DataAsset):
     def __init__(self, *args, **kwargs):
-        super(Datatable, self).__init__(*args, **kwargs)
+        super(Dataset, self).__init__(*args, **kwargs)
 
     @classmethod
     def column_map_expectation(cls, func):
@@ -35,10 +35,10 @@ class Datatable(Dataset):
 
             Depending on the `result_format` selected, column_map_expectation can additional data to a return object, \
             including `element_count`, `nonnull_values`, `nonnull_count`, `success_count`, `unexpected_list`, and \
-            `unexpected_index_list`. See :func:`_format_map_output <great_expectations.dataset.base.Dataset._format_map_output>`
+            `unexpected_index_list`. See :func:`_format_map_output <great_expectations.data_asset.base.DataAsset._format_map_output>`
 
         See also:
-            :func:`expect_column_values_to_be_unique <great_expectations.dataset.base.Dataset.expect_column_values_to_be_unique>` \
+            :func:`expect_column_values_to_be_unique <great_expectations.data_asset.base.DataAsset.expect_column_values_to_be_unique>` \
             for an example of a column_map_expectation
         """
         raise NotImplementedError
@@ -59,7 +59,7 @@ class Datatable(Dataset):
             column_aggregate_expectation *excludes null values* from being passed to the function
 
         See also:
-            :func:`expect_column_mean_to_be_between <great_expectations.dataset.base.Dataset.expect_column_mean_to_be_between>` \
+            :func:`expect_column_mean_to_be_between <great_expectations.data_asset.base.DataAsset.expect_column_mean_to_be_between>` \
             for an example of a column_aggregate_expectation
         """
         raise NotImplementedError
@@ -144,7 +144,7 @@ class Datatable(Dataset):
     ):
         """Expect the specified column to exist.
 
-        expect_column_to_exist is a :func:`expectation <great_expectations.dataset.base.Dataset.expectation>`, not a \
+        expect_column_to_exist is a :func:`expectation <great_expectations.data_asset.base.DataAsset.expectation>`, not a \
         `column_map_expectation` or `column_aggregate_expectation`.
 
         Args:
@@ -184,7 +184,7 @@ class Datatable(Dataset):
                                                    ):
         """Expect the columns to exactly match a specified list.
 
-        expect_table_columns_to_match_ordered_list is a :func:`expectation <great_expectations.dataset.base.DataSet.expectation>`, not a \
+        expect_table_columns_to_match_ordered_list is a :func:`expectation <great_expectations.data_asset.base.DataAsset.expectation>`, not a \
         `column_map_expectation` or `column_aggregate_expectation`.
 
         Args:
@@ -222,7 +222,7 @@ class Datatable(Dataset):
                                              ):
         """Expect the number of rows to be between two values.
 
-        expect_table_row_count_to_be_between is a :func:`expectation <great_expectations.dataset.base.Dataset.expectation>`, \
+        expect_table_row_count_to_be_between is a :func:`expectation <great_expectations.data_asset.base.DataAsset.expectation>`, \
         not a `column_map_expectation` or `column_aggregate_expectation`.
 
         Keyword Args:
@@ -267,7 +267,7 @@ class Datatable(Dataset):
                                         ):
         """Expect the number of rows to equal a value.
 
-        expect_table_row_count_to_equal is a basic :func:`expectation <great_expectations.dataset.base.Dataset.expectation>`, \
+        expect_table_row_count_to_equal is a basic :func:`expectation <great_expectations.data_asset.base.DataAsset.expectation>`, \
         not a `column_map_expectation` or `column_aggregate_expectation`.
 
         Args:
@@ -312,7 +312,7 @@ class Datatable(Dataset):
 
         For example, `[1, 2, 3, 3, 3]` will return `[3, 3, 3]` in `result.exceptions_list`, with `unexpected_percent=0.6.`
 
-        expect_column_values_to_be_unique is a :func:`column_map_expectation <great_expectations.dataset.base.Dataset.column_map_expectation>`.
+        expect_column_values_to_be_unique is a :func:`column_map_expectation <great_expectations.data_asset.base.DataAsset.column_map_expectation>`.
 
         Args:
             column (str): \
@@ -355,7 +355,7 @@ class Datatable(Dataset):
         To be counted as an exception, values must be explicitly null or missing, such as a NULL in PostgreSQL or an np.NaN in pandas.
         Empty strings don't count as null unless they have been coerced to a null type.
 
-        expect_column_values_to_not_be_null is a :func:`column_map_expectation <great_expectations.dataset.base.Dataset.column_map_expectation>`.
+        expect_column_values_to_not_be_null is a :func:`column_map_expectation <great_expectations.data_asset.base.DataAsset.column_map_expectation>`.
 
         Args:
             column (str): \
@@ -399,7 +399,7 @@ class Datatable(Dataset):
                                         ):
         """Expect column values to be null.
 
-        expect_column_values_to_be_null is a :func:`column_map_expectation <great_expectations.dataset.base.Dataset.column_map_expectation>`.
+        expect_column_values_to_be_null is a :func:`column_map_expectation <great_expectations.data_asset.base.DataAsset.column_map_expectation>`.
 
         Args:
             column (str): \
@@ -445,7 +445,7 @@ class Datatable(Dataset):
     ):
         """Expect each column entry to be a specified data type.
 
-        expect_column_values_to_be_of_type is a :func:`column_map_expectation <great_expectations.dataset.base.Dataset.column_map_expectation>`.
+        expect_column_values_to_be_of_type is a :func:`column_map_expectation <great_expectations.data_asset.base.DataAsset.column_map_expectation>`.
 
         Args:
             column (str): \
@@ -483,7 +483,7 @@ class Datatable(Dataset):
             expect_column_values_to_be_of_type is slated for major changes in future versions of great_expectations.
 
             As of v0.3, great_expectations is exclusively based on pandas, which handles typing in its own peculiar way.
-            Future versions of great_expectations will allow for Datasets in SQL, spark, etc.
+            Future versions of great_expectations will allow for DataAssets in SQL, spark, etc.
             When we make that change, we expect some breaking changes in parts of the codebase that are based strongly on pandas notions of typing.
 
         See also:
@@ -500,7 +500,7 @@ class Datatable(Dataset):
     ):
         """Expect each column entry to match a list of specified data types.
 
-        expect_column_values_to_be_in_type_list is a :func:`column_map_expectation <great_expectations.dataset.base.Dataset.column_map_expectation>`.
+        expect_column_values_to_be_in_type_list is a :func:`column_map_expectation <great_expectations.data_asset.base.DataAsset.column_map_expectation>`.
 
         Args:
             column (str): \
@@ -538,7 +538,7 @@ class Datatable(Dataset):
             expect_column_values_to_be_in_type_list is slated for major changes in future versions of great_expectations.
 
             As of v0.3, great_expectations is exclusively based on pandas, which handles typing in its own peculiar way.
-            Future versions of great_expectations will allow for Datasets in SQL, spark, etc.
+            Future versions of great_expectations will allow for DataAssets in SQL, spark, etc.
             When we make that change, we expect some breaking changes in parts of the codebase that are based strongly on pandas notions of typing.
 
         See also:
@@ -576,7 +576,7 @@ class Datatable(Dataset):
               },
             }
 
-        expect_column_values_to_be_in_set is a :func:`column_map_expectation <great_expectations.dataset.base.Dataset.column_map_expectation>`.
+        expect_column_values_to_be_in_set is a :func:`column_map_expectation <great_expectations.data_asset.base.DataAsset.column_map_expectation>`.
 
 
         Args:
@@ -643,7 +643,7 @@ class Datatable(Dataset):
               },
             }
 
-        expect_column_values_to_not_be_in_set is a :func:`column_map_expectation <great_expectations.dataset.base.Dataset.column_map_expectation>`.
+        expect_column_values_to_not_be_in_set is a :func:`column_map_expectation <great_expectations.data_asset.base.DataAsset.column_map_expectation>`.
 
         Args:
             column (str): \
@@ -692,7 +692,7 @@ class Datatable(Dataset):
                                            ):
         """Expect column entries to be between a minimum value and a maximum value (inclusive).
 
-        expect_column_values_to_be_between is a :func:`column_map_expectation <great_expectations.dataset.base.Dataset.column_map_expectation>`.
+        expect_column_values_to_be_between is a :func:`column_map_expectation <great_expectations.data_asset.base.DataAsset.column_map_expectation>`.
 
         Args:
             column (str): \
@@ -755,7 +755,7 @@ class Datatable(Dataset):
         If `strictly=True`, then this expectation is only satisfied if each consecutive value
         is strictly increasing--equal values are treated as failures.
 
-        expect_column_values_to_be_increasing is a :func:`column_map_expectation <great_expectations.dataset.base.Dataset.column_map_expectation>`.
+        expect_column_values_to_be_increasing is a :func:`column_map_expectation <great_expectations.data_asset.base.DataAsset.column_map_expectation>`.
 
         Args:
             column (str): \
@@ -810,7 +810,7 @@ class Datatable(Dataset):
         If `strictly=True`, then this expectation is only satisfied if each consecutive value
         is strictly decreasing--equal values are treated as failures.
 
-        expect_column_values_to_be_decreasing is a :func:`column_map_expectation <great_expectations.dataset.base.Dataset.column_map_expectation>`.
+        expect_column_values_to_be_decreasing is a :func:`column_map_expectation <great_expectations.data_asset.base.DataAsset.column_map_expectation>`.
 
         Args:
             column (str): \
@@ -864,7 +864,7 @@ class Datatable(Dataset):
 
         This expectation only works for string-type values. Invoking it on ints or floats will raise a TypeError.
 
-        expect_column_value_lengths_to_be_between is a :func:`column_map_expectation <great_expectations.dataset.base.Dataset.column_map_expectation>`.
+        expect_column_value_lengths_to_be_between is a :func:`column_map_expectation <great_expectations.data_asset.base.DataAsset.column_map_expectation>`.
 
         Args:
             column (str): \
@@ -919,7 +919,7 @@ class Datatable(Dataset):
 
         This expectation only works for string-type values. Invoking it on ints or floats will raise a TypeError.
 
-        expect_column_values_to_be_between is a :func:`column_map_expectation <great_expectations.dataset.base.Dataset.column_map_expectation>`.
+        expect_column_values_to_be_between is a :func:`column_map_expectation <great_expectations.data_asset.base.DataAsset.column_map_expectation>`.
 
         Args:
             column (str): \
@@ -966,7 +966,7 @@ class Datatable(Dataset):
         anywhere in the string, for example "[at]+" will identify the following strings as expected: "cat", "hat", \
         "aa", "a", and "t", and the following strings as unexpected: "fish", "dog".
 
-        expect_column_values_to_match_regex is a :func:`column_map_expectation <great_expectations.dataset.base.Dataset.column_map_expectation>`.
+        expect_column_values_to_match_regex is a :func:`column_map_expectation <great_expectations.data_asset.base.DataAsset.column_map_expectation>`.
 
         Args:
             column (str): \
@@ -1015,7 +1015,7 @@ class Datatable(Dataset):
         any portion of the provided string. For example, "[at]+" would identify the following strings as expected: \
         "fish", "dog", and the following as unexpected: "cat", "hat".
 
-        expect_column_values_to_not_match_regex is a :func:`column_map_expectation <great_expectations.dataset.base.Dataset.column_map_expectation>`.
+        expect_column_values_to_not_match_regex is a :func:`column_map_expectation <great_expectations.data_asset.base.DataAsset.column_map_expectation>`.
 
         Args:
             column (str): \
@@ -1064,7 +1064,7 @@ class Datatable(Dataset):
         """Expect the column entries to be strings that can be matched to either any of or all of a list of regular expressions.
         Matches can be anywhere in the string.
 
-        expect_column_values_to_match_regex_list is a :func:`column_map_expectation <great_expectations.dataset.base.Dataset.column_map_expectation>`.
+        expect_column_values_to_match_regex_list is a :func:`column_map_expectation <great_expectations.data_asset.base.DataAsset.column_map_expectation>`.
 
         Args:
             column (str): \
@@ -1114,7 +1114,7 @@ class Datatable(Dataset):
         be anywhere in the string.
 
 
-        expect_column_values_to_not_match_regex_list is a :func:`column_map_expectation <great_expectations.dataset.base.Dataset.column_map_expectation>`.
+        expect_column_values_to_not_match_regex_list is a :func:`column_map_expectation <great_expectations.data_asset.base.DataAsset.column_map_expectation>`.
 
         Args:
             column (str): \
@@ -1162,7 +1162,7 @@ class Datatable(Dataset):
                                                       ):
         """Expect column entries to be strings representing a date or time with a given format.
 
-        expect_column_values_to_match_strftime_format is a :func:`column_map_expectation <great_expectations.dataset.base.Dataset.column_map_expectation>`.
+        expect_column_values_to_match_strftime_format is a :func:`column_map_expectation <great_expectations.data_asset.base.DataAsset.column_map_expectation>`.
 
         Args:
             column (str): \
@@ -1205,7 +1205,7 @@ class Datatable(Dataset):
                                                       ):
         """Expect column entries to be parseable using dateutil.
 
-        expect_column_values_to_be_dateutil_parseable is a :func:`column_map_expectation <great_expectations.dataset.base.Dataset.column_map_expectation>`.
+        expect_column_values_to_be_dateutil_parseable is a :func:`column_map_expectation <great_expectations.data_asset.base.DataAsset.column_map_expectation>`.
 
         Args:
             column (str): \
@@ -1245,7 +1245,7 @@ class Datatable(Dataset):
                                                   ):
         """Expect column entries to be data written in JavaScript Object Notation.
 
-        expect_column_values_to_be_json_parseable is a :func:`column_map_expectation <great_expectations.dataset.base.Dataset.column_map_expectation>`.
+        expect_column_values_to_be_json_parseable is a :func:`column_map_expectation <great_expectations.data_asset.base.DataAsset.column_map_expectation>`.
 
         Args:
             column (str): \
@@ -1289,7 +1289,7 @@ class Datatable(Dataset):
                                                   ):
         """Expect column entries to be JSON objects matching a given JSON schema.
 
-        expect_column_values_to_match_json_schema is a :func:`column_map_expectation <great_expectations.dataset.base.Dataset.column_map_expectation>`.
+        expect_column_values_to_match_json_schema is a :func:`column_map_expectation <great_expectations.data_asset.base.DataAsset.column_map_expectation>`.
 
         Args:
             column (str): \
@@ -1341,12 +1341,12 @@ class Datatable(Dataset):
         This expectation compares the provided column to the specified continuous distribution with a parameteric \
         Kolmogorov-Smirnov test. The K-S test compares the provided column to the cumulative density function (CDF) of \
         the specified scipy distribution. If you don't know the desired distribution shape parameters, use the \
-        `ge.dataset.util.infer_distribution_parameters()` utility function to estimate them.
+        `ge.data_asset.util.infer_distribution_parameters()` utility function to estimate them.
 
         It returns 'success'=True if the p-value from the K-S test is greater than or equal to the provided p-value.
 
         expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than is a \
-        :func:`column_aggregate_expectation <great_expectations.dataset.base.DataSet.column_aggregate_expectation>`.
+        :func:`column_aggregate_expectation <great_expectations.data_asset.base.DataAsset.column_aggregate_expectation>`.
 
         Args:
             column (str): \
@@ -1411,7 +1411,7 @@ class Datatable(Dataset):
                                          ):
         """Expect the column mean to be between a minimum value and a maximum value (inclusive).
 
-        expect_column_mean_to_be_between is a :func:`column_aggregate_expectation <great_expectations.dataset.base.Dataset.column_aggregate_expectation>`.
+        expect_column_mean_to_be_between is a :func:`column_aggregate_expectation <great_expectations.data_asset.base.DataAsset.column_aggregate_expectation>`.
 
         Args:
             column (str): \
@@ -1467,7 +1467,7 @@ class Datatable(Dataset):
                                            ):
         """Expect the column median to be between a minimum value and a maximum value.
 
-        expect_column_median_to_be_between is a :func:`column_aggregate_expectation <great_expectations.dataset.base.Dataset.column_aggregate_expectation>`.
+        expect_column_median_to_be_between is a :func:`column_aggregate_expectation <great_expectations.data_asset.base.DataAsset.column_aggregate_expectation>`.
 
         Args:
             column (str): \
@@ -1524,7 +1524,7 @@ class Datatable(Dataset):
                                           ):
         """Expect the column standard deviation to be between a minimum value and a maximum value.
 
-        expect_column_stdev_to_be_between is a :func:`column_aggregate_expectation <great_expectations.dataset.base.Dataset.column_aggregate_expectation>`.
+        expect_column_stdev_to_be_between is a :func:`column_aggregate_expectation <great_expectations.data_asset.base.DataAsset.column_aggregate_expectation>`.
 
         Args:
             column (str): \
@@ -1580,7 +1580,7 @@ class Datatable(Dataset):
                                                        ):
         """Expect the number of unique values to be between a minimum value and a maximum value.
 
-        expect_column_unique_value_count_to_be_between is a :func:`column_aggregate_expectation <great_expectations.dataset.base.Dataset.column_aggregate_expectation>`.
+        expect_column_unique_value_count_to_be_between is a :func:`column_aggregate_expectation <great_expectations.data_asset.base.DataAsset.column_aggregate_expectation>`.
 
         Args:
             column (str): \
@@ -1646,7 +1646,7 @@ class Datatable(Dataset):
             max_value (float or None): \
                 The maximum proportion of unique values. (Proportions are on the range 0 to 1)
 
-        expect_column_unique_value_count_to_be_between is a :func:`column_aggregate_expectation <great_expectations.dataset.base.Dataset.column_aggregate_expectation>`.
+        expect_column_unique_value_count_to_be_between is a :func:`column_aggregate_expectation <great_expectations.data_asset.base.DataAsset.column_aggregate_expectation>`.
 
         Other Parameters:
             result_format (str or None): \
@@ -1693,7 +1693,7 @@ class Datatable(Dataset):
                                                      ):
         """Expect the most common value to be within the designated value set
 
-        expect_column_most_common_value_to_be_in_set is a :func:`column_aggregate_expectation <great_expectations.dataset.base.Dataset.column_aggregate_expectation>`.
+        expect_column_most_common_value_to_be_in_set is a :func:`column_aggregate_expectation <great_expectations.data_asset.base.DataAsset.column_aggregate_expectation>`.
 
         Args:
             column (str): \
@@ -1748,7 +1748,7 @@ class Datatable(Dataset):
                                         ):
         """Expect the column to sum to be between an min and max value
 
-        expect_column_sum_to_be_between is a :func:`column_aggregate_expectation <great_expectations.dataset.base.Dataset.column_aggregate_expectation>`.
+        expect_column_sum_to_be_between is a :func:`column_aggregate_expectation <great_expectations.data_asset.base.DataAsset.column_aggregate_expectation>`.
 
         Args:
             column (str): \
@@ -1804,7 +1804,7 @@ class Datatable(Dataset):
                                         ):
         """Expect the column to sum to be between an min and max value
 
-        expect_column_min_to_be_between is a :func:`column_aggregate_expectation <great_expectations.dataset.base.Dataset.column_aggregate_expectation>`.
+        expect_column_min_to_be_between is a :func:`column_aggregate_expectation <great_expectations.data_asset.base.DataAsset.column_aggregate_expectation>`.
 
         Args:
             column (str): \
@@ -1866,7 +1866,7 @@ class Datatable(Dataset):
                                         ):
         """Expect the column max to be between an min and max value
 
-        expect_column_max_to_be_between is a :func:`column_aggregate_expectation <great_expectations.dataset.base.Dataset.column_aggregate_expectation>`.
+        expect_column_max_to_be_between is a :func:`column_aggregate_expectation <great_expectations.data_asset.base.DataAsset.column_aggregate_expectation>`.
 
         Args:
             column (str): \
@@ -1931,7 +1931,7 @@ class Datatable(Dataset):
         This expectation compares categorical distributions using a Chi-squared test. \
         It returns `success=True` if values in the column match the distribution of the provided partition.
 
-        expect_column_chisquare_test_p_value_to_be_greater_than is a :func:`column_aggregate_expectation <great_expectations.dataset.base.Dataset.column_aggregate_expectation>`.
+        expect_column_chisquare_test_p_value_to_be_greater_than is a :func:`column_aggregate_expectation <great_expectations.data_asset.base.DataAsset.column_aggregate_expectation>`.
 
         Args:
             column (str): \
@@ -2004,7 +2004,7 @@ class Datatable(Dataset):
         using the provided weights. Consequently the test expects a piecewise uniform distribution using the bins from \
         the provided partition object.
 
-        expect_column_bootstrapped_ks_test_p_value_to_be_greater_than is a :func:`column_aggregate_expectation <great_expectations.dataset.base.Dataset.column_aggregate_expectation>`.
+        expect_column_bootstrapped_ks_test_p_value_to_be_greater_than is a :func:`column_aggregate_expectation <great_expectations.data_asset.base.DataAsset.column_aggregate_expectation>`.
 
         Args:
             column (str): \
@@ -2091,7 +2091,7 @@ class Datatable(Dataset):
 
         This expectation works on both categorical and continuous partitions. See notes below for details.
 
-        expect_column_kl_divergence_to_be_less_than is a :func:`column_aggregate_expectation <great_expectations.dataset.base.Dataset.column_aggregate_expectation>`.
+        expect_column_kl_divergence_to_be_less_than is a :func:`column_aggregate_expectation <great_expectations.data_asset.base.DataAsset.column_aggregate_expectation>`.
 
         Args:
             column (str): \

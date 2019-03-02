@@ -6,24 +6,24 @@ import pytest
 from .test_utils import get_dataset
 
 import great_expectations as ge
-import great_expectations.dataset.autoinspect as autoinspect
+import great_expectations.data_asset.autoinspect as autoinspect
 
 
 def test_no_autoinspection():
-    df = ge.dataset.PandasDatatable({"a": [1, 2, 3]}, autoinspect_func=None)
+    df = ge.data_asset.PandasDataset({"a": [1, 2, 3]}, autoinspect_func=None)
     config = df.get_expectations_config()
 
     assert len(config["expectations"]) == 0
 
 
 def test_default_no_autoinspection():
-    df = ge.dataset.PandasDatatable({"a": [1, 2, 3]})
+    df = ge.data_asset.PandasDataset({"a": [1, 2, 3]})
     config = df.get_expectations_config()
 
     assert len(config["expectations"]) == 0
 
 
-@pytest.mark.parametrize("dataset_type", ["PandasDatatable", "SqlAlchemyDatatable"])
+@pytest.mark.parametrize("dataset_type", ["PandasDataset", "SqlAlchemyDataset"])
 def test_autoinspect_existing_dataset(dataset_type):
     # Get a basic dataset with no expectations
     df = get_dataset(dataset_type, {"a": [1, 2, 3]}, autoinspect_func=None)
@@ -39,7 +39,7 @@ def test_autoinspect_existing_dataset(dataset_type):
         [{'expectation_type': 'expect_column_to_exist', 'kwargs': {'column': 'a'}}]
 
 
-@pytest.mark.parametrize("dataset_type", ["PandasDatatable", "SqlAlchemyDatatable"])
+@pytest.mark.parametrize("dataset_type", ["PandasDataset", "SqlAlchemyDataset"])
 def test_autoinspect_columns_exist(dataset_type):
     df = get_dataset(
         dataset_type, {"a": [1, 2, 3]}, autoinspect_func=autoinspect.columns_exist)
@@ -52,11 +52,11 @@ def test_autoinspect_columns_exist(dataset_type):
 
 def test_autoinspect_warning():
     with pytest.warns(UserWarning, match="No columns list found in dataset; no autoinspection performed."):
-        ge.dataset.Dataset(autoinspect_func=autoinspect.columns_exist)
+        ge.data_asset.DataAsset(autoinspect_func=autoinspect.columns_exist)
 
 
 def test_autoinspect_error():
-    df = ge.dataset.Dataset()
+    df = ge.data_asset.DataAsset()
     df.columns = [{"title": "nonstandard_columns"}]
     with pytest.raises(autoinspect.AutoInspectError) as autoinspect_error:
         df.autoinspect(autoinspect.columns_exist)

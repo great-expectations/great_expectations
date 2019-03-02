@@ -19,17 +19,17 @@ from .util import DotDict, recursively_convert_to_json_serializable, parse_resul
 from .autoinspect import columns_exist
 
 
-class Dataset(object):
+class DataAsset(object):
 
     def __init__(self, *args, **kwargs):
         """
-        Initialize the Dataset.
+        Initialize the DataAsset.
 
         :param autoinspect_func (function) = None: The autoinspection function that should be run on the dataset to
             establish baseline expectations.
 
-        Note: Dataset is designed to support multiple inheritance (e.g. PandasDatatable inherits from both a
-        Pandas DataFrame and Dataset), so it accepts generic *args and **kwargs arguments so that they can also be
+        Note: DataAsset is designed to support multiple inheritance (e.g. PandasDataset inherits from both a
+        Pandas DataFrame and DataAsset), so it accepts generic *args and **kwargs arguments so that they can also be
         passed to other parent classes. In python 2, there isn't a clean way to include all of *args, **kwargs, and a
         named kwarg...so we use the inelegant solution of popping from kwargs, leaving the support for the autoinspect_func
         parameter not obvious from the signature.
@@ -37,7 +37,7 @@ class Dataset(object):
         """
         autoinspect_func = kwargs.pop("autoinspect_func", None)
 
-        super(Dataset, self).__init__(*args, **kwargs)
+        super(DataAsset, self).__init__(*args, **kwargs)
         self._initialize_expectations()
         if autoinspect_func is not None:
             autoinspect_func(self)
@@ -49,7 +49,7 @@ class Dataset(object):
     def expectation(cls, method_arg_names):
         """Manages configuration and running of expectation objects.
 
-        Expectation builds and saves a new expectation configuration to the Dataset object. It is the core decorator \
+        Expectation builds and saves a new expectation configuration to the DataAsset object. It is the core decorator \
         used by great expectations to manage expectation configurations.
 
         Args:
@@ -59,8 +59,8 @@ class Dataset(object):
 
         Notes:
             Intermediate decorators that call the core @expectation decorator will most likely need to pass their \
-            decorated methods' signature up to the expectation decorator. For example, the MetaPandasDatatable \
-            column_map_expectation decorator relies on the Dataset expectation decorator, but will pass through the \
+            decorated methods' signature up to the expectation decorator. For example, the MetaPandasDataset \
+            column_map_expectation decorator relies on the DataAsset expectation decorator, but will pass through the \
             signature from the implementing method.
 
             @expectation intercepts and takes action based on the following parameters:
@@ -246,16 +246,16 @@ class Dataset(object):
             }
 
     def _append_expectation(self, expectation_config):
-        """Appends an expectation to `DataSet._expectations_config` and drops existing expectations of the same type.
+        """Appends an expectation to `DataAsset._expectations_config` and drops existing expectations of the same type.
 
            If `expectation_config` is a column expectation, this drops existing expectations that are specific to \
            that column and only if it is the same expectation type as `expectation_config`. Otherwise, if it's not a \
            column expectation, this drops existing expectations of the same type as `expectation config`. \
-           After expectations of the same type are dropped, `expectation_config` is appended to `DataSet._expectations_config`.
+           After expectations of the same type are dropped, `expectation_config` is appended to `DataAsset._expectations_config`.
 
            Args:
                expectation_config (json): \
-                   The JSON-serializable expectation to be added to the DataSet expectations in `_expectations_config`.
+                   The JSON-serializable expectation to be added to the DataAsset expectations in `_expectations_config`.
 
            Notes:
                May raise future errors once json-serializable tests are implemented to check for correct arg formatting
@@ -345,10 +345,10 @@ class Dataset(object):
         discard_include_config_kwargs=True,
         discard_catch_exceptions_kwargs=True,
     ):
-        """Copies and cleans all expectations provided by their index in DataSet._expectations_config.expectations.
+        """Copies and cleans all expectations provided by their index in DataAsset._expectations_config.expectations.
 
            Applies the _copy_and_clean_up_expectation method to multiple expectations, provided by their index in \
-           `DataSet,_expectations_config.expectations`. Returns a list of the copied and cleaned expectations.
+           `DataAsset,_expectations_config.expectations`. Returns a list of the copied and cleaned expectations.
 
            Args:
                match_indexes (List): \
@@ -666,7 +666,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
     ):
         """Writes ``_expectation_config`` to a JSON file.
 
-           Writes the DataSet's expectation config to the specified JSON ``filepath``. Failing expectations \
+           Writes the DataAsset's expectation config to the specified JSON ``filepath``. Failing expectations \
            can be excluded from the JSON expectations config with ``discard_failed_expectations``. The kwarg key-value \
            pairs :ref:`result_format`, :ref:`include_config`, and :ref:`catch_exceptions` are optionally excluded from the JSON \
            expectations config.
@@ -706,11 +706,11 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
     def validate(self, expectations_config=None, evaluation_parameters=None, catch_exceptions=True, result_format=None, only_return_failures=False):
         """Generates a JSON-formatted report describing the outcome of all expectations.
 
-            Use the default expectations_config=None to validate the expectations config associated with the DataSet.
+            Use the default expectations_config=None to validate the expectations config associated with the DataAsset.
 
             Args:
                 expectations_config (json or None): \
-                    If None, uses the expectations config generated with the Dataset during the current session. \
+                    If None, uses the expectations config generated with the DataAsset during the current session. \
                     If a JSON file, validates those expectations.
                 evaluation_parameters (dict or None): \
                     If None, uses the evaluation_paramters from the expectations_config provided or as part of the dataset.

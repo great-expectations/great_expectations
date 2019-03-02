@@ -1,4 +1,4 @@
-# Utility methods for dealing with Dataset objects
+# Utility methods for dealing with DataAsset objects
 
 from __future__ import division
 
@@ -73,7 +73,7 @@ Usage::
     http://code.activestate.com/recipes/576862/. Unfortunately, the
     original authors did not anticipate deep inheritance hierarchies, and
     we ran into a recursion issue when implementing custom subclasses of
-    PandasDatatable:
+    PandasDataset:
     https://github.com/great-expectations/great_expectations/issues/177.
 
     Our new homegrown implementation directly searches the MRO, instead
@@ -599,7 +599,7 @@ def validate_distribution_parameters(distribution, params):
 
     else:
         raise ValueError(
-            "params must be a dict or list, or use ge.dataset.util.infer_distribution_parameters(data, distribution)")
+            "params must be a dict or list, or use ge.data_asset.util.infer_distribution_parameters(data, distribution)")
 
     return
 
@@ -608,7 +608,7 @@ def create_multiple_expectations(df, columns, expectation_type, *args, **kwargs)
     """Creates an identical expectation for each of the given columns with the specified arguments, if any.
 
     Args:
-        df (great_expectations.dataset): A great expectations dataset object.
+        df (great_expectations.DataAsset): A great expectations DataAsset object.
         columns (list): A list of column names represented as strings.
         expectation_type (string): The expectation type.
 

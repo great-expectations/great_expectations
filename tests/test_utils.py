@@ -5,8 +5,8 @@ import numpy as np
 import pytest
 from sqlalchemy import create_engine
 
-from great_expectations.dataset import PandasDatatable, SqlAlchemyDatatable
-import great_expectations.dataset.autoinspect as autoinspect
+from great_expectations.data_asset import PandasDataset, SqlAlchemyDataset
+import great_expectations.data_asset.autoinspect as autoinspect
 
 
 # Taken from the following stackoverflow:
@@ -60,9 +60,9 @@ def get_dataset(dataset_type, data, autoinspect_func=autoinspect.columns_exist):
         }
 
     """
-    if dataset_type == 'PandasDatatable':
-        return PandasDatatable(data, autoinspect_func=autoinspect_func)
-    elif dataset_type == 'SqlAlchemyDatatable':
+    if dataset_type == 'PandasDataset':
+        return PandasDataset(data, autoinspect_func=autoinspect_func)
+    elif dataset_type == 'SqlAlchemyDataset':
         # Create a new database
 
         engine = create_engine('sqlite://')
@@ -71,14 +71,14 @@ def get_dataset(dataset_type, data, autoinspect_func=autoinspect.columns_exist):
         df = pd.DataFrame(data)
         df.to_sql(name='test_data', con=engine, index=False)
 
-        # Build a SqlAlchemyDatatable using that database
-        return SqlAlchemyDatatable('test_data', engine=engine, autoinspect_func=autoinspect_func)
+        # Build a SqlAlchemyDataset using that database
+        return SqlAlchemyDataset('test_data', engine=engine, autoinspect_func=autoinspect_func)
     else:
         raise ValueError("Unknown dataset_type " + str(dataset_type))
 
 
 def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type):
-    if context == "SqlAlchemyDatatable":
+    if context == "SqlAlchemyDataset":
         return expectation_type in [
             #"expect_column_to_exist",
             #"expect_table_row_count_to_be_between",
@@ -129,9 +129,9 @@ def evaluate_json_test(dataset, expectation_type, test):
     This method will evaluate the result of a test build using the Great Expectations json test format.
 
     NOTE: Tests can be suppressed for certain data types if the test contains the Key 'suppress_test_for' with a list
-        of Dataset types to suppress, such as ['SQLAlchemy', 'Pandas'].
+        of DataAsset types to suppress, such as ['SQLAlchemy', 'Pandas'].
 
-    :param dataset: (Dataset) A great expectations Dataset
+    :param dataset: (DataAsset) A great expectations DataAsset
     :param expectation_type: (string) the name of the expectation to be run using the test input
     :param test: (dict) a dictionary containing information for the test to be run. The dictionary must include:
         - title: (string) the name of the test
@@ -169,11 +169,11 @@ def evaluate_json_test(dataset, expectation_type, test):
     # Pass the test if we are in a test condition that is a known exception
 
     # Known condition: SqlAlchemy does not support parse_strings_as_datetimes
-    if 'parse_strings_as_datetimes' in test['in'] and isinstance(dataset, SqlAlchemyDatatable):
+    if 'parse_strings_as_datetimes' in test['in'] and isinstance(dataset, SqlAlchemyDataset):
         return
 
     # Known condition: SqlAlchemy does not support allow_cross_type_comparisons
-    if 'allow_cross_type_comparisons' in test['in'] and isinstance(dataset, SqlAlchemyDatatable):
+    if 'allow_cross_type_comparisons' in test['in'] and isinstance(dataset, SqlAlchemyDataset):
         return
 
     try:
@@ -192,9 +192,9 @@ def evaluate_json_test(dataset, expectation_type, test):
 
     if 'suppress_test_for' in test:
         # Optionally suppress the test for specified Dataset types
-        if 'SQLAlchemy' in test['suppress_test_for'] and isinstance(dataset, SqlAlchemyDatatable):
+        if 'SQLAlchemy' in test['suppress_test_for'] and isinstance(dataset, SqlAlchemyDataset):
             return
-        if 'Pandas' in test['suppress_test_for'] and isinstance(dataset, PandasDatatable):
+        if 'Pandas' in test['suppress_test_for'] and isinstance(dataset, PandasDataset):
             return
 
     # Check results
@@ -213,7 +213,7 @@ def evaluate_json_test(dataset, expectation_type, test):
                 assert value == result['result']['observed_value']
 
             elif key == 'unexpected_index_list':
-                if isinstance(dataset, SqlAlchemyDatatable):
+                if isinstance(dataset, SqlAlchemyDataset):
                     pass
                 else:
                     assert result['result']['unexpected_index_list'] == value

@@ -9,12 +9,12 @@ from functools import wraps
 import numpy as np
 from six import PY3
 from itertools import compress
-from .base import Dataset
+from .base import DataAsset
 from .util import DocInherit, parse_result_format
 
 
 
-class MetaFileDataset(Dataset):
+class MetaFileDataset(DataAsset):
     """MetaFileDataset is a thin layer above FileDataset.
     This two-layer inheritance is required to make @classmethod decorators work.
     Practically speaking, that means that MetaFileDataset implements \
@@ -44,7 +44,7 @@ class MetaFileDataset(Dataset):
 
         See also:
             :func:`expect_file_line_regex_match_count_to_be_between
-            <great_expectations.dataset.base.Dataset.expect_file_line_regex_match_count_to_be_between>` \
+            <great_expectations.data_asset.base.DataAsset.expect_file_line_regex_match_count_to_be_between>` \
             for an example of a file_lines_map_expectation
         """
         if PY3:
@@ -125,7 +125,7 @@ class FileDataset(MetaFileDataset):
     """
     FileDataset instantiates the great_expectations Expectations API as a
     subclass of a python file object. For the full API reference, please see
-    :func:`Dataset <great_expectations.Dataset.base.Dataset>`
+    :func:`DataAsset <great_expectations.data_asset.base.DataAsset>`
     """
 
 
@@ -324,7 +324,7 @@ class FileDataset(MetaFileDataset):
                                 for line in lines]
 
     @DocInherit
-    @Dataset.expectation(["value"])
+    @DataAsset.expectation(["value"])
     def expect_file_hash_to_equal(self, value, hash_alg='md5', result_format=None,
                                   include_config=False, catch_exceptions=None,
                                   meta=None):
@@ -379,7 +379,7 @@ class FileDataset(MetaFileDataset):
         return {"success":success}
 
     @DocInherit
-    @Dataset.expectation(["minsize", "maxsize"])
+    @DataAsset.expectation(["minsize", "maxsize"])
     def expect_file_size_to_be_between(self, minsize, maxsize, result_format=None,
                                        include_config=False, catch_exceptions=None,
                                        meta=None):
@@ -441,7 +441,7 @@ class FileDataset(MetaFileDataset):
         return {"success":success}
 
     @DocInherit
-    @Dataset.expectation([])
+    @DataAsset.expectation([])
     def expect_file_to_exist(self, result_format=None, include_config=False,
                              catch_exceptions=None, meta=None):
 
@@ -481,7 +481,7 @@ class FileDataset(MetaFileDataset):
         return {"success":success}
 
     @DocInherit
-    @Dataset.expectation([])
+    @DataAsset.expectation([])
     def expect_file_to_have_valid_table_header(self, regex, skip=None,
                                                result_format=None,
                                                include_config=False,
@@ -556,7 +556,7 @@ class FileDataset(MetaFileDataset):
         return {"success":success}
 
     @DocInherit
-    @Dataset.expectation([])
+    @DataAsset.expectation([])
     def expect_file_to_be_valid_json(self, schema=None, result_format=None,
                                      include_config=False, catch_exceptions=None,
                                      meta=None):

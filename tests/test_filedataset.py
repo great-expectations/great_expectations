@@ -3,14 +3,14 @@ from __future__ import division
 import warnings
 import pytest
 import great_expectations as ge
-import great_expectations.dataset.autoinspect as autoinspect
+import great_expectations.data_asset.autoinspect as autoinspect
 from .test_utils import assertDeepAlmostEqual
 
 def test_autoinspect_filedataset():
     #Expect a warning to be raised since a file object doesn't have a columns attribute
     warnings.simplefilter('always', UserWarning)
     file_path = './tests/test_sets/toy_data_complete.csv'
-    my_file_data = ge.dataset.FileDataset(file_path)
+    my_file_data = ge.data_asset.FileDataset(file_path)
 
     with pytest.raises(UserWarning):
         with warnings.catch_warnings(record=True):
@@ -25,7 +25,7 @@ def test_expectation_config_filedataset():
     file_path = './tests/test_sets/toy_data_complete.csv'
 
     #Create FileDataset objects
-    f_dat = ge.dataset.FileDataset(file_path)
+    f_dat = ge.data_asset.FileDataset(file_path)
 
     #Set up expectations
     f_dat.expect_file_line_regex_match_count_to_equal(regex=',\S',
@@ -76,11 +76,11 @@ def test_expectation_config_filedataset():
 
 def test_file_format_map_output():
     incomplete_file_path = './tests/test_sets/toy_data_incomplete.csv'
-    incomplete_file_dat = ge.dataset.FileDataset(incomplete_file_path)
+    incomplete_file_dat = ge.data_asset.FileDataset(incomplete_file_path)
     null_file_path = './tests/test_sets/null_file.csv'
-    null_file_dat = ge.dataset.FileDataset(null_file_path)
+    null_file_dat = ge.data_asset.FileDataset(null_file_path)
     white_space_path = './tests/test_sets/white_space.txt'
-    white_space_dat = ge.dataset.FileDataset(white_space_path)
+    white_space_dat = ge.data_asset.FileDataset(white_space_path)
 
     #Boolean Expectation Output
     expectation = incomplete_file_dat.expect_file_line_regex_match_count_to_equal(regex=',\S',

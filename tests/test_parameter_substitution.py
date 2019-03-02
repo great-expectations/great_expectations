@@ -6,20 +6,20 @@ at evaluation time, and store parameters in expectations_config
 import pytest
 import numpy as np
 
-from great_expectations.dataset import Dataset
+from great_expectations.data_asset import DataAsset
 
 
 @pytest.fixture
 def dataset():
-    return Dataset()
+    return DataAsset()
 
 
 @pytest.fixture
 def single_expectation_custom_dataset():
 
-    class SlimCustomDataset(Dataset):
+    class SlimCustomDataset(DataAsset):
 
-        @Dataset.expectation('expectation_argument')
+        @DataAsset.expectation('expectation_argument')
         def expect_nothing(self, expectation_argument):
             return {
                 'success': True,

@@ -5,7 +5,7 @@ import argparse
 
 from great_expectations import read_csv
 from great_expectations import __version__
-from great_expectations.dataset import PandasDatatable
+from great_expectations.data_asset import PandasDataset
 
 
 def dispatch(args):
@@ -79,7 +79,7 @@ def validate(parsed_args):
             custom_module, parsed_args["custom_dataset_class"])
 
     else:
-        dataset_class = PandasDatatable
+        dataset_class = PandasDataset
 
     df = read_csv(data_set, expectations_config=expectations_config,
                   dataset_class=dataset_class)

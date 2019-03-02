@@ -7,7 +7,7 @@ def test_expect_file_line_regex_match_count_to_be_between():
 
     #####Invlaid File Path######
     joke_file_path = "joke.txt"
-    joke_dat = ge.dataset.FileDataset(joke_file_path)
+    joke_dat = ge.data_asset.FileDataset(joke_file_path)
 
     with pytest.raises(IOError):
         joke_dat.expect_file_line_regex_match_count_to_be_between(regex=",\S",
@@ -16,7 +16,7 @@ def test_expect_file_line_regex_match_count_to_be_between():
                                                                   skip=1)
 
     complete_file_path = './tests/test_sets/toy_data_complete.csv'
-    file_dat = ge.dataset.FileDataset(complete_file_path)
+    file_dat = ge.data_asset.FileDataset(complete_file_path)
 
     #Invalid Skip Parameter
     with pytest.raises(ValueError):
@@ -90,8 +90,8 @@ def test_expect_file_line_regex_match_count_to_be_between():
 def test_expect_file_line_regex_match_count_to_equal():
     complete_file_path = './tests/test_sets/toy_data_complete.csv'
     incomplete_file_path = './tests/test_sets/toy_data_incomplete.csv'
-    file_dat = ge.dataset.FileDataset(complete_file_path)
-    file_incomplete_dat = ge.dataset.FileDataset(incomplete_file_path)
+    file_dat = ge.data_asset.FileDataset(complete_file_path)
+    file_incomplete_dat = ge.data_asset.FileDataset(incomplete_file_path)
 
     #Invalid Regex Value
     with pytest.raises(ValueError):
@@ -141,14 +141,14 @@ def test_expect_file_line_regex_match_count_to_equal():
 
 def test_expect_file_hash_to_equal():
     # Test for non-existent file
-    fake_file = ge.dataset.FileDataset(file_path="abc")
+    fake_file = ge.data_asset.FileDataset(file_path="abc")
 
     with pytest.raises(IOError):
         fake_file.expect_file_hash_to_equal(value='abc')
 
     # Test for non-existent hash algorithm
     titanic_path = './tests/test_sets/Titanic.csv'
-    titanic_file = ge.dataset.FileDataset(titanic_path)
+    titanic_file = ge.data_asset.FileDataset(titanic_path)
 
     with pytest.raises(ValueError):
         titanic_file.expect_file_hash_to_equal(hash_alg='md51',
@@ -170,14 +170,14 @@ def test_expect_file_hash_to_equal():
     assert good_hash_new_alg["success"]
 
 def test_expect_file_size_to_be_between():
-    fake_file = ge.dataset.FileDataset("abc")
+    fake_file = ge.data_asset.FileDataset("abc")
 
     # Test for non-existent file
     with pytest.raises(OSError):
         fake_file.expect_file_size_to_be_between(0, 10000)
 
     titanic_path = './tests/test_sets/Titanic.csv'
-    titanic_file = ge.dataset.FileDataset(titanic_path)
+    titanic_file = ge.data_asset.FileDataset(titanic_path)
 
     # Test minsize not an integer
     with pytest.raises(TypeError):
@@ -209,57 +209,57 @@ def test_expect_file_size_to_be_between():
 
 def test_expect_file_to_exist():
     # Test for non-existent file
-    fake_file = ge.dataset.FileDataset("abc")
+    fake_file = ge.data_asset.FileDataset("abc")
     fake_file_existence = fake_file.expect_file_to_exist()
     assert not fake_file_existence["success"]
 
     # Test for existing file
-    real_file = ge.dataset.FileDataset('./tests/test_sets/Titanic.csv')
+    real_file = ge.data_asset.FileDataset('./tests/test_sets/Titanic.csv')
     real_file_existence = real_file.expect_file_to_exist()
     assert real_file_existence["success"]
 
 def test_expect_file_to_have_valid_table_header():
     # Test for non-existent file
-    fake_file = ge.dataset.FileDataset('abc')
+    fake_file = ge.data_asset.FileDataset('abc')
     with pytest.raises(IOError):
         fake_file.expect_file_to_have_valid_table_header(regex='')
 
     # Test for non-unique column names
-    invalid_header_dat = ge.dataset.FileDataset('./tests/test_sets/same_column_names.csv')
+    invalid_header_dat = ge.data_asset.FileDataset('./tests/test_sets/same_column_names.csv')
     invalid_header_dat_expectation = invalid_header_dat.expect_file_to_have_valid_table_header(regex='\|',
                                                                                                skip=2)
     assert not invalid_header_dat_expectation["success"]
 
     # Test for unique column names
-    valid_header_dat = ge.dataset.FileDataset('./tests/test_sets/Titanic.csv')
+    valid_header_dat = ge.data_asset.FileDataset('./tests/test_sets/Titanic.csv')
     valid_header_dat_expectation = valid_header_dat.expect_file_to_have_valid_table_header(regex=',')
     assert valid_header_dat_expectation["success"]
 
 def test_expect_file_to_be_valid_json():
 
     # Test for non-existent file
-    fake_file = ge.dataset.FileDataset('abc')
+    fake_file = ge.data_asset.FileDataset('abc')
     with pytest.raises(IOError):
         fake_file.expect_file_to_be_valid_json()
 
     # Test invalid JSON file
-    invalid_JSON_file = ge.dataset.FileDataset('./tests/test_sets/invalid_json_file.json')
+    invalid_JSON_file = ge.data_asset.FileDataset('./tests/test_sets/invalid_json_file.json')
     invalid_JSON_expectation = invalid_JSON_file.expect_file_to_be_valid_json()
     assert not invalid_JSON_expectation["success"]
 
     # Test valid JSON file
-    valid_JSON_file = ge.dataset.FileDataset('./tests/test_sets/titanic_expectations.json')
+    valid_JSON_file = ge.data_asset.FileDataset('./tests/test_sets/titanic_expectations.json')
     valid_JSON_expectation = valid_JSON_file.expect_file_to_be_valid_json()
     assert valid_JSON_expectation["success"]
 
     # Test valid JSON file with non-matching schema
     schema_file = './tests/test_sets/sample_schema.json'
-    test_file = ge.dataset.FileDataset('./tests/test_sets/json_test1_against_schema.json')
+    test_file = ge.data_asset.FileDataset('./tests/test_sets/json_test1_against_schema.json')
     test_file_expectation = test_file.expect_file_to_be_valid_json(schema=schema_file)
     assert not test_file_expectation["success"]
 
     # Test valid JSON file with valid schema
-    test_file = ge.dataset.FileDataset('./tests/test_sets/json_test2_against_schema.json')
+    test_file = ge.data_asset.FileDataset('./tests/test_sets/json_test2_against_schema.json')
     schema_file = './tests/test_sets/sample_schema.json'
     test_file_expectation = test_file.expect_file_to_be_valid_json(schema=schema_file)
     assert test_file_expectation["success"]
