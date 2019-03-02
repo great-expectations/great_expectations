@@ -569,6 +569,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                                            column,
                                            min_value=None, max_value=None,
                                            parse_strings_as_datetimes=None,
+                                           output_strftime_format=None,
                                            allow_cross_type_comparisons=None,
                                            mostly=None,
                                            result_format=None, include_config=False, catch_exceptions=None, meta=None

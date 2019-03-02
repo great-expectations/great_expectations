@@ -5,6 +5,7 @@ from great_expectations.dataset import Dataset
 from functools import wraps
 import inspect
 from six import PY3
+from six import string_types
 import sys
 
 if sys.version_info.major == 2:  # If python 2
@@ -16,7 +17,8 @@ from .util import DocInherit, parse_result_format
 
 import sqlalchemy as sa
 from sqlalchemy.engine import reflection
-
+from dateutil.parser import parse
+from datetime import datetime
 from numbers import Number
 
 
@@ -116,8 +118,20 @@ class MetaSqlAlchemyDataset(Dataset):
 
             nonnull_count = count_results['element_count'] - \
                 count_results['null_count']
-            maybe_limited_unexpected_list = [x[column]
+
+            if "output_strftime_format" in kwargs:
+                output_strftime_format = kwargs["output_strftime_format"]
+                maybe_limited_unexpected_list = []
+                for x in unexpected_query_results.fetchall():
+                    if isinstance(x[column], string_types):
+                        col = parse(x[column])
+                    else:
+                        col = x[column]
+                    maybe_limited_unexpected_list.append(datetime.strftime(col, output_strftime_format))
+            else:
+                maybe_limited_unexpected_list = [x[column]
                                              for x in unexpected_query_results.fetchall()]
+
             success_count = nonnull_count - count_results['unexpected_count']
             success, percent_success = self._calc_map_expectation_success(
                 success_count, nonnull_count, mostly)
@@ -479,12 +493,16 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                                            max_value=None,
                                            allow_cross_type_comparisons=None,
                                            parse_strings_as_datetimes=None,
+                                           output_strftime_format=None,
                                            mostly=None,
                                            result_format=None, include_config=False, catch_exceptions=None, meta=None
                                            ):
-        if parse_strings_as_datetimes is not None:
-            raise ValueError(
-                "parse_strings_as_datetimes is not currently supported in SqlAlchemy.")
+        if parse_strings_as_datetimes:
+            if min_value:
+                min_value = parse(min_value)
+
+            if max_value:
+                max_value = parse(max_value)
 
         if min_value != None and max_value != None and min_value > max_value:
             raise ValueError("min_value cannot be greater than max_value")
@@ -572,21 +590,31 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
 
-        if parse_strings_as_datetimes:
-            raise ValueError(
-                "parse_strings_as_datetimes is not supported in SqlAlchemy")
-
         col_max = self.engine.execute(
             sa.select([sa.func.max(sa.column(column))]).select_from(
                 self._table)
         ).scalar()
+
+        col_max_out = col_max
+        if parse_strings_as_datetimes:
+            if min_value:
+                min_value = parse(min_value)
+
+            if max_value:
+                max_value = parse(max_value)
+
+            if isinstance(col_max, string_types):
+                col_max = parse(col_max)
+
+            if output_strftime_format:
+                col_max_out = datetime.strftime(col_max, output_strftime_format)
 
         # Handle possible missing values
         if col_max is None:
             return {
                 'success': False,
                 'result': {
-                    'observed_value': col_max
+                    'observed_value': col_max_out
                 }
             }
         else:
@@ -602,7 +630,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             return {
                 'success': success,
                 'result': {
-                    'observed_value': col_max
+                    'observed_value': col_max_out
                 }
             }
 
@@ -620,21 +648,32 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
 
-        if parse_strings_as_datetimes:
-            raise ValueError(
-                "parse_strings_as_datetimes is not supported in SqlAlchemy")
-
         col_min = self.engine.execute(
             sa.select([sa.func.min(sa.column(column))]).select_from(
                 self._table)
         ).scalar()
+
+        col_min_out = col_min
+        if parse_strings_as_datetimes:
+            if min_value:
+                min_value = parse(min_value)
+
+            if max_value:
+                max_value = parse(max_value)
+
+            if isinstance(col_min, string_types):
+                col_min = parse(col_min)
+
+            if output_strftime_format:
+                col_min_out = datetime.strftime(col_min, output_strftime_format)
+
 
         # Handle possible missing values
         if col_min is None:
             return {
                 'success': False,
                 'result': {
-                    'observed_value': col_min
+                    'observed_value': col_min_out
                 }
             }
         else:
@@ -650,7 +689,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             return {
                 'success': success,
                 'result': {
-                    'observed_value': col_min
+                    'observed_value': col_min_out
                 }
             }
 

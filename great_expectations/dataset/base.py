@@ -1721,6 +1721,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                                            max_value=None,
                                            allow_cross_type_comparisons=None,
                                            parse_strings_as_datetimes=None,
+                                           output_strftime_format=None,
                                            mostly=None,
                                            result_format=None, include_config=False, catch_exceptions=None, meta=None
                                            ):
@@ -1739,6 +1740,9 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                 string). Otherwise, attempting such comparisons will raise an exception.
             parse_strings_as_datetimes (boolean or None) : If True, parse min_value, max_value, and all non-null column\
                 values to datetimes before making comparisons.
+            output_strftime_format (str or None): \
+                A valid strfime format for datetime output. Only used if parse_strings_as_datetimes=True.
+
             mostly (None or a float between 0 and 1): \
                 Return `"success": True` if at least mostly percent of values match the expectation. \
                 For more detail, see :ref:`mostly`.
