@@ -4,11 +4,21 @@ import pandas as pd
 import numpy as np
 import pytest
 from sqlalchemy import create_engine
-from sqlalchemy import types
-from sqlalchemy.dialects.sqlite import DATETIME
+import sqlalchemy.dialects.sqlite as sqlitetypes
 
 from great_expectations.dataset import PandasDataset, SqlAlchemyDataset
 import great_expectations.dataset.autoinspect as autoinspect
+
+SQLITE_TYPES = {
+        "varchar": sqlitetypes.VARCHAR,
+        "char": sqlitetypes.CHAR,
+        "int": sqlitetypes.INTEGER,
+        "smallint": sqlitetypes.SMALLINT,
+        "datetime": sqlitetypes.DATETIME(truncate_microseconds=True),
+        "date": sqlitetypes.DATE,
+        "float": sqlitetypes.FLOAT,
+        "bool": sqlitetypes.BOOLEAN
+}
 
 # Taken from the following stackoverflow:
 # https://stackoverflow.com/questions/23549419/assert-that-two-dictionaries-are-almost-equal
@@ -50,7 +60,7 @@ def assertDeepAlmostEqual(expected, actual, *args, **kwargs):
         raise exc
 
 
-def get_dataset(dataset_type, data, date_type_columns=None, autoinspect_func=autoinspect.columns_exist):
+def get_dataset(dataset_type, data, schemas=None, autoinspect_func=autoinspect.columns_exist):
     """For Pandas, data should be either a DataFrame or a dictionary that can
     be instantiated as a DataFrame.
     For SQL, data should have the following shape:
@@ -72,10 +82,17 @@ def get_dataset(dataset_type, data, date_type_columns=None, autoinspect_func=aut
         df = pd.DataFrame(data)
 
         sql_dtypes = {}
-        if date_type_columns:
-            for col in date_type_columns:
-                df[col] = pd.to_datetime(df[col])
-                sql_dtypes[col] = DATETIME(truncate_microseconds=True)
+        if schemas and "sqlite" in schemas:
+            schema = schemas["sqlite"]
+            sql_dtypes = {col : SQLITE_TYPES[dtype] for (col,dtype) in schema.items()}
+            for col in schema:
+                type = schema[col]
+                if type == "int":
+                    df[col] = pd.to_numeric(df[col],downcast='signed')
+                elif type == "float":
+                    df[col] = pd.to_numeric(df[col],downcast='float')
+                elif type == "datetime":
+                    df[col] = pd.to_datetime(df[col])
 
         df.to_sql(name='test_data', con=engine, index=False, dtype=sql_dtypes)
 

@@ -20,7 +20,16 @@
       "alpha": ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"],
       "numeric": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
     },
-    "date_type_columns" : ["ts"],
+    "schemas": {
+      "sqlite": {
+        "x": "int",
+        "y": "varchar",
+        "z": "int",
+        "ts": "datetime",
+        "alpha": "varchar",
+        "numeric": "int"
+      }
+    },
     "tests": [
       {
         "title": "Basic positive test",
