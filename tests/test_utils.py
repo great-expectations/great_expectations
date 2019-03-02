@@ -146,6 +146,7 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
             "expect_column_pair_values_to_be_equal",
             "expect_column_pair_values_A_to_be_greater_than_B",
             "expect_column_pair_values_to_be_in_set",
+            "expect_multicolumn_values_to_be_unique"
         ]
     return False
 
