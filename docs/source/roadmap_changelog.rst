@@ -14,6 +14,7 @@ Planned Features
 
 v.0.4.5__develop
 ----------------
+* Added support for date/datetime type columns in some SQLAlchemy expectations (#413)
 
 v.0.4.5
 ----------------
