@@ -10,7 +10,7 @@ import numpy as np
 from six import PY3
 from itertools import compress
 from .base import DataAsset
-from .util import DocInherit, parse_result_format
+from .util import parse_result_format
 
 
 
@@ -132,4 +132,117 @@ class FileDataAsset(MetaFileDataAsset):
     def __init__(self, file_path, *args, **kwargs):
         super(FileDataAsset, self).__init__(*args, **kwargs)
         self.path = file_path
+
+
+    @MetaFileDataAsset.file_lines_map_expectation
+    def expect_file_line_regex_match_count_to_be_between(self,
+                                                         regex, lines=None,
+                                                         skip=None,
+                                                         expected_min_count=0,
+                                                         expected_max_count=None,
+                                                         mostly=None,
+                                                         result_format=None,
+                                                         include_config=False,
+                                                         catch_exceptions=None,
+                                                         meta=None):
+        """
+        Expect the number of times a regular expression appears on each line of
+        a file to be between a maximum and minimum value.
+
+        Args: regex:
+            A string that can be compiled as valid regular expression
+
+        Keyword Args:
+            lines: \
+                An empty variable that recieves the file lines from the
+                file_lines_map_expectation method. It doesn't matter what the
+                user gives for this value as it will be replaced with the lines
+                of the file by file_lines_map_expecation. It is recommended the
+                user ignore this argument and leave it at its default.
+
+            skip (nonnegative integer): \
+                Integer specifying the first lines in the file the method should
+                skip before assessing expectations
+
+            expected_min_count (None or nonnegative integer): \
+                Specifies the minimum number of times regex is expected to appear
+                on each line of the file
+
+            expected_max_count (None or nonnegative integer): \
+               Specifies the maximum number of times regex is expected to appear
+               on each line of the file
+
+            mostly (None or number between 0 and 1): \
+
+                Specifies an acceptable error for expectations. If the percentage
+                of unexpected lines is less than mostly, the method still returns
+                true even if all lines don't match the expectation criteria.
+
+            result_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`,
+                or `SUMMARY`. For more detail, see :ref:`result_format <result_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the
+                result object. For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the
+                result object. For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be
+                included in the output without modification. For more detail,
+                see :ref:`meta`.
+
+        Returns:
+
+            A JSON-serializable expectation result object.
+
+            Exact fields vary depending on the values passed to
+            :ref:`result_format <result_format>` and :ref:`include_config`,
+            :ref:`catch_exceptions`, and :ref:`meta`.
+
+        """
+        try:
+            comp_regex = re.compile(regex)
+        except:
+            raise ValueError("Must enter valid regular expression for regex")
+
+        if expected_min_count != None:
+            try:
+                assert float(expected_min_count).is_integer()
+                assert float(expected_min_count) >= 0
+            except:
+                raise ValueError("expected_min_count must be a non-negative \
+                                 integer or None")
+
+        if expected_max_count != None:
+            try:
+                assert float(expected_max_count).is_integer()
+                assert float(expected_max_count) >= 0
+            except:
+                raise ValueError("expected_max_count must be a non-negative \
+                                 integer or None")
+
+        if expected_max_count != None and expected_min_count != None:
+            try:
+                assert expected_max_count >= expected_min_count
+            except:
+                raise ValueError("expected_max_count must be greater than or \
+                                 equal to expected_min_count")
+
+        if expected_max_count != None and expected_min_count != None:
+            truth_list = [True if(len(comp_regex.findall(line)) >= expected_min_count and \
+                                len(comp_regex.findall(line)) <= expected_max_count) else False \
+                                for line in lines]
+
+        elif expected_max_count != None:
+            truth_list = [True if(len(comp_regex.findall(line)) <= expected_max_count) else False \
+                                for line in lines]
+
+        elif expected_min_count != None:
+              truth_list = [True if(len(comp_regex.findall(line)) >= expected_min_count) else False \
+                                for line in lines]
+        else:
+            truth_list = [True for line in lines]
+
+        return truth_list
 
