@@ -322,3 +322,57 @@ class FileDataAsset(MetaFileDataAsset):
         return [True if(len(comp_regex.findall(line)) == expected_count) else False \
                                 for line in lines]
 
+    @DataAsset.expectation(["value"])
+    def expect_file_hash_to_equal(self, value, hash_alg='md5', result_format=None,
+                                  include_config=False, catch_exceptions=None,
+                                  meta=None):
+
+        """
+        Expect computed file hash to equal some given value.
+
+        Args:
+            value: A string to compare with the computed hash value
+
+        Keyword Args:
+            hash_alg (string):  Indicates the hash algorithm to use
+
+            result_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`,
+                or `SUMMARY`. For more detail, see :ref:`result_format <result_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the
+                result object. For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be
+                included in the output without modification. For more detail,
+                see :ref:`meta`.
+
+        Returns:
+            A JSON-serializable expectation result object.
+
+        Exact fields vary depending on the values passed to :ref:`result_format
+        <result_format>` and :ref:`include_config`, :ref:`catch_exceptions`,
+        and :ref:`meta`.
+        """
+        success = False
+        try:
+            hash = hashlib.new(hash_alg)
+
+        # Limit file reads to 64 KB chunks at a time
+            BLOCKSIZE = 65536
+            try:
+                with open(self.path, 'rb') as file:
+                    file_buffer = file.read(BLOCKSIZE)
+                    while file_buffer:
+                        hash.update(file_buffer)
+                        file_buffer = file.read(BLOCKSIZE)
+                    success = hash.hexdigest() == value
+            except IOError:
+                raise
+        except ValueError:
+            raise
+        return {"success":success}
+
