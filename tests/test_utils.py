@@ -6,8 +6,8 @@ import pytest
 from sqlalchemy import create_engine
 import sqlalchemy.dialects.sqlite as sqlitetypes
 
-from great_expectations.dataset import PandasDataset, SqlAlchemyDataset
-import great_expectations.dataset.autoinspect as autoinspect
+from great_expectations.data_asset import PandasDataset, SqlAlchemyDataset
+import great_expectations.data_asset.autoinspect as autoinspect
 
 SQLITE_TYPES = {
         "varchar": sqlitetypes.VARCHAR,
@@ -151,14 +151,14 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
     return False
 
 
-def evaluate_json_test(dataset, expectation_type, test):
+def evaluate_json_test(data_asset, expectation_type, test):
     """
     This method will evaluate the result of a test build using the Great Expectations json test format.
 
     NOTE: Tests can be suppressed for certain data types if the test contains the Key 'suppress_test_for' with a list
-        of Dataset types to suppress, such as ['SQLAlchemy', 'Pandas'].
+        of DataAsset types to suppress, such as ['SQLAlchemy', 'Pandas'].
 
-    :param dataset: (Dataset) A great expectations Dataset
+    :param data_asset: (DataAsset) A great expectations DataAsset
     :param expectation_type: (string) the name of the expectation to be run using the test input
     :param test: (dict) a dictionary containing information for the test to be run. The dictionary must include:
         - title: (string) the name of the test
@@ -175,7 +175,7 @@ def evaluate_json_test(dataset, expectation_type, test):
     :return: None. asserts correctness of results.
     """
 
-    dataset.set_default_expectation_argument('result_format', 'COMPLETE')
+    data_asset.set_default_expectation_argument('result_format', 'COMPLETE')
 
     if 'title' not in test:
         raise ValueError(
@@ -196,28 +196,28 @@ def evaluate_json_test(dataset, expectation_type, test):
     # Pass the test if we are in a test condition that is a known exception
 
     # Known condition: SqlAlchemy does not support allow_cross_type_comparisons
-    if 'allow_cross_type_comparisons' in test['in'] and isinstance(dataset, SqlAlchemyDataset):
+    if 'allow_cross_type_comparisons' in test['in'] and isinstance(data_asset, SqlAlchemyDataset):
         return
 
     try:
         # Support tests with positional arguments
         if isinstance(test['in'], list):
-            result = getattr(dataset, expectation_type)(*test['in'])
+            result = getattr(data_asset, expectation_type)(*test['in'])
         # As well as keyword arguments
         else:
-            result = getattr(dataset, expectation_type)(**test['in'])
+            result = getattr(data_asset, expectation_type)(**test['in'])
 
     except NotImplementedError:
         # Note: This method of checking does not look for false negatives: tests that are incorrectly on the notimplemented_list
         assert candidate_test_is_on_temporary_notimplemented_list(
-            dataset.__class__.__name__, expectation_type), "Error: this test was supposed to return NotImplementedError"
+            data_asset.__class__.__name__, expectation_type), "Error: this test was supposed to return NotImplementedError"
         return
 
     if 'suppress_test_for' in test:
-        # Optionally suppress the test for specified Dataset types
-        if 'SQLAlchemy' in test['suppress_test_for'] and isinstance(dataset, SqlAlchemyDataset):
+        # Optionally suppress the test for specified DataAsset types
+        if 'SQLAlchemy' in test['suppress_test_for'] and isinstance(data_asset, SqlAlchemyDataset):
             return
-        if 'Pandas' in test['suppress_test_for'] and isinstance(dataset, PandasDataset):
+        if 'Pandas' in test['suppress_test_for'] and isinstance(data_asset, PandasDataset):
             return
 
     # Check results
@@ -236,7 +236,7 @@ def evaluate_json_test(dataset, expectation_type, test):
                 assert value == result['result']['observed_value']
 
             elif key == 'unexpected_index_list':
-                if isinstance(dataset, SqlAlchemyDataset):
+                if isinstance(data_asset, SqlAlchemyDataset):
                     pass
                 else:
                     assert result['result']['unexpected_index_list'] == value

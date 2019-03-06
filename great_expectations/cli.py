@@ -5,7 +5,7 @@ import argparse
 
 from great_expectations import read_csv
 from great_expectations import __version__
-from great_expectations.dataset import PandasDataset
+from great_expectations.data_asset import PandasDataset
 
 
 def dispatch(args):

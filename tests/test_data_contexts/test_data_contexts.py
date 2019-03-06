@@ -4,7 +4,7 @@ import sqlalchemy as sa
 import pandas as pd
 
 from great_expectations import get_data_context
-from great_expectations.dataset import PandasDataset, SqlAlchemyDataset
+from great_expectations.data_asset import PandasDataset, SqlAlchemyDataset
 
 
 @pytest.fixture(scope="module")

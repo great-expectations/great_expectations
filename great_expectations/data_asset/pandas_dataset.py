@@ -21,7 +21,7 @@ from dateutil.parser import parse
 from scipy import stats
 from six import PY3, integer_types, string_types
 
-from .base import Dataset
+from .dataset import Dataset
 from .util import DocInherit, \
     is_valid_partition_object, is_valid_categorical_partition_object, is_valid_continuous_partition_object, \
     _scipy_distribution_positional_args_from_dict, validate_distribution_parameters,\
@@ -50,7 +50,7 @@ class MetaPandasDataset(Dataset):
         object containing the actual column from the relevant pandas dataframe. This simplifies the implementing expectation
         logic while preserving the standard Dataset signature and expected behavior.
 
-        See :func:`column_map_expectation <great_expectations.Dataset.base.Dataset.column_map_expectation>` \
+        See :func:`column_map_expectation <great_expectations.data_asset.dataset.Dataset.column_map_expectation>` \
         for full documentation of this function.
         """
         if PY3:
@@ -258,7 +258,7 @@ class MetaPandasDataset(Dataset):
         Series object containing the actual column from the relevant pandas dataframe. This simplifies the implementing
         expectation logic while preserving the standard Dataset signature and expected behavior.
 
-        See :func:`column_aggregate_expectation <great_expectations.Dataset.base.Dataset.column_aggregate_expectation>` \
+        See :func:`column_aggregate_expectation <great_expectations.data_asset.dataset.Dataset.column_aggregate_expectation>` \
         for full documentation of this function.
         """
         if PY3:
@@ -329,7 +329,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
     """
     PandasDataset instantiates the great_expectations Expectations API as a subclass of a pandas.DataFrame.
 
-    For the full API reference, please see :func:`Dataset <great_expectations.Dataset.base.Dataset>`
+    For the full API reference, please see :func:`Dataset <great_expectations.data_asset.dataset.Dataset>`
 
     Notes:
         1. Samples and Subsets of PandaDataSet have ALL the expectations of the original \

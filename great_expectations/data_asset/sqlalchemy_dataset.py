@@ -1,6 +1,6 @@
 from __future__ import division
 
-from great_expectations.dataset import Dataset
+from great_expectations.data_asset import Dataset
 
 from functools import wraps
 import inspect
