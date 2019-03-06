@@ -6,18 +6,18 @@ import pytest
 from .test_utils import get_dataset
 
 import great_expectations as ge
-import great_expectations.dataset.autoinspect as autoinspect
+import great_expectations.data_asset.autoinspect as autoinspect
 
 
 def test_no_autoinspection():
-    df = ge.dataset.PandasDataset({"a": [1, 2, 3]}, autoinspect_func=None)
+    df = ge.data_asset.PandasDataset({"a": [1, 2, 3]}, autoinspect_func=None)
     config = df.get_expectations_config()
 
     assert len(config["expectations"]) == 0
 
 
 def test_default_no_autoinspection():
-    df = ge.dataset.PandasDataset({"a": [1, 2, 3]})
+    df = ge.data_asset.PandasDataset({"a": [1, 2, 3]})
     config = df.get_expectations_config()
 
     assert len(config["expectations"]) == 0
@@ -52,11 +52,11 @@ def test_autoinspect_columns_exist(dataset_type):
 
 def test_autoinspect_warning():
     with pytest.warns(UserWarning, match="No columns list found in dataset; no autoinspection performed."):
-        ge.dataset.Dataset(autoinspect_func=autoinspect.columns_exist)
+        ge.data_asset.Dataset(autoinspect_func=autoinspect.columns_exist)
 
 
 def test_autoinspect_error():
-    df = ge.dataset.Dataset()
+    df = ge.data_asset.Dataset()
     df.columns = [{"title": "nonstandard_columns"}]
     with pytest.raises(autoinspect.AutoInspectError) as autoinspect_error:
         df.autoinspect(autoinspect.columns_exist)

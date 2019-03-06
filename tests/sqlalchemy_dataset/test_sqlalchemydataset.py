@@ -1,6 +1,6 @@
 import pytest
 
-from great_expectations.dataset import MetaSqlAlchemyDataset, SqlAlchemyDataset
+from great_expectations.data_asset import MetaSqlAlchemyDataset, SqlAlchemyDataset
 import sqlalchemy as sa
 import pandas as pd
 

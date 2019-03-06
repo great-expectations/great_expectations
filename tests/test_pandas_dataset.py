@@ -5,7 +5,7 @@ import json
 import datetime
 import pandas as pd
 import great_expectations as ge
-import great_expectations.dataset.autoinspect as autoinspect
+import great_expectations.data_asset.autoinspect as autoinspect
 
 from .test_utils import assertDeepAlmostEqual
 
@@ -14,7 +14,7 @@ def test_expect_column_values_to_match_strftime_format():
     """
     """
 
-    D = ge.dataset.PandasDataset({
+    D = ge.data_asset.PandasDataset({
         'x': [1, 2, 4],
         'us_dates': ['4/30/2017', '4/30/2017', '7/4/1776'],
         'us_dates_type_error': ['4/30/2017', '4/30/2017', 5],
@@ -72,7 +72,7 @@ def test_expect_column_values_to_match_strftime_format():
 
 def test_expect_column_values_to_be_dateutil_parseable():
 
-    D = ge.dataset.PandasDataset({
+    D = ge.data_asset.PandasDataset({
         'c1': ['03/06/09', '23 April 1973', 'January 9, 2016'],
         'c2': ['9/8/2012', 'covfefe', 25],
         'c3': ['Jared', 'June 1, 2013', 'July 18, 1976'],
@@ -125,7 +125,7 @@ def test_expect_column_values_to_be_json_parseable():
     d3 = json.dumps({'i': 'a', 'j': 'b', 'k': 'c'})
     d4 = json.dumps({'i': [4, 5], 'j': [6, 7], 'k': [
                     8, 9], 'l': {4: 'x', 5: 'y', 6: 'z'}})
-    D = ge.dataset.PandasDataset({
+    D = ge.data_asset.PandasDataset({
         'json_col': [d1, d2, d3, d4],
         'not_json': [4, 5, 6, 7],
         'py_dict': [{'a': 1, 'out': 1}, {'b': 2, 'out': 4}, {'c': 3, 'out': 9}, {'d': 4, 'out': 16}],
@@ -161,7 +161,7 @@ def test_expect_column_values_to_be_json_parseable():
 
 #     with open("./tests/test_sets/expect_column_values_to_match_json_schema_test_set.json") as f:
 #         J = json.load(f)
-#         D = ge.dataset.PandasDataset(J["dataset"])
+#         D = ge.data_asset.PandasDataset(J["dataset"])
 #         D.set_default_expectation_argument("result_format", "COMPLETE")
 #         T = J["tests"]
 
@@ -178,7 +178,7 @@ def test_expect_column_values_to_be_json_parseable():
 
 def test_expectation_decorator_summary_mode():
 
-    df = ge.dataset.PandasDataset({
+    df = ge.data_asset.PandasDataset({
         'x': [1, 2, 3, 4, 5, 6, 7, 7, None, None],
     })
     df.set_default_expectation_argument("result_format", "COMPLETE")
@@ -224,7 +224,7 @@ def test_expectation_decorator_summary_mode():
 
 def test_positional_arguments():
 
-    df = ge.dataset.PandasDataset({
+    df = ge.data_asset.PandasDataset({
         'x': [1, 3, 5, 7, 9],
         'y': [2, 4, 6, 8, 10],
         'z': [None, 'a', 'b', 'c', 'abc']
@@ -279,7 +279,7 @@ def test_positional_arguments():
 
 
 def test_result_format_argument_in_decorators():
-    df = ge.dataset.PandasDataset({
+    df = ge.data_asset.PandasDataset({
         'x': [1, 3, 5, 7, 9],
         'y': [2, 4, 6, 8, 10],
         'z': [None, 'a', 'b', 'c', 'abc']
@@ -328,14 +328,14 @@ def test_from_pandas():
     })
 
     ge_df = ge.from_pandas(pd_df)
-    assert isinstance(ge_df, ge.dataset.Dataset)
+    assert isinstance(ge_df, ge.data_asset.DataAsset)
     assert list(ge_df.columns) == ['x', 'y', 'z']
     assert list(ge_df['x']) == list(pd_df['x'])
     assert list(ge_df['y']) == list(pd_df['y'])
     assert list(ge_df['z']) == list(pd_df['z'])
 
     # make an empty subclass to test dataset_class argument
-    class CustomPandasDataset(ge.dataset.PandasDataset):
+    class CustomPandasDataset(ge.data_asset.PandasDataset):
         pass
 
     ge_df_custom = ge.from_pandas(pd_df, dataset_class=CustomPandasDataset)
@@ -371,7 +371,7 @@ def test_from_pandas_expectations_config():
 
 
 def test_ge_pandas_concatenating_no_autoinspect():
-    df1 = ge.dataset.PandasDataset({
+    df1 = ge.data_asset.PandasDataset({
         'A': ['A0', 'A1', 'A2'],
         'B': ['B0', 'B1', 'B2']
     })
@@ -381,7 +381,7 @@ def test_ge_pandas_concatenating_no_autoinspect():
     df1.expect_column_values_to_match_regex('A', '^A[0-2]$')
     df1.expect_column_values_to_match_regex('B', '^B[0-2]$')
 
-    df2 = ge.dataset.PandasDataset({
+    df2 = ge.data_asset.PandasDataset({
         'A': ['A3', 'A4', 'A5'],
         'B': ['B3', 'B4', 'B5']
     })
@@ -397,16 +397,16 @@ def test_ge_pandas_concatenating_no_autoinspect():
 
     # The concatenated data frame will:
     #
-    #   1. Be a ge.dataset.PandaDataSet
+    #   1. Be a ge.data_asset.PandaDataSet
     #   2. Have no expectations (since no default expectations are created), even expectations that were common
     #      to the concatenated dataframes and still make sense (since no autoinspection happens).
 
-    assert isinstance(df, ge.dataset.PandasDataset)
+    assert isinstance(df, ge.data_asset.PandasDataset)
     assert df.find_expectations() == exp_c
 
 
 def test_ge_pandas_joining():
-    df1 = ge.dataset.PandasDataset({
+    df1 = ge.data_asset.PandasDataset({
         'A': ['A0', 'A1', 'A2'],
         'B': ['B0', 'B1', 'B2']},
         index=['K0', 'K1', 'K2'])
@@ -414,7 +414,7 @@ def test_ge_pandas_joining():
     df1.expect_column_values_to_match_regex('A', '^A[0-2]$')
     df1.expect_column_values_to_match_regex('B', '^B[0-2]$')
 
-    df2 = ge.dataset.PandasDataset({
+    df2 = ge.data_asset.PandasDataset({
         'C': ['C0', 'C2', 'C3'],
         'D': ['C0', 'D2', 'D3']},
         index=['K0', 'K2', 'K3'])
@@ -438,22 +438,22 @@ def test_ge_pandas_joining():
 
     # The joined data frame will:
     #
-    #   1. Be a ge.dataset.PandaDataSet
+    #   1. Be a ge.data_asset.PandaDataSet
     #   2. Have no expectations (no autoinspection)
 
-    assert isinstance(df, ge.dataset.PandasDataset)
+    assert isinstance(df, ge.data_asset.PandasDataset)
     assert df.find_expectations() == exp_j
 
 
 def test_ge_pandas_merging():
-    df1 = ge.dataset.PandasDataset({
+    df1 = ge.data_asset.PandasDataset({
         'id': [1, 2, 3, 4],
         'name': ['a', 'b', 'c', 'd']
     })
 
     df1.expect_column_values_to_match_regex('name', '^[A-Za-z ]+$')
 
-    df2 = ge.dataset.PandasDataset({
+    df2 = ge.data_asset.PandasDataset({
         'id': [1, 2, 3, 4],
         'salary': [57000, 52000, 59000, 65000]
     })
@@ -474,15 +474,15 @@ def test_ge_pandas_merging():
 
     # The merged data frame will:
     #
-    #   1. Be a ge.dataset.PandaDataSet
+    #   1. Be a ge.data_asset.PandaDataSet
     #   2. Have no expectations (no autoinspection is now default)
 
-    assert isinstance(df, ge.dataset.PandasDataset)
+    assert isinstance(df, ge.data_asset.PandasDataset)
     assert df.find_expectations() == exp_m
 
 
 def test_ge_pandas_sampling():
-    df = ge.dataset.PandasDataset({
+    df = ge.data_asset.PandasDataset({
         'A': [1, 2, 3, 4],
         'B': [5, 6, 7, 8],
         'C': ['a', 'b', 'c', 'd'],
@@ -500,15 +500,15 @@ def test_ge_pandas_sampling():
 
     # The sampled data frame should:
     #
-    #   1. Be a ge.dataset.PandaDataSet
+    #   1. Be a ge.data_asset.PandaDataSet
     #   2. Inherit ALL the expectations of the parent data frame
 
     samp1 = df.sample(n=2)
-    assert isinstance(samp1, ge.dataset.PandasDataset)
+    assert isinstance(samp1, ge.data_asset.PandasDataset)
     assert samp1.find_expectations() == exp1
 
     samp1 = df.sample(frac=0.25, replace=True)
-    assert isinstance(samp1, ge.dataset.PandasDataset)
+    assert isinstance(samp1, ge.data_asset.PandasDataset)
     assert samp1.find_expectations() == exp1
 
     # Change expectation on column "D", sample, and check expectations.
@@ -538,7 +538,7 @@ def test_ge_pandas_sampling():
 
 
 def test_ge_pandas_subsetting():
-    df = ge.dataset.PandasDataset({
+    df = ge.data_asset.PandasDataset({
         'A': [1, 2, 3, 4],
         'B': [5, 6, 7, 8],
         'C': ['a', 'b', 'c', 'd'],
@@ -553,46 +553,46 @@ def test_ge_pandas_subsetting():
 
     # The subsetted data frame should:
     #
-    #   1. Be a ge.dataset.PandaDataSet
+    #   1. Be a ge.data_asset.PandaDataSet
     #   2. Inherit ALL the expectations of the parent data frame
 
     exp1 = df.find_expectations()
 
     sub1 = df[['A', 'D']]
-    assert isinstance(sub1, ge.dataset.PandasDataset)
+    assert isinstance(sub1, ge.data_asset.PandasDataset)
     assert sub1.find_expectations() == exp1
 
     sub1 = df[['A']]
-    assert isinstance(sub1, ge.dataset.PandasDataset)
+    assert isinstance(sub1, ge.data_asset.PandasDataset)
     assert sub1.find_expectations() == exp1
 
     sub1 = df[:3]
-    assert isinstance(sub1, ge.dataset.PandasDataset)
+    assert isinstance(sub1, ge.data_asset.PandasDataset)
     assert sub1.find_expectations() == exp1
 
     sub1 = df[1:2]
-    assert isinstance(sub1, ge.dataset.PandasDataset)
+    assert isinstance(sub1, ge.data_asset.PandasDataset)
     assert sub1.find_expectations() == exp1
 
     sub1 = df[:-1]
-    assert isinstance(sub1, ge.dataset.PandasDataset)
+    assert isinstance(sub1, ge.data_asset.PandasDataset)
     assert sub1.find_expectations() == exp1
 
     sub1 = df[-1:]
-    assert isinstance(sub1, ge.dataset.PandasDataset)
+    assert isinstance(sub1, ge.data_asset.PandasDataset)
     assert sub1.find_expectations() == exp1
 
     sub1 = df.iloc[:3, 1:4]
-    assert isinstance(sub1, ge.dataset.PandasDataset)
+    assert isinstance(sub1, ge.data_asset.PandasDataset)
     assert sub1.find_expectations() == exp1
 
     sub1 = df.loc[0:, 'A':'B']
-    assert isinstance(sub1, ge.dataset.PandasDataset)
+    assert isinstance(sub1, ge.data_asset.PandasDataset)
     assert sub1.find_expectations() == exp1
 
 
 def test_ge_pandas_automatic_failure_removal():
-    df = ge.dataset.PandasDataset({
+    df = ge.data_asset.PandasDataset({
         'A': [1, 2, 3, 4],
         'B': [5, 6, 7, 8],
         'C': ['a', 'b', 'c', 'd'],
@@ -678,13 +678,13 @@ def test_ge_pandas_automatic_failure_removal():
 
 def test_subclass_pandas_subset_retains_subclass():
     """A subclass of PandasDataset should still be that subclass after a Pandas subsetting operation"""
-    class CustomPandasDataset(ge.dataset.PandasDataset):
+    class CustomPandasDataset(ge.data_asset.PandasDataset):
 
-        @ge.dataset.MetaPandasDataset.column_map_expectation
+        @ge.data_asset.MetaPandasDataset.column_map_expectation
         def expect_column_values_to_be_odd(self, column):
             return column.map(lambda x: x % 2)
 
-        @ge.dataset.MetaPandasDataset.column_map_expectation
+        @ge.data_asset.MetaPandasDataset.column_map_expectation
         def expectation_that_crashes_on_sixes(self, column):
             return column.map(lambda x: (x-6)/0 != "duck")
 
@@ -703,7 +703,7 @@ def test_subclass_pandas_subset_retains_subclass():
     def test_validate_map_expectation_on_categorical_column(self):
         """Map expectations should work on categorical columns"""
 
-        D = ge.dataset.PandasDataset({
+        D = ge.data_asset.PandasDataset({
             'cat_column_1': ['cat_one', 'cat_two', 'cat_one', 'cat_two', 'cat_one', 'cat_two', 'cat_one', 'cat_two'],
         })
 
@@ -719,7 +719,7 @@ def test_subclass_pandas_subset_retains_subclass():
 def test_pandas_deepcopy():
     import copy
 
-    df = ge.dataset.PandasDataset({"a": [1, 2, 3]})
+    df = ge.data_asset.PandasDataset({"a": [1, 2, 3]})
     df2 = copy.deepcopy(df)
 
     df["a"] = [2, 3, 4]

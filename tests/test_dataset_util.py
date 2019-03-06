@@ -29,43 +29,43 @@ class TestUtilMethods(unittest.TestCase):
 
     def test_continuous_partition_data_error(self):
         with self.assertRaises(ValueError):
-            test_partition = ge.dataset.util.continuous_partition_data(
+            test_partition = ge.data_asset.util.continuous_partition_data(
                 self.D['norm_0_1'], bins=-1)
             self.assertFalse(
-                ge.dataset.util.is_valid_continuous_partition_object(test_partition))
-            test_partition = ge.dataset.util.continuous_partition_data(
+                ge.data_asset.util.is_valid_continuous_partition_object(test_partition))
+            test_partition = ge.data_asset.util.continuous_partition_data(
                 self.D['norm_0_1'], n_bins=-1)
             self.assertFalse(
-                ge.dataset.util.is_valid_continuous_partition_object(test_partition))
+                ge.data_asset.util.is_valid_continuous_partition_object(test_partition))
 
     def test_partition_data_norm_0_1(self):
-        test_partition = ge.dataset.util.continuous_partition_data(
+        test_partition = ge.data_asset.util.continuous_partition_data(
             self.D.norm_0_1)
         for key, val in self.test_partitions['norm_0_1_auto'].items():
             self.assertEqual(len(val), len(test_partition[key]))
             self.assertTrue(np.allclose(test_partition[key], val))
 
     def test_partition_data_bimodal(self):
-        test_partition = ge.dataset.util.continuous_partition_data(
+        test_partition = ge.data_asset.util.continuous_partition_data(
             self.D.bimodal)
         for key, val in self.test_partitions['bimodal_auto'].items():
             self.assertEqual(len(val), len(test_partition[key]))
             self.assertTrue(np.allclose(test_partition[key], val))
 
     def test_kde_partition_data_norm_0_1(self):
-        test_partition = ge.dataset.util.kde_partition_data(self.D.norm_0_1)
+        test_partition = ge.data_asset.util.kde_partition_data(self.D.norm_0_1)
         for key, val in self.test_partitions['norm_0_1_kde'].items():
             self.assertEqual(len(val), len(test_partition[key]))
             self.assertTrue(np.allclose(test_partition[key], val))
 
     def test_kde_partition_data_bimodal(self):
-        test_partition = ge.dataset.util.kde_partition_data(self.D.bimodal)
+        test_partition = ge.data_asset.util.kde_partition_data(self.D.bimodal)
         for key, val in self.test_partitions['bimodal_kde'].items():
             self.assertEqual(len(val), len(test_partition[key]))
             self.assertTrue(np.allclose(test_partition[key], val))
 
     def test_categorical_data_fixed(self):
-        test_partition = ge.dataset.util.categorical_partition_data(
+        test_partition = ge.data_asset.util.categorical_partition_data(
             self.D.categorical_fixed)
         for k in self.test_partitions['categorical_fixed']['values']:
             # Iterate over each categorical value and check that the weights equal those computed originally.
@@ -75,54 +75,54 @@ class TestUtilMethods(unittest.TestCase):
                 test_partition['weights'][test_partition['values'].index(k)])
 
     def test_categorical_data_na(self):
-        df = ge.dataset.PandasDataset({
+        df = ge.data_asset.PandasDataset({
             'my_column': ["A", "B", "A", "B", None]
         })
-        partition = ge.dataset.util.categorical_partition_data(df['my_column'])
+        partition = ge.data_asset.util.categorical_partition_data(df['my_column'])
         self.assertTrue(
-            ge.dataset.util.is_valid_categorical_partition_object(partition))
+            ge.data_asset.util.is_valid_categorical_partition_object(partition))
         self.assertTrue(len(partition['values']) == 2)
 
     def test_is_valid_partition_object_simple(self):
-        self.assertTrue(ge.dataset.util.is_valid_continuous_partition_object(
-            ge.dataset.util.continuous_partition_data(self.D['norm_0_1'])))
-        self.assertTrue(ge.dataset.util.is_valid_continuous_partition_object(
-            ge.dataset.util.continuous_partition_data(self.D['bimodal'])))
-        self.assertTrue(ge.dataset.util.is_valid_continuous_partition_object(
-            ge.dataset.util.continuous_partition_data(self.D['norm_0_1'], bins='auto')))
-        self.assertTrue(ge.dataset.util.is_valid_continuous_partition_object(
-            ge.dataset.util.continuous_partition_data(self.D['norm_0_1'], bins='uniform', n_bins=10)))
+        self.assertTrue(ge.data_asset.util.is_valid_continuous_partition_object(
+            ge.data_asset.util.continuous_partition_data(self.D['norm_0_1'])))
+        self.assertTrue(ge.data_asset.util.is_valid_continuous_partition_object(
+            ge.data_asset.util.continuous_partition_data(self.D['bimodal'])))
+        self.assertTrue(ge.data_asset.util.is_valid_continuous_partition_object(
+            ge.data_asset.util.continuous_partition_data(self.D['norm_0_1'], bins='auto')))
+        self.assertTrue(ge.data_asset.util.is_valid_continuous_partition_object(
+            ge.data_asset.util.continuous_partition_data(self.D['norm_0_1'], bins='uniform', n_bins=10)))
 
     def test_generated_partition_objects(self):
         for partition_name, partition_object in self.test_partitions.items():
-            result = ge.dataset.util.is_valid_partition_object(
+            result = ge.data_asset.util.is_valid_partition_object(
                 partition_object)
             if not result:
                 print("Partition object " + partition_name + " is invalid.")
             self.assertTrue(result)
 
     def test_is_valid_partition_object_fails_length(self):
-        self.assertFalse(ge.dataset.util.is_valid_partition_object(
+        self.assertFalse(ge.data_asset.util.is_valid_partition_object(
             {'bins': [0, 1], 'weights': [0, 1, 2]}))
 
     def test_is_valid_partition_object_fails_weights(self):
-        self.assertFalse(ge.dataset.util.is_valid_partition_object(
+        self.assertFalse(ge.data_asset.util.is_valid_partition_object(
             {'bins': [0, 1, 2], 'weights': [0.5, 0.6]}))
 
     def test_is_valid_partition_object_fails_structure(self):
-        self.assertFalse(ge.dataset.util.is_valid_partition_object(
+        self.assertFalse(ge.data_asset.util.is_valid_partition_object(
             {'weights': [0.5, 0.5]}))
         self.assertFalse(
-            ge.dataset.util.is_valid_partition_object({'bins': [0, 1, 2]}))
+            ge.data_asset.util.is_valid_partition_object({'bins': [0, 1, 2]}))
 
     def test_recursively_convert_to_json_serializable(self):
-        D = ge.dataset.PandasDataset({
+        D = ge.data_asset.PandasDataset({
             'x': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
         })
         D.expect_column_values_to_be_in_set(
             "x", set([1, 2, 3, 4, 5, 6, 7, 8, 9]), mostly=.8)
 
-        part = ge.dataset.util.partition_data(D.x)
+        part = ge.data_asset.util.partition_data(D.x)
         D.expect_column_kl_divergence_to_be_less_than("x", part, .6)
 
         # Dumping this JSON object verifies that everything is serializable
@@ -163,7 +163,7 @@ class TestUtilMethods(unittest.TestCase):
             'np.str': np.unicode_(["hello"]),
             'yyy': decimal.Decimal(123.456)
         }
-        x = ge.dataset.util.recursively_convert_to_json_serializable(x)
+        x = ge.data_asset.util.recursively_convert_to_json_serializable(x)
         self.assertEqual(type(x['x']), list)
 
         self.assertEqual(type(x['np.bool'][0]), bool)
@@ -203,16 +203,16 @@ class TestUtilMethods(unittest.TestCase):
         self.assertAlmostEqual(
             x['np.float128'][0], 5.999999999998786324399999999, places=sys.float_info.dig)
 
-    # TypeError when non-serializable numpy object is in dataset.
+    # TypeError when non-serializable numpy object is in data_asset.
         with self.assertRaises(TypeError):
             y = {
                 'p': np.DataSource()
             }
-            ge.dataset.util.recursively_convert_to_json_serializable(y)
+            ge.data_asset.util.recursively_convert_to_json_serializable(y)
 
         try:
             x = unicode("abcdefg")
-            x = ge.dataset.util.recursively_convert_to_json_serializable(x)
+            x = ge.data_asset.util.recursively_convert_to_json_serializable(x)
             self.assertEqual(type(x), unicode)
         except NameError:
             pass
@@ -521,10 +521,10 @@ class TestUtilMethods(unittest.TestCase):
             './tests/test_sets/fixed_distributional_test_dataset.csv')
 
         with self.assertRaises(TypeError):
-            ge.dataset.util.infer_distribution_parameters(data=D.norm,
+            ge.data_asset.util.infer_distribution_parameters(data=D.norm,
                                                           distribution='norm',
                                                           params=['wrong_param_format'])
-        t = ge.dataset.util.infer_distribution_parameters(data=D.norm_std,
+        t = ge.data_asset.util.infer_distribution_parameters(data=D.norm_std,
                                                           distribution='norm',
                                                           params=None)
         self.assertEqual(t['mean'], D.norm_std.mean())
@@ -533,7 +533,7 @@ class TestUtilMethods(unittest.TestCase):
         self.assertEqual(t['scale'], 1)
 
         # beta
-        t = ge.dataset.util.infer_distribution_parameters(
+        t = ge.data_asset.util.infer_distribution_parameters(
             data=D.beta, distribution='beta')
         self.assertEqual(t['alpha'], (t['mean'] ** 2) * (
                         ((1 - t['mean']) / t['std_dev'] ** 2) - (1 / t['mean'])), "beta dist, alpha infer")
@@ -541,12 +541,12 @@ class TestUtilMethods(unittest.TestCase):
                          ((1 / t['mean']) - 1), "beta dist, beta infer")
 
         # gamma
-        t = ge.dataset.util.infer_distribution_parameters(
+        t = ge.data_asset.util.infer_distribution_parameters(
             data=D.gamma, distribution='gamma')
         self.assertEqual(t['alpha'], D.gamma.mean())
 
         # uniform distributions
-        t = ge.dataset.util.infer_distribution_parameters(data=D.uniform,
+        t = ge.data_asset.util.infer_distribution_parameters(data=D.uniform,
                                                           distribution='uniform')
         self.assertEqual(t['min'], min(D.uniform), "uniform, min infer")
         self.assertEqual(t['max'], max(D.uniform) -
@@ -554,7 +554,7 @@ class TestUtilMethods(unittest.TestCase):
 
         uni_loc = 5
         uni_scale = 10
-        t = ge.dataset.util.infer_distribution_parameters(data=D.uniform,
+        t = ge.data_asset.util.infer_distribution_parameters(data=D.uniform,
                                                           distribution='uniform',
                                                           params={
                                                               'loc': uni_loc,
@@ -565,16 +565,16 @@ class TestUtilMethods(unittest.TestCase):
 
         # expon distribution
         with self.assertRaises(AttributeError):
-            ge.dataset.util.infer_distribution_parameters(data=D.norm,
+            ge.data_asset.util.infer_distribution_parameters(data=D.norm,
                                                           distribution='fakedistribution')
 
         # chi2
-        t = ge.dataset.util.infer_distribution_parameters(
+        t = ge.data_asset.util.infer_distribution_parameters(
             data=D.chi2, distribution='chi2')
         self.assertEqual(t['df'], D.chi2.mean())
 
     def test_create_multiple_expectations(self):
-        D = ge.dataset.PandasDataset({
+        D = ge.data_asset.PandasDataset({
             'x': [1, 2, 3, 4, 5, 6],
             'y': [0, 2, 4, 6, 8, 10],
             'z': ['hi', 'hello', 'hey', 'howdy', 'hola', 'holy smokes'],
@@ -582,7 +582,7 @@ class TestUtilMethods(unittest.TestCase):
         })
 
         # Test kwarg
-        results = ge.dataset.util.create_multiple_expectations(D,
+        results = ge.data_asset.util.create_multiple_expectations(D,
                                                                ['x', 'y'],
                                                                'expect_column_values_to_be_in_set',
                                                                value_set=[1, 2, 3, 4, 5, 6])
@@ -590,14 +590,14 @@ class TestUtilMethods(unittest.TestCase):
         self.assertFalse(results[1]['success'])
 
         # Test positional argument
-        results = ge.dataset.util.create_multiple_expectations(D,
+        results = ge.data_asset.util.create_multiple_expectations(D,
                                                                ['x', 'y'],
                                                                'expect_column_values_to_be_in_set',
                                                                [1, 2, 3, 4, 5, 6])
         self.assertTrue(results[0]['success'])
         self.assertFalse(results[1]['success'])
 
-        results = ge.dataset.util.create_multiple_expectations(D,
+        results = ge.data_asset.util.create_multiple_expectations(D,
                                                                ['z', 'zz'],
                                                                'expect_column_values_to_match_regex',
                                                                'h')
@@ -605,7 +605,7 @@ class TestUtilMethods(unittest.TestCase):
         self.assertFalse(results[1]['success'])
 
         # Non-argumentative expectation
-        results = ge.dataset.util.create_multiple_expectations(D,
+        results = ge.data_asset.util.create_multiple_expectations(D,
                                                                ['z', 'zz'],
                                                                'expect_column_values_to_not_be_null')
         self.assertTrue(results[0]['success'])
@@ -613,13 +613,13 @@ class TestUtilMethods(unittest.TestCase):
 
         # Key error when non-existant column is called
         with self.assertRaises(KeyError):
-            ge.dataset.util.create_multiple_expectations(D,
+            ge.data_asset.util.create_multiple_expectations(D,
                                                          ['p'],
                                                          'expect_column_values_to_be_in_set',
                                                          ['hi'])
         # Attribute error when non-existant expectation is called
         with self.assertRaises(AttributeError):
-            ge.dataset.util.create_multiple_expectations(D,
+            ge.data_asset.util.create_multiple_expectations(D,
                                                          ['z'],
                                                          'expect_column_values_to_be_fake_news')
 
@@ -657,7 +657,7 @@ class Child(Parent):
     Child class docstring
     """
 
-    @ge.dataset.util.DocInherit
+    @ge.data_asset.util.DocInherit
     @Parent.expectation
     def override_me(self):
         """Child method docstring

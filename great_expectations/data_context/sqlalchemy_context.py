@@ -1,5 +1,5 @@
 from .base import DataContext
-from ..dataset.sqlalchemy_dataset import SqlAlchemyDataset
+from ..data_asset.sqlalchemy_dataset import SqlAlchemyDataset
 
 from sqlalchemy import create_engine, MetaData
 
