@@ -136,7 +136,7 @@ class MetaSqlAlchemyDataset(Dataset):
             success, percent_success = self._calc_map_expectation_success(
                 success_count, nonnull_count, mostly)
 
-            return_obj = self._format_column_map_output(
+            return_obj = self._format_map_output(
                 result_format, success,
                 count_results['element_count'], nonnull_count,
                 maybe_limited_unexpected_list, None

@@ -100,7 +100,7 @@ class MetaPandasDataset(Dataset):
             success, percent_success = self._calc_map_expectation_success(
                 success_count, nonnull_count, mostly)
 
-            return_obj = self._format_column_map_output(
+            return_obj = self._format_map_output(
                 result_format, success,
                 element_count, nonnull_count,
                 unexpected_list, unexpected_index_list
@@ -182,7 +182,7 @@ class MetaPandasDataset(Dataset):
             success, percent_success = self._calc_map_expectation_success(
                 success_count, nonnull_count, mostly)
 
-            return_obj = self._format_column_map_output(
+            return_obj = self._format_map_output(
                 result_format, success,
                 element_count, nonnull_count,
                 unexpected_list, unexpected_index_list
@@ -237,7 +237,7 @@ class MetaPandasDataset(Dataset):
             success, percent_success = self._calc_map_expectation_success(
                 success_count, nonnull_count, mostly)
 
-            return_obj = self._format_column_map_output(
+            return_obj = self._format_map_output(
                 result_format, success,
                 element_count, nonnull_count,
                 unexpected_list.to_dict(orient='records'), unexpected_index_list
