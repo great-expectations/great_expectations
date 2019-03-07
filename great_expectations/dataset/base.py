@@ -185,6 +185,10 @@ class Dataset(object):
                 # Add a "success" object to the config
                 expectation_config["success_on_last_run"] = return_obj["success"]
 
+                # Add meta to return object
+                if meta is not None:
+                    return_obj['meta'] = meta
+
                 return_obj = recursively_convert_to_json_serializable(
                     return_obj)
                 return return_obj
