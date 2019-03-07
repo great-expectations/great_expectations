@@ -549,3 +549,62 @@ class FileDataAsset(MetaFileDataAsset):
             success = True
 
         return {"success":success}
+    
+    @DataAsset.expectation([])
+    def expect_file_to_be_valid_json(self, schema=None, result_format=None,
+                                     include_config=False, catch_exceptions=None,
+                                     meta=None):
+
+        """
+        schema : string
+            optional JSON schema file on which JSON data file is validated against
+
+        result_format (str or None):
+            Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+            For more detail, see :ref:`result_format <result_format>`.
+
+        include_config (boolean):
+            If True, then include the expectation config as part of the result object. \
+            For more detail, see :ref:`include_config`.
+
+        catch_exceptions (boolean or None):
+            If True, then catch exceptions and include them as part of the result object. \
+            For more detail, see :ref:`catch_exceptions`.
+
+        meta (dict or None):
+            A JSON-serializable dictionary (nesting allowed) that will
+            be included in the output without modification. \
+
+        For more detail, see :ref:`meta`.
+
+        Returns:
+            A JSON-serializable expectation result object.
+
+        Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
+        :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+        """
+        success = False
+        if schema is None:
+            try:
+                with open(self.path, 'r') as f:
+                    json.load(f)
+                success = True
+            except ValueError:
+                success = False
+        else:
+            try:
+                with open(schema, 'r') as s:
+                    schema_data = s.read()
+                sdata = json.loads(schema_data)
+                with open(self.path, 'r') as f:
+                    json_data = f.read()
+                jdata = json.loads(json_data)
+                jsonschema.validate(jdata, sdata)
+                success = True
+            except jsonschema.ValidationError:
+                success = False
+            except jsonschema.SchemaError:
+                raise
+            except:
+                raise
+        return {"success":success}
