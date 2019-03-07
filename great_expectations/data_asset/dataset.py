@@ -27,7 +27,7 @@ class Dataset(DataAsset):
 
             Depending on the `result_format` selected, column_map_expectation can additional data to a return object, \
             including `element_count`, `nonnull_values`, `nonnull_count`, `success_count`, `unexpected_list`, and \
-            `unexpected_index_list`. See :func:`_format_column_map_output <great_expectations.data_asset.dataset.Dataset._format_column_map_output>`
+            `unexpected_index_list`. See :func:`_format_map_output <great_expectations.data_asset.dataset.Dataset._format_map_output>`
 
         See also:
             :func:`expect_column_values_to_be_unique <great_expectations.data_asset.dataset.Dataset.expect_column_values_to_be_unique>` \

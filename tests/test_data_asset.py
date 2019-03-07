@@ -360,7 +360,7 @@ class TestDataAsset(unittest.TestCase):
         # Clean up the output directory
         shutil.rmtree(directory_name)
 
-    def test_format_column_map_output(self):
+    def test_format_map_output(self):
         df = ge.data_asset.PandasDataset({
             "x": list("abcdefghijklmnopqrstuvwxyz"),
         })
@@ -378,7 +378,7 @@ class TestDataAsset(unittest.TestCase):
         unexpected_index_list = []
 
         self.assertEqual(
-            df._format_column_map_output(
+            df._format_map_output(
                 "BOOLEAN_ONLY",
                 success,
                 element_count, nonnull_count,
@@ -388,7 +388,7 @@ class TestDataAsset(unittest.TestCase):
         )
 
         self.assertEqual(
-            df._format_column_map_output(
+            df._format_map_output(
                 "BASIC",
                 success,
                 element_count, nonnull_count,
@@ -409,7 +409,7 @@ class TestDataAsset(unittest.TestCase):
         )
 
         self.assertEqual(
-            df._format_column_map_output(
+            df._format_map_output(
                 "SUMMARY",
                 success,
                 element_count,
@@ -433,7 +433,7 @@ class TestDataAsset(unittest.TestCase):
         )
 
         self.assertEqual(
-            df._format_column_map_output(
+            df._format_map_output(
                 "COMPLETE",
                 success,
                 element_count,
@@ -471,7 +471,7 @@ class TestDataAsset(unittest.TestCase):
         unexpected_index_list = []
 
         self.assertEqual(
-            df._format_column_map_output(
+            df._format_map_output(
                 "BOOLEAN_ONLY",
                 success,
                 element_count,
@@ -482,7 +482,7 @@ class TestDataAsset(unittest.TestCase):
         )
 
         self.assertEqual(
-            df._format_column_map_output(
+            df._format_map_output(
                 "BASIC",
                 success,
                 element_count,
@@ -504,7 +504,7 @@ class TestDataAsset(unittest.TestCase):
         )
 
         self.assertEqual(
-            df._format_column_map_output(
+            df._format_map_output(
                 "SUMMARY",
                 success,
                 element_count,
@@ -528,7 +528,7 @@ class TestDataAsset(unittest.TestCase):
         )
 
         self.assertEqual(
-            df._format_column_map_output(
+            df._format_map_output(
                 "COMPLETE",
                 success,
                 element_count,
@@ -565,7 +565,7 @@ class TestDataAsset(unittest.TestCase):
         unexpected_index_list = []
 
         self.assertEqual(
-            df._format_column_map_output(
+            df._format_map_output(
                 "BOOLEAN_ONLY",
                 success,
                 element_count,
@@ -576,7 +576,7 @@ class TestDataAsset(unittest.TestCase):
         )
 
         self.assertEqual(
-            df._format_column_map_output(
+            df._format_map_output(
                 "BASIC",
                 success,
                 element_count,
@@ -598,7 +598,7 @@ class TestDataAsset(unittest.TestCase):
         )
 
         self.assertEqual(
-            df._format_column_map_output(
+            df._format_map_output(
                 "SUMMARY",
                 success,
                 element_count,
@@ -622,7 +622,7 @@ class TestDataAsset(unittest.TestCase):
         )
 
         self.assertEqual(
-            df._format_column_map_output(
+            df._format_map_output(
                 "COMPLETE",
                 success,
                 element_count,

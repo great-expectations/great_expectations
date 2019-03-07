@@ -924,7 +924,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         return evaluation_args
 
     ##### Output generation #####
-    def _format_column_map_output(self,
+    def _format_map_output(self,
                                   result_format, success,
                                   element_count, nonnull_count,
                                   unexpected_list, unexpected_index_list
