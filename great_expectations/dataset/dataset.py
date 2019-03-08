@@ -1,4 +1,5 @@
-from .base import DataAsset
+from great_expectations.data_asset.base import DataAsset
+
 
 class Dataset(DataAsset):
     def __init__(self, *args, **kwargs):

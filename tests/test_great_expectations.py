@@ -8,8 +8,8 @@ import pandas as pd
 import re
 
 import great_expectations as ge
-from great_expectations.data_asset.autoinspect import columns_exist
-from great_expectations.data_asset import PandasDataset, MetaPandasDataset
+from great_expectations.dataset.autoinspect import columns_exist
+from great_expectations.dataset import PandasDataset, MetaPandasDataset
 from great_expectations.data_asset.base import (
     _calc_validation_statistics,
     ValidationStatistics,
@@ -245,7 +245,7 @@ class TestValidation(unittest.TestCase):
         )
 
     def test_validate_catch_non_existent_expectation(self):
-        df = ge.data_asset.PandasDataset({
+        df = ge.dataset.PandasDataset({
             "x": [1, 2, 3, 4, 5]
         })
 
@@ -270,7 +270,7 @@ class TestValidation(unittest.TestCase):
         )
 
     def test_validate_catch_invalid_parameter(self):
-        df = ge.data_asset.PandasDataset({
+        df = ge.dataset.PandasDataset({
             "x": [1, 2, 3, 4, 5]
         })
 

@@ -7,25 +7,23 @@ from datetime import datetime
 from functools import wraps
 import jsonschema
 import sys
+import numpy as np
+import pandas as pd
+from dateutil.parser import parse
+from scipy import stats
+from six import PY3, integer_types, string_types
+from numbers import Number
 
 if sys.version_info.major == 2:  # If python 2
     from itertools import izip_longest as zip_longest
 elif sys.version_info.major == 3:  # If python 3
     from itertools import zip_longest
 
-from numbers import Number
-
-import numpy as np
-import pandas as pd
-from dateutil.parser import parse
-from scipy import stats
-from six import PY3, integer_types, string_types
-
 from .dataset import Dataset
-from .util import DocInherit, \
+from great_expectations.data_asset.util import DocInherit, parse_result_format
+from great_expectations.dataset.util import \
     is_valid_partition_object, is_valid_categorical_partition_object, is_valid_continuous_partition_object, \
-    _scipy_distribution_positional_args_from_dict, validate_distribution_parameters,\
-    parse_result_format
+    _scipy_distribution_positional_args_from_dict, validate_distribution_parameters
 
 
 class MetaPandasDataset(Dataset):

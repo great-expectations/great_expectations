@@ -6,8 +6,8 @@ import pytest
 from sqlalchemy import create_engine
 import sqlalchemy.dialects.sqlite as sqlitetypes
 
-from great_expectations.data_asset import PandasDataset, SqlAlchemyDataset
-import great_expectations.data_asset.autoinspect as autoinspect
+from great_expectations.dataset import PandasDataset, SqlAlchemyDataset
+import great_expectations.dataset.autoinspect as autoinspect
 
 SQLITE_TYPES = {
         "varchar": sqlitetypes.VARCHAR,

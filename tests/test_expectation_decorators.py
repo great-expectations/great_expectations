@@ -1,7 +1,8 @@
 from __future__ import division
 
 import unittest
-from great_expectations.data_asset import DataAsset, PandasDataset, MetaPandasDataset
+from great_expectations.data_asset import DataAsset
+from great_expectations.dataset import PandasDataset, MetaPandasDataset
 
 
 class ExpectationOnlyDataAsset(DataAsset):

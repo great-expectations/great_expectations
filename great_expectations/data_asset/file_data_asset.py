@@ -9,9 +9,8 @@ from functools import wraps
 import numpy as np
 from six import PY3
 from itertools import compress
-from .base import DataAsset
-from .util import parse_result_format
-
+from great_expectations.data_asset.base import DataAsset
+from great_expectations.data_asset.util import parse_result_format
 
 
 class MetaFileDataAsset(DataAsset):
