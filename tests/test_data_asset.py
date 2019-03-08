@@ -7,16 +7,19 @@ import warnings
 import pandas as pd
 import numpy as np
 import great_expectations as ge
-import great_expectations.data_asset.autoinspect as autoinspect
+import great_expectations.dataset.autoinspect as autoinspect
 
 import unittest
 
 
 class TestDataAsset(unittest.TestCase):
+    """
+    Recognized weakness: these tests are overly dependent on the Pandas implementation of dataset.
+    """
 
     def test_data_asset(self):
 
-        D = ge.data_asset.PandasDataset({
+        D = ge.dataset.PandasDataset({
             'x': [1, 2, 4],
             'y': [1, 2, 5],
             'z': ['hello', 'jello', 'mello'],
@@ -74,7 +77,7 @@ class TestDataAsset(unittest.TestCase):
         )
 
     def test_expectation_meta(self):
-        df = ge.data_asset.PandasDataset({
+        df = ge.dataset.PandasDataset({
             'x': [1, 2, 4],
             'y': [1, 2, 5],
             'z': ['hello', 'jello', 'mello'],
@@ -104,7 +107,7 @@ class TestDataAsset(unittest.TestCase):
     # TODO: !!! Add tests for save_expectation
 
     def test_set_default_expectation_argument(self):
-        df = ge.data_asset.PandasDataset({
+        df = ge.dataset.PandasDataset({
             'x': [1, 2, 4],
             'y': [1, 2, 5],
             'z': ['hello', 'jello', 'mello'],
@@ -133,7 +136,7 @@ class TestDataAsset(unittest.TestCase):
     def test_get_and_save_expectation_config(self):
         directory_name = tempfile.mkdtemp()
 
-        df = ge.data_asset.PandasDataset({
+        df = ge.dataset.PandasDataset({
             'x': [1, 2, 4],
             'y': [1, 2, 5],
             'z': ['hello', 'jello', 'mello'],
@@ -361,7 +364,7 @@ class TestDataAsset(unittest.TestCase):
         shutil.rmtree(directory_name)
 
     def test_format_map_output(self):
-        df = ge.data_asset.PandasDataset({
+        df = ge.dataset.PandasDataset({
             "x": list("abcdefghijklmnopqrstuvwxyz"),
         })
         self.maxDiff = None
@@ -648,7 +651,7 @@ class TestDataAsset(unittest.TestCase):
         )
 
     def test_calc_map_expectation_success(self):
-        df = ge.data_asset.PandasDataset({
+        df = ge.dataset.PandasDataset({
             "x": list("abcdefghijklmnopqrstuvwxyz")
         })
         self.assertEqual(
@@ -739,7 +742,7 @@ class TestDataAsset(unittest.TestCase):
         )
 
     def test_find_expectations(self):
-        my_df = ge.data_asset.PandasDataset({
+        my_df = ge.dataset.PandasDataset({
             'x': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
             'y': [1, 2, None, 4, None, 6, 7, 8, 9, None],
             'z': ['cello', 'hello', 'jello', 'bellow', 'fellow', 'mellow', 'wellow', 'xello', 'yellow', 'zello'],
@@ -828,7 +831,7 @@ class TestDataAsset(unittest.TestCase):
         )
 
     def test_remove_expectation(self):
-        my_df = ge.data_asset.PandasDataset({
+        my_df = ge.dataset.PandasDataset({
             'x': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
             'y': [1, 2, None, 4, None, 6, 7, 8, 9, None],
             'z': ['cello', 'hello', 'jello', 'bellow', 'fellow', 'mellow', 'wellow', 'xello', 'yellow', 'zello'],
@@ -988,7 +991,7 @@ class TestDataAsset(unittest.TestCase):
         )
 
     def test_discard_failing_expectations(self):
-        df = ge.data_asset.PandasDataset({
+        df = ge.dataset.PandasDataset({
             'A': [1, 2, 3, 4],
             'B': [5, 6, 7, 8],
             'C': ['a', 'b', 'c', 'd'],
@@ -1094,11 +1097,11 @@ class TestDataAsset(unittest.TestCase):
         self.assertEqual(sub1.find_expectations(), exp1)
 
     def test_test_expectation_function(self):
-        D = ge.data_asset.PandasDataset({
+        D = ge.dataset.PandasDataset({
             'x': [1, 3, 5, 7, 9],
             'y': [1, 2, None, 7, 9],
         })
-        D2 = ge.data_asset.PandasDataset({
+        D2 = ge.dataset.PandasDataset({
             'x': [1, 3, 5, 6, 9],
             'y': [1, 2, None, 6, 9],
         })
@@ -1119,7 +1122,7 @@ class TestDataAsset(unittest.TestCase):
 
     def test_test_column_map_expectation_function(self):
 
-        D = ge.data_asset.PandasDataset({
+        D = ge.dataset.PandasDataset({
             'x': [1, 3, 5, 7, 9],
             'y': [1, 2, None, 7, 9],
         })
@@ -1149,7 +1152,7 @@ class TestDataAsset(unittest.TestCase):
         )
 
     def test_test_column_aggregate_expectation_function(self):
-        D = ge.data_asset.PandasDataset({
+        D = ge.dataset.PandasDataset({
             'x': [1, 3, 5, 7, 9],
             'y': [1, 2, None, 7, 9],
         })
@@ -1202,7 +1205,7 @@ class TestDataAsset(unittest.TestCase):
                              "WARNING: This configuration object was built using a different version of great_expectations than is currently validating it.")
 
     def test_catch_exceptions_with_bad_expectation_type(self):
-        my_df = ge.data_asset.PandasDataset({"x": range(10)})
+        my_df = ge.dataset.PandasDataset({"x": range(10)})
         my_df._append_expectation({'expectation_type': 'foobar', 'kwargs': {}})
         result = my_df.validate(catch_exceptions=True)
 

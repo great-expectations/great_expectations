@@ -1,4 +1,4 @@
-from great_expectations.data_asset.pandas_dataset import PandasDataset
+from great_expectations.dataset import PandasDataset
 
 
 class CustomPandasDataset(PandasDataset):
