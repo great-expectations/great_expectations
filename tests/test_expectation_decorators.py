@@ -45,6 +45,21 @@ class TestExpectationDecorators(unittest.TestCase):
                           },
                          out['expectation_config'])
 
+    def test_expectation_decorator_meta(self):
+        metadata = {'meta_key': 'meta_value'}
+        eds = ExpectationOnlyDataAsset()
+        out = eds.no_op_value_expectation('a', meta=metadata)
+        config = eds.get_expectations_config()
+
+        self.assertEqual({'success': True,
+                          'meta': metadata},
+                         out)
+
+        self.assertEqual({'expectation_type': 'no_op_value_expectation',
+                          'kwargs': {'value': 'a'},
+                          'meta': metadata},
+                         config['expectations'][0])
+
     def test_expectation_decorator_catch_exceptions(self):
         eds = ExpectationOnlyDataAsset()
 
