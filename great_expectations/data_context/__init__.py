@@ -1,5 +1,6 @@
 from .pandas_context import PandasCSVDataContext
 from .sqlalchemy_context import SqlAlchemyDataContext
+from .spark_context import SparkCSVDataContext
 
 
 def get_data_context(context_type, options, *args, **kwargs):
@@ -14,5 +15,7 @@ def get_data_context(context_type, options, *args, **kwargs):
         return SqlAlchemyDataContext(options, *args, **kwargs)
     elif context_type == "PandasCSV":
         return PandasCSVDataContext(options, *args, **kwargs)
+    elif context_type == "SparkCSV":
+        return SparkCSVDataContext(options, *args, **kwargs)
     else:
         raise ValueError("Unknown data context.")
