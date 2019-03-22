@@ -44,20 +44,14 @@ class MetaSparkDFDataset(Dataset):
 
 class SparkDFDataset(MetaSparkDFDataset):
     """
-    PandasDataset instantiates the great_expectations Expectations API as a subclass of a pandas.DataFrame.
-    For the full API reference, please see :func:`Dataset <great_expectations.Dataset.base.Dataset>`
-    Notes:
-        1. Samples and Subsets of PandaDataSet have ALL the expectations of the original \
-           data frame unless the user specifies the ``discard_subset_failing_expectations = True`` \
-           property on the original data frame.
-        2. Concatenations, joins, and merges of PandaDataSets ONLY contain the \
-           default_expectations (see :func:`add_default_expectations`)
+    For now this class holds an attribute `df` which is a spark.sql.DataFrame, rather than subclassing as is
+    done in PandasDataset.
     """
 
     def __init__(self, spark_df, *args, **kwargs):
         super(SparkDFDataset, self).__init__(*args, **kwargs)
         self.discard_subset_failing_expectations = kwargs.get("discard_subset_failing_expectations", False)
-        # self.add_default_expectations()
+
         self.spark_df = spark_df
 
     @DocInherit
