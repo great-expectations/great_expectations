@@ -49,6 +49,7 @@ class MetaSparkDFDataset(Dataset):
 
             col_df = self.spark_df.select(column) # pyspark.sql.DataFrame
 
+            # TODO consider caching here
             element_count = col_df.count()
 
             # FIXME rename nonnull to non_ignored?
@@ -65,6 +66,8 @@ class MetaSparkDFDataset(Dataset):
                 unexpected_df = nonnull_values \
                     .withColumn('success', success_udf(nonnull_values[0])) \
                     .filter('success = False')
+                # performance when failing an expectation is pretty bad for large datasets; suspect this list will have
+                # to be limited
                 unexpected_list = [row[column] for row in unexpected_df.collect()]
 
             success, percent_success = self._calc_map_expectation_success(
@@ -105,7 +108,7 @@ class SparkDFDataset(MetaSparkDFDataset):
     def __init__(self, spark_df, *args, **kwargs):
         super(SparkDFDataset, self).__init__(*args, **kwargs)
         self.discard_subset_failing_expectations = kwargs.get("discard_subset_failing_expectations", False)
-
+        # Creation of the Spark Dataframe is done outside this class
         self.spark_df = spark_df
 
     @DocInherit
