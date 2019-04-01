@@ -143,3 +143,69 @@ class SparkDFDataset(MetaSparkDFDataset):
         Another option would be to take the `column` dataframe and append a column for success/failure of the condition
         """
         return udf(lambda x: x in value_set)
+
+    @DocInherit
+    @Dataset.expectation(['min_value', 'max_value'])
+    def expect_table_row_count_to_be_between(
+            self,
+            min_value=None, # int
+            max_value=None, # int
+            result_format=None,
+            include_config=False,
+            catch_exceptions=None,
+            meta=None,
+    ):
+        # Assert that min_value and max_value are integers
+        try:
+            if min_value is not None:
+                if not float(min_value).is_integer():
+                    raise ValueError("min_value must be integer")
+            if max_value is not None:
+                if not float(max_value).is_integer():
+                    raise ValueError("max_value must be integer")
+        except ValueError:
+            raise ValueError("min_value and max_value must be integers")
+
+        # check that min_value or max_value is set
+        if min_value is None and max_value is None:
+            raise Exception('Must specify either or both of min_value and max_value')
+
+        row_count = self.spark_df.count()
+
+        if min_value is not None and max_value is not None:
+            outcome = row_count >= min_value and row_count <= max_value
+
+        elif min_value is None and max_value is not None:
+            outcome = row_count <= max_value
+
+        elif min_value is not None and max_value is None:
+            outcome = row_count >= min_value
+
+        return {
+            'success': outcome,
+            'result': {
+                'observed_value': row_count
+            }
+        }
+
+    @DocInherit
+    @Dataset.expectation(['value'])
+    def expect_table_row_count_to_equal(
+        self,
+        value, # int
+        result_format=None,
+        include_config=False,
+        catch_exceptions=None,
+        meta=None,
+    ):
+        if not float(value).is_integer():
+            raise ValueError("Value must be an integer")
+
+        row_count = self.spark_df.count()
+
+        return {
+            'success': row_count == value,
+            'result': {
+                'observed_value': row_count
+            }
+        }
