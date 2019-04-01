@@ -934,7 +934,8 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                                   element_count, nonnull_count,
                                   unexpected_list, unexpected_index_list
                                   ):
-        """Helper function to construct expectation result objects for column_map_expectations.
+        """Helper function to construct expectation result objects for map_expectations (such as column_map_expectation
+        and file_lines_map_expectation).
 
         Expectations support four result_formats: BOOLEAN_ONLY, BASIC, SUMMARY, and COMPLETE.
         In each case, the object returned has a different set of populated fields.
