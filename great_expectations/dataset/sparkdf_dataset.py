@@ -49,25 +49,21 @@ class MetaSparkDFDataset(Dataset):
 
             col_df = self.spark_df.select(column) # pyspark.sql.DataFrame
 
-            # TODO consider caching here
+            # a couple of tests indicate that caching here helps performance
+            col_df.cache()
             element_count = col_df.count()
 
-            # FIXME rename nonnull to non_ignored?
             nonnull_values = col_df.filter('{column} is not null'.format(column=column))
             nonnull_count = nonnull_values.count()
 
-            success_udf = func(self, nonnull_values, *args, **kwargs)
-            boolean_mapped_success_values = nonnull_values.withColumn('success', success_udf(nonnull_values[0])).select('success')
-            success_count = boolean_mapped_success_values.filter('success = True').count()
+            success_df = func(self, nonnull_values, *args, **kwargs)
+            success_count = success_df.filter('__success = True').count()
 
             if success_count == nonnull_count:
+                # save some computation time if no unexpected items
                 unexpected_list = []
             else:
-                unexpected_df = nonnull_values \
-                    .withColumn('success', success_udf(nonnull_values[0])) \
-                    .filter('success = False')
-                # performance when failing an expectation is pretty bad for large datasets; suspect this list will have
-                # to be limited
+                unexpected_df = success_df.filter('__success = False')
                 unexpected_list = [row[column] for row in unexpected_df.collect()]
 
             success, percent_success = self._calc_map_expectation_success(
@@ -139,10 +135,26 @@ class SparkDFDataset(MetaSparkDFDataset):
         """
         Assumes that `column` is a pyspark.sql.DataFrame with only 1 column.
 
-        For now, this function returns a udf representing the success criteria that can be used to filter a column.
-        Another option would be to take the `column` dataframe and append a column for success/failure of the condition
+        For now, this function returns the `column` dataframe with a column appended for success/failure of the condition
         """
-        return udf(lambda x: x in value_set)
+        success_udf = udf(lambda x: x in value_set)
+        return column.withColumn('__success', success_udf(column[0]))
+
+    @DocInherit
+    @MetaSparkDFDataset.column_map_expectation
+    def expect_column_values_to_be_unique(
+        self,
+        column,
+        mostly=None,
+        result_format=None,
+        include_config=False,
+        catch_exceptions=None,
+        meta=None,
+    ):
+        # TODO is there a more efficient way to do this?
+        dups = set([row[0] for row in column.groupBy(column[0]).count().filter('count > 1').collect()])
+        success_udf = udf(lambda x: x not in dups)
+        return column.withColumn('__success', success_udf(column[0]))
 
     @DocInherit
     @Dataset.expectation(['min_value', 'max_value'])
