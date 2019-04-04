@@ -3,6 +3,7 @@ from __future__ import division
 from six import PY3
 import inspect
 from functools import wraps
+from datetime import datetime
 # TODO change this import to be python2 compatible
 from itertools import zip_longest
 
@@ -89,6 +90,8 @@ class MetaSparkDFDataset(Dataset):
                 except KeyError:
                     pass
 
+            # TODO uncache here?
+
             return return_obj
 
         inner_wrapper.__name__ = func.__name__
@@ -123,14 +126,19 @@ class SparkDFDataset(MetaSparkDFDataset):
             return {"success": False}
 
     def expect_table_columns_to_match_ordered_list(
-        self, column_list, result_format=None, include_config=False, catch_exceptions=None, meta=None
+        self,
+        column_list, # List
+        result_format=None,
+        include_config=False,
+        catch_exceptions=None,
+        meta=None,
     ):
         """
         Checks if observed columns are in the expected order. The expectations will fail if columns are out of expected
         order, columns are missing, or additional columns are present. On failure, details are provided on the location
         of the unexpected column(s).
         """
-        if self.spark_df.columns == list(column_list):
+        if self.spark_df.columns == column_list:
             return {
                 "success": True
             }
@@ -168,6 +176,26 @@ class SparkDFDataset(MetaSparkDFDataset):
         For now, this function returns the `column` dataframe with a column appended for success/failure of the condition
         """
         success_udf = udf(lambda x: x in value_set)
+        return column.withColumn('__success', success_udf(column[0]))
+
+    @DocInherit
+    @MetaSparkDFDataset.column_map_expectation
+    def expect_column_values_to_not_be_in_set(
+            self,
+            column,  # pyspark.sql.DataFrame
+            value_set,  # List[Any]
+            mostly=None,
+            result_format=None,
+            include_config=False,
+            catch_exceptions=None,
+            meta=None,
+    ):
+        """
+        Assumes that `column` is a pyspark.sql.DataFrame with only 1 column.
+
+        For now, this function returns the `column` dataframe with a column appended for success/failure of the condition
+        """
+        success_udf = udf(lambda x: x not in value_set)
         return column.withColumn('__success', success_udf(column[0]))
 
     @DocInherit
@@ -251,3 +279,51 @@ class SparkDFDataset(MetaSparkDFDataset):
                 'observed_value': row_count
             }
         }
+
+    @DocInherit
+    @MetaSparkDFDataset.column_map_expectation
+    def expect_column_value_lengths_to_equal(
+        self,
+        column,
+        value, # int
+        mostly=None,
+        result_format=None,
+        include_config=False,
+        catch_exceptions=None,
+        meta=None,
+    ):
+        success_udf = udf(lambda x: len(x) == value)
+        return column.withColumn('__success', success_udf(column[0]))
+
+    @DocInherit
+    @MetaSparkDFDataset.column_map_expectation
+    def expect_column_values_to_match_strftime_format(
+        self,
+        column,
+        strftime_format, # str
+        mostly=None,
+        result_format=None,
+        include_config=False,
+        catch_exceptions=None,
+        meta=None,
+    ):
+        # Below is a simple validation that the provided format can both format and parse a datetime object.
+        # %D is an example of a format that can format but not parse, e.g.
+        try:
+            datetime.strptime(datetime.strftime(
+                datetime.now(), strftime_format), strftime_format)
+        except ValueError as e:
+            raise ValueError("Unable to use provided strftime_format. " + e.message)
+
+        def is_parseable_by_format(val):
+            try:
+                datetime.strptime(val, strftime_format)
+                return True
+            except TypeError as e:
+                raise TypeError("Values passed to expect_column_values_to_match_strftime_format must be of type string.\nIf you want to validate a column of dates or timestamps, please call the expectation before converting from string format.")
+
+            except ValueError as e:
+                return False
+
+        success_udf = udf(is_parseable_by_format)
+        return column.withColumn('__success', success_udf(column[0]))
