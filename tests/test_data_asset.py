@@ -12,9 +12,12 @@ import great_expectations.dataset.autoinspect as autoinspect
 import unittest
 
 
-class TestDataset(unittest.TestCase):
+class TestDataAsset(unittest.TestCase):
+    """
+    Recognized weakness: these tests are overly dependent on the Pandas implementation of dataset.
+    """
 
-    def test_dataset(self):
+    def test_data_asset(self):
 
         D = ge.dataset.PandasDataset({
             'x': [1, 2, 4],
@@ -28,7 +31,7 @@ class TestDataset(unittest.TestCase):
         self.assertEqual(
             D._expectations_config,
             {
-                "dataset_name": None,
+                "data_asset_name": None,
                 "meta": {
                     "great_expectations.__version__": ge.__version__
                 },
@@ -54,7 +57,7 @@ class TestDataset(unittest.TestCase):
         self.assertEqual(
             D.get_expectations_config(),
             {
-                "dataset_name": None,
+                "data_asset_name": None,
                 "meta": {
                     "great_expectations.__version__": ge.__version__
                 },
@@ -185,7 +188,7 @@ class TestDataset(unittest.TestCase):
                     }
                 }
             ],
-            "dataset_name": None,
+            "data_asset_name": None,
             "meta": {
                 "great_expectations.__version__": ge.__version__
             }
@@ -257,7 +260,7 @@ class TestDataset(unittest.TestCase):
                     }
                 }
             ],
-            "dataset_name": None,
+            "data_asset_name": None,
             "meta": {
                 "great_expectations.__version__": ge.__version__
             }
@@ -328,7 +331,7 @@ class TestDataset(unittest.TestCase):
                     }
                 }
             ],
-            "dataset_name": None,
+            "data_asset_name": None,
             "meta": {
                 "great_expectations.__version__": ge.__version__
             }
@@ -360,7 +363,7 @@ class TestDataset(unittest.TestCase):
         # Clean up the output directory
         shutil.rmtree(directory_name)
 
-    def test_format_column_map_output(self):
+    def test_format_map_output(self):
         df = ge.dataset.PandasDataset({
             "x": list("abcdefghijklmnopqrstuvwxyz"),
         })
@@ -378,7 +381,7 @@ class TestDataset(unittest.TestCase):
         unexpected_index_list = []
 
         self.assertEqual(
-            df._format_column_map_output(
+            df._format_map_output(
                 "BOOLEAN_ONLY",
                 success,
                 element_count, nonnull_count,
@@ -388,7 +391,7 @@ class TestDataset(unittest.TestCase):
         )
 
         self.assertEqual(
-            df._format_column_map_output(
+            df._format_map_output(
                 "BASIC",
                 success,
                 element_count, nonnull_count,
@@ -409,7 +412,7 @@ class TestDataset(unittest.TestCase):
         )
 
         self.assertEqual(
-            df._format_column_map_output(
+            df._format_map_output(
                 "SUMMARY",
                 success,
                 element_count,
@@ -433,7 +436,7 @@ class TestDataset(unittest.TestCase):
         )
 
         self.assertEqual(
-            df._format_column_map_output(
+            df._format_map_output(
                 "COMPLETE",
                 success,
                 element_count,
@@ -471,7 +474,7 @@ class TestDataset(unittest.TestCase):
         unexpected_index_list = []
 
         self.assertEqual(
-            df._format_column_map_output(
+            df._format_map_output(
                 "BOOLEAN_ONLY",
                 success,
                 element_count,
@@ -482,7 +485,7 @@ class TestDataset(unittest.TestCase):
         )
 
         self.assertEqual(
-            df._format_column_map_output(
+            df._format_map_output(
                 "BASIC",
                 success,
                 element_count,
@@ -504,7 +507,7 @@ class TestDataset(unittest.TestCase):
         )
 
         self.assertEqual(
-            df._format_column_map_output(
+            df._format_map_output(
                 "SUMMARY",
                 success,
                 element_count,
@@ -528,7 +531,7 @@ class TestDataset(unittest.TestCase):
         )
 
         self.assertEqual(
-            df._format_column_map_output(
+            df._format_map_output(
                 "COMPLETE",
                 success,
                 element_count,
@@ -565,7 +568,7 @@ class TestDataset(unittest.TestCase):
         unexpected_index_list = []
 
         self.assertEqual(
-            df._format_column_map_output(
+            df._format_map_output(
                 "BOOLEAN_ONLY",
                 success,
                 element_count,
@@ -576,7 +579,7 @@ class TestDataset(unittest.TestCase):
         )
 
         self.assertEqual(
-            df._format_column_map_output(
+            df._format_map_output(
                 "BASIC",
                 success,
                 element_count,
@@ -598,7 +601,7 @@ class TestDataset(unittest.TestCase):
         )
 
         self.assertEqual(
-            df._format_column_map_output(
+            df._format_map_output(
                 "SUMMARY",
                 success,
                 element_count,
@@ -622,7 +625,7 @@ class TestDataset(unittest.TestCase):
         )
 
         self.assertEqual(
-            df._format_column_map_output(
+            df._format_map_output(
                 "COMPLETE",
                 success,
                 element_count,
@@ -980,7 +983,7 @@ class TestDataset(unittest.TestCase):
                         'kwargs': {'column': 'y', 'type_': 'int'}
                     }
                 ],
-                'dataset_name': None,
+                'data_asset_name': None,
                 "meta": {
                     "great_expectations.__version__": ge.__version__
                 }
@@ -1186,7 +1189,7 @@ class TestDataset(unittest.TestCase):
         )
 
     def test_meta_version_warning(self):
-        D = ge.dataset.Dataset()
+        D = ge.data_asset.DataAsset()
 
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")

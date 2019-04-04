@@ -1,0 +1,10 @@
+Label1,Label2,Score1,Score2
+A,C,1
+B,D,5,1
+
+B,C,5,4
+B,1,4
+B,D,5,3
+
+A,1,4
+B,C,2,5
