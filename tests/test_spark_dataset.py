@@ -3,6 +3,7 @@ import pytest
 
 context = ge.get_data_context('SparkCSV', './tests/test_sets')
 titanic_dataset = context.get_dataset('Titanic.csv')
+strf_dataset = context.get_dataset('strf_test.csv')
 
 
 def test_expect_column_to_exist():
@@ -127,3 +128,44 @@ def test_expect_table_columns_to_match_ordered_list():
     assert result['details']['mismatched'] == [
         {'Expected': "fake_column", 'Expected Column Position': 7, 'Found': None},
     ]
+
+
+def test_expect_column_values_to_not_be_in_set():
+    result = titanic_dataset.expect_column_values_to_not_be_in_set('Age', [-1, 0])
+    assert result['success']
+
+    result = titanic_dataset.expect_column_values_to_not_be_in_set('Survived', ['1', '0'])
+    assert not result['success']
+
+    result = titanic_dataset.expect_column_values_to_not_be_in_set(
+        'Name', ['Crosby, Captain Edward Gifford'], mostly=0.99
+    )
+    assert result['success']
+    assert result['result']['partial_unexpected_list'] == ['Crosby, Captain Edward Gifford']
+
+
+def test_expect_column_value_lengths_to_equal():
+    # TODO check that TypeError is raised when trying to run this expectation on an int or float type column
+
+    result = titanic_dataset.expect_column_value_lengths_to_equal('Survived', 1)
+    assert result['success']
+
+    result = titanic_dataset.expect_column_value_lengths_to_equal('Name', 10)
+    assert not result['success']
+
+    result = titanic_dataset.expect_column_value_lengths_to_equal('PClass', 3)
+    assert not result['success']
+
+    result = titanic_dataset.expect_column_value_lengths_to_equal('PClass', 3, mostly=0.99)
+    assert result['success']
+
+
+def test_expect_column_values_to_match_strftime_format():
+    result = strf_dataset.expect_column_values_to_match_strftime_format('date', '%Y-%m-%d')
+    assert result['success']
+
+    result = strf_dataset.expect_column_values_to_match_strftime_format('date', '%Y%m%d')
+    assert not result['success']
+
+    result = titanic_dataset.expect_column_values_to_match_strftime_format('Age', '%Y-%m-%d')
+    assert not result['success']
