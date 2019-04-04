@@ -1,21 +1,22 @@
 from __future__ import division
 
 import unittest
-from great_expectations.dataset import Dataset, PandasDataset, MetaPandasDataset
+from great_expectations.data_asset import DataAsset
+from great_expectations.dataset import PandasDataset, MetaPandasDataset
 
 
-class ExpectationOnlyDataset(Dataset):
+class ExpectationOnlyDataAsset(DataAsset):
 
-    @Dataset.expectation([])
+    @DataAsset.expectation([])
     def no_op_expectation(self, result_format=None, include_config=False, catch_exceptions=None, meta=None):
         return {"success": True}
 
-    @Dataset.expectation(['value'])
+    @DataAsset.expectation(['value'])
     def no_op_value_expectation(self, value=None,
                                 result_format=None, include_config=False, catch_exceptions=None, meta=None):
         return {"success": True}
 
-    @Dataset.expectation([])
+    @DataAsset.expectation([])
     def exception_expectation(self,
                               result_format=None, include_config=False, catch_exceptions=None, meta=None):
         raise ValueError("Gotcha!")
@@ -24,7 +25,7 @@ class ExpectationOnlyDataset(Dataset):
 class TestExpectationDecorators(unittest.TestCase):
 
     def test_expectation_decorator_build_config(self):
-        eds = ExpectationOnlyDataset()
+        eds = ExpectationOnlyDataAsset()
         eds.no_op_expectation()
         eds.no_op_value_expectation('a')
 
@@ -36,7 +37,7 @@ class TestExpectationDecorators(unittest.TestCase):
                          config['expectations'][1])
 
     def test_expectation_decorator_include_config(self):
-        eds = ExpectationOnlyDataset()
+        eds = ExpectationOnlyDataAsset()
         out = eds.no_op_value_expectation('a', include_config=True)
 
         self.assertEqual({'expectation_type': 'no_op_value_expectation',
@@ -46,7 +47,7 @@ class TestExpectationDecorators(unittest.TestCase):
 
     def test_expectation_decorator_meta(self):
         metadata = {'meta_key': 'meta_value'}
-        eds = ExpectationOnlyDataset()
+        eds = ExpectationOnlyDataAsset()
         out = eds.no_op_value_expectation('a', meta=metadata)
         config = eds.get_expectations_config()
 
@@ -60,7 +61,7 @@ class TestExpectationDecorators(unittest.TestCase):
                          config['expectations'][0])
 
     def test_expectation_decorator_catch_exceptions(self):
-        eds = ExpectationOnlyDataset()
+        eds = ExpectationOnlyDataAsset()
 
         # Confirm that we would raise an error without catching exceptions
         with self.assertRaises(ValueError):
