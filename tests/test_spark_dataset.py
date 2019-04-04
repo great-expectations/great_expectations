@@ -88,3 +88,18 @@ def test_expect_table_row_count_to_equal():
     # value can be float that represents an integer
     result = titanic_dataset.expect_table_row_count_to_equal(1313.0)
     assert result['success']
+
+
+def test_expect_column_values_to_be_unique():
+    result = titanic_dataset.expect_column_values_to_be_unique('_c0')
+    assert result['success']
+
+    result = titanic_dataset.expect_column_values_to_be_unique('Age')
+    assert not result['success']
+
+    result = titanic_dataset.expect_column_values_to_be_unique('Name')
+    assert not result['success']
+    assert 'Kelly, Mr James' in result['result']['partial_unexpected_list']
+
+    result = titanic_dataset.expect_column_values_to_be_unique('Name', mostly=0.95)
+    assert result['success']
