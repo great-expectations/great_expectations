@@ -103,3 +103,27 @@ def test_expect_column_values_to_be_unique():
 
     result = titanic_dataset.expect_column_values_to_be_unique('Name', mostly=0.95)
     assert result['success']
+
+
+def test_expect_table_columns_to_match_ordered_list():
+    result = titanic_dataset.expect_table_columns_to_match_ordered_list(
+        ["_c0", "Name", "PClass", "Age", "Sex", "Survived", "SexCode"]
+    )
+    assert result['success']
+
+    result = titanic_dataset.expect_table_columns_to_match_ordered_list(
+        ["_c0", "Name", "PClass", "Age", "Sex"]
+    )
+    assert not result['success']
+    assert result['details']['mismatched'] == [
+        {'Expected': None, 'Expected Column Position': 5, 'Found': 'Survived'},
+        {'Expected': None, 'Expected Column Position': 6, 'Found': 'SexCode'}
+    ]
+
+    result = titanic_dataset.expect_table_columns_to_match_ordered_list(
+        ["_c0", "Name", "PClass", "Age", "Sex", "Survived", "SexCode", "fake_column"]
+    )
+    assert not result['success']
+    assert result['details']['mismatched'] == [
+        {'Expected': "fake_column", 'Expected Column Position': 7, 'Found': None},
+    ]

@@ -3,6 +3,8 @@ from __future__ import division
 from six import PY3
 import inspect
 from functools import wraps
+# TODO change this import to be python2 compatible
+from itertools import zip_longest
 
 from .base import Dataset
 from .util import DocInherit, parse_result_format
@@ -119,6 +121,34 @@ class SparkDFDataset(MetaSparkDFDataset):
             }
         else:
             return {"success": False}
+
+    def expect_table_columns_to_match_ordered_list(
+        self, column_list, result_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
+        """
+        Checks if observed columns are in the expected order. The expectations will fail if columns are out of expected
+        order, columns are missing, or additional columns are present. On failure, details are provided on the location
+        of the unexpected column(s).
+        """
+        if self.spark_df.columns == list(column_list):
+            return {
+                "success": True
+            }
+        else:
+            # In the case of differing column lengths between the defined expectation and the observed column set, the
+            # max is determined to generate the column_index.
+            number_of_columns = max(len(column_list), len(self.spark_df.columns))
+            column_index = range(number_of_columns)
+
+            # Create a list of the mismatched details
+            compared_lists = list(zip_longest(column_index, list(column_list), list(self.spark_df.columns)))
+            mismatched = [{"Expected Column Position": i,
+                           "Expected": k,
+                           "Found": v} for i, k, v in compared_lists if k != v]
+            return {
+                "success": False,
+                "details": {"mismatched": mismatched}
+            }
 
     @DocInherit
     @MetaSparkDFDataset.column_map_expectation
