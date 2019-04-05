@@ -6,11 +6,14 @@ from pyspark.sql import SparkSession
 
 class DatabricksTableContext(DataContext):
     """Meant to be used in a Databricks notebook
+
+    Unsure of if we want to keep this and other new, more esoteric data contexts in the
+    main library or provide an easy way for people to write their own.
     """
 
     def __init__(self, options, *args, **kwargs):
         super(DatabricksTableContext, self).__init__(options, *args, **kwargs)
-        # assuming that this grabs the already instantiated SparkSession available on Databricks notebooks
+        # this should grab the already instantiated SparkSession available on Databricks notebooks
         self.spark = SparkSession.builder.getOrCreate()
 
     def connect(self, options):
