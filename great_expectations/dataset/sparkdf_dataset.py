@@ -2,6 +2,7 @@ from __future__ import division
 
 from six import PY3
 import inspect
+import re
 from functools import wraps
 from datetime import datetime
 # TODO change this import to be python2 compatible
@@ -29,9 +30,9 @@ class MetaSparkDFDataset(Dataset):
         """Constructs an expectation using column-map semantics.
 
 
-        The MetaPandasDataset implementation replaces the "column" parameter supplied by the user with a pandas Series
-        object containing the actual column from the relevant pandas dataframe. This simplifies the implementing expectation
-        logic while preserving the standard Dataset signature and expected behavior.
+        The MetaSparkDFDataset implementation replaces the "column" parameter supplied by the user with a Spark Dataframe
+        with the actual column data. The current approach for functions implementing expectation logic is to append
+        a column named "__success" to this dataframe and return to this decorator.
 
         See :func:`column_map_expectation <great_expectations.Dataset.base.Dataset.column_map_expectation>` \
         for full documentation of this function.
@@ -44,6 +45,12 @@ class MetaSparkDFDataset(Dataset):
         @cls.expectation(argspec)
         @wraps(func)
         def inner_wrapper(self, column, mostly=None, result_format=None, *args, **kwargs):
+            """
+            This whole decorator is pending a re-write. Currently there is are huge performance issues
+            when the # of unexpected elements gets large (10s of millions). Additionally, there is likely
+            easy optimization opportunities by coupling result_format with how many different transformations
+            are done on the dataset, as is done in sqlalchemy_dataset.
+            """
 
             if result_format is None:
                 result_format = self.default_expectation_args["result_format"]
@@ -56,17 +63,24 @@ class MetaSparkDFDataset(Dataset):
             col_df.cache()
             element_count = col_df.count()
 
-            nonnull_values = col_df.filter('{column} is not null'.format(column=column))
-            nonnull_count = nonnull_values.count()
+            # FIXME temporary fix for missing/ignored value
+            if func.__name__ not in ['expect_column_values_to_not_be_null', 'expect_column_values_to_be_null']:
+                col_df = col_df.filter('{column} is not null'.format(column=column))
+                nonnull_count = col_df.count()
+            else:
+                nonnull_count = element_count
 
-            success_df = func(self, nonnull_values, *args, **kwargs)
+            success_df = func(self, col_df, *args, **kwargs)
             success_count = success_df.filter('__success = True').count()
 
             if success_count == nonnull_count:
                 # save some computation time if no unexpected items
                 unexpected_list = []
             else:
-                unexpected_df = success_df.filter('__success = False')
+                # TODO when there are a lot of unexpected items, the expectation hangs. suspect it might be
+                # the size of this list. fixing this would probably involve a refactor of this method where we get
+                # unexpected_count directly from the dataframe but use an abbreviated unexpected_list
+                unexpected_df = success_df.filter('__success = False').limit(100000)
                 unexpected_list = [row[column] for row in unexpected_df.collect()]
 
             success, percent_success = self._calc_map_expectation_success(
@@ -170,11 +184,6 @@ class SparkDFDataset(MetaSparkDFDataset):
             catch_exceptions=None,
             meta=None,
     ):
-        """
-        Assumes that `column` is a pyspark.sql.DataFrame with only 1 column.
-
-        For now, this function returns the `column` dataframe with a column appended for success/failure of the condition
-        """
         success_udf = udf(lambda x: x in value_set)
         return column.withColumn('__success', success_udf(column[0]))
 
@@ -190,11 +199,6 @@ class SparkDFDataset(MetaSparkDFDataset):
             catch_exceptions=None,
             meta=None,
     ):
-        """
-        Assumes that `column` is a pyspark.sql.DataFrame with only 1 column.
-
-        For now, this function returns the `column` dataframe with a column appended for success/failure of the condition
-        """
         success_udf = udf(lambda x: x not in value_set)
         return column.withColumn('__success', success_udf(column[0]))
 
@@ -225,7 +229,9 @@ class SparkDFDataset(MetaSparkDFDataset):
             catch_exceptions=None,
             meta=None,
     ):
-        # Assert that min_value and max_value are integers
+        # This and several other expectations have almost identical implementations in all 3 datasets;
+        # is this worth refactoring?
+
         try:
             if min_value is not None:
                 if not float(min_value).is_integer():
@@ -326,4 +332,49 @@ class SparkDFDataset(MetaSparkDFDataset):
                 return False
 
         success_udf = udf(is_parseable_by_format)
+        return column.withColumn('__success', success_udf(column[0]))
+
+    @DocInherit
+    @MetaSparkDFDataset.column_map_expectation
+    def expect_column_values_to_not_be_null(
+        self,
+        column,
+        mostly=None,
+        result_format=None,
+        include_config=False,
+        catch_exceptions=None,
+        meta=None,
+    ):
+        success_udf = udf(lambda x: x is not None)
+        return column.withColumn('__success', success_udf(column[0]))
+
+    @DocInherit
+    @MetaSparkDFDataset.column_map_expectation
+    def expect_column_values_to_be_null(
+        self,
+        column,
+        mostly=None,
+        result_format=None,
+        include_config=False,
+        catch_exceptions=None,
+        meta=None,
+    ):
+        success_udf = udf(lambda x: x is None)
+        return column.withColumn('__success', success_udf(column[0]))
+
+    @DocInherit
+    @MetaSparkDFDataset.column_map_expectation
+    def expect_column_values_to_match_regex(
+        self,
+        column,
+        regex,
+        mostly=None,
+        result_format=None,
+        include_config=False,
+        catch_exceptions=None,
+        meta=None,
+    ):
+        # TODO tests for this expectations
+        # not sure know about casting to string here
+        success_udf = udf(lambda x: re.findall(regex, str(x)) != [])
         return column.withColumn('__success', success_udf(column[0]))

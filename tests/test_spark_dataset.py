@@ -169,3 +169,13 @@ def test_expect_column_values_to_match_strftime_format():
 
     result = titanic_dataset.expect_column_values_to_match_strftime_format('Age', '%Y-%m-%d')
     assert not result['success']
+
+
+def test_expect_column_values_to_be_null():
+    result = titanic_dataset.expect_column_values_to_be_null('Name')
+    assert not result['success']
+
+
+def test_expect_column_values_to_not_be_null():
+    result = titanic_dataset.expect_column_values_to_not_be_null('Name')
+    assert result['success']
