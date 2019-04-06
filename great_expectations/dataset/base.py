@@ -980,11 +980,16 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         return evaluation_args
 
     ##### Output generation #####
-    def _format_column_map_output(self,
-                                  result_format, success,
-                                  element_count, nonnull_count,
-                                  unexpected_list, unexpected_index_list
-                                  ):
+    def _format_column_map_output(
+        self,
+        result_format, # one of ('BOOLEAN_ONLY', 'BASIC', 'SUMMARY', 'COMPLETE')
+        success,
+        element_count,
+        nonnull_count,
+        maybe_limited_unexpected_list,
+        unexpected_index_list=None,
+        unexpected_count=None,
+    ):
         """Helper function to construct expectation result objects for column_map_expectations.
 
         Expectations support four result_formats: BOOLEAN_ONLY, BASIC, SUMMARY, and COMPLETE.
@@ -1005,8 +1010,11 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         if result_format['result_format'] == 'BOOLEAN_ONLY':
             return return_obj
 
+        # currently allowing the caller to pass either a full unexpected_list or an unexpected_count
+        # and limited unexpected list. this makes sure performance isn't hurt when dealing with very large
+        # unexpected counts. this is probably temporary.
         missing_count = element_count - nonnull_count
-        unexpected_count = len(unexpected_list)
+        unexpected_count = unexpected_count or len(maybe_limited_unexpected_list)
 
         if element_count > 0:
             unexpected_percent = unexpected_count / element_count
@@ -1029,7 +1037,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             'unexpected_count': unexpected_count,
             'unexpected_percent': unexpected_percent,
             'unexpected_percent_nonmissing': unexpected_percent_nonmissing,
-            'partial_unexpected_list': unexpected_list[:result_format['partial_unexpected_count']]
+            'partial_unexpected_list': maybe_limited_unexpected_list[:result_format['partial_unexpected_count']]
         }
 
         if result_format['result_format'] == 'BASIC':
@@ -1041,14 +1049,14 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                 {'value': key, 'count': value}
                 for key, value
                 in sorted(
-                    Counter(unexpected_list).most_common(
+                    Counter(maybe_limited_unexpected_list).most_common(
                         result_format['partial_unexpected_count']),
                     key=lambda x: (-x[1], x[0]))
             ]
         except TypeError:
             partial_unexpected_counts = [
                 'partial_exception_counts requires a hashable type']
-        
+
         return_obj['result'].update(
             {
                 'partial_unexpected_index_list': unexpected_index_list[:result_format['partial_unexpected_count']] if unexpected_index_list is not None else None,
@@ -1061,7 +1069,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         return_obj['result'].update(
             {
-                'unexpected_list': unexpected_list,
+                'unexpected_list': maybe_limited_unexpected_list,
                 'unexpected_index_list': unexpected_index_list
             }
         )

@@ -7,6 +7,7 @@ from functools import wraps
 from datetime import datetime
 # TODO change this import to be python2 compatible
 from itertools import zip_longest
+from collections import UserDict, Counter
 
 from .base import Dataset
 from .util import DocInherit, parse_result_format
@@ -57,42 +58,73 @@ class MetaSparkDFDataset(Dataset):
 
             result_format = parse_result_format(result_format)
 
+            # this is a little dangerous: expectations that specify "COMPLETE" result format and have a very
+            # large number of unexpected results could hang for a long time. we should either call this out in docs
+            # or put a limit on it
+            if result_format['result_format'] == 'COMPLETE':
+                unexpected_count_limit = None
+            else:
+                unexpected_count_limit = result_format['partial_unexpected_count']
+
             col_df = self.spark_df.select(column) # pyspark.sql.DataFrame
 
             # a couple of tests indicate that caching here helps performance
             col_df.cache()
-            element_count = col_df.count()
+            # this value is cached by SparkDFDataset
+            element_count = self.row_count
 
             # FIXME temporary fix for missing/ignored value
             if func.__name__ not in ['expect_column_values_to_not_be_null', 'expect_column_values_to_be_null']:
                 col_df = col_df.filter('{column} is not null'.format(column=column))
-                nonnull_count = col_df.count()
+                # these nonnull_counts are cached by SparkDFDataset
+                nonnull_count = self.get_column_nonnull_count(column)
             else:
                 nonnull_count = element_count
 
+            # success_df will have columns [column, '__success']
+            # this feels a little hacky, so might want to change
             success_df = func(self, col_df, *args, **kwargs)
             success_count = success_df.filter('__success = True').count()
 
             if success_count == nonnull_count:
                 # save some computation time if no unexpected items
-                unexpected_list = []
+                maybe_limited_unexpected_list = []
+                unexpected_count = 0
             else:
-                # TODO when there are a lot of unexpected items, the expectation hangs. suspect it might be
-                # the size of this list. fixing this would probably involve a refactor of this method where we get
-                # unexpected_count directly from the dataframe but use an abbreviated unexpected_list
-                unexpected_df = success_df.filter('__success = False').limit(100000)
-                unexpected_list = [row[column] for row in unexpected_df.collect()]
+                # here's an example of a place where we could do optimizations if we knew result format: see
+                # comment block below
+                unexpected_df = success_df.filter('__success = False')
+                if unexpected_count_limit:
+                    unexpected_df = unexpected_df.limit(unexpected_count_limit)
+                unexpected_count = unexpected_df.count()
+                maybe_limited_unexpected_list = [
+                    row[column]
+                    for row
+                    in unexpected_df.collect()
+                ]
 
             success, percent_success = self._calc_map_expectation_success(
                 success_count, nonnull_count, mostly)
 
+            # Currently the abstraction of "result_format" that _format_column_map_output provides
+            # limits some possible optimizations within the column-map decorator. It seems that either
+            # this logic should be completely rolled into the processing done in the column_map decorator, or that the decorator
+            # should do a minimal amount of computation agnostic of result_format, and then delegate the rest to this method.
+            # In the first approach, it could make sense to put all of this decorator logic in Dataset, and then implement
+            # properties that require dataset-type-dependent implementations (as is done with SparkDFDataset.row_count currently).
+            # Then a new dataset type could just implement these properties/hooks and Dataset could deal with caching these and
+            # with the optimizations based on result_format. A side benefit would be implementing an interface for the user
+            # to get basic info about a dataset in a standardized way, e.g. my_dataset.row_count, my_dataset.columns (only for
+            # tablular datasets maybe). However, unclear if this is worth it or if it would conflict with optimizations being done
+            # in other dataset implementations.
             return_obj = self._format_column_map_output(
                 result_format,
                 success,
                 element_count,
                 nonnull_count,
-                unexpected_list,
-                # I don't think indices are relevant for a spark dataframe
+                maybe_limited_unexpected_list,
+                unexpected_count=unexpected_count,
+                # spark dataframes are not indexed
                 unexpected_index_list=None,
             )
 
@@ -104,7 +136,7 @@ class MetaSparkDFDataset(Dataset):
                 except KeyError:
                     pass
 
-            # TODO uncache here?
+            col_df.unpersist()
 
             return return_obj
 
@@ -116,15 +148,37 @@ class MetaSparkDFDataset(Dataset):
 
 class SparkDFDataset(MetaSparkDFDataset):
     """
-    For now this class holds an attribute `df` which is a spark.sql.DataFrame, rather than subclassing as is
-    done in PandasDataset.
+    This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
     """
 
     def __init__(self, spark_df, *args, **kwargs):
         super(SparkDFDataset, self).__init__(*args, **kwargs)
         self.discard_subset_failing_expectations = kwargs.get("discard_subset_failing_expectations", False)
         # Creation of the Spark Dataframe is done outside this class
+        # TODO: consider renaming to self._spark_df; see below comments
         self.spark_df = spark_df
+
+        # some data structures to keep track of commonly used values. this approach works especially well
+        # with Spark's lazy execution model, but it could be moved up to the Dataset module if other datasets could benefit.
+        # NOTE: this approach makes the strong assumption that the user will not modify self.spark_df over the
+        # lifetime of this dataset instance
+        self._row_count = None
+        self._column_nonnull_counts = {}
+
+    @property
+    def row_count(self):
+        """Compute dataframe length once and store"""
+        if not self._row_count:
+            self._row_count = self.spark_df.count()
+        return self._row_count
+
+    def get_column_nonnull_count(self, column):
+        """Compute nonnull counts for each column once and store"""
+        # TODO: is there a way to make this a property like row_count?
+        if not column in self._column_nonnull_counts:
+            nonnull_count = self.spark_df.filter('{column} is not null'.format(column=column)).count()
+            self._column_nonnull_counts[column] = nonnull_count
+        return self._column_nonnull_counts[column]
 
     @DocInherit
     @Dataset.expectation(["column"])
@@ -231,7 +285,6 @@ class SparkDFDataset(MetaSparkDFDataset):
     ):
         # This and several other expectations have almost identical implementations in all 3 datasets;
         # is this worth refactoring?
-
         try:
             if min_value is not None:
                 if not float(min_value).is_integer():
@@ -246,7 +299,7 @@ class SparkDFDataset(MetaSparkDFDataset):
         if min_value is None and max_value is None:
             raise Exception('Must specify either or both of min_value and max_value')
 
-        row_count = self.spark_df.count()
+        row_count = self.row_count
 
         if min_value is not None and max_value is not None:
             outcome = row_count >= min_value and row_count <= max_value
@@ -277,7 +330,7 @@ class SparkDFDataset(MetaSparkDFDataset):
         if not float(value).is_integer():
             raise ValueError("Value must be an integer")
 
-        row_count = self.spark_df.count()
+        row_count = self.row_count
 
         return {
             'success': row_count == value,
