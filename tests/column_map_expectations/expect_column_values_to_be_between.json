@@ -6,7 +6,7 @@
       "y": [1, 2, 3, 4, 5, 6, 7, 8, 9, "abc"],
       "z": [1, 2, 3, 4, 5, null, null, null, null, null],
       "ts": [
-        "Jan 01 1870 12:00:01",
+        "Jan 01 1970 12:00:01",
         "Dec 31 1999 12:00:01",
         "Jan 01 2000 12:00:01",
         "Feb 01 2000 12:00:01",
@@ -19,6 +19,16 @@
       ],
       "alpha": ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"],
       "numeric": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
+    },
+    "schemas": {
+      "sqlite": {
+        "x": "int",
+        "y": "varchar",
+        "z": "int",
+        "ts": "datetime",
+        "alpha": "varchar",
+        "numeric": "int"
+      }
     },
     "tests": [
       {
@@ -338,7 +348,7 @@
         "exact_match_out": false,
         "out": {
           "unexpected_list": [
-            "Jan 01 1870 12:00:01",
+            "Jan 01 1970 12:00:01",
             "Dec 31 1999 12:00:01",
             "Jan 01 2001 12:00:01"
           ],
@@ -351,7 +361,8 @@
           "column": "ts",
           "max_value": "Dec 31 2000",
           "min_value": "Jan 01 2000",
-          "parse_strings_as_datetimes": true
+          "parse_strings_as_datetimes": true,
+          "output_strftime_format" : "%b %d %Y %H:%M:%S"
         }
       },
       {

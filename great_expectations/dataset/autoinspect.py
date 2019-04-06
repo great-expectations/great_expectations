@@ -1,5 +1,5 @@
 """
-Autoinspect utilities to automatically generate expectations by evaluating a dataset.
+Autoinspect utilities to automatically generate expectations by evaluating a data_asset.
 """
 from __future__ import division
 

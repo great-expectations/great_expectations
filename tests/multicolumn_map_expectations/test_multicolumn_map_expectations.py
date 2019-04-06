@@ -18,9 +18,10 @@ contexts = ['PandasDataset', 'SqlAlchemyDataset']
 
 
 def pytest_generate_tests(metafunc):
+
     # Load all the JSON files in the directory
     dir_path = os.path.dirname(os.path.realpath(__file__))
-    test_configuration_files = glob.glob(dir_path + '/*.json')
+    test_configuration_files = glob.glob(dir_path+'/*.json')
 
     parametrized_tests = []
     ids = []
@@ -45,7 +46,7 @@ def pytest_generate_tests(metafunc):
                         })
 
                         ids.append(
-                            c + ":" + test_configuration["expectation_type"] + ":" + test["title"])
+                            c+":"+test_configuration["expectation_type"]+":"+test["title"])
 
     metafunc.parametrize(
         "test_case",
@@ -57,6 +58,7 @@ def pytest_generate_tests(metafunc):
 def test_case_runner(test_case):
     # Note: this should never be done in practice, but we are wiping expectations to reuse datasets during testing.
     test_case["dataset"]._initialize_expectations()
+
 
     evaluate_json_test(
         test_case["dataset"],

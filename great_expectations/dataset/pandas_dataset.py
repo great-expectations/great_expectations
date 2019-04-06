@@ -7,25 +7,23 @@ from datetime import datetime
 from functools import wraps
 import jsonschema
 import sys
+import numpy as np
+import pandas as pd
+from dateutil.parser import parse
+from scipy import stats
+from six import PY3, integer_types, string_types
+from numbers import Number
 
 if sys.version_info.major == 2:  # If python 2
     from itertools import izip_longest as zip_longest
 elif sys.version_info.major == 3:  # If python 3
     from itertools import zip_longest
 
-from numbers import Number
-
-import numpy as np
-import pandas as pd
-from dateutil.parser import parse
-from scipy import stats
-from six import PY3, integer_types, string_types
-
-from .base import Dataset
-from .util import DocInherit, \
+from .dataset import Dataset
+from great_expectations.data_asset.util import DocInherit, parse_result_format
+from great_expectations.dataset.util import \
     is_valid_partition_object, is_valid_categorical_partition_object, is_valid_continuous_partition_object, \
-    _scipy_distribution_positional_args_from_dict, validate_distribution_parameters,\
-    parse_result_format
+    _scipy_distribution_positional_args_from_dict, validate_distribution_parameters
 
 
 class MetaPandasDataset(Dataset):
@@ -50,7 +48,7 @@ class MetaPandasDataset(Dataset):
         object containing the actual column from the relevant pandas dataframe. This simplifies the implementing expectation
         logic while preserving the standard Dataset signature and expected behavior.
 
-        See :func:`column_map_expectation <great_expectations.Dataset.base.Dataset.column_map_expectation>` \
+        See :func:`column_map_expectation <great_expectations.data_asset.dataset.Dataset.column_map_expectation>` \
         for full documentation of this function.
         """
         if PY3:
@@ -100,7 +98,7 @@ class MetaPandasDataset(Dataset):
             success, percent_success = self._calc_map_expectation_success(
                 success_count, nonnull_count, mostly)
 
-            return_obj = self._format_column_map_output(
+            return_obj = self._format_map_output(
                 result_format, success,
                 element_count, nonnull_count,
                 unexpected_list, unexpected_index_list
@@ -182,7 +180,7 @@ class MetaPandasDataset(Dataset):
             success, percent_success = self._calc_map_expectation_success(
                 success_count, nonnull_count, mostly)
 
-            return_obj = self._format_column_map_output(
+            return_obj = self._format_map_output(
                 result_format, success,
                 element_count, nonnull_count,
                 unexpected_list, unexpected_index_list
@@ -193,15 +191,72 @@ class MetaPandasDataset(Dataset):
         inner_wrapper.__name__ = func.__name__
         inner_wrapper.__doc__ = func.__doc__
         return inner_wrapper
-    
-    
+
+
+    @classmethod
+    def multicolumn_map_expectation(cls, func):
+        """
+        The multicolumn_map_expectation decorator handles boilerplate issues surrounding the common pattern of
+        evaluating truthiness of some condition on a per row basis across a set of columns.
+        """
+        if PY3:
+            argspec = inspect.getfullargspec(func)[0][1:]
+        else:
+            argspec = inspect.getargspec(func)[0][1:]
+
+        @cls.expectation(argspec)
+        @wraps(func)
+        def inner_wrapper(self, column_list, mostly=None, ignore_row_if="all_values_are_missing",
+                          result_format=None, *args, **kwargs):
+
+            if result_format is None:
+                result_format = self.default_expectation_args["result_format"]
+
+            test_df = self[column_list]
+
+            if ignore_row_if == "all_values_are_missing":
+                boolean_mapped_skip_values = test_df.isnull().all(axis=1)
+            elif ignore_row_if == "any_value_is_missing":
+                boolean_mapped_skip_values = test_df.isnull().any(axis=1)
+            elif ignore_row_if == "never":
+                boolean_mapped_skip_values = pd.Series([False] * len(test_df))
+            else:
+                raise ValueError(
+                    "Unknown value of ignore_row_if: %s", (ignore_row_if,))
+
+            boolean_mapped_success_values = func(
+                self, test_df[boolean_mapped_skip_values == False], *args, **kwargs)
+            success_count = boolean_mapped_success_values.sum()
+            nonnull_count = (~boolean_mapped_skip_values).sum()
+            element_count = len(test_df)
+
+            unexpected_list = test_df[(boolean_mapped_skip_values == False) & (boolean_mapped_success_values == False)]
+            unexpected_index_list = list(unexpected_list.index)
+
+            success, percent_success = self._calc_map_expectation_success(
+                success_count, nonnull_count, mostly)
+
+            return_obj = self._format_map_output(
+                result_format, success,
+                element_count, nonnull_count,
+                unexpected_list.to_dict(orient='records'), unexpected_index_list
+            )
+
+            return return_obj
+
+        inner_wrapper.__name__ = func.__name__
+        inner_wrapper.__doc__ = func.__doc__
+        return inner_wrapper
+
+
     @classmethod
     def column_aggregate_expectation(cls, func):
         """Constructs an expectation using column-aggregate semantics.
         The MetaPandasDataset implementation replaces the "column" parameter supplied by the user with a pandas
         Series object containing the actual column from the relevant pandas dataframe. This simplifies the implementing
         expectation logic while preserving the standard Dataset signature and expected behavior.
-        See :func:`column_aggregate_expectation <great_expectations.Dataset.base.Dataset.column_aggregate_expectation>` \
+
+        See :func:`column_aggregate_expectation <great_expectations.data_asset.dataset.Dataset.column_aggregate_expectation>` \
         for full documentation of this function.
         """
         if PY3:
@@ -266,7 +321,7 @@ class MetaPandasDataset(Dataset):
                              (result_format['result_format'],))
 
         return inner_wrapper
-    
+
     @classmethod
     def multicolumn_aggregate_expectation(cls, func):
         """Constructs an expectation using multicolumn-aggregate semantics.
@@ -281,19 +336,19 @@ class MetaPandasDataset(Dataset):
             argspec = inspect.getfullargspec(func)[0][1:]
         else:
             argspec = inspect.getargspec(func)[0][1:]
-    
+
         @cls.expectation(argspec)
         @wraps(func)
         def inner_wrapper(self, columns, result_format = None,
                           ignore_row_if="all_values_are_missing",
                           *args, **kwargs):
-    
+
             if result_format is None:
                 result_format = self.default_expectation_args["result_format"] #Set default result_format
 
             df=self[columns] #Subset data by user specified columns
 
-            if ignore_row_if == "all_values_are_missing": 
+            if ignore_row_if == "all_values_are_missing":
                 boolean_mapped_skip_values = df.isnull().all(axis=1) #If all values for a row are missing, the row is null
             elif ignore_row_if == "any_value_is_missing":
                 boolean_mapped_skip_values = df.isnull().any(axis=1) #If any values for a row are missing, the row is null
@@ -330,7 +385,7 @@ class MetaPandasDataset(Dataset):
                     "Column aggregate expectation failed to return observed_name")
 
             #An array where each element is the boolean result of the expectation applied to some subset (usually a pair) of columns
-            observed_boolean = evaluation_result['result']['observed_boolean'] 
+            observed_boolean = evaluation_result['result']['observed_boolean']
 
             #An array where each element is the functional value of the expectation applied to some subset (usually a pair) of columns
             observed_value = evaluation_result['result']['observed_value']
@@ -359,8 +414,8 @@ class MetaPandasDataset(Dataset):
                     "element_count": element_count, #Row count
                     "missing_count": null_count,   # Null row coutn
                     "missing_percent": missing_percent, #Null row percentage
-                    "column_count": column_count,      #Number of columns 
-                    "evaluation_count":eval_count,    #Number of column subsets to which the expectation was applied  
+                    "column_count": column_count,      #Number of columns
+                    "evaluation_count":eval_count,    #Number of column subsets to which the expectation was applied
                     "unexpected_evaluation_count": unexpected_eval_count,  #Number of column subsets for which the expectation was not met
                     "unexpected_evaluation_percent":unexpected_eval_count/eval_count  #Percentage of column subsets for which the expectation was not met
                     }
@@ -398,7 +453,7 @@ class MetaPandasDataset(Dataset):
 
                 unexpected_eval_list = dict(unexpected_eval_list)
                 return_obj['result']['unexpected_eval_list'] = unexpected_eval_list
-                
+
                 if result_format['result_format'] == "COMPLETE":
                     return return_obj
             #If there are no unexpected evaluations but the result_format is still valid...
@@ -406,7 +461,7 @@ class MetaPandasDataset(Dataset):
                 if(result_format['result_format'] == "SUMMARY" or \
                    result_format['result_format'] == "COMPLETE"):
                     return return_obj
-            
+
 
             raise ValueError("Unknown result_format %s." %
                              (result_format['result_format'],))
@@ -417,7 +472,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
     """
     PandasDataset instantiates the great_expectations Expectations API as a subclass of a pandas.DataFrame.
 
-    For the full API reference, please see :func:`Dataset <great_expectations.Dataset.base.Dataset>`
+    For the full API reference, please see :func:`Dataset <great_expectations.data_asset.dataset.Dataset>`
 
     Notes:
         1. Samples and Subsets of PandaDataSet have ALL the expectations of the original \
@@ -657,6 +712,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                                            column,
                                            min_value=None, max_value=None,
                                            parse_strings_as_datetimes=None,
+                                           output_strftime_format=None,
                                            allow_cross_type_comparisons=None,
                                            mostly=None,
                                            result_format=None, include_config=False, catch_exceptions=None, meta=None
@@ -1418,7 +1474,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         if (not isinstance(internal_weight_holdout, (int, float))) or (internal_weight_holdout < 0) or (internal_weight_holdout > 1):
             raise ValueError(
                 "internal_weight_holdout must be between zero and one.")
-            
+
         if(tail_weight_holdout != 0 and "tail_weights" in partition_object):
             raise ValueError(
                 "tail_weight_holdout must be 0 when using tail_weights in partition object")
@@ -1476,21 +1532,21 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
         else:
             # Data are expected to be continuous; discretize first
-        
+
             # Build the histogram first using expected bins so that the largest bin is >=
             hist, bin_edges = np.histogram(column, partition_object['bins'], density=False)
-        
+
             # Add in the frequencies observed above or below the provided partition
             below_partition = len(np.where(column < partition_object['bins'][0])[0])
             above_partition = len(np.where(column > partition_object['bins'][-1])[0])
-        
+
             #Observed Weights is just the histogram values divided by the total number of observations
             observed_weights = np.array(hist)/len(column)
-        
+
             #Adjust expected_weights to account for tail_weight and internal_weight
             expected_weights = np.array(
                 partition_object['weights']) * (1 - tail_weight_holdout - internal_weight_holdout)
-        
+
             # Assign internal weight holdout values if applicable
             if internal_weight_holdout > 0:
                 zero_count = len(expected_weights) - \
@@ -1499,7 +1555,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                     for index, value in enumerate(expected_weights):
                         if value == 0:
                             expected_weights[index] = internal_weight_holdout / zero_count
-        
+
             # Assign tail weight holdout if applicable
             # We need to check cases to only add tail weight holdout if it makes sense based on the provided partition.
             if (partition_object['bins'][0] == -np.inf) and (partition_object['bins'][-1]) == np.inf:
@@ -1508,63 +1564,63 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                 if "tail_weights" in partition_object:
                     raise ValueError("There can be no tail weights for partitions with one or both endpoints at infinity")
                 expected_bins = partition_object['bins'][1:-1] #Remove -inf and inf
-                
+
                 comb_expected_weights=expected_weights
                 expected_tail_weights=np.concatenate(([expected_weights[0]],[expected_weights[-1]])) #Set aside tail weights
                 expected_weights=expected_weights[1:-1] #Remove tail weights
-                
+
                 comb_observed_weights=observed_weights
                 observed_tail_weights=np.concatenate(([observed_weights[0]],[observed_weights[-1]])) #Set aside tail weights
                 observed_weights=observed_weights[1:-1] #Remove tail weights
-                
-                
+
+
             elif (partition_object['bins'][0] == -np.inf):
-                
+
                 if "tail_weights" in partition_object:
                     raise ValueError("There can be no tail weights for partitions with one or both endpoints at infinity")
-                
+
                 expected_bins = partition_object['bins'][1:] #Remove -inf
-                
+
                 comb_expected_weights=np.concatenate((expected_weights,[tail_weight_holdout]))
                 expected_tail_weights=np.concatenate(([expected_weights[0]],[tail_weight_holdout])) #Set aside left tail weight and holdout
                 expected_weights = expected_weights[1:] #Remove left tail weight from main expected_weights
-                
+
                 comb_observed_weights=np.concatenate((observed_weights,[above_partition/len(column)]))
                 observed_tail_weights=np.concatenate(([observed_weights[0]],[above_partition/len(column)])) #Set aside left tail weight and above parition weight
                 observed_weights=observed_weights[1:] #Remove left tail weight from main observed_weights
-        
+
             elif (partition_object['bins'][-1] == np.inf):
-                
+
                 if "tail_weights" in partition_object:
                     raise ValueError("There can be no tail weights for partitions with one or both endpoints at infinity")
-                
+
                 expected_bins = partition_object['bins'][:-1] #Remove inf
-                
+
                 comb_expected_weights=np.concatenate(([tail_weight_holdout],expected_weights))
                 expected_tail_weights=np.concatenate(([tail_weight_holdout],[expected_weights[-1]]))  #Set aside right tail weight and holdout
                 expected_weights = expected_weights[:-1] #Remove right tail weight from main expected_weights
-                
+
                 comb_observed_weights=np.concatenate(([below_partition/len(column)],observed_weights))
                 observed_tail_weights=np.concatenate(([below_partition/len(column)],[observed_weights[-1]])) #Set aside right tail weight and below partition weight
                 observed_weights=observed_weights[:-1] #Remove right tail weight from main observed_weights
             else:
-                
+
                 expected_bins = partition_object['bins'] #No need to remove -inf or inf
-                
+
                 if "tail_weights" in partition_object:
                     tail_weights=partition_object["tail_weights"]
                     comb_expected_weights=np.concatenate(([tail_weights[0]],expected_weights,[tail_weights[1]])) #Tack on tail weights
                     expected_tail_weights=tail_weights #Tail weights are just tail_weights
                 comb_expected_weights=np.concatenate(([tail_weight_holdout / 2],expected_weights,[tail_weight_holdout / 2]))
                 expected_tail_weights=np.concatenate(([tail_weight_holdout / 2],[tail_weight_holdout / 2])) #Tail weights are just tail_weight holdout divided eaually to both tails
-                
+
                 comb_observed_weights=np.concatenate(([below_partition/len(column)],observed_weights, [above_partition/len(column)]))
                 observed_tail_weights=np.concatenate(([below_partition],[above_partition]))/len(column) #Tail weights are just the counts on either side of the partition
                 #Main expected_weights and main observered weights had no tail_weights, so nothing needs to be removed.
-        
-     
-            kl_divergence = stats.entropy(comb_observed_weights, comb_expected_weights) 
-            
+
+
+            kl_divergence = stats.entropy(comb_observed_weights, comb_expected_weights)
+
             if(np.isinf(kl_divergence) or np.isnan(kl_divergence)):
                 observed_value = None
             else:
@@ -1589,7 +1645,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                         }
                     }
                 }
-                
+
         return return_obj
 
     @DocInherit
@@ -1658,26 +1714,36 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
         return pd.Series(results, temp_df.index)
 
+    @DocInherit
+    @MetaPandasDataset.multicolumn_map_expectation
+    def expect_multicolumn_values_to_be_unique(self,
+                                               column_list,
+                                               ignore_row_if="all_values_are_missing",
+                                               result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                               ):
+        threshold = len(column_list.columns)
+        # Do not dropna here, since we have separately dealt with na in decorator
+        return column_list.nunique(dropna=False, axis=1) >= threshold
     @MetaPandasDataset.multicolumn_aggregate_expectation
     def expect_kl_divergence_between_columns_to_be_between(self, columns,
                                                            expected_min=0,
                                                            expected_max=None,
                                                            bins=None,
                                                            ignore_row_if="all_values_are_missing",
-                                                           result_format=None, 
-                                                           include_config=False, 
-                                                           catch_exceptions=None, 
+                                                           result_format=None,
+                                                           include_config=False,
+                                                           catch_exceptions=None,
                                                            meta=None):
 
         if expected_min == None and expected_max == None:
             raise ValueError("expected_min and expected_max cannot both be None")
-            
+
         if expected_min and not isinstance(expected_min, Number):
             raise ValueError("expected_min must be a number")
-        
+
         if expected_max and not isinstance(expected_max, Number):
             raise ValueError("expected_max must be a number")
-        
+
 
         if (expected_min and expected_max) and expected_min > expected_max:
             raise ValueError("expected_min must be less than expected_max")
@@ -1692,7 +1758,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         num_columns = len(column_list) #Total number of columns
 
         #We consider the kl-divergence between each pair of comparable columns
-        for i in range(0, num_columns): 
+        for i in range(0, num_columns):
             column_A = columns[column_list[i]]  #Set aside ith column as column A
             column_A = column_A[~pd.isnull(column_A)] #Remove NaNs
             column_A_name = column_A.name       # Get column A name
@@ -1701,60 +1767,60 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             for j in range(0, num_columns):
                 if i !=j:
                     column_B = columns[column_list[j]] #Set aside jth column as column B
-                    column_B = column_B[~pd.isnull(column_B)] #Remove NaNs                
+                    column_B = column_B[~pd.isnull(column_B)] #Remove NaNs
                     column_B_name = column_B.name      #Get column B name
                     column_B_data_type = column_B.dtype.name #Get column B datatype
-                    
+
                     categorical_types = ["object","bool", "category"]
                     numeric_types = ["int64", "float64", "datetime64"]
-                        
+
                     #If A and B are categorical...
                     if column_A_data_type in categorical_types\
                     and column_B_data_type in categorical_types:
                         column_A_dist = column_A.value_counts()/len(column_A)
                         column_B_dist = column_B.value_counts()/len(column_B)
-    
+
                     #If A and B are numeric...
                     elif column_A_data_type in numeric_types\
                     and column_B_data_type in numeric_types:
-    
+
                         if bins != None: #If there are user specified bins...
-    
+
                             if column_A_name in bins: #If there are user specified bins for column A...
                                 column_A_bins = bins[column_A_name] #Get the bins
                                 column_A_dist = np.histogram(column_A,
                                                              column_A_bins)[0] #Build discretized distribution for column A
                             else:
                                 column_A_dist=np.histogram(column_A)[0] #If there are no specified bins for column A use the default 10 bins
-    
+
                             if column_B_name in bins: #Same process as above for column B...
                                 column_B_bins = bins[column_B_name]
                                 column_B_dist = np.histogram(column_B,
                                                              column_B_bins)[0]
                             else:
                                 column_B_dist = np.histogram(column_B)[0]
-    
+
                         else: #if there are no user specified bins, use the default 10 bins for both columns
                             column_A_dist = np.histogram(column_A)[0]
                             column_B_dist = np.histogram(column_B)[0]
-                    
+
                     else: #If A and B are not both numeric or both categorical or of an unrecognized type...
                         continue #Skip the pair
-    
+
                     try:
                         kl_div = stats.entropy(column_A_dist, column_B_dist) #Compute the kl-divergence if possible (if the discrete distributions have the same number of elements)
                     except (ValueError): #If the kl-divergence is not computable, just skip this column pair
                         continue
-    
+
                     if expected_max != None and expected_min!=None: #Determine if expectation is met if max and min are specified
                         boolean_val = (kl_div >= expected_min and kl_div <= expected_max)
-    
+
                     elif expected_max != None: #Determine if expectation is met if only max is specified
                         boolean_val = kl_div <= expected_max
-    
+
                     elif expected_min != None: #Determine if expectation is met if only min is specified
                         boolean_val = kl_div >= expected_min
-    
+
                     comparison_name = column_A_name + " v. " + column_B_name #Create name for column pair expectation
 
                     if kl_div == np.inf:
