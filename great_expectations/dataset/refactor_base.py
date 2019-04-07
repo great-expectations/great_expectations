@@ -22,7 +22,11 @@ from .base import Dataset
 
 
 class ColumnarResultCache(UserDict):
-    """Holds information about columns"""
+    """
+    Holds information about columns
+
+    Think this is needed to make things like column_nonnull_counts accessible via a property?
+    """
     def __init__(self, callback, initial={}):
         self.data = initial
         self.callback = callback
@@ -38,12 +42,17 @@ class RefactoredDataset(object):
     def __init__(self, *args, **kwargs):
         """
         This class handles everything that is not dataset-implementation-specific. It also implements an set of
-        (mostly) properties like "row_count" and "table_columns", which serves a double purpose of 1) presenting a clean
+        properties (e.g. "row_count", "table_columns", "column_means"), which serves a double purpose of 1) presenting a clean
         and standardized interface to the user should they want to query these properties and 2) caching the results
         of expensive operations.
 
-        This design looks like it will work well for SparkDFDataset, but need to investigate more to see if
-        the same goes for other datasets
+        Caching is done using a "get-or-compute" type pattern. If a value is stored, it is accessed and returned; if not, it
+        is computed, stored, and then returned. Subclasses are expected to override the getters for these attributes, e.g. "_get_row_count".
+        For attributes like row_count and table_columns, instance variables are used and the caching logic is done in directly in the
+        property methods. For dictionary attributes, like column_means, currently an object ColumnarResultStore is handles the caching logic.
+
+        This design looks like it will work well for SparkDFDataset, but need to investigate more to see if the same goes for
+        other datasets. For instance, PandasDataset currently inherits from pandas.DataFrame, which would work less cleanly.
         """
         autoinspect_func = kwargs.pop("autoinspect_func", None)
 
@@ -52,18 +61,16 @@ class RefactoredDataset(object):
         if autoinspect_func is not None:
             autoinspect_func(self)
 
-        # some data structures to keep track of commonly used values. this approach works especially well
-        # with Spark's lazy execution model.
+        # some data structures for caching
         # NOTE: this approach makes the strong assumption that the user will not modify the core data store (e.g. self.spark_df)
         # over the lifetime of the dataset instance
         self._row_count = None
         self._table_columns = None
         self._column_nonnull_counts = ColumnarResultCache(self._get_column_nonnull_count)
-
+        self._column_means = ColumnarResultCache(self._get_column_mean)
 
     @property
     def row_count(self):
-        """Compute row count once and store"""
         if not self._row_count:
             self._row_count = self._get_row_count()
         return self._row_count
@@ -89,6 +96,12 @@ class RefactoredDataset(object):
     def _get_column_nonnull_count(self, column):
         raise NotImplementedError
 
+    @property
+    def column_means(self):
+        return self._column_means
+
+    def _get_column_mean(self, column):
+        raise NotImplementedError
 
     def autoinspect(self, autoinspect_func=columns_exist):
         autoinspect_func(self)

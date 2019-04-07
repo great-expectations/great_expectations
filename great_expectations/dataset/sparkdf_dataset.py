@@ -9,7 +9,7 @@ from datetime import datetime
 from .refactor_base import RefactoredDataset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
 
-from pyspark.sql.functions import udf
+from pyspark.sql.functions import udf, col, mean as mean_
 
 
 class MetaSparkDFDataset(RefactoredDataset):
@@ -163,6 +163,8 @@ class SparkDFDataset(MetaSparkDFDataset):
     def _get_column_nonnull_count(self, column):
         return self.spark_df.filter('{column} is not null'.format(column=column)).count()
 
+    def _get_column_mean(self, column):
+        return self.spark_df.select(mean_(col(column))).collect()[0][0]
 
     @DocInherit
     @MetaSparkDFDataset.column_map_expectation
