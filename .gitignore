@@ -108,5 +108,9 @@ ENV/
 # vim backup files
 *~
 
+# VS code
+launch.json
+settings.json
+
 .DS_Store
 **/.pytest_cache

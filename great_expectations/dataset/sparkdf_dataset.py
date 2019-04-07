@@ -5,17 +5,14 @@ import inspect
 import re
 from functools import wraps
 from datetime import datetime
-# TODO change this import to be python2 compatible
-from itertools import zip_longest
-from collections import UserDict, Counter
 
-from .dataset import Dataset
+from .refactor_base import RefactoredDataset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
 
 from pyspark.sql.functions import udf
 
 
-class MetaSparkDFDataset(Dataset):
+class MetaSparkDFDataset(RefactoredDataset):
     """MetaSparkDFDataset is a thin layer between Dataset and SparkDFDataset.
     This two-layer inheritance is required to make @classmethod decorators work.
     Practically speaking, that means that MetaSparkDFDataset implements \
@@ -77,7 +74,7 @@ class MetaSparkDFDataset(Dataset):
             if func.__name__ not in ['expect_column_values_to_not_be_null', 'expect_column_values_to_be_null']:
                 col_df = col_df.filter('{column} is not null'.format(column=column))
                 # these nonnull_counts are cached by SparkDFDataset
-                nonnull_count = self.get_column_nonnull_count(column)
+                nonnull_count = self.column_nonnull_counts[column]
             else:
                 nonnull_count = element_count
 
@@ -154,76 +151,18 @@ class SparkDFDataset(MetaSparkDFDataset):
         super(SparkDFDataset, self).__init__(*args, **kwargs)
         self.discard_subset_failing_expectations = kwargs.get("discard_subset_failing_expectations", False)
         # Creation of the Spark Dataframe is done outside this class
-        # TODO: consider renaming to self._spark_df; see below comments
+        # TODO: consider renaming to self._spark_df
         self.spark_df = spark_df
 
-        # some data structures to keep track of commonly used values. this approach works especially well
-        # with Spark's lazy execution model, but it could be moved up to the Dataset module if other datasets could benefit.
-        # NOTE: this approach makes the strong assumption that the user will not modify self.spark_df over the
-        # lifetime of this dataset instance
-        self._row_count = None
-        self._column_nonnull_counts = {}
+    def _get_row_count(self):
+        return self.spark_df.count()
 
-    @property
-    def row_count(self):
-        """Compute dataframe length once and store"""
-        if not self._row_count:
-            self._row_count = self.spark_df.count()
-        return self._row_count
+    def _get_table_columns(self):
+        return self.spark_df.columns
 
-    def get_column_nonnull_count(self, column):
-        """Compute nonnull counts for each column once and store"""
-        # TODO: is there a way to make this a property like row_count?
-        if not column in self._column_nonnull_counts:
-            nonnull_count = self.spark_df.filter('{column} is not null'.format(column=column)).count()
-            self._column_nonnull_counts[column] = nonnull_count
-        return self._column_nonnull_counts[column]
+    def _get_column_nonnull_count(self, column):
+        return self.spark_df.filter('{column} is not null'.format(column=column)).count()
 
-    @DocInherit
-    @Dataset.expectation(["column"])
-    def expect_column_to_exist(
-        self, column, column_index=None, result_format=None, include_config=False, catch_exceptions=None, meta=None
-    ):
-        if column in self.spark_df.columns:
-            return {
-                # FIXME: list.index does not check for duplicate values.
-                "success": (column_index is None) or (self.spark_df.columns.index(column) == column_index)
-            }
-        else:
-            return {"success": False}
-
-    def expect_table_columns_to_match_ordered_list(
-        self,
-        column_list, # List
-        result_format=None,
-        include_config=False,
-        catch_exceptions=None,
-        meta=None,
-    ):
-        """
-        Checks if observed columns are in the expected order. The expectations will fail if columns are out of expected
-        order, columns are missing, or additional columns are present. On failure, details are provided on the location
-        of the unexpected column(s).
-        """
-        if self.spark_df.columns == column_list:
-            return {
-                "success": True
-            }
-        else:
-            # In the case of differing column lengths between the defined expectation and the observed column set, the
-            # max is determined to generate the column_index.
-            number_of_columns = max(len(column_list), len(self.spark_df.columns))
-            column_index = range(number_of_columns)
-
-            # Create a list of the mismatched details
-            compared_lists = list(zip_longest(column_index, list(column_list), list(self.spark_df.columns)))
-            mismatched = [{"Expected Column Position": i,
-                           "Expected": k,
-                           "Found": v} for i, k, v in compared_lists if k != v]
-            return {
-                "success": False,
-                "details": {"mismatched": mismatched}
-            }
 
     @DocInherit
     @MetaSparkDFDataset.column_map_expectation
@@ -271,72 +210,7 @@ class SparkDFDataset(MetaSparkDFDataset):
         success_udf = udf(lambda x: x not in dups)
         return column.withColumn('__success', success_udf(column[0]))
 
-    @DocInherit
-    @Dataset.expectation(['min_value', 'max_value'])
-    def expect_table_row_count_to_be_between(
-            self,
-            min_value=None, # int
-            max_value=None, # int
-            result_format=None,
-            include_config=False,
-            catch_exceptions=None,
-            meta=None,
-    ):
-        # This and several other expectations have almost identical implementations in all 3 datasets;
-        # is this worth refactoring?
-        try:
-            if min_value is not None:
-                if not float(min_value).is_integer():
-                    raise ValueError("min_value must be integer")
-            if max_value is not None:
-                if not float(max_value).is_integer():
-                    raise ValueError("max_value must be integer")
-        except ValueError:
-            raise ValueError("min_value and max_value must be integers")
 
-        # check that min_value or max_value is set
-        if min_value is None and max_value is None:
-            raise Exception('Must specify either or both of min_value and max_value')
-
-        row_count = self.row_count
-
-        if min_value is not None and max_value is not None:
-            outcome = row_count >= min_value and row_count <= max_value
-
-        elif min_value is None and max_value is not None:
-            outcome = row_count <= max_value
-
-        elif min_value is not None and max_value is None:
-            outcome = row_count >= min_value
-
-        return {
-            'success': outcome,
-            'result': {
-                'observed_value': row_count
-            }
-        }
-
-    @DocInherit
-    @Dataset.expectation(['value'])
-    def expect_table_row_count_to_equal(
-        self,
-        value, # int
-        result_format=None,
-        include_config=False,
-        catch_exceptions=None,
-        meta=None,
-    ):
-        if not float(value).is_integer():
-            raise ValueError("Value must be an integer")
-
-        row_count = self.row_count
-
-        return {
-            'success': row_count == value,
-            'result': {
-                'observed_value': row_count
-            }
-        }
 
     @DocInherit
     @MetaSparkDFDataset.column_map_expectation
