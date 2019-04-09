@@ -4,10 +4,8 @@ import numpy as np
 import sys
 
 import great_expectations as ge
-sys.path.append("./tests")
-from test_utils import assertDeepAlmostEqual
-sys.path.append("./great_expectations/dataset")
-from util import is_valid_continuous_partition_object
+from ..test_utils import assertDeepAlmostEqual
+from great_expectations.dataset.util import is_valid_continuous_partition_object
 
 
 class TestDistributionalExpectations(unittest.TestCase):

@@ -9,8 +9,8 @@ from datetime import datetime
 from itertools import zip_longest
 from collections import UserDict, Counter
 
-from .base import Dataset
-from .util import DocInherit, parse_result_format
+from .dataset import Dataset
+from great_expectations.data_asset.util import DocInherit, parse_result_format
 
 from pyspark.sql.functions import udf
 
@@ -117,13 +117,12 @@ class MetaSparkDFDataset(Dataset):
             # to get basic info about a dataset in a standardized way, e.g. my_dataset.row_count, my_dataset.columns (only for
             # tablular datasets maybe). However, unclear if this is worth it or if it would conflict with optimizations being done
             # in other dataset implementations.
-            return_obj = self._format_column_map_output(
+            return_obj = self._format_map_output(
                 result_format,
                 success,
                 element_count,
                 nonnull_count,
                 maybe_limited_unexpected_list,
-                unexpected_count=unexpected_count,
                 # spark dataframes are not indexed
                 unexpected_index_list=None,
             )

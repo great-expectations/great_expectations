@@ -1,26 +1,23 @@
 from __future__ import division
 
-from great_expectations.dataset import Dataset
-
 from functools import wraps
 import inspect
 from six import PY3
 from six import string_types
 import sys
-
-if sys.version_info.major == 2:  # If python 2
-    from itertools import izip_longest as zip_longest
-elif sys.version_info.major == 3:  # If python 3
-    from itertools import zip_longest
-
-from .util import DocInherit, parse_result_format
-
 import sqlalchemy as sa
 from sqlalchemy.engine import reflection
 from dateutil.parser import parse
 from datetime import datetime
 from numbers import Number
 
+if sys.version_info.major == 2:  # If python 2
+    from itertools import izip_longest as zip_longest
+elif sys.version_info.major == 3:  # If python 3
+    from itertools import zip_longest
+
+from .dataset import Dataset
+from great_expectations.data_asset.util import DocInherit, parse_result_format
 
 class MetaSqlAlchemyDataset(Dataset):
 
@@ -136,12 +133,13 @@ class MetaSqlAlchemyDataset(Dataset):
             success, percent_success = self._calc_map_expectation_success(
                 success_count, nonnull_count, mostly)
 
-            return_obj = self._format_column_map_output(
+            return_obj = self._format_map_output(
                 result_format,
                 success,
                 count_results['element_count'],
                 nonnull_count,
                 maybe_limited_unexpected_list,
+                None,
             )
 
             if func.__name__ in ['expect_column_values_to_not_be_null', 'expect_column_values_to_be_null']:
