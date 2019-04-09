@@ -7,25 +7,23 @@ from datetime import datetime
 from functools import wraps
 import jsonschema
 import sys
+import numpy as np
+import pandas as pd
+from dateutil.parser import parse
+from scipy import stats
+from six import PY3, integer_types, string_types
+from numbers import Number
 
 if sys.version_info.major == 2:  # If python 2
     from itertools import izip_longest as zip_longest
 elif sys.version_info.major == 3:  # If python 3
     from itertools import zip_longest
 
-from numbers import Number
-
-import numpy as np
-import pandas as pd
-from dateutil.parser import parse
-from scipy import stats
-from six import PY3, integer_types, string_types
-
-from .base import Dataset
-from .util import DocInherit, \
+from .dataset import Dataset
+from great_expectations.data_asset.util import DocInherit, parse_result_format
+from great_expectations.dataset.util import \
     is_valid_partition_object, is_valid_categorical_partition_object, is_valid_continuous_partition_object, \
-    _scipy_distribution_positional_args_from_dict, validate_distribution_parameters,\
-    parse_result_format
+    _scipy_distribution_positional_args_from_dict, validate_distribution_parameters
 
 
 class MetaPandasDataset(Dataset):
@@ -50,7 +48,7 @@ class MetaPandasDataset(Dataset):
         object containing the actual column from the relevant pandas dataframe. This simplifies the implementing expectation
         logic while preserving the standard Dataset signature and expected behavior.
 
-        See :func:`column_map_expectation <great_expectations.Dataset.base.Dataset.column_map_expectation>` \
+        See :func:`column_map_expectation <great_expectations.data_asset.dataset.Dataset.column_map_expectation>` \
         for full documentation of this function.
         """
         if PY3:
@@ -100,7 +98,7 @@ class MetaPandasDataset(Dataset):
             success, percent_success = self._calc_map_expectation_success(
                 success_count, nonnull_count, mostly)
 
-            return_obj = self._format_column_map_output(
+            return_obj = self._format_map_output(
                 result_format, success,
                 element_count, nonnull_count,
                 unexpected_list, unexpected_index_list
@@ -182,7 +180,7 @@ class MetaPandasDataset(Dataset):
             success, percent_success = self._calc_map_expectation_success(
                 success_count, nonnull_count, mostly)
 
-            return_obj = self._format_column_map_output(
+            return_obj = self._format_map_output(
                 result_format, success,
                 element_count, nonnull_count,
                 unexpected_list, unexpected_index_list
@@ -237,7 +235,7 @@ class MetaPandasDataset(Dataset):
             success, percent_success = self._calc_map_expectation_success(
                 success_count, nonnull_count, mostly)
 
-            return_obj = self._format_column_map_output(
+            return_obj = self._format_map_output(
                 result_format, success,
                 element_count, nonnull_count,
                 unexpected_list.to_dict(orient='records'), unexpected_index_list
@@ -258,7 +256,7 @@ class MetaPandasDataset(Dataset):
         Series object containing the actual column from the relevant pandas dataframe. This simplifies the implementing
         expectation logic while preserving the standard Dataset signature and expected behavior.
 
-        See :func:`column_aggregate_expectation <great_expectations.Dataset.base.Dataset.column_aggregate_expectation>` \
+        See :func:`column_aggregate_expectation <great_expectations.data_asset.dataset.Dataset.column_aggregate_expectation>` \
         for full documentation of this function.
         """
         if PY3:
@@ -329,7 +327,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
     """
     PandasDataset instantiates the great_expectations Expectations API as a subclass of a pandas.DataFrame.
 
-    For the full API reference, please see :func:`Dataset <great_expectations.Dataset.base.Dataset>`
+    For the full API reference, please see :func:`Dataset <great_expectations.data_asset.dataset.Dataset>`
 
     Notes:
         1. Samples and Subsets of PandaDataSet have ALL the expectations of the original \
