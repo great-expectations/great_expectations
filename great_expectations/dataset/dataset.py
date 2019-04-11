@@ -1,9 +1,70 @@
+from collections import UserDict
+from itertools import zip_longest
+
 from great_expectations.data_asset.base import DataAsset
+from great_expectations.data_asset.util import DocInherit
+
+
+class ColumnarResultCache(UserDict):
+    """
+    Holds information about columns
+
+    Think this is needed to make things like column_nonnull_counts accessible via a property?
+    """
+    def __init__(self, callback, initial={}):
+        self.data = initial
+        self.callback = callback
+
+    def __getitem__(self, column):
+        if column not in self.data:
+            self.data[column] = self.callback(column)
+        return self.data[column]
 
 
 class Dataset(DataAsset):
     def __init__(self, *args, **kwargs):
         super(Dataset, self).__init__(*args, **kwargs)
+        # some data structures for caching information specific to tabular datasets
+        # NOTE: this approach makes the strong assumption that the user will not modify the core data store
+        # (e.g. self.spark_df) over the lifetime of the dataset instance
+        self._row_count = None
+        self._table_columns = None
+        self._column_nonnull_counts = ColumnarResultCache(self._get_column_nonnull_count)
+        self._column_means = ColumnarResultCache(self._get_column_mean)
+
+    @property
+    def row_count(self):
+        if not self._row_count:
+            self._row_count = self._get_row_count()
+        return self._row_count
+
+    def _get_row_count(self):
+        raise NotImplementedError
+
+    @property
+    def table_columns(self):
+        # named "table_columns" to avoid conflict with PandasDataset, which already has a columns attribute.
+        # maybe an argument for not subclassing pd.DataFrame
+        if not self._table_columns:
+            self._table_columns = self._get_table_columns()
+        return self._table_columns
+    
+    def _get_table_columns(self):
+        raise NotImplementedError
+
+    @property
+    def column_nonnull_counts(self):
+        return self._column_nonnull_counts
+
+    def _get_column_nonnull_count(self, column):
+        raise NotImplementedError
+
+    @property
+    def column_means(self):
+        return self._column_means
+
+    def _get_column_mean(self, column):
+        raise NotImplementedError
 
     @classmethod
     def column_map_expectation(cls, func):
@@ -101,9 +162,10 @@ class Dataset(DataAsset):
 
     ##### Table shape expectations #####
 
+    @DocInherit
+    @DataAsset.expectation(["column"])
     def expect_column_to_exist(
-        self, column, column_index=None, result_format=None, include_config=False,
-        catch_exceptions=None, meta=None
+        self, column, column_index=None, result_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
         """Expect the specified column to exist.
 
@@ -138,13 +200,24 @@ class Dataset(DataAsset):
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
 
         """
+        if column in self.table_columns:
+            return {
+                # FIXME: list.index does not check for duplicate values.
+                "success": (column_index is None) or (self.table_columns.index(column) == column_index)
+            }
+        else:
+            return {"success": False}
 
-        raise NotImplementedError
-
-    def expect_table_columns_to_match_ordered_list(self,
-                                                   column_list,
-                                                   result_format=None, include_config=False, catch_exceptions=None, meta=None
-                                                   ):
+    @DocInherit
+    @DataAsset.expectation(["column_list"])
+    def expect_table_columns_to_match_ordered_list(
+        self,
+        column_list,
+        result_format=None,
+        include_config=False,
+        catch_exceptions=None,
+        meta=None,
+    ):
         """Expect the columns to exactly match a specified list.
 
         expect_table_columns_to_match_ordered_list is a :func:`expectation <great_expectations.data_asset.dataset.Dataset.expectation>`, not a \
@@ -175,14 +248,38 @@ class Dataset(DataAsset):
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
 
         """
+        columns = self.table_columns
+        if list(columns) == list(column_list):
+            return {
+                "success": True
+            }
+        else:
+            # In the case of differing column lengths between the defined expectation and the observed column set, the
+            # max is determined to generate the column_index.
+            number_of_columns = max(len(column_list), len(columns))
+            column_index = range(number_of_columns)
 
-        raise NotImplementedError
+            # Create a list of the mismatched details
+            compared_lists = list(zip_longest(column_index, list(column_list), list(columns)))
+            mismatched = [{"Expected Column Position": i,
+                           "Expected": k,
+                           "Found": v} for i, k, v in compared_lists if k != v]
+            return {
+                "success": False,
+                "details": {"mismatched": mismatched}
+            }
 
-    def expect_table_row_count_to_be_between(self,
-                                             min_value=0,
-                                             max_value=None,
-                                             result_format=None, include_config=False, catch_exceptions=None, meta=None
-                                             ):
+    @DocInherit
+    @DataAsset.expectation(['min_value', 'max_value'])
+    def expect_table_row_count_to_be_between(
+        self,
+        min_value=None,
+        max_value=None,
+        result_format=None,
+        include_config=False,
+        catch_exceptions=None,
+        meta=None,
+    ):
         """Expect the number of rows to be between two values.
 
         expect_table_row_count_to_be_between is a :func:`expectation <great_expectations.data_asset.dataset.Dataset.expectation>`, \
@@ -222,7 +319,37 @@ class Dataset(DataAsset):
         See Also:
             expect_table_row_count_to_equal
         """
-        raise NotImplementedError
+        try:
+            if min_value is not None:
+                if not float(min_value).is_integer():
+                    raise ValueError("min_value must be integer")
+            if max_value is not None:
+                if not float(max_value).is_integer():
+                    raise ValueError("max_value must be integer")
+        except ValueError:
+            raise ValueError("min_value and max_value must be integers")
+
+        # check that min_value or max_value is set
+        if min_value is None and max_value is None:
+            raise Exception('Must specify either or both of min_value and max_value')
+
+        row_count = self.row_count
+
+        if min_value is not None and max_value is not None:
+            outcome = row_count >= min_value and row_count <= max_value
+
+        elif min_value is None and max_value is not None:
+            outcome = row_count <= max_value
+
+        elif min_value is not None and max_value is None:
+            outcome = row_count >= min_value
+
+        return {
+            'success': outcome,
+            'result': {
+                'observed_value': row_count
+            }
+        }
 
     def expect_table_row_count_to_equal(self,
                                         value,
@@ -260,7 +387,17 @@ class Dataset(DataAsset):
         See Also:
             expect_table_row_count_to_be_between
         """
-        raise NotImplementedError
+        if not float(value).is_integer():
+            raise ValueError("Value must be an integer")
+
+        row_count = self.row_count
+
+        return {
+            'success': row_count == value,
+            'result': {
+                'observed_value': row_count
+            }
+        }
 
     ##### Missing values, unique values, and types #####
 

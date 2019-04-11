@@ -6,13 +6,13 @@ import re
 from functools import wraps
 from datetime import datetime
 
-from .refactor_base import RefactoredDataset
+from .dataset import Dataset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
 
 from pyspark.sql.functions import udf, col, mean as mean_
 
 
-class MetaSparkDFDataset(RefactoredDataset):
+class MetaSparkDFDataset(Dataset):
     """MetaSparkDFDataset is a thin layer between Dataset and SparkDFDataset.
     This two-layer inheritance is required to make @classmethod decorators work.
     Practically speaking, that means that MetaSparkDFDataset implements \
