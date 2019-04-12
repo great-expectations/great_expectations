@@ -3,12 +3,17 @@ import pytest
 import os
 import json
 import glob
-import warnings
+import logging
 
+from sqlalchemy.dialects.sqlite import dialect as sqliteDialect
+from sqlalchemy.dialects.postgresql import dialect as postgresqlDialect
+
+
+from great_expectations.dataset import SqlAlchemyDataset, PandasDataset
 from ..test_utils import get_dataset, candidate_test_is_on_temporary_notimplemented_list, evaluate_json_test
 
 contexts = ['PandasDataset', 'SqlAlchemyDataset']
-
+logger = logging.getLogger(__name__)
 
 def pytest_generate_tests(metafunc):
 
@@ -28,17 +33,36 @@ def pytest_generate_tests(metafunc):
                 test_configuration = json.load(file)
 
                 if candidate_test_is_on_temporary_notimplemented_list(c, test_configuration["expectation_type"]):
-                    warnings.warn("Skipping generation of tests for expectation " + test_configuration["expectation_type"] +
+                    logger.debug("Skipping generation of tests for expectation " + test_configuration["expectation_type"] +
                                 " and context " + c)
                 else:
                     for d in test_configuration['datasets']:
                         schemas = d["schemas"] if "schemas" in d else None
-                        my_dataset = get_dataset(c, d["data"], schemas=schemas)
+                        data_asset = get_dataset(c, d["data"], schemas=schemas)
 
                         for test in d["tests"]:
+                               # Pass the test if we are in a test condition that is a known exception
+
+                            # Don't generate tests based on certain configurations
+
+                            # Known condition: SqlAlchemy does not support allow_cross_type_comparisons
+                            if 'allow_cross_type_comparisons' in test['in'] and isinstance(data_asset, SqlAlchemyDataset):
+                                continue
+
+                            if 'suppress_test_for' in test:
+                                # Optionally suppress the test for specified DataAsset types
+                                if 'SQLAlchemy' in test['suppress_test_for'] and isinstance(data_asset, SqlAlchemyDataset):
+                                    continue
+                                if 'sqlite' in test['suppress_test_for'] and isinstance(data_asset, SqlAlchemyDataset) and isinstance(data_asset.engine.dialect, sqliteDialect):
+                                    continue
+                                if 'postgresql' in test['suppress_test_for'] and isinstance(data_asset, SqlAlchemyDataset) and isinstance(data_asset.engine.dialect, postgresqlDialect):
+                                    continue
+                                if 'Pandas' in test['suppress_test_for'] and isinstance(data_asset, PandasDataset):
+                                    continue
+
                             parametrized_tests.append({
                                 "expectation_type": test_configuration["expectation_type"],
-                                "dataset": my_dataset,
+                                "dataset": data_asset,
                                 "test": test,
                             })
 

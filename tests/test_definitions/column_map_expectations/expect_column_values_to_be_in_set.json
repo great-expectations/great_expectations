@@ -123,6 +123,11 @@
       "data": {
         "empty_column": []
       },
+      "schemas": {
+        "postgresql": {
+          "empty_column": "text"
+        }
+      },
       "tests": [{
         "title": "Test empty column; should be vacuously true",
         "exact_match_out": false,
@@ -144,6 +149,9 @@
       "sqlite": {
         "dates": "datetime"
       },
+      "postgresql": {
+        "dates": "timestamp"
+      },
       "pandas": {
         "dates": "datetime64"
       }
@@ -160,7 +168,7 @@
         "out": {
           "success": true
         },
-        "suppress_test_for": "SQLAlchemy"
+        "suppress_test_for": ["sqlite"]
     },
     {
       "title": "Basic negative test case, datetime set",
@@ -175,7 +183,7 @@
         "unexpected_index_list": [0],
         "unexpected_list": ["2018-01-01 00:00:00"]      
       },
-      "suppress_test_for": "SQLAlchemy"
+      "suppress_test_for": ["sqlite"]
     }]
   }]
 }

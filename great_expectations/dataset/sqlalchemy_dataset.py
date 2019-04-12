@@ -821,7 +821,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         element_values = self.engine.execute(
             sa.select([sa.column(column)]).order_by(sa.column(column)).where(
                 sa.column(column) != None
-            ).offset(nonnull_count // 2 - 1).limit(2).select_from(self._table)
+            ).offset(max(nonnull_count // 2 - 1, 0)).limit(2).select_from(self._table)
         )
 
         column_values = list(element_values.fetchall())
