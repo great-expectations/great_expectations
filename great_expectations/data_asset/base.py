@@ -932,6 +932,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
     def _format_map_output(self,
                                   result_format, success,
                                   element_count, nonnull_count,
+                                  unexpected_count,
                                   unexpected_list, unexpected_index_list
                                   ):
         """Helper function to construct expectation result objects for map_expectations (such as column_map_expectation
@@ -943,6 +944,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         This function handles the logic for mapping those fields for column_map_expectations.
         """
+        # NB: unexpected_count parameter is explicit some implementing classes may limit the length of unexpected_list
 
         # Retain support for string-only output formats:
         result_format = parse_result_format(result_format)
@@ -956,7 +958,6 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             return return_obj
 
         missing_count = element_count - nonnull_count
-        unexpected_count = len(unexpected_list)
 
         if element_count > 0:
             unexpected_percent = unexpected_count / element_count

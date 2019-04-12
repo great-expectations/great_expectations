@@ -101,6 +101,7 @@ class MetaPandasDataset(Dataset):
             return_obj = self._format_map_output(
                 result_format, success,
                 element_count, nonnull_count,
+                len(unexpected_list),
                 unexpected_list, unexpected_index_list
             )
 
@@ -183,6 +184,7 @@ class MetaPandasDataset(Dataset):
             return_obj = self._format_map_output(
                 result_format, success,
                 element_count, nonnull_count,
+                len(unexpected_list),
                 unexpected_list, unexpected_index_list
             )
 
@@ -238,6 +240,7 @@ class MetaPandasDataset(Dataset):
             return_obj = self._format_map_output(
                 result_format, success,
                 element_count, nonnull_count,
+                len(unexpected_list),
                 unexpected_list.to_dict(orient='records'), unexpected_index_list
             )
 
