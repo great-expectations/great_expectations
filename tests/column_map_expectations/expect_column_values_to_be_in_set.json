@@ -159,7 +159,8 @@
         },
         "out": {
           "success": true
-        }
+        },
+        "suppress_test_for": "SQLAlchemy"
     },
     {
       "title": "Basic negative test case, datetime set",
@@ -173,7 +174,8 @@
         "success": false,
         "unexpected_index_list": [0],
         "unexpected_list": ["2018-01-01 00:00:00"]      
-      }
+      },
+      "suppress_test_for": "SQLAlchemy"
     }]
   }]
 }
