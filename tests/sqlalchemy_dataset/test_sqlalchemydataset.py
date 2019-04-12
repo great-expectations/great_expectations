@@ -169,4 +169,4 @@ def test_sqlalchemy_dataset_unexpected_count_calculations():
     assert res1["result"]["unexpected_count"] == 5
     assert res2["result"]["unexpected_count"] == 5
     assert len(res1["result"]["partial_unexpected_list"]) == 2
-    assert len(res1["result"]["partial_unexpected_list"]) == 5
+    assert len(res2["result"]["partial_unexpected_list"]) == 5
