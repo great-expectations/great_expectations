@@ -39,6 +39,7 @@ class Dataset(DataAsset):
         return self._row_count
 
     def _get_row_count(self):
+        # currently can't implement this for PandasDataset without errors
         raise NotImplementedError
 
     @property
@@ -351,6 +352,8 @@ class Dataset(DataAsset):
             }
         }
 
+    @DocInherit
+    @DataAsset.expectation(['value'])
     def expect_table_row_count_to_equal(self,
                                         value,
                                         result_format=None, include_config=False, catch_exceptions=None, meta=None
@@ -387,8 +390,11 @@ class Dataset(DataAsset):
         See Also:
             expect_table_row_count_to_be_between
         """
-        if not float(value).is_integer():
-            raise ValueError("Value must be an integer")
+        try:
+            if not float(value).is_integer():
+                raise ValueError("value must be an integer")
+        except ValueError:
+            raise ValueError("value must be an integer")
 
         row_count = self.row_count
 
