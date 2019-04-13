@@ -133,7 +133,7 @@ def get_dataset(dataset_type, data, schemas=None, autoinspect_func=autoinspect.c
                 elif type == "timestamp":
                     df[col] = pd.to_datetime(df[col])
 
-        tablename = "test_data_" + ''.join([random.choice(string.ascii_letters + string.digits) for n in xrange(8)])
+        tablename = "test_data_" + ''.join([random.choice(string.ascii_letters + string.digits) for n in range(8)])
         df.to_sql(name=tablename, con=conn, index=False, dtype=sql_dtypes)
 
         # Build a SqlAlchemyDataset using that database
