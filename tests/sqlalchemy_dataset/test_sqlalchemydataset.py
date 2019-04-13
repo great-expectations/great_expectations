@@ -158,31 +158,31 @@ def test_column_fallback():
     assert (dataset.expect_table_row_count_to_equal(value=3) == 
             fallback_dataset.expect_table_row_count_to_equal(value=3))
 
+@pytest.fixture
+def unexpected_count_df():
+    return  get_dataset("SqlAlchemyDataset", {"a": [1, 2, 1, 2, 1, 2, 1, 2, 1, 2]})
 
-def test_sqlalchemy_dataset_unexpected_count_calculations():
+
+def test_sqlalchemy_dataset_unexpected_count_calculations(unexpected_count_df):
     # The partial_unexpected_count should not affect overall success calculations, but should limit number of returned rows
-    df = get_dataset("SqlAlchemyDataset", {"a": [1, 2, 1, 2, 1, 2, 1, 2, 1, 2]})
-
-    res1 = df.expect_column_values_to_be_in_set("a", value_set=[1], result_format={"result_format": "BASIC", "partial_unexpected_count": 2})
-    res2 = df.expect_column_values_to_be_in_set("a", value_set=[1], result_format={"result_format": "BASIC", "partial_unexpected_count": 10})
+    res1 = unexpected_count_df.expect_column_values_to_be_in_set("a", value_set=[1], result_format={"result_format": "BASIC", "partial_unexpected_count": 2})
+    res2 = unexpected_count_df.expect_column_values_to_be_in_set("a", value_set=[1], result_format={"result_format": "BASIC", "partial_unexpected_count": 10})
 
     assert res1["result"]["unexpected_count"] == 5
     assert res2["result"]["unexpected_count"] == 5
+    # Note difference here
     assert len(res1["result"]["partial_unexpected_list"]) == 2
     assert len(res2["result"]["partial_unexpected_list"]) == 5
 
 
     # However, the "COMPLETE" result format ignores the limit.
-    res1 = df.expect_column_values_to_be_in_set("a", value_set=[1], result_format={"result_format": "COMPLETE", "partial_unexpected_count": 2})
-    res2 = df.expect_column_values_to_be_in_set("a", value_set=[1], result_format={"result_format": "COMPLETE", "partial_unexpected_count": 10})
+    res1 = unexpected_count_df.expect_column_values_to_be_in_set("a", value_set=[1], result_format={"result_format": "COMPLETE", "partial_unexpected_count": 2})
+    res2 = unexpected_count_df.expect_column_values_to_be_in_set("a", value_set=[1], result_format={"result_format": "COMPLETE", "partial_unexpected_count": 10})
 
     assert res1["result"]["unexpected_count"] == 5
     assert res2["result"]["unexpected_count"] == 5
-    # Note difference here
-    assert len(res1["result"]["partial_unexpected_list"]) == 5
-    assert len(res2["result"]["partial_unexpected_list"]) == 5
 
 
-def test_result_format_warning():
+def test_result_format_warning(unexpected_count_df):
     with pytest.warns(UserWarning, match=r'Setting result format to COMPLETE for a SqlAlchemyDataset can be dangerous'):
-        df.expect_column_values_to_be_in_set("a", value_set=[1], result_format={"result_format": "COMPLETE", "partial_unexpected_count": 2})
+        unexpected_count_df.expect_column_values_to_be_in_set("a", value_set=[1], result_format={"result_format": "COMPLETE", "partial_unexpected_count": 2})
