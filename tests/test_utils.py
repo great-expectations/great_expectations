@@ -1,10 +1,16 @@
 from __future__ import division
 
+import random
+import string
+import warnings
+
 import pandas as pd
 import numpy as np
 import pytest
 from sqlalchemy import create_engine
+from sqlalchemy.exc import SQLAlchemyError
 import sqlalchemy.dialects.sqlite as sqlitetypes
+import sqlalchemy.dialects.postgresql as postgresqltypes
 
 from great_expectations.dataset import PandasDataset, SqlAlchemyDataset
 import great_expectations.dataset.autoinspect as autoinspect
@@ -18,6 +24,17 @@ SQLITE_TYPES = {
         "date": sqlitetypes.DATE,
         "float": sqlitetypes.FLOAT,
         "bool": sqlitetypes.BOOLEAN
+}
+
+POSTGRESQL_TYPES = {
+        "text": postgresqltypes.TEXT,
+        "char": postgresqltypes.CHAR,
+        "int": postgresqltypes.INTEGER,
+        "smallint": postgresqltypes.SMALLINT,
+        "timestamp": postgresqltypes.TIMESTAMP,
+        "date": postgresqltypes.DATE,
+        "float": postgresqltypes.FLOAT,
+        "bool": postgresqltypes.BOOLEAN
 }
 
 # Taken from the following stackoverflow:
@@ -72,17 +89,28 @@ def get_dataset(dataset_type, data, schemas=None, autoinspect_func=autoinspect.c
 
     """
     if dataset_type == 'PandasDataset':
-        return PandasDataset(data, autoinspect_func=autoinspect_func)
+        df = pd.DataFrame(data)
+        if schemas and "pandas" in schemas:
+            pandas_schema = {key:np.dtype(value) for (key, value) in schemas["pandas"].items()}
+            df = df.astype(pandas_schema)
+        return PandasDataset(df, autoinspect_func=autoinspect_func)
     elif dataset_type == 'SqlAlchemyDataset':
         # Create a new database
 
-        engine = create_engine('sqlite://')
+        # Try to use a local postgres instance (e.g. on Travis); this will allow more testing than sqlite
+        try:
+            engine = create_engine('postgresql://test:test@localhost/test_ci')
+            conn = engine.connect()
+        except SQLAlchemyError:
+            warnings.warn("Falling back to sqlite database.")
+            engine = create_engine('sqlite://')
+            conn = engine.connect()
 
         # Add the data to the database as a new table
         df = pd.DataFrame(data)
 
         sql_dtypes = {}
-        if schemas and "sqlite" in schemas:
+        if schemas and "sqlite" in schemas and isinstance(engine.dialect, sqlitetypes.dialect):
             schema = schemas["sqlite"]
             sql_dtypes = {col : SQLITE_TYPES[dtype] for (col,dtype) in schema.items()}
             for col in schema:
@@ -93,12 +121,23 @@ def get_dataset(dataset_type, data, schemas=None, autoinspect_func=autoinspect.c
                     df[col] = pd.to_numeric(df[col],downcast='float')
                 elif type == "datetime":
                     df[col] = pd.to_datetime(df[col])
+        elif schemas and "postgresql" in schemas and isinstance(engine.dialect, postgresqltypes.dialect):
+            schema = schemas["postgresql"]
+            sql_dtypes = {col : POSTGRESQL_TYPES[dtype] for (col, dtype) in schema.items()}
+            for col in schema:
+                type = schema[col]
+                if type == "int":
+                    df[col] = pd.to_numeric(df[col],downcast='signed')
+                elif type == "float":
+                    df[col] = pd.to_numeric(df[col],downcast='float')
+                elif type == "timestamp":
+                    df[col] = pd.to_datetime(df[col])
 
-        df.to_sql(name='test_data', con=engine, index=False, dtype=sql_dtypes)
-
+        tablename = "test_data_" + ''.join([random.choice(string.ascii_letters + string.digits) for n in range(8)])
+        df.to_sql(name=tablename, con=conn, index=False, dtype=sql_dtypes)
 
         # Build a SqlAlchemyDataset using that database
-        return SqlAlchemyDataset('test_data', engine=engine, autoinspect_func=autoinspect_func)
+        return SqlAlchemyDataset(tablename, engine=conn, autoinspect_func=autoinspect_func)
     else:
         raise ValueError("Unknown dataset_type " + str(dataset_type))
 
@@ -193,32 +232,12 @@ def evaluate_json_test(data_asset, expectation_type, test):
         raise ValueError(
             "Invalid test configuration detected: 'out' is required.")
 
-    # Pass the test if we are in a test condition that is a known exception
-
-    # Known condition: SqlAlchemy does not support allow_cross_type_comparisons
-    if 'allow_cross_type_comparisons' in test['in'] and isinstance(data_asset, SqlAlchemyDataset):
-        return
-
-    try:
-        # Support tests with positional arguments
-        if isinstance(test['in'], list):
-            result = getattr(data_asset, expectation_type)(*test['in'])
-        # As well as keyword arguments
-        else:
-            result = getattr(data_asset, expectation_type)(**test['in'])
-
-    except NotImplementedError:
-        # Note: This method of checking does not look for false negatives: tests that are incorrectly on the notimplemented_list
-        assert candidate_test_is_on_temporary_notimplemented_list(
-            data_asset.__class__.__name__, expectation_type), "Error: this test was supposed to return NotImplementedError"
-        return
-
-    if 'suppress_test_for' in test:
-        # Optionally suppress the test for specified DataAsset types
-        if 'SQLAlchemy' in test['suppress_test_for'] and isinstance(data_asset, SqlAlchemyDataset):
-            return
-        if 'Pandas' in test['suppress_test_for'] and isinstance(data_asset, PandasDataset):
-            return
+    # Support tests with positional arguments
+    if isinstance(test['in'], list):
+        result = getattr(data_asset, expectation_type)(*test['in'])
+    # As well as keyword arguments
+    else:
+        result = getattr(data_asset, expectation_type)(**test['in'])
 
     # Check results
     if test['exact_match_out'] is True:
