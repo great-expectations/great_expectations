@@ -11,8 +11,10 @@ from sqlalchemy import create_engine
 from sqlalchemy.exc import SQLAlchemyError
 import sqlalchemy.dialects.sqlite as sqlitetypes
 import sqlalchemy.dialects.postgresql as postgresqltypes
+from pyspark.sql import SparkSession
+import pyspark.sql.types as sparktypes
 
-from great_expectations.dataset import PandasDataset, SqlAlchemyDataset
+from great_expectations.dataset import PandasDataset, SqlAlchemyDataset, SparkDFDataset
 import great_expectations.dataset.autoinspect as autoinspect
 
 SQLITE_TYPES = {
@@ -35,6 +37,15 @@ POSTGRESQL_TYPES = {
         "date": postgresqltypes.DATE,
         "float": postgresqltypes.FLOAT,
         "bool": postgresqltypes.BOOLEAN
+}
+
+SPARK_TYPES = {
+    "string": sparktypes.StringType,
+    "int": sparktypes.IntegerType,
+    "date": sparktypes.DateType,
+    "timestamp": sparktypes.TimestampType,
+    "float": sparktypes.FloatType,
+    "bool": sparktypes.BooleanType,
 }
 
 # Taken from the following stackoverflow:
@@ -138,6 +149,20 @@ def get_dataset(dataset_type, data, schemas=None, autoinspect_func=autoinspect.c
 
         # Build a SqlAlchemyDataset using that database
         return SqlAlchemyDataset(tablename, engine=conn, autoinspect_func=autoinspect_func)
+    elif dataset_type == 'SparkDFDataset':
+        spark = SparkSession.builder.getOrCreate()
+        if schemas and 'spark' in schemas:
+            schema = schemas['spark']
+            spark_schema = sparktypes.StructType([
+                sparktypes.StructField(column, SPARK_TYPES[schema[column]]())
+                for column in schema
+            ])
+        else:
+            # if no schema provided, uses Spark's schema inference
+            spark_schema = None
+        data_reshaped = list(zip(*[v for _, v in data.items()]))
+        spark_df = spark.createDataFrame(data_reshaped, spark_schema)
+        return SparkDFDataset(spark_df)
     else:
         raise ValueError("Unknown dataset_type " + str(dataset_type))
 
@@ -178,6 +203,50 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
             #"expect_column_sum_to_be_between",
             #"expect_column_min_to_be_between",
             #"expect_column_max_to_be_between",
+            "expect_column_chisquare_test_p_value_to_be_greater_than",
+            "expect_column_bootstrapped_ks_test_p_value_to_be_greater_than",
+            "expect_column_kl_divergence_to_be_less_than",
+            "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",
+            "expect_column_pair_values_to_be_equal",
+            "expect_column_pair_values_A_to_be_greater_than_B",
+            "expect_column_pair_values_to_be_in_set",
+            "expect_multicolumn_values_to_be_unique"
+        ]
+    if context == "SparkDFDataset":
+        return expectation_type in [
+            # "expect_column_to_exist",
+            # "expect_table_row_count_to_be_between",
+            # "expect_table_row_count_to_equal",
+            "expect_table_columns_to_match_ordered_list",
+            "expect_column_values_to_be_unique",
+            "expect_column_values_to_not_be_null",
+            "expect_column_values_to_be_null",
+            "expect_column_values_to_be_of_type",
+            "expect_column_values_to_be_in_type_list",
+            "expect_column_values_to_be_in_set",
+            "expect_column_values_to_not_be_in_set",
+            "expect_column_values_to_be_between",
+            "expect_column_values_to_be_increasing",
+            "expect_column_values_to_be_decreasing",
+            "expect_column_value_lengths_to_be_between",
+            "expect_column_value_lengths_to_equal",
+            "expect_column_values_to_match_regex",
+            "expect_column_values_to_not_match_regex",
+            "expect_column_values_to_match_regex_list",
+            "expect_column_values_to_not_match_regex_list",
+            "expect_column_values_to_match_strftime_format",
+            "expect_column_values_to_be_dateutil_parseable",
+            "expect_column_values_to_be_json_parseable",
+            "expect_column_values_to_match_json_schema",
+            "expect_column_mean_to_be_between",
+            "expect_column_median_to_be_between",
+            "expect_column_stdev_to_be_between",
+            "expect_column_unique_value_count_to_be_between",
+            "expect_column_proportion_of_unique_values_to_be_between",
+            "expect_column_most_common_value_to_be_in_set",
+            "expect_column_sum_to_be_between",
+            "expect_column_min_to_be_between",
+            "expect_column_max_to_be_between",
             "expect_column_chisquare_test_p_value_to_be_greater_than",
             "expect_column_bootstrapped_ks_test_p_value_to_be_greater_than",
             "expect_column_kl_divergence_to_be_less_than",
