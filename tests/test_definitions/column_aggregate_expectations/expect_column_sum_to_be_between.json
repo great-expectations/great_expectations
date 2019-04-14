@@ -19,6 +19,15 @@
         "zz": "datetime",
         "a": "int",
         "b": "int"
+      },
+      "postgresql": {
+        "w": "int",
+        "x": "int",
+        "y": "int",
+        "z": "text",
+        "zz": "timestamp",
+        "a": "int",
+        "b": "int"
       }
     },
     "tests" : [{

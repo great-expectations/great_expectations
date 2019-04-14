@@ -95,7 +95,7 @@ class MetaSqlAlchemyDataset(Dataset):
             if "unexpected_count" not in count_results or count_results["unexpected_count"] is None:
                 count_results["unexpected_count"] = 0
 
-            # Retrieve unexpected  values
+            # Retrieve unexpected values
             unexpected_query_results = self.engine.execute(
                 sa.select([sa.column(column)]).select_from(self._table).where(
                     sa.and_(sa.not_(expected_condition),
@@ -410,9 +410,14 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                                           column,
                                           value_set,
                                           mostly=None,
+                                          parse_strings_as_datetimes=None,
                                           result_format=None, include_config=False, catch_exceptions=None, meta=None
                                           ):
-        return sa.column(column).in_(tuple(value_set))
+        if parse_strings_as_datetimes:
+            parsed_value_set = [parse(value) if isinstance(value, string_types) else value for value in value_set]
+        else:
+            parsed_value_set = value_set
+        return sa.column(column).in_(tuple(parsed_value_set))
 
     @DocInherit
     @MetaSqlAlchemyDataset.column_map_expectation
@@ -758,7 +763,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         element_values = self.engine.execute(
             sa.select([sa.column(column)]).order_by(sa.column(column)).where(
                 sa.column(column) != None
-            ).offset(nonnull_count // 2 - 1).limit(2).select_from(self._table)
+            ).offset(max(nonnull_count // 2 - 1, 0)).limit(2).select_from(self._table)
         )
 
         column_values = list(element_values.fetchall())
