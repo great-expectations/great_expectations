@@ -7,7 +7,7 @@
         [{
           "title": "This test should never run!",
           "exact_match_out": false,
-          "suppress_test_for": ["Pandas", "SQLAlchemy"],
+          "suppress_test_for": ["Pandas", "SQLAlchemy", "Spark"],
           "in": ["a"],
           "kwargs": {},
           "out": {

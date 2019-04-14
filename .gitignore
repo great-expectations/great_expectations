@@ -109,8 +109,7 @@ ENV/
 *~
 
 # VS code
-launch.json
-settings.json
+.vscode
 
 .DS_Store
 **/.pytest_cache
