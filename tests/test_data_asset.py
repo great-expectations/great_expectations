@@ -385,6 +385,7 @@ class TestDataAsset(unittest.TestCase):
                 "BOOLEAN_ONLY",
                 success,
                 element_count, nonnull_count,
+                len(unexpected_list),
                 unexpected_list, unexpected_index_list
             ),
             {'success': True}
@@ -395,6 +396,7 @@ class TestDataAsset(unittest.TestCase):
                 "BASIC",
                 success,
                 element_count, nonnull_count,
+                len(unexpected_list),
                 unexpected_list, unexpected_index_list
             ),
             {
@@ -417,6 +419,7 @@ class TestDataAsset(unittest.TestCase):
                 success,
                 element_count,
                 nonnull_count,
+                len(unexpected_list),
                 unexpected_list, unexpected_index_list
             ),
             {
@@ -441,6 +444,7 @@ class TestDataAsset(unittest.TestCase):
                 success,
                 element_count,
                 nonnull_count,
+                len(unexpected_list),
                 unexpected_list, unexpected_index_list
             ),
             {
@@ -479,6 +483,7 @@ class TestDataAsset(unittest.TestCase):
                 success,
                 element_count,
                 nonnull_count,
+                len(unexpected_list),
                 unexpected_list, unexpected_index_list
             ),
             {'success': True}
@@ -490,6 +495,7 @@ class TestDataAsset(unittest.TestCase):
                 success,
                 element_count,
                 nonnull_count,
+                len(unexpected_list),
                 unexpected_list, unexpected_index_list
             ),
             {
@@ -512,6 +518,7 @@ class TestDataAsset(unittest.TestCase):
                 success,
                 element_count,
                 nonnull_count,
+                len(unexpected_list),
                 unexpected_list, unexpected_index_list
             ),
             {
@@ -536,6 +543,7 @@ class TestDataAsset(unittest.TestCase):
                 success,
                 element_count,
                 nonnull_count,
+                len(unexpected_list),
                 unexpected_list, unexpected_index_list
             ),
             {
@@ -573,6 +581,7 @@ class TestDataAsset(unittest.TestCase):
                 success,
                 element_count,
                 nonnull_count,
+                len(unexpected_list),
                 unexpected_list, unexpected_index_list
             ),
             {'success': False}
@@ -584,6 +593,7 @@ class TestDataAsset(unittest.TestCase):
                 success,
                 element_count,
                 nonnull_count,
+                len(unexpected_list),
                 unexpected_list, unexpected_index_list
             ),
             {
@@ -606,6 +616,7 @@ class TestDataAsset(unittest.TestCase):
                 success,
                 element_count,
                 nonnull_count,
+                len(unexpected_list),
                 unexpected_list, unexpected_index_list
             ),
             {
@@ -630,6 +641,7 @@ class TestDataAsset(unittest.TestCase):
                 success,
                 element_count,
                 nonnull_count,
+                len(unexpected_list),
                 unexpected_list, unexpected_index_list
             ),
             {
