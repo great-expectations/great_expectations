@@ -515,6 +515,7 @@ class Dataset(DataAsset):
                                           column,
                                           value_set,
                                           mostly=None,
+                                          parse_strings_as_datetimes=None,
                                           result_format=None, include_config=False, catch_exceptions=None, meta=None
                                           ):
         """Expect each column value to be in a given set.
@@ -552,6 +553,8 @@ class Dataset(DataAsset):
             mostly (None or a float between 0 and 1): \
                 Return `"success": True` if at least mostly percent of values match the expectation. \
                 For more detail, see :ref:`mostly`.
+            parse_strings_as_datetimes (boolean or None) : If True values provided in value_set will be parsed as \
+                datetimes before making comparisons.
 
         Other Parameters:
             result_format (str or None): \
@@ -590,7 +593,7 @@ class Dataset(DataAsset):
         ::
 
             # my_df.my_col = [1,2,2,3,3,3]
-            >>> my_df.expect_column_values_to_be_in_set(
+            >>> my_df.expect_column_values_to_not_be_in_set(
                 "my_col",
                 [1,2]
             )

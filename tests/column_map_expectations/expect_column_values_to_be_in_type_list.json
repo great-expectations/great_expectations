@@ -13,16 +13,14 @@
       },
       "schemas": {
         "pandas" : {
-          "x": "np.int_",
-          "y": "np.float_",
+          "x": "int",
+          "y": "float",
           "z": "str",
-          "n": "null",
+          "n": "str",
           "b": "bool",
-          "s": ["string", "int"],
-          "s1": ["string", "np.int64", "int"]
-        },
-        "sql": {},
-        "spark": {}
+          "s": "str",
+          "s1": "str"
+        }
       },
       "tests": [
         {
