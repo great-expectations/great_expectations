@@ -72,7 +72,11 @@ def get_dataset(dataset_type, data, schemas=None, autoinspect_func=autoinspect.c
 
     """
     if dataset_type == 'PandasDataset':
-        return PandasDataset(data, autoinspect_func=autoinspect_func)
+        df = pd.DataFrame(data)
+        if schemas and "pandas" in schemas:
+            pandas_schema = {key:np.dtype(value) for (key, value) in schemas["pandas"].items()}
+            df = df.astype(pandas_schema)
+        return PandasDataset(df, autoinspect_func=autoinspect_func)
     elif dataset_type == 'SqlAlchemyDataset':
         # Create a new database
 
