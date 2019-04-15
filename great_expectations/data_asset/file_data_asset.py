@@ -97,12 +97,14 @@ class MetaFileDataAsset(DataAsset):
                     return_obj = self._format_map_output(
                         result_format, success,
                         element_count, nonnull_count,
+                        len(unexpected_list),
                         unexpected_list, unexpected_index_list
                     )
                 else:
                     return_obj = self._format_map_output(
                         result_format=result_format, success=None,
                         element_count=element_count, nonnull_count=0,
+                        unexpected_count=0,
                         unexpected_list=[], unexpected_index_list=[]
                     )
             else:
@@ -110,6 +112,7 @@ class MetaFileDataAsset(DataAsset):
                                                      success=None,
                                                      element_count=0,
                                                      nonnull_count=0,
+                                                     unexpected_count=0,
                                                      unexpected_list=[],
                                                      unexpected_index_list=[])
             f.close()

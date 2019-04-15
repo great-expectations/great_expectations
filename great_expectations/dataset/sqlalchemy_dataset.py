@@ -5,6 +5,8 @@ import inspect
 from six import PY3
 from six import string_types
 import sys
+import warnings
+
 import sqlalchemy as sa
 from sqlalchemy.engine import reflection
 from dateutil.parser import parse
@@ -46,6 +48,7 @@ class MetaSqlAlchemyDataset(Dataset):
             result_format = parse_result_format(result_format)
 
             if result_format['result_format'] == 'COMPLETE':
+                warnings.warn("Setting result format to COMPLETE for a SqlAlchemyDataset can be dangerous because it will not limit the number of returned results.")
                 unexpected_count_limit = None
             else:
                 unexpected_count_limit = result_format['partial_unexpected_count']
@@ -136,6 +139,7 @@ class MetaSqlAlchemyDataset(Dataset):
             return_obj = self._format_map_output(
                 result_format, success,
                 count_results['element_count'], nonnull_count,
+                count_results['unexpected_count'],
                 maybe_limited_unexpected_list, None
             )
 
