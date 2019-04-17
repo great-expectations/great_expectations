@@ -5,7 +5,7 @@ Autoinspection
 ================================================================================
 
 It can be very convenient to have great expectations automatically review a \
-dataset and suggest expectations that may be appropriate. Currently, there \
+dataset and suggest expectations that may be appropriate. Currently, there's \
 a very basic, but easily extensible, autoinspection capability available.
 
 Dataset objects have an `autoinspect` method which allows you to provide a \
