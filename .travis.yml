@@ -9,10 +9,14 @@ env:
   - PANDAS=0.21.0
   - PANDAS=0.23.4
   - PANDAS=latest
+services:
+  - postgresql
 install:
   - pip install --only-binary=numpy,scipy numpy scipy
   - if [ "$PANDAS" = "latest" ]; then pip install pandas; else pip install pandas==$PANDAS; fi
   - pip install -r requirements-dev.txt
+before_script:
+  - psql -c 'create database test_ci;' -U postgres
 script:
   - pytest --cov=great_expectations tests/
 after_success:
