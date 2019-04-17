@@ -365,6 +365,9 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         self.discard_subset_failing_expectations = kwargs.get(
             'discard_subset_failing_expectations', False)
 
+    def _get_row_count(self):
+        return self.shape[0]
+
     ### Expectation methods ###
     @DocInherit
     @Dataset.expectation(['column'])
@@ -411,70 +414,6 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                 "success": False,
                 "details": {"mismatched": mismatched}
             }
-
-    @DocInherit
-    @Dataset.expectation(['min_value', 'max_value'])
-    def expect_table_row_count_to_be_between(self,
-                                             min_value=0,
-                                             max_value=None,
-                                             result_format=None, include_config=False, catch_exceptions=None, meta=None
-                                             ):
-        # Assert that min_value and max_value are integers
-        try:
-            if min_value is not None:
-                float(min_value).is_integer()
-
-            if max_value is not None:
-                float(max_value).is_integer()
-
-        except ValueError:
-            raise ValueError("min_value and max_value must be integers")
-
-        row_count = self.shape[0]
-
-        if min_value != None and max_value != None:
-            outcome = row_count >= min_value and row_count <= max_value
-
-        elif min_value == None and max_value != None:
-            outcome = row_count <= max_value
-
-        elif min_value != None and max_value == None:
-            outcome = row_count >= min_value
-
-        return {
-            'success': outcome,
-            'result': {
-                'observed_value': row_count
-            }
-        }
-
-    @DocInherit
-    @Dataset.expectation(['value'])
-    def expect_table_row_count_to_equal(self,
-                                        value,
-                                        result_format=None, include_config=False, catch_exceptions=None, meta=None
-                                        ):
-        try:
-            if value is not None:
-                float(value).is_integer()
-
-        except ValueError:
-            raise ValueError("value must be an integer")
-
-        if value is None:
-            raise ValueError("value must be provided")
-
-        if self.shape[0] == value:
-            outcome = True
-        else:
-            outcome = False
-
-        return {
-            'success': outcome,
-            'result': {
-                'observed_value': self.shape[0]
-            }
-        }
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
@@ -551,8 +490,13 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
     @MetaPandasDataset.column_map_expectation
     def expect_column_values_to_be_in_set(self, column, value_set,
                                           mostly=None,
+                                          parse_strings_as_datetimes=None,
                                           result_format=None, include_config=False, catch_exceptions=None, meta=None):
-        return column.map(lambda x: x in value_set)
+        if parse_strings_as_datetimes:
+            parsed_value_set = [parse(value) if isinstance(value, string_types) else value for value in value_set]
+        else:
+            parsed_value_set = value_set
+        return column.map(lambda x: x in parsed_value_set)
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation

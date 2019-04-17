@@ -112,7 +112,7 @@
       "tests": [{
           "title": "type mismatch: null observed_value",
           "exact_match_out": false,
-	  "suppress_test_for": ["SQLAlchemy"],
+	        "suppress_test_for": ["SQLAlchemy"],
           "in": {
             "column": "s",
             "min_value": 0,
@@ -134,7 +134,9 @@
           "out": {
             "success": true,
             "observed_value": 0.5
-          }
+          },
+          "suppress_test_for": ["postgresql"],
+          "_comment": "postgresql will not allow coercing the boolean type to an average"
         },
         {
           "title": "coerced types: true/false and null",
@@ -147,7 +149,9 @@
           "out": {
             "success": true,
             "observed_value": 0.5
-          }
+          },
+          "suppress_test_for": ["postgresql"],
+          "_comment": "postgresql will not allow coercing the boolean type to an average"
         },
         {
           "title": "TypeError: catch exceptions. Non-number min-value",

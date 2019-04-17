@@ -1,12 +1,20 @@
 from __future__ import division
 
+import random
+import string
+import warnings
+
 import pandas as pd
 import numpy as np
 import pytest
 from sqlalchemy import create_engine
+from sqlalchemy.exc import SQLAlchemyError
 import sqlalchemy.dialects.sqlite as sqlitetypes
+import sqlalchemy.dialects.postgresql as postgresqltypes
+from pyspark.sql import SparkSession
+import pyspark.sql.types as sparktypes
 
-from great_expectations.dataset import PandasDataset, SqlAlchemyDataset
+from great_expectations.dataset import PandasDataset, SqlAlchemyDataset, SparkDFDataset
 import great_expectations.dataset.autoinspect as autoinspect
 
 SQLITE_TYPES = {
@@ -18,6 +26,26 @@ SQLITE_TYPES = {
         "date": sqlitetypes.DATE,
         "float": sqlitetypes.FLOAT,
         "bool": sqlitetypes.BOOLEAN
+}
+
+POSTGRESQL_TYPES = {
+        "text": postgresqltypes.TEXT,
+        "char": postgresqltypes.CHAR,
+        "int": postgresqltypes.INTEGER,
+        "smallint": postgresqltypes.SMALLINT,
+        "timestamp": postgresqltypes.TIMESTAMP,
+        "date": postgresqltypes.DATE,
+        "float": postgresqltypes.FLOAT,
+        "bool": postgresqltypes.BOOLEAN
+}
+
+SPARK_TYPES = {
+    "string": sparktypes.StringType,
+    "int": sparktypes.IntegerType,
+    "date": sparktypes.DateType,
+    "timestamp": sparktypes.TimestampType,
+    "float": sparktypes.FloatType,
+    "bool": sparktypes.BooleanType,
 }
 
 # Taken from the following stackoverflow:
@@ -72,17 +100,28 @@ def get_dataset(dataset_type, data, schemas=None, autoinspect_func=autoinspect.c
 
     """
     if dataset_type == 'PandasDataset':
-        return PandasDataset(data, autoinspect_func=autoinspect_func)
+        df = pd.DataFrame(data)
+        if schemas and "pandas" in schemas:
+            pandas_schema = {key:np.dtype(value) for (key, value) in schemas["pandas"].items()}
+            df = df.astype(pandas_schema)
+        return PandasDataset(df, autoinspect_func=autoinspect_func)
     elif dataset_type == 'SqlAlchemyDataset':
         # Create a new database
 
-        engine = create_engine('sqlite://')
+        # Try to use a local postgres instance (e.g. on Travis); this will allow more testing than sqlite
+        try:
+            engine = create_engine('postgresql://test:test@localhost/test_ci')
+            conn = engine.connect()
+        except SQLAlchemyError:
+            warnings.warn("Falling back to sqlite database.")
+            engine = create_engine('sqlite://')
+            conn = engine.connect()
 
         # Add the data to the database as a new table
         df = pd.DataFrame(data)
 
         sql_dtypes = {}
-        if schemas and "sqlite" in schemas:
+        if schemas and "sqlite" in schemas and isinstance(engine.dialect, sqlitetypes.dialect):
             schema = schemas["sqlite"]
             sql_dtypes = {col : SQLITE_TYPES[dtype] for (col,dtype) in schema.items()}
             for col in schema:
@@ -93,12 +132,37 @@ def get_dataset(dataset_type, data, schemas=None, autoinspect_func=autoinspect.c
                     df[col] = pd.to_numeric(df[col],downcast='float')
                 elif type == "datetime":
                     df[col] = pd.to_datetime(df[col])
+        elif schemas and "postgresql" in schemas and isinstance(engine.dialect, postgresqltypes.dialect):
+            schema = schemas["postgresql"]
+            sql_dtypes = {col : POSTGRESQL_TYPES[dtype] for (col, dtype) in schema.items()}
+            for col in schema:
+                type = schema[col]
+                if type == "int":
+                    df[col] = pd.to_numeric(df[col],downcast='signed')
+                elif type == "float":
+                    df[col] = pd.to_numeric(df[col],downcast='float')
+                elif type == "timestamp":
+                    df[col] = pd.to_datetime(df[col])
 
-        df.to_sql(name='test_data', con=engine, index=False, dtype=sql_dtypes)
-
+        tablename = "test_data_" + ''.join([random.choice(string.ascii_letters + string.digits) for n in range(8)])
+        df.to_sql(name=tablename, con=conn, index=False, dtype=sql_dtypes)
 
         # Build a SqlAlchemyDataset using that database
-        return SqlAlchemyDataset('test_data', engine=engine, autoinspect_func=autoinspect_func)
+        return SqlAlchemyDataset(tablename, engine=conn, autoinspect_func=autoinspect_func)
+    elif dataset_type == 'SparkDFDataset':
+        spark = SparkSession.builder.getOrCreate()
+        if schemas and 'spark' in schemas:
+            schema = schemas['spark']
+            spark_schema = sparktypes.StructType([
+                sparktypes.StructField(column, SPARK_TYPES[schema[column]]())
+                for column in schema
+            ])
+        else:
+            # if no schema provided, uses Spark's schema inference
+            spark_schema = None
+        data_reshaped = list(zip(*[v for _, v in data.items()]))
+        spark_df = spark.createDataFrame(data_reshaped, spark_schema)
+        return SparkDFDataset(spark_df)
     else:
         raise ValueError("Unknown dataset_type " + str(dataset_type))
 
@@ -139,6 +203,50 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
             #"expect_column_sum_to_be_between",
             #"expect_column_min_to_be_between",
             #"expect_column_max_to_be_between",
+            "expect_column_chisquare_test_p_value_to_be_greater_than",
+            "expect_column_bootstrapped_ks_test_p_value_to_be_greater_than",
+            "expect_column_kl_divergence_to_be_less_than",
+            "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",
+            "expect_column_pair_values_to_be_equal",
+            "expect_column_pair_values_A_to_be_greater_than_B",
+            "expect_column_pair_values_to_be_in_set",
+            "expect_multicolumn_values_to_be_unique"
+        ]
+    if context == "SparkDFDataset":
+        return expectation_type in [
+            # "expect_column_to_exist",
+            # "expect_table_row_count_to_be_between",
+            # "expect_table_row_count_to_equal",
+            "expect_table_columns_to_match_ordered_list",
+            "expect_column_values_to_be_unique",
+            "expect_column_values_to_not_be_null",
+            "expect_column_values_to_be_null",
+            "expect_column_values_to_be_of_type",
+            "expect_column_values_to_be_in_type_list",
+            "expect_column_values_to_be_in_set",
+            "expect_column_values_to_not_be_in_set",
+            "expect_column_values_to_be_between",
+            "expect_column_values_to_be_increasing",
+            "expect_column_values_to_be_decreasing",
+            "expect_column_value_lengths_to_be_between",
+            "expect_column_value_lengths_to_equal",
+            "expect_column_values_to_match_regex",
+            "expect_column_values_to_not_match_regex",
+            "expect_column_values_to_match_regex_list",
+            "expect_column_values_to_not_match_regex_list",
+            "expect_column_values_to_match_strftime_format",
+            "expect_column_values_to_be_dateutil_parseable",
+            "expect_column_values_to_be_json_parseable",
+            "expect_column_values_to_match_json_schema",
+            "expect_column_mean_to_be_between",
+            "expect_column_median_to_be_between",
+            "expect_column_stdev_to_be_between",
+            "expect_column_unique_value_count_to_be_between",
+            "expect_column_proportion_of_unique_values_to_be_between",
+            "expect_column_most_common_value_to_be_in_set",
+            "expect_column_sum_to_be_between",
+            "expect_column_min_to_be_between",
+            "expect_column_max_to_be_between",
             "expect_column_chisquare_test_p_value_to_be_greater_than",
             "expect_column_bootstrapped_ks_test_p_value_to_be_greater_than",
             "expect_column_kl_divergence_to_be_less_than",
@@ -193,32 +301,12 @@ def evaluate_json_test(data_asset, expectation_type, test):
         raise ValueError(
             "Invalid test configuration detected: 'out' is required.")
 
-    # Pass the test if we are in a test condition that is a known exception
-
-    # Known condition: SqlAlchemy does not support allow_cross_type_comparisons
-    if 'allow_cross_type_comparisons' in test['in'] and isinstance(data_asset, SqlAlchemyDataset):
-        return
-
-    try:
-        # Support tests with positional arguments
-        if isinstance(test['in'], list):
-            result = getattr(data_asset, expectation_type)(*test['in'])
-        # As well as keyword arguments
-        else:
-            result = getattr(data_asset, expectation_type)(**test['in'])
-
-    except NotImplementedError:
-        # Note: This method of checking does not look for false negatives: tests that are incorrectly on the notimplemented_list
-        assert candidate_test_is_on_temporary_notimplemented_list(
-            data_asset.__class__.__name__, expectation_type), "Error: this test was supposed to return NotImplementedError"
-        return
-
-    if 'suppress_test_for' in test:
-        # Optionally suppress the test for specified DataAsset types
-        if 'SQLAlchemy' in test['suppress_test_for'] and isinstance(data_asset, SqlAlchemyDataset):
-            return
-        if 'Pandas' in test['suppress_test_for'] and isinstance(data_asset, PandasDataset):
-            return
+    # Support tests with positional arguments
+    if isinstance(test['in'], list):
+        result = getattr(data_asset, expectation_type)(*test['in'])
+    # As well as keyword arguments
+    else:
+        result = getattr(data_asset, expectation_type)(**test['in'])
 
     # Check results
     if test['exact_match_out'] is True:
