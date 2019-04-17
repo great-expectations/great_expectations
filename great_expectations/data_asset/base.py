@@ -802,6 +802,18 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                 expectation_method = getattr(
                     self, expectation['expectation_type'])
 
+                # Under certain conditions (at least on Ubuntu and Python 3.7.0) Counter(unexpected_list) takes
+                # extremely long time when executed to retrieve most common unexpected values.
+                # This was observed only on expect_column_values_to_not_be_null expectations.
+                # Not sure what causes this, so for now we are implementing a workaround:
+                # since there is no reason to look for most common unexpected values in this case,
+                # we will instruct the result formatting method to skip this step.
+                if expectation['expectation_type'] == 'expect_column_values_to_not_be_null':
+                    if result_format is None:
+                        result_format = {}
+                    result_format = parse_result_format(result_format)
+                    result_format['partial_unexpected_strategy'] = 'const'
+
                 if result_format is not None:
                     expectation['kwargs'].update(
                         {"result_format": result_format})
@@ -988,14 +1000,16 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         # Try to return the most common values, if possible.
         try:
-            partial_unexpected_counts = [
-                {'value': key, 'count': value}
-                for key, value
-                in sorted(
-                    Counter(unexpected_list).most_common(
-                        result_format['partial_unexpected_count']),
-                    key=lambda x: (-x[1], x[0]))
-            ]
+            if 'const' == result_format.get('partial_unexpected_strategy'):
+                partial_unexpected_counts = [{'value': 'None', 'count': unexpected_count}]
+            else:
+                partial_unexpected_counts = [
+                    {'value': key, 'count': value}
+                    for key, value
+                    in sorted(
+                        Counter(unexpected_list).most_common(result_format['partial_unexpected_count']),
+                        key=lambda x: (-x[1], x[0]))
+                ]
         except TypeError:
             partial_unexpected_counts = [
                 'partial_exception_counts requires a hashable type']
