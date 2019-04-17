@@ -230,8 +230,8 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
             "expect_column_values_to_be_decreasing",
             "expect_column_value_lengths_to_be_between",
             "expect_column_value_lengths_to_equal",
-            "expect_column_values_to_match_regex",
-            "expect_column_values_to_not_match_regex",
+            # "expect_column_values_to_match_regex",
+            # "expect_column_values_to_not_match_regex",
             "expect_column_values_to_match_regex_list",
             "expect_column_values_to_not_match_regex_list",
             "expect_column_values_to_match_strftime_format",
@@ -324,7 +324,7 @@ def evaluate_json_test(data_asset, expectation_type, test):
                 assert value == result['result']['observed_value']
 
             elif key == 'unexpected_index_list':
-                if isinstance(data_asset, SqlAlchemyDataset):
+                if isinstance(data_asset, (SqlAlchemyDataset, SparkDFDataset)):
                     pass
                 else:
                     assert result['result']['unexpected_index_list'] == value

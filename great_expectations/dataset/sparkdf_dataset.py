@@ -302,7 +302,22 @@ class SparkDFDataset(MetaSparkDFDataset):
         catch_exceptions=None,
         meta=None,
     ):
-        # TODO tests for this expectations
         # not sure know about casting to string here
         success_udf = udf(lambda x: re.findall(regex, str(x)) != [])
+        return column.withColumn('__success', success_udf(column[0]))
+
+    @DocInherit
+    @MetaSparkDFDataset.column_map_expectation
+    def expect_column_values_to_not_match_regex(
+        self,
+        column,
+        regex,
+        mostly=None,
+        result_format=None,
+        include_config=False,
+        catch_exceptions=None,
+        meta=None,
+    ):
+        # not sure know about casting to string here
+        success_udf = udf(lambda x: re.findall(regex, str(x)) == [])
         return column.withColumn('__success', success_udf(column[0]))
