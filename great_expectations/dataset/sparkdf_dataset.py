@@ -91,17 +91,16 @@ class MetaSparkDFDataset(Dataset):
             success_df = func(self, col_df, *args, **kwargs)
             success_count = success_df.filter('__success = True').count()
 
-            if success_count == nonnull_count:
+            unexpected_count = nonnull_count - success_count
+            if unexpected_count == 0:
                 # save some computation time if no unexpected items
                 maybe_limited_unexpected_list = []
-                unexpected_count = 0
             else:
                 # here's an example of a place where we could do optimizations if we knew result format: see
                 # comment block below
                 unexpected_df = success_df.filter('__success = False')
                 if unexpected_count_limit:
                     unexpected_df = unexpected_df.limit(unexpected_count_limit)
-                unexpected_count = unexpected_df.count()
                 maybe_limited_unexpected_list = [
                     row[column]
                     for row
@@ -128,8 +127,7 @@ class MetaSparkDFDataset(Dataset):
                 element_count,
                 nonnull_count,
                 maybe_limited_unexpected_list,
-                # spark dataframes are not indexed
-                unexpected_index_list=None,
+                unexpected_count=unexpected_count,
             )
 
             # FIXME Temp fix for result format
@@ -289,8 +287,6 @@ class SparkDFDataset(MetaSparkDFDataset):
         dups = set([row[0] for row in column.groupBy(column[0]).count().filter('count > 1').collect()])
         success_udf = udf(lambda x: x not in dups)
         return column.withColumn('__success', success_udf(column[0]))
-
-
 
     @DocInherit
     @MetaSparkDFDataset.column_map_expectation
