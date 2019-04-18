@@ -8,7 +8,15 @@ from datetime import datetime
 
 from .dataset import Dataset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
+from great_expectations.dataset.util import (
+    is_valid_partition_object,
+    is_valid_categorical_partition_object,
+    is_valid_continuous_partition_object,
+)
 
+import pandas as pd
+import numpy as np
+from scipy import stats
 from pyspark.sql.functions import udf, col, mean as mean_
 
 
@@ -222,7 +230,6 @@ class SparkDFDataset(MetaSparkDFDataset):
         super(SparkDFDataset, self).__init__(*args, **kwargs)
         self.discard_subset_failing_expectations = kwargs.get("discard_subset_failing_expectations", False)
         # Creation of the Spark Dataframe is done outside this class
-        # TODO: consider renaming to self._spark_df
         self.spark_df = spark_df
 
     def _get_row_count(self):
@@ -427,3 +434,101 @@ class SparkDFDataset(MetaSparkDFDataset):
                 "observed_value": col_sum
             }
         }
+
+    @DocInherit
+    @MetaSparkDFDataset.column_aggregate_expectation
+    def expect_column_kl_divergence_to_be_less_than(
+        self,
+        column,
+        partition_object=None,
+        threshold=None,
+        tail_weight_holdout=0,
+        internal_weight_holdout=0,
+        result_format=None,
+        include_config=False,
+        catch_exceptions=None,
+        meta=None,
+    ):
+        # TODO consider refactoring the logic that is shared here
+        if not is_valid_partition_object(partition_object):
+            raise ValueError("Invalid partition object.")
+
+        if (not isinstance(threshold, (int, float))) or (threshold < 0):
+            raise ValueError(
+                "Threshold must be specified, greater than or equal to zero.")
+
+        if (not isinstance(tail_weight_holdout, (int, float))) or (tail_weight_holdout < 0) or (tail_weight_holdout > 1):
+            raise ValueError(
+                "tail_weight_holdout must be between zero and one.")
+
+        if (not isinstance(internal_weight_holdout, (int, float))) or (internal_weight_holdout < 0) or (internal_weight_holdout > 1):
+            raise ValueError(
+                "internal_weight_holdout must be between zero and one.")
+
+        if(tail_weight_holdout != 0 and "tail_weights" in partition_object):
+            raise ValueError(
+                "tail_weight_holdout must be 0 when using tail_weights in partition object")
+
+        # TODO: add checks for duplicate values in is_valid_categorical_partition_object
+        if is_valid_categorical_partition_object(partition_object):
+            if internal_weight_holdout > 0:
+                raise ValueError(
+                    "Internal weight holdout cannot be used for discrete data.")
+
+            # Data are expected to be discrete, use value_counts
+            col_name = column.columns[0]
+            value_counts = column.groupBy(col_name).count().orderBy(col_name).collect()
+            observed_counts = pd.Series(
+                [row['count'] for row in value_counts],
+                index=[row[col_name] for row in value_counts],
+                name='observed',
+            )
+            observed_weights = observed_counts / self.row_count
+            expected_weights = pd.Series(
+                partition_object['weights'], index=partition_object['values'], name='expected')
+            # test_df = pd.concat([expected_weights, observed_weights], axis=1, sort=True) # Sort not available before pandas 0.23.0
+            test_df = pd.concat([expected_weights, observed_weights], axis=1)
+
+            na_counts = test_df.isnull().sum()
+
+            # Handle NaN: if we expected something that's not there, it's just not there.
+            pk = test_df['observed'].fillna(0)
+            # Handle NaN: if something's there that was not expected, substitute the relevant value for tail_weight_holdout
+            if na_counts['expected'] > 0:
+                # Scale existing expected values
+                test_df['expected'] = test_df['expected'] * \
+                    (1 - tail_weight_holdout)
+                # Fill NAs with holdout.
+                qk = test_df['expected'].fillna(
+                    tail_weight_holdout / na_counts['expected'])
+            else:
+                qk = test_df['expected']
+
+            kl_divergence = stats.entropy(pk, qk)
+
+            if(np.isinf(kl_divergence) or np.isnan(kl_divergence)):
+                observed_value = None
+            else:
+                observed_value = kl_divergence
+
+            return_obj = {
+                "success": kl_divergence <= threshold,
+                "result": {
+                    "observed_value": observed_value,
+                    "details": {
+                        "observed_partition": {
+                            "values": test_df.index.tolist(),
+                            "weights": pk.tolist()
+                        },
+                        "expected_partition": {
+                            "values": test_df.index.tolist(),
+                            "weights": qk.tolist()
+                        }
+                    }
+                }
+            }
+        else:
+            # TODO
+            raise NotImplementedError('Not implemented for continuous distributions')
+
+        return return_obj
