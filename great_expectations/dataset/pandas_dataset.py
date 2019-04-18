@@ -996,6 +996,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                                         max_value=None,
                                         result_format=None, include_config=False, catch_exceptions=None, meta=None
                                         ):
+        # TODO consider refactoring this and similar expectations
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
 
@@ -1278,6 +1279,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             raise ValueError(
                 "tail_weight_holdout must be 0 when using tail_weights in partition object")
 
+        # TODO: add checks for duplicate values in is_valid_categorical_partition_object
         if is_valid_categorical_partition_object(partition_object):
             if internal_weight_holdout > 0:
                 raise ValueError(
