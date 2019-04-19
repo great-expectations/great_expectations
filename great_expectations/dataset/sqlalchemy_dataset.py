@@ -9,7 +9,6 @@ import sqlalchemy as sa
 from sqlalchemy.engine import reflection
 from dateutil.parser import parse
 from datetime import datetime
-from numbers import Number
 
 if sys.version_info.major == 2:  # If python 2
     from itertools import izip_longest as zip_longest
@@ -290,6 +289,35 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         count_query = sa.select([sa.func.count()]).select_from(
             self._table)
         return self.engine.execute(count_query).scalar()
+
+    def _get_column_nonnull_count(self, column):
+        ignore_values = [None]
+        count_query = sa.select([
+            sa.func.count().label('element_count'),
+            sa.func.sum(
+                sa.case([(sa.or_(
+                    sa.column(column).in_(ignore_values),
+                    # Below is necessary b/c sa.in_() uses `==` but None != None
+                    # But we only consider this if None is actually in the list of ignore values
+                    sa.column(column).is_(None) if None in ignore_values else False), 1)], else_=0)
+            ).label('null_count'),
+        ]).select_from(self._table)
+        count_results = dict(self.engine.execute(count_query).fetchone())
+        element_count = count_results['element_count']
+        null_count = count_results['null_count'] or 0
+        return element_count - null_count
+
+    def _get_column_sum(self, column):
+        return self.engine.execute(
+            sa.select([sa.func.sum(sa.column(column))]).select_from(
+                self._table)
+        ).scalar()
+
+    def _get_column_mean(self, column):
+        return self.engine.execute(
+            sa.select([sa.func.avg(sa.column(column))]).select_from(
+                self._table)
+        ).scalar()
 
     def create_temporary_table(self, table_name, custom_sql):
         """
@@ -633,96 +661,6 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 'success': success,
                 'result': {
                     'observed_value': col_min_out
-                }
-            }
-
-    @DocInherit
-    @MetaSqlAlchemyDataset.column_aggregate_expectation
-    def expect_column_sum_to_be_between(self,
-                                        column,
-                                        min_value=None,
-                                        max_value=None,
-                                        result_format=None, include_config=False, catch_exceptions=None, meta=None
-                                        ):
-
-        if min_value is None and max_value is None:
-            raise ValueError("min_value and max_value cannot both be None")
-
-        col_sum = self.engine.execute(
-            sa.select([sa.func.sum(sa.column(column))]).select_from(
-                self._table)
-        ).scalar()
-
-        # Handle possible missing values
-        if col_sum is None:
-            return {
-                'success': False,
-                'result': {
-                    'observed_value': col_sum
-                }
-            }
-        else:
-            if min_value is not None and max_value is not None:
-                success = (min_value <= col_sum) and (col_sum <= max_value)
-
-            elif min_value is None and max_value is not None:
-                success = (col_sum <= max_value)
-
-            elif min_value is not None and max_value is None:
-                success = (min_value <= col_sum)
-
-            return {
-                'success': success,
-                'result': {
-                    'observed_value': col_sum
-                }
-            }
-
-    @DocInherit
-    @MetaSqlAlchemyDataset.column_aggregate_expectation
-    def expect_column_mean_to_be_between(self,
-                                         column,
-                                         min_value=None,
-                                         max_value=None,
-                                         result_format=None, include_config=False, catch_exceptions=None, meta=None
-                                         ):
-
-        if min_value is None and max_value is None:
-            raise ValueError("min_value and max_value cannot both be None")
-
-        if min_value is not None and not isinstance(min_value, (Number)):
-            raise ValueError("min_value must be a number")
-
-        if max_value is not None and not isinstance(max_value, (Number)):
-            raise ValueError("max_value must be a number")
-
-        col_avg = self.engine.execute(
-            sa.select([sa.func.avg(sa.column(column))]).select_from(
-                self._table)
-        ).scalar()
-
-        # Handle possible missing values
-        if col_avg is None:
-            return {
-                'success': False,
-                'result': {
-                    'observed_value': col_avg
-                }
-            }
-        else:
-            if min_value != None and max_value != None:
-                success = (min_value <= col_avg) and (col_avg <= max_value)
-
-            elif min_value == None and max_value != None:
-                success = (col_avg <= max_value)
-
-            elif min_value != None and max_value == None:
-                success = (min_value <= col_avg)
-
-            return {
-                'success': success,
-                'result': {
-                    'observed_value': col_avg
                 }
             }
 

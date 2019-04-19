@@ -147,77 +147,6 @@ class MetaSparkDFDataset(Dataset):
 
         return inner_wrapper
 
-    @classmethod
-    def column_aggregate_expectation(cls, func):
-        """Constructs an expectation using column-aggregate semantics.
-
-        The MetaSparkDF implementation replaces the "column" parameter supplied by the user with a Spark
-        DataFrame object containing the actual column from the relevant dataframe. This simplifies the implementing
-        expectation logic while preserving the standard Dataset signature and expected behavior.
-
-        See :func:`column_aggregate_expectation <great_expectations.data_asset.dataset.Dataset.column_aggregate_expectation>` \
-        for full documentation of this function.
-        """
-        if PY3:
-            argspec = inspect.getfullargspec(func)[0][1:]
-        else:
-            argspec = inspect.getargspec(func)[0][1:]
-
-        @cls.expectation(argspec)
-        @wraps(func)
-        def inner_wrapper(self, column, result_format=None, *args, **kwargs):
-
-            if result_format is None:
-                result_format = self.default_expectation_args["result_format"]
-
-            col_df = self.spark_df.select(column) # pyspark.sql.DataFrame
-
-            element_count = self.row_count
-            col_df = col_df.filter('{column} is not null'.format(column=column))
-            nonnull_count = self.column_nonnull_counts[column]
-            null_count = element_count - nonnull_count
-
-            evaluation_result = func(self, col_df, *args, **kwargs)
-
-            if 'success' not in evaluation_result:
-                raise ValueError(
-                    "Column aggregate expectation failed to return required information: success")
-
-            if ('result' not in evaluation_result) or ('observed_value' not in evaluation_result['result']):
-                raise ValueError(
-                    "Column aggregate expectation failed to return required information: observed_value")
-
-            # Retain support for string-only output formats:
-            result_format = parse_result_format(result_format)
-
-            return_obj = {
-                'success': bool(evaluation_result['success'])
-            }
-
-            if result_format['result_format'] == 'BOOLEAN_ONLY':
-                return return_obj
-
-            return_obj['result'] = {
-                'observed_value': evaluation_result['result']['observed_value'],
-                "element_count": element_count,
-                "missing_count": null_count,
-                "missing_percent": null_count * 1.0 / element_count if element_count > 0 else None
-            }
-
-            if result_format['result_format'] == 'BASIC':
-                return return_obj
-
-            if 'details' in evaluation_result['result']:
-                return_obj['result']['details'] = evaluation_result['result']['details']
-
-            if result_format['result_format'] in ["SUMMARY", "COMPLETE"]:
-                return return_obj
-
-            raise ValueError("Unknown result_format %s." %
-                             (result_format['result_format'],))
-
-        return inner_wrapper
-
 
 class SparkDFDataset(MetaSparkDFDataset):
     """
@@ -240,7 +169,16 @@ class SparkDFDataset(MetaSparkDFDataset):
         return self.spark_df.filter('{column} is not null'.format(column=column)).count()
 
     def _get_column_mean(self, column):
-        return self.spark_df.select(mean_(col(column))).collect()[0][0]
+        return self.spark_df.select(column).groupBy().mean().collect()[0][0]
+
+    def _get_column_sum(self, column):
+        return self.spark_df.select(column).groupBy().sum().collect()[0][0]
+
+    def _get_column_max(self, column):
+        return self.spark_df.select(column).groupBy().max().collect()[0][0]
+
+    def _get_column_min(self, column):
+        return self.spark_df.select(column).groupBy().min().collect()[0][0]
 
     def _get_column_value_counts(self, column):
         value_counts = self.spark_df.select(column)\
@@ -255,6 +193,7 @@ class SparkDFDataset(MetaSparkDFDataset):
             # don't know about including name here
             name=column,
         )
+
 
     @DocInherit
     @MetaSparkDFDataset.column_map_expectation
@@ -409,41 +348,6 @@ class SparkDFDataset(MetaSparkDFDataset):
         # not sure know about casting to string here
         success_udf = udf(lambda x: re.findall(regex, str(x)) == [])
         return column.withColumn('__success', success_udf(column[0]))
-
-    @DocInherit
-    @MetaSparkDFDataset.column_aggregate_expectation
-    def expect_column_sum_to_be_between(
-        self,
-        column,
-        min_value=None,
-        max_value=None,
-        result_format=None,
-        include_config=False,
-        catch_exceptions=None,
-        meta=None,
-    ):
-        # TODO consider refactoring this and similar expectations
-        # TODO check for column type
-        if min_value is None and max_value is None:
-            raise ValueError("min_value and max_value cannot both be None")
-
-        col_sum = column.groupBy().sum().collect()[0][0]
-
-        if min_value != None and max_value != None:
-            success = (min_value <= col_sum) and (col_sum <= max_value)
-
-        elif min_value == None and max_value != None:
-            success = (col_sum <= max_value)
-
-        elif min_value != None and max_value == None:
-            success = (min_value <= col_sum)
-
-        return {
-            "success": success,
-            "result": {
-                "observed_value": col_sum
-            }
-        }
 
     @DocInherit
     @MetaSparkDFDataset.column_aggregate_expectation
