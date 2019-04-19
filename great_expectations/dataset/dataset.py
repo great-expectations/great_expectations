@@ -83,8 +83,8 @@ class MetaDataset(DataAsset):
 
             if result_format['result_format'] == 'BOOLEAN_ONLY':
                 return return_obj
-            
-            # TODO: this logic is from the SqlAlchemy decorator: need to evaulate if thisis needed
+
+            # TODO: this logic is from the SqlAlchemy decorator: need to evaulate if this is needed
     #         # Use the element and null count information from a column_aggregate_expectation if it is needed
     #         # it anyway to avoid an extra trip to the database
 
@@ -149,6 +149,7 @@ class Dataset(MetaDataset):
         self._column_maxes = ColumnarResultCache(self._get_column_max)
         self._column_mins = ColumnarResultCache(self._get_column_min)
         self._column_unique_counts = ColumnarResultCache(self._get_column_unique_count)
+        self._column_modes = ColumnarResultCache(self._get_column_modes)
 
     @property
     def row_count(self):
@@ -219,6 +220,14 @@ class Dataset(MetaDataset):
         return self._column_unique_counts
 
     def _get_column_unique_count(self, column):
+        raise NotImplementedError
+
+    @property
+    def column_modes(self):
+        return self._column_modes
+
+    def _get_column_modes(self, column):
+        """returns a list of column modes"""
         raise NotImplementedError
 
     @classmethod
@@ -2024,12 +2033,18 @@ class Dataset(MetaDataset):
             }
         }
 
-    def expect_column_most_common_value_to_be_in_set(self,
-                                                     column,
-                                                     value_set,
-                                                     ties_okay=None,
-                                                     result_format=None, include_config=False, catch_exceptions=None, meta=None
-                                                     ):
+    @DocInherit
+    @MetaDataset.column_aggregate_expectation
+    def expect_column_most_common_value_to_be_in_set(
+        self,
+        column,
+        value_set,
+        ties_okay=None,
+        result_format=None,
+        include_config=False,
+        catch_exceptions=None,
+        meta=None,
+    ):
         """Expect the most common value to be within the designated value set
 
         expect_column_most_common_value_to_be_in_set is a :func:`column_aggregate_expectation <great_expectations.data_asset.dataset.Dataset.column_aggregate_expectation>`.
@@ -2077,7 +2092,20 @@ class Dataset(MetaDataset):
             `observed_value` will contain a single copy of each most common value.
 
         """
-        raise NotImplementedError
+        mode_list = self.column_modes[column]
+        intersection_count = len(set(value_set).intersection(mode_list))
+
+        if ties_okay:
+            success = intersection_count > 0
+        else:
+            success = len(mode_list) == 1 and intersection_count == 1
+
+        return {
+            'success': success,
+            'result': {
+                'observed_value': mode_list
+            }
+        }
 
     @DocInherit
     @MetaDataset.column_aggregate_expectation
