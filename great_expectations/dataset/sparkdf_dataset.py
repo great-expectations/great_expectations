@@ -194,6 +194,8 @@ class SparkDFDataset(MetaSparkDFDataset):
             name=column,
         )
 
+    def _get_column_unique_count(self, column):
+        return self.column_value_counts[column].shape[0]
 
     @DocInherit
     @MetaSparkDFDataset.column_map_expectation

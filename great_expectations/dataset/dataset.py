@@ -83,6 +83,34 @@ class MetaDataset(DataAsset):
 
             if result_format['result_format'] == 'BOOLEAN_ONLY':
                 return return_obj
+            
+            # TODO: this logic is from the SqlAlchemy decorator: need to evaulate if thisis needed
+    #         # Use the element and null count information from a column_aggregate_expectation if it is needed
+    #         # it anyway to avoid an extra trip to the database
+
+    #         if 'element_count' not in evaluation_result and 'null_count' not in evaluation_result:
+    #             count_query = sa.select([
+    #                 sa.func.count().label('element_count'),
+    #                 sa.func.sum(
+    #                     sa.case([(sa.column(column) == None, 1)], else_=0)
+    #                 ).label('null_count'),
+    #             ]).select_from(self._table)
+
+    #             count_results = dict(
+    #                 self.engine.execute(count_query).fetchone())
+
+    #             # Handle case of empty table gracefully:
+    #             if "element_count" not in count_results or count_results["element_count"] is None:
+    #                 count_results["element_count"] = 0
+    #             if "null_count" not in count_results or count_results["null_count"] is None:
+    #                 count_results["null_count"] = 0
+
+    #             return_obj['result'] = {
+    #                 'observed_value': evaluation_result['result']['observed_value'],
+    #                 "element_count": count_results['element_count'],
+    #                 "missing_count": count_results['null_count'],
+    #                 "missing_percent": count_results['null_count'] / count_results['element_count'] if count_results['element_count'] > 0 else None
+    #             }
 
             return_obj['result'] = {
                 'observed_value': evaluation_result['result']['observed_value'],
@@ -120,6 +148,7 @@ class Dataset(MetaDataset):
         self._column_sums = ColumnarResultCache(self._get_column_sum)
         self._column_maxes = ColumnarResultCache(self._get_column_max)
         self._column_mins = ColumnarResultCache(self._get_column_min)
+        self._column_unique_counts = ColumnarResultCache(self._get_column_unique_count)
 
     @property
     def row_count(self):
@@ -183,6 +212,13 @@ class Dataset(MetaDataset):
         return self._column_mins
 
     def _get_column_min(self, column):
+        raise NotImplementedError
+
+    @property
+    def column_unique_counts(self):
+        return self._column_unique_counts
+
+    def _get_column_unique_count(self, column):
         raise NotImplementedError
 
     @classmethod
@@ -1767,11 +1803,11 @@ class Dataset(MetaDataset):
         raise NotImplementedError
 
     def expect_column_stdev_to_be_between(self,
-                                          column,
-                                          min_value=None,
-                                          max_value=None,
-                                          result_format=None, include_config=False, catch_exceptions=None, meta=None
-                                          ):
+                                         column,
+                                         min_value=None,
+                                         max_value=None,
+                                         result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                         ):
         """Expect the column standard deviation to be between a minimum value and a maximum value.
 
         expect_column_stdev_to_be_between is a :func:`column_aggregate_expectation <great_expectations.data_asset.dataset.Dataset.column_aggregate_expectation>`.
@@ -1822,12 +1858,18 @@ class Dataset(MetaDataset):
         """
         raise NotImplementedError
 
-    def expect_column_unique_value_count_to_be_between(self,
-                                                       column,
-                                                       min_value=None,
-                                                       max_value=None,
-                                                       result_format=None, include_config=False, catch_exceptions=None, meta=None
-                                                       ):
+    @DocInherit
+    @MetaDataset.column_aggregate_expectation
+    def expect_column_unique_value_count_to_be_between(
+        self,
+        column,
+        min_value=None,
+        max_value=None,
+        result_format=None,
+        include_config=False,
+        catch_exceptions=None,
+        meta=None,
+    ):
         """Expect the number of unique values to be between a minimum value and a maximum value.
 
         expect_column_unique_value_count_to_be_between is a :func:`column_aggregate_expectation <great_expectations.data_asset.dataset.Dataset.column_aggregate_expectation>`.
@@ -1875,14 +1917,42 @@ class Dataset(MetaDataset):
         See Also:
             expect_column_proportion_of_unique_values_to_be_between
         """
-        raise NotImplementedError
+        if min_value is None and max_value is None:
+            raise ValueError("min_value and max_value cannot both be None")
 
-    def expect_column_proportion_of_unique_values_to_be_between(self,
-                                                                column,
-                                                                min_value=0,
-                                                                max_value=1,
-                                                                result_format=None, include_config=False, catch_exceptions=None, meta=None
-                                                                ):
+        unique_value_count = self.column_unique_counts[column]
+
+        # Handle possible missing values
+        if unique_value_count is None:
+            return {
+                'success': False,
+                'result': {
+                    'observed_value': unique_value_count
+                }
+            }
+        else:
+            return {
+                "success": (
+                    ((min_value is None) or (min_value <= unique_value_count)) and
+                    ((max_value is None) or (unique_value_count <= max_value))
+                ),
+                "result": {
+                    "observed_value": unique_value_count
+                }
+            }
+
+    @DocInherit
+    @MetaDataset.column_aggregate_expectation
+    def expect_column_proportion_of_unique_values_to_be_between(
+        self,
+        column,
+        min_value=0,
+        max_value=1,
+        result_format=None,
+        include_config=False,
+        catch_exceptions=None,
+        meta=None,
+    ):
         """Expect the proportion of unique values to be between a minimum value and a maximum value.
 
         For example, in a column containing [1, 2, 2, 3, 3, 3, 4, 4, 4, 4], there are 4 unique values and 10 total \
@@ -1933,7 +2003,26 @@ class Dataset(MetaDataset):
         See Also:
             expect_column_unique_value_count_to_be_between
         """
-        raise NotImplementedError
+        if min_value is None and max_value is None:
+            raise ValueError("min_value and max_value cannot both be None")
+
+        unique_value_count = self.column_unique_counts[column]
+        total_value_count = self.column_nonnull_counts[column]
+
+        if total_value_count > 0:
+            proportion_unique = float(unique_value_count) / total_value_count
+        else:
+            proportion_unique = None
+
+        return {
+            "success": (
+                ((min_value is None) or (min_value <= proportion_unique)) and
+                ((max_value is None) or (proportion_unique <= max_value))
+            ),
+            "result": {
+                "observed_value": proportion_unique
+            }
+        }
 
     def expect_column_most_common_value_to_be_in_set(self,
                                                      column,

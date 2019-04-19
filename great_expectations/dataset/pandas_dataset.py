@@ -311,6 +311,12 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         nonnull_values = series[null_indexes == False]
         return len(nonnull_values)
 
+    def _get_column_value_counts(self, column):
+        return self[column].value_counts()
+
+    def _get_column_unique_count(self, column):
+        return self.column_value_counts[column].shape[0]
+
     ### Expectation methods ###
     @DocInherit
     @Dataset.expectation(['column'])
@@ -838,52 +844,6 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
     @DocInherit
     @MetaPandasDataset.column_aggregate_expectation
-    def expect_column_unique_value_count_to_be_between(self, column, min_value=None, max_value=None,
-                                                       result_format=None, include_config=False, catch_exceptions=None, meta=None):
-
-        if min_value is None and max_value is None:
-            raise ValueError("min_value and max_value cannot both be None")
-
-        unique_value_count = column.value_counts().shape[0]
-
-        return {
-            "success": (
-                ((min_value is None) or (min_value <= unique_value_count)) and
-                ((max_value is None) or (unique_value_count <= max_value))
-            ),
-            "result": {
-                "observed_value": unique_value_count
-            }
-        }
-
-    @DocInherit
-    @MetaPandasDataset.column_aggregate_expectation
-    def expect_column_proportion_of_unique_values_to_be_between(self, column, min_value=0, max_value=1,
-                                                                result_format=None, include_config=False, catch_exceptions=None, meta=None):
-
-        if min_value is None and max_value is None:
-            raise ValueError("min_value and max_value cannot both be None")
-
-        unique_value_count = column.value_counts().shape[0]
-        total_value_count = int(len(column))  # .notnull().sum()
-
-        if total_value_count > 0:
-            proportion_unique = float(unique_value_count) / total_value_count
-        else:
-            proportion_unique = None
-
-        return {
-            "success": (
-                ((min_value is None) or (min_value <= proportion_unique)) and
-                ((max_value is None) or (proportion_unique <= max_value))
-            ),
-            "result": {
-                "observed_value": proportion_unique
-            }
-        }
-
-    @DocInherit
-    @MetaPandasDataset.column_aggregate_expectation
     def expect_column_most_common_value_to_be_in_set(self, column, value_set, ties_okay=None,
                                                      result_format=None, include_config=False, catch_exceptions=None, meta=None):
 
@@ -1125,21 +1085,21 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
         else:
             # Data are expected to be continuous; discretize first
-        
+
             # Build the histogram first using expected bins so that the largest bin is >=
             hist, bin_edges = np.histogram(column, partition_object['bins'], density=False)
-        
+
             # Add in the frequencies observed above or below the provided partition
             below_partition = len(np.where(column < partition_object['bins'][0])[0])
             above_partition = len(np.where(column > partition_object['bins'][-1])[0])
-        
+
             #Observed Weights is just the histogram values divided by the total number of observations
             observed_weights = np.array(hist)/len(column)
-        
+
             #Adjust expected_weights to account for tail_weight and internal_weight
             expected_weights = np.array(
                 partition_object['weights']) * (1 - tail_weight_holdout - internal_weight_holdout)
-        
+
             # Assign internal weight holdout values if applicable
             if internal_weight_holdout > 0:
                 zero_count = len(expected_weights) - \

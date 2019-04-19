@@ -152,18 +152,20 @@ def get_dataset(dataset_type, data, schemas=None, autoinspect_func=autoinspect.c
 
     elif dataset_type == 'SparkDFDataset':
         spark = SparkSession.builder.getOrCreate()
+        data_reshaped = list(zip(*[v for _, v in data.items()]))
         if schemas and 'spark' in schemas:
             schema = schemas['spark']
             spark_schema = sparktypes.StructType([
                 sparktypes.StructField(column, SPARK_TYPES[schema[column]]())
                 for column in schema
             ])
+            spark_df = spark.createDataFrame(data_reshaped, spark_schema)
         else:
             # if no schema provided, uses Spark's schema inference
-            spark_schema = None
-        data_reshaped = list(zip(*[v for _, v in data.items()]))
-        spark_df = spark.createDataFrame(data_reshaped, spark_schema)
+            columns = list(data.keys()) # do we need to care about the order here?
+            spark_df = spark.createDataFrame(data_reshaped, columns)
         return SparkDFDataset(spark_df)
+
     else:
         raise ValueError("Unknown dataset_type " + str(dataset_type))
 
@@ -242,8 +244,8 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
             "expect_column_mean_to_be_between",
             "expect_column_median_to_be_between",
             "expect_column_stdev_to_be_between",
-            "expect_column_unique_value_count_to_be_between",
-            "expect_column_proportion_of_unique_values_to_be_between",
+            # "expect_column_unique_value_count_to_be_between",
+            # "expect_column_proportion_of_unique_values_to_be_between",
             "expect_column_most_common_value_to_be_in_set",
             # "expect_column_sum_to_be_between",
             "expect_column_min_to_be_between",
