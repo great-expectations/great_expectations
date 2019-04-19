@@ -248,81 +248,6 @@ class MetaPandasDataset(Dataset):
         return inner_wrapper
 
 
-    @classmethod
-    def column_aggregate_expectation(cls, func):
-        """Constructs an expectation using column-aggregate semantics.
-
-        The MetaPandasDataset implementation replaces the "column" parameter supplied by the user with a pandas
-        Series object containing the actual column from the relevant pandas dataframe. This simplifies the implementing
-        expectation logic while preserving the standard Dataset signature and expected behavior.
-
-        See :func:`column_aggregate_expectation <great_expectations.data_asset.dataset.Dataset.column_aggregate_expectation>` \
-        for full documentation of this function.
-        """
-        if PY3:
-            argspec = inspect.getfullargspec(func)[0][1:]
-        else:
-            argspec = inspect.getargspec(func)[0][1:]
-
-        @cls.expectation(argspec)
-        @wraps(func)
-        def inner_wrapper(self, column, result_format=None, *args, **kwargs):
-
-            if result_format is None:
-                result_format = self.default_expectation_args["result_format"]
-
-            series = self[column]
-            null_indexes = series.isnull()
-
-            element_count = int(len(series))
-            nonnull_values = series[null_indexes == False]
-            # Simplify this expression because the old version fails under pandas 0.21 (but only that version)
-            # nonnull_count = int((null_indexes == False).sum())
-            nonnull_count = len(nonnull_values)
-            null_count = element_count - nonnull_count
-
-            evaluation_result = func(self, nonnull_values, *args, **kwargs)
-
-            if 'success' not in evaluation_result:
-                raise ValueError(
-                    "Column aggregate expectation failed to return required information: success")
-
-            if ('result' not in evaluation_result) or ('observed_value' not in evaluation_result['result']):
-                raise ValueError(
-                    "Column aggregate expectation failed to return required information: observed_value")
-
-            # Retain support for string-only output formats:
-            result_format = parse_result_format(result_format)
-
-            return_obj = {
-                'success': bool(evaluation_result['success'])
-            }
-
-            if result_format['result_format'] == 'BOOLEAN_ONLY':
-                return return_obj
-
-            return_obj['result'] = {
-                'observed_value': evaluation_result['result']['observed_value'],
-                "element_count": element_count,
-                "missing_count": null_count,
-                "missing_percent": null_count * 1.0 / element_count if element_count > 0 else None
-            }
-
-            if result_format['result_format'] == 'BASIC':
-                return return_obj
-
-            if 'details' in evaluation_result['result']:
-                return_obj['result']['details'] = evaluation_result['result']['details']
-
-            if result_format['result_format'] in ["SUMMARY", "COMPLETE"]:
-                return return_obj
-
-            raise ValueError("Unknown result_format %s." %
-                             (result_format['result_format'],))
-
-        return inner_wrapper
-
-
 class PandasDataset(MetaPandasDataset, pd.DataFrame):
     """
     PandasDataset instantiates the great_expectations Expectations API as a subclass of a pandas.DataFrame.
@@ -367,6 +292,24 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
     def _get_row_count(self):
         return self.shape[0]
+
+    def _get_column_sum(self, column):
+        return self[column].sum()
+
+    def _get_column_max(self, column):
+        return self[column].max()
+
+    def _get_column_min(self, column):
+        return self[column].min()
+
+    def _get_column_mean(self, column):
+        return self[column].mean()
+
+    def _get_column_nonnull_count(self, column):
+        series = self[column]
+        null_indexes = series.isnull()
+        nonnull_values = series[null_indexes == False]
+        return len(nonnull_values)
 
     ### Expectation methods ###
     @DocInherit
@@ -855,32 +798,6 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
     @DocInherit
     @MetaPandasDataset.column_aggregate_expectation
-    def expect_column_mean_to_be_between(self, column, min_value=None, max_value=None,
-                                         result_format=None, include_config=False, catch_exceptions=None, meta=None):
-
-        if min_value is None and max_value is None:
-            raise ValueError("min_value and max_value cannot both be None")
-
-        if min_value is not None and not isinstance(min_value, (Number)):
-            raise ValueError("min_value must be a number")
-
-        if max_value is not None and not isinstance(max_value, (Number)):
-            raise ValueError("max_value must be a number")
-
-        column_mean = column.mean()
-
-        return {
-            'success': (
-                ((min_value is None) or (min_value <= column_mean)) and
-                ((max_value is None) or (column_mean <= max_value))
-            ),
-            'result': {
-                'observed_value': column_mean
-            }
-        }
-
-    @DocInherit
-    @MetaPandasDataset.column_aggregate_expectation
     def expect_column_median_to_be_between(self, column, min_value=None, max_value=None,
                                            result_format=None, include_config=False, catch_exceptions=None, meta=None):
 
@@ -988,132 +905,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             }
         }
 
-    @DocInherit
-    @MetaPandasDataset.column_aggregate_expectation
-    def expect_column_sum_to_be_between(self,
-                                        column,
-                                        min_value=None,
-                                        max_value=None,
-                                        result_format=None, include_config=False, catch_exceptions=None, meta=None
-                                        ):
-        # TODO consider refactoring this and similar expectations
-        if min_value is None and max_value is None:
-            raise ValueError("min_value and max_value cannot both be None")
 
-        col_sum = column.sum()
-
-        if min_value != None and max_value != None:
-            success = (min_value <= col_sum) and (col_sum <= max_value)
-
-        elif min_value == None and max_value != None:
-            success = (col_sum <= max_value)
-
-        elif min_value != None and max_value == None:
-            success = (min_value <= col_sum)
-
-        return {
-            "success": success,
-            "result": {
-                "observed_value": col_sum
-            }
-        }
-
-    @DocInherit
-    @MetaPandasDataset.column_aggregate_expectation
-    def expect_column_min_to_be_between(self,
-                                        column,
-                                        min_value=None,
-                                        max_value=None,
-                                        parse_strings_as_datetimes=None,
-                                        output_strftime_format=None,
-                                        result_format=None, include_config=False, catch_exceptions=None, meta=None
-                                        ):
-        if min_value is None and max_value is None:
-            raise ValueError("min_value and max_value cannot both be None")
-
-        if parse_strings_as_datetimes:
-            if min_value:
-                min_value = parse(min_value)
-
-            if max_value:
-                max_value = parse(max_value)
-
-            temp_column = column.map(parse)
-
-        else:
-            temp_column = column
-
-        col_min = temp_column.min()
-
-        if min_value != None and max_value != None:
-            success = (min_value <= col_min) and (col_min <= max_value)
-
-        elif min_value == None and max_value != None:
-            success = (col_min <= max_value)
-
-        elif min_value != None and max_value == None:
-            success = (min_value <= col_min)
-
-        if parse_strings_as_datetimes:
-            if output_strftime_format:
-                col_min = datetime.strftime(col_min, output_strftime_format)
-            else:
-                col_min = str(col_min)
-        return {
-            'success': success,
-            'result': {
-                'observed_value': col_min
-            }
-        }
-
-    @DocInherit
-    @MetaPandasDataset.column_aggregate_expectation
-    def expect_column_max_to_be_between(self,
-                                        column,
-                                        min_value=None,
-                                        max_value=None,
-                                        parse_strings_as_datetimes=None,
-                                        output_strftime_format=None,
-                                        result_format=None, include_config=False, catch_exceptions=None, meta=None
-                                        ):
-        if min_value is None and max_value is None:
-            raise ValueError("min_value and max_value cannot both be None")
-
-        if parse_strings_as_datetimes:
-            if min_value:
-                min_value = parse(min_value)
-
-            if max_value:
-                max_value = parse(max_value)
-
-            temp_column = column.map(parse)
-
-        else:
-            temp_column = column
-
-        col_max = temp_column.max()
-
-        if min_value != None and max_value != None:
-            success = (min_value <= col_max) and (col_max <= max_value)
-
-        elif min_value == None and max_value != None:
-            success = (col_max <= max_value)
-
-        elif min_value != None and max_value == None:
-            success = (min_value <= col_max)
-
-        if parse_strings_as_datetimes:
-            if output_strftime_format:
-                col_max = datetime.strftime(col_max, output_strftime_format)
-            else:
-                col_max = str(col_max)
-
-        return {
-            "success": success,
-            "result": {
-                "observed_value": col_max
-            }
-        }
 
     @DocInherit
     @MetaPandasDataset.column_aggregate_expectation

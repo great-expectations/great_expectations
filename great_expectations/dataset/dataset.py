@@ -1,8 +1,12 @@
+import inspect
 from collections import UserDict
 from itertools import zip_longest
+from six import PY3
+from functools import wraps
+from numbers import Number
 
 from great_expectations.data_asset.base import DataAsset
-from great_expectations.data_asset.util import DocInherit
+from great_expectations.data_asset.util import DocInherit, parse_result_format
 
 
 class ColumnarResultCache(UserDict):
@@ -21,7 +25,88 @@ class ColumnarResultCache(UserDict):
         return self.data[column]
 
 
-class Dataset(DataAsset):
+class MetaDataset(DataAsset):
+    """
+    Holds expectation decorators.
+    """
+
+    @classmethod
+    def column_aggregate_expectation(cls, func):
+        """Constructs an expectation using column-aggregate semantics.
+
+        The column_aggregate_expectation decorator handles boilerplate issues surrounding the common pattern of \
+        evaluating truthiness of some condition on an aggregated-column basis.
+
+        Args:
+            func (function): \
+                The function implementing an expectation using an aggregate property of a column. \
+                The function should take a column of data and return the aggregate value it computes.
+
+        Notes:
+            column_aggregate_expectation *excludes null values* from being passed to the function
+
+        See also:
+            :func:`expect_column_mean_to_be_between <great_expectations.data_asset.dataset.Dataset.expect_column_mean_to_be_between>` \
+            for an example of a column_aggregate_expectation
+        """
+        if PY3:
+            argspec = inspect.getfullargspec(func)[0][1:]
+        else:
+            argspec = inspect.getargspec(func)[0][1:]
+
+        @cls.expectation(argspec)
+        @wraps(func)
+        def inner_wrapper(self, column, result_format=None, *args, **kwargs):
+
+            if result_format is None:
+                result_format = self.default_expectation_args["result_format"]
+            # Retain support for string-only output formats:
+            result_format = parse_result_format(result_format)
+
+            element_count = self.row_count
+            nonnull_count = self.column_nonnull_counts[column]
+            null_count = element_count - nonnull_count
+
+            evaluation_result = func(self, column, *args, **kwargs)
+
+            if 'success' not in evaluation_result:
+                raise ValueError(
+                    "Column aggregate expectation failed to return required information: success")
+
+            if ('result' not in evaluation_result) or ('observed_value' not in evaluation_result['result']):
+                raise ValueError(
+                    "Column aggregate expectation failed to return required information: observed_value")
+
+            return_obj = {
+                'success': bool(evaluation_result['success'])
+            }
+
+            if result_format['result_format'] == 'BOOLEAN_ONLY':
+                return return_obj
+
+            return_obj['result'] = {
+                'observed_value': evaluation_result['result']['observed_value'],
+                "element_count": element_count,
+                "missing_count": null_count,
+                "missing_percent": null_count * 1.0 / element_count if element_count > 0 else None
+            }
+
+            if result_format['result_format'] == 'BASIC':
+                return return_obj
+
+            if 'details' in evaluation_result['result']:
+                return_obj['result']['details'] = evaluation_result['result']['details']
+
+            if result_format['result_format'] in ["SUMMARY", "COMPLETE"]:
+                return return_obj
+
+            raise ValueError("Unknown result_format %s." %
+                                (result_format['result_format'],))
+
+        return inner_wrapper
+
+
+class Dataset(MetaDataset):
     def __init__(self, *args, **kwargs):
         super(Dataset, self).__init__(*args, **kwargs)
         # some data structures for caching information specific to tabular datasets
@@ -32,6 +117,9 @@ class Dataset(DataAsset):
         self._column_nonnull_counts = ColumnarResultCache(self._get_column_nonnull_count)
         self._column_means = ColumnarResultCache(self._get_column_mean)
         self._column_value_counts = ColumnarResultCache(self._get_column_value_counts)
+        self._column_sums = ColumnarResultCache(self._get_column_sum)
+        self._column_maxes = ColumnarResultCache(self._get_column_max)
+        self._column_mins = ColumnarResultCache(self._get_column_min)
 
     @property
     def row_count(self):
@@ -76,6 +164,27 @@ class Dataset(DataAsset):
         """returns pd.Series of value counts for a column, sorted by value"""
         raise NotImplementedError
 
+    @property
+    def column_sums(self):
+        return self._column_sums
+
+    def _get_column_sum(self, column):
+        raise NotImplementedError
+
+    @property
+    def column_maxes(self):
+        return self._column_maxes
+
+    def _get_column_max(self, column):
+        raise NotImplementedError
+
+    @property
+    def column_mins(self):
+        return self._column_mins
+
+    def _get_column_min(self, column):
+        raise NotImplementedError
+
     @classmethod
     def column_map_expectation(cls, func):
         """Constructs an expectation using column-map semantics.
@@ -104,27 +213,6 @@ class Dataset(DataAsset):
         See also:
             :func:`expect_column_values_to_be_unique <great_expectations.data_asset.dataset.Dataset.expect_column_values_to_be_unique>` \
             for an example of a column_map_expectation
-        """
-        raise NotImplementedError
-
-    @classmethod
-    def column_aggregate_expectation(cls, func):
-        """Constructs an expectation using column-aggregate semantics.
-
-        The column_aggregate_expectation decorator handles boilerplate issues surrounding the common pattern of \
-        evaluating truthiness of some condition on an aggregated-column basis.
-
-        Args:
-            func (function): \
-                The function implementing an expectation using an aggregate property of a column. \
-                The function should take a column of data and return the aggregate value it computes.
-
-        Notes:
-            column_aggregate_expectation *excludes null values* from being passed to the function
-
-        See also:
-            :func:`expect_column_mean_to_be_between <great_expectations.data_asset.dataset.Dataset.expect_column_mean_to_be_between>` \
-            for an example of a column_aggregate_expectation
         """
         raise NotImplementedError
 
@@ -1525,12 +1613,18 @@ class Dataset(DataAsset):
         """
         raise NotImplementedError
 
-    def expect_column_mean_to_be_between(self,
-                                         column,
-                                         min_value=None,
-                                         max_value=None,
-                                         result_format=None, include_config=False, catch_exceptions=None, meta=None
-                                         ):
+    @DocInherit
+    @MetaDataset.column_aggregate_expectation
+    def expect_column_mean_to_be_between(
+        self,
+        column,
+        min_value=None,
+        max_value=None,
+        result_format=None,
+        include_config=False,
+        catch_exceptions=None,
+        meta=None,
+    ):
         """Expect the column mean to be between a minimum value and a maximum value (inclusive).
 
         expect_column_mean_to_be_between is a :func:`column_aggregate_expectation <great_expectations.data_asset.dataset.Dataset.column_aggregate_expectation>`.
@@ -1579,7 +1673,41 @@ class Dataset(DataAsset):
             expect_column_median_to_be_between
             expect_column_stdev_to_be_between
         """
-        raise NotImplementedError
+        if min_value is None and max_value is None:
+            raise ValueError("min_value and max_value cannot both be None")
+
+        if min_value is not None and not isinstance(min_value, (Number)):
+            raise ValueError("min_value must be a number")
+
+        if max_value is not None and not isinstance(max_value, (Number)):
+            raise ValueError("max_value must be a number")
+
+        col_avg = self.column_means[column]
+
+        # Handle possible missing values
+        if col_avg is None:
+            return {
+                'success': False,
+                'result': {
+                    'observed_value': col_avg
+                }
+            }
+        else:
+            if min_value != None and max_value != None:
+                success = (min_value <= col_avg) and (col_avg <= max_value)
+
+            elif min_value == None and max_value != None:
+                success = (col_avg <= max_value)
+
+            elif min_value != None and max_value == None:
+                success = (min_value <= col_avg)
+
+            return {
+                'success': success,
+                'result': {
+                    'observed_value': col_avg
+                }
+            }
 
     def expect_column_median_to_be_between(self,
                                            column,
@@ -1862,12 +1990,18 @@ class Dataset(DataAsset):
         """
         raise NotImplementedError
 
-    def expect_column_sum_to_be_between(self,
-                                        column,
-                                        min_value=None,
-                                        max_value=None,
-                                        result_format=None, include_config=False, catch_exceptions=None, meta=None
-                                        ):
+    @DocInherit
+    @MetaDataset.column_aggregate_expectation
+    def expect_column_sum_to_be_between(
+        self,
+        column,
+        min_value=None,
+        max_value=None,
+        result_format=None,
+        include_config=False,
+        catch_exceptions=None,
+        meta=None,
+    ):
         """Expect the column to sum to be between an min and max value
 
         expect_column_sum_to_be_between is a :func:`column_aggregate_expectation <great_expectations.data_asset.dataset.Dataset.column_aggregate_expectation>`.
@@ -1914,16 +2048,51 @@ class Dataset(DataAsset):
             * If max_value is None, then min_value is treated as a lower bound
 
         """
-        raise NotImplementedError
+        # TODO check for column type
+        if min_value is None and max_value is None:
+            raise ValueError("min_value and max_value cannot both be None")
 
-    def expect_column_min_to_be_between(self,
-                                        column,
-                                        min_value=None,
-                                        max_value=None,
-                                        parse_strings_as_datetimes=None,
-                                        output_strftime_format=None,
-                                        result_format=None, include_config=False, catch_exceptions=None, meta=None
-                                        ):
+        col_sum = self.column_sums[column]
+
+        # Handle possible missing values
+        if col_sum is None:
+            return {
+                'success': False,
+                'result': {
+                    'observed_value': col_sum
+                }
+            }
+        else:
+            if min_value is not None and max_value is not None:
+                success = (min_value <= col_sum) and (col_sum <= max_value)
+
+            elif min_value is None and max_value is not None:
+                success = (col_sum <= max_value)
+
+            elif min_value is not None and max_value is None:
+                success = (min_value <= col_sum)
+
+            return {
+                'success': success,
+                'result': {
+                    'observed_value': col_sum
+                }
+            }
+
+    @DocInherit
+    @MetaDataset.column_aggregate_expectation
+    def expect_column_min_to_be_between(
+        self,
+        column,
+        min_value=None,
+        max_value=None,
+        parse_strings_as_datetimes=None,
+        output_strftime_format=None,
+        result_format=None,
+        include_config=False,
+        catch_exceptions=None,
+        meta=None,
+    ):
         """Expect the column to sum to be between an min and max value
 
         expect_column_min_to_be_between is a :func:`column_aggregate_expectation <great_expectations.data_asset.dataset.Dataset.column_aggregate_expectation>`.
@@ -1976,16 +2145,59 @@ class Dataset(DataAsset):
             * If max_value is None, then min_value is treated as a lower bound
 
         """
-        raise NotImplementedError
+        if min_value is None and max_value is None:
+            raise ValueError("min_value and max_value cannot both be None")
 
-    def expect_column_max_to_be_between(self,
-                                        column,
-                                        min_value=None,
-                                        max_value=None,
-                                        parse_strings_as_datetimes=None,
-                                        output_strftime_format=None,
-                                        result_format=None, include_config=False, catch_exceptions=None, meta=None
-                                        ):
+        # TODO figure out how to deal with this logic post-refactor
+        if parse_strings_as_datetimes:
+            raise NotImplementedError
+        #     if min_value:
+        #         min_value = parse(min_value)
+
+        #     if max_value:
+        #         max_value = parse(max_value)
+
+        #     temp_column = column.map(parse)
+        # else:
+        #     temp_column = column
+
+        col_min = self.column_mins[column]
+
+        if min_value != None and max_value != None:
+            success = (min_value <= col_min) and (col_min <= max_value)
+
+        elif min_value == None and max_value != None:
+            success = (col_min <= max_value)
+
+        elif min_value != None and max_value == None:
+            success = (min_value <= col_min)
+
+        if parse_strings_as_datetimes:
+            if output_strftime_format:
+                col_min = datetime.strftime(col_min, output_strftime_format)
+            else:
+                col_min = str(col_min)
+        return {
+            'success': success,
+            'result': {
+                'observed_value': col_min
+            }
+        }
+
+    @DocInherit
+    @MetaDataset.column_aggregate_expectation
+    def expect_column_max_to_be_between(
+        self,
+        column,
+        min_value=None,
+        max_value=None,
+        parse_strings_as_datetimes=None,
+        output_strftime_format=None,
+        result_format=None,
+        include_config=False,
+        catch_exceptions=None,
+        meta=None,
+    ):
         """Expect the column max to be between an min and max value
 
         expect_column_max_to_be_between is a :func:`column_aggregate_expectation <great_expectations.data_asset.dataset.Dataset.column_aggregate_expectation>`.
@@ -2038,7 +2250,47 @@ class Dataset(DataAsset):
             * If max_value is None, then min_value is treated as a lower bound
 
         """
-        raise NotImplementedError
+        if min_value is None and max_value is None:
+            raise ValueError("min_value and max_value cannot both be None")
+
+        # TODO figure out how to deal with this logic post-refactor
+        if parse_strings_as_datetimes:
+            raise NotImplementedError
+        #     if min_value:
+        #         min_value = parse(min_value)
+
+        #     if max_value:
+        #         max_value = parse(max_value)
+
+        #     temp_column = column.map(parse)
+        # else:
+        #     temp_column = column
+
+        col_max = self.column_maxes[column]
+
+        if min_value != None and max_value != None:
+            success = (min_value <= col_max) and (col_max <= max_value)
+
+        elif min_value == None and max_value != None:
+            success = (col_max <= max_value)
+
+        elif min_value != None and max_value == None:
+            success = (min_value <= col_max)
+
+        if parse_strings_as_datetimes:
+            if output_strftime_format:
+                col_max = datetime.strftime(col_max, output_strftime_format)
+            else:
+                col_max = str(col_max)
+
+        return {
+            "success": success,
+            "result": {
+                "observed_value": col_max
+            }
+        }
+
+
 
     # Distributional expectations
     def expect_column_chisquare_test_p_value_to_be_greater_than(self,

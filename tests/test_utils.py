@@ -149,6 +149,7 @@ def get_dataset(dataset_type, data, schemas=None, autoinspect_func=autoinspect.c
 
         # Build a SqlAlchemyDataset using that database
         return SqlAlchemyDataset(tablename, engine=conn, autoinspect_func=autoinspect_func)
+
     elif dataset_type == 'SparkDFDataset':
         spark = SparkSession.builder.getOrCreate()
         if schemas and 'spark' in schemas:
