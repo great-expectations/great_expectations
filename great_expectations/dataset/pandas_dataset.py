@@ -317,6 +317,9 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
     def _get_column_unique_count(self, column):
         return self.column_value_counts[column].shape[0]
 
+    def _get_column_modes(self, column):
+        return list(self[column].mode().values)
+
     ### Expectation methods ###
     @DocInherit
     @Dataset.expectation(['column'])
@@ -841,31 +844,6 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                 "observed_value": column_stdev
             }
         }
-
-    @DocInherit
-    @MetaPandasDataset.column_aggregate_expectation
-    def expect_column_most_common_value_to_be_in_set(self, column, value_set, ties_okay=None,
-                                                     result_format=None, include_config=False, catch_exceptions=None, meta=None):
-
-        mode_list = list(column.mode().values)
-        intersection_count = len(set(value_set).intersection(mode_list))
-
-        if ties_okay:
-            success = intersection_count > 0
-        else:
-            if len(mode_list) > 1:
-                success = False
-            else:
-                success = intersection_count == 1
-
-        return {
-            'success': success,
-            'result': {
-                'observed_value': mode_list
-            }
-        }
-
-
 
     @DocInherit
     @MetaPandasDataset.column_aggregate_expectation

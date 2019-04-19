@@ -187,6 +187,7 @@ class SparkDFDataset(MetaSparkDFDataset):
             .count()\
             .orderBy(column)\
             .collect()
+        # assuming this won't get too big
         return pd.Series(
             [row['count'] for row in value_counts],
             index=[row[column] for row in value_counts],
@@ -196,6 +197,11 @@ class SparkDFDataset(MetaSparkDFDataset):
 
     def _get_column_unique_count(self, column):
         return self.column_value_counts[column].shape[0]
+
+    def _get_column_modes(self, column):
+        """leverages computation done in _get_column_value_counts"""
+        s = self.column_value_counts[column]
+        return list(s[s == s.max()].index)
 
     @DocInherit
     @MetaSparkDFDataset.column_map_expectation
