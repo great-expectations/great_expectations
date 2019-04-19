@@ -11,8 +11,8 @@ class ColumnarResultCache(UserDict):
 
     Think this is needed to make things like column_nonnull_counts accessible via a property?
     """
-    def __init__(self, callback, initial={}):
-        self.data = initial
+    def __init__(self, callback):
+        self.data = {}
         self.callback = callback
 
     def __getitem__(self, column):
@@ -31,6 +31,7 @@ class Dataset(DataAsset):
         self._table_columns = None
         self._column_nonnull_counts = ColumnarResultCache(self._get_column_nonnull_count)
         self._column_means = ColumnarResultCache(self._get_column_mean)
+        self._column_value_counts = ColumnarResultCache(self._get_column_value_counts)
 
     @property
     def row_count(self):
@@ -65,6 +66,14 @@ class Dataset(DataAsset):
         return self._column_means
 
     def _get_column_mean(self, column):
+        raise NotImplementedError
+
+    @property
+    def column_value_counts(self):
+        return self._column_value_counts
+
+    def _get_column_value_counts(self, column):
+        """returns pd.Series of value counts for a column, sorted by value"""
         raise NotImplementedError
 
     @classmethod
