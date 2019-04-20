@@ -2315,20 +2315,20 @@ class Dataset(MetaDataset):
 
         col_min = self.column_mins[column]
 
-        if min_value != None and max_value != None:
+        if col_min is None:
+            success = False
+        elif min_value is not None and max_value is not None:
             success = (min_value <= col_min) and (col_min <= max_value)
-
-        elif min_value == None and max_value != None:
+        elif min_value is None and max_value is not None:
             success = (col_min <= max_value)
-
-        elif min_value != None and max_value == None:
+        elif min_value is not None and max_value is None:
             success = (min_value <= col_min)
 
-        if parse_strings_as_datetimes:
-            if output_strftime_format:
-                col_min = datetime.strftime(col_min, output_strftime_format)
-            else:
-                col_min = str(col_min)
+        # if parse_strings_as_datetimes:
+        #     if output_strftime_format:
+        #         col_min = datetime.strftime(col_min, output_strftime_format)
+        #     else:
+        #         col_min = str(col_min)
         return {
             'success': success,
             'result': {
@@ -2420,20 +2420,20 @@ class Dataset(MetaDataset):
 
         col_max = self.column_maxes[column]
 
-        if min_value != None and max_value != None:
+        if col_max is None:
+            success = False
+        elif min_value is not None and max_value is not None:
             success = (min_value <= col_max) and (col_max <= max_value)
-
-        elif min_value == None and max_value != None:
+        elif min_value is None and max_value is not None:
             success = (col_max <= max_value)
-
-        elif min_value != None and max_value == None:
+        elif min_value is not None and max_value is None:
             success = (min_value <= col_max)
 
-        if parse_strings_as_datetimes:
-            if output_strftime_format:
-                col_max = datetime.strftime(col_max, output_strftime_format)
-            else:
-                col_max = str(col_max)
+        # if parse_strings_as_datetimes:
+        #     if output_strftime_format:
+        #         col_max = datetime.strftime(col_max, output_strftime_format)
+        #     else:
+        #         col_max = str(col_max)
 
         return {
             "success": success,
@@ -2441,8 +2441,6 @@ class Dataset(MetaDataset):
                 "observed_value": col_max
             }
         }
-
-
 
     # Distributional expectations
     def expect_column_chisquare_test_p_value_to_be_greater_than(self,
