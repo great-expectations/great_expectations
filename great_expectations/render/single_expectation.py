@@ -1,3 +1,5 @@
+from .base import Renderer
+
 class SingleExpectationRenderer(Renderer):
     def __init__(self, expectation):
         self.expectation = expectation
@@ -174,7 +176,7 @@ class SingleEvrRenderer(Renderer):
 
 class HtmlElementRenderer(Renderer):
     def __init__(self, ):
-
+        pass
 
 class SingleTableHtmlRenderer(Renderer):
     pass

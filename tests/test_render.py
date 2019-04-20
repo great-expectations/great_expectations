@@ -4,7 +4,7 @@ from great_expectations import render
 test_expectations_config = {
     "dataset_name": None,
     "meta": {
-        "great_expectations.__version__": "0.4.1"
+        "great_expectations.__version__": "0.4.5"
     },
     "expectations": [
         {
@@ -148,7 +148,7 @@ class TestRender(unittest.TestCase):
     def test_does_something(self):
         results = render.render(
             renderer_class=render.FullPageHtmlRenderer,
-            expectations=test_expectations_config,
+            expectations=test_expectations_config["expectations"],
         )
         print(results)
         assert results != None
