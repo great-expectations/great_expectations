@@ -150,6 +150,7 @@ class Dataset(MetaDataset):
         self._column_mins = ColumnarResultCache(self._get_column_min)
         self._column_unique_counts = ColumnarResultCache(self._get_column_unique_count)
         self._column_modes = ColumnarResultCache(self._get_column_modes)
+        self._column_medians = ColumnarResultCache(self._get_column_median)
 
     @property
     def row_count(self):
@@ -228,6 +229,13 @@ class Dataset(MetaDataset):
 
     def _get_column_modes(self, column):
         """returns a list of column modes"""
+        raise NotImplementedError
+
+    @property
+    def column_medians(self):
+        return self._column_medians
+
+    def _get_column_median(self, column):
         raise NotImplementedError
 
     @classmethod
@@ -1754,12 +1762,18 @@ class Dataset(MetaDataset):
                 }
             }
 
-    def expect_column_median_to_be_between(self,
-                                           column,
-                                           min_value=None,
-                                           max_value=None,
-                                           result_format=None, include_config=False, catch_exceptions=None, meta=None
-                                           ):
+    @DocInherit
+    @MetaDataset.column_aggregate_expectation
+    def expect_column_median_to_be_between(
+        self,
+        column,
+        min_value=None,
+        max_value=None,
+        result_format=None,
+        include_config=False,
+        catch_exceptions=None,
+        meta=None,
+    ):
         """Expect the column median to be between a minimum value and a maximum value.
 
         expect_column_median_to_be_between is a :func:`column_aggregate_expectation <great_expectations.data_asset.dataset.Dataset.column_aggregate_expectation>`.
@@ -1809,7 +1823,28 @@ class Dataset(MetaDataset):
             expect_column_stdev_to_be_between
 
         """
-        raise NotImplementedError
+        if min_value is None and max_value is None:
+            raise ValueError("min_value and max_value cannot both be None")
+
+        column_median = self.column_medians[column]
+
+        if column_median is None:
+            return {
+                'success': False,
+                'result': {
+                    'observed_value': None
+                }
+            }
+        else:
+            return {
+                "success": (
+                    ((min_value is None) or (min_value <= column_median)) and
+                    ((max_value is None) or (column_median <= max_value))
+                ),
+                "result": {
+                    "observed_value": column_median
+                }
+            }
 
     def expect_column_stdev_to_be_between(self,
                                          column,
