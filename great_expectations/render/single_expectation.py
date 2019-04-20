@@ -10,8 +10,6 @@ class SingleExpectationRenderer(Renderer):
     def render(self):
         expectation = self.expectation
 
-        print(expectation)
-
         if expectation["expectation_type"] == "expect_column_to_exist":
             return expectation["kwargs"]["column"] + " is a required field."
 

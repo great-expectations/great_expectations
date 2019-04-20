@@ -7,14 +7,6 @@ from .single_expectation import SingleExpectationRenderer
 #FullPageExpectationHtmlRenderer
 #FullPageValidationResultHtmlRenderer
 
-t = Template(open(
-    os.path.join(
-        os.path.dirname(__file__),
-        'fixtures/single_page.j2'
-    )
-).read())
-print(t.render())
-
 class FullPageHtmlRenderer(Renderer):
     def __init__(self, expectations, inspectable):
         self.expectations = expectations
@@ -23,6 +15,13 @@ class FullPageHtmlRenderer(Renderer):
         return True
 
     def render(self):
+        t = Template(open(
+            os.path.join(
+                os.path.dirname(__file__),
+                'fixtures/single_page.j2'
+            )
+        ).read())
+
         results = []
         for expectation in self.expectations:
             expectation_renderer = SingleExpectationRenderer(
@@ -31,4 +30,10 @@ class FullPageHtmlRenderer(Renderer):
             results.append(expectation_renderer.render())
         
         print(results)
-        return results
+
+        rendered_page = t.render(**{
+            "elements": results
+        })
+        print(rendered_page)
+
+        return rendered_page
