@@ -804,14 +804,17 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                     self, expectation['expectation_type'])
 
                 if result_format is not None:
-                    expectation['kwargs'].update(parse_result_format(result_format))
+                    expectation['kwargs'].update({'result_format': result_format})
 
                 # Counting the number of unexpected values can be expensive when there is a large
                 # number of np.nan values.
                 # This only happens on expect_column_values_to_not_be_null expectations.
                 # Since there is no reason to look for most common unexpected values in this case,
                 # we will instruct the result formatting method to skip this step.
-                if expectation['expectation_type'] in ['expect_column_values_to_not_be_null', 'expect_column_values_to_be_null']:
+
+                if expectation['expectation_type'] in ['expect_column_values_to_not_be_null',
+                                                       'expect_column_values_to_be_null']:
+                    expectation['kwargs']['result_format'] = parse_result_format(expectation['kwargs']['result_format'])
                     expectation['kwargs']['result_format']['partial_unexpected_count'] = 0
 
                 # A missing parameter should raise a KeyError
