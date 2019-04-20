@@ -226,6 +226,18 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 self._table)
         ).scalar()
 
+    def _get_column_max(self, column):
+        return self.engine.execute(
+            sa.select([sa.func.max(sa.column(column))]).select_from(
+                self._table)
+        ).scalar()
+
+    def _get_column_min(self, column):
+        return self.engine.execute(
+            sa.select([sa.func.min(sa.column(column))]).select_from(
+                self._table)
+        ).scalar()
+
     def _get_column_mean(self, column):
         return self.engine.execute(
             sa.select([sa.func.avg(sa.column(column))]).select_from(
@@ -237,6 +249,29 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             sa.select([sa.func.count(sa.func.distinct(sa.column(column)))]).select_from(
                 self._table)
         ).scalar()
+
+    def _get_column_median(self, column):
+        nonnull_count = self.column_nonnull_counts[column]
+        element_values = self.engine.execute(
+            sa.select([sa.column(column)]).order_by(sa.column(column)).where(
+                sa.column(column) != None
+            ).offset(max(nonnull_count // 2 - 1, 0)).limit(2).select_from(self._table)
+        )
+
+        column_values = list(element_values.fetchall())
+
+        if len(column_values) == 0:
+            column_median = None
+        elif nonnull_count % 2 == 0:
+            # An even number of column values: take the average of the two center values
+            column_median = (
+                column_values[0][0] +  # left center value
+                column_values[1][0]    # right center value
+            ) / 2.0  # Average center values
+        else:
+            # An odd number of column values, we can just take the center value
+            column_median = column_values[1][0]  # True center value
+        return column_median
 
     def create_temporary_table(self, table_name, custom_sql):
         """
@@ -465,191 +500,6 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
     ###
     ###
     ###
-
-    @DocInherit
-    @MetaSqlAlchemyDataset.column_aggregate_expectation
-    def expect_column_max_to_be_between(self,
-                                        column,
-                                        min_value=None,
-                                        max_value=None,
-                                        parse_strings_as_datetimes=None,
-                                        output_strftime_format=None,
-                                        result_format=None, include_config=False, catch_exceptions=None, meta=None
-                                        ):
-
-        if min_value is None and max_value is None:
-            raise ValueError("min_value and max_value cannot both be None")
-
-        col_max = self.engine.execute(
-            sa.select([sa.func.max(sa.column(column))]).select_from(
-                self._table)
-        ).scalar()
-
-        col_max_out = col_max
-        if parse_strings_as_datetimes:
-            if min_value:
-                min_value = parse(min_value)
-
-            if max_value:
-                max_value = parse(max_value)
-
-            if isinstance(col_max, string_types):
-                col_max = parse(col_max)
-
-            if output_strftime_format:
-                col_max_out = datetime.strftime(col_max, output_strftime_format)
-
-        # Handle possible missing values
-        if col_max is None:
-            return {
-                'success': False,
-                'result': {
-                    'observed_value': col_max_out
-                }
-            }
-        else:
-            if min_value is not None and max_value is not None:
-                success = (min_value <= col_max) and (col_max <= max_value)
-
-            elif min_value is None and max_value is not None:
-                success = (col_max <= max_value)
-
-            elif min_value is not None and max_value is None:
-                success = (min_value <= col_max)
-
-            return {
-                'success': success,
-                'result': {
-                    'observed_value': col_max_out
-                }
-            }
-
-    @DocInherit
-    @MetaSqlAlchemyDataset.column_aggregate_expectation
-    def expect_column_min_to_be_between(self,
-                                        column,
-                                        min_value=None,
-                                        max_value=None,
-                                        parse_strings_as_datetimes=None,
-                                        output_strftime_format=None,
-                                        result_format=None, include_config=False, catch_exceptions=None, meta=None
-                                        ):
-
-        if min_value is None and max_value is None:
-            raise ValueError("min_value and max_value cannot both be None")
-
-        col_min = self.engine.execute(
-            sa.select([sa.func.min(sa.column(column))]).select_from(
-                self._table)
-        ).scalar()
-
-        col_min_out = col_min
-        if parse_strings_as_datetimes:
-            if min_value:
-                min_value = parse(min_value)
-
-            if max_value:
-                max_value = parse(max_value)
-
-            if isinstance(col_min, string_types):
-                col_min = parse(col_min)
-
-            if output_strftime_format:
-                col_min_out = datetime.strftime(col_min, output_strftime_format)
-
-
-        # Handle possible missing values
-        if col_min is None:
-            return {
-                'success': False,
-                'result': {
-                    'observed_value': col_min_out
-                }
-            }
-        else:
-            if min_value is not None and max_value is not None:
-                success = (min_value <= col_min) and (col_min <= max_value)
-
-            elif min_value is None and max_value is not None:
-                success = (col_min <= max_value)
-
-            elif min_value is not None and max_value is None:
-                success = (min_value <= col_min)
-
-            return {
-                'success': success,
-                'result': {
-                    'observed_value': col_min_out
-                }
-            }
-
-    @DocInherit
-    @MetaSqlAlchemyDataset.column_aggregate_expectation
-    def expect_column_median_to_be_between(self,
-                                           column,
-                                           min_value=None,
-                                           max_value=None,
-                                           result_format=None, include_config=False, catch_exceptions=None, meta=None
-                                           ):
-
-        if min_value is None and max_value is None:
-            raise ValueError("min_value and max_value cannot both be None")
-
-        # Inspiration from https://stackoverflow.com/questions/942620/missing-median-aggregate-function-in-django
-        count_query = self.engine.execute(
-            sa.select([
-                sa.func.count().label("element_count"),
-                sa.func.sum(
-                    sa.case([(sa.column(column) == None, 1)], else_=0)
-                ).label('null_count')
-            ]).select_from(self._table)
-        )
-
-        counts = dict(count_query.fetchone())
-
-        # Handle empty counts
-        if "element_count" not in counts or counts["element_count"] is None:
-            counts["element_count"] = 0
-        if "null_count" not in counts or counts["null_count"] is None:
-            counts["null_count"] = 0
-
-        # The number of non-null/non-ignored values
-        nonnull_count = counts['element_count'] - counts['null_count']
-
-        element_values = self.engine.execute(
-            sa.select([sa.column(column)]).order_by(sa.column(column)).where(
-                sa.column(column) != None
-            ).offset(max(nonnull_count // 2 - 1, 0)).limit(2).select_from(self._table)
-        )
-
-        column_values = list(element_values.fetchall())
-
-        if len(column_values) == 0:
-            return {
-                'success': False,
-                'result': {
-                    'observed_value': None
-                }
-            }
-        else:
-            if nonnull_count % 2 == 0:
-                # An even number of column values: take the average of the two center values
-                column_median = (
-                    column_values[0][0] +  # left center value
-                    column_values[1][0]        # right center value
-                ) / 2.0  # Average center values
-            else:
-                # An odd number of column values, we can just take the center value
-                column_median = column_values[1][0]  # True center value
-
-            return {
-                'success':
-                    ((min_value is None) or (min_value <= column_median)) and
-                    ((max_value is None) or (column_median <= max_value)),
-                'result': {
-                    'observed_value': column_median
-                }
-            }
 
     @MetaSqlAlchemyDataset.column_map_expectation
     def expect_column_values_to_be_unique(self, column, mostly=None,
