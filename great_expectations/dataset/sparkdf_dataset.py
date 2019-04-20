@@ -169,7 +169,12 @@ class SparkDFDataset(MetaSparkDFDataset):
         return self.spark_df.filter('{column} is not null'.format(column=column)).count()
 
     def _get_column_mean(self, column):
-        return self.spark_df.select(column).groupBy().mean().collect()[0][0]
+        # TODO need to apply this logic to other such methods?
+        types = dict(self.spark_df.dtypes)
+        if types[column] not in ('int', 'float', 'double'):
+            raise TypeError('Expected numeric column type for function mean()')
+        result = self.spark_df.select(column).groupBy().mean().collect()[0]
+        return result[0] if len(result) > 0 else None
 
     def _get_column_sum(self, column):
         return self.spark_df.select(column).groupBy().sum().collect()[0][0]
@@ -202,6 +207,11 @@ class SparkDFDataset(MetaSparkDFDataset):
         """leverages computation done in _get_column_value_counts"""
         s = self.column_value_counts[column]
         return list(s[s == s.max()].index)
+
+    def _get_column_median(self, column):
+        # TODO this doesn't actually work e.g. median([1, 2, 3, 4]) -> 2.0
+        result = self.spark_df.approxQuantile(column, [0.5], 0)
+        return result[0] if len(result) > 0 else None
 
     @DocInherit
     @MetaSparkDFDataset.column_map_expectation

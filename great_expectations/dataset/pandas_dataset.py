@@ -320,6 +320,9 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
     def _get_column_modes(self, column):
         return list(self[column].mode().values)
 
+    def _get_column_median(self, column):
+        return self[column].median()
+
     ### Expectation methods ###
     @DocInherit
     @Dataset.expectation(['column'])
@@ -802,26 +805,6 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                     "expected_params": positional_parameters,
                     "observed_ks_result": ks_result
                 }
-            }
-        }
-
-    @DocInherit
-    @MetaPandasDataset.column_aggregate_expectation
-    def expect_column_median_to_be_between(self, column, min_value=None, max_value=None,
-                                           result_format=None, include_config=False, catch_exceptions=None, meta=None):
-
-        if min_value is None and max_value is None:
-            raise ValueError("min_value and max_value cannot both be None")
-
-        column_median = column.median()
-
-        return {
-            "success": (
-                ((min_value is None) or (min_value <= column_median)) and
-                ((max_value is None) or (column_median <= max_value))
-            ),
-            "result": {
-                "observed_value": column_median
             }
         }
 
