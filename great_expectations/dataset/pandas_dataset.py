@@ -809,56 +809,6 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
     @DocInherit
     @MetaPandasDataset.column_aggregate_expectation
-    def expect_column_chisquare_test_p_value_to_be_greater_than(self, column, partition_object=None, p=0.05, tail_weight_holdout=0,
-                                                                result_format=None, include_config=False, catch_exceptions=None, meta=None):
-        if not is_valid_categorical_partition_object(partition_object):
-            raise ValueError("Invalid partition object.")
-
-        observed_frequencies = column.value_counts()
-        # Convert to Series object to allow joining on index values
-        expected_column = pd.Series(
-            partition_object['weights'], index=partition_object['values'], name='expected') * len(column)
-        # Join along the indices to allow proper comparison of both types of possible missing values
-        # test_df = pd.concat([expected_column, observed_frequencies], axis=1, sort=True) # Sort parameter not available before pandas 0.23.0
-        test_df = pd.concat([expected_column, observed_frequencies], axis=1)
-
-        na_counts = test_df.isnull().sum()
-
-        # Handle NaN: if we expected something that's not there, it's just not there.
-        test_df[column.name] = test_df[column.name].fillna(0)
-        # Handle NaN: if something's there that was not expected, substitute the relevant value for tail_weight_holdout
-        if na_counts['expected'] > 0:
-            # Scale existing expected values
-            test_df['expected'] = test_df['expected'] * \
-                (1 - tail_weight_holdout)
-            # Fill NAs with holdout.
-            test_df['expected'] = test_df['expected'].fillna(
-                len(column) * (tail_weight_holdout / na_counts['expected']))
-
-        test_result = stats.chisquare(
-            test_df[column.name], test_df['expected'])[1]
-
-        return_obj = {
-            "success": test_result > p,
-            "result": {
-                "observed_value": test_result,
-                "details": {
-                    "observed_partition": {
-                        "values": test_df.index.tolist(),
-                        "weights": test_df[column.name].tolist()
-                    },
-                    "expected_partition": {
-                        "values": test_df.index.tolist(),
-                        "weights": test_df['expected'].tolist()
-                    }
-                }
-            }
-        }
-
-        return return_obj
-
-    @DocInherit
-    @MetaPandasDataset.column_aggregate_expectation
     def expect_column_bootstrapped_ks_test_p_value_to_be_greater_than(self, column, partition_object=None, p=0.05, bootstrap_samples=None, bootstrap_sample_size=None,
                                                                       result_format=None, include_config=False, catch_exceptions=None, meta=None):
         if not is_valid_continuous_partition_object(partition_object):
