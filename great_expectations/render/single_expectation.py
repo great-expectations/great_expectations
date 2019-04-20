@@ -6,6 +6,7 @@ class SingleExpectationRenderer(Renderer):
         return True
 
     def render(self):
+        expectation = self.expectation
 
         if expectation["expectation_type"] == "expect_column_to_exist":
             bullet_points.append("is a required field.")

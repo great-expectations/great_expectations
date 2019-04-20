@@ -7,6 +7,8 @@ class TestRender(unittest.TestCase):
         from great_expectations import render
 
     def test_does_something(self):
-        render.generate_single_expectations()
+        render.render(
+            render.FullPageHtmlRenderer
+        )
 
 
