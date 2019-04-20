@@ -203,6 +203,9 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             self._table)
         return self.engine.execute(count_query).scalar()
 
+    def _get_table_columns(self):
+        return [col['name'] for col in self.columns]
+
     def _get_column_nonnull_count(self, column):
         ignore_values = [None]
         count_query = sa.select([
@@ -290,70 +293,6 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         col_names = self.engine.execute(sql).keys()
         col_dict = [{'name': col_name} for col_name in col_names]
         return col_dict
-
-
-    ###
-    ###
-    ###
-    #
-    # Table level implementations
-    #
-    ###
-    ###
-    ###
-
-    @DocInherit
-    @Dataset.expectation(['column_list'])
-    def expect_table_columns_to_match_ordered_list(self, column_list,
-                                                   result_format=None, include_config=False, catch_exceptions=None, meta=None):
-        """
-        Checks if observed columns are in the expected order. The expectations will fail if columns are out of expected
-        order, columns are missing, or additional columns are present. On failure, details are provided on the location
-        of the unexpected column(s).
-        """
-        observed_columns = [col['name'] for col in self.columns]
-
-        if observed_columns == list(column_list):
-            return {
-                "success": True
-            }
-        else:
-            # In the case of differing column lengths between the defined expectation and the observed column set, the
-            # max is determined to generate the column_index.
-            number_of_columns = max(len(column_list), len(observed_columns))
-            column_index = range(number_of_columns)
-
-            # Create a list of the mismatched details
-            compared_lists = list(zip_longest(column_index, list(column_list), observed_columns))
-            mismatched = [{"Expected Column Position": i,
-                           "Expected": k,
-                           "Found": v} for i, k, v in compared_lists if k != v]
-            return {
-                "success": False,
-                "details": {"mismatched": mismatched}
-            }
-
-    @DocInherit
-    @Dataset.expectation(['column'])
-    def expect_column_to_exist(self,
-                               column, column_index=None, result_format=None, include_config=False,
-                               catch_exceptions=None, meta=None
-                               ):
-
-        col_names = [col['name'] for col in self.columns]
-
-        if column_index is None:
-            success = column in col_names
-        else:
-            try:
-                col_index = col_names.index(column)
-                success = (column_index == col_index)
-            except ValueError:
-                success = False
-
-        return {
-            'success': success
-        }
 
     ###
     ###
