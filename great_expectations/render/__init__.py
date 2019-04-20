@@ -16,7 +16,10 @@ from .full_page import (
     FullPageHtmlRenderer,
 )
 
-def render(renderer_class, expectations=None, inspectable=None):
-    renderer = renderer_class(expectations=expectations, inspectable=inspectable)
+def render(expectations=None, input_inspectable=None, renderer_class=None, output_inspectable=None):
+    renderer = renderer_class(
+        expectations=expectations,
+        inspectable=input_inspectable,
+    )
     results = renderer.render()
     return results
