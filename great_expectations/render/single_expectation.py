@@ -10,96 +10,98 @@ class SingleExpectationRenderer(Renderer):
     def render(self):
         expectation = self.expectation
 
-        if expectation["expectation_type"] == "expect_column_to_exist":
-            bullet_points.append("is a required field.")
+        print(expectation)
 
-        elif expectation["expectation_type"] in ["expect_column_values_to_be_of_type", "expect_column_values_to_be_of_semantic_type"]:
+        if expectation["expectation_type"] == "expect_column_to_exist":
+            return expectation["kwargs"]["column"] + " is a required field."
+
+        # elif expectation["expectation_type"] in ["expect_column_values_to_be_of_type", "expect_column_values_to_be_of_semantic_type"]:
             # print(json.dumps(expectation, indent=2))
-            column_type = result["expectation_config"]["kwargs"]["type_"]
+            # column_type = result["expectation_config"]["kwargs"]["type_"]
 
         elif expectation["expectation_type"] == "expect_column_values_to_not_be_null":
             if "mostly" in expectation["kwargs"]:
-                bullet_points.append("must not be missing more than %.1f\% of the time.")
+                return expectation["kwargs"]["column"] + " must not be missing more than %.1f\% of the time."
             else:
-                bullet_points.append("must never be missing.")
+                return expectation["kwargs"]["column"] + " must never be missing."
 
         elif expectation["expectation_type"] == "expect_column_values_to_be_null":
             if "mostly" in expectation["kwargs"]:
-                # bullet_points.append("must not be missing more than %.1f\% of the time.")
+                # return expectation["kwargs"]["column"] + " must not be missing more than %.1f\% of the time.")
                 raise NotImplementedError
             else:
-                bullet_points.append("must always be missing.")
+                return expectation["kwargs"]["column"] + " must always be missing."
 
         elif expectation["expectation_type"] == "expect_column_values_to_be_dateutil_parseable":
             if "mostly" in expectation["kwargs"]:
-                bullet_points.append("must be formatted as date or time at least %.1f\% of the time." % (expectation["kwargs"]["mostly"]))
+                return expectation["kwargs"]["column"] + " must be formatted as date or time at least %.1f\% of the time." % (expectation["kwargs"]["mostly"])
             else:
-                bullet_points.append("must always be formatted as a date or time.")
+                return expectation["kwargs"]["column"] + " must always be formatted as a date or time."
 
         elif expectation["expectation_type"] == "expect_column_value_lengths_to_equal":
             # print(json.dumps(expectation, indent=2))
             if "mostly" in expectation["kwargs"]:
-                bullet_points.append("must be exactly %d characters long at least %.1f\% of the time.")
+                return expectation["kwargs"]["column"] + " must be exactly %d characters long at least %.1f\% of the time."
             else:
-                bullet_points.append("must be exactly %d characters long." %(expectation["kwargs"]["value"]))
+                return expectation["kwargs"]["column"] + " must be exactly %d characters long." %(expectation["kwargs"]["value"])
 
         elif expectation["expectation_type"] == "expect_column_value_lengths_to_be_between":
             # print(json.dumps(expectation, indent=2))
             if "mostly" in expectation["kwargs"]:
-                bullet_points.append("must be between %d and %d characters long at least %.1f\% of the time.")
+                return expectation["kwargs"]["column"] + " must be between %d and %d characters long at least %.1f\% of the time."
             else:
-                bullet_points.append("must always be between %d and %d characters long." %(expectation["kwargs"]["min_value"], expectation["kwargs"]["max_value"]))
+                return expectation["kwargs"]["column"] + " must always be between %d and %d characters long." %(expectation["kwargs"]["min_value"], expectation["kwargs"]["max_value"])
 
         elif expectation["expectation_type"] == "expect_column_values_to_be_between":
             # print(json.dumps(expectation, indent=2))
             if "mostly" in expectation["kwargs"]:
-                bullet_points.append("must be between %d and %d at least %.1f\% of the time.")
+                return expectation["kwargs"]["column"] + " must be between %d and %d at least %.1f\% of the time."
             else:
                 if "parse_strings_as_datetimes" in expectation["kwargs"]:
-                    bullet_points.append("must always be a date between %s and %s." %(str(expectation["kwargs"]["min_value"]), str(expectation["kwargs"]["max_value"])))
+                    return expectation["kwargs"]["column"] + " must always be a date between %s and %s." %(str(expectation["kwargs"]["min_value"]), str(expectation["kwargs"]["max_value"]))
                 else:
-                    bullet_points.append("must always be between %d and %d." %(expectation["kwargs"]["min_value"], expectation["kwargs"]["max_value"]))
+                    return expectation["kwargs"]["column"] + " must always be between %d and %d." %(expectation["kwargs"]["min_value"], expectation["kwargs"]["max_value"])
 
         elif expectation["expectation_type"] == "expect_column_values_to_be_unique":
             # print(json.dumps(expectation, indent=2))
             if "mostly" in expectation["kwargs"]:
-                bullet_points.append("must be unique at least %.1f\% of the time.")
+                return expectation["kwargs"]["column"] + " must be unique at least %.1f\% of the time."
             else:
-                bullet_points.append("must always be unique.")
+                return expectation["kwargs"]["column"] + " must always be unique."
 
         elif expectation["expectation_type"] == "expect_column_mean_to_be_between":
-            bullet_points.append("must have a mean value between %d and %d." %(expectation["kwargs"]["min_value"], expectation["kwargs"]["max_value"]))
+            return expectation["kwargs"]["column"] + " must have a mean value between %d and %d." %(expectation["kwargs"]["min_value"], expectation["kwargs"]["max_value"])
 
         elif expectation["expectation_type"] == "expect_column_median_to_be_between":
-            bullet_points.append("must have a median value between %d and %d." %(expectation["kwargs"]["min_value"], expectation["kwargs"]["max_value"]))
+            return expectation["kwargs"]["column"] + " must have a median value between %d and %d." %(expectation["kwargs"]["min_value"], expectation["kwargs"]["max_value"])
 
         elif expectation["expectation_type"] == "expect_column_stdev_to_be_between":
-            bullet_points.append("must have a standard deviation between %d and %d." %(expectation["kwargs"]["min_value"], expectation["kwargs"]["max_value"]))
+            return expectation["kwargs"]["column"] + " must have a standard deviation between %d and %d." %(expectation["kwargs"]["min_value"], expectation["kwargs"]["max_value"])
 
         elif expectation["expectation_type"] == "expect_column_unique_value_count_to_be_between":
-            bullet_points.append("must have between %d and %d unique values." % (expectation["kwargs"]["min_value"], expectation["kwargs"]["max_value"]))
+            return expectation["kwargs"]["column"] + " must have between %d and %d unique values." % (expectation["kwargs"]["min_value"], expectation["kwargs"]["max_value"])
 
         elif expectation["expectation_type"] == "expect_column_values_to_not_match_regex":
             #FIXME: Need to add logic for mostly
-            bullet_points.append("must not match this regular expression: <span class=\"example-list\">%s</span>." % (expectation["kwargs"]["regex"],))
+            return expectation["kwargs"]["column"] + " must not match this regular expression: <span class=\"example-list\">%s</span>." % (expectation["kwargs"]["regex"],)
 
         elif expectation["expectation_type"] == "expect_column_values_to_match_regex":
             #FIXME: Need to add logic for mostly
-            bullet_points.append("must match this regular expression: <span class=\"example-list\">%s</span>." % (expectation["kwargs"]["regex"],))
+            return expectation["kwargs"]["column"] + " must match this regular expression: <span class=\"example-list\">%s</span>." % (expectation["kwargs"]["regex"],)
 
         elif expectation["expectation_type"] == "expect_column_values_to_be_json_parseable":
             # print(json.dumps(expectation["kwargs"], indent=2))
             #FIXME: Need to add logic for mostly
-            bullet_points.append("must be a parseable JSON object.")
+            return expectation["kwargs"]["column"] + " must be a parseable JSON object."
 
         # elif expectation["expectation_type"] == "expect_column_values_to_not_match_regex":
 
 
         elif expectation["expectation_type"] == "expect_column_proportion_of_unique_values_to_be_between":
-            bullet_points.append("has between %.1f and %.1f%% unique values." % (
+            return expectation["kwargs"]["column"] + " has between %.1f and %.1f%% unique values." % (
                 100*expectation["kwargs"]["min_value"],
                 100*expectation["kwargs"]["max_value"]
-            ))
+            )
 
             stats_table_rows.append({
                 "A" : "unique values",

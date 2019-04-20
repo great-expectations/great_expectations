@@ -19,4 +19,5 @@ class FullPageHtmlRenderer(Renderer):
             )
             results.append(expectation_renderer.render())
         
+        print(results)
         return results
