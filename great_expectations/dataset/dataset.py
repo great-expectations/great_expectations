@@ -7,6 +7,17 @@ from numbers import Number
 
 from great_expectations.data_asset.base import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
+from great_expectations.dataset.util import (
+    is_valid_partition_object,
+    is_valid_categorical_partition_object,
+    is_valid_continuous_partition_object,
+    _scipy_distribution_positional_args_from_dict,
+    validate_distribution_parameters,
+)
+
+import pandas as pd
+import numpy as np
+from scipy import stats
 
 
 class ColumnarResultCache(UserDict):
@@ -2444,13 +2455,19 @@ class Dataset(MetaDataset):
         }
 
     # Distributional expectations
-    def expect_column_chisquare_test_p_value_to_be_greater_than(self,
-                                                                column,
-                                                                partition_object=None,
-                                                                p=0.05,
-                                                                tail_weight_holdout=0,
-                                                                result_format=None, include_config=False, catch_exceptions=None, meta=None
-                                                                ):
+    @DocInherit
+    @MetaDataset.column_aggregate_expectation
+    def expect_column_chisquare_test_p_value_to_be_greater_than(
+        self,
+        column,
+        partition_object=None,
+        p=0.05,
+        tail_weight_holdout=0,
+        result_format=None,
+        include_config=False,
+        catch_exceptions=None,
+        meta=None,
+    ):
         """Expect column values to be distributed similarly to the provided categorical partition. \
 
         This expectation compares categorical distributions using a Chi-squared test. \
@@ -2509,9 +2526,50 @@ class Dataset(MetaDataset):
                             The partition expected from the data, after including tail_weight_holdout
                     }
                 }
-
         """
-        raise NotImplementedError
+        if not is_valid_categorical_partition_object(partition_object):
+            raise ValueError("Invalid partition object.")
+
+        observed_frequencies = self.column_value_counts[column]
+        # Convert to Series object to allow joining on index values
+        expected_column = pd.Series(
+            partition_object['weights'], index=partition_object['values'], name='expected') * len(column)
+        # Join along the indices to allow proper comparison of both types of possible missing values
+        # test_df = pd.concat([expected_column, observed_frequencies], axis=1, sort=True) # Sort parameter not available before pandas 0.23.0
+        test_df = pd.concat([expected_column, observed_frequencies], axis=1)
+
+        na_counts = test_df.isnull().sum()
+
+        # Handle NaN: if we expected something that's not there, it's just not there.
+        test_df[column] = test_df[column].fillna(0)
+        # Handle NaN: if something's there that was not expected, substitute the relevant value for tail_weight_holdout
+        if na_counts['expected'] > 0:
+            # Scale existing expected values
+            test_df['expected'] = test_df['expected'] * \
+                (1 - tail_weight_holdout)
+            # Fill NAs with holdout.
+            test_df['expected'] = test_df['expected'].fillna(
+                len(column) * (tail_weight_holdout / na_counts['expected']))
+
+        test_result = stats.chisquare(
+            test_df[column], test_df['expected'])[1]
+
+        return {
+            "success": test_result > p,
+            "result": {
+                "observed_value": test_result,
+                "details": {
+                    "observed_partition": {
+                        "values": test_df.index.tolist(),
+                        "weights": test_df[column].tolist()
+                    },
+                    "expected_partition": {
+                        "values": test_df.index.tolist(),
+                        "weights": test_df['expected'].tolist()
+                    }
+                }
+            }
+        }
 
     def expect_column_bootstrapped_ks_test_p_value_to_be_greater_than(self,
                                                                       column,
