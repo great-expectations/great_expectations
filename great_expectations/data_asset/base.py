@@ -20,7 +20,7 @@ from great_expectations.dataset.autoinspect import columns_exist
 
 class DataAsset(object):
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, **kwargs):
         """
         Initialize the DataAsset.
 
@@ -35,9 +35,10 @@ class DataAsset(object):
 
         """
         autoinspect_func = kwargs.pop("autoinspect_func", None)
+        initial_config = kwargs.pop("config", None)
+        data_asset_name = kwargs.pop("name", None)
 
-        super(DataAsset, self).__init__(*args, **kwargs)
-        self._initialize_expectations()
+        self._initialize_expectations(config=initial_config, name=data_asset_name)
         if autoinspect_func is not None:
             autoinspect_func(self)
 
