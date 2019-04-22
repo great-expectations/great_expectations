@@ -60,6 +60,7 @@ class MetaSqlAlchemyDataset(Dataset):
             ignore_values = [None]
             if func.__name__ in ['expect_column_values_to_not_be_null', 'expect_column_values_to_be_null']:
                 ignore_values = []
+                result_format['partial_unexpected_count'] = 0  # Optimization to avoid meaningless computation for these expectations
 
             count_query = sa.select([
                 sa.func.count().label('element_count'),
