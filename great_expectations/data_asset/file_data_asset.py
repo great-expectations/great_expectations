@@ -261,10 +261,10 @@ class FileDataAsset(MetaFileDataAsset):
                                                     expected_count=0, 
                                                     skip=None,
                                                     mostly=None, 
-                                                    nonnull_lines_regex="^\s*$",
+                                                    nonnull_lines_regex=r"^\s*$",
                                                     result_format=None,
                                                     include_config=False,
-                                                    catch_exceptions=None, 
+                                                    catch_exceptions=None,
                                                     meta=None,
                                                     _lines=None):
 
@@ -551,8 +551,7 @@ class FileDataAsset(MetaFileDataAsset):
             except:
                 raise ValueError("skip must be a positive integer")
 
-            for i in range(1, skip+1):
-                lines.pop(0)
+            lines = lines[skip:]
 
         header_line = lines[0].strip()
         header_names = comp_regex.split(header_line)
