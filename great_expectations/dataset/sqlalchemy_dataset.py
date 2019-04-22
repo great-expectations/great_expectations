@@ -95,7 +95,7 @@ class MetaSqlAlchemyDataset(Dataset):
             if "unexpected_count" not in count_results or count_results["unexpected_count"] is None:
                 count_results["unexpected_count"] = 0
 
-            # Retrieve unexpected  values
+            # Retrieve unexpected values
             unexpected_query_results = self.engine.execute(
                 sa.select([sa.column(column)]).select_from(self._table).where(
                     sa.and_(sa.not_(expected_condition),
@@ -287,6 +287,11 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         # Only call super once connection is established and table_name and columns known to allow autoinspection
         super(SqlAlchemyDataset, self).__init__(*args, **kwargs)
 
+    def _get_row_count(self):
+        count_query = sa.select([sa.func.count()]).select_from(
+            self._table)
+        return self.engine.execute(count_query).scalar()
+
     def create_temporary_table(self, table_name, custom_sql):
         """
         Create Temporary table based on sql query. This will be used as a basis for executing expectations.
@@ -315,72 +320,6 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
     ###
     ###
     ###
-
-    @DocInherit
-    @Dataset.expectation(['value'])
-    def expect_table_row_count_to_equal(self,
-                                        value=None,
-                                        result_format=None, include_config=False, catch_exceptions=None, meta=None
-                                        ):
-        # Assert that min_value and max_value are integers
-        try:
-            if value is not None:
-                float(value).is_integer()
-
-        except ValueError:
-            raise ValueError("value must an integer")
-
-        if value is None:
-            raise ValueError("value must be provided")
-
-        count_query = sa.select([sa.func.count()]).select_from(
-            self._table)
-        row_count = self.engine.execute(count_query).scalar()
-
-        return {
-            'success': row_count == value,
-            'result': {
-                'observed_value': row_count
-            }
-        }
-
-    @DocInherit
-    @Dataset.expectation(['min_value', 'max_value'])
-    def expect_table_row_count_to_be_between(self,
-                                             min_value=0,
-                                             max_value=None,
-                                             result_format=None, include_config=False, catch_exceptions=None, meta=None
-                                             ):
-        # Assert that min_value and max_value are integers
-        try:
-            if min_value is not None:
-                float(min_value).is_integer()
-
-            if max_value is not None:
-                float(max_value).is_integer()
-
-        except ValueError:
-            raise ValueError("min_value and max_value must be integers")
-
-        count_query = sa.select([sa.func.count()]).select_from(
-            self._table)
-        row_count = self.engine.execute(count_query).scalar()
-
-        if min_value != None and max_value != None:
-            outcome = row_count >= min_value and row_count <= max_value
-
-        elif min_value == None and max_value != None:
-            outcome = row_count <= max_value
-
-        elif min_value != None and max_value == None:
-            outcome = row_count >= min_value
-
-        return {
-            'success': outcome,
-            'result': {
-                'observed_value': row_count
-            }
-        }
 
     @DocInherit
     @Dataset.expectation(['column_list'])
@@ -471,9 +410,14 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                                           column,
                                           value_set,
                                           mostly=None,
+                                          parse_strings_as_datetimes=None,
                                           result_format=None, include_config=False, catch_exceptions=None, meta=None
                                           ):
-        return sa.column(column).in_(tuple(value_set))
+        if parse_strings_as_datetimes:
+            parsed_value_set = [parse(value) if isinstance(value, string_types) else value for value in value_set]
+        else:
+            parsed_value_set = value_set
+        return sa.column(column).in_(tuple(parsed_value_set))
 
     @DocInherit
     @MetaSqlAlchemyDataset.column_map_expectation
@@ -819,7 +763,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         element_values = self.engine.execute(
             sa.select([sa.column(column)]).order_by(sa.column(column)).where(
                 sa.column(column) != None
-            ).offset(nonnull_count // 2 - 1).limit(2).select_from(self._table)
+            ).offset(max(nonnull_count // 2 - 1, 0)).limit(2).select_from(self._table)
         )
 
         column_values = list(element_values.fetchall())

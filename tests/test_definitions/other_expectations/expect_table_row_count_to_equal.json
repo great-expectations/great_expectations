@@ -22,6 +22,13 @@
           null
         ]
       },
+      "schemas": {
+        "spark": {
+          "c1": "int",
+          "c2": "string",
+          "c3": "string"
+        }
+      },
       "tests": [
         {
           "title": "Basic positive case",

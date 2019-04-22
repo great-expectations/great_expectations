@@ -28,6 +28,14 @@
         "ts": "datetime",
         "alpha": "varchar",
         "numeric": "int"
+      },
+      "postgresql": {
+        "x": "int",
+        "y": "text",
+        "z": "int",
+        "ts": "timestamp",
+        "alpha": "text",
+        "numeric": "int"
       }
     },
     "tests": [
