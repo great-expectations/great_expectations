@@ -78,9 +78,12 @@ class MetaFileDataAsset(DataAsset):
                     lines.pop(0)
 
             if lines:
+                if null_lines_regex is not None:
                 null_lines = re.compile(null_lines_regex) #Ignore lines that are empty or have only white space ("null values" in the line-map context)
                 boolean_mapped_null_lines = np.array(
                     [bool(null_lines.match(line)) for line in lines])
+                else:
+                    boolean_mapped_null_lines = np.zeros(len(lines), dtype=bool)
                 element_count = int(len(lines))
                 if element_count > sum(boolean_mapped_null_lines):
                     nonnull_lines = list(compress(lines, np.invert(boolean_mapped_null_lines)))
