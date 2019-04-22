@@ -41,6 +41,7 @@ class MetaFileDataAsset(DataAsset):
             Users can specify skip value k that will cause the expectation
             function to disregard the first k lines of the file
 
+            null_lines_regex defines a regex used to skip lines, but can be overridden
         See also:
             :func:`expect_file_line_regex_match_count_to_be_between
             <great_expectations.data_asset.base.DataAsset.expect_file_line_regex_match_count_to_be_between>` \
@@ -53,7 +54,7 @@ class MetaFileDataAsset(DataAsset):
 
         @cls.expectation(argspec)
         @wraps(func)
-        def inner_wrapper(self, mostly=None, skip=None, result_format=None, *args, **kwargs):
+        def inner_wrapper(self, skip=None, mostly=None, null_lines_regex=r"^\s*$", result_format=None, *args, **kwargs):
             try:
                 f = open(self.path, "r")
             except:
@@ -77,7 +78,7 @@ class MetaFileDataAsset(DataAsset):
                     lines.pop(0)
 
             if lines:
-                null_lines = re.compile("\s+") #Ignore lines with just white space
+                null_lines = re.compile(null_lines_regex) #Ignore lines that are empty or have only white space ("null values" in the line-map context)
                 boolean_mapped_null_lines = np.array(
                     [bool(null_lines.match(line)) for line in lines])
                 element_count = int(len(lines))
