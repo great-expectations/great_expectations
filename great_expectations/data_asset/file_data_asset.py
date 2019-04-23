@@ -426,11 +426,19 @@ class FileDataAsset(MetaFileDataAsset):
         except OSError:
             raise
 
-        if not float(minsize).is_integer():
-            raise TypeError('minsize must be an integer')
+        # We want string or float or int versions of numbers, but
+        # they must be representable as clean integers.
+        try:
+            if not float(minsize).is_integer():
+                raise ValueError('minsize must be an integer')
+            minsize = int(float(minsize))
 
-        if maxsize is not None and not float(maxsize).is_integer():
-            raise TypeError('maxsize must be an integer')
+            if maxsize is not None and not float(maxsize).is_integer():
+                raise ValueError('maxsize must be an integer')
+            elif maxsize is not None:
+                maxsize = int(float(maxsize))
+        except TypeError:
+            raise
 
         if minsize < 0:
             raise ValueError('minsize must be greater than or equal to 0')
