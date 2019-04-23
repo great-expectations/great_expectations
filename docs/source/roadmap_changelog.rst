@@ -15,6 +15,15 @@ Planned Features
 v.0.4.5__develop
 ----------------
 * Added support for date/datetime type columns in some SQLAlchemy expectations (#413)
+* Optimization: You can now disable `partial_unexpected_counts` by setting the \
+    `partial_unexpected_count` value to 0 in the result_format argument, and we do not compute it when it would
+    not be returned. (#431, thanks @eugmandel)
+* Fix: Correct error in unexpected_percent computations for sqlalchemy when unexpected values exceed limit (#424)
+* Fix: Pass meta object to expectation result (#415, thanks @jseeman)
+* Internal documentation and testing improvements (thanks @zdog).
+* Add support for multicolumn expectations, with `expect_multicolumn_values_to_be_unique` as an example (#406)
+* Add dataset class to from_pandas to simplify using custom datasets (#404, thanks @jtilly)
+* Add schema support for sqlalchemy data context (#410, thanks @rahulj51)
 
 v.0.4.5
 ----------------
