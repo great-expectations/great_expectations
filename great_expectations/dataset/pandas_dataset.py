@@ -369,6 +369,21 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         self.discard_subset_failing_expectations = kwargs.get(
             'discard_subset_failing_expectations', False)
 
+    def get_expectations_config(self,
+                            discard_failed_expectations=True,
+                            discard_result_format_kwargs=True,
+                            discard_include_configs_kwargs=True,
+                            discard_catch_exceptions_kwargs=True,
+                            suppress_warnings=False
+                            ):
+        config = super().get_expectations_config(discard_failed_expectations=discard_failed_expectations,
+                                                discard_result_format_kwargs=discard_result_format_kwargs,
+                                                discard_include_configs_kwargs=discard_include_configs_kwargs,
+                                                discard_catch_exceptions_kwargs=discard_catch_exceptions_kwargs,
+                                                suppress_warnings=suppress_warnings)
+        config["data_asset_type"] = __class__.__name__
+        return config
+
     ### Expectation methods ###
     @DocInherit
     @Dataset.expectation(['column'])

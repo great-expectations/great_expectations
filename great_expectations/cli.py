@@ -2,11 +2,14 @@ import json
 import sys
 import os
 import argparse
+import logging
 
 from great_expectations import read_csv
 from great_expectations import __version__
-from great_expectations.dataset import PandasDataset
+from great_expectations.dataset import Dataset, PandasDataset
+from great_expectations.data_asset import FileDataAsset
 
+logger = logging.getLogger(__name__)
 
 def dispatch(args):
     parser = argparse.ArgumentParser(
@@ -69,6 +72,7 @@ def validate(parsed_args):
     else:
         evaluation_parameters = None
 
+    # Use a custom dataasset module and class if provided. Otherwise infer from the config.
     if parsed_args["custom_dataset_module"]:
         sys.path.insert(0, os.path.dirname(
             parsed_args["custom_dataset_module"]))
@@ -77,14 +81,27 @@ def validate(parsed_args):
         custom_module = __import__(module_name)
         dataset_class = getattr(
             custom_module, parsed_args["custom_dataset_class"])
-
+    elif "data_asset_type" in expectations_config:
+        if expectations_config["data_asset_type"]== "PandasDataset":
+            dataset_class = PandasDataset
+        elif expectations_config["data_asset_type"].endswith("Dataset"):
+            logger.info("Using PandasDataset to validate dataset of type %s." % expectations_config["data_asset_type"])
+            dataset_class = PandasDataset
+        elif expectations_config["data_asset_type"] == "FileDataAsset":
+            dataset_class = FileDataAsset
+        else:
+            logger.critical("Unrecognized data_asset_type %s" % expectations_config["data_asset_type"])
+            return -1
     else:
         dataset_class = PandasDataset
 
-    df = read_csv(data_set, expectations_config=expectations_config,
-                  dataset_class=dataset_class)
+    if isinstance(dataset_class, Dataset):
+        da = read_csv(data_set, expectations_config=expectations_config,
+                    dataset_class=dataset_class)
+    else:
+        da = dataset_class(data_set, config=expectations_config)
 
-    result = df.validate(
+    result = da.validate(
         evaluation_parameters=evaluation_parameters,
         result_format=parsed_args["result_format"],
         catch_exceptions=parsed_args["catch_exceptions"],
@@ -103,6 +120,11 @@ def version(parsed_args):
 
 
 def main():
+    handler = logging.StreamHandler()
+    formatter = logging.Formatter('%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+    logger.setLevel(logging.INFO)
     return_value = dispatch(sys.argv[1:])
     sys.exit(return_value)
 
