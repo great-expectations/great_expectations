@@ -181,11 +181,11 @@ def test_expect_file_size_to_be_between():
 
     # Test minsize not an integer
     with pytest.raises(TypeError):
-        titanic_file.expect_file_size_to_be_between('0', 10000)
+        titanic_file.expect_file_size_to_be_between('a', 10000)
 
     # Test maxsize not an integer
     with pytest.raises(TypeError):
-        titanic_file.expect_file_size_to_be_between(0, '10000')
+        titanic_file.expect_file_size_to_be_between(0, '10000a')
 
     # Test minsize less than 0
     with pytest.raises(ValueError):

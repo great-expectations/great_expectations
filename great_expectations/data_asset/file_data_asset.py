@@ -433,13 +433,13 @@ class FileDataAsset(MetaFileDataAsset):
             raise TypeError('maxsize must be an integer')
 
         if minsize < 0:
-            raise ValueError('minsize must be greater than of equal to 0')
+            raise ValueError('minsize must be greater than or equal to 0')
 
         if maxsize is not None and maxsize < 0:
-            raise ValueError('maxsize must be greater than of equal to 0')
+            raise ValueError('maxsize must be greater than or equal to 0')
 
         if maxsize is not None and minsize > maxsize:
-            raise ValueError('maxsize must be greater than of equal to minsize')
+            raise ValueError('maxsize must be greater than or equal to minsize')
 
         if maxsize is None and size >= minsize:
             success = True
