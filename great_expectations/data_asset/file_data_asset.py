@@ -387,7 +387,7 @@ class FileDataAsset(MetaFileDataAsset):
         return {"success":success}
 
     @DataAsset.expectation(["minsize", "maxsize"])
-    def expect_file_size_to_be_between(self, minsize, maxsize, result_format=None,
+    def expect_file_size_to_be_between(self, minsize=0, maxsize=None, result_format=None,
                                        include_config=False, catch_exceptions=None,
                                        meta=None):
 
@@ -421,31 +421,47 @@ class FileDataAsset(MetaFileDataAsset):
         :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
         """
 
-        success = False
         try:
             size = os.path.getsize(self._path)
         except OSError:
             raise
 
-        if not isinstance(minsize,int):
-            raise TypeError('minsize must be an integer')
+        # We want string or float or int versions of numbers, but
+        # they must be representable as clean integers.
+        try:
+            if not float(minsize).is_integer():
+                raise ValueError('minsize must be an integer')
+            minsize = int(float(minsize))
 
-        if not isinstance(maxsize,int):
-            raise TypeError('maxsize must be an integer')
+            if maxsize is not None and not float(maxsize).is_integer():
+                raise ValueError('maxsize must be an integer')
+            elif maxsize is not None:
+                maxsize = int(float(maxsize))
+        except TypeError:
+            raise
 
         if minsize < 0:
-            raise ValueError('minsize must be greater than of equal to 0')
+            raise ValueError('minsize must be greater than or equal to 0')
 
-        if maxsize < 0:
-            raise ValueError('maxsize must be greater than of equal to 0')
+        if maxsize is not None and maxsize < 0:
+            raise ValueError('maxsize must be greater than or equal to 0')
 
-        if minsize > maxsize:
-            raise ValueError('maxsize must be greater than of equal to minsize')
+        if maxsize is not None and minsize > maxsize:
+            raise ValueError('maxsize must be greater than or equal to minsize')
 
-        if (size >= minsize) and (size <= maxsize):
+        if maxsize is None and size >= minsize:
             success = True
+        elif (size >= minsize) and (size <= maxsize):
+            success = True
+        else: 
+            success = False
 
-        return {"success":success}
+        return {
+            "success": success,
+            "details": {
+                "filesize": size
+            }
+        }
     
     @DataAsset.expectation(["filepath"])
     def expect_file_to_exist(self, filepath=None, result_format=None, include_config=False,

@@ -180,12 +180,12 @@ def test_expect_file_size_to_be_between():
     titanic_file = ge.data_asset.FileDataAsset(titanic_path)
 
     # Test minsize not an integer
-    with pytest.raises(TypeError):
-        titanic_file.expect_file_size_to_be_between('0', 10000)
+    with pytest.raises(ValueError):
+        titanic_file.expect_file_size_to_be_between('a', 10000)
 
     # Test maxsize not an integer
-    with pytest.raises(TypeError):
-        titanic_file.expect_file_size_to_be_between(0, '10000')
+    with pytest.raises(ValueError):
+        titanic_file.expect_file_size_to_be_between(0, '10000a')
 
     # Test minsize less than 0
     with pytest.raises(ValueError):
