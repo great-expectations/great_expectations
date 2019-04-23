@@ -5,6 +5,12 @@ class Dataset(DataAsset):
     def __init__(self, *args, **kwargs):
         super(Dataset, self).__init__(*args, **kwargs)
 
+    def _initialize_expectations(self, config=None, data_asset_name=None):
+        """Override data_asset_type with "Dataset"
+        """
+        super(Dataset, self)._initialize_expectations(config=config, data_asset_name=data_asset_name)
+        self._expectations_config["data_asset_type"] = "Dataset"
+
     @classmethod
     def column_map_expectation(cls, func):
         """Constructs an expectation using column-map semantics.

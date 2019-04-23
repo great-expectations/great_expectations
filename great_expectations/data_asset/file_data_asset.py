@@ -60,7 +60,7 @@ class MetaFileDataAsset(DataAsset):
         @wraps(func)
         def inner_wrapper(self, skip=None, mostly=None, null_lines_regex=r"^\s*$", result_format=None, *args, **kwargs):
             try:
-                f = open(self.path, "r")
+                f = open(self._path, "r")
             except:
                 raise
 
@@ -139,10 +139,9 @@ class FileDataAsset(MetaFileDataAsset):
     """
 
 
-    def __init__(self, file_path, *args, **kwargs):
+    def __init__(self, file_path=None, *args, **kwargs):
         super(FileDataAsset, self).__init__(*args, **kwargs)
-        self.path = file_path
-
+        self._path = file_path
 
     @MetaFileDataAsset.file_lines_map_expectation
     def expect_file_line_regex_match_count_to_be_between(self,
@@ -375,7 +374,7 @@ class FileDataAsset(MetaFileDataAsset):
         # Limit file reads to 64 KB chunks at a time
             BLOCKSIZE = 65536
             try:
-                with open(self.path, 'rb') as file:
+                with open(self._path, 'rb') as file:
                     file_buffer = file.read(BLOCKSIZE)
                     while file_buffer:
                         hash.update(file_buffer)
@@ -424,7 +423,7 @@ class FileDataAsset(MetaFileDataAsset):
 
         success = False
         try:
-            size = os.path.getsize(self.path)
+            size = os.path.getsize(self._path)
         except OSError:
             raise
 
@@ -448,12 +447,17 @@ class FileDataAsset(MetaFileDataAsset):
 
         return {"success":success}
     
-    @DataAsset.expectation([])
-    def expect_file_to_exist(self, result_format=None, include_config=False,
+    @DataAsset.expectation(["filepath"])
+    def expect_file_to_exist(self, filepath=None, result_format=None, include_config=False,
                              catch_exceptions=None, meta=None):
 
         """
         Checks to see if a file specified by the user actually exists
+
+        Args:
+            filepath (str or None): \
+                The filepath to evalutate. If none, will check the currently-configured path object
+                of this FileDataAsset.
 
         Keyword Args:
 
@@ -481,9 +485,12 @@ class FileDataAsset(MetaFileDataAsset):
         :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
         """
 
-        success = False
-        if os.path.isfile(self.path):
+        if filepath is not None and os.path.isfile(filepath):
             success = True
+        elif self._path is not None and os.path.isfile(self._path):
+            success = True
+        else:
+            success = False
 
         return {"success":success}
 
@@ -537,7 +544,7 @@ class FileDataAsset(MetaFileDataAsset):
         success = False
 
         try:
-            with open(self.path, 'r') as f:
+            with open(self._path, 'r') as f:
                 lines = f.readlines() #Read in file lines
 
         except IOError:
@@ -596,7 +603,7 @@ class FileDataAsset(MetaFileDataAsset):
         success = False
         if schema is None:
             try:
-                with open(self.path, 'r') as f:
+                with open(self._path, 'r') as f:
                     json.load(f)
                 success = True
             except ValueError:
@@ -606,7 +613,7 @@ class FileDataAsset(MetaFileDataAsset):
                 with open(schema, 'r') as s:
                     schema_data = s.read()
                 sdata = json.loads(schema_data)
-                with open(self.path, 'r') as f:
+                with open(self._path, 'r') as f:
                     json_data = f.read()
                 jdata = json.loads(json_data)
                 jsonschema.validate(jdata, sdata)
