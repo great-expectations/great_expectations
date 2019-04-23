@@ -289,21 +289,6 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         # Only call super once connection is established and table_name and columns known to allow autoinspection
         super(SqlAlchemyDataset, self).__init__(*args, **kwargs)
 
-    def get_expectations_config(self,
-                            discard_failed_expectations=True,
-                            discard_result_format_kwargs=True,
-                            discard_include_configs_kwargs=True,
-                            discard_catch_exceptions_kwargs=True,
-                            suppress_warnings=False
-                            ):
-        config = super().get_expectations_config(discard_failed_expectations=discard_failed_expectations,
-                                                discard_result_format_kwargs=discard_result_format_kwargs,
-                                                discard_include_configs_kwargs=discard_include_configs_kwargs,
-                                                discard_catch_exceptions_kwargs=discard_catch_exceptions_kwargs,
-                                                suppress_warnings=suppress_warnings)
-        config["data_asset_type"] = __class__.__name__
-        return config
-
     def create_temporary_table(self, table_name, custom_sql):
         """
         Create Temporary table based on sql query. This will be used as a basis for executing expectations.

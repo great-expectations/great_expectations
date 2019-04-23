@@ -5,6 +5,7 @@ import copy
 from functools import wraps
 import traceback
 import warnings
+import logging
 from six import PY3, string_types
 from collections import namedtuple
 
@@ -17,6 +18,7 @@ from great_expectations.version import __version__
 from great_expectations.data_asset.util import DotDict, recursively_convert_to_json_serializable, parse_result_format
 from great_expectations.dataset.autoinspect import columns_exist
 
+logger = logging.getLogger("DataAsset")
 
 class DataAsset(object):
 
@@ -218,6 +220,9 @@ class DataAsset(object):
 
         """
         if config != None:
+            if "data_asset_type" in config and config["data_asset_type"] != self.__class__.__name__:
+                logger.warning("Building data asset of type %s but config is of type %s" % \
+                    (config["data_asset_type"], self.__class__.__name__))
             #!!! Should validate the incoming config with jsonschema here
 
             # Copy the original so that we don't overwrite it by accident
@@ -236,6 +241,7 @@ class DataAsset(object):
                 warnings.simplefilter("ignore", category=UserWarning)
                 self._expectations_config = DotDict({
                     "data_asset_name": data_asset_name,
+                    "data_asset_type": self.__class__.__name__,
                     "meta": {
                         "great_expectations.__version__": __version__
                     },

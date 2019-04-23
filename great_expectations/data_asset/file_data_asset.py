@@ -143,21 +143,6 @@ class FileDataAsset(MetaFileDataAsset):
         super(FileDataAsset, self).__init__(*args, **kwargs)
         self._path = file_path
 
-    def get_expectations_config(self,
-                            discard_failed_expectations=True,
-                            discard_result_format_kwargs=True,
-                            discard_include_configs_kwargs=True,
-                            discard_catch_exceptions_kwargs=True,
-                            suppress_warnings=False
-                            ):
-        config = super().get_expectations_config(discard_failed_expectations=discard_failed_expectations,
-                                                discard_result_format_kwargs=discard_result_format_kwargs,
-                                                discard_include_configs_kwargs=discard_include_configs_kwargs,
-                                                discard_catch_exceptions_kwargs=discard_catch_exceptions_kwargs,
-                                                suppress_warnings=suppress_warnings)
-        config["data_asset_type"] = __class__.__name__
-        return config
-
     @MetaFileDataAsset.file_lines_map_expectation
     def expect_file_line_regex_match_count_to_be_between(self,
                                                          regex,
