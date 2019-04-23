@@ -35,9 +35,11 @@ class DataAsset(object):
 
         """
         autoinspect_func = kwargs.pop("autoinspect_func", None)
+        initial_config = kwargs.pop("config", None)
+        data_asset_name = kwargs.pop("data_asset_name", None)
 
         super(DataAsset, self).__init__(*args, **kwargs)
-        self._initialize_expectations()
+        self._initialize_expectations(config=initial_config, data_asset_name=data_asset_name)
         if autoinspect_func is not None:
             autoinspect_func(self)
 
@@ -198,7 +200,7 @@ class DataAsset(object):
 
         return outer_wrapper
 
-    def _initialize_expectations(self, config=None, name=None):
+    def _initialize_expectations(self, config=None, data_asset_name=None):
         """Instantiates `_expectations_config` as empty by default or with a specified expectation `config`.
         In addition, this always sets the `default_expectation_args` to:
             `include_config`: False,
@@ -209,9 +211,9 @@ class DataAsset(object):
             config (json): \
                 A json-serializable expectation config. \
                 If None, creates default `_expectations_config` with an empty list of expectations and \
-                key value `data_asset_name` as `name`.
+                key value `data_asset_name` as `data_asset_name`.
 
-            name (string): \
+            data_asset_name (string): \
                 The name to assign to `_expectations_config.data_asset_name` if `config` is not provided.
 
         """
@@ -224,6 +226,8 @@ class DataAsset(object):
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore", category=UserWarning)
                 self._expectations_config = DotDict(copy.deepcopy(config))
+                if data_asset_name is not None:
+                    self._expectations_config["data_asset_name"] = data_asset_name
 
         else:
             # Pandas incorrectly interprets this as an attempt to create a column and throws up a warning. Suppress it
@@ -231,7 +235,7 @@ class DataAsset(object):
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore", category=UserWarning)
                 self._expectations_config = DotDict({
-                    "data_asset_name": name,
+                    "data_asset_name": data_asset_name,
                     "meta": {
                         "great_expectations.__version__": __version__
                     },
@@ -730,7 +734,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                     If True, the returned results include the config information associated with each expectation, if \
                     it exists.
                 only_return_failures (boolean): \
-                    If True, expectation results are only returned when ``success = False``\.
+                    If True, expectation results are only returned when ``success = False`` \
 
             Returns:
                 A JSON-formatted dictionary containing a list of the validation results. \
@@ -911,6 +915,14 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         self._expectations_config['evaluation_parameters'].update(
             {parameter_name: parameter_value})
+
+    def set_data_asset_name(self, data_asset_name):
+        """Sets the name of this data_asset as stored in the expectations configuration."""
+        self._expectations_config['data_asset_name'] = data_asset_name
+
+    def get_data_asset_name(self):
+        """Gets the current name of this data_asset as stored in the expectations configuration."""
+        return self._expectations_config['data_asset_name']
 
     def _build_evaluation_parameters(self, expectation_args, evaluation_parameters):
         """Build a dictionary of parameters to evaluate, using the provided evaluation_paramters,
