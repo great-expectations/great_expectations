@@ -796,7 +796,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         try:
             if expectations_config['meta']['great_expectations.__version__'] != __version__:
                 warnings.warn(
-                    "WARNING: This configuration object was built using a different version of great_expectations than is currently validating it.")
+                    "WARNING: This configuration object was built using version %s of great_expectations, but is currently being valided by version %s." % (expectations_config['meta']['great_expectations.__version__'], __version__))
         except KeyError:
             warnings.warn(
                 "WARNING: No great_expectations version found in configuration object.")
