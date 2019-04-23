@@ -82,7 +82,7 @@ def validate(parsed_args):
         dataset_class = getattr(
             custom_module, parsed_args["custom_dataset_class"])
     elif "data_asset_type" in expectations_config:
-        if expectations_config["data_asset_type"]== "PandasDataset":
+        if expectations_config["data_asset_type"] == "Dataset" or expectations_config["data_asset_type"] == "PandasDataset":
             dataset_class = PandasDataset
         elif expectations_config["data_asset_type"].endswith("Dataset"):
             logger.info("Using PandasDataset to validate dataset of type %s." % expectations_config["data_asset_type"])
@@ -90,7 +90,7 @@ def validate(parsed_args):
         elif expectations_config["data_asset_type"] == "FileDataAsset":
             dataset_class = FileDataAsset
         else:
-            logger.critical("Unrecognized data_asset_type %s" % expectations_config["data_asset_type"])
+            logger.critical("Unrecognized data_asset_type %s. You may need to specifcy custom_dataset_module and custom_dataset_class." % expectations_config["data_asset_type"])
             return -1
     else:
         dataset_class = PandasDataset

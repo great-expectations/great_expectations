@@ -32,7 +32,7 @@ class TestDataAsset(unittest.TestCase):
             D._expectations_config,
             {
                 "data_asset_name": None,
-                "data_asset_type": "PandasDataset",
+                "data_asset_type": "Dataset",
                 "meta": {
                     "great_expectations.__version__": ge.__version__
                 },
@@ -45,7 +45,7 @@ class TestDataAsset(unittest.TestCase):
             D.get_expectations_config(),
             {
                 "data_asset_name": None,
-                "data_asset_type": "PandasDataset",
+                "data_asset_type": "Dataset",
                 "meta": {
                     "great_expectations.__version__": ge.__version__
                 },
@@ -166,7 +166,7 @@ class TestDataAsset(unittest.TestCase):
                 }
             ],
             "data_asset_name": None,
-            "data_asset_type": "PandasDataset",
+            "data_asset_type": "Dataset",
             "meta": {
                 "great_expectations.__version__": ge.__version__
             }
@@ -239,7 +239,7 @@ class TestDataAsset(unittest.TestCase):
                 }
             ],
             "data_asset_name": None,
-            "data_asset_type": "PandasDataset",
+            "data_asset_type": "Dataset",
             "meta": {
                 "great_expectations.__version__": ge.__version__
             }
@@ -311,7 +311,7 @@ class TestDataAsset(unittest.TestCase):
                 }
             ],
             "data_asset_name": None,
-            "data_asset_type": "PandasDataset",
+            "data_asset_type": "Dataset",
             "meta": {
                 "great_expectations.__version__": ge.__version__
             }
@@ -976,7 +976,7 @@ class TestDataAsset(unittest.TestCase):
                     }
                 ],
                 'data_asset_name': None,
-                "data_asset_type": "PandasDataset",
+                "data_asset_type": "Dataset",
                 "meta": {
                     "great_expectations.__version__": ge.__version__
                 }
