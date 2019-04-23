@@ -76,7 +76,7 @@ For quick, hands-on introductions to Great Expectations' key features, check out
 What's the best way to get in touch with the Great Expectations team?
 --------------------------------------------------------------------------------
 
-[Issues on GitHub](https://github.com/great-expectations/great_expectations/issues). If you have questions, comments, feature requests, etc., [opening an issue](https://github.com/great-expectations/great_expectations/issues/new) is definitely the best path forward.
+If you have questions, comments, feature requests, etc., [opening an issue](https://github.com/great-expectations/great_expectations/issues/new) is definitely the best path forward. We also have a slack channel: if you emal us at <team@greatexpectations.io> with the subject line "SLACK" we'll get you an invite.
 
 
 Great Expectations doesn't do X. Is it right for my use case?

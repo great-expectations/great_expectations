@@ -5,6 +5,7 @@ import copy
 from functools import wraps
 import traceback
 import warnings
+import logging
 from six import PY3, string_types
 from collections import namedtuple
 
@@ -17,6 +18,7 @@ from great_expectations.version import __version__
 from great_expectations.data_asset.util import DotDict, recursively_convert_to_json_serializable, parse_result_format
 from great_expectations.dataset.autoinspect import columns_exist
 
+logger = logging.getLogger("DataAsset")
 
 class DataAsset(object):
 
@@ -207,6 +209,10 @@ class DataAsset(object):
             `catch_exceptions`: False,
             `output_format`: 'BASIC'
 
+        By default, initializes data_asset_type to the name of the implementing class, but subclasses
+        that have interoperable semantics (e.g. Dataset) may override that parameter to clarify their
+        interoperability.
+
         Args:
             config (json): \
                 A json-serializable expectation config. \
@@ -236,6 +242,7 @@ class DataAsset(object):
                 warnings.simplefilter("ignore", category=UserWarning)
                 self._expectations_config = DotDict({
                     "data_asset_name": data_asset_name,
+                    "data_asset_type": self.__class__.__name__,
                     "meta": {
                         "great_expectations.__version__": __version__
                     },
