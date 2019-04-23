@@ -209,6 +209,10 @@ class DataAsset(object):
             `catch_exceptions`: False,
             `output_format`: 'BASIC'
 
+        By default, initializes data_asset_type to the name of the implementing class, but subclasses
+        that have interoperable semantics (e.g. Dataset) may override that parameter to clarify their
+        interoperability.
+
         Args:
             config (json): \
                 A json-serializable expectation config. \
@@ -220,9 +224,6 @@ class DataAsset(object):
 
         """
         if config != None:
-            if "data_asset_type" in config and config["data_asset_type"] != self.__class__.__name__:
-                logger.warning("Building data asset of type %s but config is of type %s" % \
-                    (config["data_asset_type"], self.__class__.__name__))
             #!!! Should validate the incoming config with jsonschema here
 
             # Copy the original so that we don't overwrite it by accident
