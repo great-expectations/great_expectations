@@ -69,6 +69,7 @@ class MetaPandasDataset(Dataset):
             ignore_values = [None, np.nan]
             if func.__name__ in ['expect_column_values_to_not_be_null', 'expect_column_values_to_be_null']:
                 ignore_values = []
+                result_format['partial_unexpected_count'] = 0  # Optimization to avoid meaningless computation for these expectations
 
             series = self[column]
 
