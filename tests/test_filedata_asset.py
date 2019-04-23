@@ -30,12 +30,12 @@ def test_expectation_config_filedata_asset():
     f_dat = ge.data_asset.FileDataAsset(file_path)
 
     # Set up expectations
-    f_dat.expect_file_line_regex_match_count_to_equal(regex=',\S',
+    f_dat.expect_file_line_regex_match_count_to_equal(regex=r',\S',
                                                       expected_count=3,
                                                       skip=1, result_format="BASIC",
                                                       catch_exceptions=True)
 
-    f_dat.expect_file_line_regex_match_count_to_be_between(regex=',\S',
+    f_dat.expect_file_line_regex_match_count_to_be_between(regex=r',\S',
                                                            expected_max_count=2,
                                                            skip=1, result_format="SUMMARY",
                                                            include_config=True)
@@ -86,7 +86,7 @@ def test_file_format_map_output():
     white_space_dat = ge.data_asset.FileDataAsset(white_space_path)
 
     # Boolean Expectation Output
-    expectation = incomplete_file_dat.expect_file_line_regex_match_count_to_equal(regex=',\S',
+    expectation = incomplete_file_dat.expect_file_line_regex_match_count_to_equal(regex=r',\S',
                                                                                   expected_count=3,
                                                                                   skip=1,
                                                                                   result_format="BOOLEAN_ONLY")
@@ -94,7 +94,7 @@ def test_file_format_map_output():
     assertDeepAlmostEqual(expected_result, expectation)
 
     # Empty File Expectations
-    expectation = null_file_dat.expect_file_line_regex_match_count_to_equal(regex=',\S',
+    expectation = null_file_dat.expect_file_line_regex_match_count_to_equal(regex=r',\S',
                                                                             expected_count=3,
                                                                             skip=1,
                                                                             result_format="BASIC")
@@ -109,7 +109,7 @@ def test_file_format_map_output():
     assertDeepAlmostEqual(expected_result, expectation)
 
     # White Space File
-    expectation = white_space_dat.expect_file_line_regex_match_count_to_equal(regex=',\S',
+    expectation = white_space_dat.expect_file_line_regex_match_count_to_equal(regex=r',\S',
                                                                               expected_count=3,
                                                                               result_format="BASIC")
     expected_result = {"success":None,
@@ -123,7 +123,7 @@ def test_file_format_map_output():
     assertDeepAlmostEqual(expected_result, expectation)
 
     # Complete Result Format
-    expectation = incomplete_file_dat.expect_file_line_regex_match_count_to_equal(regex=',\S',
+    expectation = incomplete_file_dat.expect_file_line_regex_match_count_to_equal(regex=r',\S',
                                                                                   expected_count=3,
                                                                                   skip=1,
                                                                                   result_format="COMPLETE")
@@ -147,7 +147,7 @@ def test_file_format_map_output():
 
     # Invalid Result Format
     with pytest.raises(ValueError):
-            expectation = incomplete_file_dat.expect_file_line_regex_match_count_to_equal(regex=',\S',
+            expectation = incomplete_file_dat.expect_file_line_regex_match_count_to_equal(regex=r',\S',
                                                                                           expected_count=3,
                                                                                           skip=1,
                                                                                           result_format="JOKE")
