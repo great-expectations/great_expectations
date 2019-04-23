@@ -95,7 +95,7 @@ def validate(parsed_args):
     else:
         dataset_class = PandasDataset
 
-    if isinstance(dataset_class, Dataset):
+    if issubclass(dataset_class, Dataset):
         da = read_csv(data_set, expectations_config=expectations_config,
                     dataset_class=dataset_class)
     else:
