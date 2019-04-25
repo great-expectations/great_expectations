@@ -558,7 +558,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                                           parse_strings_as_datetimes=None,
                                           result_format=None, include_config=False, catch_exceptions=None, meta=None):
         if parse_strings_as_datetimes:
-            parsed_value_set = [parse(value) if isinstance(value, string_types) else value for value in value_set]
+            parsed_value_set = self._parse_value_set(value_set)
         else:
             parsed_value_set = value_set
         return column.map(lambda x: x in parsed_value_set)
@@ -567,8 +567,13 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
     @MetaPandasDataset.column_map_expectation
     def expect_column_values_to_not_be_in_set(self, column, value_set,
                                               mostly=None,
+                                              parse_strings_as_datetimes=None,
                                               result_format=None, include_config=False, catch_exceptions=None, meta=None):
-        return column.map(lambda x: x not in value_set)
+        if parse_strings_as_datetimes:
+            parsed_value_set = self._parse_value_set(value_set)
+        else:
+            parsed_value_set = value_set
+        return column.map(lambda x: x not in parsed_value_set)
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
