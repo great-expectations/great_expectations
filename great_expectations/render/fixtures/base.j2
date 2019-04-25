@@ -3,28 +3,54 @@
   <head>
     <title>{% block title %}{% endblock %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="refresh" content="1"/>
+    <meta http-equiv="refresh" content="10"/>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-    <style type="text/css">
-      .container {
-        max-width: 500px;
-        padding-top: 100px;
-      }
-    </style>
   </head>
   <body>
     {% block navbar %}{% include 'navbar.j2' %}{% endblock %}
     {% block header %}{% endblock %}
     <div class="container">
         <div class="row">
-            <div class="col-2">
+            <div class="col-3">
+<nav id="navbar-example3" class="navbar navbar-light bg-light">
+  <a class="navbar-brand" href="#">Navbar</a>
+  <nav class="nav nav-pills flex-column">
+    <a class="nav-link" href="#item-1">Item 1</a>
+    <nav class="nav nav-pills flex-column">
+      <a class="nav-link ml-3 my-1" href="#item-1-1">Item 1-1</a>
+      <a class="nav-link ml-3 my-1" href="#item-1-2">Item 1-2</a>
+    </nav>
+    <a class="nav-link" href="#item-2">Item2</a>
+    <a class="nav-link" href="#item-3">Item3</a>
+    <nav class="nav nav-pills flex-column">
+      <a class="nav-link ml-3 my-1" href="#item-3-1">Item 3-1</a>
+      <a class="nav-link ml-3 my-1" href="#item-3-2">Item 3-2</a>
+    </nav>
+  </nav>
+</nav>          
                 <ul>
                     {% for item in range(10) %}
                         <li>{{ item }}</li>
                     {% endfor %}
                 </ul>
             </div>
-            <div class="col-10">
+            <div class="col-9">
+                <div data-spy="scroll" data-target="#navbar-example3" data-offset="0">
+                    <h4 id="item-1">Item 1</h4>
+                    <p>...</p>
+                    <h5 id="item-1-1">Item 1-1</h5>
+                    <p>...</p>
+                    <h5 id="item-1-2">Item 2-2</h5>
+                    <p>...</p>
+                    <h4 id="item-2">Item 2</h4>
+                    <p>...</p>
+                    <h4 id="item-3">Item 3</h4>
+                    <p>...</p>
+                    <h5 id="item-3-1">Item 3-1</h5>
+                    <p>...</p>
+                    <h5 id="item-3-2">Item 3-2</h5>
+                    <p>...</p>
+                </div>
                 <ul>
                     {% for item in elements %}
                         <li>{{ item }}</li>
