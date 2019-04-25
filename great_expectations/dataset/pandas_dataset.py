@@ -761,16 +761,14 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
     def expect_column_values_to_match_regex(self, column, regex,
                                             mostly=None,
                                             result_format=None, include_config=False, catch_exceptions=None, meta=None):
-        return column.map(
-            lambda x: re.findall(regex, str(x)) != []
-        )
+        return column.astype(str).str.contains(regex)
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
     def expect_column_values_to_not_match_regex(self, column, regex,
                                                 mostly=None,
                                                 result_format=None, include_config=False, catch_exceptions=None, meta=None):
-        return column.map(lambda x: re.findall(regex, str(x)) == [])
+        return ~column.astype(str).str.contains(regex)
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
@@ -778,33 +776,32 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                                                  mostly=None,
                                                  result_format=None, include_config=False, catch_exceptions=None, meta=None):
 
+        regex_matches = []
+        for regex in regex_list:
+            regex_matches.append(column.astype(str).str.contains(regex))
+        regex_match_df = pd.concat(regex_matches, 
+                                   axis=1, ignore_index=True, sort=False)
+
         if match_on == "any":
-
-            def match_in_list(val):
-                if any(re.findall(regex, str(val)) for regex in regex_list):
-                    return True
-                else:
-                    return False
-
+            return regex_match_df.any(axis='columns')
         elif match_on == "all":
+            return regex_match_df.all(axis='columns')
+        else:
+            raise ValueError("match_on must be either 'any' or 'all'")
 
-            def match_in_list(val):
-                if all(re.findall(regex, str(val)) for regex in regex_list):
-                    return True
-                else:
-                    return False
-
-        return column.map(match_in_list)
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
     def expect_column_values_to_not_match_regex_list(self, column, regex_list,
                                                      mostly=None,
                                                      result_format=None, include_config=False, catch_exceptions=None, meta=None):
-        return column.map(
-            lambda x: not any([re.findall(regex, str(x))
-                               for regex in regex_list])
-        )
+        regex_matches = []
+        for regex in regex_list:
+            regex_matches.append(column.astype(str).str.contains(regex))
+        regex_match_df = pd.concat(regex_matches, 
+                                   axis=1, ignore_index=True, sort=False)
+
+        return ~regex_match_df.any(axis='columns')
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
