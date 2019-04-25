@@ -551,11 +551,6 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
         return column.map(lambda x: isinstance(x, tuple(target_type_list)))
 
-    @staticmethod
-    def _parse_value_set(value_set):
-        parsed_value_set = [parse(value) if isinstance(value, string_types) else value for value in value_set]
-        return parsed_value_set
-
     @DocInherit
     @MetaPandasDataset.column_map_expectation
     def expect_column_values_to_be_in_set(self, column, value_set,
