@@ -3,7 +3,7 @@ from __future__ import division
 import inspect
 import json
 import re
-from datetime import datetime
+from datetime import datetime # , timedelta # Add for case of testing timedelta types
 from functools import wraps
 import jsonschema
 import sys
@@ -520,12 +520,24 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             "float": [float, np.float_],
             "double": [float, np.longdouble],
             "bytes": [bytes, np.bytes_],
-            "string": [string_types, np.string_]
+            "string": [np.string_] + list (string_types)
+            # TODO: Consider adding these additional types with additional tests
+            # Would require updates to get_dataset test infrastructure for categorical
+            # "timedelta": [timedelta, np.timedelta64],
+            # "datetime": [datetime, np.datetime64],
+            # "category": ["category"]
         }
 
         target_type = type_map[type_]
 
-        return column.map(lambda x: isinstance(x, tuple(target_type)))
+        # Short-circuit if the dtype tells us
+        if column.dtype != "object":
+            if column.dtype in target_type:
+                return np.ones(len(column), dtype=bool)
+            else:
+                return np.zeros(len(column), dtype=bool)
+        else:
+            return column.map(lambda x: isinstance(x, tuple(target_type)))
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
@@ -541,7 +553,12 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             "float": [float, np.float_],
             "double": [float, np.longdouble],
             "bytes": [bytes, np.bytes_],
-            "string": [string_types, np.string_]
+            "string": [np.string_] + list (string_types)
+            # TODO: Consider adding these additional types with additional tests
+            # Would require updates to get_dataset test infrastructure for categorical
+            # "timedelta": [timedelta, np.timedelta64],
+            # "datetime": [datetime, np.datetime64],
+            # "category": ["category"]
         }
 
         # Build one type list with each specified type list from type_map
@@ -549,7 +566,14 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         for type_ in type_list:
             target_type_list += type_map[type_]
 
-        return column.map(lambda x: isinstance(x, tuple(target_type_list)))
+        # Short-circuit if the dtype tells us
+        if column.dtype != "object":
+            if column.dtype in target_type_list:
+                return np.ones(len(column), dtype=bool)
+            else:
+                return np.zeros(len(column), dtype=bool)
+        else:
+            return column.map(lambda x: isinstance(x, tuple(target_type_list)))
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
