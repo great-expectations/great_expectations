@@ -436,13 +436,13 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
         row_count = self.shape[0]
 
-        if min_value != None and max_value != None:
+        if min_value is not None and max_value is not None:
             outcome = row_count >= min_value and row_count <= max_value
 
-        elif min_value == None and max_value != None:
+        elif min_value is None and max_value is not None:
             outcome = row_count <= max_value
 
-        elif min_value != None and max_value == None:
+        elif min_value is not None and max_value is None:
             outcome = row_count >= min_value
 
         return {
@@ -601,7 +601,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         else:
             temp_column = column
 
-        if min_value != None and max_value != None and min_value > max_value:
+        if min_value is not None and max_value is not None and min_value > max_value:
             raise ValueError("min_value cannot be greater than max_value")
 
         def is_between(val):
@@ -612,7 +612,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             if type(val) == None:
                 return False
             else:
-                if min_value != None and max_value != None:
+                if min_value is not None and max_value is not None:
                     if allow_cross_type_comparisons:
                         try:
                             return (min_value <= val) and (val <= max_value)
@@ -626,7 +626,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
                         return (min_value <= val) and (val <= max_value)
 
-                elif min_value == None and max_value != None:
+                elif min_value is None and max_value is not None:
                     if allow_cross_type_comparisons:
                         try:
                             return val <= max_value
@@ -640,7 +640,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
                         return val <= max_value
 
-                elif min_value != None and max_value == None:
+                elif min_value is not None and max_value is None:
                     if allow_cross_type_comparisons:
                         try:
                             return min_value <= val
@@ -737,13 +737,13 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
         column_lengths = column.astype(str).str.len()
 
-        if min_value != None and max_value != None:
+        if min_value is not None and max_value is not None:
             return column_lengths.between(min_value, max_value)
 
-        elif min_value == None and max_value != None:
+        elif min_value is None and max_value is not None:
             return column_lengths <= max_value
 
-        elif min_value != None and max_value == None:
+        elif min_value is not None and max_value is None:
             return column_lengths >= min_value
 
         else:
@@ -779,7 +779,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         regex_matches = []
         for regex in regex_list:
             regex_matches.append(column.astype(str).str.contains(regex))
-        regex_match_df = pd.concat(regex_matches, 
+        regex_match_df = pd.concat(regex_matches,
                                    axis=1, ignore_index=True, sort=False)
 
         if match_on == "any":
@@ -1067,13 +1067,13 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
         col_sum = column.sum()
 
-        if min_value != None and max_value != None:
+        if min_value is not None and max_value is not None:
             success = (min_value <= col_sum) and (col_sum <= max_value)
 
-        elif min_value == None and max_value != None:
+        elif min_value is None and max_value is not None:
             success = (col_sum <= max_value)
 
-        elif min_value != None and max_value == None:
+        elif min_value is not None and max_value is None:
             success = (min_value <= col_sum)
 
         return {
@@ -1110,13 +1110,13 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
         col_min = temp_column.min()
 
-        if min_value != None and max_value != None:
+        if min_value is not None and max_value is not None:
             success = (min_value <= col_min) and (col_min <= max_value)
 
-        elif min_value == None and max_value != None:
+        elif min_value is None and max_value is not None:
             success = (col_min <= max_value)
 
-        elif min_value != None and max_value == None:
+        elif min_value is not None and max_value is None:
             success = (min_value <= col_min)
 
         if parse_strings_as_datetimes:
@@ -1158,13 +1158,13 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
         col_max = temp_column.max()
 
-        if min_value != None and max_value != None:
+        if min_value is not None and max_value is not None:
             success = (min_value <= col_max) and (col_max <= max_value)
 
-        elif min_value == None and max_value != None:
+        elif min_value is None and max_value is not None:
             success = (col_max <= max_value)
 
-        elif min_value != None and max_value == None:
+        elif min_value is not None and max_value is None:
             success = (min_value <= col_max)
 
         if parse_strings_as_datetimes:
