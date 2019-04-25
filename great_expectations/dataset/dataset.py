@@ -136,7 +136,6 @@ class MetaDataset(DataAsset):
 
 class Dataset(MetaDataset):
     def __init__(self, *args, **kwargs):
-        super(Dataset, self).__init__(*args, **kwargs)
         # some data structures for caching information specific to tabular datasets
         # NOTE: this approach makes the strong assumption that the user will not modify the core data store
         # (e.g. self.spark_df) over the lifetime of the dataset instance
@@ -151,6 +150,8 @@ class Dataset(MetaDataset):
         self._column_unique_counts = ColumnarResultCache(self._get_column_unique_count)
         self._column_modes = ColumnarResultCache(self._get_column_modes)
         self._column_medians = ColumnarResultCache(self._get_column_median)
+
+        super(Dataset, self).__init__(*args, **kwargs)
 
     @property
     def row_count(self):
