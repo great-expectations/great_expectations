@@ -495,7 +495,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                                             mostly=None,
                                             result_format=None, include_config=False, catch_exceptions=None, meta=None, include_nulls=True):
 
-        return column.map(lambda x: x is not None and not pd.isnull(x))
+        return ~column.isnull()
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
@@ -503,7 +503,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                                         mostly=None,
                                         result_format=None, include_config=False, catch_exceptions=None, meta=None):
 
-        return column.map(lambda x: x is None or pd.isnull(x))
+        return column.isnull()
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
