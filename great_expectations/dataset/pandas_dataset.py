@@ -485,8 +485,8 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
     def expect_column_values_to_be_unique(self, column,
                                           mostly=None,
                                           result_format=None, include_config=False, catch_exceptions=None, meta=None):
-        dupes = set(column[column.duplicated()])
-        return column.map(lambda x: x not in dupes)
+
+        return ~column.duplicated(keep=False)
 
     # @Dataset.expectation(['column', 'mostly', 'result_format'])
     @DocInherit
@@ -495,7 +495,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                                             mostly=None,
                                             result_format=None, include_config=False, catch_exceptions=None, meta=None, include_nulls=True):
 
-        return column.map(lambda x: x is not None and not pd.isnull(x))
+        return ~column.isnull()
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
@@ -503,7 +503,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                                         mostly=None,
                                         result_format=None, include_config=False, catch_exceptions=None, meta=None):
 
-        return column.map(lambda x: x is None or pd.isnull(x))
+        return column.isnull()
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
@@ -561,7 +561,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             parsed_value_set = self._parse_value_set(value_set)
         else:
             parsed_value_set = value_set
-        return column.map(lambda x: x in parsed_value_set)
+        return column.isin(parsed_value_set)
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
@@ -573,7 +573,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             parsed_value_set = self._parse_value_set(value_set)
         else:
             parsed_value_set = value_set
-        return column.map(lambda x: x not in parsed_value_set)
+        return ~column.isin(parsed_value_set)
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
@@ -735,27 +735,26 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         except ValueError:
             raise ValueError("min_value and max_value must be integers")
 
-        def length_is_between(val):
-            if min_value != None and max_value != None:
-                return len(val) >= min_value and len(val) <= max_value
+        column_lengths = column.astype(str).str.len()
 
-            elif min_value == None and max_value != None:
-                return len(val) <= max_value
+        if min_value != None and max_value != None:
+            return column_lengths.between(min_value, max_value)
 
-            elif min_value != None and max_value == None:
-                return len(val) >= min_value
+        elif min_value == None and max_value != None:
+            return column_lengths <= max_value
 
-            else:
-                return False
+        elif min_value != None and max_value == None:
+            return column_lengths >= min_value
 
-        return column.map(length_is_between)
+        else:
+            return False
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
     def expect_column_value_lengths_to_equal(self, column, value,
                                              mostly=None,
                                              result_format=None, include_config=False, catch_exceptions=None, meta=None):
-        return column.map(lambda x: len(x) == value)
+        return column.str.len() == value
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
