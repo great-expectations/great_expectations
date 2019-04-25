@@ -485,8 +485,8 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
     def expect_column_values_to_be_unique(self, column,
                                           mostly=None,
                                           result_format=None, include_config=False, catch_exceptions=None, meta=None):
-        dupes = set(column[column.duplicated()])
-        return column.map(lambda x: x not in dupes)
+
+        return ~column.duplicated(keep=False)
 
     # @Dataset.expectation(['column', 'mostly', 'result_format'])
     @DocInherit
