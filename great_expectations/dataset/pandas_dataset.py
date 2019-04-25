@@ -566,7 +566,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             parsed_value_set = self._parse_value_set(value_set)
         else:
             parsed_value_set = value_set
-        return column.map(lambda x: x in parsed_value_set)
+        return column.isin(parsed_value_set)
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
@@ -578,7 +578,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             parsed_value_set = self._parse_value_set(value_set)
         else:
             parsed_value_set = value_set
-        return column.map(lambda x: x not in parsed_value_set)
+        return ~column.isin(parsed_value_set)
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
