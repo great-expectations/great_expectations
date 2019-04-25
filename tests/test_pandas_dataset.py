@@ -157,24 +157,6 @@ def test_expect_column_values_to_be_json_parseable():
         assert t['out']['unexpected_index_list'] == out['result']['unexpected_index_list']
         assert t['out']['unexpected_list'] == out['result']['unexpected_list']
 
-# def test_expect_column_values_to_match_json_schema(self):
-
-#     with open("./tests/test_sets/expect_column_values_to_match_json_schema_test_set.json") as f:
-#         J = json.load(f)
-#         D = ge.dataset.PandasDataset(J["dataset"])
-#         D.set_default_expectation_argument("result_format", "COMPLETE")
-#         T = J["tests"]
-
-#         self.maxDiff = None
-
-#     for t in T:
-#         out = D.expect_column_values_to_match_json_schema(**t['in'])#, **t['kwargs'])
-#         self.assertEqual(t['out']['success'], out['success'])
-#         if 'unexpected_index_list' in t['out']:
-#             self.assertEqual(t['out']['unexpected_index_list'], out['result']['unexpected_index_list'])
-#         if 'unexpected_list' in t['out']:
-#             self.assertEqual(t['out']['unexpected_list'], out['result']['unexpected_list'])
-
 
 def test_expectation_decorator_summary_mode():
 
@@ -328,7 +310,7 @@ def test_from_pandas():
     })
 
     ge_df = ge.from_pandas(pd_df)
-    assert isinstance(ge_df, ge.dataset.Dataset)
+    assert isinstance(ge_df, ge.data_asset.DataAsset)
     assert list(ge_df.columns) == ['x', 'y', 'z']
     assert list(ge_df['x']) == list(pd_df['x'])
     assert list(ge_df['y']) == list(pd_df['y'])
@@ -458,7 +440,7 @@ def test_ge_pandas_merging():
         'salary': [57000, 52000, 59000, 65000]
     })
 
-    df2.expect_column_values_to_match_regex('salary', '^[0-9]{4,6]$')
+    df2.expect_column_values_to_match_regex('salary', '^[0-9]{4,6}$')
 
     df = df1.merge(df2, on='id')
 
