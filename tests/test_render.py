@@ -153,6 +153,9 @@ class TestRender(unittest.TestCase):
         print(results)
         assert results != None
 
+        with open('./test.html', 'w') as f:
+            f.write(results)
+
         # assert False
 
 

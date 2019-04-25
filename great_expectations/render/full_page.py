@@ -1,5 +1,6 @@
 import os
 from jinja2 import Template
+from jinja2 import Environment, BaseLoader, PackageLoader, select_autoescape
 
 from .base import Renderer
 from .single_expectation import SingleExpectationRenderer
@@ -15,12 +16,23 @@ class FullPageHtmlRenderer(Renderer):
         return True
 
     def render(self):
-        t = Template(open(
-            os.path.join(
-                os.path.dirname(__file__),
-                'fixtures/single_page.j2'
-            )
-        ).read())
+        # t = Environment(loader=BaseLoader).from_string(myString)
+        # data = rtemplate.render(**data)
+        env = Environment(
+            loader=PackageLoader('great_expectations', 'render/fixtures'),
+            autoescape=select_autoescape(['html', 'xml'])
+        )
+
+        print( env.list_templates() )        
+
+        t = env.get_template('single_page_prescriptive.j2')
+
+        # t = Template(open(
+        #     os.path.join(
+        #         os.path.dirname(__file__),
+        #         'fixtures/single_page_prescriptive.j2'
+        #     )
+        # ).read())
 
         results = []
         for expectation in self.expectations:
@@ -28,12 +40,11 @@ class FullPageHtmlRenderer(Renderer):
                 expectation=expectation,
             )
             results.append(expectation_renderer.render())
-        
-        print(results)
+        # print(results)
 
         rendered_page = t.render(**{
             "elements": results
         })
-        print(rendered_page)
+        # print(rendered_page)
 
         return rendered_page
