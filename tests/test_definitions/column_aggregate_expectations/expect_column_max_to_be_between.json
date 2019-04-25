@@ -7,8 +7,31 @@
       "y" : [1, 1, 1, 2, 2, 2, 3, 3, 3, 4],
       "z" : ["a", "b", "c", "d", "e", null, null, null, null, null],
       "zz" : ["1/1/2016", "1/2/2016", "2/2/2016", "2/2/2016", "3/1/2016", "2/1/2017", null, null, null, null],
+      "zzz" : ["1/1/2016", "1/2/2016", "2/2/2016", "2/2/2016", "3/1/2016", "2/1/2017", null, null, null, null],
       "a" : [null, 0, null, null, 1, null, null, 2, null, null],
       "b" : [null, 0, null, null, 2, null, null, 1, null, null]
+    },
+    "schemas": {
+      "sqlite": {
+        "w" : "int",
+        "x" : "int",
+        "y" : "int",
+        "z" : "varchar",
+        "zz" : "datetime",
+        "zzz" : "varchar",
+        "a" : "int",
+        "b" : "int"
+      },
+      "postgresql": {
+        "w" : "int",
+        "x" : "int",
+        "y" : "int",
+        "z" : "text",
+        "zz" : "timestamp",
+        "zzz" : "text",
+        "a" : "int",
+        "b" : "int"
+      }
     },
     "tests" : [{
       "title": "Basic positive test case",
@@ -89,7 +112,7 @@
       "title": "Test on a date-like series containing strings",
       "exact_match_out" : false,
       "in": {
-        "column": "zz",
+        "column": "zzz",
         "min_value": "2/1/2016",
         "max_value": "3/1/2016",
         "parse_strings_as_datetimes": false

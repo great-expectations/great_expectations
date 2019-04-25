@@ -7,25 +7,23 @@ from datetime import datetime
 from functools import wraps
 import jsonschema
 import sys
+import numpy as np
+import pandas as pd
+from dateutil.parser import parse
+from scipy import stats
+from six import PY3, integer_types, string_types
+from numbers import Number
 
 if sys.version_info.major == 2:  # If python 2
     from itertools import izip_longest as zip_longest
 elif sys.version_info.major == 3:  # If python 3
     from itertools import zip_longest
 
-from numbers import Number
-
-import numpy as np
-import pandas as pd
-from dateutil.parser import parse
-from scipy import stats
-from six import PY3, integer_types, string_types
-
-from .base import Dataset
-from .util import DocInherit, \
+from .dataset import Dataset
+from great_expectations.data_asset.util import DocInherit, parse_result_format
+from great_expectations.dataset.util import \
     is_valid_partition_object, is_valid_categorical_partition_object, is_valid_continuous_partition_object, \
-    _scipy_distribution_positional_args_from_dict, validate_distribution_parameters,\
-    parse_result_format
+    _scipy_distribution_positional_args_from_dict, validate_distribution_parameters
 
 
 class MetaPandasDataset(Dataset):
@@ -50,7 +48,7 @@ class MetaPandasDataset(Dataset):
         object containing the actual column from the relevant pandas dataframe. This simplifies the implementing expectation
         logic while preserving the standard Dataset signature and expected behavior.
 
-        See :func:`column_map_expectation <great_expectations.Dataset.base.Dataset.column_map_expectation>` \
+        See :func:`column_map_expectation <great_expectations.data_asset.dataset.Dataset.column_map_expectation>` \
         for full documentation of this function.
         """
         if PY3:
@@ -71,6 +69,7 @@ class MetaPandasDataset(Dataset):
             ignore_values = [None, np.nan]
             if func.__name__ in ['expect_column_values_to_not_be_null', 'expect_column_values_to_be_null']:
                 ignore_values = []
+                result_format['partial_unexpected_count'] = 0  # Optimization to avoid meaningless computation for these expectations
 
             series = self[column]
 
@@ -100,9 +99,10 @@ class MetaPandasDataset(Dataset):
             success, percent_success = self._calc_map_expectation_success(
                 success_count, nonnull_count, mostly)
 
-            return_obj = self._format_column_map_output(
+            return_obj = self._format_map_output(
                 result_format, success,
                 element_count, nonnull_count,
+                len(unexpected_list),
                 unexpected_list, unexpected_index_list
             )
 
@@ -182,9 +182,10 @@ class MetaPandasDataset(Dataset):
             success, percent_success = self._calc_map_expectation_success(
                 success_count, nonnull_count, mostly)
 
-            return_obj = self._format_column_map_output(
+            return_obj = self._format_map_output(
                 result_format, success,
                 element_count, nonnull_count,
+                len(unexpected_list),
                 unexpected_list, unexpected_index_list
             )
 
@@ -195,6 +196,63 @@ class MetaPandasDataset(Dataset):
         return inner_wrapper
 
     @classmethod
+    def multicolumn_map_expectation(cls, func):
+        """
+        The multicolumn_map_expectation decorator handles boilerplate issues surrounding the common pattern of
+        evaluating truthiness of some condition on a per row basis across a set of columns.
+        """
+        if PY3:
+            argspec = inspect.getfullargspec(func)[0][1:]
+        else:
+            argspec = inspect.getargspec(func)[0][1:]
+
+        @cls.expectation(argspec)
+        @wraps(func)
+        def inner_wrapper(self, column_list, mostly=None, ignore_row_if="all_values_are_missing",
+                          result_format=None, *args, **kwargs):
+
+            if result_format is None:
+                result_format = self.default_expectation_args["result_format"]
+
+            test_df = self[column_list]
+
+            if ignore_row_if == "all_values_are_missing":
+                boolean_mapped_skip_values = test_df.isnull().all(axis=1)
+            elif ignore_row_if == "any_value_is_missing":
+                boolean_mapped_skip_values = test_df.isnull().any(axis=1)
+            elif ignore_row_if == "never":
+                boolean_mapped_skip_values = pd.Series([False] * len(test_df))
+            else:
+                raise ValueError(
+                    "Unknown value of ignore_row_if: %s", (ignore_row_if,))
+
+            boolean_mapped_success_values = func(
+                self, test_df[boolean_mapped_skip_values == False], *args, **kwargs)
+            success_count = boolean_mapped_success_values.sum()
+            nonnull_count = (~boolean_mapped_skip_values).sum()
+            element_count = len(test_df)
+
+            unexpected_list = test_df[(boolean_mapped_skip_values == False) & (boolean_mapped_success_values == False)]
+            unexpected_index_list = list(unexpected_list.index)
+
+            success, percent_success = self._calc_map_expectation_success(
+                success_count, nonnull_count, mostly)
+
+            return_obj = self._format_map_output(
+                result_format, success,
+                element_count, nonnull_count,
+                len(unexpected_list),
+                unexpected_list.to_dict(orient='records'), unexpected_index_list
+            )
+
+            return return_obj
+
+        inner_wrapper.__name__ = func.__name__
+        inner_wrapper.__doc__ = func.__doc__
+        return inner_wrapper
+
+
+    @classmethod
     def column_aggregate_expectation(cls, func):
         """Constructs an expectation using column-aggregate semantics.
 
@@ -202,7 +260,7 @@ class MetaPandasDataset(Dataset):
         Series object containing the actual column from the relevant pandas dataframe. This simplifies the implementing
         expectation logic while preserving the standard Dataset signature and expected behavior.
 
-        See :func:`column_aggregate_expectation <great_expectations.Dataset.base.Dataset.column_aggregate_expectation>` \
+        See :func:`column_aggregate_expectation <great_expectations.data_asset.dataset.Dataset.column_aggregate_expectation>` \
         for full documentation of this function.
         """
         if PY3:
@@ -273,7 +331,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
     """
     PandasDataset instantiates the great_expectations Expectations API as a subclass of a pandas.DataFrame.
 
-    For the full API reference, please see :func:`Dataset <great_expectations.Dataset.base.Dataset>`
+    For the full API reference, please see :func:`Dataset <great_expectations.data_asset.dataset.Dataset>`
 
     Notes:
         1. Samples and Subsets of PandaDataSet have ALL the expectations of the original \
@@ -497,8 +555,13 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
     @MetaPandasDataset.column_map_expectation
     def expect_column_values_to_be_in_set(self, column, value_set,
                                           mostly=None,
+                                          parse_strings_as_datetimes=None,
                                           result_format=None, include_config=False, catch_exceptions=None, meta=None):
-        return column.map(lambda x: x in value_set)
+        if parse_strings_as_datetimes:
+            parsed_value_set = [parse(value) if isinstance(value, string_types) else value for value in value_set]
+        else:
+            parsed_value_set = value_set
+        return column.map(lambda x: x in parsed_value_set)
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
@@ -513,6 +576,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                                            column,
                                            min_value=None, max_value=None,
                                            parse_strings_as_datetimes=None,
+                                           output_strftime_format=None,
                                            allow_cross_type_comparisons=None,
                                            mostly=None,
                                            result_format=None, include_config=False, catch_exceptions=None, meta=None
@@ -1513,3 +1577,14 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             results.append((a, b) in value_pairs_set)
 
         return pd.Series(results, temp_df.index)
+
+    @DocInherit
+    @MetaPandasDataset.multicolumn_map_expectation
+    def expect_multicolumn_values_to_be_unique(self,
+                                               column_list,
+                                               ignore_row_if="all_values_are_missing",
+                                               result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                               ):
+        threshold = len(column_list.columns)
+        # Do not dropna here, since we have separately dealt with na in decorator
+        return column_list.nunique(dropna=False, axis=1) >= threshold

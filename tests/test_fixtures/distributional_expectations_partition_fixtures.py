@@ -35,22 +35,22 @@ def generate_new_data():
 def generate_new_partitions(df):
     test_partitions = {}
     for column in ['norm_0_1', 'norm_1_1', 'bimodal']:
-        partition_object = ge.dataset.util.kde_partition_data(df[column])
+        partition_object = ge.data_asset.util.kde_partition_data(df[column])
         # Print how close sum of weights is to one for a quick visual consistency check when data are generated
         #print(column + '_kde: '+ str(abs(1-np.sum(partition_object['weights']))))
         test_partitions[column + '_kde'] = partition_object
 
         for bin_type in ['uniform', 'ntile', 'auto']:
-            partition_object = ge.dataset.util.continuous_partition_data(
+            partition_object = ge.data_asset.util.continuous_partition_data(
                 df[column], bin_type)
             # Print how close sum of weights is to one for a quick visual consistency check when data are generated
             #print(column + '_' + bin_type + ': ' + str(abs(1 - np.sum(partition_object['weights']))))
             test_partitions[column + '_' + bin_type] = partition_object
 
-    partition_object = ge.dataset.util.categorical_partition_data(
+    partition_object = ge.data_asset.util.categorical_partition_data(
         df['categorical_fixed'])
     test_partitions['categorical_fixed'] = partition_object
-    alt_partition = ge.dataset.util.categorical_partition_data(
+    alt_partition = ge.data_asset.util.categorical_partition_data(
         df['categorical_fixed'])
     # overwrite weights with uniform weights to give a testing dataset
     alt_partition['weights'] = [
@@ -71,7 +71,7 @@ if __name__ == "__main__":
               float_format='%.' + str(precision) + 'g')
     test_partitions = generate_new_partitions(df)
 
-    ge.dataset.util.ensure_json_serializable(test_partitions)
+    ge.data_asset.util.ensure_json_serializable(test_partitions)
     with open('../test_sets/test_partitions.json', 'w') as file:
         file.write(json.dumps(test_partitions))
 

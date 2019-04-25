@@ -97,11 +97,12 @@ This is more complicated, since you have to handle all the logic of additional p
 
 .. code-block:: bash
 
-    from great_expectations.dataset import Dataset, PandasDataset
+    from great_expectations.data_asset import DataAsset
+    from great_expectations.dataset import PandasDataset
 
     class CustomPandasDataset(PandasDataset):
 
-        @Dataset.expectation(["column", "mostly"])
+        @DataAsset.expectation(["column", "mostly"])
         def expect_column_values_to_equal_1(self, column, mostly=None):
             not_null = self[column].notnull()
 
@@ -137,7 +138,7 @@ For rapid prototyping, you can use the following syntax to quickly iterate on th
 
 .. code-block:: bash
 
-    >> Dataset.test_expectation_function(my_func)
+    >> DataAsset.test_expectation_function(my_func)
     
     >> Dataset.test_column_map_expectation_function(my_map_func, column='my_column')
     

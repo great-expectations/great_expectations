@@ -12,9 +12,12 @@ import great_expectations.dataset.autoinspect as autoinspect
 import unittest
 
 
-class TestDataset(unittest.TestCase):
+class TestDataAsset(unittest.TestCase):
+    """
+    Recognized weakness: these tests are overly dependent on the Pandas implementation of dataset.
+    """
 
-    def test_dataset(self):
+    def test_data_asset(self):
 
         D = ge.dataset.PandasDataset({
             'x': [1, 2, 4],
@@ -28,25 +31,12 @@ class TestDataset(unittest.TestCase):
         self.assertEqual(
             D._expectations_config,
             {
-                "dataset_name": None,
+                "data_asset_name": None,
+                "data_asset_type": "Dataset",
                 "meta": {
                     "great_expectations.__version__": ge.__version__
                 },
                 "expectations": []
-                # No longer expect autoinspection 20180920
-                # {
-                #     "expectation_type" : "expect_column_to_exist",
-                #     "kwargs" : { "column" : "x", 'result_format': 'BASIC'},
-                #     'success_on_last_run': True
-                # },{
-                #     "expectation_type" : "expect_column_to_exist",
-                #     "kwargs" : { "column" : "y", 'result_format': 'BASIC'},
-                #     'success_on_last_run': True
-                # },{
-                #     "expectation_type" : "expect_column_to_exist",
-                #     "kwargs" : { "column" : "z", 'result_format': 'BASIC'},
-                #     'success_on_last_run': True
-                # }]
             }
         )
 
@@ -54,22 +44,12 @@ class TestDataset(unittest.TestCase):
         self.assertEqual(
             D.get_expectations_config(),
             {
-                "dataset_name": None,
+                "data_asset_name": None,
+                "data_asset_type": "Dataset",
                 "meta": {
                     "great_expectations.__version__": ge.__version__
                 },
                 "expectations": []
-                # No longer expect autoinspection 20180920
-                # {
-                #     "expectation_type" : "expect_column_to_exist",
-                #     "kwargs" : { "column" : "x"}
-                # },{
-                #     "expectation_type" : "expect_column_to_exist",
-                #     "kwargs" : { "column" : "y"}
-                # },{
-                #     "expectation_type" : "expect_column_to_exist",
-                #     "kwargs" : { "column" : "z"}
-                # }]
             }
         )
 
@@ -185,7 +165,8 @@ class TestDataset(unittest.TestCase):
                     }
                 }
             ],
-            "dataset_name": None,
+            "data_asset_name": None,
+            "data_asset_type": "Dataset",
             "meta": {
                 "great_expectations.__version__": ge.__version__
             }
@@ -257,7 +238,8 @@ class TestDataset(unittest.TestCase):
                     }
                 }
             ],
-            "dataset_name": None,
+            "data_asset_name": None,
+            "data_asset_type": "Dataset",
             "meta": {
                 "great_expectations.__version__": ge.__version__
             }
@@ -328,7 +310,8 @@ class TestDataset(unittest.TestCase):
                     }
                 }
             ],
-            "dataset_name": None,
+            "data_asset_name": None,
+            "data_asset_type": "Dataset",
             "meta": {
                 "great_expectations.__version__": ge.__version__
             }
@@ -360,7 +343,7 @@ class TestDataset(unittest.TestCase):
         # Clean up the output directory
         shutil.rmtree(directory_name)
 
-    def test_format_column_map_output(self):
+    def test_format_map_output(self):
         df = ge.dataset.PandasDataset({
             "x": list("abcdefghijklmnopqrstuvwxyz"),
         })
@@ -378,20 +361,22 @@ class TestDataset(unittest.TestCase):
         unexpected_index_list = []
 
         self.assertEqual(
-            df._format_column_map_output(
+            df._format_map_output(
                 "BOOLEAN_ONLY",
                 success,
                 element_count, nonnull_count,
+                len(unexpected_list),
                 unexpected_list, unexpected_index_list
             ),
             {'success': True}
         )
 
         self.assertEqual(
-            df._format_column_map_output(
+            df._format_map_output(
                 "BASIC",
                 success,
                 element_count, nonnull_count,
+                len(unexpected_list),
                 unexpected_list, unexpected_index_list
             ),
             {
@@ -409,11 +394,12 @@ class TestDataset(unittest.TestCase):
         )
 
         self.assertEqual(
-            df._format_column_map_output(
+            df._format_map_output(
                 "SUMMARY",
                 success,
                 element_count,
                 nonnull_count,
+                len(unexpected_list),
                 unexpected_list, unexpected_index_list
             ),
             {
@@ -433,11 +419,12 @@ class TestDataset(unittest.TestCase):
         )
 
         self.assertEqual(
-            df._format_column_map_output(
+            df._format_map_output(
                 "COMPLETE",
                 success,
                 element_count,
                 nonnull_count,
+                len(unexpected_list),
                 unexpected_list, unexpected_index_list
             ),
             {
@@ -471,22 +458,24 @@ class TestDataset(unittest.TestCase):
         unexpected_index_list = []
 
         self.assertEqual(
-            df._format_column_map_output(
+            df._format_map_output(
                 "BOOLEAN_ONLY",
                 success,
                 element_count,
                 nonnull_count,
+                len(unexpected_list),
                 unexpected_list, unexpected_index_list
             ),
             {'success': True}
         )
 
         self.assertEqual(
-            df._format_column_map_output(
+            df._format_map_output(
                 "BASIC",
                 success,
                 element_count,
                 nonnull_count,
+                len(unexpected_list),
                 unexpected_list, unexpected_index_list
             ),
             {
@@ -504,11 +493,12 @@ class TestDataset(unittest.TestCase):
         )
 
         self.assertEqual(
-            df._format_column_map_output(
+            df._format_map_output(
                 "SUMMARY",
                 success,
                 element_count,
                 nonnull_count,
+                len(unexpected_list),
                 unexpected_list, unexpected_index_list
             ),
             {
@@ -528,11 +518,12 @@ class TestDataset(unittest.TestCase):
         )
 
         self.assertEqual(
-            df._format_column_map_output(
+            df._format_map_output(
                 "COMPLETE",
                 success,
                 element_count,
                 nonnull_count,
+                len(unexpected_list),
                 unexpected_list, unexpected_index_list
             ),
             {
@@ -565,22 +556,24 @@ class TestDataset(unittest.TestCase):
         unexpected_index_list = []
 
         self.assertEqual(
-            df._format_column_map_output(
+            df._format_map_output(
                 "BOOLEAN_ONLY",
                 success,
                 element_count,
                 nonnull_count,
+                len(unexpected_list),
                 unexpected_list, unexpected_index_list
             ),
             {'success': False}
         )
 
         self.assertEqual(
-            df._format_column_map_output(
+            df._format_map_output(
                 "BASIC",
                 success,
                 element_count,
                 nonnull_count,
+                len(unexpected_list),
                 unexpected_list, unexpected_index_list
             ),
             {
@@ -598,11 +591,12 @@ class TestDataset(unittest.TestCase):
         )
 
         self.assertEqual(
-            df._format_column_map_output(
+            df._format_map_output(
                 "SUMMARY",
                 success,
                 element_count,
                 nonnull_count,
+                len(unexpected_list),
                 unexpected_list, unexpected_index_list
             ),
             {
@@ -622,11 +616,12 @@ class TestDataset(unittest.TestCase):
         )
 
         self.assertEqual(
-            df._format_column_map_output(
+            df._format_map_output(
                 "COMPLETE",
                 success,
                 element_count,
                 nonnull_count,
+                len(unexpected_list),
                 unexpected_list, unexpected_index_list
             ),
             {
@@ -980,7 +975,8 @@ class TestDataset(unittest.TestCase):
                         'kwargs': {'column': 'y', 'type_': 'int'}
                     }
                 ],
-                'dataset_name': None,
+                'data_asset_name': None,
+                "data_asset_type": "Dataset",
                 "meta": {
                     "great_expectations.__version__": ge.__version__
                 }
@@ -1186,7 +1182,7 @@ class TestDataset(unittest.TestCase):
         )
 
     def test_meta_version_warning(self):
-        D = ge.dataset.Dataset()
+        D = ge.data_asset.DataAsset()
 
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
@@ -1199,7 +1195,7 @@ class TestDataset(unittest.TestCase):
             out = D.validate(expectations_config={
                              "meta": {"great_expectations.__version__": "0.0.0"}, "expectations": []})
             self.assertEqual(str(w[0].message),
-                             "WARNING: This configuration object was built using a different version of great_expectations than is currently validating it.")
+                             "WARNING: This configuration object was built using version 0.0.0 of great_expectations, but is currently being valided by version %s." % ge.__version__)
 
     def test_catch_exceptions_with_bad_expectation_type(self):
         my_df = ge.dataset.PandasDataset({"x": range(10)})
