@@ -760,7 +760,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
     def expect_column_value_lengths_to_equal(self, column, value,
                                              mostly=None,
                                              result_format=None, include_config=False, catch_exceptions=None, meta=None):
-        return column.map(lambda x: len(x) == value)
+        return column.column.str.len() == value
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
