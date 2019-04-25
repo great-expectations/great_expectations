@@ -11,10 +11,27 @@ Planned Features
 * Support for non-tabular datasources (e.g. JSON, XML, AVRO)
 * Real-time/streaming and adaption of distributional expectations
 
-
-v.0.4.5__develop
+v.0.5.0__develop
 ----------------
+
+
+v.0.5.0
+----------------
+* Restructured class hierarchy to have a more generic DataAsset parent that maintains expectation logic separate \
+    from the tabular organization of Dataset expectations
+* Added new FileDataAsset and associated expectations (#416 thanks @anhollis)
 * Added support for date/datetime type columns in some SQLAlchemy expectations (#413)
+* Added support for a multicolumn expectation, expect multicolumn values to be unique (#408)
+* Optimization: You can now disable `partial_unexpected_counts` by setting the \
+    `partial_unexpected_count` value to 0 in the result_format argument, and we do not compute it when it would
+    not be returned. (#431, thanks @eugmandel)
+* Fix: Correct error in unexpected_percent computations for sqlalchemy when unexpected values exceed limit (#424)
+* Fix: Pass meta object to expectation result (#415, thanks @jseeman)
+* Add support for multicolumn expectations, with `expect_multicolumn_values_to_be_unique` as an example (#406)
+* Add dataset class to from_pandas to simplify using custom datasets (#404, thanks @jtilly)
+* Add schema support for sqlalchemy data context (#410, thanks @rahulj51)
+* Minor documentation, warning, and testing improvements (thanks @zdog).
+
 
 v.0.4.5
 ----------------
