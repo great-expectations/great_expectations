@@ -262,6 +262,27 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
            is performed by default).
     """
 
+    # this is necessary to subclass pandas in a proper way.
+    # NOTE: specifying added properties in this way means that they will NOT be carried over when
+    # the dataframe is manipulated, which we might want. To specify properties that are carried over
+    # to manipulation results, we would just use `_metadata = ['row_count', ...]` here. The most likely
+    # case is that we want the former, but also want to re-initialize these values to None so we don't
+    # get an attribute error when trying to access them (I think this could be done in __finalize__?)
+    _internal_names = pd.DataFrame._internal_names + [
+        '_row_count',
+        '_table_columns',
+        '_column_nonnull_counts',
+        '_column_means',
+        '_column_value_counts',
+        '_column_sums',
+        '_column_maxes',
+        '_column_mins',
+        '_column_unique_counts',
+        '_column_modes' ,
+        '_column_medians',
+    ]
+    _internal_names_set = set(_internal_names)
+
     # We may want to expand or alter support for subclassing dataframes in the future:
     # See http://pandas.pydata.org/pandas-docs/stable/extending.html#extending-subclassing-pandas
 
@@ -292,6 +313,9 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
     def _get_row_count(self):
         return self.shape[0]
+
+    def _get_table_columns(self):
+        return list(self.columns)
 
     def _get_column_sum(self, column):
         return self[column].sum()
@@ -324,51 +348,6 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         return self[column].median()
 
     ### Expectation methods ###
-    @DocInherit
-    @Dataset.expectation(['column'])
-    def expect_column_to_exist(
-            self, column, column_index=None, result_format=None, include_config=False,
-            catch_exceptions=None, meta=None
-    ):
-
-        if column in self:
-            return {
-                "success": (column_index is None) or (self.columns.get_loc(column) == column_index)
-            }
-
-        else:
-            return {
-                "success": False
-            }
-
-    @DocInherit
-    @Dataset.expectation(['column_list'])
-    def expect_table_columns_to_match_ordered_list(self, column_list,
-                                                  result_format=None, include_config=False, catch_exceptions=None, meta=None):
-        """
-        Checks if observed columns are in the expected order. The expectations will fail if columns are out of expected
-        order, columns are missing, or additional columns are present. On failure, details are provided on the location
-        of the unexpected column(s).
-        """
-        if list(self.columns) == list(column_list):
-            return {
-                "success": True
-            }
-        else:
-            # In the case of differing column lengths between the defined expectation and the observed column set, the
-            # max is determined to generate the column_index.
-            number_of_columns = max(len(column_list), len(self.columns))
-            column_index = range(number_of_columns)
-
-            # Create a list of the mismatched details
-            compared_lists = list(zip_longest(column_index, list(column_list), list(self.columns)))
-            mismatched = [{"Expected Column Position": i,
-                           "Expected": k,
-                           "Found": v} for i, k, v in compared_lists if k != v]
-            return {
-                "success": False,
-                "details": {"mismatched": mismatched}
-            }
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
