@@ -13,7 +13,7 @@ Great Expectations
 What is great_expectations?
 --------------------------------------------------------------------------------
 
-Great Expectations is a framework that helps teams save time and promote analytic integrity with a new twist on automated testing: pipeline tests. Pipeline tests are applied to data (instead of code) and at batch time (instead of compile or deploy time).
+Great Expectations helps teams save time and promote analytic integrity by offering a unique approach to automated testing: pipeline tests. Pipeline tests are applied to data (instead of code) and at batch time (instead of compile or deploy time). Pipeline tests are like unit tests for datasets: they help you guard against upstream data changes and monitor data quality.
 
 Software developers have long known that automated testing is essential for managing complex codebases. Great Expectations brings the same discipline, confidence, and acceleration to data science and engineering teams.
 
@@ -34,7 +34,6 @@ How do I get started?
 --------------------------------------------------------------------------------
 
 It's easy! Just use pip install:
-
 
     $ pip install great_expectations
 
