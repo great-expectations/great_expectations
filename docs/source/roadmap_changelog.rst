@@ -11,6 +11,9 @@ Planned Features
 * Support for non-tabular datasources (e.g. JSON, XML, AVRO)
 * Real-time/streaming and adaption of distributional expectations
 
+v.0.5.0__develop
+----------------
+
 
 v.0.5.0
 ----------------
