@@ -2,6 +2,11 @@ import json
 
 from .base import Renderer
 
+def render_parameter(var, format_str, mode="span", classes=["param-span"]):
+    format_str_2 = '<span class="'+(" ".join(classes))+'">{0:'+format_str+'}</span>'
+    print(format_str_2)
+    return (format_str_2).format(var)
+
 class SingleExpectationRenderer(Renderer):
     def __init__(self, expectation):
         self.expectation = expectation
@@ -21,17 +26,20 @@ class SingleExpectationRenderer(Renderer):
 
         elif expectation["expectation_type"] == "expect_column_values_to_not_be_null":
             if "mostly" in expectation["kwargs"]:
-                return expectation["kwargs"]["column"] + (" must not be missing more than %.1f%% of the time." % (100*expectation["kwargs"]["mostly"],))
+                return " must not be missing more than %s%% of the time." % (
+                    render_parameter(100*expectation["kwargs"]["mostly"], ".1f")
+                )
             else:
-                return expectation["kwargs"]["column"] + " must never be missing."
+                return " must never be missing."
 
         elif expectation["expectation_type"] == "expect_column_values_to_be_null":
             if "mostly" in expectation["kwargs"]:
-                return expectation["kwargs"]["column"] + " must missing at least %.1f%% of the time." % ( 100*(1-expectation["kwargs"]["mostly"]) )
+                return " must missing at least %s%% of the time." % (
+                    render_parameter(100*(1-expectation["kwargs"]["mostly"]), ".1f")
+                )
 
-                raise NotImplementedError
             else:
-                return expectation["kwargs"]["column"] + " must always be missing."
+                return " must always be missing."
 
         elif expectation["expectation_type"] == "expect_column_values_to_be_dateutil_parseable":
             if "mostly" in expectation["kwargs"]:
@@ -42,55 +50,54 @@ class SingleExpectationRenderer(Renderer):
         elif expectation["expectation_type"] == "expect_column_value_lengths_to_equal":
             # print(json.dumps(expectation, indent=2))
             if "mostly" in expectation["kwargs"]:
-                return expectation["kwargs"]["column"] + " must be exactly %d characters long at least %.1f%% of the time." % (
-                    expectation["kwargs"]["value"],
-                    100*expectation["kwargs"]["mostly"],
+                return "must be exactly %s characters long at least %s%% of the time." % (
+                    render_parameter(expectation["kwargs"]["value"], "d"),
+                    render_parameter(100*expectation["kwargs"]["mostly"], ".1f"),
                 )
             else:
-                return expectation["kwargs"]["column"] + " must be exactly %d characters long." %(expectation["kwargs"]["value"])
+                return "must be exactly <span class=\"param-span\">%d</span> characters long." %(expectation["kwargs"]["value"])
 
         elif expectation["expectation_type"] == "expect_column_value_lengths_to_be_between":
-            if "mostly" in expectation["kwargs"]:
-                if (expectation["kwargs"]["min_value"] == None) and (expectation["kwargs"]["max_value"] == None):
-                    return expectation["kwargs"]["column"] + " has a bogus expect_column_value_lengths_to_be_between expectation."
+            if (expectation["kwargs"]["min_value"] == None) and (expectation["kwargs"]["max_value"] == None):
+                return " has a bogus %s expectation." % (
+                    render_parameter("expect_column_value_lengths_to_be_between", "s")
+                )
 
-                elif expectation["kwargs"]["min_value"] != None and expectation["kwargs"]["max_value"] != None:
-                    return expectation["kwargs"]["column"] + " must be between %d and %d characters long at least %.1f\% of the time." % (
-                        expectation["kwargs"]["min_value"],
-                        expectation["kwargs"]["max_value"],
-                        expectation["kwargs"]["mostly"],
+            if "mostly" in expectation["kwargs"]:
+                if expectation["kwargs"]["min_value"] != None and expectation["kwargs"]["max_value"] != None:
+                    return " must be between %s and %s characters long at least %s%% of the time." % (
+                        render_parameter(expectation["kwargs"]["min_value"], "d"),
+                        render_parameter(expectation["kwargs"]["max_value"], "d"),
+                        render_parameter(expectation["kwargs"]["mostly"], ".1f"),
                     )
 
                 elif expectation["kwargs"]["min_value"] == None:
-                    return expectation["kwargs"]["column"] + " must be less than %d characters long at least %.1f\% of the time." % (
+                    return " must be less than %d characters long at least %.1f\% of the time." % (
                         expectation["kwargs"]["max_value"],
                         expectation["kwargs"]["mostly"],
                     )
 
                 elif expectation["kwargs"]["max_value"] == None:
-                    return expectation["kwargs"]["column"] + " must be more than %d characters long at least %.1f\% of the time." % (
+                    return " must be more than %d characters long at least %.1f\% of the time." % (
                         expectation["kwargs"]["min_value"],
                         expectation["kwargs"]["mostly"],
                     )
 
             else:
-                if (expectation["kwargs"]["min_value"] == None) and (expectation["kwargs"]["max_value"] == None):
-                    return expectation["kwargs"]["column"] + " has a bogus expect_column_value_lengths_to_be_between expectation."
-
-                elif expectation["kwargs"]["min_value"] != None and expectation["kwargs"]["max_value"] != None:
-                    return expectation["kwargs"]["column"] + " must always be between %d and %d characters long." % (
-                        expectation["kwargs"]["min_value"],
-                        expectation["kwargs"]["max_value"],
+                if expectation["kwargs"]["min_value"] != None and expectation["kwargs"]["max_value"] != None:
+                    return " must always be between %s and %s characters long." % (
+                        render_parameter(expectation["kwargs"]["min_value"], "d"),
+                        render_parameter(expectation["kwargs"]["max_value"], "d"),
                     )
 
                 elif expectation["kwargs"]["min_value"] == None:
-                    return expectation["kwargs"]["column"] + " must always be less than %d characters long." % (
-                        expectation["kwargs"]["max_value"],
+                    return " must always be less than %s characters long." % (
+                        render_parameter(expectation["kwargs"]["max_value"], "d"),
                     )
 
                 elif expectation["kwargs"]["max_value"] == None:
-                    return expectation["kwargs"]["column"] + " must always be more than %d characters long." % (
-                        expectation["kwargs"]["min_value"],
+                    return " must always be more than %s characters long." % (
+                        render_parameter(expectation["kwargs"]["min_value"], "d"),
                     )
 
         elif expectation["expectation_type"] == "expect_column_values_to_be_between":
