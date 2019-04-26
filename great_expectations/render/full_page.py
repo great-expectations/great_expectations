@@ -22,21 +22,11 @@ class FullPageHtmlRenderer(Renderer):
 
         sections = []
         for group, expectations in grouped_expectations.items():
-            section = {
-                "section_name" : group,
-                "expectations" : []
-            }
-
-            for expectation in expectations:
-                try:
-                    expectation_renderer = SingleExpectationRenderer(
-                        expectation=expectation,
-                    )
-                    section["expectations"].append(expectation_renderer.render())
-                except:
-                    section["expectations"].append("Broken!")
-
-            sections.append(section)
+            sections.append(
+                self._render_column_section_from_expectations(
+                    group, expectations
+                )
+            )
 
         rendered_page = t.render(
             **{
@@ -63,6 +53,54 @@ class FullPageHtmlRenderer(Renderer):
                 column_expectations_dict["NO_COLUMN"].append(exp)
 
         return column_expectations_dict
+
+    def _render_column_section_from_expectations(self, column_name, expectations_list):
+        description = {
+            "content_block_type" : "text",
+            "content" : []
+        }
+        bullet_list = {
+            "content_block_type" : "bullet_list",
+            "content" : []
+        }
+        graph = {
+            "content_block_type" : "graph",
+            "content" : []
+        }
+        table = {
+            "content_block_type" : "table",
+            "content" : []
+        }
+        example_list = {
+            "content_block_type" : "example_list",
+            "content" : []
+        }
+        more_description = {
+            "content_block_type" : "text",
+            "content" : []
+        }
+
+        for expectation in expectations_list:
+            try:
+                expectation_renderer = SingleExpectationRenderer(
+                    expectation=expectation,
+                )
+                bullet_list["content"].append(expectation_renderer.render())
+            except:
+                bullet_list["content"].append("Broken!")
+
+        section = {
+            "section_name" : column_name,
+            "content_blocks" : [
+                description,
+                bullet_list,
+                graph,
+                example_list,
+                more_description,
+            ]
+        }
+
+        return section
 
 class MockFullPageHtmlRenderer(FullPageHtmlRenderer):
 
