@@ -92,9 +92,9 @@ class FullPageHtmlRenderer(Renderer):
         section = {
             "section_name" : column_name,
             "content_blocks" : [
+                graph,
                 description,
                 bullet_list,
-                graph,
                 example_list,
                 more_description,
             ]
