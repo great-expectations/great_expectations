@@ -33,7 +33,7 @@
         <p>{{ lipsum(1) }}</p>
     </div> #}
 
-    <div id="section-{{loop.index}}" style="clear:both;">
+    <div id="section-{{loop.index}}" style="clear:both; margin-bottom: 50px;">
         <h4>{{section['section_name']}}</h4>
         {% for content_block in section["content_blocks"] %}
             {% if content_block["content_block_type"] == "text" %}
