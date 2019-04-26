@@ -13,7 +13,8 @@ jtbd:
 """
 
 from .full_page import (
-    FullPageHtmlRenderer,
+    MockFullPageHtmlRenderer,
+    FullPagePrescriptiveExpectationRenderer,
 )
 
 def render(expectations=None, input_inspectable=None, renderer_class=None, output_inspectable=None):

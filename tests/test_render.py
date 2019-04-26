@@ -140,14 +140,25 @@ test_validation_results = {
   ]
 }
 
-class TestRender(unittest.TestCase):
+class TestFullPageRender(unittest.TestCase):
 
     def test_import(self):
         from great_expectations import render
 
-    def test_does_something(self):
+    def test_mock_renderer(self):
         results = render.render(
-            renderer_class=render.FullPageHtmlRenderer,
+            renderer_class=render.MockFullPageHtmlRenderer,
+            expectations=test_expectations_config["expectations"],
+        )
+        print(results)
+        assert results != None
+
+        # with open('./test.html', 'w') as f:
+        #     f.write(results)
+
+    def test_prescriptive_expectation_renderer(self):
+        results = render.render(
+            renderer_class=render.FullPagePrescriptiveExpectationRenderer,
             expectations=test_expectations_config["expectations"],
         )
         print(results)
@@ -157,5 +168,3 @@ class TestRender(unittest.TestCase):
             f.write(results)
 
         # assert False
-
-
