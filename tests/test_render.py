@@ -164,10 +164,10 @@ class TestFullPageRender(unittest.TestCase):
             # expectations=test_expectations_config["expectations"],
             expectations=json.load(open('tests/test_fixtures/test_expectations.json')),
         )
-        print(results)
+        # print(results)
         assert results != None
 
         with open('./test.html', 'w') as f:
             f.write(results)
 
-        # assert False
+        assert False

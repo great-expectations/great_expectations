@@ -1,5 +1,6 @@
 import os
 import random
+import json
 from collections import defaultdict
 
 from jinja2 import Template
@@ -63,10 +64,14 @@ class FullPageHtmlRenderer(Renderer):
             "content_block_type" : "bullet_list",
             "content" : []
         }
-        graph = {
-            "content_block_type" : "graph",
-            "content" : []
-        }
+        if random.random() > .5:
+            graph = {
+                "content_block_type" : "graph",
+                "content" : []
+            }
+        else:
+            graph = {}
+
         graph2 = {
             "content_block_type" : "graph",
             "content" : []
@@ -89,9 +94,17 @@ class FullPageHtmlRenderer(Renderer):
                 expectation_renderer = SingleExpectationRenderer(
                     expectation=expectation,
                 )
-                bullet_list["content"].append(expectation_renderer.render())
-            except:
-                bullet_list["content"].append("Broken!")
+                # print(expectation)
+                bullet_point = expectation_renderer.render()
+                assert bullet_point != None
+                bullet_list["content"].append(bullet_point)
+            except Exception as e:
+                bullet_list["content"].append("""
+<div class="alert alert-danger" role="alert">
+  Failed to render Expectation:<br/><pre>"""+json.dumps(expectation, indent=2)+"""</pre>
+  <p>"""+str(e)+"""
+</div>
+                """)
 
         section = {
             "section_name" : column_name,

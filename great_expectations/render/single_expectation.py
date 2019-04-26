@@ -1,3 +1,5 @@
+import json
+
 from .base import Renderer
 
 class SingleExpectationRenderer(Renderer):
@@ -19,13 +21,14 @@ class SingleExpectationRenderer(Renderer):
 
         elif expectation["expectation_type"] == "expect_column_values_to_not_be_null":
             if "mostly" in expectation["kwargs"]:
-                return expectation["kwargs"]["column"] + " must not be missing more than %.1f\% of the time."
+                return expectation["kwargs"]["column"] + (" must not be missing more than %.1f%% of the time." % (100*expectation["kwargs"]["mostly"],))
             else:
                 return expectation["kwargs"]["column"] + " must never be missing."
 
         elif expectation["expectation_type"] == "expect_column_values_to_be_null":
             if "mostly" in expectation["kwargs"]:
-                # return expectation["kwargs"]["column"] + " must not be missing more than %.1f\% of the time.")
+                return expectation["kwargs"]["column"] + " must missing at least %.1f%% of the time." % ( 100*(1-expectation["kwargs"]["mostly"]) )
+
                 raise NotImplementedError
             else:
                 return expectation["kwargs"]["column"] + " must always be missing."
@@ -39,16 +42,56 @@ class SingleExpectationRenderer(Renderer):
         elif expectation["expectation_type"] == "expect_column_value_lengths_to_equal":
             # print(json.dumps(expectation, indent=2))
             if "mostly" in expectation["kwargs"]:
-                return expectation["kwargs"]["column"] + " must be exactly %d characters long at least %.1f\% of the time."
+                return expectation["kwargs"]["column"] + " must be exactly %d characters long at least %.1f%% of the time." % (
+                    expectation["kwargs"]["value"],
+                    100*expectation["kwargs"]["mostly"],
+                )
             else:
                 return expectation["kwargs"]["column"] + " must be exactly %d characters long." %(expectation["kwargs"]["value"])
 
         elif expectation["expectation_type"] == "expect_column_value_lengths_to_be_between":
-            # print(json.dumps(expectation, indent=2))
             if "mostly" in expectation["kwargs"]:
-                return expectation["kwargs"]["column"] + " must be between %d and %d characters long at least %.1f\% of the time."
+                if (expectation["kwargs"]["min_value"] == None) and (expectation["kwargs"]["max_value"] == None):
+                    return expectation["kwargs"]["column"] + " has a bogus expect_column_value_lengths_to_be_between expectation."
+
+                elif expectation["kwargs"]["min_value"] != None and expectation["kwargs"]["max_value"] != None:
+                    return expectation["kwargs"]["column"] + " must be between %d and %d characters long at least %.1f\% of the time." % (
+                        expectation["kwargs"]["min_value"],
+                        expectation["kwargs"]["max_value"],
+                        expectation["kwargs"]["mostly"],
+                    )
+
+                elif expectation["kwargs"]["min_value"] == None:
+                    return expectation["kwargs"]["column"] + " must be less than %d characters long at least %.1f\% of the time." % (
+                        expectation["kwargs"]["max_value"],
+                        expectation["kwargs"]["mostly"],
+                    )
+
+                elif expectation["kwargs"]["max_value"] == None:
+                    return expectation["kwargs"]["column"] + " must be more than %d characters long at least %.1f\% of the time." % (
+                        expectation["kwargs"]["min_value"],
+                        expectation["kwargs"]["mostly"],
+                    )
+
             else:
-                return expectation["kwargs"]["column"] + " must always be between %d and %d characters long." %(expectation["kwargs"]["min_value"], expectation["kwargs"]["max_value"])
+                if (expectation["kwargs"]["min_value"] == None) and (expectation["kwargs"]["max_value"] == None):
+                    return expectation["kwargs"]["column"] + " has a bogus expect_column_value_lengths_to_be_between expectation."
+
+                elif expectation["kwargs"]["min_value"] != None and expectation["kwargs"]["max_value"] != None:
+                    return expectation["kwargs"]["column"] + " must always be between %d and %d characters long." % (
+                        expectation["kwargs"]["min_value"],
+                        expectation["kwargs"]["max_value"],
+                    )
+
+                elif expectation["kwargs"]["min_value"] == None:
+                    return expectation["kwargs"]["column"] + " must always be less than %d characters long." % (
+                        expectation["kwargs"]["max_value"],
+                    )
+
+                elif expectation["kwargs"]["max_value"] == None:
+                    return expectation["kwargs"]["column"] + " must always be more than %d characters long." % (
+                        expectation["kwargs"]["min_value"],
+                    )
 
         elif expectation["expectation_type"] == "expect_column_values_to_be_between":
             # print(json.dumps(expectation, indent=2))
@@ -86,6 +129,14 @@ class SingleExpectationRenderer(Renderer):
         elif expectation["expectation_type"] == "expect_column_values_to_match_regex":
             #FIXME: Need to add logic for mostly
             return expectation["kwargs"]["column"] + " must match this regular expression: <span class=\"example-list\">%s</span>." % (expectation["kwargs"]["regex"],)
+
+        elif expectation["expectation_type"] == "expect_column_values_to_match_regex_list":
+            #FIXME: Need to add logic for mostly
+            return expectation["kwargs"]["column"] + " must match this regular expression: <span class=\"example-list\">%s</span>." % (expectation["kwargs"]["regex_list"],)
+
+        elif expectation["expectation_type"] == "expect_column_values_to_not_match_regex_list":
+            #FIXME: Need to add logic for mostly
+            return expectation["kwargs"]["column"] + " must not match this regular expression: <span class=\"example-list\">%s</span>." % (expectation["kwargs"]["regex_list"],)
 
         elif expectation["expectation_type"] == "expect_column_values_to_be_json_parseable":
             # print(json.dumps(expectation["kwargs"], indent=2))
