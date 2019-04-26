@@ -19,6 +19,8 @@
       .sticky {
         position: -webkit-sticky;
         position: sticky;
+        height: 100vh;
+        overflow-y: auto;
         top: 15px;
       }
     </style>
@@ -44,14 +46,14 @@
           <nav id="navigation" class="navbar navbar-light bg-light sticky">
             <nav class="nav nav-pills flex-column">
               <a class="navbar-brand" href="#">MyTable</a>
-              {% for i in range(20) %}
+              {% for i in range(200) %}
                 <a class="nav-link" href="#section-{{i}}">Section {{i}}</a>
               {% endfor %}
             </nav>
           </nav>
         </div>
         <div class="col-9">
-            {% for i in range(20) %}
+            {% for i in range(200) %}
                 <div id="section-{{i}}">
                     <h4>Section {{ i }}</h4>
                     <p>{{ lipsum(1) }}</p>
