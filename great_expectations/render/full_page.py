@@ -1,4 +1,6 @@
 import os
+import random
+
 from jinja2 import Template
 from jinja2 import Environment, BaseLoader, PackageLoader, select_autoescape
 
@@ -22,6 +24,7 @@ class FullPageHtmlRenderer(Renderer):
             loader=PackageLoader('great_expectations', 'render/fixtures'),
             autoescape=select_autoescape(['html', 'xml'])
         )
+        # env.filters['random'] = random
 
         print( env.list_templates() )        
 
@@ -42,7 +45,8 @@ class FullPageHtmlRenderer(Renderer):
             results.append(expectation_renderer.render())
         # print(results)
 
-        rendered_page = t.render(**{
+        rendered_page = t.render(
+            **{
             "elements": results
         })
         # print(rendered_page)
