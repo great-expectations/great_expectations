@@ -135,11 +135,13 @@ class SingleExpectationRenderer(Renderer):
 
         elif expectation["expectation_type"] == "expect_column_values_to_match_regex":
             #FIXME: Need to add logic for mostly
-            return expectation["kwargs"]["column"] + " must match this regular expression: <span class=\"example-list\">%s</span>." % (expectation["kwargs"]["regex"],)
+            return " must match this regular expression: <span class=\"example-list\">%s</span>." % (expectation["kwargs"]["regex"],)
 
         elif expectation["expectation_type"] == "expect_column_values_to_match_regex_list":
             #FIXME: Need to add logic for mostly
-            return expectation["kwargs"]["column"] + " must match this regular expression: <span class=\"example-list\">%s</span>." % (expectation["kwargs"]["regex_list"],)
+            return " must match at least one of these regular expressions: <span class=\"example-list\">%s</span>" % (
+                " ".join([render_parameter(regex, "s") for regex in expectation["kwargs"]["regex_list"]]),
+            )
 
         elif expectation["expectation_type"] == "expect_column_values_to_not_match_regex_list":
             #FIXME: Need to add logic for mostly
