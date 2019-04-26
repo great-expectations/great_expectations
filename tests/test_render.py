@@ -1,4 +1,6 @@
 import unittest
+import json
+
 from great_expectations import render
 
 test_expectations_config = {
@@ -159,7 +161,8 @@ class TestFullPageRender(unittest.TestCase):
     def test_prescriptive_expectation_renderer(self):
         results = render.render(
             renderer_class=render.FullPagePrescriptiveExpectationRenderer,
-            expectations=test_expectations_config["expectations"],
+            # expectations=test_expectations_config["expectations"],
+            expectations=json.load(open('tests/test_fixtures/test_expectations.json')),
         )
         print(results)
         assert results != None
