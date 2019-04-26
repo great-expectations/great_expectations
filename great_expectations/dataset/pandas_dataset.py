@@ -779,8 +779,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         regex_matches = []
         for regex in regex_list:
             regex_matches.append(column.astype(str).str.contains(regex))
-        regex_match_df = pd.concat(regex_matches,
-                                   axis=1, ignore_index=True, sort=False)
+        regex_match_df = pd.concat(regex_matches, axis=1, ignore_index=True)
 
         if match_on == "any":
             return regex_match_df.any(axis='columns')
@@ -798,8 +797,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         regex_matches = []
         for regex in regex_list:
             regex_matches.append(column.astype(str).str.contains(regex))
-        regex_match_df = pd.concat(regex_matches, 
-                                   axis=1, ignore_index=True, sort=False)
+        regex_match_df = pd.concat(regex_matches, axis=1, ignore_index=True)
 
         return ~regex_match_df.any(axis='columns')
 
