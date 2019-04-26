@@ -50,8 +50,8 @@
             </p>
             {% elif content_block["content_block_type"] == "graph" %}
             <img
-                style="max-width:50%; max-height:200px; float: right;"
-                src="http://localhost:8000/plot-{{range(0,10)|random}}.png"
+                style="max-width:32%; max-height:200px; float: right;"
+                src="http://localhost:8000/plot-{{range(5,10)|random}}.png"
             />
             {% elif content_block["content_block_type"] == "table" %}
             {% elif content_block["content_block_type"] == "example_list" %}

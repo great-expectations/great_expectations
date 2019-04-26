@@ -67,6 +67,10 @@ class FullPageHtmlRenderer(Renderer):
             "content_block_type" : "graph",
             "content" : []
         }
+        graph2 = {
+            "content_block_type" : "graph",
+            "content" : []
+        }
         table = {
             "content_block_type" : "table",
             "content" : []
@@ -93,7 +97,9 @@ class FullPageHtmlRenderer(Renderer):
             "section_name" : column_name,
             "content_blocks" : [
                 graph,
+                # graph2,
                 description,
+                table,
                 bullet_list,
                 example_list,
                 more_description,
