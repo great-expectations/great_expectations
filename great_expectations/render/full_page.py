@@ -18,24 +18,11 @@ class FullPageHtmlRenderer(Renderer):
         return True
 
     def render(self):
-        # t = Environment(loader=BaseLoader).from_string(myString)
-        # data = rtemplate.render(**data)
         env = Environment(
             loader=PackageLoader('great_expectations', 'render/fixtures'),
             autoescape=select_autoescape(['html', 'xml'])
         )
-        # env.filters['random'] = random
-
-        print( env.list_templates() )        
-
         t = env.get_template('single_page_prescriptive.j2')
-
-        # t = Template(open(
-        #     os.path.join(
-        #         os.path.dirname(__file__),
-        #         'fixtures/single_page_prescriptive.j2'
-        #     )
-        # ).read())
 
         results = []
         for expectation in self.expectations:
