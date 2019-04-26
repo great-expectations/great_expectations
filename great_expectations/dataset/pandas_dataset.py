@@ -436,13 +436,13 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
         row_count = self.shape[0]
 
-        if min_value != None and max_value != None:
+        if min_value is not None and max_value is not None:
             outcome = row_count >= min_value and row_count <= max_value
 
-        elif min_value == None and max_value != None:
+        elif min_value is None and max_value is not None:
             outcome = row_count <= max_value
 
-        elif min_value != None and max_value == None:
+        elif min_value is not None and max_value is None:
             outcome = row_count >= min_value
 
         return {
@@ -601,7 +601,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         else:
             temp_column = column
 
-        if min_value != None and max_value != None and min_value > max_value:
+        if min_value is not None and max_value is not None and min_value > max_value:
             raise ValueError("min_value cannot be greater than max_value")
 
         def is_between(val):
@@ -612,7 +612,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             if type(val) == None:
                 return False
             else:
-                if min_value != None and max_value != None:
+                if min_value is not None and max_value is not None:
                     if allow_cross_type_comparisons:
                         try:
                             return (min_value <= val) and (val <= max_value)
@@ -626,7 +626,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
                         return (min_value <= val) and (val <= max_value)
 
-                elif min_value == None and max_value != None:
+                elif min_value is None and max_value is not None:
                     if allow_cross_type_comparisons:
                         try:
                             return val <= max_value
@@ -640,7 +640,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
                         return val <= max_value
 
-                elif min_value != None and max_value == None:
+                elif min_value is not None and max_value is None:
                     if allow_cross_type_comparisons:
                         try:
                             return min_value <= val
@@ -737,13 +737,13 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
         column_lengths = column.astype(str).str.len()
 
-        if min_value != None and max_value != None:
+        if min_value is not None and max_value is not None:
             return column_lengths.between(min_value, max_value)
 
-        elif min_value == None and max_value != None:
+        elif min_value is None and max_value is not None:
             return column_lengths <= max_value
 
-        elif min_value != None and max_value == None:
+        elif min_value is not None and max_value is None:
             return column_lengths >= min_value
 
         else:
@@ -761,16 +761,14 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
     def expect_column_values_to_match_regex(self, column, regex,
                                             mostly=None,
                                             result_format=None, include_config=False, catch_exceptions=None, meta=None):
-        return column.map(
-            lambda x: re.findall(regex, str(x)) != []
-        )
+        return column.astype(str).str.contains(regex)
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
     def expect_column_values_to_not_match_regex(self, column, regex,
                                                 mostly=None,
                                                 result_format=None, include_config=False, catch_exceptions=None, meta=None):
-        return column.map(lambda x: re.findall(regex, str(x)) == [])
+        return ~column.astype(str).str.contains(regex)
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
@@ -778,33 +776,30 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                                                  mostly=None,
                                                  result_format=None, include_config=False, catch_exceptions=None, meta=None):
 
+        regex_matches = []
+        for regex in regex_list:
+            regex_matches.append(column.astype(str).str.contains(regex))
+        regex_match_df = pd.concat(regex_matches, axis=1, ignore_index=True)
+
         if match_on == "any":
-
-            def match_in_list(val):
-                if any(re.findall(regex, str(val)) for regex in regex_list):
-                    return True
-                else:
-                    return False
-
+            return regex_match_df.any(axis='columns')
         elif match_on == "all":
+            return regex_match_df.all(axis='columns')
+        else:
+            raise ValueError("match_on must be either 'any' or 'all'")
 
-            def match_in_list(val):
-                if all(re.findall(regex, str(val)) for regex in regex_list):
-                    return True
-                else:
-                    return False
-
-        return column.map(match_in_list)
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
     def expect_column_values_to_not_match_regex_list(self, column, regex_list,
                                                      mostly=None,
                                                      result_format=None, include_config=False, catch_exceptions=None, meta=None):
-        return column.map(
-            lambda x: not any([re.findall(regex, str(x))
-                               for regex in regex_list])
-        )
+        regex_matches = []
+        for regex in regex_list:
+            regex_matches.append(column.astype(str).str.contains(regex))
+        regex_match_df = pd.concat(regex_matches, axis=1, ignore_index=True)
+
+        return ~regex_match_df.any(axis='columns')
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
@@ -1070,13 +1065,13 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
         col_sum = column.sum()
 
-        if min_value != None and max_value != None:
+        if min_value is not None and max_value is not None:
             success = (min_value <= col_sum) and (col_sum <= max_value)
 
-        elif min_value == None and max_value != None:
+        elif min_value is None and max_value is not None:
             success = (col_sum <= max_value)
 
-        elif min_value != None and max_value == None:
+        elif min_value is not None and max_value is None:
             success = (min_value <= col_sum)
 
         return {
@@ -1113,13 +1108,13 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
         col_min = temp_column.min()
 
-        if min_value != None and max_value != None:
+        if min_value is not None and max_value is not None:
             success = (min_value <= col_min) and (col_min <= max_value)
 
-        elif min_value == None and max_value != None:
+        elif min_value is None and max_value is not None:
             success = (col_min <= max_value)
 
-        elif min_value != None and max_value == None:
+        elif min_value is not None and max_value is None:
             success = (min_value <= col_min)
 
         if parse_strings_as_datetimes:
@@ -1161,13 +1156,13 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
         col_max = temp_column.max()
 
-        if min_value != None and max_value != None:
+        if min_value is not None and max_value is not None:
             success = (min_value <= col_max) and (col_max <= max_value)
 
-        elif min_value == None and max_value != None:
+        elif min_value is None and max_value is not None:
             success = (col_max <= max_value)
 
-        elif min_value != None and max_value == None:
+        elif min_value is not None and max_value is None:
             success = (min_value <= col_max)
 
         if parse_strings_as_datetimes:
