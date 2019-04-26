@@ -26,12 +26,15 @@ class FullPageHtmlRenderer(Renderer):
                 "section_name" : group,
                 "expectations" : []
             }
-            
+
             for expectation in expectations:
-                expectation_renderer = SingleExpectationRenderer(
-                    expectation=expectation,
-                )
-                section["expectations"].append(expectation_renderer.render())
+                try:
+                    expectation_renderer = SingleExpectationRenderer(
+                        expectation=expectation,
+                    )
+                    section["expectations"].append(expectation_renderer.render())
+                except:
+                    section["expectations"].append("Broken!")
 
             sections.append(section)
 
@@ -65,7 +68,7 @@ class MockFullPageHtmlRenderer(FullPageHtmlRenderer):
 
     def _get_template(self):
         env = Environment(
-            loader=PackageLoader('great_expectations', 'render/fixtures'),
+            loader=PackageLoader('great_expectations', 'render/fixtures/templates'),
             autoescape=select_autoescape(['html', 'xml'])
         )
         return env.get_template('mock.j2')
@@ -75,7 +78,7 @@ class FullPagePrescriptiveExpectationRenderer(FullPageHtmlRenderer):
 
     def _get_template(self):
         env = Environment(
-            loader=PackageLoader('great_expectations', 'render/fixtures'),
+            loader=PackageLoader('great_expectations', 'render/fixtures/templates'),
             autoescape=select_autoescape(['html', 'xml'])
         )
         return env.get_template('single_page_prescriptive.j2')

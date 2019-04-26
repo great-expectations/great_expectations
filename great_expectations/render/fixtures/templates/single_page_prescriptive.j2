@@ -16,7 +16,7 @@
 
 {% block sections %}
 {% for section in sections %}
-    <div id="section-{{loop.index}}">
+    {# <div id="section-{{loop.index}}">
         <h4>{{section['section_name']}}</h4>
         <p>{{ lipsum(1) }}</p>
         <img style="max-width:50%; max-height:200px; float: right;" src="http://localhost:8000/plot-{{range(0,10)|random}}.png"/>
@@ -31,6 +31,18 @@
             </ul>
         </p>
         <p>{{ lipsum(1) }}</p>
+    </div> #}
+
+    <div id="section-{{loop.index}}">
+        <h4>{{section['section_name']}}</h4>
+        <p>
+            <ul>
+                {% for bullet_point in section["expectations"] %}
+                <li>{{ bullet_point }}</li>
+                {% endfor %}
+            </ul>
+        </p>
     </div>
+
 {% endfor %}
 {% endblock %}
