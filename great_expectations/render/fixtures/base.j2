@@ -57,15 +57,17 @@
                 <div id="section-{{i}}">
                     <h4>Section {{ i }}</h4>
                     <p>{{ lipsum(1) }}</p>
+                    <img style="max-width:50%; max-height:200px; float: right;" src="http://localhost:8000/plot-{{range(0,10)|random}}.png"/>
                     <p>
                         <ul>
+                            {% for i in range(7) %}
                             <li>x_var is a required field.</li>
+                            {% endfor %}
                             <li>y_var is a required field.</li>
                             <li>x_var must never be missing.</li>
                             <li>y_var must never be missing.</li>
                         </ul>
                     </p>
-                    <img src="http://localhost:8000/plot-{{range(0,10)|random}}.png"/>
                     <p>{{ lipsum(1) }}</p>
                 </div>
             {% endfor %}
