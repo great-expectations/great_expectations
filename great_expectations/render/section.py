@@ -43,10 +43,6 @@ class PrescriptiveExpectationColumnSectionRenderer(SectionRenderer):
         else:
             graph = {}
 
-        graph2 = {
-            "content_block_type" : "graph",
-            "content" : []
-        }
         table = {
             "content_block_type" : "table",
             "content" : []
@@ -112,57 +108,50 @@ class DescriptiveEvrColumnSectionRenderer(SectionRenderer):
             "content" : [self.column_name],
         }
 
-        type_expectation = self._find_evr_by_type(self.evrs, "expect_column_values_to_be_of_type")
-        type_ = type_expectation["expectation_config"]["kwargs"]["type_"]
-        description = {
+        type_evr = self._find_evr_by_type(self.evrs, "expect_column_values_to_be_of_type")
+        type_ = type_evr["expectation_config"]["kwargs"]["type_"]
+        type_text = {
             "content_block_type" : "text",
             "content" : [type_]
         }
+
         bullet_list = {
             "content_block_type" : "bullet_list",
             "content" : []
         }
-#         if random.random() > .5:
-#             graph = {
-#                 "content_block_type" : "graph",
-#                 "content" : []
-#             }
-#         else:
-#             graph = {}
-
-#         graph2 = {
-#             "content_block_type" : "graph",
-#             "content" : []
-#         }
-#         table = {
-#             "content_block_type" : "table",
-#             "content" : []
-#         }
-#         example_list = {
-#             "content_block_type" : "example_list",
-#             "content" : []
-#         }
-#         more_description = {
-#             "content_block_type" : "text",
-#             "content" : []
-#         }
-
         for evr in self.evrs:
-            # expectation = evr["expectation_config"]
             bullet_list["content"].append("""
 <div class="alert alert-primary" role="alert">
   <pre>"""+json.dumps(evr, indent=2)+"""</pre>
 </div>
             """)
 
+        table = {
+            "content_block_type" : "table",
+            "content" : []
+        }
+        for evr in self.evrs:
+            expectation_type = evr["expectation_config"]["expectation_type"]
+            if "result" in evr and "unexpected_percent" in evr["result"]:
+                unexpected_percent = evr["result"]["unexpected_percent"]
+            else:
+                unexpected_percent = None
+
+            if "result" in evr and "observed_value" in evr["result"]:
+                observed_value = evr["result"]["observed_value"]
+            else:
+                observed_value = None
+            
+            table["content"].append([
+                expectation_type, unexpected_percent, observed_value
+            ])
+
         section = {
             "section_name" : self.column_name,
             "content_blocks" : [
                 header,
-                # graph,
-                # # graph2,
-                description,
-                # table,
+                type_text,
+                table,
                 bullet_list,
                 # example_list,
                 # more_description,
