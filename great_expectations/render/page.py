@@ -8,10 +8,7 @@ from jinja2 import Environment, BaseLoader, PackageLoader, select_autoescape
 
 from .base import Renderer
 from .single_expectation import SingleExpectationRenderer
-from .section import EvrSectionRenderer
-
-#FullPageExpectationHtmlRenderer
-#FullPageValidationResultHtmlRenderer
+from .section import EvrColumnSectionRenderer
 
 class FullPageHtmlRenderer(Renderer):
     def __init__(self, expectations, inspectable):
@@ -33,6 +30,7 @@ class FullPageHtmlRenderer(Renderer):
         raise NotImplementedError
 
 class PrescriptiveExpectationPageRenderer(FullPageHtmlRenderer):
+    """Renders an Expectation Suite as a standalone HTML file."""
 
     def render(self):
         t = self._get_template()
@@ -133,6 +131,7 @@ class PrescriptiveExpectationPageRenderer(FullPageHtmlRenderer):
         return section
 
 class DescriptiveEvrPageRenderer(FullPageHtmlRenderer):
+    """Renders an EVR set as a standalone HTML file."""
 
     def __init__(self, evrs):
         self.evrs = evrs
@@ -151,7 +150,7 @@ class DescriptiveEvrPageRenderer(FullPageHtmlRenderer):
 
         sections = []
         for group, evrs in grouped_evrs.items():
-            section_renderer = EvrSectionRenderer(group, evrs)
+            section_renderer = EvrColumnSectionRenderer(group, evrs)
             sections.append(
                 section_renderer.render()
             )

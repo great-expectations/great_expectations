@@ -1,4 +1,8 @@
+import json
+
 from .base import Renderer
+from .single_expectation import SingleExpectationRenderer
+# from .snippet import 
 
 class SectionRenderer(Renderer):
     def __init__(self, expectations, inspectable):
@@ -16,7 +20,9 @@ class SectionRenderer(Renderer):
         raise NotImplementedError
 
 
-class EvrSectionRenderer(SectionRenderer):
+class EvrColumnSectionRenderer(SectionRenderer):
+    """Generates a section's worth of content blocks for a set of EVRs from the same column."""
+
     def __init__(self, column_name, evrs):
         self.column_name = column_name
         self.evrs = evrs
@@ -26,10 +32,10 @@ class EvrSectionRenderer(SectionRenderer):
             "content_block_type" : "text",
             "content" : []
         }
-#         bullet_list = {
-#             "content_block_type" : "bullet_list",
-#             "content" : []
-#         }
+        bullet_list = {
+            "content_block_type" : "bullet_list",
+            "content" : []
+        }
 #         if random.random() > .5:
 #             graph = {
 #                 "content_block_type" : "graph",
@@ -55,22 +61,23 @@ class EvrSectionRenderer(SectionRenderer):
 #             "content" : []
 #         }
 
-#         for expectation in expectations_list:
-#             try:
-#                 expectation_renderer = SingleExpectationRenderer(
-#                     expectation=expectation,
-#                 )
-#                 # print(expectation)
-#                 bullet_point = expectation_renderer.render()
-#                 assert bullet_point != None
-#                 bullet_list["content"].append(bullet_point)
-#             except Exception as e:
-#                 bullet_list["content"].append("""
-# <div class="alert alert-danger" role="alert">
-#   Failed to render Expectation:<br/><pre>"""+json.dumps(expectation, indent=2)+"""</pre>
-#   <p>"""+str(e)+"""
-# </div>
-#                 """)
+        for evr in self.evrs:
+            expectation = evr["expectation_config"]
+            try:
+                expectation_renderer = SingleExpectationRenderer(
+                    expectation=expectation,
+                )
+                # print(expectation)
+                bullet_point = expectation_renderer.render()
+                assert bullet_point != None
+                bullet_list["content"].append(bullet_point)
+            except Exception as e:
+                bullet_list["content"].append("""
+<div class="alert alert-danger" role="alert">
+  Failed to render Expectation:<br/><pre>"""+json.dumps(expectation, indent=2)+"""</pre>
+  <p>"""+str(e)+"""
+</div>
+                """)
 
         section = {
             "section_name" : self.column_name,
@@ -79,7 +86,7 @@ class EvrSectionRenderer(SectionRenderer):
                 # # graph2,
                 description,
                 # table,
-                # bullet_list,
+                bullet_list,
                 # example_list,
                 # more_description,
             ]
