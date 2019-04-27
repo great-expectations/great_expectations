@@ -12,10 +12,9 @@ jtbd:
 * render a single Expectation as a single element (e.g. div, p, span, JSON, jinja, markdown)
 """
 
-from .full_page import (
-    MockFullPageHtmlRenderer,
-    FullPagePrescriptiveExpectationRenderer,
-    FullPageDescriptiveEvrRenderer,
+from .page import (
+    PrescriptiveExpectationPageRenderer,
+    DescriptiveEvrPageRenderer,
 )
 
 def render(expectations=None, input_inspectable=None, renderer_class=None, output_inspectable=None):
