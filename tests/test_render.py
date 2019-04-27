@@ -15,6 +15,9 @@ class TestPageRenderers(unittest.TestCase):
         )
         assert results != None
 
+        # with open('./test.html', 'w') as f:
+        #     f.write(results)
+
     def test_descriptive_evr_renderer(self):
         R = render.DescriptiveEvrPageRenderer(
           json.load(open('tests/test_fixtures/rendering_fixtures/evr_suite_3.json'))["results"],
