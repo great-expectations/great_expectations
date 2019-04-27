@@ -43,3 +43,98 @@ def columns_exist(inspect_dataset):
 
     create_multiple_expectations(
         inspect_dataset, columns, "expect_column_to_exist")
+
+
+#!!! This method is invoked by pseudo_pandas_profiling
+#!!! We probably want to refactor autoinspectors to be full classes, rather than just functions.
+#!!! That will allow for subfunctions and inheritance.
+#!!! However, we probably *don't* want autoinspection to be stateful.
+def _get_column_type_and_cardinality(df, column):
+    
+    if df.expect_column_values_to_be_of_type(column, "int")["success"]:
+        type_ = "int"
+        
+    elif df.expect_column_values_to_be_of_type(column, "float")["success"]:
+        type_ = "float"
+    
+    elif df.expect_column_values_to_be_of_type(column, "string")["success"]:
+        type_ = "string"
+        
+    else:
+        type_ = "unknown"
+
+    unique = df.expect_column_unique_value_count_to_be_between(column, 0, None)['result']['observed_value']
+    pct_unique = df.expect_column_proportion_of_unique_values_to_be_between(column, 0, None)['result']['observed_value']
+    
+    if pct_unique == 1.0:
+        cardinality = "unique"
+    
+    elif pct_unique > .1:
+        cardinality = "many"
+
+    elif pct_unique > .02:
+        cardinality = "lots"
+
+    else:
+        if unique == 0:
+            cardinality = "none"
+
+        elif unique == 1:
+            cardinality = "one"
+
+        elif unique == 2:
+            cardinality = "two"
+
+        elif unique < 10:
+            cardinality = "very few"
+            
+        elif unique < 200:
+            cardinality = "few"
+            
+        else:
+            cardinality = "unknown"
+#             print(
+#                 column, '\t',
+#                 unique,
+#                 pct_unique
+#             )
+
+    return (type_, cardinality)
+
+def pseudo_pandas_profiling(dataset):
+    df = dataset
+
+    for column in df.columns:
+        # print(column, get_column_type_and_cardinality(df, column))
+        type_, cardinality = _get_column_type_and_cardinality(df, column)
+
+        if type_ == "int":
+            if cardinality == "unique":
+                df.expect_column_values_to_be_unique(column)
+                df.expect_column_values_to_be_increasing(column)
+            
+            elif cardinality == "very few":
+    #             print(df[column].value_counts())
+                pass
+                
+            else:
+                print(column, cardinality)
+        
+        elif type_ == "float":
+    #         print(column, type_, cardinality)
+            pass
+
+        elif type_ == "string":
+            if cardinality == "unique":
+                df.expect_column_values_to_be_unique(column)
+                df.expect_column_values_to_be_increasing(column)
+            
+            elif cardinality in ["one", "two", "very few", "few"]:
+                df.expect_column_values_to_be_in_set(column, [])
+    #             print(df[column].value_counts())
+                
+            else:
+                print(column, type_, cardinality)
+
+        else:
+            print("??????", column, type_, cardinality)
