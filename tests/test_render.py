@@ -162,7 +162,8 @@ class TestFullPageRender(unittest.TestCase):
         results = render.render(
             renderer_class=render.FullPagePrescriptiveExpectationRenderer,
             # expectations=test_expectations_config["expectations"],
-            expectations=json.load(open('tests/test_fixtures/test_expectations.json')),
+            # expectations=json.load(open('tests/test_fixtures/test_expectations.json')),
+            expectations=json.load(open('tests/test_fixtures/more_test_expectations.json'))["expectations"],
         )
         # print(results)
         assert results != None

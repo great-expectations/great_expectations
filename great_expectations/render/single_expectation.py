@@ -20,6 +20,11 @@ class SingleExpectationRenderer(Renderer):
         if expectation["expectation_type"] == "expect_column_to_exist":
             return expectation["kwargs"]["column"] + " is a required field."
 
+        elif expectation["expectation_type"] == "expect_column_values_to_be_of_type":
+            return " is of type %s." % (
+                render_parameter(expectation["kwargs"]["type_"], "s")
+            )
+
         # elif expectation["expectation_type"] in ["expect_column_values_to_be_of_type", "expect_column_values_to_be_of_semantic_type"]:
             # print(json.dumps(expectation, indent=2))
             # column_type = result["expectation_config"]["kwargs"]["type_"]
@@ -127,7 +132,26 @@ class SingleExpectationRenderer(Renderer):
             return expectation["kwargs"]["column"] + " must have a standard deviation between %d and %d." %(expectation["kwargs"]["min_value"], expectation["kwargs"]["max_value"])
 
         elif expectation["expectation_type"] == "expect_column_unique_value_count_to_be_between":
-            return expectation["kwargs"]["column"] + " must have between %d and %d unique values." % (expectation["kwargs"]["min_value"], expectation["kwargs"]["max_value"])
+            if (expectation["kwargs"]["min_value"] == None) and (expectation["kwargs"]["max_value"] == None):
+                return " has a bogus %s expectation." % (
+                    render_parameter("expect_column_unique_value_count_to_be_between", "s")
+                )
+
+            elif expectation["kwargs"]["min_value"] == None:
+                return " must have fewer than %s unique values." % (
+                    render_parameter(expectation["kwargs"]["max_value"], "d")
+                )
+
+            elif expectation["kwargs"]["max_value"] == None:
+                return " must have at least %s unique values." % (
+                    render_parameter(expectation["kwargs"]["min_value"], "d")
+                )
+
+            else:
+                return " must have between %s and %s unique values." % (
+                    render_parameter(expectation["kwargs"]["min_value"], "d"),
+                    render_parameter(expectation["kwargs"]["max_value"], "d"),
+                )
 
         elif expectation["expectation_type"] == "expect_column_values_to_not_match_regex":
             #FIXME: Need to add logic for mostly
@@ -156,15 +180,26 @@ class SingleExpectationRenderer(Renderer):
 
 
         elif expectation["expectation_type"] == "expect_column_proportion_of_unique_values_to_be_between":
-            return expectation["kwargs"]["column"] + " has between %.1f and %.1f%% unique values." % (
-                100*expectation["kwargs"]["min_value"],
-                100*expectation["kwargs"]["max_value"]
-            )
+            if (expectation["kwargs"]["min_value"] == None) and (expectation["kwargs"]["max_value"] == None):
+                return " has a bogus %s expectation." % (
+                    render_parameter("expect_column_proportion_of_unique_values_to_be_between", "s")
+                )
 
-            stats_table_rows.append({
-                "A" : "unique values",
-                "B" : result["result"]["observed_value"]
-            })
+            elif expectation["kwargs"]["min_value"] == None:
+                return " must have fewer than %s%% unique values." % (
+                    render_parameter(100*expectation["kwargs"]["max_value"], ".1f")
+                )
+
+            elif expectation["kwargs"]["max_value"] == None:
+                return " must have at least %s%% unique values." % (
+                    render_parameter(100*expectation["kwargs"]["min_value"], ".1f")
+                )
+
+            else:
+                return " must have between %s and %s%% unique values." % (
+                    render_parameter(100*expectation["kwargs"]["min_value"], ".1f"),
+                    render_parameter(100*expectation["kwargs"]["max_value"], ".1f"),
+                )
 
         elif expectation["expectation_type"] == "expect_column_values_to_be_in_set":
             example_list = {
