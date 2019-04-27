@@ -1,25 +1,46 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>Data documentation compiled by Great Expectations</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet" media="screen">
-    <style type="text/css">
-      .container {
-        max-width: 500px;
-        padding-top: 100px;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="container">
-        <ul>
-            {% for item in elements %}
-                <li>{{ item }}</li>
-            {% endfor %}
-        </ul>
+{% extends "base.j2" %}
+{% block title %}Data documentation compiled by Great Expectations{% endblock %}
+
+
+{% block navbar %}
+<nav id="navigation" class="navbar navbar-light bg-light sticky">
+    <nav class="nav nav-pills flex-column">
+        <a class="navbar-brand" href="#">MyTable</a>
+        {% for section in sections %}
+        <a class="nav-link" href="#section-{{loop.index}}">{{section['section_name']}}</a>
+        {% endfor %}
+    </nav>
+</nav>
+{% endblock %}
+
+
+{% block sections %}
+{% for section in sections %}
+    <div id="section-{{loop.index}}" style="clear:both; margin-bottom: 50px;">
+        <h4>{{section['section_name']}}</h4>
+        {% for content_block in section["content_blocks"] %}
+            {% if content_block["content_block_type"] == "text" %}
+            <p>
+                {{ lipsum(1, min=5, max=20) }}
+            </p>
+            {% elif content_block["content_block_type"] == "bullet_list" %}
+            <p>
+                <ul>
+                    {% for bullet_point in content_block["content"] %}
+                    <li>{{ bullet_point }}</li>
+                    {% endfor %}
+                </ul>
+            </p>
+            {% elif content_block["content_block_type"] == "graph" %}
+            <img
+                style="max-width:32%; max-height:200px; float: right;"
+                src="http://localhost:8000/plot-{{range(5,10)|random}}.png"
+            />
+            {% elif content_block["content_block_type"] == "table" %}
+            {% elif content_block["content_block_type"] == "example_list" %}
+            {% endif %}
+        {% endfor %}
     </div>
-    <script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
-    <script src="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
-  </body>
-</html>
+
+{% endfor %}
+{% endblock %}

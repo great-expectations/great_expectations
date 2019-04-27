@@ -147,16 +147,16 @@ class TestFullPageRender(unittest.TestCase):
     def test_import(self):
         from great_expectations import render
 
-    def test_mock_renderer(self):
-        results = render.render(
-            renderer_class=render.MockFullPageHtmlRenderer,
-            expectations=test_expectations_config["expectations"],
-        )
-        print(results)
-        assert results != None
+    # def test_mock_renderer(self):
+    #     results = render.render(
+    #         renderer_class=render.MockFullPageHtmlRenderer,
+    #         expectations=test_expectations_config["expectations"],
+    #     )
+    #     print(results)
+    #     assert results != None
 
-        # with open('./test.html', 'w') as f:
-        #     f.write(results)
+    #     # with open('./test.html', 'w') as f:
+    #     #     f.write(results)
 
     def test_prescriptive_expectation_renderer(self):
         results = render.render(
@@ -165,10 +165,19 @@ class TestFullPageRender(unittest.TestCase):
             # expectations=json.load(open('tests/test_fixtures/test_expectations.json')),
             expectations=json.load(open('tests/test_fixtures/more_test_expectations.json'))["expectations"],
         )
-        # print(results)
         assert results != None
 
+        # with open('./test.html', 'w') as f:
+        #     f.write(results)
+
+    def test_descriptive_evr_renderer(self):
+        R = render.FullPageDescriptiveEvrRenderer(
+          json.load(open('tests/test_fixtures/more_test_expectations_results.json'))["results"],
+        )
+        rendered_page = R.render()
+        assert rendered_page != None
+
         with open('./test.html', 'w') as f:
-            f.write(results)
+            f.write(rendered_page)
 
         assert False

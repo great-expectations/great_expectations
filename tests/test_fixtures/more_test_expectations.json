@@ -113,6 +113,14 @@
       }
     },
     {
+      "expectation_type": "expect_column_max_to_be_between",
+      "kwargs": {
+        "column": "hu_site_limit",
+        "min_value": 0,
+        "max_value": 0
+      }
+    },
+    {
       "expectation_type": "expect_column_values_to_be_between",
       "kwargs": {
         "column": "hu_site_limit",
@@ -151,6 +159,12 @@
       }
     },
     {
+      "expectation_type": "expect_column_values_to_be_increasing",
+      "kwargs": {
+        "column": "policyID"
+      }
+    },
+    {
       "expectation_type": "expect_column_values_to_be_of_type",
       "kwargs": {
         "column": "statecode",
@@ -174,6 +188,13 @@
       }
     },
     {
+      "expectation_type": "expect_column_values_to_be_in_set",
+      "kwargs": {
+        "column": "statecode",
+        "values_set": []
+      }
+    },
+    {
       "expectation_type": "expect_column_values_to_be_of_type",
       "kwargs": {
         "column": "county",
@@ -194,6 +215,13 @@
         "column": "county",
         "min_value": 0,
         "max_value": null
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_in_set",
+      "kwargs": {
+        "column": "county",
+        "values_set": []
       }
     },
     {
@@ -496,6 +524,13 @@
       }
     },
     {
+      "expectation_type": "expect_column_values_to_be_in_set",
+      "kwargs": {
+        "column": "line",
+        "values_set": []
+      }
+    },
+    {
       "expectation_type": "expect_column_values_to_be_of_type",
       "kwargs": {
         "column": "construction",
@@ -516,6 +551,13 @@
         "column": "construction",
         "min_value": 0,
         "max_value": null
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_in_set",
+      "kwargs": {
+        "column": "construction",
+        "values_set": []
       }
     },
     {
