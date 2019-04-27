@@ -7,7 +7,6 @@ from jinja2 import Template
 from jinja2 import Environment, BaseLoader, PackageLoader, select_autoescape
 
 from .base import Renderer
-from .single_expectation import SingleExpectationRenderer
 from .section import (
     PrescriptiveExpectationColumnSectionRenderer,
     DescriptiveEvrColumnSectionRenderer,
