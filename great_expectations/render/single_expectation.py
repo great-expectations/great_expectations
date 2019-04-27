@@ -202,13 +202,16 @@ class SingleExpectationRenderer(Renderer):
                 )
 
         elif expectation["expectation_type"] == "expect_column_values_to_be_in_set":
-            example_list = {
-                "box_type": "Report-ExampleList",
-                "props": {
-                    "subtitle": "Common values include:",
-                    "list": expectation["kwargs"]["values_set"][:20],
-                }
-            }
+            return " must belong to this set: <span class=\"example-list\">%s</span>" % (
+                " ".join([render_parameter(regex, "s") for regex in expectation["kwargs"]["values_set"]]),
+            )
+            # example_list = {
+            #     "box_type": "Report-ExampleList",
+            #     "props": {
+            #         "subtitle": "Common values include:",
+            #         "list": expectation["kwargs"]["values_set"][:20],
+            #     }
+            # }
 
         #Note: This is a fake expectation generated as a quasi_expectation by shackleton.
         elif expectation["expectation_type"] == "expect_common_values_to_be_in_list":

@@ -8,6 +8,7 @@ from jinja2 import Environment, BaseLoader, PackageLoader, select_autoescape
 
 from .base import Renderer
 from .single_expectation import SingleExpectationRenderer
+from .section import EvrSectionRenderer
 
 #FullPageExpectationHtmlRenderer
 #FullPageValidationResultHtmlRenderer
@@ -15,6 +16,36 @@ from .single_expectation import SingleExpectationRenderer
 class FullPageHtmlRenderer(Renderer):
     def __init__(self, expectations, inspectable):
         self.expectations = expectations
+
+    def _validate_input(self, expectations):
+        # raise NotImplementedError
+        #!!! Need to fix this
+        return True
+
+    def _get_template(self):
+        raise NotImplementedError
+
+    def render(self):
+        raise NotImplementedError
+
+class MockFullPageHtmlRenderer(FullPageHtmlRenderer):
+
+    def _get_template(self):
+        env = Environment(
+            loader=PackageLoader('great_expectations', 'render/fixtures/templates'),
+            autoescape=select_autoescape(['html', 'xml'])
+        )
+        return env.get_template('mock.j2')
+
+
+class FullPagePrescriptiveExpectationRenderer(FullPageHtmlRenderer):
+
+    def _get_template(self):
+        env = Environment(
+            loader=PackageLoader('great_expectations', 'render/fixtures/templates'),
+            autoescape=select_autoescape(['html', 'xml'])
+        )
+        return env.get_template('single_page_prescriptive.j2')
 
     def render(self):
         t = self._get_template()
@@ -36,13 +67,6 @@ class FullPageHtmlRenderer(Renderer):
 
         return rendered_page
 
-    def _validate_input(self, expectations):
-        # raise NotImplementedError
-        #!!! Need to fix this
-        return True
-
-    def _get_template(self):
-        raise NotImplementedError
 
     def _group_expectations_by_columns(self, expectations_list):
         column_expectations_dict = defaultdict(list)
@@ -55,6 +79,7 @@ class FullPageHtmlRenderer(Renderer):
 
         return column_expectations_dict
 
+    #!!! Factor this out into an appropriate renderer in section.py
     def _render_column_section_from_expectations(self, column_name, expectations_list):
         description = {
             "content_block_type" : "text",
@@ -121,21 +146,46 @@ class FullPageHtmlRenderer(Renderer):
 
         return section
 
-class MockFullPageHtmlRenderer(FullPageHtmlRenderer):
+class FullPageDescriptiveEvrRenderer(FullPageHtmlRenderer):
+
+    def __init__(self, evrs):
+        self.evrs = evrs
 
     def _get_template(self):
         env = Environment(
             loader=PackageLoader('great_expectations', 'render/fixtures/templates'),
             autoescape=select_autoescape(['html', 'xml'])
         )
-        return env.get_template('mock.j2')
+        return env.get_template('single_page_descriptive.j2')
+
+    def render(self):
+        t = self._get_template()
+
+        grouped_evrs = self._group_evrs_by_columns(self.evrs)
+
+        sections = []
+        for group, evrs in grouped_evrs.items():
+            section_renderer = EvrSectionRenderer(group, evrs)
+            sections.append(
+                section_renderer.render()
+            )
+
+        rendered_page = t.render(
+            **{
+            "sections": sections
+        })
+
+        return rendered_page
 
 
-class FullPagePrescriptiveExpectationRenderer(FullPageHtmlRenderer):
+    def _group_evrs_by_columns(self, evrs_list):
+        column_evrs_dict = defaultdict(list)
 
-    def _get_template(self):
-        env = Environment(
-            loader=PackageLoader('great_expectations', 'render/fixtures/templates'),
-            autoescape=select_autoescape(['html', 'xml'])
-        )
-        return env.get_template('single_page_prescriptive.j2')
+        for evr in evrs_list:
+            exp = evr["expectation_config"]
+            if "column" in exp["kwargs"]:
+                column_evrs_dict[exp["kwargs"]["column"]].append(evr)
+            else:
+                column_evrs_dict["NO_COLUMN"].append(evr)
+
+        return column_evrs_dict

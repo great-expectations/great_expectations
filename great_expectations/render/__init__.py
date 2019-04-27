@@ -15,6 +15,7 @@ jtbd:
 from .full_page import (
     MockFullPageHtmlRenderer,
     FullPagePrescriptiveExpectationRenderer,
+    FullPageDescriptiveEvrRenderer,
 )
 
 def render(expectations=None, input_inspectable=None, renderer_class=None, output_inspectable=None):
