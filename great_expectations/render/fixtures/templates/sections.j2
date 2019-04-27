@@ -27,10 +27,10 @@
         />
 
         {% elif content_block["content_block_type"] == "table" %}
-        <table>
+        <table style="width:50%">
             {% set table = content_block["content"] %}
             {% for row in table %}
-            <tr>
+            <tr class="{{ loop.cycle('odd', 'even') }}" >
                 {% set rowloop = loop %}
                 {% for cell in row %}
                     <td id="cell-{{ rowloop.index }}-{{ loop.index }}">{{ cell }}</td>
