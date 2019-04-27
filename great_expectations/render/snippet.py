@@ -262,6 +262,7 @@ class ExpectationBulletPointSnippetRenderer(Renderer):
             #FIXME: This warning is actually pretty helpful
             print("WARNING: Unhandled expectation_type %s" % expectation["expectation_type"],)
 
+
 class EvrSnippetRenderer(Renderer):
     def __init__(self, expectation):
         self.expectation = expectation

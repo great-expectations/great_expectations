@@ -28,8 +28,8 @@ class PrescriptiveExpectationColumnSectionRenderer(SectionRenderer):
 
     def render(self):
         description = {
-            "content_block_type" : "text",
-            "content" : []
+            "content_block_type" : "header",
+            "content" : [self.column_name]
         }
         bullet_list = {
             "content_block_type" : "bullet_list",
@@ -101,10 +101,22 @@ class DescriptiveEvrColumnSectionRenderer(SectionRenderer):
         self.column_name = column_name
         self.evrs = evrs
 
+    def _find_evr_by_type(self, evrs, type_):
+        for evr in evrs:
+            if evr["expectation_config"]["expectation_type"] == type_:
+                return evr
+
     def render(self):
+        header = {
+            "content_block_type" : "header",
+            "content" : [self.column_name],
+        }
+
+        type_expectation = self._find_evr_by_type(self.evrs, "expect_column_values_to_be_of_type")
+        type_ = type_expectation["expectation_config"]["kwargs"]["type_"]
         description = {
             "content_block_type" : "text",
-            "content" : []
+            "content" : [type_]
         }
         bullet_list = {
             "content_block_type" : "bullet_list",
@@ -136,7 +148,7 @@ class DescriptiveEvrColumnSectionRenderer(SectionRenderer):
 #         }
 
         for evr in self.evrs:
-            expectation = evr["expectation_config"]
+            # expectation = evr["expectation_config"]
             bullet_list["content"].append("""
 <div class="alert alert-primary" role="alert">
   <pre>"""+json.dumps(evr, indent=2)+"""</pre>
@@ -146,6 +158,7 @@ class DescriptiveEvrColumnSectionRenderer(SectionRenderer):
         section = {
             "section_name" : self.column_name,
             "content_blocks" : [
+                header,
                 # graph,
                 # # graph2,
                 description,

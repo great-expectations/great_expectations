@@ -1,11 +1,16 @@
 {% for section in sections %}
 <div id="section-{{loop.index}}" style="clear:both; margin-bottom: 50px;">
-    <h4>{{section['section_name']}}</h4>
+    
     {% for content_block in section["content_blocks"] %}
-        {% if content_block["content_block_type"] == "text" %}
+        {% if content_block["content_block_type"] == "header" %}
+        <h4>{{content_block["content"][0]}}</h4>
+
+        {% elif content_block["content_block_type"] == "text" %}
         <p>
-            {{ lipsum(1, min=5, max=20) }}
+            {{content_block["content"][0]}}
+            {# {{ lipsum(1, min=5, max=20) }} #}
         </p>
+
         {% elif content_block["content_block_type"] == "bullet_list" %}
         <p>
             <ul>
@@ -14,11 +19,13 @@
                 {% endfor %}
             </ul>
         </p>
+
         {% elif content_block["content_block_type"] == "graph" %}
         <img
             style="max-width:32%; max-height:200px; float: right;"
             src="http://localhost:8000/plot-{{range(5,10)|random}}.png"
         />
+
         {% elif content_block["content_block_type"] == "table" %}
         {% elif content_block["content_block_type"] == "example_list" %}
         {% endif %}
