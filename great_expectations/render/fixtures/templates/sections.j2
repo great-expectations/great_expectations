@@ -27,6 +27,18 @@
         />
 
         {% elif content_block["content_block_type"] == "table" %}
+        <table>
+            {% set table = content_block["content"] %}
+            {% for row in table %}
+            <tr>
+                {% set rowloop = loop %}
+                {% for cell in row %}
+                    <td id="cell-{{ rowloop.index }}-{{ loop.index }}">{{ cell }}</td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </table>
+
         {% elif content_block["content_block_type"] == "example_list" %}
         {% endif %}
     {% endfor %}
