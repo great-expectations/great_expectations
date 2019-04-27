@@ -147,31 +147,17 @@ class TestFullPageRender(unittest.TestCase):
     def test_import(self):
         from great_expectations import render
 
-    # def test_mock_renderer(self):
-    #     results = render.render(
-    #         renderer_class=render.MockFullPageHtmlRenderer,
-    #         expectations=test_expectations_config["expectations"],
-    #     )
-    #     print(results)
-    #     assert results != None
-
-    #     # with open('./test.html', 'w') as f:
-    #     #     f.write(results)
-
     def test_prescriptive_expectation_renderer(self):
         results = render.render(
-            renderer_class=render.FullPagePrescriptiveExpectationRenderer,
+            renderer_class=render.PrescriptiveExpectationPageRenderer,
             # expectations=test_expectations_config["expectations"],
             # expectations=json.load(open('tests/test_fixtures/test_expectations.json')),
             expectations=json.load(open('tests/test_fixtures/more_test_expectations.json'))["expectations"],
         )
         assert results != None
 
-        # with open('./test.html', 'w') as f:
-        #     f.write(results)
-
     def test_descriptive_evr_renderer(self):
-        R = render.FullPageDescriptiveEvrRenderer(
+        R = render.DescriptiveEvrPageRenderer(
           json.load(open('tests/test_fixtures/more_test_expectations_results.json'))["results"],
         )
         rendered_page = R.render()
@@ -179,5 +165,3 @@ class TestFullPageRender(unittest.TestCase):
 
         with open('./test.html', 'w') as f:
             f.write(rendered_page)
-
-        assert False

@@ -23,29 +23,16 @@ class FullPageHtmlRenderer(Renderer):
         return True
 
     def _get_template(self):
-        raise NotImplementedError
-
-    def render(self):
-        raise NotImplementedError
-
-class MockFullPageHtmlRenderer(FullPageHtmlRenderer):
-
-    def _get_template(self):
-        env = Environment(
-            loader=PackageLoader('great_expectations', 'render/fixtures/templates'),
-            autoescape=select_autoescape(['html', 'xml'])
-        )
-        return env.get_template('mock.j2')
-
-
-class FullPagePrescriptiveExpectationRenderer(FullPageHtmlRenderer):
-
-    def _get_template(self):
         env = Environment(
             loader=PackageLoader('great_expectations', 'render/fixtures/templates'),
             autoescape=select_autoescape(['html', 'xml'])
         )
         return env.get_template('single_page_prescriptive.j2')
+
+    def render(self):
+        raise NotImplementedError
+
+class PrescriptiveExpectationPageRenderer(FullPageHtmlRenderer):
 
     def render(self):
         t = self._get_template()
@@ -66,7 +53,6 @@ class FullPagePrescriptiveExpectationRenderer(FullPageHtmlRenderer):
         })
 
         return rendered_page
-
 
     def _group_expectations_by_columns(self, expectations_list):
         column_expectations_dict = defaultdict(list)
@@ -146,7 +132,7 @@ class FullPagePrescriptiveExpectationRenderer(FullPageHtmlRenderer):
 
         return section
 
-class FullPageDescriptiveEvrRenderer(FullPageHtmlRenderer):
+class DescriptiveEvrPageRenderer(FullPageHtmlRenderer):
 
     def __init__(self, evrs):
         self.evrs = evrs
