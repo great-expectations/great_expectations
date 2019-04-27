@@ -107,15 +107,18 @@ def pseudo_pandas_profiling(dataset):
     for column in df.columns:
         # print(column, get_column_type_and_cardinality(df, column))
         type_, cardinality = _get_column_type_and_cardinality(df, column)
+        df.expect_column_values_to_not_be_null(column)
 
         if type_ == "int":
+            df.expect_column_values_to_not_be_in_set(column, [0])
+
             if cardinality == "unique":
                 df.expect_column_values_to_be_unique(column)
                 df.expect_column_values_to_be_increasing(column)
             
-            elif cardinality == "very few":
-    #             print(df[column].value_counts())
-                pass
+    #         elif cardinality == "very few":
+    # #             print(df[column].value_counts())
+    #             pass
                 
             else:
                 print(column, cardinality)
@@ -125,6 +128,11 @@ def pseudo_pandas_profiling(dataset):
             pass
 
         elif type_ == "string":
+            #Check for leading and tralining whitespace.
+            #!!! It would be nice to build additional Expectations here, but
+            #!!! the default logic for remove_expectations prevents us.
+            df.expect_column_values_to_not_match_regex(column, "^\s+|\s+$")
+
             if cardinality == "unique":
                 df.expect_column_values_to_be_unique(column)
                 df.expect_column_values_to_be_increasing(column)

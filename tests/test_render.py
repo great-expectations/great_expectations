@@ -26,19 +26,18 @@ class TestPageRenderers(unittest.TestCase):
         rendered_page = R.render()
         assert rendered_page != None
 
-        with open('./test.html', 'w') as f:
-            f.write(rendered_page)
+        # with open('./test.html', 'w') as f:
+        #     f.write(rendered_page)
 
 
     def test_full_oobe_flow(sefl):
         df = ge.read_csv("/Users/abe/Documents/superconductive/data/Sacramentorealestatetransactions.csv")
         df.autoinspect(ge.dataset.autoinspect.pseudo_pandas_profiling)
         evrs = df.validate()["results"]
-        print(evrs)
 
         R = render.DescriptiveEvrPageRenderer(evrs)
         rendered_page = R.render()
         assert rendered_page != None
 
-        with open('./test.html', 'w') as f:
-            f.write(rendered_page)
+        # with open('./test.html', 'w') as f:
+        #     f.write(rendered_page)
