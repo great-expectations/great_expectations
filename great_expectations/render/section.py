@@ -2,7 +2,10 @@ import json
 import random
 
 from .base import Renderer
-from .snippet import ExpectationBulletPointSnippetRenderer
+from .snippet import (
+    ExpectationBulletPointSnippetRenderer,
+    EvrTableRowSnippetRenderer,
+)
 
 class SectionRenderer(Renderer):
     def __init__(self, expectations, inspectable):
@@ -131,20 +134,10 @@ class DescriptiveEvrColumnSectionRenderer(SectionRenderer):
             "content" : []
         }
         for evr in self.evrs:
-            expectation_type = evr["expectation_config"]["expectation_type"]
-            if "result" in evr and "unexpected_percent" in evr["result"]:
-                unexpected_percent = evr["result"]["unexpected_percent"]
-            else:
-                unexpected_percent = None
-
-            if "result" in evr and "observed_value" in evr["result"]:
-                observed_value = evr["result"]["observed_value"]
-            else:
-                observed_value = None
-            
-            table["content"].append([
-                expectation_type, unexpected_percent, observed_value
-            ])
+            evr_renderer = EvrTableRowSnippetRenderer(evr=evr)
+            table_row = evr_renderer.render()
+            if table_row:
+                table["content"].append(table_row)
 
         section = {
             "section_name" : self.column_name,
