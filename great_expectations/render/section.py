@@ -2,8 +2,7 @@ import json
 import random
 
 from .base import Renderer
-from .single_expectation import SingleExpectationRenderer
-# from .snippet import 
+from .snippet import ExpectationBulletPointSnippetRenderer
 
 class SectionRenderer(Renderer):
     def __init__(self, expectations, inspectable):
@@ -63,7 +62,7 @@ class PrescriptiveExpectationColumnSectionRenderer(SectionRenderer):
 
         for expectation in self.expectations_list:
             try:
-                expectation_renderer = SingleExpectationRenderer(
+                expectation_renderer = ExpectationBulletPointSnippetRenderer(
                     expectation=expectation,
                 )
                 # print(expectation)
