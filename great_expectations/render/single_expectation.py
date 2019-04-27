@@ -18,7 +18,7 @@ class SingleExpectationRenderer(Renderer):
         expectation = self.expectation
 
         if expectation["expectation_type"] == "expect_column_to_exist":
-            return expectation["kwargs"]["column"] + " is a required field."
+            return " is a required field."
 
         elif expectation["expectation_type"] == "expect_column_values_to_be_of_type":
             return " is of type %s." % (
@@ -48,9 +48,9 @@ class SingleExpectationRenderer(Renderer):
 
         elif expectation["expectation_type"] == "expect_column_values_to_be_dateutil_parseable":
             if "mostly" in expectation["kwargs"]:
-                return expectation["kwargs"]["column"] + " must be formatted as date or time at least %.1f\% of the time." % (expectation["kwargs"]["mostly"])
+                return " must be formatted as date or time at least %.1f\% of the time." % (expectation["kwargs"]["mostly"])
             else:
-                return expectation["kwargs"]["column"] + " must always be formatted as a date or time."
+                return " must always be formatted as a date or time."
 
         elif expectation["expectation_type"] == "expect_column_value_lengths_to_equal":
             # print(json.dumps(expectation, indent=2))
@@ -108,28 +108,28 @@ class SingleExpectationRenderer(Renderer):
         elif expectation["expectation_type"] == "expect_column_values_to_be_between":
             # print(json.dumps(expectation, indent=2))
             if "mostly" in expectation["kwargs"]:
-                return expectation["kwargs"]["column"] + " must be between %d and %d at least %.1f\% of the time."
+                return " must be between %d and %d at least %.1f\% of the time."
             else:
                 if "parse_strings_as_datetimes" in expectation["kwargs"]:
-                    return expectation["kwargs"]["column"] + " must always be a date between %s and %s." %(str(expectation["kwargs"]["min_value"]), str(expectation["kwargs"]["max_value"]))
+                    return " must always be a date between %s and %s." %(str(expectation["kwargs"]["min_value"]), str(expectation["kwargs"]["max_value"]))
                 else:
-                    return expectation["kwargs"]["column"] + " must always be between %d and %d." %(expectation["kwargs"]["min_value"], expectation["kwargs"]["max_value"])
+                    return " must always be between %d and %d." %(expectation["kwargs"]["min_value"], expectation["kwargs"]["max_value"])
 
         elif expectation["expectation_type"] == "expect_column_values_to_be_unique":
             # print(json.dumps(expectation, indent=2))
             if "mostly" in expectation["kwargs"]:
-                return expectation["kwargs"]["column"] + " must be unique at least %.1f\% of the time."
+                return " must be unique at least %.1f\% of the time."
             else:
-                return expectation["kwargs"]["column"] + " must always be unique."
+                return " must always be unique."
 
         elif expectation["expectation_type"] == "expect_column_mean_to_be_between":
-            return expectation["kwargs"]["column"] + " must have a mean value between %d and %d." %(expectation["kwargs"]["min_value"], expectation["kwargs"]["max_value"])
+            return " must have a mean value between %d and %d." %(expectation["kwargs"]["min_value"], expectation["kwargs"]["max_value"])
 
         elif expectation["expectation_type"] == "expect_column_median_to_be_between":
-            return expectation["kwargs"]["column"] + " must have a median value between %d and %d." %(expectation["kwargs"]["min_value"], expectation["kwargs"]["max_value"])
+            return " must have a median value between %d and %d." %(expectation["kwargs"]["min_value"], expectation["kwargs"]["max_value"])
 
         elif expectation["expectation_type"] == "expect_column_stdev_to_be_between":
-            return expectation["kwargs"]["column"] + " must have a standard deviation between %d and %d." %(expectation["kwargs"]["min_value"], expectation["kwargs"]["max_value"])
+            return " must have a standard deviation between %d and %d." %(expectation["kwargs"]["min_value"], expectation["kwargs"]["max_value"])
 
         elif expectation["expectation_type"] == "expect_column_unique_value_count_to_be_between":
             if (expectation["kwargs"]["min_value"] == None) and (expectation["kwargs"]["max_value"] == None):
@@ -155,7 +155,7 @@ class SingleExpectationRenderer(Renderer):
 
         elif expectation["expectation_type"] == "expect_column_values_to_not_match_regex":
             #FIXME: Need to add logic for mostly
-            return expectation["kwargs"]["column"] + " must not match this regular expression: <span class=\"example-list\">%s</span>." % (expectation["kwargs"]["regex"],)
+            return " must not match this regular expression: <span class=\"example-list\">%s</span>." % (expectation["kwargs"]["regex"],)
 
         elif expectation["expectation_type"] == "expect_column_values_to_match_regex":
             #FIXME: Need to add logic for mostly
@@ -169,12 +169,12 @@ class SingleExpectationRenderer(Renderer):
 
         elif expectation["expectation_type"] == "expect_column_values_to_not_match_regex_list":
             #FIXME: Need to add logic for mostly
-            return expectation["kwargs"]["column"] + " must not match this regular expression: <span class=\"example-list\">%s</span>." % (expectation["kwargs"]["regex_list"],)
+            return " must not match this regular expression: <span class=\"example-list\">%s</span>." % (expectation["kwargs"]["regex_list"],)
 
         elif expectation["expectation_type"] == "expect_column_values_to_be_json_parseable":
             # print(json.dumps(expectation["kwargs"], indent=2))
             #FIXME: Need to add logic for mostly
-            return expectation["kwargs"]["column"] + " must be a parseable JSON object."
+            return " must be a parseable JSON object."
 
         # elif expectation["expectation_type"] == "expect_column_values_to_not_match_regex":
 
