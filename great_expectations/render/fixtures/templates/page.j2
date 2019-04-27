@@ -42,11 +42,11 @@
       <div class="row">
 
         <div class="col-3">
-          {% block navbar %}{% endblock %}
+          {% block navbar %}{% include 'navbar.j2' %}{% endblock %}
         </div>
 
         <div class="col-9">
-          {% block sections %}{% endblock %}
+          {% block sections %}{% include 'sections.j2' %}{% endblock %}
         </div>
 
       </div>

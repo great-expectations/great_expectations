@@ -27,7 +27,7 @@ class FullPageHtmlRenderer(Renderer):
             loader=PackageLoader('great_expectations', 'render/fixtures/templates'),
             autoescape=select_autoescape(['html', 'xml'])
         )
-        return env.get_template('single_page_prescriptive.j2')
+        return env.get_template('page.j2')
 
     def render(self):
         raise NotImplementedError
@@ -70,13 +70,6 @@ class DescriptiveEvrPageRenderer(FullPageHtmlRenderer):
 
     def __init__(self, evrs):
         self.evrs = evrs
-
-    def _get_template(self):
-        env = Environment(
-            loader=PackageLoader('great_expectations', 'render/fixtures/templates'),
-            autoescape=select_autoescape(['html', 'xml'])
-        )
-        return env.get_template('single_page_descriptive.j2')
 
     def render(self):
         t = self._get_template()
