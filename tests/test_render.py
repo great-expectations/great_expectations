@@ -30,7 +30,7 @@ class TestPageRenderers(unittest.TestCase):
         #     f.write(rendered_page)
 
 
-    def test_full_oobe_flow(sefl):
+    def test_full_oobe_flow(self):
         df = ge.read_csv("examples/data/Titanic.csv")
         # df = ge.read_csv("examples/data/Meteorite_Landings.csv")
         df.autoinspect(ge.dataset.autoinspect.pseudo_pandas_profiling)
@@ -42,8 +42,8 @@ class TestPageRenderers(unittest.TestCase):
         rendered_page = R.render()
         assert rendered_page != None
 
-        with open('./test.html', 'w') as f:
-            f.write(rendered_page)
+        # with open('./test.html', 'w') as f:
+        #     f.write(rendered_page)
 
 class TestSectionRenderers(unittest.TestCase):
 
