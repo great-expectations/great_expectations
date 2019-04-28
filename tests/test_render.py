@@ -31,7 +31,8 @@ class TestPageRenderers(unittest.TestCase):
 
 
     def test_full_oobe_flow(sefl):
-        df = ge.read_csv("examples/data/Titanic.csv")
+        # df = ge.read_csv("examples/data/Titanic.csv")
+        df = ge.read_csv("examples/data/Meteorite_Landings.csv")
         df.autoinspect(ge.dataset.autoinspect.pseudo_pandas_profiling)
         # df.autoinspect(ge.dataset.autoinspect.columns_exist)
         evrs = df.validate()["results"]
