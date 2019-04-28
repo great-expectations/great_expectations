@@ -4,7 +4,7 @@ from .base import Renderer
 
 def render_parameter(var, format_str, mode="span", classes=["param-span"]):
     format_str_2 = '<span class="'+(" ".join(classes))+'">{0:'+format_str+'}</span>'
-    print(format_str_2)
+    # print(format_str_2)
     return (format_str_2).format(var)
 
 class ExpectationBulletPointSnippetRenderer(Renderer):
@@ -203,7 +203,7 @@ class ExpectationBulletPointSnippetRenderer(Renderer):
 
         elif expectation["expectation_type"] == "expect_column_values_to_be_in_set":
             return " must belong to this set: <span class=\"example-list\">%s</span>" % (
-                " ".join([render_parameter(regex, "s") for regex in expectation["kwargs"]["values_set"]]),
+                " ".join([render_parameter(value, "s") for value in expectation["kwargs"]["values_set"]]),
             )
             # example_list = {
             #     "box_type": "Report-ExampleList",

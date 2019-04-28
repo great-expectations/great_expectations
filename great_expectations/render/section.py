@@ -119,48 +119,54 @@ class DescriptiveEvrColumnSectionRenderer(SectionRenderer):
             if evr["expectation_config"]["expectation_type"] == type_:
                 return evr
 
-    def render(self, mode='json'):
-        #!!! Someday we may add markdown and others
-        assert mode in ['html', 'json']
-
-        header = {
-            "content_block_type" : "header",
-            "content" : [self.column_name],
-        }
-
+    def _render_column_type(self, evrs, content_blocks):
         type_evr = self._find_evr_by_type(self.evrs, "expect_column_values_to_be_of_type")
         if type_evr:
             type_ = type_evr["expectation_config"]["kwargs"]["type_"]
-            type_text = {
+            new_block = {
                 "content_block_type" : "text",
                 "content" : [type_]
             }
+            content_blocks.append(new_block)
+
+            #!!! Before returning evrs, we should find and delete the `type_evr` that was used to render new_block.
+            remaining_evrs = evrs
+            return remaining_evrs, content_blocks
+
         else:
-            type_text = {
-                "content_block_type" : "text",
-                "content" : []
-            }
+            return evrs, content_blocks
 
-
+    def _render_values_set(self, evrs, content_blocks):
         set_evr = self._find_evr_by_type(self.evrs, "expect_column_values_to_be_in_set")
         if set_evr and "partial_unexpected_counts" in set_evr["result"]:
-            example_list_text = {
-                "content_block_type" : "text",
-                "content" : [
-                    "Example values: " + ", ".join([
-                        render_parameter(item["value"], "s") for item in set_evr["result"]["partial_unexpected_counts"]
-                    ])
-                ]
-            }
-        else:
-            example_list_text = {
-                "content_block_type" : "text",
-                "content" : []
-            }
+            partial_unexpected_counts = set_evr["result"]["partial_unexpected_counts"]
+            if len(partial_unexpected_counts) > 10 :
+                new_block = {
+                    "content_block_type" : "text",
+                    "content" : [
+                        "<b>Example values:</b><br/> " + ", ".join([
+                            render_parameter(str(item["value"]), "s") for item in partial_unexpected_counts
+                        ])
+                    ]
+                }
+            else:
+                new_block = {
+                    "content_block_type" : "text",
+                    "content" : [
+                        "<b>GRAPH!!!:</b><br/> " + ", ".join([
+                            render_parameter(str(item["value"]), "s") for item in partial_unexpected_counts
+                        ])
+                    ]
+                }
 
+            content_blocks.append(new_block)
 
+        #!!! Before returning evrs, we should find and delete the `set_evr` that was used to render new_block.
+        return evrs, content_blocks
+
+    def _render_stats_table(self, evrs, content_blocks):
         remaining_evrs = []
-        table = {
+        new_block = {
             "content_block_type" : "table",
             "content" : []
         }
@@ -168,38 +174,64 @@ class DescriptiveEvrColumnSectionRenderer(SectionRenderer):
             evr_renderer = EvrTableRowSnippetRenderer(evr=evr)
             table_rows = evr_renderer.render()
             if table_rows:
-                table["content"] += table_rows
+                new_block["content"] += table_rows
             else:
                 remaining_evrs.append(evr)
+        
+        content_blocks.append(new_block)
 
+        return remaining_evrs, content_blocks
 
-        bullet_list = {
-            "content_block_type" : "bullet_list",
+    def _render_bullet_list(self, evrs, content_blocks):
+        new_block = {
+            "content_block_type" : "text",
             "content" : []
         }
-        for evr in remaining_evrs:
+        for evr in evrs:
+            #!!! This is a hack to cover up the fact that we're not yet pulling these EVRs out of the list.
             if evr["expectation_config"]["expectation_type"] not in [
                 "expect_column_to_exist",
                 "expect_column_values_to_be_of_type",
-                "expect_column_values_to_be_in_set",
+                # "expect_column_values_to_be_in_set",
             ]:
-                bullet_list["content"].append("""
+                new_block["content"].append("""
     <div class="alert alert-primary" role="alert">
+        Warning! Unrendered EVR:<br/>
     <pre>"""+json.dumps(evr, indent=2)+"""</pre>
     </div>
                 """)
 
+        content_blocks.append(new_block)
+        return [], content_blocks
+        
+
+    def render(self, mode='json'):
+        #!!! Someday we may add markdown and others
+        assert mode in ['html', 'json']
+
+        content_blocks = []
+        content_blocks.append({
+            "content_block_type" : "header",
+            "content" : [self.column_name],
+        })
+
+        remaining_evrs, content_blocks = self._render_column_type(self.evrs, content_blocks)
+        remaining_evrs, content_blocks = self._render_values_set(remaining_evrs, content_blocks)
+        remaining_evrs, content_blocks = self._render_stats_table(remaining_evrs, content_blocks)
+        remaining_evrs, content_blocks = self._render_bullet_list(remaining_evrs, content_blocks)
+
         section = {
             "section_name" : self.column_name,
-            "content_blocks" : [
-                header,
-                type_text,
-                example_list_text,
-                table,
-                bullet_list,
-                # example_list,
-                # more_description,
-            ]
+            "content_blocks" : content_blocks
+            # [
+            #     header,
+            #     type_text,
+            #     example_list_text,
+            #     table,
+            #     bullet_list,
+            #     # example_list,
+            #     # more_description,
+            # ]
         }
 
         if mode == "json":

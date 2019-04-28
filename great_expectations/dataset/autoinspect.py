@@ -109,6 +109,7 @@ def pseudo_pandas_profiling(dataset):
 
         type_, cardinality = _get_column_type_and_cardinality(df, column)
         df.expect_column_values_to_not_be_null(column)
+        df.expect_column_values_to_be_in_set(column, [], result_format="SUMMARY")
 
         if type_ == "int":
             df.expect_column_values_to_not_be_in_set(column, [0])
@@ -138,7 +139,7 @@ def pseudo_pandas_profiling(dataset):
                 df.expect_column_values_to_be_unique(column)
             
             elif cardinality in ["one", "two", "very few", "few"]:
-                df.expect_column_values_to_be_in_set(column, [], result_format="SUMMARY")
+                
     #             print(df[column].value_counts())
                 pass
                 
