@@ -16,8 +16,8 @@ class TestPageRenderers(unittest.TestCase):
         )
         assert results != None
 
-        with open('./test.html', 'w') as f:
-            f.write(results)
+        # with open('./test.html', 'w') as f:
+        #     f.write(results)
 
     def test_descriptive_evr_renderer(self):
         R = render.DescriptiveEvrPageRenderer(
@@ -42,8 +42,8 @@ class TestPageRenderers(unittest.TestCase):
         rendered_page = R.render()
         assert rendered_page != None
 
-        # with open('./test.html', 'w') as f:
-        #     f.write(rendered_page)
+        with open('./test.html', 'w') as f:
+            f.write(rendered_page)
 
 class TestSectionRenderers(unittest.TestCase):
 
