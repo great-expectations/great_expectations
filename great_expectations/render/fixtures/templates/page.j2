@@ -6,7 +6,7 @@
     <title>{% block title %}{% endblock %}</title>
 
     {# {# Remove this when not debugging: #}
-    {# <meta http-equiv="refresh" content="5"/> #}
+    <meta http-equiv="refresh" content="2"/>
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"/>
     <style>
@@ -26,6 +26,22 @@
       .param-span{
         background:#eef;
         padding:5px;
+      }
+
+      .ge-section{
+        display: flex;
+        flex-flow: row wrap;
+        margin-left: -8px; /* Adjustment for the gutter */
+        width: 100%;
+      }
+
+      .ge-section div{
+        flex: auto;
+        {# height: 250px; #}
+        min-width: 150px;
+        margin: 0 8px 8px 0; /* Some gutter */
+        {# background-color: #004;         #}
+        {# border: 1px solid black; #}
       }
 
       tr{

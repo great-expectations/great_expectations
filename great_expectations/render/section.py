@@ -167,7 +167,7 @@ class DescriptiveEvrColumnSectionRenderer(SectionRenderer):
                 bars = alt.Chart(df).mark_bar().encode(
                     x='count:Q',
                     y="value:O"
-                ).properties(height=40+20*len(partial_unexpected_counts), width=320)
+                ).properties(height=40+20*len(partial_unexpected_counts), width=240)
 
                 text = bars.mark_text(
                     align='left',
