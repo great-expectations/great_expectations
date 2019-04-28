@@ -1,6 +1,10 @@
 import json
 import random
 
+from jinja2 import (
+    Template, Environment, BaseLoader, PackageLoader, select_autoescape
+)
+
 from .base import Renderer
 from .snippet import (
     ExpectationBulletPointSnippetRenderer,
@@ -30,7 +34,7 @@ class PrescriptiveExpectationColumnSectionRenderer(SectionRenderer):
         self.column_name = column_name
         self.expectations_list = expectations_list
 
-    def render(self):
+    def render(self, mode='json'):
         description = {
             "content_block_type" : "header",
             "content" : [self.column_name]
@@ -90,8 +94,17 @@ class PrescriptiveExpectationColumnSectionRenderer(SectionRenderer):
             ]
         }
 
-        return section
+        if mode == "json":
+            return section
+        
+        elif mode == "html":
+            env = Environment(
+                loader=PackageLoader('great_expectations', 'render/fixtures/templates'),
+                autoescape=select_autoescape(['html', 'xml'])
+            )
+            t = env.get_template('section.j2')
 
+            return t.render(**{'section' : section})
 
 
 class DescriptiveEvrColumnSectionRenderer(SectionRenderer):
@@ -106,7 +119,10 @@ class DescriptiveEvrColumnSectionRenderer(SectionRenderer):
             if evr["expectation_config"]["expectation_type"] == type_:
                 return evr
 
-    def render(self):
+    def render(self, mode='json'):
+        #!!! Someday we may add markdown and others
+        assert mode in ['html', 'json']
+
         header = {
             "content_block_type" : "header",
             "content" : [self.column_name],
@@ -173,7 +189,6 @@ class DescriptiveEvrColumnSectionRenderer(SectionRenderer):
     </div>
                 """)
 
-
         section = {
             "section_name" : self.column_name,
             "content_blocks" : [
@@ -187,4 +202,14 @@ class DescriptiveEvrColumnSectionRenderer(SectionRenderer):
             ]
         }
 
-        return section
+        if mode == "json":
+            return section
+        
+        elif mode == "html":
+            env = Environment(
+                loader=PackageLoader('great_expectations', 'render/fixtures/templates'),
+                autoescape=select_autoescape(['html', 'xml'])
+            )
+            t = env.get_template('section.j2')
+
+            return t.render(**{'section' : section})
