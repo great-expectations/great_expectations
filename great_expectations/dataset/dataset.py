@@ -95,34 +95,6 @@ class MetaDataset(DataAsset):
             if result_format['result_format'] == 'BOOLEAN_ONLY':
                 return return_obj
 
-            # TODO: this logic is from the SqlAlchemy decorator: need to evaulate if this is needed
-    #         # Use the element and null count information from a column_aggregate_expectation if it is needed
-    #         # it anyway to avoid an extra trip to the database
-
-    #         if 'element_count' not in evaluation_result and 'null_count' not in evaluation_result:
-    #             count_query = sa.select([
-    #                 sa.func.count().label('element_count'),
-    #                 sa.func.sum(
-    #                     sa.case([(sa.column(column) == None, 1)], else_=0)
-    #                 ).label('null_count'),
-    #             ]).select_from(self._table)
-
-    #             count_results = dict(
-    #                 self.engine.execute(count_query).fetchone())
-
-    #             # Handle case of empty table gracefully:
-    #             if "element_count" not in count_results or count_results["element_count"] is None:
-    #                 count_results["element_count"] = 0
-    #             if "null_count" not in count_results or count_results["null_count"] is None:
-    #                 count_results["null_count"] = 0
-
-    #             return_obj['result'] = {
-    #                 'observed_value': evaluation_result['result']['observed_value'],
-    #                 "element_count": count_results['element_count'],
-    #                 "missing_count": count_results['null_count'],
-    #                 "missing_percent": count_results['null_count'] / count_results['element_count'] if count_results['element_count'] > 0 else None
-    #             }
-
             return_obj['result'] = {
                 'observed_value': evaluation_result['result']['observed_value'],
                 "element_count": element_count,
@@ -162,6 +134,7 @@ class Dataset(MetaDataset):
         self._column_unique_counts = ColumnarResultCache(self._get_column_unique_count)
         self._column_modes = ColumnarResultCache(self._get_column_modes)
         self._column_medians = ColumnarResultCache(self._get_column_median)
+        self._column_stdevs = ColumnarResultCache(self._get_column_stdev)
 
         super(Dataset, self).__init__(*args, **kwargs)
 
@@ -249,6 +222,13 @@ class Dataset(MetaDataset):
         return self._column_medians
 
     def _get_column_median(self, column):
+        raise NotImplementedError
+
+    @property
+    def column_stdevs(self):
+        return self._column_stdevs
+
+    def _get_column_stdev(self, column):
         raise NotImplementedError
 
     @classmethod
@@ -1859,6 +1839,8 @@ class Dataset(MetaDataset):
                 }
             }
 
+    @DocInherit
+    @MetaDataset.column_aggregate_expectation
     def expect_column_stdev_to_be_between(self,
                                          column,
                                          min_value=None,
@@ -1913,7 +1895,20 @@ class Dataset(MetaDataset):
             expect_column_mean_to_be_between
             expect_column_median_to_be_between
         """
-        raise NotImplementedError
+        if min_value is None and max_value is None:
+            raise ValueError("min_value and max_value cannot both be None")
+
+        column_stdev = self.column_stdevs[column]
+
+        return {
+            "success": (
+                ((min_value is None) or (min_value <= column_stdev)) and
+                ((max_value is None) or (column_stdev <= max_value))
+            ),
+            "result": {
+                "observed_value": column_stdev
+            }
+        }
 
     @DocInherit
     @MetaDataset.column_aggregate_expectation

@@ -243,7 +243,7 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
             "expect_column_values_to_match_json_schema",
             # "expect_column_mean_to_be_between",
             "expect_column_median_to_be_between",
-            "expect_column_stdev_to_be_between",
+            # "expect_column_stdev_to_be_between",
             # "expect_column_unique_value_count_to_be_between",
             # "expect_column_proportion_of_unique_values_to_be_between",
             # "expect_column_most_common_value_to_be_in_set",
@@ -323,8 +323,10 @@ def evaluate_json_test(data_asset, expectation_type, test):
                 assert result['success'] == value
 
             elif key == 'observed_value':
-                # assert np.allclose(result['result']['observed_value'], value)
-                assert value == result['result']['observed_value']
+                if 'tolerance' in test['out']:
+                    assert np.allclose(result['result']['observed_value'], value, rtol=test['out']['tolerance'])
+                else:
+                    assert value == result['result']['observed_value']
 
             elif key == 'unexpected_index_list':
                 if isinstance(data_asset, (SqlAlchemyDataset, SparkDFDataset)):
@@ -345,6 +347,10 @@ def evaluate_json_test(data_asset, expectation_type, test):
                 assert value in result['exception_info']['exception_traceback'], "expected to find " + \
                     value + " in " + \
                     result['exception_info']['exception_traceback']
+
+            elif key == 'tolerance':
+                # tolerance is used when checking observed_value
+                pass
 
             else:
                 raise ValueError(
