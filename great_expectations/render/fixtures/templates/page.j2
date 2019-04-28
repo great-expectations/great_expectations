@@ -6,7 +6,7 @@
     <title>{% block title %}{% endblock %}</title>
 
     {# {# Remove this when not debugging: #}
-    <meta http-equiv="refresh" content="1"/>
+    {# <meta http-equiv="refresh" content="5"/> #}
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"/>
     <style>
@@ -38,6 +38,10 @@
         padding: 1px 10px 1px 10px;
       }
     </style>
+
+    <script src="https://cdn.jsdelivr.net/npm/vega@5.3.5/build/vega.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-lite@3.2.1/build/vega-lite.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-embed@4.0.0/build/vega-embed.js"></script>
   </head>
 
   <body

@@ -1,7 +1,10 @@
 {% for section in sections %}
 <div id="section-{{loop.index}}" style="clear:both; margin-bottom: 50px;">
     
+    {% set section_loop = loop %}
     {% for content_block in section["content_blocks"] %}
+        {% set content_block_loop = loop %}
+
         {% if content_block["content_block_type"] == "header" %}
         <h4>{{content_block["content"][0]}}</h4>
 
@@ -21,23 +24,33 @@
         </p>
 
         {% elif content_block["content_block_type"] == "graph" %}
-        <img
+        {# <img
             style="max-width:32%; max-height:200px; float: right;"
             src="http://localhost:8000/plot-{{range(5,10)|random}}.png"
-        />
+        /> #}
+        <div id="vis-{{section_loop.index}}-{{content_block_loop.index}}"></div>
+        <script>
+        // Assign the specification to a local variable vlSpec.
+        var vlSpec = {{content_block["content"][0]}};
+
+        // Embed the visualization in the container with id `vis`
+        vegaEmbed('#vis-{{section_loop.index}}-{{loop.index}}', vlSpec, {actions: false});
+        </script>
 
         {% elif content_block["content_block_type"] == "table" %}
-        <table style="width:50%">
-            {% set table = content_block["content"] %}
-            {% for row in table %}
-            <tr class="{{ loop.cycle('odd', 'even') }}" >
-                {% set rowloop = loop %}
-                {% for cell in row %}
-                    <td id="cell-{{ rowloop.index }}-{{ loop.index }}">{{ cell }}</td>
+        <div style="width:50%">
+            <table >
+                {% set table = content_block["content"] %}
+                {% for row in table %}
+                <tr class="{{ loop.cycle('odd', 'even') }}" >
+                    {% set rowloop = loop %}
+                    {% for cell in row %}
+                        <td id="cell-{{ rowloop.index }}-{{ loop.index }}">{{ cell }}</td>
+                    {% endfor %}
+                </tr>
                 {% endfor %}
-            </tr>
-            {% endfor %}
-        </table>
+            </table>
+        </div>
 
         {% elif content_block["content_block_type"] == "example_list" %}
         {% endif %}
