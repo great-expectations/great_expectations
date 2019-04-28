@@ -4,6 +4,8 @@ import random
 from jinja2 import (
     Template, Environment, BaseLoader, PackageLoader, select_autoescape
 )
+import pandas as pd
+import altair as alt
 
 from .base import Renderer
 from .snippet import (
@@ -129,8 +131,6 @@ class DescriptiveEvrColumnSectionRenderer(SectionRenderer):
 
         return evrs, content_blocks
 
-
-
     def _render_column_type(self, evrs, content_blocks):
         type_evr = self._find_evr_by_type(self.evrs, "expect_column_values_to_be_of_type")
         if type_evr:
@@ -162,13 +162,26 @@ class DescriptiveEvrColumnSectionRenderer(SectionRenderer):
                     ]
                 }
             else:
+                df = pd.DataFrame(partial_unexpected_counts)
+
+                bars = alt.Chart(df).mark_bar().encode(
+                    x='count:Q',
+                    y="value:O"
+                ).properties(height=40+20*len(partial_unexpected_counts), width=320)
+
+                text = bars.mark_text(
+                    align='left',
+                    baseline='middle',
+                    dx=3  # Nudges text to right so it doesn't appear on top of the bar
+                ).encode(
+                    text='count:Q'
+                )
+
+                chart = (bars + text).properties(height=900)
+
                 new_block = {
-                    "content_block_type" : "text",
-                    "content" : [
-                        "<b>GRAPH!!!:</b><br/> " + ", ".join([
-                            render_parameter(str(item["value"]), "s") for item in partial_unexpected_counts
-                        ])
-                    ]
+                    "content_block_type" : "graph",
+                    "content" : [chart.to_json()]
                 }
 
             content_blocks.append(new_block)
@@ -204,7 +217,7 @@ class DescriptiveEvrColumnSectionRenderer(SectionRenderer):
             if evr["expectation_config"]["expectation_type"] not in [
                 "expect_column_to_exist",
                 "expect_column_values_to_be_of_type",
-                # "expect_column_values_to_be_in_set",
+                "expect_column_values_to_be_in_set",
             ]:
                 new_block["content"].append("""
     <div class="alert alert-primary" role="alert">
