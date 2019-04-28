@@ -280,6 +280,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         '_column_unique_counts',
         '_column_modes' ,
         '_column_medians',
+        '_column_stdevs',
     ]
     _internal_names_set = set(_internal_names)
 
@@ -346,6 +347,9 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
     def _get_column_median(self, column):
         return self[column].median()
+
+    def _get_column_stdev(self, column):
+        return self[column].std()
 
     ### Expectation methods ###
 
@@ -784,26 +788,6 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                     "expected_params": positional_parameters,
                     "observed_ks_result": ks_result
                 }
-            }
-        }
-
-    @DocInherit
-    @MetaPandasDataset.column_aggregate_expectation
-    def expect_column_stdev_to_be_between(self, column, min_value=None, max_value=None,
-                                          result_format=None, include_config=False, catch_exceptions=None, meta=None):
-
-        if min_value is None and max_value is None:
-            raise ValueError("min_value and max_value cannot both be None")
-
-        column_stdev = column.std()
-
-        return {
-            "success": (
-                ((min_value is None) or (min_value <= column_stdev)) and
-                ((max_value is None) or (column_stdev <= max_value))
-            ),
-            "result": {
-                "observed_value": column_stdev
             }
         }
 

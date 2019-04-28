@@ -17,7 +17,7 @@ from great_expectations.dataset.util import (
 import pandas as pd
 import numpy as np
 from scipy import stats
-from pyspark.sql.functions import udf, col, mean as mean_
+from pyspark.sql.functions import udf, col, stddev as stddev_
 
 
 class MetaSparkDFDataset(Dataset):
@@ -212,6 +212,9 @@ class SparkDFDataset(MetaSparkDFDataset):
         # TODO this doesn't actually work e.g. median([1, 2, 3, 4]) -> 2.0
         result = self.spark_df.approxQuantile(column, [0.5], 0)
         return result[0] if len(result) > 0 else None
+
+    def _get_column_stdev(self, column):
+        return self.spark_df.select(stddev_(col(column))).collect()[0][0]
 
     @DocInherit
     @MetaSparkDFDataset.column_map_expectation

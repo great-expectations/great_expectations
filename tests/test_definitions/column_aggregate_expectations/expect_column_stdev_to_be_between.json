@@ -18,7 +18,8 @@
         },
         "out": {
           "success": true,
-          "observed_value": 1.1547005383792517
+          "observed_value": 1.1547005383792517,
+          "tolerance": 0.000000000001
         }
       },{
       "title" : "Positive test, exact min and max",
@@ -31,7 +32,8 @@
       "out": {
         "success": true,
         "observed_value": 1.1547005383792517
-      }
+      },
+      "suppress_test_for": ["Spark"]
     },
       {
         "title": "Basic Negative test",
@@ -43,7 +45,8 @@
         },
         "out": {
           "success": false,
-          "observed_value": 1.1547005383792517
+          "observed_value": 1.1547005383792517,
+          "tolerance": 0.000000000001
         }
       },{
         "title": "Positive, Zero stdev, exact min and max",
