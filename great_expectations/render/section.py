@@ -5,6 +5,7 @@ from .base import Renderer
 from .snippet import (
     ExpectationBulletPointSnippetRenderer,
     EvrTableRowSnippetRenderer,
+    render_parameter,
 )
 
 class SectionRenderer(Renderer):
@@ -112,38 +113,73 @@ class DescriptiveEvrColumnSectionRenderer(SectionRenderer):
         }
 
         type_evr = self._find_evr_by_type(self.evrs, "expect_column_values_to_be_of_type")
-        type_ = type_evr["expectation_config"]["kwargs"]["type_"]
-        type_text = {
-            "content_block_type" : "text",
-            "content" : [type_]
-        }
+        if type_evr:
+            type_ = type_evr["expectation_config"]["kwargs"]["type_"]
+            type_text = {
+                "content_block_type" : "text",
+                "content" : [type_]
+            }
+        else:
+            type_text = {
+                "content_block_type" : "text",
+                "content" : []
+            }
 
-        bullet_list = {
-            "content_block_type" : "bullet_list",
-            "content" : []
-        }
-        for evr in self.evrs:
-            bullet_list["content"].append("""
-<div class="alert alert-primary" role="alert">
-  <pre>"""+json.dumps(evr, indent=2)+"""</pre>
-</div>
-            """)
 
+        set_evr = self._find_evr_by_type(self.evrs, "expect_column_values_to_be_in_set")
+        if set_evr and "partial_unexpected_counts" in set_evr["result"]:
+            example_list_text = {
+                "content_block_type" : "text",
+                "content" : [
+                    "Example values: " + ", ".join([
+                        render_parameter(item["value"], "s") for item in set_evr["result"]["partial_unexpected_counts"]
+                    ])
+                ]
+            }
+        else:
+            example_list_text = {
+                "content_block_type" : "text",
+                "content" : []
+            }
+
+
+        remaining_evrs = []
         table = {
             "content_block_type" : "table",
             "content" : []
         }
         for evr in self.evrs:
             evr_renderer = EvrTableRowSnippetRenderer(evr=evr)
-            table_row = evr_renderer.render()
-            if table_row:
-                table["content"].append(table_row)
+            table_rows = evr_renderer.render()
+            if table_rows:
+                table["content"] += table_rows
+            else:
+                remaining_evrs.append(evr)
+
+
+        bullet_list = {
+            "content_block_type" : "bullet_list",
+            "content" : []
+        }
+        for evr in remaining_evrs:
+            if evr["expectation_config"]["expectation_type"] not in [
+                "expect_column_to_exist",
+                "expect_column_values_to_be_of_type",
+                "expect_column_values_to_be_in_set",
+            ]:
+                bullet_list["content"].append("""
+    <div class="alert alert-primary" role="alert">
+    <pre>"""+json.dumps(evr, indent=2)+"""</pre>
+    </div>
+                """)
+
 
         section = {
             "section_name" : self.column_name,
             "content_blocks" : [
                 header,
                 type_text,
+                example_list_text,
                 table,
                 bullet_list,
                 # example_list,
