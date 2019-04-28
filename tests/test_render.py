@@ -33,11 +33,13 @@ class TestPageRenderers(unittest.TestCase):
     def test_full_oobe_flow(sefl):
         df = ge.read_csv("examples/data/Titanic.csv")
         df.autoinspect(ge.dataset.autoinspect.pseudo_pandas_profiling)
+        # df.autoinspect(ge.dataset.autoinspect.columns_exist)
         evrs = df.validate()["results"]
+        # print(json.dumps(evrs, indent=2))
 
         R = render.DescriptiveEvrPageRenderer(evrs)
         rendered_page = R.render()
         assert rendered_page != None
 
-        # with open('./test.html', 'w') as f:
-        #     f.write(rendered_page)
+        with open('./test.html', 'w') as f:
+            f.write(rendered_page)
