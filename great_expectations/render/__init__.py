@@ -14,6 +14,11 @@ from .page import (
     DescriptiveEvrPageRenderer,
 )
 
+from .section import (
+    PrescriptiveExpectationColumnSectionRenderer,
+    DescriptiveEvrColumnSectionRenderer,
+)
+
 def render(expectations=None, input_inspectable=None, renderer_class=None, output_inspectable=None):
     renderer = renderer_class(
         expectations=expectations,

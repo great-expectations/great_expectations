@@ -136,7 +136,6 @@ def pseudo_pandas_profiling(dataset):
 
             if cardinality == "unique":
                 df.expect_column_values_to_be_unique(column)
-                df.expect_column_values_to_be_increasing(column)
             
             elif cardinality in ["one", "two", "very few", "few"]:
                 df.expect_column_values_to_be_in_set(column, [], result_format="SUMMARY")
