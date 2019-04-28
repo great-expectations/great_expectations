@@ -3,8 +3,9 @@ import random
 import json
 from collections import defaultdict
 
-from jinja2 import Template
-from jinja2 import Environment, BaseLoader, PackageLoader, select_autoescape
+from jinja2 import (
+    Template, Environment, BaseLoader, PackageLoader, select_autoescape
+)
 
 from .base import Renderer
 from .section import (
