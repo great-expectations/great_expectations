@@ -111,6 +111,7 @@ class DescriptiveEvrColumnSectionRenderer(SectionRenderer):
     """Generates a section's worth of descriptive content blocks for a set of EVRs from the same column."""
 
     def __init__(self, column_name, evrs):
+        #!!! We should get the column name from an expectation, not another rando param.
         self.column_name = column_name
         self.evrs = evrs
 
@@ -118,6 +119,17 @@ class DescriptiveEvrColumnSectionRenderer(SectionRenderer):
         for evr in evrs:
             if evr["expectation_config"]["expectation_type"] == type_:
                 return evr
+    
+    def _render_header(self, evrs, content_blocks):
+        #!!! We should get the column name from an expectation, not another rando param.
+        content_blocks.append({
+            "content_block_type" : "header",
+            "content" : [self.column_name],
+        })
+
+        return evrs, content_blocks
+
+
 
     def _render_column_type(self, evrs, content_blocks):
         type_evr = self._find_evr_by_type(self.evrs, "expect_column_values_to_be_of_type")
@@ -209,12 +221,8 @@ class DescriptiveEvrColumnSectionRenderer(SectionRenderer):
         #!!! Someday we may add markdown and others
         assert mode in ['html', 'json']
 
-        content_blocks = []
-        content_blocks.append({
-            "content_block_type" : "header",
-            "content" : [self.column_name],
-        })
-
+        # This feels nice and tidy. We should probably use this pattern elsewhere, too.
+        remaining_evrs, content_blocks = self._render_header(self.evrs, [])
         remaining_evrs, content_blocks = self._render_column_type(self.evrs, content_blocks)
         remaining_evrs, content_blocks = self._render_values_set(remaining_evrs, content_blocks)
         remaining_evrs, content_blocks = self._render_stats_table(remaining_evrs, content_blocks)
@@ -223,17 +231,9 @@ class DescriptiveEvrColumnSectionRenderer(SectionRenderer):
         section = {
             "section_name" : self.column_name,
             "content_blocks" : content_blocks
-            # [
-            #     header,
-            #     type_text,
-            #     example_list_text,
-            #     table,
-            #     bullet_list,
-            #     # example_list,
-            #     # more_description,
-            # ]
         }
 
+        #!!! This code should probably be factored out. We'll use it for many a renderer...
         if mode == "json":
             return section
         
