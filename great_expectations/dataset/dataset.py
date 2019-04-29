@@ -2410,6 +2410,7 @@ class Dataset(MetaDataset):
             * If max_value is None, then min_value is treated as a lower bound
 
         """
+        # TODO spark tests
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
 

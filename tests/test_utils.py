@@ -160,6 +160,14 @@ def get_dataset(dataset_type, data, schemas=None, autoinspect_func=autoinspect.c
                 for column in schema
             ])
             spark_df = spark.createDataFrame(data_reshaped, spark_schema)
+        elif len(data_reshaped) == 0:
+            # if we have an empty dataset and no schema, need to assign an arbitrary type
+            columns = list(data.keys())
+            spark_schema = sparktypes.StructType([
+                sparktypes.StructField(column, sparktypes.StringType())
+                for column in columns
+            ])
+            spark_df = spark.createDataFrame(data_reshaped, spark_schema)
         else:
             # if no schema provided, uses Spark's schema inference
             columns = list(data.keys()) # do we need to care about the order here?
@@ -220,19 +228,19 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
             # "expect_column_to_exist",
             # "expect_table_row_count_to_be_between",
             # "expect_table_row_count_to_equal",
-            "expect_table_columns_to_match_ordered_list",
+            # "expect_table_columns_to_match_ordered_list",
             "expect_column_values_to_be_unique",
-            "expect_column_values_to_not_be_null",
-            "expect_column_values_to_be_null",
+            # "expect_column_values_to_not_be_null",
+            # "expect_column_values_to_be_null",
             "expect_column_values_to_be_of_type",
             "expect_column_values_to_be_in_type_list",
-            "expect_column_values_to_be_in_set",
-            "expect_column_values_to_not_be_in_set",
+            # "expect_column_values_to_be_in_set",
+            # "expect_column_values_to_not_be_in_set",
             "expect_column_values_to_be_between",
             "expect_column_values_to_be_increasing",
             "expect_column_values_to_be_decreasing",
             "expect_column_value_lengths_to_be_between",
-            "expect_column_value_lengths_to_equal",
+            # "expect_column_value_lengths_to_equal",
             # "expect_column_values_to_match_regex",
             # "expect_column_values_to_not_match_regex",
             "expect_column_values_to_match_regex_list",
@@ -248,7 +256,7 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
             # "expect_column_proportion_of_unique_values_to_be_between",
             # "expect_column_most_common_value_to_be_in_set",
             # "expect_column_sum_to_be_between",
-            "expect_column_min_to_be_between",
+            # "expect_column_min_to_be_between",
             "expect_column_max_to_be_between",
             "expect_column_chisquare_test_p_value_to_be_greater_than",
             "expect_column_bootstrapped_ks_test_p_value_to_be_greater_than",
