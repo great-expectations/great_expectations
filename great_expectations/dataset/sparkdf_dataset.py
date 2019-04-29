@@ -223,11 +223,15 @@ class SparkDFDataset(MetaSparkDFDataset):
             column,  # pyspark.sql.DataFrame
             value_set,  # List[Any]
             mostly=None,
+            parse_strings_as_datetimes=None,
             result_format=None,
             include_config=False,
             catch_exceptions=None,
             meta=None,
     ):
+        # TODO
+        if parse_strings_as_datetimes:
+            raise NotImplementedError
         success_udf = udf(lambda x: x in value_set)
         return column.withColumn('__success', success_udf(column[0]))
 
