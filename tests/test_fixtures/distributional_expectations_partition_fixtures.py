@@ -79,7 +79,7 @@ if __name__ == "__main__":
     with open('../test_sets/test_partitions.json', 'w') as file:
         file.write(json.dumps(test_partitions))
 
-    df = generate_new_data(seed=20190430)
+    df = generate_new_data(seed=20190501)
     d = df.to_dict(orient="list")
     json.dump(d, open('../test_sets/distributional_expectations_data_test.json', 'w'))
     print("Done generating new base data, partitions, and test data.")
