@@ -15,6 +15,8 @@ import sqlalchemy.dialects.postgresql as postgresqltypes
 from great_expectations.dataset import PandasDataset, SqlAlchemyDataset
 import great_expectations.dataset.autoinspect as autoinspect
 
+CONTEXTS = ['PandasDataset', 'SqlAlchemyDataset']
+
 SQLITE_TYPES = {
         "varchar": sqlitetypes.VARCHAR,
         "char": sqlitetypes.CHAR,
@@ -267,6 +269,21 @@ def evaluate_json_test(data_asset, expectation_type, test):
 
             elif key == 'details':
                 assert result['result']['details'] == value
+
+            elif key.startswith("observed_cdf"):
+                if "x_-1" in key:
+                    if key.endswith("gt"):
+                        assert result["result"]["details"]["observed_cdf"]["x"][-1] > value
+                    else:
+                        assert result["result"]["details"]["observed_cdf"]["x"][-1] == value
+                elif "x_0" in key:
+                    if key.endswith("lt"):
+                        assert result["result"]["details"]["observed_cdf"]["x"][0] < value
+                    else:
+                        assert result["result"]["details"]["observed_cdf"]["x"][0] == value
+                else:
+                    raise ValueError(
+                        "Invalid test specification: unknown key " + key + " in 'out'")
 
             elif key == 'traceback_substring':
                 assert result['exception_info']['raised_exception']
