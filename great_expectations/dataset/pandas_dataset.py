@@ -346,7 +346,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         return self[column].value_counts()
 
     def _get_column_unique_count(self, column):
-        return self.column_value_counts[column].shape[0]
+        return self.get_column_value_counts(column).shape[0]
 
     def _get_column_modes(self, column):
         return list(self[column].mode().values)

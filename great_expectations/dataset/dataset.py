@@ -1,5 +1,4 @@
 import inspect
-from collections import UserDict
 from itertools import zip_longest
 from six import PY3
 from functools import wraps
@@ -22,13 +21,14 @@ import numpy as np
 from scipy import stats
 
 
-class ColumnarResultCache(UserDict):
+class ColumnarResultCache:
     """Holds information about columns"""
     def __init__(self, callback):
         self.data = {}
         self.callback = callback
 
     def get(self, *args):
+        """Args is a tuple of parameters that will be used as the key to look up cached values"""
         if args not in self.data:
             self.data[args] = self.callback(*args)
         return self.data[args]
@@ -2510,7 +2510,7 @@ class Dataset(MetaDataset):
         if not is_valid_categorical_partition_object(partition_object):
             raise ValueError("Invalid partition object.")
 
-        observed_frequencies = self.column_value_counts[column]
+        observed_frequencies = self.get_column_value_counts(column)
         # Convert to Series object to allow joining on index values
         expected_column = pd.Series(
             partition_object['weights'], index=partition_object['values'], name='expected') * len(column)
