@@ -1343,7 +1343,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             raise ValueError(
                 "internal_weight_holdout must be between zero and one.")
             
-        if(tail_weight_holdout != 0 and "tail_weights" in partition_object):
+        if (tail_weight_holdout != 0 and "tail_weights" in partition_object):
             raise ValueError(
                 "tail_weight_holdout must be 0 when using tail_weights in partition object")
 
@@ -1412,8 +1412,14 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             observed_weights = np.array(hist)/len(column)
         
             #Adjust expected_weights to account for tail_weight and internal_weight
+            if "tail_weights" in partition_object:
+                partition_tail_weight_holdout = np.sum(partition_object["tail_weights"])
+            else:
+                partition_tail_weight_holdout = 0
+
             expected_weights = np.array(
-                partition_object['weights']) * (1 - tail_weight_holdout - internal_weight_holdout)
+                partition_object['weights']) * (1 - tail_weight_holdout - internal_weight_holdout - partition_tail_weight_holdout)
+                #partition_object['weights']) * (1 - tail_weight_holdout - internal_weight_holdout)
         
             # Assign internal weight holdout values if applicable
             if internal_weight_holdout > 0:
@@ -1478,7 +1484,8 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                 if "tail_weights" in partition_object:
                     tail_weights=partition_object["tail_weights"]
                     comb_expected_weights=np.concatenate(([tail_weights[0]],expected_weights,[tail_weights[1]])) #Tack on tail weights
-                    expected_tail_weights=tail_weights #Tail weights are just tail_weights
+                    expected_tail_weights=np.array(tail_weights) #Tail weights are just tail_weights
+                else:
                 comb_expected_weights=np.concatenate(([tail_weight_holdout / 2],expected_weights,[tail_weight_holdout / 2]))
                 expected_tail_weights=np.concatenate(([tail_weight_holdout / 2],[tail_weight_holdout / 2])) #Tail weights are just tail_weight holdout divided eaually to both tails
                 
