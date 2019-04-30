@@ -4,6 +4,8 @@ from itertools import zip_longest
 from six import PY3
 from functools import wraps
 from numbers import Number
+from dateutil.parser import parse
+from datetime import datetime
 
 from great_expectations.data_asset.base import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
@@ -21,19 +23,15 @@ from scipy import stats
 
 
 class ColumnarResultCache(UserDict):
-    """
-    Holds information about columns
-
-    Think this is needed to make things like column_nonnull_counts accessible via a property?
-    """
+    """Holds information about columns"""
     def __init__(self, callback):
         self.data = {}
         self.callback = callback
 
-    def __getitem__(self, column):
-        if column not in self.data:
-            self.data[column] = self.callback(column)
-        return self.data[column]
+    def get(self, *args):
+        if args not in self.data:
+            self.data[args] = self.callback(*args)
+        return self.data[args]
 
 
 class MetaDataset(DataAsset):
@@ -75,7 +73,7 @@ class MetaDataset(DataAsset):
             result_format = parse_result_format(result_format)
 
             element_count = self.row_count
-            nonnull_count = self.column_nonnull_counts[column]
+            nonnull_count = self.get_column_nonnull_count(column)
             null_count = element_count - nonnull_count
 
             evaluation_result = func(self, column, *args, **kwargs)
@@ -159,76 +157,73 @@ class Dataset(MetaDataset):
     def _get_table_columns(self):
         raise NotImplementedError
 
-    @property
-    def column_nonnull_counts(self):
-        return self._column_nonnull_counts
+    def get_column_nonnull_count(self, column):
+        return self._column_nonnull_counts.get(column)
 
     def _get_column_nonnull_count(self, column):
         raise NotImplementedError
 
-    @property
-    def column_means(self):
-        return self._column_means
+    def get_column_mean(self, column):
+        return self._column_means.get(column)
 
     def _get_column_mean(self, column):
         raise NotImplementedError
 
-    @property
-    def column_value_counts(self):
-        return self._column_value_counts
+    def get_column_value_counts(self, column):
+        return self._column_value_counts.get(column)
 
     def _get_column_value_counts(self, column):
         """returns pd.Series of value counts for a column, sorted by value"""
         raise NotImplementedError
 
-    @property
-    def column_sums(self):
-        return self._column_sums
+    def get_column_sum(self, column):
+        return self._column_sums.get(column)
 
     def _get_column_sum(self, column):
         raise NotImplementedError
 
-    @property
-    def column_maxes(self):
-        return self._column_maxes
+    def get_column_max(self, column, parse_strings_as_datetimes=False):
+        return self._column_maxes.get(column, parse_strings_as_datetimes)
 
-    def _get_column_max(self, column):
+    def _get_column_max(self, column, parse_strings_as_datetimes=False):
         raise NotImplementedError
 
-    @property
-    def column_mins(self):
-        return self._column_mins
+    def get_column_min(self, column, parse_strings_as_datetimes=False):
+        return self._column_mins.get(column, parse_strings_as_datetimes)
 
-    def _get_column_min(self, column):
+    def _get_column_min(self, column, parse_strings_as_datetimes=False):
         raise NotImplementedError
 
-    @property
-    def column_unique_counts(self):
-        return self._column_unique_counts
+    def get_column_unique_count(self, column):
+        return self._column_unique_counts.get(column)
 
     def _get_column_unique_count(self, column):
         raise NotImplementedError
 
-    @property
-    def column_modes(self):
-        return self._column_modes
+    def get_column_modes(self, column):
+        return self._column_modes.get(column)
 
     def _get_column_modes(self, column):
         """returns a list of column modes"""
         raise NotImplementedError
 
-    @property
-    def column_medians(self):
-        return self._column_medians
+    def get_column_median(self, column):
+        return self._column_medians.get(column)
 
     def _get_column_median(self, column):
         raise NotImplementedError
 
-    @property
-    def column_stdevs(self):
-        return self._column_stdevs
+    def get_column_stdev(self, column):
+        return self._column_stdevs.get(column)
 
     def _get_column_stdev(self, column):
+        raise NotImplementedError
+
+    def _get_column_hist(self, column, bins):
+        """return a list of counts corresponding to bins"""
+        raise NotImplementedError
+
+    def _get_column_count_in_range(self, column, min_val=None, max_val=None, min_strictly=False, max_strictly=True):
         raise NotImplementedError
 
     @classmethod
@@ -938,7 +933,7 @@ class Dataset(MetaDataset):
                                            min_value=None,
                                            max_value=None,
                                            allow_cross_type_comparisons=None,
-                                           parse_strings_as_datetimes=None,
+                                           parse_strings_as_datetimes=False,
                                            output_strftime_format=None,
                                            mostly=None,
                                            result_format=None, include_config=False, catch_exceptions=None, meta=None
@@ -999,7 +994,7 @@ class Dataset(MetaDataset):
     def expect_column_values_to_be_increasing(self,
                                               column,
                                               strictly=None,
-                                              parse_strings_as_datetimes=None,
+                                              parse_strings_as_datetimes=False,
                                               mostly=None,
                                               result_format=None, include_config=False, catch_exceptions=None, meta=None
                                               ):
@@ -1054,7 +1049,7 @@ class Dataset(MetaDataset):
     def expect_column_values_to_be_decreasing(self,
                                               column,
                                               strictly=None,
-                                              parse_strings_as_datetimes=None,
+                                              parse_strings_as_datetimes=False,
                                               mostly=None,
                                               result_format=None, include_config=False, catch_exceptions=None, meta=None
                                               ):
@@ -1211,6 +1206,8 @@ class Dataset(MetaDataset):
         See Also:
             expect_column_value_lengths_to_be_between
         """
+        raise NotImplementedError
+
 
     def expect_column_values_to_match_regex(self,
                                             column,
@@ -1728,7 +1725,7 @@ class Dataset(MetaDataset):
         if max_value is not None and not isinstance(max_value, (Number)):
             raise ValueError("max_value must be a number")
 
-        col_avg = self.column_means[column]
+        col_avg = self.get_column_mean(column)
 
         # Handle possible missing values
         if col_avg is None:
@@ -1819,7 +1816,7 @@ class Dataset(MetaDataset):
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
 
-        column_median = self.column_medians[column]
+        column_median = self.get_column_median(column)
 
         if column_median is None:
             return {
@@ -1898,7 +1895,7 @@ class Dataset(MetaDataset):
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
 
-        column_stdev = self.column_stdevs[column]
+        column_stdev = self.get_column_stdev(column)
 
         return {
             "success": (
@@ -1972,7 +1969,7 @@ class Dataset(MetaDataset):
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
 
-        unique_value_count = self.column_unique_counts[column]
+        unique_value_count = self.get_column_unique_count(column)
 
         # Handle possible missing values
         if unique_value_count is None:
@@ -2058,8 +2055,8 @@ class Dataset(MetaDataset):
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
 
-        unique_value_count = self.column_unique_counts[column]
-        total_value_count = self.column_nonnull_counts[column]
+        unique_value_count = self.get_column_unique_count(column)
+        total_value_count = self.get_column_nonnull_count(column)
 
         if total_value_count > 0:
             proportion_unique = float(unique_value_count) / total_value_count
@@ -2135,7 +2132,7 @@ class Dataset(MetaDataset):
             `observed_value` will contain a single copy of each most common value.
 
         """
-        mode_list = self.column_modes[column]
+        mode_list = self.get_column_modes(column)
         intersection_count = len(set(value_set).intersection(mode_list))
 
         if ties_okay:
@@ -2212,7 +2209,7 @@ class Dataset(MetaDataset):
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
 
-        col_sum = self.column_sums[column]
+        col_sum = self.get_column_sum(column)
 
         # Handle possible missing values
         if col_sum is None:
@@ -2246,7 +2243,7 @@ class Dataset(MetaDataset):
         column,
         min_value=None,
         max_value=None,
-        parse_strings_as_datetimes=None,
+        parse_strings_as_datetimes=False,
         output_strftime_format=None,
         result_format=None,
         include_config=False,
@@ -2308,20 +2305,13 @@ class Dataset(MetaDataset):
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
 
-        # TODO figure out how to deal with this logic post-refactor
         if parse_strings_as_datetimes:
-            raise NotImplementedError
-        #     if min_value:
-        #         min_value = parse(min_value)
+            if min_value:
+                min_value = parse(min_value)
+            if max_value:
+                max_value = parse(max_value)
 
-        #     if max_value:
-        #         max_value = parse(max_value)
-
-        #     temp_column = column.map(parse)
-        # else:
-        #     temp_column = column
-
-        col_min = self.column_mins[column]
+        col_min = self.get_column_min(column, parse_strings_as_datetimes)
 
         if col_min is None:
             success = False
@@ -2351,7 +2341,7 @@ class Dataset(MetaDataset):
         column,
         min_value=None,
         max_value=None,
-        parse_strings_as_datetimes=None,
+        parse_strings_as_datetimes=False,
         output_strftime_format=None,
         result_format=None,
         include_config=False,
@@ -2414,20 +2404,13 @@ class Dataset(MetaDataset):
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
 
-        # TODO figure out how to deal with this logic post-refactor
         if parse_strings_as_datetimes:
-            raise NotImplementedError
-        #     if min_value:
-        #         min_value = parse(min_value)
+            if min_value:
+                min_value = parse(min_value)
+            if max_value:
+                max_value = parse(max_value)
 
-        #     if max_value:
-        #         max_value = parse(max_value)
-
-        #     temp_column = column.map(parse)
-        # else:
-        #     temp_column = column
-
-        col_max = self.column_maxes[column]
+        col_max = self.get_column_max(column, parse_strings_as_datetimes)
 
         if col_max is None:
             success = False
@@ -2438,11 +2421,11 @@ class Dataset(MetaDataset):
         elif min_value is not None and max_value is None:
             success = (min_value <= col_max)
 
-        # if parse_strings_as_datetimes:
-        #     if output_strftime_format:
-        #         col_max = datetime.strftime(col_max, output_strftime_format)
-        #     else:
-        #         col_max = str(col_max)
+        if parse_strings_as_datetimes:
+            if output_strftime_format:
+                col_max = datetime.strftime(col_max, output_strftime_format)
+            else:
+                col_max = str(col_max)
 
         return {
             "success": success,
@@ -2653,13 +2636,20 @@ class Dataset(MetaDataset):
         """
         raise NotImplementedError
 
-    def expect_column_kl_divergence_to_be_less_than(self,
-                                                    column,
-                                                    partition_object=None,
-                                                    threshold=None,
-                                                    tail_weight_holdout=0,
-                                                    internal_weight_holdout=0,
-                                                    result_format=None, include_config=False, catch_exceptions=None, meta=None):
+    @DocInherit
+    @MetaDataset.column_aggregate_expectation
+    def expect_column_kl_divergence_to_be_less_than(
+        self,
+        column,
+        partition_object=None,
+        threshold=None,
+        tail_weight_holdout=0,
+        internal_weight_holdout=0,
+        result_format=None,
+        include_config=False,
+        catch_exceptions=None,
+        meta=None,
+    ):
         """Expect the Kulback-Leibler (KL) divergence (relative entropy) of the specified column with respect to the \
         partition object to be lower than the provided threshold.
 
@@ -2760,7 +2750,196 @@ class Dataset(MetaDataset):
             expect_column_bootstrapped_ks_test_p_value_to_be_greater_than
 
         """
-        raise NotImplementedError
+        if not is_valid_partition_object(partition_object):
+            raise ValueError("Invalid partition object.")
+
+        if (not isinstance(threshold, (int, float))) or (threshold < 0):
+            raise ValueError(
+                "Threshold must be specified, greater than or equal to zero.")
+
+        if (not isinstance(tail_weight_holdout, (int, float))) or (tail_weight_holdout < 0) or (tail_weight_holdout > 1):
+            raise ValueError(
+                "tail_weight_holdout must be between zero and one.")
+
+        if (not isinstance(internal_weight_holdout, (int, float))) or (internal_weight_holdout < 0) or (internal_weight_holdout > 1):
+            raise ValueError(
+                "internal_weight_holdout must be between zero and one.")
+            
+        if(tail_weight_holdout != 0 and "tail_weights" in partition_object):
+            raise ValueError(
+                "tail_weight_holdout must be 0 when using tail_weights in partition object")
+
+        # TODO: add checks for duplicate values in is_valid_categorical_partition_object
+        if is_valid_categorical_partition_object(partition_object):
+            if internal_weight_holdout > 0:
+                raise ValueError(
+                    "Internal weight holdout cannot be used for discrete data.")
+
+            # Data are expected to be discrete, use value_counts
+            observed_weights = self.get_column_value_counts(column) / len(column)
+            expected_weights = pd.Series(
+                partition_object['weights'], index=partition_object['values'], name='expected')
+            # test_df = pd.concat([expected_weights, observed_weights], axis=1, sort=True) # Sort not available before pandas 0.23.0
+            test_df = pd.concat([expected_weights, observed_weights], axis=1)
+
+            na_counts = test_df.isnull().sum()
+
+            # Handle NaN: if we expected something that's not there, it's just not there.
+            pk = test_df[column].fillna(0)
+            # Handle NaN: if something's there that was not expected, substitute the relevant value for tail_weight_holdout
+            if na_counts['expected'] > 0:
+                # Scale existing expected values
+                test_df['expected'] = test_df['expected'] * \
+                    (1 - tail_weight_holdout)
+                # Fill NAs with holdout.
+                qk = test_df['expected'].fillna(
+                    tail_weight_holdout / na_counts['expected'])
+            else:
+                qk = test_df['expected']
+
+            kl_divergence = stats.entropy(pk, qk)
+
+            if(np.isinf(kl_divergence) or np.isnan(kl_divergence)):
+                observed_value = None
+            else:
+                observed_value = kl_divergence
+
+            return_obj = {
+                "success": kl_divergence <= threshold,
+                "result": {
+                    "observed_value": observed_value,
+                    "details": {
+                        "observed_partition": {
+                            "values": test_df.index.tolist(),
+                            "weights": pk.tolist()
+                        },
+                        "expected_partition": {
+                            "values": test_df.index.tolist(),
+                            "weights": qk.tolist()
+                        }
+                    }
+                }
+            }
+
+        else:
+            # Data are expected to be continuous; discretize first
+            # Build the histogram first using expected bins so that the largest bin is >=
+            hist = np.array(self._get_column_hist(column, partition_object['bins']))
+            # np.histogram(column, partition_object['bins'], density=False)
+            bin_edges = partition_object['bins']
+            # Add in the frequencies observed above or below the provided partition
+            # below_partition = len(np.where(column < partition_object['bins'][0])[0])
+            # above_partition = len(np.where(column > partition_object['bins'][-1])[0])
+            below_partition = self._get_column_count_in_range(column, max_val=partition_object['bins'][0], max_strictly=True)
+            above_partition = self._get_column_count_in_range(column, min_val=partition_object['bins'][-1], min_strictly=True)
+
+            #Observed Weights is just the histogram values divided by the total number of observations
+            observed_weights = np.array(hist) / len(column)
+
+            #Adjust expected_weights to account for tail_weight and internal_weight
+            expected_weights = np.array(
+                partition_object['weights']) * (1 - tail_weight_holdout - internal_weight_holdout)
+
+            # Assign internal weight holdout values if applicable
+            if internal_weight_holdout > 0:
+                zero_count = len(expected_weights) - \
+                    np.count_nonzero(expected_weights)
+                if zero_count > 0:
+                    for index, value in enumerate(expected_weights):
+                        if value == 0:
+                            expected_weights[index] = internal_weight_holdout / zero_count
+        
+            # Assign tail weight holdout if applicable
+            # We need to check cases to only add tail weight holdout if it makes sense based on the provided partition.
+            if (partition_object['bins'][0] == -np.inf) and (partition_object['bins'][-1]) == np.inf:
+                if tail_weight_holdout > 0:
+                    raise ValueError("tail_weight_holdout cannot be used for partitions with infinite endpoints.")
+                if "tail_weights" in partition_object:
+                    raise ValueError("There can be no tail weights for partitions with one or both endpoints at infinity")
+                expected_bins = partition_object['bins'][1:-1] #Remove -inf and inf
+                
+                comb_expected_weights=expected_weights
+                expected_tail_weights=np.concatenate(([expected_weights[0]],[expected_weights[-1]])) #Set aside tail weights
+                expected_weights=expected_weights[1:-1] #Remove tail weights
+                
+                comb_observed_weights=observed_weights
+                observed_tail_weights=np.concatenate(([observed_weights[0]],[observed_weights[-1]])) #Set aside tail weights
+                observed_weights=observed_weights[1:-1] #Remove tail weights
+                
+                
+            elif (partition_object['bins'][0] == -np.inf):
+                
+                if "tail_weights" in partition_object:
+                    raise ValueError("There can be no tail weights for partitions with one or both endpoints at infinity")
+                
+                expected_bins = partition_object['bins'][1:] #Remove -inf
+                
+                comb_expected_weights=np.concatenate((expected_weights,[tail_weight_holdout]))
+                expected_tail_weights=np.concatenate(([expected_weights[0]],[tail_weight_holdout])) #Set aside left tail weight and holdout
+                expected_weights = expected_weights[1:] #Remove left tail weight from main expected_weights
+                
+                comb_observed_weights=np.concatenate((observed_weights,[above_partition/len(column)]))
+                observed_tail_weights=np.concatenate(([observed_weights[0]],[above_partition/len(column)])) #Set aside left tail weight and above parition weight
+                observed_weights=observed_weights[1:] #Remove left tail weight from main observed_weights
+        
+            elif (partition_object['bins'][-1] == np.inf):
+                
+                if "tail_weights" in partition_object:
+                    raise ValueError("There can be no tail weights for partitions with one or both endpoints at infinity")
+                
+                expected_bins = partition_object['bins'][:-1] #Remove inf
+                
+                comb_expected_weights=np.concatenate(([tail_weight_holdout],expected_weights))
+                expected_tail_weights=np.concatenate(([tail_weight_holdout],[expected_weights[-1]]))  #Set aside right tail weight and holdout
+                expected_weights = expected_weights[:-1] #Remove right tail weight from main expected_weights
+                
+                comb_observed_weights=np.concatenate(([below_partition/len(column)],observed_weights))
+                observed_tail_weights=np.concatenate(([below_partition/len(column)],[observed_weights[-1]])) #Set aside right tail weight and below partition weight
+                observed_weights=observed_weights[:-1] #Remove right tail weight from main observed_weights
+            else:
+                
+                expected_bins = partition_object['bins'] #No need to remove -inf or inf
+                
+                if "tail_weights" in partition_object:
+                    tail_weights=partition_object["tail_weights"]
+                    comb_expected_weights=np.concatenate(([tail_weights[0]],expected_weights,[tail_weights[1]])) #Tack on tail weights
+                    expected_tail_weights=tail_weights #Tail weights are just tail_weights
+                comb_expected_weights=np.concatenate(([tail_weight_holdout / 2],expected_weights,[tail_weight_holdout / 2]))
+                expected_tail_weights=np.concatenate(([tail_weight_holdout / 2],[tail_weight_holdout / 2])) #Tail weights are just tail_weight holdout divided eaually to both tails
+                
+                comb_observed_weights=np.concatenate(([below_partition/len(column)],observed_weights, [above_partition/len(column)]))
+                observed_tail_weights=np.concatenate(([below_partition],[above_partition]))/len(column) #Tail weights are just the counts on either side of the partition
+                #Main expected_weights and main observered weights had no tail_weights, so nothing needs to be removed.
+        
+     
+            kl_divergence = stats.entropy(comb_observed_weights, comb_expected_weights) 
+            
+            if(np.isinf(kl_divergence) or np.isnan(kl_divergence)):
+                observed_value = None
+            else:
+                observed_value = kl_divergence
+
+            return_obj = {
+                    "success": kl_divergence <= threshold,
+                    "result": {
+                        "observed_value": observed_value,
+                        "details": {
+                            "observed_partition": {
+                                # return expected_bins, since we used those bins to compute the observed_weights
+                                "bins": expected_bins,
+                                "weights": observed_weights.tolist(),
+                                "tail_weights":observed_tail_weights.tolist()
+                            },
+                            "expected_partition": {
+                                "bins": expected_bins,
+                                "weights": expected_weights.tolist(),
+                                "tail_weights":expected_tail_weights.tolist()
+                            }
+                        }
+                    }
+                }
+                
+        return return_obj
 
     ### Column pairs ###
 
@@ -2807,7 +2986,7 @@ class Dataset(MetaDataset):
                                                          column_A,
                                                          column_B,
                                                          or_equal=None,
-                                                         parse_strings_as_datetimes=None,
+                                                         parse_strings_as_datetimes=False,
                                                          allow_cross_type_comparisons=None,
                                                          ignore_row_if="both_values_are_missing",
                                                          result_format=None, include_config=False, catch_exceptions=None, meta=None

@@ -229,13 +229,17 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 self._table)
         ).scalar()
 
-    def _get_column_max(self, column):
+    def _get_column_max(self, column, parse_strings_as_datetimes=False):
+        if parse_strings_as_datetimes:
+            raise NotImplementedError
         return self.engine.execute(
             sa.select([sa.func.max(sa.column(column))]).select_from(
                 self._table)
         ).scalar()
 
-    def _get_column_min(self, column):
+    def _get_column_min(self, column, parse_strings_as_datetimes=False):
+        if parse_strings_as_datetimes:
+            raise NotImplementedError
         return self.engine.execute(
             sa.select([sa.func.min(sa.column(column))]).select_from(
                 self._table)
@@ -254,7 +258,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         ).scalar()
 
     def _get_column_median(self, column):
-        nonnull_count = self.column_nonnull_counts[column]
+        nonnull_count = self.get_column_nonnull_count(column)
         element_values = self.engine.execute(
             sa.select([sa.column(column)]).order_by(sa.column(column)).where(
                 sa.column(column) != None

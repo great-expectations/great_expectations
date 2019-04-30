@@ -321,11 +321,17 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
     def _get_column_sum(self, column):
         return self[column].sum()
 
-    def _get_column_max(self, column):
-        return self[column].max()
+    def _get_column_max(self, column, parse_strings_as_datetimes=False):
+        temp_column = self[column].dropna()
+        if parse_strings_as_datetimes:
+            temp_column = temp_column.map(parse)
+        return temp_column.max()
 
-    def _get_column_min(self, column):
-        return self[column].min()
+    def _get_column_min(self, column, parse_strings_as_datetimes=False):
+        temp_column = self[column].dropna()
+        if parse_strings_as_datetimes:
+            temp_column = temp_column.map(parse)
+        return temp_column.min()
 
     def _get_column_mean(self, column):
         return self[column].mean()
@@ -350,6 +356,31 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
     def _get_column_stdev(self, column):
         return self[column].std()
+
+    def _get_column_hist(self, column, bins):
+        hist, bin_edges = np.histogram(self[column], bins, density=False)
+        return list(hist)
+
+    def _get_column_count_in_range(self, column, min_val=None, max_val=None, min_strictly=False, max_strictly=True):
+        # TODO this logic could probably go in the non-underscore version if we want to cache
+        if min_val is None and max_val is None:
+            raise ValueError('Must specify either min or max value')
+        if min_val is not None and max_val is not None and min_val > max_val:
+            raise ValueError('Min value must be <= to max value')
+
+        result = self[column]
+        if min_val is not None:
+            if min_strictly:
+                result = result[result > min_val]
+            else:
+                result = result[result >= min_val]
+        if max_val is not None:
+            if max_strictly:
+                result = result[result < max_val]
+            else:
+                result = result[result <= max_val]
+        return len(result)
+
 
     ### Expectation methods ###
 
@@ -881,199 +912,6 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
         return return_obj
 
-    @DocInherit
-    @MetaPandasDataset.column_aggregate_expectation
-    def expect_column_kl_divergence_to_be_less_than(self, column, partition_object=None, threshold=None,
-                                                    tail_weight_holdout=0, internal_weight_holdout=0,
-                                                    result_format=None, include_config=False, catch_exceptions=None, meta=None):
-        if not is_valid_partition_object(partition_object):
-            raise ValueError("Invalid partition object.")
-
-        if (not isinstance(threshold, (int, float))) or (threshold < 0):
-            raise ValueError(
-                "Threshold must be specified, greater than or equal to zero.")
-
-        if (not isinstance(tail_weight_holdout, (int, float))) or (tail_weight_holdout < 0) or (tail_weight_holdout > 1):
-            raise ValueError(
-                "tail_weight_holdout must be between zero and one.")
-
-        if (not isinstance(internal_weight_holdout, (int, float))) or (internal_weight_holdout < 0) or (internal_weight_holdout > 1):
-            raise ValueError(
-                "internal_weight_holdout must be between zero and one.")
-            
-        if(tail_weight_holdout != 0 and "tail_weights" in partition_object):
-            raise ValueError(
-                "tail_weight_holdout must be 0 when using tail_weights in partition object")
-
-        # TODO: add checks for duplicate values in is_valid_categorical_partition_object
-        if is_valid_categorical_partition_object(partition_object):
-            if internal_weight_holdout > 0:
-                raise ValueError(
-                    "Internal weight holdout cannot be used for discrete data.")
-
-            # Data are expected to be discrete, use value_counts
-            observed_weights = column.value_counts() / len(column)
-            expected_weights = pd.Series(
-                partition_object['weights'], index=partition_object['values'], name='expected')
-            # test_df = pd.concat([expected_weights, observed_weights], axis=1, sort=True) # Sort not available before pandas 0.23.0
-            test_df = pd.concat([expected_weights, observed_weights], axis=1)
-
-            na_counts = test_df.isnull().sum()
-
-            # Handle NaN: if we expected something that's not there, it's just not there.
-            pk = test_df[column.name].fillna(0)
-            # Handle NaN: if something's there that was not expected, substitute the relevant value for tail_weight_holdout
-            if na_counts['expected'] > 0:
-                # Scale existing expected values
-                test_df['expected'] = test_df['expected'] * \
-                    (1 - tail_weight_holdout)
-                # Fill NAs with holdout.
-                qk = test_df['expected'].fillna(
-                    tail_weight_holdout / na_counts['expected'])
-            else:
-                qk = test_df['expected']
-
-            kl_divergence = stats.entropy(pk, qk)
-
-            if(np.isinf(kl_divergence) or np.isnan(kl_divergence)):
-                observed_value = None
-            else:
-                observed_value = kl_divergence
-
-            return_obj = {
-                "success": kl_divergence <= threshold,
-                "result": {
-                    "observed_value": observed_value,
-                    "details": {
-                        "observed_partition": {
-                            "values": test_df.index.tolist(),
-                            "weights": pk.tolist()
-                        },
-                        "expected_partition": {
-                            "values": test_df.index.tolist(),
-                            "weights": qk.tolist()
-                        }
-                    }
-                }
-            }
-
-        else:
-            # Data are expected to be continuous; discretize first
-
-            # Build the histogram first using expected bins so that the largest bin is >=
-            hist, bin_edges = np.histogram(column, partition_object['bins'], density=False)
-
-            # Add in the frequencies observed above or below the provided partition
-            below_partition = len(np.where(column < partition_object['bins'][0])[0])
-            above_partition = len(np.where(column > partition_object['bins'][-1])[0])
-
-            #Observed Weights is just the histogram values divided by the total number of observations
-            observed_weights = np.array(hist)/len(column)
-
-            #Adjust expected_weights to account for tail_weight and internal_weight
-            expected_weights = np.array(
-                partition_object['weights']) * (1 - tail_weight_holdout - internal_weight_holdout)
-
-            # Assign internal weight holdout values if applicable
-            if internal_weight_holdout > 0:
-                zero_count = len(expected_weights) - \
-                    np.count_nonzero(expected_weights)
-                if zero_count > 0:
-                    for index, value in enumerate(expected_weights):
-                        if value == 0:
-                            expected_weights[index] = internal_weight_holdout / zero_count
-        
-            # Assign tail weight holdout if applicable
-            # We need to check cases to only add tail weight holdout if it makes sense based on the provided partition.
-            if (partition_object['bins'][0] == -np.inf) and (partition_object['bins'][-1]) == np.inf:
-                if tail_weight_holdout > 0:
-                    raise ValueError("tail_weight_holdout cannot be used for partitions with infinite endpoints.")
-                if "tail_weights" in partition_object:
-                    raise ValueError("There can be no tail weights for partitions with one or both endpoints at infinity")
-                expected_bins = partition_object['bins'][1:-1] #Remove -inf and inf
-                
-                comb_expected_weights=expected_weights
-                expected_tail_weights=np.concatenate(([expected_weights[0]],[expected_weights[-1]])) #Set aside tail weights
-                expected_weights=expected_weights[1:-1] #Remove tail weights
-                
-                comb_observed_weights=observed_weights
-                observed_tail_weights=np.concatenate(([observed_weights[0]],[observed_weights[-1]])) #Set aside tail weights
-                observed_weights=observed_weights[1:-1] #Remove tail weights
-                
-                
-            elif (partition_object['bins'][0] == -np.inf):
-                
-                if "tail_weights" in partition_object:
-                    raise ValueError("There can be no tail weights for partitions with one or both endpoints at infinity")
-                
-                expected_bins = partition_object['bins'][1:] #Remove -inf
-                
-                comb_expected_weights=np.concatenate((expected_weights,[tail_weight_holdout]))
-                expected_tail_weights=np.concatenate(([expected_weights[0]],[tail_weight_holdout])) #Set aside left tail weight and holdout
-                expected_weights = expected_weights[1:] #Remove left tail weight from main expected_weights
-                
-                comb_observed_weights=np.concatenate((observed_weights,[above_partition/len(column)]))
-                observed_tail_weights=np.concatenate(([observed_weights[0]],[above_partition/len(column)])) #Set aside left tail weight and above parition weight
-                observed_weights=observed_weights[1:] #Remove left tail weight from main observed_weights
-        
-            elif (partition_object['bins'][-1] == np.inf):
-                
-                if "tail_weights" in partition_object:
-                    raise ValueError("There can be no tail weights for partitions with one or both endpoints at infinity")
-                
-                expected_bins = partition_object['bins'][:-1] #Remove inf
-                
-                comb_expected_weights=np.concatenate(([tail_weight_holdout],expected_weights))
-                expected_tail_weights=np.concatenate(([tail_weight_holdout],[expected_weights[-1]]))  #Set aside right tail weight and holdout
-                expected_weights = expected_weights[:-1] #Remove right tail weight from main expected_weights
-                
-                comb_observed_weights=np.concatenate(([below_partition/len(column)],observed_weights))
-                observed_tail_weights=np.concatenate(([below_partition/len(column)],[observed_weights[-1]])) #Set aside right tail weight and below partition weight
-                observed_weights=observed_weights[:-1] #Remove right tail weight from main observed_weights
-            else:
-                
-                expected_bins = partition_object['bins'] #No need to remove -inf or inf
-                
-                if "tail_weights" in partition_object:
-                    tail_weights=partition_object["tail_weights"]
-                    comb_expected_weights=np.concatenate(([tail_weights[0]],expected_weights,[tail_weights[1]])) #Tack on tail weights
-                    expected_tail_weights=tail_weights #Tail weights are just tail_weights
-                comb_expected_weights=np.concatenate(([tail_weight_holdout / 2],expected_weights,[tail_weight_holdout / 2]))
-                expected_tail_weights=np.concatenate(([tail_weight_holdout / 2],[tail_weight_holdout / 2])) #Tail weights are just tail_weight holdout divided eaually to both tails
-                
-                comb_observed_weights=np.concatenate(([below_partition/len(column)],observed_weights, [above_partition/len(column)]))
-                observed_tail_weights=np.concatenate(([below_partition],[above_partition]))/len(column) #Tail weights are just the counts on either side of the partition
-                #Main expected_weights and main observered weights had no tail_weights, so nothing needs to be removed.
-        
-     
-            kl_divergence = stats.entropy(comb_observed_weights, comb_expected_weights) 
-            
-            if(np.isinf(kl_divergence) or np.isnan(kl_divergence)):
-                observed_value = None
-            else:
-                observed_value = kl_divergence
-
-            return_obj = {
-                    "success": kl_divergence <= threshold,
-                    "result": {
-                        "observed_value": observed_value,
-                        "details": {
-                            "observed_partition": {
-                                # return expected_bins, since we used those bins to compute the observed_weights
-                                "bins": expected_bins,
-                                "weights": observed_weights.tolist(),
-                                "tail_weights":observed_tail_weights.tolist()
-                            },
-                            "expected_partition": {
-                                "bins": expected_bins,
-                                "weights": expected_weights.tolist(),
-                                "tail_weights":expected_tail_weights.tolist()
-                            }
-                        }
-                    }
-                }
-                
-        return return_obj
 
     @DocInherit
     @MetaPandasDataset.column_pair_map_expectation
