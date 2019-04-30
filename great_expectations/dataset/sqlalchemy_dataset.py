@@ -434,16 +434,6 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         elif min_value is not None and max_value is None:
             return sa.func.length(sa.column(column)) >= min_value
 
-    ###
-    ###
-    ###
-    #
-    # Column Aggregate Expectation Implementations
-    #
-    ###
-    ###
-    ###
-
     @MetaSqlAlchemyDataset.column_map_expectation
     def expect_column_values_to_be_unique(self, column, mostly=None,
                                           result_format=None, include_config=False, catch_exceptions=None, meta=None):

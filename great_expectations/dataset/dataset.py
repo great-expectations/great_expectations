@@ -23,15 +23,19 @@ from scipy import stats
 
 class ColumnarResultCache:
     """Holds information about columns"""
-    def __init__(self, callback):
+    def __init__(self, callback, caching=False):
         self.data = {}
         self.callback = callback
+        self.caching = caching
 
     def get(self, *args):
         """Args is a tuple of parameters that will be used as the key to look up cached values"""
-        if args not in self.data:
-            self.data[args] = self.callback(*args)
-        return self.data[args]
+        if self.caching:
+            if args not in self.data:
+                self.data[args] = self.callback(*args)
+            return self.data[args]
+        else:
+            return self.callback(*args)
 
 
 class MetaDataset(DataAsset):
@@ -117,30 +121,35 @@ class MetaDataset(DataAsset):
 
 class Dataset(MetaDataset):
     def __init__(self, *args, **kwargs):
+        self.caching = kwargs.get('caching', False)
+
         # some data structures for caching information specific to tabular datasets
         # these definitions currently need to come before MetaDataset.__init__ to allow for autoinspection
         # NOTE: this approach makes the strong assumption that the user will not modify the core data store
         # (e.g. self.spark_df) over the lifetime of the dataset instance
         self._row_count = None
         self._table_columns = None
-        self._column_nonnull_counts = ColumnarResultCache(self._get_column_nonnull_count)
-        self._column_means = ColumnarResultCache(self._get_column_mean)
-        self._column_value_counts = ColumnarResultCache(self._get_column_value_counts)
-        self._column_sums = ColumnarResultCache(self._get_column_sum)
-        self._column_maxes = ColumnarResultCache(self._get_column_max)
-        self._column_mins = ColumnarResultCache(self._get_column_min)
-        self._column_unique_counts = ColumnarResultCache(self._get_column_unique_count)
-        self._column_modes = ColumnarResultCache(self._get_column_modes)
-        self._column_medians = ColumnarResultCache(self._get_column_median)
-        self._column_stdevs = ColumnarResultCache(self._get_column_stdev)
+        self._column_nonnull_counts = ColumnarResultCache(self._get_column_nonnull_count, self.caching)
+        self._column_means = ColumnarResultCache(self._get_column_mean, self.caching)
+        self._column_value_counts = ColumnarResultCache(self._get_column_value_counts, self.caching)
+        self._column_sums = ColumnarResultCache(self._get_column_sum, self.caching)
+        self._column_maxes = ColumnarResultCache(self._get_column_max, self.caching)
+        self._column_mins = ColumnarResultCache(self._get_column_min, self.caching)
+        self._column_unique_counts = ColumnarResultCache(self._get_column_unique_count, self.caching)
+        self._column_modes = ColumnarResultCache(self._get_column_modes, self.caching)
+        self._column_medians = ColumnarResultCache(self._get_column_median, self.caching)
+        self._column_stdevs = ColumnarResultCache(self._get_column_stdev, self.caching)
 
         super(Dataset, self).__init__(*args, **kwargs)
 
     @property
     def row_count(self):
-        if not self._row_count:
-            self._row_count = self._get_row_count()
-        return self._row_count
+        if self.caching:
+            if not self._row_count:
+                self._row_count = self._get_row_count()
+            return self._row_count
+        else:
+            return self._get_row_count()
 
     def _get_row_count(self):
         # currently can't implement this for PandasDataset without errors
@@ -148,11 +157,12 @@ class Dataset(MetaDataset):
 
     @property
     def table_columns(self):
-        # named "table_columns" to avoid conflict with PandasDataset, which already has a columns attribute.
-        # maybe an argument for not subclassing pd.DataFrame
-        if not self._table_columns:
-            self._table_columns = self._get_table_columns()
-        return self._table_columns
+        if self.caching:
+            if not self._table_columns:
+                self._table_columns = self._get_table_columns()
+            return self._table_columns
+        else:
+            return self._get_table_columns()
     
     def _get_table_columns(self):
         raise NotImplementedError

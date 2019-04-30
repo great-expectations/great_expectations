@@ -269,6 +269,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
     # case is that we want the former, but also want to re-initialize these values to None so we don't
     # get an attribute error when trying to access them (I think this could be done in __finalize__?)
     _internal_names = pd.DataFrame._internal_names + [
+        'caching',
         '_row_count',
         '_table_columns',
         '_column_nonnull_counts',
