@@ -11,8 +11,11 @@ Planned Features
 * Support for non-tabular datasources (e.g. JSON, XML, AVRO)
 * Real-time/streaming and adaption of distributional expectations
 
-v.0.5.0__develop
-----------------
+
+v.0.5.1
+---------------
+* Fix issue where no result_format available for expect_column_values_to_be_null caused error
+* Use vectorized computation in pandas (#443, #445; thanks @RoyalTS)
 
 
 v.0.5.0
