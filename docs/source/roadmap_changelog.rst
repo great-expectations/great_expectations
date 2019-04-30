@@ -12,6 +12,12 @@ Planned Features
 * Real-time/streaming and adaption of distributional expectations
 
 
+v.0.5.1
+---------------
+* Fix issue where no result_format available for expect_column_values_to_be_null caused error
+* Use vectorized computation in pandas (#443, #445; thanks @RoyalTS)
+
+
 v.0.5.0
 ----------------
 * Restructured class hierarchy to have a more generic DataAsset parent that maintains expectation logic separate \
