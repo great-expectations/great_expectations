@@ -35,6 +35,8 @@ class DataAsset(object):
 
         """
         autoinspect_func = kwargs.pop("autoinspect_func", None)
+        # TODO: a better way to deal with this?
+        kwargs.pop('caching', None)
 
         super(DataAsset, self).__init__(*args, **kwargs)
         self._initialize_expectations()
