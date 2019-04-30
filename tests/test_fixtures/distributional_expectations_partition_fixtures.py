@@ -4,6 +4,7 @@ import scipy.stats as stats
 import great_expectations as ge
 import json
 import sys
+import copy
 
 """
 Use this file to generate random datasets for testing distributional expectations.
@@ -16,7 +17,9 @@ The partitions should be built from distributional_expectations_data_base.csv. T
 """
 
 
-def generate_new_data():
+def generate_new_data(seed):
+    np.random.seed(seed=seed)
+
     norm_0_1 = stats.norm.rvs(0, 1, 1000)
     norm_1_1 = stats.norm.rvs(1, 1, 1000)
     norm_10_1 = stats.norm.rvs(10, 1, 1000)
@@ -35,22 +38,28 @@ def generate_new_data():
 def generate_new_partitions(df):
     test_partitions = {}
     for column in ['norm_0_1', 'norm_1_1', 'bimodal']:
-        partition_object = ge.data_asset.util.kde_partition_data(df[column])
+        partition_object = ge.dataset.util.kde_partition_data(df[column])
         # Print how close sum of weights is to one for a quick visual consistency check when data are generated
         #print(column + '_kde: '+ str(abs(1-np.sum(partition_object['weights']))))
         test_partitions[column + '_kde'] = partition_object
 
         for bin_type in ['uniform', 'ntile', 'auto']:
-            partition_object = ge.data_asset.util.continuous_partition_data(
+            partition_object = ge.dataset.util.continuous_partition_data(
                 df[column], bin_type)
             # Print how close sum of weights is to one for a quick visual consistency check when data are generated
             #print(column + '_' + bin_type + ': ' + str(abs(1 - np.sum(partition_object['weights']))))
             test_partitions[column + '_' + bin_type] = partition_object
 
-    partition_object = ge.data_asset.util.categorical_partition_data(
+        # Create infinite endpoint partitions:
+        inf_partition = copy.deepcopy(test_partitions[column + "_auto"])
+        inf_partition["weights"] = inf_partition["weights"] * (1 - 0.01)
+        inf_partition["tail_weights"] = [0.005, 0.005]
+        test_partitions[column + '_auto_inf'] = inf_partition
+
+    partition_object = ge.dataset.util.categorical_partition_data(
         df['categorical_fixed'])
     test_partitions['categorical_fixed'] = partition_object
-    alt_partition = ge.data_asset.util.categorical_partition_data(
+    alt_partition = ge.dataset.util.categorical_partition_data(
         df['categorical_fixed'])
     # overwrite weights with uniform weights to give a testing dataset
     alt_partition['weights'] = [
@@ -61,21 +70,16 @@ def generate_new_partitions(df):
 
 
 if __name__ == "__main__":
-    # Set precision we'll use:
-    precision = sys.float_info.dig
-    print("Setting pandas float_format to use " +
-          str(precision) + " digits of precision.")
-
-    df = generate_new_data()
-    df.to_csv('../test_sets/distributional_expectations_data_base.csv',
-              float_format='%.' + str(precision) + 'g')
+    df = generate_new_data(seed=42)
+    d = df.to_dict(orient="list")
+    json.dump(d, open('../test_sets/distributional_expectations_data_base.json', 'w'))
     test_partitions = generate_new_partitions(df)
 
-    ge.data_asset.util.ensure_json_serializable(test_partitions)
+    test_partitions = ge.data_asset.util.recursively_convert_to_json_serializable(test_partitions)
     with open('../test_sets/test_partitions.json', 'w') as file:
         file.write(json.dumps(test_partitions))
 
-    df = generate_new_data()
-    df.to_csv('../test_sets/distributional_expectations_data_test.csv',
-              float_format='%.' + str(precision) + 'g')
+    df = generate_new_data(seed=20190430)
+    d = df.to_dict(orient="list")
+    json.dump(d, open('../test_sets/distributional_expectations_data_test.json', 'w'))
     print("Done generating new base data, partitions, and test data.")
