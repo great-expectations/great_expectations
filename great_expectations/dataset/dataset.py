@@ -152,7 +152,7 @@ class Dataset(MetaDataset):
             return self._get_row_count()
 
     def _get_row_count(self):
-        # currently can't implement this for PandasDataset without errors
+        """Returns: int, table row count"""
         raise NotImplementedError
 
     @property
@@ -165,75 +165,85 @@ class Dataset(MetaDataset):
             return self._get_table_columns()
     
     def _get_table_columns(self):
+        """Returns: List[str], list of column names"""
         raise NotImplementedError
 
     def get_column_nonnull_count(self, column):
         return self._column_nonnull_counts.get(column)
 
     def _get_column_nonnull_count(self, column):
+        """Returns: int"""
         raise NotImplementedError
 
     def get_column_mean(self, column):
         return self._column_means.get(column)
 
     def _get_column_mean(self, column):
+        """Returns: float"""
         raise NotImplementedError
 
     def get_column_value_counts(self, column):
         return self._column_value_counts.get(column)
 
     def _get_column_value_counts(self, column):
-        """returns pd.Series of value counts for a column, sorted by value"""
+        """Returns: pd.Series of value counts for a column, sorted by value"""
         raise NotImplementedError
 
     def get_column_sum(self, column):
         return self._column_sums.get(column)
 
     def _get_column_sum(self, column):
+        """Returns: float"""
         raise NotImplementedError
 
     def get_column_max(self, column, parse_strings_as_datetimes=False):
         return self._column_maxes.get(column, parse_strings_as_datetimes)
 
     def _get_column_max(self, column, parse_strings_as_datetimes=False):
+        """Returns: any"""
         raise NotImplementedError
 
     def get_column_min(self, column, parse_strings_as_datetimes=False):
         return self._column_mins.get(column, parse_strings_as_datetimes)
 
     def _get_column_min(self, column, parse_strings_as_datetimes=False):
+        """Returns: any"""
         raise NotImplementedError
 
     def get_column_unique_count(self, column):
         return self._column_unique_counts.get(column)
 
     def _get_column_unique_count(self, column):
+        """Returns: int"""
         raise NotImplementedError
 
     def get_column_modes(self, column):
         return self._column_modes.get(column)
 
     def _get_column_modes(self, column):
-        """returns a list of column modes"""
+        """Returns: List[any], list of modes (ties OK)"""
         raise NotImplementedError
 
     def get_column_median(self, column):
         return self._column_medians.get(column)
 
     def _get_column_median(self, column):
+        """Returns: any"""
         raise NotImplementedError
 
     def get_column_stdev(self, column):
         return self._column_stdevs.get(column)
 
     def _get_column_stdev(self, column):
+        """Returns: float"""
         raise NotImplementedError
 
     def _get_column_hist(self, column, bins):
-        """return a list of counts corresponding to bins"""
+        """Returns: List[int], a list of counts corresponding to bins"""
         raise NotImplementedError
 
     def _get_column_count_in_range(self, column, min_val=None, max_val=None, min_strictly=False, max_strictly=True):
+        """Returns: int"""
         raise NotImplementedError
 
     @classmethod
