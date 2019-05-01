@@ -31,7 +31,7 @@ including interactive exploratory work and automatic validation.
 +---------------------------------------+----------------+----------------+----------------+----------------+
 |    details (dictionary)               |Defined on a per-expectation basis                                 |
 +---------------------------------------+----------------+----------------+----------------+----------------+
-| Fields defined for `column_map_expectation` type expectations:                                       |
+| Fields defined for `column_map_expectation` type expectations:                                            |
 +---------------------------------------+----------------+----------------+----------------+----------------+
 |    unexpected_count                   |no              |yes             |yes             |yes             |
 +---------------------------------------+----------------+----------------+----------------+----------------+
@@ -49,7 +49,7 @@ including interactive exploratory work and automatic validation.
 +---------------------------------------+----------------+----------------+----------------+----------------+
 |    unexpected_list                    |no              |no              |no              |yes             |
 +---------------------------------------+----------------+----------------+----------------+----------------+
-| Fields defined for `column_aggregate_expectation` type expectations:                                 |
+| Fields defined for `column_aggregate_expectation` type expectations:                                      |
 +---------------------------------------+----------------+----------------+----------------+----------------+
 |    observed_value                     |no              |yes             |yes             |yes             |
 +---------------------------------------+----------------+----------------+----------------+----------------+
