@@ -791,6 +791,8 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                                                                                     result_format=None,
                                                                                     include_config=False,
                                                                                     catch_exceptions=None, meta=None):
+        column = self[column]
+
         if p_value <= 0 or p_value >= 1:
             raise ValueError("p_value must be between 0 and 1 exclusive")
 
@@ -827,6 +829,8 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
     @MetaPandasDataset.column_aggregate_expectation
     def expect_column_bootstrapped_ks_test_p_value_to_be_greater_than(self, column, partition_object=None, p=0.05, bootstrap_samples=None, bootstrap_sample_size=None,
                                                                       result_format=None, include_config=False, catch_exceptions=None, meta=None):
+        column = self[column]
+
         if not is_valid_continuous_partition_object(partition_object):
             raise ValueError("Invalid continuous partition object.")
 
