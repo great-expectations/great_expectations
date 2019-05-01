@@ -76,7 +76,7 @@ if __name__ == "__main__":
     test_partitions = generate_new_partitions(df)
 
     test_partitions = ge.data_asset.util.recursively_convert_to_json_serializable(test_partitions)
-    with open('../test_sets/test_partitions.json', 'w') as file:
+    with open('../test_sets/test_partitions_definition_fixture.json', 'w') as file:
         file.write(json.dumps(test_partitions))
 
     df = generate_new_data(seed=20190501)
