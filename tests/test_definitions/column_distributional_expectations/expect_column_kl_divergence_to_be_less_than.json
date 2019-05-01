@@ -39,6 +39,20 @@
           }
         }
       }
+    },
+    {
+      "title": "internal holdout with categorical partition",
+      "exact_match_out": false,
+      "in": {
+        "column": "categorical_fixed",
+        "partition_object": {"weights": [0.54, 0.32, 0.14], "values": ["A", "B", "C"]},
+        "threshold": 0.1,
+        "internal_weight_holdout": 0.01,
+        "catch_exceptions": true
+      },
+      "out": {
+        "traceback_substring": "ValueError"
+      }
     }]
   },
   {
@@ -130,7 +144,755 @@
         "out": {
           "success": true
         }
+      },
+      {
+        "title": "norm_0_1_auto_inf partition - should fail with no holdout",
+        "exact_match_out": false,
+        "in": {
+          "column": "norm_0_1",
+          "partition_object": {
+            "bins": [ -Infinity, -3.2412673400690726, -2.987910238971794, -2.734553137874516, -2.481196036777238, -2.2278389356799595, -1.974481834582681, -1.7211247334854027, -1.4677676323881244, -1.214410531290846, -0.9610534301935676, -0.7076963290962892, -0.45433922799901083, -0.2009821269017329, 0.05237497419554549, 0.30573207529282387, 0.5590891763901022, 0.8124462774873806, 1.065803378584659, 1.3191604796819374, 1.5725175807792158, 1.8258746818764942, 2.0792317829737725, 2.332588884071051, 2.5859459851683293, 2.839303086265607, 3.092660187362885, 3.3460172884601636, 3.599374389557442, 3.852731490654721, Infinity],
+            "weights": [ 0.005, 0.00099, 0.0, 0.00297, 0.00297, 0.010889999999999999, 0.01287, 0.028710000000000003, 0.04554, 0.052469999999999996, 0.0693, 0.10196999999999999, 0.08613, 0.09207, 0.1089, 0.08811, 0.08514, 0.06336, 0.0396, 0.03762, 0.02277, 0.01683, 0.010889999999999999, 0.00594, 0.00198, 0.00099, 0.0, 0.0, 0.00099, 0.005 ]
+          },
+          "threshold": 0.5
+        },
+        "out": {
+          "success": false
+        }
+      },
+      {
+        "title": "norm_0_1_auto_inf partition - tail weights - should fail with no internal holdout",
+        "exact_match_out": false,
+        "in": {
+          "column": "norm_0_1",
+          "partition_object": {
+            "bins": [ -3.2412673400690726, -2.987910238971794, -2.734553137874516, -2.481196036777238, -2.2278389356799595, -1.974481834582681, -1.7211247334854027, -1.4677676323881244, -1.214410531290846, -0.9610534301935676, -0.7076963290962892, -0.45433922799901083, -0.2009821269017329, 0.05237497419554549, 0.30573207529282387, 0.5590891763901022, 0.8124462774873806, 1.065803378584659, 1.3191604796819374, 1.5725175807792158, 1.8258746818764942, 2.0792317829737725, 2.332588884071051, 2.5859459851683293, 2.839303086265607, 3.092660187362885, 3.3460172884601636, 3.599374389557442, 3.852731490654721 ],
+            "weights": [ 0.00099, 0.0, 0.00297, 0.00297, 0.010889999999999999, 0.01287, 0.028710000000000003, 0.04554, 0.052469999999999996, 0.0693, 0.10196999999999999, 0.08613, 0.09207, 0.1089, 0.08811, 0.08514, 0.06336, 0.0396, 0.03762, 0.02277, 0.01683, 0.010889999999999999, 0.00594, 0.00198, 0.00099, 0.0, 0.0, 0.00099 ],
+            "tail_weights": [ 0.005, 0.005 ]
+          },
+          "threshold": 0.5
+        },
+        "out": {
+          "success": false
+        }
+      },
+      {
+        "title": "positive - norm_0_1_auto partition",
+        "exact_match_out": false,
+        "in": {
+          "column": "norm_0_1",
+          "partition_object": {
+            "bins": [ -3.2412673400690726, -2.987910238971794, -2.734553137874516, -2.481196036777238, -2.2278389356799595, -1.974481834582681, -1.7211247334854027, -1.4677676323881244, -1.214410531290846, -0.9610534301935676, -0.7076963290962892, -0.45433922799901083, -0.2009821269017329, 0.05237497419554549, 0.30573207529282387, 0.5590891763901022, 0.8124462774873806, 1.065803378584659, 1.3191604796819374, 1.5725175807792158, 1.8258746818764942, 2.0792317829737725, 2.332588884071051, 2.5859459851683293, 2.839303086265607, 3.092660187362885, 3.3460172884601636, 3.599374389557442, 3.852731490654721 ],
+            "weights": [ 0.001, 0.0, 0.003, 0.003, 0.011, 0.013, 0.029, 0.046, 0.053, 0.07, 0.103, 0.087, 0.093, 0.11, 0.089, 0.086, 0.064, 0.04, 0.038, 0.023, 0.017, 0.011, 0.006, 0.002, 0.001, 0.0, 0.0, 0.001 ]
+          },
+          "threshold": 0.1,
+          "tail_weight_holdout": 0.01,
+          "internal_weight_holdout": 0.01
+        },
+        "out": {
+          "success": true
+        }
+      },
+      {
+        "title": "positive - norm_0_1_uniform partition",
+        "exact_match_out": false,
+        "in": {
+          "column": "norm_0_1",
+          "partition_object": {
+            "bins": [ -3.2412673400690726, -2.531867456996693, -1.822467573924314, -1.1130676908519344, -0.40366780777955524, 0.30573207529282387, 1.0151319583652039, 1.724531841437583, 2.433931724509962, 3.143331607582341, 3.852731490654721 ],
+            "weights": [ 0.004, 0.022, 0.096, 0.228, 0.272, 0.226, 0.104, 0.038, 0.009, 0.001 ]
+          },
+          "threshold": 0.1,
+          "tail_weight_holdout": 0.01,
+          "internal_weight_holdout": 0.01
+        },
+        "out": {
+          "success": true
+        }
+      },
+      {
+        "title": "positive - norm_0_1_ntile partition",
+        "exact_match_out": false,
+        "in": {
+          "column": "norm_0_1",
+          "partition_object": {
+            "bins": [ -3.2412673400690726, -1.2447631108514743, -0.8034814724483254, -0.5233580988912199, -0.24068966203741293, 0.025300612234888248, 0.24868582526450372, 0.5139818158561709, 0.8135111522744447, 1.3056452018671392, 3.852731490654721 ],
+            "weights": [ 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1 ]
+          },
+          "threshold": 0.1,
+          "tail_weight_holdout": 0.01,
+          "internal_weight_holdout": 0.01
+        },
+        "out": {
+          "success": true
+        }
+      },
+      {
+        "title": "positive - norm_0_1_kde partition",
+        "_notes": "note higher threshold for KDE partition",
+        "exact_match_out": false,
+        "in": {
+          "column": "norm_0_1",
+          "partition_object": {
+            "bins": [ -3.2412673400690726, -1.2447631108514743, -0.8034814724483254, -0.5233580988912199, -0.24068966203741293, 0.025300612234888248, 0.24868582526450372, 0.5139818158561709, 0.8135111522744447, 1.3056452018671392, 3.852731490654721 ],
+            "weights": [ 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1 ]
+          },
+          "threshold": 0.3,
+          "tail_weight_holdout": 0.01,
+          "internal_weight_holdout": 0.01
+        },
+        "out": {
+          "success": true
+        }
+      },
+      {
+        "title": "negative - norm_1_1 column - norm_0_1_auto partition",
+        "exact_match_out": false,
+        "in": {
+          "column": "norm_1_1",
+          "partition_object": {
+            "bins": [ -3.2412673400690726, -2.987910238971794, -2.734553137874516, -2.481196036777238, -2.2278389356799595, -1.974481834582681, -1.7211247334854027, -1.4677676323881244, -1.214410531290846, -0.9610534301935676, -0.7076963290962892, -0.45433922799901083, -0.2009821269017329, 0.05237497419554549, 0.30573207529282387, 0.5590891763901022, 0.8124462774873806, 1.065803378584659, 1.3191604796819374, 1.5725175807792158, 1.8258746818764942, 2.0792317829737725, 2.332588884071051, 2.5859459851683293, 2.839303086265607, 3.092660187362885, 3.3460172884601636, 3.599374389557442, 3.852731490654721 ],
+            "weights": [ 0.001, 0.0, 0.003, 0.003, 0.011, 0.013, 0.029, 0.046, 0.053, 0.07, 0.103, 0.087, 0.093, 0.11, 0.089, 0.086, 0.064, 0.04, 0.038, 0.023, 0.017, 0.011, 0.006, 0.002, 0.001, 0.0, 0.0, 0.001 ]
+          },
+          "threshold": 0.1,
+          "tail_weight_holdout": 0.01,
+          "internal_weight_holdout": 0.01
+        },
+        "out": {
+          "success": false
+        }
+      },
+      {
+        "title": "negative - norm_1_1 column - norm_0_1_uniform partition",
+        "exact_match_out": false,
+        "in": {
+          "column": "norm_1_1",
+          "partition_object": {
+            "bins": [ -3.2412673400690726, -2.531867456996693, -1.822467573924314, -1.1130676908519344, -0.40366780777955524, 0.30573207529282387, 1.0151319583652039, 1.724531841437583, 2.433931724509962, 3.143331607582341, 3.852731490654721 ],
+            "weights": [ 0.004, 0.022, 0.096, 0.228, 0.272, 0.226, 0.104, 0.038, 0.009, 0.001 ]
+          },
+          "threshold": 0.1,
+          "tail_weight_holdout": 0.01,
+          "internal_weight_holdout": 0.01
+        },
+        "out": {
+          "success": false
+        }
+      },
+      {
+        "title": "negative - norm_1_1 column - norm_0_1_ntile partition",
+        "exact_match_out": false,
+        "in": {
+          "column": "norm_1_1",
+          "partition_object": {
+            "bins": [ -3.2412673400690726, -1.2447631108514743, -0.8034814724483254, -0.5233580988912199, -0.24068966203741293, 0.025300612234888248, 0.24868582526450372, 0.5139818158561709, 0.8135111522744447, 1.3056452018671392, 3.852731490654721 ],
+            "weights": [ 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1 ]
+          },
+          "threshold": 0.1,
+          "tail_weight_holdout": 0.01,
+          "internal_weight_holdout": 0.01
+        },
+        "out": {
+          "success": false
+        }
+      },
+      {
+        "title": "negative - norm_1_1 column - norm_0_1_kde partition",
+        "_notes": "note higher threshold for KDE partition",
+        "exact_match_out": false,
+        "in": {
+          "column": "norm_1_1",
+          "partition_object": {
+            "bins": [ -3.2412673400690726, -1.2447631108514743, -0.8034814724483254, -0.5233580988912199, -0.24068966203741293, 0.025300612234888248, 0.24868582526450372, 0.5139818158561709, 0.8135111522744447, 1.3056452018671392, 3.852731490654721 ],
+            "weights": [ 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1 ]
+          },
+          "threshold": 0.3,
+          "tail_weight_holdout": 0.01,
+          "internal_weight_holdout": 0.01
+        },
+        "out": {
+          "success": false
+        }
+      },
+      {
+        "title": "positive - bimodal_auto partition",
+        "exact_match_out": false,
+        "in": {
+          "column": "bimodal",
+          "partition_object": {
+            "bins": [ -3.2412673400690726, -1.6805850631140362, -0.11990278615899985, 1.4407794907960363, 3.001461767751073, 4.562144044706109, 6.122826321661146, 7.683508598616182, 9.244190875571219, 10.804873152526255, 12.365555429481292, 13.926237706436327 ],
+            "weights": [ 0.018, 0.204, 0.235, 0.041, 0.002, 0.0, 0.004, 0.105, 0.285, 0.099, 0.007 ]
+          },
+          "threshold": 0.1,
+          "tail_weight_holdout": 0.01,
+          "internal_weight_holdout": 0.01
+        },
+        "out": {
+          "success": true
+        }
+      },
+      {
+        "title": "negative - bimodal column - norm_0_1_auto partition",
+        "exact_match_out": false,
+        "in": {
+          "column": "bimodal",
+          "partition_object": {
+            "bins": [ -3.2412673400690726, -2.987910238971794, -2.734553137874516, -2.481196036777238, -2.2278389356799595, -1.974481834582681, -1.7211247334854027, -1.4677676323881244, -1.214410531290846, -0.9610534301935676, -0.7076963290962892, -0.45433922799901083, -0.2009821269017329, 0.05237497419554549, 0.30573207529282387, 0.5590891763901022, 0.8124462774873806, 1.065803378584659, 1.3191604796819374, 1.5725175807792158, 1.8258746818764942, 2.0792317829737725, 2.332588884071051, 2.5859459851683293, 2.839303086265607, 3.092660187362885, 3.3460172884601636, 3.599374389557442, 3.852731490654721 ],
+            "weights": [ 0.001, 0.0, 0.003, 0.003, 0.011, 0.013, 0.029, 0.046, 0.053, 0.07, 0.103, 0.087, 0.093, 0.11, 0.089, 0.086, 0.064, 0.04, 0.038, 0.023, 0.017, 0.011, 0.006, 0.002, 0.001, 0.0, 0.0, 0.001 ]
+          },
+          "threshold": 0.1,
+          "tail_weight_holdout": 0.01,
+          "internal_weight_holdout": 0.01
+        },
+        "out": {
+          "success": false
+        }
+      },
+      {
+        "title": "negative - bimodal column - norm_0_1_uniform partition",
+        "exact_match_out": false,
+        "in": {
+          "column": "bimodal",
+          "partition_object": {
+            "bins": [ -3.2412673400690726, -2.531867456996693, -1.822467573924314, -1.1130676908519344, -0.40366780777955524, 0.30573207529282387, 1.0151319583652039, 1.724531841437583, 2.433931724509962, 3.143331607582341, 3.852731490654721 ],
+            "weights": [ 0.004, 0.022, 0.096, 0.228, 0.272, 0.226, 0.104, 0.038, 0.009, 0.001 ]
+          },
+          "threshold": 0.1,
+          "tail_weight_holdout": 0.01,
+          "internal_weight_holdout": 0.01
+        },
+        "out": {
+          "success": false
+        }
       }
     ]
-  }]
+  },
+  {
+    "data": {
+      "x": [-0.5, 0.5, 1.5, 2.5, null],
+      "y": [-0.5, 0.5, 1.5, 2.5, 3.5]
+    },
+    "tests": [
+      {
+        "title": "manual partition - lower inf bound",
+        "exact_match_out": false,
+        "in": {
+          "column": "x",
+          "partition_object": {
+            "bins": [-Infinity, 0, 1, 2, 3],
+            "weights": [0.25, 0.25, 0.25, 0.25]
+          },
+          "threshold": 0.0
+        },
+        "out": {
+          "success": true,
+          "observed_partition": {
+            "bins": [0, 1, 2, 3],
+            "weights": [0.25, 0.25, 0.25],
+            "tail_weights":[0.25,0]
+          },
+          "expected_partition": {
+            "bins": [0, 1, 2, 3],
+            "weights": [0.25, 0.25, 0.25],
+            "tail_weights":[0.25,0]
+          }
+        }
+      },
+      {
+        "title": "manual partition - lower inf bound tail_weights",
+        "exact_match_out": false,
+        "in": {
+          "column": "x",
+          "partition_object": {
+            "bins": [0, 1, 2, 3],
+            "weights": [0.25, 0.25, 0.25],
+            "tail_weights": [0.25, 0]
+          },
+          "threshold": 0.0
+        },
+        "out": {
+          "success": true,
+          "observed_partition": {
+            "bins": [0, 1, 2, 3],
+            "weights": [0.25, 0.25, 0.25],
+            "tail_weights":[0.25,0]
+          },
+          "expected_partition": {
+            "bins": [0, 1, 2, 3],
+            "weights": [0.25, 0.25, 0.25],
+            "tail_weights":[0.25,0]
+          }
+        }
+      },
+      {
+        "title": "manual partition - upper inf bound",
+        "_notes": "test should fail - we expect zero weight less than zero",
+        "exact_match_out": false,
+        "in": {
+          "column": "y",
+          "partition_object": {
+            "bins": [0, 1, 2, 3, Infinity],
+            "weights": [0.25, 0.25, 0.25, 0.25]
+          },
+          "threshold": 0.5
+        },
+        "out": {
+          "success": false,
+          "observed_partition": {
+            "bins": [0, 1, 2, 3],
+            "weights": [0.2, 0.2, 0.2],
+            "tail_weights": [0.2, 0.2]
+          },
+          "expected_partition": {
+            "bins": [0, 1, 2, 3],
+            "weights": [0.25, 0.25, 0.25],
+            "tail_weights": [0, 0.25]
+          }
+        }
+      },
+      {
+        "title": "manual partition - upper inf bound tail_weights",
+        "exact_match_out": false,
+        "in": {
+          "column": "y",
+          "partition_object": {
+            "bins": [0, 1, 2, 3],
+            "weights": [0.25, 0.25, 0.25],
+            "tail_weights": [0, 0.25]
+          },
+          "threshold": 0.5
+        },
+        "out": {
+          "success": false,
+          "observed_partition": {
+            "bins": [0, 1, 2, 3],
+            "weights": [0.2, 0.2, 0.2],
+            "tail_weights": [0.2, 0.2]
+          },
+          "expected_partition": {
+            "bins": [0, 1, 2, 3],
+            "weights": [0.25, 0.25, 0.25],
+            "tail_weights": [0, 0.25]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "data": {
+      "z": [-0.5, 0.5, 0.5, 1.5, 1.5, 1.5, 1.5, 2.5, 2.5, 3.5]
+    },
+    "tests": [
+      {
+        "title": "manual partition - lower and upper inf bounds",
+        "exact_match_out": false,
+        "in": {
+          "column": "z",
+          "partition_object": {
+            "bins": [-Infinity, 0, 1, 2, 3, Infinity],
+            "weights": [0.1, 0.2, 0.4, 0.2, 0.1]
+          },
+          "threshold": 0.5
+        },
+        "out": {
+          "success": true,
+          "observed_partition": {
+            "bins": [0, 1, 2, 3],
+            "weights": [0.2, 0.4, 0.2],
+            "tail_weights":[0.1,0.1]
+          },
+          "expected_partition": {
+            "bins": [ 0, 1, 2, 3],
+            "weights": [0.2, 0.4, 0.2],
+            "tail_weights":[0.1,0.1]
+          }
+        }
+      },
+      {
+        "title": "manual partition - lower and upper inf bounds",
+        "exact_match_out": false,
+        "in": {
+          "column": "z",
+          "partition_object": {
+            "bins": [0, 1, 2, 3],
+            "weights": [0.2, 0.4, 0.2],
+            "tail_weights": [0.1, 0.1]
+          },
+          "threshold": 0.5
+        },
+        "out": {
+          "success": true,
+          "observed_partition": {
+            "bins": [0, 1, 2, 3],
+            "weights": [0.2, 0.4, 0.2],
+            "tail_weights":[0.1,0.1]
+          },
+          "expected_partition": {
+            "bins": [ 0, 1, 2, 3],
+            "weights": [0.2, 0.4, 0.2],
+            "tail_weights":[0.1,0.1]
+          }
+        }
+      },
+      {
+        "title": "tail weight holdout is not defined for partitions already extending to inifinity",
+        "exact_match_out": false,
+        "in": {
+          "column": "z",
+          "partition_object": {
+            "bins": [-Infinity, 0, 1, 2, 3, Infinity],
+            "weights": [0.1, 0.2, 0.4, 0.2, 0.1]
+          },
+          "threshold": 0.5,
+          "tail_weight_holdout": 0.1,
+          "catch_exceptions": true
+        },
+        "out": {
+          "traceback_substring": "ValueError"
+        }
+      },
+      {
+        "title": "tail weight holdout is not defined for partitions already extending to inifinity - tail_weight",
+        "exact_match_out": false,
+        "in": {
+          "column": "z",
+          "partition_object": {
+            "bins": [0, 1, 2, 3],
+            "weights": [0.2, 0.4, 0.2],
+            "tail_weights": [0.1, 0.1]
+          },
+          "threshold": 0.5,
+          "tail_weight_holdout": 0.1,
+          "catch_exceptions": true
+        },
+        "out": {
+          "traceback_substring": "ValueError"
+        }
+      },
+      {
+        "title": "empty partition",
+        "exact_match_out": false,
+        "in": {
+          "column": "z",
+          "partition_object": {},
+          "threshold": 0.5,
+          "tail_weight_holdout": 0.1,
+          "catch_exceptions": true
+        },
+        "out": {
+          "traceback_substring": "ValueError"
+        }
+      },
+      {
+        "title": "missing threshold",
+        "exact_match_out": false,
+        "in": {
+          "column": "z",
+          "partition_object": {
+            "bins": [0, 1, 2, 3],
+            "weights": [0.2, 0.4, 0.2],
+            "tail_weights": [0.1, 0.1]
+          },
+          "catch_exceptions": true
+        },
+        "out": {
+          "traceback_substring": "ValueError"
+        }
+      },
+      {
+        "title": "too-big tail_weight",
+        "exact_match_out": false,
+        "in": {
+          "column": "z",
+          "partition_object": {
+            "bins": [0, 1, 2, 3],
+            "weights": [0.2, 0.4, 0.2],
+            "tail_weights": [0.1, 0.1]
+          },
+          "threshold": 0.5,
+          "tail_weight_holdout": 2,
+          "catch_exceptions": true
+        },
+        "out": {
+          "traceback_substring": "ValueError"
+        }
+      },
+      {
+        "title": "too-big internal_weight",
+        "exact_match_out": false,
+        "in": {
+          "column": "z",
+          "partition_object": {
+            "bins": [0, 1, 2, 3],
+            "weights": [0.2, 0.4, 0.2],
+            "tail_weights": [0.1, 0.1]
+          },
+          "threshold": 0.5,
+          "internal_weight_holdout": 2,
+          "catch_exceptions": true
+        },
+        "out": {
+          "traceback_substring": "ValueError"
+        }
+      }
+    ]
+  },
+  {
+    "_notes": "tests for cases where the observed value is infinite or undefined - discrete",
+    "data": {
+      "x1": ["a", "a", "a", "a", "b", "b", "b", "b", "c", "c"]
+    },
+    "tests": [
+      {
+        "title": "manual partition - undefined (infinite) kl divergence",
+        "exact_match_out": false,
+        "in": {
+          "column": "x1",
+          "partition_object":{
+            "weights": [0.5, 0.5],
+            "values": ["a", "b"]
+          },
+          "threshold": 0.05
+        },
+        "out": {
+          "observed_value": null
+        }
+      }
+    ]
+  },
+  {
+    "_notes": "tests for cases where the observed value is infinite or undefined - continuous",
+    "data": {
+      "x" :[-1.95, 1.03, 1.00, 0.81, -2.27,  0.52, 2.45, -1.19, -0.17, -1.54, 2.20, -2.66,  1.71,  1.59, 2.19, null, null, null, null, null, null, null, null],
+      "x2": [-1.5, -1.5, -1.35, -1.2, -1.19, -1.12, -1.04, -1, 0, 0, 0, 0.25, 0.34, 1, 1.1, 1.13, 1.22, 1.34, 1.4, 1.46, 1.5, 1.5, 1.5]
+    },
+    "tests": [
+      {
+        "title": "manual partition - undefined (infinite) kl divergence",
+        "exact_match_out": false,
+        "in": {
+          "column": "x2",
+          "partition_object": {
+            "weights": [0.1, 0.4, 0, 0, 0.4, 0.1],
+            "bins": [-2, -1.5, -1, 0, 1, 1.5, 2]
+          },
+          "threshold": 0.05
+        },
+        "out": {
+          "observed_value": null
+        }
+      },
+      {
+        "title": "manual partition - undefined (infinite) kl divergence - bins do not cover all data",
+        "exact_match_out": false,
+        "in": {
+          "column": "x2",
+          "partition_object": {
+            "weights": [0.25, 0.25, 0.25, 0.25],
+            "bins": [-1, 0, 1, 1.5, 2]
+          },
+          "threshold": 0.05
+        },
+        "out": {
+          "observed_value": null
+        }
+      },
+      {
+        "title": "manual partition - return partitions should have tail_weights",
+        "exact_match_out": false,
+        "in": {
+          "column": "x",
+          "partition_object": {
+            "weights": [0.3, 0.15, 0.05, 0.05, 0.2, 0.25],
+            "bins": [-Infinity, -2, -1, 0, 1, 2, Infinity]
+          },
+          "threshold": 0.05
+        },
+        "out": {
+          "expected_partition": {
+            "bins": [-2,-1,0,1,2],
+            "weights": [0.15,0.05,0.05,0.2],
+            "tail_weights":[0.3,0.25]
+          },
+          "observed_partition": {
+            "bins": [-2, -1, 0, 1, 2],
+            "weights": [0.2, 0.06666666666666667, 0.13333333333333333, 0.26666666666666666],
+            "tail_weights": [0.13333333333333333, 0.2]
+          }
+        }
+      },
+      {
+        "title": "manual partition - tail_weights - return partitions should have tail_weights",
+        "exact_match_out": false,
+        "in": {
+          "column": "x",
+          "partition_object": {
+            "weights": [0.15, 0.05, 0.05, 0.2],
+            "bins": [-2, -1, 0, 1, 2],
+            "tail_weights": [0.3, 0.25]
+          },
+          "threshold": 0.05
+        },
+        "out": {
+          "expected_partition": {
+            "bins": [-2,-1,0,1,2],
+            "weights": [0.15,0.05,0.05,0.2],
+            "tail_weights":[0.3,0.25]
+          },
+          "observed_partition": {
+            "bins": [-2, -1, 0, 1, 2],
+            "weights": [0.2, 0.06666666666666667, 0.13333333333333333, 0.26666666666666666],
+            "tail_weights": [0.13333333333333333, 0.2]
+          }
+        }
+      },
+      {
+        "title": "manual partition - bounded endpoints - empty tail_weights in return",
+        "exact_match_out": false,
+        "in": {
+          "column": "x",
+          "partition_object": {
+            "weights": [0.3, 0.15, 0.05, 0.05, 0.2, 0.25],
+            "bins": [-3, -2, -1, 0, 1, 2, 3]
+          },
+          "threshold": 0.05
+        },
+        "out": {
+          "expected_partition": {
+            "bins": [-3, -2, -1, 0, 1, 2, 3],
+            "weights": [0.3, 0.15, 0.05, 0.05, 0.2, 0.25],
+            "tail_weights": [0, 0]
+          },
+          "observed_partition": {
+            "bins": [-3, -2, -1, 0, 1, 2, 3],
+            "weights": [0.13333333333333333, 0.2, 0.06666666666666667, 0.13333333333333333, 0.26666666666666666, 0.2],
+            "tail_weights": [0, 0]
+          }
+        }
+      },
+      {
+        "title": "manual partition - bounded endpoints - observed with tail_weight - infinite KL divergence",
+        "exact_match_out": false,
+        "in": {
+          "column": "x",
+          "partition_object": {
+            "weights":[0.45, 0.05, 0.05, 0.2, 0.25],
+            "bins":[-2, -1, 0, 1, 2, 3]
+          },
+          "threshold": 0.05,
+          "internal_weight_holdout": 0,
+          "tail_weight_holdout": 0
+        },
+        "out": {
+          "expected_partition": {
+            "bins": [-2, -1, 0, 1, 2, 3],
+            "weights": [0.45, 0.05, 0.05, 0.2, 0.25],
+            "tail_weights":[0, 0]
+          },
+          "observed_partition": {
+            "bins": [-2, -1, 0, 1, 2, 3],
+            "weights": [0.2, 0.06666666666666667, 0.13333333333333333, 0.26666666666666666, 0.2],
+            "tail_weights": [0.13333333333333333, 0]
+          }
+        }
+      },
+      {
+        "title": "manual partition - infinite endpoints - non-zero tail_hold_out",
+        "exact_match_out": false,
+        "in": {
+          "column": "x",
+          "partition_object": {
+            "weights": [0.3, 0.15, 0.05, 0.05, 0.2, 0.25],
+            "bins":[-Infinity, -2, -1, 0, 1, 2, Infinity]},
+          "threshold": 0.05,
+          "internal_weight_holdout": 0,
+          "tail_weight_holdout": 0.01,
+          "catch_exceptions": true
+        },
+        "out": {
+          "traceback_substring": "ValueError"
+        }
+      },
+      {
+        "title": "manual partition - upper infinite endpoint - non-zero tail_hold_out",
+        "_notes": "expected_partition == [0.3*0.98,0.15*0.98,0.05*0.98,0.05*0.98,0.2*0.98]",
+        "exact_match_out": false,
+        "in": {
+          "column": "x",
+          "partition_object": {
+            "weights": [0.3, 0.15, 0.05, 0.05, 0.2, 0.25],
+            "bins":[-3, -2, -1, 0, 1, 2, Infinity]},
+          "threshold": 0.05,
+          "internal_weight_holdout": 0,
+          "tail_weight_holdout": 0.02
+        },
+        "out": {
+          "observed_partition": {
+              "bins": [-3, -2, -1, 0, 1, 2],
+              "weights": [0.13333333333333333, 0.2, 0.06666666666666667, 0.13333333333333333, 0.26666666666666666],
+              "tail_weights": [0, 0.2]
+          },
+          "expected_partition": {
+              "bins": [-3,-2,-1,0,1,2],
+              "weights": [0.294, 0.147, 0.049, 0.049, 0.196],
+              "tail_weights":[0.02, 0.245]
+          }
+        }
+      },
+      {
+        "title": "manual partition - lower infinite endpoint - non-zero tail_hold_out",
+        "_notes": "expected_partition == [0.15*0.95,0.05*0.95,0.05*0.95,0.45*0.95]",
+        "exact_match_out": false,
+        "in": {
+          "column": "x",
+          "partition_object": {
+            "weights": [0.3, 0.15, 0.05, 0.05, 0.45],
+            "bins":[-Infinity, -2, -1, 0, 1, 2]},
+          "threshold": 0.05,
+          "internal_weight_holdout": 0,
+          "tail_weight_holdout": 0.05
+        },
+        "out": {
+          "observed_partition": {
+              "bins": [-2, -1, 0, 1, 2],
+              "weights": [0.2, 0.06666666666666667, 0.13333333333333333, 0.26666666666666666],
+              "tail_weights": [0.13333333333333333, 0.2]
+          },
+          "expected_partition": {
+              "bins": [-2, -1, 0, 1, 2],
+              "weights": [0.1425, 0.0475, 0.0475, 0.4275],
+              "tail_weights": [0.285, 0.05]
+          }
+        }
+      },
+      {
+        "title": "manual partition - bounded endpoints - non-zero tail_hold_out",
+        "_notes": "expected_partition == [0.3*0.9, 0.15*0.9, 0.05, 0.10*0.9, 0.45*0.9]",
+        "exact_match_out": false,
+        "in": {
+          "column": "x",
+          "partition_object": {
+            "weights": [0.3, 0.15, 0.0, 0.1, 0.45],
+            "bins": [-3, -2, -1, 0, 1, 2]
+          },
+          "threshold": 0.05,
+          "internal_weight_holdout": 0.05,
+          "tail_weight_holdout": 0.05
+        },
+        "out": {
+          "observed_partition": {
+              "bins": [-3, -2, -1, 0, 1, 2],
+              "weights": [0.13333333333333333, 0.2, 0.06666666666666667, 0.13333333333333333, 0.26666666666666666],
+              "tail_weights": [0, 0.2]
+          },
+          "expected_partition": {
+              "bins": [-3, -2, -1, 0, 1, 2],
+              "weights": [0.27, 0.135, 0.05, 0.09000000000000001, 0.405],
+              "tail_weights": [0.025, 0.025]
+          }
+        }
+      }
+    ]
+  }
+  ]
 }
