@@ -393,7 +393,6 @@
     },
     {
       "title": "bad partition - tail weights - raise error",
-      "_notes": "this test relies on using python json deserialization of the string Infinity",
       "exact_match_out": false,
       "in": {
         "column": "norm_0_1",
@@ -407,6 +406,25 @@
       "out": {
         "traceback_substring": "Partition cannot have tail weights"
       }
-    }]
+    },
+    {
+      "title": "bad partition - categorical - raise error",
+      "exact_match_out": false,
+      "in": {
+        "column": "norm_0_1",
+        "partition_object": {
+          "values": [
+              "A",
+              "B",
+              "C" ],
+          "weights": [ 0.54, 0.32, 0.14 ]
+        },
+        "catch_exceptions": true
+      },
+      "out": {
+        "traceback_substring": "ValueError"
+      }
+    }
+  ]
   }]
 }

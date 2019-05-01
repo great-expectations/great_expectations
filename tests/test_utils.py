@@ -290,6 +290,18 @@ def evaluate_json_test(data_asset, expectation_type, test):
                 assert value in result['exception_info']['exception_traceback'], "expected to find " + \
                     value + " in " + \
                     result['exception_info']['exception_traceback']
+            
+            elif key == "expected_partition":
+                assert np.allclose(result["result"]["details"]["expected_partition"]["bins"], value["bins"])
+                assert np.allclose(result["result"]["details"]["expected_partition"]["weights"], value["weights"])
+                if "tail_weights" in result["result"]["details"]["expected_partition"]:
+                    assert np.allclose(result["result"]["details"]["expected_partition"]["tail_weights"], value["tail_weights"])
+     
+            elif key == "observed_partition":
+                assert np.allclose(result["result"]["details"]["observed_partition"]["bins"], value["bins"])
+                assert np.allclose(result["result"]["details"]["observed_partition"]["weights"], value["weights"])
+                if "tail_weights" in result["result"]["details"]["observed_partition"]:
+                    assert np.allclose(result["result"]["details"]["observed_partition"]["tail_weights"], value["tail_weights"])
 
             else:
                 raise ValueError(
