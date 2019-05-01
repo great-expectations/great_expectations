@@ -1,10 +1,11 @@
 from __future__ import division
 
-from six import PY3
 import inspect
 import re
+from six import PY3, string_types
 from functools import wraps
 from datetime import datetime
+from dateutil.parser import parse
 
 from .dataset import Dataset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
@@ -18,6 +19,7 @@ import pandas as pd
 import numpy as np
 from scipy import stats
 from pyspark.sql.functions import udf, col, stddev as stddev_
+import pyspark.sql.types as sparktypes
 
 
 class MetaSparkDFDataset(Dataset):
@@ -180,20 +182,22 @@ class SparkDFDataset(MetaSparkDFDataset):
         return self.spark_df.select(column).groupBy().sum().collect()[0][0]
 
     def _get_column_max(self, column, parse_strings_as_datetimes=False):
+        temp_column = self.spark_df.select(column).where(col(column).isNotNull())
         if parse_strings_as_datetimes:
-            raise NotImplementedError
-        row = self.spark_df.select(column).where(col(column).isNotNull()).agg({column: 'max'}).collect()
-        if not row or not row[0]:
+            temp_column = self._apply_dateutil_parse(temp_column)
+        result = temp_column.agg({column: 'max'}).collect()
+        if not result or not result[0]:
             return None
-        return row[0][0]
+        return result[0][0]
 
     def _get_column_min(self, column, parse_strings_as_datetimes=False):
+        temp_column = self.spark_df.select(column).where(col(column).isNotNull())
         if parse_strings_as_datetimes:
-            raise NotImplementedError
-        row = self.spark_df.select(column).where(col(column).isNotNull()).agg({column: 'min'}).collect()
-        if not row or not row[0]:
+            temp_column = self._apply_dateutil_parse(temp_column)
+        result = temp_column.agg({column: 'min'}).collect()
+        if not result or not result[0]:
             return None
-        return row[0][0]
+        return result[0][0]
 
     def _get_column_value_counts(self, column):
         value_counts = self.spark_df.select(column)\
@@ -254,6 +258,15 @@ class SparkDFDataset(MetaSparkDFDataset):
                 result = result.filter(col(column) <= max_val)
         return result.count()
 
+    # Utils
+    @staticmethod
+    def _apply_dateutil_parse(column):
+        assert len(column.columns) == 1, "Expected DataFrame with 1 column"
+        col_name = column.columns[0]
+        _udf = udf(parse, sparktypes.TimestampType())
+        return column.withColumn(col_name, _udf(col_name))
+
+    # Expectations
     @DocInherit
     @MetaSparkDFDataset.column_map_expectation
     def expect_column_values_to_be_in_set(
@@ -267,9 +280,9 @@ class SparkDFDataset(MetaSparkDFDataset):
             catch_exceptions=None,
             meta=None,
     ):
-        # TODO
         if parse_strings_as_datetimes:
-            raise NotImplementedError
+            column = self._apply_dateutil_parse(column)
+            value_set = [parse(value) if isinstance(value, string_types) else value for value in value_set]
         success_udf = udf(lambda x: x in value_set)
         return column.withColumn('__success', success_udf(column[0]))
 
