@@ -182,7 +182,7 @@ class SparkDFDataset(MetaSparkDFDataset):
     def _get_column_max(self, column, parse_strings_as_datetimes=False):
         if parse_strings_as_datetimes:
             raise NotImplementedError
-        row = self.spark_df.select(column).where(col(column).isNotNull()).groupBy(column).max().collect()
+        row = self.spark_df.select(column).where(col(column).isNotNull()).agg({column: 'max'}).collect()
         if not row or not row[0]:
             return None
         return row[0][0]
@@ -190,7 +190,7 @@ class SparkDFDataset(MetaSparkDFDataset):
     def _get_column_min(self, column, parse_strings_as_datetimes=False):
         if parse_strings_as_datetimes:
             raise NotImplementedError
-        row = self.spark_df.select(column).where(col(column).isNotNull()).groupBy(column).min().collect()
+        row = self.spark_df.select(column).where(col(column).isNotNull()).agg({column: 'min'}).collect()
         if not row or not row[0]:
             return None
         return row[0][0]

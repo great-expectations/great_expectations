@@ -2332,11 +2332,11 @@ class Dataset(MetaDataset):
         elif min_value is not None and max_value is None:
             success = (min_value <= col_min)
 
-        # if parse_strings_as_datetimes:
-        #     if output_strftime_format:
-        #         col_min = datetime.strftime(col_min, output_strftime_format)
-        #     else:
-        #         col_min = str(col_min)
+        if parse_strings_as_datetimes:
+            if output_strftime_format:
+                col_min = datetime.strftime(col_min, output_strftime_format)
+            else:
+                col_min = str(col_min)
         return {
             'success': success,
             'result': {
