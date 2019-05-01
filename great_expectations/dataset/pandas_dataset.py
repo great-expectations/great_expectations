@@ -1423,8 +1423,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                 partition_tail_weight_holdout = 0
 
             expected_weights = np.array(
-                partition_object['weights']) * (1 - tail_weight_holdout - internal_weight_holdout - partition_tail_weight_holdout)
-                #partition_object['weights']) * (1 - tail_weight_holdout - internal_weight_holdout)
+                partition_object['weights']) * (1 - tail_weight_holdout - internal_weight_holdout)
         
             # Assign internal weight holdout values if applicable
             if internal_weight_holdout > 0:
