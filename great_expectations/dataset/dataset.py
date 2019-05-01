@@ -2533,7 +2533,7 @@ class Dataset(MetaDataset):
         observed_frequencies = self.get_column_value_counts(column)
         # Convert to Series object to allow joining on index values
         expected_column = pd.Series(
-            partition_object['weights'], index=partition_object['values'], name='expected') * len(column)
+            partition_object['weights'], index=partition_object['values'], name='expected') * self.get_column_nonnull_count(column)
         # Join along the indices to allow proper comparison of both types of possible missing values
         # test_df = pd.concat([expected_column, observed_frequencies], axis=1, sort=True) # Sort parameter not available before pandas 0.23.0
         test_df = pd.concat([expected_column, observed_frequencies], axis=1)
