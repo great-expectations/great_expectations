@@ -158,9 +158,18 @@ def from_pandas(pandas_df,
     )
 
 
-def validate(data_asset, expectations_config, data_asset_type=dataset.PandasDataset, *args, **kwargs):
+def validate(data_asset, expectations_config, data_asset_type=None, *args, **kwargs):
     """Validate the provided data asset using the provided config"""
-    # Special handling for pandas: we will allow conversion from pandas dataframes directly
+
+    # If the object is already a Dataset type, then this is purely a convenience method
+    # and no conversion is needed
+    if isinstance(data_asset, dataset.Dataset) and data_asset_type is None:
+        return data_asset.validate(*args, **kwargs)
+    elif data_asset_type is None:
+        data_asset_type = dataset.PandasDataset
+
+    # Otherwise, we will convert for the user to a subclass of the
+    # existing class to enable new expectations, but only for datasets
     if not isinstance(data_asset, (dataset.Dataset, pd.DataFrame)):
         raise ValueError("The validate util method only supports dataset validations, including custom subclasses. For other data asset types, use the object's own validate method.")
 
