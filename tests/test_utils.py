@@ -157,11 +157,21 @@ def get_dataset(dataset_type, data, schemas=None, autoinspect_func=autoinspect.c
         data_reshaped = list(zip(*[v for _, v in data.items()]))
         if schemas and 'spark' in schemas:
             schema = schemas['spark']
-            spark_schema = sparktypes.StructType([
-                sparktypes.StructField(column, SPARK_TYPES[schema[column]]())
-                for column in schema
-            ])
-            spark_df = spark.createDataFrame(data_reshaped, spark_schema)
+            # sometimes first method causes Spark to throw a TypeError
+            try:
+                spark_schema = sparktypes.StructType([
+                    sparktypes.StructField(column, SPARK_TYPES[schema[column]]())
+                    for column in schema
+                ])
+                spark_df = spark.createDataFrame(data_reshaped, spark_schema)
+            except TypeError:
+                string_schema = sparktypes.StructType([
+                    sparktypes.StructField(column, sparktypes.StringType())
+                    for column in schema
+                ])
+                spark_df = spark.createDataFrame(data_reshaped, string_schema)
+                for c in spark_df.columns:
+                    spark_df = spark_df.withColumn(c, spark_df[c].cast(SPARK_TYPES[schema[c]]()))
         elif len(data_reshaped) == 0:
             # if we have an empty dataset and no schema, need to assign an arbitrary type
             columns = list(data.keys())
@@ -260,9 +270,9 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
             # "expect_column_sum_to_be_between",
             # "expect_column_min_to_be_between",
             # "expect_column_max_to_be_between",
-            "expect_column_chisquare_test_p_value_to_be_greater_than",
+            # "expect_column_chisquare_test_p_value_to_be_greater_than",
             "expect_column_bootstrapped_ks_test_p_value_to_be_greater_than",
-            "expect_column_kl_divergence_to_be_less_than",
+            # "expect_column_kl_divergence_to_be_less_than",
             "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",
             "expect_column_pair_values_to_be_equal",
             "expect_column_pair_values_A_to_be_greater_than_B",

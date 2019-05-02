@@ -2536,10 +2536,11 @@ class Dataset(MetaDataset):
         if not is_valid_categorical_partition_object(partition_object):
             raise ValueError("Invalid partition object.")
 
+        element_count = self.get_column_nonnull_count(column)
         observed_frequencies = self.get_column_value_counts(column)
         # Convert to Series object to allow joining on index values
         expected_column = pd.Series(
-            partition_object['weights'], index=partition_object['values'], name='expected') * self.get_column_nonnull_count(column)
+            partition_object['weights'], index=partition_object['values'], name='expected') * element_count
         # Join along the indices to allow proper comparison of both types of possible missing values
         # test_df = pd.concat([expected_column, observed_frequencies], axis=1, sort=True) # Sort parameter not available before pandas 0.23.0
         test_df = pd.concat([expected_column, observed_frequencies], axis=1)
@@ -2551,11 +2552,10 @@ class Dataset(MetaDataset):
         # Handle NaN: if something's there that was not expected, substitute the relevant value for tail_weight_holdout
         if na_counts['expected'] > 0:
             # Scale existing expected values
-            test_df['expected'] = test_df['expected'] * \
-                (1 - tail_weight_holdout)
+            test_df['expected'] = test_df['expected'] * (1 - tail_weight_holdout)
             # Fill NAs with holdout.
             test_df['expected'] = test_df['expected'].fillna(
-                len(column) * (tail_weight_holdout / na_counts['expected']))
+                element_count * (tail_weight_holdout / na_counts['expected']))
 
         test_result = stats.chisquare(
             test_df[column], test_df['expected'])[1]
@@ -2802,7 +2802,7 @@ class Dataset(MetaDataset):
                     "Internal weight holdout cannot be used for discrete data.")
 
             # Data are expected to be discrete, use value_counts
-            observed_weights = self.get_column_value_counts(column) / len(column)
+            observed_weights = self.get_column_value_counts(column) / self.get_column_nonnull_count(column)
             expected_weights = pd.Series(
                 partition_object['weights'], index=partition_object['values'], name='expected')
             # test_df = pd.concat([expected_weights, observed_weights], axis=1, sort=True) # Sort not available before pandas 0.23.0
@@ -2860,7 +2860,7 @@ class Dataset(MetaDataset):
             above_partition = self._get_column_count_in_range(column, min_val=partition_object['bins'][-1], min_strictly=True)
 
             #Observed Weights is just the histogram values divided by the total number of observations
-            observed_weights = np.array(hist) / len(column)
+            observed_weights = np.array(hist) / self.get_column_nonnull_count(column)
 
             #Adjust expected_weights to account for tail_weight and internal_weight
             if "tail_weights" in partition_object:
@@ -2909,28 +2909,28 @@ class Dataset(MetaDataset):
                 expected_tail_weights=np.concatenate(([expected_weights[0]],[tail_weight_holdout])) #Set aside left tail weight and holdout
                 expected_weights = expected_weights[1:] #Remove left tail weight from main expected_weights
                 
-                comb_observed_weights=np.concatenate((observed_weights,[above_partition/len(column)]))
-                observed_tail_weights=np.concatenate(([observed_weights[0]],[above_partition/len(column)])) #Set aside left tail weight and above parition weight
+                comb_observed_weights=np.concatenate((observed_weights,[above_partition / self.get_column_nonnull_count(column)]))
+                observed_tail_weights=np.concatenate(([observed_weights[0]],[above_partition / self.get_column_nonnull_count(column)])) #Set aside left tail weight and above parition weight
                 observed_weights=observed_weights[1:] #Remove left tail weight from main observed_weights
         
             elif (partition_object['bins'][-1] == np.inf):
-                
+
                 if "tail_weights" in partition_object:
                     raise ValueError("There can be no tail weights for partitions with one or both endpoints at infinity")
-                
+
                 expected_bins = partition_object['bins'][:-1] #Remove inf
-                
+
                 comb_expected_weights=np.concatenate(([tail_weight_holdout],expected_weights))
                 expected_tail_weights=np.concatenate(([tail_weight_holdout],[expected_weights[-1]]))  #Set aside right tail weight and holdout
                 expected_weights = expected_weights[:-1] #Remove right tail weight from main expected_weights
-                
-                comb_observed_weights=np.concatenate(([below_partition/len(column)],observed_weights))
-                observed_tail_weights=np.concatenate(([below_partition/len(column)],[observed_weights[-1]])) #Set aside right tail weight and below partition weight
+
+                comb_observed_weights=np.concatenate(([below_partition/self.get_column_nonnull_count(column)],observed_weights))
+                observed_tail_weights=np.concatenate(([below_partition/self.get_column_nonnull_count(column)],[observed_weights[-1]])) #Set aside right tail weight and below partition weight
                 observed_weights=observed_weights[:-1] #Remove right tail weight from main observed_weights
             else:
-                
+
                 expected_bins = partition_object['bins'] #No need to remove -inf or inf
-                
+
                 if "tail_weights" in partition_object:
                     tail_weights=partition_object["tail_weights"]
                     comb_expected_weights=np.concatenate(([tail_weights[0]],expected_weights,[tail_weights[1]])) #Tack on tail weights
@@ -2939,10 +2939,10 @@ class Dataset(MetaDataset):
                     comb_expected_weights=np.concatenate(([tail_weight_holdout / 2],expected_weights,[tail_weight_holdout / 2]))
                     expected_tail_weights=np.concatenate(([tail_weight_holdout / 2],[tail_weight_holdout / 2])) #Tail weights are just tail_weight holdout divided eaually to both tails
 
-                comb_observed_weights=np.concatenate(([below_partition/len(column)],observed_weights, [above_partition/len(column)]))
-                observed_tail_weights=np.concatenate(([below_partition],[above_partition]))/len(column) #Tail weights are just the counts on either side of the partition
+                comb_observed_weights=np.concatenate(([below_partition/self.get_column_nonnull_count(column)],observed_weights, [above_partition/self.get_column_nonnull_count(column)]))
+                observed_tail_weights=np.concatenate(([below_partition],[above_partition])) / self.get_column_nonnull_count(column) #Tail weights are just the counts on either side of the partition
                 #Main expected_weights and main observered weights had no tail_weights, so nothing needs to be removed.
-        
+
      
             kl_divergence = stats.entropy(comb_observed_weights, comb_expected_weights) 
             

@@ -236,7 +236,14 @@ class SparkDFDataset(MetaSparkDFDataset):
         """return a list of counts corresponding to bins"""
         hist = []
         for i in range(0, len(bins) - 1):
-            hist.append(self._get_column_count_in_range(column, bins[i], bins[i + 1]))
+            # all bins except last are half-open
+            if i == len(bins) - 2:
+                max_strictly = False
+            else:
+                max_strictly = True
+            hist.append(
+                self._get_column_count_in_range(column, min_val=bins[i], max_val=bins[i + 1], max_strictly=max_strictly)
+            )
         return hist
 
     def _get_column_count_in_range(self, column, min_val=None, max_val=None, min_strictly=False, max_strictly=True):
