@@ -1,10 +1,14 @@
+import glob
 import json
+import shutil
 import sys
 import os
 import argparse
 import logging
 
-from great_expectations import read_csv
+import yaml
+
+from great_expectations import read_csv, script_relative_path
 from great_expectations import __version__
 from great_expectations.dataset import Dataset, PandasDataset
 from great_expectations.data_asset import FileDataAsset
@@ -47,9 +51,74 @@ def dispatch(args):
     version_parser = subparsers.add_parser('version')
     version_parser.set_defaults(func=version)
 
+    scaffold_parser = subparsers.add_parser('init')
+    scaffold_parser.set_defaults(func=janky_init)
     parsed_args = parser.parse_args(args)
 
     return parsed_args.func(parsed_args)
+
+
+def safe_mmkdir(directory):
+    try:
+        os.mkdir(directory)
+    except FileExistsError as fe:
+        pass
+
+
+def janky_init(parsed_args):
+    project_yml_filename = ".great_expectations_project.yml"
+
+    print('Welcome to Great Expectations! Always know what to expect from your data.')
+    print('\tScaffolding project')
+
+    _scaffold_directories_and_notebooks()
+
+    slack_webhook = None
+    access_key_id = None
+    aws_secret_access_key = None
+
+    wants_slack = input("Would you like to set up slack notifications? [Y/n] ")
+    if wants_slack.lower() not in ["no", "n", "false", "f"]:
+        slack_webhook = str(input("Please paste your Slack webhook url here: "))
+
+    wants_s3 = input("Would you like to set up an S3 bucket for validation results? [Y/n]")
+    if wants_s3.lower() not in ["no", "n", "false", "f"]:
+        print("\nPlease note that credentials are only stored in {}): ".format(project_yml_filename))
+        bucket = str(input("Which S3 bucket would you like validation results and data stored in? "))
+        access_key_id = str(input("AWS access key id: "))
+        aws_secret_access_key = str(input("AWS access key secret: "))
+
+        wants_gitignore_fixed = input("Credentials stored in {}\n\nWould you like this added to your .gitignore? [Y/n] ".format(project_yml_filename))
+        # TODO fix gitignore and strongly encourage them if they do it manually
+
+    if slack_webhook or access_key_id or aws_secret_access_key:
+        with open(project_yml_filename, 'w') as ff:
+            ff.write(yaml.dump(
+                {
+                    "slack_webhook": slack_webhook,
+                    "aws": {
+                        "bucket": bucket,
+                        "access_key_id": access_key_id,
+                        "secret_access_key": aws_secret_access_key,
+                    }
+                }
+            ))
+
+
+def _scaffold_directories_and_notebooks():
+    base_dir = "great_expecations"
+
+    safe_mmkdir(base_dir)
+    notebook_dir_name = "notebooks"
+    notebook_directory = os.path.join(base_dir, notebook_dir_name)
+    safe_mmkdir(notebook_directory)
+
+    config_dir = os.path.join(base_dir, "dataset_expectations_configs")
+    safe_mmkdir(config_dir)
+
+    for notebook in glob.glob(script_relative_path("init_notebooks/*.ipynb")):
+        notebook_name = os.path.basename(notebook)
+        shutil.copyfile(notebook, os.path.join(notebook_directory, notebook_name))
 
 
 def validate(parsed_args):
