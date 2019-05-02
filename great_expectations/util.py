@@ -166,7 +166,10 @@ def validate(data_asset, expectations_config, data_asset_type=None, *args, **kwa
     if isinstance(data_asset, dataset.Dataset) and data_asset_type is None:
         return data_asset.validate(*args, **kwargs)
     elif data_asset_type is None:
-        data_asset_type = dataset.PandasDataset
+        # Guess the GE data_asset_type based on the type of the data_asset
+        if isinstance(data_asset, pd.DataFrame):
+            data_asset_type = dataset.PandasDataset
+        # Add other data_asset_type conditions here as needed
 
     # Otherwise, we will convert for the user to a subclass of the
     # existing class to enable new expectations, but only for datasets
