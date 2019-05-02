@@ -5,6 +5,8 @@ import inspect
 from six import PY3
 from six import string_types
 import sys
+import warnings
+
 import sqlalchemy as sa
 from sqlalchemy.engine import reflection
 from dateutil.parser import parse
@@ -45,6 +47,7 @@ class MetaSqlAlchemyDataset(Dataset):
             result_format = parse_result_format(result_format)
 
             if result_format['result_format'] == 'COMPLETE':
+                warnings.warn("Setting result format to COMPLETE for a SqlAlchemyDataset can be dangerous because it will not limit the number of returned results.")
                 unexpected_count_limit = None
             else:
                 unexpected_count_limit = result_format['partial_unexpected_count']
@@ -56,6 +59,12 @@ class MetaSqlAlchemyDataset(Dataset):
             ignore_values = [None]
             if func.__name__ in ['expect_column_values_to_not_be_null', 'expect_column_values_to_be_null']:
                 ignore_values = []
+                # Counting the number of unexpected values can be expensive when there is a large
+                # number of np.nan values.
+                # This only happens on expect_column_values_to_not_be_null expectations.
+                # Since there is no reason to look for most common unexpected values in this case,
+                # we will instruct the result formatting method to skip this step.
+                result_format['partial_unexpected_count'] = 0 
 
             count_query = sa.select([
                 sa.func.count().label('element_count'),
@@ -137,7 +146,9 @@ class MetaSqlAlchemyDataset(Dataset):
                 success,
                 count_results['element_count'],
                 nonnull_count,
+                count_results['unexpected_count'],
                 maybe_limited_unexpected_list,
+                None,
             )
 
             if func.__name__ in ['expect_column_values_to_not_be_null', 'expect_column_values_to_be_null']:
@@ -145,6 +156,7 @@ class MetaSqlAlchemyDataset(Dataset):
                 del return_obj['result']['unexpected_percent_nonmissing']
                 try:
                     del return_obj['result']['partial_unexpected_counts']
+                    del return_obj['result']['partial_unexpected_list']
                 except KeyError:
                     pass
 
@@ -338,7 +350,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                                           result_format=None, include_config=False, catch_exceptions=None, meta=None
                                           ):
         if parse_strings_as_datetimes:
-            parsed_value_set = [parse(value) if isinstance(value, string_types) else value for value in value_set]
+            parsed_value_set = self._parse_value_set(value_set)
         else:
             parsed_value_set = value_set
         return sa.column(column).in_(tuple(parsed_value_set))
@@ -349,9 +361,14 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                                               column,
                                               value_set,
                                               mostly=None,
+                                              parse_strings_as_datetimes=None,
                                               result_format=None, include_config=False, catch_exceptions=None, meta=None
                                               ):
-        return sa.column(column).notin_(tuple(value_set))
+        if parse_strings_as_datetimes:
+            parsed_value_set = self._parse_value_set(value_set)
+        else:
+            parsed_value_set = value_set
+        return sa.column(column).notin_(tuple(parsed_value_set))
 
     @DocInherit
     @MetaSqlAlchemyDataset.column_map_expectation

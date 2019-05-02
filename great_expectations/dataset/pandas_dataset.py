@@ -69,6 +69,12 @@ class MetaPandasDataset(Dataset):
             ignore_values = [None, np.nan]
             if func.__name__ in ['expect_column_values_to_not_be_null', 'expect_column_values_to_be_null']:
                 ignore_values = []
+                # Counting the number of unexpected values can be expensive when there is a large
+                # number of np.nan values.
+                # This only happens on expect_column_values_to_not_be_null expectations.
+                # Since there is no reason to look for most common unexpected values in this case,
+                # we will instruct the result formatting method to skip this step.
+                result_format['partial_unexpected_count'] = 0 
 
             series = self[column]
 
@@ -101,6 +107,7 @@ class MetaPandasDataset(Dataset):
             return_obj = self._format_map_output(
                 result_format, success,
                 element_count, nonnull_count,
+                len(unexpected_list),
                 unexpected_list, unexpected_index_list
             )
 
@@ -109,6 +116,7 @@ class MetaPandasDataset(Dataset):
                 del return_obj['result']['unexpected_percent_nonmissing']
                 try:
                     del return_obj['result']['partial_unexpected_counts']
+                    del return_obj['result']['partial_unexpected_list']
                 except KeyError:
                     pass
 
@@ -183,6 +191,7 @@ class MetaPandasDataset(Dataset):
             return_obj = self._format_map_output(
                 result_format, success,
                 element_count, nonnull_count,
+                len(unexpected_list),
                 unexpected_list, unexpected_index_list
             )
 
@@ -238,6 +247,7 @@ class MetaPandasDataset(Dataset):
             return_obj = self._format_map_output(
                 result_format, success,
                 element_count, nonnull_count,
+                len(unexpected_list),
                 unexpected_list.to_dict(orient='records'), unexpected_index_list
             )
 
@@ -390,8 +400,8 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
     def expect_column_values_to_be_unique(self, column,
                                           mostly=None,
                                           result_format=None, include_config=False, catch_exceptions=None, meta=None):
-        dupes = set(column[column.duplicated()])
-        return column.map(lambda x: x not in dupes)
+
+        return ~column.duplicated(keep=False)
 
     # @Dataset.expectation(['column', 'mostly', 'result_format'])
     @DocInherit
@@ -400,7 +410,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                                             mostly=None,
                                             result_format=None, include_config=False, catch_exceptions=None, meta=None, include_nulls=True):
 
-        return column.map(lambda x: x is not None and not pd.isnull(x))
+        return ~column.isnull()
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
@@ -408,7 +418,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                                         mostly=None,
                                         result_format=None, include_config=False, catch_exceptions=None, meta=None):
 
-        return column.map(lambda x: x is None or pd.isnull(x))
+        return column.isnull()
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
@@ -463,17 +473,22 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                                           parse_strings_as_datetimes=None,
                                           result_format=None, include_config=False, catch_exceptions=None, meta=None):
         if parse_strings_as_datetimes:
-            parsed_value_set = [parse(value) if isinstance(value, string_types) else value for value in value_set]
+            parsed_value_set = self._parse_value_set(value_set)
         else:
             parsed_value_set = value_set
-        return column.map(lambda x: x in parsed_value_set)
+        return column.isin(parsed_value_set)
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
     def expect_column_values_to_not_be_in_set(self, column, value_set,
                                               mostly=None,
+                                              parse_strings_as_datetimes=None,
                                               result_format=None, include_config=False, catch_exceptions=None, meta=None):
-        return column.map(lambda x: x not in value_set)
+        if parse_strings_as_datetimes:
+            parsed_value_set = self._parse_value_set(value_set)
+        else:
+            parsed_value_set = value_set
+        return ~column.isin(parsed_value_set)
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
@@ -501,7 +516,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         else:
             temp_column = column
 
-        if min_value != None and max_value != None and min_value > max_value:
+        if min_value is not None and max_value is not None and min_value > max_value:
             raise ValueError("min_value cannot be greater than max_value")
 
         def is_between(val):
@@ -512,7 +527,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             if type(val) == None:
                 return False
             else:
-                if min_value != None and max_value != None:
+                if min_value is not None and max_value is not None:
                     if allow_cross_type_comparisons:
                         try:
                             return (min_value <= val) and (val <= max_value)
@@ -526,7 +541,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
                         return (min_value <= val) and (val <= max_value)
 
-                elif min_value == None and max_value != None:
+                elif min_value is None and max_value is not None:
                     if allow_cross_type_comparisons:
                         try:
                             return val <= max_value
@@ -540,7 +555,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
                         return val <= max_value
 
-                elif min_value != None and max_value == None:
+                elif min_value is not None and max_value is None:
                     if allow_cross_type_comparisons:
                         try:
                             return min_value <= val
@@ -635,43 +650,40 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         except ValueError:
             raise ValueError("min_value and max_value must be integers")
 
-        def length_is_between(val):
-            if min_value != None and max_value != None:
-                return len(val) >= min_value and len(val) <= max_value
+        column_lengths = column.astype(str).str.len()
 
-            elif min_value == None and max_value != None:
-                return len(val) <= max_value
+        if min_value is not None and max_value is not None:
+            return column_lengths.between(min_value, max_value)
 
-            elif min_value != None and max_value == None:
-                return len(val) >= min_value
+        elif min_value is None and max_value is not None:
+            return column_lengths <= max_value
 
-            else:
-                return False
+        elif min_value is not None and max_value is None:
+            return column_lengths >= min_value
 
-        return column.map(length_is_between)
+        else:
+            return False
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
     def expect_column_value_lengths_to_equal(self, column, value,
                                              mostly=None,
                                              result_format=None, include_config=False, catch_exceptions=None, meta=None):
-        return column.map(lambda x: len(x) == value)
+        return column.str.len() == value
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
     def expect_column_values_to_match_regex(self, column, regex,
                                             mostly=None,
                                             result_format=None, include_config=False, catch_exceptions=None, meta=None):
-        return column.map(
-            lambda x: re.findall(regex, str(x)) != []
-        )
+        return column.astype(str).str.contains(regex)
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
     def expect_column_values_to_not_match_regex(self, column, regex,
                                                 mostly=None,
                                                 result_format=None, include_config=False, catch_exceptions=None, meta=None):
-        return column.map(lambda x: re.findall(regex, str(x)) == [])
+        return ~column.astype(str).str.contains(regex)
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
@@ -679,33 +691,30 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                                                  mostly=None,
                                                  result_format=None, include_config=False, catch_exceptions=None, meta=None):
 
+        regex_matches = []
+        for regex in regex_list:
+            regex_matches.append(column.astype(str).str.contains(regex))
+        regex_match_df = pd.concat(regex_matches, axis=1, ignore_index=True)
+
         if match_on == "any":
-
-            def match_in_list(val):
-                if any(re.findall(regex, str(val)) for regex in regex_list):
-                    return True
-                else:
-                    return False
-
+            return regex_match_df.any(axis='columns')
         elif match_on == "all":
+            return regex_match_df.all(axis='columns')
+        else:
+            raise ValueError("match_on must be either 'any' or 'all'")
 
-            def match_in_list(val):
-                if all(re.findall(regex, str(val)) for regex in regex_list):
-                    return True
-                else:
-                    return False
-
-        return column.map(match_in_list)
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
     def expect_column_values_to_not_match_regex_list(self, column, regex_list,
                                                      mostly=None,
                                                      result_format=None, include_config=False, catch_exceptions=None, meta=None):
-        return column.map(
-            lambda x: not any([re.findall(regex, str(x))
-                               for regex in regex_list])
-        )
+        regex_matches = []
+        for regex in regex_list:
+            regex_matches.append(column.astype(str).str.contains(regex))
+        regex_match_df = pd.concat(regex_matches, axis=1, ignore_index=True)
+
+        return ~regex_match_df.any(axis='columns')
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
@@ -834,8 +843,12 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         if not is_valid_continuous_partition_object(partition_object):
             raise ValueError("Invalid continuous partition object.")
 
+        # TODO: consider changing this into a check that tail_weights does not exist exclusively, by moving this check into is_valid_continuous_partition_object
         if (partition_object['bins'][0] == -np.inf) or (partition_object['bins'][-1] == np.inf):
             raise ValueError("Partition endpoints must be finite.")
+
+        if "tail_weights" in partition_object and np.sum(partition_object["tail_weights"]) > 0:
+            raise ValueError("Partition cannot have tail weights -- endpoints must be finite.")
 
         test_cdf = np.append(np.array([0]), np.cumsum(
             partition_object['weights']))

@@ -10,7 +10,7 @@ def test_expect_file_line_regex_match_count_to_be_between():
     joke_dat = ge.data_asset.FileDataAsset(joke_file_path)
 
     with pytest.raises(IOError):
-        joke_dat.expect_file_line_regex_match_count_to_be_between(regex=",\S",
+        joke_dat.expect_file_line_regex_match_count_to_be_between(regex=r",\S",
                                                                   expected_min_count=0,
                                                                   expected_max_count=4,
                                                                   skip=1)
@@ -20,7 +20,7 @@ def test_expect_file_line_regex_match_count_to_be_between():
 
     #Invalid Skip Parameter
     with pytest.raises(ValueError):
-        file_dat.expect_file_line_regex_match_count_to_be_between(regex=",\S",
+        file_dat.expect_file_line_regex_match_count_to_be_between(regex=r",\S",
                                                                   expected_min_count=0,
                                                                   expected_max_count=4,
                                                                   skip=2.4)
@@ -34,41 +34,41 @@ def test_expect_file_line_regex_match_count_to_be_between():
 
     #Non-integer min value
     with pytest.raises(ValueError):
-        file_dat.expect_file_line_regex_match_count_to_be_between(regex=",\S",
+        file_dat.expect_file_line_regex_match_count_to_be_between(regex=r",\S",
                                                                   expected_min_count=1.3,
                                                                   expected_max_count=8,
                                                                   skip=1)
 
     #Negative min value
     with pytest.raises(ValueError):
-        file_dat.expect_file_line_regex_match_count_to_be_between(regex=",\S",
+        file_dat.expect_file_line_regex_match_count_to_be_between(regex=r",\S",
                                                                   expected_min_count=-2,
                                                                   expected_max_count=8,
                                                                   skip=1)
 
     #Non-integer max value
     with pytest.raises(ValueError):
-        file_dat.expect_file_line_regex_match_count_to_be_between(regex=",\S",
+        file_dat.expect_file_line_regex_match_count_to_be_between(regex=r",\S",
                                                                   expected_min_count=0,
                                                                   expected_max_count="foo",
                                                                   skip=1)
 
     #Negative max value
     with pytest.raises(ValueError):
-        file_dat.expect_file_line_regex_match_count_to_be_between(regex=",\S",
+        file_dat.expect_file_line_regex_match_count_to_be_between(regex=r",\S",
                                                                   expected_min_count=0,
                                                                   expected_max_count=-1,
                                                                   skip=1)
 
     #Min count more than max count
     with pytest.raises(ValueError):
-        file_dat.expect_file_line_regex_match_count_to_be_between(regex=",\S",
+        file_dat.expect_file_line_regex_match_count_to_be_between(regex=r",\S",
                                                                   expected_min_count=4,
                                                                   expected_max_count=3,
                                                                   skip=1)
 
     #Count does not fall in range
-    fail_trial = file_dat.expect_file_line_regex_match_count_to_be_between(regex=",\S",
+    fail_trial = file_dat.expect_file_line_regex_match_count_to_be_between(regex=r",\S",
                                                                            expected_min_count=9,
                                                                            expected_max_count=12,
                                                                            skip=1)
@@ -78,7 +78,7 @@ def test_expect_file_line_regex_match_count_to_be_between():
     assert fail_trial['result']['missing_percent'] == 0
 
     #Count does fall in range
-    success_trial = file_dat.expect_file_line_regex_match_count_to_be_between(regex=",\S",
+    success_trial = file_dat.expect_file_line_regex_match_count_to_be_between(regex=r",\S",
                                                                               expected_min_count=0,
                                                                               expected_max_count=4,
                                                                               skip=1)
@@ -101,18 +101,18 @@ def test_expect_file_line_regex_match_count_to_equal():
 
     #Non-integer expected_count
     with pytest.raises(ValueError):
-        file_dat.expect_file_line_regex_match_count_to_equal(regex=",\S",
+        file_dat.expect_file_line_regex_match_count_to_equal(regex=r",\S",
                                                              expected_count=6.3,
                                                              skip=1)
 
     #Negative expected_count
     with pytest.raises(ValueError):
-        file_dat.expect_file_line_regex_match_count_to_equal(regex=",\S",
+        file_dat.expect_file_line_regex_match_count_to_equal(regex=r",\S",
                                                              expected_count=-6,
                                                              skip=1)
 
     #Count does not equal expected count
-    fail_trial = file_incomplete_dat.expect_file_line_regex_match_count_to_equal(regex=",\S",
+    fail_trial = file_incomplete_dat.expect_file_line_regex_match_count_to_equal(regex=r",\S",
                                                                                  expected_count=3,
                                                                                  skip=1)
 
@@ -122,7 +122,7 @@ def test_expect_file_line_regex_match_count_to_equal():
     assert fail_trial['result']['unexpected_percent_nonmissing'] == 3/7
 
     #Mostly success
-    mostly_trial = file_incomplete_dat.expect_file_line_regex_match_count_to_equal(regex=",\S",
+    mostly_trial = file_incomplete_dat.expect_file_line_regex_match_count_to_equal(regex=r",\S",
                                                                                    expected_count=3,
                                                                                    skip=1,
                                                                                    mostly=0.57)
@@ -130,7 +130,7 @@ def test_expect_file_line_regex_match_count_to_equal():
     assert mostly_trial["success"]
 
     #Count does fall in range
-    success_trial = file_dat.expect_file_line_regex_match_count_to_equal(regex=",\S",
+    success_trial = file_dat.expect_file_line_regex_match_count_to_equal(regex=r",\S",
                                                                          expected_count=3,
                                                                          skip=1)
 
@@ -180,12 +180,12 @@ def test_expect_file_size_to_be_between():
     titanic_file = ge.data_asset.FileDataAsset(titanic_path)
 
     # Test minsize not an integer
-    with pytest.raises(TypeError):
-        titanic_file.expect_file_size_to_be_between('0', 10000)
+    with pytest.raises(ValueError):
+        titanic_file.expect_file_size_to_be_between('a', 10000)
 
     # Test maxsize not an integer
-    with pytest.raises(TypeError):
-        titanic_file.expect_file_size_to_be_between(0, '10000')
+    with pytest.raises(ValueError):
+        titanic_file.expect_file_size_to_be_between(0, '10000a')
 
     # Test minsize less than 0
     with pytest.raises(ValueError):
