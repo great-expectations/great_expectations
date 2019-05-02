@@ -37,9 +37,6 @@ class DataAsset(object):
 
         """
         autoinspect_func = kwargs.pop("autoinspect_func", None)
-        # TODO: a better way to deal with this?
-        kwargs.pop('caching', None)
-
         initial_config = kwargs.pop("config", None)
         data_asset_name = kwargs.pop("data_asset_name", None)
 
