@@ -9,7 +9,7 @@ The `result_format` parameter may be either a string or a dictionary which speci
   - For dictionary usage, `result_format` which may include the following keys:
 
     - :ref:`result_format`: Sets the fields to return in result.
-    - partial_unexpected_count: Sets the number of results to include in partial_unexpected_count, if applicable.
+    - partial_unexpected_count: Sets the number of results to include in partial_unexpected_count, if applicable. If set to 0, this will suppress the unexpected counts.
 
 
 `result_format`
@@ -31,7 +31,7 @@ including interactive exploratory work and automatic validation.
 +---------------------------------------+----------------+----------------+----------------+----------------+
 |    details (dictionary)               |Defined on a per-expectation basis                                 |
 +---------------------------------------+----------------+----------------+----------------+----------------+
-| Fields defined for `column_map_expectation` type expectations:                                       |
+| Fields defined for `column_map_expectation` type expectations:                                            |
 +---------------------------------------+----------------+----------------+----------------+----------------+
 |    unexpected_count                   |no              |yes             |yes             |yes             |
 +---------------------------------------+----------------+----------------+----------------+----------------+
@@ -49,7 +49,7 @@ including interactive exploratory work and automatic validation.
 +---------------------------------------+----------------+----------------+----------------+----------------+
 |    unexpected_list                    |no              |no              |no              |yes             |
 +---------------------------------------+----------------+----------------+----------------+----------------+
-| Fields defined for `column_aggregate_expectation` type expectations:                                 |
+| Fields defined for `column_aggregate_expectation` type expectations:                                      |
 +---------------------------------------+----------------+----------------+----------------+----------------+
 |    observed_value                     |no              |yes             |yes             |yes             |
 +---------------------------------------+----------------+----------------+----------------+----------------+

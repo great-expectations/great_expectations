@@ -17,6 +17,8 @@ import pyspark.sql.types as sparktypes
 from great_expectations.dataset import PandasDataset, SqlAlchemyDataset, SparkDFDataset
 import great_expectations.dataset.autoinspect as autoinspect
 
+CONTEXTS = ['PandasDataset', 'SqlAlchemyDataset', 'SparkDFDataset']
+
 SQLITE_TYPES = {
         "varchar": sqlitetypes.VARCHAR,
         "char": sqlitetypes.CHAR,
@@ -350,11 +352,38 @@ def evaluate_json_test(data_asset, expectation_type, test):
             elif key == 'details':
                 assert result['result']['details'] == value
 
+            elif key.startswith("observed_cdf"):
+                if "x_-1" in key:
+                    if key.endswith("gt"):
+                        assert result["result"]["details"]["observed_cdf"]["x"][-1] > value
+                    else:
+                        assert result["result"]["details"]["observed_cdf"]["x"][-1] == value
+                elif "x_0" in key:
+                    if key.endswith("lt"):
+                        assert result["result"]["details"]["observed_cdf"]["x"][0] < value
+                    else:
+                        assert result["result"]["details"]["observed_cdf"]["x"][0] == value
+                else:
+                    raise ValueError(
+                        "Invalid test specification: unknown key " + key + " in 'out'")
+
             elif key == 'traceback_substring':
                 assert result['exception_info']['raised_exception']
                 assert value in result['exception_info']['exception_traceback'], "expected to find " + \
                     value + " in " + \
                     result['exception_info']['exception_traceback']
+            
+            elif key == "expected_partition":
+                assert np.allclose(result["result"]["details"]["expected_partition"]["bins"], value["bins"])
+                assert np.allclose(result["result"]["details"]["expected_partition"]["weights"], value["weights"])
+                if "tail_weights" in result["result"]["details"]["expected_partition"]:
+                    assert np.allclose(result["result"]["details"]["expected_partition"]["tail_weights"], value["tail_weights"])
+     
+            elif key == "observed_partition":
+                assert np.allclose(result["result"]["details"]["observed_partition"]["bins"], value["bins"])
+                assert np.allclose(result["result"]["details"]["observed_partition"]["weights"], value["weights"])
+                if "tail_weights" in result["result"]["details"]["observed_partition"]:
+                    assert np.allclose(result["result"]["details"]["observed_partition"]["tail_weights"], value["tail_weights"])
 
             elif key == 'tolerance':
                 # tolerance is used when checking observed_value

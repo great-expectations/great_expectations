@@ -1,6 +1,6 @@
 import inspect
 from itertools import zip_longest
-from six import PY3
+from six import PY3, string_types
 from functools import wraps
 from numbers import Number
 from dateutil.parser import parse
@@ -245,6 +245,11 @@ class Dataset(MetaDataset):
     def _get_column_count_in_range(self, column, min_val=None, max_val=None, min_strictly=False, max_strictly=True):
         """Returns: int"""
         raise NotImplementedError
+    def _initialize_expectations(self, config=None, data_asset_name=None):
+        """Override data_asset_type with "Dataset"
+        """
+        super(Dataset, self)._initialize_expectations(config=config, data_asset_name=data_asset_name)
+        self._expectations_config["data_asset_type"] = "Dataset"
 
     @classmethod
     def column_map_expectation(cls, func):
@@ -886,6 +891,7 @@ class Dataset(MetaDataset):
                                               column,
                                               value_set,
                                               mostly=None,
+                                              parse_strings_as_datetimes=None,
                                               result_format=None, include_config=False, catch_exceptions=None, meta=None
                                               ):
         """Expect column entries to not be in the set.
@@ -2857,6 +2863,11 @@ class Dataset(MetaDataset):
             observed_weights = np.array(hist) / len(column)
 
             #Adjust expected_weights to account for tail_weight and internal_weight
+            if "tail_weights" in partition_object:
+	                partition_tail_weight_holdout = np.sum(partition_object["tail_weights"])
+            else:
+                partition_tail_weight_holdout = 0
+
             expected_weights = np.array(
                 partition_object['weights']) * (1 - tail_weight_holdout - internal_weight_holdout)
 
@@ -2923,10 +2934,11 @@ class Dataset(MetaDataset):
                 if "tail_weights" in partition_object:
                     tail_weights=partition_object["tail_weights"]
                     comb_expected_weights=np.concatenate(([tail_weights[0]],expected_weights,[tail_weights[1]])) #Tack on tail weights
-                    expected_tail_weights=tail_weights #Tail weights are just tail_weights
-                comb_expected_weights=np.concatenate(([tail_weight_holdout / 2],expected_weights,[tail_weight_holdout / 2]))
-                expected_tail_weights=np.concatenate(([tail_weight_holdout / 2],[tail_weight_holdout / 2])) #Tail weights are just tail_weight holdout divided eaually to both tails
-                
+                    expected_tail_weights=np.array(tail_weights) #Tail weights are just tail_weights
+                else:
+                    comb_expected_weights=np.concatenate(([tail_weight_holdout / 2],expected_weights,[tail_weight_holdout / 2]))
+                    expected_tail_weights=np.concatenate(([tail_weight_holdout / 2],[tail_weight_holdout / 2])) #Tail weights are just tail_weight holdout divided eaually to both tails
+
                 comb_observed_weights=np.concatenate(([below_partition/len(column)],observed_weights, [above_partition/len(column)]))
                 observed_tail_weights=np.concatenate(([below_partition],[above_partition]))/len(column) #Tail weights are just the counts on either side of the partition
                 #Main expected_weights and main observered weights had no tail_weights, so nothing needs to be removed.
@@ -3129,3 +3141,7 @@ class Dataset(MetaDataset):
         """
         raise NotImplementedError
 
+    @staticmethod
+    def _parse_value_set(value_set):
+        parsed_value_set = [parse(value) if isinstance(value, string_types) else value for value in value_set]
+        return parsed_value_set

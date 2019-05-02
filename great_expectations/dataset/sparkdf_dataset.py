@@ -128,8 +128,9 @@ class MetaSparkDFDataset(Dataset):
                 success,
                 element_count,
                 nonnull_count,
+                unexpected_count,
                 maybe_limited_unexpected_list,
-                unexpected_count=unexpected_count,
+                unexpected_index_list=None,
             )
 
             # FIXME Temp fix for result format

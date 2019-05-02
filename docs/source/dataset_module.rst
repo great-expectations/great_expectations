@@ -3,10 +3,10 @@
 Dataset Module
 ==================================
 
-great_expectations.dataset.base
--------------------------------
+great_expectations.dataset.dataset
+----------------------------------
 
-.. automodule:: great_expectations.dataset.base
+.. automodule:: great_expectations.dataset.dataset
     :members:
     :undoc-members:
     :show-inheritance:
@@ -62,7 +62,7 @@ great_expectations.dataset.util
 
 
 great_expectations.dataset.autoinspect
--------------------------------
+--------------------------------------
 
 .. automodule:: great_expectations.dataset.autoinspect
     :members:
