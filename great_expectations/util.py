@@ -158,13 +158,20 @@ def from_pandas(pandas_df,
     )
 
 
-def validate(df, expectations_config, *args, **kwargs):
-    # FIXME: I'm not sure that this should always default to PandasDataset
-    dataset_ = _convert_to_dataset_class(df,
-                                         dataset.pandas_dataset.PandasDataset,
-                                         expectations_config
-                                         )
-    return dataset_.validate(*args, **kwargs)
+def validate(data_asset, expectations_config, data_asset_type=dataset.PandasDataset, *args, **kwargs):
+    """Validate the provided data asset using the provided config"""
+    # Special handling for pandas: we will allow conversion from pandas dataframes directly
+    if not isinstance(data_asset, (dataset.Dataset, pd.DataFrame)):
+        raise ValueError("The validate util method only supports dataset validations, including custom subclasses. For other data asset types, use the object's own validate method.")
+
+    if not issubclass(type(data_asset), data_asset_type):
+        if isinstance(data_asset, pd.DataFrame) and issubclass(data_asset_type, dataset.PandasDataset):
+            pass # This is a special type of allowed coercion
+        else:
+            raise ValueError("The validate util method only supports validation for subtypes of the provided data_asset_type.")
+
+    data_asset_ = _convert_to_dataset_class(data_asset, data_asset_type, expectations_config)
+    return data_asset_.validate(*args, **kwargs)
 
 
 class DotDict(dict):
