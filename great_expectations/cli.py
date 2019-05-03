@@ -52,7 +52,7 @@ def dispatch(args):
     version_parser.set_defaults(func=version)
 
     scaffold_parser = subparsers.add_parser('init')
-    scaffold_parser.set_defaults(func=janky_init)
+    scaffold_parser.set_defaults(func=init)
     parsed_args = parser.parse_args(args)
 
     return parsed_args.func(parsed_args)
@@ -65,7 +65,7 @@ def safe_mmkdir(directory):
         pass
 
 
-def janky_init(parsed_args):
+def init(parsed_args):
     project_yml_filename = ".great_expectations_project.yml"
 
     print('Welcome to Great Expectations! Always know what to expect from your data.')
@@ -74,8 +74,6 @@ def janky_init(parsed_args):
     _scaffold_directories_and_notebooks()
 
     slack_webhook = None
-    access_key_id = None
-    aws_secret_access_key = None
 
     wants_slack = input("Would you like to set up slack notifications? [Y/n] ")
     if wants_slack.lower() not in ["no", "n", "false", "f"]:
@@ -83,37 +81,33 @@ def janky_init(parsed_args):
 
     wants_s3 = input("Would you like to set up an S3 bucket for validation results? [Y/n]")
     if wants_s3.lower() not in ["no", "n", "false", "f"]:
-        print("\nPlease note that credentials are only stored in {}): ".format(project_yml_filename))
         bucket = str(input("Which S3 bucket would you like validation results and data stored in? "))
-        access_key_id = str(input("AWS access key id: "))
-        aws_secret_access_key = str(input("AWS access key secret: "))
 
-        wants_gitignore_fixed = input("Credentials stored in {}\n\nWould you like this added to your .gitignore? [Y/n] ".format(project_yml_filename))
-        # TODO fix gitignore and strongly encourage them if they do it manually
-
-    if slack_webhook or access_key_id or aws_secret_access_key:
+    if slack_webhook or bucket:
         with open(project_yml_filename, 'w') as ff:
             ff.write(yaml.dump(
                 {
                     "slack_webhook": slack_webhook,
                     "aws": {
-                        "bucket": bucket,
-                        "access_key_id": access_key_id,
-                        "secret_access_key": aws_secret_access_key,
+                        "bucket": bucket
                     }
                 }
             ))
+    
+    print("Welcome to Great Expectations!")
+    print("")
+    print("Your new project scaffolding is complete. Check the new great_expectations/ directory into source control to track your expectation configurations.")
 
 
 def _scaffold_directories_and_notebooks():
-    base_dir = "great_expecations"
+    base_dir = "great_expectations"
 
     safe_mmkdir(base_dir)
     notebook_dir_name = "notebooks"
     notebook_directory = os.path.join(base_dir, notebook_dir_name)
     safe_mmkdir(notebook_directory)
 
-    config_dir = os.path.join(base_dir, "dataset_expectations_configs")
+    config_dir = os.path.join(base_dir, "data_asset_configurations")
     safe_mmkdir(config_dir)
 
     for notebook in glob.glob(script_relative_path("init_notebooks/*.ipynb")):
