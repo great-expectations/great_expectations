@@ -16,10 +16,10 @@ class DataContext(object):
         self.directory = options
         self.validation_params = {}
 
-    def list_dataset_configs(self):
+    def list_data_asset_configs(self):
         return [os.path.splitext(os.path.basename(file_path))[0] for file_path in os.listdir(self.directory) if file_path.endswith('.json')]
 
-    def get_dataset_config(self, data_asset_name):
+    def get_data_asset_config(self, data_asset_name):
         config_file_path = os.path.join(self.directory, data_asset_name + '.json')
         if os.path.isfile(config_file_path):
             with open(os.path.join(self.directory, data_asset_name + '.json')) as json_file:
@@ -35,11 +35,11 @@ class DataContext(object):
                 'expectations': [],
              }
 
-    def save_dataset_config(self, dataset_config):
-        data_asset_name = dataset_config['data_asset_name']
+    def save_data_asset_config(self, data_asset_config):
+        data_asset_name = data_asset_config['data_asset_name']
         config_file_path = os.path.join(self.directory, data_asset_name + '.json')
         with open(config_file_path, 'w') as outfile:
-            json.dump(dataset_config, outfile)
+            json.dump(data_asset_config, outfile)
 
     def bind_evaluation_parameters(self, run_id, expectations_config):
         return self.validation_params
