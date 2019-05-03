@@ -40,6 +40,8 @@ class DataAsset(object):
         autoinspect_func = kwargs.pop("autoinspect_func", None)
         initial_config = kwargs.pop("config", None)
         data_asset_name = kwargs.pop("data_asset_name", None)
+        self._interactive_evaluation = kwargs.pop("interactive_evaluation", False)
+        
 
         super(DataAsset, self).__init__(*args, **kwargs)
         self._initialize_expectations(config=initial_config, data_asset_name=data_asset_name)
@@ -157,8 +159,11 @@ class DataAsset(object):
                 exception_message = None
 
                 # Finally, execute the expectation method itself
-                try:
-                    return_obj = func(self, **evaluation_args)
+                if self._interactive_evaluation:
+                    try:
+                        return_obj = func(self, **evaluation_args)
+                else:
+                    return_obj = {"message": "expecatation stored"}
 
                 except Exception as err:
                     if catch_exceptions:
@@ -807,6 +812,10 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
            Raises:
                AttributeError - if 'catch_exceptions'=None and an expectation throws an AttributeError
         """
+        validate__interactive_evaluation = self._interactive_evaluation
+        if self._interactive_evaluation == False:
+            # Turn this off for an explicit call to validate
+            self._interactive_evaluation = True
 
         results = []
 
@@ -961,6 +970,8 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         if result_callback is not None:
             result_callback(result)
+
+        self._interactive_evaluation = validate__interactive_evaluation
 
         return result
 
