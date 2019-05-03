@@ -3,6 +3,8 @@ from __future__ import division
 import inspect
 import json
 import re
+import logging
+import io
 from datetime import datetime
 from functools import wraps
 import jsonschema
@@ -25,6 +27,7 @@ from great_expectations.dataset.util import \
     is_valid_partition_object, is_valid_categorical_partition_object, is_valid_continuous_partition_object, \
     _scipy_distribution_positional_args_from_dict, validate_distribution_parameters
 
+logger = logging.getLogger(__name__)
 
 class MetaPandasDataset(Dataset):
     """MetaPandasDataset is a thin layer between Dataset and PandasDataset.
@@ -374,6 +377,16 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         super(PandasDataset, self).__init__(*args, **kwargs)
         self.discard_subset_failing_expectations = kwargs.get(
             'discard_subset_failing_expectations', False)
+
+    ### Helper Implementations ###
+    def _save_dataset(self, dataset_store):
+        if isinstance(dataset_store, io.BufferedIOBase):
+            logger.info("Storing dataset to file")
+            self.to_csv(dataset_store)
+        else:
+            ##### WARNING -- ASSUMING S3 ########
+            logger.info("Storing to s3")
+            dataset_store.put(Body=self.to_csv().encode('utf-8'))
 
     ### Expectation methods ###
     @DocInherit

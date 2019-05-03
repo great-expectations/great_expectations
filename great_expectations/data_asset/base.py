@@ -6,6 +6,7 @@ from functools import wraps
 import traceback
 import warnings
 import logging
+import uuid
 from six import PY3, string_types
 from collections import namedtuple
 
@@ -720,7 +721,32 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         expectation_config_str = json.dumps(expectations_config, indent=2)
         open(filepath, 'w').write(expectation_config_str)
 
-    def validate(self, expectations_config=None, evaluation_parameters=None, catch_exceptions=True, result_format=None, only_return_failures=False):
+    ######BEFORE MERGE --- MOVE THIS TO THE CORRECT LOCATION########
+    def _save_dataset(self, dataset_store):
+        raise NotImplementedError
+
+    def _save_result(self, result, result_store):
+        if isinstance(result_store, string_types):
+            logger.info("Storing dataset to file")
+            with open(result_store, 'w+') as file:
+                json.dump(result_store, file)
+        else:
+            ##### WARNING -- ASSUMING S3 ########
+            logger.info("Storing to s3")
+            result_store.put(Body=json.dumps(result).encode('utf-8'))
+
+
+    def validate(self, 
+                 expectations_config=None, 
+                 run_id=None,
+                 data_context=None,
+                 evaluation_parameters=None,
+                 catch_exceptions=True, 
+                 result_format=None, 
+                 only_return_failures=False,
+                 save_dataset_on_failure=None,
+                 result_store=None,
+                 result_callback=None):
         """Generates a JSON-formatted report describing the outcome of all expectations.
 
             Use the default expectations_config=None to validate the expectations config associated with the DataAsset.
@@ -794,10 +820,22 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         elif isinstance(expectations_config, string_types):
             expectations_config = json.load(open(expectations_config, 'r'))
 
-        if evaluation_parameters is None:
-            # Use evaluation parameters from the (maybe provided) config
-            if "evaluation_parameters" in expectations_config:
-                evaluation_parameters = expectations_config["evaluation_parameters"]
+        # Evaluation parameter priority is
+        # 1. from provided parameters
+        # 2. from expectation configuration
+        # 3. from data context
+        # So, we load them in reverse order
+
+        if data_context is not None:
+            runtime_evaluation_parameters = data_context.bind_evaluation_parameters(run_id, expectations_config)
+        else:
+            runtime_evaluation_parameters = {}
+
+        if "evaluation_parameters" in expectations_config:
+            runtime_evaluation_parameters.update(expectations_config["evaluation_parameters"])
+        
+        if evaluation_parameters is not None:
+            runtime_evaluation_parameters.update(evaluation_parameters)
 
         # Warn if our version is different from the version in the configuration
         try:
@@ -819,7 +857,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
                 # A missing parameter should raise a KeyError
                 evaluation_args = self._build_evaluation_parameters(
-                    expectation['kwargs'], evaluation_parameters)
+                    expectation['kwargs'], runtime_evaluation_parameters)
 
                 result = expectation_method(
                     catch_exceptions=catch_exceptions,
@@ -858,6 +896,9 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         statistics = _calc_validation_statistics(results)
 
+        if data_context is not None:
+            data_context.register_validation_results(run_id, results)
+
         if only_return_failures:
             abbrev_results = []
             for exp in results:
@@ -873,11 +914,37 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                 "successful_expectations": statistics.successful_expectations,
                 "unsuccessful_expectations": statistics.unsuccessful_expectations,
                 "success_percent": statistics.success_percent,
-            }
+            },
+            "meta": {
+                "great_expectations.__version__": __version__,
+                "data_asset_name": expectations_config["data_asset_name"] if "data_asset_name" in expectations_config else None
+            }            
         }
 
         if evaluation_parameters is not None:
             result.update({"evaluation_parameters": evaluation_parameters})
+
+        if run_id is not None:
+            result["meta"].update({"run_id": run_id})
+        else:
+            result["meta"].update({"run_id": str(uuid.uuid4())})
+
+        if save_dataset_on_failure is not None and result["success"] == False:
+            ##### WARNING: HACKED FOR DEMO #######
+            bucket = save_dataset_on_failure.bucket_name
+            key = save_dataset_on_failure.key
+            result["meta"]["dataset_reference"] = f"s3://{bucket}/{key}"
+            self._save_dataset(save_dataset_on_failure)
+
+        if result_store is not None:
+            ##### WARNING: HACKED FOR DEMO #######
+            bucket = result_store.bucket_name
+            key = result_store.key
+            result["meta"]["result_reference"] = f"s3://{bucket}/{key}"
+            self._save_result(result, result_store = result_store)
+
+        if result_callback is not None:
+            result_callback(result)
 
         return result
 
@@ -918,7 +985,10 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
     def get_data_asset_name(self):
         """Gets the current name of this data_asset as stored in the expectations configuration."""
-        return self._expectations_config['data_asset_name']
+        if "data_asset_name" in self.expectations_config:
+            return self._expectations_config['data_asset_name']
+        else:
+            return None
 
     def _build_evaluation_parameters(self, expectation_args, evaluation_parameters):
         """Build a dictionary of parameters to evaluate, using the provided evaluation_paramters,

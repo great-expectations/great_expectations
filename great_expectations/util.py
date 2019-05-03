@@ -1,7 +1,12 @@
 import pandas as pd
 import json
+import logging
+import uuid
+from datetime import datetime
 
 import great_expectations.dataset as dataset
+
+logger = logging.getLogger(__name__)
 
 
 def _convert_to_dataset_class(df, dataset_class, expectations_config=None, autoinspect_func=None):
@@ -185,6 +190,80 @@ def validate(data_asset, expectations_config, data_asset_type=None, *args, **kwa
     data_asset_ = _convert_to_dataset_class(data_asset, data_asset_type, expectations_config)
     return data_asset_.validate(*args, **kwargs)
 
+
+def get_slack_callback(webhook):
+    import requests
+
+    def send_slack_notification(validation_json=None):
+        """
+            Post a slack notification.
+        """
+        if "data_asset_name" in validation_json:
+            data_asset_name = validation_json['data_asset_name']
+        else:
+            data_asset_name = "no_name_provided_" + str(uuid.uuid4())
+
+        timestamp = datetime.utcnow().timestamp()
+        n_checks_succeeded = validation_json['statistics']['successful_expectations']
+        n_checks = validation_json['statistics']['evaluated_expectations']
+
+        if "run_id" in validation_json["meta"]:
+            run_id = validation_json['meta']['run_id']
+        else:
+            run_id = None
+
+        status = "Success" if validation_json["success"] else "Failed"
+        tada = " :tada:" if validation_json["success"] else ""
+        color = '#28a745' if validation_json["success"] else '#dc3545'
+
+        if "dataset_reference" in validation_json["meta"]:
+            path = validation_json["meta"]["dataset_reference"]
+        else:
+            path = None
+  
+        session = requests.Session()
+
+        query = {
+            'attachments': [
+                {
+                    'fallback': f'Validation of dataset "{data_asset_name}" is complete: {status}.',
+                    'title': f'Dataset Validation Completed with Status "{status}"',
+                    'title_link': run_id,
+                    'pretext': f'Validated dataset "{data_asset_name}".',
+                    'text': '{n_checks_succeeded}/{n_checks} Expectations '
+                            'Were Met{tada}. Validation report saved to "{path}"'.format(
+                        n_checks_succeeded=n_checks_succeeded,
+                        n_checks=n_checks,
+                        tada=tada,
+                        run_id=run_id,
+                        status=status,
+                        path=path),
+                    'color': color,
+                    'footer': 'Great Expectations',
+                    'ts': timestamp
+                }
+            ]
+        }
+
+        try:
+            response = session.post(url=webhook, json=query)
+        except requests.ConnectionError:
+            logger.warning(
+                'Failed to connect to Slack webhook at {url} '
+                'after {max_retries} retries.'.format(
+                    url=webhook, max_retries=10))
+        except Exception as e:
+            logger.error(str(e))
+        else:
+            if response.status_code != 200:
+                logger.warning(
+                    'Request to Slack webhook at {webhook} '
+                    'returned error {status_code}: {text}'.format(
+                        url=webhook,
+                        status_code=response.status_code,
+                        text=response.text))
+  
+    return send_slack_notification
 
 class DotDict(dict):
     """dot.notation access to dictionary attributes"""
