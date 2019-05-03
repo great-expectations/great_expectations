@@ -903,6 +903,22 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                     abbrev_results.append(exp)
             results = abbrev_results
 
+        # TODO: refactor this once we've settled on the correct naming convetion everywhere
+        data_asset_name = None
+        if "data_asset_name" in expectations_config:
+            data_asset_name = expectations_config["data_asset_name"]
+        elif "dataset_name" in expectations_config:
+            data_asset_name = expectations_config["dataset_name"]
+        elif "meta" in expectations_config:
+            if "data_asset_name" in expectations_config["meta"]:
+                data_asset_name = expectations_config["meta"]["data_asset_name"]
+            elif "dataset_name" in expectations_config["meta"]:
+                data_asset_name = expectations_config["meta"]["dataset_name"]
+
+
+
+
+
         result = {
             "results": results,
             "success": statistics.success,
@@ -914,7 +930,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             },
             "meta": {
                 "great_expectations.__version__": __version__,
-                "data_asset_name": expectations_config["data_asset_name"] if "data_asset_name" in expectations_config else None
+                "data_asset_name": data_asset_name
             }            
         }
 

@@ -182,7 +182,7 @@ def validate(data_asset, expectations_config, data_asset_type=None, *args, **kwa
         raise ValueError("The validate util method only supports dataset validations, including custom subclasses. For other data asset types, use the object's own validate method.")
 
     if not issubclass(type(data_asset), data_asset_type):
-        if isinstance(data_asset, pd.DataFrame) and issubclass(data_asset_type, dataset.PandasDataset):
+        if isinstance(data_asset, (pd.DataFrame)) and issubclass(data_asset_type, dataset.PandasDataset):
             pass # This is a special type of allowed coercion
         else:
             raise ValueError("The validate util method only supports validation for subtypes of the provided data_asset_type.")
@@ -198,12 +198,12 @@ def get_slack_callback(webhook):
         """
             Post a slack notification.
         """
-        if "data_asset_name" in validation_json:
-            data_asset_name = validation_json['data_asset_name']
+        if "meta" in validation_json and "data_asset_name" in validation_json["meta"]:
+            data_asset_name = validation_json["meta"]["data_asset_name"]
         else:
             data_asset_name = "no_name_provided_" + str(uuid.uuid4())
 
-        timestamp = datetime.utcnow().timestamp()
+        timestamp = datetime.now().timestamp()
         n_checks_succeeded = validation_json['statistics']['successful_expectations']
         n_checks = validation_json['statistics']['evaluated_expectations']
 
@@ -216,12 +216,22 @@ def get_slack_callback(webhook):
         tada = " :tada:" if validation_json["success"] else ""
         color = '#28a745' if validation_json["success"] else '#dc3545'
 
-        if "dataset_reference" in validation_json["meta"]:
-            path = validation_json["meta"]["dataset_reference"]
-        else:
-            path = None
+
   
         session = requests.Session()
+
+        text = "{n_checks_succeeded} / {n_checks} expectations were met{tada}.\n".format(
+                        n_checks_succeeded=n_checks_succeeded,
+                        n_checks=n_checks,
+                        tada=tada)
+        
+        if "result_reference" in validation_json["meta"]:
+            text = text + "Validation report saved to {result_path}\n".format(
+                result_path=validation_json["meta"]["result_reference"])
+
+        if "dataset_reference" in validation_json["meta"]:
+            text = text + "Validated dataset saved to {dataset_reference}\n".format(
+                dataset_reference=validation_json["meta"]["dataset_reference"])
 
         query = {
             'attachments': [
@@ -230,14 +240,7 @@ def get_slack_callback(webhook):
                     'title': f'Dataset Validation Completed with Status "{status}"',
                     'title_link': run_id,
                     'pretext': f'Validated dataset "{data_asset_name}".',
-                    'text': '{n_checks_succeeded}/{n_checks} Expectations '
-                            'Were Met{tada}. Validation report saved to "{path}"'.format(
-                        n_checks_succeeded=n_checks_succeeded,
-                        n_checks=n_checks,
-                        tada=tada,
-                        run_id=run_id,
-                        status=status,
-                        path=path),
+                    'text': text,
                     'color': color,
                     'footer': 'Great Expectations',
                     'ts': timestamp
