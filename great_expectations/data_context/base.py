@@ -19,24 +19,25 @@ class DataContext(object):
     def list_dataset_configs(self):
         return [os.path.splitext(os.path.basename(file_path))[0] for file_path in os.listdir(self.directory) if file_path.endswith('.json')]
 
-    def get_dataset_config(self, dataset_name):
-        config_file_path = os.path.join(self.directory, dataset_name + '.json')
+    def get_dataset_config(self, data_asset_name):
+        config_file_path = os.path.join(self.directory, data_asset_name + '.json')
         if os.path.isfile(config_file_path):
-            with open(os.path.join(self.directory, dataset_name + '.json')) as json_file:
+            with open(os.path.join(self.directory, data_asset_name + '.json')) as json_file:
                 return json.load(json_file)
         else:
             #TODO (Eugene): Would it be better to return None if the file does not exist? Currently this method acts as
             # get_or_create
             return {
-                'dataset_name': dataset_name,
+                'data_asset_name': data_asset_name,
                 'meta': {
                     'great_expectations.__version__': __version__
                 },
                 'expectations': [],
              }
 
-    def save_dataset_config(self, dataset_name, dataset_config):
-        config_file_path = os.path.join(self.directory, dataset_name + '.json')
+    def save_dataset_config(self, dataset_config):
+        data_asset_name = dataset_config['data_asset_name']
+        config_file_path = os.path.join(self.directory, data_asset_name + '.json')
         with open(config_file_path, 'w') as outfile:
             json.dump(dataset_config, outfile)
 
