@@ -49,7 +49,7 @@ class DataContext(object):
             if result['expectation_config']['expectation_type'] == 'expect_column_unique_value_count_to_be_between'\
                 and result['expectation_config']['kwargs']['column'] == 'patient_nbr':
                 self.validation_params = {
-                    "$PARAMETER.urn:great_expectations:validations:datasets:diabetes_data:expectations:expect_column_unique_value_count_to_be_between:columns:patient_nbr:result:observed_value": result['result']['observed_value']
+                    "urn:great_expectations:validations:datasets:diabetes_data:expectations:expect_column_unique_value_count_to_be_between:columns:patient_nbr:result:observed_value": result['result']['observed_value']
                 }
 
     def _compile(self):
