@@ -1,5 +1,6 @@
 from .pandas_context import PandasCSVDataContext
 from .sqlalchemy_context import SqlAlchemyDataContext
+from .base import DataContext
 
 
 def get_data_context(context_type, options, *args, **kwargs):
