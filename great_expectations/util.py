@@ -15,7 +15,7 @@ def _convert_to_dataset_class(df, dataset_class, expectations_config=None, autoi
     """
     if expectations_config is not None:
         # Cast the dataframe into the new class, and manually initialize expectations according to the provided configuration
-        df.__class__ = dataset_class
+        df = dataset_class(df)
         df._initialize_expectations(expectations_config)
     else:
         # Instantiate the new Dataset with default expectations
