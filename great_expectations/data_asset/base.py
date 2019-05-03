@@ -159,7 +159,7 @@ class DataAsset(object):
                 exception_message = None
 
                 # Finally, execute the expectation method itself
-                if self._interactive_evaluation:
+                if self._interactive_evaluation == True:
                     try:
                         return_obj = func(self, **evaluation_args)
                 
@@ -817,7 +817,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         validate__interactive_evaluation = self._interactive_evaluation
         if self._interactive_evaluation == False:
             # Turn this off for an explicit call to validate
-            self.interactive_evaluation = True
+            self._interactive_evaluation = True
 
         results = []
 
