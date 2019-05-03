@@ -896,9 +896,6 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         statistics = _calc_validation_statistics(results)
 
-        if data_context is not None:
-            data_context.register_validation_results(run_id, results)
-
         if only_return_failures:
             abbrev_results = []
             for exp in results:
@@ -920,6 +917,9 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                 "data_asset_name": expectations_config["data_asset_name"] if "data_asset_name" in expectations_config else None
             }            
         }
+
+        if data_context is not None:
+            data_context.register_validation_results(run_id, result)
 
         if evaluation_parameters is not None:
             result.update({"evaluation_parameters": evaluation_parameters})
