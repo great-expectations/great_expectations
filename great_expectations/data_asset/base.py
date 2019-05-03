@@ -37,16 +37,16 @@ class DataAsset(object):
         parameter not obvious from the signature.
 
         """
+        interactive_evaluation = kwargs.pop("interactive_evaluation", True)
         autoinspect_func = kwargs.pop("autoinspect_func", None)
         initial_config = kwargs.pop("config", None)
         data_asset_name = kwargs.pop("data_asset_name", None)
-        self._interactive_evaluation = kwargs.pop("interactive_evaluation", False)
-        
-
         super(DataAsset, self).__init__(*args, **kwargs)
         self._initialize_expectations(config=initial_config, data_asset_name=data_asset_name)
         if autoinspect_func is not None:
             autoinspect_func(self)
+        self._interactive_evaluation = interactive_evaluation
+
 
     def autoinspect(self, autoinspect_func=columns_exist):
         autoinspect_func(self)
@@ -159,24 +159,29 @@ class DataAsset(object):
                 exception_message = None
 
                 # Finally, execute the expectation method itself
-                if self._interactive_evaluation:
+                if self._interactive_evaluation == True:
                     try:
                         return_obj = func(self, **evaluation_args)
+                
+                    except Exception as err:
+                        if catch_exceptions:
+                            raised_exception = True
+                            exception_traceback = traceback.format_exc()
+                            exception_message = str(err)
+
+                            return_obj = {
+                                "success": False
+                            }
+
+                        else:
+                            raise(err)
+                    
+                    # Add a "success" object to the config
+                    expectation_config["success_on_last_run"] = return_obj["success"]
+
                 else:
                     return_obj = {"message": "expecatation stored"}
 
-                except Exception as err:
-                    if catch_exceptions:
-                        raised_exception = True
-                        exception_traceback = traceback.format_exc()
-                        exception_message = str(err)
-
-                        return_obj = {
-                            "success": False
-                        }
-
-                    else:
-                        raise(err)
 
                 # Append the expectation to the config.
                 self._append_expectation(expectation_config)
@@ -191,9 +196,6 @@ class DataAsset(object):
                         "exception_message": exception_message,
                         "exception_traceback": exception_traceback
                     }
-
-                # Add a "success" object to the config
-                expectation_config["success_on_last_run"] = return_obj["success"]
 
                 # Add meta to return object
                 if meta is not None:
@@ -1012,7 +1014,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
     def get_data_asset_name(self):
         """Gets the current name of this data_asset as stored in the expectations configuration."""
-        if "data_asset_name" in self.expectations_config:
+        if "data_asset_name" in self._expectations_config:
             return self._expectations_config['data_asset_name']
         else:
             return None
