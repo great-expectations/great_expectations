@@ -40,7 +40,7 @@ class DataContext(object):
         with open(config_file_path, 'w') as outfile:
             json.dump(dataset_config, outfile)
 
-    def bind_evaluation_params(self, run_id, expectations_config):
+    def bind_evaluation_parameters(self, run_id, expectations_config):
         return self.validation_params
 
     def register_validation_results(self, run_id, validation_results):
