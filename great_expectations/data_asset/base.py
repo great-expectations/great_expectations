@@ -37,14 +37,16 @@ class DataAsset(object):
         parameter not obvious from the signature.
 
         """
+        interactive_evaluation = kwargs.pop("interactive_evaluation", True)
         autoinspect_func = kwargs.pop("autoinspect_func", None)
         initial_config = kwargs.pop("config", None)
         data_asset_name = kwargs.pop("data_asset_name", None)
-
         super(DataAsset, self).__init__(*args, **kwargs)
         self._initialize_expectations(config=initial_config, data_asset_name=data_asset_name)
         if autoinspect_func is not None:
             autoinspect_func(self)
+        self._interactive_evaluation = interactive_evaluation
+
 
     def autoinspect(self, autoinspect_func=columns_exist):
         autoinspect_func(self)
@@ -157,21 +159,29 @@ class DataAsset(object):
                 exception_message = None
 
                 # Finally, execute the expectation method itself
-                try:
-                    return_obj = func(self, **evaluation_args)
+                if self._interactive_evaluation == True:
+                    try:
+                        return_obj = func(self, **evaluation_args)
+                
+                    except Exception as err:
+                        if catch_exceptions:
+                            raised_exception = True
+                            exception_traceback = traceback.format_exc()
+                            exception_message = str(err)
 
-                except Exception as err:
-                    if catch_exceptions:
-                        raised_exception = True
-                        exception_traceback = traceback.format_exc()
-                        exception_message = str(err)
+                            return_obj = {
+                                "success": False
+                            }
 
-                        return_obj = {
-                            "success": False
-                        }
+                        else:
+                            raise(err)
+                    
+                    # Add a "success" object to the config
+                    expectation_config["success_on_last_run"] = return_obj["success"]
 
-                    else:
-                        raise(err)
+                else:
+                    return_obj = {"message": "expecatation stored"}
+
 
                 # Append the expectation to the config.
                 self._append_expectation(expectation_config)
@@ -186,9 +196,6 @@ class DataAsset(object):
                         "exception_message": exception_message,
                         "exception_traceback": exception_traceback
                     }
-
-                # Add a "success" object to the config
-                expectation_config["success_on_last_run"] = return_obj["success"]
 
                 # Add meta to return object
                 if meta is not None:
@@ -807,6 +814,10 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
            Raises:
                AttributeError - if 'catch_exceptions'=None and an expectation throws an AttributeError
         """
+        validate__interactive_evaluation = self._interactive_evaluation
+        if self._interactive_evaluation == False:
+            # Turn this off for an explicit call to validate
+            self._interactive_evaluation = True
 
         results = []
 
@@ -896,15 +907,28 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         statistics = _calc_validation_statistics(results)
 
-        if data_context is not None:
-            data_context.register_validation_results(run_id, results)
-
         if only_return_failures:
             abbrev_results = []
             for exp in results:
                 if exp["success"] == False:
                     abbrev_results.append(exp)
             results = abbrev_results
+
+        # TODO: refactor this once we've settled on the correct naming convetion everywhere
+        data_asset_name = None
+        if "data_asset_name" in expectations_config:
+            data_asset_name = expectations_config["data_asset_name"]
+        elif "dataset_name" in expectations_config:
+            data_asset_name = expectations_config["dataset_name"]
+        elif "meta" in expectations_config:
+            if "data_asset_name" in expectations_config["meta"]:
+                data_asset_name = expectations_config["meta"]["data_asset_name"]
+            elif "dataset_name" in expectations_config["meta"]:
+                data_asset_name = expectations_config["meta"]["dataset_name"]
+
+
+
+
 
         result = {
             "results": results,
@@ -917,9 +941,12 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             },
             "meta": {
                 "great_expectations.__version__": __version__,
-                "data_asset_name": expectations_config["data_asset_name"] if "data_asset_name" in expectations_config else None
+                "data_asset_name": data_asset_name
             }            
         }
+
+        if data_context is not None:
+            data_context.register_validation_results(run_id, result)
 
         if evaluation_parameters is not None:
             result.update({"evaluation_parameters": evaluation_parameters})
@@ -945,6 +972,8 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         if result_callback is not None:
             result_callback(result)
+
+        self._interactive_evaluation = validate__interactive_evaluation
 
         return result
 
@@ -985,7 +1014,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
     def get_data_asset_name(self):
         """Gets the current name of this data_asset as stored in the expectations configuration."""
-        if "data_asset_name" in self.expectations_config:
+        if "data_asset_name" in self._expectations_config:
             return self._expectations_config['data_asset_name']
         else:
             return None
