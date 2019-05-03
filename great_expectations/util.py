@@ -11,6 +11,11 @@ import great_expectations.dataset as dataset
 logger = logging.getLogger(__name__)
 
 
+#####
+from urllib.parse import urlparse
+####
+
+
 def _convert_to_dataset_class(df, dataset_class, expectations_config=None, autoinspect_func=None):
     """
     Convert a (pandas) dataframe to a great_expectations dataset, with (optional) expectations_config
@@ -298,3 +303,21 @@ def script_relative_path(file_path):
     scriptdir = inspect.stack()[1][1]
     return os.path.join(os.path.dirname(os.path.abspath(scriptdir)), file_path)
 
+###### UNHARDENED --- FOR DEMO ##########
+
+def review_validation(s3, s3_url, failed_only=False):
+    parsed_url = urlparse(s3_url)
+    bucket = parsed_url.netloc
+    key = parsed_url.path[1:]
+    
+    s3_response_object = s3.get_object(Bucket=bucket, Key=key)
+    object_content = s3_response_object['Body'].read()
+    
+    results_dict = json.loads(object_content)
+
+    if failed_only:
+        failed_results_list = [result for result in results_dict["results"] if not result["success"]]
+        results_dict["results"] = failed_results_list
+        return results_dict
+    else:
+        return results_dict

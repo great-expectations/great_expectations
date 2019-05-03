@@ -9,11 +9,21 @@ class DataContext(object):
     Warning: this feature is new in v0.4 and may change based on community feedback.
     """
 
-    def __init__(self, options, *args, **kwargs):
+    def __init__(self, options=None, *args, **kwargs):
         self.connect(options, *args, **kwargs)
 
     def connect(self, options):
-        self.directory = options
+        # TODO: Revisit this logic to better at making real guesses
+        if options is None:
+            if os.path.isdir("../notebooks") and os.path.isdir("../../great_expectations"):
+                self.directory = ("../data_asset_configurations")
+            else:
+                self.directory = "./great_expectations/data_asset_configurations"
+        else:
+            if os.path.isdir(os.path.join(options, "great_expectations")):
+                self.directory = options + "/great_expectations/data_asset_configurations"
+            else:
+                self.directory = os.path.join(options, "great_expectations/data_asset_configurations")
         self.validation_params = {}
 
     def list_data_asset_configs(self):
