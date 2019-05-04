@@ -200,55 +200,90 @@ def get_slack_callback(webhook):
         """
             Post a slack notification.
         """
-        if "meta" in validation_json and "data_asset_name" in validation_json["meta"]:
-            data_asset_name = validation_json["meta"]["data_asset_name"]
-        else:
-            data_asset_name = "no_name_provided_" + str(uuid.uuid4())
+        # Defaults
+        timestamp = datetime.strftime(datetime.now(), "%x %X")
+        status = "Failed :x:"
+        run_id = None
+        data_asset_name = "no_name_provided_" + str(uuid.uuid4())
+        text = "No validation occurred. Please ensure you passed a validation_json."
+        report_element = None
+        dataset_element = None
 
-        timestamp = datetime.now().timestamp()
-        n_checks_succeeded = validation_json['statistics']['successful_expectations']
-        n_checks = validation_json['statistics']['evaluated_expectations']
+        if validation_json:
+            if "meta" in validation_json and "data_asset_name" in validation_json["meta"]:
+                data_asset_name = validation_json["meta"]["data_asset_name"]
 
-        if "run_id" in validation_json["meta"]:
-            run_id = validation_json['meta']['run_id']
-        else:
-            run_id = None
+            n_checks_succeeded = validation_json['statistics']['successful_expectations']
+            n_checks = validation_json['statistics']['evaluated_expectations']
 
-        status = "Success" if validation_json["success"] else "Failed"
-        tada = " :tada:" if validation_json["success"] else ""
-        color = '#28a745' if validation_json["success"] else '#dc3545'
+            run_id = validation_json['meta'].get('run_id', None)
 
+            if validation_json["success"]:
+                status = "Success :tada:"
 
-  
+            text = "{n_checks_succeeded} of {n_checks} expectations were met\n\n".format(
+                            n_checks_succeeded=n_checks_succeeded,
+                            n_checks=n_checks
+            )
+
+            if "result_reference" in validation_json["meta"]:
+                report_element = {
+                            "type": "button",
+                            "text": {
+                                "type": "plain_text",
+                                "text": "View Validation Report"
+                            },
+                            "url": validation_json["meta"]["result_reference"]
+                        }
+
+            if "dataset_reference" in validation_json["meta"]:
+                dataset_element = {
+                    "type": "button",
+                    "text": {
+                        "type": "plain_text",
+                        "text": "View Dataset"
+                    },
+                    "url": validation_json["meta"]["dataset_reference"]
+                }
+
         session = requests.Session()
 
-        text = "{n_checks_succeeded} / {n_checks} expectations were met{tada}.\n".format(
-                        n_checks_succeeded=n_checks_succeeded,
-                        n_checks=n_checks,
-                        tada=tada)
-        
-        if "result_reference" in validation_json["meta"]:
-            text = text + "Validation report saved to {result_path}\n".format(
-                result_path=validation_json["meta"]["result_reference"])
-
-        if "dataset_reference" in validation_json["meta"]:
-            text = text + "Validated dataset saved to {dataset_reference}\n".format(
-                dataset_reference=validation_json["meta"]["dataset_reference"])
-
         query = {
-            'attachments': [
+            "blocks": [
                 {
-                    'fallback': f'Validation of dataset "{data_asset_name}" is complete: {status}.',
-                    'title': f'Dataset Validation Completed with Status "{status}"',
-                    'title_link': run_id,
-                    'pretext': f'Validated dataset "{data_asset_name}".',
-                    'text': text,
-                    'color': color,
-                    'footer': 'Great Expectations',
-                    'ts': timestamp
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": f"""*Validated dataset:* `{data_asset_name}` *Status: {status}*\n{text}"""
+                    }
+                },
+            ]
+        }
+
+        footer_section = {
+            "type": "context",
+            "elements": [
+                {
+                    "type": "mrkdwn",
+                    "text": f"Great Expectations run id {run_id} ran at {timestamp}"
                 }
             ]
         }
+
+        button_elements = []
+        if report_element:
+            button_elements.append(report_element)
+        if dataset_element:
+            button_elements.append(dataset_element)
+
+        if button_elements:
+            button_section = {
+                "type": "actions",
+                "elements": button_elements
+            }
+            query["blocks"].append(button_section)
+
+        query["blocks"].append(footer_section)
 
         try:
             response = session.post(url=webhook, json=query)
