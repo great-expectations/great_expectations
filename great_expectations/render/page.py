@@ -13,6 +13,7 @@ from .section import (
     DescriptiveEvrColumnSectionRenderer,
 )
 
+
 class FullPageHtmlRenderer(Renderer):
     def __init__(self, expectations, inspectable):
         self.expectations = expectations
@@ -24,7 +25,8 @@ class FullPageHtmlRenderer(Renderer):
 
     def _get_template(self):
         env = Environment(
-            loader=PackageLoader('great_expectations', 'render/fixtures/templates'),
+            loader=PackageLoader('great_expectations',
+                                 'render/fixtures/templates'),
             autoescape=select_autoescape(['html', 'xml'])
         )
         return env.get_template('page.j2')
@@ -32,25 +34,29 @@ class FullPageHtmlRenderer(Renderer):
     def render(self):
         raise NotImplementedError
 
+
 class PrescriptiveExpectationPageRenderer(FullPageHtmlRenderer):
     """Renders an Expectation Suite as a standalone HTML file."""
 
+    @classmethod
     def render(self):
         t = self._get_template()
 
-        grouped_expectations = self._group_expectations_by_columns(self.expectations)
+        grouped_expectations = self._group_expectations_by_columns(
+            self.expectations)
 
         sections = []
         for group, expectations in grouped_expectations.items():
-            section_renderer = PrescriptiveExpectationColumnSectionRenderer(group, expectations)
+            section_renderer = PrescriptiveExpectationColumnSectionRenderer(
+                group, expectations)
             sections.append(
                 section_renderer.render()
             )
 
         rendered_page = t.render(
             **{
-            "sections": sections
-        })
+                "sections": sections
+            })
 
         return rendered_page
 
@@ -64,6 +70,7 @@ class PrescriptiveExpectationPageRenderer(FullPageHtmlRenderer):
                 column_expectations_dict["NO_COLUMN"].append(exp)
 
         return column_expectations_dict
+
 
 class DescriptiveEvrPageRenderer(FullPageHtmlRenderer):
     """Renders an EVR set as a standalone HTML file."""
@@ -85,11 +92,10 @@ class DescriptiveEvrPageRenderer(FullPageHtmlRenderer):
 
         rendered_page = t.render(
             **{
-            "sections": sections
-        })
+                "sections": sections
+            })
 
         return rendered_page
-
 
     def _group_evrs_by_columns(self, evrs_list):
         column_evrs_dict = defaultdict(list)
