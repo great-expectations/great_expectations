@@ -2,10 +2,13 @@ import json
 
 from .base import Renderer
 
+
 def render_parameter(var, format_str, mode="span", classes=["param-span"]):
-    format_str_2 = '<span class="'+(" ".join(classes))+'">{0:'+format_str+'}</span>'
+    format_str_2 = '<span class="' + \
+        (" ".join(classes))+'">{0:'+format_str+'}</span>'
     # print(format_str_2)
     return (format_str_2).format(var)
+
 
 class ExpectationBulletPointSnippetRenderer(Renderer):
     def __init__(self, expectation):
@@ -32,7 +35,8 @@ class ExpectationBulletPointSnippetRenderer(Renderer):
         elif expectation["expectation_type"] == "expect_column_values_to_not_be_null":
             if "mostly" in expectation["kwargs"]:
                 return " must not be missing more than %s%% of the time." % (
-                    render_parameter(100*expectation["kwargs"]["mostly"], ".1f")
+                    render_parameter(
+                        100*expectation["kwargs"]["mostly"], ".1f")
                 )
             else:
                 return " must never be missing."
@@ -40,7 +44,8 @@ class ExpectationBulletPointSnippetRenderer(Renderer):
         elif expectation["expectation_type"] == "expect_column_values_to_be_null":
             if "mostly" in expectation["kwargs"]:
                 return " must missing at least %s%% of the time." % (
-                    render_parameter(100*(1-expectation["kwargs"]["mostly"]), ".1f")
+                    render_parameter(
+                        100*(1-expectation["kwargs"]["mostly"]), ".1f")
                 )
 
             else:
@@ -57,23 +62,28 @@ class ExpectationBulletPointSnippetRenderer(Renderer):
             if "mostly" in expectation["kwargs"]:
                 return "must be exactly %s characters long at least %s%% of the time." % (
                     render_parameter(expectation["kwargs"]["value"], "d"),
-                    render_parameter(100*expectation["kwargs"]["mostly"], ".1f"),
+                    render_parameter(
+                        100*expectation["kwargs"]["mostly"], ".1f"),
                 )
             else:
-                return "must be exactly <span class=\"param-span\">%d</span> characters long." %(expectation["kwargs"]["value"])
+                return "must be exactly <span class=\"param-span\">%d</span> characters long." % (expectation["kwargs"]["value"])
 
         elif expectation["expectation_type"] == "expect_column_value_lengths_to_be_between":
             if (expectation["kwargs"]["min_value"] == None) and (expectation["kwargs"]["max_value"] == None):
                 return " has a bogus %s expectation." % (
-                    render_parameter("expect_column_value_lengths_to_be_between", "s")
+                    render_parameter(
+                        "expect_column_value_lengths_to_be_between", "s")
                 )
 
             if "mostly" in expectation["kwargs"]:
                 if expectation["kwargs"]["min_value"] != None and expectation["kwargs"]["max_value"] != None:
                     return " must be between %s and %s characters long at least %s%% of the time." % (
-                        render_parameter(expectation["kwargs"]["min_value"], "d"),
-                        render_parameter(expectation["kwargs"]["max_value"], "d"),
-                        render_parameter(expectation["kwargs"]["mostly"], ".1f"),
+                        render_parameter(
+                            expectation["kwargs"]["min_value"], "d"),
+                        render_parameter(
+                            expectation["kwargs"]["max_value"], "d"),
+                        render_parameter(
+                            expectation["kwargs"]["mostly"], ".1f"),
                     )
 
                 elif expectation["kwargs"]["min_value"] == None:
@@ -91,18 +101,22 @@ class ExpectationBulletPointSnippetRenderer(Renderer):
             else:
                 if expectation["kwargs"]["min_value"] != None and expectation["kwargs"]["max_value"] != None:
                     return " must always be between %s and %s characters long." % (
-                        render_parameter(expectation["kwargs"]["min_value"], "d"),
-                        render_parameter(expectation["kwargs"]["max_value"], "d"),
+                        render_parameter(
+                            expectation["kwargs"]["min_value"], "d"),
+                        render_parameter(
+                            expectation["kwargs"]["max_value"], "d"),
                     )
 
                 elif expectation["kwargs"]["min_value"] == None:
                     return " must always be less than %s characters long." % (
-                        render_parameter(expectation["kwargs"]["max_value"], "d"),
+                        render_parameter(
+                            expectation["kwargs"]["max_value"], "d"),
                     )
 
                 elif expectation["kwargs"]["max_value"] == None:
                     return " must always be more than %s characters long." % (
-                        render_parameter(expectation["kwargs"]["min_value"], "d"),
+                        render_parameter(
+                            expectation["kwargs"]["min_value"], "d"),
                     )
 
         elif expectation["expectation_type"] == "expect_column_values_to_be_between":
@@ -111,9 +125,9 @@ class ExpectationBulletPointSnippetRenderer(Renderer):
                 return " must be between %d and %d at least %.1f\% of the time."
             else:
                 if "parse_strings_as_datetimes" in expectation["kwargs"]:
-                    return " must always be a date between %s and %s." %(str(expectation["kwargs"]["min_value"]), str(expectation["kwargs"]["max_value"]))
+                    return " must always be a date between %s and %s." % (str(expectation["kwargs"]["min_value"]), str(expectation["kwargs"]["max_value"]))
                 else:
-                    return " must always be between %d and %d." %(expectation["kwargs"]["min_value"], expectation["kwargs"]["max_value"])
+                    return " must always be between %d and %d." % (expectation["kwargs"]["min_value"], expectation["kwargs"]["max_value"])
 
         elif expectation["expectation_type"] == "expect_column_values_to_be_unique":
             # print(json.dumps(expectation, indent=2))
@@ -123,18 +137,19 @@ class ExpectationBulletPointSnippetRenderer(Renderer):
                 return " must always be unique."
 
         elif expectation["expectation_type"] == "expect_column_mean_to_be_between":
-            return " must have a mean value between %d and %d." %(expectation["kwargs"]["min_value"], expectation["kwargs"]["max_value"])
+            return " must have a mean value between %d and %d." % (expectation["kwargs"]["min_value"], expectation["kwargs"]["max_value"])
 
         elif expectation["expectation_type"] == "expect_column_median_to_be_between":
-            return " must have a median value between %d and %d." %(expectation["kwargs"]["min_value"], expectation["kwargs"]["max_value"])
+            return " must have a median value between %d and %d." % (expectation["kwargs"]["min_value"], expectation["kwargs"]["max_value"])
 
         elif expectation["expectation_type"] == "expect_column_stdev_to_be_between":
-            return " must have a standard deviation between %d and %d." %(expectation["kwargs"]["min_value"], expectation["kwargs"]["max_value"])
+            return " must have a standard deviation between %d and %d." % (expectation["kwargs"]["min_value"], expectation["kwargs"]["max_value"])
 
         elif expectation["expectation_type"] == "expect_column_unique_value_count_to_be_between":
             if (expectation["kwargs"]["min_value"] == None) and (expectation["kwargs"]["max_value"] == None):
                 return " has a bogus %s expectation." % (
-                    render_parameter("expect_column_unique_value_count_to_be_between", "s")
+                    render_parameter(
+                        "expect_column_unique_value_count_to_be_between", "s")
                 )
 
             elif expectation["kwargs"]["min_value"] == None:
@@ -154,66 +169,72 @@ class ExpectationBulletPointSnippetRenderer(Renderer):
                 )
 
         elif expectation["expectation_type"] == "expect_column_values_to_not_match_regex":
-            #FIXME: Need to add logic for mostly
+            # FIXME: Need to add logic for mostly
             return " must not match this regular expression: <span class=\"example-list\">%s</span>." % (expectation["kwargs"]["regex"],)
 
         elif expectation["expectation_type"] == "expect_column_values_to_match_regex":
-            #FIXME: Need to add logic for mostly
+            # FIXME: Need to add logic for mostly
             return " must match this regular expression: <span class=\"example-list\">%s</span>." % (expectation["kwargs"]["regex"],)
 
         elif expectation["expectation_type"] == "expect_column_values_to_match_regex_list":
-            #FIXME: Need to add logic for mostly
+            # FIXME: Need to add logic for mostly
             return " must match at least one of these regular expressions: <span class=\"example-list\">%s</span>" % (
-                " ".join([render_parameter(regex, "s") for regex in expectation["kwargs"]["regex_list"]]),
+                " ".join([render_parameter(regex, "s")
+                          for regex in expectation["kwargs"]["regex_list"]]),
             )
 
         elif expectation["expectation_type"] == "expect_column_values_to_not_match_regex_list":
-            #FIXME: Need to add logic for mostly
+            # FIXME: Need to add logic for mostly
             return " must not match this regular expression: <span class=\"example-list\">%s</span>." % (expectation["kwargs"]["regex_list"],)
 
         elif expectation["expectation_type"] == "expect_column_values_to_be_json_parseable":
             # print(json.dumps(expectation["kwargs"], indent=2))
-            #FIXME: Need to add logic for mostly
+            # FIXME: Need to add logic for mostly
             return " must be a parseable JSON object."
 
         # elif expectation["expectation_type"] == "expect_column_values_to_not_match_regex":
 
-
         elif expectation["expectation_type"] == "expect_column_proportion_of_unique_values_to_be_between":
             if (expectation["kwargs"]["min_value"] == None) and (expectation["kwargs"]["max_value"] == None):
                 return " has a bogus %s expectation." % (
-                    render_parameter("expect_column_proportion_of_unique_values_to_be_between", "s")
+                    render_parameter(
+                        "expect_column_proportion_of_unique_values_to_be_between", "s")
                 )
 
             elif expectation["kwargs"]["min_value"] == None:
                 return " must have fewer than %s%% unique values." % (
-                    render_parameter(100*expectation["kwargs"]["max_value"], ".1f")
+                    render_parameter(
+                        100*expectation["kwargs"]["max_value"], ".1f")
                 )
 
             elif expectation["kwargs"]["max_value"] == None:
                 return " must have at least %s%% unique values." % (
-                    render_parameter(100*expectation["kwargs"]["min_value"], ".1f")
+                    render_parameter(
+                        100*expectation["kwargs"]["min_value"], ".1f")
                 )
 
             else:
                 return " must have between %s and %s%% unique values." % (
-                    render_parameter(100*expectation["kwargs"]["min_value"], ".1f"),
-                    render_parameter(100*expectation["kwargs"]["max_value"], ".1f"),
+                    render_parameter(
+                        100*expectation["kwargs"]["min_value"], ".1f"),
+                    render_parameter(
+                        100*expectation["kwargs"]["max_value"], ".1f"),
                 )
 
         elif expectation["expectation_type"] == "expect_column_values_to_be_in_set":
-            return " must belong to this set: <span class=\"example-list\">%s</span>" % (
-                " ".join([render_parameter(value, "s") for value in expectation["kwargs"]["values_set"]]),
-            )
-            # example_list = {
-            #     "box_type": "Report-ExampleList",
-            #     "props": {
-            #         "subtitle": "Common values include:",
-            #         "list": expectation["kwargs"]["values_set"][:20],
-            #     }
-            # }
+                        return " must belong to this set: <span class=\"example-list\">%s</span>" % (
+                            " ".join([render_parameter(value, "s")
+                                      for value in expectation["kwargs"]["values_set"]]),
+                        )
+           # example_list = {
+           #     "box_type": "Report-ExampleList",
+           #     "props": {
+           #         "subtitle": "Common values include:",
+           #         "list": expectation["kwargs"]["values_set"][:20],
+           #     }
+           # }
 
-        #Note: This is a fake expectation generated as a quasi_expectation by shackleton.
+        # Note: This is a fake expectation generated as a quasi_expectation by shackleton.
         elif expectation["expectation_type"] == "expect_common_values_to_be_in_list":
             example_list = {
                 "box_type": "Report-ExampleList",
@@ -225,15 +246,15 @@ class ExpectationBulletPointSnippetRenderer(Renderer):
 
         elif expectation["expectation_type"] == "expect_column_kl_divergence_to_be_less_than":
             # print(json.dumps(expectation["kwargs"], indent=2))
-            #FIXME: Potentially very brittle
+            # FIXME: Potentially very brittle
             data_values = []
-            for i,v in enumerate(expectation["kwargs"]["partition_object"]["values"]):
+            for i, v in enumerate(expectation["kwargs"]["partition_object"]["values"]):
                 data_values.append({
                     "value": v,
                     "weight": expectation["kwargs"]["partition_object"]["weights"][i],
                 })
 
-            #FIXME: This graph code is okay, but not great.
+            # FIXME: This graph code is okay, but not great.
             graph = {
                 "box_type": "Report-Graph",
                 "props": {
@@ -259,8 +280,9 @@ class ExpectationBulletPointSnippetRenderer(Renderer):
             }
 
         else:
-            #FIXME: This warning is actually pretty helpful
-            print("WARNING: Unhandled expectation_type %s" % expectation["expectation_type"],)
+            # FIXME: This warning is actually pretty helpful
+            print("WARNING: Unhandled expectation_type %s" %
+                  expectation["expectation_type"],)
 
 
 class EvrTableRowSnippetRenderer(Renderer):
@@ -294,7 +316,7 @@ class EvrTableRowSnippetRenderer(Renderer):
             observed_value = evr["result"]["observed_value"]
         else:
             observed_value = None
-                
+
         unrenderable_expectation_types = [
             "expect_column_to_exist",
             "expect_column_values_to_be_of_type",
