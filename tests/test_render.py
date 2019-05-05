@@ -4,6 +4,7 @@ import json
 import great_expectations as ge
 from great_expectations import render
 
+
 class TestPageRenderers(unittest.TestCase):
 
     def test_import(self):
@@ -12,7 +13,8 @@ class TestPageRenderers(unittest.TestCase):
     def test_prescriptive_expectation_renderer(self):
         results = render.render(
             renderer_class=render.PrescriptiveExpectationPageRenderer,
-            expectations=json.load(open('tests/test_fixtures/rendering_fixtures/expectation_suite_3.json'))["expectations"],
+            expectations=json.load(open(
+                'tests/test_fixtures/rendering_fixtures/expectation_suite_3.json'))["expectations"],
         )
         assert results != None
 
@@ -20,15 +22,18 @@ class TestPageRenderers(unittest.TestCase):
         #     f.write(results)
 
     def test_descriptive_evr_renderer(self):
-        R = render.DescriptiveEvrPageRenderer(
-          json.load(open('tests/test_fixtures/rendering_fixtures/evr_suite_3.json'))["results"],
+        # R = render.DescriptiveEvrPageRenderer(
+        #   json.load(open('tests/test_fixtures/rendering_fixtures/evr_suite_3.json'))["results"],
+        # )
+        # rendered_page = R.render()
+        rendered_page = DescriptiveEvrPageRenderer.render(
+            json.load(
+                open('tests/test_fixtures/rendering_fixtures/evr_suite_3.json'))["results"],
         )
-        rendered_page = R.render()
         assert rendered_page != None
 
         # with open('./test.html', 'w') as f:
         #     f.write(rendered_page)
-
 
     def test_full_oobe_flow(self):
         df = ge.read_csv("examples/data/Titanic.csv")
@@ -44,6 +49,7 @@ class TestPageRenderers(unittest.TestCase):
 
         # with open('./test.html', 'w') as f:
         #     f.write(rendered_page)
+
 
 class TestSectionRenderers(unittest.TestCase):
 
