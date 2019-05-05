@@ -1,0 +1,63 @@
+{% extends "base.j2" %}
+{% block title %}Data documentation compiled by Great Expectations{% endblock %}
+
+
+{% block navbar %}
+<nav id="navigation" class="navbar navbar-light bg-light sticky">
+    <nav class="nav nav-pills flex-column">
+        <a class="navbar-brand" href="#">MyTable</a>
+        {% for section in sections %}
+        <a class="nav-link" href="#section-{{loop.index}}">{{section['section_name']}}</a>
+        {% endfor %}
+    </nav>
+</nav>
+{% endblock %}
+
+
+{% block sections %}
+{% for section in sections %}
+    {# <div id="section-{{loop.index}}">
+        <h4>{{section['section_name']}}</h4>
+        <p>{{ lipsum(1) }}</p>
+        <img style="max-width:50%; max-height:200px; float: right;" src="http://localhost:8000/plot-{{range(0,10)|random}}.png"/>
+        <p>
+            <ul>
+                {% for i in range(7) %}
+                <li>x_var is a required field.</li>
+                {% endfor %}
+                <li>y_var is a required field.</li>
+                <li>x_var must never be missing.</li>
+                <li>y_var must never be missing.</li>
+            </ul>
+        </p>
+        <p>{{ lipsum(1) }}</p>
+    </div> #}
+
+    <div id="section-{{loop.index}}" style="clear:both; margin-bottom: 50px;">
+        <h4>{{section['section_name']}}</h4>
+        {% for content_block in section["content_blocks"] %}
+            {% if content_block["content_block_type"] == "text" %}
+            <p>
+                {{ lipsum(1, min=5, max=20) }}
+            </p>
+            {% elif content_block["content_block_type"] == "bullet_list" %}
+            <p>
+                <ul>
+                    {% for bullet_point in content_block["content"] %}
+                    <li>{{ bullet_point }}</li>
+                    {% endfor %}
+                </ul>
+            </p>
+            {% elif content_block["content_block_type"] == "graph" %}
+            <img
+                style="max-width:32%; max-height:200px; float: right;"
+                src="http://localhost:8000/plot-{{range(5,10)|random}}.png"
+            />
+            {% elif content_block["content_block_type"] == "table" %}
+            {% elif content_block["content_block_type"] == "example_list" %}
+            {% endif %}
+        {% endfor %}
+    </div>
+
+{% endfor %}
+{% endblock %}

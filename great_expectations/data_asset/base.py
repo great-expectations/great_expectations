@@ -189,7 +189,6 @@ class DataAsset(object):
                 if meta is not None:
                     return_obj['meta'] = meta
 
-
                 return_obj = recursively_convert_to_json_serializable(
                     return_obj)
                 return return_obj
@@ -930,11 +929,11 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
     ##### Output generation #####
     def _format_map_output(self,
-                                  result_format, success,
-                                  element_count, nonnull_count,
-                                  unexpected_count,
-                                  unexpected_list, unexpected_index_list
-                                  ):
+                           result_format, success,
+                           element_count, nonnull_count,
+                           unexpected_count,
+                           unexpected_list, unexpected_index_list
+                           ):
         """Helper function to construct expectation result objects for map_expectations (such as column_map_expectation
         and file_lines_map_expectation).
 
@@ -999,7 +998,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         except TypeError:
             partial_unexpected_counts = [
                 'partial_exception_counts requires a hashable type']
-        
+
         return_obj['result'].update(
             {
                 'partial_unexpected_index_list': unexpected_index_list[:result_format['partial_unexpected_count']] if unexpected_index_list is not None else None,
@@ -1082,6 +1081,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         new_function = self.expectation(argspec)(function)
         return new_function(self, *args, **kwargs)
+
 
 ValidationStatistics = namedtuple("ValidationStatistics", [
     "evaluated_expectations",
