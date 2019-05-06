@@ -180,7 +180,7 @@ class DataAsset(object):
                     expectation_config["success_on_last_run"] = return_obj["success"]
 
                 else:
-                    return_obj = {"message": "expecatation stored"}
+                    return_obj = {"stored_configuration": expectation_config}
 
 
                 # Append the expectation to the config.
