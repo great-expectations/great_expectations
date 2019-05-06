@@ -302,22 +302,3 @@ def script_relative_path(file_path):
     import inspect
     scriptdir = inspect.stack()[1][1]
     return os.path.join(os.path.dirname(os.path.abspath(scriptdir)), file_path)
-
-###### UNHARDENED --- FOR DEMO ##########
-
-def review_validation(s3, s3_url, failed_only=False):
-    parsed_url = urlparse(s3_url)
-    bucket = parsed_url.netloc
-    key = parsed_url.path[1:]
-    
-    s3_response_object = s3.get_object(Bucket=bucket, Key=key)
-    object_content = s3_response_object['Body'].read()
-    
-    results_dict = json.loads(object_content)
-
-    if failed_only:
-        failed_results_list = [result for result in results_dict["results"] if not result["success"]]
-        results_dict["results"] = failed_results_list
-        return results_dict
-    else:
-        return results_dict
