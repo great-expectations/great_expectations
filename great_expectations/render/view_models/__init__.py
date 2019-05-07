@@ -1,4 +1,2 @@
-from .default.page import (
-    PrescriptiveExpectationPageRenderer,
-    DescriptiveEvrPageRenderer,
-)
+from .default.page.prescriptive import PrescriptiveExpectationPageRenderer
+from .default.page.descriptive import DescriptiveEvrPageRenderer
