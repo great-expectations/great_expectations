@@ -16,9 +16,12 @@ Great Expectation's renderers are designed to allow for great flexibility and ex
 
 ### Key concepts
 
-`snippets`
+- snippets : Each snippet converts a single Expectation (or EVR) to a string or list of strings.
+- view_models : View models convert groups of expectations, usually JSON objects. View_models can be nested.
 
-A collection of functions that each convert a single Expectation (or EVR) to a string or list of strings.
+### SnippetRenderers
+
+Each `SnippetRenderer` is a collection of functions that each convert a single Expectation (or EVR) to a serializable string or list of strings.
 
 ```
 ExpectationBulletPointSnippetRenderer.render({
@@ -45,7 +48,86 @@ ExpectationBulletPointSnippetRenderer.render({
 > 'must be between <span class="param-span">3</span> and <span class="param-span">20</span> characters long at least <span class="param-span">0.95</span>% of the time.'
 ```
 
-It could also be a JSON object representing a graph or some other object.
+The string could also be a JSON object representing a graph or some other object.
+
+```
+EvrContentBlockSnippetRenderer.render(my_evr)
+
+> {
+  "content_block_type": "graph",
+  "content": [
+    {
+      "$schema": "https://vega.github.io/schema/vega-lite/v2.6.0.json",
+      "config": {
+        "view": {
+          "height": 300,
+          "width": 400
+        }
+      },
+      "datasets": {
+        "data-cfff8a6fe8134dace707fd67405d0857": [
+          {
+            "count": 45641,
+            "value": "Valid"
+          },
+          {
+            "count": 75,
+            "value": "Relict"
+          }
+        ]
+      },
+      "height": 900,
+      "layer": [
+        {
+          "data": {
+            "name": "data-cfff8a6fe8134dace707fd67405d0857"
+          },
+          "encoding": {
+            "x": {
+              "field": "count",
+              "type": "quantitative"
+            },
+            "y": {
+              "field": "value",
+              "type": "ordinal"
+            }
+          },
+          "height": 80,
+          "mark": "bar",
+          "width": 240
+        },
+        {
+          "data": {
+            "name": "data-cfff8a6fe8134dace707fd67405d0857"
+          },
+          "encoding": {
+            "text": {
+              "field": "count",
+              "type": "quantitative"
+            },
+            "x": {
+              "field": "count",
+              "type": "quantitative"
+            },
+            "y": {
+              "field": "value",
+              "type": "ordinal"
+            }
+          },
+          "height": 80,
+          "mark": {
+            "align": "left",
+            "baseline": "middle",
+            "dx": 3,
+            "type": "text"
+          },
+          "width": 240
+        }
+      ]
+    }
+  ]
+}
+```
 
 `MySnippetRenderer.render` accepts
 
