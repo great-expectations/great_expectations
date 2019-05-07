@@ -97,3 +97,16 @@ class TestSnippetRenderers(unittest.TestCase):
         }, include_column_name=True)
         print(result)
         assert result == "x_var is a required field."
+
+        result = render.snippets.expectation_bullet_point.ExpectationBulletPointSnippetRenderer.render(
+            {
+                "expectation_type": "expect_column_value_lengths_to_be_between",
+                "kwargs": {
+                    "column": "last_name",
+                    "min_value": 3,
+                    "max_value": 20,
+                    "mostly": .95
+                }
+            }, include_column_name=True)
+        print(result)
+        assert result == ' must be between <span class="param-span">3</span> and <span class="param-span">20</span> characters long at least <span class="param-span">0.9</span>% of the time.'
