@@ -31,6 +31,20 @@ ExpectationBulletPointSnippetRenderer.render({
 
 The string may include markup.
 
+```
+ExpectationBulletPointSnippetRenderer.render({
+    "expectation_type": "expect_column_value_lengths_to_be_between",
+    "kwargs": {
+        "column": "last_name",
+        "min_value": 3,
+        "max_value": 20,
+        "mostly": .95
+    }
+})
+
+> 'must be between <span class="param-span">3</span> and <span class="param-span">20</span> characters long at least <span class="param-span">0.95</span>% of the time.'
+```
+
 It could also be a JSON object representing a graph or some other object.
 
 `MySnippetRenderer.render` accepts
