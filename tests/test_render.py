@@ -3,7 +3,7 @@ import json
 
 import great_expectations as ge
 from great_expectations import render
-
+from .test_utils import assertDeepAlmostEqual
 
 # class TestPageRenderers(unittest.TestCase):
 
@@ -187,4 +187,40 @@ class TestContentBlockRenderers(unittest.TestCase):
     )
     print(json.dumps(result))
 
-    assert json.dumps(result) == """{"content_block_type": "graph", "content": [{"$schema": "https://vega.github.io/schema/vega-lite/v2.6.0.json", "config": {"view": {"height": 300, "width": 400}}, "datasets": {"data-cfff8a6fe8134dace707fd67405d0857": [{"count": 45641, "value": "Valid"}, {"count": 75, "value": "Relict"}]}, "height": 900, "layer": [{"data": {"name": "data-cfff8a6fe8134dace707fd67405d0857"}, "encoding": {"x": {"field": "count", "type": "quantitative"}, "y": {"field": "value", "type": "ordinal"}}, "height": 80, "mark": "bar", "width": 240}, {"data": {"name": "data-cfff8a6fe8134dace707fd67405d0857"}, "encoding": {"text": {"field": "count", "type": "quantitative"}, "x": {"field": "count", "type": "quantitative"}, "y": {"field": "value", "type": "ordinal"}}, "height": 80, "mark": {"align": "left", "baseline": "middle", "dx": 3, "type": "text"}, "width": 240}]}]}"""
+    # assert json.dumps(result) == """{"content_block_type": "graph", "content": [{"$schema": "https://vega.github.io/schema/vega-lite/v2.6.0.json", "config": {"view": {"height": 300, "width": 400}}, "datasets": {"data-cfff8a6fe8134dace707fd67405d0857": [{"count": 45641, "value": "Valid"}, {"count": 75, "value": "Relict"}]}, "height": 900, "layer": [{"data": {"name": "data-cfff8a6fe8134dace707fd67405d0857"}, "encoding": {"x": {"field": "count", "type": "quantitative"}, "y": {"field": "value", "type": "ordinal"}}, "height": 80, "mark": "bar", "width": 240}, {"data": {"name": "data-cfff8a6fe8134dace707fd67405d0857"}, "encoding": {"text": {"field": "count", "type": "quantitative"}, "x": {"field": "count", "type": "quantitative"}, "y": {"field": "value", "type": "ordinal"}}, "height": 80, "mark": {"align": "left", "baseline": "middle", "dx": 3, "type": "text"}, "width": 240}]}]}"""
+    assertDeepAlmostEqual(
+        result,
+        {
+            "content_block_type": "graph",
+            "content": [{
+                "$schema": "https://vega.github.io/schema/vega-lite/v2.6.0.json",
+                "config": {"view": {"height": 300, "width": 400}},
+                "datasets": {
+                    "data-cfff8a6fe8134dace707fd67405d0857": [
+                        {"count": 45641, "value": "Valid"}, {
+                            "count": 75, "value": "Relict"}
+                    ]},
+                "height": 900,
+                "layer": [{
+                    "data": {"name": "data-cfff8a6fe8134dace707fd67405d0857"},
+                    "encoding": {
+                        "x": {"field": "count", "type": "quantitative"},
+                        "y": {"field": "value", "type": "ordinal"}
+                    },
+                    "height": 80,
+                    "mark": "bar",
+                    "width": 240
+                }, {
+                    "data": {"name": "data-cfff8a6fe8134dace707fd67405d0857"},
+                    "encoding": {
+                        "text": {"field": "count", "type": "quantitative"},
+                        "x": {"field": "count", "type": "quantitative"},
+                        "y": {"field": "value", "type": "ordinal"}
+                    },
+                    "height": 80,
+                    "mark": {"align": "left", "baseline": "middle", "dx": 3, "type": "text"},
+                    "width": 240
+                }]
+            }]
+        }
+    )
