@@ -11,30 +11,30 @@ class TestPageRenderers(unittest.TestCase):
     def test_import(self):
         from great_expectations import render
 
-    # def test_prescriptive_expectation_renderer(self):
-    #     results = render.render(
-    #         renderer_class=render.PrescriptiveExpectationPageRenderer,
-    #         expectations=json.load(open(
-    #             'tests/test_fixtures/rendering_fixtures/expectation_suite_3.json'))["expectations"],
-    #     )
-    #     assert results != None
+    def test_prescriptive_expectation_renderer(self):
+        expectations_config = json.load(
+            open(
+                'tests/test_fixtures/rendering_fixtures/expectation_suite_3.json'
+            )
+        )
+        results = render.view_models.PrescriptiveExpectationPageRenderer().render(
+            expectations_config,
+        )
+        assert results != None
 
-    #     # with open('./test.html', 'w') as f:
-    #     #     f.write(results)
+        # with open('./test.html', 'w') as f:
+        #     f.write(results)
 
-    # def test_descriptive_evr_renderer(self):
-    #     # R = render.DescriptiveEvrPageRenderer(
-    #     #   json.load(open('tests/test_fixtures/rendering_fixtures/evr_suite_3.json'))["results"],
-    #     # )
-    #     # rendered_page = R.render()
-    #     rendered_page = DescriptiveEvrPageRenderer.render(
-    #         json.load(
-    #             open('tests/test_fixtures/rendering_fixtures/evr_suite_3.json'))["results"],
-    #     )
-    #     assert rendered_page != None
+    def test_descriptive_evr_renderer(self):
+        rendered_page = render.view_models.DescriptiveEvrPageRenderer().render(
+            json.load(
+                open('tests/test_fixtures/rendering_fixtures/evr_suite_3.json')
+            )["results"],
+        )
+        assert rendered_page != None
 
-    #     # with open('./test.html', 'w') as f:
-    #     #     f.write(rendered_page)
+        with open('./test.html', 'w') as f:
+            f.write(rendered_page)
 
     def test_full_oobe_flow(self):
         df = ge.read_csv("examples/data/Titanic.csv")
@@ -50,8 +50,8 @@ class TestPageRenderers(unittest.TestCase):
         )
         assert rendered_page != None
 
-        with open('./test.html', 'w') as f:
-            f.write(rendered_page)
+        # with open('./test.html', 'w') as f:
+        #     f.write(rendered_page)
 
 
 # class TestSectionRenderers(unittest.TestCase):
