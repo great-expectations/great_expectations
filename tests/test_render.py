@@ -22,8 +22,8 @@ class TestPageRenderers(unittest.TestCase):
         assert "<li> is a required field.</li>" in results
         assert '<li> must have at least <span class="param-span">0</span> unique values.</li>' in results
 
-        # with open('./test.html', 'w') as f:
-        #     f.write(results)
+        with open('./test.html', 'w') as f:
+            f.write(results)
 
     def test_descriptive_evr_renderer(self):
         rendered_page = render.view_models.DescriptiveEvrPageRenderer().render(
@@ -114,7 +114,7 @@ class TestSnippetRenderers(unittest.TestCase):
                     "max_value": 20,
                     "mostly": .95
                 }
-            }, include_column_name=True)
+            }, include_column_name=False)
         print(result)
         assert result == ' must be between <span class="param-span">3</span> and <span class="param-span">20</span> characters long at least <span class="param-span">0.9</span>% of the time.'
 
