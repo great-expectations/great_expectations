@@ -11,6 +11,7 @@
       {
         "title": "Basic Positive test",
         "exact_match_out": false,
+        "tolerance": 0.000000000001,
         "in": {
           "column": "dist1",
           "min_value": 0.5,
@@ -18,8 +19,7 @@
         },
         "out": {
           "success": true,
-          "observed_value": 1.1547005383792517,
-          "tolerance": 0.000000000001
+          "observed_value": 1.1547005383792517
         }
       },{
       "title" : "Positive test, exact min and max",
@@ -38,6 +38,7 @@
       {
         "title": "Basic Negative test",
         "exact_match_out": false,
+        "tolerance": 0.000000000001,
         "in": {
           "column": "dist1",
           "min_value": 0,
@@ -45,8 +46,7 @@
         },
         "out": {
           "success": false,
-          "observed_value": 1.1547005383792517,
-          "tolerance": 0.000000000001
+          "observed_value": 1.1547005383792517
         }
       },{
         "title": "Positive, Zero stdev, exact min and max",
