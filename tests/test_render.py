@@ -110,3 +110,153 @@ class TestSnippetRenderers(unittest.TestCase):
             }, include_column_name=True)
         print(result)
         assert result == ' must be between <span class="param-span">3</span> and <span class="param-span">20</span> characters long at least <span class="param-span">0.9</span>% of the time.'
+
+
+class TestContentBlockRenderers(unittest.TestCase):
+    result = render.snippets.evr_content_block.EvrContentBlockSnippetRenderer.render(
+        {
+            'success': False,
+            'result': {
+                'element_count': 45716,
+                'missing_count': 0,
+                'missing_percent': 0.0,
+                'unexpected_count': 45716,
+                'unexpected_percent': 1.0,
+                'unexpected_percent_nonmissing': 1.0,
+                'partial_unexpected_list': [
+                    'Valid',
+                    'Valid',
+                    'Valid',
+                    'Valid',
+                    'Valid',
+                    'Valid',
+                    'Valid',
+                    'Valid',
+                    'Valid',
+                    'Valid',
+                    'Valid',
+                    'Valid',
+                    'Valid',
+                    'Valid',
+                    'Valid',
+                    'Valid',
+                    'Valid',
+                    'Valid',
+                    'Valid',
+                    'Valid'
+                ],
+                'partial_unexpected_index_list': [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15,
+                    16,
+                    17,
+                    18,
+                    19
+                ],
+                'partial_unexpected_counts': [{'value': 'Valid', 'count': 45641},
+                                              {'value': 'Relict', 'count': 75}]
+            },
+            'exception_info': {
+                'raised_exception': False,
+                'exception_message': None,
+                'exception_traceback': None
+            },
+            'expectation_config': {
+                'expectation_type': 'expect_column_values_to_be_in_set',
+                'kwargs': {
+                    'column': 'nametype',
+                    'value_set': [],
+                    'result_format': 'SUMMARY'
+                }
+            }
+        },
+    )
+    print(json.dumps(result, indent=2))
+    assert json.dumps(result, indent=2) == """{
+  "content_block_type": "graph",
+  "content": [
+    {
+      "$schema": "https://vega.github.io/schema/vega-lite/v2.6.0.json",
+      "config": {
+        "view": {
+          "height": 300,
+          "width": 400
+        }
+      },
+      "datasets": {
+        "data-cfff8a6fe8134dace707fd67405d0857": [
+          {
+            "count": 45641,
+            "value": "Valid"
+          },
+          {
+            "count": 75,
+            "value": "Relict"
+          }
+        ]
+      },
+      "height": 900,
+      "layer": [
+        {
+          "data": {
+            "name": "data-cfff8a6fe8134dace707fd67405d0857"
+          },
+          "encoding": {
+            "x": {
+              "field": "count",
+              "type": "quantitative"
+            },
+            "y": {
+              "field": "value",
+              "type": "ordinal"
+            }
+          },
+          "height": 80,
+          "mark": "bar",
+          "width": 240
+        },
+        {
+          "data": {
+            "name": "data-cfff8a6fe8134dace707fd67405d0857"
+          },
+          "encoding": {
+            "text": {
+              "field": "count",
+              "type": "quantitative"
+            },
+            "x": {
+              "field": "count",
+              "type": "quantitative"
+            },
+            "y": {
+              "field": "value",
+              "type": "ordinal"
+            }
+          },
+          "height": 80,
+          "mark": {
+            "align": "left",
+            "baseline": "middle",
+            "dx": 3,
+            "type": "text"
+          },
+          "width": 240
+        }
+      ]
+    }
+  ]
+}"""

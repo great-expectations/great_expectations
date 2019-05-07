@@ -18,6 +18,7 @@ from .snippets import (
     evr_graph,
     evr_table_row,
     expectation_bullet_point,
+    evr_content_block,
 )
 
 
