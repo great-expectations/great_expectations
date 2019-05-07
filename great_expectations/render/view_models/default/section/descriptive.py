@@ -30,7 +30,7 @@ class DescriptiveEvrColumnSectionRenderer(SectionRenderer):
         #!!! We should get the column name from an expectation, not another rando param.
         content_blocks.append({
             "content_block_type": "header",
-            "content": ["RANDO"],
+            "content": ["FOOBAR"],
         })
 
         return evrs, content_blocks
@@ -129,7 +129,7 @@ class DescriptiveEvrColumnSectionRenderer(SectionRenderer):
             remaining_evrs, content_blocks)
 
         section = {
-            "section_name": "RANDO",
+            "section_name": "FOOBAR",
             "content_blocks": content_blocks
         }
 

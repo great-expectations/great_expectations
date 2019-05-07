@@ -24,7 +24,7 @@ class PrescriptiveExpectationColumnSectionRenderer(SectionRenderer):
     def render(cls, expectations_list, mode='json'):
         description = {
             "content_block_type": "header",
-            "content": ["RANDO"]
+            "content": ["FOOBAR"]
         }
         bullet_list = {
             "content_block_type": "bullet_list",

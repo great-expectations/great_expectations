@@ -21,9 +21,11 @@ class TestPageRenderers(unittest.TestCase):
             expectations_config,
         )
         assert results != None
+        assert "<li> is a required field.</li>" in results
+        assert '<li> must have at least <span class="param-span">0</span> unique values.</li>' in results
 
-        with open('./test.html', 'w') as f:
-            f.write(results)
+        # with open('./test.html', 'w') as f:
+        #     f.write(results)
 
     def test_descriptive_evr_renderer(self):
         rendered_page = render.view_models.DescriptiveEvrPageRenderer().render(
@@ -33,8 +35,8 @@ class TestPageRenderers(unittest.TestCase):
         )
         assert rendered_page != None
 
-        # with open('./test.html', 'w') as f:
-        #     f.write(rendered_page)
+        with open('./test.html', 'w') as f:
+            f.write(rendered_page)
 
     def test_full_oobe_flow(self):
         df = ge.read_csv("examples/data/Titanic.csv")
@@ -54,34 +56,34 @@ class TestPageRenderers(unittest.TestCase):
         #     f.write(rendered_page)
 
 
-# class TestSectionRenderers(unittest.TestCase):
+class TestSectionRenderers(unittest.TestCase):
 
-#     def test_render_modes(self):
-#         return
-#         df = ge.read_csv("examples/data/Meteorite_Landings.csv")
-#         df.autoinspect(ge.dataset.autoinspect.pseudo_pandas_profiling)
-#         expectations_list = df.get_expectations_config()["expectations"]
-#         # print( json.dumps(expectations_list, indent=2) )
+    def test_render_modes(self):
+        return
+        df = ge.read_csv("examples/data/Meteorite_Landings.csv")
+        df.autoinspect(ge.dataset.autoinspect.pseudo_pandas_profiling)
+        expectations_list = df.get_expectations_config()["expectations"]
+        # print( json.dumps(expectations_list, indent=2) )
 
-#         # evrs = df.validate()["results"]
-#         # print( json.dumps(evrs, indent=2) )
+        # evrs = df.validate()["results"]
+        # print( json.dumps(evrs, indent=2) )
 
-#         R = render.PrescriptiveExpectationColumnSectionRenderer(
-#             column_name="",
-#             expectations_list=expectations_list
-#         )
-#         rendered_section = R.render()
-#         assert rendered_section != None
-#         json.dumps(rendered_section)
-#         # print( json.dumps(rendered_section, indent=2) )
+        R = render.PrescriptiveExpectationColumnSectionRenderer(
+            column_name="",
+            expectations_list=expectations_list
+        )
+        rendered_section = R.render()
+        assert rendered_section != None
+        json.dumps(rendered_section)
+        # print( json.dumps(rendered_section, indent=2) )
 
-#         rendered_section = R.render('html')
-#         # print( rendered_section )
+        rendered_section = R.render('html')
+        # print( rendered_section )
 
-#         # with open('./test.html', 'w') as f:
-#         #     f.write(rendered_page)
+        # with open('./test.html', 'w') as f:
+        #     f.write(rendered_page)
 
-#         assert "<li> must never be missing.</li>" in rendered_section
+        assert "<li> must never be missing.</li>" in rendered_section
 
 
 class TestSnippetRenderers(unittest.TestCase):
