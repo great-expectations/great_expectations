@@ -17,6 +17,6 @@ class ViewModelRenderer(Renderer):
 
     @classmethod
     def render(cls, *args, **kwargs):
-        class.validate_input(*args, **kwargs)
-        class._render_to_json(*args, **kwargs)
+        cls.validate_input(*args, **kwargs)
+        cls._render_to_json(*args, **kwargs)
         raise NotImplementedError

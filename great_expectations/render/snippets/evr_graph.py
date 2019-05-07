@@ -1,3 +1,3 @@
 import json
 
-from ..base import SnippetRenderer
+from . import SnippetRenderer

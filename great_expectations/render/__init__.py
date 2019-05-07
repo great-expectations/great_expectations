@@ -9,15 +9,17 @@ jtbd:
 * render a single Expectation as a single element (e.g. div, p, span, JSON, jinja, markdown)
 """
 
-from .page import (
-    PrescriptiveExpectationPageRenderer,
-    DescriptiveEvrPageRenderer,
+from .view_models import (
+    default,
+    slack,
 )
 
-from .section import (
-    PrescriptiveExpectationColumnSectionRenderer,
-    DescriptiveEvrColumnSectionRenderer,
+from .snippets import (
+    evr_graph,
+    evr_table_row,
+    expectation_bullet_point,
 )
+
 
 def render(expectations=None, input_inspectable=None, renderer_class=None, output_inspectable=None):
     renderer = renderer_class(

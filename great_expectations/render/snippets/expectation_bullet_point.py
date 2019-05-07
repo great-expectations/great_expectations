@@ -1,13 +1,10 @@
 import json
 
-from ....base import Renderer
+from . import SnippetRenderer
 from .util import render_parameter
 
 
-class ExpectationBulletPointSnippetRenderer(Renderer):
-    def __init__(self, expectation):
-        self.expectation = expectation
-
+class ExpectationBulletPointSnippetRenderer(SnippetRenderer):
     def validate_input(self, expectation):
         return True
 

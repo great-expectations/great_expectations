@@ -79,3 +79,9 @@ class TestSectionRenderers(unittest.TestCase):
         #     f.write(rendered_page)
 
         assert "<li> must never be missing.</li>" in rendered_section
+
+
+class TestSnippetRenderers(unittest.TestCase):
+
+    def test_util_render_parameter(self):
+        assert render.snippets.util.render_parameter(100, "d") == None
