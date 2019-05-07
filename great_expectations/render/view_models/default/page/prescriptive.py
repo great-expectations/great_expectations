@@ -31,7 +31,7 @@ class PrescriptiveExpectationPageRenderer(FullPageHtmlRenderer):
     def render(cls, expectations_config):
         cls._validate_input(expectations_config)
 
-        print(json.dumps(expectations_config, indent=2))
+        # print(json.dumps(expectations_config, indent=2))
         expectations = expectations_config["expectations"]
         t = cls._get_template()
 
@@ -41,10 +41,10 @@ class PrescriptiveExpectationPageRenderer(FullPageHtmlRenderer):
 
         sections = []
         for group, expectations in grouped_expectations.items():
-            section_renderer = PrescriptiveExpectationColumnSectionRenderer(
-                group, expectations)
+            # section_renderer = PrescriptiveExpectationColumnSectionRenderer(
+            #     group, expectations)
             sections.append(
-                section_renderer.render()
+                PrescriptiveExpectationColumnSectionRenderer().render(expectations)
             )
 
         rendered_page = t.render(
