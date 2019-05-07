@@ -1,10 +1,10 @@
 import json
 
-from .base import Renderer
+from . import SnippetRenderer
 from .util import render_parameter
 
 
-class EvrTableRowSnippetRenderer(Renderer):
+class EvrTableRowSnippetRenderer(SnippetRenderer):
     def __init__(self, evr):
         self.evr = evr
 
