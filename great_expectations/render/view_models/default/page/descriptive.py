@@ -23,9 +23,11 @@ class DescriptiveEvrPageRenderer(FullPageHtmlRenderer):
 
         sections = []
         for group, evrs in grouped_evrs.items():
-            section_renderer = DescriptiveEvrColumnSectionRenderer(group, evrs)
+            #!!! We should get the column name from an expectation, not another rando param.
             sections.append(
-                section_renderer.render()
+                DescriptiveEvrColumnSectionRenderer().render(
+                    evrs
+                )
             )
 
         rendered_page = t.render(
