@@ -91,7 +91,7 @@ def initialize_project(parsed_args):
     It scaffolds directories, sets up notebooks, creates a project file, and
     appends to a `.gitignore` file.
     """
-    project_yml_filename = ".great_expectations_project.yml"
+    project_yml_filename = ".great_expectations.yml"
     base_dir = "great_expectations"
 
     print('Welcome to Great Expectations! Always know what to expect from your data. 📊')
@@ -110,7 +110,7 @@ def initialize_project(parsed_args):
         bucket = str(input("Which S3 bucket would you like validation results and data stored in? "))
 
     _save_append_line_to_gitignore("# These entries were added by Great Expectations")
-    for directory in ["validations", "snapshots"]:
+    for directory in ["validations", "snapshots", "samples"]:
         _save_append_line_to_gitignore(base_dir + "/" + directory)
 
     if slack_webhook or bucket:
@@ -133,13 +133,16 @@ def initialize_project(parsed_args):
                 }
             )
             ff.write("# This project file was created with `great_expectations init`\n" + yml)
-    # TODO nice thank you message showing what was done.
+    
+    print("Welcome to Great Expectations!")
+    print("")
+    print("Your new project scaffolding is complete. Check the new great_expectations/ directory into source control to track your expectation configurations.")
 
 def _scaffold_directories_and_notebooks(base_dir):
     safe_mmkdir(base_dir)
     notebook_dir_name = "notebooks"
 
-    for directory in [notebook_dir_name, "dataset_expectations_configs" "validations", "snapshots"]:
+    for directory in [notebook_dir_name, "data_asset_configurations" "validations", "snapshots", "samples"]:
         safe_mmkdir(os.path.join(base_dir, directory))
 
     for notebook in glob.glob(script_relative_path("init_notebooks/*.ipynb")):
