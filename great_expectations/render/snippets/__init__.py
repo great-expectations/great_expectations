@@ -1,16 +1,3 @@
-import json
-
-from ..base import Renderer
-
-
-class SnippetRenderer(Renderer):
-
-    @classmethod
-    def validate_input(cls, expectation=None, evr=None):
-        return True
-
-    @classmethod
-    def render(cls, expectation=None, evr=None):
-        cls.validate_input(*args, **kwargs)
-        cls._render_to_json(*args, **kwargs)
-        raise NotImplementedError
+from .expectation_bullet_point import ExpectationBulletPointSnippetRenderer
+from .evr_table_row import EvrTableRowSnippetRenderer
+from .evr_content_block import EvrContentBlockSnippetRenderer

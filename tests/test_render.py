@@ -5,50 +5,53 @@ import great_expectations as ge
 from great_expectations import render
 from .test_utils import assertDeepAlmostEqual
 
-# class TestPageRenderers(unittest.TestCase):
 
-#     def test_import(self):
-#         from great_expectations import render
+class TestPageRenderers(unittest.TestCase):
 
-#     def test_prescriptive_expectation_renderer(self):
-#         results = render.render(
-#             renderer_class=render.PrescriptiveExpectationPageRenderer,
-#             expectations=json.load(open(
-#                 'tests/test_fixtures/rendering_fixtures/expectation_suite_3.json'))["expectations"],
-#         )
-#         assert results != None
+    def test_import(self):
+        from great_expectations import render
 
-#         # with open('./test.html', 'w') as f:
-#         #     f.write(results)
+    # def test_prescriptive_expectation_renderer(self):
+    #     results = render.render(
+    #         renderer_class=render.PrescriptiveExpectationPageRenderer,
+    #         expectations=json.load(open(
+    #             'tests/test_fixtures/rendering_fixtures/expectation_suite_3.json'))["expectations"],
+    #     )
+    #     assert results != None
 
-#     def test_descriptive_evr_renderer(self):
-#         # R = render.DescriptiveEvrPageRenderer(
-#         #   json.load(open('tests/test_fixtures/rendering_fixtures/evr_suite_3.json'))["results"],
-#         # )
-#         # rendered_page = R.render()
-#         rendered_page = DescriptiveEvrPageRenderer.render(
-#             json.load(
-#                 open('tests/test_fixtures/rendering_fixtures/evr_suite_3.json'))["results"],
-#         )
-#         assert rendered_page != None
+    #     # with open('./test.html', 'w') as f:
+    #     #     f.write(results)
 
-#         # with open('./test.html', 'w') as f:
-#         #     f.write(rendered_page)
+    # def test_descriptive_evr_renderer(self):
+    #     # R = render.DescriptiveEvrPageRenderer(
+    #     #   json.load(open('tests/test_fixtures/rendering_fixtures/evr_suite_3.json'))["results"],
+    #     # )
+    #     # rendered_page = R.render()
+    #     rendered_page = DescriptiveEvrPageRenderer.render(
+    #         json.load(
+    #             open('tests/test_fixtures/rendering_fixtures/evr_suite_3.json'))["results"],
+    #     )
+    #     assert rendered_page != None
 
-#     def test_full_oobe_flow(self):
-#         df = ge.read_csv("examples/data/Titanic.csv")
-#         # df = ge.read_csv("examples/data/Meteorite_Landings.csv")
-#         df.autoinspect(ge.dataset.autoinspect.pseudo_pandas_profiling)
-#         # df.autoinspect(ge.dataset.autoinspect.columns_exist)
-#         evrs = df.validate()["results"]
-#         # print(json.dumps(evrs, indent=2))
+    #     # with open('./test.html', 'w') as f:
+    #     #     f.write(rendered_page)
 
-#         R = render.DescriptiveEvrPageRenderer(evrs)
-#         rendered_page = R.render()
-#         assert rendered_page != None
+    def test_full_oobe_flow(self):
+        df = ge.read_csv("examples/data/Titanic.csv")
+        # df = ge.read_csv("examples/data/Meteorite_Landings.csv")
+        df.autoinspect(ge.dataset.autoinspect.pseudo_pandas_profiling)
+        # df.autoinspect(ge.dataset.autoinspect.columns_exist)
+        evrs = df.validate()["results"]
+        # print(json.dumps(evrs, indent=2))
 
-#         # with open('./test.html', 'w') as f:
-#         #     f.write(rendered_page)
+        rendered_page = render.compile_to_documentation(
+            evrs,
+            render.view_models.DescriptiveEvrPageRenderer,
+        )
+        assert rendered_page != None
+
+        with open('./test.html', 'w') as f:
+            f.write(rendered_page)
 
 
 # class TestSectionRenderers(unittest.TestCase):

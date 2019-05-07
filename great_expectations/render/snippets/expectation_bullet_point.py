@@ -1,6 +1,6 @@
 import json
 
-from . import SnippetRenderer
+from .base import SnippetRenderer
 from .util import render_parameter
 
 
