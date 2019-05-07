@@ -92,37 +92,35 @@ def initialize_project(parsed_args):
     appends to a `.gitignore` file.
     """
     project_yml_filename = ".great_expectations_project.yml"
-    base_dir = "great_expecations"
+    base_dir = "great_expectations"
 
     print('Welcome to Great Expectations! Always know what to expect from your data. 📊')
-    print('\tScaffolding project')
+    print('Scaffolding project')
+    print("Please note that these settings are only stored in {} ".format(project_yml_filename))
+   
     _scaffold_directories_and_notebooks(base_dir)
-
+    
     slack_webhook = None
-    access_key_id = None
-    aws_secret_access_key = None
     bucket = None
 
     if _does_user_want(input("Would you like to set up slack notifications? [Y/n] ")):
         slack_webhook = str(input("Please paste your Slack webhook url here: "))
 
-    if _does_user_want(input("Would you like to set up an S3 bucket for validation results? [Y/n]")):
-        print("\nPlease note that credentials are only stored in {}): ".format(project_yml_filename))
+    if _does_user_want(input("Would you like to set up an S3 bucket for validation results? [Y/n] ")):
         bucket = str(input("Which S3 bucket would you like validation results and data stored in? "))
-        access_key_id = str(input("AWS access key id: "))
-        aws_secret_access_key = str(input("AWS access key secret: "))
 
     _save_append_line_to_gitignore("# These entries were added by Great Expectations")
     for directory in ["validations", "snapshots"]:
         _save_append_line_to_gitignore(base_dir + "/" + directory)
 
-    if _does_user_want(input("Credentials stored in {}\nWould you like this added to a .gitignore? [Y/n] ".format(project_yml_filename))):
-        _save_append_line_to_gitignore(project_yml_filename)
-    else:
-        print("""⚠️   Warning! You have elected to skip adding entries to your .gitignore.
-    This is NOT recommended as it may contain credentials. Do not commit this to source control!""".format(project_yml_filename))
+    if slack_webhook or bucket:
+        if _does_user_want(input("Would you to add {} to a .gitignore? [Y/n] ".format(project_yml_filename))):
+            _save_append_line_to_gitignore(project_yml_filename)
+        else:
+            print("""⚠️   Warning! You have elected to skip adding entries to your .gitignore.
+    This is NOT recommended as it may contain secrets. Do not commit this to source control!""".format(project_yml_filename))
 
-    if slack_webhook or access_key_id or aws_secret_access_key or bucket:
+    if slack_webhook or bucket:
         # TODO fail if a project file already exists
         with open(project_yml_filename, 'w') as ff:
             # TODO consider just writing plain text instead of using yaml.dump to add nice comments.
@@ -131,13 +129,11 @@ def initialize_project(parsed_args):
                     "slack_webhook": slack_webhook,
                     "aws": {
                         "bucket": bucket,
-                        "access_key_id": access_key_id,
-                        "secret_access_key": aws_secret_access_key,
                     }
                 }
             )
             ff.write("# This project file was created with `great_expectations init`\n" + yml)
-
+    # TODO nice thank you message showing what was done.
 
 def _scaffold_directories_and_notebooks(base_dir):
     safe_mmkdir(base_dir)
