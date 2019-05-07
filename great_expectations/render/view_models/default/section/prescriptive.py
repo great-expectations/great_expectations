@@ -82,8 +82,10 @@ class PrescriptiveExpectationColumnSectionRenderer(SectionRenderer):
 
         elif mode == "html":
             env = Environment(
-                loader=PackageLoader('great_expectations',
-                                     'render/fixtures/templates'),
+                loader=PackageLoader(
+                    'great_expectations',
+                    'render/view_models/default/fixtures/templates'
+                ),
                 autoescape=select_autoescape(['html', 'xml'])
             )
             t = env.get_template('section.j2')

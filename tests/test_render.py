@@ -13,9 +13,7 @@ class TestPageRenderers(unittest.TestCase):
 
     def test_prescriptive_expectation_renderer(self):
         expectations_config = json.load(
-            open(
-                'tests/test_fixtures/rendering_fixtures/expectation_suite_3.json'
-            )
+            open('tests/test_fixtures/rendering_fixtures/expectation_suite_3.json')
         )
         results = render.view_models.PrescriptiveExpectationPageRenderer().render(
             expectations_config,
@@ -35,8 +33,8 @@ class TestPageRenderers(unittest.TestCase):
         )
         assert rendered_page != None
 
-        with open('./test.html', 'w') as f:
-            f.write(rendered_page)
+        # with open('./test.html', 'w') as f:
+        #     f.write(rendered_page)
 
     def test_full_oobe_flow(self):
         df = ge.read_csv("examples/data/Titanic.csv")
@@ -59,31 +57,35 @@ class TestPageRenderers(unittest.TestCase):
 class TestSectionRenderers(unittest.TestCase):
 
     def test_render_modes(self):
-        return
-        df = ge.read_csv("examples/data/Meteorite_Landings.csv")
-        df.autoinspect(ge.dataset.autoinspect.pseudo_pandas_profiling)
-        expectations_list = df.get_expectations_config()["expectations"]
+        # df = ge.read_csv("examples/data/Meteorite_Landings.csv")
+        # df.autoinspect(ge.dataset.autoinspect.pseudo_pandas_profiling)
+        # expectations_list = df.get_expectations_config()["expectations"]
+
+        expectations_list = json.load(
+            open('tests/test_fixtures/rendering_fixtures/expectation_suite_3.json')
+        )["expectations"]
+
         # print( json.dumps(expectations_list, indent=2) )
 
         # evrs = df.validate()["results"]
         # print( json.dumps(evrs, indent=2) )
 
-        R = render.PrescriptiveExpectationColumnSectionRenderer(
-            column_name="",
-            expectations_list=expectations_list
+        R = render.view_models.default.section.prescriptive.PrescriptiveExpectationColumnSectionRenderer
+        rendered_section = R.render(
+            expectations_list
         )
-        rendered_section = R.render()
         assert rendered_section != None
-        json.dumps(rendered_section)
+        assert json.dumps(rendered_section)
         # print( json.dumps(rendered_section, indent=2) )
 
-        rendered_section = R.render('html')
-        # print( rendered_section )
+        rendered_section = R.render(
+            expectations_list,
+            'html'
+        )
+        # print(rendered_section)
 
-        # with open('./test.html', 'w') as f:
-        #     f.write(rendered_page)
-
-        assert "<li> must never be missing.</li>" in rendered_section
+        assert "<li> is a required field.</li>" in rendered_section
+        # assert False
 
 
 class TestSnippetRenderers(unittest.TestCase):
