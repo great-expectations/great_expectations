@@ -52,7 +52,7 @@ def dispatch(args):
     version_parser.set_defaults(func=version)
 
     scaffold_parser = subparsers.add_parser('init')
-    scaffold_parser.set_defaults(func=init)
+    scaffold_parser.set_defaults(func=initialize_project)
     parsed_args = parser.parse_args(args)
 
     return parsed_args.func(parsed_args)
@@ -65,54 +65,89 @@ def safe_mmkdir(directory):
         pass
 
 
-def init(parsed_args):
-    project_yml_filename = ".great_expectations_project.yml"
+def _does_user_want(user_input):
+    while user_input.lower() not in ["y", "yes", "no", "n", ""]:
+        user_input = input("[Y/n] is required. Please try again. ")
 
-    print('Welcome to Great Expectations! Always know what to expect from your data.')
-    print('\tScaffolding project')
+    return user_input.lower() in ["", "yes", "y", "yes"]
+    # return user_input.lower() not in ["no", "n", "false", "f"]
 
-    _scaffold_directories_and_notebooks()
 
+def _save_append_line_to_gitignore(line):
+    _gitignore = ".gitignore"
+    if os.path.exists(_gitignore):
+        append_write = 'a'
+    else:
+        append_write = 'w'
+
+    with open(_gitignore, append_write) as gitignore:
+        gitignore.write(line + "\n")
+
+
+def initialize_project(parsed_args):
+    """
+    This guided input walks the user through setting up a project.
+
+    It scaffolds directories, sets up notebooks, creates a project file, and
+    appends to a `.gitignore` file.
+    """
+    project_yml_filename = ".great_expectations.yml"
+    base_dir = "great_expectations"
+
+    print('Welcome to Great Expectations! Always know what to expect from your data. 📊')
+    print('Scaffolding project')
+    print("Please note that these settings are only stored in {} ".format(project_yml_filename))
+   
+    _scaffold_directories_and_notebooks(base_dir)
+    
     slack_webhook = None
+    bucket = None
 
-    wants_slack = input("Would you like to set up slack notifications? [Y/n] ")
-    if wants_slack.lower() not in ["no", "n", "false", "f"]:
+    if _does_user_want(input("Would you like to set up slack notifications? [Y/n] ")):
         slack_webhook = str(input("Please paste your Slack webhook url here: "))
 
-    wants_s3 = input("Would you like to set up an S3 bucket for validation results? [Y/n]")
-    if wants_s3.lower() not in ["no", "n", "false", "f"]:
+    if _does_user_want(input("Would you like to set up an S3 bucket for validation results? [Y/n] ")):
         bucket = str(input("Which S3 bucket would you like validation results and data stored in? "))
 
+    _save_append_line_to_gitignore("# These entries were added by Great Expectations")
+    for directory in ["validations", "snapshots", "samples"]:
+        _save_append_line_to_gitignore(base_dir + "/" + directory)
+
     if slack_webhook or bucket:
+        if _does_user_want(input("Would you to add {} to a .gitignore? [Y/n] ".format(project_yml_filename))):
+            _save_append_line_to_gitignore(project_yml_filename)
+        else:
+            print("""⚠️   Warning! You have elected to skip adding entries to your .gitignore.
+    This is NOT recommended as it may contain secrets. Do not commit this to source control!""".format(project_yml_filename))
+
+    if slack_webhook or bucket:
+        # TODO fail if a project file already exists
         with open(project_yml_filename, 'w') as ff:
-            ff.write(yaml.dump(
+            # TODO consider just writing plain text instead of using yaml.dump to add nice comments.
+            yml = yaml.dump(
                 {
                     "slack_webhook": slack_webhook,
                     "aws": {
-                        "bucket": bucket
+                        "bucket": bucket,
                     }
                 }
-            ))
+            )
+            ff.write("# This project file was created with `great_expectations init`\n" + yml)
     
     print("Welcome to Great Expectations!")
     print("")
     print("Your new project scaffolding is complete. Check the new great_expectations/ directory into source control to track your expectation configurations.")
 
-
-def _scaffold_directories_and_notebooks():
-    base_dir = "great_expectations"
-
+def _scaffold_directories_and_notebooks(base_dir):
     safe_mmkdir(base_dir)
     notebook_dir_name = "notebooks"
-    notebook_directory = os.path.join(base_dir, notebook_dir_name)
-    safe_mmkdir(notebook_directory)
 
-    config_dir = os.path.join(base_dir, "data_asset_configurations")
-    safe_mmkdir(config_dir)
+    for directory in [notebook_dir_name, "data_asset_configurations" "validations", "snapshots", "samples"]:
+        safe_mmkdir(os.path.join(base_dir, directory))
 
     for notebook in glob.glob(script_relative_path("init_notebooks/*.ipynb")):
         notebook_name = os.path.basename(notebook)
-        shutil.copyfile(notebook, os.path.join(notebook_directory, notebook_name))
+        shutil.copyfile(notebook, os.path.join(base_dir, notebook_dir_name, notebook_name))
 
 
 def validate(parsed_args):
