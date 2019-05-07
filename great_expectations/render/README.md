@@ -2,15 +2,38 @@
 
 ### Why Renderers?
 
-Renderers compile Expectations and Expectation Validation Results (EVRs) to human-readable docs.
+Renderers compile Expectations and Expectation Validation Results (EVRs) to human-readable docs. Compiling allows you to keep your documentation in sync with your tests. As long as you're consistently running pipeline tests, you know that your docs will never go stale.
 
-This compile step allows Expectations to keep your documentation in sync with your tests. As long as you're consistently running pipeline tests, you know that your docs will never go stale.
+Great Expectation's renderers are designed to allow for great flexibility and extensibility. We know that there are many ways to describe and visualize data. The Great Expectations approach allows us to encompass widely varying use cases, such as:
 
-Great Expectation's renderers are designed to allow for great flexibility and extensibility. We know that there are many ways to describe and visualize data. Eventually, we hope that GE can encompass them all.
+- Text summarization to ("74 out of 74 tests passed, with 3 warnings." vs "Detail views of all warnings")
+- Rendering to multiple view models: HTML, Slack, etc.
+- Rendering within other platforms.
+- Rendering to various UI elements, such as tables, bullet lists, graphs, etc.
+- Rendering at different levels of data density
+- Language localization
+- etc.
 
 ### Key concepts
 
 `snippets`
+
+A collection of functions that each convert a single Expectation (or EVR) to a string or list of strings.
+
+```
+ExpectationBulletPointSnippetRenderer.render({
+    "expectation_type": "expect_column_to_exist",
+    "kwargs": {"column": "x_var"}
+}, include_column_name=True)
+
+> "x_var is a required field."
+```
+
+The string may include markup.
+
+It could also be a JSON object representing a graph or some other object.
+
+`MySnippetRenderer.render` accepts
 
 { Expectation or EVR } -> snippet
 

@@ -5,14 +5,21 @@ from .util import render_parameter
 
 
 class ExpectationBulletPointSnippetRenderer(SnippetRenderer):
-    def validate_input(self, expectation):
+    @classmethod
+    def validate_input(cls):
         return True
 
-    def render(self):
-        expectation = self.expectation
+    @classmethod
+    def render(cls, expectation, include_column_name=False):
+
+        #!!! What about expectations without column names?
+        if include_column_name:
+            optional_column_name_prefix = expectation["kwargs"]["column"]
+        else:
+            optional_column_name_prefix = ""
 
         if expectation["expectation_type"] == "expect_column_to_exist":
-            return " is a required field."
+            return optional_column_name_prefix+" is a required field."
 
         elif expectation["expectation_type"] == "expect_column_values_to_be_of_type":
             return " is of type %s." % (
