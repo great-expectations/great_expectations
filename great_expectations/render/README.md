@@ -16,8 +16,15 @@ Great Expectation's renderers are designed to allow for great flexibility and ex
 
 ### Key concepts
 
+**Expectation Validation Results (EVRs)**: a JSON-serializable object generated when attempting to `validate` an Expectation.
+
 - snippets : Each snippet converts a single Expectation (or EVR) to a string or list of strings.
 - view_models : View models convert groups of expectations, usually JSON objects. View_models can be nested.
+
+**Descriptive** vs **Prescriptive** documentation
+
+- Descriptive docs capture how _this_ data looks _now_. Think profiling, exploration, summarization. Descriptive docs are usually compiled from EVRs
+- Prescriptive docs capture how this _type_ of data _should always_ look. Think testing, validation, SLAs. Prescriptive docs are usually compiled from Expectations.
 
 ### SnippetRenderers
 
@@ -138,11 +145,6 @@ EvrContentBlockSnippetRenderer.render(my_evr)
 { Expectations or EVRs } -> view_model -> view_model ... -> view_model -> snippets
 
 For example, to generate standalone documentation in GE, you can invoke a `PageRenderer` and it will handle the cascade of `SectionRenderers` and `SnippetRenderers` needed to render all the way to HTML. This is the flow shown in the video.
-
-`Descriptive` vs `Prescriptive` documentation:
-
-- Descriptive docs capture how _this_ data looks _now_. Think profiling, exploration, summarization.
-- Prescriptive docs capture how this _type_ of data _should always_ look. Think testing, validation, SLAs.
 
 ### Code organization
 
