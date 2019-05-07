@@ -15,10 +15,11 @@ class EvrContentBlockSnippetRenderer(SnippetRenderer):
     * I'm not 100% sure that this should be a SnippetRenderer class. It might work better as a view_model.
     """
 
-    #!!! This method needs to be bumped up to the parent class
     @classmethod
     def render(cls, evr):
+        cls.validate_input(evr)
         expectation_type = evr["expectation_config"]["expectation_type"]
+
         if expectation_type in cls.supported_expectation_types:
             return cls.supported_expectation_types[expectation_type](evr)
         else:

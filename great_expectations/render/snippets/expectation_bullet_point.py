@@ -5,12 +5,11 @@ from .util import render_parameter
 
 
 class ExpectationBulletPointSnippetRenderer(SnippetRenderer):
-    @classmethod
-    def validate_input(cls):
-        return True
 
     @classmethod
     def render(cls, expectation, include_column_name=False):
+        cls.validate_input(expectation)
+        expectation_type = expectation["expectation_type"]
 
         #!!! What about expectations without column names?
         if include_column_name:
@@ -18,10 +17,96 @@ class ExpectationBulletPointSnippetRenderer(SnippetRenderer):
         else:
             optional_column_name_prefix = ""
 
-        if expectation["expectation_type"] == "expect_column_to_exist":
-            return optional_column_name_prefix+" is a required field."
+        if expectation_type in cls.supported_expectation_types:
+            return optional_column_name_prefix + cls.supported_expectation_types[expectation_type](expectation)
+        else:
+            raise NotImplementedError
 
-        elif expectation["expectation_type"] == "expect_column_values_to_be_of_type":
+    @classmethod
+    def _expect_column_to_exist(cls, expectation):
+        return " is a required field."
+
+    @classmethod
+    def _expect_column_value_lengths_to_be_between(cls, expectation):
+        if (expectation["kwargs"]["min_value"] == None) and (expectation["kwargs"]["max_value"] == None):
+            return " has a bogus %s expectation." % (
+                render_parameter(
+                    "expect_column_value_lengths_to_be_between", "s")
+            )
+
+        if "mostly" in expectation["kwargs"]:
+            if expectation["kwargs"]["min_value"] != None and expectation["kwargs"]["max_value"] != None:
+                return " must be between %s and %s characters long at least %s%% of the time." % (
+                    render_parameter(
+                        expectation["kwargs"]["min_value"], "d"),
+                    render_parameter(
+                        expectation["kwargs"]["max_value"], "d"),
+                    render_parameter(
+                        expectation["kwargs"]["mostly"], ".1f"),
+                )
+
+            elif expectation["kwargs"]["min_value"] == None:
+                return " must be less than %d characters long at least %.1f\% of the time." % (
+                    expectation["kwargs"]["max_value"],
+                    expectation["kwargs"]["mostly"],
+                )
+
+            elif expectation["kwargs"]["max_value"] == None:
+                return " must be more than %d characters long at least %.1f\% of the time." % (
+                    expectation["kwargs"]["min_value"],
+                    expectation["kwargs"]["mostly"],
+                )
+
+        else:
+            if expectation["kwargs"]["min_value"] != None and expectation["kwargs"]["max_value"] != None:
+                return " must always be between %s and %s characters long." % (
+                    render_parameter(
+                        expectation["kwargs"]["min_value"], "d"),
+                    render_parameter(
+                        expectation["kwargs"]["max_value"], "d"),
+                )
+
+            elif expectation["kwargs"]["min_value"] == None:
+                return " must always be less than %s characters long." % (
+                    render_parameter(
+                        expectation["kwargs"]["max_value"], "d"),
+                )
+
+            elif expectation["kwargs"]["max_value"] == None:
+                return " must always be more than %s characters long." % (
+                    render_parameter(
+                        expectation["kwargs"]["min_value"], "d"),
+                )
+
+    @classmethod
+    def _expect_column_unique_value_count_to_be_between(cls, expectation):
+        if (expectation["kwargs"]["min_value"] == None) and (expectation["kwargs"]["max_value"] == None):
+            return " has a bogus %s expectation." % (
+                render_parameter(
+                    "expect_column_unique_value_count_to_be_between", "s")
+            )
+
+        elif expectation["kwargs"]["min_value"] == None:
+            return " must have fewer than %s unique values." % (
+                render_parameter(expectation["kwargs"]["max_value"], "d")
+            )
+
+        elif expectation["kwargs"]["max_value"] == None:
+            return " must have at least %s unique values." % (
+                render_parameter(expectation["kwargs"]["min_value"], "d")
+            )
+
+        else:
+            return " must have between %s and %s unique values." % (
+                render_parameter(expectation["kwargs"]["min_value"], "d"),
+                render_parameter(expectation["kwargs"]["max_value"], "d"),
+            )
+
+
+    def this_method_is_actually_a_comment():
+        return None
+
+        if expectation["expectation_type"] == "expect_column_values_to_be_of_type":
             return " is of type %s." % (
                 render_parameter(expectation["kwargs"]["type_"], "s")
             )
@@ -66,56 +151,7 @@ class ExpectationBulletPointSnippetRenderer(SnippetRenderer):
             else:
                 return "must be exactly <span class=\"param-span\">%d</span> characters long." % (expectation["kwargs"]["value"])
 
-        elif expectation["expectation_type"] == "expect_column_value_lengths_to_be_between":
-            if (expectation["kwargs"]["min_value"] == None) and (expectation["kwargs"]["max_value"] == None):
-                return " has a bogus %s expectation." % (
-                    render_parameter(
-                        "expect_column_value_lengths_to_be_between", "s")
-                )
-
-            if "mostly" in expectation["kwargs"]:
-                if expectation["kwargs"]["min_value"] != None and expectation["kwargs"]["max_value"] != None:
-                    return " must be between %s and %s characters long at least %s%% of the time." % (
-                        render_parameter(
-                            expectation["kwargs"]["min_value"], "d"),
-                        render_parameter(
-                            expectation["kwargs"]["max_value"], "d"),
-                        render_parameter(
-                            expectation["kwargs"]["mostly"], ".1f"),
-                    )
-
-                elif expectation["kwargs"]["min_value"] == None:
-                    return " must be less than %d characters long at least %.1f\% of the time." % (
-                        expectation["kwargs"]["max_value"],
-                        expectation["kwargs"]["mostly"],
-                    )
-
-                elif expectation["kwargs"]["max_value"] == None:
-                    return " must be more than %d characters long at least %.1f\% of the time." % (
-                        expectation["kwargs"]["min_value"],
-                        expectation["kwargs"]["mostly"],
-                    )
-
-            else:
-                if expectation["kwargs"]["min_value"] != None and expectation["kwargs"]["max_value"] != None:
-                    return " must always be between %s and %s characters long." % (
-                        render_parameter(
-                            expectation["kwargs"]["min_value"], "d"),
-                        render_parameter(
-                            expectation["kwargs"]["max_value"], "d"),
-                    )
-
-                elif expectation["kwargs"]["min_value"] == None:
-                    return " must always be less than %s characters long." % (
-                        render_parameter(
-                            expectation["kwargs"]["max_value"], "d"),
-                    )
-
-                elif expectation["kwargs"]["max_value"] == None:
-                    return " must always be more than %s characters long." % (
-                        render_parameter(
-                            expectation["kwargs"]["min_value"], "d"),
-                    )
+        # elif expectation["expectation_type"] == "expect_column_value_lengths_to_be_between":
 
         elif expectation["expectation_type"] == "expect_column_values_to_be_between":
             # print(json.dumps(expectation, indent=2))
@@ -142,29 +178,6 @@ class ExpectationBulletPointSnippetRenderer(SnippetRenderer):
 
         elif expectation["expectation_type"] == "expect_column_stdev_to_be_between":
             return " must have a standard deviation between %d and %d." % (expectation["kwargs"]["min_value"], expectation["kwargs"]["max_value"])
-
-        elif expectation["expectation_type"] == "expect_column_unique_value_count_to_be_between":
-            if (expectation["kwargs"]["min_value"] == None) and (expectation["kwargs"]["max_value"] == None):
-                return " has a bogus %s expectation." % (
-                    render_parameter(
-                        "expect_column_unique_value_count_to_be_between", "s")
-                )
-
-            elif expectation["kwargs"]["min_value"] == None:
-                return " must have fewer than %s unique values." % (
-                    render_parameter(expectation["kwargs"]["max_value"], "d")
-                )
-
-            elif expectation["kwargs"]["max_value"] == None:
-                return " must have at least %s unique values." % (
-                    render_parameter(expectation["kwargs"]["min_value"], "d")
-                )
-
-            else:
-                return " must have between %s and %s unique values." % (
-                    render_parameter(expectation["kwargs"]["min_value"], "d"),
-                    render_parameter(expectation["kwargs"]["max_value"], "d"),
-                )
 
         elif expectation["expectation_type"] == "expect_column_values_to_not_match_regex":
             # FIXME: Need to add logic for mostly
@@ -281,3 +294,13 @@ class ExpectationBulletPointSnippetRenderer(SnippetRenderer):
             # FIXME: This warning is actually pretty helpful
             print("WARNING: Unhandled expectation_type %s" %
                   expectation["expectation_type"],)
+
+
+# Create a function map for our SnippetRenderer class.
+# Because our snippet functions are classmethods, this must be done after the class is declared.
+# https://stackoverflow.com/questions/11058686/various-errors-in-code-that-tries-to-call-classmethods
+ExpectationBulletPointSnippetRenderer.supported_expectation_types = {
+    "expect_column_to_exist": ExpectationBulletPointSnippetRenderer._expect_column_to_exist,
+    "expect_column_value_lengths_to_be_between": ExpectationBulletPointSnippetRenderer._expect_column_value_lengths_to_be_between,
+    "expect_column_unique_value_count_to_be_between": ExpectationBulletPointSnippetRenderer._expect_column_unique_value_count_to_be_between,    
+}

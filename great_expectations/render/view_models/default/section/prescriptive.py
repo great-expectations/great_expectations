@@ -56,6 +56,7 @@ class PrescriptiveExpectationColumnSectionRenderer(SectionRenderer):
                 bullet_point = ExpectationBulletPointSnippetRenderer().render(expectation)
                 assert bullet_point != None
                 bullet_list["content"].append(bullet_point)
+
             except Exception as e:
                 bullet_list["content"].append("""
 <div class="alert alert-danger" role="alert">
