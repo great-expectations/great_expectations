@@ -343,8 +343,8 @@ def evaluate_json_test(data_asset, expectation_type, test):
                 assert result['success'] == value
 
             elif key == 'observed_value':
-                if 'tolerance' in test['out']:
-                    assert np.allclose(result['result']['observed_value'], value, rtol=test['out']['tolerance'])
+                if 'tolerance' in test:
+                    assert np.allclose(result['result']['observed_value'], value, rtol=test['tolerance'])
                 else:
                     assert value == result['result']['observed_value']
 
@@ -394,10 +394,6 @@ def evaluate_json_test(data_asset, expectation_type, test):
                 assert np.allclose(result["result"]["details"]["observed_partition"]["weights"], value["weights"])
                 if "tail_weights" in result["result"]["details"]["observed_partition"]:
                     assert np.allclose(result["result"]["details"]["observed_partition"]["tail_weights"], value["tail_weights"])
-
-            elif key == 'tolerance':
-                # tolerance is used when checking observed_value
-                pass
 
             else:
                 raise ValueError(
