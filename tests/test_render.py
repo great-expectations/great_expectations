@@ -84,4 +84,6 @@ class TestSectionRenderers(unittest.TestCase):
 class TestSnippetRenderers(unittest.TestCase):
 
     def test_util_render_parameter(self):
-        assert render.snippets.util.render_parameter(100, "d") == None
+        #!!! More tests needed here, eventually.
+        assert render.snippets.util.render_parameter(
+            100, "d") == '<span class="param-span">100</span>'
