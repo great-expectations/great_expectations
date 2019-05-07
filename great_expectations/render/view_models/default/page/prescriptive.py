@@ -21,7 +21,10 @@ class PrescriptiveExpectationPageRenderer(FullPageHtmlRenderer):
         #!!! Add informative error messages here
         assert type(expectations_config) == dict
 
-        # assert {expectations_config.keys()} == {""}
+        keys = expectations_config.keys()
+        assert 'expectations' in keys
+        assert type(expectations_config["expectations"]) == list
+
         return True
 
     @classmethod
