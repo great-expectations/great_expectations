@@ -231,3 +231,15 @@ You have three main options:
 3. Compile the appropriate `view_model` to JSON, and provide your own view components
 
 ### How do I create a custom view_model?
+
+"""
+jtbd:
+
+- render many Expectation Suites as a full static HTML site
+  navigation
+
+- render a single Expectation Suite as a (potentially nested) list of elements (e.g. div, p, span, JSON, jinja, markdown)
+  grouping?
+
+- render a single Expectation as a single element (e.g. div, p, span, JSON, jinja, markdown)
+  """

@@ -7,12 +7,14 @@ from jinja2 import (
 import pandas as pd
 import altair as alt
 
-from .base import Renderer
-from .snippet import (
+from ...base import Renderer
+from ...snippets import (
     ExpectationBulletPointSnippetRenderer,
     EvrTableRowSnippetRenderer,
-    render_parameter,
+    # render_parameter,
+    EvrContentBlockSnippetRenderer
 )
+
 
 class SectionRenderer(Renderer):
     def __init__(self, expectations, inspectable):
@@ -29,6 +31,7 @@ class SectionRenderer(Renderer):
     def render(self):
         raise NotImplementedError
 
+
 class PrescriptiveExpectationColumnSectionRenderer(SectionRenderer):
     """Generates a section's worth of prescriptive content blocks for a set of Expectations from the same column."""
 
@@ -38,32 +41,32 @@ class PrescriptiveExpectationColumnSectionRenderer(SectionRenderer):
 
     def render(self, mode='json'):
         description = {
-            "content_block_type" : "header",
-            "content" : [self.column_name]
+            "content_block_type": "header",
+            "content": [self.column_name]
         }
         bullet_list = {
-            "content_block_type" : "bullet_list",
-            "content" : []
+            "content_block_type": "bullet_list",
+            "content": []
         }
         if random.random() > .5:
             graph = {
-                "content_block_type" : "graph",
-                "content" : []
+                "content_block_type": "graph",
+                "content": []
             }
         else:
             graph = {}
 
         table = {
-            "content_block_type" : "table",
-            "content" : []
+            "content_block_type": "table",
+            "content": []
         }
         example_list = {
-            "content_block_type" : "example_list",
-            "content" : []
+            "content_block_type": "example_list",
+            "content": []
         }
         more_description = {
-            "content_block_type" : "text",
-            "content" : []
+            "content_block_type": "text",
+            "content": []
         }
 
         for expectation in self.expectations_list:
@@ -84,8 +87,8 @@ class PrescriptiveExpectationColumnSectionRenderer(SectionRenderer):
                 """)
 
         section = {
-            "section_name" : self.column_name,
-            "content_blocks" : [
+            "section_name": self.column_name,
+            "content_blocks": [
                 graph,
                 # graph2,
                 description,
@@ -98,15 +101,16 @@ class PrescriptiveExpectationColumnSectionRenderer(SectionRenderer):
 
         if mode == "json":
             return section
-        
+
         elif mode == "html":
             env = Environment(
-                loader=PackageLoader('great_expectations', 'render/fixtures/templates'),
+                loader=PackageLoader('great_expectations',
+                                     'render/fixtures/templates'),
                 autoescape=select_autoescape(['html', 'xml'])
             )
             t = env.get_template('section.j2')
 
-            return t.render(**{'section' : section})
+            return t.render(**{'section': section})
 
 
 class DescriptiveEvrColumnSectionRenderer(SectionRenderer):
@@ -114,30 +118,31 @@ class DescriptiveEvrColumnSectionRenderer(SectionRenderer):
 
     def __init__(self, column_name, evrs):
         #!!! We should get the column name from an expectation, not another rando param.
-        self.column_name = column_name
+        self.column_name = column_name+"!!!!"
         self.evrs = evrs
 
     def _find_evr_by_type(self, evrs, type_):
         for evr in evrs:
             if evr["expectation_config"]["expectation_type"] == type_:
                 return evr
-    
+
     def _render_header(self, evrs, content_blocks):
         #!!! We should get the column name from an expectation, not another rando param.
         content_blocks.append({
-            "content_block_type" : "header",
-            "content" : [self.column_name],
+            "content_block_type": "header",
+            "content": [self.column_name],
         })
 
         return evrs, content_blocks
 
     def _render_column_type(self, evrs, content_blocks):
-        type_evr = self._find_evr_by_type(self.evrs, "expect_column_values_to_be_of_type")
+        type_evr = self._find_evr_by_type(
+            self.evrs, "expect_column_values_to_be_of_type")
         if type_evr:
             type_ = type_evr["expectation_config"]["kwargs"]["type_"]
             new_block = {
-                "content_block_type" : "text",
-                "content" : [type_]
+                "content_block_type": "text",
+                "content": [type_]
             }
             content_blocks.append(new_block)
 
@@ -149,40 +154,42 @@ class DescriptiveEvrColumnSectionRenderer(SectionRenderer):
             return evrs, content_blocks
 
     def _render_values_set(self, evrs, content_blocks):
-        set_evr = self._find_evr_by_type(self.evrs, "expect_column_values_to_be_in_set")
+        set_evr = self._find_evr_by_type(
+            self.evrs, "expect_column_values_to_be_in_set")
         if set_evr and "partial_unexpected_counts" in set_evr["result"]:
-            partial_unexpected_counts = set_evr["result"]["partial_unexpected_counts"]
-            if len(partial_unexpected_counts) > 10 :
-                new_block = {
-                    "content_block_type" : "text",
-                    "content" : [
-                        "<b>Example values:</b><br/> " + ", ".join([
-                            render_parameter(str(item["value"]), "s") for item in partial_unexpected_counts
-                        ])
-                    ]
-                }
-            else:
-                df = pd.DataFrame(partial_unexpected_counts)
+            new_block = EvrContentBlockSnippetRenderer().render(set_evr)
+            # partial_unexpected_counts = set_evr["result"]["partial_unexpected_counts"]
+            # if len(partial_unexpected_counts) > 10:
+            #     new_block = {
+            #         "content_block_type": "text",
+            #         "content": [
+            #             "<b>Example values:</b><br/> " + ", ".join([
+            #                 render_parameter(str(item["value"]), "s") for item in partial_unexpected_counts
+            #             ])
+            #         ]
+            #     }
+            # else:
+            #     df = pd.DataFrame(partial_unexpected_counts)
 
-                bars = alt.Chart(df).mark_bar().encode(
-                    x='count:Q',
-                    y="value:O"
-                ).properties(height=40+20*len(partial_unexpected_counts), width=240)
+            #     bars = alt.Chart(df).mark_bar().encode(
+            #         x='count:Q',
+            #         y="value:O"
+            #     ).properties(height=40+20*len(partial_unexpected_counts), width=240)
 
-                text = bars.mark_text(
-                    align='left',
-                    baseline='middle',
-                    dx=3  # Nudges text to right so it doesn't appear on top of the bar
-                ).encode(
-                    text='count:Q'
-                )
+            #     text = bars.mark_text(
+            #         align='left',
+            #         baseline='middle',
+            #         dx=3  # Nudges text to right so it doesn't appear on top of the bar
+            #     ).encode(
+            #         text='count:Q'
+            #     )
 
-                chart = (bars + text).properties(height=900)
+            #     chart = (bars + text).properties(height=900)
 
-                new_block = {
-                    "content_block_type" : "graph",
-                    "content" : [chart.to_json()]
-                }
+            #     new_block = {
+            #         "content_block_type": "graph",
+            #         "content": [chart.to_json()]
+            #     }
 
             content_blocks.append(new_block)
 
@@ -192,8 +199,8 @@ class DescriptiveEvrColumnSectionRenderer(SectionRenderer):
     def _render_stats_table(self, evrs, content_blocks):
         remaining_evrs = []
         new_block = {
-            "content_block_type" : "table",
-            "content" : []
+            "content_block_type": "table",
+            "content": []
         }
         for evr in self.evrs:
             evr_renderer = EvrTableRowSnippetRenderer(evr=evr)
@@ -202,15 +209,15 @@ class DescriptiveEvrColumnSectionRenderer(SectionRenderer):
                 new_block["content"] += table_rows
             else:
                 remaining_evrs.append(evr)
-        
+
         content_blocks.append(new_block)
 
         return remaining_evrs, content_blocks
 
     def _render_bullet_list(self, evrs, content_blocks):
         new_block = {
-            "content_block_type" : "text",
-            "content" : []
+            "content_block_type": "text",
+            "content": []
         }
         for evr in evrs:
             #!!! This is a hack to cover up the fact that we're not yet pulling these EVRs out of the list.
@@ -228,7 +235,6 @@ class DescriptiveEvrColumnSectionRenderer(SectionRenderer):
 
         content_blocks.append(new_block)
         return [], content_blocks
-        
 
     def render(self, mode='json'):
         #!!! Someday we may add markdown and others
@@ -236,25 +242,30 @@ class DescriptiveEvrColumnSectionRenderer(SectionRenderer):
 
         # This feels nice and tidy. We should probably use this pattern elsewhere, too.
         remaining_evrs, content_blocks = self._render_header(self.evrs, [])
-        remaining_evrs, content_blocks = self._render_column_type(self.evrs, content_blocks)
-        remaining_evrs, content_blocks = self._render_values_set(remaining_evrs, content_blocks)
-        remaining_evrs, content_blocks = self._render_stats_table(remaining_evrs, content_blocks)
-        remaining_evrs, content_blocks = self._render_bullet_list(remaining_evrs, content_blocks)
+        remaining_evrs, content_blocks = self._render_column_type(
+            self.evrs, content_blocks)
+        remaining_evrs, content_blocks = self._render_values_set(
+            remaining_evrs, content_blocks)
+        remaining_evrs, content_blocks = self._render_stats_table(
+            remaining_evrs, content_blocks)
+        remaining_evrs, content_blocks = self._render_bullet_list(
+            remaining_evrs, content_blocks)
 
         section = {
-            "section_name" : self.column_name,
-            "content_blocks" : content_blocks
+            "section_name": self.column_name,
+            "content_blocks": content_blocks
         }
 
         #!!! This code should probably be factored out. We'll use it for many a renderer...
         if mode == "json":
             return section
-        
+
         elif mode == "html":
             env = Environment(
-                loader=PackageLoader('great_expectations', 'render/fixtures/templates'),
+                loader=PackageLoader('great_expectations',
+                                     'render/fixtures/templates'),
                 autoescape=select_autoescape(['html', 'xml'])
             )
             t = env.get_template('section.j2')
 
-            return t.render(**{'section' : section})
+            return t.render(**{'section': section})

@@ -3,12 +3,19 @@ import json
 import pandas as pd
 import altair as alt
 
-from . import SnippetRenderer
+from .base import SnippetRenderer
 from .util import render_parameter
 
 
 class EvrContentBlockSnippetRenderer(SnippetRenderer):
+    """Render EVRs to ContentBlocks in view_model.default
 
+    Notes:
+    * Many EVRs probably aren't renderable this way.
+    * I'm not 100% sure that this should be a SnippetRenderer class. It might work better as a view_model.
+    """
+
+    #!!! This method needs to be bumped up to the parent class
     @classmethod
     def render(cls, evr):
         expectation_type = evr["expectation_config"]["expectation_type"]
@@ -59,6 +66,9 @@ class EvrContentBlockSnippetRenderer(SnippetRenderer):
         return new_block
 
 
+# Create a function map for our SnippetRenderer class.
+# Because our snippet functions are classmethods, this must be done after the class is declared.
+# https://stackoverflow.com/questions/11058686/various-errors-in-code-that-tries-to-call-classmethods
 EvrContentBlockSnippetRenderer.supported_expectation_types = {
     "expect_column_values_to_be_in_set": EvrContentBlockSnippetRenderer._expect_column_values_to_be_in_set,
 }

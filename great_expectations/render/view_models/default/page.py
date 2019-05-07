@@ -7,7 +7,7 @@ from jinja2 import (
     Template, Environment, BaseLoader, PackageLoader, select_autoescape
 )
 
-from .base import Renderer
+from ...base import Renderer
 from .section import (
     PrescriptiveExpectationColumnSectionRenderer,
     DescriptiveEvrColumnSectionRenderer,
@@ -15,35 +15,50 @@ from .section import (
 
 
 class FullPageHtmlRenderer(Renderer):
-    def __init__(self, expectations, inspectable):
-        self.expectations = expectations
-
-    def _validate_input(self, expectations):
+    @classmethod
+    def _validate_input(cls, expectations):
         # raise NotImplementedError
         #!!! Need to fix this
         return True
 
-    def _get_template(self):
+    @classmethod
+    def _get_template(cls):
         env = Environment(
-            loader=PackageLoader('great_expectations',
-                                 'render/fixtures/templates'),
+            loader=PackageLoader(
+                'great_expectations',
+                'render/view_models/default/fixtures/templates'
+            ),
             autoescape=select_autoescape(['html', 'xml'])
         )
         return env.get_template('page.j2')
 
-    def render(self):
+    @classmethod
+    def render(cls, input):
         raise NotImplementedError
 
 
 class PrescriptiveExpectationPageRenderer(FullPageHtmlRenderer):
     """Renders an Expectation Suite as a standalone HTML file."""
+    @classmethod
+    def _validate_input(cls, expectations_config):
+
+        #!!! Add informative error messages here
+        assert type(expectations_config) == dict
+
+        # assert {expectations_config.keys()} == {""}
+        return True
 
     @classmethod
-    def render(self):
-        t = self._get_template()
+    def render(cls, expectations_config):
+        cls._validate_input(expectations_config)
 
-        grouped_expectations = self._group_expectations_by_columns(
-            self.expectations)
+        print(json.dumps(expectations_config, indent=2))
+        expectations = expectations_config["expectations"]
+        t = cls._get_template()
+
+        grouped_expectations = cls._group_expectations_by_columns(
+            expectations
+        )
 
         sections = []
         for group, expectations in grouped_expectations.items():
@@ -60,7 +75,8 @@ class PrescriptiveExpectationPageRenderer(FullPageHtmlRenderer):
 
         return rendered_page
 
-    def _group_expectations_by_columns(self, expectations_list):
+    @classmethod
+    def _group_expectations_by_columns(cls, expectations_list):
         column_expectations_dict = defaultdict(list)
 
         for exp in expectations_list:
@@ -74,14 +90,18 @@ class PrescriptiveExpectationPageRenderer(FullPageHtmlRenderer):
 
 class DescriptiveEvrPageRenderer(FullPageHtmlRenderer):
     """Renders an EVR set as a standalone HTML file."""
+    @classmethod
+    def _validate_input(cls, evrs):
+        assert type(evrs) == list
 
-    def __init__(self, evrs):
-        self.evrs = evrs
+        return True
 
-    def render(self):
-        t = self._get_template()
+    @classmethod
+    def render(cls, evrs):
+        cls._validate_input(evrs)
+        t = cls._get_template()
 
-        grouped_evrs = self._group_evrs_by_columns(self.evrs)
+        grouped_evrs = cls._group_evrs_by_columns(evrs)
 
         sections = []
         for group, evrs in grouped_evrs.items():
@@ -97,7 +117,8 @@ class DescriptiveEvrPageRenderer(FullPageHtmlRenderer):
 
         return rendered_page
 
-    def _group_evrs_by_columns(self, evrs_list):
+    @classmethod
+    def _group_evrs_by_columns(cls, evrs_list):
         column_evrs_dict = defaultdict(list)
 
         for evr in evrs_list:
