@@ -180,7 +180,7 @@ class DataAsset(object):
                     expectation_config["success_on_last_run"] = return_obj["success"]
 
                 else:
-                    return_obj = {"message": "expecatation stored"}
+                    return_obj = {"stored_configuration": expectation_config}
 
 
                 # Append the expectation to the config.
@@ -1040,6 +1040,8 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                                               value["$PARAMETER"]]
                 elif evaluation_parameters is not None and value["$PARAMETER"] in evaluation_parameters:
                     evaluation_args[key] = evaluation_parameters[value['$PARAMETER']]
+                elif self._interactive_evaluation == False:
+                    pass
                 else:
                     raise KeyError(
                         "No value found for $PARAMETER " + value["$PARAMETER"])

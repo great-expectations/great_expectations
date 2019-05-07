@@ -11,6 +11,11 @@ import great_expectations.dataset as dataset
 logger = logging.getLogger(__name__)
 
 
+#####
+from urllib.parse import urlparse
+####
+
+
 def _convert_to_dataset_class(df, dataset_class, expectations_config=None, autoinspect_func=None):
     """
     Convert a (pandas) dataframe to a great_expectations dataset, with (optional) expectations_config
@@ -297,4 +302,3 @@ def script_relative_path(file_path):
     import inspect
     scriptdir = inspect.stack()[1][1]
     return os.path.join(os.path.dirname(os.path.abspath(scriptdir)), file_path)
-
