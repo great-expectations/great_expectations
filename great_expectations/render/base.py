@@ -12,6 +12,8 @@ class Renderer(object):
     def render(cls, *args, **kwargs):
         raise NotImplementedError
 
+#!!! Move this out to view_model.__init__
+
 
 class ViewModelRenderer(Renderer):
 
