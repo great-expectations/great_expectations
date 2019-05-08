@@ -69,8 +69,7 @@
         "max_value": 0,
         "catch_exceptions": true
       },
-      "out" : {},
-      "error":{
+      "out" : {
         "traceback_substring": "must be integers"
       }
     },{
@@ -80,8 +79,7 @@
         "max_value": "quack",
         "catch_exceptions": true
       },
-      "out" : {},
-      "error":{
+      "out" : {
         "traceback_substring": "must be integers"
       }
     }]

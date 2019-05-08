@@ -278,9 +278,8 @@
           "mostly": 0.95,
           "catch_exceptions": true
         },
-        "out": {},
-        "error":{
-          "traceback_substring" : "TypeError: Column values, min_value, and max_value must either be None or of the same type."
+        "out": {
+          "traceback_substring__updateme" : "TypeError: Column values, min_value, and max_value must either be None or of the same type."
         }
       },
       {
@@ -293,9 +292,8 @@
           "mostly": 0.9,
           "catch_exceptions": true
         },
-        "out": {},
-        "error":{
-          "traceback_substring" : "TypeError: Column values, min_value, and max_value must either be None or of the same type."
+        "out": {
+          "traceback_substring__updateme" : "TypeError: Column values, min_value, and max_value must either be None or of the same type."
         }
       },
       {
@@ -308,9 +306,8 @@
           "mostly": 0.8,
           "catch_exceptions": true
         },
-        "out": {},
-        "error":{
-          "traceback_substring" : "TypeError: Column values, min_value, and max_value must either be None or of the same type."
+        "out": {
+          "traceback_substring__updateme" : "TypeError: Column values, min_value, and max_value must either be None or of the same type."
         }
       },
       {
@@ -382,9 +379,8 @@
           "min_value": 0,
           "catch_exceptions": true
         },
-        "out":{},
-        "error":{
-          "traceback_substring" : "TypeError: Column values, min_value, and max_value must either be None or of the same type."
+        "out":{
+          "traceback_substring__updateme" : "TypeError: Column values, min_value, and max_value must either be None or of the same type."
         }
       },
       {
@@ -396,9 +392,8 @@
           "max_value": 0,
           "catch_exceptions": true
         },
-        "out":{},
-        "error":{
-          "traceback_substring" : "ValueError: min_value cannot be greater than max_value"
+        "out":{
+          "traceback_substring__updateme" : "ValueError: min_value cannot be greater than max_value"
         }
       },
       {
@@ -446,9 +441,8 @@
           "min_value": null,
           "catch_exceptions": true
         },
-        "out":{},
-        "error":{
-          "traceback_substring" : "cannot both be None"
+        "out":{
+          "traceback_substring__updateme" : "cannot both be None"
         }
       }
     ]

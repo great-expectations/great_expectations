@@ -116,10 +116,9 @@
           "value_set": null,
           "catch_exceptions": true
         },
-        "out": {},
-        "error":{
-          "traceback_substring": "argument of type 'NoneType' is not iterable"
-          }
+        "out": {
+          "traceback_substring": "value_set must be provided"
+        }
       }
     ]
   }]

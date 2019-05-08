@@ -113,10 +113,9 @@
           "value_set": null,
           "catch_exceptions": true
         },
-        "out": {},
-        "error":{
-          "traceback_substring": "argument of type 'NoneType' is not iterable"
-          }
+        "out": {
+          "traceback_substring": "value_set must be provided"
+        }
       }
     ]},
     {
@@ -143,17 +142,21 @@
   },
   {
     "data" : {
-      "dates" : ["2018-01-01", "2018-01-02", "2018-01-02 00:34:01"]
+      "dates" : ["2018-01-01", "2018-01-02", "2018-01-02 00:34:01"],
+      "text_dates" : ["2018-01-01", "2018-01-02", "2018-01-02 00:34:01"]
     },
     "schemas": {
       "sqlite": {
-        "dates": "datetime"
+        "dates": "datetime",
+        "text_dates": "varchar"
       },
       "postgresql": {
-        "dates": "timestamp"
+        "dates": "timestamp",
+        "text_dates": "text"
       },
       "pandas": {
-        "dates": "datetime64"
+        "dates": "datetime64",
+        "text_dates": "object"
       }
     },
     "tests" : [
@@ -184,6 +187,21 @@
         "unexpected_list": ["2018-01-01 00:00:00"]      
       },
       "suppress_test_for": ["sqlite"]
-    }]
+    },
+    {
+      "title": "Attempted coercion of non-datetime column in sqlalchemy",
+      "exact_match_out": false,
+      "in": {
+        "column": "text_dates",
+        "value_set": ["2018-01-02", "2018-01-02 00:34:01"],
+        "parse_strings_as_datetimes": true,
+        "catch_exceptions": true
+      },
+      "out": {
+        "traceback_substring": "parse_strings_as_datetimes cannot convert datatypes in sqlalchemy"
+      },
+      "suppress_test_for": ["Pandas"]
+    }
+  ]
   }]
 }

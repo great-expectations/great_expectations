@@ -109,8 +109,7 @@
         "column": "y",
         "catch_exceptions": true
       },
-      "out" : {},
-      "error": {
+      "out" : {
         "traceback_substring": "cannot both be None"
       }
     }]

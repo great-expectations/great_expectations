@@ -132,8 +132,7 @@
           "max_value": null,
           "catch_exceptions": true
         },
-        "out": {},
-        "error": {
+        "out": {
           "traceback_substring": "min_value and max_value cannot both be None"
         }
       }]

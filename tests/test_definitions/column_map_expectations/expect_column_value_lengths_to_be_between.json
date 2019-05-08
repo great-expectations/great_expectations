@@ -106,9 +106,8 @@
         "max_value": 0,
         "catch_exceptions": true
       },
-      "out" : {},
-      "error":{
-        "traceback_substring": "must be integers"
+      "out" : {
+        "traceback_substring__updateme": "must be integers"
       }
     },{
       "title": "Test error handling for non-int max_value",
@@ -118,9 +117,8 @@
         "max_value": "quack",
         "catch_exceptions": true
       },
-      "out" : {},
-      "error":{
-        "traceback_substring": "must be integers"
+      "out" : {
+        "traceback_substring__updateme": "must be integers"
       }
     },{
       "title": "Test error handling for both null max and min values",
@@ -131,9 +129,8 @@
         "max_value": null,
         "catch_exceptions": true
       },
-      "out" : {},
-      "error":{
-        "traceback_substring": "min_value and max_value cannot both be None"
+      "out" : {
+        "traceback_substring__updateme": "min_value and max_value cannot both be None"
       }
     },{
       "title": "Test error handling, values are integers",
@@ -144,9 +141,8 @@
         "max_value": 1,
         "catch_exceptions": true
       },
-      "out" : {},
-      "error":{
-        "traceback_substring": "object of type 'int' has no len()"
+      "out" : {
+        "traceback_substring__updateme": "object of type 'int' has no len()"
       }
     }]
   }]

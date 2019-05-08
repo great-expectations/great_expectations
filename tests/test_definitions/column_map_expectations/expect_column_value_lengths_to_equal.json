@@ -71,15 +71,16 @@
         "unexpected_list": ["sexy"]
       }
     },{
-      "title": "Positive test, integer, length = 1",
+      "title": "Raise exception; integer, length = 1",
       "exact_match_out" : false,
       "in":{
         "column": "equal_length_integer",
         "value": 1,
         "catch_exceptions": true
       },
-      "out": {},
-      "traceback_substring": "TypeError: object of type 'int' has no len()"
+      "out": {
+        "traceback_substring__updateme": "TypeError: object of type 'int' has no len()"
+      }
     }]
   }]
 }

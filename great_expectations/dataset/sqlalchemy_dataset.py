@@ -482,6 +482,9 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                                           parse_strings_as_datetimes=None,
                                           result_format=None, include_config=False, catch_exceptions=None, meta=None
                                           ):
+        if value_set is None:
+            raise TypeError("value_set must be provided")
+        
         if parse_strings_as_datetimes:
             # If the column is already a datetime column, accept this parameter, otherwise raise an error.
             for col_obj in self.columns:
@@ -503,6 +506,9 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                                               parse_strings_as_datetimes=None,
                                               result_format=None, include_config=False, catch_exceptions=None, meta=None
                                               ):
+        if value_set is None:
+            raise TypeError("value_set must be provided")
+            
         if parse_strings_as_datetimes:
             # If the column is already a datetime column, accept this parameter, otherwise raise an error.
             for col_obj in self.columns:
