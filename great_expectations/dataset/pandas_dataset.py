@@ -565,9 +565,16 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                                           result_format=None, include_config=False, catch_exceptions=None, meta=None):
         if parse_strings_as_datetimes:
             parsed_value_set = self._parse_value_set(value_set)
+
+            if np.issubdtype(column.dtype, np.datetime64):
+                temp_column = column
+        else:
+                temp_column = column.map(parse)
         else:
             parsed_value_set = value_set
-        return column.isin(parsed_value_set)
+            temp_column = column
+
+        return temp_column.isin(parsed_value_set)
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
@@ -577,9 +584,16 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                                               result_format=None, include_config=False, catch_exceptions=None, meta=None):
         if parse_strings_as_datetimes:
             parsed_value_set = self._parse_value_set(value_set)
+            
+            if np.issubdtype(column.dtype, np.datetime64):
+                temp_column = column
+        else:
+                temp_column = column.map(parse)
         else:
             parsed_value_set = value_set
-        return ~column.isin(parsed_value_set)
+            temp_column = column
+
+        return ~temp_column.isin(parsed_value_set)
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
@@ -602,6 +616,9 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             if max_value:
                 max_value = parse(max_value)
 
+            if np.issubdtype(column.dtype, np.datetime64):
+                temp_column = column
+            else:
             temp_column = column.map(parse)
 
         else:
@@ -1107,6 +1124,9 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             if max_value:
                 max_value = parse(max_value)
 
+            if np.issubdtype(column.dtype, np.datetime64):
+                temp_column = column
+            else:
             temp_column = column.map(parse)
 
         else:
@@ -1155,6 +1175,9 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             if max_value:
                 max_value = parse(max_value)
 
+            if np.issubdtype(column.dtype, np.datetime64):
+                temp_column = column
+            else:
             temp_column = column.map(parse)
 
         else:

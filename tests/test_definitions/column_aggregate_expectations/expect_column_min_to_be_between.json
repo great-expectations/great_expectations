@@ -7,6 +7,8 @@
       "y" : [1, 1, 1, 2, 2, 2, 3, 3, 3, 4],
       "z" : ["a", "b", "c", "d", "e", null, null, null, null, null],
       "zz" : ["2/1/2016", "2/2/2016", "2/2/2016", "10/1/2016", "1/2/2017", "10/1/2017", null, null, null, null],
+      "zz2" : ["2/1/2016", "2/2/2016", "2/2/2016", "10/1/2016", "1/2/2017", "10/1/2015", null, null, null, null],
+      "text_dates": ["2/1/2016", "2/2/2016", "2/2/2016", "10/1/2016", "1/2/2017", "10/1/2015", null, null, null, null],
       "a" : [null, 0, null, null, 1, null, null, 2, null, null],
       "b" : [null, 0, null, null, 2, null, null, 1, null, null]
     },
@@ -17,6 +19,8 @@
         "y": "int",
         "z": "varchar",
         "zz": "datetime",
+        "zz2": "datetime",
+        "text_dates": "varchar",
         "a": "int",
         "b": "int"
       },
@@ -26,8 +30,15 @@
         "y": "int",
         "z": "text",
         "zz": "timestamp",
+        "zz2": "timestamp",
+        "text_dates": "text",
         "a": "int",
         "b": "int"
+      },
+      "pandas": {
+        "zz": "datetime64",
+        "zz2": "datetime64",
+        "text_dates": "object"
       }
     },
     "tests" : [{
@@ -130,7 +141,37 @@
         "success": true,
         "observed_value": "02/01/2016"
       }
-    },{
+    },
+    {
+      "title": "Negative test with dates",
+      "exact_match_out" : false,
+      "in": {
+        "column": "zz2",
+        "min_value": "2/1/2016",
+        "max_value": "3/1/2016",
+        "parse_strings_as_datetimes": true
+      },
+      "out": {
+        "success": false,
+        "observed_value": "2015-10-01 00:00:00"
+      }
+    },
+    {
+      "title": "Try to coerce dates",
+      "exact_match_out": false,
+      "in": {
+        "column": "text_dates",
+        "min_value": "2/1/2016",
+        "max_value": "3/1/2016",
+        "parse_strings_as_datetimes": true,
+        "catch_exceptions": true
+      },
+      "out": {
+        "traceback_substring": "parse_strings_as_datetimes cannot convert datatypes"
+      },
+      "suppress_test_for": ["Pandas"]
+    },
+    {
       "title": "Negative test case with only a max",
       "exact_match_out" : false,
       "in": {
@@ -148,8 +189,7 @@
         "column": "y",
         "catch_exceptions": true
       },
-      "out": {},
-      "error": {
+      "out": {
         "traceback_substring": "cannot both be None"
       }
     }]

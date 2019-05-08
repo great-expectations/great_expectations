@@ -8,6 +8,8 @@
       "z" : ["a", "b", "c", "d", "e", null, null, null, null, null],
       "zz" : ["1/1/2016", "1/2/2016", "2/2/2016", "2/2/2016", "3/1/2016", "2/1/2017", null, null, null, null],
       "zzz" : ["1/1/2016", "1/2/2016", "2/2/2016", "2/2/2016", "3/1/2016", "2/1/2017", null, null, null, null],
+      "zz2" : ["2/1/2016", "2/2/2016", "2/2/2016", "10/1/2016", "10/2/2017", "1/1/2018", null, null, null, null],
+      "text_dates": ["2/1/2016", "2/2/2016", "2/2/2016", "10/1/2016", "10/2/2017", "1/1/2018", null, null, null, null],
       "a" : [null, 0, null, null, 1, null, null, 2, null, null],
       "b" : [null, 0, null, null, 2, null, null, 1, null, null]
     },
@@ -18,6 +20,8 @@
         "y" : "int",
         "z" : "varchar",
         "zz" : "datetime",
+        "zz2": "datetime",
+        "text_dates": "varchar",
         "zzz" : "varchar",
         "a" : "int",
         "b" : "int"
@@ -28,6 +32,8 @@
         "y" : "int",
         "z" : "text",
         "zz" : "timestamp",
+        "zz2": "timestamp",
+        "text_dates": "text",
         "zzz" : "text",
         "a" : "int",
         "b" : "int"
@@ -132,6 +138,44 @@
       "out": {
         "success": true,
         "observed_value": "e"
+      }
+    },{
+      "title": "Negative test with dates",
+      "exact_match_out" : false,
+      "in": {
+        "column": "zz2",
+        "min_value": "2/1/2016",
+        "max_value": "3/1/2016",
+        "parse_strings_as_datetimes": true
+      },
+      "out": {
+        "success": false,
+        "observed_value": "2018-01-01 00:00:00"
+      }
+    },
+    {
+      "title": "Try to coerce dates",
+      "exact_match_out": false,
+      "in": {
+        "column": "text_dates",
+        "min_value": "2/1/2016",
+        "max_value": "3/1/2016",
+        "parse_strings_as_datetimes": true,
+        "catch_exceptions": true
+      },
+      "out": {
+        "traceback_substring": "parse_strings_as_datetimes cannot convert datatypes"
+      },
+      "suppress_test_for": ["Pandas"]
+    },{
+      "title": "Raise ValueError with both max and min are missing",
+      "exact_match_out" : false,
+      "in": {
+        "column": "y",
+        "catch_exceptions": true
+      },
+      "out": {
+        "traceback_substring": "cannot both be None"
       }
     }]},
     {

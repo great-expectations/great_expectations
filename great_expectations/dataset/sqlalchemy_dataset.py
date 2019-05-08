@@ -483,9 +483,15 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                                           result_format=None, include_config=False, catch_exceptions=None, meta=None
                                           ):
         if parse_strings_as_datetimes:
+            # If the column is already a datetime column, accept this parameter, otherwise raise an error.
+            for col_obj in self.columns:
+                if col_obj["name"] == column and not isinstance(col_obj["type"], sa.types.DateTime):
+                    raise "parse_strings_as_datetimes cannot convert datatypes in sqlalchemy; data must be a datetime type"
+
             parsed_value_set = self._parse_value_set(value_set)
         else:
             parsed_value_set = value_set
+    
         return sa.column(column).in_(tuple(parsed_value_set))
 
     @DocInherit
@@ -498,6 +504,11 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                                               result_format=None, include_config=False, catch_exceptions=None, meta=None
                                               ):
         if parse_strings_as_datetimes:
+            # If the column is already a datetime column, accept this parameter, otherwise raise an error.
+            for col_obj in self.columns:
+                if col_obj["name"] == column and not isinstance(col_obj["type"], sa.types.DateTime):
+                    raise "parse_strings_as_datetimes cannot convert datatypes in sqlalchemy; data must be a datetime type"
+
             parsed_value_set = self._parse_value_set(value_set)
         else:
             parsed_value_set = value_set
@@ -515,7 +526,13 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                                            mostly=None,
                                            result_format=None, include_config=False, catch_exceptions=None, meta=None
                                            ):
+        
         if parse_strings_as_datetimes:
+            # If the column is already a datetime column, accept this parameter, otherwise raise an error.
+            for col_obj in self.columns:
+                if col_obj["name"] == column and not isinstance(col_obj["type"], sa.types.DateTime):
+                    raise "parse_strings_as_datetimes cannot convert datatypes in sqlalchemy; data must be a datetime type"
+
             if min_value:
                 min_value = parse(min_value)
 
@@ -605,6 +622,12 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                                         result_format=None, include_config=False, catch_exceptions=None, meta=None
                                         ):
 
+        if parse_strings_as_datetimes:
+            # If the column is already a datetime column, accept this parameter, otherwise raise an error.
+            for col_obj in self.columns:
+                if col_obj["name"] == column and not isinstance(col_obj["type"], sa.types.DateTime):
+                    raise "parse_strings_as_datetimes cannot convert datatypes in sqlalchemy; data must be a datetime type"
+        
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
 
@@ -665,6 +688,12 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
+
+        if parse_strings_as_datetimes:
+            # If the column is already a datetime column, accept this parameter, otherwise raise an error.
+            for col_obj in self.columns:
+                if col_obj["name"] == column and not isinstance(col_obj["type"], sa.types.DateTime):
+                    raise "parse_strings_as_datetimes cannot convert datatypes in sqlalchemy; data must be a datetime type"
 
         col_min = self.engine.execute(
             sa.select([sa.func.min(sa.column(column))]).select_from(
