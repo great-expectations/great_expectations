@@ -36,7 +36,7 @@ def test_build_slack_notification_request_with_no_validation_json():
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": """*Validated dataset:* `no_name_provided_99` *Status: Failed :x:*\nNo validation occurred. Please ensure you passed a validation_json.""",
+                    "text": "No validation occurred. Please ensure you passed a validation_json.",
                 },
             },
             {
@@ -66,26 +66,68 @@ def test_build_slack_notification_request_with_successful_validation(validation_
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": """*Validated dataset:* `diabetes_raw_csv` *Status: Success :tada:*\n33 of 44 expectations were met\n\n""",
+                    "text": "*Validated dataset:* `diabetes_raw_csv`\n*Status: Success :tada:*\n33 of 44 expectations were met\n\n",
                 },
             },
             {
-                "type": "actions",
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "- *Validation Report*: s3://my_bucket/blah.json",
+                },
+            },
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "- *Validation Dataset*: s3://my_bucket/blah.csv",
+                },
+            },
+            {
+                "type": "context",
                 "elements": [
                     {
-                        "type": "button",
-                        "text": {
-                            "type": "plain_text",
-                            "text": "View Validation Report",
-                        },
-                        "url": validation_json["meta"]["result_reference"],
-                    },
-                    {
-                        "type": "button",
-                        "text": {"type": "plain_text", "text": "View Dataset"},
-                        "url": validation_json["meta"]["dataset_reference"],
-                    },
+                        "type": "mrkdwn",
+                        "text": "Great Expectations run id 7 ran at 05/05/19 12:12:12",
+                    }
                 ],
+            },
+        ]
+    }
+
+
+def test_build_slack_notification_request_with_failed_validation(validation_json):
+    validation_json["success"] = False
+
+    with mock.patch("uuid.uuid4") as mock_uuid:
+        mock_uuid.return_value = 99
+        with mock.patch("datetime.datetime") as mock_datetime:
+            mock_datetime.strftime.return_value = "05/05/19 12:12:12"
+            obs = build_slack_notification_request(validation_json)
+
+    assert isinstance(obs, dict)
+    assert obs == {
+        "blocks": [
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "*Validated dataset:* `diabetes_raw_csv`\n*Status: Failed :x:*\n33 of 44 expectations were met\n\n",
+                },
+            },
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "- *Validation Report*: s3://my_bucket/blah.json",
+                },
+            },
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "- *Validation Dataset*: s3://my_bucket/blah.csv",
+                },
             },
             {
                 "type": "context",
@@ -118,18 +160,15 @@ def test_build_slack_notification_request_with_successful_validation_and_no_resu
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": """*Validated dataset:* `diabetes_raw_csv` *Status: Success :tada:*\n33 of 44 expectations were met\n\n""",
+                    "text": "*Validated dataset:* `diabetes_raw_csv`\n*Status: Success :tada:*\n33 of 44 expectations were met\n\n",
                 },
             },
             {
-                "type": "actions",
-                "elements": [
-                    {
-                        "type": "button",
-                        "text": {"type": "plain_text", "text": "View Dataset"},
-                        "url": validation_json["meta"]["dataset_reference"],
-                    }
-                ],
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "- *Validation Dataset*: s3://my_bucket/blah.csv",
+                },
             },
             {
                 "type": "context",
@@ -162,21 +201,15 @@ def test_build_slack_notification_request_with_successful_validation_and_no_data
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": """*Validated dataset:* `diabetes_raw_csv` *Status: Success :tada:*\n33 of 44 expectations were met\n\n""",
+                    "text": "*Validated dataset:* `diabetes_raw_csv`\n*Status: Success :tada:*\n33 of 44 expectations were met\n\n",
                 },
             },
             {
-                "type": "actions",
-                "elements": [
-                    {
-                        "type": "button",
-                        "text": {
-                            "type": "plain_text",
-                            "text": "View Validation Report",
-                        },
-                        "url": validation_json["meta"]["result_reference"],
-                    }
-                ],
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "- *Validation Report*: s3://my_bucket/blah.json",
+                },
             },
             {
                 "type": "context",

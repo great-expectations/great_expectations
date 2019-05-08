@@ -200,66 +200,58 @@ def build_slack_notification_request(validation_json=None):
     status = "Failed :x:"
     run_id = None
     data_asset_name = "no_name_provided_" + str(uuid.uuid4())
-    text = "No validation occurred. Please ensure you passed a validation_json."
-    report_element = None
-    dataset_element = None
+    title_block = {
+               "type": "section",
+               "text": {
+                   "type": "mrkdwn",
+                   "text": "No validation occurred. Please ensure you passed a validation_json.",
+               },
+           }
+
+    query = {"blocks": [title_block]}
+
     if validation_json:
         if "meta" in validation_json and "data_asset_name" in validation_json["meta"]:
             data_asset_name = validation_json["meta"]["data_asset_name"]
 
         n_checks_succeeded = validation_json["statistics"]["successful_expectations"]
         n_checks = validation_json["statistics"]["evaluated_expectations"]
-
         run_id = validation_json["meta"].get("run_id", None)
+        check_details_text = "{} of {} expectations were met\n\n".format(n_checks_succeeded, n_checks)
 
         if validation_json["success"]:
             status = "Success :tada:"
 
-        text = "{n_checks_succeeded} of {n_checks} expectations were met\n\n".format(
-            n_checks_succeeded=n_checks_succeeded, n_checks=n_checks
-        )
+        query["blocks"][0]["text"]["text"] = "*Validated dataset:* `{}`\n*Status: {}*\n{}".format(data_asset_name, status, check_details_text)
 
         if "result_reference" in validation_json["meta"]:
             report_element = {
-                "type": "button",
-                "text": {"type": "plain_text", "text": "View Validation Report"},
-                "url": validation_json["meta"]["result_reference"],
-            }
-
-        if "dataset_reference" in validation_json["meta"]:
-            dataset_element = {
-                "type": "button",
-                "text": {"type": "plain_text", "text": "View Dataset"},
-                "url": validation_json["meta"]["dataset_reference"],
-            }
-    query = {
-        "blocks": [
-            {
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f"""*Validated dataset:* `{data_asset_name}` *Status: {status}*\n{text}""",
+                    "text": "- *Validation Report*: {}".format(validation_json["meta"]["result_reference"])},
+            }
+            query["blocks"].append(report_element)
+
+        if "dataset_reference" in validation_json["meta"]:
+            dataset_element = {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "- *Validation Dataset*: {}".format(validation_json["meta"]["dataset_reference"])
                 },
             }
-        ]
-    }
+            query["blocks"].append(dataset_element)
+
     footer_section = {
         "type": "context",
         "elements": [
             {
                 "type": "mrkdwn",
-                "text": f"Great Expectations run id {run_id} ran at {timestamp}",
+                "text": "Great Expectations run id {} ran at {}".format(run_id, timestamp),
             }
         ],
     }
-    button_elements = []
-    if report_element:
-        button_elements.append(report_element)
-    if dataset_element:
-        button_elements.append(dataset_element)
-    if button_elements:
-        button_section = {"type": "actions", "elements": button_elements}
-        query["blocks"].append(button_section)
     query["blocks"].append(footer_section)
     return query
 
@@ -284,7 +276,7 @@ def get_slack_callback(webhook):
         else:
             if response.status_code != 200:
                 logger.warning(
-                    'Request to Slack webhook at {webhook} '
+                    'Request to Slack webhook at {url} '
                     'returned error {status_code}: {text}'.format(
                         url=webhook,
                         status_code=response.status_code,
