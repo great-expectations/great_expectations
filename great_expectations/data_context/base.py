@@ -48,7 +48,9 @@ class DataContext(object):
         # TODO: What if the project config file does not exist?
         # TODO: Should we merge the project config file with the global config file?
         with open(os.path.join(self.context_root_directory, ".great_expectations.yml"), "r") as data:
-            self._project_config = yaml.safe_load(data)
+            test = data.readlines()
+            self._project_config = {}
+            # self._project_config = yaml.safe_load(data)
 
         self._load_evaluation_parameter_store()
 
@@ -71,6 +73,8 @@ class DataContext(object):
                 if not run_id in self.dict:
                     self.dict[run_id] = {}
                 self.dict[run_id][name] = value
+            def get_run_parameters(self, run_id):
+                return self.dict[run_id]
 
         # If user wishes to provide their own implementation for this key value store (e.g.,
         # Redis-based), they should specify the following in the project config file:
@@ -139,13 +143,13 @@ class DataContext(object):
         self._compiled = False
 
     def bind_evaluation_parameters(self, run_id, expectations_config):
-        return self.validation_params[run_id] if run_id in self.validation_params else {}
+        return self._evaluation_parameter_store.get_run_parameters(run_id)
 
     def register_validation_results(self, run_id, validation_results):
         if not self._compiled:
             self._compile()
 
-        if not "data_asset_name" in validation_results["meta"]:
+        if "meta" not in validation_results or "data_asset_name" not in validation_results["meta"]:
             logger.warning("No data_asset_name found in validation results; evaluation parameters cannot be registered.")
             return
         elif validation_results["meta"]["data_asset_name"] not in self._compiled_parameters["data_assets"]:
@@ -189,10 +193,10 @@ class DataContext(object):
                         else:
                             logger.warning("Unrecognized key for parameter %s" % desired_param)
 
-    def store_validation_param(self, key, value):
+    def store_validation_param(self, run_id, key, value):
         self._evaluation_parameter_store.set(run_id, key, value)
 
-    def get_validation_param(self, key):
+    def get_validation_param(self, run_id, key):
         return self._evaluation_parameter_store.set(run_id, key)
 
     def _compile(self):
@@ -282,9 +286,9 @@ class DataContext(object):
                                     self._compiled_parameters["data_assets"][data_asset][expectation_name]["columns"][column_name][param_key] = set()
                                 self._compiled_parameters["data_assets"][data_asset][expectation_name]["columns"][column_name][param_key].add(parameter)   
                             
-                            elif param_key in ["results", "details"]:
+                            elif param_key in ["result", "details"]:
                                 if param_key not in self._compiled_parameters["data_assets"][data_asset][expectation_name]:
-                                    self._compiled_parameters["data_assets"][data_asset][expectation_name] = set()
+                                    self._compiled_parameters["data_assets"][data_asset][expectation_name][param_key] = set()
                                 self._compiled_parameters["data_assets"][data_asset][expectation_name][param_key].add(parameter)  
                             
                             else:
