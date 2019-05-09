@@ -42,10 +42,10 @@ class DataAsset(object):
         initial_config = kwargs.pop("config", None)
         data_asset_name = kwargs.pop("data_asset_name", None)
         super(DataAsset, self).__init__(*args, **kwargs)
+        self._interactive_evaluation = interactive_evaluation
         self._initialize_expectations(config=initial_config, data_asset_name=data_asset_name)
         if autoinspect_func is not None:
             autoinspect_func(self)
-        self._interactive_evaluation = interactive_evaluation
 
 
     def autoinspect(self, autoinspect_func=columns_exist):
