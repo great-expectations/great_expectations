@@ -4,7 +4,8 @@ import pandas as pd
 import json
 import logging
 import uuid
-from datetime import datetime
+import datetime
+import requests
 
 import great_expectations.dataset as dataset
 
@@ -198,62 +199,75 @@ def validate(data_asset, expectations_config, data_asset_type=None, *args, **kwa
     return data_asset_.validate(*args, **kwargs)
 
 
-def get_slack_callback(webhook):
-    import requests
+def build_slack_notification_request(validation_json=None):
+    # Defaults
+    timestamp = datetime.datetime.strftime(datetime.datetime.now(), "%x %X")
+    status = "Failed :x:"
+    run_id = None
+    data_asset_name = "no_name_provided_" + str(uuid.uuid4())
+    title_block = {
+               "type": "section",
+               "text": {
+                   "type": "mrkdwn",
+                   "text": "No validation occurred. Please ensure you passed a validation_json.",
+               },
+           }
 
+    query = {"blocks": [title_block]}
+
+    if validation_json:
+        if "meta" in validation_json and "data_asset_name" in validation_json["meta"]:
+            data_asset_name = validation_json["meta"]["data_asset_name"]
+
+        n_checks_succeeded = validation_json["statistics"]["successful_expectations"]
+        n_checks = validation_json["statistics"]["evaluated_expectations"]
+        run_id = validation_json["meta"].get("run_id", None)
+        check_details_text = "{} of {} expectations were met\n\n".format(n_checks_succeeded, n_checks)
+
+        if validation_json["success"]:
+            status = "Success :tada:"
+
+        query["blocks"][0]["text"]["text"] = "*Validated dataset:* `{}`\n*Status: {}*\n{}".format(data_asset_name, status, check_details_text)
+
+        if "result_reference" in validation_json["meta"]:
+            report_element = {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "- *Validation Report*: {}".format(validation_json["meta"]["result_reference"])},
+            }
+            query["blocks"].append(report_element)
+
+        if "dataset_reference" in validation_json["meta"]:
+            dataset_element = {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "- *Validation Dataset*: {}".format(validation_json["meta"]["dataset_reference"])
+                },
+            }
+            query["blocks"].append(dataset_element)
+
+    footer_section = {
+        "type": "context",
+        "elements": [
+            {
+                "type": "mrkdwn",
+                "text": "Great Expectations run id {} ran at {}".format(run_id, timestamp),
+            }
+        ],
+    }
+    query["blocks"].append(footer_section)
+    return query
+
+
+def get_slack_callback(webhook):
     def send_slack_notification(validation_json=None):
         """
             Post a slack notification.
         """
-        if "meta" in validation_json and "data_asset_name" in validation_json["meta"]:
-            data_asset_name = validation_json["meta"]["data_asset_name"]
-        else:
-            data_asset_name = "no_name_provided_" + str(uuid.uuid4())
-
-        timestamp = datetime.now().timestamp()
-        n_checks_succeeded = validation_json['statistics']['successful_expectations']
-        n_checks = validation_json['statistics']['evaluated_expectations']
-
-        if "run_id" in validation_json["meta"]:
-            run_id = validation_json['meta']['run_id']
-        else:
-            run_id = None
-
-        status = "Success" if validation_json["success"] else "Failed"
-        tada = " :tada:" if validation_json["success"] else ""
-        color = '#28a745' if validation_json["success"] else '#dc3545'
-
-
-  
         session = requests.Session()
-
-        text = "{n_checks_succeeded} / {n_checks} expectations were met{tada}.\n".format(
-                        n_checks_succeeded=n_checks_succeeded,
-                        n_checks=n_checks,
-                        tada=tada)
-        
-        if "result_reference" in validation_json["meta"]:
-            text = text + "Validation report saved to {result_path}\n".format(
-                result_path=validation_json["meta"]["result_reference"])
-
-        if "dataset_reference" in validation_json["meta"]:
-            text = text + "Validated dataset saved to {dataset_reference}\n".format(
-                dataset_reference=validation_json["meta"]["dataset_reference"])
-
-        query = {
-            'attachments': [
-                {
-                    'fallback': f'Validation of dataset "{data_asset_name}" is complete: {status}.',
-                    'title': f'Dataset Validation Completed with Status "{status}"',
-                    'title_link': run_id,
-                    'pretext': f'Validated dataset "{data_asset_name}".',
-                    'text': text,
-                    'color': color,
-                    'footer': 'Great Expectations',
-                    'ts': timestamp
-                }
-            ]
-        }
+        query = build_slack_notification_request(validation_json)
 
         try:
             response = session.post(url=webhook, json=query)
@@ -267,13 +281,13 @@ def get_slack_callback(webhook):
         else:
             if response.status_code != 200:
                 logger.warning(
-                    'Request to Slack webhook at {webhook} '
+                    'Request to Slack webhook at {url} '
                     'returned error {status_code}: {text}'.format(
                         url=webhook,
                         status_code=response.status_code,
                         text=response.text))
-  
     return send_slack_notification
+
 
 class DotDict(dict):
     """dot.notation access to dictionary attributes"""
