@@ -1,6 +1,8 @@
 import os
 import json
 import logging
+import yaml
+import sys
 
 from great_expectations.version import __version__
 from great_expectations.dataset import PandasDataset
@@ -11,6 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 class DataContext(object):
+    #TODO: update class documentation
     """A generic DataContext, exposing the base API including constructor with `options` parameter, list_datasets,
     and get_dataset.
 
@@ -20,21 +23,91 @@ class DataContext(object):
     def __init__(self, options=None, *args, **kwargs):
         self.connect(options, *args, **kwargs)
 
-    def connect(self, options):
+    def connect(self, context_root_dir):
+        # determine the "context root directory" - this is the parent of "great_expectations" dir
+
+        if context_root_dir is None:
+            raise Exception("the guessing logic not implemented yet!")
         # TODO: Revisit this logic to better at making real guesses
-        if options is None:
-            if os.path.isdir("../notebooks") and os.path.isdir("../../great_expectations"):
-                self.directory = "../data_asset_configurations"
-            else:
-                self.directory = "./great_expectations/data_asset_configurations"
+        # if os.path.isdir("../notebooks") and os.path.isdir("../../great_expectations"):
+            #     self.context_root_directory = "../data_asset_configurations"
+            # else:
+            #     self.context_root_directory = "./great_expectations/data_asset_configurations"
         else:
-            if os.path.isdir(os.path.join(options, "great_expectations")):
-                self.directory = options + "/great_expectations/data_asset_configurations"
+            if os.path.isdir(os.path.join(context_root_dir, "great_expectations")):
+                self.context_root_directory = context_root_dir
             else:
-                self.directory = os.path.join(options, "great_expectations/data_asset_configurations")
-        self.validation_params = {}
-        self._project_config = {} # TODO: read from .yml file if available
+                self.context_root_directory = context_root_dir
+
+        self.context_root_directory = os.path.abspath(self.context_root_directory)
+
+        self.directory = os.path.join(self.context_root_directory, "great_expectations/data_asset_configurations")
+        self.plugin_store_directory = os.path.join(self.context_root_directory, "great_expectations/plugins/store")
+        sys.path.append(self.plugin_store_directory)
+
+        # TODO: What if the project config file does not exist?
+        # TODO: Should we merge the project config file with the global config file?
+        with open(os.path.join(self.context_root_directory, ".great_expectations.yml"), "r") as data:
+            self._project_config = yaml.safe_load(data)
+
+        self._load_evaluation_parameter_store()
+
         self._compiled = False
+
+
+    def _load_evaluation_parameter_store(self):
+
+        # This is a trivial class that implements in-memory key value store.
+        # We use it when user does not specify a custom class in the config file
+        class MemoryEvaluationParameterStore(object):
+            def __init__(self):
+                self.dict = {}
+            def get(self, run_id, name):
+                if run_id in self.dict:
+                    return self.dict[run_id][name] 
+                else:
+                    return {}
+            def set(self, run_id, name, value):
+                if not run_id in self.dict:
+                    self.dict[run_id] = {}
+                self.dict[run_id][name] = value
+
+        # If user wishes to provide their own implementation for this key value store (e.g.,
+        # Redis-based), they should specify the following in the project config file:
+        #
+        # evaluation_parameter_store:
+        #   type: demostore
+        #   config:  - this is optional - this is how we can pass kwargs to the object's c-tor
+        #     param1: boo
+        #     param2: bah
+        #
+        # Module called "demostore" must be found in great_expectations/plugins/store.
+        # Class "GreatExpectationsEvaluationParameterStore" must be defined in that module.
+        # The class must implement the following methods:
+        # 1. def __init__(self, **kwargs)
+        #
+        # 2. def get(self, name)
+        #
+        # 3. def set(self, name, value)
+        #
+        # We will load the module dynamically
+        try:
+            config_block = self._project_config.get("evaluation_parameter_store")
+            if not config_block or not config_block.get("type"):
+                self._evaluation_parameter_store = MemoryEvaluationParameterStore()
+            else:
+                module_name = config_block.get("type")
+                class_name = "GreatExpectationsEvaluationParameterStore"
+
+                loaded_module = __import__(module_name, fromlist=[module_name])
+                loaded_class = getattr(loaded_module, class_name)
+                if config_block.get("config"):
+                    self._evaluation_parameter_store = loaded_class(**config_block.get("config"))
+                else:
+                    self._evaluation_parameter_store = loaded_class()
+        except Exception as err:
+            logger.exception("Failed to load evaluation_parameter_store class")
+            raise
 
     def list_data_asset_configs(self, show_full_path=False):
         if show_full_path:
@@ -116,16 +189,11 @@ class DataContext(object):
                         else:
                             logger.warning("Unrecognized key for parameter %s" % desired_param)
 
-    def store_validation_param(self, run_id, key, value):
-        if run_id not in self.validation_params:
-            self.validation_params[run_id] = {}
-        self.validation_params[run_id].update({key: value})
+    def store_validation_param(self, key, value):
+        self._evaluation_parameter_store.set(run_id, key, value)
 
     def get_validation_param(self, key):
-        try:
-            return self.validation_params["key"]
-        except KeyError:
-            return None
+        return self._evaluation_parameter_store.set(run_id, key)
 
     def _compile(self):
         """Compiles all current expectation configurations in this context to be ready for reseult registration.
