@@ -6,8 +6,6 @@ import os
 import argparse
 import logging
 
-import yaml
-
 from great_expectations import read_csv, script_relative_path
 from great_expectations import __version__
 from great_expectations.dataset import Dataset, PandasDataset
@@ -84,6 +82,20 @@ def _save_append_line_to_gitignore(line):
         gitignore.write(line + "\n")
 
 
+def _yml_template(bucket="", slack_webhook=""):
+    return """# This project file was created with the command `great_expectations init`
+
+aws:
+  # Add the name of an S3 bucket here. Validation reports and datasets can be 
+  # stored here for easy debugging.
+  bucket: {}
+
+# Add your Slack webhook here to get notifications of validation results
+# See https://api.slack.com/incoming-webhooks for setup
+slack_webhook: {}
+""".format(bucket, slack_webhook)
+
+
 def initialize_project(parsed_args):
     """
     This guided input walks the user through setting up a project.
@@ -123,16 +135,7 @@ def initialize_project(parsed_args):
     if slack_webhook or bucket:
         # TODO fail if a project file already exists
         with open(project_yml_filename, 'w') as ff:
-            # TODO consider just writing plain text instead of using yaml.dump to add nice comments.
-            yml = yaml.dump(
-                {
-                    "slack_webhook": slack_webhook,
-                    "aws": {
-                        "bucket": bucket,
-                    }
-                }
-            )
-            ff.write("# This project file was created with `great_expectations init`\n" + yml)
+            ff.write(_yml_template(bucket, slack_webhook))
     
     print("Welcome to Great Expectations!")
     print("")
