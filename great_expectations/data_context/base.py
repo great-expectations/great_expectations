@@ -83,36 +83,43 @@ class DataContext(object):
         
         for result in validation_results['results']:
             # Unoptimized: loop over all results and check if each is needed
-            if result['expectation_config']['expectation_type'] in self._compiled_parameters["data_assets"][data_asset_name]:
-                if "column" in result['expectation_config']['kwargs'] and \
-                    result['expectation_config']['kwargs']["column"] in self._compiled_parameters["data_assets"][data_asset_name]["columns"]:
+            expectation_type = result['expectation_config']['expectation_type']
+            if expectation_type in self._compiled_parameters["data_assets"][data_asset_name]:
+                # First, bind column-style parameters
+                if (("column" in result['expectation_config']['kwargs']) and 
+                    ("columns" in self._compiled_parameters["data_assets"][data_asset_name][expectation_type]) and 
+                    (result['expectation_config']['kwargs']["column"] in self._compiled_parameters["data_assets"][data_asset_name][expectation_type]["columns"])):
+
                     column = result['expectation_config']['kwargs']["column"]
                     # Now that we have a small search space, invert logic, and look for the parameters in our result
-                    for type_key, desired_parameters in self._compiled_parameters["data_assets"][data_asset_name]["columns"][column].items():
+                    for type_key, desired_parameters in self._compiled_parameters["data_assets"][data_asset_name][expectation_type]["columns"][column].items():
                         # value here is the set of desired parameters under the type_key
                         for desired_param in desired_parameters:
                             desired_key = desired_param.split(":")[-1]
                             if type_key == "result" and desired_key in result['result']:
-                                self.store_validation_param(desired_param, result["result"][desired_key])
+                                self.store_validation_param(run_id, desired_param, result["result"][desired_key])
                             elif type_key == "details" and desired_key in result["result"]["details"]:
-                                self.store_validation_param(desired_param, result["result"]["details"])
+                                self.store_validation_param(run_id, desired_param, result["result"]["details"])
                             else:
                                 logger.warning("Unrecognized key for parameter %s" % desired_param)
                 
-                for type_key, desired_parameters in self._compiled_parameters["data_assets"][data_asset_name]:
+                # Next, bind parameters that do not have column parameter
+                for type_key, desired_parameters in self._compiled_parameters["data_assets"][data_asset_name][expectation_type].items():
                     if type_key == "columns":
                         continue
                     for desired_param in desired_parameters:
                         desired_key = desired_param.split(":")[-1]
                         if type_key == "result" and desired_key in result['result']:
-                            self.store_validation_param(desired_param, result["result"][desired_key])
+                            self.store_validation_param(run_id, desired_param, result["result"][desired_key])
                         elif type_key == "details" and desired_key in result["result"]["details"]:
-                            self.store_validation_param(desired_param, result["result"]["details"])
+                            self.store_validation_param(run_id, desired_param, result["result"]["details"])
                         else:
                             logger.warning("Unrecognized key for parameter %s" % desired_param)
 
-    def store_validation_param(self, key, value):
-        self.validation_params.update({key: value})
+    def store_validation_param(self, run_id, key, value):
+        if run_id not in self.validation_params:
+            self.validation_params[run_id] = {}
+        self.validation_params[run_id].update({key: value})
 
     def get_validation_param(self, key):
         try:
@@ -173,35 +180,48 @@ class DataContext(object):
                     if isinstance(value, dict) and '$PARAMETER' in value:
                         # Compile only respects parameters in urn structure beginning with urn:great_expectations:validations
                         if value["$PARAMETER"].startswith("urn:great_expectations:validations:"):
+                            column_expectation = False
                             parameter = value["$PARAMETER"]
                             self._compiled_parameters["raw"].add(parameter)
                             param_parts = parameter.split(":")
                             try:
-                                if param_parts[3] not in known_assets:
-                                    logger.warning("Adding parameter %s for unknown data asset config" % parameter)
-
-                                if param_parts[3] not in self._compiled_parameters["data_assets"]:
-                                    self._compiled_parameters["data_assets"][param_parts[3]] = {}
-
-                                if param_parts[5] not in self._compiled_parameters["data_assets"][param_parts[3]]:
-                                    self._compiled_parameters["data_assets"][param_parts[3]][param_parts[5]] = {}
-
-                                if param_parts[6] in ["results", "details"]:
-                                    if param_parts[6] not in self._compiled_parameters["data_assets"][param_parts[3]][param_parts[5]]:
-                                        self._compiled_parameters["data_assets"][param_parts[3]][param_parts[5]] = set()
-                                    self._compiled_parameters["data_assets"][param_parts[3]][param_parts[5]][param_parts[6]].add(parameter)
-                                
-                                elif param_parts[6] == "columns":
-                                    if param_parts[7] not in self._compiled_parameters["data_assets"][param_parts[3]][param_parts[5]]:
-                                        self._compiled_parameters["data_assets"][param_parts[3]][param_parts[5]][param_parts[7]] = {}
-                                    if param_parts[8] not in self._compiled_parameters["data_assets"][param_parts[3]][param_parts[5]][param_parts[7]]:
-                                        self._compiled_parameters["data_assets"][param_parts[3]][param_parts[5]][param_parts[7]][param_parts[8]] = set()
-                                    self._compiled_parameters["data_assets"][param_parts[3]][param_parts[5]][param_parts[7]][param_parts[8]].add(parameter)                                  
-                                
+                                data_asset = param_parts[3]
+                                expectation_name = param_parts[5]
+                                if param_parts[6] == "columns":
+                                    column_expectation = True
+                                    column_name = param_parts[7]
+                                    param_key = param_parts[8]
                                 else:
-                                    logger.warning("Invalid parameter urn (unrecognized structure): %s" % parameter)
+                                    param_key = param_parts[6]
                             except IndexError:
                                 logger.warning("Invalid parameter urn (not enough parts): %s" % parameter)
+
+                            if data_asset not in known_assets:
+                                logger.warning("Adding parameter %s for unknown data asset config" % parameter)
+
+                            if data_asset not in self._compiled_parameters["data_assets"]:
+                                self._compiled_parameters["data_assets"][data_asset] = {}
+
+                            if expectation_name not in self._compiled_parameters["data_assets"][data_asset]:
+                                self._compiled_parameters["data_assets"][data_asset][expectation_name] = {}
+
+                            if column_expectation:
+                                if "columns" not in self._compiled_parameters["data_assets"][data_asset][expectation_name]:
+                                    self._compiled_parameters["data_assets"][data_asset][expectation_name]["columns"] = {}
+                                if column_name not in self._compiled_parameters["data_assets"][data_asset][expectation_name]["columns"]:
+                                    self._compiled_parameters["data_assets"][data_asset][expectation_name]["columns"][column_name] = {}
+                                if param_key not in self._compiled_parameters["data_assets"][data_asset][expectation_name]["columns"][column_name]:
+                                    self._compiled_parameters["data_assets"][data_asset][expectation_name]["columns"][column_name][param_key] = set()
+                                self._compiled_parameters["data_assets"][data_asset][expectation_name]["columns"][column_name][param_key].add(parameter)   
+                            
+                            elif param_key in ["results", "details"]:
+                                if param_key not in self._compiled_parameters["data_assets"][data_asset][expectation_name]:
+                                    self._compiled_parameters["data_assets"][data_asset][expectation_name] = set()
+                                self._compiled_parameters["data_assets"][data_asset][expectation_name][param_key].add(parameter)  
+                            
+                            else:
+                                logger.warning("Invalid parameter urn (unrecognized structure): %s" % parameter)
+
         self._compiled = True
 
     def review_validation_result(self, url, failed_only=False):
