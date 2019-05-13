@@ -12,11 +12,6 @@ from sqlalchemy.engine import reflection
 from dateutil.parser import parse
 from datetime import datetime
 
-if sys.version_info.major == 2:  # If python 2
-    from itertools import izip_longest as zip_longest
-elif sys.version_info.major == 3:  # If python 3
-    from itertools import zip_longest
-
 from .dataset import Dataset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
 
