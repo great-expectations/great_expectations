@@ -120,8 +120,8 @@ class MetaDataset(DataAsset):
 
 
 class Dataset(MetaDataset):
-    def __init__(self, *args, caching=False, **kwargs):
-        self.caching = caching
+    def __init__(self, *args, **kwargs):
+        self.caching = kwargs.pop("caching", False)
 
         # some data structures for caching information specific to tabular datasets
         # these definitions currently need to come before MetaDataset.__init__ to allow for autoinspection
