@@ -27,5 +27,10 @@ def columns_exist(inspect_dataset):
     Args:
         inspect_dataset (great_expectations.dataset): The dataset to inspect and to which to add expectations.
     """
-    create_multiple_expectations(
-        inspect_dataset, inspect_dataset.table_columns, "expect_column_to_exist")
+    if not hasattr(inspect_dataset, 'table_columns'):
+        warnings.warn(
+            "No columns list found in dataset; no autoinspection performed.")
+        return
+    if not isinstance(inspect_dataset.table_columns[0], string_types):
+        raise AutoInspectError("Unable to determine column names for this dataset.")
+    create_multiple_expectations(inspect_dataset, inspect_dataset.table_columns, "expect_column_to_exist")
