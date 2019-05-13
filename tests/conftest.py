@@ -48,8 +48,8 @@ def basic_expectations_config():
     return config
 
 @pytest.fixture
-def file_data_asset(tmpdir):
-    path = os.path.join(tmpdir, 'file_data_asset.txt')
+def file_data_asset(tmpdir_factory):
+    path = tmpdir_factory.mktemp("file_data_asset_test").join("file_data_asset.txt")
     with open(path, 'w+') as file:
         file.write(json.dumps([0,1,2,3,4]))
 
