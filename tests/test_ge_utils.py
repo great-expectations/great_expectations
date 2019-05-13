@@ -3,8 +3,11 @@ import great_expectations as ge
 
 
 def test_validate_non_dataset(file_data_asset, empty_expectations_config):
-    with pytest.raises(ValueError, match=r"The validate util method only supports dataset validations"):
-        ge.validate(file_data_asset, empty_expectations_config, ge.data_asset.FileDataAsset)
+    
+    with pytest.raises(ValueError, match=r"The validate util method only supports type conversion for dataset validations"):
+        ge.validate(file_data_asset, empty_expectations_config)
+    res = ge.validate(file_data_asset, empty_expectations_config, ge.data_asset.FileDataAsset)
+    assert res["success"] == True
 
 
 def test_validate_dataset(dataset, basic_expectations_config):
