@@ -23,7 +23,7 @@ class DatabricksTableContext(DataContext):
         tables = self.spark.sql('show tables in {}'.format(self.database))
         return [row.tableName for row in tables.collect()]
 
-    def get_dataset(self, dataset_name, *args, caching=False, **kwargs):
+    def get_dataset(self, dataset_name, caching=False, **kwargs):
         query = 'select * from {}.{}'.format(self.database, dataset_name)
         if kwargs.get('partition'):
             if not kwargs.get('date_field'):
