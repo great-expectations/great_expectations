@@ -1,8 +1,15 @@
+import logging
+
 from .base import DataContext
 from ..dataset.sparkdf_dataset import SparkDFDataset
 
-from pyspark.sql import SparkSession
+logger = logging.getLogger(__name__)
 
+try:
+    from pyspark.sql import SparkSession
+except ImportError:
+    logger.error("Unable to load spark context; install optional spark dependency for support.")
+    raise
 
 class DatabricksTableContext(DataContext):
     """Meant to be used in a Databricks notebook
