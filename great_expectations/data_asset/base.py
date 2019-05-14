@@ -5,6 +5,7 @@ import copy
 from functools import wraps
 import traceback
 import warnings
+import logging
 from six import PY3, string_types
 from collections import namedtuple
 
@@ -17,6 +18,7 @@ from great_expectations.version import __version__
 from great_expectations.data_asset.util import DotDict, recursively_convert_to_json_serializable, parse_result_format
 from great_expectations.dataset.autoinspect import columns_exist
 
+logger = logging.getLogger("DataAsset")
 
 class DataAsset(object):
 
@@ -35,9 +37,11 @@ class DataAsset(object):
 
         """
         autoinspect_func = kwargs.pop("autoinspect_func", None)
+        initial_config = kwargs.pop("config", None)
+        data_asset_name = kwargs.pop("data_asset_name", None)
 
         super(DataAsset, self).__init__(*args, **kwargs)
-        self._initialize_expectations()
+        self._initialize_expectations(config=initial_config, data_asset_name=data_asset_name)
         if autoinspect_func is not None:
             autoinspect_func(self)
 
@@ -198,20 +202,24 @@ class DataAsset(object):
 
         return outer_wrapper
 
-    def _initialize_expectations(self, config=None, name=None):
+    def _initialize_expectations(self, config=None, data_asset_name=None):
         """Instantiates `_expectations_config` as empty by default or with a specified expectation `config`.
         In addition, this always sets the `default_expectation_args` to:
             `include_config`: False,
             `catch_exceptions`: False,
             `output_format`: 'BASIC'
 
+        By default, initializes data_asset_type to the name of the implementing class, but subclasses
+        that have interoperable semantics (e.g. Dataset) may override that parameter to clarify their
+        interoperability.
+
         Args:
             config (json): \
                 A json-serializable expectation config. \
                 If None, creates default `_expectations_config` with an empty list of expectations and \
-                key value `data_asset_name` as `name`.
+                key value `data_asset_name` as `data_asset_name`.
 
-            name (string): \
+            data_asset_name (string): \
                 The name to assign to `_expectations_config.data_asset_name` if `config` is not provided.
 
         """
@@ -224,6 +232,8 @@ class DataAsset(object):
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore", category=UserWarning)
                 self._expectations_config = DotDict(copy.deepcopy(config))
+                if data_asset_name is not None:
+                    self._expectations_config["data_asset_name"] = data_asset_name
 
         else:
             # Pandas incorrectly interprets this as an attempt to create a column and throws up a warning. Suppress it
@@ -231,7 +241,8 @@ class DataAsset(object):
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore", category=UserWarning)
                 self._expectations_config = DotDict({
-                    "data_asset_name": name,
+                    "data_asset_name": data_asset_name,
+                    "data_asset_type": self.__class__.__name__,
                     "meta": {
                         "great_expectations.__version__": __version__
                     },
@@ -730,7 +741,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                     If True, the returned results include the config information associated with each expectation, if \
                     it exists.
                 only_return_failures (boolean): \
-                    If True, expectation results are only returned when ``success = False``\.
+                    If True, expectation results are only returned when ``success = False`` \
 
             Returns:
                 A JSON-formatted dictionary containing a list of the validation results. \
@@ -792,19 +803,19 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         try:
             if expectations_config['meta']['great_expectations.__version__'] != __version__:
                 warnings.warn(
-                    "WARNING: This configuration object was built using a different version of great_expectations than is currently validating it.")
+                    "WARNING: This configuration object was built using version %s of great_expectations, but is currently being valided by version %s." % (expectations_config['meta']['great_expectations.__version__'], __version__))
         except KeyError:
             warnings.warn(
                 "WARNING: No great_expectations version found in configuration object.")
 
         for expectation in expectations_config['expectations']:
+
             try:
                 expectation_method = getattr(
                     self, expectation['expectation_type'])
 
                 if result_format is not None:
-                    expectation['kwargs'].update(
-                        {"result_format": result_format})
+                    expectation['kwargs'].update({'result_format': result_format})
 
                 # A missing parameter should raise a KeyError
                 evaluation_args = self._build_evaluation_parameters(
@@ -901,6 +912,14 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         self._expectations_config['evaluation_parameters'].update(
             {parameter_name: parameter_value})
 
+    def set_data_asset_name(self, data_asset_name):
+        """Sets the name of this data_asset as stored in the expectations configuration."""
+        self._expectations_config['data_asset_name'] = data_asset_name
+
+    def get_data_asset_name(self):
+        """Gets the current name of this data_asset as stored in the expectations configuration."""
+        return self._expectations_config['data_asset_name']
+
     def _build_evaluation_parameters(self, expectation_args, evaluation_parameters):
         """Build a dictionary of parameters to evaluate, using the provided evaluation_paramters,
         AND mutate expectation_args by removing any parameter values passed in as temporary values during
@@ -929,11 +948,16 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         return evaluation_args
 
     ##### Output generation #####
-    def _format_map_output(self,
-                                  result_format, success,
-                                  element_count, nonnull_count,
-                                  unexpected_list, unexpected_index_list
-                                  ):
+    def _format_map_output(
+        self,
+        result_format,
+        success,
+        element_count,
+        nonnull_count,
+        unexpected_count,
+        unexpected_list,
+        unexpected_index_list,
+    ):
         """Helper function to construct expectation result objects for map_expectations (such as column_map_expectation
         and file_lines_map_expectation).
 
@@ -943,6 +967,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         This function handles the logic for mapping those fields for column_map_expectations.
         """
+        # NB: unexpected_count parameter is explicit some implementing classes may limit the length of unexpected_list
 
         # Retain support for string-only output formats:
         result_format = parse_result_format(result_format)
@@ -956,7 +981,6 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             return return_obj
 
         missing_count = element_count - nonnull_count
-        unexpected_count = len(unexpected_list)
 
         if element_count > 0:
             unexpected_percent = unexpected_count / element_count
@@ -986,25 +1010,27 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             return return_obj
 
         # Try to return the most common values, if possible.
-        try:
-            partial_unexpected_counts = [
+        if 0 < result_format.get('partial_unexpected_count'):
+            try:
+                partial_unexpected_counts = [
                 {'value': key, 'count': value}
                 for key, value
                 in sorted(
-                    Counter(unexpected_list).most_common(
-                        result_format['partial_unexpected_count']),
+                    Counter(unexpected_list).most_common(result_format['partial_unexpected_count']),
                     key=lambda x: (-x[1], x[0]))
-            ]
-        except TypeError:
-            partial_unexpected_counts = [
-                'partial_exception_counts requires a hashable type']
-        
-        return_obj['result'].update(
-            {
-                'partial_unexpected_index_list': unexpected_index_list[:result_format['partial_unexpected_count']] if unexpected_index_list is not None else None,
-                'partial_unexpected_counts': partial_unexpected_counts
-            }
-        )
+                ]
+            except TypeError:
+                partial_unexpected_counts = [
+                    'partial_exception_counts requires a hashable type']
+            finally:
+                return_obj['result'].update(
+                    {
+                        'partial_unexpected_index_list': unexpected_index_list[:result_format[
+                            'partial_unexpected_count']] if unexpected_index_list is not None else None,
+                        'partial_unexpected_counts': partial_unexpected_counts
+                    }
+                )
+
 
         if result_format['result_format'] == 'SUMMARY':
             return return_obj
