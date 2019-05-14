@@ -23,6 +23,7 @@ config = {
         'spark':  ['pyspark>=2.3.2'],
         'sqlalchemy': ['sqlalchemy>=1.2'],
         'airflow': ['apache-airflow[s3]>=1.9.0', 'boto3>=1.7.3']
+        
     },
     'packages': find_packages(exclude=['docs', 'tests', 'examples']),
     'entry_points': {
