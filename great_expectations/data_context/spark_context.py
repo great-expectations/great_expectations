@@ -20,7 +20,9 @@ class SparkCSVDataContext(DataContext):
     def list_datasets(self):
         return os.listdir(self.directory)
 
-    def get_dataset(self, dataset_name, *args, **kwargs):
-        # TODO: deal with passing kwargs to spark.read and don't hard code options
-        df = self.spark.read.option('header', True).csv(os.path.join(self.directory, dataset_name))
-        return SparkDFDataset(df)
+    def get_dataset(self, dataset_name, *args, caching=False, **kwargs):
+        reader = self.spark.read
+        for option in kwargs.items():
+            reader = reader.option(*option)
+        df = reader.csv(os.path.join(self.directory, dataset_name))
+        return SparkDFDataset(df, caching=caching)

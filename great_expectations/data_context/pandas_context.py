@@ -22,7 +22,7 @@ class PandasCSVDataContext(DataContext):
     def list_datasets(self):
         return os.listdir(self.directory)
 
-    def get_dataset(self, dataset_name, *args, **kwargs):
+    def get_dataset(self, dataset_name, *args, caching=False, **kwargs):
         df = pd.read_csv(os.path.join(
             self.directory, dataset_name), *args, **kwargs)
-        return PandasDataset(df)
+        return PandasDataset(df, caching=caching)

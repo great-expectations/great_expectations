@@ -3,10 +3,19 @@
   "datasets": [{
       "data": {
         "x": [2.0, 5.0],
-        "y": [5.0, 5],
+        "y": [5, 5],
         "z": [0, 10],
         "n": [0, null],
         "b": [true, false]
+      },
+      "schemas": {
+        "spark": {
+          "x": "float",
+          "y": "int",
+          "z": "int",
+          "n": "int",
+          "b": "bool"
+        }
       },
       "tests": [{
           "title": "simple mean: positive range",
@@ -135,7 +144,7 @@
             "success": true,
             "observed_value": 0.5
           },
-          "suppress_test_for": ["postgresql"],
+          "suppress_test_for": ["postgresql", "Spark"],
           "_comment": "postgresql will not allow coercing the boolean type to an average"
         },
         {
@@ -150,7 +159,7 @@
             "success": true,
             "observed_value": 0.5
           },
-          "suppress_test_for": ["postgresql"],
+          "suppress_test_for": ["postgresql", "Spark"],
           "_comment": "postgresql will not allow coercing the boolean type to an average"
         },
         {
@@ -193,6 +202,11 @@
     {
       "data": {
         "empty_column": []
+      },
+      "schemas": {
+        "spark": {
+          "empty_column": "int"
+        }
       },
       "tests": [{
         "title": "Test empty column; should be false (no observed value with which to compare)",
