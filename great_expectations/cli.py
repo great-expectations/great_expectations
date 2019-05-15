@@ -145,7 +145,7 @@ def _scaffold_directories_and_notebooks(base_dir):
     safe_mmkdir(base_dir)
     notebook_dir_name = "notebooks"
 
-    for directory in [notebook_dir_name, "data_asset_configurations" "validations", "snapshots", "samples"]:
+    for directory in [notebook_dir_name, "data_asset_configurations", "validations", "snapshots", "samples"]:
         safe_mmkdir(os.path.join(base_dir, directory))
 
     for notebook in glob.glob(script_relative_path("init_notebooks/*.ipynb")):
