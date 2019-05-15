@@ -12,6 +12,10 @@ Planned Features
 * Real-time/streaming and adaption of distributional expectations
 
 
+v.0.5.1__develop
+----------------
+
+
 v.0.5.1
 ---------------
 * Fix issue where no result_format available for expect_column_values_to_be_null caused error
