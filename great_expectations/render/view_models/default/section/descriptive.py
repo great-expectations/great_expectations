@@ -122,7 +122,7 @@ class DescriptiveEvrColumnSectionRenderer(SectionRenderer):
         return [], content_blocks
 
     @classmethod
-    def render(cls, evrs, section_name, mode='json'):
+    def render(cls, evrs, section_name, section_type=None, mode='json'):
         #!!! Someday we may add markdown and others
         assert mode in ['html', 'json', 'widget']
 
@@ -139,6 +139,7 @@ class DescriptiveEvrColumnSectionRenderer(SectionRenderer):
 
         section = {
             "section_name": section_name,
+            "section_type": section_type,
             "content_blocks": content_blocks
         }
 
