@@ -26,7 +26,7 @@ class DescriptiveEvrPageRenderer(FullPageHtmlRenderer):
             #!!! We should get the column name from an expectation, not another rando param.
             sections.append(
                 DescriptiveEvrColumnSectionRenderer().render(
-                    evrs
+                    evrs, group
                 )
             )
 

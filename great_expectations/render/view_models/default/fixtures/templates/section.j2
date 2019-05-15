@@ -24,11 +24,14 @@
         </p>
 
         {% elif content_block["content_block_type"] == "graph" %}
-        <img
-            style="max-width:32%; max-height:200px; float: right;"
-            src="http://localhost:8000/plot-{{range(5,10)|random}}.png"
-        />
+        <div id="vis-{{section_loop.index}}-{{content_block_loop.index}}" style="width:45%"></div>
+        <script>
+        // Assign the specification to a local variable vlSpec.
+        var vlSpec = {{content_block["content"][0]}};
 
+        // Embed the visualization in the container with id `vis`
+        vegaEmbed('#vis-{{section_loop.index}}-{{loop.index}}', vlSpec, {actions: false});
+        </script>
         {% elif content_block["content_block_type"] == "table" %}
         <table style="width:50%">
             {% set table = content_block["content"] %}
