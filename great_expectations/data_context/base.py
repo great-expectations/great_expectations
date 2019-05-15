@@ -72,7 +72,10 @@ class DataContext(object):
                     self.dict[run_id] = {}
                 self.dict[run_id][name] = value
             def get_run_parameters(self, run_id):
-                return self.dict[run_id]
+                if run_id in self.dict:
+                    return self.dict[run_id]
+                else:
+                    return {}
 
         # If user wishes to provide their own implementation for this key value store (e.g.,
         # Redis-based), they should specify the following in the project config file:
