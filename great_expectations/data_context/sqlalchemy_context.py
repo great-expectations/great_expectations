@@ -1,8 +1,15 @@
+import logging
+
 from .base import DataContext
-from ..dataset.sqlalchemy_dataset import SqlAlchemyDataset
 
-from sqlalchemy import create_engine, MetaData
+logger = logging.getLogger(__name__)
 
+try:
+    from ..dataset.sqlalchemy_dataset import SqlAlchemyDataset
+    from sqlalchemy import create_engine, MetaData
+except ImportError:
+    logger.error("Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support")
+    raise
 
 class SqlAlchemyDataContext(DataContext):
     """

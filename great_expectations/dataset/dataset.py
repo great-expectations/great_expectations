@@ -1,10 +1,16 @@
 import inspect
-from itertools import zip_longest
+import sys
 from six import PY3, string_types
 from functools import wraps
 from numbers import Number
 from dateutil.parser import parse
 from datetime import datetime
+
+if sys.version_info.major == 2:  # If python 2
+    from itertools import izip_longest as zip_longest
+elif sys.version_info.major == 3:  # If python 3
+    from itertools import zip_longest
+
 
 from great_expectations.data_asset.base import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
@@ -120,8 +126,8 @@ class MetaDataset(DataAsset):
 
 
 class Dataset(MetaDataset):
-    def __init__(self, *args, caching=False, **kwargs):
-        self.caching = caching
+    def __init__(self, *args, **kwargs):
+        self.caching = kwargs.pop("caching", False)
 
         # some data structures for caching information specific to tabular datasets
         # these definitions currently need to come before MetaDataset.__init__ to allow for autoinspection

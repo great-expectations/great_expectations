@@ -1,10 +1,16 @@
 import os
+import logging
 
 from .base import DataContext
 from ..dataset.sparkdf_dataset import SparkDFDataset
 
-from pyspark.sql import SparkSession
+logger = logging.getLogger(__name__)
 
+try:
+    from pyspark.sql import SparkSession
+except ImportError:
+    logger.error("Unable to load spark context; install optional spark dependency for support.")
+    raise
 
 class SparkCSVDataContext(DataContext):
     """For now, functions like PandasCSVDataContext
@@ -20,7 +26,7 @@ class SparkCSVDataContext(DataContext):
     def list_datasets(self):
         return os.listdir(self.directory)
 
-    def get_dataset(self, dataset_name, *args, caching=False, **kwargs):
+    def get_dataset(self, dataset_name, caching=False, **kwargs):
         reader = self.spark.read
         for option in kwargs.items():
             reader = reader.option(*option)

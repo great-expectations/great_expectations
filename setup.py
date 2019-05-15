@@ -19,6 +19,12 @@ config = {
     'author_email': 'team@greatexpectations.io',
     'version': __version__,
     'install_requires': required,
+    'extras_require': {
+        'spark':  ['pyspark>=2.3.2'],
+        'sqlalchemy': ['sqlalchemy>=1.2'],
+        'airflow': ['apache-airflow[s3]>=1.9.0', 'boto3>=1.7.3']
+        
+    },
     'packages': find_packages(exclude=['docs', 'tests', 'examples']),
     'entry_points': {
         'console_scripts': ['great_expectations=great_expectations.cli:main']
@@ -26,9 +32,9 @@ config = {
     'name': 'great_expectations',
     'long_description': long_description,
     'license': 'Apache-2.0',
-    'keywords': 'data science testing pipeline',
+    'keywords': 'data science testing pipeline data quality dataquality validation datavalidation',
     'classifiers': [
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
         'Intended Audience :: Science/Research',
         'Intended Audience :: Other Audience',
@@ -40,6 +46,7 @@ config = {
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
     ]
 }
 

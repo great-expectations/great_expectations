@@ -1,7 +1,19 @@
+import logging
+
 from .pandas_context import PandasCSVDataContext
-from .sqlalchemy_context import SqlAlchemyDataContext
-from .spark_context import SparkCSVDataContext
-from .databricks_context import DatabricksTableContext
+
+logger = logging.getLogger(__name__)
+
+try:
+    from .sqlalchemy_context import SqlAlchemyDataContext
+except ImportError:
+    logger.info("Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support")
+
+try:
+    from .spark_context import SparkCSVDataContext
+    from .databricks_context import DatabricksTableContext
+except ImportError:
+    logger.info("Unable to load Spark contexts; install optional spark dependency for support")
 
 
 def get_data_context(context_type, options, *args, **kwargs):

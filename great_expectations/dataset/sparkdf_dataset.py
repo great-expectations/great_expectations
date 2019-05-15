@@ -2,6 +2,7 @@ from __future__ import division
 
 import inspect
 import re
+import logging
 from six import PY3, string_types
 from functools import wraps
 from datetime import datetime
@@ -18,9 +19,15 @@ from great_expectations.dataset.util import (
 import pandas as pd
 import numpy as np
 from scipy import stats
-from pyspark.sql.functions import udf, col, stddev as stddev_
-import pyspark.sql.types as sparktypes
 
+logger = logging.getLogger(__name__)
+
+try:
+    from pyspark.sql.functions import udf, col, stddev as stddev_
+    import pyspark.sql.types as sparktypes
+except ImportError:
+    logger.error("Unable to load spark context; install optional spark dependency for support.")
+    raise
 
 class MetaSparkDFDataset(Dataset):
     """MetaSparkDFDataset is a thin layer between Dataset and SparkDFDataset.

@@ -1,21 +1,23 @@
 from __future__ import division
+from six import PY3, string_types
 
 from functools import wraps
 import inspect
-from six import PY3
-from six import string_types
+import logging
 import sys
 import warnings
 
-import sqlalchemy as sa
-from sqlalchemy.engine import reflection
+logger = logging.getLogger(__name__)
+
+try:
+    import sqlalchemy as sa
+    from sqlalchemy.engine import reflection
+except ImportError:
+    logger.error("Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support")
+    raise
+
 from dateutil.parser import parse
 from datetime import datetime
-
-if sys.version_info.major == 2:  # If python 2
-    from itertools import izip_longest as zip_longest
-elif sys.version_info.major == 3:  # If python 3
-    from itertools import zip_longest
 
 from .dataset import Dataset
 from great_expectations.data_asset.util import DocInherit, parse_result_format

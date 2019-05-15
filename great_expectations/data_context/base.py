@@ -14,5 +14,5 @@ class DataContext(object):
     def list_datasets(self):
         return NotImplementedError
 
-    def get_dataset(self, dataset_name, caching=False):
+    def get_dataset(self, dataset_name, caching=False, **kwargs):
         return NotImplementedError
