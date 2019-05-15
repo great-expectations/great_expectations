@@ -655,6 +655,130 @@ class Dataset(DataAsset):
         """
         raise NotImplementedError
 
+    def expect_column_distinct_values_to_contain_set(self,
+                                                     column,
+                                                     value_set,
+                                                     parse_strings_as_datetimes=None,
+                                                     result_format=None, include_config=False, catch_exceptions=None, meta=None):
+        """Expect the set of distinct column values to contain a given set.
+
+        In contrast to expect_column_values_to_be_in_set() this ensures not that all column values are members of the given set but that values from the set _must_ be present in the column
+
+        For example:
+        ::
+
+            # my_df.my_col = [1,2,2,3,3,3]
+            >>> my_df.expect_column_distinct_values_to_contain_set(
+                "my_col",
+                [2,3]
+            )
+            {
+              "success": true
+              "result": {
+                "observed_value": [1,2,3]
+              },
+            }
+
+        expect_column_distinct_values_to_contain_set is a :func:`column_aggregate_expectation <great_expectations.data_asset.dataset.Dataset.column_aggregate_expectation>`.
+
+
+        Args:
+            column (str): \
+                The column name.
+            value_set (set-like): \
+                A set of objects used for comparison.
+
+        Keyword Args:
+            parse_strings_as_datetimes (boolean or None) : If True values provided in value_set will be parsed as \
+                datetimes before making comparisons.
+
+        Other Parameters:
+            result_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`result_format <result_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
+
+        Returns:
+            A JSON-serializable expectation result object.
+
+            Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+        See Also:
+            expect_column_distinct_values_to_equal_set
+        """
+        raise NotImplementedError
+
+    def expect_column_distinct_values_to_equal_set(self,
+                                                   column,
+                                                   value_set,
+                                                   parse_strings_as_datetimes=None,
+                                                   result_format=None, include_config=False, catch_exceptions=None, meta=None):
+        """Expect the set of distinct column values to equal a given set.
+
+        In contrast to expect_column_distinct_values_to_contain_set() this ensures not only that a certain set of values are present in the column but that these _and only these values_ are present.
+
+        For example:
+        ::
+
+            # my_df.my_col = [1,2,2,3,3,3]
+            >>> my_df.expect_column_distinct_values_to_equal_set(
+                "my_col",
+                [2,3]
+            )
+            {
+              "success": false
+              "result": {
+                "observed_value": [1,2,3]
+              },
+            }
+
+        expect_column_distinct_values_to_equal_set is a :func:`column_aggregate_expectation <great_expectations.data_asset.dataset.Dataset.column_aggregate_expectation>`.
+
+
+        Args:
+            column (str): \
+                The column name.
+            value_set (set-like): \
+                A set of objects used for comparison.
+
+        Keyword Args:
+            parse_strings_as_datetimes (boolean or None) : If True values provided in value_set will be parsed as \
+                datetimes before making comparisons.
+
+        Other Parameters:
+            result_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`result_format <result_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
+
+        Returns:
+            A JSON-serializable expectation result object.
+
+            Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+        See Also:
+            expect_column_distinct_values_to_contain_set
+        """
+        raise NotImplementedError
+
     def expect_column_values_to_be_between(self,
                                            column,
                                            min_value=None,
@@ -2328,7 +2452,10 @@ class Dataset(DataAsset):
         """
         raise NotImplementedError
 
-    @staticmethod
-    def _parse_value_set(value_set):
-        parsed_value_set = [parse(value) if isinstance(value, string_types) else value for value in value_set]
-        return parsed_value_set
+    def parse_datetimes_in_value_set(func):
+        def wrapper_parse_datetimes_in_value_set(*args, **kwargs):
+            if "parse_strings_as_datetimes" in kwargs and kwargs["parse_strings_as_datetimes"]:
+                kwargs['value_set'] = [parse(value) if isinstance(value, string_types) else value for value in kwargs['value_set']]
+                del kwargs["parse_strings_as_datetimes"]
+            return func(*args, **kwargs)
+        return wrapper_parse_datetimes_in_value_set
