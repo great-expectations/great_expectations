@@ -558,28 +558,50 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         return column.map(lambda x: isinstance(x, tuple(target_type_list)))
 
     @DocInherit
+    @MetaPandasDataset.parse_datetimes_in_value_set
     @MetaPandasDataset.column_map_expectation
     def expect_column_values_to_be_in_set(self, column, value_set,
                                           mostly=None,
-                                          parse_strings_as_datetimes=None,
                                           result_format=None, include_config=False, catch_exceptions=None, meta=None):
-        if parse_strings_as_datetimes:
-            parsed_value_set = self._parse_value_set(value_set)
-        else:
-            parsed_value_set = value_set
-        return column.isin(parsed_value_set)
+        return column.isin(value_set)
 
     @DocInherit
+    @MetaPandasDataset.parse_datetimes_in_value_set
     @MetaPandasDataset.column_map_expectation
     def expect_column_values_to_not_be_in_set(self, column, value_set,
                                               mostly=None,
-                                              parse_strings_as_datetimes=None,
                                               result_format=None, include_config=False, catch_exceptions=None, meta=None):
-        if parse_strings_as_datetimes:
-            parsed_value_set = self._parse_value_set(value_set)
-        else:
-            parsed_value_set = value_set
-        return ~column.isin(parsed_value_set)
+        return ~column.isin(value_set)
+
+    @DocInherit
+    @MetaPandasDataset.parse_datetimes_in_value_set
+    @MetaPandasDataset.column_aggregate_expectation
+    def expect_column_distinct_values_to_contain_set(self, column, value_set,
+                                                     result_format=None, include_config=False, catch_exceptions=None, meta=None):
+        expected_value_set = set(value_set)
+        observed_value_set = set(column.unique().tolist())
+
+        return {
+            "success": observed_value_set.issuperset(expected_value_set),
+            "result": {
+                "observed_value": list(observed_value_set)
+            }
+        }
+
+    @DocInherit
+    @MetaPandasDataset.parse_datetimes_in_value_set
+    @MetaPandasDataset.column_aggregate_expectation
+    def expect_column_distinct_values_to_equal_set(self, column, value_set,
+                                                   result_format=None, include_config=False, catch_exceptions=None, meta=None):
+        expected_value_set = set(value_set)
+        observed_value_set = set(column.unique().tolist())
+
+        return {
+            "success": observed_value_set == expected_value_set,
+            "result": {
+                "observed_value": list(observed_value_set)
+            }
+        }
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
