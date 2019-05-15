@@ -89,6 +89,6 @@ class PrescriptiveExpectationColumnSectionRenderer(SectionRenderer):
                 ),
                 autoescape=select_autoescape(['html', 'xml'])
             )
-            t = env.get_template('section.j2')
+            t = env.get_template('sections.j2')
 
-            return t.render(**{'section': section})
+            return t.render(**{'sections': [section]})
