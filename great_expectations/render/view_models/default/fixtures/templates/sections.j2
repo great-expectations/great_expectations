@@ -1,63 +1,66 @@
-{% for section in sections %}
-<div id="section-{{loop.index}}" class="ge-section" style="clear:both; margin-bottom: 50px;">
-    
-    {% set section_loop = loop %}
-    {% for content_block in section["content_blocks"] %}
-        {% set content_block_loop = loop %}
+{% if not nowrap %}{% extends "widget.j2" %}{% endif %}
+{% block sections %}
+    {% for section in sections %}
+    <div id="section-{{loop.index}}" class="ge-section" style="clear:both; margin-bottom: 50px;">
+        
+        {% set section_loop = loop %}
+        {% for content_block in section["content_blocks"] %}
+            {% set content_block_loop = loop %}
 
-        {% if content_block["content_block_type"] == "header" %}
-        <div style="width:100%"><h4>{{content_block["content"][0]}}</h4></div>
+            {% if content_block["content_block_type"] == "header" %}
+            <div style="width:100%"><h4>{{content_block["content"][0]}}</h4></div>
 
-        {% elif content_block["content_block_type"] == "text" %}
-        <div style="width:100%">
-            <p>
-                {{content_block["content"][0]}}
-                {# {{ lipsum(1, min=5, max=20) }} #}
-            </p>
-        </div>
+            {% elif content_block["content_block_type"] == "text" %}
+            <div style="width:100%">
+                <p>
+                    {{content_block["content"][0]}}
+                    {# {{ lipsum(1, min=5, max=20) }} #}
+                </p>
+            </div>
 
-        {% elif content_block["content_block_type"] == "bullet_list" %}
-        <div style="width:100%">
-            <p>
-                <ul>
-                    {% for bullet_point in content_block["content"] %}
-                    <li>{{ bullet_point }}</li>
+            {% elif content_block["content_block_type"] == "bullet_list" %}
+            <div style="width:100%">
+                <p>
+                    <ul>
+                        {% for bullet_point in content_block["content"] %}
+                        <li>{{ bullet_point }}</li>
+                        {% endfor %}
+                    </ul>
+                </p>
+            </div>
+
+            {% elif content_block["content_block_type"] == "graph" %}
+            {# <img
+                style="max-width:32%; max-height:200px; float: right;"
+                src="http://localhost:8000/plot-{{range(5,10)|random}}.png"
+            /> #}
+            <div id="vis-{{section_loop.index}}-{{content_block_loop.index}}" style="width:45%"></div>
+            <script>
+            // Assign the specification to a local variable vlSpec.
+            const vlSpec = {{content_block["content"][0]}};
+
+            // Embed the visualization in the container with id `vis`
+            vegaEmbed('#vis-{{section_loop.index}}-{{loop.index}}', vlSpec, {actions: false}).then(result=>console.log(result)).catch(console.warn);
+            </script>
+
+            {% elif content_block["content_block_type"] == "table" %}
+            <div style="width:45%">
+                <table >
+                    {% set table = content_block["content"] %}
+                    {% for row in table %}
+                    <tr class="{{ loop.cycle('odd', 'even') }}" >
+                        {% set rowloop = loop %}
+                        {% for cell in row %}
+                            <td id="cell-{{ rowloop.index }}-{{ loop.index }}">{{ cell }}</td>
+                        {% endfor %}
+                    </tr>
                     {% endfor %}
-                </ul>
-            </p>
-        </div>
+                </table>
+            </div>
 
-        {% elif content_block["content_block_type"] == "graph" %}
-        {# <img
-            style="max-width:32%; max-height:200px; float: right;"
-            src="http://localhost:8000/plot-{{range(5,10)|random}}.png"
-        /> #}
-        <div id="vis-{{section_loop.index}}-{{content_block_loop.index}}" style="width:45%"></div>
-        <script>
-        // Assign the specification to a local variable vlSpec.
-        var vlSpec = {{content_block["content"][0]}};
-
-        // Embed the visualization in the container with id `vis`
-        vegaEmbed('#vis-{{section_loop.index}}-{{loop.index}}', vlSpec, {actions: false});
-        </script>
-
-        {% elif content_block["content_block_type"] == "table" %}
-        <div style="width:45%">
-            <table >
-                {% set table = content_block["content"] %}
-                {% for row in table %}
-                <tr class="{{ loop.cycle('odd', 'even') }}" >
-                    {% set rowloop = loop %}
-                    {% for cell in row %}
-                        <td id="cell-{{ rowloop.index }}-{{ loop.index }}">{{ cell }}</td>
-                    {% endfor %}
-                </tr>
-                {% endfor %}
-            </table>
-        </div>
-
-        {% elif content_block["content_block_type"] == "example_list" %}
-        {% endif %}
+            {% elif content_block["content_block_type"] == "example_list" %}
+            {% endif %}
+        {% endfor %}
+    </div>
     {% endfor %}
-</div>
-{% endfor %}
+{% endblock %} 

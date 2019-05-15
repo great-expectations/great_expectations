@@ -26,11 +26,11 @@ class DescriptiveEvrColumnSectionRenderer(SectionRenderer):
                 return evr
 
     @classmethod
-    def _render_header(cls, evrs, content_blocks):
+    def _render_header(cls, evrs, evr_group, content_blocks):
         #!!! We should get the column name from an expectation, not another rando param.
         content_blocks.append({
             "content_block_type": "header",
-            "content": ["FOOBAR"],
+            "content": [evr_group],
         })
 
         return evrs, content_blocks
@@ -62,12 +62,19 @@ class DescriptiveEvrColumnSectionRenderer(SectionRenderer):
             evrs,
             "expect_column_values_to_be_in_set"
         )
-        if set_evr and "partial_unexpected_counts" in set_evr["result"]:
-            new_block = EvrContentBlockSnippetRenderer().render(set_evr)
 
+        new_block = None
+
+        if set_evr and "partial_unexpected_counts" in set_evr["result"]:
+            new_block = EvrContentBlockSnippetRenderer().render(set_evr, "partial_unexpected_counts")
+        elif set_evr and "partial_unexpected_list" in set_evr["result"]:
+            new_block = EvrContentBlockSnippetRenderer().render(set_evr, "partial_unexpected_list")
+
+        if new_block is not None:
             content_blocks.append(new_block)
 
         #!!! Before returning evrs, we should find and delete the `set_evr` that was used to render new_block.
+        ## JPC: I'm not sure that's necessary
         return evrs, content_blocks
 
     @classmethod
@@ -91,10 +98,7 @@ class DescriptiveEvrColumnSectionRenderer(SectionRenderer):
 
     @classmethod
     def _render_bullet_list(cls, evrs, content_blocks):
-        new_block = {
-            "content_block_type": "text",
-            "content": []
-        }
+        new_block = None
         for evr in evrs:
             #!!! This is a hack to cover up the fact that we're not yet pulling these EVRs out of the list.
             if evr["expectation_config"]["expectation_type"] not in [
@@ -102,6 +106,10 @@ class DescriptiveEvrColumnSectionRenderer(SectionRenderer):
                 "expect_column_values_to_be_of_type",
                 "expect_column_values_to_be_in_set",
             ]:
+                new_block = {
+                    "content_block_type": "text",
+                    "content": []
+                }
                 new_block["content"].append("""
     <div class="alert alert-primary" role="alert">
         Warning! Unrendered EVR:<br/>
@@ -109,16 +117,17 @@ class DescriptiveEvrColumnSectionRenderer(SectionRenderer):
     </div>
                 """)
 
-        content_blocks.append(new_block)
+        if new_block is not None:
+            content_blocks.append(new_block)
         return [], content_blocks
 
     @classmethod
-    def render(cls, evrs, mode='json'):
+    def render(cls, evrs, section_name, mode='json'):
         #!!! Someday we may add markdown and others
-        assert mode in ['html', 'json']
+        assert mode in ['html', 'json', 'widget']
 
         # This feels nice and tidy. We should probably use this pattern elsewhere, too.
-        remaining_evrs, content_blocks = cls._render_header(evrs, [])
+        remaining_evrs, content_blocks = cls._render_header(evrs, section_name, [])
         remaining_evrs, content_blocks = cls._render_column_type(
             evrs, content_blocks)
         remaining_evrs, content_blocks = cls._render_values_set(
@@ -129,20 +138,25 @@ class DescriptiveEvrColumnSectionRenderer(SectionRenderer):
             remaining_evrs, content_blocks)
 
         section = {
-            "section_name": "FOOBAR",
+            "section_name": section_name,
             "content_blocks": content_blocks
         }
+
+        env = Environment(
+            loader=PackageLoader('great_expectations',
+                                 'render/view_models/default/fixtures/templates'),
+            autoescape=select_autoescape(['html', 'xml'])
+        )
 
         #!!! This code should probably be factored out. We'll use it for many a renderer...
         if mode == "json":
             return section
 
         elif mode == "html":
-            env = Environment(
-                loader=PackageLoader('great_expectations',
-                                     'render/fixtures/templates'),
-                autoescape=select_autoescape(['html', 'xml'])
-            )
-            t = env.get_template('section.j2')
+            t = env.get_template('sections.j2')
+            return t.render(**{'sections': [section], 'nowrap': True})
+        
+        elif mode == "widget":
+            t = env.get_template('sections.j2')
+            return t.render(**{'sections': [section]})
 
-            return t.render(**{'section': section})
