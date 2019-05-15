@@ -23,7 +23,6 @@ class DescriptiveEvrPageRenderer(FullPageHtmlRenderer):
 
         sections = []
         for group, evrs in grouped_evrs.items():
-            #!!! We should get the column name from an expectation, not another rando param.
             sections.append(
                 DescriptiveEvrColumnSectionRenderer().render(
                     evrs, group
@@ -46,6 +45,6 @@ class DescriptiveEvrPageRenderer(FullPageHtmlRenderer):
             if "column" in exp["kwargs"]:
                 column_evrs_dict[exp["kwargs"]["column"]].append(evr)
             else:
-                column_evrs_dict["NO_COLUMN"].append(evr)
+                column_evrs_dict["table"].append(evr)
 
         return column_evrs_dict
