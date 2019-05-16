@@ -1263,8 +1263,12 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         if not is_valid_continuous_partition_object(partition_object):
             raise ValueError("Invalid continuous partition object.")
 
+        # TODO: consider changing this into a check that tail_weights does not exist exclusively, by moving this check into is_valid_continuous_partition_object
         if (partition_object['bins'][0] == -np.inf) or (partition_object['bins'][-1] == np.inf):
             raise ValueError("Partition endpoints must be finite.")
+
+        if "tail_weights" in partition_object and np.sum(partition_object["tail_weights"]) > 0:
+            raise ValueError("Partition cannot have tail weights -- endpoints must be finite.")
 
         test_cdf = np.append(np.array([0]), np.cumsum(
             partition_object['weights']))
@@ -1366,7 +1370,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             raise ValueError(
                 "internal_weight_holdout must be between zero and one.")
             
-        if(tail_weight_holdout != 0 and "tail_weights" in partition_object):
+        if (tail_weight_holdout != 0 and "tail_weights" in partition_object):
             raise ValueError(
                 "tail_weight_holdout must be 0 when using tail_weights in partition object")
 
@@ -1435,6 +1439,11 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             observed_weights = np.array(hist)/len(column)
         
             #Adjust expected_weights to account for tail_weight and internal_weight
+            if "tail_weights" in partition_object:
+                partition_tail_weight_holdout = np.sum(partition_object["tail_weights"])
+            else:
+                partition_tail_weight_holdout = 0
+
             expected_weights = np.array(
                 partition_object['weights']) * (1 - tail_weight_holdout - internal_weight_holdout)
         
@@ -1501,9 +1510,10 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                 if "tail_weights" in partition_object:
                     tail_weights=partition_object["tail_weights"]
                     comb_expected_weights=np.concatenate(([tail_weights[0]],expected_weights,[tail_weights[1]])) #Tack on tail weights
-                    expected_tail_weights=tail_weights #Tail weights are just tail_weights
-                comb_expected_weights=np.concatenate(([tail_weight_holdout / 2],expected_weights,[tail_weight_holdout / 2]))
-                expected_tail_weights=np.concatenate(([tail_weight_holdout / 2],[tail_weight_holdout / 2])) #Tail weights are just tail_weight holdout divided eaually to both tails
+                    expected_tail_weights=np.array(tail_weights) #Tail weights are just tail_weights
+                else:
+                    comb_expected_weights=np.concatenate(([tail_weight_holdout / 2],expected_weights,[tail_weight_holdout / 2]))
+                    expected_tail_weights=np.concatenate(([tail_weight_holdout / 2],[tail_weight_holdout / 2])) #Tail weights are just tail_weight holdout divided eaually to both tails
                 
                 comb_observed_weights=np.concatenate(([below_partition/len(column)],observed_weights, [above_partition/len(column)]))
                 observed_tail_weights=np.concatenate(([below_partition],[above_partition]))/len(column) #Tail weights are just the counts on either side of the partition
