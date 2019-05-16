@@ -1,7 +1,7 @@
 import pandas as pd
 import os
 
-from .base import DataSource
+from .base_source import DataSource
 from ..dataset.pandas_dataset import PandasDataset
 
 
@@ -20,10 +20,11 @@ class PandasCSVDataSource(DataSource):
     def connect(self, path):
         self.directory = path
 
-    def list_datasets(self):
+    def list_data_assets(self):
         return os.listdir(self.directory)
 
-    def get_dataset(self, dataset_name, *args, **kwargs):
+    def get_data_asset(self, dataset_name, *args, **kwargs):
+        data_context = kwargs.pop("data_context", None)
         df = pd.read_csv(os.path.join(
             self.directory, dataset_name), *args, **kwargs)
-        return PandasDataset(df)
+        return PandasDataset(df, data_context=data_context)
