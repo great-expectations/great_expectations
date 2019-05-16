@@ -78,5 +78,5 @@ class DBTTools(object):
                 return data.read()
         except FileNotFoundError as e:
             raise FileNotFoundError(
-                f"File {model_name} was not found. Is it in a sub-directory?"
+                f"dbt model {model_name} was not found. Is it in a sub-directory?"
             )
