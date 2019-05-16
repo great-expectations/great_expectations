@@ -1,5 +1,6 @@
 from __future__ import division
 
+import uuid
 from functools import wraps
 import inspect
 from six import PY3
@@ -258,7 +259,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
     def __init__(self, table_name=None, engine=None, connection_string=None,
                  custom_sql=None, schema=None, *args, **kwargs):
         if table_name is None:
-            raise ValueError("No table_name provided.")
+            table_name = uuid.uuid4()
 
         self._table = sa.Table(table_name, sa.MetaData(), schema=schema)
 
