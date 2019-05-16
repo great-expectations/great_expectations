@@ -743,7 +743,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         if isinstance(result_store, string_types):
             logger.info("Storing dataset to file")
             with open(result_store, 'w+') as file:
-                json.dump(result_store, file)
+                json.dump(result, file)
         else:
             ##### WARNING -- ASSUMING S3 ########
             logger.info("Storing to s3")
@@ -976,9 +976,12 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         if result_store is not None:
             ##### WARNING: HACKED FOR DEMO #######
-            bucket = result_store.bucket_name
-            key = result_store.key
-            result["meta"]["result_reference"] = f"s3://{bucket}/{key}"
+            if isinstance(result_store, string_types):
+                logger.info("Storing result to file")
+            else: #TODO: hack - assumes S3
+                bucket = result_store.bucket_name
+                key = result_store.key
+                result["meta"]["result_reference"] = f"s3://{bucket}/{key}"
             self._save_result(result, result_store = result_store)
 
         if result_callback is not None:

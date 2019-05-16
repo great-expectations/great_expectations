@@ -69,9 +69,7 @@ class DataContext(object):
         # TODO: What if the project config file does not exist?
         # TODO: Should we merge the project config file with the global config file?
         with open(os.path.join(self.context_root_directory, ".great_expectations.yml"), "r") as data:
-            test = data.readlines()
-            self._project_config = {}
-            # self._project_config = yaml.safe_load(data)
+            self._project_config = yaml.safe_load(data) or {}
 
         self._load_evaluation_parameter_store()
 
@@ -123,7 +121,10 @@ class DataContext(object):
                     self.dict[run_id] = {}
                 self.dict[run_id][name] = value
             def get_run_parameters(self, run_id):
-                return self.dict[run_id]
+                if run_id in self.dict:
+                    return self.dict[run_id]
+                else:
+                    return {}
 
         # If user wishes to provide their own implementation for this key value store (e.g.,
         # Redis-based), they should specify the following in the project config file:
@@ -246,7 +247,7 @@ class DataContext(object):
         self._evaluation_parameter_store.set(run_id, key, value)
 
     def get_validation_param(self, run_id, key):
-        return self._evaluation_parameter_store.set(run_id, key)
+        return self._evaluation_parameter_store.get(run_id, key)
 
     def _compile(self):
         """Compiles all current expectation configurations in this context to be ready for reseult registration.
