@@ -11,20 +11,32 @@ class DBTTools(object):
         self,
         profile,
         target,
+        # TODO this is geared towards init notebook use
+        dbt_base_directory="../../",
         dbt_project_file="dbt_project.yml",
         dbt_profiles_file_path="~/.dbt/profiles.yml",
     ):
         """
         Since the profiles file may contain multiple profiles and targets, the caller must specify the ones to use.
 
+        :param dbt_base_directory: path to base of dbt project (defaults to ../../)
         :param profile_name: profile name (top level block in profiles.yml)
         :param target_name: target name (inside the profile block)
         :param dbt_profiles_file_path: path to dbt profiles.yml. If not provided, the method will try to load from dbt default location
         """
         self.profile = profile
         self.target = target
-        self.dbt_project_file = dbt_project_file
         self.dbt_profiles_file_path = dbt_profiles_file_path
+
+        with open(os.path.join(dbt_base_directory, dbt_project_file), "r") as f:
+            self.dbt_project = yaml.safe_load(f) or {}
+
+        self.dbt_target_path = os.path.join(
+            dbt_base_directory,
+            self.dbt_project["target-path"],
+            "compiled",
+            self.dbt_project["name"],
+        )
 
     def get_sqlalchemy_engine(self):
         """
@@ -52,17 +64,6 @@ class DBTTools(object):
 
         return engine
 
-    def _get_dbt_target_path(self):
-        """
-        Get the dbt `target` path from a users's dbt_project.yml file
-
-        :return: path to `target` directory
-        """
-        with open(os.path.expanduser(self.dbt_project_file), "r") as f:
-            dbt_project = yaml.safe_load(f) or {}
-
-        return os.path.join(dbt_project["target-path"], "compiled", dbt_project["name"])
-
     def get_model_compiled_sql(self, model_name):
         """
         Read compiled SQL of a dbt model.
@@ -73,10 +74,10 @@ class DBTTools(object):
         """
         try:
             with open(
-                os.path.join(self._get_dbt_target_path(), model_name) + ".sql", "r"
+                os.path.join(self.dbt_target_path, model_name) + ".sql", "r"
             ) as data:
                 return data.read()
         except FileNotFoundError as e:
             raise FileNotFoundError(
-                f"dbt model {model_name} was not found. Is it in a sub-directory?"
+                f"dbt model {model_name} was not found in the compiled directory. Please run `dbt compile` or `dbt run` and try again. Or, check the directory."
             )
