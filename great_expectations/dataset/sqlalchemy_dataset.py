@@ -258,8 +258,12 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
     def __init__(self, table_name=None, engine=None, connection_string=None,
                  custom_sql=None, schema=None, *args, **kwargs):
-        if table_name is None:
+
+        if custom_sql and not table_name:
             table_name = uuid.uuid4()
+
+        if table_name is None:
+            raise ValueError("No table_name provided.")
 
         self._table = sa.Table(table_name, sa.MetaData(), schema=schema)
 
