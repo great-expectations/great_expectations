@@ -1,9 +1,16 @@
 from great_expectations.data_asset.base import DataAsset
-
+from six import string_types
+from dateutil.parser import parse
 
 class Dataset(DataAsset):
     def __init__(self, *args, **kwargs):
         super(Dataset, self).__init__(*args, **kwargs)
+
+    def _initialize_expectations(self, config=None, data_asset_name=None):
+        """Override data_asset_type with "Dataset"
+        """
+        super(Dataset, self)._initialize_expectations(config=config, data_asset_name=data_asset_name)
+        self._expectations_config["data_asset_type"] = "Dataset"
 
     @classmethod
     def column_map_expectation(cls, func):
@@ -585,6 +592,7 @@ class Dataset(DataAsset):
                                               column,
                                               value_set,
                                               mostly=None,
+                                              parse_strings_as_datetimes=None,
                                               result_format=None, include_config=False, catch_exceptions=None, meta=None
                                               ):
         """Expect column entries to not be in the set.
@@ -2320,3 +2328,7 @@ class Dataset(DataAsset):
         """
         raise NotImplementedError
 
+    @staticmethod
+    def _parse_value_set(value_set):
+        parsed_value_set = [parse(value) if isinstance(value, string_types) else value for value in value_set]
+        return parsed_value_set

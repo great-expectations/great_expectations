@@ -32,24 +32,11 @@ class TestDataAsset(unittest.TestCase):
             D._expectations_config,
             {
                 "data_asset_name": None,
+                "data_asset_type": "Dataset",
                 "meta": {
                     "great_expectations.__version__": ge.__version__
                 },
                 "expectations": []
-                # No longer expect autoinspection 20180920
-                # {
-                #     "expectation_type" : "expect_column_to_exist",
-                #     "kwargs" : { "column" : "x", 'result_format': 'BASIC'},
-                #     'success_on_last_run': True
-                # },{
-                #     "expectation_type" : "expect_column_to_exist",
-                #     "kwargs" : { "column" : "y", 'result_format': 'BASIC'},
-                #     'success_on_last_run': True
-                # },{
-                #     "expectation_type" : "expect_column_to_exist",
-                #     "kwargs" : { "column" : "z", 'result_format': 'BASIC'},
-                #     'success_on_last_run': True
-                # }]
             }
         )
 
@@ -58,21 +45,11 @@ class TestDataAsset(unittest.TestCase):
             D.get_expectations_config(),
             {
                 "data_asset_name": None,
+                "data_asset_type": "Dataset",
                 "meta": {
                     "great_expectations.__version__": ge.__version__
                 },
                 "expectations": []
-                # No longer expect autoinspection 20180920
-                # {
-                #     "expectation_type" : "expect_column_to_exist",
-                #     "kwargs" : { "column" : "x"}
-                # },{
-                #     "expectation_type" : "expect_column_to_exist",
-                #     "kwargs" : { "column" : "y"}
-                # },{
-                #     "expectation_type" : "expect_column_to_exist",
-                #     "kwargs" : { "column" : "z"}
-                # }]
             }
         )
 
@@ -189,6 +166,7 @@ class TestDataAsset(unittest.TestCase):
                 }
             ],
             "data_asset_name": None,
+            "data_asset_type": "Dataset",
             "meta": {
                 "great_expectations.__version__": ge.__version__
             }
@@ -261,6 +239,7 @@ class TestDataAsset(unittest.TestCase):
                 }
             ],
             "data_asset_name": None,
+            "data_asset_type": "Dataset",
             "meta": {
                 "great_expectations.__version__": ge.__version__
             }
@@ -332,6 +311,7 @@ class TestDataAsset(unittest.TestCase):
                 }
             ],
             "data_asset_name": None,
+            "data_asset_type": "Dataset",
             "meta": {
                 "great_expectations.__version__": ge.__version__
             }
@@ -996,6 +976,7 @@ class TestDataAsset(unittest.TestCase):
                     }
                 ],
                 'data_asset_name': None,
+                "data_asset_type": "Dataset",
                 "meta": {
                     "great_expectations.__version__": ge.__version__
                 }
@@ -1214,7 +1195,7 @@ class TestDataAsset(unittest.TestCase):
             out = D.validate(expectations_config={
                              "meta": {"great_expectations.__version__": "0.0.0"}, "expectations": []})
             self.assertEqual(str(w[0].message),
-                             "WARNING: This configuration object was built using a different version of great_expectations than is currently validating it.")
+                             "WARNING: This configuration object was built using version 0.0.0 of great_expectations, but is currently being valided by version %s." % ge.__version__)
 
     def test_catch_exceptions_with_bad_expectation_type(self):
         my_df = ge.dataset.PandasDataset({"x": range(10)})

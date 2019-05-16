@@ -60,6 +60,12 @@ class MetaSqlAlchemyDataset(Dataset):
             ignore_values = [None]
             if func.__name__ in ['expect_column_values_to_not_be_null', 'expect_column_values_to_be_null']:
                 ignore_values = []
+                # Counting the number of unexpected values can be expensive when there is a large
+                # number of np.nan values.
+                # This only happens on expect_column_values_to_not_be_null expectations.
+                # Since there is no reason to look for most common unexpected values in this case,
+                # we will instruct the result formatting method to skip this step.
+                result_format['partial_unexpected_count'] = 0 
 
             count_query = sa.select([
                 sa.func.count().label('element_count'),
@@ -148,6 +154,7 @@ class MetaSqlAlchemyDataset(Dataset):
                 del return_obj['result']['unexpected_percent_nonmissing']
                 try:
                     del return_obj['result']['partial_unexpected_counts']
+                    del return_obj['result']['partial_unexpected_list']
                 except KeyError:
                     pass
 
@@ -476,7 +483,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                                           result_format=None, include_config=False, catch_exceptions=None, meta=None
                                           ):
         if parse_strings_as_datetimes:
-            parsed_value_set = [parse(value) if isinstance(value, string_types) else value for value in value_set]
+            parsed_value_set = self._parse_value_set(value_set)
         else:
             parsed_value_set = value_set
         return sa.column(column).in_(tuple(parsed_value_set))
@@ -487,9 +494,14 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                                               column,
                                               value_set,
                                               mostly=None,
+                                              parse_strings_as_datetimes=None,
                                               result_format=None, include_config=False, catch_exceptions=None, meta=None
                                               ):
-        return sa.column(column).notin_(tuple(value_set))
+        if parse_strings_as_datetimes:
+            parsed_value_set = self._parse_value_set(value_set)
+        else:
+            parsed_value_set = value_set
+        return sa.column(column).notin_(tuple(parsed_value_set))
 
     @DocInherit
     @MetaSqlAlchemyDataset.column_map_expectation

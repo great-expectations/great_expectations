@@ -440,7 +440,7 @@ def test_ge_pandas_merging():
         'salary': [57000, 52000, 59000, 65000]
     })
 
-    df2.expect_column_values_to_match_regex('salary', '^[0-9]{4,6]$')
+    df2.expect_column_values_to_match_regex('salary', '^[0-9]{4,6}$')
 
     df = df1.merge(df2, on='id')
 
