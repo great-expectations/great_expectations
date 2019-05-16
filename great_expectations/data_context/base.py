@@ -3,14 +3,15 @@ import json
 import logging
 import yaml
 import sys
+from glob import glob
 
 from great_expectations.version import __version__
 from great_expectations.dataset import PandasDataset
 from great_expectations import read_csv
 from urllib.parse import urlparse
 
-from ..sqlalchemy_context import SqlAlchemyDataSource
-from ..pandas_context import PandasCSVDataSource
+from .sqlalchemy_source import SqlAlchemyDataSource, DBTDataSource
+from .pandas_source import PandasCSVDataSource
 
 logger = logging.getLogger(__name__)
 
@@ -19,16 +20,6 @@ logger = logging.getLogger(__name__)
 class ExpectationExplorer(object):
     def make_widget(self, return_obj):
         return return_obj
-
-class DataSource(object):
-    def __init__():
-        return
-
-    def get_data_asset(self):
-        raise NotImplementedError
-
-    def list_data_assets(self):
-        raise NotImplementedError
 
 class DataContext(object):
     #TODO: update class documentation
@@ -81,7 +72,7 @@ class DataContext(object):
 
     def get_data_asset(self, datasource_name="default", data_asset_name="None", *args, **kwargs):
         datasource = self._get_datasource(datasource_name)
-        data_asset = datasource.get_data_asset(data_asset_name, *args, **kwargs)
+        data_asset = datasource.get_data_asset(data_asset_name, *args, data_context=self, **kwargs)
         data_asset._initialize_expectations(self.get_data_asset_config(data_asset_name))
         return data_asset
 
@@ -93,7 +84,9 @@ class DataContext(object):
                 return PandasCSVDataSource(**datasource_config)
 
             elif datasource_type == "dbt":
-                return DBTDataSource(**datasource_config)
+                profile = datasource_config["profile"]
+                target = datasource_config["target"]
+                return DBTDataSource(profile, target)
 
             elif datasource_type == "sqlalchemy":
                 return SqlAlchemyDataSource(**datasource_config)
@@ -163,11 +156,10 @@ class DataContext(object):
             logger.exception("Failed to load evaluation_parameter_store class")
             raise
 
-    def list_data_asset_configs(self, show_full_path=False):
-        if show_full_path:
-            return [os.path.abspath(os.path.join(self.directory, file_path)) for file_path in os.listdir(self.directory) if file_path.endswith('.json')]
-        else:
-            return [os.path.splitext(os.path.basename(file_path))[0] for file_path in os.listdir(self.directory) if file_path.endswith('.json')]
+    def list_data_asset_configs(self):
+        root_path = self.directory
+        result = [os.path.splitext(os.path.relpath(y, root_path))[0] for x in os.walk(root_path) for y in glob(os.path.join(x[0], '*.json'))]
+        return result
 
     def get_data_asset_config(self, data_asset_name):
         config_file_path = os.path.join(self.directory, data_asset_name + '.json')
@@ -188,6 +180,7 @@ class DataContext(object):
     def save_data_asset_config(self, data_asset_config):
         data_asset_name = data_asset_config['data_asset_name']
         config_file_path = os.path.join(self.directory, data_asset_name + '.json')
+        os.makedirs(os.path.split(config_file_path)[0], exist_ok=True)
         with open(config_file_path, 'w') as outfile:
             json.dump(data_asset_config, outfile)
         self._compiled = False
@@ -294,8 +287,9 @@ class DataContext(object):
         }
 
         known_assets = self.list_data_asset_configs()
+        config_paths = [y for x in os.walk(self.directory) for y in glob(os.path.join(x[0], '*.json'))]
 
-        for config_file in self.list_data_asset_configs(show_full_path=True):
+        for config_file in config_paths:
             config = json.load(open(config_file, 'r'))
             for expectation in config["expectations"]:
                 for _, value in expectation["kwargs"].items():

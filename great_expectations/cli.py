@@ -82,6 +82,18 @@ def _save_append_line_to_gitignore(line):
         gitignore.write(line + "\n")
 
 
+def _profile_template():
+    return """
+superconductive:
+    default:
+        type: postgres
+        host: localhost 
+        port: 5432
+        user: postgres  
+        pass: "****"
+        dbname: postgres
+"""
+
 def _yml_template(bucket="", slack_webhook=""):
     return """# This project file was created with the command `great_expectations init`
 
@@ -93,6 +105,22 @@ aws:
 # Add your Slack webhook here to get notifications of validation results
 # See https://api.slack.com/incoming-webhooks for setup
 slack_webhook: {}
+
+# Configure datasources below. Valid datasource types include pandas, sqlalchemy, and dbt
+datasources:
+#   pandas:
+#     type: pandas
+#     path: /data
+#   mydb:
+#     type: sqlalchemy
+#     profile_name: great_expectations
+#     target_name: default
+#     profiles_filepath: ~/.great_expectations/profiles.yml
+  dbt:
+    type: dbt
+    profile_name: great_expectations
+    target_name: default
+    profiles_filepath: ~/.dbt/profiles.yml
 """.format(bucket, slack_webhook)
 
 
@@ -132,10 +160,10 @@ def initialize_project(parsed_args):
             print("""⚠️   Warning! You have elected to skip adding entries to your .gitignore.
     This is NOT recommended as it may contain secrets. Do not commit this to source control!""".format(project_yml_filename))
 
-    if slack_webhook or bucket:
-        # TODO fail if a project file already exists
-        with open(project_yml_filename, 'w') as ff:
-            ff.write(_yml_template(bucket, slack_webhook))
+    # if slack_webhook or bucket:
+    #     # TODO fail if a project file already exists
+    with open(project_yml_filename, 'w') as ff:
+        ff.write(_yml_template(bucket, slack_webhook))
     
     print("Welcome to Great Expectations!")
     print("")
