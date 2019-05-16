@@ -260,7 +260,8 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                  custom_sql=None, schema=None, *args, **kwargs):
 
         if custom_sql and not table_name:
-            table_name = uuid.uuid4()
+            # dashes are special characters in most databases so use undercores
+            table_name = str(uuid.uuid4()).replace("-", "_")
 
         if table_name is None:
             raise ValueError("No table_name provided.")

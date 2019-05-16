@@ -114,11 +114,11 @@ def test_sqlalchemydataset_raises_error_on_missing_table_name():
 
 def test_sqlalchemmydataset_builds_guid_for_table_name_on_custom_sql():
     with mock.patch("uuid.uuid4") as mock_uuid:
-        mock_uuid.return_value = "a-long-messy-guid"
+        mock_uuid.return_value = "a-guid-with-dashes-that-will-break-sql"
         engine = mock.MagicMock()
 
         dataset = SqlAlchemyDataset(engine=engine, custom_sql="select 1")
-        assert dataset._table.name =="a-long-messy-guid"
+        assert dataset._table.name =="a_guid_with_dashes_that_will_break_sql"
 
 
 def test_sqlalchemydataset_with_custom_sql():
