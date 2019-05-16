@@ -4,7 +4,7 @@ from ..dataset.sqlalchemy_dataset import SqlAlchemyDataset
 from sqlalchemy import create_engine, MetaData
 
 
-class SqlAlchemyDataContext(DataContext):
+class SqlAlchemyDataSource(DataSource):
     """
     A SqlAlchemyDataContext creates a SQLAlchemy engine and provides a list of tables available in the list_datasets
     method. Its get_dataset method returns a new SqlAlchemy dataset with the provided name.
@@ -13,7 +13,7 @@ class SqlAlchemyDataContext(DataContext):
     """
 
     def __init__(self, *args, **kwargs):
-        super(SqlAlchemyDataContext, self).__init__(*args, **kwargs)
+        super(SqlAlchemyDataSource, self).__init__(*args, **kwargs)
         self.meta = MetaData()
 
     def connect(self, options, *args, **kwargs):

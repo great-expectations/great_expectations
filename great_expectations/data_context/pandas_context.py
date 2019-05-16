@@ -1,11 +1,11 @@
 import pandas as pd
 import os
 
-from .base import DataContext
+from .base import DataSource
 from ..dataset.pandas_dataset import PandasDataset
 
 
-class PandasCSVDataContext(DataContext):
+class PandasCSVDataSource(DataSource):
     """
     A PandasCSVDataContext makes it easy to get a list of files available in the list_datasets
     method. Its get_dataset method returns a new Pandas dataset with the provided name.
@@ -14,10 +14,11 @@ class PandasCSVDataContext(DataContext):
     """
 
     def __init__(self, *args, **kwargs):
-        super(PandasCSVDataContext, self).__init__(*args, **kwargs)
+        super(PandasCSVDataSource, self).__init__(*args, **kwargs)
+        self.connect(kwargs["path"])
 
-    def connect(self, options):
-        self.directory = options
+    def connect(self, path):
+        self.directory = path
 
     def list_datasets(self):
         return os.listdir(self.directory)

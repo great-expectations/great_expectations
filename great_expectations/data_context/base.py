@@ -9,8 +9,26 @@ from great_expectations.dataset import PandasDataset
 from great_expectations import read_csv
 from urllib.parse import urlparse
 
+from ..sqlalchemy_context import SqlAlchemyDataSource
+from ..pandas_context import PandasCSVDataSource
+
 logger = logging.getLogger(__name__)
 
+
+# STUB
+class ExpectationExplorer(object):
+    def make_widget(self, return_obj):
+        return return_obj
+
+class DataSource(object):
+    def __init__():
+        return
+
+    def get_data_asset(self):
+        raise NotImplementedError
+
+    def list_data_assets(self):
+        raise NotImplementedError
 
 class DataContext(object):
     #TODO: update class documentation
@@ -20,7 +38,10 @@ class DataContext(object):
     Warning: this feature is new in v0.4 and may change based on community feedback.
     """
 
-    def __init__(self, options=None, *args, **kwargs):
+    def __init__(self, options=None, expectation_explorer=False, *args, **kwargs):
+        self._expectation_explorer = expectation_explorer
+        if expectation_explorer:
+            self._expectation_explorer_manager = ExpectationExplorer()
         self.connect(options, *args, **kwargs)
 
     def connect(self, context_root_dir):
@@ -55,6 +76,34 @@ class DataContext(object):
         self._load_evaluation_parameter_store()
 
         self._compiled = False
+
+    def list_data_assets(self, datasource_name="default"):
+        datasource = self._get_datasource(datasource_name)
+        return datasource.list_data_assets()
+
+    def get_data_asset(self, datasource_name="default", data_asset_name="None", *args, **kwargs):
+        datasource = self._get_datasource(datasource_name)
+        data_asset = datasource.get_data_asset(data_asset_name, *args, **kwargs)
+        data_asset._initialize_expectations(self.get_data_asset_config(data_asset_name))
+        return data_asset
+
+    def _get_datasource(self, datasource_name):
+        try:
+            datasource_config = self._project_config["datasources"][datasource_name]
+            datasource_type = datasource_config["type"]
+            if datasource_type == "pandas":
+                return PandasCSVDataSource(**datasource_config)
+
+            elif datasource_type == "dbt":
+                return DBTDataSource(**datasource_config)
+
+            elif datasource_type == "sqlalchemy":
+                return SqlAlchemyDataSource(**datasource_config)
+            else:
+                raise ValueError(f"Unrecognized datasource type {datasource_type}")
+
+        except KeyError:
+            raise ValueError(f"Unable to load datasource {datasource_name} -- no configuration found or invalid configuration.")
 
 
     def _load_evaluation_parameter_store(self):
@@ -350,3 +399,9 @@ class DataContext(object):
 
         else:
             raise ValueError("Only s3 urls are supported.")
+
+    def update_return_obj(self, return_obj):
+        if self._expectation_explorer:
+            return self._expectation_explorer_manager.make_widget(return_obj)
+        else:
+            return return_obj
