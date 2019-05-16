@@ -2452,10 +2452,7 @@ class Dataset(DataAsset):
         """
         raise NotImplementedError
 
-    def parse_datetimes_in_value_set(func):
-        def wrapper_parse_datetimes_in_value_set(*args, **kwargs):
-            if "parse_strings_as_datetimes" in kwargs and kwargs["parse_strings_as_datetimes"]:
-                kwargs['value_set'] = [parse(value) if isinstance(value, string_types) else value for value in kwargs['value_set']]
-                del kwargs["parse_strings_as_datetimes"]
-            return func(*args, **kwargs)
-        return wrapper_parse_datetimes_in_value_set
+    @staticmethod
+    def _parse_value_set(value_set):
+        parsed_value_set = [parse(value) if isinstance(value, string_types) else value for value in value_set]
+        return parsed_value_set

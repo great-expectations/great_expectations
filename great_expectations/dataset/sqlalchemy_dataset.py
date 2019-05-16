@@ -474,26 +474,34 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         return sa.column(column) != None
 
     @DocInherit
-    @MetaSqlAlchemyDataset.parse_datetimes_in_value_set
     @MetaSqlAlchemyDataset.column_map_expectation
     def expect_column_values_to_be_in_set(self,
                                           column,
                                           value_set,
                                           mostly=None,
+                                          parse_strings_as_datetimes=None,
                                           result_format=None, include_config=False, catch_exceptions=None, meta=None
                                           ):
-        return sa.column(column).in_(tuple(value_set))
+        if parse_strings_as_datetimes:
+            parsed_value_set = self._parse_value_set(value_set)
+        else:
+            parsed_value_set = value_set
+        return sa.column(column).in_(tuple(parsed_value_set))
 
     @DocInherit
-    @MetaSqlAlchemyDataset.parse_datetimes_in_value_set
     @MetaSqlAlchemyDataset.column_map_expectation
     def expect_column_values_to_not_be_in_set(self,
                                               column,
                                               value_set,
                                               mostly=None,
+                                              parse_strings_as_datetimes=None,
                                               result_format=None, include_config=False, catch_exceptions=None, meta=None
                                               ):
-        return sa.column(column).notin_(tuple(value_set))
+        if parse_strings_as_datetimes:
+            parsed_value_set = self._parse_value_set(value_set)
+        else:
+            parsed_value_set = value_set
+        return sa.column(column).notin_(tuple(parsed_value_set))
 
     def get_distinct_values(self, column):
         sql_results = self.engine.execute(
@@ -504,11 +512,16 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         return set([val[0] for val in sql_results])
 
     @DocInherit
-    @MetaSqlAlchemyDataset.parse_datetimes_in_value_set
     @MetaSqlAlchemyDataset.column_aggregate_expectation
     def expect_column_distinct_values_to_contain_set(self, column, value_set,
+                                                     parse_strings_as_datetimes=None,
                                                      result_format=None, include_config=False, catch_exceptions=None, meta=None):
-        expected_value_set = set(value_set)
+        if parse_strings_as_datetimes:
+            parsed_value_set = self._parse_value_set(value_set)
+        else:
+            parsed_value_set = value_set
+
+        expected_value_set = set(parsed_value_set)
         observed_value_set = self.get_distinct_values(column)
 
         return {
@@ -519,11 +532,16 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         }
 
     @DocInherit
-    @MetaSqlAlchemyDataset.parse_datetimes_in_value_set
     @MetaSqlAlchemyDataset.column_aggregate_expectation
     def expect_column_distinct_values_to_equal_set(self, column, value_set,
+                                                   parse_strings_as_datetimes=None,
                                                    result_format=None, include_config=False, catch_exceptions=None, meta=None):
-        expected_value_set = set(value_set)
+        if parse_strings_as_datetimes:
+            parsed_value_set = self._parse_value_set(value_set)
+        else:
+            parsed_value_set = value_set
+
+        expected_value_set = set(parsed_value_set)
         observed_value_set = self.get_distinct_values(column)
 
         return {
