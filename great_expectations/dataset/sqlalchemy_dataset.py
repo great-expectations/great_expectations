@@ -308,7 +308,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         It hasn't been tested in all SQL dialects, and may change based on community feedback.
         :param custom_sql:
         """
-        stmt = "CREATE TEMPORARY TABLE {table_name} AS {custom_sql}".format(
+        stmt = "CREATE TEMPORARY TABLE \"{table_name}\" AS {custom_sql}".format(
             table_name=table_name, custom_sql=custom_sql)
         self.engine.execute(stmt)
 
