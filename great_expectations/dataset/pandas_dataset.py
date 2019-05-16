@@ -568,7 +568,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
             if np.issubdtype(column.dtype, np.datetime64):
                 temp_column = column
-        else:
+            else:
                 temp_column = column.map(parse)
         else:
             parsed_value_set = value_set
@@ -587,7 +587,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             
             if np.issubdtype(column.dtype, np.datetime64):
                 temp_column = column
-        else:
+            else:
                 temp_column = column.map(parse)
         else:
             parsed_value_set = value_set
@@ -619,7 +619,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             if np.issubdtype(column.dtype, np.datetime64):
                 temp_column = column
             else:
-            temp_column = column.map(parse)
+                temp_column = column.map(parse)
 
         else:
             temp_column = column
@@ -1127,7 +1127,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             if np.issubdtype(column.dtype, np.datetime64):
                 temp_column = column
             else:
-            temp_column = column.map(parse)
+                temp_column = column.map(parse)
 
         else:
             temp_column = column
@@ -1178,7 +1178,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             if np.issubdtype(column.dtype, np.datetime64):
                 temp_column = column
             else:
-            temp_column = column.map(parse)
+                temp_column = column.map(parse)
 
         else:
             temp_column = column
