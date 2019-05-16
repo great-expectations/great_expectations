@@ -14,6 +14,9 @@ Planned Features
 
 v.0.5.1__develop
 ----------------
+* Add support for SparkDFDataset (thanks @cselig)
+* Drop official support for python 2 and pandas < 0.22
+* Migrate distributional expectations to new testing framework
 
 
 v.0.5.1
