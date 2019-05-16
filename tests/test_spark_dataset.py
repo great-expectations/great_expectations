@@ -2,8 +2,8 @@ import great_expectations as ge
 import pytest
 
 context = ge.get_data_context('SparkCSV', './tests/test_sets')
-titanic_dataset = context.get_dataset('Titanic.csv')
-strf_dataset = context.get_dataset('strf_test.csv')
+titanic_dataset = context.get_dataset('Titanic.csv', header=True)
+strf_dataset = context.get_dataset('strf_test.csv', header=True)
 
 
 def test_expect_column_values_to_be_unique():
