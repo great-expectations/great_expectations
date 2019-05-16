@@ -527,7 +527,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         return {
             "success": observed_value_set.issuperset(expected_value_set),
             "result": {
-                "observed_value": list(observed_value_set)
+                "observed_value": sorted(list(observed_value_set))
             }
         }
 
@@ -547,7 +547,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         return {
             "success": observed_value_set == expected_value_set,
             "result": {
-                "observed_value": list(observed_value_set)
+                "observed_value": sorted(list(observed_value_set))
             }
         }
 
