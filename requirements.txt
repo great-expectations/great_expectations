@@ -7,3 +7,4 @@ six>=1.9.0
 jsonschema>=2.5.1
 sqlalchemy>=1.2
 altair==2.2.2
+PyYAML==5.1

@@ -16,3 +16,4 @@ pytest-cov>=2.6.1
 coveralls>=1.3
 psycopg2>=2.8.1
 altair==2.2.2
+PyYAML==5.1
