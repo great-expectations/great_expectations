@@ -39,6 +39,8 @@ TODO: SnippetRenderers should also use jinja instead of string spanning
 
 Each `SnippetRenderer` is a collection of functions that each convert a single Expectation (or EVR) to a serializable string or list of strings.
 
+TODO: Some snippetrenderers should operate on multiple expectation_configurations or EVRs (e.g. bullet list summarizing conditions across columns in a table)
+
 ```
 ExpectationBulletPointSnippetRenderer.render({
     "expectation_type": "expect_column_to_exist",

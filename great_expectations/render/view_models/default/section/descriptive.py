@@ -66,7 +66,13 @@ class DescriptiveEvrColumnSectionRenderer(SectionRenderer):
         )
 
         new_block = None
+        
+        # TODO: _render_values_set differs from the other content block generators in that it gets back a full
+        # content block; I think that is a better pattern than the snippetRenderer pattern that gets back snippets
+        # without the accompanying content block
 
+        # Further, the template for the content block should be packaged separately so that
+        # content block renderers can self-render and be includeed in the bigger templates
         if set_evr and "partial_unexpected_counts" in set_evr["result"]:
             new_block = EvrContentBlockSnippetRenderer().render(set_evr, "partial_unexpected_counts")
         elif set_evr and "partial_unexpected_list" in set_evr["result"]:
