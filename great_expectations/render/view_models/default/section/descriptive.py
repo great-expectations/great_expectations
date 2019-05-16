@@ -1,5 +1,6 @@
 import json
 import random
+import logging
 
 from jinja2 import (
     Template, Environment, BaseLoader, PackageLoader, select_autoescape
@@ -15,6 +16,7 @@ from ....snippets import (
     EvrContentBlockSnippetRenderer
 )
 
+logger = logging.getLogger(__name__)
 
 class DescriptiveEvrColumnSectionRenderer(SectionRenderer):
     """Generates a section's worth of descriptive content blocks for a set of EVRs from the same column."""
@@ -122,9 +124,34 @@ class DescriptiveEvrColumnSectionRenderer(SectionRenderer):
         return [], content_blocks
 
     @classmethod
-    def render(cls, evrs, section_name, section_type=None, mode='json'):
-        #!!! Someday we may add markdown and others
-        assert mode in ['html', 'json', 'widget']
+    def _get_template(cls, template):
+        recognized_templates = ['html', 'json', 'widget']
+        if template not in recognized_templates:
+            try:
+                env = Environment(
+                    loader=PackageLoader('great_expectations',
+                                        'render/view_models/default/fixtures/templates'),
+                    autoescape=select_autoescape(['html', 'xml'])
+                )
+                t = env.get_template(template)
+            except:
+                logger.warning(f"Unable to find template {template}. Registered templates are {recognized_templates}")
+        elif template == 'html':
+            t = env.get_template('sections.j2')
+        elif template == 'widget':
+            t = env.get_template('widget.j2')
+        else:
+            class NoOpTemplate(object):
+                @classmethod
+                def render(cls, render_object):
+                    return render_object
+            t = NoOpTemplate
+
+        return t
+
+    @classmethod
+    def render(cls, evrs, section_name, section_type=None, template='json'):
+        t = cls._get_template(template)
 
         # This feels nice and tidy. We should probably use this pattern elsewhere, too.
         remaining_evrs, content_blocks = cls._render_header(evrs, section_name, [])
@@ -142,22 +169,11 @@ class DescriptiveEvrColumnSectionRenderer(SectionRenderer):
             "section_type": section_type,
             "content_blocks": content_blocks
         }
-
-        env = Environment(
-            loader=PackageLoader('great_expectations',
-                                 'render/view_models/default/fixtures/templates'),
-            autoescape=select_autoescape(['html', 'xml'])
-        )
-
-        #!!! This code should probably be factored out. We'll use it for many a renderer...
-        if mode == "json":
-            return section
-
-        elif mode == "html":
-            t = env.get_template('sections.j2')
-            return t.render(**{'sections': [section], 'nowrap': True})
         
-        elif mode == "widget":
-            t = env.get_template('sections.j2')
-            return t.render(**{'sections': [section]})
+        render_obj = {
+            "sections": [section]
+        }
+        if template == "widget":
+            render_obj["nowrap"] = True
 
+        return t.render(render_obj)
