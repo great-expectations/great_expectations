@@ -38,6 +38,22 @@ class DBTTools(object):
             self.dbt_project["name"],
         )
 
+    def get_sqlalchemy_connection_options(self):
+        with open(os.path.expanduser(self.dbt_profiles_file_path), "r") as data:
+            profiles_config = yaml.safe_load(data) or {}
+
+        db_config = profiles_config[self.profile]["outputs"][self.target]
+        options = \
+            sqlalchemy.engine.url.URL(
+                db_config["type"],
+                username=db_config["user"],
+                password=db_config["pass"],
+                host=db_config["host"],
+                port=db_config["port"],
+                database=db_config["dbname"],
+            )
+        return options
+
     def get_sqlalchemy_engine(self):
         """
         Create sqlalchemy engine using config and credentials stored in a particular profile/target in dbt profiles.yml file.
