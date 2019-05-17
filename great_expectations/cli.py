@@ -118,8 +118,7 @@ datasources:
 #     profiles_filepath: ~/.great_expectations/profiles.yml
   dbt:
     type: dbt
-    profile_name: great_expectations
-    target_name: default
+    profile: great_expectations
     profiles_filepath: ~/.dbt/profiles.yml
 """.format(bucket, slack_webhook)
 
