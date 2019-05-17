@@ -189,6 +189,19 @@ def get_dataset(dataset_type, data, schemas=None, autoinspect_func=autoinspect.c
     else:
         raise ValueError("Unknown dataset_type " + str(dataset_type))
 
+def candidate_getter_is_on_temporary_notimplemented_list(context, getter):
+    if context == 'SqlAlchemyDataset':
+        return getter in [
+            '_get_column_count_in_range',
+            '_get_column_hist',
+            '_get_column_modes',
+            '_get_column_stdev',
+            '_get_column_value_counts',
+        ]
+    if context == 'SparkDFDataset':
+        return getter in [
+            '_get_column_median',
+        ]
 
 def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type):
     if context == "SqlAlchemyDataset":
