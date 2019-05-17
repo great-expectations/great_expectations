@@ -16,8 +16,7 @@ class DBTTools(object):
         dbt_profiles_file_path="~/.dbt/profiles.yml",
     ):
         """
-        Since the profiles file may contain multiple profiles and targets, the caller must specify the profile to use.
-        We will use the default target in the specified profile.
+        Since the profiles file may contain multiple profiles, the caller must specify the profile to use.
 
         :param dbt_base_directory: path to base of dbt project (defaults to ../../)
         :param profile: profile name (top level block in profiles.yml)
