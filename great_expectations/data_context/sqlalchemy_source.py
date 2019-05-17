@@ -30,9 +30,9 @@ class SqlAlchemyDataSource(DataSource):
 
 
 class DBTDataSource(SqlAlchemyDataSource):
-    def __init__(self, profile, target, *args, **kwargs):
+    def __init__(self, profile, *args, **kwargs):
         super(DBTDataSource, self).__init__(*args, **kwargs)
-        self._dbt_tools = DBTTools(profile, target)
+        self._dbt_tools = DBTTools(profile)
         options = self._dbt_tools.get_sqlalchemy_connection_options()
         self.connect(options)
 
