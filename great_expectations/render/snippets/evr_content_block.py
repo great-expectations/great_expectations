@@ -71,7 +71,7 @@ class EvrContentBlockSnippetRenderer(SnippetRenderer):
                 "content_block_type": "text",
                 "content": [
                     "<b>Example values:</b><br/> " + ", ".join([
-                            render_parameter(str(item["value"]), "s") for item in partial_unexpected_list
+                            render_parameter(str(item), "s") for item in partial_unexpected_list
                     ])
                 ]
             }
