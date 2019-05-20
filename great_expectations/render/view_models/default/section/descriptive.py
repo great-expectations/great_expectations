@@ -132,13 +132,13 @@ class DescriptiveEvrColumnSectionRenderer(SectionRenderer):
     @classmethod
     def _get_template(cls, template):
         recognized_templates = ['html', 'json', 'widget']
+        env = Environment(
+            loader=PackageLoader('great_expectations',
+                                'render/view_models/default/fixtures/templates'),
+            autoescape=select_autoescape(['html', 'xml'])
+        )
         if template not in recognized_templates:
             try:
-                env = Environment(
-                    loader=PackageLoader('great_expectations',
-                                        'render/view_models/default/fixtures/templates'),
-                    autoescape=select_autoescape(['html', 'xml'])
-                )
                 t = env.get_template(template)
             except:
                 logger.warning(f"Unable to find template {template}. Registered templates are {recognized_templates}")
