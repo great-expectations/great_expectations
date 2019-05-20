@@ -567,6 +567,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             parsed_value_set = self._parse_value_set(value_set)
         else:
             parsed_value_set = value_set
+
         return column.isin(parsed_value_set)
 
     @DocInherit
@@ -579,7 +580,48 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             parsed_value_set = self._parse_value_set(value_set)
         else:
             parsed_value_set = value_set
+
         return ~column.isin(parsed_value_set)
+
+    @DocInherit
+    @MetaPandasDataset.column_aggregate_expectation
+    def expect_column_distinct_values_to_contain_set(self, column, value_set,
+                                                     parse_strings_as_datetimes=None,
+                                                     result_format=None, include_config=False, catch_exceptions=None, meta=None):
+        if parse_strings_as_datetimes:
+            parsed_value_set = self._parse_value_set(value_set)
+        else:
+            parsed_value_set = value_set
+
+        expected_value_set = set(parsed_value_set)
+        observed_value_set = set(column.unique().tolist())
+
+        return {
+            "success": observed_value_set.issuperset(expected_value_set),
+            "result": {
+                "observed_value": sorted(list(observed_value_set))
+            }
+        }
+
+    @DocInherit
+    @MetaPandasDataset.column_aggregate_expectation
+    def expect_column_distinct_values_to_equal_set(self, column, value_set,
+                                                   parse_strings_as_datetimes=None,
+                                                   result_format=None, include_config=False, catch_exceptions=None, meta=None):
+        if parse_strings_as_datetimes:
+            parsed_value_set = self._parse_value_set(value_set)
+        else:
+            parsed_value_set = value_set
+
+        expected_value_set = set(parsed_value_set)
+        observed_value_set = set(column.unique().tolist())
+
+        return {
+            "success": observed_value_set == expected_value_set,
+            "result": {
+                "observed_value": sorted(list(observed_value_set))
+            }
+        }
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
