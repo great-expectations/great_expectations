@@ -81,14 +81,26 @@ class DataContext(object):
             datasource_config = self._project_config["datasources"][datasource_name]
             datasource_type = datasource_config["type"]
             if datasource_type == "pandas":
-                return PandasCSVDataSource(**datasource_config)
+                try:
+                    path = datasource_config["path"]
+                except KeyError:
+                    raise ValueError("Pandas data source requires a path argument.")
+                return PandasCSVDataSource(path=path)
 
             elif datasource_type == "dbt":
-                profile = datasource_config["profile"]
+                try:
+                    profile = datasource_config["profile"]
+                except KeyError:
+                    raise ValueError("DBT data source requires a profile argument.")
                 return DBTDataSource(profile)
 
             elif datasource_type == "sqlalchemy":
-                return SqlAlchemyDataSource(**datasource_config)
+                try:
+                    profile = datasource_config["profile"]
+                    options = SqlAlchemyDataSource._get_db_connection_options_from_profile(profile)
+                except KeyError:
+                    raise ValueError("SqlAlchemy datasource requires a profile be specified.")
+                return SqlAlchemyDataSource(options)
             else:
                 raise ValueError(f"Unrecognized datasource type {datasource_type}")
 
