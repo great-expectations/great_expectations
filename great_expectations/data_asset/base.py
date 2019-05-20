@@ -41,9 +41,11 @@ class DataAsset(object):
         autoinspect_func = kwargs.pop("autoinspect_func", None)
         initial_config = kwargs.pop("config", None)
         data_asset_name = kwargs.pop("data_asset_name", None)
+        data_context = kwargs.pop("data_context", None)
         super(DataAsset, self).__init__(*args, **kwargs)
         self._interactive_evaluation = interactive_evaluation
         self._initialize_expectations(config=initial_config, data_asset_name=data_asset_name)
+        self._data_context = data_context
         if autoinspect_func is not None:
             autoinspect_func(self)
 
@@ -203,6 +205,10 @@ class DataAsset(object):
 
                 return_obj = recursively_convert_to_json_serializable(
                     return_obj)
+
+                if self._data_context is not None:
+                    return_obj = self._data_context.update_return_obj(return_obj)
+
                 return return_obj
 
             return wrapper
@@ -713,10 +719,6 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                   suppressed.
 
         """
-        if filepath == None:
-            # FIXME: Fetch the proper filepath from the project config
-            pass
-
         expectations_config = self.get_expectations_config(
             discard_failed_expectations,
             discard_result_format_kwargs,
@@ -724,8 +726,13 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             discard_catch_exceptions_kwargs,
             suppress_warnings
         )
-        expectation_config_str = json.dumps(expectations_config, indent=2)
-        open(filepath, 'w').write(expectation_config_str)
+        if filepath is None and self._data_context is not None:
+            self._data_context.save_data_asset_config(expectations_config)
+        elif filepath is not None:
+            expectation_config_str = json.dumps(expectations_config, indent=2)
+            open(filepath, 'w').write(expectation_config_str)
+        else:
+            raise ValueError("Unable to save config: filepath or data_context must be available.")
 
     ######BEFORE MERGE --- MOVE THIS TO THE CORRECT LOCATION########
     def _save_dataset(self, dataset_store):
@@ -817,6 +824,14 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         if self._interactive_evaluation == False:
             # Turn this off for an explicit call to validate
             self._interactive_evaluation = True
+
+        # If a different validation data context was provided, override 
+        validate__data_context = self._data_context
+        if data_context is None and self._data_context is not None:
+            data_context = self._data_context
+        elif data_context is not None:
+            # temporarily set self._data_context so it is used inside the expectation decorator
+            self._data_context = data_context
 
         results = []
 
@@ -925,10 +940,6 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             elif "dataset_name" in expectations_config["meta"]:
                 data_asset_name = expectations_config["meta"]["dataset_name"]
 
-
-
-
-
         result = {
             "results": results,
             "success": statistics.success,
@@ -975,6 +986,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         if result_callback is not None:
             result_callback(result)
 
+        self._data_context = validate__data_context
         self._interactive_evaluation = validate__interactive_evaluation
 
         return result

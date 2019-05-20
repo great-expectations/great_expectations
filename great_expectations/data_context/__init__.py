@@ -1,5 +1,5 @@
-from .pandas_context import PandasCSVDataContext
-from .sqlalchemy_context import SqlAlchemyDataContext
+from .pandas_source import PandasCSVDataSource
+from .sqlalchemy_source import SqlAlchemyDataSource
 from .base import DataContext
 
 
@@ -12,8 +12,8 @@ def get_data_context(context_type, options, *args, **kwargs):
     :return: a new DataContext object
     """
     if context_type == "SqlAlchemy":
-        return SqlAlchemyDataContext(options, *args, **kwargs)
+        return SqlAlchemyDataSource(options, *args, **kwargs)
     elif context_type == "PandasCSV":
-        return PandasCSVDataContext(options, *args, **kwargs)
+        return PandasCSVDataSource(options, *args, **kwargs)
     else:
         raise ValueError("Unknown data context.")
