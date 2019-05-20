@@ -24,7 +24,7 @@ class EvrContentBlockSnippetRenderer(SnippetRenderer):
         if content_block_fn is not None:
             return content_block_fn(evr, result_key)
         else:
-            raise NotImplementedError
+            return None
 
     @classmethod
     def expect_column_values_to_be_in_set(cls, evr, result_key):
@@ -77,11 +77,3 @@ class EvrContentBlockSnippetRenderer(SnippetRenderer):
             }
 
         return new_block
-
-
-# Create a function map for our SnippetRenderer class.
-# Because our snippet functions are classmethods, this must be done after the class is declared.
-# https://stackoverflow.com/questions/11058686/various-errors-in-code-that-tries-to-call-classmethods
-# EvrContentBlockSnippetRenderer.supported_expectation_types = {
-#     "expect_column_values_to_be_in_set": EvrContentBlockSnippetRenderer._expect_column_values_to_be_in_set,
-# }
