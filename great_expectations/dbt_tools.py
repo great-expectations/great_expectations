@@ -10,22 +10,19 @@ class DBTTools(object):
     def __init__(
         self,
         profile,
-        target,
         # TODO this is geared towards init notebook use
         dbt_base_directory="../../",
         dbt_project_file="dbt_project.yml",
         dbt_profiles_file_path="~/.dbt/profiles.yml",
     ):
         """
-        Since the profiles file may contain multiple profiles and targets, the caller must specify the ones to use.
+        Since the profiles file may contain multiple profiles, the caller must specify the profile to use.
 
         :param dbt_base_directory: path to base of dbt project (defaults to ../../)
-        :param profile_name: profile name (top level block in profiles.yml)
-        :param target_name: target name (inside the profile block)
+        :param profile: profile name (top level block in profiles.yml)
         :param dbt_profiles_file_path: path to dbt profiles.yml. If not provided, the method will try to load from dbt default location
         """
         self.profile = profile
-        self.target = target
         self.dbt_profiles_file_path = dbt_profiles_file_path
 
         with open(os.path.join(dbt_base_directory, dbt_project_file), "r") as f:
@@ -42,7 +39,8 @@ class DBTTools(object):
         with open(os.path.expanduser(self.dbt_profiles_file_path), "r") as data:
             profiles_config = yaml.safe_load(data) or {}
 
-        db_config = profiles_config[self.profile]["outputs"][self.target]
+        target = profiles_config[self.profile]["target"]
+        db_config = profiles_config[self.profile]["outputs"][target]
         options = \
             sqlalchemy.engine.url.URL(
                 db_config["type"],
@@ -63,7 +61,8 @@ class DBTTools(object):
         with open(os.path.expanduser(self.dbt_profiles_file_path), "r") as data:
             profiles_config = yaml.safe_load(data) or {}
 
-        db_config = profiles_config[self.profile]["outputs"][self.target]
+        target = profiles_config[self.profile]["target"]
+        db_config = profiles_config[self.profile]["outputs"][target]
         engine = sqlalchemy.create_engine(
             sqlalchemy.engine.url.URL(
                 db_config["type"],

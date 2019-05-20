@@ -85,8 +85,7 @@ class DataContext(object):
 
             elif datasource_type == "dbt":
                 profile = datasource_config["profile"]
-                target = datasource_config["target"]
-                return DBTDataSource(profile, target)
+                return DBTDataSource(profile)
 
             elif datasource_type == "sqlalchemy":
                 return SqlAlchemyDataSource(**datasource_config)
