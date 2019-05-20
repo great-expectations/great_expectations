@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 # STUB
 class ExpectationExplorer(object):
-    def make_widget(self, return_obj):
+    def make_widget(self, data_asset, return_obj):
         return return_obj
 
 class DataContext(object):
@@ -395,8 +395,8 @@ class DataContext(object):
         else:
             raise ValueError("Only s3 urls are supported.")
 
-    def update_return_obj(self, return_obj):
+    def update_return_obj(self, data_asset, return_obj):
         if self._expectation_explorer:
-            return self._expectation_explorer_manager.make_widget(return_obj)
+            return self._expectation_explorer_manager.make_widget(data_asset, return_obj)
         else:
             return return_obj
