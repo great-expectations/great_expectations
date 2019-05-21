@@ -398,6 +398,6 @@ class DataContext(object):
 
     def update_return_obj(self, return_obj):
         if self._expectation_explorer:
-            return self._expectation_explorer_manager.make_widget(return_obj)
+            return self._expectation_explorer_manager.create_expectation_widget(return_obj)
         else:
             return return_obj
