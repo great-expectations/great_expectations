@@ -7,7 +7,9 @@ from glob import glob
 
 from great_expectations.version import __version__
 from great_expectations.dataset import PandasDataset
-from great_expectations import read_csv
+from great_expectations import read_csv, render
+from IPython.display import display
+import ipywidgets as widgets
 from urllib.parse import urlparse
 
 from .sqlalchemy_source import SqlAlchemyDataSource, DBTDataSource
