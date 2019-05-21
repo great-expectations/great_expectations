@@ -851,8 +851,8 @@ class DataContext(object):
         else:
             raise ValueError("Only s3 urls are supported.")
 
-    def update_return_obj(self, return_obj):
+    def update_return_obj(self, data_asset, return_obj):
         if self._expectation_explorer:
-            return self._expectation_explorer_manager.create_expectation_widget(return_obj)
+            return self._expectation_explorer_manager.create_expectation_widget(data_asset, return_obj)
         else:
             return return_obj
