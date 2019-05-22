@@ -8,19 +8,20 @@ from glob import glob
 from great_expectations.version import __version__
 from great_expectations.dataset import PandasDataset
 from great_expectations import read_csv
+from IPython.display import display
+import ipywidgets as widgets
 from urllib.parse import urlparse
 
+from .sqlalchemy_source import SqlAlchemyDataSource
+from .dbt_source import DBTDataSource
+from .expectation_explorer import ExpectationExplorer
 from .sqlalchemy_source import SqlAlchemyDataSource
 from .dbt_source import DBTDataSource
 from .pandas_source import PandasCSVDataSource
 
 logger = logging.getLogger(__name__)
+debug_view = widgets.Output(layout={'border': '3 px solid pink'})
 
-
-# STUB
-class ExpectationExplorer(object):
-    def make_widget(self, return_obj):
-        return return_obj
 
 class DataContext(object):
     #TODO: update class documentation
@@ -85,7 +86,10 @@ class DataContext(object):
                 return PandasCSVDataSource(**datasource_config)
 
             elif datasource_type == "dbt":
-                profile = datasource_config["profile"]
+                try:
+                    profile = datasource_config["profile"]
+                except KeyError:
+                    raise ValueError("DBT data source requires a profile argument.")
                 return DBTDataSource(profile)
 
             elif datasource_type == "sqlalchemy":
@@ -395,8 +399,9 @@ class DataContext(object):
         else:
             raise ValueError("Only s3 urls are supported.")
 
-    def update_return_obj(self, return_obj):
+    def update_return_obj(self, data_asset, return_obj):
         if self._expectation_explorer:
-            return self._expectation_explorer_manager.make_widget(return_obj)
+            return self._expectation_explorer_manager.create_expectation_widget(data_asset, return_obj)
         else:
             return return_obj
+
