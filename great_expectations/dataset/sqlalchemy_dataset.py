@@ -9,6 +9,13 @@ import warnings
 
 logger = logging.getLogger(__name__)
 
+try:
+    import sqlalchemy as sa
+    from sqlalchemy.engine import reflection
+except ImportError:
+    logger.error("Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support")
+    raise
+
 import pandas as pd
 
 from dateutil.parser import parse
@@ -169,14 +176,6 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
     def __init__(self, table_name=None, engine=None, connection_string=None,
                  custom_sql=None, schema=None, *args, **kwargs):
-
-        try:
-            import sqlalchemy as sa
-            from sqlalchemy.engine import reflection
-        except ImportError:
-            logger.error("Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support")
-            raise
-
         if table_name is None:
             raise ValueError("No table_name provided.")
 
