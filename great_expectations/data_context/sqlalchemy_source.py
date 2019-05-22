@@ -3,6 +3,7 @@ from ..dataset.sqlalchemy_dataset import SqlAlchemyDataset
 from ..dbt_tools import DBTTools
 
 from sqlalchemy import create_engine, MetaData
+import sqlalchemy.engine.url as url
 
 
 class SqlAlchemyDataSource(DataSource):
@@ -16,6 +17,8 @@ class SqlAlchemyDataSource(DataSource):
     def __init__(self, *args, **kwargs):
         super(SqlAlchemyDataSource, self).__init__(*args, **kwargs)
         self.meta = MetaData()
+        # TODO: add logic for dealing with other configuration parameters than options
+        self.connect(*args, **kwargs)
 
     def connect(self, options, *args, **kwargs):
         self.engine = create_engine(options, *args, **kwargs)
@@ -27,6 +30,10 @@ class SqlAlchemyDataSource(DataSource):
 
     def get_data_asset(self, data_asset_name, custom_sql=None, schema=None, data_context=None):
         return SqlAlchemyDataset(table_name=data_asset_name, engine=self.engine, custom_sql=custom_sql, schema=schema, data_context=data_context)
+
+    @classmethod
+    def _get_db_connection_options_from_profile(cls, profile):
+        return url.URL(**profile)
 
 
 class DBTDataSource(SqlAlchemyDataSource):

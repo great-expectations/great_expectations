@@ -208,7 +208,7 @@ class DataAsset(object):
                     return_obj)
 
                 if self._data_context is not None:
-                    return_obj = self._data_context.update_return_obj(return_obj)
+                    return_obj = self._data_context.update_return_obj(self, return_obj)
 
                 return return_obj
 
