@@ -18,8 +18,8 @@ class TestPageRenderers(unittest.TestCase):
         )
         assert results != None
 
-        with open('./prescriptive.html', 'w') as f:
-            f.write(results)
+        # with open('./prescriptive.html', 'w') as f:
+        #     f.write(results)
 
     def test_descriptive_evr_renderer(self):
         R = render.DescriptiveEvrPageRenderer(
@@ -29,8 +29,8 @@ class TestPageRenderers(unittest.TestCase):
         rendered_page = R.render()
         assert rendered_page != None
 
-        with open('./descriptive.html', 'w') as f:
-            f.write(rendered_page)
+        # with open('./descriptive.html', 'w') as f:
+        #     f.write(rendered_page)
 
     def test_full_oobe_flow(self):
         df = ge.read_csv("examples/data/Titanic.csv")
@@ -44,8 +44,8 @@ class TestPageRenderers(unittest.TestCase):
         rendered_page = R.render()
         assert rendered_page != None
 
-        with open('./full-oobe.html', 'w') as f:
-            f.write(rendered_page)
+        # with open('./full-oobe.html', 'w') as f:
+        #     f.write(rendered_page)
 
 
 class TestSectionRenderers(unittest.TestCase):
