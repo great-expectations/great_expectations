@@ -90,7 +90,7 @@ def assertDeepAlmostEqual(expected, actual, *args, **kwargs):
         raise exc
 
 
-def get_dataset(dataset_type, data, schemas=None, autoinspect_func=autoinspect.columns_exist):
+def get_dataset(dataset_type, data, schemas=None, autoinspect_func=autoinspect.columns_exist, caching=False):
     """For Pandas, data should be either a DataFrame or a dictionary that can
     be instantiated as a DataFrame.
     For SQL, data should have the following shape:
@@ -106,7 +106,7 @@ def get_dataset(dataset_type, data, schemas=None, autoinspect_func=autoinspect.c
         if schemas and "pandas" in schemas:
             pandas_schema = {key:np.dtype(value) for (key, value) in schemas["pandas"].items()}
             df = df.astype(pandas_schema)
-        return PandasDataset(df, autoinspect_func=autoinspect_func)
+        return PandasDataset(df, autoinspect_func=autoinspect_func, caching=caching)
     elif dataset_type == 'SqlAlchemyDataset':
         # Create a new database
 
@@ -150,7 +150,7 @@ def get_dataset(dataset_type, data, schemas=None, autoinspect_func=autoinspect.c
         df.to_sql(name=tablename, con=conn, index=False, dtype=sql_dtypes)
 
         # Build a SqlAlchemyDataset using that database
-        return SqlAlchemyDataset(tablename, engine=conn, autoinspect_func=autoinspect_func)
+        return SqlAlchemyDataset(tablename, engine=conn, autoinspect_func=autoinspect_func, caching=caching)
 
     elif dataset_type == 'SparkDFDataset':
         spark = SparkSession.builder.getOrCreate()
@@ -184,7 +184,7 @@ def get_dataset(dataset_type, data, schemas=None, autoinspect_func=autoinspect.c
             # if no schema provided, uses Spark's schema inference
             columns = list(data.keys()) # do we need to care about the order here?
             spark_df = spark.createDataFrame(data_reshaped, columns)
-        return SparkDFDataset(spark_df)
+        return SparkDFDataset(spark_df, caching=caching)
 
     else:
         raise ValueError("Unknown dataset_type " + str(dataset_type))

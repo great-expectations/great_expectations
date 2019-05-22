@@ -212,15 +212,15 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         # Only call super once connection is established and table_name and columns known to allow autoinspection
         super(SqlAlchemyDataset, self).__init__(*args, **kwargs)
 
-    def _get_row_count(self):
+    def get_row_count(self):
         count_query = sa.select([sa.func.count()]).select_from(
             self._table)
         return self.engine.execute(count_query).scalar()
 
-    def _get_table_columns(self):
+    def get_table_columns(self):
         return [col['name'] for col in self.columns]
 
-    def _get_column_nonnull_count(self, column):
+    def get_column_nonnull_count(self, column):
         ignore_values = [None]
         count_query = sa.select([
             sa.func.count().label('element_count'),
@@ -237,13 +237,13 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         null_count = count_results['null_count'] or 0
         return element_count - null_count
 
-    def _get_column_sum(self, column):
+    def get_column_sum(self, column):
         return self.engine.execute(
             sa.select([sa.func.sum(sa.column(column))]).select_from(
                 self._table)
         ).scalar()
 
-    def _get_column_max(self, column, parse_strings_as_datetimes=False):
+    def get_column_max(self, column, parse_strings_as_datetimes=False):
         if parse_strings_as_datetimes:
             raise NotImplementedError
         return self.engine.execute(
@@ -251,7 +251,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 self._table)
         ).scalar()
 
-    def _get_column_min(self, column, parse_strings_as_datetimes=False):
+    def get_column_min(self, column, parse_strings_as_datetimes=False):
         if parse_strings_as_datetimes:
             raise NotImplementedError
         return self.engine.execute(
@@ -259,19 +259,19 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 self._table)
         ).scalar()
 
-    def _get_column_mean(self, column):
+    def get_column_mean(self, column):
         return self.engine.execute(
             sa.select([sa.func.avg(sa.column(column))]).select_from(
                 self._table)
         ).scalar()
 
-    def _get_column_unique_count(self, column):
+    def get_column_unique_count(self, column):
         return self.engine.execute(
             sa.select([sa.func.count(sa.func.distinct(sa.column(column)))]).select_from(
                 self._table)
         ).scalar()
 
-    def _get_column_median(self, column):
+    def get_column_median(self, column):
         nonnull_count = self.get_column_nonnull_count(column)
         element_values = self.engine.execute(
             sa.select([sa.column(column)]).order_by(sa.column(column)).where(
