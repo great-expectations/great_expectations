@@ -238,11 +238,8 @@ class ExpectationExplorer(object):
                 expectation_type, column)
             ge_expectation_kwargs = self.expectation_kwarg_widgets_to_ge_kwargs(
                 expectation_state['kwargs'])
-            new_result = getattr(ge_df, expectation_type)(
+            new_result = getattr(ge_df, expectation_type)(include_config=True,
                 **ge_expectation_kwargs)
-
-            self.update_result(new_result=new_result,
-                               expectation_type=expectation_type, column=column)
 
         min_value_widget.observe(on_min_value_change, names='value')
         max_dl = widgets.link((max_value_widget, 'value'),
@@ -284,11 +281,8 @@ class ExpectationExplorer(object):
                 expectation_type, column)
             ge_expectation_kwargs = self.expectation_kwarg_widgets_to_ge_kwargs(
                 expectation_state['kwargs'])
-            new_result = getattr(ge_df, expectation_type)(
+            new_result = getattr(ge_df, expectation_type)(include_config=True,
                 **ge_expectation_kwargs)
-
-            self.update_result(new_result=new_result,
-                               expectation_type=expectation_type, column=column)
 
         max_value_widget.observe(on_max_value_change, names='value')
         min_dl = widgets.link((min_value_widget, 'value'),
