@@ -35,7 +35,6 @@ class SqlAlchemyDataSource(DataSource):
     def _get_sqlalchemy_connection_options(self, profile_name, profiles_filepath):
         with open(os.path.expanduser(profiles_filepath), "r") as data:
             profiles_config = yaml.safe_load(data) or {}
-            print(profiles_config)
 
         db_config = profiles_config[profile_name]["sqlaclhemy"]
         options = \
