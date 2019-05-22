@@ -10,7 +10,8 @@ from great_expectations.dataset import PandasDataset
 from great_expectations import read_csv
 from urllib.parse import urlparse
 
-from .sqlalchemy_source import SqlAlchemyDataSource, DBTDataSource
+from .sqlalchemy_source import SqlAlchemyDataSource
+from .dbt_source import DBTDataSource
 from .pandas_source import PandasCSVDataSource
 
 logger = logging.getLogger(__name__)
