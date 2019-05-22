@@ -131,8 +131,8 @@ class Dataset(MetaDataset):
 
         # some data structures for caching information specific to tabular datasets
         # these definitions currently need to come before MetaDataset.__init__ to allow for autoinspection
-        # NOTE: this approach makes the strong assumption that the user will not modify the core data store
-        # (e.g. self.spark_df) over the lifetime of the dataset instance
+        # NOTE: using caching makes the strong assumption that the user will not modify the core data store
+        # (e.g. a SQL table or spark dataframe) over the lifetime of the dataset instance
         self._row_count = None
         self._table_columns = None
         self._column_nonnull_counts = ColumnarResultCache(self._get_column_nonnull_count, self.caching)
@@ -251,6 +251,7 @@ class Dataset(MetaDataset):
     def _get_column_count_in_range(self, column, min_val=None, max_val=None, min_strictly=False, max_strictly=True):
         """Returns: int"""
         raise NotImplementedError
+
     def _initialize_expectations(self, config=None, data_asset_name=None):
         """Override data_asset_type with "Dataset"
         """
@@ -957,130 +958,6 @@ class Dataset(MetaDataset):
 
         See Also:
             expect_column_values_to_be_in_set
-        """
-        raise NotImplementedError
-
-    def expect_column_distinct_values_to_contain_set(self,
-                                                     column,
-                                                     value_set,
-                                                     parse_strings_as_datetimes=None,
-                                                     result_format=None, include_config=False, catch_exceptions=None, meta=None):
-        """Expect the set of distinct column values to contain a given set.
-
-        In contrast to expect_column_values_to_be_in_set() this ensures not that all column values are members of the given set but that values from the set _must_ be present in the column
-
-        For example:
-        ::
-
-            # my_df.my_col = [1,2,2,3,3,3]
-            >>> my_df.expect_column_distinct_values_to_contain_set(
-                "my_col",
-                [2,3]
-            )
-            {
-              "success": true
-              "result": {
-                "observed_value": [1,2,3]
-              },
-            }
-
-        expect_column_distinct_values_to_contain_set is a :func:`column_aggregate_expectation <great_expectations.data_asset.dataset.Dataset.column_aggregate_expectation>`.
-
-
-        Args:
-            column (str): \
-                The column name.
-            value_set (set-like): \
-                A set of objects used for comparison.
-
-        Keyword Args:
-            parse_strings_as_datetimes (boolean or None) : If True values provided in value_set will be parsed as \
-                datetimes before making comparisons.
-
-        Other Parameters:
-            result_format (str or None): \
-                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
-                For more detail, see :ref:`result_format <result_format>`.
-            include_config (boolean): \
-                If True, then include the expectation config as part of the result object. \
-                For more detail, see :ref:`include_config`.
-            catch_exceptions (boolean or None): \
-                If True, then catch exceptions and include them as part of the result object. \
-                For more detail, see :ref:`catch_exceptions`.
-            meta (dict or None): \
-                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
-                For more detail, see :ref:`meta`.
-
-        Returns:
-            A JSON-serializable expectation result object.
-
-            Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
-            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
-
-        See Also:
-            expect_column_distinct_values_to_equal_set
-        """
-        raise NotImplementedError
-
-    def expect_column_distinct_values_to_equal_set(self,
-                                                   column,
-                                                   value_set,
-                                                   parse_strings_as_datetimes=None,
-                                                   result_format=None, include_config=False, catch_exceptions=None, meta=None):
-        """Expect the set of distinct column values to equal a given set.
-
-        In contrast to expect_column_distinct_values_to_contain_set() this ensures not only that a certain set of values are present in the column but that these _and only these values_ are present.
-
-        For example:
-        ::
-
-            # my_df.my_col = [1,2,2,3,3,3]
-            >>> my_df.expect_column_distinct_values_to_equal_set(
-                "my_col",
-                [2,3]
-            )
-            {
-              "success": false
-              "result": {
-                "observed_value": [1,2,3]
-              },
-            }
-
-        expect_column_distinct_values_to_equal_set is a :func:`column_aggregate_expectation <great_expectations.data_asset.dataset.Dataset.column_aggregate_expectation>`.
-
-
-        Args:
-            column (str): \
-                The column name.
-            value_set (set-like): \
-                A set of objects used for comparison.
-
-        Keyword Args:
-            parse_strings_as_datetimes (boolean or None) : If True values provided in value_set will be parsed as \
-                datetimes before making comparisons.
-
-        Other Parameters:
-            result_format (str or None): \
-                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
-                For more detail, see :ref:`result_format <result_format>`.
-            include_config (boolean): \
-                If True, then include the expectation config as part of the result object. \
-                For more detail, see :ref:`include_config`.
-            catch_exceptions (boolean or None): \
-                If True, then catch exceptions and include them as part of the result object. \
-                For more detail, see :ref:`catch_exceptions`.
-            meta (dict or None): \
-                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
-                For more detail, see :ref:`meta`.
-
-        Returns:
-            A JSON-serializable expectation result object.
-
-            Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
-            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
-
-        See Also:
-            expect_column_distinct_values_to_contain_set
         """
         raise NotImplementedError
 
@@ -1811,6 +1688,161 @@ class Dataset(MetaDataset):
 
         """
         raise NotImplementedError
+
+    @DocInherit
+    @MetaDataset.column_aggregate_expectation
+    def expect_column_distinct_values_to_equal_set(self,
+                                                   column,
+                                                   value_set,
+                                                   parse_strings_as_datetimes=None,
+                                                   result_format=None, include_config=False, catch_exceptions=None, meta=None):
+        """Expect the set of distinct column values to equal a given set.
+
+        In contrast to expect_column_distinct_values_to_contain_set() this ensures not only that a certain set of values are present in the column but that these _and only these values_ are present.
+
+        For example:
+        ::
+
+            # my_df.my_col = [1,2,2,3,3,3]
+            >>> my_df.expect_column_distinct_values_to_equal_set(
+                "my_col",
+                [2,3]
+            )
+            {
+              "success": false
+              "result": {
+                "observed_value": [1,2,3]
+              },
+            }
+
+        expect_column_distinct_values_to_equal_set is a :func:`column_aggregate_expectation <great_expectations.data_asset.dataset.Dataset.column_aggregate_expectation>`.
+
+
+        Args:
+            column (str): \
+                The column name.
+            value_set (set-like): \
+                A set of objects used for comparison.
+
+        Keyword Args:
+            parse_strings_as_datetimes (boolean or None) : If True values provided in value_set will be parsed as \
+                datetimes before making comparisons.
+
+        Other Parameters:
+            result_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`result_format <result_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
+
+        Returns:
+            A JSON-serializable expectation result object.
+
+            Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+        See Also:
+            expect_column_distinct_values_to_contain_set
+        """
+        if parse_strings_as_datetimes:
+            parsed_value_set = self._parse_value_set(value_set)
+        else:
+            parsed_value_set = value_set
+
+        expected_value_set = set(parsed_value_set)
+        observed_value_set = set(self.get_column_value_counts(column).index)
+
+        return {
+            "success": observed_value_set == expected_value_set,
+            "result": {
+                "observed_value": sorted(list(observed_value_set))
+            }
+        }
+
+
+    @DocInherit
+    @MetaDataset.column_aggregate_expectation
+    def expect_column_distinct_values_to_contain_set(self,
+                                                    column,
+                                                    value_set,
+                                                    parse_strings_as_datetimes=None,
+                                                    result_format=None, include_config=False, catch_exceptions=None, meta=None):
+        """Expect the set of distinct column values to contain a given set.
+
+        In contrast to expect_column_values_to_be_in_set() this ensures not that all column values are members of the given set but that values from the set _must_ be present in the column
+
+        For example:
+        ::
+
+            # my_df.my_col = [1,2,2,3,3,3]
+            >>> my_df.expect_column_distinct_values_to_contain_set(
+                "my_col",
+                [2,3]
+            )
+            {
+            "success": true
+            "result": {
+                "observed_value": [1,2,3]
+            },
+            }
+
+        expect_column_distinct_values_to_contain_set is a :func:`column_aggregate_expectation <great_expectations.data_asset.dataset.Dataset.column_aggregate_expectation>`.
+
+
+        Args:
+            column (str): \
+                The column name.
+            value_set (set-like): \
+                A set of objects used for comparison.
+
+        Keyword Args:
+            parse_strings_as_datetimes (boolean or None) : If True values provided in value_set will be parsed as \
+                datetimes before making comparisons.
+
+        Other Parameters:
+            result_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`result_format <result_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
+
+        Returns:
+            A JSON-serializable expectation result object.
+
+            Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+        See Also:
+            expect_column_distinct_values_to_equal_set
+        """
+        if parse_strings_as_datetimes:
+            parsed_value_set = self._parse_value_set(value_set)
+        else:
+            parsed_value_set = value_set
+
+        expected_value_set = set(parsed_value_set)
+        observed_value_set = set(self.get_column_value_counts(column).index)
+
+        return {
+            "success": observed_value_set.issuperset(expected_value_set),
+            "result": {
+                "observed_value": sorted(list(observed_value_set))
+            }
+        }
 
     @DocInherit
     @MetaDataset.column_aggregate_expectation
