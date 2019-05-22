@@ -81,6 +81,32 @@ def test_invalid_data_context():
         get_data_context('what_a_ridiculous_name', None)
         assert "Unknown data context." in str(err)
 
+def test_list_data_asset_configs(parameterized_config_data_context):
+    assert parameterized_config_data_context.list_data_asset_configs() == ['parameterized_expectations_config_fixture']
+
+def test_get_existing_data_asset_config(parameterized_config_data_context):
+    data_asset_config = parameterized_config_data_context.get_data_asset_config('parameterized_expectations_config_fixture')
+    assert data_asset_config['data_asset_name'] == 'parameterized_expectations_config_fixture'
+    assert len(data_asset_config['expectations']) == 2
+
+def test_get_new_data_asset_config(parameterized_config_data_context):
+    data_asset_config = parameterized_config_data_context.get_data_asset_config('this_data_asset_config_does_not_exist')
+    assert data_asset_config['data_asset_name'] == 'this_data_asset_config_does_not_exist'
+    assert len(data_asset_config['expectations']) == 0
+
+def test_save_data_asset_config(parameterized_config_data_context):
+    data_asset_config = parameterized_config_data_context.get_data_asset_config('this_data_asset_config_does_not_exist')
+    assert data_asset_config['data_asset_name'] == 'this_data_asset_config_does_not_exist'
+    assert len(data_asset_config['expectations']) == 0
+    data_asset_config['expectations'].append({
+            "expectation_type": "expect_table_row_count_to_equal",
+            "kwargs": {
+                "value": 10
+            }
+        })
+    parameterized_config_data_context.save_data_asset_config(data_asset_config)
+    data_asset_config_saved = parameterized_config_data_context.get_data_asset_config('this_data_asset_config_does_not_exist')
+    assert data_asset_config['expectations'] == data_asset_config_saved['expectations']
 
 def test_sqlalchemy_data_context(test_db_connection_string):
     context = get_data_context(
