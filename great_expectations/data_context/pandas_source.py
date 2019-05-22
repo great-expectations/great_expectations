@@ -13,9 +13,9 @@ class PandasCSVDataSource(DataSource):
     Warning: this feature is new in v0.4 and may change based on community feedback.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, path=None, *args, **kwargs):
         super(PandasCSVDataSource, self).__init__(*args, **kwargs)
-        self.connect(kwargs["path"])
+        self.connect(path)
 
     def connect(self, path):
         self.directory = path

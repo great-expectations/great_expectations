@@ -7,19 +7,18 @@ from glob import glob
 
 from great_expectations.version import __version__
 from great_expectations.dataset import PandasDataset
-from great_expectations import read_csv
+from great_expectations import read_csv, render
+from IPython.display import display
+import ipywidgets as widgets
 from urllib.parse import urlparse
 
+from .expectation_explorer import ExpectationExplorer
 from .sqlalchemy_source import SqlAlchemyDataSource, DBTDataSource
 from .pandas_source import PandasCSVDataSource
 
 logger = logging.getLogger(__name__)
+debug_view = widgets.Output(layout={'border': '3 px solid pink'})
 
-
-# STUB
-class ExpectationExplorer(object):
-    def make_widget(self, return_obj):
-        return return_obj
 
 class DataContext(object):
     #TODO: update class documentation
@@ -81,14 +80,26 @@ class DataContext(object):
             datasource_config = self._project_config["datasources"][datasource_name]
             datasource_type = datasource_config["type"]
             if datasource_type == "pandas":
-                return PandasCSVDataSource(**datasource_config)
+                try:
+                    path = datasource_config["path"]
+                except KeyError:
+                    raise ValueError("Pandas data source requires a path argument.")
+                return PandasCSVDataSource(path=path)
 
             elif datasource_type == "dbt":
-                profile = datasource_config["profile"]
+                try:
+                    profile = datasource_config["profile"]
+                except KeyError:
+                    raise ValueError("DBT data source requires a profile argument.")
                 return DBTDataSource(profile)
 
             elif datasource_type == "sqlalchemy":
-                return SqlAlchemyDataSource(**datasource_config)
+                try:
+                    profile = datasource_config["profile"]
+                    options = SqlAlchemyDataSource._get_db_connection_options_from_profile(profile)
+                except KeyError:
+                    raise ValueError("SqlAlchemy datasource requires a profile be specified.")
+                return SqlAlchemyDataSource(options)
             else:
                 raise ValueError(f"Unrecognized datasource type {datasource_type}")
 
@@ -394,8 +405,9 @@ class DataContext(object):
         else:
             raise ValueError("Only s3 urls are supported.")
 
-    def update_return_obj(self, return_obj):
+    def update_return_obj(self, data_asset, return_obj):
         if self._expectation_explorer:
-            return self._expectation_explorer_manager.make_widget(return_obj)
+            return self._expectation_explorer_manager.create_expectation_widget(data_asset, return_obj)
         else:
             return return_obj
+
