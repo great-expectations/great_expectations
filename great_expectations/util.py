@@ -23,17 +23,18 @@ def _convert_to_dataset_class(df, dataset_class, expectations_config=None, autoi
     """
     if expectations_config is not None:
         # Cast the dataframe into the new class, and manually initialize expectations according to the provided configuration
-        df = dataset_class(df)
-        df._initialize_expectations(expectations_config)
+        new_df = dataset_class.from_dataset(df)
+        new_df._initialize_expectations(expectations_config)
     else:
         # Instantiate the new Dataset with default expectations
         try:
-            df = dataset_class(df, autoinspect_func=autoinspect_func)
+            new_df = dataset_class.from_dataset(df)
+            new_df.autoinspect(autoinspect_func)
         except:
             raise NotImplementedError(
                 "read_csv requires a Dataset class that can be instantiated from a Pandas DataFrame")
 
-    return df
+    return new_df
 
 
 def read_csv(

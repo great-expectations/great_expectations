@@ -162,10 +162,15 @@ class SparkDFDataset(MetaSparkDFDataset):
     """
     This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
     """
+    @classmethod
+    def from_dataset(cls, dataset=None):
+        if isinstance(dataset, SparkDFDataset):
+            return cls(spark_df=dataset.spark_df)
+        else:
+            raise ValueError("from_dataset requires a SparkDFDataset dataset")
 
     def __init__(self, spark_df, *args, **kwargs):
         super(SparkDFDataset, self).__init__(*args, **kwargs)
-        self.discard_subset_failing_expectations = kwargs.get("discard_subset_failing_expectations", False)
         # Creation of the Spark Dataframe is done outside this class
         self.spark_df = spark_df
 
