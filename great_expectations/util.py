@@ -178,7 +178,7 @@ def validate(data_asset, expectations_config, data_asset_type=None, *args, **kwa
     # If the object is already a Dataset type, then this is purely a convenience method
     # and no conversion is needed
     if isinstance(data_asset, dataset.Dataset) and data_asset_type is None:
-        return data_asset.validate(*args, **kwargs)
+        return data_asset.validate(expectations_config=expectations_config, *args, **kwargs)
     elif data_asset_type is None:
         # Guess the GE data_asset_type based on the type of the data_asset
         if isinstance(data_asset, pd.DataFrame):

@@ -42,6 +42,12 @@ def basic_expectations_config():
                 "kwargs": {
                     "column": "naturals"
                 }
+            },
+            {
+                "expectation_type": "expect_column_values_to_be_unique",
+                "kwargs": {
+                    "column": "naturals"
+                }
             }
         ]
     }
