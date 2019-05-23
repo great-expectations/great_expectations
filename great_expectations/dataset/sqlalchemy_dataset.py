@@ -261,7 +261,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 self._table)
         ).scalar()
     
-    def _get_column_value_counts(self, column):
+    def get_column_value_counts(self, column):
         results = self.engine.execute(
             sa.select([
                 sa.column(column).label("value"),
@@ -310,7 +310,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             column_median = column_values[1][0]  # True center value
         return column_median
 
-    def _get_column_hist(self, column, bins):
+    def get_column_hist(self, column, bins):
         # TODO: this is **terribly** inefficient; consider refactor
         """return a list of counts corresponding to bins"""
         hist = []
@@ -321,11 +321,11 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             else:
                 max_strictly = True
             hist.append(
-                self._get_column_count_in_range(column, min_val=bins[i], max_val=bins[i + 1], max_strictly=max_strictly)
+                self.get_column_count_in_range(column, min_val=bins[i], max_val=bins[i + 1], max_strictly=max_strictly)
             )
         return hist
 
-    def _get_column_count_in_range(self, column, min_val=None, max_val=None, min_strictly=False, max_strictly=True):
+    def get_column_count_in_range(self, column, min_val=None, max_val=None, min_strictly=False, max_strictly=True):
         if min_val is None and max_val is None:
             raise ValueError('Must specify either min or max value')
         if min_val is not None and max_val is not None and min_val > max_val:
