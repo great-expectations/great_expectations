@@ -6,6 +6,13 @@
       "b" : ["aaa", "abb", "acc", "bdd", null],
       "c" : [ null,  null,  null,  null, null]
     },
+    "schemas": {
+      "spark": {
+        "a": "string",
+        "b": "string",
+        "c": "string"
+      }
+    },
     "tests": [{
       "title": "Negative test, insufficient Mostly + one non-matching value",
       "exact_match_out" : false,

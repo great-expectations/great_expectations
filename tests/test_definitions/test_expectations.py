@@ -8,8 +8,7 @@ import logging
 from sqlalchemy.dialects.sqlite import dialect as sqliteDialect
 from sqlalchemy.dialects.postgresql import dialect as postgresqlDialect
 
-
-from great_expectations.dataset import SqlAlchemyDataset, PandasDataset
+from great_expectations.dataset import SqlAlchemyDataset, PandasDataset, SparkDFDataset
 from ..test_utils import CONTEXTS, get_dataset, candidate_test_is_on_temporary_notimplemented_list, evaluate_json_test
 
 logger = logging.getLogger(__name__)
@@ -57,6 +56,8 @@ def pytest_generate_tests(metafunc):
                                 if 'postgresql' in test['suppress_test_for'] and isinstance(data_asset, SqlAlchemyDataset) and isinstance(data_asset.engine.dialect, postgresqlDialect):
                                     continue
                                 if 'Pandas' in test['suppress_test_for'] and isinstance(data_asset, PandasDataset):
+                                    continue
+                                if 'Spark' in test['suppress_test_for'] and isinstance(data_asset, SparkDFDataset):
                                     continue
 
                             parametrized_tests.append({

@@ -1,8 +1,15 @@
+import logging
+
 from .base import DataContext
-from ..dataset.sqlalchemy_dataset import SqlAlchemyDataset
 
-from sqlalchemy import create_engine, MetaData
+logger = logging.getLogger(__name__)
 
+try:
+    from ..dataset.sqlalchemy_dataset import SqlAlchemyDataset
+    from sqlalchemy import create_engine, MetaData
+except ImportError:
+    logger.error("Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support")
+    raise
 
 class SqlAlchemyDataContext(DataContext):
     """
@@ -24,5 +31,7 @@ class SqlAlchemyDataContext(DataContext):
         tables = [str(table) for table in self.meta.sorted_tables]
         return tables
 
-    def get_dataset(self, dataset_name, custom_sql=None, schema=None):
-        return SqlAlchemyDataset(table_name=dataset_name, engine=self.engine, custom_sql=custom_sql, schema=schema)
+    def get_dataset(self, dataset_name, custom_sql=None, schema=None, caching=False):
+        return SqlAlchemyDataset(
+            table_name=dataset_name, engine=self.engine, custom_sql=custom_sql, schema=schema, caching=caching
+        )
