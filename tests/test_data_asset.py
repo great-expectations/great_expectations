@@ -1152,9 +1152,9 @@ class TestDataAsset(unittest.TestCase):
 
         def expect_second_value_to_be(self, column, value, result_format=None, include_config=False, catch_exceptions=None, meta=None):
             return {
-                "success": column.iloc[1] == value,
+                "success": self[column].iloc[1] == value,
                 "result": {
-                    "observed_value": column.iloc[1],
+                    "observed_value": self[column].iloc[1],
                 }
             }
 
