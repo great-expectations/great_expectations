@@ -28,6 +28,15 @@
         "zz": "timestamp",
         "a": "int",
         "b": "int"
+      },
+      "spark": {
+        "w": "int",
+        "x": "int",
+        "y": "int",
+        "z": "string",
+        "zz": "string",
+        "a": "int",
+        "b": "int"
       }
     },
     "tests" : [{

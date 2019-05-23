@@ -253,7 +253,8 @@ class TestExpectationDecorators(unittest.TestCase):
 
             @PandasDataset.column_aggregate_expectation
             def expect_column_median_to_be_odd(self, column):
-                return {"success": column.median() % 2, "result": {"observed_value": column.median()}}
+                median =  self.get_column_median(column)
+                return {"success": median % 2, "result": {"observed_value": median}}
 
         df = CustomPandasDataset({
             'all_odd': [1, 3, 5, 7, 9],
