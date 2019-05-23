@@ -45,6 +45,11 @@ def is_valid_continuous_partition_object(partition_object):
         comb_weights=partition_object["tail_weights"]+partition_object["weights"]
     else:
         comb_weights=partition_object["weights"]
+
+    ## TODO: Consider adding this check to migrate to the tail_weights structure of partition objects
+    # if (partition_object['bins'][0] == -np.inf) or (partition_object['bins'][-1] == np.inf):
+    #     return False
+
     # Expect one more bin edge than weight; all bin edges should be monotonically increasing; weights should sum to one
     if (len(partition_object['bins']) == (len(partition_object['weights']) + 1)) and \
             np.all(np.diff(partition_object['bins']) > 0) and \

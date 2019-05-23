@@ -22,6 +22,13 @@
           null
         ]
       },
+      "schemas": {
+        "spark": {
+          "a": "int",
+          "b": "int",
+          "c": "int"
+        }
+      },
       "tests": [
         {
           "title": "Positive test, min == max",
@@ -151,6 +158,11 @@
     {
       "data": {
         "empty_column": []
+      },
+      "schemas": {
+        "spark": {
+          "empty_column": "int"
+        }
       },
       "tests": [{
         "title": "Test empty column; should be false (no observed value with which to compare)",
