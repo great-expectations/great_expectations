@@ -8,7 +8,7 @@ import numpy as np
 import great_expectations as ge
 from .test_utils import get_dataset
 
-CONTEXTS = ['PandasDataset', 'SqlAlchemyDataset']
+CONTEXTS = ['PandasDataset', 'SqlAlchemyDataset', 'SparkDFDataset']
 
 @pytest.fixture
 def empty_expectations_config():
@@ -76,6 +76,11 @@ def dataset(request):
             "naturals": "float"
         },
         "sqlite": {
+            "infinities": "float",
+            "nulls": "float",
+            "naturals": "float"
+        },
+        "spark": {
             "infinities": "float",
             "nulls": "float",
             "naturals": "float"
