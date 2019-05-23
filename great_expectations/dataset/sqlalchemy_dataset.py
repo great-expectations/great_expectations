@@ -175,6 +175,13 @@ class MetaSqlAlchemyDataset(Dataset):
 
 class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
+    @classmethod
+    def from_dataset(cls, dataset=None):
+        if isinstance(dataset, SqlAlchemyDataset):
+            return cls(table_name=dataset._table, engine=dataset.engine)
+        else:
+            raise ValueError("from_dataset requires a SqlAlchemy dataset")
+
     def __init__(self, table_name=None, engine=None, connection_string=None,
                  custom_sql=None, schema=None, *args, **kwargs):
 
