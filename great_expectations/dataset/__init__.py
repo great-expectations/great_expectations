@@ -1,4 +1,15 @@
+import logging
+
 from .dataset import Dataset
 from .pandas_dataset import MetaPandasDataset, PandasDataset
-from .sqlalchemy_dataset import MetaSqlAlchemyDataset, SqlAlchemyDataset
-from .sparkdf_dataset import MetaSparkDFDataset, SparkDFDataset
+
+logger = logging.getLogger(__name__)
+
+try:
+    from .sqlalchemy_dataset import MetaSqlAlchemyDataset, SqlAlchemyDataset
+except ImportError:
+    logger.info("Unable to load sqlalchemy dataset; install optional sqlalchemy dependency for support.")
+try:
+    from .sparkdf_dataset import MetaSparkDFDataset, SparkDFDataset
+except ImportError:
+    logger.info("Unable to load spark dataset; install optional spark dependency for support.")
