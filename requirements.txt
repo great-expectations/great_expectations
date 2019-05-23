@@ -7,4 +7,4 @@ six>=1.9.0
 jsonschema>=2.5.1
 sqlalchemy>=1.2
 PyYAML==5.1
-ipywidgets==7.4.2
+ipywidgets>=7.4.2
