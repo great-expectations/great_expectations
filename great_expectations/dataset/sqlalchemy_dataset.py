@@ -1,6 +1,7 @@
 from __future__ import division
 from six import PY3, string_types
 
+import uuid
 from functools import wraps
 import inspect
 import logging
@@ -176,6 +177,11 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
     def __init__(self, table_name=None, engine=None, connection_string=None,
                  custom_sql=None, schema=None, *args, **kwargs):
+
+        if custom_sql and not table_name:
+            # dashes are special characters in most databases so use undercores
+            table_name = str(uuid.uuid4()).replace("-", "_")
+
         if table_name is None:
             raise ValueError("No table_name provided.")
 
@@ -371,7 +377,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         It hasn't been tested in all SQL dialects, and may change based on community feedback.
         :param custom_sql:
         """
-        stmt = "CREATE TEMPORARY TABLE {table_name} AS {custom_sql}".format(
+        stmt = "CREATE TEMPORARY TABLE \"{table_name}\" AS {custom_sql}".format(
             table_name=table_name, custom_sql=custom_sql)
         self.engine.execute(stmt)
 

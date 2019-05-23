@@ -16,3 +16,4 @@ pytest-cov>=2.6.1
 coveralls>=1.3
 pyspark>=2.3.2
 psycopg2>=2.7.6,<2.8
+PyYAML==5.1

@@ -6,6 +6,7 @@ from functools import wraps
 import traceback
 import warnings
 import logging
+import uuid
 from six import PY3, string_types
 from collections import namedtuple
 
@@ -36,14 +37,18 @@ class DataAsset(object):
         parameter not obvious from the signature.
 
         """
+        interactive_evaluation = kwargs.pop("interactive_evaluation", True)
         autoinspect_func = kwargs.pop("autoinspect_func", None)
         initial_config = kwargs.pop("config", None)
         data_asset_name = kwargs.pop("data_asset_name", None)
-
+        data_context = kwargs.pop("data_context", None)
         super(DataAsset, self).__init__(*args, **kwargs)
+        self._interactive_evaluation = interactive_evaluation
         self._initialize_expectations(config=initial_config, data_asset_name=data_asset_name)
+        self._data_context = data_context
         if autoinspect_func is not None:
             autoinspect_func(self)
+
 
     def autoinspect(self, autoinspect_func=columns_exist):
         autoinspect_func(self)
@@ -156,21 +161,29 @@ class DataAsset(object):
                 exception_message = None
 
                 # Finally, execute the expectation method itself
-                try:
-                    return_obj = func(self, **evaluation_args)
+                if self._interactive_evaluation == True:
+                    try:
+                        return_obj = func(self, **evaluation_args)
+                
+                    except Exception as err:
+                        if catch_exceptions:
+                            raised_exception = True
+                            exception_traceback = traceback.format_exc()
+                            exception_message = str(err)
 
-                except Exception as err:
-                    if catch_exceptions:
-                        raised_exception = True
-                        exception_traceback = traceback.format_exc()
-                        exception_message = str(err)
+                            return_obj = {
+                                "success": False
+                            }
 
-                        return_obj = {
-                            "success": False
-                        }
+                        else:
+                            raise(err)
+                    
+                    # Add a "success" object to the config
+                    expectation_config["success_on_last_run"] = return_obj["success"]
 
-                    else:
-                        raise(err)
+                else:
+                    return_obj = {"stored_configuration": expectation_config}
+
 
                 # Append the expectation to the config.
                 self._append_expectation(expectation_config)
@@ -186,9 +199,6 @@ class DataAsset(object):
                         "exception_traceback": exception_traceback
                     }
 
-                # Add a "success" object to the config
-                expectation_config["success_on_last_run"] = return_obj["success"]
-
                 # Add meta to return object
                 if meta is not None:
                     return_obj['meta'] = meta
@@ -196,6 +206,10 @@ class DataAsset(object):
 
                 return_obj = recursively_convert_to_json_serializable(
                     return_obj)
+
+                if self._data_context is not None:
+                    return_obj = self._data_context.update_return_obj(self, return_obj)
+
                 return return_obj
 
             return wrapper
@@ -706,10 +720,6 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                   suppressed.
 
         """
-        if filepath == None:
-            # FIXME: Fetch the proper filepath from the project config
-            pass
-
         expectations_config = self.get_expectations_config(
             discard_failed_expectations,
             discard_result_format_kwargs,
@@ -717,10 +727,40 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             discard_catch_exceptions_kwargs,
             suppress_warnings
         )
-        expectation_config_str = json.dumps(expectations_config, indent=2)
-        open(filepath, 'w').write(expectation_config_str)
+        if filepath is None and self._data_context is not None:
+            self._data_context.save_data_asset_config(expectations_config)
+        elif filepath is not None:
+            expectation_config_str = json.dumps(expectations_config, indent=2)
+            open(filepath, 'w').write(expectation_config_str)
+        else:
+            raise ValueError("Unable to save config: filepath or data_context must be available.")
 
-    def validate(self, expectations_config=None, evaluation_parameters=None, catch_exceptions=True, result_format=None, only_return_failures=False):
+    ######BEFORE MERGE --- MOVE THIS TO THE CORRECT LOCATION########
+    def _save_dataset(self, dataset_store):
+        raise NotImplementedError
+
+    def _save_result(self, result, result_store):
+        if isinstance(result_store, string_types):
+            logger.info("Storing dataset to file")
+            with open(result_store, 'w+') as file:
+                json.dump(result, file)
+        else:
+            ##### WARNING -- ASSUMING S3 ########
+            logger.info("Storing to s3")
+            result_store.put(Body=json.dumps(result).encode('utf-8'))
+
+
+    def validate(self, 
+                 expectations_config=None, 
+                 run_id=None,
+                 data_context=None,
+                 evaluation_parameters=None,
+                 catch_exceptions=True, 
+                 result_format=None, 
+                 only_return_failures=False,
+                 save_dataset_on_failure=None,
+                 result_store=None,
+                 result_callback=None):
         """Generates a JSON-formatted report describing the outcome of all expectations.
 
             Use the default expectations_config=None to validate the expectations config associated with the DataAsset.
@@ -781,6 +821,18 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
            Raises:
                AttributeError - if 'catch_exceptions'=None and an expectation throws an AttributeError
         """
+        validate__interactive_evaluation = self._interactive_evaluation
+        if self._interactive_evaluation == False:
+            # Turn this off for an explicit call to validate
+            self._interactive_evaluation = True
+
+        # If a different validation data context was provided, override 
+        validate__data_context = self._data_context
+        if data_context is None and self._data_context is not None:
+            data_context = self._data_context
+        elif data_context is not None:
+            # temporarily set self._data_context so it is used inside the expectation decorator
+            self._data_context = data_context
 
         results = []
 
@@ -794,10 +846,22 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         elif isinstance(expectations_config, string_types):
             expectations_config = json.load(open(expectations_config, 'r'))
 
-        if evaluation_parameters is None:
-            # Use evaluation parameters from the (maybe provided) config
-            if "evaluation_parameters" in expectations_config:
-                evaluation_parameters = expectations_config["evaluation_parameters"]
+        # Evaluation parameter priority is
+        # 1. from provided parameters
+        # 2. from expectation configuration
+        # 3. from data context
+        # So, we load them in reverse order
+
+        if data_context is not None:
+            runtime_evaluation_parameters = data_context.bind_evaluation_parameters(run_id, expectations_config)
+        else:
+            runtime_evaluation_parameters = {}
+
+        if "evaluation_parameters" in expectations_config:
+            runtime_evaluation_parameters.update(expectations_config["evaluation_parameters"])
+        
+        if evaluation_parameters is not None:
+            runtime_evaluation_parameters.update(evaluation_parameters)
 
         # Warn if our version is different from the version in the configuration
         try:
@@ -819,7 +883,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
                 # A missing parameter should raise a KeyError
                 evaluation_args = self._build_evaluation_parameters(
-                    expectation['kwargs'], evaluation_parameters)
+                    expectation['kwargs'], runtime_evaluation_parameters)
 
                 result = expectation_method(
                     catch_exceptions=catch_exceptions,
@@ -865,6 +929,18 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                     abbrev_results.append(exp)
             results = abbrev_results
 
+        # TODO: refactor this once we've settled on the correct naming convetion everywhere
+        data_asset_name = None
+        if "data_asset_name" in expectations_config:
+            data_asset_name = expectations_config["data_asset_name"]
+        elif "dataset_name" in expectations_config:
+            data_asset_name = expectations_config["dataset_name"]
+        elif "meta" in expectations_config:
+            if "data_asset_name" in expectations_config["meta"]:
+                data_asset_name = expectations_config["meta"]["data_asset_name"]
+            elif "dataset_name" in expectations_config["meta"]:
+                data_asset_name = expectations_config["meta"]["dataset_name"]
+
         result = {
             "results": results,
             "success": statistics.success,
@@ -873,11 +949,46 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                 "successful_expectations": statistics.successful_expectations,
                 "unsuccessful_expectations": statistics.unsuccessful_expectations,
                 "success_percent": statistics.success_percent,
-            }
+            },
+            "meta": {
+                "great_expectations.__version__": __version__,
+                "data_asset_name": data_asset_name
+            }            
         }
+
+        if data_context is not None:
+            data_context.register_validation_results(run_id, result)
 
         if evaluation_parameters is not None:
             result.update({"evaluation_parameters": evaluation_parameters})
+
+        if run_id is not None:
+            result["meta"].update({"run_id": run_id})
+        else:
+            result["meta"].update({"run_id": str(uuid.uuid4())})
+
+        if save_dataset_on_failure is not None and result["success"] == False:
+            ##### WARNING: HACKED FOR DEMO #######
+            bucket = save_dataset_on_failure.bucket_name
+            key = save_dataset_on_failure.key
+            result["meta"]["dataset_reference"] = f"s3://{bucket}/{key}"
+            self._save_dataset(save_dataset_on_failure)
+
+        if result_store is not None:
+            ##### WARNING: HACKED FOR DEMO #######
+            if isinstance(result_store, string_types):
+                logger.info("Storing result to file")
+            else: #TODO: hack - assumes S3
+                bucket = result_store.bucket_name
+                key = result_store.key
+                result["meta"]["result_reference"] = f"s3://{bucket}/{key}"
+            self._save_result(result, result_store = result_store)
+
+        if result_callback is not None:
+            result_callback(result)
+
+        self._data_context = validate__data_context
+        self._interactive_evaluation = validate__interactive_evaluation
 
         return result
 
@@ -918,7 +1029,10 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
     def get_data_asset_name(self):
         """Gets the current name of this data_asset as stored in the expectations configuration."""
-        return self._expectations_config['data_asset_name']
+        if "data_asset_name" in self._expectations_config:
+            return self._expectations_config['data_asset_name']
+        else:
+            return None
 
     def _build_evaluation_parameters(self, expectation_args, evaluation_parameters):
         """Build a dictionary of parameters to evaluate, using the provided evaluation_paramters,
@@ -941,6 +1055,8 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                                               value["$PARAMETER"]]
                 elif evaluation_parameters is not None and value["$PARAMETER"] in evaluation_parameters:
                     evaluation_args[key] = evaluation_parameters[value['$PARAMETER']]
+                elif self._interactive_evaluation == False:
+                    pass
                 else:
                     raise KeyError(
                         "No value found for $PARAMETER " + value["$PARAMETER"])
