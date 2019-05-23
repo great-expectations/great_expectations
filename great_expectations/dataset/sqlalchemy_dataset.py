@@ -16,6 +16,8 @@ except ImportError:
     logger.error("Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support")
     raise
 
+import pandas as pd
+
 from dateutil.parser import parse
 from datetime import datetime
 
@@ -258,6 +260,20 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             sa.select([sa.func.min(sa.column(column))]).select_from(
                 self._table)
         ).scalar()
+    
+    def _get_column_value_counts(self, column):
+        results = self.engine.execute(
+            sa.select([
+                sa.column(column).label("value"),
+                sa.func.count(sa.column(column)).label("count"),
+            ]).where(sa.column(column) != None) \
+              .group_by(sa.column(column)) \
+              .select_from(self._table)).fetchall()
+        return pd.Series(
+            [row[1] for row in results],
+            index=[row[0] for row in results],
+            name=column
+        )
 
     def get_column_mean(self, column):
         return self.engine.execute(
@@ -293,6 +309,60 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             # An odd number of column values, we can just take the center value
             column_median = column_values[1][0]  # True center value
         return column_median
+
+    def _get_column_hist(self, column, bins):
+        # TODO: this is **terribly** inefficient; consider refactor
+        """return a list of counts corresponding to bins"""
+        hist = []
+        for i in range(0, len(bins) - 1):
+            # all bins except last are half-open
+            if i == len(bins) - 2:
+                max_strictly = False
+            else:
+                max_strictly = True
+            hist.append(
+                self._get_column_count_in_range(column, min_val=bins[i], max_val=bins[i + 1], max_strictly=max_strictly)
+            )
+        return hist
+
+    def _get_column_count_in_range(self, column, min_val=None, max_val=None, min_strictly=False, max_strictly=True):
+        if min_val is None and max_val is None:
+            raise ValueError('Must specify either min or max value')
+        if min_val is not None and max_val is not None and min_val > max_val:
+            raise ValueError('Min value must be <= to max value')
+
+        min_condition = None
+        max_condition = None
+        if min_val is not None:
+            if min_strictly:
+                min_condition = sa.column(column) > min_val
+            else:
+                min_condition = sa.column(column) >= min_val
+        if max_val is not None:
+            if max_strictly:
+                max_condition = sa.column(column) < max_val
+            else:
+                max_condition = sa.column(column) <= max_val
+        
+        if min_condition is not None and max_condition is not None:
+            condition = sa.and_(min_condition, max_condition)
+        elif min_condition is not None:
+            condition = min_condition
+        else:
+            condition = max_condition
+
+        query = query = sa.select([
+                    sa.func.count((sa.column(column)))
+                ]) \
+                .where(
+                    sa.and_(
+                        sa.column(column) != None,
+                        condition
+                    )
+                ) \
+                .select_from(self._table)
+        
+        return self.engine.execute(query).scalar()
 
     def create_temporary_table(self, table_name, custom_sql):
         """

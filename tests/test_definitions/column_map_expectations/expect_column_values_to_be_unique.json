@@ -11,6 +11,18 @@
       "null": [null, null, null, null],
       "mult_dup": ["1", "1", "2", "2"]
     },
+    "schemas": {
+      "spark": {
+        "a": "string",
+        "b": "string",
+        "c": "int",
+        "d": "string",
+        "n": "int",
+        "unique": "int",
+        "null": "null",
+        "mult_dup": "string"
+      }
+    },
     "tests" : [
       {
         "title": "Basic positive test case",
