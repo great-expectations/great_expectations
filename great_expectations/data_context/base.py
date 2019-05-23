@@ -7,13 +7,16 @@ from glob import glob
 
 from great_expectations.version import __version__
 from great_expectations.dataset import PandasDataset
-from great_expectations import read_csv, render
+from great_expectations import read_csv
 from IPython.display import display
 import ipywidgets as widgets
 from urllib.parse import urlparse
 
+from .sqlalchemy_source import SqlAlchemyDataSource
+from .dbt_source import DBTDataSource
 from .expectation_explorer import ExpectationExplorer
-from .sqlalchemy_source import SqlAlchemyDataSource, DBTDataSource
+from .sqlalchemy_source import SqlAlchemyDataSource
+from .dbt_source import DBTDataSource
 from .pandas_source import PandasCSVDataSource
 
 logger = logging.getLogger(__name__)
@@ -80,11 +83,7 @@ class DataContext(object):
             datasource_config = self._project_config["datasources"][datasource_name]
             datasource_type = datasource_config["type"]
             if datasource_type == "pandas":
-                try:
-                    path = datasource_config["path"]
-                except KeyError:
-                    raise ValueError("Pandas data source requires a path argument.")
-                return PandasCSVDataSource(path=path)
+                return PandasCSVDataSource(**datasource_config)
 
             elif datasource_type == "dbt":
                 try:
@@ -94,12 +93,7 @@ class DataContext(object):
                 return DBTDataSource(profile)
 
             elif datasource_type == "sqlalchemy":
-                try:
-                    profile = datasource_config["profile"]
-                    options = SqlAlchemyDataSource._get_db_connection_options_from_profile(profile)
-                except KeyError:
-                    raise ValueError("SqlAlchemy datasource requires a profile be specified.")
-                return SqlAlchemyDataSource(options)
+                return SqlAlchemyDataSource(**datasource_config)
             else:
                 raise ValueError(f"Unrecognized datasource type {datasource_type}")
 
