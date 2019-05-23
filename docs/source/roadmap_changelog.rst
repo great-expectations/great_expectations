@@ -14,6 +14,12 @@ Planned Features
 
 v.0.5.1__develop
 ----------------
+* Add support for SparkDFDataset (thanks @cselig)
+* Migrate distributional expectations to new testing framework
+BREAKING CHANGES:
+* Add caching mechanism for Datasets; \
+  when enabled, GE assumes that dataset does not change between evaluation of individual expectations
+* Drop official support for python 2 and pandas < 0.22
 
 
 v.0.5.1

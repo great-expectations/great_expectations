@@ -404,4 +404,3 @@ class DataContext(object):
             return self._expectation_explorer_manager.create_expectation_widget(data_asset, return_obj)
         else:
             return return_obj
-

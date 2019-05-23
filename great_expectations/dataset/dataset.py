@@ -1,10 +1,256 @@
-from great_expectations.data_asset.base import DataAsset
-from six import string_types
+import inspect
+import sys
+from six import PY3, string_types
+from functools import wraps
+from numbers import Number
 from dateutil.parser import parse
+from datetime import datetime
 
-class Dataset(DataAsset):
+if sys.version_info.major == 2:  # If python 2
+    from itertools import izip_longest as zip_longest
+elif sys.version_info.major == 3:  # If python 3
+    from itertools import zip_longest
+
+
+from great_expectations.data_asset.base import DataAsset
+from great_expectations.data_asset.util import DocInherit, parse_result_format
+from great_expectations.dataset.util import (
+    is_valid_partition_object,
+    is_valid_categorical_partition_object,
+    is_valid_continuous_partition_object,
+    _scipy_distribution_positional_args_from_dict,
+    validate_distribution_parameters,
+)
+
+import pandas as pd
+import numpy as np
+from scipy import stats
+
+
+class ColumnarResultCache:
+    """Holds information about columns"""
+    def __init__(self, callback, caching=False):
+        self.data = {}
+        self.callback = callback
+        self.caching = caching
+
+    def get(self, *args):
+        """Args is a tuple of parameters that will be used as the key to look up cached values"""
+        if self.caching:
+            if args not in self.data:
+                self.data[args] = self.callback(*args)
+            return self.data[args]
+        else:
+            return self.callback(*args)
+
+
+class MetaDataset(DataAsset):
+    """
+    Holds expectation decorators.
+    """
+
+    @classmethod
+    def column_aggregate_expectation(cls, func):
+        """Constructs an expectation using column-aggregate semantics.
+
+        The column_aggregate_expectation decorator handles boilerplate issues surrounding the common pattern of \
+        evaluating truthiness of some condition on an aggregated-column basis.
+
+        Args:
+            func (function): \
+                The function implementing an expectation using an aggregate property of a column. \
+                The function should take a column of data and return the aggregate value it computes.
+
+        Notes:
+            column_aggregate_expectation *excludes null values* from being passed to the function
+
+        See also:
+            :func:`expect_column_mean_to_be_between <great_expectations.data_asset.dataset.Dataset.expect_column_mean_to_be_between>` \
+            for an example of a column_aggregate_expectation
+        """
+        if PY3:
+            argspec = inspect.getfullargspec(func)[0][1:]
+        else:
+            argspec = inspect.getargspec(func)[0][1:]
+
+        @cls.expectation(argspec)
+        @wraps(func)
+        def inner_wrapper(self, column, result_format=None, *args, **kwargs):
+
+            if result_format is None:
+                result_format = self.default_expectation_args["result_format"]
+            # Retain support for string-only output formats:
+            result_format = parse_result_format(result_format)
+
+            element_count = self.row_count
+            nonnull_count = self.get_column_nonnull_count(column)
+            null_count = element_count - nonnull_count
+
+            evaluation_result = func(self, column, *args, **kwargs)
+
+            if 'success' not in evaluation_result:
+                raise ValueError(
+                    "Column aggregate expectation failed to return required information: success")
+
+            if ('result' not in evaluation_result) or ('observed_value' not in evaluation_result['result']):
+                raise ValueError(
+                    "Column aggregate expectation failed to return required information: observed_value")
+
+            return_obj = {
+                'success': bool(evaluation_result['success'])
+            }
+
+            if result_format['result_format'] == 'BOOLEAN_ONLY':
+                return return_obj
+
+            return_obj['result'] = {
+                'observed_value': evaluation_result['result']['observed_value'],
+                "element_count": element_count,
+                "missing_count": null_count,
+                "missing_percent": null_count * 1.0 / element_count if element_count > 0 else None
+            }
+
+            if result_format['result_format'] == 'BASIC':
+                return return_obj
+
+            if 'details' in evaluation_result['result']:
+                return_obj['result']['details'] = evaluation_result['result']['details']
+
+            if result_format['result_format'] in ["SUMMARY", "COMPLETE"]:
+                return return_obj
+
+            raise ValueError("Unknown result_format %s." %
+                                (result_format['result_format'],))
+
+        return inner_wrapper
+
+
+class Dataset(MetaDataset):
     def __init__(self, *args, **kwargs):
+        self.caching = kwargs.pop("caching", False)
+
+        # some data structures for caching information specific to tabular datasets
+        # these definitions currently need to come before MetaDataset.__init__ to allow for autoinspection
+        # NOTE: using caching makes the strong assumption that the user will not modify the core data store
+        # (e.g. a SQL table or spark dataframe) over the lifetime of the dataset instance
+        self._row_count = None
+        self._table_columns = None
+        self._column_nonnull_counts = ColumnarResultCache(self._get_column_nonnull_count, self.caching)
+        self._column_means = ColumnarResultCache(self._get_column_mean, self.caching)
+        self._column_value_counts = ColumnarResultCache(self._get_column_value_counts, self.caching)
+        self._column_sums = ColumnarResultCache(self._get_column_sum, self.caching)
+        self._column_maxes = ColumnarResultCache(self._get_column_max, self.caching)
+        self._column_mins = ColumnarResultCache(self._get_column_min, self.caching)
+        self._column_unique_counts = ColumnarResultCache(self._get_column_unique_count, self.caching)
+        self._column_modes = ColumnarResultCache(self._get_column_modes, self.caching)
+        self._column_medians = ColumnarResultCache(self._get_column_median, self.caching)
+        self._column_stdevs = ColumnarResultCache(self._get_column_stdev, self.caching)
+
         super(Dataset, self).__init__(*args, **kwargs)
+
+    @property
+    def row_count(self):
+        if self.caching:
+            if not self._row_count:
+                self._row_count = self._get_row_count()
+            return self._row_count
+        else:
+            return self._get_row_count()
+
+    def _get_row_count(self):
+        """Returns: int, table row count"""
+        raise NotImplementedError
+
+    @property
+    def table_columns(self):
+        if self.caching:
+            if not self._table_columns:
+                self._table_columns = self._get_table_columns()
+            return self._table_columns
+        else:
+            return self._get_table_columns()
+    
+    def _get_table_columns(self):
+        """Returns: List[str], list of column names"""
+        raise NotImplementedError
+
+    def get_column_nonnull_count(self, column):
+        return self._column_nonnull_counts.get(column)
+
+    def _get_column_nonnull_count(self, column):
+        """Returns: int"""
+        raise NotImplementedError
+
+    def get_column_mean(self, column):
+        return self._column_means.get(column)
+
+    def _get_column_mean(self, column):
+        """Returns: float"""
+        raise NotImplementedError
+
+    def get_column_value_counts(self, column):
+        return self._column_value_counts.get(column)
+
+    def _get_column_value_counts(self, column):
+        """Returns: pd.Series of value counts for a column, sorted by value"""
+        raise NotImplementedError
+
+    def get_column_sum(self, column):
+        return self._column_sums.get(column)
+
+    def _get_column_sum(self, column):
+        """Returns: float"""
+        raise NotImplementedError
+
+    def get_column_max(self, column, parse_strings_as_datetimes=False):
+        return self._column_maxes.get(column, parse_strings_as_datetimes)
+
+    def _get_column_max(self, column, parse_strings_as_datetimes=False):
+        """Returns: any"""
+        raise NotImplementedError
+
+    def get_column_min(self, column, parse_strings_as_datetimes=False):
+        return self._column_mins.get(column, parse_strings_as_datetimes)
+
+    def _get_column_min(self, column, parse_strings_as_datetimes=False):
+        """Returns: any"""
+        raise NotImplementedError
+
+    def get_column_unique_count(self, column):
+        return self._column_unique_counts.get(column)
+
+    def _get_column_unique_count(self, column):
+        """Returns: int"""
+        raise NotImplementedError
+
+    def get_column_modes(self, column):
+        return self._column_modes.get(column)
+
+    def _get_column_modes(self, column):
+        """Returns: List[any], list of modes (ties OK)"""
+        raise NotImplementedError
+
+    def get_column_median(self, column):
+        return self._column_medians.get(column)
+
+    def _get_column_median(self, column):
+        """Returns: any"""
+        raise NotImplementedError
+
+    def get_column_stdev(self, column):
+        return self._column_stdevs.get(column)
+
+    def _get_column_stdev(self, column):
+        """Returns: float"""
+        raise NotImplementedError
+
+    def _get_column_hist(self, column, bins):
+        """Returns: List[int], a list of counts corresponding to bins"""
+        raise NotImplementedError
+
+    def _get_column_count_in_range(self, column, min_val=None, max_val=None, min_strictly=False, max_strictly=True):
+        """Returns: int"""
+        raise NotImplementedError
 
     def _initialize_expectations(self, config=None, data_asset_name=None):
         """Override data_asset_type with "Dataset"
@@ -40,27 +286,6 @@ class Dataset(DataAsset):
         See also:
             :func:`expect_column_values_to_be_unique <great_expectations.data_asset.dataset.Dataset.expect_column_values_to_be_unique>` \
             for an example of a column_map_expectation
-        """
-        raise NotImplementedError
-
-    @classmethod
-    def column_aggregate_expectation(cls, func):
-        """Constructs an expectation using column-aggregate semantics.
-
-        The column_aggregate_expectation decorator handles boilerplate issues surrounding the common pattern of \
-        evaluating truthiness of some condition on an aggregated-column basis.
-
-        Args:
-            func (function): \
-                The function implementing an expectation using an aggregate property of a column. \
-                The function should take a column of data and return the aggregate value it computes.
-
-        Notes:
-            column_aggregate_expectation *excludes null values* from being passed to the function
-
-        See also:
-            :func:`expect_column_mean_to_be_between <great_expectations.data_asset.dataset.Dataset.expect_column_mean_to_be_between>` \
-            for an example of a column_aggregate_expectation
         """
         raise NotImplementedError
 
@@ -108,9 +333,10 @@ class Dataset(DataAsset):
 
     ##### Table shape expectations #####
 
+    @DocInherit
+    @DataAsset.expectation(["column"])
     def expect_column_to_exist(
-        self, column, column_index=None, result_format=None, include_config=False,
-        catch_exceptions=None, meta=None
+        self, column, column_index=None, result_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
         """Expect the specified column to exist.
 
@@ -145,13 +371,24 @@ class Dataset(DataAsset):
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
 
         """
+        if column in self.table_columns:
+            return {
+                # FIXME: list.index does not check for duplicate values.
+                "success": (column_index is None) or (self.table_columns.index(column) == column_index)
+            }
+        else:
+            return {"success": False}
 
-        raise NotImplementedError
-
-    def expect_table_columns_to_match_ordered_list(self,
-                                                   column_list,
-                                                   result_format=None, include_config=False, catch_exceptions=None, meta=None
-                                                   ):
+    @DocInherit
+    @DataAsset.expectation(["column_list"])
+    def expect_table_columns_to_match_ordered_list(
+        self,
+        column_list,
+        result_format=None,
+        include_config=False,
+        catch_exceptions=None,
+        meta=None,
+    ):
         """Expect the columns to exactly match a specified list.
 
         expect_table_columns_to_match_ordered_list is a :func:`expectation <great_expectations.data_asset.dataset.Dataset.expectation>`, not a \
@@ -182,14 +419,38 @@ class Dataset(DataAsset):
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
 
         """
+        columns = self.table_columns
+        if list(columns) == list(column_list):
+            return {
+                "success": True
+            }
+        else:
+            # In the case of differing column lengths between the defined expectation and the observed column set, the
+            # max is determined to generate the column_index.
+            number_of_columns = max(len(column_list), len(columns))
+            column_index = range(number_of_columns)
 
-        raise NotImplementedError
+            # Create a list of the mismatched details
+            compared_lists = list(zip_longest(column_index, list(column_list), list(columns)))
+            mismatched = [{"Expected Column Position": i,
+                           "Expected": k,
+                           "Found": v} for i, k, v in compared_lists if k != v]
+            return {
+                "success": False,
+                "details": {"mismatched": mismatched}
+            }
 
-    def expect_table_row_count_to_be_between(self,
-                                             min_value=0,
-                                             max_value=None,
-                                             result_format=None, include_config=False, catch_exceptions=None, meta=None
-                                             ):
+    @DocInherit
+    @DataAsset.expectation(['min_value', 'max_value'])
+    def expect_table_row_count_to_be_between(
+        self,
+        min_value=None,
+        max_value=None,
+        result_format=None,
+        include_config=False,
+        catch_exceptions=None,
+        meta=None,
+    ):
         """Expect the number of rows to be between two values.
 
         expect_table_row_count_to_be_between is a :func:`expectation <great_expectations.data_asset.dataset.Dataset.expectation>`, \
@@ -229,8 +490,40 @@ class Dataset(DataAsset):
         See Also:
             expect_table_row_count_to_equal
         """
-        raise NotImplementedError
+        try:
+            if min_value is not None:
+                if not float(min_value).is_integer():
+                    raise ValueError("min_value must be integer")
+            if max_value is not None:
+                if not float(max_value).is_integer():
+                    raise ValueError("max_value must be integer")
+        except ValueError:
+            raise ValueError("min_value and max_value must be integers")
 
+        # check that min_value or max_value is set
+        if min_value is None and max_value is None:
+            raise Exception('Must specify either or both of min_value and max_value')
+
+        row_count = self.row_count
+
+        if min_value is not None and max_value is not None:
+            outcome = row_count >= min_value and row_count <= max_value
+
+        elif min_value is None and max_value is not None:
+            outcome = row_count <= max_value
+
+        elif min_value is not None and max_value is None:
+            outcome = row_count >= min_value
+
+        return {
+            'success': outcome,
+            'result': {
+                'observed_value': row_count
+            }
+        }
+
+    @DocInherit
+    @DataAsset.expectation(['value'])
     def expect_table_row_count_to_equal(self,
                                         value,
                                         result_format=None, include_config=False, catch_exceptions=None, meta=None
@@ -267,7 +560,20 @@ class Dataset(DataAsset):
         See Also:
             expect_table_row_count_to_be_between
         """
-        raise NotImplementedError
+        try:
+            if not float(value).is_integer():
+                raise ValueError("value must be an integer")
+        except ValueError:
+            raise ValueError("value must be an integer")
+
+        row_count = self.row_count
+
+        return {
+            'success': row_count == value,
+            'result': {
+                'observed_value': row_count
+            }
+        }
 
     ##### Missing values, unique values, and types #####
 
@@ -660,7 +966,7 @@ class Dataset(DataAsset):
                                            min_value=None,
                                            max_value=None,
                                            allow_cross_type_comparisons=None,
-                                           parse_strings_as_datetimes=None,
+                                           parse_strings_as_datetimes=False,
                                            output_strftime_format=None,
                                            mostly=None,
                                            result_format=None, include_config=False, catch_exceptions=None, meta=None
@@ -721,7 +1027,7 @@ class Dataset(DataAsset):
     def expect_column_values_to_be_increasing(self,
                                               column,
                                               strictly=None,
-                                              parse_strings_as_datetimes=None,
+                                              parse_strings_as_datetimes=False,
                                               mostly=None,
                                               result_format=None, include_config=False, catch_exceptions=None, meta=None
                                               ):
@@ -776,7 +1082,7 @@ class Dataset(DataAsset):
     def expect_column_values_to_be_decreasing(self,
                                               column,
                                               strictly=None,
-                                              parse_strings_as_datetimes=None,
+                                              parse_strings_as_datetimes=False,
                                               mostly=None,
                                               result_format=None, include_config=False, catch_exceptions=None, meta=None
                                               ):
@@ -933,6 +1239,8 @@ class Dataset(DataAsset):
         See Also:
             expect_column_value_lengths_to_be_between
         """
+        raise NotImplementedError
+
 
     def expect_column_values_to_match_regex(self,
                                             column,
@@ -1381,12 +1689,173 @@ class Dataset(DataAsset):
         """
         raise NotImplementedError
 
-    def expect_column_mean_to_be_between(self,
-                                         column,
-                                         min_value=None,
-                                         max_value=None,
-                                         result_format=None, include_config=False, catch_exceptions=None, meta=None
-                                         ):
+    @DocInherit
+    @MetaDataset.column_aggregate_expectation
+    def expect_column_distinct_values_to_equal_set(self,
+                                                   column,
+                                                   value_set,
+                                                   parse_strings_as_datetimes=None,
+                                                   result_format=None, include_config=False, catch_exceptions=None, meta=None):
+        """Expect the set of distinct column values to equal a given set.
+
+        In contrast to expect_column_distinct_values_to_contain_set() this ensures not only that a certain set of values are present in the column but that these _and only these values_ are present.
+
+        For example:
+        ::
+
+            # my_df.my_col = [1,2,2,3,3,3]
+            >>> my_df.expect_column_distinct_values_to_equal_set(
+                "my_col",
+                [2,3]
+            )
+            {
+              "success": false
+              "result": {
+                "observed_value": [1,2,3]
+              },
+            }
+
+        expect_column_distinct_values_to_equal_set is a :func:`column_aggregate_expectation <great_expectations.data_asset.dataset.Dataset.column_aggregate_expectation>`.
+
+
+        Args:
+            column (str): \
+                The column name.
+            value_set (set-like): \
+                A set of objects used for comparison.
+
+        Keyword Args:
+            parse_strings_as_datetimes (boolean or None) : If True values provided in value_set will be parsed as \
+                datetimes before making comparisons.
+
+        Other Parameters:
+            result_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`result_format <result_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
+
+        Returns:
+            A JSON-serializable expectation result object.
+
+            Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+        See Also:
+            expect_column_distinct_values_to_contain_set
+        """
+        if parse_strings_as_datetimes:
+            parsed_value_set = self._parse_value_set(value_set)
+        else:
+            parsed_value_set = value_set
+
+        expected_value_set = set(parsed_value_set)
+        observed_value_set = set(self.get_column_value_counts(column).index)
+
+        return {
+            "success": observed_value_set == expected_value_set,
+            "result": {
+                "observed_value": sorted(list(observed_value_set))
+            }
+        }
+
+
+    @DocInherit
+    @MetaDataset.column_aggregate_expectation
+    def expect_column_distinct_values_to_contain_set(self,
+                                                    column,
+                                                    value_set,
+                                                    parse_strings_as_datetimes=None,
+                                                    result_format=None, include_config=False, catch_exceptions=None, meta=None):
+        """Expect the set of distinct column values to contain a given set.
+
+        In contrast to expect_column_values_to_be_in_set() this ensures not that all column values are members of the given set but that values from the set _must_ be present in the column
+
+        For example:
+        ::
+
+            # my_df.my_col = [1,2,2,3,3,3]
+            >>> my_df.expect_column_distinct_values_to_contain_set(
+                "my_col",
+                [2,3]
+            )
+            {
+            "success": true
+            "result": {
+                "observed_value": [1,2,3]
+            },
+            }
+
+        expect_column_distinct_values_to_contain_set is a :func:`column_aggregate_expectation <great_expectations.data_asset.dataset.Dataset.column_aggregate_expectation>`.
+
+
+        Args:
+            column (str): \
+                The column name.
+            value_set (set-like): \
+                A set of objects used for comparison.
+
+        Keyword Args:
+            parse_strings_as_datetimes (boolean or None) : If True values provided in value_set will be parsed as \
+                datetimes before making comparisons.
+
+        Other Parameters:
+            result_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`result_format <result_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
+
+        Returns:
+            A JSON-serializable expectation result object.
+
+            Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+        See Also:
+            expect_column_distinct_values_to_equal_set
+        """
+        if parse_strings_as_datetimes:
+            parsed_value_set = self._parse_value_set(value_set)
+        else:
+            parsed_value_set = value_set
+
+        expected_value_set = set(parsed_value_set)
+        observed_value_set = set(self.get_column_value_counts(column).index)
+
+        return {
+            "success": observed_value_set.issuperset(expected_value_set),
+            "result": {
+                "observed_value": sorted(list(observed_value_set))
+            }
+        }
+
+    @DocInherit
+    @MetaDataset.column_aggregate_expectation
+    def expect_column_mean_to_be_between(
+        self,
+        column,
+        min_value=None,
+        max_value=None,
+        result_format=None,
+        include_config=False,
+        catch_exceptions=None,
+        meta=None,
+    ):
         """Expect the column mean to be between a minimum value and a maximum value (inclusive).
 
         expect_column_mean_to_be_between is a :func:`column_aggregate_expectation <great_expectations.data_asset.dataset.Dataset.column_aggregate_expectation>`.
@@ -1435,14 +1904,54 @@ class Dataset(DataAsset):
             expect_column_median_to_be_between
             expect_column_stdev_to_be_between
         """
-        raise NotImplementedError
+        if min_value is None and max_value is None:
+            raise ValueError("min_value and max_value cannot both be None")
 
-    def expect_column_median_to_be_between(self,
-                                           column,
-                                           min_value=None,
-                                           max_value=None,
-                                           result_format=None, include_config=False, catch_exceptions=None, meta=None
-                                           ):
+        if min_value is not None and not isinstance(min_value, (Number)):
+            raise ValueError("min_value must be a number")
+
+        if max_value is not None and not isinstance(max_value, (Number)):
+            raise ValueError("max_value must be a number")
+
+        col_avg = self.get_column_mean(column)
+
+        # Handle possible missing values
+        if col_avg is None:
+            return {
+                'success': False,
+                'result': {
+                    'observed_value': col_avg
+                }
+            }
+        else:
+            if min_value != None and max_value != None:
+                success = (min_value <= col_avg) and (col_avg <= max_value)
+
+            elif min_value == None and max_value != None:
+                success = (col_avg <= max_value)
+
+            elif min_value != None and max_value == None:
+                success = (min_value <= col_avg)
+
+            return {
+                'success': success,
+                'result': {
+                    'observed_value': col_avg
+                }
+            }
+
+    @DocInherit
+    @MetaDataset.column_aggregate_expectation
+    def expect_column_median_to_be_between(
+        self,
+        column,
+        min_value=None,
+        max_value=None,
+        result_format=None,
+        include_config=False,
+        catch_exceptions=None,
+        meta=None,
+    ):
         """Expect the column median to be between a minimum value and a maximum value.
 
         expect_column_median_to_be_between is a :func:`column_aggregate_expectation <great_expectations.data_asset.dataset.Dataset.column_aggregate_expectation>`.
@@ -1492,14 +2001,37 @@ class Dataset(DataAsset):
             expect_column_stdev_to_be_between
 
         """
-        raise NotImplementedError
+        if min_value is None and max_value is None:
+            raise ValueError("min_value and max_value cannot both be None")
 
+        column_median = self.get_column_median(column)
+
+        if column_median is None:
+            return {
+                'success': False,
+                'result': {
+                    'observed_value': None
+                }
+            }
+        else:
+            return {
+                "success": (
+                    ((min_value is None) or (min_value <= column_median)) and
+                    ((max_value is None) or (column_median <= max_value))
+                ),
+                "result": {
+                    "observed_value": column_median
+                }
+            }
+
+    @DocInherit
+    @MetaDataset.column_aggregate_expectation
     def expect_column_stdev_to_be_between(self,
-                                          column,
-                                          min_value=None,
-                                          max_value=None,
-                                          result_format=None, include_config=False, catch_exceptions=None, meta=None
-                                          ):
+                                         column,
+                                         min_value=None,
+                                         max_value=None,
+                                         result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                         ):
         """Expect the column standard deviation to be between a minimum value and a maximum value.
 
         expect_column_stdev_to_be_between is a :func:`column_aggregate_expectation <great_expectations.data_asset.dataset.Dataset.column_aggregate_expectation>`.
@@ -1548,14 +2080,33 @@ class Dataset(DataAsset):
             expect_column_mean_to_be_between
             expect_column_median_to_be_between
         """
-        raise NotImplementedError
+        if min_value is None and max_value is None:
+            raise ValueError("min_value and max_value cannot both be None")
 
-    def expect_column_unique_value_count_to_be_between(self,
-                                                       column,
-                                                       min_value=None,
-                                                       max_value=None,
-                                                       result_format=None, include_config=False, catch_exceptions=None, meta=None
-                                                       ):
+        column_stdev = self.get_column_stdev(column)
+
+        return {
+            "success": (
+                ((min_value is None) or (min_value <= column_stdev)) and
+                ((max_value is None) or (column_stdev <= max_value))
+            ),
+            "result": {
+                "observed_value": column_stdev
+            }
+        }
+
+    @DocInherit
+    @MetaDataset.column_aggregate_expectation
+    def expect_column_unique_value_count_to_be_between(
+        self,
+        column,
+        min_value=None,
+        max_value=None,
+        result_format=None,
+        include_config=False,
+        catch_exceptions=None,
+        meta=None,
+    ):
         """Expect the number of unique values to be between a minimum value and a maximum value.
 
         expect_column_unique_value_count_to_be_between is a :func:`column_aggregate_expectation <great_expectations.data_asset.dataset.Dataset.column_aggregate_expectation>`.
@@ -1603,14 +2154,42 @@ class Dataset(DataAsset):
         See Also:
             expect_column_proportion_of_unique_values_to_be_between
         """
-        raise NotImplementedError
+        if min_value is None and max_value is None:
+            raise ValueError("min_value and max_value cannot both be None")
 
-    def expect_column_proportion_of_unique_values_to_be_between(self,
-                                                                column,
-                                                                min_value=0,
-                                                                max_value=1,
-                                                                result_format=None, include_config=False, catch_exceptions=None, meta=None
-                                                                ):
+        unique_value_count = self.get_column_unique_count(column)
+
+        # Handle possible missing values
+        if unique_value_count is None:
+            return {
+                'success': False,
+                'result': {
+                    'observed_value': unique_value_count
+                }
+            }
+        else:
+            return {
+                "success": (
+                    ((min_value is None) or (min_value <= unique_value_count)) and
+                    ((max_value is None) or (unique_value_count <= max_value))
+                ),
+                "result": {
+                    "observed_value": unique_value_count
+                }
+            }
+
+    @DocInherit
+    @MetaDataset.column_aggregate_expectation
+    def expect_column_proportion_of_unique_values_to_be_between(
+        self,
+        column,
+        min_value=0,
+        max_value=1,
+        result_format=None,
+        include_config=False,
+        catch_exceptions=None,
+        meta=None,
+    ):
         """Expect the proportion of unique values to be between a minimum value and a maximum value.
 
         For example, in a column containing [1, 2, 2, 3, 3, 3, 4, 4, 4, 4], there are 4 unique values and 10 total \
@@ -1661,14 +2240,39 @@ class Dataset(DataAsset):
         See Also:
             expect_column_unique_value_count_to_be_between
         """
-        raise NotImplementedError
+        if min_value is None and max_value is None:
+            raise ValueError("min_value and max_value cannot both be None")
 
-    def expect_column_most_common_value_to_be_in_set(self,
-                                                     column,
-                                                     value_set,
-                                                     ties_okay=None,
-                                                     result_format=None, include_config=False, catch_exceptions=None, meta=None
-                                                     ):
+        unique_value_count = self.get_column_unique_count(column)
+        total_value_count = self.get_column_nonnull_count(column)
+
+        if total_value_count > 0:
+            proportion_unique = float(unique_value_count) / total_value_count
+        else:
+            proportion_unique = None
+
+        return {
+            "success": (
+                ((min_value is None) or (min_value <= proportion_unique)) and
+                ((max_value is None) or (proportion_unique <= max_value))
+            ),
+            "result": {
+                "observed_value": proportion_unique
+            }
+        }
+
+    @DocInherit
+    @MetaDataset.column_aggregate_expectation
+    def expect_column_most_common_value_to_be_in_set(
+        self,
+        column,
+        value_set,
+        ties_okay=None,
+        result_format=None,
+        include_config=False,
+        catch_exceptions=None,
+        meta=None,
+    ):
         """Expect the most common value to be within the designated value set
 
         expect_column_most_common_value_to_be_in_set is a :func:`column_aggregate_expectation <great_expectations.data_asset.dataset.Dataset.column_aggregate_expectation>`.
@@ -1716,14 +2320,33 @@ class Dataset(DataAsset):
             `observed_value` will contain a single copy of each most common value.
 
         """
-        raise NotImplementedError
+        mode_list = self.get_column_modes(column)
+        intersection_count = len(set(value_set).intersection(mode_list))
 
-    def expect_column_sum_to_be_between(self,
-                                        column,
-                                        min_value=None,
-                                        max_value=None,
-                                        result_format=None, include_config=False, catch_exceptions=None, meta=None
-                                        ):
+        if ties_okay:
+            success = intersection_count > 0
+        else:
+            success = len(mode_list) == 1 and intersection_count == 1
+
+        return {
+            'success': success,
+            'result': {
+                'observed_value': mode_list
+            }
+        }
+
+    @DocInherit
+    @MetaDataset.column_aggregate_expectation
+    def expect_column_sum_to_be_between(
+        self,
+        column,
+        min_value=None,
+        max_value=None,
+        result_format=None,
+        include_config=False,
+        catch_exceptions=None,
+        meta=None,
+    ):
         """Expect the column to sum to be between an min and max value
 
         expect_column_sum_to_be_between is a :func:`column_aggregate_expectation <great_expectations.data_asset.dataset.Dataset.column_aggregate_expectation>`.
@@ -1770,16 +2393,51 @@ class Dataset(DataAsset):
             * If max_value is None, then min_value is treated as a lower bound
 
         """
-        raise NotImplementedError
+        # TODO check for column type
+        if min_value is None and max_value is None:
+            raise ValueError("min_value and max_value cannot both be None")
 
-    def expect_column_min_to_be_between(self,
-                                        column,
-                                        min_value=None,
-                                        max_value=None,
-                                        parse_strings_as_datetimes=None,
-                                        output_strftime_format=None,
-                                        result_format=None, include_config=False, catch_exceptions=None, meta=None
-                                        ):
+        col_sum = self.get_column_sum(column)
+
+        # Handle possible missing values
+        if col_sum is None:
+            return {
+                'success': False,
+                'result': {
+                    'observed_value': col_sum
+                }
+            }
+        else:
+            if min_value is not None and max_value is not None:
+                success = (min_value <= col_sum) and (col_sum <= max_value)
+
+            elif min_value is None and max_value is not None:
+                success = (col_sum <= max_value)
+
+            elif min_value is not None and max_value is None:
+                success = (min_value <= col_sum)
+
+            return {
+                'success': success,
+                'result': {
+                    'observed_value': col_sum
+                }
+            }
+
+    @DocInherit
+    @MetaDataset.column_aggregate_expectation
+    def expect_column_min_to_be_between(
+        self,
+        column,
+        min_value=None,
+        max_value=None,
+        parse_strings_as_datetimes=False,
+        output_strftime_format=None,
+        result_format=None,
+        include_config=False,
+        catch_exceptions=None,
+        meta=None,
+    ):
         """Expect the column to sum to be between an min and max value
 
         expect_column_min_to_be_between is a :func:`column_aggregate_expectation <great_expectations.data_asset.dataset.Dataset.column_aggregate_expectation>`.
@@ -1832,16 +2490,52 @@ class Dataset(DataAsset):
             * If max_value is None, then min_value is treated as a lower bound
 
         """
-        raise NotImplementedError
+        if min_value is None and max_value is None:
+            raise ValueError("min_value and max_value cannot both be None")
 
-    def expect_column_max_to_be_between(self,
-                                        column,
-                                        min_value=None,
-                                        max_value=None,
-                                        parse_strings_as_datetimes=None,
-                                        output_strftime_format=None,
-                                        result_format=None, include_config=False, catch_exceptions=None, meta=None
-                                        ):
+        if parse_strings_as_datetimes:
+            if min_value:
+                min_value = parse(min_value)
+            if max_value:
+                max_value = parse(max_value)
+
+        col_min = self.get_column_min(column, parse_strings_as_datetimes)
+
+        if col_min is None:
+            success = False
+        elif min_value is not None and max_value is not None:
+            success = (min_value <= col_min) and (col_min <= max_value)
+        elif min_value is None and max_value is not None:
+            success = (col_min <= max_value)
+        elif min_value is not None and max_value is None:
+            success = (min_value <= col_min)
+
+        if parse_strings_as_datetimes:
+            if output_strftime_format:
+                col_min = datetime.strftime(col_min, output_strftime_format)
+            else:
+                col_min = str(col_min)
+        return {
+            'success': success,
+            'result': {
+                'observed_value': col_min
+            }
+        }
+
+    @DocInherit
+    @MetaDataset.column_aggregate_expectation
+    def expect_column_max_to_be_between(
+        self,
+        column,
+        min_value=None,
+        max_value=None,
+        parse_strings_as_datetimes=False,
+        output_strftime_format=None,
+        result_format=None,
+        include_config=False,
+        catch_exceptions=None,
+        meta=None,
+    ):
         """Expect the column max to be between an min and max value
 
         expect_column_max_to_be_between is a :func:`column_aggregate_expectation <great_expectations.data_asset.dataset.Dataset.column_aggregate_expectation>`.
@@ -1894,16 +2588,54 @@ class Dataset(DataAsset):
             * If max_value is None, then min_value is treated as a lower bound
 
         """
-        raise NotImplementedError
+        # TODO spark tests
+        if min_value is None and max_value is None:
+            raise ValueError("min_value and max_value cannot both be None")
+
+        if parse_strings_as_datetimes:
+            if min_value:
+                min_value = parse(min_value)
+            if max_value:
+                max_value = parse(max_value)
+
+        col_max = self.get_column_max(column, parse_strings_as_datetimes)
+
+        if col_max is None:
+            success = False
+        elif min_value is not None and max_value is not None:
+            success = (min_value <= col_max) and (col_max <= max_value)
+        elif min_value is None and max_value is not None:
+            success = (col_max <= max_value)
+        elif min_value is not None and max_value is None:
+            success = (min_value <= col_max)
+
+        if parse_strings_as_datetimes:
+            if output_strftime_format:
+                col_max = datetime.strftime(col_max, output_strftime_format)
+            else:
+                col_max = str(col_max)
+
+        return {
+            "success": success,
+            "result": {
+                "observed_value": col_max
+            }
+        }
 
     # Distributional expectations
-    def expect_column_chisquare_test_p_value_to_be_greater_than(self,
-                                                                column,
-                                                                partition_object=None,
-                                                                p=0.05,
-                                                                tail_weight_holdout=0,
-                                                                result_format=None, include_config=False, catch_exceptions=None, meta=None
-                                                                ):
+    @DocInherit
+    @MetaDataset.column_aggregate_expectation
+    def expect_column_chisquare_test_p_value_to_be_greater_than(
+        self,
+        column,
+        partition_object=None,
+        p=0.05,
+        tail_weight_holdout=0,
+        result_format=None,
+        include_config=False,
+        catch_exceptions=None,
+        meta=None,
+    ):
         """Expect column values to be distributed similarly to the provided categorical partition. \
 
         This expectation compares categorical distributions using a Chi-squared test. \
@@ -1962,9 +2694,50 @@ class Dataset(DataAsset):
                             The partition expected from the data, after including tail_weight_holdout
                     }
                 }
-
         """
-        raise NotImplementedError
+        if not is_valid_categorical_partition_object(partition_object):
+            raise ValueError("Invalid partition object.")
+
+        element_count = self.get_column_nonnull_count(column)
+        observed_frequencies = self.get_column_value_counts(column)
+        # Convert to Series object to allow joining on index values
+        expected_column = pd.Series(
+            partition_object['weights'], index=partition_object['values'], name='expected') * element_count
+        # Join along the indices to allow proper comparison of both types of possible missing values
+        # test_df = pd.concat([expected_column, observed_frequencies], axis=1, sort=True) # Sort parameter not available before pandas 0.23.0
+        test_df = pd.concat([expected_column, observed_frequencies], axis=1)
+
+        na_counts = test_df.isnull().sum()
+
+        # Handle NaN: if we expected something that's not there, it's just not there.
+        test_df[column] = test_df[column].fillna(0)
+        # Handle NaN: if something's there that was not expected, substitute the relevant value for tail_weight_holdout
+        if na_counts['expected'] > 0:
+            # Scale existing expected values
+            test_df['expected'] = test_df['expected'] * (1 - tail_weight_holdout)
+            # Fill NAs with holdout.
+            test_df['expected'] = test_df['expected'].fillna(
+                element_count * (tail_weight_holdout / na_counts['expected']))
+
+        test_result = stats.chisquare(
+            test_df[column], test_df['expected'])[1]
+
+        return {
+            "success": test_result > p,
+            "result": {
+                "observed_value": test_result,
+                "details": {
+                    "observed_partition": {
+                        "values": test_df.index.tolist(),
+                        "weights": test_df[column].tolist()
+                    },
+                    "expected_partition": {
+                        "values": test_df.index.tolist(),
+                        "weights": test_df['expected'].tolist()
+                    }
+                }
+            }
+        }
 
     def expect_column_bootstrapped_ks_test_p_value_to_be_greater_than(self,
                                                                       column,
@@ -2051,13 +2824,20 @@ class Dataset(DataAsset):
         """
         raise NotImplementedError
 
-    def expect_column_kl_divergence_to_be_less_than(self,
-                                                    column,
-                                                    partition_object=None,
-                                                    threshold=None,
-                                                    tail_weight_holdout=0,
-                                                    internal_weight_holdout=0,
-                                                    result_format=None, include_config=False, catch_exceptions=None, meta=None):
+    @DocInherit
+    @MetaDataset.column_aggregate_expectation
+    def expect_column_kl_divergence_to_be_less_than(
+        self,
+        column,
+        partition_object=None,
+        threshold=None,
+        tail_weight_holdout=0,
+        internal_weight_holdout=0,
+        result_format=None,
+        include_config=False,
+        catch_exceptions=None,
+        meta=None,
+    ):
         """Expect the Kulback-Leibler (KL) divergence (relative entropy) of the specified column with respect to the \
         partition object to be lower than the provided threshold.
 
@@ -2158,7 +2938,202 @@ class Dataset(DataAsset):
             expect_column_bootstrapped_ks_test_p_value_to_be_greater_than
 
         """
-        raise NotImplementedError
+        if not is_valid_partition_object(partition_object):
+            raise ValueError("Invalid partition object.")
+
+        if (not isinstance(threshold, (int, float))) or (threshold < 0):
+            raise ValueError(
+                "Threshold must be specified, greater than or equal to zero.")
+
+        if (not isinstance(tail_weight_holdout, (int, float))) or (tail_weight_holdout < 0) or (tail_weight_holdout > 1):
+            raise ValueError(
+                "tail_weight_holdout must be between zero and one.")
+
+        if (not isinstance(internal_weight_holdout, (int, float))) or (internal_weight_holdout < 0) or (internal_weight_holdout > 1):
+            raise ValueError(
+                "internal_weight_holdout must be between zero and one.")
+            
+        if(tail_weight_holdout != 0 and "tail_weights" in partition_object):
+            raise ValueError(
+                "tail_weight_holdout must be 0 when using tail_weights in partition object")
+
+        # TODO: add checks for duplicate values in is_valid_categorical_partition_object
+        if is_valid_categorical_partition_object(partition_object):
+            if internal_weight_holdout > 0:
+                raise ValueError(
+                    "Internal weight holdout cannot be used for discrete data.")
+
+            # Data are expected to be discrete, use value_counts
+            observed_weights = self.get_column_value_counts(column) / self.get_column_nonnull_count(column)
+            expected_weights = pd.Series(
+                partition_object['weights'], index=partition_object['values'], name='expected')
+            # test_df = pd.concat([expected_weights, observed_weights], axis=1, sort=True) # Sort not available before pandas 0.23.0
+            test_df = pd.concat([expected_weights, observed_weights], axis=1)
+
+            na_counts = test_df.isnull().sum()
+
+            # Handle NaN: if we expected something that's not there, it's just not there.
+            pk = test_df[column].fillna(0)
+            # Handle NaN: if something's there that was not expected, substitute the relevant value for tail_weight_holdout
+            if na_counts['expected'] > 0:
+                # Scale existing expected values
+                test_df['expected'] = test_df['expected'] * \
+                    (1 - tail_weight_holdout)
+                # Fill NAs with holdout.
+                qk = test_df['expected'].fillna(
+                    tail_weight_holdout / na_counts['expected'])
+            else:
+                qk = test_df['expected']
+
+            kl_divergence = stats.entropy(pk, qk)
+
+            if(np.isinf(kl_divergence) or np.isnan(kl_divergence)):
+                observed_value = None
+            else:
+                observed_value = kl_divergence
+
+            return_obj = {
+                "success": kl_divergence <= threshold,
+                "result": {
+                    "observed_value": observed_value,
+                    "details": {
+                        "observed_partition": {
+                            "values": test_df.index.tolist(),
+                            "weights": pk.tolist()
+                        },
+                        "expected_partition": {
+                            "values": test_df.index.tolist(),
+                            "weights": qk.tolist()
+                        }
+                    }
+                }
+            }
+
+        else:
+            # Data are expected to be continuous; discretize first
+            # Build the histogram first using expected bins so that the largest bin is >=
+            hist = np.array(self._get_column_hist(column, partition_object['bins']))
+            # np.histogram(column, partition_object['bins'], density=False)
+            bin_edges = partition_object['bins']
+            # Add in the frequencies observed above or below the provided partition
+            # below_partition = len(np.where(column < partition_object['bins'][0])[0])
+            # above_partition = len(np.where(column > partition_object['bins'][-1])[0])
+            below_partition = self._get_column_count_in_range(column, max_val=partition_object['bins'][0], max_strictly=True)
+            above_partition = self._get_column_count_in_range(column, min_val=partition_object['bins'][-1], min_strictly=True)
+
+            #Observed Weights is just the histogram values divided by the total number of observations
+            observed_weights = np.array(hist) / self.get_column_nonnull_count(column)
+
+            #Adjust expected_weights to account for tail_weight and internal_weight
+            if "tail_weights" in partition_object:
+	                partition_tail_weight_holdout = np.sum(partition_object["tail_weights"])
+            else:
+                partition_tail_weight_holdout = 0
+
+            expected_weights = np.array(
+                partition_object['weights']) * (1 - tail_weight_holdout - internal_weight_holdout)
+
+            # Assign internal weight holdout values if applicable
+            if internal_weight_holdout > 0:
+                zero_count = len(expected_weights) - \
+                    np.count_nonzero(expected_weights)
+                if zero_count > 0:
+                    for index, value in enumerate(expected_weights):
+                        if value == 0:
+                            expected_weights[index] = internal_weight_holdout / zero_count
+        
+            # Assign tail weight holdout if applicable
+            # We need to check cases to only add tail weight holdout if it makes sense based on the provided partition.
+            if (partition_object['bins'][0] == -np.inf) and (partition_object['bins'][-1]) == np.inf:
+                if tail_weight_holdout > 0:
+                    raise ValueError("tail_weight_holdout cannot be used for partitions with infinite endpoints.")
+                if "tail_weights" in partition_object:
+                    raise ValueError("There can be no tail weights for partitions with one or both endpoints at infinity")
+                expected_bins = partition_object['bins'][1:-1] #Remove -inf and inf
+                
+                comb_expected_weights=expected_weights
+                expected_tail_weights=np.concatenate(([expected_weights[0]],[expected_weights[-1]])) #Set aside tail weights
+                expected_weights=expected_weights[1:-1] #Remove tail weights
+                
+                comb_observed_weights=observed_weights
+                observed_tail_weights=np.concatenate(([observed_weights[0]],[observed_weights[-1]])) #Set aside tail weights
+                observed_weights=observed_weights[1:-1] #Remove tail weights
+                
+                
+            elif (partition_object['bins'][0] == -np.inf):
+                
+                if "tail_weights" in partition_object:
+                    raise ValueError("There can be no tail weights for partitions with one or both endpoints at infinity")
+                
+                expected_bins = partition_object['bins'][1:] #Remove -inf
+                
+                comb_expected_weights=np.concatenate((expected_weights,[tail_weight_holdout]))
+                expected_tail_weights=np.concatenate(([expected_weights[0]],[tail_weight_holdout])) #Set aside left tail weight and holdout
+                expected_weights = expected_weights[1:] #Remove left tail weight from main expected_weights
+                
+                comb_observed_weights=np.concatenate((observed_weights,[above_partition / self.get_column_nonnull_count(column)]))
+                observed_tail_weights=np.concatenate(([observed_weights[0]],[above_partition / self.get_column_nonnull_count(column)])) #Set aside left tail weight and above parition weight
+                observed_weights=observed_weights[1:] #Remove left tail weight from main observed_weights
+        
+            elif (partition_object['bins'][-1] == np.inf):
+
+                if "tail_weights" in partition_object:
+                    raise ValueError("There can be no tail weights for partitions with one or both endpoints at infinity")
+
+                expected_bins = partition_object['bins'][:-1] #Remove inf
+
+                comb_expected_weights=np.concatenate(([tail_weight_holdout],expected_weights))
+                expected_tail_weights=np.concatenate(([tail_weight_holdout],[expected_weights[-1]]))  #Set aside right tail weight and holdout
+                expected_weights = expected_weights[:-1] #Remove right tail weight from main expected_weights
+
+                comb_observed_weights=np.concatenate(([below_partition/self.get_column_nonnull_count(column)],observed_weights))
+                observed_tail_weights=np.concatenate(([below_partition/self.get_column_nonnull_count(column)],[observed_weights[-1]])) #Set aside right tail weight and below partition weight
+                observed_weights=observed_weights[:-1] #Remove right tail weight from main observed_weights
+            else:
+
+                expected_bins = partition_object['bins'] #No need to remove -inf or inf
+
+                if "tail_weights" in partition_object:
+                    tail_weights=partition_object["tail_weights"]
+                    comb_expected_weights=np.concatenate(([tail_weights[0]],expected_weights,[tail_weights[1]])) #Tack on tail weights
+                    expected_tail_weights=np.array(tail_weights) #Tail weights are just tail_weights
+                else:
+                    comb_expected_weights=np.concatenate(([tail_weight_holdout / 2],expected_weights,[tail_weight_holdout / 2]))
+                    expected_tail_weights=np.concatenate(([tail_weight_holdout / 2],[tail_weight_holdout / 2])) #Tail weights are just tail_weight holdout divided eaually to both tails
+
+                comb_observed_weights=np.concatenate(([below_partition/self.get_column_nonnull_count(column)],observed_weights, [above_partition/self.get_column_nonnull_count(column)]))
+                observed_tail_weights=np.concatenate(([below_partition],[above_partition])) / self.get_column_nonnull_count(column) #Tail weights are just the counts on either side of the partition
+                #Main expected_weights and main observered weights had no tail_weights, so nothing needs to be removed.
+
+     
+            kl_divergence = stats.entropy(comb_observed_weights, comb_expected_weights) 
+            
+            if(np.isinf(kl_divergence) or np.isnan(kl_divergence)):
+                observed_value = None
+            else:
+                observed_value = kl_divergence
+
+            return_obj = {
+                    "success": kl_divergence <= threshold,
+                    "result": {
+                        "observed_value": observed_value,
+                        "details": {
+                            "observed_partition": {
+                                # return expected_bins, since we used those bins to compute the observed_weights
+                                "bins": expected_bins,
+                                "weights": observed_weights.tolist(),
+                                "tail_weights":observed_tail_weights.tolist()
+                            },
+                            "expected_partition": {
+                                "bins": expected_bins,
+                                "weights": expected_weights.tolist(),
+                                "tail_weights":expected_tail_weights.tolist()
+                            }
+                        }
+                    }
+                }
+                
+        return return_obj
 
     ### Column pairs ###
 
@@ -2205,7 +3180,7 @@ class Dataset(DataAsset):
                                                          column_A,
                                                          column_B,
                                                          or_equal=None,
-                                                         parse_strings_as_datetimes=None,
+                                                         parse_strings_as_datetimes=False,
                                                          allow_cross_type_comparisons=None,
                                                          ignore_row_if="both_values_are_missing",
                                                          result_format=None, include_config=False, catch_exceptions=None, meta=None
