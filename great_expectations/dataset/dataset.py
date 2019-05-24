@@ -148,6 +148,12 @@ class Dataset(MetaDataset):
 
         super(Dataset, self).__init__(*args, **kwargs)
 
+    @classmethod
+    def from_dataset(cls, dataset=None):
+        """This base implementation naievely passes arguments on to the real constructor, which
+        is suitable really when a constructor knows to take its own type. In general, this should be overridden"""
+        return cls(dataset)
+
     @property
     def row_count(self):
         if self.caching:
