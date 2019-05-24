@@ -2,7 +2,9 @@ language: python
 os:
   - linux
 python:
+  - "2.7"
   - "3.6"
+  - "3.7"
 env:
   - PANDAS=0.22.0
   - PANDAS=0.23.4
