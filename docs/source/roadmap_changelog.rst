@@ -10,6 +10,10 @@ Planned Features
 * Support for non-tabular datasources (e.g. JSON, XML, AVRO)
 
 
+v.0.6.0__develop
+________________
+
+
 v.0.6.0
 ------------
 * Add support for SparkDFDataset and caching (HUGE work from @cselig)
