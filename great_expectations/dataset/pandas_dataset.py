@@ -278,18 +278,6 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
     # get an attribute error when trying to access them (I think this could be done in __finalize__?)
     _internal_names = pd.DataFrame._internal_names + [
         'caching',
-        '_row_count',
-        '_table_columns',
-        '_column_nonnull_counts',
-        '_column_means',
-        '_column_value_counts',
-        '_column_sums',
-        '_column_maxes',
-        '_column_mins',
-        '_column_unique_counts',
-        '_column_modes' ,
-        '_column_medians',
-        '_column_stdevs',
     ]
     _internal_names_set = set(_internal_names)
 
@@ -331,56 +319,56 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             logger.info("Storing to s3")
             dataset_store.put(Body=self.to_csv().encode('utf-8'))
 
-    def _get_row_count(self):
+    def get_row_count(self):
         return self.shape[0]
 
-    def _get_table_columns(self):
+    def get_table_columns(self):
         return list(self.columns)
 
-    def _get_column_sum(self, column):
+    def get_column_sum(self, column):
         return self[column].sum()
 
-    def _get_column_max(self, column, parse_strings_as_datetimes=False):
+    def get_column_max(self, column, parse_strings_as_datetimes=False):
         temp_column = self[column].dropna()
         if parse_strings_as_datetimes:
             temp_column = temp_column.map(parse)
         return temp_column.max()
 
-    def _get_column_min(self, column, parse_strings_as_datetimes=False):
+    def get_column_min(self, column, parse_strings_as_datetimes=False):
         temp_column = self[column].dropna()
         if parse_strings_as_datetimes:
             temp_column = temp_column.map(parse)
         return temp_column.min()
 
-    def _get_column_mean(self, column):
+    def get_column_mean(self, column):
         return self[column].mean()
 
-    def _get_column_nonnull_count(self, column):
+    def get_column_nonnull_count(self, column):
         series = self[column]
         null_indexes = series.isnull()
         nonnull_values = series[null_indexes == False]
         return len(nonnull_values)
 
-    def _get_column_value_counts(self, column):
+    def get_column_value_counts(self, column):
         return self[column].value_counts()
 
-    def _get_column_unique_count(self, column):
+    def get_column_unique_count(self, column):
         return self.get_column_value_counts(column).shape[0]
 
-    def _get_column_modes(self, column):
+    def get_column_modes(self, column):
         return list(self[column].mode().values)
 
-    def _get_column_median(self, column):
+    def get_column_median(self, column):
         return self[column].median()
 
-    def _get_column_stdev(self, column):
+    def get_column_stdev(self, column):
         return self[column].std()
 
-    def _get_column_hist(self, column, bins):
+    def get_column_hist(self, column, bins):
         hist, bin_edges = np.histogram(self[column], bins, density=False)
         return list(hist)
 
-    def _get_column_count_in_range(self, column, min_val=None, max_val=None, min_strictly=False, max_strictly=True):
+    def get_column_count_in_range(self, column, min_val=None, max_val=None, min_strictly=False, max_strictly=True):
         # TODO this logic could probably go in the non-underscore version if we want to cache
         if min_val is None and max_val is None:
             raise ValueError('Must specify either min or max value')
