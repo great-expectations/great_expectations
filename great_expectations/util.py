@@ -23,17 +23,19 @@ def _convert_to_dataset_class(df, dataset_class, expectations_config=None, autoi
     """
     if expectations_config is not None:
         # Cast the dataframe into the new class, and manually initialize expectations according to the provided configuration
-        df = dataset_class(df)
-        df._initialize_expectations(expectations_config)
+        new_df = dataset_class.from_dataset(df)
+        new_df._initialize_expectations(expectations_config)
     else:
         # Instantiate the new Dataset with default expectations
         try:
-            df = dataset_class(df, autoinspect_func=autoinspect_func)
+            new_df = dataset_class.from_dataset(df)
         except:
             raise NotImplementedError(
                 "read_csv requires a Dataset class that can be instantiated from a Pandas DataFrame")
+        if autoinspect_func is not None:
+            new_df.autoinspect(autoinspect_func)
 
-    return df
+    return new_df
 
 
 def read_csv(
@@ -177,7 +179,7 @@ def validate(data_asset, expectations_config, data_asset_type=None, *args, **kwa
     # If the object is already a Dataset type, then this is purely a convenience method
     # and no conversion is needed
     if isinstance(data_asset, dataset.Dataset) and data_asset_type is None:
-        return data_asset.validate(*args, **kwargs)
+        return data_asset.validate(expectations_config=expectations_config, *args, **kwargs)
     elif data_asset_type is None:
         # Guess the GE data_asset_type based on the type of the data_asset
         if isinstance(data_asset, pd.DataFrame):
