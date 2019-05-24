@@ -1,7 +1,7 @@
 import inspect
 import sys
 from six import PY3, string_types
-from functools import wraps
+from functools import wraps, lru_cache
 from numbers import Number
 from dateutil.parser import parse
 from datetime import datetime
@@ -25,23 +25,6 @@ from great_expectations.dataset.util import (
 import pandas as pd
 import numpy as np
 from scipy import stats
-
-
-class ColumnarResultCache:
-    """Holds information about columns"""
-    def __init__(self, callback, caching=False):
-        self.data = {}
-        self.callback = callback
-        self.caching = caching
-
-    def get(self, *args):
-        """Args is a tuple of parameters that will be used as the key to look up cached values"""
-        if self.caching:
-            if args not in self.data:
-                self.data[args] = self.callback(*args)
-            return self.data[args]
-        else:
-            return self.callback(*args)
 
 
 class MetaDataset(DataAsset):
@@ -82,7 +65,7 @@ class MetaDataset(DataAsset):
             # Retain support for string-only output formats:
             result_format = parse_result_format(result_format)
 
-            element_count = self.row_count
+            element_count = self.get_row_count()
             nonnull_count = self.get_column_nonnull_count(column)
             null_count = element_count - nonnull_count
 
@@ -126,129 +109,89 @@ class MetaDataset(DataAsset):
 
 
 class Dataset(MetaDataset):
-    def __init__(self, *args, **kwargs):
-        self.caching = kwargs.pop("caching", False)
 
-        # some data structures for caching information specific to tabular datasets
-        # these definitions currently need to come before MetaDataset.__init__ to allow for autoinspection
+    # getter functions with hashable arguments - can be cached
+    hashable_getters = [
+        'get_column_max',
+        'get_column_mean',
+        'get_column_median',
+        'get_column_min',
+        'get_column_modes',
+        'get_column_nonnull_count',
+        'get_column_stdev',
+        'get_column_sum',
+        'get_column_unique_count',
+        'get_column_value_counts',
+        'get_row_count',
+        'get_table_columns',
+        'get_column_count_in_range',
+    ]
+
+    def __init__(self, *args, **kwargs):
         # NOTE: using caching makes the strong assumption that the user will not modify the core data store
-        # (e.g. a SQL table or spark dataframe) over the lifetime of the dataset instance
-        self._row_count = None
-        self._table_columns = None
-        self._column_nonnull_counts = ColumnarResultCache(self._get_column_nonnull_count, self.caching)
-        self._column_means = ColumnarResultCache(self._get_column_mean, self.caching)
-        self._column_value_counts = ColumnarResultCache(self._get_column_value_counts, self.caching)
-        self._column_sums = ColumnarResultCache(self._get_column_sum, self.caching)
-        self._column_maxes = ColumnarResultCache(self._get_column_max, self.caching)
-        self._column_mins = ColumnarResultCache(self._get_column_min, self.caching)
-        self._column_unique_counts = ColumnarResultCache(self._get_column_unique_count, self.caching)
-        self._column_modes = ColumnarResultCache(self._get_column_modes, self.caching)
-        self._column_medians = ColumnarResultCache(self._get_column_median, self.caching)
-        self._column_stdevs = ColumnarResultCache(self._get_column_stdev, self.caching)
+        # (e.g. self.spark_df) over the lifetime of the dataset instance
+        self.caching = kwargs.pop("caching", False)
 
         super(Dataset, self).__init__(*args, **kwargs)
 
-    @property
-    def row_count(self):
         if self.caching:
-            if not self._row_count:
-                self._row_count = self._get_row_count()
-            return self._row_count
-        else:
-            return self._get_row_count()
+            for func in self.hashable_getters:
+                caching_func = lru_cache(maxsize=None)(getattr(self, func))
+                setattr(self, func, caching_func)
 
-    def _get_row_count(self):
+    def get_row_count(self):
         """Returns: int, table row count"""
         raise NotImplementedError
 
-    @property
-    def table_columns(self):
-        if self.caching:
-            if not self._table_columns:
-                self._table_columns = self._get_table_columns()
-            return self._table_columns
-        else:
-            return self._get_table_columns()
-    
-    def _get_table_columns(self):
+    def get_table_columns(self):
         """Returns: List[str], list of column names"""
         raise NotImplementedError
 
     def get_column_nonnull_count(self, column):
-        return self._column_nonnull_counts.get(column)
-
-    def _get_column_nonnull_count(self, column):
         """Returns: int"""
         raise NotImplementedError
 
     def get_column_mean(self, column):
-        return self._column_means.get(column)
-
-    def _get_column_mean(self, column):
         """Returns: float"""
         raise NotImplementedError
 
     def get_column_value_counts(self, column):
-        return self._column_value_counts.get(column)
-
-    def _get_column_value_counts(self, column):
         """Returns: pd.Series of value counts for a column, sorted by value"""
         raise NotImplementedError
 
     def get_column_sum(self, column):
-        return self._column_sums.get(column)
-
-    def _get_column_sum(self, column):
         """Returns: float"""
         raise NotImplementedError
 
     def get_column_max(self, column, parse_strings_as_datetimes=False):
-        return self._column_maxes.get(column, parse_strings_as_datetimes)
-
-    def _get_column_max(self, column, parse_strings_as_datetimes=False):
         """Returns: any"""
         raise NotImplementedError
 
     def get_column_min(self, column, parse_strings_as_datetimes=False):
-        return self._column_mins.get(column, parse_strings_as_datetimes)
-
-    def _get_column_min(self, column, parse_strings_as_datetimes=False):
         """Returns: any"""
         raise NotImplementedError
 
     def get_column_unique_count(self, column):
-        return self._column_unique_counts.get(column)
-
-    def _get_column_unique_count(self, column):
         """Returns: int"""
         raise NotImplementedError
 
     def get_column_modes(self, column):
-        return self._column_modes.get(column)
-
-    def _get_column_modes(self, column):
         """Returns: List[any], list of modes (ties OK)"""
         raise NotImplementedError
 
     def get_column_median(self, column):
-        return self._column_medians.get(column)
-
-    def _get_column_median(self, column):
         """Returns: any"""
         raise NotImplementedError
 
     def get_column_stdev(self, column):
-        return self._column_stdevs.get(column)
-
-    def _get_column_stdev(self, column):
         """Returns: float"""
         raise NotImplementedError
 
-    def _get_column_hist(self, column, bins):
+    def get_column_hist(self, column, bins):
         """Returns: List[int], a list of counts corresponding to bins"""
         raise NotImplementedError
 
-    def _get_column_count_in_range(self, column, min_val=None, max_val=None, min_strictly=False, max_strictly=True):
+    def get_column_count_in_range(self, column, min_val=None, max_val=None, min_strictly=False, max_strictly=True):
         """Returns: int"""
         raise NotImplementedError
 
@@ -371,10 +314,11 @@ class Dataset(MetaDataset):
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
 
         """
-        if column in self.table_columns:
+        columns = self.get_table_columns()
+        if column in columns:
             return {
                 # FIXME: list.index does not check for duplicate values.
-                "success": (column_index is None) or (self.table_columns.index(column) == column_index)
+                "success": (column_index is None) or (columns.index(column) == column_index)
             }
         else:
             return {"success": False}
@@ -419,7 +363,7 @@ class Dataset(MetaDataset):
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
 
         """
-        columns = self.table_columns
+        columns = self.get_table_columns()
         if list(columns) == list(column_list):
             return {
                 "success": True
@@ -504,7 +448,7 @@ class Dataset(MetaDataset):
         if min_value is None and max_value is None:
             raise Exception('Must specify either or both of min_value and max_value')
 
-        row_count = self.row_count
+        row_count = self.get_row_count()
 
         if min_value is not None and max_value is not None:
             outcome = row_count >= min_value and row_count <= max_value
@@ -566,7 +510,7 @@ class Dataset(MetaDataset):
         except ValueError:
             raise ValueError("value must be an integer")
 
-        row_count = self.row_count
+        row_count = self.get_row_count()
 
         return {
             'success': row_count == value,
@@ -3012,14 +2956,14 @@ class Dataset(MetaDataset):
         else:
             # Data are expected to be continuous; discretize first
             # Build the histogram first using expected bins so that the largest bin is >=
-            hist = np.array(self._get_column_hist(column, partition_object['bins']))
+            hist = np.array(self.get_column_hist(column, partition_object['bins']))
             # np.histogram(column, partition_object['bins'], density=False)
             bin_edges = partition_object['bins']
             # Add in the frequencies observed above or below the provided partition
             # below_partition = len(np.where(column < partition_object['bins'][0])[0])
             # above_partition = len(np.where(column > partition_object['bins'][-1])[0])
-            below_partition = self._get_column_count_in_range(column, max_val=partition_object['bins'][0], max_strictly=True)
-            above_partition = self._get_column_count_in_range(column, min_val=partition_object['bins'][-1], min_strictly=True)
+            below_partition = self.get_column_count_in_range(column, max_val=partition_object['bins'][0], max_strictly=True)
+            above_partition = self.get_column_count_in_range(column, min_val=partition_object['bins'][-1], min_strictly=True)
 
             #Observed Weights is just the histogram values divided by the total number of observations
             observed_weights = np.array(hist) / self.get_column_nonnull_count(column)

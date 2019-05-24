@@ -84,8 +84,7 @@ class MetaSparkDFDataset(Dataset):
 
             # a couple of tests indicate that caching here helps performance
             col_df.cache()
-            # this value is cached by SparkDFDataset
-            element_count = self.row_count
+            element_count = self.get_row_count()
 
             # FIXME temporary fix for missing/ignored value
             if func.__name__ not in ['expect_column_values_to_not_be_null', 'expect_column_values_to_be_null']:
@@ -169,16 +168,16 @@ class SparkDFDataset(MetaSparkDFDataset):
         # Creation of the Spark Dataframe is done outside this class
         self.spark_df = spark_df
 
-    def _get_row_count(self):
+    def get_row_count(self):
         return self.spark_df.count()
 
-    def _get_table_columns(self):
+    def get_table_columns(self):
         return self.spark_df.columns
 
-    def _get_column_nonnull_count(self, column):
+    def get_column_nonnull_count(self, column):
         return self.spark_df.filter('{column} is not null'.format(column=column)).count()
 
-    def _get_column_mean(self, column):
+    def get_column_mean(self, column):
         # TODO need to apply this logic to other such methods?
         types = dict(self.spark_df.dtypes)
         if types[column] not in ('int', 'float', 'double'):
@@ -186,10 +185,10 @@ class SparkDFDataset(MetaSparkDFDataset):
         result = self.spark_df.select(column).groupBy().mean().collect()[0]
         return result[0] if len(result) > 0 else None
 
-    def _get_column_sum(self, column):
+    def get_column_sum(self, column):
         return self.spark_df.select(column).groupBy().sum().collect()[0][0]
 
-    def _get_column_max(self, column, parse_strings_as_datetimes=False):
+    def get_column_max(self, column, parse_strings_as_datetimes=False):
         temp_column = self.spark_df.select(column).where(col(column).isNotNull())
         if parse_strings_as_datetimes:
             temp_column = self._apply_dateutil_parse(temp_column)
@@ -198,7 +197,7 @@ class SparkDFDataset(MetaSparkDFDataset):
             return None
         return result[0][0]
 
-    def _get_column_min(self, column, parse_strings_as_datetimes=False):
+    def get_column_min(self, column, parse_strings_as_datetimes=False):
         temp_column = self.spark_df.select(column).where(col(column).isNotNull())
         if parse_strings_as_datetimes:
             temp_column = self._apply_dateutil_parse(temp_column)
@@ -207,7 +206,7 @@ class SparkDFDataset(MetaSparkDFDataset):
             return None
         return result[0][0]
 
-    def _get_column_value_counts(self, column):
+    def get_column_value_counts(self, column):
         value_counts = self.spark_df.select(column)\
             .filter('{} is not null'.format(column))\
             .groupBy(column)\
@@ -222,24 +221,24 @@ class SparkDFDataset(MetaSparkDFDataset):
             name=column,
         )
 
-    def _get_column_unique_count(self, column):
+    def get_column_unique_count(self, column):
         return self.get_column_value_counts(column).shape[0]
 
-    def _get_column_modes(self, column):
+    def get_column_modes(self, column):
         """leverages computation done in _get_column_value_counts"""
         s = self.get_column_value_counts(column)
         return list(s[s == s.max()].index)
 
-    def _get_column_median(self, column):
+    def get_column_median(self, column):
         # TODO this doesn't actually work e.g. median([1, 2, 3, 4]) -> 2.0
         raise NotImplementedError
         result = self.spark_df.approxQuantile(column, [0.5], 0)
         return result[0] if len(result) > 0 else None
 
-    def _get_column_stdev(self, column):
+    def get_column_stdev(self, column):
         return self.spark_df.select(stddev_(col(column))).collect()[0][0]
 
-    def _get_column_hist(self, column, bins):
+    def get_column_hist(self, column, bins):
         """return a list of counts corresponding to bins"""
         hist = []
         for i in range(0, len(bins) - 1):
@@ -249,11 +248,11 @@ class SparkDFDataset(MetaSparkDFDataset):
             else:
                 max_strictly = True
             hist.append(
-                self._get_column_count_in_range(column, min_val=bins[i], max_val=bins[i + 1], max_strictly=max_strictly)
+                self.get_column_count_in_range(column, min_val=bins[i], max_val=bins[i + 1], max_strictly=max_strictly)
             )
         return hist
 
-    def _get_column_count_in_range(self, column, min_val=None, max_val=None, min_strictly=False, max_strictly=True):
+    def get_column_count_in_range(self, column, min_val=None, max_val=None, min_strictly=False, max_strictly=True):
         # TODO this logic could probably go in the non-underscore version if we want to cache
         if min_val is None and max_val is None:
             raise ValueError('Must specify either min or max value')
