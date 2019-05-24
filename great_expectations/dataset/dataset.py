@@ -1,16 +1,17 @@
 import inspect
 import sys
 from six import PY3, string_types
-from functools import wraps, lru_cache
+from functools import wraps
 from numbers import Number
 from dateutil.parser import parse
 from datetime import datetime
 
 if sys.version_info.major == 2:  # If python 2
     from itertools import izip_longest as zip_longest
+    from backports.functools_lru_cache import lru_cache
 elif sys.version_info.major == 3:  # If python 3
     from itertools import zip_longest
-
+    from functools import lru_cache
 
 from great_expectations.data_asset.base import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
