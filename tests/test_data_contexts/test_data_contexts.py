@@ -7,7 +7,7 @@ import sqlalchemy as sa
 import pandas as pd
 
 from great_expectations.data_context import DataContext
-from great_expectations import get_data_context
+# get_data_context
 from great_expectations.dataset import PandasDataset, SqlAlchemyDataset
 
 
@@ -75,11 +75,11 @@ def parameterized_config_data_context(tmpdir_factory):
     return DataContext(context_path)
 
 
-def test_invalid_data_context():
-    # Test an unknown data context name
-    with pytest.raises(ValueError) as err:
-        get_data_context('what_a_ridiculous_name', None)
-        assert "Unknown data context." in str(err)
+# def test_invalid_data_context():
+#     # Test an unknown data context name
+#     with pytest.raises(ValueError) as err:
+#         get_data_context('what_a_ridiculous_name', None)
+#         assert "Unknown data context." in str(err)
 
 def test_list_data_asset_configs(parameterized_config_data_context):
     assert parameterized_config_data_context.list_data_asset_configs() == ['parameterized_expectations_config_fixture']
@@ -108,23 +108,23 @@ def test_save_data_asset_config(parameterized_config_data_context):
     data_asset_config_saved = parameterized_config_data_context.get_data_asset_config('this_data_asset_config_does_not_exist')
     assert data_asset_config['expectations'] == data_asset_config_saved['expectations']
 
-def test_sqlalchemy_data_context(test_db_connection_string):
-    context = get_data_context(
-        'SqlAlchemy', test_db_connection_string, echo=False)
+# def test_sqlalchemy_data_context(test_db_connection_string):
+#     context = get_data_context(
+#         'SqlAlchemy', test_db_connection_string, echo=False)
 
-    assert context.list_datasets() == ['table_1', 'table_2']
-    dataset1 = context.get_dataset('table_1')
-    dataset2 = context.get_dataset('table_2', schema='main')
-    assert isinstance(dataset1, SqlAlchemyDataset)
-    assert isinstance(dataset2, SqlAlchemyDataset)
+#     assert context.list_datasets() == ['table_1', 'table_2']
+#     dataset1 = context.get_dataset('table_1')
+#     dataset2 = context.get_dataset('table_2', schema='main')
+#     assert isinstance(dataset1, SqlAlchemyDataset)
+#     assert isinstance(dataset2, SqlAlchemyDataset)
 
 
-def test_pandas_data_context(test_folder_connection_path):
-    context = get_data_context('PandasCSV', test_folder_connection_path)
+# def test_pandas_data_context(test_folder_connection_path):
+#     context = get_data_context('PandasCSV', test_folder_connection_path)
 
-    assert context.list_datasets() == ['test.csv']
-    dataset = context.get_dataset('test.csv')
-    assert isinstance(dataset, PandasDataset)
+#     assert context.list_datasets() == ['test.csv']
+#     dataset = context.get_dataset('test.csv')
+#     assert isinstance(dataset, PandasDataset)
 
 def test_register_validation_results(parameterized_config_data_context):
     run_id = "460d61be-7266-11e9-8848-1681be663d3e"

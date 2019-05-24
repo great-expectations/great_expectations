@@ -138,6 +138,12 @@ class Dataset(MetaDataset):
             for func in self.hashable_getters:
                 caching_func = lru_cache(maxsize=None)(getattr(self, func))
                 setattr(self, func, caching_func)
+    
+    @classmethod
+    def from_dataset(cls, dataset=None):
+        """This base implementation naievely passes arguments on to the real constructor, which
+        is suitable really when a constructor knows to take its own type. In general, this should be overridden"""
+        return cls(dataset)
 
     def get_row_count(self):
         """Returns: int, table row count"""
