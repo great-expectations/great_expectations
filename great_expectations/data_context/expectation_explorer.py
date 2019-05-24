@@ -1,3 +1,4 @@
+from itertools import chain
 import logging
 
 from IPython.display import display
@@ -13,49 +14,71 @@ class ExpectationExplorer(object):
         self.expectation_kwarg_field_names = {
             'expect_column_values_to_be_unique': ['mostly'],
             'expect_column_unique_value_count_to_be_between': ['min_value', 'max_value'],
-            'expect_column_values_to_be_in_set': ['value_set', 'mostly'],
-            'expect_column_to_exist': ['column_index'],
+            'expect_column_value_lengths_to_be_between': ['min_value', 'max_value', 'mostly'],
+            'expect_table_row_count_to_be_between': ['min_value', 'max_value'],
+            'expect_column_proportion_of_unique_values_to_be_between': ['min_value', 'max_value'],
+            'expect_column_median_to_be_between': ['min_value', 'max_value'],
+            'expect_column_mean_to_be_between': ['min_value', 'max_value'],
+            'expect_column_stdev_to_be_between': ['min_value', 'max_value'],
+            'expect_column_sum_to_be_between': ['min_value', 'max_value'],
             'expect_column_values_to_not_be_null': ['mostly'],
             'expect_column_values_to_be_null': ['mostly'],
+            'expect_column_values_to_be_json_parseable': ['mostly'],
+            'expect_column_values_to_be_dateutil_parseable': ['mostly'],
+            'expect_column_values_to_be_increasing': ['strictly', 'parse_strings_as_datetimes', 'mostly'],
+            'expect_column_values_to_be_decreasing': ['strictly', 'parse_strings_as_datetimes', 'mostly'],
+            ######
+            'expect_column_values_to_be_in_set': ['value_set', 'mostly'],
             'expect_column_values_to_not_be_in_set': ['value_set', 'mostly'],
+            ######
+            'expect_column_to_exist': ['column_index'],
             'expect_column_values_to_match_regex': ['regex', 'mostly'],
             'expect_column_values_to_not_match_regex': ['regex', 'mostly'],
             'expect_column_values_to_match_regex_list': ['regex_list', 'match_on', 'mostly'],
             'expect_column_values_to_not_match_regex_list': ['regex_list', 'mostly'],
             'expect_column_values_to_match_strftime_format': ['strftime_format', 'mostly'],
-            'expect_column_values_to_be_json_parseable': ['mostly'],
             'expect_column_values_to_match_json_schema': ['json_schema', 'mostly'],
             'expect_column_value_lengths_to_equal': ['value', 'mostly'],
-            'expect_column_value_lengths_to_be_between': ['min_value', 'max_value', 'mostly'],
             'expect_column_values_to_be_between': ['min_value', 'max_value', 'allow_cross_type_comparisons', 'parse_strings_as_datetimes', 'output_strftime_format', 'mostly'],
             'expect_column_max_to_be_between': ['min_value', 'max_value', 'parse_strings_as_datetimes', 'output_strftime_format'],
             'expect_column_min_to_be_between': ['min_value', 'max_value', 'parse_strings_as_datetimes', 'output_strftime_format'],
             'expect_table_row_count_to_equal': ['value'],
-            'expect_table_row_count_to_be_between': ['min_value', 'max_value'],
             'expect_table_columns_to_match_ordered_list': ['column_list'],
-            'expect_column_proportion_of_unique_values_to_be_between': ['min_value', 'max_value'],
-            'expect_column_values_to_be_dateutil_parseable': ['mostly'],
-            'expect_column_values_to_be_increasing': ['strictly', 'parse_strings_as_datetimes', 'mostly'],
-            'expect_column_values_to_be_decreasing': ['strictly', 'parse_strings_as_datetimes', 'mostly'],
-            'expect_column_median_to_be_between': ['min_value', 'max_value'],
-            'expect_column_mean_to_be_between': ['min_value', 'max_value'],
-            'expect_column_stdev_to_be_between': ['min_value', 'max_value'],
-            'expect_column_kl_divergence_to_be_less_than': ['partition_object', 'threshold', 'internal_weight_holdout', 'tail_weight_holdout'],
-            'expect_column_sum_to_be_between': ['min_value', 'max_value'],
             'expect_column_most_common_value_to_be_in_set': ['value_set', 'ties_okay'],
+            ####
             'expect_column_pair_values_to_be_equal': ['ignore_row_if'],
             'expect_column_pair_values_A_to_be_greater_than_B': ['or_equal', 'allow_cross_type_comparisons', 'ignore_row_if'],
             'expect_column_pair_values_to_be_in_set': ['value_pairs_set', 'ignore_row_if'],
+            'expect_multicolumn_values_to_be_unique': ['ignore_row_if'],
             ####
             'expect_column_values_to_be_of_type': ['type_', 'mostly'],
             'expect_column_values_to_be_in_type_list': ['type_list', 'mostly'],
-            'expect_multicolumn_values_to_be_unique': ['ignore_row_if'],
+            ####
+            'expect_column_kl_divergence_to_be_less_than': ['partition_object', 'threshold', 'internal_weight_holdout', 'tail_weight_holdout'],
             'expect_column_chisquare_test_p_value_to_be_greater_than': ['partition_object', 'p'],
             'expect_column_bootstrapped_ks_test_p_value_to_be_greater_than': ['partition_object', 'p', 'bootstrap_samples', 'bootstrap_sample_size'],
             'expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than': ['distribution', 'p_value', 'params'],
         }
         self.kwarg_widget_exclusions = [
             'column', 'result_format', 'include_config']
+        self.min_max_subtypes = {
+            'integer': {
+                'positive': [
+                    'expect_column_unique_value_count_to_be_between',
+                    'expect_column_value_lengths_to_be_between',
+                    'expect_table_row_count_to_be_between'
+                ],
+                'unbounded': ['expect_column_median_to_be_between'],
+            },
+            'float': {
+                'unit_interval': ['expect_column_proportion_of_unique_values_to_be_between'],
+                'unbounded': [
+                    'expect_column_mean_to_be_between',
+                    'expect_column_stdev_to_be_between',
+                    'expect_column_sum_to_be_between'
+                ]
+            }
+        }
         # debug_view is for debugging ipywidgets callback functions
         self.debug_view = widgets.Output(layout={'border': '3 px solid pink'})
 
@@ -181,9 +204,35 @@ class ExpectationExplorer(object):
 
         return expectation_kwargs
 
+
+    def generate_boolean_checkbox_widget(self, *, value, description_text):
+        return widgets.Checkbox(
+            value=value,
+            description=description_text,
+            disabled=False
+        )
     # widget generators for input fields
-    # def generate_mostly_widget(self, *, ge_df, mostly=1, expectation_type, column=None, **expectation_kwargs):
-    def generate_mostly_widget(self, ge_df, mostly, expectation_type, column=None, **expectation_kwargs):
+    def generate_strictly_widget(self, *, ge_df, expectation_type, strictly=None, **expectation_kwargs):
+        inc_dec = expectation_type.split('_')[-1]
+        strictly_widget = self.generate_boolean_checkbox_widget(
+            value=strictly,
+            description=f'strictly {inc_dec}'
+        )
+
+        @debug_view.capture(clear_output=True)
+        def on_strictly_change(change):
+            expectation_state = self.get_expectation_state(
+                expectation_type, column)
+            ge_expectation_kwargs = self.expectation_kwarg_widgets_to_ge_kwargs(
+                expectation_state['kwargs'])
+
+            new_result = getattr(ge_df, expectation_type)(
+                include_config=True, **ge_expectation_kwargs)
+
+        strictly_widget.observe(on_mostly_change, names='value')
+        return strictly_widget
+
+    def generate_mostly_widget(self, *, ge_df, mostly=1, expectation_type, column=None, **expectation_kwargs):
         mostly_widget = widgets.FloatSlider(
             value=mostly,
             min=0,
@@ -218,39 +267,78 @@ class ExpectationExplorer(object):
         min_value_widget = expectation_state['kwargs'].get('min_value')
         max_value_widget = expectation_state['kwargs'].get('max_value')
 
-        if expectation_type == 'expect_column_unique_value_count_to_be_between':
+        # integer
+        if expectation_type in list(chain.from_iterable(self.min_max_subtypes['integer'].values())):
+            if expectation_type in self.min_max_subtypes['integer']['positive']:
+                default_min_value = 0
+                default_max_value = int(9e300)
+            elif expectation_type in self.min_max_subtypes['integer']['unbounded']:
+                default_min_value = -int(9e300)
+                default_max_value = int(9e300)
+
             if min_value_widget:
-                min_value_widget.value = min_value or int(-9e300)
+                min_value_widget.value = min_value or default_min_value
             else:
                 min_value_widget = widgets.BoundedIntText(
-                    value=min_value or 0,
-                    min=0,
+                    value=min_value or default_min_value,
+                    min=default_min_value,
                     description='min_value: ',
                     disabled=False
                 )
             if not max_value_widget:
                 max_value_widget = widgets.BoundedIntText(
                     description='max_value: ',
-                    value=int(9e300),
-                    max=int(9e300),
+                    value=default_max_value,
+                    max=default_max_value,
+                    disabled=False
+                )
+        # float
+        elif expectation_type in list(chain.from_iterable(self.min_max_subtypes['float'].values())):
+            if expectation_type in self.min_max_subtypes['float']['unit_interval']:
+                default_min_value = 0
+                default_max_value = 1
+            elif expectation_type in self.min_max_subtypes['float']['unbounded']:
+                default_min_value = -int(9e300)
+                default_max_value = int(9e300)
+
+            if min_value_widget:
+                min_value_widget.value = min_value or default_min_value
+            else:
+                min_value_widget = widgets.BoundedFloatText(
+                    value=min_value or default_min_value,
+                    min=default_min_value,
+                    step=0.01,
+                    description='min_value: ',
+                    disabled=False
+                )
+            if not max_value_widget:
+                max_value_widget = widgets.BoundedFloatText(
+                    description='max_value: ',
+                    value=default_max_value,
+                    max=default_max_value,
+                    step=0.01,
                     disabled=False
                 )
 
-        @debug_view.capture(clear_output=True)
-        def on_min_value_change(change):
-            expectation_state = self.get_expectation_state(
-                expectation_type, column)
-            ge_expectation_kwargs = self.expectation_kwarg_widgets_to_ge_kwargs(
-                expectation_state['kwargs'])
-            new_result = getattr(ge_df, expectation_type)(include_config=True,
-                **ge_expectation_kwargs)
+        if min_value_widget and max_value_widget:
+            @debug_view.capture(clear_output=True)
+            def on_min_value_change(change):
+                expectation_state = self.get_expectation_state(
+                    expectation_type, column)
+                ge_expectation_kwargs = self.expectation_kwarg_widgets_to_ge_kwargs(
+                    expectation_state['kwargs'])
+                new_result = getattr(ge_df, expectation_type)(include_config=True,
+                    **ge_expectation_kwargs)
 
-        min_value_widget.observe(on_min_value_change, names='value')
-        max_dl = widgets.link((max_value_widget, 'value'),
-                              (min_value_widget, 'max'))
+            min_value_widget.observe(on_min_value_change, names='value')
+            max_dl = widgets.link((max_value_widget, 'value'),
+                                (min_value_widget, 'max'))
+            expectation_state['kwargs']['max_value'] = max_value_widget
 
+        min_value_widget = min_value_widget or self.generate_expectation_kwarg_fallback_widget(
+            expectation_kwarg_name='min_value', **{'min_value': min_value})
         expectation_state['kwargs']['min_value'] = min_value_widget
-        expectation_state['kwargs']['max_value'] = max_value_widget
+
         self.set_expectation_state(expectation_type, expectation_state, column)
 
         return min_value_widget
@@ -262,39 +350,79 @@ class ExpectationExplorer(object):
         min_value_widget = expectation_state['kwargs'].get('min_value')
         max_value_widget = expectation_state['kwargs'].get('max_value')
 
-        if expectation_type == 'expect_column_unique_value_count_to_be_between':
+        # integer
+        if expectation_type in list(chain.from_iterable(self.min_max_subtypes['integer'].values())):
+            if expectation_type in self.min_max_subtypes['integer']['positive']:
+                default_min_value = 0
+                default_max_value = int(9e300)
+            elif expectation_type in self.min_max_subtypes['integer']['unbounded']:
+                default_min_value = -int(9e300)
+                default_max_value = int(9e300)
+
             if max_value_widget:
-                max_value_widget.value = max_value or int(9e300)
+                max_value_widget.value = max_value or default_max_value
             else:
                 max_value_widget = widgets.BoundedIntText(
-                    value=max_value or int(9e300),
-                    max=int(9e300),
+                    value=max_value or default_max_value,
+                    max=default_max_value,
                     description='max_value: ',
                     disabled=False
                 )
             if not min_value_widget:
                 min_value_widget = widgets.BoundedIntText(
-                    min=0,
-                    value=0,
+                    min=default_min_value,
+                    value=default_min_value,
+                    description='min_value: ',
+                    disabled=False
+                )
+        # float
+        elif expectation_type in list(chain.from_iterable(self.min_max_subtypes['float'].values())):
+            if expectation_type in self.min_max_subtypes['float']['unit_interval']:
+                default_min_value = 0
+                default_max_value = 1
+            elif expectation_type in self.min_max_subtypes['float']['unbounded']:
+                default_min_value = -int(9e300)
+                default_max_value = int(9e300)
+            
+            if max_value_widget:
+                max_value_widget.value = max_value or default_max_value
+            else:
+                max_value_widget = widgets.BoundedFloatText(
+                    value=max_value or default_max_value,
+                    max=default_max_value,
+                    step=0.01,
+                    description='max_value: ',
+                    disabled=False
+                )
+            if not min_value_widget:
+                min_value_widget = widgets.BoundedFloatText(
+                    min=default_min_value,
+                    step=0.01,
+                    value=default_min_value,
                     description='min_value: ',
                     disabled=False
                 )
 
-        @debug_view.capture(clear_output=True)
-        def on_max_value_change(change):
-            expectation_state = self.get_expectation_state(
-                expectation_type, column)
-            ge_expectation_kwargs = self.expectation_kwarg_widgets_to_ge_kwargs(
-                expectation_state['kwargs'])
-            new_result = getattr(ge_df, expectation_type)(include_config=True,
-                **ge_expectation_kwargs)
+        if min_value_widget and max_value_widget:
+            @debug_view.capture(clear_output=True)
+            def on_max_value_change(change):
+                expectation_state = self.get_expectation_state(
+                    expectation_type, column)
+                ge_expectation_kwargs = self.expectation_kwarg_widgets_to_ge_kwargs(
+                    expectation_state['kwargs'])
+                new_result = getattr(ge_df, expectation_type)(include_config=True,
+                    **ge_expectation_kwargs)
 
-        max_value_widget.observe(on_max_value_change, names='value')
-        min_dl = widgets.link((min_value_widget, 'value'),
-                              (max_value_widget, 'min'))
+            max_value_widget.observe(on_max_value_change, names='value')
+            min_dl = widgets.link((min_value_widget, 'value'),
+                                (max_value_widget, 'min'))
+            expectation_state['kwargs']['min_value'] = min_value_widget
 
-        expectation_state['kwargs']['min_value'] = min_value_widget
+        max_value_widget = max_value_widget or self.generate_expectation_kwarg_fallback_widget(
+            expectation_kwarg_name='max_value', **{'max_value': max_value}
+        )
         expectation_state['kwargs']['max_value'] = max_value_widget
+
         self.set_expectation_state(expectation_type, expectation_state, column)
 
         return max_value_widget
@@ -331,7 +459,7 @@ class ExpectationExplorer(object):
         expectation_kwarg_value = expectation_kwargs.get(
             expectation_kwarg_name)
         warning_message = widgets.HTML(
-            value='<div><strong>Warning: </strong>Cannot find dynamic widget for expectation kwarg "{expectation_kwarg_name}". To change kwarg value, please call expectation again with the modified value.</div>'.format(expectation_kwarg_name=expectation_kwarg_name)
+            value=f'<div><strong>Warning: </strong>No input widget for kwarg "{expectation_kwarg_name}". To change value, call expectation again with the modified value.</div>'
         )
         static_widget = widgets.Textarea(value=str(
             expectation_kwarg_value), description='{expectation_kwarg_name}: '.format(expectation_kwarg_name=expectation_kwarg_name), disabled=True)
