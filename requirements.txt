@@ -8,3 +8,8 @@ jsonschema>=2.5.1
 sqlalchemy>=1.2
 PyYAML==5.1
 ipywidgets==7.4.2
+requests>=2.20
+pyfiglet>=0.8
+termcolor>=1.1.0
+clint>=0.5.1
+six>=1.12.0
