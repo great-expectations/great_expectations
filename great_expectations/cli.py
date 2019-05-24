@@ -5,6 +5,15 @@ import sys
 import os
 import argparse
 import logging
+from pyfiglet import figlet_format
+import six
+from clint.textui import prompt, validators
+from clint.textui import colored as clint_colored, puts, indent
+
+try:
+    from termcolor import colored
+except ImportError:
+    colored = None
 
 from great_expectations import read_csv, script_relative_path
 from great_expectations import __version__
@@ -12,6 +21,18 @@ from great_expectations.dataset import Dataset, PandasDataset
 from great_expectations.data_asset import FileDataAsset
 
 logger = logging.getLogger(__name__)
+
+def log_message(string, color, font="big", figlet=False):
+    if colored:
+        if not figlet:
+            six.print_(colored(string, color))
+        else:
+            six.print_(colored(figlet_format(
+                string, font=font), color))
+    else:
+        six.print_(string)
+
+
 
 def dispatch(args):
     parser = argparse.ArgumentParser(
@@ -94,7 +115,7 @@ superconductive:
         dbname: postgres
 """
 
-def _yml_template(bucket="", slack_webhook=""):
+def _yml_template(bucket="''", slack_webhook="''", sql_alchemy_profile="YOUR_SQLALCHEMY_PROFILE", dbt_profile="YOUR_DBT_PROFILE"):
     return """# This project file was created with the command `great_expectations init`
 
 aws:
@@ -112,14 +133,13 @@ datasources:
     type: pandas
   mydb:
     type: sqlalchemy
-    profile_name: great_expectations
-    target_name: default
+    profile_name: {}
     profiles_filepath: ~/.great_expectations/profiles.yml
   mydbt:
     type: dbt
-    profile: great_expectations 
+    profile: {} 
     profiles_filepath: ~/.dbt/profiles.yml
-""".format(bucket, slack_webhook)
+""".format(bucket, slack_webhook, sql_alchemy_profile, dbt_profile)
 
 
 def initialize_project(parsed_args):
@@ -131,42 +151,104 @@ def initialize_project(parsed_args):
     """
     project_yml_filename = ".great_expectations.yml"
     base_dir = "great_expectations"
+    sql_alchemy_profile = None
+    dbt_profile = None
 
-    print('Welcome to Great Expectations! Always know what to expect from your data. 📊')
-    print('Scaffolding project')
-    print("Please note that these settings are only stored in {} ".format(project_yml_filename))
-   
+    log_message("Great Expectations", color="cyan", figlet=True)
+
+    greeting_1 = """
+Welcome to Great Expectations! Always know what to expect from your data.
+    
+When you develop data pipelines, ML models, ETLs and other data products, Great Expectations helps you express what you expect your data to look like (e.g., "column X should not have more than 5% null values"). It produces tests and documentation.
+    
+When your data product runs in production, Great Expectations uses the tests that you created to validate data and protect your code against data that it was not written to deal with.
+    
+    """
+    log_message(greeting_1, color="blue")
+
+    if not prompt.yn("Let's add Great Expectations to your project. We will add great_expectations directory in current directory and .great_expectations.yml config file. OK to proceed?"):
+        log_message("OK - run great_expectations init again when ready. Exiting...", color="blue")
+        exit(0)
+
     _scaffold_directories_and_notebooks(base_dir)
+    log_message("\nDone. Later you can check out .great_expectations.yml config file for useful options.", color="blue")
+
     
-    slack_webhook = None
-    bucket = None
+    # Shows a list of options to select from
+    data_source_options = [{'selector': '1', 'prompt': 'CSV files/Pandas', 'return': 'csv'},
+                    {'selector': '2', 'prompt': 'Relational database (SQL)', 'return': 'sqlalchemy'},
+                    {'selector': '3', 'prompt': 'DBT (data build tool) models', 'return': 'dbt'},
+                    {'selector': '4', 'prompt': 'None of the above', 'return': 'none'}]
+    data_source_selection = prompt.options("\nTime to create expectations for your data. This is done in Jupyter Notebook/Jupyter Lab. Before we point you to the right notebook, what data does your project work with?", data_source_options)
+    if data_source_selection == 'dbt':
+        dbt_profile = prompt.query(str(clint_colored.white("Please specify the name of the dbt profile (from your ~/.dbt/profiles.yml file Great Expectations should use to connect to the database: ")))
 
-    if _does_user_want(input("Would you like to set up slack notifications? [Y/n] ")):
-        slack_webhook = str(input("Please paste your Slack webhook url here: "))
+        msg = """
+To create expectations for your dbt models start Jupyter and open notebook great_expectations/notebooks/using_great_expectations_with_dbt.ipynb - 
+it will walk you through next steps. 
+                """
+        log_message(msg, color="blue")
+    elif data_source_selection == 'sqlalchemy':
+        msg = """
+Great Expectations relies on sqlalchemy to connect to relational databases.
+Please make sure that you have it installed.         
+To create expectations for your SQL queries start Jupyter and open notebook great_expectations/notebooks/using_great_expectations_with_sql.ipynb - 
+it will walk you through configuring the database connection and next steps. 
+        """
+        log_message(msg, color="blue")
+    elif data_source_selection == 'csv':
+        msg = """
+To create expectations for your CSV files start Jupyter and open notebook great_expectations/notebooks/using_great_expectations_with_pandas.ipynb - 
+it will walk you through configuring the database connection and next steps. 
+                """
+        log_message(msg, color="blue")
+    else:
+        msg = """
+We are looking for more types of data types to support. Please create a GitHub issue here: https://github.com/great-expectations/great_expectations/issues/new
+In the meantime you can see what Great Expectations can do on CSV files.
+To create expectations for your CSV files start Jupyter and open notebook great_expectations/notebooks/using_great_expectations_with_pandas.ipynb - 
+it will walk you through configuring the database connection and next steps. 
 
-    if _does_user_want(input("Would you like to set up an S3 bucket for validation results? [Y/n] ")):
-        bucket = str(input("Which S3 bucket would you like validation results and data stored in? "))
+        """
+        log_message(msg, color="blue")
 
-    _save_append_line_to_gitignore("# These entries were added by Great Expectations")
-    for directory in ["validations", "snapshots", "samples"]:
-        _save_append_line_to_gitignore(base_dir + "/" + directory)
+    template_args = {}
+    if dbt_profile:
+        template_args["dbt_profile"] = dbt_profile
+    if sql_alchemy_profile:
+        template_args["sql_alchemy_profile"] = sql_alchemy_profile
 
-    if slack_webhook or bucket:
-        if _does_user_want(input("Would you to add {} to a .gitignore? [Y/n] ".format(project_yml_filename))):
-            _save_append_line_to_gitignore(project_yml_filename)
-        else:
-            print("""⚠️   Warning! You have elected to skip adding entries to your .gitignore.
-    This is NOT recommended as it may contain secrets. Do not commit this to source control!""".format(project_yml_filename))
-
-    # if slack_webhook or bucket:
-    #     # TODO fail if a project file already exists
     with open(project_yml_filename, 'w') as ff:
-        ff.write(_yml_template(bucket, slack_webhook))
-    
-    print("Welcome to Great Expectations!")
-    print("")
-    print("\nYour new project scaffolding is complete. Check the new great_expectations/ directory into source control to track your expectation configurations.")
-    print("We prepared Jupyter notebooks for you to start adding expectations to your project's datasets. \nWe have examples of how to use Great Expectations with CSV files and Pandas, relational databases and dbt (data build tool). \nRun Jupyter Notebook or Jupyter Lab and choose the right notebook for you in great_expectations/notebook directory of your project.")
+        ff.write(_yml_template(**template_args))
+
+    # path = prompt.query(str(clint_colored.yellow('Installation Path')), default='/usr/local/bin/', validators=[validators.PathValidator()])
+
+
+    # slack_webhook = None
+    # bucket = None
+    #
+    # if _does_user_want(input("Would you like to set up slack notifications? [Y/n] ")):
+    #     slack_webhook = str(input("Please paste your Slack webhook url here: "))
+    #
+    # if _does_user_want(input("Would you like to set up an S3 bucket for validation results? [Y/n] ")):
+    #     bucket = str(input("Which S3 bucket would you like validation results and data stored in? "))
+    #
+    # _save_append_line_to_gitignore("# These entries were added by Great Expectations")
+    # for directory in ["validations", "snapshots", "samples"]:
+    #     _save_append_line_to_gitignore(base_dir + "/" + directory)
+    #
+    # if slack_webhook or bucket:
+    #     if _does_user_want(input("Would you to add {} to a .gitignore? [Y/n] ".format(project_yml_filename))):
+    #         _save_append_line_to_gitignore(project_yml_filename)
+    #     else:
+    #         print("""⚠️   Warning! You have elected to skip adding entries to your .gitignore.
+    # This is NOT recommended as it may contain secrets. Do not commit this to source control!""".format(project_yml_filename))
+    #
+    # # if slack_webhook or bucket:
+    # #     # TODO fail if a project file already exists
+    # with open(project_yml_filename, 'w') as ff:
+    #     ff.write(_yml_template(bucket, slack_webhook))
+
 
 def _scaffold_directories_and_notebooks(base_dir):
     safe_mmkdir(base_dir)
