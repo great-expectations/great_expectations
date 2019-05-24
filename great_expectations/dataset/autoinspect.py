@@ -27,19 +27,13 @@ def columns_exist(inspect_dataset):
     Args:
         inspect_dataset (great_expectations.dataset): The dataset to inspect and to which to add expectations.
     """
-
-    # Attempt to get column names. For pandas, columns is just a list of strings
-    if not hasattr(inspect_dataset, "columns"):
+    if not hasattr(inspect_dataset, 'get_table_columns'):
         warnings.warn(
             "No columns list found in dataset; no autoinspection performed.")
-        return
-    elif isinstance(inspect_dataset.columns[0], string_types):
-        columns = inspect_dataset.columns
-    elif isinstance(inspect_dataset.columns[0], dict) and "name" in inspect_dataset.columns[0]:
-        columns = [col['name'] for col in inspect_dataset.columns]
-    else:
-        raise AutoInspectError(
-            "Unable to determine column names for this dataset.")
-
-    create_multiple_expectations(
-        inspect_dataset, columns, "expect_column_to_exist")
+        raise NotImplementedError("columns_exist autoinspection is not implemented for data assests without the table_columns property")
+    table_columns = inspect_dataset.get_table_columns()
+    if table_columns is None:
+        warnings.warn(
+            "No columns list found in dataset; no autoinspection performed.")
+        raise NotImplementedError("columns_exist autoinspection is not implemented for data assests without the table_columns property")
+    create_multiple_expectations(inspect_dataset, table_columns, "expect_column_to_exist")

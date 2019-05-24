@@ -51,13 +51,5 @@ def test_autoinspect_columns_exist(dataset_type):
 
 
 def test_autoinspect_warning():
-    with pytest.warns(UserWarning, match="No columns list found in dataset; no autoinspection performed."):
+    with pytest.raises(NotImplementedError):
         ge.dataset.Dataset(autoinspect_func=autoinspect.columns_exist)
-
-
-def test_autoinspect_error():
-    df = ge.dataset.Dataset()
-    df.columns = [{"title": "nonstandard_columns"}]
-    with pytest.raises(autoinspect.AutoInspectError) as autoinspect_error:
-        df.autoinspect(autoinspect.columns_exist)
-        assert autoinspect_error.message == "Unable to determine column names for this dataset."

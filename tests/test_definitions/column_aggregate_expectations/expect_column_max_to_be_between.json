@@ -97,6 +97,7 @@
     },{
       "title": "Test on a series containing dates, with an output_strftime_format value",
       "exact_match_out" : false,
+      "suppress_test_for": ["SQLAlchemy"],
       "in": {
         "column": "zz",
         "min_value": "2/1/2016",

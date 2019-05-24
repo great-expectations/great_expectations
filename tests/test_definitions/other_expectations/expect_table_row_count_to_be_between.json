@@ -6,6 +6,13 @@
       "c2" : ["a","b","c","d"],
       "c3" : [null,null,null,null]
     },
+    "schemas": {
+      "spark": {
+        "c1": "int",
+        "c2": "string",
+        "c3": "string"
+      }
+    },
     "tests": [{
       "title": "Basic positive test",
       "exact_match_out" : false,
