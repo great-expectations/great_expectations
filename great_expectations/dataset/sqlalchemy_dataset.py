@@ -175,6 +175,13 @@ class MetaSqlAlchemyDataset(Dataset):
 
 class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
+    @classmethod
+    def from_dataset(cls, dataset=None):
+        if isinstance(dataset, SqlAlchemyDataset):
+            return cls(table_name=str(dataset._table.name), engine=dataset.engine)
+        else:
+            raise ValueError("from_dataset requires a SqlAlchemy dataset")
+
     def __init__(self, table_name=None, engine=None, connection_string=None,
                  custom_sql=None, schema=None, *args, **kwargs):
 
@@ -220,15 +227,15 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         # Only call super once connection is established and table_name and columns known to allow autoinspection
         super(SqlAlchemyDataset, self).__init__(*args, **kwargs)
 
-    def _get_row_count(self):
+    def get_row_count(self):
         count_query = sa.select([sa.func.count()]).select_from(
             self._table)
         return self.engine.execute(count_query).scalar()
 
-    def _get_table_columns(self):
+    def get_table_columns(self):
         return [col['name'] for col in self.columns]
 
-    def _get_column_nonnull_count(self, column):
+    def get_column_nonnull_count(self, column):
         ignore_values = [None]
         count_query = sa.select([
             sa.func.count().label('element_count'),
@@ -244,14 +251,14 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         element_count = count_results['element_count']
         null_count = count_results['null_count'] or 0
         return element_count - null_count
- 
-    def _get_column_sum(self, column):
+
+    def get_column_sum(self, column):
         return self.engine.execute(
             sa.select([sa.func.sum(sa.column(column))]).select_from(
                 self._table)
         ).scalar()
 
-    def _get_column_max(self, column, parse_strings_as_datetimes=False):
+    def get_column_max(self, column, parse_strings_as_datetimes=False):
         if parse_strings_as_datetimes:
             raise NotImplementedError
         return self.engine.execute(
@@ -259,7 +266,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 self._table)
         ).scalar()
 
-    def _get_column_min(self, column, parse_strings_as_datetimes=False):
+    def get_column_min(self, column, parse_strings_as_datetimes=False):
         if parse_strings_as_datetimes:
             raise NotImplementedError
         return self.engine.execute(
@@ -267,7 +274,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 self._table)
         ).scalar()
     
-    def _get_column_value_counts(self, column):
+    def get_column_value_counts(self, column):
         results = self.engine.execute(
             sa.select([
                 sa.column(column).label("value"),
@@ -281,19 +288,19 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             name=column
         )
 
-    def _get_column_mean(self, column):
+    def get_column_mean(self, column):
         return self.engine.execute(
             sa.select([sa.func.avg(sa.column(column))]).select_from(
                 self._table)
         ).scalar()
 
-    def _get_column_unique_count(self, column):
+    def get_column_unique_count(self, column):
         return self.engine.execute(
             sa.select([sa.func.count(sa.func.distinct(sa.column(column)))]).select_from(
                 self._table)
         ).scalar()
 
-    def _get_column_median(self, column):
+    def get_column_median(self, column):
         nonnull_count = self.get_column_nonnull_count(column)
         element_values = self.engine.execute(
             sa.select([sa.column(column)]).order_by(sa.column(column)).where(
@@ -316,7 +323,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             column_median = column_values[1][0]  # True center value
         return column_median
 
-    def _get_column_hist(self, column, bins):
+    def get_column_hist(self, column, bins):
         # TODO: this is **terribly** inefficient; consider refactor
         """return a list of counts corresponding to bins"""
         hist = []
@@ -327,11 +334,11 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             else:
                 max_strictly = True
             hist.append(
-                self._get_column_count_in_range(column, min_val=bins[i], max_val=bins[i + 1], max_strictly=max_strictly)
+                self.get_column_count_in_range(column, min_val=bins[i], max_val=bins[i + 1], max_strictly=max_strictly)
             )
         return hist
 
-    def _get_column_count_in_range(self, column, min_val=None, max_val=None, min_strictly=False, max_strictly=True):
+    def get_column_count_in_range(self, column, min_val=None, max_val=None, min_strictly=False, max_strictly=True):
         if min_val is None and max_val is None:
             raise ValueError('Must specify either min or max value')
         if min_val is not None and max_val is not None and min_val > max_val:
