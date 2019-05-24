@@ -108,17 +108,16 @@ slack_webhook: {}
 
 # Configure datasources below. Valid datasource types include pandas, sqlalchemy, and dbt
 datasources:
-#   pandas:
-#     type: pandas
-#     path: /data
-#   mydb:
-#     type: sqlalchemy
-#     profile_name: great_expectations
-#     target_name: default
-#     profiles_filepath: ~/.great_expectations/profiles.yml
-  dbt:
+  mycsvfile:
+    type: pandas
+  mydb:
+    type: sqlalchemy
+    profile_name: great_expectations
+    target_name: default
+    profiles_filepath: ~/.great_expectations/profiles.yml
+  mydbt:
     type: dbt
-    profile: great_expectations
+    profile: great_expectations 
     profiles_filepath: ~/.dbt/profiles.yml
 """.format(bucket, slack_webhook)
 
@@ -166,7 +165,8 @@ def initialize_project(parsed_args):
     
     print("Welcome to Great Expectations!")
     print("")
-    print("Your new project scaffolding is complete. Check the new great_expectations/ directory into source control to track your expectation configurations.")
+    print("\nYour new project scaffolding is complete. Check the new great_expectations/ directory into source control to track your expectation configurations.")
+    print("We prepared Jupyter notebooks for you to start adding expectations to your project's datasets. \nWe have examples of how to use Great Expectations with CSV files and Pandas, relational databases and dbt (data build tool). \nRun Jupyter Notebook or Jupyter Lab and choose the right notebook for you in great_expectations/notebook directory of your project.")
 
 def _scaffold_directories_and_notebooks(base_dir):
     safe_mmkdir(base_dir)

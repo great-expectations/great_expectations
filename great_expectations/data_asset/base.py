@@ -177,9 +177,6 @@ class DataAsset(object):
 
                         else:
                             raise(err)
-                    
-                    # Add a "success" object to the config
-                    expectation_config["success_on_last_run"] = return_obj["success"]
 
                 else:
                     return_obj = {"stored_configuration": expectation_config}
@@ -191,6 +188,11 @@ class DataAsset(object):
                 if include_config:
                     return_obj["expectation_config"] = copy.deepcopy(
                         expectation_config)
+
+                # If there was no interactive evaluation, success will not have been computed.
+                if "success" in return_obj:
+                    # Add a "success" object to the config
+                    expectation_config["success_on_last_run"] = return_obj["success"]                        
 
                 if catch_exceptions:
                     return_obj["exception_info"] = {

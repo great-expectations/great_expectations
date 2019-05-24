@@ -1,5 +1,5 @@
 class DataSource(object):
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         return
 
     def get_data_asset(self):
