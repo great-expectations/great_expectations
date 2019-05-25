@@ -37,6 +37,6 @@ def test_implementations(context, test):
         result = result.to_dict()
 
     if 'tolerance' in test:
-        assert np.allclose(test['expected'], result)
+        assert np.allclose(test['expected'], result, test['tolerance'])
     else:
         assert test['expected'] == result
