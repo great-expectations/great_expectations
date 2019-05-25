@@ -2,14 +2,24 @@ dist: xenial
 language: python
 os:
   - linux
-python:
-  - "2.7"
-  - "3.6"
-  - "3.7"
-env:
-  - PANDAS=0.22.0
-  - PANDAS=0.23.4
-  - PANDAS=latest
+matrix:
+  include:
+  - python: 2.7
+    env: PANDAS=0.22.0
+  - python: 2.7
+    env: PANDAS=0.23.4
+  - python: 2.7
+    env: PANDAS=latest
+  - python: 3.6
+    env: PANDAS=0.22.0
+  - python: 3.6
+    env: PANDAS=0.23.4
+  - python: 3.6
+    env: PANDAS=latest
+  - python: 3.7
+    env: PANDAS=0.23.4
+  - python: 3.7
+    env: PANDAS=latest
 jdk:
   - openjdk8
 services:
@@ -21,6 +31,7 @@ install:
 before_script:
   - psql -c 'create database test_ci;' -U postgres
 script:
+  - jdk_switcher use openjdk8
   - pytest --cov=great_expectations tests/
 after_success:
   - coveralls
