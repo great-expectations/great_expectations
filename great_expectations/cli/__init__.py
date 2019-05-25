@@ -20,7 +20,14 @@ from great_expectations import __version__
 from great_expectations.dataset import Dataset, PandasDataset
 from great_expectations.data_asset import FileDataAsset
 
+from .supporting_methods import (
+    _scaffold_directories_and_notebooks,
+    safe_mmkdir,
+    _yml_template,
+)
+
 logger = logging.getLogger(__name__)
+
 
 def log_message(string, color, font="big", figlet=False):
     if colored:
@@ -31,7 +38,6 @@ def log_message(string, color, font="big", figlet=False):
                 string, font=font), color))
     else:
         six.print_(string)
-
 
 
 def dispatch(args):
@@ -72,74 +78,11 @@ def dispatch(args):
 
     scaffold_parser = subparsers.add_parser('init')
     scaffold_parser.set_defaults(func=initialize_project)
+    scaffold_parser.add_argument('--target_directory', '-d', default="./",
+                                 help='The root of the project directory where you want to initialize Great Expectations.')
     parsed_args = parser.parse_args(args)
 
     return parsed_args.func(parsed_args)
-
-
-def safe_mmkdir(directory):
-    try:
-        os.mkdir(directory)
-    except FileExistsError as fe:
-        pass
-
-
-def _does_user_want(user_input):
-    while user_input.lower() not in ["y", "yes", "no", "n", ""]:
-        user_input = input("[Y/n] is required. Please try again. ")
-
-    return user_input.lower() in ["", "yes", "y", "yes"]
-    # return user_input.lower() not in ["no", "n", "false", "f"]
-
-
-def _save_append_line_to_gitignore(line):
-    _gitignore = ".gitignore"
-    if os.path.exists(_gitignore):
-        append_write = 'a'
-    else:
-        append_write = 'w'
-
-    with open(_gitignore, append_write) as gitignore:
-        gitignore.write(line + "\n")
-
-
-def _profile_template():
-    return """
-superconductive:
-    default:
-        type: postgres
-        host: localhost 
-        port: 5432
-        user: postgres  
-        pass: "****"
-        dbname: postgres
-"""
-
-def _yml_template(bucket="''", slack_webhook="''", sql_alchemy_profile="YOUR_SQLALCHEMY_PROFILE", dbt_profile="YOUR_DBT_PROFILE"):
-    return """# This project file was created with the command `great_expectations init`
-
-aws:
-  # Add the name of an S3 bucket here. Validation reports and datasets can be 
-  # stored here for easy debugging.
-  bucket: {}
-
-# Add your Slack webhook here to get notifications of validation results
-# See https://api.slack.com/incoming-webhooks for setup
-slack_webhook: {}
-
-# Configure datasources below. Valid datasource types include pandas, sqlalchemy, and dbt
-datasources:
-  mycsvfile:
-    type: pandas
-  mydb:
-    type: sqlalchemy
-    profile_name: {}
-    profiles_filepath: ~/.great_expectations/profiles.yml
-  mydbt:
-    type: dbt
-    profile: {} 
-    profiles_filepath: ~/.dbt/profiles.yml
-""".format(bucket, slack_webhook, sql_alchemy_profile, dbt_profile)
 
 
 def initialize_project(parsed_args):
@@ -149,8 +92,13 @@ def initialize_project(parsed_args):
     It scaffolds directories, sets up notebooks, creates a project file, and
     appends to a `.gitignore` file.
     """
-    project_yml_filename = ".great_expectations.yml"
-    base_dir = "great_expectations"
+    parsed_args = vars(parsed_args)
+    target_directory = parsed_args['target_directory']
+
+    project_yml_filename = target_directory + \
+        "/great_expectations/great_expectations.yml"
+    print(project_yml_filename)
+    base_dir = target_directory+"/great_expectations"
     sql_alchemy_profile = None
     dbt_profile = None
 
@@ -167,21 +115,26 @@ When your data product runs in production, Great Expectations uses the tests tha
     log_message(greeting_1, color="blue")
 
     if not prompt.yn("Let's add Great Expectations to your project. We will add great_expectations directory in current directory and .great_expectations.yml config file. OK to proceed?"):
-        log_message("OK - run great_expectations init again when ready. Exiting...", color="blue")
+        log_message(
+            "OK - run great_expectations init again when ready. Exiting...", color="blue")
         exit(0)
 
     _scaffold_directories_and_notebooks(base_dir)
-    log_message("\nDone. Later you can check out .great_expectations.yml config file for useful options.", color="blue")
+    log_message(
+        "\nDone. Later you can check out .great_expectations.yml config file for useful options.", color="blue")
 
-    
     # Shows a list of options to select from
     data_source_options = [{'selector': '1', 'prompt': 'CSV files/Pandas', 'return': 'csv'},
-                    {'selector': '2', 'prompt': 'Relational database (SQL)', 'return': 'sqlalchemy'},
-                    {'selector': '3', 'prompt': 'DBT (data build tool) models', 'return': 'dbt'},
-                    {'selector': '4', 'prompt': 'None of the above', 'return': 'none'}]
-    data_source_selection = prompt.options("\nTime to create expectations for your data. This is done in Jupyter Notebook/Jupyter Lab. Before we point you to the right notebook, what data does your project work with?", data_source_options)
+                           {'selector': '2',
+                               'prompt': 'Relational database (SQL)', 'return': 'sqlalchemy'},
+                           {'selector': '3',
+                               'prompt': 'DBT (data build tool) models', 'return': 'dbt'},
+                           {'selector': '4', 'prompt': 'None of the above', 'return': 'none'}]
+    data_source_selection = prompt.options(
+        "\nTime to create expectations for your data. This is done in Jupyter Notebook/Jupyter Lab. Before we point you to the right notebook, what data does your project work with?", data_source_options)
     if data_source_selection == 'dbt':
-        dbt_profile = prompt.query(str(clint_colored.white("Please specify the name of the dbt profile (from your ~/.dbt/profiles.yml file Great Expectations should use to connect to the database: ")))
+        dbt_profile = prompt.query(str(clint_colored.white(
+            "Please specify the name of the dbt profile (from your ~/.dbt/profiles.yml file Great Expectations should use to connect to the database: ")))
 
         msg = """
 To create expectations for your dbt models start Jupyter and open notebook great_expectations/notebooks/using_great_expectations_with_dbt.ipynb - 
@@ -223,7 +176,6 @@ it will walk you through configuring the database connection and next steps.
 
     # path = prompt.query(str(clint_colored.yellow('Installation Path')), default='/usr/local/bin/', validators=[validators.PathValidator()])
 
-
     # slack_webhook = None
     # bucket = None
     #
@@ -249,20 +201,6 @@ it will walk you through configuring the database connection and next steps.
     # with open(project_yml_filename, 'w') as ff:
     #     ff.write(_yml_template(bucket, slack_webhook))
 
-
-def _scaffold_directories_and_notebooks(base_dir):
-    safe_mmkdir(base_dir)
-    notebook_dir_name = "notebooks"
-
-    for directory in [notebook_dir_name, "data_asset_configurations", "validations", "snapshots", "samples"]:
-        safe_mmkdir(os.path.join(base_dir, directory))
-
-    for notebook in glob.glob(script_relative_path("init_notebooks/*.ipynb")):
-        notebook_name = os.path.basename(notebook)
-        shutil.copyfile(notebook, os.path.join(base_dir, notebook_dir_name, notebook_name))
-
-    safe_mmkdir(os.path.join(base_dir, notebook_dir_name, "tutorial_data"))
-    shutil.copyfile(script_relative_path("init_notebooks/tutorial_data/Titanic.csv"), os.path.join(base_dir, notebook_dir_name, "tutorial_data", "Titanic.csv"))
 
 def validate(parsed_args):
     """
@@ -297,19 +235,21 @@ def validate(parsed_args):
         if expectations_config["data_asset_type"] == "Dataset" or expectations_config["data_asset_type"] == "PandasDataset":
             dataset_class = PandasDataset
         elif expectations_config["data_asset_type"].endswith("Dataset"):
-            logger.info("Using PandasDataset to validate dataset of type %s." % expectations_config["data_asset_type"])
+            logger.info("Using PandasDataset to validate dataset of type %s." %
+                        expectations_config["data_asset_type"])
             dataset_class = PandasDataset
         elif expectations_config["data_asset_type"] == "FileDataAsset":
             dataset_class = FileDataAsset
         else:
-            logger.critical("Unrecognized data_asset_type %s. You may need to specifcy custom_dataset_module and custom_dataset_class." % expectations_config["data_asset_type"])
+            logger.critical("Unrecognized data_asset_type %s. You may need to specifcy custom_dataset_module and custom_dataset_class." %
+                            expectations_config["data_asset_type"])
             return -1
     else:
         dataset_class = PandasDataset
 
     if issubclass(dataset_class, Dataset):
         da = read_csv(data_set, expectations_config=expectations_config,
-                    dataset_class=dataset_class)
+                      dataset_class=dataset_class)
     else:
         da = dataset_class(data_set, config=expectations_config)
 
@@ -333,7 +273,8 @@ def version(parsed_args):
 
 def main():
     handler = logging.StreamHandler()
-    formatter = logging.Formatter('%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
+    formatter = logging.Formatter(
+        '%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
     handler.setFormatter(formatter)
     logger.addHandler(handler)
     logger.setLevel(logging.INFO)
