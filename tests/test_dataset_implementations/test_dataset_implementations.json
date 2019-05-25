@@ -38,7 +38,7 @@
             "data": {
                 "a": [1, 2, 3, 4, 5],
                 "b": ["a", "b", "c", "d", "e"],
-                "c": [1, 2, 2, 3, 3, 3]
+                "c": [1, 2, 2, 3, 3]
             },
             "schemas": {
                 "SparkDFDataset": {
@@ -140,8 +140,239 @@
             "kwargs": {
                 "column": "a"
             },
-            "expected": 5.5,
-            "supress_test_for": ["SparkDFDataset"]
+            "expected": 5.5
+        },
+        {
+            "func": "get_column_median",
+            "dataset": "d3",
+            "kwargs": {
+                "column": "a"
+            },
+            "expected": 3
+        },
+        {
+            "func": "get_column_value_counts",
+            "dataset": "d2",
+            "kwargs": {
+                "column": "b"
+            },
+            "expected": {
+                "a": 1,
+                "b": 2,
+                "c": 3,
+                "d": 4
+            }
+        },
+        {
+            "func": "get_column_value_counts",
+            "dataset": "d2",
+            "kwargs": {
+                "column": "c"
+            },
+            "expected": {
+                "a": 1,
+                "b": 2,
+                "c": 3,
+                "d": 1
+            }
+        },
+        {
+            "func": "get_column_max",
+            "dataset": "d1",
+            "kwargs": {
+                "column": "x"
+            },
+            "expected": 5
+        },
+        {
+            "func": "get_column_max",
+            "dataset": "d1",
+            "kwargs": {
+                "column": "n"
+            },
+            "expected": 0
+        },
+        {
+            "func": "get_column_max",
+            "dataset": "d2",
+            "kwargs": {
+                "column": "d"
+            },
+            "expected": "g"
+        },
+        {
+            "func": "get_column_min",
+            "dataset": "d1",
+            "kwargs": {
+                "column": "x"
+            },
+            "expected": 2
+        },
+        {
+            "func": "get_column_min",
+            "dataset": "d1",
+            "kwargs": {
+                "column": "n"
+            },
+            "expected": 0
+        },
+        {
+            "func": "get_column_min",
+            "dataset": "d2",
+            "kwargs": {
+                "column": "d"
+            },
+            "expected": "a"
+        },
+        {
+            "func": "get_column_unique_count",
+            "dataset": "d1",
+            "kwargs": {
+                "column": "n"
+            },
+            "expected": 1
+        },
+        {
+            "func": "get_column_unique_count",
+            "dataset": "d2",
+            "kwargs": {
+                "column": "b"
+            },
+            "expected": 4
+        },
+        {
+            "func": "get_column_unique_count",
+            "dataset": "d2",
+            "kwargs": {
+                "column": "c"
+            },
+            "expected": 4
+        },
+        {
+            "func": "get_column_unique_count",
+            "dataset": "d3",
+            "kwargs": {
+                "column": "c"
+            },
+            "expected": 3
+        },
+        {
+            "func": "get_column_modes",
+            "dataset": "d1",
+            "kwargs": {
+                "column": "y"
+            },
+            "expected": [5]
+        },
+        {
+            "func": "get_column_modes",
+            "dataset": "d2",
+            "kwargs": {
+                "column": "b"
+            },
+            "expected": ["d"]
+        },
+        {
+            "func": "get_column_modes",
+            "dataset": "d2",
+            "kwargs": {
+                "column": "d"
+            },
+            "expected": ["a", "b", "c", "d", "e", "f", "g"]
+        },
+        {
+            "func": "get_column_modes",
+            "dataset": "d3",
+            "kwargs": {
+                "column": "c"
+            },
+            "expected": [2, 3]
+        },
+        {
+            "func": "get_column_stdev",
+            "dataset": "d2",
+            "tolerance": 0.00000001,
+            "kwargs": {
+                "column": "a"
+            },
+            "expected": 3.0276503540974917
+        },
+        {
+            "func": "get_column_stdev",
+            "dataset": "d3",
+            "tolerance": 0.00000001,
+            "kwargs": {
+                "column": "c"
+            },
+            "expected": 0.8366600265340755
+        },
+        {
+            "func": "get_column_hist",
+            "dataset": "d2",
+            "kwargs": {
+                "column": "a",
+                "bins": [1, 5, 9, 11]
+            },
+            "expected": [4, 4, 2]
+        },
+        {
+            "func": "get_column_hist",
+            "dataset": "d2",
+            "kwargs": {
+                "column": "a",
+                "bins": [1, 7, 9]
+            },
+            "expected": [6, 3]
+        },
+        {
+            "func": "get_column_count_in_range",
+            "dataset": "d2",
+            "kwargs": {
+                "column": "a",
+                "min_val": 7
+            },
+            "expected": 4
+        },
+        {
+            "func": "get_column_count_in_range",
+            "dataset": "d2",
+            "kwargs": {
+                "column": "a",
+                "max_val": 2
+            },
+            "expected": 1
+        },
+        {
+            "func": "get_column_count_in_range",
+            "dataset": "d2",
+            "kwargs": {
+                "column": "a",
+                "min_val": 3,
+                "max_val": 7
+            },
+            "expected": 4
+        },
+        {
+            "func": "get_column_count_in_range",
+            "dataset": "d2",
+            "kwargs": {
+                "column": "a",
+                "min_val": 3,
+                "max_val": 7,
+                "min_strictly": true
+            },
+            "expected": 3
+        },
+        {
+            "func": "get_column_count_in_range",
+            "dataset": "d2",
+            "kwargs": {
+                "column": "a",
+                "min_val": 3,
+                "max_val": 7,
+                "max_strictly": false
+            },
+            "expected": 5
         }
     ]
 }

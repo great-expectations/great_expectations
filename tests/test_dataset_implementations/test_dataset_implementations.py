@@ -4,6 +4,7 @@ import os
 from ..test_utils import CONTEXTS, get_dataset, candidate_getter_is_on_temporary_notimplemented_list
 
 import pytest
+import numpy as np
 
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -24,8 +25,18 @@ def test_implementations(context, test):
     )
     if should_skip:
         pytest.skip()
+
     data = test_datasets[test['dataset']]['data']
     schema = test_datasets[test['dataset']]['schemas'].get(context)
     dataset = get_dataset(context, data, schemas=schema)
     func = getattr(dataset, test['func'])
-    assert test['expected'] == func(**test.get('kwargs', {}))
+    result = func(**test.get('kwargs', {}))
+
+    # can't serialize pd.Series to json, so convert to dict and compare
+    if test['func'] == 'get_column_value_counts':
+        result = result.to_dict()
+
+    if 'tolerance' in test:
+        assert np.allclose(test['expected'], result)
+    else:
+        assert test['expected'] == result
