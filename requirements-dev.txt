@@ -19,3 +19,4 @@ psycopg2>=2.7.6,<2.8
 PyYAML==5.1
 ipywidgets>=7.4.2
 pyfiglet>=0.8
+clint>=0.5.1
