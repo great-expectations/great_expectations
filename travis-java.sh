@@ -6,7 +6,7 @@
 # See: 
 # https://travis-ci.community/t/how-to-use-java8-in-a-python-non-java-project-on-xenial/1823
 
-show current JAVA_HOME and java version
+# show current JAVA_HOME and java version
 echo "Current JAVA_HOME: $JAVA_HOME"
 echo "Current java -version:"
 java -version
@@ -19,3 +19,6 @@ sudo update-java-alternatives -s java-1.8.0-openjdk-amd64
 
 # change JAVA_HOME to Java 8
 export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+echo "Current JAVA_HOME: $JAVA_HOME"
+echo "Current java -version:"
+java -version
