@@ -5,21 +5,25 @@ Changelog and Roadmap
 
 Planned Features
 ----------------
-* More expectation coverage in SqlAlchemyDataset
+* Improved project initialization and data contexts
 * Improved variable typing
-* New Datasets (e.g. Spark)
 * Support for non-tabular datasources (e.g. JSON, XML, AVRO)
-* Real-time/streaming and adaption of distributional expectations
 
 
-v.0.5.1__develop
-----------------
-* Add support for SparkDFDataset (thanks @cselig)
+v.0.6.0__develop
+________________
+
+
+v.0.6.0
+------------
+* Add support for SparkDFDataset and caching (HUGE work from @cselig)
 * Migrate distributional expectations to new testing framework
-BREAKING CHANGES:
-* Add caching mechanism for Datasets; \
-  when enabled, GE assumes that dataset does not change between evaluation of individual expectations
-* Drop official support for python 2 and pandas < 0.22
+* Add support for two new expectations: expect_column_distinct_values_to_contain_set 
+  and expect_column_distinct_values_to_equal_set (thanks @RoyalTS)
+* FUTURE BREAKING CHANGE: The new cache mechanism for Datasets, \
+  when enabled, causes GE to assume that dataset does not change between evaluation of individual expectations. \
+  We anticipate this will become the future default behavior.
+* BREAKING CHANGE: Drop official support for python 2 and pandas < 0.22
 
 
 v.0.5.1

@@ -48,6 +48,8 @@ SPARK_TYPES = {
     "timestamp": sparktypes.TimestampType,
     "float": sparktypes.DoubleType,
     "bool": sparktypes.BooleanType,
+    "object": sparktypes.DataType,
+    "null": sparktypes.NullType
 }
 
 # Taken from the following stackoverflow:
@@ -90,7 +92,7 @@ def assertDeepAlmostEqual(expected, actual, *args, **kwargs):
         raise exc
 
 
-def get_dataset(dataset_type, data, schemas=None, autoinspect_func=autoinspect.columns_exist):
+def get_dataset(dataset_type, data, schemas=None, autoinspect_func=autoinspect.columns_exist, caching=False):
     """For Pandas, data should be either a DataFrame or a dictionary that can
     be instantiated as a DataFrame.
     For SQL, data should have the following shape:
@@ -106,7 +108,7 @@ def get_dataset(dataset_type, data, schemas=None, autoinspect_func=autoinspect.c
         if schemas and "pandas" in schemas:
             pandas_schema = {key:np.dtype(value) for (key, value) in schemas["pandas"].items()}
             df = df.astype(pandas_schema)
-        return PandasDataset(df, autoinspect_func=autoinspect_func)
+        return PandasDataset(df, autoinspect_func=autoinspect_func, caching=caching)
     elif dataset_type == 'SqlAlchemyDataset':
         # Create a new database
 
@@ -150,7 +152,7 @@ def get_dataset(dataset_type, data, schemas=None, autoinspect_func=autoinspect.c
         df.to_sql(name=tablename, con=conn, index=False, dtype=sql_dtypes)
 
         # Build a SqlAlchemyDataset using that database
-        return SqlAlchemyDataset(tablename, engine=conn, autoinspect_func=autoinspect_func)
+        return SqlAlchemyDataset(tablename, engine=conn, autoinspect_func=autoinspect_func, caching=caching)
 
     elif dataset_type == 'SparkDFDataset':
         spark = SparkSession.builder.getOrCreate()
@@ -184,7 +186,7 @@ def get_dataset(dataset_type, data, schemas=None, autoinspect_func=autoinspect.c
             # if no schema provided, uses Spark's schema inference
             columns = list(data.keys()) # do we need to care about the order here?
             spark_df = spark.createDataFrame(data_reshaped, columns)
-        return SparkDFDataset(spark_df)
+        return SparkDFDataset(spark_df, caching=caching)
 
     else:
         raise ValueError("Unknown dataset_type " + str(dataset_type))
@@ -206,17 +208,19 @@ def candidate_getter_is_on_temporary_notimplemented_list(context, getter):
 def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type):
     if context == "SqlAlchemyDataset":
         return expectation_type in [
-            #"expect_column_to_exist",
-            #"expect_table_row_count_to_be_between",
-            #"expect_table_row_count_to_equal",
-            #"expect_table_columns_to_match_ordered_list",
-            #"expect_column_values_to_be_unique",
+            # "expect_column_to_exist",
+            # "expect_table_row_count_to_be_between",
+            # "expect_table_row_count_to_equal",
+            # "expect_table_columns_to_match_ordered_list",
+            # "expect_column_values_to_be_unique",
             # "expect_column_values_to_not_be_null",
             # "expect_column_values_to_be_null",
             "expect_column_values_to_be_of_type",
             "expect_column_values_to_be_in_type_list",
             # "expect_column_values_to_be_in_set",
             # "expect_column_values_to_not_be_in_set",
+            # "expect_column_distinct_values_to_equal_set",
+            # "expect_column_distinct_values_to_contain_set",
             # "expect_column_values_to_be_between",
             "expect_column_values_to_be_increasing",
             "expect_column_values_to_be_decreasing",
@@ -236,12 +240,12 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
             #"expect_column_unique_value_count_to_be_between",
             #"expect_column_proportion_of_unique_values_to_be_between",
             "expect_column_most_common_value_to_be_in_set",
-            #"expect_column_sum_to_be_between",
-            #"expect_column_min_to_be_between",
-            #"expect_column_max_to_be_between",
-            "expect_column_chisquare_test_p_value_to_be_greater_than",
+            # "expect_column_sum_to_be_between",
+            # "expect_column_min_to_be_between",
+            # "expect_column_max_to_be_between",
+            # "expect_column_chisquare_test_p_value_to_be_greater_than",
             "expect_column_bootstrapped_ks_test_p_value_to_be_greater_than",
-            "expect_column_kl_divergence_to_be_less_than",
+            # "expect_column_kl_divergence_to_be_less_than",
             "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",
             "expect_column_pair_values_to_be_equal",
             "expect_column_pair_values_A_to_be_greater_than_B",
@@ -254,13 +258,15 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
             # "expect_table_row_count_to_be_between",
             # "expect_table_row_count_to_equal",
             # "expect_table_columns_to_match_ordered_list",
-            "expect_column_values_to_be_unique",
+            # "expect_column_values_to_be_unique",
             # "expect_column_values_to_not_be_null",
             # "expect_column_values_to_be_null",
             "expect_column_values_to_be_of_type",
             "expect_column_values_to_be_in_type_list",
             # "expect_column_values_to_be_in_set",
             # "expect_column_values_to_not_be_in_set",
+            # "expect_column_distinct_values_to_equal_set",
+            # "expect_column_distinct_values_to_contain_set",
             "expect_column_values_to_be_between",
             "expect_column_values_to_be_increasing",
             "expect_column_values_to_be_decreasing",
