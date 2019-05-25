@@ -3,7 +3,7 @@ scipy>=0.19.0
 pandas>=0.22.0
 python-dateutil>=2.4.2
 pytz>=2015.6
-six>=1.9.0
+six>=1.12.0
 jsonschema>=2.5.1
 sqlalchemy>=1.2
 xlrd>=1.1.0
@@ -18,3 +18,4 @@ pyspark>=2.3.2
 psycopg2>=2.7.6,<2.8
 PyYAML==5.1
 ipywidgets>=7.4.2
+pyfiglet>=0.8
