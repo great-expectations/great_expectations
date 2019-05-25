@@ -7,13 +7,15 @@ import pytest
 
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
-test_config_path = os.path.join(dir_path, 'test_config.json')
+test_config_path = os.path.join(dir_path, 'test_dataset_implementations.json')
 test_config = json.load(open(test_config_path))
-data = test_config['data']
-schemas = test_config.get('schemas', {})
+test_datasets = test_config['test_datasets']
+
+def generate_ids(test):
+    return ':'.join([test['dataset'], test['func']])
 
 @pytest.mark.parametrize('context', CONTEXTS)
-@pytest.mark.parametrize('test', test_config['tests'])
+@pytest.mark.parametrize('test', test_config['tests'], ids=[generate_ids(t) for t in test_config['tests']])
 def test_implementations(context, test):
     should_skip = (
         candidate_getter_is_on_temporary_notimplemented_list(context, test['func'])
@@ -22,6 +24,8 @@ def test_implementations(context, test):
     )
     if should_skip:
         pytest.xfail()
-    dataset = get_dataset(context, data, schemas=schemas.get(context))
+    data = test_datasets[test['dataset']]['data']
+    schema = test_datasets[test['dataset']]['schemas'].get(context)
+    dataset = get_dataset(context, data, schemas=schema)
     func = getattr(dataset, test['func'])
-    assert test['expected'] == func(**test['kwargs'])
+    assert test['expected'] == func(**test.get('kwargs', {}))

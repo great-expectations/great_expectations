@@ -1,0 +1,146 @@
+{
+    "test_datasets": {
+        "d1": {
+            "data": {
+                "x": [2.0, 5.0],
+                "y": [5, 5],
+                "z": [0, 10],
+                "n": [0, null],
+                "b": [true, false]
+            },
+            "schemas": {
+                "SparkDFDataset": {
+                  "x": "float",
+                  "y": "int",
+                  "z": "int",
+                  "n": "int",
+                  "b": "bool"
+                }
+            }
+        },
+        "d2": {
+            "data": {
+                "a": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+                "b": ["a", "b", "b", "c", "c", "c", "d", "d", "d", "d"],
+                "c": ["a", "b", "b", "c", "c", "c", "d", null, null, null],
+                "d": ["a", "b", "c", "d", "e", "f", "g", null, null, null]
+            },
+            "schemas": {
+                "SparkDFDataset": {
+                  "a": "int",
+                  "b": "string",
+                  "c": "string",
+                  "d": "string"
+                }
+            }
+        },
+        "d3": {
+            "data": {
+                "a": [1, 2, 3, 4, 5],
+                "b": ["a", "b", "c", "d", "e"],
+                "c": [1, 2, 2, 3, 3, 3]
+            },
+            "schemas": {
+                "SparkDFDataset": {
+                    "a": "int",
+                    "b": "string",
+                    "c": "int"
+                }
+            }
+        }
+    },
+    "tests": [
+        {
+            "func": "_get_row_count",
+            "dataset": "d1",
+            "expected": 2
+        },
+        {
+            "func": "_get_row_count",
+            "dataset": "d2",
+            "expected": 10
+        },
+        {
+            "func": "_get_table_columns",
+            "dataset": "d1",
+            "expected": ["x", "y", "z", "n", "b"]
+        },
+        {
+            "func": "_get_table_columns",
+            "dataset": "d2",
+            "expected": ["a", "b", "c", "d"]
+        },
+        {
+            "func": "_get_column_nonnull_count",
+            "dataset": "d2",
+            "kwargs": {
+                "column": "b"
+            },
+            "expected": 10
+        },
+        {
+            "func": "_get_column_nonnull_count",
+            "dataset": "d2",
+            "kwargs": {
+                "column": "c"
+            },
+            "expected": 7
+        },
+        {
+            "func": "_get_column_mean",
+            "dataset": "d1",
+            "kwargs": {
+                "column": "x"
+            },
+            "expected": 3.5
+        },
+        {
+            "func": "_get_column_mean",
+            "dataset": "d1",
+            "kwargs": {
+                "column": "y"
+            },
+            "expected": 5
+        },
+        {
+            "func": "_get_column_mean",
+            "dataset": "d1",
+            "kwargs": {
+                "column": "z"
+            },
+            "expected": 5
+        },
+        {
+            "func": "_get_column_sum",
+            "dataset": "d1",
+            "kwargs": {
+                "column": "x"
+            },
+            "expected": 7
+        },
+        {
+            "func": "_get_column_sum",
+            "dataset": "d1",
+            "kwargs": {
+                "column": "n"
+            },
+            "expected": 0
+        },
+        {
+            "func": "_get_column_sum",
+            "dataset": "d2",
+            "kwargs": {
+                "column": "a"
+            },
+            "expected": 55
+        },
+        {
+            "func": "_get_column_median",
+            "dataset": "d2",
+            "kwargs": {
+                "column": "a"
+            },
+            "expected": 5.5
+        }
+    ]
+}
