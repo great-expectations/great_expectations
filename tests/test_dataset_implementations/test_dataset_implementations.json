@@ -51,27 +51,27 @@
     },
     "tests": [
         {
-            "func": "_get_row_count",
+            "func": "get_row_count",
             "dataset": "d1",
             "expected": 2
         },
         {
-            "func": "_get_row_count",
+            "func": "get_row_count",
             "dataset": "d2",
             "expected": 10
         },
         {
-            "func": "_get_table_columns",
+            "func": "get_table_columns",
             "dataset": "d1",
             "expected": ["x", "y", "z", "n", "b"]
         },
         {
-            "func": "_get_table_columns",
+            "func": "get_table_columns",
             "dataset": "d2",
             "expected": ["a", "b", "c", "d"]
         },
         {
-            "func": "_get_column_nonnull_count",
+            "func": "get_column_nonnull_count",
             "dataset": "d2",
             "kwargs": {
                 "column": "b"
@@ -79,7 +79,7 @@
             "expected": 10
         },
         {
-            "func": "_get_column_nonnull_count",
+            "func": "get_column_nonnull_count",
             "dataset": "d2",
             "kwargs": {
                 "column": "c"
@@ -87,7 +87,7 @@
             "expected": 7
         },
         {
-            "func": "_get_column_mean",
+            "func": "get_column_mean",
             "dataset": "d1",
             "kwargs": {
                 "column": "x"
@@ -95,7 +95,7 @@
             "expected": 3.5
         },
         {
-            "func": "_get_column_mean",
+            "func": "get_column_mean",
             "dataset": "d1",
             "kwargs": {
                 "column": "y"
@@ -103,7 +103,7 @@
             "expected": 5
         },
         {
-            "func": "_get_column_mean",
+            "func": "get_column_mean",
             "dataset": "d1",
             "kwargs": {
                 "column": "z"
@@ -111,7 +111,7 @@
             "expected": 5
         },
         {
-            "func": "_get_column_sum",
+            "func": "get_column_sum",
             "dataset": "d1",
             "kwargs": {
                 "column": "x"
@@ -119,7 +119,7 @@
             "expected": 7
         },
         {
-            "func": "_get_column_sum",
+            "func": "get_column_sum",
             "dataset": "d1",
             "kwargs": {
                 "column": "n"
@@ -127,7 +127,7 @@
             "expected": 0
         },
         {
-            "func": "_get_column_sum",
+            "func": "get_column_sum",
             "dataset": "d2",
             "kwargs": {
                 "column": "a"
@@ -135,12 +135,13 @@
             "expected": 55
         },
         {
-            "func": "_get_column_median",
+            "func": "get_column_median",
             "dataset": "d2",
             "kwargs": {
                 "column": "a"
             },
-            "expected": 5.5
+            "expected": 5.5,
+            "supress_test_for": ["SparkDFDataset"]
         }
     ]
 }

@@ -23,7 +23,7 @@ def test_implementations(context, test):
         context in test.get('supress_test_for', [])
     )
     if should_skip:
-        pytest.xfail()
+        pytest.skip()
     data = test_datasets[test['dataset']]['data']
     schema = test_datasets[test['dataset']]['schemas'].get(context)
     dataset = get_dataset(context, data, schemas=schema)
