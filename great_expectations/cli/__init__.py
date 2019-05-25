@@ -95,10 +95,9 @@ def initialize_project(parsed_args):
     parsed_args = vars(parsed_args)
     target_directory = parsed_args['target_directory']
 
-    project_yml_filename = target_directory + \
-        "/great_expectations/great_expectations.yml"
-    print(project_yml_filename)
-    base_dir = target_directory+"/great_expectations"
+    project_yml_filename = os.path.join(target_directory,
+                                        "great_expectations/great_expectations.yml")
+    base_dir = os.path.join(target_directory, "great_expectations")
     sql_alchemy_profile = None
     dbt_profile = None
 
