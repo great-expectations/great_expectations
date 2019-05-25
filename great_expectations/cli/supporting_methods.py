@@ -75,10 +75,12 @@ def _scaffold_directories_and_notebooks(base_dir):
     safe_mmkdir(base_dir)
     notebook_dir_name = "notebooks"
 
-    for directory in [notebook_dir_name, "data_asset_configurations", "validations", "snapshots", "samples"]:
+    open(os.path.join(base_dir, ".gitignore"), 'w').write("""do_not_commit/""")
+
+    for directory in [notebook_dir_name, "expectation_configs", "validations", "snapshots", "samples", "do_not_commit"]:
         safe_mmkdir(os.path.join(base_dir, directory))
 
-    for notebook in glob.glob(script_relative_path("init_notebooks/*.ipynb")):
+    for notebook in glob.glob(script_relative_path("../init_notebooks/*.ipynb")):
         notebook_name = os.path.basename(notebook)
         shutil.copyfile(notebook, os.path.join(
             base_dir, notebook_dir_name, notebook_name))
