@@ -6,20 +6,20 @@ matrix:
   include:
   - python: 2.7
     env: PANDAS=0.22.0
-  - python: 2.7
-    env: PANDAS=0.23.4
-  - python: 2.7
-    env: PANDAS=latest
-  - python: 3.6
-    env: PANDAS=0.22.0
-  - python: 3.6
-    env: PANDAS=0.23.4
-  - python: 3.6
-    env: PANDAS=latest
-  - python: 3.7
-    env: PANDAS=0.23.4
-  - python: 3.7
-    env: PANDAS=latest
+  # - python: 2.7
+  #   env: PANDAS=0.23.4
+  # - python: 2.7
+  #   env: PANDAS=latest
+  # - python: 3.6
+  #   env: PANDAS=0.22.0
+  # - python: 3.6
+  #   env: PANDAS=0.23.4
+  # - python: 3.6
+  #   env: PANDAS=latest
+  # - python: 3.7
+  #   env: PANDAS=0.23.4
+  # - python: 3.7
+  #   env: PANDAS=latest
 services:
   - postgresql
 install:
