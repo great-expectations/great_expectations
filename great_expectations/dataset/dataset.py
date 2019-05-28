@@ -1,3 +1,5 @@
+from future import division
+
 import inspect
 import sys
 from six import PY3, string_types
