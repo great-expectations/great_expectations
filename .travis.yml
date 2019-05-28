@@ -4,23 +4,30 @@ os:
   - linux
 matrix:
   include:
-  - dist: trusty
-    python: 2.7
-    env: PANDAS=0.22.0
-  # - python: 2.7
-  #   env: PANDAS=0.23.4
-  # - python: 2.7
-  #   env: PANDAS=latest
-  # - python: 3.6
+  # - dist: trusty
+  #   python: 2.7
   #   env: PANDAS=0.22.0
-  # - python: 3.6
+  # - dist: trusty
+  #   python: 2.7
   #   env: PANDAS=0.23.4
-  # - python: 3.6
+  # - dist: trusty
+  #   python: 2.7
   #   env: PANDAS=latest
-  # - python: 3.7
+  # - dist: trusty
+  #   python: 3.6
+  #   env: PANDAS=0.22.0
+  # - dist: trusty
+  #   python: 3.6
   #   env: PANDAS=0.23.4
-  # - python: 3.7
+  # - dist: trusty
+  #   python: 3.6
   #   env: PANDAS=latest
+  # - dist: xenial
+  #   python: 3.7
+  #   env: PANDAS=0.23.4
+  - dist: xenial
+    python: 3.7
+    env: PANDAS=latest
 services:
   - postgresql
 install:
