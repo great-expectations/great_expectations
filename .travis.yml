@@ -1,10 +1,11 @@
-dist: xenial
+# dist: xenial
 language: python
 os:
   - linux
 matrix:
   include:
-  - python: 2.7
+  - dist: trusty
+    python: 2.7
     env: PANDAS=0.22.0
   # - python: 2.7
   #   env: PANDAS=0.23.4
