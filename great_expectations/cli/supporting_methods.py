@@ -4,14 +4,6 @@ import shutil
 
 from great_expectations import script_relative_path
 
-
-def safe_mmkdir(directory):
-    try:
-        os.mkdir(directory)
-    except FileExistsError as fe:
-        pass
-
-
 def _does_user_want(user_input):
     while user_input.lower() not in ["y", "yes", "no", "n", ""]:
         user_input = input("[Y/n] is required. Please try again. ")
@@ -72,19 +64,19 @@ datasources:
 
 
 def _scaffold_directories_and_notebooks(base_dir):
-    safe_mmkdir(base_dir)
+    os.makedirs(base_dir, exist_ok=True)
     notebook_dir_name = "notebooks"
 
-    open(os.path.join(base_dir, ".gitignore"), 'w').write("""do_not_commit/""")
+    open(os.path.join(base_dir, ".gitignore"), 'w').write("""uncommitted/""")
 
-    for directory in [notebook_dir_name, "expectation_configs", "validations", "snapshots", "samples", "do_not_commit"]:
-        safe_mmkdir(os.path.join(base_dir, directory))
+    for directory in [notebook_dir_name, "expectations", "datasources", "uncommitted", "plugins", "fixtures"]:
+        os.makedirs(os.path.join(base_dir, directory), exist_ok=True)
 
     for notebook in glob.glob(script_relative_path("../init_notebooks/*.ipynb")):
         notebook_name = os.path.basename(notebook)
         shutil.copyfile(notebook, os.path.join(
             base_dir, notebook_dir_name, notebook_name))
 
-    safe_mmkdir(os.path.join(base_dir, notebook_dir_name, "tutorial_data"))
+    os.makedirs(os.path.join(base_dir, notebook_dir_name, "tutorial_data"), exist_ok=True)
     shutil.copyfile(script_relative_path("../init_notebooks/tutorial_data/Titanic.csv"),
                     os.path.join(base_dir, notebook_dir_name, "tutorial_data", "Titanic.csv"))
