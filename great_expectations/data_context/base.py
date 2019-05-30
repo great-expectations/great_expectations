@@ -139,10 +139,10 @@ class DataContext(object):
         datasource = self.get_datasource(datasource_name)
         return datasource.list_data_assets()
 
-    def get_data_asset(self, data_asset_name="None", datasource_name="default", *args, **kwargs):
+    def get_data_asset(self, data_asset_name, datasource_name="default", batch_kwargs=None):
         datasource = self.get_datasource(datasource_name)
-        data_asset = datasource.get_data_asset(data_asset_name, *args, data_context=self, **kwargs)
-        data_asset._initialize_expectations(self.get_data_asset_config(data_asset_name))
+        data_asset = datasource.get_data_asset(data_asset_name, batch_kwargs)
+        # data_asset._initialize_expectations(self.get_data_asset_config(data_asset_name))
         return data_asset
 
     def add_datasource(self, name, type_, **kwargs):
