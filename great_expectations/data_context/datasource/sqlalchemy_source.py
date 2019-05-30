@@ -4,7 +4,7 @@ import sqlalchemy
 from sqlalchemy import create_engine, MetaData
 
 from .datasource import Datasource
-from .data_asset_generator import BatchGenerator
+from .batch_generator import BatchGenerator
 from ...dataset.sqlalchemy_dataset import SqlAlchemyDataset
 
 class QueryGenerator(BatchGenerator):

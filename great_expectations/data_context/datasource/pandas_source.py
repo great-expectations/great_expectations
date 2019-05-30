@@ -2,7 +2,7 @@ import pandas as pd
 import os
 
 from .datasource import Datasource
-from .data_asset_generator import BatchGenerator
+from .batch_generator import BatchGenerator
 from ...dataset.pandas_dataset import PandasDataset
 
 
