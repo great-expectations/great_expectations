@@ -61,7 +61,7 @@ class DataContext(object):
 
         # TODO: What if the project config file does not exist?
         # TODO: Should we merge the project config file with the global config file?
-        with open(os.path.join(self.context_root_directory, ".great_expectations.yml"), "r") as data:
+        with open(os.path.join(self.context_root_directory, "great_expectations", "great_expectations.yml"), "r") as data:
             self._project_config = yaml.safe_load(data) or {}
 
         self._load_evaluation_parameter_store()
