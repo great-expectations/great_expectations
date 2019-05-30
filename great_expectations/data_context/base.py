@@ -3,8 +3,10 @@ import json
 import logging
 import yaml
 import sys
+import copy
 from glob import glob
 
+from great_expectations.exceptions import ExpectationsConfigNotFoundError
 from great_expectations.version import __version__
 from great_expectations.dataset import PandasDataset
 from great_expectations import read_csv
@@ -12,12 +14,12 @@ from IPython.display import display
 import ipywidgets as widgets
 from urllib.parse import urlparse
 
-from .sqlalchemy_source import SqlAlchemyDataSource
-from .dbt_source import DBTDataSource
+from .datasource.sqlalchemy_source import SqlAlchemyDatasource
+from .datasource.dbt_source import DBTDatasource
+from .datasource.pandas_source import PandasCSVDatasource
+from .datasource.spark_source import SparkDFDatasource
+
 from .expectation_explorer import ExpectationExplorer
-from .sqlalchemy_source import SqlAlchemyDataSource
-from .dbt_source import DBTDataSource
-from .pandas_source import PandasCSVDataSource
 
 logger = logging.getLogger(__name__)
 debug_view = widgets.Output(layout={'border': '3 px solid pink'})
@@ -36,6 +38,7 @@ class DataContext(object):
         if expectation_explorer:
             self._expectation_explorer_manager = ExpectationExplorer()
         self.connect(options, *args, **kwargs)
+        self._datasources = {}
 
     def connect(self, context_root_dir):
         # determine the "context root directory" - this is the parent of "great_expectations" dir
@@ -55,50 +58,134 @@ class DataContext(object):
 
         self.context_root_directory = os.path.abspath(self.context_root_directory)
 
-        self.directory = os.path.join(self.context_root_directory, "great_expectations/data_asset_configurations")
+        self.directory = os.path.join(self.context_root_directory, "great_expectations/expectations")
         self.plugin_store_directory = os.path.join(self.context_root_directory, "great_expectations/plugins/store")
         sys.path.append(self.plugin_store_directory)
-
-        # TODO: What if the project config file does not exist?
-        # TODO: Should we merge the project config file with the global config file?
-        with open(os.path.join(self.context_root_directory, ".great_expectations.yml"), "r") as data:
-            self._project_config = yaml.safe_load(data) or {}
+        
+        self._project_config = self._load_project_config()
 
         self._load_evaluation_parameter_store()
-
         self._compiled = False
 
+    def _load_project_config(self):
+        # TODO: What if the project config file does not exist?
+        # TODO: Should we merge the project config file with the global config file?
+        with open(os.path.join(self.context_root_directory, "great_expectations.yml"), "r") as data:
+            return yaml.safe_load(data) or {}
+
+    def _save_project_config(self):
+        with open(os.path.join(self.context_root_directory, "great_expectations.yml"), "w") as data:
+            yaml.safe_dump(self._project_config, data)
+
+    def _get_all_profile_credentials(self):
+        try:
+            with open(os.path.join(self.context_root_directory, "uncommitted/credentials/profiles.yml"), "r") as profiles_file:
+                return yaml.safe_load(profiles_file) or {}
+        except FileNotFoundError:
+            logger.warning("No profile credential store found.")
+            return {}
+
+    def get_profile_credentials(self, profile_name):
+        profiles = self._get_all_profile_credentials()
+        if profile_name in profiles:
+            return profiles[profile_name]
+        else:
+            return {}
+
+    def add_profile_credentials(self, profile_name, **kwargs):
+        profiles = self._get_all_profile_credentials()
+        profiles[profile_name] = {**kwargs}
+        profiles_filepath = os.path.join(self.context_root_directory, "uncommitted/credentials/profiles.yml")
+        os.makedirs(os.path.dirname(profiles_filepath), exist_ok=True)
+        with open(profiles_filepath, "w") as profiles_file:
+            yaml.safe_dump(profiles, profiles_file)
+
+    def get_datasource_config(self, datasource_name):
+        """We allow a datasource to be defined in any combination of the following two ways:
+        
+        1. It may be fully specified in the datasources section of the great_expectations.yml file
+        2. It may be stored in a file by convention located in `datasources/<datasource_name>/config.yml`
+        3. It may be listed in the great_expectations.yml file with a config_file key that provides a relative path to a different yml config file
+        
+        Any key duplicated across configs will be updated by the last key read (in the order above)
+        """
+        datasource_config = {}
+        defined_config_path = None
+        default_config_path = os.path.join(self.context_root_directory, "datasources", datasource_name, "config.yml")
+        if datasource_name in self._project_config["datasources"]:
+            base_datasource_config = copy.deepcopy(self._project_config["datasources"][datasource_name])
+            if "config_file" in base_datasource_config:
+                defined_config_path = os.path.join(self.context_root_directory, base_datasource_config.pop("config_file"))
+            datasource_config.update(base_datasource_config)
+        
+        try:
+            with open(default_config_path, "r") as config_file:
+                default_path_datasource_config = yaml.safe_load(config_file) or {}
+            datasource_config.update(default_path_datasource_config)
+        except FileNotFoundError:
+            logger.debug("No config file found in default location for datasource %s" % datasource_name)
+        
+        if defined_config_path is not None:
+            try:
+                with open(defined_config_path, "r") as config_file:
+                    defined_path_datasource_config = yaml.safe_load(config_file) or {}
+                datasource_config.update(defined_path_datasource_config)
+            except FileNotFoundError:
+                logger.warning("No config file found in user-defined location for datasource %s" % datasource_name)
+        
+        return datasource_config
+
     def list_data_assets(self, datasource_name="default"):
-        datasource = self._get_datasource(datasource_name)
+        datasource = self.get_datasource(datasource_name)
         return datasource.list_data_assets()
 
-    def get_data_asset(self, datasource_name="default", data_asset_name="None", *args, **kwargs):
-        datasource = self._get_datasource(datasource_name)
+    def get_data_asset(self, data_asset_name="None", datasource_name="default", *args, **kwargs):
+        datasource = self.get_datasource(datasource_name)
         data_asset = datasource.get_data_asset(data_asset_name, *args, data_context=self, **kwargs)
         data_asset._initialize_expectations(self.get_data_asset_config(data_asset_name))
         return data_asset
 
-    def _get_datasource(self, datasource_name):
+    def add_datasource(self, name, type_, **kwargs):
+        datasource_class = self._get_datasource_class(type_)
+        datasource = datasource_class(name, type_, data_context=self, **kwargs)
+        self._datasources[name] = datasource
+        if not "datasources" in self._project_config:
+            self._project_config["datasources"] = {}
+        self._project_config["datasources"][name] = datasource.get_config()
+        self._save_project_config()
+
+        return datasource
+
+    def get_config(self):
+        self._save_project_config()
+        return self._project_config
+
+    def _get_datasource_class(self, datasource_type):
+        if datasource_type == "pandas":
+            return PandasCSVDatasource
+        elif datasource_type == "dbt":
+            return DBTDatasource
+        elif datasource_type == "sqlalchemy":
+            return SqlAlchemyDatasource
+        elif datasource_type == "spark":
+            return SparkDFDatasource
+        else:
+            try:
+                # Update to do dynamic loading based on plugin types
+                return PandasCSVDatasource
+            except ImportError:
+                raise
+    
+    def get_datasource(self, datasource_name):
+        if datasource_name in self._datasources:
+            return self._datasources[datasource_name]
         try:
-            datasource_config = self._project_config["datasources"][datasource_name]
-            datasource_type = datasource_config["type"]
-            if datasource_type == "pandas":
-                return PandasCSVDataSource(**datasource_config)
-
-            elif datasource_type == "dbt":
-                try:
-                    profile = datasource_config["profile"]
-                except KeyError:
-                    raise ValueError("DBT data source requires a profile argument.")
-                return DBTDataSource(profile)
-
-            elif datasource_type == "sqlalchemy":
-                return SqlAlchemyDataSource(**datasource_config)
-            else:
-                raise ValueError(f"Unrecognized datasource type {datasource_type}")
-
+            datasource_config = copy.deepcopy(self._project_config["datasources"][datasource_name])
+            type_ = datasource_config.pop("type")
+            datasource_class= self._get_datasource_class(type_)
+            return datasource_class(datasource_name, type_, self, **datasource_config)
         except KeyError:
-            raise ValueError(f"Unable to load datasource {datasource_name} -- no configuration found or invalid configuration.")
+            raise ValueError(f"Unable to load datasource %s -- no configuration found or invalid configuration." % datasource_name)
 
 
     def _load_evaluation_parameter_store(self):
@@ -160,10 +247,30 @@ class DataContext(object):
             logger.exception("Failed to load evaluation_parameter_store class")
             raise
 
-    def list_data_asset_configs(self):
+    def list_expectations_configs(self):
         root_path = self.directory
         result = [os.path.splitext(os.path.relpath(y, root_path))[0] for x in os.walk(root_path) for y in glob(os.path.join(x[0], '*.json'))]
         return result
+
+    def _find_data_asset_config(data_asset_name, batch_kwargs):
+        configs = self.list_expectations_configs
+        if data_asset_name in configs:
+            return self.get_data_asset_config(data_asset_name)
+        else:
+            last_found_config = None
+            options = 0
+            for config in configs:
+                if data_asset_name in config:
+                    options += 1
+                    last_found_config = config
+            if options == 1:
+                return last_found_config
+
+        raise ExpectationsConfigNotFoundError(data_asset_name)
+                
+
+    def get_expectations_config(self, data_asset_name, batch_kwargs):
+        return self.get_data_asset_config(data_asset_name)
 
     def get_data_asset_config(self, data_asset_name):
         config_file_path = os.path.join(self.directory, data_asset_name + '.json')
@@ -179,7 +286,7 @@ class DataContext(object):
                     'great_expectations.__version__': __version__
                 },
                 'expectations': [],
-             }
+             } 
 
     def save_data_asset_config(self, data_asset_config):
         data_asset_name = data_asset_config['data_asset_name']
