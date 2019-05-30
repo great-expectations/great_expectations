@@ -252,8 +252,8 @@ class DataContext(object):
         result = [os.path.splitext(os.path.relpath(y, root_path))[0] for x in os.walk(root_path) for y in glob(os.path.join(x[0], '*.json'))]
         return result
 
-    def _find_data_asset_config(data_asset_name, batch_kwargs):
-        configs = self.list_expectations_configs
+    def _find_data_asset_config(self, data_asset_name, batch_kwargs):
+        configs = self.list_expectations_configs()
         if data_asset_name in configs:
             return self.get_data_asset_config(data_asset_name)
         else:
@@ -397,7 +397,7 @@ class DataContext(object):
             "data_assets": {}
         }
 
-        known_assets = self.list_data_asset_configs()
+        known_assets = self.list_expectations_configs()
         config_paths = [y for x in os.walk(self.directory) for y in glob(os.path.join(x[0], '*.json'))]
 
         for config_file in config_paths:

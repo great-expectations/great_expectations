@@ -112,17 +112,17 @@ When your data product runs in production, Great Expectations uses the tests tha
     """
     log_message(greeting_1, color="blue")
 
-    if not prompt.yn("Let's add Great Expectations to your project. We will add great_expectations directory in current directory and .great_expectations.yml config file. OK to proceed?"):
+    if not prompt.yn("Let's add Great Expectations to your project. We will add great_expectations directory in current directory and great_expectations/great_expectations.yml config file. OK to proceed?"):
         log_message(
             "OK - run great_expectations init again when ready. Exiting...", color="blue")
         exit(0)
 
     _scaffold_directories_and_notebooks(base_dir)
     log_message(
-        "\nDone. Later you can check out .great_expectations.yml config file for useful options.", color="blue")
+        "\nDone. Later you can check out great_expectations/great_expectations.yml config file for useful options.", color="blue")
 
     # Shows a list of options to select from
-    data_source_options = [{'selector': '1', 'prompt': 'CSV files/Pandas', 'return': 'csv'},
+    data_source_options = [{'selector': '1', 'prompt': 'CSV files on local filesystem', 'return': 'csv'},
                            {'selector': '2',
                                'prompt': 'Relational database (SQL)', 'return': 'sqlalchemy'},
                            {'selector': '3',
@@ -141,13 +141,31 @@ it will walk you through next steps.
         log_message(msg, color="blue")
     elif data_source_selection == 'sqlalchemy':
         msg = """
+Give your new data source a short name
+        """
+        data_source_name = prompt.query(str(clint_colored.white(msg)), default="mydb")
+        msg = """
+Configure the database credentials in the "{0:s}" section of this config file: great_expectations/uncommitted/credentials/profiles.yml
+
 Great Expectations relies on sqlalchemy to connect to relational databases.
 Please make sure that you have it installed.         
 To create expectations for your SQL queries start Jupyter and open notebook great_expectations/notebooks/using_great_expectations_with_sql.ipynb - 
 it will walk you through configuring the database connection and next steps. 
-        """
+        """.format(data_source_name)
         log_message(msg, color="blue")
     elif data_source_selection == 'csv':
+
+        msg = """
+Give your new data source a short name
+        """
+        data_source_name = prompt.query(str(clint_colored.white(msg)), default="mydir")
+
+        msg = """
+Enter full path of the root directory where the data files are stored        
+        """
+
+        path = prompt.query(str(clint_colored.white(msg)), default='/data/', validators=[validators.PathValidator()])
+
         msg = """
 To create expectations for your CSV files start Jupyter and open notebook great_expectations/notebooks/using_great_expectations_with_pandas.ipynb - 
 it will walk you through configuring the database connection and next steps. 
