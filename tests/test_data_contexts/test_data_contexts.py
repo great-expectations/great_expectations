@@ -68,10 +68,10 @@ def parameterized_expectations_config():
 def parameterized_config_data_context(tmpdir_factory):
     # TODO: harmonize with Eugene's approach to testing data context so we have a single fixture
     context_path = tmpdir_factory.mktemp("empty_context_dir")
-    asset_config_path = os.path.join(context_path, "great_expectations/data_asset_configurations")
+    asset_config_path = os.path.join(context_path, "great_expectations/expectations")
     os.makedirs(asset_config_path, exist_ok=True)
     shutil.copy("./tests/test_fixtures/.great_expectations.yml", str(context_path))
-    shutil.copy("./tests/test_fixtures/data_asset_configurations/parameterized_expectations_config_fixture.json",str(asset_config_path))
+    shutil.copy("./tests/test_fixtures/expectations/parameterized_expectations_config_fixture.json",str(asset_config_path))
     return DataContext(context_path)
 
 

@@ -1,8 +1,8 @@
 import os
 import logging
 
-from .base import DataContext
-from ..dataset.sparkdf_dataset import SparkDFDataset
+from .datasource import Datasource
+from ...dataset.sparkdf_dataset import SparkDFDataset
 
 logger = logging.getLogger(__name__)
 
@@ -12,12 +12,12 @@ except ImportError:
     logger.error("Unable to load spark context; install optional spark dependency for support.")
     raise
 
-class SparkCSVDataContext(DataContext):
+class SparkDFDatasource(Datasource):
     """For now, functions like PandasCSVDataContext
     """
 
     def __init__(self, options, *args, **kwargs):
-        super(SparkCSVDataContext, self).__init__(options, *args, **kwargs)
+        super(SparkDFDatasource, self).__init__(options, *args, **kwargs)
         self.spark = SparkSession.builder.getOrCreate()
 
     def connect(self, options):

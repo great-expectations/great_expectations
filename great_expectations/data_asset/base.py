@@ -39,12 +39,12 @@ class DataAsset(object):
         """
         interactive_evaluation = kwargs.pop("interactive_evaluation", True)
         autoinspect_func = kwargs.pop("autoinspect_func", None)
-        initial_config = kwargs.pop("config", None)
+        expectations_config = kwargs.pop("expectations_config", None)
         data_asset_name = kwargs.pop("data_asset_name", None)
         data_context = kwargs.pop("data_context", None)
         super(DataAsset, self).__init__(*args, **kwargs)
         self._interactive_evaluation = interactive_evaluation
-        self._initialize_expectations(config=initial_config, data_asset_name=data_asset_name)
+        self._initialize_expectations(config=expectations_config, data_asset_name=data_asset_name)
         self._data_context = data_context
         if autoinspect_func is not None:
             autoinspect_func(self)

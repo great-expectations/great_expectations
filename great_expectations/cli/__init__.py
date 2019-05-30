@@ -22,7 +22,6 @@ from great_expectations.data_asset import FileDataAsset
 
 from .supporting_methods import (
     _scaffold_directories_and_notebooks,
-    safe_mmkdir,
     _yml_template,
 )
 

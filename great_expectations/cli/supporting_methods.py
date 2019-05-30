@@ -54,8 +54,8 @@ datasources:
     type: pandas
   mydb:
     type: sqlalchemy
-    profile_name: {}
-    profiles_filepath: ~/.great_expectations/profiles.yml
+    profile: {}
+    profiles_filepath: uncommitted/credentials/profiles.yml
   mydbt:
     type: dbt
     profile: {} 

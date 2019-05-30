@@ -1,18 +1,18 @@
-from .base_source import DataSource
-from ..dataset.sqlalchemy_dataset import SqlAlchemyDataset
-from ..dbt_tools import DBTTools
+from .datasource import Datasource
+from ...dataset.sqlalchemy_dataset import SqlAlchemyDataset
+from ...dbt_tools import DBTTools
 
 from sqlalchemy import create_engine, MetaData
 
 
-class DBTDataSource(DataSource):
+class DBTDatasource(Datasource):
     """
     A DBTDataSource create a SQLAlchemy connection to the database used by a dbt project
     and allows to create, manage and validate expectations on the models that exist in that dbt project.
     """
 
     def __init__(self, profile, *args, **kwargs):
-        super(DBTDataSource, self).__init__(*args, **kwargs)
+        super(DBTDatasource, self).__init__(*args, **kwargs)
         self.meta = MetaData()
         self._dbt_tools = DBTTools(profile)
         options = self._dbt_tools.get_sqlalchemy_connection_options()
