@@ -18,7 +18,7 @@ class QueryGenerator(BatchGenerator):
         query = self._generator_config["queries"][data_asset_name] 
         return iter([
             {
-                "query": query,
+                "custom_sql": query,
                 "timestamp": datetime.datetime.now().timestamp()
             }
         ])
@@ -68,8 +68,9 @@ class SqlAlchemyDatasource(Datasource):
             raise ValueError("Unrecognized DataAssetGenerator type %s" % type_)
 
     def _get_data_asset(self, data_asset_name, batch_kwargs, expectations_config):
-        if "query" not in batch_kwargs:
-            batch_kwargs["query"] = "SELECT * FROM %s;" % data_asset_name
+        if "custom_sql" not in batch_kwargs:
+            batch_kwargs["custom_sql"] = "SELECT * FROM %s;" % data_asset_name
 
+        custom_sql = batch_kwargs["custom_sql"]
         # TODO: resolve table_name and data_assset_name vs custom_sql convention
-        return SqlAlchemyDataset(table_name=data_asset_name, engine=self.engine, data_context=self._data_context, data_asset_name=data_asset_name, expectations_config=expectations_config, **batch_kwargs)
+        return SqlAlchemyDataset(table_name=data_asset_name, engine=self.engine, data_context=self._data_context, data_asset_name=data_asset_name, expectations_config=expectations_config, custom_sql=custom_sql)
