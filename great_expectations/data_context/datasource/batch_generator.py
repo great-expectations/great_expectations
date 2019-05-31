@@ -29,8 +29,10 @@ class BatchGenerator(object):
     def yield_batch_kwargs(self, data_asset_name):
         if data_asset_name not in self._data_asset_iterators:
             self.reset_iterator(data_asset_name)
-
         data_asset_iterator = self._data_asset_iterators[data_asset_name]
-        for batch_kwargs in data_asset_iterator:
-            yield batch_kwargs
-    
+        try:
+            return next(data_asset_iterator)
+        except StopIteration:
+            self.reset_iterator(data_asset_name)
+            data_asset_iterator = self._data_asset_iterators[data_asset_name]
+            return next(data_asset_iterator)

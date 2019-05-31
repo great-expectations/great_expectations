@@ -37,6 +37,9 @@ class DBTModelGenerator(BatchGenerator):
                 "dbt model %s was not found in the compiled directory. Please run `dbt compile` or `dbt run` and try again. Or, check the directory." % data_asset_name
             )
 
+    def list_data_asset_names(self):
+        return [path for path in os.walk(self.dbt_target_path) if path.endswith(".sql")]
+
 
 class DBTDatasource(Datasource):
     """
@@ -52,9 +55,14 @@ class DBTDatasource(Datasource):
             base_directory="../../",
             project_filepath="dbt_project.yml",
             profiles_filepath="~/.dbt/profiles.yml",
+            generators=None,
             **kwargs
         ):
-        super(DBTDatasource, self).__init__(name, type_, data_context)
+        if generators is None:
+            generators = {
+                "default": {"type": "dbt_models"}
+            }
+        super(DBTDatasource, self).__init__(name, type_, data_context, generators)
         self._datasource_config.update({
             "profile": profile,
             "base_directory": base_directory,
@@ -74,11 +82,11 @@ class DBTDatasource(Datasource):
         )
 
         self._options = self._get_sqlalchemy_connection_options()
-        self._connected = False
+        self._connect(self._get_sqlalchemy_connection_options())
+        self._build_generators()
 
     def _connect(self, options, *args, **kwargs):
         self.engine = create_engine(options, *args, **kwargs)
-        self._connected = True
 
     def _get_sqlalchemy_connection_options(self):
         with open(os.path.expanduser(self._datasource_config["profiles_filepath"]), "r") as data:
@@ -97,34 +105,7 @@ class DBTDatasource(Datasource):
             )
         return options
 
-    def get_sqlalchemy_engine(self):
-        """
-        Create sqlalchemy engine using config and credentials stored in a particular profile/target in dbt profiles.yml file.
-
-        :return: initialized sqlalchemy engine
-        """
-        with open(os.path.expanduser(self._datasource_config["profiles_filepath"]), "r") as data:
-            profiles_config = yaml.safe_load(data) or {}
-
-        target = profiles_config[self._datasource_config["profile"]]["target"]
-        db_config = profiles_config[self._datasource_config["profile"]]["outputs"][target]
-        engine = sqlalchemy.create_engine(
-            sqlalchemy.engine.url.URL(
-                db_config["type"],
-                username=db_config["user"],
-                password=db_config["pass"],
-                host=db_config["host"],
-                port=db_config["port"],
-                database=db_config["dbname"],
-            )
-        )
-        # Ensure the connection is valid
-        # TODO error handling might be nice here
-        connection = engine.connect()
-
-        return engine
-
-    def _get_data_asset_generator_class(self, type_):
+    def _get_generator_class(self, type_):
         if type_ == "dbt_models":
             return DBTModelGenerator
         else:
@@ -143,5 +124,11 @@ class DBTDatasource(Datasource):
             This method will read the compiled SQL for this model from dbt's "compiled" folder - make sure that
             it is up to date after modifying the model's SQL source - recompile or rerun your dbt pipeline
         """
-        custom_sql = batch_kwargs["custom_sql"]
-        return SqlAlchemyDataset(table_name=data_asset_name, engine=self.engine, data_context=self._data_context, data_asset_name=data_asset_name, expectations_config=expectations_config, custom_sql=custom_sql)
+        custom_sql = batch_kwargs["query"]
+        return SqlAlchemyDataset(table_name=data_asset_name, 
+            engine=self.engine, 
+            data_context=self._data_context, 
+            data_asset_name=data_asset_name,
+            expectations_config=expectations_config, 
+            custom_sql=custom_sql, 
+            batch_kwargs=batch_kwargs)
