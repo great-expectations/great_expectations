@@ -52,7 +52,6 @@ class DBTDatasource(Datasource):
             type_, 
             data_context, 
             profile,         
-            base_directory="./",
             project_filepath="dbt_project.yml",
             profiles_filepath="~/.dbt/profiles.yml",
             generators=None,
@@ -65,17 +64,16 @@ class DBTDatasource(Datasource):
         super(DBTDatasource, self).__init__(name, type_, data_context, generators)
         self._datasource_config.update({
             "profile": profile,
-            "base_directory": base_directory,
             "project_filepath": project_filepath,
             "profiles_filepath": profiles_filepath
         })
 
         self.meta = MetaData()
-        with open(os.path.join(self._datasource_config["base_directory"], self._datasource_config["project_filepath"]), "r") as f:
+        with open(os.path.join(self._data_context.get_context_root_directory(), self._datasource_config["project_filepath"]), "r") as f:
             self._dbt_project = yaml.safe_load(f) or {}
             
         self.dbt_target_path = os.path.join(
-            self._datasource_config["base_directory"],
+            self._data_context.get_context_root_directory(),
             self._dbt_project["target-path"],
             "compiled",
             self._dbt_project["name"],
