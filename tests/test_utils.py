@@ -114,7 +114,7 @@ def get_dataset(dataset_type, data, schemas=None, autoinspect_func=autoinspect.c
 
         # Try to use a local postgres instance (e.g. on Travis); this will allow more testing than sqlite
         try:
-            engine = create_engine('postgresql://test:test@localhost/test_ci')
+            engine = create_engine('postgresql://postgres@localhost/test_ci')
             conn = engine.connect()
         except SQLAlchemyError:
             warnings.warn("Falling back to sqlite database.")
@@ -213,10 +213,10 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
             "expect_column_values_to_be_decreasing",
             # "expect_column_value_lengths_to_be_between",
             # "expect_column_value_lengths_to_equal",
-            "expect_column_values_to_match_regex",
-            "expect_column_values_to_not_match_regex",
-            "expect_column_values_to_match_regex_list",
-            "expect_column_values_to_not_match_regex_list",
+            # "expect_column_values_to_match_regex",
+            # "expect_column_values_to_not_match_regex",
+            # "expect_column_values_to_match_regex_list",
+            # "expect_column_values_to_not_match_regex_list",
             "expect_column_values_to_match_strftime_format",
             "expect_column_values_to_be_dateutil_parseable",
             "expect_column_values_to_be_json_parseable",
