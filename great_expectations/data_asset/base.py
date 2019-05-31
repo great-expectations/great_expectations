@@ -42,9 +42,10 @@ class DataAsset(object):
         expectations_config = kwargs.pop("expectations_config", None)
         data_asset_name = kwargs.pop("data_asset_name", None)
         data_context = kwargs.pop("data_context", None)
+        batch_kwargs = kwargs.pop("batch_kwargs", None)
         super(DataAsset, self).__init__(*args, **kwargs)
         self._interactive_evaluation = interactive_evaluation
-        self._initialize_expectations(config=expectations_config, data_asset_name=data_asset_name)
+        self._initialize_expectations(config=expectations_config, data_asset_name=data_asset_name, batch_kwargs=batch_kwargs)
         self._data_context = data_context
         if autoinspect_func is not None:
             autoinspect_func(self)
@@ -218,7 +219,7 @@ class DataAsset(object):
 
         return outer_wrapper
 
-    def _initialize_expectations(self, config=None, data_asset_name=None):
+    def _initialize_expectations(self, config=None, data_asset_name=None, batch_kwargs=None):
         """Instantiates `_expectations_config` as empty by default or with a specified expectation `config`.
         In addition, this always sets the `default_expectation_args` to:
             `include_config`: False,
@@ -260,10 +261,13 @@ class DataAsset(object):
                     "data_asset_name": data_asset_name,
                     "data_asset_type": self.__class__.__name__,
                     "meta": {
-                        "great_expectations.__version__": __version__
+                        "great_expectations.__version__": __version__,
                     },
                     "expectations": []
                 })
+
+        if batch_kwargs is not None:
+            self._expectations_config["meta"].update({"batch_kwargs": batch_kwargs})
 
         # Pandas incorrectly interprets this as an attempt to create a column and throws up a warning. Suppress it
         # since we are subclassing.
