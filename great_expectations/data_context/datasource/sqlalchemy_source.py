@@ -1,5 +1,6 @@
 import datetime
 import os
+from string import Template
 
 import sqlalchemy
 from sqlalchemy import create_engine, MetaData
@@ -53,10 +54,12 @@ class QueryGenerator(BatchGenerator):
 
 class SqlAlchemyDatasource(Datasource):
     """
-    A SqlAlchemyDataContext creates a SQLAlchemy engine and provides a list of tables available in the list_datasets
-    method. Its get_dataset method returns a new SqlAlchemy dataset with the provided name.
-
-    Warning: this feature is new in v0.4 and may change based on community feedback.
+    A SqlAlchemyDatasource will provide data_assets converting batch_kwargs using the following rules:
+      - if the batch_kwargs include a table key, the datasource will provide a dataset object connected
+        to that table
+      - if the batch_kwargs include a query key, the datasource will create a temporary table using that
+        that query. The query can be parameterized according to the standard python Template engine, which
+        uses $parameter, with additional kwargs passed to the get_data_asset method.
     """
 
     def __init__(self, name, type_, data_context, profile_name=None, generators=None, **kwargs):
@@ -95,7 +98,7 @@ class SqlAlchemyDatasource(Datasource):
         else:
             raise ValueError("Unrecognized DataAssetGenerator type %s" % type_)
 
-    def _get_data_asset(self, data_asset_name, batch_kwargs, expectations_config, schema=None):
+    def _get_data_asset(self, data_asset_name, batch_kwargs, expectations_config, schema=None, **kwargs):
         if "table" in batch_kwargs:
             return SqlAlchemyDataset(table_name=batch_kwargs["table"], 
                 engine=self.engine,
@@ -106,13 +109,13 @@ class SqlAlchemyDatasource(Datasource):
                 batch_kwargs=batch_kwargs)        
 
         elif "query" in batch_kwargs:
+            query = Template(batch_kwargs["query"]).safe_substitute(**kwargs)
             return SqlAlchemyDataset(table_name=data_asset_name, 
                 engine=self.engine,
-                schema=schema,
                 data_context=self._data_context, 
                 data_asset_name=data_asset_name, 
                 expectations_config=expectations_config, 
-                custom_sql=batch_kwargs["query"], 
+                custom_sql=query, 
                 batch_kwargs=batch_kwargs)
     
         else:
