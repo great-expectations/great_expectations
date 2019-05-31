@@ -36,13 +36,13 @@ class QueryGenerator(BatchGenerator):
         if data_asset_name in tables:
             return iter([
                 {
-                    "query": "SELECT * FROM %s;" % data_asset_name,
+                    "table": data_asset_name,
                     "timestamp": datetime.datetime.now().timestamp()
                 }
             ])
 
     def add_query(self, data_asset_name, query):
-        with open(os.path.join(self._queries_path, data_asset_namne + ".sql"), "w") as queryfile:
+        with open(os.path.join(self._queries_path, data_asset_name + ".sql"), "w") as queryfile:
             queryfile.write(query)
 
     def list_data_asset_names(self):
@@ -96,15 +96,23 @@ class SqlAlchemyDatasource(Datasource):
             raise ValueError("Unrecognized DataAssetGenerator type %s" % type_)
 
     def _get_data_asset(self, data_asset_name, batch_kwargs, expectations_config):
-        if "custom_sql" not in batch_kwargs:
-            batch_kwargs["custom_sql"] = "SELECT * FROM %s;" % data_asset_name
+        if "table" in batch_kwargs:
+            return SqlAlchemyDataset(table_name=batch_kwargs["table"], 
+                engine=self.engine, 
+                data_context=self._data_context, 
+                data_asset_name=data_asset_name, 
+                expectations_config=expectations_config, 
+                batch_kwargs=batch_kwargs)        
 
-        custom_sql = batch_kwargs["query"]
-        # TODO: resolve table_name and data_assset_name vs custom_sql convention
+        elif "query" in batch_kwargs:
         return SqlAlchemyDataset(table_name=data_asset_name, 
             engine=self.engine, 
             data_context=self._data_context, 
             data_asset_name=data_asset_name, 
             expectations_config=expectations_config, 
-            custom_sql=custom_sql, 
+                custom_sql=batch_kwargs["query"], 
             batch_kwargs=batch_kwargs)
+
+        else:
+            raise ValueError("Invalid batch_kwargs: exactly one of 'table' or 'query' must be specified")
+
