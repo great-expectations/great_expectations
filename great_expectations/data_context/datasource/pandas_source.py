@@ -13,8 +13,7 @@ class PandasCSVDatasource(Datasource):
     Use with the FilesystemPathGenerator for simple cases.
     """
 
-    def __init__(self, name, type_, data_context=None, generators=None, base_directory="/data", read_csv_kwargs=None):
-        self._base_directory = base_directory
+    def __init__(self, name, type_, data_context=None, generators=None, read_csv_kwargs=None):
         if generators is None:
             generators = {
                 "default": {"type": "filesystem", "base_directory": "/data"}
@@ -22,7 +21,6 @@ class PandasCSVDatasource(Datasource):
         super(PandasCSVDatasource, self).__init__(name, type_, data_context, generators)
         self._datasource_config.update(
             {
-                "base_directory": base_directory,
                 "read_csv_kwargs": read_csv_kwargs or {}
             }
         )
