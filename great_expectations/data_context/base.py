@@ -50,11 +50,6 @@ class DataContext(object):
             #     self.context_root_directory = "../data_asset_configurations"
             # else:
             #     self.context_root_directory = "./great_expectations/data_asset_configurations"
-        else:
-            if os.path.isdir(os.path.join(context_root_dir, "great_expectations")):
-                self.context_root_directory = context_root_dir
-            else:
-                self.context_root_directory = context_root_dir
 
         self.context_root_directory = os.path.abspath(self.context_root_directory)
 

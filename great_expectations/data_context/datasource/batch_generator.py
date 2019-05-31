@@ -1,3 +1,6 @@
+import os
+import yaml
+import copy
 import logging
 
 logger = logging.getLogger(__name__)
@@ -5,6 +8,7 @@ logger = logging.getLogger(__name__)
 class BatchGenerator(object):
 
     def __init__(self, name, type_, datasource=None):
+        self._name = name
         self._generator_config = {
             "type": type_
         }
@@ -22,7 +26,7 @@ class BatchGenerator(object):
 
     def _save_config(self):
         self._datasource._save_config()
-        
+     
     def reset_iterator(self, data_asset_name):
         self._data_asset_iterators[data_asset_name] = self._get_iterator(data_asset_name)
 
