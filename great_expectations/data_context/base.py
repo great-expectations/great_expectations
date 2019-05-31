@@ -73,6 +73,9 @@ class DataContext(object):
         self._load_evaluation_parameter_store()
         self._compiled = False
 
+    def get_context_root_directory(self):
+        return self.context_root_directory
+
     def _load_project_config(self):
         # TODO: What if the project config file does not exist?
         # TODO: Should we merge the project config file with the global config file?
