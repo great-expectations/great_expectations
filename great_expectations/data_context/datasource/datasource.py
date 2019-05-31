@@ -12,13 +12,20 @@ class Datasource(object):
     def from_configuration(cls, **kwargs):
         return cls(**kwargs)
 
-    def __init__(self, name, type_, data_context=None):
+    def __init__(self, name, type_, data_context=None, generators=None):
         self._data_context = data_context
         self._name = name
         self._generators = {}
         self._datasource_config = {
             "type": type_
         }
+        if generators is not None:
+            self._datasource_config.update({
+                "generators": generators
+            })
+        if self._data_context is None:
+            # Setup is done; no additional config to read
+            return
         try:
             config_path = os.path.join(self._data_context.context_root_directory, "datasources", name, "config.yml")
             with open(config_path, "r") as data:
@@ -65,7 +72,6 @@ class Datasource(object):
             return self._generators[generator_name]
         elif generator_name in self._datasource_config["generators"]:
             generator_config = copy.deepcopy(self._datasource_config["generators"][generator_name])
-
         elif len(self._datasource_config["generators"]) == 1:
             generator_config = copy.deepcopy(self._datasource_config["generators"][self._datasource_config["generators"].keys()[0]])
         else:

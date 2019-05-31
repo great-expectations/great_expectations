@@ -1,1 +1,2 @@
-from .pandas_source import FilesystemPathGenerator
+from .spark_source import SparkDFDatasource
+from .pandas_source import PandasCSVDatasource, FilesystemPathGenerator
