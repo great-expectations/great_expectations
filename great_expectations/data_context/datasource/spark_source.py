@@ -46,7 +46,7 @@ class SparkDFDatasource(Datasource):
         elif "query" in batch_kwargs:
             df = self.spark.sql(batch_kwargs.query)
 
-        return SparkDFDataset(df, 
+        return SparkDFDataset(df,
             expectations_config=expectations_config,
             data_context=self._data_context,
             data_asset_name=data_asset_name,
