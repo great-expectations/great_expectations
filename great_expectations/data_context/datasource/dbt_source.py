@@ -2,7 +2,7 @@ import os
 import yaml
 import datetime
 
-from .sqlalchemy_source import SqlAlchemyDatasource
+from .datasource import Datasource
 from .batch_generator import BatchGenerator
 from ...dataset.sqlalchemy_dataset import SqlAlchemyDataset
 
@@ -34,11 +34,11 @@ class DBTModelGenerator(BatchGenerator):
                 }])
         except FileNotFoundError as e:
             raise FileNotFoundError(
-                f"dbt model {data_asset_name} was not found in the compiled directory. Please run `dbt compile` or `dbt run` and try again. Or, check the directory."
+                "dbt model %s was not found in the compiled directory. Please run `dbt compile` or `dbt run` and try again. Or, check the directory." % data_asset_name
             )
 
 
-class DBTDatasource(SqlAlchemyDatasource):
+class DBTDatasource(Datasource):
     """
     A DBTDataSource create a SQLAlchemy connection to the database used by a dbt project
     and allows to create, manage and validate expectations on the models that exist in that dbt project.
@@ -48,26 +48,26 @@ class DBTDatasource(SqlAlchemyDatasource):
             name, 
             type_, 
             data_context, 
-            profile_name,         
+            profile,         
             base_directory="../../",
             project_filepath="dbt_project.yml",
             profiles_filepath="~/.dbt/profiles.yml",
             **kwargs
         ):
-        super(DBTDatasource, self).__init__(name, type_, data_context, profile_name)
+        super(DBTDatasource, self).__init__(name, type_, data_context)
         self._datasource_config.update({
-            "profile": profile_name,
+            "profile": profile,
             "base_directory": base_directory,
             "project_filepath": project_filepath,
             "profiles_filepath": profiles_filepath
         })
 
         self.meta = MetaData()
-        with open(self._datasource_config["profile_filepath"], "r") as f:
+        with open(os.path.join(self._datasource_config["base_directory"], self._datasource_config["project_filepath"]), "r") as f:
             self._dbt_project = yaml.safe_load(f) or {}
             
         self.dbt_target_path = os.path.join(
-            self._data_context["base_directory"],
+            self._datasource_config["base_directory"],
             self._dbt_project["target-path"],
             "compiled",
             self._dbt_project["name"],
@@ -125,7 +125,7 @@ class DBTDatasource(SqlAlchemyDatasource):
         return engine
 
     def _get_data_asset_generator_class(self, type_):
-        if type_ == "queries":
+        if type_ == "dbt_models":
             return DBTModelGenerator
         else:
             raise ValueError("Unrecognized DataAssetGenerator type %s" % type_)

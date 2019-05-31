@@ -37,7 +37,7 @@ class DataContext(object):
         self._expectation_explorer = expectation_explorer
         if expectation_explorer:
             self._expectation_explorer_manager = ExpectationExplorer()
-        self.connect(options, *args, **kwargs)
+        self.connect(options)
         self._datasources = {}
 
     def connect(self, context_root_dir):
@@ -58,8 +58,8 @@ class DataContext(object):
 
         self.context_root_directory = os.path.abspath(self.context_root_directory)
 
-        self.directory = os.path.join(self.context_root_directory, "great_expectations/expectations")
-        self.plugin_store_directory = os.path.join(self.context_root_directory, "great_expectations/plugins/store")
+        self.expectations_directory = os.path.join(self.context_root_directory, "expectations")
+        self.plugin_store_directory = os.path.join(self.context_root_directory, "plugins/store")
         sys.path.append(self.plugin_store_directory)
         
         self._project_config = self._load_project_config()
@@ -70,8 +70,11 @@ class DataContext(object):
     def _load_project_config(self):
         # TODO: What if the project config file does not exist?
         # TODO: Should we merge the project config file with the global config file?
-        with open(os.path.join(self.context_root_directory, "great_expectations.yml"), "r") as data:
-            return yaml.safe_load(data) or {}
+        try:
+            with open(os.path.join(self.context_root_directory, "great_expectations.yml"), "r") as data:
+                return yaml.safe_load(data) or {}
+        except FileNotFoundError:
+            return {}
 
     def _save_project_config(self):
         with open(os.path.join(self.context_root_directory, "great_expectations.yml"), "w") as data:
@@ -139,7 +142,9 @@ class DataContext(object):
         datasource = self.get_datasource(datasource_name)
         return datasource.list_data_assets()
 
-    def get_data_asset(self, data_asset_name, datasource_name="default", batch_kwargs=None):
+    def get_data_asset(self, datasource_name, data_asset_name, batch_kwargs=None):
+        data_asset_name = self._normalize_data_asset_name(data_asset_name)
+        # datasource_name = find(data_asset_name.split("/")[0]
         datasource = self.get_datasource(datasource_name)
         data_asset = datasource.get_data_asset(data_asset_name, batch_kwargs)
         # data_asset._initialize_expectations(self.get_data_asset_config(data_asset_name))
@@ -248,34 +253,38 @@ class DataContext(object):
             raise
 
     def list_expectations_configs(self):
-        root_path = self.directory
+        root_path = self.expectations_directory
         result = [os.path.splitext(os.path.relpath(y, root_path))[0] for x in os.walk(root_path) for y in glob(os.path.join(x[0], '*.json'))]
         return result
 
-    def _find_data_asset_config(self, data_asset_name, batch_kwargs):
+    def _normalize_data_asset_name(self, data_asset_name, batch_kwargs=None):
         configs = self.list_expectations_configs()
         if data_asset_name in configs:
-            return self.get_data_asset_config(data_asset_name)
+            return data_asset_name
         else:
             last_found_config = None
             options = 0
             for config in configs:
+                config_components = config.split("/")
                 if data_asset_name in config:
                     options += 1
                     last_found_config = config
             if options == 1:
                 return last_found_config
 
-        raise ExpectationsConfigNotFoundError(data_asset_name)
+        
+        # We allow "new" configs to be considered normalized out of the box
+        return data_asset_name
+        # raise ExpectationsConfigNotFoundError(data_asset_name)
                 
 
     def get_expectations_config(self, data_asset_name, batch_kwargs):
         return self.get_data_asset_config(data_asset_name)
 
     def get_data_asset_config(self, data_asset_name):
-        config_file_path = os.path.join(self.directory, data_asset_name + '.json')
+        config_file_path = os.path.join(self.expectations_directory, data_asset_name + '.json')
         if os.path.isfile(config_file_path):
-            with open(os.path.join(self.directory, data_asset_name + '.json')) as json_file:
+            with open(os.path.join(self.expectations_directory, data_asset_name + '.json')) as json_file:
                 return json.load(json_file)
         else:
             #TODO (Eugene): Would it be better to return None if the file does not exist? Currently this method acts as
@@ -290,7 +299,7 @@ class DataContext(object):
 
     def save_data_asset_config(self, data_asset_config):
         data_asset_name = data_asset_config['data_asset_name']
-        config_file_path = os.path.join(self.directory, data_asset_name + '.json')
+        config_file_path = os.path.join(self.expectations_directory, data_asset_name + '.json')
         os.makedirs(os.path.split(config_file_path)[0], exist_ok=True)
         with open(config_file_path, 'w') as outfile:
             json.dump(data_asset_config, outfile)
@@ -398,7 +407,7 @@ class DataContext(object):
         }
 
         known_assets = self.list_expectations_configs()
-        config_paths = [y for x in os.walk(self.directory) for y in glob(os.path.join(x[0], '*.json'))]
+        config_paths = [y for x in os.walk(self.expectations_directory) for y in glob(os.path.join(x[0], '*.json'))]
 
         for config_file in config_paths:
             config = json.load(open(config_file, 'r'))

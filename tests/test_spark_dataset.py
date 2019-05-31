@@ -1,9 +1,9 @@
 import great_expectations as ge
-from great_expectations.data_context.datasource import SparkDFDataSource
+from great_expectations.data_context.datasource import SparkDFDatasource
 import pytest
 
 # context = ge.get_data_context('SparkCSV', './tests/test_sets')
-context = SparkDFDataSource('./tests/test_sets')
+context = SparkDFDatasource("mysparksource", "spark", None, './tests/test_sets')
 titanic_dataset = context.get_dataset('Titanic.csv', header=True)
 strf_dataset = context.get_dataset('strf_test.csv', header=True)
 
