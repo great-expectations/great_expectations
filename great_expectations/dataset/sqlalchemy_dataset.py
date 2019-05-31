@@ -585,6 +585,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         return condition
 
+    @MetaSqlAlchemyDataset.column_map_expectation
     def expect_column_values_to_match_regex_list(self,
                                                  column,
                                                  regex_list,
@@ -625,6 +626,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         return condition
 
+    @MetaSqlAlchemyDataset.column_map_expectation
     def expect_column_values_to_not_match_regex_list(self, column, regex_list,
                                                      mostly=None,
                                                      result_format=None, include_config=False, catch_exceptions=None, meta=None):
