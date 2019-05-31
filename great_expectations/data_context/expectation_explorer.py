@@ -73,6 +73,10 @@ class ExpectationExplorer(object):
                     'expect_column_stdev_to_be_between',
                     'expect_column_sum_to_be_between'
                 ]
+            },
+
+            'mixed': {
+                'unbounded': ['expect_column_values_to_be_between']
             }
         }
         self.debug_view = widgets.Output(layout={'border': '3 px solid pink'})
@@ -219,13 +223,14 @@ class ExpectationExplorer(object):
             continuous_update=continuous_update
         )
 
-    def generate_text_widget(self, *, value, description='', description_tooltip='', continuous_update=False, placeholder=''):
+    def generate_text_widget(self, *, value, description='', description_tooltip='', continuous_update=False, placeholder='', disabled=False):
         return widgets.Text(
             value=value,
             placeholder=placeholder,
             description=description,
             description_tooltip=description_tooltip,
-            continuous_update=continuous_update
+            continuous_update=continuous_update,
+            disabled=disabled
         )
 
     def generate_radio_buttons_widget(self, *, options=[], value, description='', description_tooltip=''):
@@ -295,11 +300,14 @@ class ExpectationExplorer(object):
         exception_widget = expectation_state['exception_widget']
         expectation_type = expectation_state['expectation_type']
 
+        parse_strings_as_datetimes = expectation_kwargs.get('parse_strings_as_datetimes', False)
+
         output_strftime_format_widget = self.generate_text_widget(
             value=output_strftime_format,
             description='output strftime format: ',
             placeholder='press enter to confirm...',
-            description_tooltip='Enter a valid strfime format for datetime output.'
+            description_tooltip='Enter a valid strfime format for datetime output.',
+            disabled=not parse_strings_as_datetimes
         )
 
         widget_dict = {
@@ -399,7 +407,7 @@ class ExpectationExplorer(object):
         expectation_type = expectation_state['expectation_type']
         ties_okay_widget = self.generate_boolean_checkbox_widget(
             value=ties_okay,
-            description='ties_okay: ',
+            description='ties_okay',
             description_tooltip='If True, then the expectation will still succeed if values outside the designated set are as common (but not more common) than designated values.'
         )
 
@@ -573,6 +581,11 @@ class ExpectationExplorer(object):
 
         @exception_widget.capture(clear_output=True)
         def on_parse_strings_as_datetimes_change(change):
+            output_strftime_format_widget_dict = expectation_state['kwargs'].get('output_strftime_format')
+            output_strftime_format_widget = output_strftime_format_widget_dict.get('kwarg_widget')
+            if output_strftime_format_widget:
+                output_strftime_format_widget.disabled = not change['new']
+
             ge_expectation_kwargs = self.expectation_kwarg_dict_to_ge_kwargs(
                 expectation_state['kwargs'])
 
@@ -720,11 +733,9 @@ class ExpectationExplorer(object):
                                 (min_value_widget, 'max'))
             expectation_state['kwargs']['max_value'] = {'kwarg_widget': max_value_widget}
 
-        min_value_widget_dict = {'kwarg_widget': min_value_widget} or self.generate_expectation_kwarg_fallback_widget_dict(
+        min_value_widget_dict = {'kwarg_widget': min_value_widget} if min_value_widget else self.generate_expectation_kwarg_fallback_widget_dict(
             expectation_kwarg_name='min_value', **{'min_value': min_value})
         expectation_state['kwargs']['min_value'] = min_value_widget_dict
-
-        self.set_expectation_state(expectation_state, column)
 
         return min_value_widget_dict
 
@@ -803,12 +814,10 @@ class ExpectationExplorer(object):
                                 (max_value_widget, 'min'))
             expectation_state['kwargs']['min_value'] = {'kwarg_widget': min_value_widget}
 
-        max_value_widget_dict = {'kwarg_widget': max_value_widget} or self.generate_expectation_kwarg_fallback_widget_dict(
+        max_value_widget_dict = {'kwarg_widget': max_value_widget} if max_value_widget else self.generate_expectation_kwarg_fallback_widget_dict(
             expectation_kwarg_name='max_value', **{'max_value': max_value}
         )
         expectation_state['kwargs']['max_value'] = max_value_widget_dict
-
-        self.set_expectation_state(expectation_state, column)
 
         return max_value_widget_dict
 
@@ -1028,6 +1037,9 @@ class ExpectationExplorer(object):
                     self.generate_expectation_kwarg_fallback_widget_dict(expectation_kwarg_name=expectation_kwarg_name, **expectation_kwargs)
             expectation_state['kwargs'][expectation_kwarg_name] = widget_dict
             expectation_kwarg_input_widget_dicts.append(widget_dict)
+
+        with self.debug_view:
+            print(expectation_kwarg_input_widget_dicts)
 
         # container for kwarg input widgets
         expectation_kwarg_input_box = widgets.VBox(
