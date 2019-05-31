@@ -600,24 +600,24 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             if match_on == "any":
                 condition = \
                     sa.or_(
-                       [sa.text(column + " ~ '" + regex + "'") for regex in regex_list]
+                       *[sa.text(column + " ~ '" + regex + "'") for regex in regex_list]
                     )
             else:
                 condition = \
                     sa.and_(
-                       [sa.text(column + " ~ '" + regex + "'") for regex in regex_list]
+                       *[sa.text(column + " ~ '" + regex + "'") for regex in regex_list]
                     )
         # Mysql
         elif isinstance(self.engine.dialect, sa.dialects.mssql.dialect):
             if match_on == "any":
                 condition = \
                     sa.or_(
-                       [sa.text(column + " REGEXP '" + regex + "'") for regex in regex_list]
+                       *[sa.text(column + " REGEXP '" + regex + "'") for regex in regex_list]
                     )
             else:
                 condition = \
                     sa.and_(
-                       [sa.text(column + " REGEXP '" + regex + "'") for regex in regex_list]
+                       *[sa.text(column + " REGEXP '" + regex + "'") for regex in regex_list]
                     )
         else:
             logger.warning("Regex is not supported for dialect %s" % str(self.engine.dialect))
@@ -633,13 +633,13 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         if isinstance(self.engine.dialect, sa.dialects.postgresql.dialect):
             condition = \
                 sa.and_(
-                    [sa.text(column + " !~ '" + regex + "'") for regex in regex_list]
+                    *[sa.text(column + " !~ '" + regex + "'") for regex in regex_list]
                 )
         # Mysql
         elif isinstance(self.engine.dialect, sa.dialects.mssql.dialect):
             condition = \
                 sa.and_(
-                    [sa.text(column + " NOT REGEXP '" + regex + "'") for regex in regex_list]
+                    *[sa.text(column + " NOT REGEXP '" + regex + "'") for regex in regex_list]
                 )
         else:
             logger.warning("Regex is not supported for dialect %s" % str(self.engine.dialect))
