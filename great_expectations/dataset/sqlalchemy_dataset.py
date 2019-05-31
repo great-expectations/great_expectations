@@ -545,7 +545,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         if isinstance(self.engine.dialect, sa.dialects.postgresql.dialect):
             condition = sa.text(column + " ~ '" + regex + "'")
         # Mysql
-        elif isinstance(self.engine.dialect, sa.dialects.mssql.dialect):
+        elif isinstance(self.engine.dialect, sa.dialects.mysql.dialect):
             condition = sa.text(column + " REGEXP  '" + regex + "'")
         else:
             logger.warning("Regex is not supported for dialect %s" % str(self.engine.dialect))
@@ -564,7 +564,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         if isinstance(self.engine.dialect, sa.dialects.postgresql.dialect):
             condition = sa.text(column + " !~ '" + regex + "'")
         # Mysql
-        elif isinstance(self.engine.dialect, sa.dialects.mssql.dialect):
+        elif isinstance(self.engine.dialect, sa.dialects.mysql.dialect):
             condition = sa.text(column + " NOT REGEXP  '" + regex + "'")
         else:
             logger.warning("Regex is not supported for dialect %s" % str(self.engine.dialect))
@@ -596,7 +596,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                        *[sa.text(column + " ~ '" + regex + "'") for regex in regex_list]
                     )
         # Mysql
-        elif isinstance(self.engine.dialect, sa.dialects.mssql.dialect):
+        elif isinstance(self.engine.dialect, sa.dialects.mysql.dialect):
             if match_on == "any":
                 condition = \
                     sa.or_(
@@ -625,7 +625,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                     *[sa.text(column + " !~ '" + regex + "'") for regex in regex_list]
                 )
         # Mysql
-        elif isinstance(self.engine.dialect, sa.dialects.mssql.dialect):
+        elif isinstance(self.engine.dialect, sa.dialects.mysql.dialect):
             condition = \
                 sa.and_(
                     *[sa.text(column + " NOT REGEXP '" + regex + "'") for regex in regex_list]
