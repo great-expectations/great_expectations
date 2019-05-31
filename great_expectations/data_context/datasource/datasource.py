@@ -118,3 +118,6 @@ class Datasource(object):
     def list_data_asset_names(self, generator_name=None):
         generator = self.get_generator(generator_name)
         return generator.list_data_asset_names()
+
+    def build_batch_kwargs(self, **kwargs):
+        raise NotImplementedError
