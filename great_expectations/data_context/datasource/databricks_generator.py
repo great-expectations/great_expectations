@@ -29,7 +29,6 @@ class DatabricksTableGenerator(BatchGenerator):
         tables = self.spark.sql('show tables in {}'.format(self.database))
         return [row.tableName for row in tables.collect()]
 
-
     def _get_iterator(self, data_asset_name, **kwargs):
         query = 'select * from {}.{}'.format(self.database, data_asset_name)
         if kwargs.get('partition'):

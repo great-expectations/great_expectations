@@ -33,9 +33,9 @@ class Datasource(object):
     def _load_datasource_config(self):
         if self._data_context is None:
             # Setup is done; no additional config to read
-            return
+            return {}
         try:
-            config_path = os.path.join(self._data_context.context_root_directory, "datasources", self._name, "config.yml")
+            config_path = os.path.join(self._data_context.context_root_directory, "great_expectations/datasources", self._name, "config.yml")
             with open(config_path, "r") as data:
                 extra_config = yaml.safe_load(data) or {}
             logger.info("Loading config from %s" % str(config_path))

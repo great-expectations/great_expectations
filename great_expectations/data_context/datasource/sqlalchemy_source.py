@@ -1,4 +1,5 @@
 import datetime
+import os
 
 import sqlalchemy
 from sqlalchemy import create_engine, MetaData
@@ -14,23 +15,41 @@ class QueryGenerator(BatchGenerator):
     def __init__(self, name, type_, datasource):
         super(QueryGenerator, self).__init__(name, type_, datasource)
         # TODO: Implement table-level introspection
+        self.meta = MetaData()
+        self._queries_path = os.path.join(self._datasource._data_context.context_root_directory, 
+                "great_expectations/datasources", 
+                self._datasource._name,
+                "generators",
+                self._name,
+                "queries")
 
     def _get_iterator(self, data_asset_name):
-        query = self._generator_config["queries"][data_asset_name] 
-        return iter([
-            {
-                "query": query,
-                "timestamp": datetime.datetime.now().timestamp()
-            }
-        ])
+        if data_asset_name in [path for path in os.walk(self._queries_path) if path.endswith(".sql")]:
+            with open(os.path.join(self._queries_path, data_asset_name) + ".sql", "r") as data:
+                return iter([{
+                    "query": data.read(),
+                    "timestamp": datetime.datetime.now().timestamp()
+                }])
+
+        self.meta.reflect(bind=self._datasource.engine)
+        tables = [str(table) for table in self.meta.sorted_tables]
+        if data_asset_name in tables:
+            return iter([
+                {
+                    "query": "SELECT * FROM %s;" % data_asset_name,
+                    "timestamp": datetime.datetime.now().timestamp()
+                }
+            ])
+
+    def add_query(self, data_asset_name, query):
+        with open(os.path.join(self._queries_path, data_asset_namne + ".sql"), "w") as queryfile:
+            queryfile.write(query)
 
     def list_data_asset_names(self):
-        return list(self._generator_config["queries"])
-
-    def add_query(self, name, **kwargs):
-        self._generator_config["queries"][name] = {**kwargs}
-        self._save_config()
-
+        defined_queries = [path for path in os.walk(self._queries_path) if path.endswith(".sql")]
+        self.meta.reflect(bind=self._datasource.engine)
+        tables = [str(table) for table in self.meta.sorted_tables]
+        return defined_queries + tables
 
 class SqlAlchemyDatasource(Datasource):
     """

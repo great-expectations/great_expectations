@@ -20,8 +20,10 @@ class SparkDFDatasource(Datasource):
 
     def __init__(self, name, type_, data_context=None, generators=None, *args, **kwargs):
         if generators is None:
+            # Provide a gentle way to build a datasource with a sane default, including ability to specify the base_directory
+            base_directory = kwargs.pop("base_directory", "/data")
             generators = {
-                "default": {"type": "filesystem", "base_directory": "/data"}
+                "default": {"type": "filesystem", "base_directory": base_directory}
         }
         super(SparkDFDatasource, self).__init__(name, type_, data_context, generators)
         self.spark = SparkSession.builder.getOrCreate()
@@ -46,7 +48,7 @@ class SparkDFDatasource(Datasource):
         elif "query" in batch_kwargs:
             df = self.spark.sql(batch_kwargs.query)
 
-        return SparkDFDataset(df, 
+        return SparkDFDataset(df,
             expectations_config=expectations_config,
             data_context=self._data_context,
             data_asset_name=data_asset_name,

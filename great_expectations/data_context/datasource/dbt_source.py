@@ -25,14 +25,12 @@ class DBTModelGenerator(BatchGenerator):
         :return: compiled SQL ready to be executed
         """
         try:
-            with open(
-                os.path.join(self.dbt_target_path, data_asset_name) + ".sql", "r"
-            ) as data:
+            with open(os.path.join(self.dbt_target_path, data_asset_name) + ".sql", "r") as data:
                 return iter([{
                     "query": data.read(),
                     "timestamp": datetime.datetime.now().timestamp()
                 }])
-        except FileNotFoundError as e:
+        except FileNotFoundError:
             raise FileNotFoundError(
                 "dbt model %s was not found in the compiled directory. Please run `dbt compile` or `dbt run` and try again. Or, check the directory." % data_asset_name
             )
