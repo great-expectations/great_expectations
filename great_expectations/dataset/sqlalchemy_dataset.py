@@ -533,3 +533,105 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             having(sa.func.count(sa.column(column)) > 1)
 
         return sa.column(column).notin_(dup_query)
+
+    @MetaSqlAlchemyDataset.column_map_expectation
+    def expect_column_values_to_match_regex(self,
+                                                column,
+                                                regex,
+                                                mostly=None,
+                                                result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                                ):
+        # Postgres-only version
+        if isinstance(self.engine.dialect, sa.dialects.postgresql.dialect):
+            condition = sa.text(column + " ~ '" + regex + "'")
+        # Mysql
+        elif isinstance(self.engine.dialect, sa.dialects.mssql.dialect):
+            condition = sa.text(column + " REGEXP  '" + regex + "'")
+        else:
+            logger.warning("Regex is not supported for dialect %s" % str(self.engine.dialect))
+            raise NotImplementedError
+
+        return condition
+
+    @MetaSqlAlchemyDataset.column_map_expectation
+    def expect_column_values_to_not_match_regex(self,
+                                                column,
+                                                regex,
+                                                mostly=None,
+                                                result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                                ):
+        # Postgres-only version
+        if isinstance(self.engine.dialect, sa.dialects.postgresql.dialect):
+            condition = sa.text(column + " !~ '" + regex + "'")
+        # Mysql
+        elif isinstance(self.engine.dialect, sa.dialects.mssql.dialect):
+            condition = sa.text(column + " NOT REGEXP  '" + regex + "'")
+        else:
+            logger.warning("Regex is not supported for dialect %s" % str(self.engine.dialect))
+            raise NotImplementedError
+
+        return condition
+
+    @MetaSqlAlchemyDataset.column_map_expectation
+    def expect_column_values_to_match_regex_list(self,
+                                                 column,
+                                                 regex_list,
+                                                 match_on="any",
+                                                 mostly=None,
+                                                 result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                                 ):
+
+        if match_on not in ["any", "all"]:
+            raise ValueError("match_on must be any or all")
+        # Postgres-only version
+        if isinstance(self.engine.dialect, sa.dialects.postgresql.dialect):
+            if match_on == "any":
+                condition = \
+                    sa.or_(
+                       *[sa.text(column + " ~ '" + regex + "'") for regex in regex_list]
+                    )
+            else:
+                condition = \
+                    sa.and_(
+                       *[sa.text(column + " ~ '" + regex + "'") for regex in regex_list]
+                    )
+        # Mysql
+        elif isinstance(self.engine.dialect, sa.dialects.mssql.dialect):
+            if match_on == "any":
+                condition = \
+                    sa.or_(
+                       *[sa.text(column + " REGEXP '" + regex + "'") for regex in regex_list]
+                    )
+            else:
+                condition = \
+                    sa.and_(
+                       *[sa.text(column + " REGEXP '" + regex + "'") for regex in regex_list]
+                    )
+        else:
+            logger.warning("Regex is not supported for dialect %s" % str(self.engine.dialect))
+            raise NotImplementedError
+
+        return condition
+
+    @MetaSqlAlchemyDataset.column_map_expectation
+    def expect_column_values_to_not_match_regex_list(self, column, regex_list,
+                                                     mostly=None,
+                                                     result_format=None, include_config=False, catch_exceptions=None, meta=None):
+
+        # Postgres-only version
+        if isinstance(self.engine.dialect, sa.dialects.postgresql.dialect):
+            condition = \
+                sa.and_(
+                    *[sa.text(column + " !~ '" + regex + "'") for regex in regex_list]
+                )
+        # Mysql
+        elif isinstance(self.engine.dialect, sa.dialects.mssql.dialect):
+            condition = \
+                sa.and_(
+                    *[sa.text(column + " NOT REGEXP '" + regex + "'") for regex in regex_list]
+                )
+        else:
+            logger.warning("Regex is not supported for dialect %s" % str(self.engine.dialect))
+            raise NotImplementedError
+
+        return condition
