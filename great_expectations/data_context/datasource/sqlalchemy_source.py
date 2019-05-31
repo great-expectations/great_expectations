@@ -41,6 +41,10 @@ class QueryGenerator(BatchGenerator):
                 }
             ])
 
+    def add_query(self, data_asset_name, query):
+        with open(os.path.join(self._queries_path, data_asset_namne + ".sql"), "w") as queryfile:
+            queryfile.write(query)
+
     def list_data_asset_names(self):
         defined_queries = [path for path in os.walk(self._queries_path) if path.endswith(".sql")]
         self.meta.reflect(bind=self._datasource.engine)
