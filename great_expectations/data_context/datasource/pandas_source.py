@@ -34,9 +34,9 @@ class PandasCSVDatasource(Datasource):
         else:
             raise ValueError("Unrecognized BatchGenerator type %s" % type_)
 
-    def _get_data_asset(self, data_asset_name, batch_kwargs, expectations_config):
+    def _get_data_asset(self, data_asset_name, batch_kwargs, expectations_config, **kwargs):
         full_path = os.path.join(batch_kwargs["path"])
-        df = pd.read_csv(full_path, **self._datasource_config["read_csv_kwargs"])
+        df = pd.read_csv(full_path, **self._datasource_config["read_csv_kwargs"], **kwargs)
         
         return PandasDataset(df, 
             expectations_config=expectations_config, 
