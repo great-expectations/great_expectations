@@ -113,11 +113,16 @@ Let's add Great Expectations to your project.
 We will add great_expectations directory that will look like that: 
 
     great_expectations
-        ├── great_expectations.yml
+        ├── great_expectations.yml        
+        ├── datasources
         ├── expectations
+        ├── fixtures
         ├── notebooks
         ├── plugins
         ├── uncommitted
+        |   └── validations        
+        |   └── credentials        
+        |   └── samples        
         ├── .gitignore
     
 OK to proceed?    
@@ -205,9 +210,6 @@ it will walk you through configuring the database connection and next steps.
         exit(0)
 
     _scaffold_directories_and_notebooks(base_dir)
-    template_args = {}
-    with open(project_yml_filename, 'w') as ff:
-        ff.write(_yml_template(**template_args))
     log_message(
         "\nDone. Later you can check out great_expectations/great_expectations.yml config file for useful options.", color="blue")
 
@@ -222,7 +224,7 @@ it will walk you through configuring the database connection and next steps.
     if data_source_selection == "3": # dbt
         dbt_profile = click.prompt(msg_prompt_dbt_choose_profile)
         log_message(msg_dbt_go_to_notebook, color="blue")
-        context.add_datasource("dbt", "dbt", profile_name=dbt_profile)
+        context.add_datasource("dbt", "dbt", profile=dbt_profile)
 
     elif data_source_selection == "2": #sqlalchemy
         data_source_name = click.prompt(msg_prompt_datasource_name, default="mydb", show_default=True)
@@ -252,44 +254,6 @@ it will walk you through configuring the database connection and next steps.
 
     else:
         log_message(msg_unknown_data_source, color="blue")
-
-    template_args = {}
-    if dbt_profile:
-        template_args["dbt_profile"] = dbt_profile
-    if sql_alchemy_profile:
-        template_args["sql_alchemy_profile"] = sql_alchemy_profile
-
-    # with open(project_yml_filename, 'w') as ff:
-    #     ff.write(_yml_template(**template_args))
-
-
-
-    # path = prompt.query(str(clint_colored.yellow('Installation Path')), default='/usr/local/bin/', validators=[validators.PathValidator()])
-
-    # slack_webhook = None
-    # bucket = None
-    #
-    # if _does_user_want(input("Would you like to set up slack notifications? [Y/n] ")):
-    #     slack_webhook = str(input("Please paste your Slack webhook url here: "))
-    #
-    # if _does_user_want(input("Would you like to set up an S3 bucket for validation results? [Y/n] ")):
-    #     bucket = str(input("Which S3 bucket would you like validation results and data stored in? "))
-    #
-    # _save_append_line_to_gitignore("# These entries were added by Great Expectations")
-    # for directory in ["validations", "snapshots", "samples"]:
-    #     _save_append_line_to_gitignore(base_dir + "/" + directory)
-    #
-    # if slack_webhook or bucket:
-    #     if _does_user_want(input("Would you to add {} to a .gitignore? [Y/n] ".format(project_yml_filename))):
-    #         _save_append_line_to_gitignore(project_yml_filename)
-    #     else:
-    #         print("""⚠️   Warning! You have elected to skip adding entries to your .gitignore.
-    # This is NOT recommended as it may contain secrets. Do not commit this to source control!""".format(project_yml_filename))
-    #
-    # # if slack_webhook or bucket:
-    # #     # TODO fail if a project file already exists
-    # with open(project_yml_filename, 'w') as ff:
-    #     ff.write(_yml_template(bucket, slack_webhook))
 
 
 def validate(parsed_args):
