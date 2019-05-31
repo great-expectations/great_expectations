@@ -199,7 +199,6 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         if engine is not None:
             self.engine = engine
-
         else:
             try:
                 self.engine = sa.create_engine(connection_string)
@@ -217,7 +216,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
 
         try:
-            insp = reflection.Inspector.from_engine(engine)
+            insp = reflection.Inspector.from_engine(self.engine)
             self.columns = insp.get_columns(table_name, schema=schema)
         except KeyError:
             # we will get a KeyError for temporary tables, since
@@ -558,7 +557,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         if isinstance(self.engine.dialect, sa.dialects.postgresql.dialect):
             condition = sa.text(column + " ~ '" + regex + "'")
         # Mysql
-        elif isinstance(self.engine.dialect, sa.dialects.mssql.dialect):
+        elif isinstance(self.engine.dialect, sa.dialects.mysql.dialect):
             condition = sa.text(column + " REGEXP  '" + regex + "'")
         else:
             logger.warning("Regex is not supported for dialect %s" % str(self.engine.dialect))
@@ -577,7 +576,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         if isinstance(self.engine.dialect, sa.dialects.postgresql.dialect):
             condition = sa.text(column + " !~ '" + regex + "'")
         # Mysql
-        elif isinstance(self.engine.dialect, sa.dialects.mssql.dialect):
+        elif isinstance(self.engine.dialect, sa.dialects.mysql.dialect):
             condition = sa.text(column + " NOT REGEXP  '" + regex + "'")
         else:
             logger.warning("Regex is not supported for dialect %s" % str(self.engine.dialect))
@@ -609,7 +608,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                        *[sa.text(column + " ~ '" + regex + "'") for regex in regex_list]
                     )
         # Mysql
-        elif isinstance(self.engine.dialect, sa.dialects.mssql.dialect):
+        elif isinstance(self.engine.dialect, sa.dialects.mysql.dialect):
             if match_on == "any":
                 condition = \
                     sa.or_(
@@ -638,7 +637,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                     *[sa.text(column + " !~ '" + regex + "'") for regex in regex_list]
                 )
         # Mysql
-        elif isinstance(self.engine.dialect, sa.dialects.mssql.dialect):
+        elif isinstance(self.engine.dialect, sa.dialects.mysql.dialect):
             condition = \
                 sa.and_(
                     *[sa.text(column + " NOT REGEXP '" + regex + "'") for regex in regex_list]
