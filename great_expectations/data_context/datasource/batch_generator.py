@@ -11,7 +11,7 @@ class BatchGenerator(object):
         self._data_asset_iterators = {}
         self._datasource = datasource
 
-    def _get_iterator(self, data_asset_name):
+    def _get_iterator(self, data_asset_name, **kwargs):
         raise NotImplementedError
 
     def list_data_asset_names(self):

@@ -93,7 +93,7 @@ class Datasource(object):
         self._generators[generator_name] = generator
         return generator
 
-    def get_data_asset(self, data_asset_name, batch_kwargs=None):
+    def get_data_asset(self, data_asset_name, batch_kwargs=None, **kwargs):
         if batch_kwargs is None:
             generator = self.get_generator()
             if generator is not None:
@@ -106,10 +106,10 @@ class Datasource(object):
         else:
             expectations_config = None
 
-        return self._get_data_asset(data_asset_name, batch_kwargs, expectations_config)
+        return self._get_data_asset(data_asset_name, batch_kwargs, expectations_config, **kwargs)
 
     
-    def _get_data_asset(self, data_asset_name, batch_kwargs, expectations_config):
+    def _get_data_asset(self, data_asset_name, batch_kwargs, expectations_config, **kwargs):
         raise NotImplementedError
 
     def _get_generator_class(self, type_):

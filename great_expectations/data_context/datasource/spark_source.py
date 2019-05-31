@@ -2,6 +2,8 @@ import os
 import logging
 
 from .datasource import Datasource
+from .filesystem_path_generator import FilesystemPathGenerator
+from .databricks_generator import DatabricksTableGenerator
 
 logger = logging.getLogger(__name__)
 
@@ -16,20 +18,37 @@ class SparkDFDatasource(Datasource):
     """For now, functions like PandasCSVDataContext
     """
 
-    def __init__(self, name, type_, data_context=None, base_directory="/data", *args, **kwargs):
-        super(SparkDFDatasource, self).__init__(name, type_, data_context, *args, **kwargs)
+    def __init__(self, name, type_, data_context=None, generators=None, *args, **kwargs):
+        if generators is None:
+            generators = {
+                "default": {"type": "filesystem", "base_directory": "/data"}
+        }
+        super(SparkDFDatasource, self).__init__(name, type_, data_context, generators)
         self.spark = SparkSession.builder.getOrCreate()
-        self.connect(base_directory)
+        self._build_generators()
 
-    def connect(self, base_directory):
-        self.directory = base_directory
+    def _get_generator_class(self, type_):
+        if type_ == "filesystem":
+            return FilesystemPathGenerator
+        elif type_ == "databricks":
+            return DatabricksTableGenerator
+        else:
+            raise ValueError("Unrecognized BatchGenerator type %s" % type_)
 
-    def list_datasets(self):
-        return os.listdir(self.directory)
 
-    def get_dataset(self, dataset_name, caching=False, **kwargs):
-        reader = self.spark.read
-        for option in kwargs.items():
-            reader = reader.option(*option)
-        df = reader.csv(os.path.join(self.directory, dataset_name))
-        return SparkDFDataset(df, caching=caching)
+    def _get_data_asset(self, data_asset_name, batch_kwargs, expectations_config, caching=False, **kwargs):
+        if "path" in batch_kwargs:
+            reader = self.spark.read
+            for option in kwargs.items():
+                reader = reader.option(*option)
+            df = reader.csv(os.path.join(batch_kwargs["path"]))
+
+        elif "query" in batch_kwargs:
+            df = self.spark.sql(batch_kwargs.query)
+
+        return SparkDFDataset(df, 
+            expectations_config=expectations_config,
+            data_context=self._data_context,
+            data_asset_name=data_asset_name,
+            batch_kwargs=batch_kwargs,
+            caching=caching)
