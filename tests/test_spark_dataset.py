@@ -3,7 +3,7 @@ from great_expectations.data_context.datasource import SparkDFDatasource
 import pytest
 
 # context = ge.get_data_context('SparkCSV', './tests/test_sets')
-context = SparkDFDatasource("mysparksource", "spark", None, {"default": {"type": "filesystem", "base_directory": "./tests/test_sets"}})
+context = SparkDFDatasource("mysparksource", "spark", None, base_directory="./tests/test_sets")
 titanic_dataset = context.get_data_asset('Titanic.csv', header=True)
 strf_dataset = context.get_data_asset('strf_test.csv', header=True)
 
