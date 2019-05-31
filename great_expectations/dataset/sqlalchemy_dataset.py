@@ -186,7 +186,6 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         if engine is not None:
             self.engine = engine
-
         else:
             try:
                 self.engine = sa.create_engine(connection_string)
@@ -204,7 +203,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
 
         try:
-            insp = reflection.Inspector.from_engine(engine)
+            insp = reflection.Inspector.from_engine(self.engine)
             self.columns = insp.get_columns(table_name, schema=schema)
         except KeyError:
             # we will get a KeyError for temporary tables, since
