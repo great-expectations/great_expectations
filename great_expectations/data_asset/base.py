@@ -45,8 +45,9 @@ class DataAsset(object):
         batch_kwargs = kwargs.pop("batch_kwargs", None)
         super(DataAsset, self).__init__(*args, **kwargs)
         self._interactive_evaluation = interactive_evaluation
-        self._initialize_expectations(config=expectations_config, data_asset_name=data_asset_name, batch_kwargs=batch_kwargs)
+        self._initialize_expectations(config=expectations_config, data_asset_name=data_asset_name)
         self._data_context = data_context
+        self._batch_kwargs = batch_kwargs
         if autoinspect_func is not None:
             autoinspect_func(self)
 
@@ -219,7 +220,7 @@ class DataAsset(object):
 
         return outer_wrapper
 
-    def _initialize_expectations(self, config=None, data_asset_name=None, batch_kwargs=None):
+    def _initialize_expectations(self, config=None, data_asset_name=None):
         """Instantiates `_expectations_config` as empty by default or with a specified expectation `config`.
         In addition, this always sets the `default_expectation_args` to:
             `include_config`: False,
@@ -265,9 +266,6 @@ class DataAsset(object):
                     },
                     "expectations": []
                 })
-
-        if batch_kwargs is not None:
-            self._expectations_config["meta"].update({"batch_kwargs": batch_kwargs})
 
         # Pandas incorrectly interprets this as an attempt to create a column and throws up a warning. Suppress it
         # since we are subclassing.
@@ -551,6 +549,9 @@ class DataAsset(object):
                     return [expectation]
                 else:
                     return expectation
+
+    def get_batch_kwargs(self):
+        return self._batch_kwargs
 
     def discard_failing_expectations(self):
         res = self.validate(only_return_failures=True).get('results')
@@ -972,6 +973,9 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             result["meta"].update({"run_id": run_id})
         else:
             result["meta"].update({"run_id": str(uuid.uuid4())})
+
+        if self._batch_kwargs is not None:
+            result["meta"].update({"batch_kwargs": self._batch_kwargs})
 
         if save_dataset_on_failure is not None and result["success"] == False:
             ##### WARNING: HACKED FOR DEMO #######
