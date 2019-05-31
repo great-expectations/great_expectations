@@ -1,5 +1,7 @@
-import pandas as pd
 import os
+import datetime
+
+import pandas as pd
 
 from .datasource import Datasource
 from .filesystem_path_generator import FilesystemPathGenerator
@@ -43,3 +45,10 @@ class PandasCSVDatasource(Datasource):
             data_context=self._data_context, 
             data_asset_name=data_asset_name, 
             batch_kwargs=batch_kwargs)
+
+    def build_batch_kwargs(self, filepath, **kwargs):
+        return {
+            "path": filepath,
+            "timestamp": datetime.datetime.now().timestamp(),
+            **kwargs
+        }

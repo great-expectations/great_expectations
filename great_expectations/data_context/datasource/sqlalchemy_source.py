@@ -105,14 +105,28 @@ class SqlAlchemyDatasource(Datasource):
                 batch_kwargs=batch_kwargs)        
 
         elif "query" in batch_kwargs:
-        return SqlAlchemyDataset(table_name=data_asset_name, 
-            engine=self.engine, 
-            data_context=self._data_context, 
-            data_asset_name=data_asset_name, 
-            expectations_config=expectations_config, 
+            return SqlAlchemyDataset(table_name=data_asset_name, 
+                engine=self.engine, 
+                data_context=self._data_context, 
+                data_asset_name=data_asset_name, 
+                expectations_config=expectations_config, 
                 custom_sql=batch_kwargs["query"], 
-            batch_kwargs=batch_kwargs)
-
+                batch_kwargs=batch_kwargs)
+    
         else:
             raise ValueError("Invalid batch_kwargs: exactly one of 'table' or 'query' must be specified")
 
+    def build_batch_kwargs(self, table=None, query=None):
+        if (table is None and query is None) or (table is not None and query is not None):
+            raise ValueError("Exactly one of 'table' or 'query' must be specified.")
+
+        if table is not None:
+            return {
+                "table": table,
+                "timestamp": datetime.datetime.now().timestamp()
+            }
+        else:
+            return {
+                "query": query,
+                "timestamp": datetime.datetime.now().timestamp()
+            }
