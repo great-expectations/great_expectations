@@ -13,15 +13,19 @@ class QueryGenerator(BatchGenerator):
 
     def __init__(self, name, type_, datasource):
         super(QueryGenerator, self).__init__(name, type_, datasource)
+        # TODO: Implement table-level introspection
 
     def _get_iterator(self, data_asset_name):
         query = self._generator_config["queries"][data_asset_name] 
         return iter([
             {
-                "custom_sql": query,
+                "query": query,
                 "timestamp": datetime.datetime.now().timestamp()
             }
         ])
+
+    def list_data_asset_names(self):
+        return list(self._generator_config["queries"])
 
     def add_query(self, name, **kwargs):
         self._generator_config["queries"][name] = {**kwargs}
@@ -36,8 +40,12 @@ class SqlAlchemyDatasource(Datasource):
     Warning: this feature is new in v0.4 and may change based on community feedback.
     """
 
-    def __init__(self, name, type_, data_context, profile_name=None, **kwargs):
-        super(SqlAlchemyDatasource, self).__init__(name, type_, data_context)
+    def __init__(self, name, type_, data_context, profile_name=None, generators=None, **kwargs):
+        if generators is None:
+            generators = {
+                "default": {"type": "queries"}
+        }
+        super(SqlAlchemyDatasource, self).__init__(name, type_, data_context, generators=generators)
         if profile_name is not None:
             self._datasource_config.update({
                 "profile": profile_name
@@ -57,6 +65,7 @@ class SqlAlchemyDatasource(Datasource):
             options = sqlalchemy.engine.url.URL(drivername, **credentials)
 
         self._connect(options)
+        self._build_generators()
 
     def _connect(self, options, *args, **kwargs):
         self.engine = create_engine(options, *args, **kwargs)
@@ -71,6 +80,12 @@ class SqlAlchemyDatasource(Datasource):
         if "custom_sql" not in batch_kwargs:
             batch_kwargs["custom_sql"] = "SELECT * FROM %s;" % data_asset_name
 
-        custom_sql = batch_kwargs["custom_sql"]
+        custom_sql = batch_kwargs["query"]
         # TODO: resolve table_name and data_assset_name vs custom_sql convention
-        return SqlAlchemyDataset(table_name=data_asset_name, engine=self.engine, data_context=self._data_context, data_asset_name=data_asset_name, expectations_config=expectations_config, custom_sql=custom_sql)
+        return SqlAlchemyDataset(table_name=data_asset_name, 
+            engine=self.engine, 
+            data_context=self._data_context, 
+            data_asset_name=data_asset_name, 
+            expectations_config=expectations_config, 
+            custom_sql=custom_sql, 
+            batch_kwargs=batch_kwargs)

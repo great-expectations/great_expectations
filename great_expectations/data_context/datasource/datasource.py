@@ -16,24 +16,33 @@ class Datasource(object):
         self._data_context = data_context
         self._name = name
         self._generators = {}
+        if generators is None:
+            generators = {}
         self._datasource_config = {
-            "type": type_
+            "type": type_,
+            "generators": generators
         }
-        if generators is not None:
-            self._datasource_config.update({
-                "generators": generators
-            })
+
+        extra_config = self._load_datasource_config()
+        self._datasource_config.update(extra_config)
+        
+    def _build_generators(self):
+        for generator in self._datasource_config["generators"].keys():
+            self.get_generator(generator)
+
+    def _load_datasource_config(self):
         if self._data_context is None:
             # Setup is done; no additional config to read
             return
         try:
-            config_path = os.path.join(self._data_context.context_root_directory, "datasources", name, "config.yml")
+            config_path = os.path.join(self._data_context.context_root_directory, "datasources", self._name, "config.yml")
             with open(config_path, "r") as data:
                 extra_config = yaml.safe_load(data) or {}
-                self._datasource_config.update(extra_config)
             logger.info("Loading config from %s" % str(config_path))
+            return extra_config
         except FileNotFoundError:
             logger.debug("No additional config file found.")
+            return {}
 
     def get_credentials(self, profile_name):
         if self._data_context is not None:
@@ -67,13 +76,15 @@ class Datasource(object):
 
     def get_generator(self, generator_name="default"):
         """Get the (named) generator from a datasource)
-        """
+        """     
         if generator_name in self._generators:
             return self._generators[generator_name]
         elif generator_name in self._datasource_config["generators"]:
             generator_config = copy.deepcopy(self._datasource_config["generators"][generator_name])
         elif len(self._datasource_config["generators"]) == 1:
-            generator_config = copy.deepcopy(self._datasource_config["generators"][self._datasource_config["generators"].keys()[0]])
+            # If there's only one generator, we will use it by default
+            generator_name = list(self._datasource_config["generators"])[0]
+            generator_config = copy.deepcopy(self._datasource_config["generators"][generator_name])
         else:
             raise ValueError(f"Unable to load generator %s -- no configuration found or invalid configuration." % generator_name)
         type_ = generator_config.pop("type")
@@ -86,7 +97,7 @@ class Datasource(object):
         if batch_kwargs is None:
             generator = self.get_generator()
             if generator is not None:
-                batch_kwargs = generator.yield_batch(data_asset_name)
+                batch_kwargs = generator.yield_batch_kwargs(data_asset_name)
             else:
                 raise ValueError("No generator or batch_kwargs available to provide a dataset.")
 
@@ -104,5 +115,6 @@ class Datasource(object):
     def _get_generator_class(self, type_):
         raise NotImplementedError
 
-    def list_data_assets(self):
-        raise NotImplementedError
+    def list_data_asset_names(self, generator_name=None):
+        generator = self.get_generator(generator_name)
+        return generator.list_data_asset_names()

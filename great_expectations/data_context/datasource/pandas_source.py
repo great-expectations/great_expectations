@@ -64,15 +64,20 @@ class PandasCSVDatasource(Datasource):
     Use with the FilesystemPathGenerator for simple cases.
     """
 
-    def __init__(self, name, type_, data_context=None, base_directory="/data", read_csv_kwargs=None):
-        super(PandasCSVDatasource, self).__init__(name, type_, data_context)
+    def __init__(self, name, type_, data_context=None, generators=None, base_directory="/data", read_csv_kwargs=None):
+        self._base_directory = base_directory
+        if generators is None:
+            generators = {
+                "default": {"type": "filesystem"}
+        }
+        super(PandasCSVDatasource, self).__init__(name, type_, data_context, generators)
         self._datasource_config.update(
             {
                 "base_directory": base_directory,
-                "read_csv_kwargs": read_csv_kwargs
+                "read_csv_kwargs": read_csv_kwargs or {}
             }
         )
-        self._base_directory = base_directory
+        self._build_generators()
 
     def _get_generator_class(self, type_):
         if type_ == "filesystem":
@@ -81,10 +86,11 @@ class PandasCSVDatasource(Datasource):
             raise ValueError("Unrecognized DataAssetGenerator type %s" % type_)
 
     def _get_data_asset(self, data_asset_name, batch_kwargs, expectations_config):
-        if "path" not in batch_kwargs:
-            path = data_asset_name
-
-        full_path = os.path.join(self._base_directory, path)
+        full_path = os.path.join(self._base_directory, batch_kwargs["path"])
         df = pd.read_csv(full_path, **self._datasource_config["read_csv_kwargs"])
         
-        return PandasDataset(df, expectations_config=expectations_config, data_context=self._data_context, data_asset_name=data_asset_name)
+        return PandasDataset(df, 
+            expectations_config=expectations_config, 
+            data_context=self._data_context, 
+            data_asset_name=data_asset_name, 
+            batch_kwargs=batch_kwargs)

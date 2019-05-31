@@ -35,10 +35,10 @@ class DataContext(object):
 
     def __init__(self, options=None, expectation_explorer=False, *args, **kwargs):
         self._expectation_explorer = expectation_explorer
+        self._datasources = {}
         if expectation_explorer:
             self._expectation_explorer_manager = ExpectationExplorer()
         self.connect(options)
-        self._datasources = {}
 
     def connect(self, context_root_dir):
         # determine the "context root directory" - this is the parent of "great_expectations" dir
@@ -58,11 +58,17 @@ class DataContext(object):
 
         self.context_root_directory = os.path.abspath(self.context_root_directory)
 
-        self.expectations_directory = os.path.join(self.context_root_directory, "expectations")
-        self.plugin_store_directory = os.path.join(self.context_root_directory, "plugins/store")
+        self.expectations_directory = os.path.join(self.context_root_directory, "great_expectations/expectations")
+        self.plugin_store_directory = os.path.join(self.context_root_directory, "great_expectations/plugins/store")
         sys.path.append(self.plugin_store_directory)
         
         self._project_config = self._load_project_config()
+        if "datasources" not in self._project_config:
+            self._project_config["datasources"] = {}
+        for datasource in self._project_config["datasources"].keys():
+            # TODO: if one of these loads fails, be okay with that
+            self.get_datasource(datasource)
+
 
         self._load_evaluation_parameter_store()
         self._compiled = False
@@ -138,9 +144,9 @@ class DataContext(object):
         
         return datasource_config
 
-    def list_data_assets(self, datasource_name="default"):
+    def list_data_asset_names(self, datasource_name=None, generator_name=None):
         datasource = self.get_datasource(datasource_name)
-        return datasource.list_data_assets()
+        return datasource.list_data_asset_names(generator_name)
 
     def get_data_asset(self, datasource_name, data_asset_name, batch_kwargs=None):
         data_asset_name = self._normalize_data_asset_name(data_asset_name)
@@ -180,19 +186,23 @@ class DataContext(object):
                 return PandasCSVDatasource
             except ImportError:
                 raise
-    
-    def get_datasource(self, datasource_name):
+ 
+    def get_datasource(self, datasource_name="default"):
         if datasource_name in self._datasources:
             return self._datasources[datasource_name]
-        try:
+        elif datasource_name in self._project_config["datasources"]:
             datasource_config = copy.deepcopy(self._project_config["datasources"][datasource_name])
-            type_ = datasource_config.pop("type")
-            datasource_class= self._get_datasource_class(type_)
-            return datasource_class(datasource_name, type_, self, **datasource_config)
-        except KeyError:
+        elif len(self._project_config["datasources"]) == 1:
+            datasource_name = list(self._project_config["datasources"])[0]
+            datasource_config = copy.deepcopy(self._project_config["datasources"][datasource_name])
+        else:
             raise ValueError(f"Unable to load datasource %s -- no configuration found or invalid configuration." % datasource_name)
-
-
+        type_ = datasource_config.pop("type")
+        datasource_class= self._get_datasource_class(type_)
+        datasource = datasource_class(datasource_name, type_, self, **datasource_config)
+        self._datasources[datasource_name] = datasource
+        return datasource
+            
     def _load_evaluation_parameter_store(self):
 
         # This is a trivial class that implements in-memory key value store.
