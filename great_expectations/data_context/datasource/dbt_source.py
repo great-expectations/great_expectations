@@ -52,7 +52,7 @@ class DBTDatasource(Datasource):
             type_, 
             data_context, 
             profile,         
-            base_directory="../../",
+            base_directory="./",
             project_filepath="dbt_project.yml",
             profiles_filepath="~/.dbt/profiles.yml",
             generators=None,
