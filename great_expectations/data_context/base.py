@@ -51,8 +51,7 @@ class DataContext(object):
             # else:
             #     self.context_root_directory = "./great_expectations/data_asset_configurations"
 
-        self.context_root_directory = context_root_dir
-        self.context_root_directory = os.path.abspath(self.context_root_directory)
+        self.context_root_directory = os.path.abspath(context_root_dir)
 
         self.expectations_directory = os.path.join(self.context_root_directory, "great_expectations/expectations")
         self.plugin_store_directory = os.path.join(self.context_root_directory, "great_expectations/plugins/store")
