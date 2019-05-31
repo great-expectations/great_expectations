@@ -340,7 +340,6 @@ def evaluate_json_test(data_asset, expectation_type, test):
     # Check results
     if test['exact_match_out'] is True:
         assert test['out'] == result
-
     else:
         for key, value in test['out'].items():
             # Apply our great expectations-specific test logic
