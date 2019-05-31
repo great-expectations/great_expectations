@@ -114,7 +114,7 @@ def get_dataset(dataset_type, data, schemas=None, autoinspect_func=autoinspect.c
 
         # Try to use a local postgres instance (e.g. on Travis); this will allow more testing than sqlite
         try:
-            engine = create_engine('postgresql://test:test@localhost/test_ci')
+            engine = create_engine('postgresql://postgres@localhost/test_ci')
             conn = engine.connect()
         except SQLAlchemyError:
             warnings.warn("Falling back to sqlite database.")
