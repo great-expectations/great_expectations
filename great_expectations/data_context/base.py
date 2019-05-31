@@ -71,18 +71,18 @@ class DataContext(object):
         # TODO: What if the project config file does not exist?
         # TODO: Should we merge the project config file with the global config file?
         try:
-            with open(os.path.join(self.context_root_directory, "great_expectations.yml"), "r") as data:
+            with open(os.path.join(self.context_root_directory, "great_expectations", "great_expectations.yml"), "r") as data:
                 return yaml.safe_load(data) or {}
         except FileNotFoundError:
             return {}
 
     def _save_project_config(self):
-        with open(os.path.join(self.context_root_directory, "great_expectations.yml"), "w") as data:
+        with open(os.path.join(self.context_root_directory, "great_expectations", "great_expectations.yml"), "w") as data:
             yaml.safe_dump(self._project_config, data)
 
     def _get_all_profile_credentials(self):
         try:
-            with open(os.path.join(self.context_root_directory, "uncommitted/credentials/profiles.yml"), "r") as profiles_file:
+            with open(os.path.join(self.context_root_directory, "great_expectations/uncommitted/credentials/profiles.yml"), "r") as profiles_file:
                 return yaml.safe_load(profiles_file) or {}
         except FileNotFoundError:
             logger.warning("No profile credential store found.")
@@ -98,7 +98,7 @@ class DataContext(object):
     def add_profile_credentials(self, profile_name, **kwargs):
         profiles = self._get_all_profile_credentials()
         profiles[profile_name] = {**kwargs}
-        profiles_filepath = os.path.join(self.context_root_directory, "uncommitted/credentials/profiles.yml")
+        profiles_filepath = os.path.join(self.context_root_directory, "great_expectations/uncommitted/credentials/profiles.yml")
         os.makedirs(os.path.dirname(profiles_filepath), exist_ok=True)
         with open(profiles_filepath, "w") as profiles_file:
             yaml.safe_dump(profiles, profiles_file)
