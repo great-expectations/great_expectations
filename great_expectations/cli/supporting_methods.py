@@ -13,7 +13,7 @@ def _does_user_want(user_input):
 
 
 def _save_append_line_to_gitignore(line):
-    _gitignore = ".gitignore"
+    _gitignore = "great_expectatons/.gitignore"
     if os.path.exists(_gitignore):
         append_write = 'a'
     else:
@@ -80,3 +80,4 @@ def _scaffold_directories_and_notebooks(base_dir):
     os.makedirs(os.path.join(base_dir, notebook_dir_name, "tutorial_data"), exist_ok=True)
     shutil.copyfile(script_relative_path("../init_notebooks/tutorial_data/Titanic.csv"),
                     os.path.join(base_dir, notebook_dir_name, "tutorial_data", "Titanic.csv"))
+
