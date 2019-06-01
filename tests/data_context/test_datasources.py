@@ -8,17 +8,6 @@ from great_expectations.data_context import DataContext
 from great_expectations.data_context.datasource.sqlalchemy_source import SqlAlchemyDatasource
 
 
-@pytest.fixture()
-def data_context(tmpdir_factory):
-    # TODO: harmonize with Eugene's approach to testing data context so we have a single fixture
-    context_path = tmpdir_factory.mktemp("empty_context_dir")
-    asset_config_path = os.path.join(context_path, "great_expectations/expectations")
-    os.makedirs(asset_config_path, exist_ok=True)
-    shutil.copy("./tests/test_fixtures/great_expectations.yml", str(context_path))
-    shutil.copy("./tests/test_fixtures/expectations/parameterized_expectations_config_fixture.json",str(asset_config_path))
-    return DataContext(context_path)
-
-
 def test_create_pandas_datasource(data_context, tmpdir):
     name = "test_pandas_datasource"
     type_ = "pandas"
@@ -137,5 +126,7 @@ def test_file_kwargs_genenrator(data_context, tmpdir):
         assert batch in f3_batches
     assert len(f3_batches) == 2
 
-def test_sql_query_generator():
+def test_sqlalchemysource_templating(sqlitedb_engine):
+    datasource = SqlAlchemyDatasource(engine=sqlitedb_engine)
+    df = datasource.get_data_asset("test")
     assert True
