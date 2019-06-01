@@ -62,12 +62,12 @@ class SqlAlchemyDatasource(Datasource):
         uses $parameter, with additional kwargs passed to the get_data_asset method.
     """
 
-    def __init__(self, name, type_, data_context, profile_name=None, generators=None, **kwargs):
+    def __init__(self, name="default", data_context=None, profile_name=None, generators=None, **kwargs):
         if generators is None:
             generators = {
                 "default": {"type": "queries"}
         }
-        super(SqlAlchemyDatasource, self).__init__(name, type_, data_context, generators=generators)
+        super(SqlAlchemyDatasource, self).__init__(name, type_="sqlalchemy", data_context=data_context, generators=generators)
         if profile_name is not None:
             self._datasource_config.update({
                 "profile": profile_name

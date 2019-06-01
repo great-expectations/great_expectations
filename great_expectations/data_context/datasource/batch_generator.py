@@ -25,7 +25,10 @@ class BatchGenerator(object):
         return self._generator_config
 
     def _save_config(self):
-        self._datasource._save_config()
+        if self._datasource is not None:
+            self._datasource._save_config()
+        else:
+            logger.warning("Unable to save generator config without a datasource attached.")
      
     def reset_iterator(self, data_asset_name):
         self._data_asset_iterators[data_asset_name] = self._get_iterator(data_asset_name)

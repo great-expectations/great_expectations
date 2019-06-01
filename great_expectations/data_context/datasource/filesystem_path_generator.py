@@ -8,8 +8,8 @@ class FilesystemPathGenerator(BatchGenerator):
     /data/users/users_20180102.csv
     """
 
-    def __init__(self, name, type_, datasource, base_directory="/data"):
-        super(FilesystemPathGenerator, self).__init__(name, type_, datasource)
+    def __init__(self, name="default", datasource=None, base_directory="/data"):
+        super(FilesystemPathGenerator, self).__init__(name, type_="filesystem", datasource=datasource)
         self._base_directory = base_directory
 
     def list_data_asset_names(self):

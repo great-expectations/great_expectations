@@ -50,15 +50,19 @@ class Datasource(object):
         return None
 
     def get_config(self):
-        self._save_config()
+        if self._data_context is not None:
+            self._save_config()
         return self._datasource_config
 
     def _save_config(self):
-        base_config = copy.deepcopy(self._datasource_config)
-        if "config_file" in base_config:
-            config_filepath = os.path.join(self._data_context.context_root_directory, base_config.pop["config_file"])
+        if self._data_context is not None:
+            base_config = copy.deepcopy(self._datasource_config)
+            if "config_file" in base_config:
+                config_filepath = os.path.join(self._data_context.context_root_directory, base_config.pop["config_file"])
+            else:
+                config_filepath = os.path.join(self._data_context.context_root_directory, "great_expectations/datasources", self._name, "config.yml")
         else:
-            config_filepath = os.path.join(self._data_context.context_root_directory, "great_expectations/datasources", self._name, "config.yml")
+            logger.warning("Unable to save config with no data context attached.")
 
         os.makedirs(os.path.dirname(config_filepath), exist_ok=True)
         with open(config_filepath, "w") as data_file:
@@ -71,7 +75,8 @@ class Datasource(object):
         if not "generators" in self._datasource_config:
             self._datasource_config["generators"] = {}
         self._datasource_config["generators"][name] = generator.get_config()
-        self._save_config()
+        if self._data_context is not None:
+            self._save_config()
         return generator
 
     def get_generator(self, generator_name="default"):
