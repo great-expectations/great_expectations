@@ -150,6 +150,9 @@ class DataContext(object):
         data_asset_name = self._normalize_data_asset_name(data_asset_name)
         # datasource_name = find(data_asset_name.split("/")[0]
         datasource = self.get_datasource(datasource_name)
+        if not datasource:
+            raise Exception("Can't find datasource {0:s} in the config - please check your great_expectations.yml")
+
         data_asset = datasource.get_data_asset(data_asset_name, batch_kwargs)
         # data_asset._initialize_expectations(self.get_data_asset_config(data_asset_name))
         return data_asset
@@ -190,9 +193,9 @@ class DataContext(object):
             return self._datasources[datasource_name]
         elif datasource_name in self._project_config["datasources"]:
             datasource_config = copy.deepcopy(self._project_config["datasources"][datasource_name])
-        elif len(self._project_config["datasources"]) == 1:
-            datasource_name = list(self._project_config["datasources"])[0]
-            datasource_config = copy.deepcopy(self._project_config["datasources"][datasource_name])
+        # elif len(self._project_config["datasources"]) == 1:
+        #     datasource_name = list(self._project_config["datasources"])[0]
+        #     datasource_config = copy.deepcopy(self._project_config["datasources"][datasource_name])
         else:
             raise ValueError(f"Unable to load datasource %s -- no configuration found or invalid configuration." % datasource_name)
         type_ = datasource_config.pop("type")
