@@ -77,7 +77,3 @@ def _scaffold_directories_and_notebooks(base_dir):
         shutil.copyfile(notebook, os.path.join(
             base_dir, notebook_dir_name, notebook_name))
 
-    os.makedirs(os.path.join(base_dir, notebook_dir_name, "tutorial_data"), exist_ok=True)
-    shutil.copyfile(script_relative_path("../init_notebooks/tutorial_data/Titanic.csv"),
-                    os.path.join(base_dir, notebook_dir_name, "tutorial_data", "Titanic.csv"))
-
