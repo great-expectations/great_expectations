@@ -8,11 +8,12 @@ from great_expectations.data_context import DataContext
 from great_expectations.data_context.datasource.sqlalchemy_source import SqlAlchemyDatasource
 
 
-def test_create_pandas_datasource(data_context, tmpdir):
+def test_create_pandas_datasource(data_context, tmp_path_factory):
+    basedir = tmp_path_factory.mktemp('test_create_pandas_datasource')
     name = "test_pandas_datasource"
     type_ = "pandas"
 
-    data_context.add_datasource(name, type_, base_directory=str(tmpdir))
+    data_context.add_datasource(name, type_, base_directory=str(basedir))
     data_context_config = data_context.get_config()
 
     assert name in data_context_config["datasources"] 
@@ -20,7 +21,7 @@ def test_create_pandas_datasource(data_context, tmpdir):
 
     # We should now see updated configs
     # Finally, we should be able to confirm that the folder structure is as expected
-    with open(os.path.join(data_context.context_root_directory, "great_expectations.yml"), "r") as data_context_config_file:
+    with open(os.path.join(data_context.context_root_directory, "great_expectations/great_expectations.yml"), "r") as data_context_config_file:
         data_context_file_config = yaml.safe_load(data_context_config_file)
 
     assert data_context_file_config["datasources"][name] == data_context_config["datasources"][name]
@@ -44,8 +45,6 @@ def test_create_sqlalchemy_datasource(data_context):
     data_context_config = data_context.get_config()
     assert name in data_context_config["datasources"] 
     assert data_context_config["datasources"][name]["type"] == type_
-    # That should be *all* we store absent a profile
-    assert len(data_context_config["datasources"][name]) == 1
 
     # We should be able to get it in this session even without saving the config
     source = data_context.get_datasource(name)
@@ -56,7 +55,7 @@ def test_create_sqlalchemy_datasource(data_context):
 
     # But we should be able to add a source using a profile
     name = "second_source"
-    data_context.add_datasource(name, type_, profile_name="test_sqlalchemy_datasource")
+    data_context.add_datasource(name, type_, profile="test_sqlalchemy_datasource")
     
     data_context_config = data_context.get_config()
     assert name in data_context_config["datasources"] 
@@ -67,66 +66,27 @@ def test_create_sqlalchemy_datasource(data_context):
     assert isinstance(source, SqlAlchemyDatasource)
 
     # Finally, we should be able to confirm that the folder structure is as expected
-    with open(os.path.join(data_context.context_root_directory, "uncommitted/credentials/profiles.yml"), "r") as profiles_file:
+    with open(os.path.join(data_context.context_root_directory, "great_expectations/uncommitted/credentials/profiles.yml"), "r") as profiles_file:
         profiles = yaml.safe_load(profiles_file)
     
     assert profiles == {
         profile_name: {**connection_kwargs}
     }
 
-def test_create_sparkdf_datasource(data_context, tmpdir):
+def test_create_sparkdf_datasource(data_context, tmp_path_factory):
+    base_dir = tmp_path_factory.mktemp('test_create_sparkdf_datasource')
     name = "test_pandas_datasource"
     type_ = "pandas"
 
-    data_context.add_datasource(name, type_, base_directory=str(tmpdir))
+    data_context.add_datasource(name, type_, base_directory=str(base_dir))
     data_context_config = data_context.get_config()
 
     assert name in data_context_config["datasources"] 
     assert data_context_config["datasources"][name]["type"] == type_ 
 
-
-def test_file_kwargs_genenrator(data_context, tmpdir):
-    # Put a few files in the directory
-    with open(os.path.join(tmpdir, "f1.csv"), "w") as outfile:
-        outfile.writelines(["a\tb\tc\n"])
-    with open(os.path.join(tmpdir, "f2.csv"), "w") as outfile:
-        outfile.writelines(["a\tb\tc\n"])
-
-    os.makedirs(os.path.join(tmpdir, "f3"))
-    with open(os.path.join(tmpdir, "f3", "f3_20190101.csv"), "w") as outfile:
-        outfile.writelines(["a\tb\tc\n"])
-    with open(os.path.join(tmpdir, "f3", "f3_20190102.csv"), "w") as outfile:
-        outfile.writelines(["a\tb\tc\n"])
-
-    datasource = data_context.add_datasource("default", "pandas", base_directory=str(tmpdir))
-    generator = datasource.add_generator("defaut", "filesystem")
-
-    known_data_asset_names = set(generator.list_data_asset_names())
-
-    assert known_data_asset_names == set([
-        "f1", "f2", "f3"
-    ])
-
-    f1_batches = [batch_kwargs for batch_kwargs in generator.yield_batch_kwargs("f1")]
-    assert f1_batches[0] == {
-            "path": os.path.join(tmpdir, "f1.csv")
-        }
-    assert len(f1_batches) == 1
-
-    f3_batches = [batch_kwargs for batch_kwargs in generator.yield_batch_kwargs("f3")]
-    expected_batches = [
-        {
-            "path": os.path.join(tmpdir, "f3", "f3_20190101.csv")
-        },
-        {
-            "path": os.path.join(tmpdir, "f3", "f3_20190102.csv")
-        }
-    ]
-    for batch in expected_batches:
-        assert batch in f3_batches
-    assert len(f3_batches) == 2
-
 def test_sqlalchemysource_templating(sqlitedb_engine):
     datasource = SqlAlchemyDatasource(engine=sqlitedb_engine)
+    generator = datasource.get_generator()
+    generator.add_query("test", "select true;")
     df = datasource.get_data_asset("test")
     assert True
