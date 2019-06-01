@@ -123,7 +123,7 @@ We will add great_expectations directory that will look like that:
         |   └── validations        
         |   └── credentials        
         |   └── samples        
-        ├── .gitignore
+        └── .gitignore
     
 OK to proceed?    
     """
