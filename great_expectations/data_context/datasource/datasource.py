@@ -70,7 +70,7 @@ class Datasource(object):
 
     def add_generator(self, name, type_, **kwargs):
         data_asset_generator_class = self._get_generator_class(type_)
-        generator = data_asset_generator_class(name, type_, self, **kwargs)
+        generator = data_asset_generator_class(name=name, datasource=self, **kwargs)
         self._generators[name] = generator
         if not "generators" in self._datasource_config:
             self._datasource_config["generators"] = {}
@@ -94,7 +94,7 @@ class Datasource(object):
             raise ValueError(f"Unable to load generator %s -- no configuration found or invalid configuration." % generator_name)
         type_ = generator_config.pop("type")
         generator_class = self._get_generator_class(type_)
-        generator = generator_class(generator_name, type_, self, **generator_config)
+        generator = generator_class(name=generator_name, datasource=self, **generator_config)
         self._generators[generator_name] = generator
         return generator
 

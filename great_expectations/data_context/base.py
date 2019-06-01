@@ -156,7 +156,7 @@ class DataContext(object):
 
     def add_datasource(self, name, type_, **kwargs):
         datasource_class = self._get_datasource_class(type_)
-        datasource = datasource_class(name, type_, data_context=self, **kwargs)
+        datasource = datasource_class(name=name, data_context=self, **kwargs)
         self._datasources[name] = datasource
         if not "datasources" in self._project_config:
             self._project_config["datasources"] = {}
@@ -197,7 +197,7 @@ class DataContext(object):
             raise ValueError(f"Unable to load datasource %s -- no configuration found or invalid configuration." % datasource_name)
         type_ = datasource_config.pop("type")
         datasource_class= self._get_datasource_class(type_)
-        datasource = datasource_class(datasource_name, type_, self, **datasource_config)
+        datasource = datasource_class(name=datasource_name, data_context=self, **datasource_config)
         self._datasources[datasource_name] = datasource
         return datasource
             
