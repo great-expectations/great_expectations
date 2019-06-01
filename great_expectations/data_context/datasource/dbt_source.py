@@ -12,8 +12,8 @@ from sqlalchemy import create_engine, MetaData
 class DBTModelGenerator(BatchGenerator):
     """This is a helper class that makes using great expectations with dbt easy!"""
 
-    def __init__(self, name, type_, datasource):
-        super(DBTModelGenerator, self).__init__(name, type_, datasource)
+    def __init__(self, name="default", datasource=None):
+        super(DBTModelGenerator, self).__init__(name, type_="dbt_models", datasource=datasource)
         self.dbt_target_path = datasource.dbt_target_path
 
     def _get_iterator(self, data_asset_name):
@@ -46,20 +46,19 @@ class DBTDatasource(Datasource):
     """
 
     def __init__(self, 
-            name, 
-            type_, 
-            data_context, 
-            profile,         
+            name="default", 
+            data_context=None,
+            generators=None,
+            profile="default",         
             project_filepath="dbt_project.yml",
             profiles_filepath="~/.dbt/profiles.yml",
-            generators=None,
             **kwargs
         ):
         if generators is None:
             generators = {
                 "default": {"type": "dbt_models"}
             }
-        super(DBTDatasource, self).__init__(name, type_, data_context, generators)
+        super(DBTDatasource, self).__init__(name, type_="dbt", data_context=data_context, generators=generators)
         self._datasource_config.update({
             "profile": profile,
             "project_filepath": project_filepath,

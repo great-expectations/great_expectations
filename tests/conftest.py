@@ -1,9 +1,11 @@
 import pytest
 
+import shutil
 import os
 import json
 
 import numpy as np
+import sqlalchemy as sa
 
 import great_expectations as ge
 from .test_utils import get_dataset
@@ -93,3 +95,16 @@ def dataset(request):
         }
     }
     return get_dataset(request.param, data, schemas=schemas)
+
+@pytest.fixture()
+def sqlitedb_engine():
+    return sa.create_engine('sqlite://')
+
+@pytest.fixture()
+def data_context(tmp_path_factory):
+    context_path = tmp_path_factory.mktemp('data_context')
+    asset_config_path = os.path.join(context_path, "great_expectations/expectations")
+    os.makedirs(asset_config_path, exist_ok=True)
+    shutil.copy("./tests/test_fixtures/great_expectations.yml", str(os.path.join(context_path, "great_expectations")))
+    shutil.copy("./tests/test_fixtures/expectations/parameterized_expectations_config_fixture.json", str(asset_config_path))
+    return ge.data_context.DataContext(context_path)
