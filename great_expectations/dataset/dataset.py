@@ -202,10 +202,10 @@ class Dataset(MetaDataset):
         """Returns: int"""
         raise NotImplementedError
 
-    def _initialize_expectations(self, config=None, data_asset_name=None, batch_kwargs=None):
+    def _initialize_expectations(self, config=None, data_asset_name=None):
         """Override data_asset_type with "Dataset"
         """
-        super(Dataset, self)._initialize_expectations(config=config, data_asset_name=data_asset_name, batch_kwargs=batch_kwargs)
+        super(Dataset, self)._initialize_expectations(config=config, data_asset_name=data_asset_name)
         self._expectations_config["data_asset_type"] = "Dataset"
 
     @classmethod
