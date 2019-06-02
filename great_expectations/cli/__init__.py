@@ -149,7 +149,8 @@ it will walk you through next steps.
     """
 
     msg_prompt_filesys_enter_base_path = """
-Enter full path of the root directory where the data files are stored        
+Enter the path of the root directory where the data files are stored 
+(the path may be either absolute or relative to current directory)          
     """
 
     msg_filesys_go_to_notebook = """
