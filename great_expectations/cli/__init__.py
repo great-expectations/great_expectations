@@ -123,7 +123,7 @@ We will add great_expectations directory that will look like that:
         |   └── validations        
         |   └── credentials        
         |   └── samples        
-        ├── .gitignore
+        └── .gitignore
     
 OK to proceed?    
     """
@@ -153,9 +153,15 @@ Enter full path of the root directory where the data files are stored
     """
 
     msg_filesys_go_to_notebook = """
-To create expectations for your CSV files start Jupyter and open notebook
-great_expectations/notebooks/using_great_expectations_with_pandas.ipynb - 
+To create expectations for your CSV files start Jupyter and open the notebook
+great_expectations/notebooks/using_great_expectations_with_pandas.ipynb.
 it will walk you through configuring the database connection and next steps. 
+
+To launch with jupyter notebooks:
+    jupyter notebook great_expectations/notebooks/create_expectations_for_csv_files.ipynb
+
+To launch with jupyter lab: 
+    jupyter lab great_expectations/notebooks/create_expectations_for_csv_files.ipynb
     """
 
     msg_prompt_datasource_name = """
