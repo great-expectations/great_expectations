@@ -101,6 +101,13 @@ def sqlitedb_engine():
     return sa.create_engine('sqlite://')
 
 @pytest.fixture()
+def empty_data_context(tmp_path_factory):
+    context_path = tmp_path_factory.mktemp('empty_data_context')
+    asset_config_path = os.path.join(context_path, "great_expectations/expectations")
+    os.makedirs(asset_config_path, exist_ok=True)
+    return ge.data_context.DataContext(context_path)
+
+@pytest.fixture()
 def data_context(tmp_path_factory):
     context_path = tmp_path_factory.mktemp('data_context')
     asset_config_path = os.path.join(context_path, "great_expectations/expectations")
