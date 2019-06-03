@@ -277,7 +277,11 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
     # case is that we want the former, but also want to re-initialize these values to None so we don't
     # get an attribute error when trying to access them (I think this could be done in __finalize__?)
     _internal_names = pd.DataFrame._internal_names + [
+        '_batch_kwargs',
+        '_expectations_config',
         'caching',
+        'default_expectation_args',
+        'discard_subset_failing_expectations'
     ]
     _internal_names_set = set(_internal_names)
 
