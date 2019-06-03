@@ -93,15 +93,7 @@ def assertDeepAlmostEqual(expected, actual, *args, **kwargs):
 
 
 def get_dataset(dataset_type, data, schemas=None, autoinspect_func=autoinspect.columns_exist, caching=False):
-    """For Pandas, data should be either a DataFrame or a dictionary that can
-    be instantiated as a DataFrame.
-    For SQL, data should have the following shape:
-        {
-            'table':
-                'table': SqlAlchemy Table object
-                named_column: [list of values]
-        }
-
+    """Utility to create datasets for json-formatted tests.
     """
     if dataset_type == 'PandasDataset':
         df = pd.DataFrame(data)
@@ -186,7 +178,7 @@ def get_dataset(dataset_type, data, schemas=None, autoinspect_func=autoinspect.c
             # if no schema provided, uses Spark's schema inference
             columns = list(data.keys())
             spark_df = spark.createDataFrame(data_reshaped, columns)
-        return SparkDFDataset(spark_df, caching=caching)
+        return SparkDFDataset(spark_df, autoinspect_func=autoinspect_func, caching=caching)
 
     else:
         raise ValueError("Unknown dataset_type " + str(dataset_type))

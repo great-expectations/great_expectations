@@ -1,7 +1,20 @@
+import os
+
 import pandas as pd
 import json
+import logging
+import uuid
+import datetime
+import requests
 
 import great_expectations.dataset as dataset
+
+logger = logging.getLogger(__name__)
+
+
+#####
+from urllib.parse import urlparse
+####
 
 
 def _convert_to_dataset_class(df, dataset_class, expectations_config=None, autoinspect_func=None):
@@ -10,17 +23,19 @@ def _convert_to_dataset_class(df, dataset_class, expectations_config=None, autoi
     """
     if expectations_config is not None:
         # Cast the dataframe into the new class, and manually initialize expectations according to the provided configuration
-        df = dataset_class(df)
-        df._initialize_expectations(expectations_config)
+        new_df = dataset_class.from_dataset(df)
+        new_df._initialize_expectations(expectations_config)
     else:
         # Instantiate the new Dataset with default expectations
         try:
-            df = dataset_class(df, autoinspect_func=autoinspect_func)
+            new_df = dataset_class.from_dataset(df)
         except:
             raise NotImplementedError(
                 "read_csv requires a Dataset class that can be instantiated from a Pandas DataFrame")
+        if autoinspect_func is not None:
+            new_df.autoinspect(autoinspect_func)
 
-    return df
+    return new_df
 
 
 def read_csv(
@@ -158,13 +173,122 @@ def from_pandas(pandas_df,
     )
 
 
-def validate(df, expectations_config, *args, **kwargs):
-    # FIXME: I'm not sure that this should always default to PandasDataset
-    dataset_ = _convert_to_dataset_class(df,
-                                         dataset.pandas_dataset.PandasDataset,
-                                         expectations_config
-                                         )
-    return dataset_.validate(*args, **kwargs)
+def validate(data_asset, expectations_config, data_asset_type=None, *args, **kwargs):
+    """Validate the provided data asset using the provided config"""
+
+    # If the object is already a Dataset type, then this is purely a convenience method
+    # and no conversion is needed
+    if isinstance(data_asset, dataset.Dataset) and data_asset_type is None:
+        return data_asset.validate(expectations_config=expectations_config, *args, **kwargs)
+    elif data_asset_type is None:
+        # Guess the GE data_asset_type based on the type of the data_asset
+        if isinstance(data_asset, pd.DataFrame):
+            data_asset_type = dataset.PandasDataset
+        # Add other data_asset_type conditions here as needed
+
+    # Otherwise, we will convert for the user to a subclass of the
+    # existing class to enable new expectations, but only for datasets
+    if not isinstance(data_asset, (dataset.Dataset, pd.DataFrame)):
+        raise ValueError("The validate util method only supports dataset validations, including custom subclasses. For other data asset types, use the object's own validate method.")
+
+    if not issubclass(type(data_asset), data_asset_type):
+        if isinstance(data_asset, (pd.DataFrame)) and issubclass(data_asset_type, dataset.PandasDataset):
+            pass # This is a special type of allowed coercion
+        else:
+            raise ValueError("The validate util method only supports validation for subtypes of the provided data_asset_type.")
+
+    data_asset_ = _convert_to_dataset_class(data_asset, data_asset_type, expectations_config)
+    return data_asset_.validate(*args, **kwargs)
+
+
+def build_slack_notification_request(validation_json=None):
+    # Defaults
+    timestamp = datetime.datetime.strftime(datetime.datetime.now(), "%x %X")
+    status = "Failed :x:"
+    run_id = None
+    data_asset_name = "no_name_provided_" + str(uuid.uuid4())
+    title_block = {
+               "type": "section",
+               "text": {
+                   "type": "mrkdwn",
+                   "text": "No validation occurred. Please ensure you passed a validation_json.",
+               },
+           }
+
+    query = {"blocks": [title_block]}
+
+    if validation_json:
+        if "meta" in validation_json and "data_asset_name" in validation_json["meta"]:
+            data_asset_name = validation_json["meta"]["data_asset_name"]
+
+        n_checks_succeeded = validation_json["statistics"]["successful_expectations"]
+        n_checks = validation_json["statistics"]["evaluated_expectations"]
+        run_id = validation_json["meta"].get("run_id", None)
+        check_details_text = "{} of {} expectations were met\n\n".format(n_checks_succeeded, n_checks)
+
+        if validation_json["success"]:
+            status = "Success :tada:"
+
+        query["blocks"][0]["text"]["text"] = "*Validated dataset:* `{}`\n*Status: {}*\n{}".format(data_asset_name, status, check_details_text)
+
+        if "result_reference" in validation_json["meta"]:
+            report_element = {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "- *Validation Report*: {}".format(validation_json["meta"]["result_reference"])},
+            }
+            query["blocks"].append(report_element)
+
+        if "dataset_reference" in validation_json["meta"]:
+            dataset_element = {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "- *Validation Dataset*: {}".format(validation_json["meta"]["dataset_reference"])
+                },
+            }
+            query["blocks"].append(dataset_element)
+
+    footer_section = {
+        "type": "context",
+        "elements": [
+            {
+                "type": "mrkdwn",
+                "text": "Great Expectations run id {} ran at {}".format(run_id, timestamp),
+            }
+        ],
+    }
+    query["blocks"].append(footer_section)
+    return query
+
+
+def get_slack_callback(webhook):
+    def send_slack_notification(validation_json=None):
+        """
+            Post a slack notification.
+        """
+        session = requests.Session()
+        query = build_slack_notification_request(validation_json)
+
+        try:
+            response = session.post(url=webhook, json=query)
+        except requests.ConnectionError:
+            logger.warning(
+                'Failed to connect to Slack webhook at {url} '
+                'after {max_retries} retries.'.format(
+                    url=webhook, max_retries=10))
+        except Exception as e:
+            logger.error(str(e))
+        else:
+            if response.status_code != 200:
+                logger.warning(
+                    'Request to Slack webhook at {url} '
+                    'returned error {status_code}: {text}'.format(
+                        url=webhook,
+                        status_code=response.status_code,
+                        text=response.text))
+    return send_slack_notification
 
 
 class DotDict(dict):
@@ -177,3 +301,20 @@ class DotDict(dict):
 
     def __dir__(self):
         return self.keys()
+
+
+def script_relative_path(file_path):
+    '''
+    Useful for testing with local files. Use a path relative to where the
+    test resides and this function will return the absolute path
+    of that file. Otherwise it will be relative to script that
+    ran the test
+
+    Note this is expensive performance wise so if you are calling this many
+    times you may want to call it once and cache the base dir.
+    '''
+    # from http://bit.ly/2snyC6s
+
+    import inspect
+    scriptdir = inspect.stack()[1][1]
+    return os.path.join(os.path.dirname(os.path.abspath(scriptdir)), file_path)
