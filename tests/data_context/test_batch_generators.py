@@ -7,9 +7,9 @@ def test_file_kwargs_generator(data_context, filesystem_csv):
 
     datasource = data_context.add_datasource("default", "pandas", base_directory=str(base_dir))
     generator = datasource.get_generator("default")
-    known_data_asset_names = set(datasource.list_available_data_asset_names())
+    known_data_asset_names = datasource.list_available_data_asset_names()
 
-    assert known_data_asset_names == set([
+    assert known_data_asset_names[0]["available_data_asset_names"] == set([
         "f1", "f2", "f3"
     ])
 

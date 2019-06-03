@@ -78,7 +78,7 @@ class QueryGenerator(BatchGenerator):
         else:
             tables = []
 
-        return defined_queries + tables
+        return set(defined_queries + tables)
 
 class SqlAlchemyDatasource(Datasource):
     """

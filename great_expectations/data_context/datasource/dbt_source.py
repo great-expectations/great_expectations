@@ -38,7 +38,7 @@ class DBTModelGenerator(BatchGenerator):
             )
 
     def list_available_data_asset_names(self):
-        return [path for path in os.walk(self.dbt_target_path) if path.endswith(".sql")]
+        return set([path for path in os.walk(self.dbt_target_path) if path.endswith(".sql")])
 
 
 class DBTDatasource(Datasource):
