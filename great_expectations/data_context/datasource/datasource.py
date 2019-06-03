@@ -7,6 +7,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 yaml = YAML()
+yaml.default_flow_style = False
 
 class Datasource(object):
 
