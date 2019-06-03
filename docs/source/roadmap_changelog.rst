@@ -9,6 +9,10 @@ Planned Features
 * Improved variable typing
 * Support for non-tabular datasources (e.g. JSON, XML, AVRO)
 
+v.0.6.1__develop
+________________
+
+
 
 v.0.6.1
 ________________
