@@ -4,6 +4,7 @@ import os
 import json
 import glob
 import logging
+from collections import OrderedDict
 
 from sqlalchemy.dialects.sqlite import dialect as sqliteDialect
 from sqlalchemy.dialects.postgresql import dialect as postgresqlDialect
@@ -28,7 +29,8 @@ def pytest_generate_tests(metafunc):
         for c in CONTEXTS:
             for filename in test_configuration_files:
                 file = open(filename)
-                test_configuration = json.load(file)
+                # Use OrderedDict so that python2 will use the correct order of columns in all cases
+                test_configuration = json.load(file, object_pairs_hook=OrderedDict)
 
                 if candidate_test_is_on_temporary_notimplemented_list(c, test_configuration["expectation_type"]):
                     logger.debug("Skipping generation of tests for expectation " + test_configuration["expectation_type"] +
