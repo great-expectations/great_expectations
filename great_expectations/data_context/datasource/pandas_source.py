@@ -7,6 +7,8 @@ from .datasource import Datasource
 from .filesystem_path_generator import FilesystemPathGenerator
 from ...dataset.pandas_dataset import PandasDataset
 
+from ...exceptions import BatchKwargsError
+
 class PandasCSVDatasource(Datasource):
     """
     A PandasDataSource makes it easy to create, manage and validate expectations on
@@ -37,7 +39,11 @@ class PandasCSVDatasource(Datasource):
             raise ValueError("Unrecognized BatchGenerator type %s" % type_)
 
     def _get_data_asset(self, data_asset_name, batch_kwargs, expectations_config, **kwargs):
-        full_path = os.path.join(batch_kwargs["path"])
+        try:
+            full_path = os.path.join(batch_kwargs["path"])
+        except KeyError:
+            raise BatchKwargsError("Invalid batch_kwargs: path is required for a PandasCSVDatasource", batch_kwargs)
+
         df = pd.read_csv(full_path, **self._datasource_config["read_csv_kwargs"], **kwargs)
         
         return PandasDataset(df, 

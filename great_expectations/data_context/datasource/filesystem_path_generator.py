@@ -40,7 +40,7 @@ class FilesystemPathGenerator(BatchGenerator):
                 }
                 ])
         else:
-            return iter([{}])
+            raise FileNotFoundError(os.path.join(self._base_directory, data_asset_name))
 
     def _build_batch_kwargs_path_iter(self, path_iter):
         try:
