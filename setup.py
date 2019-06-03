@@ -27,7 +27,7 @@ config = {
     },
     'packages': find_packages(exclude=['docs', 'tests', 'examples']),
     'entry_points': {
-        'console_scripts': ['great_expectations=great_expectations.cli:main']
+        'console_scripts': ['great_expectations=great_expectations.cli.cli:main']
     },
     'name': 'great_expectations',
     'long_description': long_description,
