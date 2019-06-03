@@ -33,9 +33,15 @@ To get more done with data, faster. Teams use great_expectations to
 How do I get started?
 --------------------------------------------------------------------------------
 
-It's easy! Just use pip install:
+It's easy! 
+    First use pip install:
 
-    $ pip install great_expectations
+        $ pip install great_expectations
+
+    Then run this command in the root directory of the project you want to try Great Expectations on:
+
+        $ great_expectations init
+    
 
 You can also clone the repository, which includes examples of using great_expectations.
 
