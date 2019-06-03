@@ -11,3 +11,4 @@ class ExpectationsConfigNotFoundError(GreatExpectationsError):
 class BatchKwargsError(GreatExpectationsError):
     def __init__(self, message, batch_kwargs):
         self.message = message
+        self.batch_kwargs = batch_kwargs
