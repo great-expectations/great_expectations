@@ -82,8 +82,21 @@ def parameterized_config_data_context(tmpdir_factory):
 #         get_data_context('what_a_ridiculous_name', None)
 #         assert "Unknown data context." in str(err)
 
-def test_list_data_asset_configs(parameterized_config_data_context):
-    assert parameterized_config_data_context.list_data_asset_configs() == ['parameterized_expectations_config_fixture']
+def test_list_available_data_asset_names(empty_data_context, filesystem_csv):
+    empty_data_context.add_datasource("my_datasource", "pandas", base_directory= str(filesystem_csv))
+    available_asset_names = empty_data_context.list_available_data_asset_names() 
+
+    assert available_asset_names == [{
+        "datasource": "my_datasource",
+        "available_data_asset_names": [{
+            "generator": "default",
+            "available_data_asset_names": set(["f1", "f2", "f3"])
+        }]
+    }]
+    # assert data_context.list_available_data_asset_names() == ['parameterized_expectations_config_fixture']
+
+def test_list_expectations_configs(data_context):
+    assert data_context.list_expectations_configs() == ['parameterized_expectations_config_fixture']
 
 def test_get_existing_data_asset_config(parameterized_config_data_context):
     data_asset_config = parameterized_config_data_context.get_data_asset_config('parameterized_expectations_config_fixture')
@@ -228,4 +241,32 @@ def test_normalize_data_asset_names(tmpdir):
 
     context = DataContext(context_dir)
 
-    assert context._normalize_data_asset_name("data_asset_1") == "ds1/gen1/data_asset_1"
+    # assert context._normalize_data_asset_name("data_asset_1") == "ds1/gen1/data_asset_1"
+    # NOTE: NORMALIZATION IS CURRENTLY A NO-OP
+    assert context._normalize_data_asset_name("data_asset_1") == "data_asset_1"
+
+
+def test_list_datasources(data_context):
+    datasources = data_context.list_datasources()
+
+    assert datasources == [
+        {
+            "name": "default",
+            "type": "pandas"
+        }
+    ]
+
+    data_context.add_datasource("second_pandas_source", "pandas")
+
+    datasources = data_context.list_datasources()
+
+    assert datasources == [
+        {
+            "name": "default",
+            "type": "pandas"
+        },
+        {
+            "name": "second_pandas_source",
+            "type": "pandas"
+        }
+    ]

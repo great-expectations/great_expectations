@@ -5,6 +5,7 @@ from ruamel.yaml import YAML
 import sys
 import copy
 from glob import glob
+from six import string_types
 
 from great_expectations.exceptions import ExpectationsConfigNotFoundError
 from great_expectations.version import __version__
@@ -142,9 +143,30 @@ class DataContext(object):
         
         return datasource_config
 
-    def list_data_asset_names(self, datasource_name=None, generator_name=None):
-        datasource = self.get_datasource(datasource_name)
-        return datasource.list_data_asset_names(generator_name)
+    def list_available_data_asset_names(self, datasource_names=None, generator_names=None):
+        data_asset_names = []
+        if datasource_names is None:
+            datasource_names = [datasource["name"] for datasource in self.list_datasources()]
+        elif isinstance(datasource_names, string_types):
+            datasource_names = [datasource_names]
+        elif not isinstance(datasource_names, list):
+            raise ValueError("Datasource names must be a datasource name, list of datasource anmes or None (to list all datasources)")
+        
+        if generator_names is not None:
+            if isinstance(generator_names, string_types):
+                generator_names = [generator_names]
+            if len(generator_names) != len(datasource_names):
+                raise ValueError("If providing generators, you must specify one generator for each datasource.")
+
+        for idx, datasource_name in enumerate(datasource_names):
+            datasource = self.get_datasource(datasource_name)
+            data_asset_names.append(
+                {
+                    "datasource": datasource_name,
+                    "available_data_asset_names": datasource.list_available_data_asset_names(generator_names[idx] if generator_names is not None else None) 
+                }
+            )
+        return data_asset_names
 
     def get_data_asset(self, datasource_name, data_asset_name, batch_kwargs=None, **kwargs):
         data_asset_name = self._normalize_data_asset_name(data_asset_name)
@@ -267,6 +289,9 @@ class DataContext(object):
         root_path = self.expectations_directory
         result = [os.path.splitext(os.path.relpath(y, root_path))[0] for x in os.walk(root_path) for y in glob(os.path.join(x[0], '*.json'))]
         return result
+
+    def list_datasources(self):
+        return [{"name": key, "type": value["type"]} for key, value in self._project_config["datasources"].items()]
 
     def _normalize_data_asset_name(self, data_asset_name, batch_kwargs=None):
         configs = self.list_expectations_configs()

@@ -12,14 +12,14 @@ class FilesystemPathGenerator(BatchGenerator):
         super(FilesystemPathGenerator, self).__init__(name, type_="filesystem", datasource=datasource)
         self._base_directory = base_directory
 
-    def list_data_asset_names(self):
-        known_assets = []
+    def list_available_data_asset_names(self):
+        known_assets = set()
         file_options = os.listdir(self._get_current_base_directory())
         for file_option in file_options:
             if file_option.endswith(".csv"):
-                known_assets.append(file_option[:-4])
+                known_assets.add(file_option[:-4])
             else:
-                known_assets.append(file_option)
+                known_assets.add(file_option)
         return known_assets
 
     def _get_iterator(self, data_asset_name):
@@ -54,7 +54,7 @@ class FilesystemPathGenerator(BatchGenerator):
     # If base directory is a relative path, interpret it as relative to the data context's
     # context root directory (parent directory of great_expectation dir)
     def _get_current_base_directory(self):
-        if os.path.isabs(self._base_directory):
+        if os.path.isabs(self._base_directory) or self._datasource.get_data_context() is None:
             return self._base_directory
         else:
             return os.path.join(self._datasource.get_data_context().get_context_root_directory(), self._base_directory)

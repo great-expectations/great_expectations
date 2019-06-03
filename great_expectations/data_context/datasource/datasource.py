@@ -1,6 +1,7 @@
 import os
 from ruamel.yaml import YAML
 import copy
+from six import string_types
 
 import logging
 
@@ -109,6 +110,9 @@ class Datasource(object):
         self._generators[generator_name] = generator
         return generator
 
+    def list_generators(self):
+        return [{"name": key, "type": value["type"]} for key, value in self._datasource_config["generators"].items()]
+
     def get_data_asset(self, data_asset_name, batch_kwargs=None, **kwargs):
         if batch_kwargs is None:
             generator = self.get_generator()
@@ -131,9 +135,22 @@ class Datasource(object):
     def _get_generator_class(self, type_):
         raise NotImplementedError
 
-    def list_data_asset_names(self, generator_name=None):
-        generator = self.get_generator(generator_name)
-        return generator.list_data_asset_names()
+    def list_available_data_asset_names(self, generator_names=None):
+        available_data_asset_names = []
+        if generator_names is None:
+            generator_names = [generator["name"] for generator in self.list_generators()]
+        elif isinstance(generator_names, string_types):
+            generator_names = [generator_names]
+
+        for generator_name in generator_names:
+            generator = self.get_generator(generator_name)
+            available_data_asset_names.append(
+                {
+                    "generator": generator_name,
+                    "available_data_asset_names": generator.list_available_data_asset_names()
+                }
+            )
+        return available_data_asset_names
 
     def build_batch_kwargs(self, **kwargs):
         raise NotImplementedError

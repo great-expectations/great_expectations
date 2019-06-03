@@ -37,8 +37,8 @@ class DBTModelGenerator(BatchGenerator):
                 "dbt model %s was not found in the compiled directory. Please run `dbt compile` or `dbt run` and try again. Or, check the directory." % data_asset_name
             )
 
-    def list_data_asset_names(self):
-        return [path for path in os.walk(self.dbt_target_path) if path.endswith(".sql")]
+    def list_available_data_asset_names(self):
+        return set([path for path in os.walk(self.dbt_target_path) if path.endswith(".sql")])
 
 
 class DBTDatasource(Datasource):
