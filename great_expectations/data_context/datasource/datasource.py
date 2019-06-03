@@ -1,10 +1,11 @@
 import os
-import yaml
+from ruamel.yaml import YAML
 import copy
 
 import logging
 
 logger = logging.getLogger(__name__)
+yaml = YAML()
 
 class Datasource(object):
 
@@ -37,7 +38,7 @@ class Datasource(object):
         try:
             config_path = os.path.join(self._data_context.context_root_directory, "great_expectations/datasources", self._name, "config.yml")
             with open(config_path, "r") as data:
-                extra_config = yaml.safe_load(data) or {}
+                extra_config = yaml.load(data) or {}
             logger.info("Loading config from %s" % str(config_path))
             return extra_config
         except FileNotFoundError:
@@ -66,7 +67,7 @@ class Datasource(object):
 
         os.makedirs(os.path.dirname(config_filepath), exist_ok=True)
         with open(config_filepath, "w") as data_file:
-                yaml.safe_dump(self._datasource_config, data_file)
+                yaml.dump(self._datasource_config, data_file)
 
     def add_generator(self, name, type_, **kwargs):
         data_asset_generator_class = self._get_generator_class(type_)
