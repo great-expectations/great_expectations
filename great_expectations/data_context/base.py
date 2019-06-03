@@ -1,7 +1,7 @@
 import os
 import json
 import logging
-import yaml
+from ruamel.yaml import YAML
 import sys
 import copy
 from glob import glob
@@ -23,7 +23,7 @@ from .expectation_explorer import ExpectationExplorer
 
 logger = logging.getLogger(__name__)
 debug_view = widgets.Output(layout={'border': '3 px solid pink'})
-
+yaml = YAML()
 
 class DataContext(object):
     #TODO: update class documentation
@@ -75,19 +75,19 @@ class DataContext(object):
         # TODO: What if the project config file does not exist?
         # TODO: Should we merge the project config file with the global config file?
         try:
-            with open(os.path.join(self.context_root_directory, "great_expectations", "great_expectations.yml"), "r") as data:
-                return yaml.safe_load(data) or {}
+            with open(os.path.join(self.context_root_directory, "great_expectations/great_expectations.yml"), "r") as data:
+                return yaml.load(data)
         except FileNotFoundError:
             return {}
 
     def _save_project_config(self):
-        with open(os.path.join(self.context_root_directory, "great_expectations", "great_expectations.yml"), "w") as data:
-            yaml.safe_dump(self._project_config, data)
+        with open(os.path.join(self.context_root_directory, "great_expectations/great_expectations.yml"), "w") as data:
+            yaml.dump(self._project_config, data)
 
     def _get_all_profile_credentials(self):
         try:
             with open(os.path.join(self.context_root_directory, "great_expectations/uncommitted/credentials/profiles.yml"), "r") as profiles_file:
-                return yaml.safe_load(profiles_file) or {}
+                return yaml.load(profiles_file) or {}
         except FileNotFoundError:
             logger.warning("No profile credential store found.")
             return {}
@@ -105,7 +105,7 @@ class DataContext(object):
         profiles_filepath = os.path.join(self.context_root_directory, "great_expectations/uncommitted/credentials/profiles.yml")
         os.makedirs(os.path.dirname(profiles_filepath), exist_ok=True)
         with open(profiles_filepath, "w") as profiles_file:
-            yaml.safe_dump(profiles, profiles_file)
+            yaml.dump(profiles, profiles_file)
 
     def get_datasource_config(self, datasource_name):
         """We allow a datasource to be defined in any combination of the following two ways:
@@ -127,7 +127,7 @@ class DataContext(object):
         
         try:
             with open(default_config_path, "r") as config_file:
-                default_path_datasource_config = yaml.safe_load(config_file) or {}
+                default_path_datasource_config = yaml.load(config_file) or {}
             datasource_config.update(default_path_datasource_config)
         except FileNotFoundError:
             logger.debug("No config file found in default location for datasource %s" % datasource_name)
@@ -135,7 +135,7 @@ class DataContext(object):
         if defined_config_path is not None:
             try:
                 with open(defined_config_path, "r") as config_file:
-                    defined_path_datasource_config = yaml.safe_load(config_file) or {}
+                    defined_path_datasource_config = yaml.load(config_file) or {}
                 datasource_config.update(defined_path_datasource_config)
             except FileNotFoundError:
                 logger.warning("No config file found in user-defined location for datasource %s" % datasource_name)

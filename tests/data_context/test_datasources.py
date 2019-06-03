@@ -1,8 +1,9 @@
 import pytest
 
+from ruamel.yaml import YAML
+yaml = YAML(typ='safe')
 import os
 import shutil
-import yaml
 
 from great_expectations.data_context import DataContext
 from great_expectations.data_context.datasource.sqlalchemy_source import SqlAlchemyDatasource
@@ -22,7 +23,7 @@ def test_create_pandas_datasource(data_context, tmp_path_factory):
     # We should now see updated configs
     # Finally, we should be able to confirm that the folder structure is as expected
     with open(os.path.join(data_context.context_root_directory, "great_expectations/great_expectations.yml"), "r") as data_context_config_file:
-        data_context_file_config = yaml.safe_load(data_context_config_file)
+        data_context_file_config = yaml.load(data_context_config_file)
 
     assert data_context_file_config["datasources"][name] == data_context_config["datasources"][name]
 
@@ -67,7 +68,7 @@ def test_create_sqlalchemy_datasource(data_context):
 
     # Finally, we should be able to confirm that the folder structure is as expected
     with open(os.path.join(data_context.context_root_directory, "great_expectations/uncommitted/credentials/profiles.yml"), "r") as profiles_file:
-        profiles = yaml.safe_load(profiles_file)
+        profiles = yaml.load(profiles_file)
     
     assert profiles == {
         profile_name: {**connection_kwargs}
