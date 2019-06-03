@@ -184,7 +184,7 @@ def get_dataset(dataset_type, data, schemas=None, autoinspect_func=autoinspect.c
             spark_df = spark.createDataFrame(data_reshaped, spark_schema)
         else:
             # if no schema provided, uses Spark's schema inference
-            columns = list(data.keys()) # do we need to care about the order here?
+            columns = list(data.keys())
             spark_df = spark.createDataFrame(data_reshaped, columns)
         return SparkDFDataset(spark_df, caching=caching)
 

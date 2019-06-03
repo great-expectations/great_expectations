@@ -1,17 +1,36 @@
 language: python
 os:
   - linux
-python:
-  - "3.6"
-env:
-  - PANDAS=0.22.0
-  - PANDAS=0.23.4
-  - PANDAS=latest
-jdk:
-  - openjdk8
+matrix:
+  include:
+  - dist: trusty
+    python: 2.7
+    env: PANDAS=0.22.0
+  - dist: trusty
+    python: 2.7
+    env: PANDAS=0.23.4
+  - dist: trusty
+    python: 2.7
+    env: PANDAS=latest
+  - dist: trusty
+    python: 3.6
+    env: PANDAS=0.22.0
+  - dist: trusty
+    python: 3.6
+    env: PANDAS=0.23.4
+  - dist: trusty
+    python: 3.6
+    env: PANDAS=latest
+  # - dist: xenial
+  #   python: 3.7
+  #   env: PANDAS=0.23.4
+  # - dist: xenial
+  #   python: 3.7
+  #   env: PANDAS=latest
 services:
   - postgresql
 install:
+  # - ./travis-java.sh
   - pip install --only-binary=numpy,scipy numpy scipy
   - if [ "$PANDAS" = "latest" ]; then pip install pandas; else pip install pandas==$PANDAS; fi
   - pip install -r requirements-dev.txt
