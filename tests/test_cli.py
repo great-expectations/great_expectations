@@ -145,24 +145,6 @@ def test_cli_evaluation_parameters(capsys):
     json_result = json.loads(out)
     assert json_result['evaluation_parameters'] == expected_evaluation_parameters
 
-
-def test_cli_evaluation_parameters(capsys):
-    with pytest.warns(UserWarning, match="No great_expectations version found in configuration object."):
-        great_expectations.cli.dispatch(["validate",
-                                         "./tests/test_sets/Titanic.csv",
-                                         "./tests/test_sets/titanic_parameterized_expectations.json",
-                                         "--evaluation_parameters",
-                                         "./tests/test_sets/titanic_evaluation_parameters.json",
-                                         "-f", "True"])
-
-    out, err = capsys.readouterr()
-    with open('./tests/test_sets/titanic_evaluation_parameters.json', 'r') as f:
-        expected_evaluation_parameters = json.load(f)
-
-    json_result = json.loads(out)
-    assert json_result['evaluation_parameters'] == expected_evaluation_parameters
-
-
 def test_cli_init(capsys):
 
     # input_args and monkeypatched_prompt_* functions are required to mock up input through the CLI.
