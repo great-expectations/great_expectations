@@ -25,6 +25,7 @@ from .expectation_explorer import ExpectationExplorer
 logger = logging.getLogger(__name__)
 debug_view = widgets.Output(layout={'border': '3 px solid pink'})
 yaml = YAML()
+yaml.default_flow_style = False
 
 class DataContext(object):
     #TODO: update class documentation
@@ -79,7 +80,10 @@ class DataContext(object):
             with open(os.path.join(self.context_root_directory, "great_expectations/great_expectations.yml"), "r") as data:
                 return yaml.load(data)
         except FileNotFoundError:
-            return {}
+            base_config = yaml.load("{}")
+            # add comments the first a data context is created
+            base_config.yaml_set_start_comment(PROJECT_HELP_COMMENT)
+            return base_config
 
     def _save_project_config(self):
         with open(os.path.join(self.context_root_directory, "great_expectations/great_expectations.yml"), "w") as data:
@@ -163,7 +167,7 @@ class DataContext(object):
             data_asset_names.append(
                 {
                     "datasource": datasource_name,
-                    "available_data_asset_names": datasource.list_available_data_asset_names(generator_names[idx] if generator_names is not None else None) 
+                    "generators": datasource.list_available_data_asset_names(generator_names[idx] if generator_names is not None else None) 
                 }
             )
         return data_asset_names
@@ -556,3 +560,13 @@ class DataContext(object):
             return self._expectation_explorer_manager.create_expectation_widget(data_asset, return_obj)
         else:
             return return_obj
+
+
+
+
+PROJECT_HELP_COMMENT="""Welcome to great expectations. This project configuration file allows you to define datasources, generators,
+integrations, and other configuration artifacts that make it easier to use Great Expectations.
+
+For more help configuring great expectations, see the documentation at: https://greatexpectations.io/config_file.html
+
+"""
