@@ -172,9 +172,20 @@ Time to create expectations for your data. This is done in Jupyter Notebook/Jupy
 Before we point you to the right notebook, what data does your project work with?    
     1. Directory on local filesystem
     2. Relational database (SQL)
-    3. DBT (data build tool) models
+    3. Spark DataFrames
     4. None of the above
     """
+
+#     msg_prompt_choose_data_source = """
+# Time to create expectations for your data. This is done in Jupyter Notebook/Jupyter Lab. 
+# 
+# Before we point you to the right notebook, what data does your project work with?    
+#     1. Directory on local filesystem
+#     2. Relational database (SQL)
+#     3. DBT (data build tool) models
+#     4. None of the above
+#     """
+
 
     msg_prompt_dbt_choose_profile = """
 Please specify the name of the dbt profile (from your ~/.dbt/profiles.yml file Great Expectations should use to connect to the database    
@@ -263,10 +274,19 @@ it will walk you through configuring the database connection and next steps.
 
     print(data_source_selection)
 
-    if data_source_selection == "3": # dbt
-        dbt_profile = click.prompt(msg_prompt_dbt_choose_profile)
-        cli_message(msg_dbt_go_to_notebook, color="blue")
-        context.add_datasource("dbt", "dbt", profile=dbt_profile)
+    # if data_source_selection == "5": # dbt
+    #     dbt_profile = click.prompt(msg_prompt_dbt_choose_profile)
+    #     log_message(msg_dbt_go_to_notebook, color="blue")
+    #     context.add_datasource("dbt", "dbt", profile=dbt_profile)
+    if data_source_selection == "3": # Spark
+        path = click.prompt(msg_prompt_filesys_enter_base_path, default='/data/', type=click.Path(exists=True, file_okay=False, dir_okay=True, readable=True), show_default=True)
+
+        default_data_source_name = os.path.basename(path)
+        data_source_name = click.prompt(msg_prompt_datasource_name, default=default_data_source_name, show_default=True)
+
+        log_message(msg_filesys_go_to_notebook, color="blue")
+        context.add_datasource(data_source_name, "spark", base_directory=path)
+
 
     elif data_source_selection == "2": #sqlalchemy
         data_source_name = click.prompt(msg_prompt_datasource_name, default="mydb", show_default=True)
