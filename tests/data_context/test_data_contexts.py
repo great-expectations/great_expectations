@@ -2,6 +2,7 @@ import pytest
 
 import os
 import shutil
+import json
 
 import sqlalchemy as sa
 import pandas as pd
@@ -68,10 +69,10 @@ def parameterized_expectations_config():
 def parameterized_config_data_context(tmpdir_factory):
     # TODO: harmonize with Eugene's approach to testing data context so we have a single fixture
     context_path = tmpdir_factory.mktemp("empty_context_dir")
-    asset_config_path = os.path.join(context_path, "great_expectations/data_asset_configurations")
+    asset_config_path = os.path.join(context_path, "great_expectations/expectations")
     os.makedirs(asset_config_path, exist_ok=True)
-    shutil.copy("./tests/test_fixtures/.great_expectations.yml", str(context_path))
-    shutil.copy("./tests/test_fixtures/data_asset_configurations/parameterized_expectations_config_fixture.json",str(asset_config_path))
+    shutil.copy("./tests/test_fixtures/great_expectations_basic.yml", str(context_path))
+    shutil.copy("./tests/test_fixtures/expectations/parameterized_expectations_config_fixture.json",str(asset_config_path))
     return DataContext(context_path)
 
 
@@ -217,3 +218,14 @@ def test_compile(parameterized_config_data_context):
             }
         }
     }
+
+def test_normalize_data_asset_names(tmpdir):
+    context_dir = os.path.join(tmpdir, "great_expectations")
+    basedir = os.path.join(context_dir, "expectations/ds1/gen1/data_asset_1/")
+    os.makedirs(basedir)
+    with open(os.path.join(basedir, "default.json"), "w") as config:
+        json.dump({"data_asset_name": "data_assset_1"}, config)
+
+    context = DataContext(context_dir)
+
+    assert context._normalize_data_asset_name("data_asset_1") == "ds1/gen1/data_asset_1"
