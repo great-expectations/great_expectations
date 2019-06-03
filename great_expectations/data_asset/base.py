@@ -243,39 +243,25 @@ class DataAsset(object):
         """
         if config != None:
             #!!! Should validate the incoming config with jsonschema here
-
-            # Copy the original so that we don't overwrite it by accident
-            # Pandas incorrectly interprets this as an attempt to create a column and throws up a warning. Suppress it
-            # since we are subclassing.
-            with warnings.catch_warnings():
-                warnings.simplefilter("ignore", category=UserWarning)
-                self._expectations_config = DotDict(copy.deepcopy(config))
-                if data_asset_name is not None:
-                    self._expectations_config["data_asset_name"] = data_asset_name
+            self._expectations_config = DotDict(copy.deepcopy(config))
+            if data_asset_name is not None:
+                self._expectations_config["data_asset_name"] = data_asset_name
 
         else:
-            # Pandas incorrectly interprets this as an attempt to create a column and throws up a warning. Suppress it
-            # since we are subclassing.
-            with warnings.catch_warnings():
-                warnings.simplefilter("ignore", category=UserWarning)
-                self._expectations_config = DotDict({
-                    "data_asset_name": data_asset_name,
-                    "data_asset_type": self.__class__.__name__,
-                    "meta": {
-                        "great_expectations.__version__": __version__,
-                    },
-                    "expectations": []
-                })
+            self._expectations_config = DotDict({
+                "data_asset_name": data_asset_name,
+                "data_asset_type": self.__class__.__name__,
+                "meta": {
+                    "great_expectations.__version__": __version__,
+                },
+                "expectations": []
+            })
 
-        # Pandas incorrectly interprets this as an attempt to create a column and throws up a warning. Suppress it
-        # since we are subclassing.
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", category=UserWarning)
-            self.default_expectation_args = {
-                "include_config": False,
-                "catch_exceptions": False,
-                "result_format": 'BASIC',
-            }
+        self.default_expectation_args = {
+            "include_config": False,
+            "catch_exceptions": False,
+            "result_format": 'BASIC',
+        }
 
     def _append_expectation(self, expectation_config):
         """Appends an expectation to `DataAsset._expectations_config` and drops existing expectations of the same type.
