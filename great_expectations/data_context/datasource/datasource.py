@@ -60,7 +60,7 @@ class Datasource(object):
     def _save_config(self):
         # For now, just use the data context config
         if self._data_context is not None:
-            self._data_context._save_config()
+            self._data_context._save_project_config()
         else:
             config_filepath = "great_expectations.yml"
             with open(config_filepath, 'w') as config_file:
