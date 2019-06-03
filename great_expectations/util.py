@@ -301,20 +301,3 @@ class DotDict(dict):
 
     def __dir__(self):
         return self.keys()
-
-
-def script_relative_path(file_path):
-    '''
-    Useful for testing with local files. Use a path relative to where the
-    test resides and this function will return the absolute path
-    of that file. Otherwise it will be relative to script that
-    ran the test
-
-    Note this is expensive performance wise so if you are calling this many
-    times you may want to call it once and cache the base dir.
-    '''
-    # from http://bit.ly/2snyC6s
-
-    import inspect
-    scriptdir = inspect.stack()[1][1]
-    return os.path.join(os.path.dirname(os.path.abspath(scriptdir)), file_path)
