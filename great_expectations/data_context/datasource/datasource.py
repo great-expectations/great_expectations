@@ -126,3 +126,8 @@ class Datasource(object):
 
     def build_batch_kwargs(self, **kwargs):
         raise NotImplementedError
+
+    def get_data_context(self):
+        return self._data_context
+
+

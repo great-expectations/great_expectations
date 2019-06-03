@@ -149,7 +149,8 @@ it will walk you through next steps.
     """
 
     msg_prompt_filesys_enter_base_path = """
-Enter full path of the root directory where the data files are stored        
+Enter the path of the root directory where the data files are stored 
+(the path may be either absolute or relative to current directory)          
     """
 
     msg_filesys_go_to_notebook = """
@@ -246,7 +247,7 @@ it will walk you through configuring the database connection and next steps.
             "database": "postgres"
         }
         context.add_profile_credentials(data_source_name, **credentials)
-        context.add_datasource(data_source_name, "sqlalchemy", profile_name=data_source_name)
+        context.add_datasource(data_source_name, "sqlalchemy", profile=data_source_name)
 
 
     elif data_source_selection == "1": # csv
