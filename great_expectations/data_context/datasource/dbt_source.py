@@ -1,5 +1,5 @@
 import os
-import yaml
+from ruamel.yaml import YAML
 import datetime
 
 from .datasource import Datasource
@@ -8,6 +8,8 @@ from ...dataset.sqlalchemy_dataset import SqlAlchemyDataset
 
 import sqlalchemy
 from sqlalchemy import create_engine, MetaData
+
+yaml = YAML(typ='safe')
 
 class DBTModelGenerator(BatchGenerator):
     """This is a helper class that makes using great expectations with dbt easy!"""
@@ -67,7 +69,7 @@ class DBTDatasource(Datasource):
 
         self.meta = MetaData()
         with open(os.path.join(self._data_context.get_context_root_directory(), self._datasource_config["project_filepath"]), "r") as f:
-            self._dbt_project = yaml.safe_load(f) or {}
+            self._dbt_project = yaml.load(f) or {}
             
         self.dbt_target_path = os.path.join(
             self._data_context.get_context_root_directory(),
@@ -85,7 +87,7 @@ class DBTDatasource(Datasource):
 
     def _get_sqlalchemy_connection_options(self):
         with open(os.path.expanduser(self._datasource_config["profiles_filepath"]), "r") as data:
-            profiles_config = yaml.safe_load(data) or {}
+            profiles_config = yaml.load(data) or {}
 
         target = profiles_config[self._datasource_config["profile"]]["target"]
         db_config = profiles_config[self._datasource_config["profile"]]["outputs"][target]
