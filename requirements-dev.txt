@@ -16,7 +16,7 @@ pytest-cov>=2.6.1
 coveralls>=1.3
 pyspark>=2.3.2
 psycopg2>=2.7.6,<2.8
-PyYAML==5.1
+ruamel.yaml>=0.15.24
 ipywidgets>=7.4.2
 pyfiglet>=0.8
 clint>=0.5.1
