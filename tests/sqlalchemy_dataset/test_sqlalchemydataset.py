@@ -97,6 +97,10 @@ def test_missing_engine_error():
         assert "Engine or connection_string must be provided." in str(err)
 
 
+def test_only_connection_string():
+    SqlAlchemyDataset('test_engine', connection_string='sqlite://')
+
+
 def test_schema_custom_sql_error():
     engine = sa.create_engine('sqlite://')
 

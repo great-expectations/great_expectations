@@ -39,13 +39,15 @@ class DataAsset(object):
         """
         interactive_evaluation = kwargs.pop("interactive_evaluation", True)
         autoinspect_func = kwargs.pop("autoinspect_func", None)
-        initial_config = kwargs.pop("config", None)
+        expectations_config = kwargs.pop("expectations_config", None)
         data_asset_name = kwargs.pop("data_asset_name", None)
         data_context = kwargs.pop("data_context", None)
+        batch_kwargs = kwargs.pop("batch_kwargs", None)
         super(DataAsset, self).__init__(*args, **kwargs)
         self._interactive_evaluation = interactive_evaluation
-        self._initialize_expectations(config=initial_config, data_asset_name=data_asset_name)
+        self._initialize_expectations(config=expectations_config, data_asset_name=data_asset_name)
         self._data_context = data_context
+        self._batch_kwargs = batch_kwargs
         if autoinspect_func is not None:
             autoinspect_func(self)
 
@@ -241,39 +243,25 @@ class DataAsset(object):
         """
         if config != None:
             #!!! Should validate the incoming config with jsonschema here
-
-            # Copy the original so that we don't overwrite it by accident
-            # Pandas incorrectly interprets this as an attempt to create a column and throws up a warning. Suppress it
-            # since we are subclassing.
-            with warnings.catch_warnings():
-                warnings.simplefilter("ignore", category=UserWarning)
-                self._expectations_config = DotDict(copy.deepcopy(config))
-                if data_asset_name is not None:
-                    self._expectations_config["data_asset_name"] = data_asset_name
+            self._expectations_config = DotDict(copy.deepcopy(config))
+            if data_asset_name is not None:
+                self._expectations_config["data_asset_name"] = data_asset_name
 
         else:
-            # Pandas incorrectly interprets this as an attempt to create a column and throws up a warning. Suppress it
-            # since we are subclassing.
-            with warnings.catch_warnings():
-                warnings.simplefilter("ignore", category=UserWarning)
-                self._expectations_config = DotDict({
-                    "data_asset_name": data_asset_name,
-                    "data_asset_type": self.__class__.__name__,
-                    "meta": {
-                        "great_expectations.__version__": __version__
-                    },
-                    "expectations": []
-                })
+            self._expectations_config = DotDict({
+                "data_asset_name": data_asset_name,
+                "data_asset_type": self.__class__.__name__,
+                "meta": {
+                    "great_expectations.__version__": __version__,
+                },
+                "expectations": []
+            })
 
-        # Pandas incorrectly interprets this as an attempt to create a column and throws up a warning. Suppress it
-        # since we are subclassing.
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", category=UserWarning)
-            self.default_expectation_args = {
-                "include_config": False,
-                "catch_exceptions": False,
-                "result_format": 'BASIC',
-            }
+        self.default_expectation_args = {
+            "include_config": False,
+            "catch_exceptions": False,
+            "result_format": 'BASIC',
+        }
 
     def _append_expectation(self, expectation_config):
         """Appends an expectation to `DataAsset._expectations_config` and drops existing expectations of the same type.
@@ -547,6 +535,9 @@ class DataAsset(object):
                     return [expectation]
                 else:
                     return expectation
+
+    def get_batch_kwargs(self):
+        return self._batch_kwargs
 
     def discard_failing_expectations(self):
         res = self.validate(only_return_failures=True).get('results')
@@ -968,6 +959,9 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             result["meta"].update({"run_id": run_id})
         else:
             result["meta"].update({"run_id": str(uuid.uuid4())})
+
+        if self._batch_kwargs is not None:
+            result["meta"].update({"batch_kwargs": self._batch_kwargs})
 
         if save_dataset_on_failure is not None and result["success"] == False:
             ##### WARNING: HACKED FOR DEMO #######
