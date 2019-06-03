@@ -31,23 +31,25 @@ class Datasource(object):
             self.get_generator(generator)
 
     def _load_datasource_config(self):
-        if self._data_context is None:
-            # Setup is done; no additional config to read
-            return {}
-        try:
-            config_path = os.path.join(self._data_context.context_root_directory, "great_expectations/datasources", self._name, "config.yml")
-            with open(config_path, "r") as data:
-                extra_config = yaml.safe_load(data) or {}
-            logger.info("Loading config from %s" % str(config_path))
-            return extra_config
-        except FileNotFoundError:
-            logger.debug("No additional config file found.")
-            return {}
+        # For now, just use the data context config
+        return {}
+        # if self._data_context is None:
+        #     # Setup is done; no additional config to read
+        #     return {}
+        # try:
+        #     config_path = os.path.join(self._data_context.context_root_directory, "great_expectations/datasources", self._name, "config.yml")
+        #     with open(config_path, "r") as data:
+        #         extra_config = yaml.safe_load(data) or {}
+        #     logger.info("Loading config from %s" % str(config_path))
+        #     return extra_config
+        # except FileNotFoundError:
+        #     logger.debug("No additional config file found.")
+        #     return {}
 
     def get_credentials(self, profile_name):
         if self._data_context is not None:
             return self._data_context.get_profile_credentials(profile_name)
-        return None
+        return {}
 
     def get_config(self):
         if self._data_context is not None:
@@ -55,18 +57,26 @@ class Datasource(object):
         return self._datasource_config
 
     def _save_config(self):
+        # For now, just use the data context config
         if self._data_context is not None:
-            base_config = copy.deepcopy(self._datasource_config)
-            if "config_file" in base_config:
-                config_filepath = os.path.join(self._data_context.context_root_directory, base_config.pop["config_file"])
-            else:
-                config_filepath = os.path.join(self._data_context.context_root_directory, "great_expectations/datasources", self._name, "config.yml")
+            self._data_context._save_config()
         else:
-            logger.warning("Unable to save config with no data context attached.")
+            config_filepath = "great_expectations.yml"
+            with open(config_filepath, 'w') as config_file:
+                yaml.dump(self._datasource_config, config_file)
 
-        os.makedirs(os.path.dirname(config_filepath), exist_ok=True)
-        with open(config_filepath, "w") as data_file:
-                yaml.safe_dump(self._datasource_config, data_file)
+        # if self._data_context is not None:
+        #     base_config = copy.deepcopy(self._datasource_config)
+        #     if "config_file" in base_config:
+        #         config_filepath = os.path.join(self._data_context.context_root_directory, base_config.pop["config_file"])
+        #     else:
+        #         config_filepath = os.path.join(self._data_context.context_root_directory, "great_expectations/datasources", self._name, "config.yml")
+        # else:
+        #     logger.warning("Unable to save config with no data context attached.")
+
+        # os.makedirs(os.path.dirname(config_filepath), exist_ok=True)
+        # with open(config_filepath, "w") as data_file:
+        #     yaml.safe_dump(self._datasource_config, data_file)
 
     def add_generator(self, name, type_, **kwargs):
         data_asset_generator_class = self._get_generator_class(type_)

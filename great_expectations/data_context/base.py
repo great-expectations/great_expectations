@@ -146,14 +146,14 @@ class DataContext(object):
         datasource = self.get_datasource(datasource_name)
         return datasource.list_data_asset_names(generator_name)
 
-    def get_data_asset(self, datasource_name, data_asset_name, batch_kwargs=None):
+    def get_data_asset(self, datasource_name, data_asset_name, batch_kwargs=None, **kwargs):
         data_asset_name = self._normalize_data_asset_name(data_asset_name)
         # datasource_name = find(data_asset_name.split("/")[0]
         datasource = self.get_datasource(datasource_name)
         if not datasource:
             raise Exception("Can't find datasource {0:s} in the config - please check your great_expectations.yml")
 
-        data_asset = datasource.get_data_asset(data_asset_name, batch_kwargs)
+        data_asset = datasource.get_data_asset(data_asset_name, batch_kwargs, **kwargs)
         # data_asset._initialize_expectations(self.get_data_asset_config(data_asset_name))
         return data_asset
 
