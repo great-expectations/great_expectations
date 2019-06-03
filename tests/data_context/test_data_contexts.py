@@ -88,7 +88,7 @@ def test_list_available_data_asset_names(empty_data_context, filesystem_csv):
 
     assert available_asset_names == [{
         "datasource": "my_datasource",
-        "available_data_asset_names": [{
+        "generators": [{
             "generator": "default",
             "available_data_asset_names": set(["f1", "f2", "f3"])
         }]
