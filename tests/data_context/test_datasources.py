@@ -5,9 +5,39 @@ yaml = YAML(typ='safe')
 import os
 import shutil
 
+import pandas as pd
+import sqlalchemy as sa
+
 from great_expectations.data_context import DataContext
+from great_expectations.data_context.datasource.pandas_source import PandasCSVDatasource
 from great_expectations.data_context.datasource.sqlalchemy_source import SqlAlchemyDatasource
 
+from great_expectations.dataset import PandasDataset, SqlAlchemyDataset
+
+@pytest.fixture(scope="module")
+def test_folder_connection_path(tmp_path_factory):
+    df1 = pd.DataFrame(
+        {'col_1': [1, 2, 3, 4, 5], 'col_2': ['a', 'b', 'c', 'd', 'e']})
+    path = str(tmp_path_factory.mktemp("test_folder_connection_path"))
+    df1.to_csv(os.path.join(path, "test.csv"))
+
+    return str(path)
+
+@pytest.fixture(scope="module")
+def test_db_connection_string(tmp_path_factory):
+    df1 = pd.DataFrame(
+        {'col_1': [1, 2, 3, 4, 5], 'col_2': ['a', 'b', 'c', 'd', 'e']})
+    df2 = pd.DataFrame(
+        {'col_1': [0, 1, 2, 3, 4], 'col_2': ['b', 'c', 'd', 'e', 'f']})
+
+    basepath = str(tmp_path_factory.mktemp("db_context"))
+    path = os.path.join(basepath, "test.db")
+    engine = sa.create_engine('sqlite:///' + str(path))
+    df1.to_sql('table_1', con=engine, index=True)
+    df2.to_sql('table_2', con=engine, index=True, schema='main')
+
+    # Return a connection string to this newly-created db
+    return 'sqlite:///' + str(path)
 
 def test_create_pandas_datasource(data_context, tmp_path_factory):
     basedir = tmp_path_factory.mktemp('test_create_pandas_datasource')
@@ -26,6 +56,33 @@ def test_create_pandas_datasource(data_context, tmp_path_factory):
         data_context_file_config = yaml.load(data_context_config_file)
 
     assert data_context_file_config["datasources"][name] == data_context_config["datasources"][name]
+
+def test_standalone_pandas_datasource(test_folder_connection_path):
+    datasource = PandasCSVDatasource('PandasCSV', base_directory=test_folder_connection_path)
+
+    assert datasource.list_available_data_asset_names() == [{"generator": "default", "available_data_asset_names": {"test"}}]
+    manual_batch_kwargs = datasource.build_batch_kwargs(os.path.join(str(test_folder_connection_path), "test.csv"))
+
+    # Get the default (filesystem) generator
+    generator = datasource.get_generator()
+    auto_batch_kwargs = generator.yield_batch_kwargs("test")
+
+    assert manual_batch_kwargs["path"] == auto_batch_kwargs["path"]
+
+    # Include some extra kwargs...
+    dataset = datasource.get_data_asset("test", batch_kwargs=auto_batch_kwargs, sep=",", header=0, index_col=0)
+    assert isinstance(dataset, PandasDataset)
+    assert (dataset["col_1"] == [1, 2, 3, 4, 5]).all()
+
+def test_standalone_sqlalchemy_datasource(test_db_connection_string):
+    datasource = SqlAlchemyDatasource(
+        'SqlAlchemy', connection_string=test_db_connection_string, echo=False)
+
+    assert datasource.list_available_data_asset_names() == [{"generator": "default", "available_data_asset_names": {"table_1", "table_2"}}]
+    dataset1 = datasource.get_data_asset("table_1")
+    dataset2 = datasource.get_data_asset("table_2", schema='main')
+    assert isinstance(dataset1, SqlAlchemyDataset)
+    assert isinstance(dataset2, SqlAlchemyDataset)
 
 
 def test_create_sqlalchemy_datasource(data_context):
