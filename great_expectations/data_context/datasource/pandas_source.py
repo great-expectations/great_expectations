@@ -47,7 +47,7 @@ class PandasCSVDatasource(Datasource):
         all_kwargs = dict(**self._datasource_config["read_csv_kwargs"])
         all_kwargs.update(**kwargs)
 
-        df = pd.read_csv(full_path, all_kwargs)
+        df = pd.read_csv(full_path, **all_kwargs)
         
         return PandasDataset(df, 
             expectations_config=expectations_config, 
