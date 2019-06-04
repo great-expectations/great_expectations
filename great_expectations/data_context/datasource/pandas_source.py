@@ -1,5 +1,5 @@
 import os
-import datetime
+import time
 
 import pandas as pd
 
@@ -58,7 +58,7 @@ class PandasCSVDatasource(Datasource):
     def build_batch_kwargs(self, filepath, **kwargs):
         batch_kwargs = {
             "path": filepath,
-            "timestamp": datetime.datetime.now().timestamp(),
+            "timestamp": time.time()
         }
         batch_kwargs.update(dict(**kwargs))
         return batch_kwargs

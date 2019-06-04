@@ -1,4 +1,4 @@
-import datetime
+import time
 import os
 import logging
 from string import Template
@@ -39,13 +39,13 @@ class QueryGenerator(BatchGenerator):
                 with open(os.path.join(self._queries_path, data_asset_name) + ".sql", "r") as data:
                     return iter([{
                         "query": data.read(),
-                        "timestamp": datetime.datetime.now().timestamp()
+                        "timestamp": time.time()
                     }])
         else:
             if data_asset_name in self._queries:
                 return iter([{
                     "query": self._queries[data_asset_name],
-                    "timestamp": datetime.datetime.now().timestamp()
+                    "timestamp": time.time()
                 }])
 
         if self.engine is not None:
@@ -55,7 +55,7 @@ class QueryGenerator(BatchGenerator):
                 return iter([
                     {
                         "table": data_asset_name,
-                        "timestamp": datetime.datetime.now().timestamp()
+                        "timestamp": time.time()
                     }
                 ])
 
@@ -162,10 +162,10 @@ class SqlAlchemyDatasource(Datasource):
         if table is not None:
             return {
                 "table": table,
-                "timestamp": datetime.datetime.now().timestamp()
+                "timestamp": time.time()
             }
         else:
             return {
                 "query": query,
-                "timestamp": datetime.datetime.now().timestamp()
+                "timestamp": time.time()
             }
