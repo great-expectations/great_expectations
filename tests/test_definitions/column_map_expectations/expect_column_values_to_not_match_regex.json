@@ -25,7 +25,8 @@
         "success":false,
         "unexpected_index_list": [0, 1, 2, 3],
         "unexpected_list": ["aaa", "abb", "acc", "add"]
-      }
+      },
+      "suppress_test_for": ["sqlite"]
     },{
       "title": "Positive test, exact mostly w/ one non-matching value",
       "exact_match_out" : false,
@@ -38,7 +39,8 @@
         "success":true,
         "unexpected_index_list": [0, 1, 2, 3],
         "unexpected_list": ["aaa", "abb", "acc", "add"]
-      }
+      },
+      "suppress_test_for": ["sqlite"]
     },{
       "title": "Positive test, sufficient mostly w/ one non-matching value",
       "exact_match_out" : false,
@@ -51,7 +53,8 @@
         "success":true,
         "unexpected_index_list": [0, 1, 2, 3],
         "unexpected_list": ["aaa", "abb", "acc", "add"]
-      }
+      },
+      "suppress_test_for": ["sqlite"]
     },{
       "title": "Negative test, one missing value and insufficent mostly",
       "exact_match_out" : false,
@@ -64,7 +67,8 @@
         "success":false,
         "unexpected_index_list": [0, 1, 2],
         "unexpected_list": ["aaa", "abb", "acc"]
-      }
+      },
+      "suppress_test_for": ["sqlite"]
     },{
       "title": "Positive test, one missing value, no exceptions",
       "exact_match_out" : false,
@@ -76,7 +80,8 @@
         "success":true,
         "unexpected_index_list": [],
         "unexpected_list": []
-      }
+      },
+      "suppress_test_for": ["sqlite"]
     },{
       "title": "Positive test. all missing values",
       "exact_match_out" : false,
@@ -88,7 +93,8 @@
         "success": true,
         "unexpected_index_list": [],
         "unexpected_list": []
-      }
+      },
+      "suppress_test_for": ["sqlite"]
     },{
       "title": "Positive test. all missing values, mostly",
       "exact_match_out" : false,
@@ -101,7 +107,8 @@
         "success": true,
         "unexpected_index_list": [],
         "unexpected_list": []
-      }
+      },
+      "suppress_test_for": ["sqlite"]
     },{
       "title": "Negative test, Empty regex",
       "exact_match_out" : false,
@@ -113,7 +120,8 @@
         "success": false,
         "unexpected_index_list": [0, 1, 2, 3],
         "unexpected_list": ["aaa", "abb", "acc", "bdd"]
-      }
+      },
+      "suppress_test_for": ["sqlite"]
     },{
       "title": "Negative test, match characters not at the beginning of string, exact mostly",
       "exact_match_out" : false,
@@ -126,7 +134,8 @@
         "success": true,
         "unexpected_index_list": [1, 4],
         "unexpected_list": ["abb", "bee"]
-      }
+      },
+      "suppress_test_for": ["sqlite"]
     }]
   }]
 }
