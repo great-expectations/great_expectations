@@ -40,7 +40,7 @@ class DataContext(object):
     Warning: this feature is new in v0.4 and may change based on community feedback.
     """
 
-    def __init__(self, options=None, expectation_explorer=False, *args, **kwargs):
+    def __init__(self, options=None, expectation_explorer=False):
         self._expectation_explorer = expectation_explorer
         self._datasources = {}
         if expectation_explorer:
@@ -51,12 +51,12 @@ class DataContext(object):
         # determine the "context root directory" - this is the parent of "great_expectations" dir
 
         if context_root_dir is None:
-            raise Exception("the guessing logic not implemented yet!")
-        # TODO: Revisit this logic to better at making real guesses
-        # if os.path.isdir("../notebooks") and os.path.isdir("../../great_expectations"):
-            #     self.context_root_directory = "../data_asset_configurations"
-            # else:
-            #     self.context_root_directory = "./great_expectations/data_asset_configurations"
+            if os.path.isdir("../notebooks") and os.path.isdir("../../great_expectations") and os.path.isfile("../../great_expectations/great_expectations.yml"):
+                self.context_root_directory = "../../"
+            elif os.path.isdir("./great_expectations") and os.path.isfile("./great_expectations/great_expectations.yml"):
+                self.context_root_directory = "./"
+            else:
+                raise("Unable to locate context root directory. Please provide a directory name.")
 
         self.context_root_directory = os.path.abspath(context_root_dir)
 
