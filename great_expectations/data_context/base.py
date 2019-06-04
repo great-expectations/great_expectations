@@ -79,8 +79,6 @@ class DataContext(object):
         return self.context_root_directory
 
     def _load_project_config(self):
-        # TODO: What if the project config file does not exist?
-        # TODO: Should we merge the project config file with the global config file?
         try:
             with open(os.path.join(self.context_root_directory, "great_expectations/great_expectations.yml"), "r") as data:
                 return yaml.load(data)
@@ -88,7 +86,7 @@ class DataContext(object):
             if e.errno != errno.ENOENT:
                 raise
             base_config = yaml.load("{}")
-            # add comments the first a data context is created
+            # add comments the first time a data context is created
             base_config.yaml_set_start_comment(PROJECT_HELP_COMMENT)
             return base_config
 
@@ -103,8 +101,10 @@ class DataContext(object):
         except IOError as e:
             if e.errno != errno.ENOENT:
                 raise
-            logger.warning("No profile credential store found.")
-            return {}
+            logger.debug("Generating empty profile store.")
+            base_profile_store = yaml.load("{}")
+            base_profile_store.yaml_set_start_comment(PROFILE_COMMENT)
+            return base_profile_store
 
     def get_profile_credentials(self, profile_name):
         profiles = self._get_all_profile_credentials()
@@ -118,6 +118,8 @@ class DataContext(object):
         profiles[profile_name] = dict(**kwargs)
         profiles_filepath = os.path.join(self.context_root_directory, "great_expectations/uncommitted/credentials/profiles.yml")
         safe_mmkdir(os.path.dirname(profiles_filepath), exist_ok=True)
+        if not os.path.isfile(profiles_filepath):
+            logger.info("Creating new profiles store at {profiles_filepath}".format(profiles_filepath=profiles_filepath))
         with open(profiles_filepath, "w") as profiles_file:
             yaml.dump(profiles, profiles_file)
 
@@ -577,9 +579,24 @@ class DataContext(object):
 
 
 
-PROJECT_HELP_COMMENT="""Welcome to great expectations. This project configuration file allows you to define datasources, generators,
-integrations, and other configuration artifacts that make it easier to use Great Expectations.
+PROJECT_HELP_COMMENT="""Welcome to great expectations. 
+This project configuration file allows you to define datasources, 
+generators, integrations, and other configuration artifacts that
+make it easier to use Great Expectations.
 
-For more help configuring great expectations, see the documentation at: https://greatexpectations.io/config_file.html
+For more help configuring great expectations, 
+see the documentation at: https://greatexpectations.io/config_file.html
+
+"""
+
+
+PROFILE_COMMENT="""This file stores profiles with database access credentials. 
+Do not commit this file to version control. 
+
+A profile can optionally have a single parameter called 
+"url" which will be passed to sqlalchemy's create_engine.
+
+Otherwise, all credential options specified here for a 
+given profile will be passed to sqlalchemy's create URL function.
 
 """
