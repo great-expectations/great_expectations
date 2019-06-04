@@ -71,7 +71,7 @@ def test_create_sqlalchemy_datasource(data_context):
         profiles = yaml.load(profiles_file)
     
     assert profiles == {
-        profile_name: {**connection_kwargs}
+        profile_name: dict(**connection_kwargs)
     }
 
 def test_create_sparkdf_datasource(data_context, tmp_path_factory):

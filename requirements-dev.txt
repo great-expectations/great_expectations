@@ -21,5 +21,6 @@ sphinxcontrib-napoleon>=0.6.1
 sphinx_rtd_theme>=0.4.3
 pypandoc>=1.4
 pytest>=4.1.1
+mock>=3.0.5
 pytest-cov>=2.6.1
 coveralls>=1.3

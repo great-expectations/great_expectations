@@ -1,4 +1,5 @@
 import os
+import errno
 
 from .batch_generator import BatchGenerator
 
@@ -26,7 +27,10 @@ class FilesystemPathGenerator(BatchGenerator):
         # If the data_asset_name is a file, then return the path.
         # Otherwise, use files in a subdir as batches
         if os.path.isdir(os.path.join(self._get_current_base_directory(), data_asset_name)):
-            return self._build_batch_kwargs_path_iter(os.scandir(os.path.join(self._get_current_base_directory(), data_asset_name)))
+            # return self._build_batch_kwargs_path_iter(os.scandir(os.path.join(self._get_current_base_directory(), data_asset_name)))
+            return iter([{
+                "path": os.path.join(self._get_current_base_directory(), data_asset_name, x)
+            } for x in os.listdir(os.path.join(self._get_current_base_directory(), data_asset_name))])
         elif os.path.isfile(os.path.join(self._get_current_base_directory(), data_asset_name)):
             return iter([
                 {
@@ -40,16 +44,17 @@ class FilesystemPathGenerator(BatchGenerator):
                 }
                 ])
         else:
-            raise FileNotFoundError(os.path.join(self._base_directory, data_asset_name))
+            raise IOError(os.path.join(self._base_directory, data_asset_name))
 
-    def _build_batch_kwargs_path_iter(self, path_iter):
-        try:
-            while True:
-                yield {
-                    "path": next(path_iter).path
-                }
-        except StopIteration:
-            return
+    # Removed to support python2 (no scandir; listdir instead)
+    # def _build_batch_kwargs_path_iter(self, path_iter):
+    #     try:
+    #         while True:
+    #             yield {
+    #                 "path": next(path_iter).path
+    #             }
+    #     except StopIteration:
+    #         return
 
     # If base directory is a relative path, interpret it as relative to the data context's
     # context root directory (parent directory of great_expectation dir)

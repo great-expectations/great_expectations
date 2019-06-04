@@ -4,16 +4,21 @@ import logging
 from ruamel.yaml import YAML
 import sys
 import copy
+import errno
 from glob import glob
 from six import string_types
 
-from great_expectations.exceptions import ExpectationsConfigNotFoundError
-from great_expectations.version import __version__
-from great_expectations.dataset import PandasDataset
-from great_expectations import read_csv
+from ..exceptions import ExpectationsConfigNotFoundError
+from ..version import __version__
+from ..dataset import PandasDataset
+from ..util import safe_mmkdir, read_csv
+
 from IPython.display import display
 import ipywidgets as widgets
-from urllib.parse import urlparse
+try:
+    from urllib.parse import urlparse
+except ImportError:
+    from urlparse import urlparse
 
 from .datasource.sqlalchemy_source import SqlAlchemyDatasource
 from .datasource.dbt_source import DBTDatasource
@@ -79,7 +84,9 @@ class DataContext(object):
         try:
             with open(os.path.join(self.context_root_directory, "great_expectations/great_expectations.yml"), "r") as data:
                 return yaml.load(data)
-        except FileNotFoundError:
+        except IOError as e:
+            if e.errno != errno.ENOENT:
+                raise
             base_config = yaml.load("{}")
             # add comments the first a data context is created
             base_config.yaml_set_start_comment(PROJECT_HELP_COMMENT)
@@ -93,7 +100,9 @@ class DataContext(object):
         try:
             with open(os.path.join(self.context_root_directory, "great_expectations/uncommitted/credentials/profiles.yml"), "r") as profiles_file:
                 return yaml.load(profiles_file) or {}
-        except FileNotFoundError:
+        except IOError as e:
+            if e.errno != errno.ENOENT:
+                raise
             logger.warning("No profile credential store found.")
             return {}
 
@@ -106,9 +115,9 @@ class DataContext(object):
 
     def add_profile_credentials(self, profile_name, **kwargs):
         profiles = self._get_all_profile_credentials()
-        profiles[profile_name] = {**kwargs}
+        profiles[profile_name] = dict(**kwargs)
         profiles_filepath = os.path.join(self.context_root_directory, "great_expectations/uncommitted/credentials/profiles.yml")
-        os.makedirs(os.path.dirname(profiles_filepath), exist_ok=True)
+        safe_mmkdir(os.path.dirname(profiles_filepath), exist_ok=True)
         with open(profiles_filepath, "w") as profiles_file:
             yaml.dump(profiles, profiles_file)
 
@@ -134,7 +143,9 @@ class DataContext(object):
             with open(default_config_path, "r") as config_file:
                 default_path_datasource_config = yaml.load(config_file) or {}
             datasource_config.update(default_path_datasource_config)
-        except FileNotFoundError:
+        except IOError as e:
+            if e.errno != errno.ENOENT:
+                raise
             logger.debug("No config file found in default location for datasource %s" % datasource_name)
         
         if defined_config_path is not None:
@@ -142,7 +153,9 @@ class DataContext(object):
                 with open(defined_config_path, "r") as config_file:
                     defined_path_datasource_config = yaml.load(config_file) or {}
                 datasource_config.update(defined_path_datasource_config)
-            except FileNotFoundError:
+            except IOError as e:
+                if e.errno != errno.ENOENT:
+                    raise
                 logger.warning("No config file found in user-defined location for datasource %s" % datasource_name)
         
         return datasource_config
@@ -340,7 +353,7 @@ class DataContext(object):
     def save_data_asset_config(self, data_asset_config):
         data_asset_name = data_asset_config['data_asset_name']
         config_file_path = os.path.join(self.expectations_directory, data_asset_name + '.json')
-        os.makedirs(os.path.split(config_file_path)[0], exist_ok=True)
+        safe_mmkdir(os.path.split(config_file_path)[0], exist_ok=True)
         with open(config_file_path, 'w') as outfile:
             json.dump(data_asset_config, outfile)
         self._compiled = False
