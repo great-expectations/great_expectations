@@ -161,7 +161,6 @@ def test_register_validation_results(parameterized_config_data_context):
 
 def test_compile(parameterized_config_data_context):
     parameterized_config_data_context._compile()
-    print(parameterized_config_data_context._compiled_parameters)
     assert parameterized_config_data_context._compiled_parameters == {
         'raw': {
             'urn:great_expectations:validations:source_diabetes_data:expectations:expect_column_unique_value_count_to_be_between:columns:patient_nbr:result:observed_value', 
