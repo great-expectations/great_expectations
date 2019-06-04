@@ -333,7 +333,7 @@ class DataContext(object):
         # raise ExpectationsConfigNotFoundError(data_asset_name)
                 
 
-    def get_expectations_config(self, data_asset_name, batch_kwargs):
+    def get_expectations_config(self, data_asset_name, batch_kwargs=None):
         return self.get_data_asset_config(data_asset_name)
 
     def get_data_asset_config(self, data_asset_name):
