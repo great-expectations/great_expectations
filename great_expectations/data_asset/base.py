@@ -967,7 +967,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             ##### WARNING: HACKED FOR DEMO #######
             bucket = save_dataset_on_failure.bucket_name
             key = save_dataset_on_failure.key
-            result["meta"]["dataset_reference"] = f"s3://{bucket}/{key}"
+            result["meta"]["dataset_reference"] = "s3://{bucket}/{key}".format(bucket=bucket, key=key)
             self._save_dataset(save_dataset_on_failure)
 
         if result_store is not None:
@@ -977,7 +977,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             else: #TODO: hack - assumes S3
                 bucket = result_store.bucket_name
                 key = result_store.key
-                result["meta"]["result_reference"] = f"s3://{bucket}/{key}"
+                result["meta"]["result_reference"] = "s3://{bucket}/{key}".format(bucket=bucket, key=key)
             self._save_result(result, result_store = result_store)
 
         if result_callback is not None:

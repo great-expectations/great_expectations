@@ -223,7 +223,7 @@ class DataContext(object):
         #     datasource_name = list(self._project_config["datasources"])[0]
         #     datasource_config = copy.deepcopy(self._project_config["datasources"][datasource_name])
         else:
-            raise ValueError(f"Unable to load datasource %s -- no configuration found or invalid configuration." % datasource_name)
+            raise ValueError("Unable to load datasource %s -- no configuration found or invalid configuration." % datasource_name)
         type_ = datasource_config.pop("type")
         datasource_class= self._get_datasource_class(type_)
         datasource = datasource_class(name=datasource_name, data_context=self, **datasource_config)
