@@ -20,4 +20,4 @@ psycopg2>=2.7.6,<2.8
 ruamel.yaml>=0.15.24
 ipywidgets>=7.4.2
 pyfiglet>=0.8
-clint>=0.5.1
+Click>=7.0
