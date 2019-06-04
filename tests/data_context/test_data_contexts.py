@@ -8,18 +8,19 @@ import sqlalchemy as sa
 import pandas as pd
 
 from great_expectations.data_context import DataContext
+from great_expectations.util import safe_mmkdir
 # get_data_context
 from great_expectations.dataset import PandasDataset, SqlAlchemyDataset
 
 
 @pytest.fixture(scope="module")
-def test_db_connection_string(tmpdir_factory):
+def test_db_connection_string(tmp_path_factory):
     df1 = pd.DataFrame(
         {'col_1': [1, 2, 3, 4, 5], 'col_2': ['a', 'b', 'c', 'd', 'e']})
     df2 = pd.DataFrame(
         {'col_1': [0, 1, 2, 3, 4], 'col_2': ['b', 'c', 'd', 'e', 'f']})
 
-    path = tmpdir_factory.mktemp("db_context").join("test.db")
+    path = tmp_path_factory.mktemp("db_context").join("test.db")
     engine = sa.create_engine('sqlite:///' + str(path))
     df1.to_sql('table_1', con=engine, index=True)
     df2.to_sql('table_2', con=engine, index=True, schema='main')
@@ -29,10 +30,10 @@ def test_db_connection_string(tmpdir_factory):
 
 
 @pytest.fixture(scope="module")
-def test_folder_connection_path(tmpdir_factory):
+def test_folder_connection_path(tmp_path_factory):
     df1 = pd.DataFrame(
         {'col_1': [1, 2, 3, 4, 5], 'col_2': ['a', 'b', 'c', 'd', 'e']})
-    path = tmpdir_factory.mktemp("csv_context")
+    path = tmp_path_factory.mktemp("csv_context")
     df1.to_csv(path.join("test.csv"))
 
     return str(path)
@@ -66,11 +67,11 @@ def parameterized_expectations_config():
     }
 
 @pytest.fixture()
-def parameterized_config_data_context(tmpdir_factory):
-    # TODO: harmonize with Eugene's approach to testing data context so we have a single fixture
-    context_path = tmpdir_factory.mktemp("empty_context_dir")
+def parameterized_config_data_context(tmp_path_factory):
+    context_path = tmp_path_factory.mktemp("empty_context_dir")
+    context_path = str(context_path)
     asset_config_path = os.path.join(context_path, "great_expectations/expectations")
-    os.makedirs(asset_config_path, exist_ok=True)
+    safe_mmkdir(asset_config_path, exist_ok=True)
     shutil.copy("./tests/test_fixtures/great_expectations_basic.yml", str(context_path))
     shutil.copy("./tests/test_fixtures/expectations/parameterized_expectations_config_fixture.json",str(asset_config_path))
     return DataContext(context_path)
@@ -232,12 +233,14 @@ def test_compile(parameterized_config_data_context):
         }
     }
 
-def test_normalize_data_asset_names(tmpdir):
-    context_dir = os.path.join(tmpdir, "great_expectations")
-    basedir = os.path.join(context_dir, "expectations/ds1/gen1/data_asset_1/")
-    os.makedirs(basedir)
-    with open(os.path.join(basedir, "default.json"), "w") as config:
-        json.dump({"data_asset_name": "data_assset_1"}, config)
+def test_normalize_data_asset_names(tmp_path_factory):
+    base_dir = tmp_path_factory.mktemp("test_normalize_data_asset_names")
+    base_dir = str(base_dir)
+    context_dir = os.path.join(base_dir, "great_expectations")
+    # asset_dir = context_dir.join("expectations/ds1/gen1/data_asset_1/")
+    # os.makedirs(asset_dir)
+    # with open(asset_dir("default.json"), "w") as config:
+    #     json.dump({"data_asset_name": "data_assset_1"}, config)
 
     context = DataContext(context_dir)
 

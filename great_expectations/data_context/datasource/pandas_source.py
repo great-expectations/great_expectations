@@ -1,5 +1,5 @@
 import os
-import datetime
+import time
 
 import pandas as pd
 
@@ -43,8 +43,11 @@ class PandasCSVDatasource(Datasource):
             full_path = os.path.join(batch_kwargs["path"])
         except KeyError:
             raise BatchKwargsError("Invalid batch_kwargs: path is required for a PandasCSVDatasource", batch_kwargs)
+        
+        all_kwargs = dict(**self._datasource_config["read_csv_kwargs"])
+        all_kwargs.update(**kwargs)
 
-        df = pd.read_csv(full_path, **self._datasource_config["read_csv_kwargs"], **kwargs)
+        df = pd.read_csv(full_path, all_kwargs)
         
         return PandasDataset(df, 
             expectations_config=expectations_config, 
@@ -53,8 +56,9 @@ class PandasCSVDatasource(Datasource):
             batch_kwargs=batch_kwargs)
 
     def build_batch_kwargs(self, filepath, **kwargs):
-        return {
+        batch_kwargs = {
             "path": filepath,
-            "timestamp": datetime.datetime.now().timestamp(),
-            **kwargs
+            "timestamp": time.time()
         }
+        batch_kwargs.update(dict(**kwargs))
+        return batch_kwargs

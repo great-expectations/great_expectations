@@ -1,3 +1,5 @@
+from __future__ import unicode_literals # Since our cli produces unicode output, but we want tests in python2 as well
+
 import json
 import os
 import shutil
@@ -5,7 +7,10 @@ from ruamel.yaml import YAML
 yaml = YAML()
 yaml.default_flow_style = False
 
-from unittest import mock
+try:
+    from unittest import mock
+except ImportError:
+    import mock
 import pytest
 import tempfile
 
@@ -155,21 +160,21 @@ def test_cli_evaluation_parameters(capsys):
 
     assert json_result['evaluation_parameters'] == expected_evaluation_parameters
 
-def test_cli_init_diff(tmp_path_factory):
+def test_cli_init(tmp_path_factory):
     basedir = tmp_path_factory.mktemp("test_cli_init_diff")
+    basedir = str(basedir)
     os.makedirs(os.path.join(basedir, "data"))
     curdir = os.path.abspath(os.getcwd())
     os.chdir(basedir)
     runner = CliRunner()
     result = runner.invoke(cli, ["init"], input="Y\n1\n%s\n\n" % str(os.path.join(basedir, "data")))
 
-    assert """Welcome to Great Expectations! Always know what to expect from your data.""" in str(result.output)
+    assert """Welcome to Great Expectations! Always know what to expect from your data.""" in result.output
 
 
     assert os.path.isdir(os.path.join(basedir, "great_expectations"))
     assert os.path.isfile(os.path.join(basedir, "great_expectations/great_expectations.yml"))
     config = yaml.load(open(os.path.join(basedir, "great_expectations/great_expectations.yml"), "r"))
-    print(config)
     assert config["datasources"]["data"]["type"] == "pandas"
 
     os.chdir(curdir)

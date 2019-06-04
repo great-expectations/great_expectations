@@ -60,7 +60,8 @@ class ExpectationExplorer(object):
         self.debug_view = widgets.Output(layout={'border': '3 px solid pink'})
 
     # @debug_view.capture(clear_output=True)
-    def update_result(self, *, new_result, expectation_type, column=None):
+    # def update_result(self, *, new_result, expectation_type, column=None):
+    def update_result(self, new_result, expectation_type, column=None):
         new_success_value = new_result.get('success')
         new_result_widgets = self.generate_expectation_result_detail_widgets(
             new_result['result'], expectation_type)
@@ -68,20 +69,20 @@ class ExpectationExplorer(object):
 
         if column:
             self.expectation_widgets[column][expectation_type][
-                'success'].value = f'<span><strong>Success: </strong>{str(new_success_value)}</span>'
+                'success'].value = '<span><strong>Success: </strong>{str(new_success_value)}</span>'.format(new_success_value=new_success_value)
             self.expectation_widgets[column][expectation_type]['result_detail_widget']\
                 .children = new_result_widgets
             self.expectation_widgets[column][expectation_type]['editor_widget']\
                 .layout\
-                .border = f'2px solid {new_border_color}'
+                .border = '2px solid {new_border_color}'.format(new_border_color=new_border_color)
         else:
             self.expectation_widgets['non_column_expectations'][expectation_type][
-                'success'].value = f'<span><strong>Success: </strong>{str(new_success_value)}</span>'
+                'success'].value = '<span><strong>Success: </strong>{str(new_success_value)}</span>'.format(new_success_value=new_success_value)
             self.expectation_widgets['non_column_expectations'][expectation_type]['result_detail_widget']\
                 .children = new_result_widgets
             self.expectation_widgets['non_column_expectations'][expectation_type]['editor_widget']\
                 .layout\
-                .border = f'2px solid {new_border_color}'
+                .border = '2px solid {new_border_color}'.format(new_border_color=new_border_color)
 
     def get_expectation_state(self, expectation_type, column=None):
         if column:
@@ -133,7 +134,7 @@ class ExpectationExplorer(object):
                     existing_expectation_kwarg_widgets[kwarg_name] = kwarg_value
             else:
                 widget_generator = getattr(
-                    self, f'generate_{kwarg_name}_widget', None)
+                    self, 'generate_{kwarg_name}_widget'.format(kwarg_name=kwarg_name), None)
                 widget = widget_generator(ge_df=ge_df, expectation_type=expectation_type, **new_expectation_kwargs) if widget_generator \
                     else self.generate_expectation_kwarg_fallback_widget(expectation_kwarg_name=kwarg_name, **new_expectation_kwargs)
                 existing_expectation_kwarg_widgets[kwarg_name] = widget
@@ -158,7 +159,7 @@ class ExpectationExplorer(object):
         expectation_kwargs = {}
 
         for key, value in kwarg_widgets.items():
-            if not getattr(self, f'generate_{key}_widget', None):
+            if not getattr(self, 'generate_{key}_widget'.format(key=key), None):
                 continue
             expectation_kwargs[key] = kwarg_transformer(key, value)
 
@@ -174,14 +175,15 @@ class ExpectationExplorer(object):
         expectation_kwargs = ge_kwargs.copy()
 
         for key, value in expectation_kwargs.items():
-            if not getattr(self, f'generate_{key}_widget', None):
+            if not getattr(self, 'generate_{key}_widget'.format(key=key), None):
                 continue
             expectation_kwargs[key] = kwarg_transformer(key, value)
 
         return expectation_kwargs
 
     # widget generators for input fields
-    def generate_mostly_widget(self, *, ge_df, mostly=1, expectation_type, column=None, **expectation_kwargs):
+    # def generate_mostly_widget(self, *, ge_df, mostly=1, expectation_type, column=None, **expectation_kwargs):
+    def generate_mostly_widget(self, ge_df, mostly, expectation_type, column=None, **expectation_kwargs):
         mostly_widget = widgets.FloatSlider(
             value=mostly,
             min=0,
@@ -208,7 +210,9 @@ class ExpectationExplorer(object):
         mostly_widget.observe(on_mostly_change, names='value')
         return mostly_widget
 
-    def generate_min_value_widget(self, *, ge_df, expectation_type, min_value=None, column=None, **expectation_kwargs):
+    # def generate_min_value_widget(self, *, ge_df, expectation_type, min_value=None, column=None, **expectation_kwargs):
+    def generate_min_value_widget(self, ge_df, expectation_type, min_value=None, column=None, **expectation_kwargs):
+
         expectation_state = self.get_expectation_state(
             expectation_type, column) or {'kwargs': {}}
         min_value_widget = expectation_state['kwargs'].get('min_value')
@@ -251,7 +255,8 @@ class ExpectationExplorer(object):
 
         return min_value_widget
 
-    def generate_max_value_widget(self, *, ge_df, expectation_type, max_value=None, column=None, **expectation_kwargs):
+    # def generate_max_value_widget(self, *, ge_df, expectation_type, max_value=None, column=None, **expectation_kwargs):
+    def generate_max_value_widget(self, ge_df, expectation_type, max_value=None, column=None, **expectation_kwargs):
         expectation_state = self.get_expectation_state(
             expectation_type, column) or {'kwargs': {}}
         min_value_widget = expectation_state['kwargs'].get('min_value')
@@ -294,7 +299,8 @@ class ExpectationExplorer(object):
 
         return max_value_widget
 
-    def generate_value_set_widget(self, *, ge_df, expectation_type, value_set, column, **expectation_kwargs):
+#     def generate_value_set_widget(self, *, ge_df, expectation_type, value_set, column, **expectation_kwargs):
+    def generate_value_set_widget(self, ge_df, expectation_type, value_set, column, **expectation_kwargs):
         expectation_state = self.get_expectation_state(
             expectation_type, column)
         value_set_widget = widgets.Textarea(
@@ -320,26 +326,27 @@ class ExpectationExplorer(object):
         value_set_widget.observe(on_value_set_change, names='value')
         return value_set_widget
 
-    def generate_expectation_kwarg_fallback_widget(self, *, expectation_kwarg_name, **expectation_kwargs):
+#    def generate_expectation_kwarg_fallback_widget(self, *, expectation_kwarg_name, **expectation_kwargs):
+    def generate_expectation_kwarg_fallback_widget(self, expectation_kwarg_name, **expectation_kwargs):
         expectation_kwarg_value = expectation_kwargs.get(
             expectation_kwarg_name)
         warning_message = widgets.HTML(
-            value=f'<div><strong>Warning: </strong>Cannot find dynamic widget for expectation kwarg "{expectation_kwarg_name}". To change kwarg value, please call expectation again with the modified value.</div>'
+            value='<div><strong>Warning: </strong>Cannot find dynamic widget for expectation kwarg "{expectation_kwarg_name}". To change kwarg value, please call expectation again with the modified value.</div>'.format(expectation_kwarg_name=expectation_kwarg_name)
         )
         static_widget = widgets.Textarea(value=str(
-            expectation_kwarg_value), description=f'{expectation_kwarg_name}: ', disabled=True)
+            expectation_kwarg_value), description='{expectation_kwarg_name}: '.format(expectation_kwarg_name=expectation_kwarg_name), disabled=True)
         return widgets.VBox([warning_message, static_widget])
 
     # widget generators for general info shared between all expectations
     def generate_column_widget(self, column, **kwargs):
         #         return widgets.HTML(value=f'<span><strong>Column: </strong>{column}</span>') if column else None
-        return widgets.HTML(value=f'<div><style type<strong>Column: </strong>{column}</div>') if column else None
+        return widgets.HTML(value='<div><style type<strong>Column: </strong>{column}</div>'.format(column=column)) if column else None
 
     def generate_expectation_type_widget(self, expectation_type):
-        return widgets.HTML(value=f'<span><strong>Expectation Type: </strong>{expectation_type}</span>')
+        return widgets.HTML(value='<span><strong>Expectation Type: </strong>{expectation_type}</span>'.format(expectation_type=expectation_type))
 
     def generate_success_widget(self, success):
-        return widgets.HTML(value=f'<span><strong>Success: </strong>{str(success)}</span>')
+        return widgets.HTML(value='<span><strong>Success: </strong>{str(success)}</span>'.format(success=success))
 
     def generate_basic_expectation_info_box(self, expectation_type, success_widget, column=None):
         if column:
@@ -392,7 +399,7 @@ class ExpectationExplorer(object):
         # success_widget
         success = expectation_validation_result['success']
         success_widget = widgets.HTML(
-            value=f'<span><strong>Success: </strong>{str(success)}</span>')
+            value='<span><strong>Success: </strong>{str(success)}</span>'.format(success=success))
 
         # widget with basic info (column, expectation_type)
         basic_expectation_info_box = self.generate_basic_expectation_info_box(
@@ -424,7 +431,7 @@ class ExpectationExplorer(object):
         expectation_kwarg_input_widgets = []
         for expectation_kwarg_name in self.expectation_kwarg_field_names.get(expectation_type):
             widget_generator = getattr(
-                self, f'generate_{expectation_kwarg_name}_widget', None)
+                self, 'generate_{expectation_kwarg_name}_widget'.format(expectation_kwarg_name=expectation_kwarg_name), None)
             widget = widget_generator(ge_df=ge_df, expectation_type=expectation_type, **expectation_kwargs) if widget_generator \
                 else self.generate_expectation_kwarg_fallback_widget(expectation_kwarg_name=expectation_kwarg_name, **expectation_kwargs)
             expectation_state['kwargs'][expectation_kwarg_name] = widget
@@ -444,7 +451,7 @@ class ExpectationExplorer(object):
                 result_detail_accordion
             ],
             layout=widgets.Layout(
-                border=f'2px solid {"green" if success else "red"}',
+                border='2px solid {color}'.format(color="green" if success else "red"),
                 margin='5px'
             )
         )

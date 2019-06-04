@@ -1,4 +1,4 @@
-import datetime
+import time
 import logging
 
 from .batch_generator import BatchGenerator
@@ -38,6 +38,6 @@ class DatabricksTableGenerator(BatchGenerator):
         return iter(
             {
                 "query": query,
-                "timestamp": datetime.datetime.now().timestamp()
+                "timestamp": time.time()
             }
         )

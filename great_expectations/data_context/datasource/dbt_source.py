@@ -1,15 +1,15 @@
 import os
-from ruamel.yaml import YAML
-import datetime
+import time
 
-from .datasource import Datasource
-from .batch_generator import BatchGenerator
-from ...dataset.sqlalchemy_dataset import SqlAlchemyDataset
+from ruamel.yaml import YAML
+yaml = YAML(typ='safe')
 
 import sqlalchemy
 from sqlalchemy import create_engine, MetaData
 
-yaml = YAML(typ='safe')
+from .datasource import Datasource
+from .batch_generator import BatchGenerator
+from ...dataset.sqlalchemy_dataset import SqlAlchemyDataset
 
 class DBTModelGenerator(BatchGenerator):
     """This is a helper class that makes using great expectations with dbt easy!"""
@@ -30,12 +30,15 @@ class DBTModelGenerator(BatchGenerator):
             with open(os.path.join(self.dbt_target_path, data_asset_name) + ".sql", "r") as data:
                 return iter([{
                     "query": data.read(),
-                    "timestamp": datetime.datetime.now().timestamp()
+                    "timestamp": time.time()
                 }])
-        except FileNotFoundError:
-            raise FileNotFoundError(
-                "dbt model %s was not found in the compiled directory. Please run `dbt compile` or `dbt run` and try again. Or, check the directory." % data_asset_name
-            )
+        except IOError as e:
+            if e.errno == errno.NOENT:
+                raise IOError(
+                    "dbt model %s was not found in the compiled directory. Please run `dbt compile` or `dbt run` and try again. Or, check the directory." % data_asset_name
+                )
+            else:
+                raise
 
     def list_available_data_asset_names(self):
         return set([path for path in os.walk(self.dbt_target_path) if path.endswith(".sql")])

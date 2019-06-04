@@ -6,16 +6,11 @@ import logging
 import uuid
 import datetime
 import requests
+import errno
 
 import great_expectations.dataset as dataset
 
 logger = logging.getLogger(__name__)
-
-
-#####
-from urllib.parse import urlparse
-####
-
 
 def _convert_to_dataset_class(df, dataset_class, expectations_config=None, autoinspect_func=None):
     """
@@ -301,3 +296,11 @@ class DotDict(dict):
 
     def __dir__(self):
         return self.keys()
+
+def safe_mmkdir(directory, exist_ok=True): #exist_ok is  always true; it's ignored, but left here to make porting later easier
+    """Simple wrapper since exist_ok is not available in python 2"""
+    try:
+        os.makedirs(directory)
+    except OSError as e:
+        if e.errno != errno.EEXIST:
+            raise

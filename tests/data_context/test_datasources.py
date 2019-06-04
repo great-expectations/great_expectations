@@ -71,7 +71,7 @@ def test_create_sqlalchemy_datasource(data_context):
         profiles = yaml.load(profiles_file)
     
     assert profiles == {
-        profile_name: {**connection_kwargs}
+        profile_name: dict(**connection_kwargs)
     }
 
 def test_create_sparkdf_datasource(data_context, tmp_path_factory):
@@ -88,6 +88,6 @@ def test_create_sparkdf_datasource(data_context, tmp_path_factory):
 def test_sqlalchemysource_templating(sqlitedb_engine):
     datasource = SqlAlchemyDatasource(engine=sqlitedb_engine)
     generator = datasource.get_generator()
-    generator.add_query("test", "select true;")
+    generator.add_query("test", "select 'cat' as animal_name;")
     df = datasource.get_data_asset("test")
     assert True
