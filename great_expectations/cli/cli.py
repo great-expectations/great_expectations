@@ -224,21 +224,16 @@ Give your new data source a short name
 Great Expectations relies on sqlalchemy to connect to relational databases.
 Please make sure that you have it installed.         
 
-Configure the database credentials in the "{0:s}" section of this config file: 
-great_expectations/uncommitted/credentials/profiles.yml:
-    
-    {0:s}:
-        drivername: postgres
-        host: localhost 
-        port: 5432
-        username: postgres  
-        password: ****
-        database: postgres
+Next, we will configure database credentials and store them in the "{0:s}" section
+of this config file: great_expectations/uncommitted/credentials/profiles.yml:
+     """
 
+    msg_sqlalchemy_go_to_notebook = """
 To create expectations for your SQL queries start Jupyter and open notebook 
 great_expectations/notebooks/using_great_expectations_with_sql.ipynb - 
 it will walk you through configuring the database connection and next steps. 
-            """
+"""
+
     msg_unknown_data_source = """
 We are looking for more types of data types to support. 
 Please create a GitHub issue here: 
@@ -286,7 +281,7 @@ it will walk you through configuring the database connection and next steps.
         default_data_source_name = os.path.basename(path)
         data_source_name = click.prompt(msg_prompt_datasource_name, default=default_data_source_name, show_default=True)
 
-        log_message(msg_filesys_go_to_notebook, color="blue")
+        cli_message(msg_filesys_go_to_notebook, color="blue")
         context.add_datasource(data_source_name, "spark", base_directory=path)
 
 
@@ -295,15 +290,25 @@ it will walk you through configuring the database connection and next steps.
 
         cli_message(msg_sqlalchemy_config_connection.format(data_source_name), color="blue")
 
+        drivername = click.prompt("What is the driver for the sqlalchemy connection?", default="postgres", show_default=True)
+        host = click.prompt("What is the host for the sqlalchemy connection?", default="localhost", show_default=True)
+        port = click.prompt("What is the port for the sqlalchemy connection?", default="5432", show_default=True)
+        username = click.prompt("What is the username for the sqlalchemy connection?", default="postgres", show_default=True)
+        password = click.prompt("What is the password for the sqlalchemy connection?", default="", show_default=False, hide_input=True)
+        database = click.prompt("What is the database name for the sqlalchemy connection?", default="postgres", show_default=True)
+
         credentials = {
-            "drivername": "postgres",
-            "host": "localhost",
-            "port": 5432,
-            "username": "postgres",
-            "password": "****",
-            "database": "postgres"
+            "drivername": drivername,
+            "host": host,
+            "port": port,
+            "username": username,
+            "password": password,
+            "database": database
         }
         context.add_profile_credentials(data_source_name, **credentials)
+
+        cli_message(msg_sqlalchemy_go_to_notebook, color="blue")
+
         context.add_datasource(data_source_name, "sqlalchemy", profile=data_source_name)
 
 
