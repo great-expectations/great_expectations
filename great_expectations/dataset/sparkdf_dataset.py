@@ -185,7 +185,7 @@ class SparkDFDataset(MetaSparkDFDataset):
     def get_column_mean(self, column):
         # TODO need to apply this logic to other such methods?
         types = dict(self.spark_df.dtypes)
-        if types[column] not in ('int', 'float', 'double'):
+        if types[column] not in ('int', 'float', 'double', 'bigint'):
             raise TypeError('Expected numeric column type for function mean()')
         result = self.spark_df.select(column).groupBy().mean().collect()[0]
         return result[0] if len(result) > 0 else None
