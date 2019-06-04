@@ -76,14 +76,33 @@ def test_create_sqlalchemy_datasource(data_context):
 
 def test_create_sparkdf_datasource(data_context, tmp_path_factory):
     base_dir = tmp_path_factory.mktemp('test_create_sparkdf_datasource')
-    name = "test_pandas_datasource"
-    type_ = "pandas"
+    name = "test_sparkdf_datasource"
+    type_ = "spark"
 
     data_context.add_datasource(name, type_, base_directory=str(base_dir))
     data_context_config = data_context.get_config()
 
     assert name in data_context_config["datasources"] 
+    assert data_context_config["datasources"][name]["type"] == type_
+    assert data_context_config["datasources"][name]["generators"]["default"]["base_directory"] == str(base_dir)
+
+    base_dir = tmp_path_factory.mktemp('test_create_sparkdf_datasource-2')
+    name = "test_sparkdf_datasource"
+    type_ = "spark"
+
+    data_context.add_datasource(name, type_, reader_options={"sep": "|", "header": False})
+    data_context_config = data_context.get_config()
+
+    assert name in data_context_config["datasources"] 
     assert data_context_config["datasources"][name]["type"] == type_ 
+    assert data_context_config["datasources"][name]["reader_options"]["sep"] == "|"
+
+    # Note that pipe is special in yml, so let's also check to see that it was properly serialized
+    with open(os.path.join(data_context.get_context_root_directory(), "great_expectations/great_expectations.yml"), "r") as configfile:
+        lines = configfile.readlines()
+        assert "      sep: '|'\n" in lines
+        assert "      header: false\n" in lines
+
 
 def test_sqlalchemysource_templating(sqlitedb_engine):
     datasource = SqlAlchemyDatasource(engine=sqlitedb_engine)
