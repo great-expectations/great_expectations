@@ -9,10 +9,16 @@ Planned Features
 * Improved variable typing
 * Support for non-tabular datasources (e.g. JSON, XML, AVRO)
 
-
-v.0.6.0__develop
+v.0.6.1__develop
 ________________
 
+
+
+v.0.6.1
+________________
+* Re-add testing (and support) for py2
+* NOTE: Support for SqlAlchemyDataset and SparkDFDataset is enabled via optional install
+ (e.g. `pip install great_expectations[sqlalchemy]` or `pip install great_expectations[spark]`)
 
 v.0.6.0
 ------------
@@ -23,8 +29,7 @@ v.0.6.0
 * FUTURE BREAKING CHANGE: The new cache mechanism for Datasets, \
   when enabled, causes GE to assume that dataset does not change between evaluation of individual expectations. \
   We anticipate this will become the future default behavior.
-* BREAKING CHANGE: Drop official support for python 2 and pandas < 0.22
-
+* BREAKING CHANGE: Drop official support pandas < 0.22
 
 v.0.5.1
 ---------------
