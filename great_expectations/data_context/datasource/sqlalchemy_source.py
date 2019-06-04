@@ -108,23 +108,22 @@ class SqlAlchemyDatasource(Datasource):
         kwarg_engine = kwargs.pop("engine", None)
         if kwarg_engine is not None:
             self.engine = kwarg_engine
-        else:
-        
+        # if a connection string or url was provided, use that
+        elif "connection_string" in kwargs:
+            connection_string = kwargs.pop("connection_string")
+            self.engine = create_engine(connection_string, **kwargs)
+        elif "url" in kwargs:
+            url = kwargs.pop("url")
+            self.engine = create_engine(url, **kwargs)
+        else:   
             # Update credentials with anything passed during connection time
             credentials.update(dict(**kwargs))
-            self.meta = MetaData()
+            drivername = credentials.pop("drivername")
+            options = sqlalchemy.engine.url.URL(drivername, **credentials)
+            self.engine = create_engine(options)
 
-            if "url" in credentials:
-                options = credentials.pop("url")
-            else:
-                drivername = credentials.pop("drivername")
-                options = sqlalchemy.engine.url.URL(drivername, **credentials)
-            self._connect(options)
-
+        self.meta = MetaData()
         self._build_generators()
-
-    def _connect(self, options, *args, **kwargs):
-        self.engine = create_engine(options, *args, **kwargs)
 
     def _get_generator_class(self, type_):
         if type_ == "queries":
