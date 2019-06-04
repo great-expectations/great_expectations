@@ -17,16 +17,12 @@ def _convert_to_dataset_class(df, dataset_class, expectations_config=None, autoi
     Convert a (pandas) dataframe to a great_expectations dataset, with (optional) expectations_config
     """
     if expectations_config is not None:
-        # Cast the dataframe into the new class, and manually initialize expectations according to the provided configuration
+        # Create a dataset of the new class type, and manually initialize expectations according to the provided configuration
         new_df = dataset_class.from_dataset(df)
         new_df._initialize_expectations(expectations_config)
     else:
         # Instantiate the new Dataset with default expectations
-        try:
-            new_df = dataset_class.from_dataset(df)
-        except:
-            raise NotImplementedError(
-                "read_csv requires a Dataset class that can be instantiated from a Pandas DataFrame")
+        new_df = dataset_class.from_dataset(df)
         if autoinspect_func is not None:
             new_df.autoinspect(autoinspect_func)
 
@@ -167,14 +163,24 @@ def from_pandas(pandas_df,
         autoinspect_func
     )
 
-
-def validate(data_asset, expectations_config, data_asset_type=None, *args, **kwargs):
+def validate(data_asset, expectations_config=None, data_asset_name=None, data_context=None, data_asset_type=None, *args, **kwargs):
     """Validate the provided data asset using the provided config"""
+    if expectations_config is None and data_context is None:
+        raise ValueError("Either an expectations config or a DataContext is required for validation.")
+
+    if expectations_config is None:
+        logger.info("Using expectations config from DataContext.")
+        expectations_config = data_context.get_expectations_config(data_asset_name)
+    else:
+        if data_asset_name in expectations_config:
+            logger.info("Using expectations config with name %s" % expectations_config["data_asset_name"])
+        else:
+            logger.info("Using expectations config with no data_asset_name")
 
     # If the object is already a Dataset type, then this is purely a convenience method
     # and no conversion is needed
     if isinstance(data_asset, dataset.Dataset) and data_asset_type is None:
-        return data_asset.validate(expectations_config=expectations_config, *args, **kwargs)
+        return data_asset.validate(expectations_config=expectations_config, data_context=data_context, *args, **kwargs)
     elif data_asset_type is None:
         # Guess the GE data_asset_type based on the type of the data_asset
         if isinstance(data_asset, pd.DataFrame):
@@ -193,7 +199,7 @@ def validate(data_asset, expectations_config, data_asset_type=None, *args, **kwa
             raise ValueError("The validate util method only supports validation for subtypes of the provided data_asset_type.")
 
     data_asset_ = _convert_to_dataset_class(data_asset, data_asset_type, expectations_config)
-    return data_asset_.validate(*args, **kwargs)
+    return data_asset_.validate(*args, data_context=data_context, **kwargs)
 
 
 def build_slack_notification_request(validation_json=None):
