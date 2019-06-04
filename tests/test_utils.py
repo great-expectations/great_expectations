@@ -194,11 +194,8 @@ def get_dataset(dataset_type, data, schemas=None, autoinspect_func=autoinspect.c
 def candidate_getter_is_on_temporary_notimplemented_list(context, getter):
     if context == 'SqlAlchemyDataset':
         return getter in [
-            'get_column_count_in_range',
-            'get_column_hist',
             'get_column_modes',
             'get_column_stdev',
-            'get_column_value_counts',
         ]
     if context == 'SparkDFDataset':
         return getter in [
