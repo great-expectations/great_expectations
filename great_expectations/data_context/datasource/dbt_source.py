@@ -32,10 +32,13 @@ class DBTModelGenerator(BatchGenerator):
                     "query": data.read(),
                     "timestamp": datetime.datetime.now().timestamp()
                 }])
-        except FileNotFoundError:
-            raise FileNotFoundError(
-                "dbt model %s was not found in the compiled directory. Please run `dbt compile` or `dbt run` and try again. Or, check the directory." % data_asset_name
-            )
+        except IOError as e:
+            if e.errno == errno.NOENT:
+                raise IOError(
+                    "dbt model %s was not found in the compiled directory. Please run `dbt compile` or `dbt run` and try again. Or, check the directory." % data_asset_name
+                )
+            else:
+                raise
 
     def list_available_data_asset_names(self):
         return set([path for path in os.walk(self.dbt_target_path) if path.endswith(".sql")])

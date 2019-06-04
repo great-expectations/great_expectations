@@ -111,7 +111,7 @@ class SqlAlchemyDatasource(Datasource):
         else:
         
             # Update credentials with anything passed during connection time
-            credentials.update({**kwargs})
+            credentials.update(dict(**kwargs))
             self.meta = MetaData()
 
             if "url" in credentials:
