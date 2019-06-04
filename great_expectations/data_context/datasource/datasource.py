@@ -5,6 +5,8 @@ from six import string_types
 
 import logging
 
+from ...util import safe_mmkdir
+
 logger = logging.getLogger(__name__)
 yaml = YAML()
 yaml.default_flow_style = False
@@ -77,7 +79,7 @@ class Datasource(object):
         # else:
         #     logger.warning("Unable to save config with no data context attached.")
 
-        # os.makedirs(os.path.dirname(config_filepath), exist_ok=True)
+        # safe_mmkdir(os.path.dirname(config_filepath), exist_ok=True)
         # with open(config_filepath, "w") as data_file:
         #     yaml.safe_dump(self._datasource_config, data_file)
 
@@ -104,7 +106,7 @@ class Datasource(object):
             generator_name = list(self._datasource_config["generators"])[0]
             generator_config = copy.deepcopy(self._datasource_config["generators"][generator_name])
         else:
-            raise ValueError(f"Unable to load generator %s -- no configuration found or invalid configuration." % generator_name)
+            raise ValueError("Unable to load generator %s -- no configuration found or invalid configuration." % generator_name)
         type_ = generator_config.pop("type")
         generator_class = self._get_generator_class(type_)
         generator = generator_class(name=generator_name, datasource=self, **generator_config)

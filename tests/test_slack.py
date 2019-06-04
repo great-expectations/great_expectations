@@ -1,5 +1,9 @@
 import pytest
-from unittest import mock
+try:
+    from unittest import mock
+except ImportError:
+    import mock
+
 from great_expectations import get_slack_callback, build_slack_notification_request
 
 

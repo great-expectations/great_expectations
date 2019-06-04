@@ -2,17 +2,19 @@ import os
 import glob
 import shutil
 
+from ..util import safe_mmkdir
+
 def _scaffold_directories_and_notebooks(base_dir):
-    os.makedirs(base_dir, exist_ok=True)
+    safe_mmkdir(base_dir, exist_ok=True)
     notebook_dir_name = "notebooks"
 
     open(os.path.join(base_dir, ".gitignore"), 'w').write("""uncommitted/""")
 
     for directory in [notebook_dir_name, "expectations", "datasources", "uncommitted", "plugins", "fixtures"]:
-        os.makedirs(os.path.join(base_dir, directory), exist_ok=True)
+        safe_mmkdir(os.path.join(base_dir, directory), exist_ok=True)
 
     for uncommitted_directory in ["validations", "credentials", "samples"]:
-        os.makedirs(os.path.join(base_dir, "uncommitted", uncommitted_directory), exist_ok=True)
+        safe_mmkdir(os.path.join(base_dir, "uncommitted", uncommitted_directory), exist_ok=True)
 
     for notebook in glob.glob(script_relative_path("../init_notebooks/*.ipynb")):
         notebook_name = os.path.basename(notebook)

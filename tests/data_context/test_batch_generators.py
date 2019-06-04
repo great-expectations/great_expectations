@@ -36,5 +36,5 @@ def test_file_kwargs_generator_error(data_context, filesystem_csv):
     base_dir = filesystem_csv
     data_context.add_datasource("default", "pandas", base_directory=str(base_dir))
 
-    with pytest.raises(FileNotFoundError, match="f4"):
+    with pytest.raises(IOError, match="f4"):
         data_context.get_data_asset("default", "f4")
