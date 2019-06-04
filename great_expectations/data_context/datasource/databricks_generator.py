@@ -38,6 +38,6 @@ class DatabricksTableGenerator(BatchGenerator):
         return iter(
             {
                 "query": query,
-                "timestamp": datetime.datetime.now().timestamp()
+                "timestamp": datetime.datetime.timestamp(datetime.now())
             }
         )
