@@ -364,7 +364,65 @@ class DataContext(object):
     def bind_evaluation_parameters(self, run_id, expectations_config):
         return self._evaluation_parameter_store.get_run_parameters(run_id)
 
-    def register_validation_results(self, run_id, validation_results, data_asset):
+    def register_validation_results(self, run_id, validation_results, data_asset=None):
+        """Process results of a validation run, including registering evaluation parameters that are now available
+        and storing results and snapshots if so configured."""
+
+        if "result_store" in self._project_config:
+            result_store = self._project_config["result_store"]
+            if isinstance(result_store, string_types) and result_store == "filesystem":
+                logger.info("Storing result to file")
+                with open(os.path.join(self.context_root_directory, "great_expectations/uncommitted/validations/",
+                                       run_id), "w") as outfile:
+                    json.dump(validation_results, outfile)
+            elif isinstance(result_store, dict) and "s3" in result_store:
+                bucket = result_store["bucket"]
+                key_prefix = result_store["key_prefix"]
+                key = key_prefix + "validations/{run_id}".format(run_id=run_id) + ".json"
+                validation_results["meta"]["result_reference"] = "s3://{bucket}/{key}".format(bucket=bucket, key=key)
+                try:
+                    import boto3
+                    s3 = boto3.resource('s3')
+                    result_s3 = s3.Object(bucket, key)
+                    result_s3.put(Body=json.dumps(validation_results).encode('utf-8'))
+                except ImportError:
+                    logger.error("Error importing boto3 for AWS support.")
+                except Exception:
+                    raise
+
+        if "result_callback" in self._project_config:
+            result_callback = self._project_config["result_callback"]
+            if isinstance(result_callback, dict) and "slack" in result_callback:
+                get_slack_callback(result_callback["slack"])(validation_results)
+            else:
+                logger.warning("Unrecognized result_callback configuration.")
+
+        if "data_asset_snapshot_store" in self._project_config and validation_results["success"] is False:
+            data_asset_snapshot_store = self._project_config["data_asset_snapshot_store"]
+            if isinstance(data_asset, PandasDataset):
+                if isinstance(data_asset_snapshot_store, string_types):
+                    logger.info("Storing dataset to file")
+                    self.to_csv(data_asset_snapshot_store)
+                elif isinstance(data_asset_snapshot_store, dict) and "s3" in data_asset_snapshot_store:
+                    bucket = data_asset_snapshot_store["bucket"]
+                    key_prefix = data_asset_snapshot_store["key_prefix"]
+                    key = key_prefix + "snapshots/{run_id}/{data_asset_name}".format(run_id=run_id,
+                                                                                     data_asset_name=data_asset.get_data_asset_name()) + ".csv.gz"
+                    validation_results["meta"]["data_asset_snapshot"] = "s3://{bucket}/{key}".format(bucket=bucket, key=key)
+
+                    try:
+                        import boto3
+                        s3 = boto3.resource('s3')
+                        result_s3 = s3.Object(bucket, key)
+                        result_s3.put(Body=data_asset.to_csv(compression="gzip").encode('utf-8'))
+                    except ImportError:
+                        logger.error("Error importing boto3 for AWS support.")
+                    except Exception:
+                        raise
+            else:
+                logger.warning(
+                    "Unable to save data_asset of type: %s. Only PandasDataset is supported." % type(data_asset))
+
         if not self._compiled:
             self._compile()
 
@@ -412,61 +470,6 @@ class DataContext(object):
                             self.store_validation_param(run_id, desired_param, result["result"]["details"])
                         else:
                             logger.warning("Unrecognized key for parameter %s" % desired_param)
-
-        if "data_asset_snapshot_store" in self._project_config and validation_results["success"] is False:
-            data_asset_snapshot_store = self._project_config["data_asset_snapshot_store"]
-            if isinstance(data_asset, PandasDataset):
-                if isinstance(data_asset_snapshot_store, string_types):
-                    logger.info("Storing dataset to file")
-                    self.to_csv(data_asset_snapshot_store)
-                elif isinstance(data_asset_snapshot_store, dict) and "s3" in data_asset_snapshot_store:
-                    bucket = data_asset_snapshot_store["bucket"]
-                    key_prefix = data_asset_snapshot_store["key_prefix"]
-                    key = key_prefix + "snapshots/{run_id}/{data_asset_name}".format(run_id=run_id,
-                                                                                     data_asset_name=data_asset.get_data_asset_name()) + ".csv.gz"
-                    validation_results["meta"]["data_asset_snapshot"] = "s3://{bucket}/{key}".format(bucket=bucket, key=key)
-
-                    try:
-                        import boto3
-                        s3 = boto3.resource('s3')
-                        result_s3 = s3.Object(bucket, key)
-                        result_s3.put(Body=data_asset.to_csv(compression="gzip").encode('utf-8'))
-                    except ImportError:
-                        logger.error("Error importing boto3 for AWS support.")
-                    except Exception:
-                        raise
-            else:
-                logger.warning(
-                    "Unable to save data_asset of type: %s. Only PandasDataset is supported." % type(data_asset))
-
-        if "result_store" in self._project_config:
-            result_store = self._project_config["result_store"]
-            if isinstance(result_store, string_types) and result_store == "filesystem":
-                logger.info("Storing result to file")
-                with open(os.path.join(self.context_root_directory, "great_expectations/uncommitted/validations/",
-                                       run_id), "w") as outfile:
-                    json.dump(validation_results, outfile)
-            elif isinstance(result_store, dict) and "s3" in result_store:
-                bucket = result_store["bucket"]
-                key_prefix = result_store["key_prefix"]
-                key = key_prefix + "validations/{run_id}".format(run_id=run_id) + ".json"
-                validation_results["meta"]["result_reference"] = "s3://{bucket}/{key}".format(bucket=bucket, key=key)
-                try:
-                    import boto3
-                    s3 = boto3.resource('s3')
-                    result_s3 = s3.Object(bucket, key)
-                    result_s3.put(Body=json.dumps(validation_results).encode('utf-8'))
-                except ImportError:
-                    logger.error("Error importing boto3 for AWS support.")
-                except Exception:
-                    raise
-
-        if "result_callback" in self._project_config:
-            result_callback = self._project_config["result_callback"]
-            if isinstance(result_callback, dict) and "slack" in result_callback:
-                get_slack_callback(result_callback["slack"])(validation_results)
-            else:
-                logger.warning("Unrecognized result_callback configuration.")
 
         return validation_results
 
