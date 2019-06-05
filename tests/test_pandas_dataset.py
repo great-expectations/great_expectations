@@ -330,28 +330,6 @@ def test_from_pandas():
     assert list(ge_df_custom['z'])==list(pd_df['z'])
 
 
-def test_from_pandas_expectations_config():
-    # Logic mostly copied from TestValidation.test_validate
-    def load_ge_config(file):
-        with open(file) as f:
-            return json.load(f)
-
-    my_expectations_config = load_ge_config(
-        "./tests/test_sets/titanic_expectations.json")
-
-    pd_df = pd.read_csv("./tests/test_sets/Titanic.csv")
-    my_df = ge.from_pandas(pd_df, expectations_config=my_expectations_config)
-
-    my_df.set_default_expectation_argument("result_format", "COMPLETE")
-
-    results = my_df.validate(catch_exceptions=False)
-
-    expected_results = load_ge_config(
-        "./tests/test_sets/expected_results_20180303.json")
-
-    assertDeepAlmostEqual(results, expected_results)
-
-
 def test_ge_pandas_concatenating_no_autoinspect():
     df1 = ge.dataset.PandasDataset({
         'A': ['A0', 'A1', 'A2'],

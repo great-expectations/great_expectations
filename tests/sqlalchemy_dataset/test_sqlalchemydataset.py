@@ -1,4 +1,7 @@
-from unittest import mock
+try:
+    from unittest import mock
+except ImportError:
+    import mock
 import pytest
 
 from great_expectations.dataset import MetaSqlAlchemyDataset, SqlAlchemyDataset
@@ -95,6 +98,10 @@ def test_missing_engine_error():
     with pytest.raises(ValueError) as err:
         SqlAlchemyDataset('test_engine', schema='example')
         assert "Engine or connection_string must be provided." in str(err)
+
+
+def test_only_connection_string():
+    SqlAlchemyDataset('test_engine', connection_string='sqlite://')
 
 
 def test_schema_custom_sql_error():
