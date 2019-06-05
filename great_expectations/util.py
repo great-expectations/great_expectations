@@ -170,7 +170,7 @@ def validate(data_asset, expectations_config=None, data_asset_name=None, data_co
 
     if expectations_config is None:
         logger.info("Using expectations config from DataContext.")
-        expectations_config = data_context.get_expectations_config(data_asset_name)
+        expectations_config = data_context.get_expectations(data_asset_name)
     else:
         if data_asset_name in expectations_config:
             logger.info("Using expectations config with name %s" % expectations_config["data_asset_name"])

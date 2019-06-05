@@ -1,12 +1,40 @@
 from IPython.core.display import display, HTML
 
-def set_data_source(context, data_source_type):
+def set_data_source(context, data_source_type=None):
     data_source_name = None
 
-    configured_datasources = [datasource['name'] for datasource in context.list_datasources() if
-                                     datasource['type'] == data_source_type]
-    if len(configured_datasources) == 0:
-        display(HTML("""
+    if not data_source_type:
+        configured_datasources = [datasource for datasource in context.list_datasources()]
+
+        if len(configured_datasources) == 0:
+            display(HTML("""
+<p>
+No data sources found in the great_expectations.yml of your project.
+</p>
+
+<p>
+If you did not create the data source during init, here is how to add it now: <a href="https://great-expectations.readthedocs.io/en/latest/how_to_add_data_source.html">How To Add a Data Source</a>
+</p>
+""".format(data_source_type)))
+        elif len(configured_datasources) > 1:
+            display(HTML("""
+<p>
+Found more than one data source in the great_expectations.yml of your project:
+<b>{1:s}</b>
+</p>
+<p>
+Uncomment the next cell and set data_source_name to one of these names.
+</p>
+""".format(data_source_type, ','.join([datasource['name'] for datasource in configured_datasources]))))
+        else:
+            data_source_name = configured_datasources[0]['name']
+            display(HTML("Will be using this data source from your project's great_expectations.yml: <b>{0:s}</b>".format(data_source_name)))
+
+    else:
+        configured_datasources = [datasource['name'] for datasource in context.list_datasources() if
+                                         datasource['type'] == data_source_type]
+        if len(configured_datasources) == 0:
+            display(HTML("""
 <p>
 No {0:s} data sources found in the great_expectations.yml of your project.
 </p>
@@ -15,8 +43,8 @@ No {0:s} data sources found in the great_expectations.yml of your project.
 If you did not create the data source during init, here is how to add it now: <a href="https://great-expectations.readthedocs.io/en/latest/how_to_add_data_source.html">How To Add a Data Source</a>
 </p>
 """.format(data_source_type)))
-    elif len(configured_datasources) > 1:
-        display(HTML("""
+        elif len(configured_datasources) > 1:
+            display(HTML("""
 <p>
 Found more than one {0:s} data source in the great_expectations.yml of your project:
 <b>{1:s}</b>
@@ -25,9 +53,9 @@ Found more than one {0:s} data source in the great_expectations.yml of your proj
 Uncomment the next cell and set data_source_name to one of these names.
 </p>
 """.format(data_source_type, ','.join(configured_datasources))))
-    else:
-        data_source_name = configured_datasources[0]
-        display(HTML("Will be using this {0:s} data source from your project's great_expectations.yml: <b>{1:s}</b>".format(data_source_type, data_source_name)))
+        else:
+            data_source_name = configured_datasources[0]
+            display(HTML("Will be using this {0:s} data source from your project's great_expectations.yml: <b>{1:s}</b>".format(data_source_type, data_source_name)))
 
     return data_source_name
 
