@@ -14,7 +14,7 @@ import re
 import great_expectations as ge
 from great_expectations.dataset.autoinspect import columns_exist
 from great_expectations.dataset import PandasDataset, MetaPandasDataset
-from great_expectations.data_asset.base import (
+from great_expectations.data_asset.data_asset import (
     _calc_validation_statistics,
     ValidationStatistics,
 )
