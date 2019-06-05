@@ -18,6 +18,7 @@ except ImportError:
     from urlparse import urlparse
 
 from great_expectations.util import get_slack_callback
+from great_expectations.data_asset import DataAsset
 from great_expectations.dataset import PandasDataset
 from great_expectations.datasource.sqlalchemy_source import SqlAlchemyDatasource
 from great_expectations.datasource.dbt_source import DBTDatasource
@@ -370,14 +371,25 @@ class DataContext(object):
 
         if "result_store" in self._project_config:
             result_store = self._project_config["result_store"]
-            if isinstance(result_store, string_types) and result_store == "filesystem":
+            if isinstance(result_store, dict) and "filesystem" in result_store:
                 logger.info("Storing result to file")
-                with open(os.path.join(self.context_root_directory, "great_expectations/uncommitted/validations/",
-                                       run_id), "w") as outfile:
+                # TODO: better error handling if base directory doesn't exist or isn't configured
+                try:
+                    os.makedirs(os.path.join(self.context_root_directory, result_store["filesystem"]["base_directory"], run_id))
+                except OSError as e:
+                    if e.errno != errno.EEXIST:
+                        raise
+                if isinstance(data_asset, DataAsset):
+                    data_asset_name = data_asset.get_data_asset_name()
+                else:
+                    data_asset_name = "_untitled"
+
+                with open(os.path.join(self.context_root_directory, result_store["filesystem"]["base_directory"],
+                                       run_id, data_asset_name + ".json"), "w") as outfile:
                     json.dump(validation_results, outfile)
             elif isinstance(result_store, dict) and "s3" in result_store:
-                bucket = result_store["bucket"]
-                key_prefix = result_store["key_prefix"]
+                bucket = result_store["s3"]["bucket"]
+                key_prefix = result_store["s3"]["key_prefix"]
                 key = key_prefix + "validations/{run_id}".format(run_id=run_id) + ".json"
                 validation_results["meta"]["result_reference"] = "s3://{bucket}/{key}".format(bucket=bucket, key=key)
                 try:
@@ -400,12 +412,20 @@ class DataContext(object):
         if "data_asset_snapshot_store" in self._project_config and validation_results["success"] is False:
             data_asset_snapshot_store = self._project_config["data_asset_snapshot_store"]
             if isinstance(data_asset, PandasDataset):
-                if isinstance(data_asset_snapshot_store, string_types):
+                if isinstance(data_asset_snapshot_store, dict) and "filesystem" in data_asset_snapshot_store:
                     logger.info("Storing dataset to file")
-                    self.to_csv(data_asset_snapshot_store)
+                    try:
+                        os.makedirs(os.path.join(self.context_root_directory, data_asset_snapshot_store["filesystem"]["base_directory"], run_id))
+                    except OSError as e:
+                        if e.errno != errno.EEXIST:
+                            raise
+
+                    data_asset.to_csv(os.path.join(self.context_root_directory, data_asset_snapshot_store["filesystem"]["base_directory"],
+                                                   run_id,
+                                                   data_asset.get_data_asset_name() + ".csv.gz"), compression="gzip")
                 elif isinstance(data_asset_snapshot_store, dict) and "s3" in data_asset_snapshot_store:
-                    bucket = data_asset_snapshot_store["bucket"]
-                    key_prefix = data_asset_snapshot_store["key_prefix"]
+                    bucket = data_asset_snapshot_store["s3"]["bucket"]
+                    key_prefix = data_asset_snapshot_store["s3"]["key_prefix"]
                     key = key_prefix + "snapshots/{run_id}/{data_asset_name}".format(run_id=run_id,
                                                                                      data_asset_name=data_asset.get_data_asset_name()) + ".csv.gz"
                     validation_results["meta"]["data_asset_snapshot"] = "s3://{bucket}/{key}".format(bucket=bucket, key=key)
@@ -428,10 +448,10 @@ class DataContext(object):
 
         if "meta" not in validation_results or "data_asset_name" not in validation_results["meta"]:
             logger.warning("No data_asset_name found in validation results; evaluation parameters cannot be registered.")
-            return
+            return validation_results
         elif validation_results["meta"]["data_asset_name"] not in self._compiled_parameters["data_assets"]:
             # This is fine; short-circuit since we do not need to register any results from this dataset.
-            return
+            return validation_results
         else:
             data_asset_name = validation_results["meta"]["data_asset_name"]
         
@@ -653,22 +673,20 @@ PROJECT_OPTIONAL_CONFIG_COMMENT = """
 
 # Configure additional data context options here.
 
-# Uncomment the lines below to enable a result store. If a result store is enabled,
+# Uncomment the lines below to enable s3 as a result store. If a result store is enabled,
 # validation results will be saved in the store according to run id.
 
 # For S3, ensure that appropriate credentials or assume_role permissions are set where
 # validation happens.
 
 
-# result_store:
+result_store:
+  filesystem:
+    base_directory: uncommitted/validations/
 #   s3:
 #     bucket: <your bucket>
 #     key_prefix: <your key prefix>
 #   
-
-# Alternatively, to save locally:
-
-# result_store: filesystem
 
 # Uncomment the lines below to enable a result callback.
 
@@ -678,7 +696,9 @@ PROJECT_OPTIONAL_CONFIG_COMMENT = """
     
 # Uncomment the lines below to save snapshots of data assets that fail validation.
 
-# data_asset_snapshot_store:
+data_asset_snapshot_store:
+  filesystem:
+    base_directory: uncommitted/snapshots/
 #   s3:
 #     bucket:
 #     key_prefix:
