@@ -74,17 +74,17 @@ def test_list_expectations_configs(data_context):
     assert data_context.list_expectations_configs() == ['parameterized_expectations_config_fixture']
 
 def test_get_existing_data_asset_config(parameterized_config_data_context):
-    data_asset_config = parameterized_config_data_context.get_data_asset_config('parameterized_expectations_config_fixture')
+    data_asset_config = parameterized_config_data_context.get_expectations('parameterized_expectations_config_fixture')
     assert data_asset_config['data_asset_name'] == 'parameterized_expectations_config_fixture'
     assert len(data_asset_config['expectations']) == 2
 
 def test_get_new_data_asset_config(parameterized_config_data_context):
-    data_asset_config = parameterized_config_data_context.get_data_asset_config('this_data_asset_config_does_not_exist')
+    data_asset_config = parameterized_config_data_context.get_expectations('this_data_asset_config_does_not_exist')
     assert data_asset_config['data_asset_name'] == 'this_data_asset_config_does_not_exist'
     assert len(data_asset_config['expectations']) == 0
 
 def test_save_data_asset_config(parameterized_config_data_context):
-    data_asset_config = parameterized_config_data_context.get_data_asset_config('this_data_asset_config_does_not_exist')
+    data_asset_config = parameterized_config_data_context.get_expectations('this_data_asset_config_does_not_exist')
     assert data_asset_config['data_asset_name'] == 'this_data_asset_config_does_not_exist'
     assert len(data_asset_config['expectations']) == 0
     data_asset_config['expectations'].append({
@@ -93,8 +93,8 @@ def test_save_data_asset_config(parameterized_config_data_context):
                 "value": 10
             }
         })
-    parameterized_config_data_context.save_data_asset_config(data_asset_config)
-    data_asset_config_saved = parameterized_config_data_context.get_data_asset_config('this_data_asset_config_does_not_exist')
+    parameterized_config_data_context.save_expectations(data_asset_config)
+    data_asset_config_saved = parameterized_config_data_context.get_expectations('this_data_asset_config_does_not_exist')
     assert data_asset_config['expectations'] == data_asset_config_saved['expectations']
 
 def test_register_validation_results(parameterized_config_data_context):
