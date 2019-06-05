@@ -22,7 +22,7 @@ except ImportError:
 
 from great_expectations.datasource.sqlalchemy_source import SqlAlchemyDatasource
 from great_expectations.datasource.dbt_source import DBTDatasource
-from great_expectations.datasource import PandasCSVDatasource
+from great_expectations.datasource import PandasDatasource
 from great_expectations.datasource import SparkDFDatasource
 
 from .expectation_explorer import ExpectationExplorer
@@ -215,7 +215,7 @@ class DataContext(object):
 
     def _get_datasource_class(self, datasource_type):
         if datasource_type == "pandas":
-            return PandasCSVDatasource
+            return PandasDatasource
         elif datasource_type == "dbt":
             return DBTDatasource
         elif datasource_type == "sqlalchemy":
@@ -225,7 +225,7 @@ class DataContext(object):
         else:
             try:
                 # Update to do dynamic loading based on plugin types
-                return PandasCSVDatasource
+                return PandasDatasource
             except ImportError:
                 raise
  

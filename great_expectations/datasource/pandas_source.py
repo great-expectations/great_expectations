@@ -9,7 +9,8 @@ from great_expectations.dataset.pandas_dataset import PandasDataset
 
 from great_expectations.exceptions import BatchKwargsError
 
-class PandasCSVDatasource(Datasource):
+
+class PandasDatasource(Datasource):
     """
     A PandasDataSource makes it easy to create, manage and validate expectations on
     Pandas dataframes.
@@ -24,7 +25,7 @@ class PandasCSVDatasource(Datasource):
             generators = {
                 "default": {"type": "filesystem", "base_directory": base_directory}
         }
-        super(PandasCSVDatasource, self).__init__(name, type_="pandas", data_context=data_context, generators=generators)
+        super(PandasDatasource, self).__init__(name, type_="pandas", data_context=data_context, generators=generators)
         self._datasource_config.update(
             {
                 "read_csv_kwargs": read_csv_kwargs or {}
@@ -42,7 +43,7 @@ class PandasCSVDatasource(Datasource):
         try:
             full_path = os.path.join(batch_kwargs["path"])
         except KeyError:
-            raise BatchKwargsError("Invalid batch_kwargs: path is required for a PandasCSVDatasource", batch_kwargs)
+            raise BatchKwargsError("Invalid batch_kwargs: path is required for a PandasDatasource", batch_kwargs)
         
         all_kwargs = dict(**self._datasource_config["read_csv_kwargs"])
         all_kwargs.update(**kwargs)
