@@ -943,7 +943,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             result["meta"].update({"batch_kwargs": self._batch_kwargs})
 
         if data_context is not None:
-            data_context.register_validation_results(run_id, result)
+            data_context.register_validation_results(run_id, result, self)
 
         self._data_context = validate__data_context
         self._interactive_evaluation = validate__interactive_evaluation

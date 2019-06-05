@@ -313,16 +313,6 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         self.discard_subset_failing_expectations = kwargs.get(
             'discard_subset_failing_expectations', False)
 
-    ### Helper Implementations ###
-    def _save_dataset(self, dataset_store):
-        if isinstance(dataset_store, io.BufferedIOBase):
-            logger.info("Storing dataset to file")
-            self.to_csv(dataset_store)
-        else:
-            ##### WARNING -- ASSUMING S3 ########
-            logger.info("Storing to s3")
-            dataset_store.put(Body=self.to_csv().encode('utf-8'))
-
     def get_row_count(self):
         return self.shape[0]
 
