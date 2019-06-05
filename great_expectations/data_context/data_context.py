@@ -8,12 +8,9 @@ import errno
 from glob import glob
 from six import string_types
 
-from ..exceptions import ExpectationsConfigNotFoundError
 from ..version import __version__
-from ..dataset import PandasDataset
 from ..util import safe_mmkdir, read_csv
 
-from IPython.display import display
 import ipywidgets as widgets
 try:
     from urllib.parse import urlparse
@@ -30,7 +27,9 @@ from .expectation_explorer import ExpectationExplorer
 logger = logging.getLogger(__name__)
 debug_view = widgets.Output(layout={'border': '3 px solid pink'})
 yaml = YAML()
+yaml.indent(mapping=2, sequence=4, offset=2)
 yaml.default_flow_style = False
+
 
 class DataContext(object):
     #TODO: update class documentation
@@ -40,18 +39,16 @@ class DataContext(object):
     Warning: this feature is new in v0.4 and may change based on community feedback.
     """
 
-    def __init__(self, options=None, expectation_explorer=False):
+    def __init__(self, context_root_dir=None, expectation_explorer=False):
         self._expectation_explorer = expectation_explorer
         self._datasources = {}
         if expectation_explorer:
             self._expectation_explorer_manager = ExpectationExplorer()
-        self.connect(options)
-
-    def connect(self, context_root_dir):
         # determine the "context root directory" - this is the parent of "great_expectations" dir
 
         if context_root_dir is None:
-            if os.path.isdir("../notebooks") and os.path.isdir("../../great_expectations") and os.path.isfile("../../great_expectations/great_expectations.yml"):
+            if (os.path.isdir("../notebooks") and os.path.isdir("../../great_expectations")
+                    and os.path.isfile("../../great_expectations/great_expectations.yml")):
                 self.context_root_directory = "../../"
             elif os.path.isdir("./great_expectations") and os.path.isfile("./great_expectations/great_expectations.yml"):
                 self.context_root_directory = "./"
@@ -71,7 +68,6 @@ class DataContext(object):
             # TODO: if one of these loads fails, be okay with that
             self.get_datasource(datasource)
 
-
         self._load_evaluation_parameter_store()
         self._compiled = False
 
@@ -85,9 +81,13 @@ class DataContext(object):
         except IOError as e:
             if e.errno != errno.ENOENT:
                 raise
-            base_config = yaml.load("{}")
-            # add comments the first time a data context is created
-            base_config.yaml_set_start_comment(PROJECT_HELP_COMMENT)
+            with open(os.path.join(self.context_root_directory, "great_expectations/great_expectations.yml"), "w") as template:
+                template.write(PROJECT_TEMPLATE)
+
+            with open(os.path.join(self.context_root_directory, "great_expectations/great_expectations.yml"),
+                      "r") as template:
+                base_config = yaml.load(template)
+
             return base_config
 
     def _save_project_config(self):
@@ -383,7 +383,8 @@ class DataContext(object):
                 # First, bind column-style parameters
                 if (("column" in result['expectation_config']['kwargs']) and 
                     ("columns" in self._compiled_parameters["data_assets"][data_asset_name][expectation_type]) and 
-                    (result['expectation_config']['kwargs']["column"] in self._compiled_parameters["data_assets"][data_asset_name][expectation_type]["columns"])):
+                    (result['expectation_config']['kwargs']["column"] in
+                     self._compiled_parameters["data_assets"][data_asset_name][expectation_type]["columns"])):
 
                     column = result['expectation_config']['kwargs']["column"]
                     # Now that we have a small search space, invert logic, and look for the parameters in our result
@@ -410,6 +411,40 @@ class DataContext(object):
                             self.store_validation_param(run_id, desired_param, result["result"]["details"])
                         else:
                             logger.warning("Unrecognized key for parameter %s" % desired_param)
+
+        if self.save_dataset_on_failure is not None and result["success"] is False:
+            ##### WARNING: HACKED FOR DEMO #######
+            bucket = save_dataset_on_failure.bucket_name
+            key = save_dataset_on_failure.key
+            result["meta"]["dataset_reference"] = "s3://{bucket}/{key}".format(bucket=bucket, key=key)
+            self._save_dataset(save_dataset_on_failure)
+
+        if self.result_store is not None:
+            ##### WARNING: HACKED FOR DEMO #######
+            if isinstance(result_store, string_types):
+                logger.info("Storing result to file")
+            else:  # TODO: hack - assumes S3
+                bucket = result_store.bucket_name
+                key = result_store.key
+                result["meta"]["result_reference"] = "s3://{bucket}/{key}".format(bucket=bucket, key=key)
+            self._save_result(result, result_store=result_store)
+
+        if self.result_callback is not None:
+            result_callback(result)
+
+    ######BEFORE MERGE --- MOVE THIS TO THE CORRECT LOCATION########
+    def _save_dataset(self, dataset_store):
+        raise NotImplementedError
+
+    def _save_result(self, result, result_store):
+        if isinstance(result_store, string_types):
+            logger.info("Storing dataset to file")
+            with open(result_store, 'w+') as file:
+                json.dump(result, file)
+        else:
+            ##### WARNING -- ASSUMING S3 ########
+            logger.info("Storing to s3")
+            result_store.put(Body=json.dumps(result).encode('utf-8'))
 
     def store_validation_param(self, run_id, key, value):
         self._evaluation_parameter_store.set(run_id, key, value)
@@ -577,20 +612,53 @@ class DataContext(object):
             return return_obj
 
 
+PROJECT_HELP_COMMENT = """# Welcome to great expectations. 
+# This project configuration file allows you to define datasources, 
+# generators, integrations, and other configuration artifacts that
+# make it easier to use Great Expectations.
 
-
-PROJECT_HELP_COMMENT="""Welcome to great expectations. 
-This project configuration file allows you to define datasources, 
-generators, integrations, and other configuration artifacts that
-make it easier to use Great Expectations.
-
-For more help configuring great expectations, 
-see the documentation at: https://greatexpectations.io/config_file.html
+# For more help configuring great expectations, 
+# see the documentation at: https://greatexpectations.io/config_file.html
 
 """
 
+PROJECT_OPTIONAL_CONFIG_COMMENT = """
 
-PROFILE_COMMENT="""This file stores profiles with database access credentials. 
+# Configure additional data context options here.
+
+# Uncomment the lines below to enable a result store. If a result store is enabled,
+# validation results will be saved in the store according to run id.
+
+# For S3, ensure that appropriate credentials or assume_role permissions are set where
+# validation happens.
+
+
+# result_store:
+#   s3:
+#     bucket_name:
+#     key_prefix:
+
+
+# Uncomment the lines below to enable a result callback.
+
+# result_callback:
+#   slack:
+#     webhook: https://slack.com/replace_with_your_webhook
+    
+    
+# Uncomment the lines below to save snapshots of data assets that fail validation.
+
+# data_asset_snapshot_store:
+#   s3:
+#     bucket_name:
+#     key_prefix:
+
+"""
+
+PROJECT_TEMPLATE = PROJECT_HELP_COMMENT + "datasources: {}\n" + PROJECT_OPTIONAL_CONFIG_COMMENT
+
+
+PROFILE_COMMENT = """This file stores profiles with database access credentials. 
 Do not commit this file to version control. 
 
 A profile can optionally have a single parameter called 
