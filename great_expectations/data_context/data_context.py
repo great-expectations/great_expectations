@@ -370,6 +370,11 @@ class DataContext(object):
         and storing results and snapshots if so configured."""
 
         if "result_store" in self._project_config:
+            if isinstance(data_asset, DataAsset):
+                data_asset_name = data_asset.get_data_asset_name()
+            else:
+                data_asset_name = "_untitled"
+
             result_store = self._project_config["result_store"]
             if isinstance(result_store, dict) and "filesystem" in result_store:
                 logger.info("Storing result to file")
@@ -379,10 +384,6 @@ class DataContext(object):
                 except OSError as e:
                     if e.errno != errno.EEXIST:
                         raise
-                if isinstance(data_asset, DataAsset):
-                    data_asset_name = data_asset.get_data_asset_name()
-                else:
-                    data_asset_name = "_untitled"
 
                 with open(os.path.join(self.context_root_directory, "great_expectations", result_store["filesystem"]["base_directory"],
                                        run_id, data_asset_name + ".json"), "w") as outfile:
@@ -390,7 +391,8 @@ class DataContext(object):
             elif isinstance(result_store, dict) and "s3" in result_store:
                 bucket = result_store["s3"]["bucket"]
                 key_prefix = result_store["s3"]["key_prefix"]
-                key = os.path.join(key_prefix, "validations/{run_id}".format(run_id=run_id), ".json")
+                key = os.path.join(key_prefix, "validations/{run_id}/{data_asset_name}.json".format(run_id=run_id,
+                                                                                     data_asset_name=data_asset_name))
                 validation_results["meta"]["result_reference"] = "s3://{bucket}/{key}".format(bucket=bucket, key=key)
                 try:
                     import boto3
@@ -426,8 +428,8 @@ class DataContext(object):
                 elif isinstance(data_asset_snapshot_store, dict) and "s3" in data_asset_snapshot_store:
                     bucket = data_asset_snapshot_store["s3"]["bucket"]
                     key_prefix = data_asset_snapshot_store["s3"]["key_prefix"]
-                    key = os.path.join(key_prefix, "snapshots/{run_id}/{data_asset_name}".format(run_id=run_id,
-                                                                                     data_asset_name=data_asset.get_data_asset_name()), ".csv.gz")
+                    key = os.path.join(key_prefix, "snapshots/{run_id}/{data_asset_name}.csv.gz".format(run_id=run_id,
+                                                                                     data_asset_name=data_asset.get_data_asset_name()))
                     validation_results["meta"]["data_asset_snapshot"] = "s3://{bucket}/{key}".format(bucket=bucket, key=key)
 
                     try:
