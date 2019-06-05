@@ -1,0 +1,11 @@
+# This is a basic configuration for testing.
+# It has comments that should be preserved.
+datasources:
+  # For example, this one.
+  default:
+    type: pandas
+    generators:
+      # The name default is read if no datasource or generator is specified
+      default:
+        type: filesystem
+        base_directory: /data

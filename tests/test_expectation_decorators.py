@@ -29,7 +29,7 @@ class TestExpectationDecorators(unittest.TestCase):
         eds.no_op_expectation()
         eds.no_op_value_expectation('a')
 
-        config = eds.get_expectations_config()
+        config = eds.get_expectations()
         self.assertEqual({'expectation_type': 'no_op_expectation', 'kwargs': {}},
                          config['expectations'][0])
 
@@ -49,7 +49,7 @@ class TestExpectationDecorators(unittest.TestCase):
         metadata = {'meta_key': 'meta_value'}
         eds = ExpectationOnlyDataAsset()
         out = eds.no_op_value_expectation('a', meta=metadata)
-        config = eds.get_expectations_config()
+        config = eds.get_expectations()
 
         self.assertEqual({'success': True,
                           'meta': metadata},
@@ -253,7 +253,8 @@ class TestExpectationDecorators(unittest.TestCase):
 
             @PandasDataset.column_aggregate_expectation
             def expect_column_median_to_be_odd(self, column):
-                return {"success": column.median() % 2, "result": {"observed_value": column.median()}}
+                median =  self.get_column_median(column)
+                return {"success": median % 2, "result": {"observed_value": median}}
 
         df = CustomPandasDataset({
             'all_odd': [1, 3, 5, 7, 9],

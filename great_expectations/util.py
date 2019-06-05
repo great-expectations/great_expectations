@@ -6,34 +6,27 @@ import logging
 import uuid
 import datetime
 import requests
+import errno
 
 import great_expectations.dataset as dataset
 
 logger = logging.getLogger(__name__)
-
-
-#####
-from urllib.parse import urlparse
-####
-
 
 def _convert_to_dataset_class(df, dataset_class, expectations_config=None, autoinspect_func=None):
     """
     Convert a (pandas) dataframe to a great_expectations dataset, with (optional) expectations_config
     """
     if expectations_config is not None:
-        # Cast the dataframe into the new class, and manually initialize expectations according to the provided configuration
-        df = dataset_class(df)
-        df._initialize_expectations(expectations_config)
+        # Create a dataset of the new class type, and manually initialize expectations according to the provided configuration
+        new_df = dataset_class.from_dataset(df)
+        new_df._initialize_expectations(expectations_config)
     else:
         # Instantiate the new Dataset with default expectations
-        try:
-            df = dataset_class(df, autoinspect_func=autoinspect_func)
-        except:
-            raise NotImplementedError(
-                "read_csv requires a Dataset class that can be instantiated from a Pandas DataFrame")
+        new_df = dataset_class.from_dataset(df)
+        if autoinspect_func is not None:
+            new_df.autoinspect(autoinspect_func)
 
-    return df
+    return new_df
 
 
 def read_csv(
@@ -170,14 +163,24 @@ def from_pandas(pandas_df,
         autoinspect_func
     )
 
-
-def validate(data_asset, expectations_config, data_asset_type=None, *args, **kwargs):
+def validate(data_asset, expectations_config=None, data_asset_name=None, data_context=None, data_asset_type=None, *args, **kwargs):
     """Validate the provided data asset using the provided config"""
+    if expectations_config is None and data_context is None:
+        raise ValueError("Either an expectations config or a DataContext is required for validation.")
+
+    if expectations_config is None:
+        logger.info("Using expectations config from DataContext.")
+        expectations_config = data_context.get_expectations(data_asset_name)
+    else:
+        if data_asset_name in expectations_config:
+            logger.info("Using expectations config with name %s" % expectations_config["data_asset_name"])
+        else:
+            logger.info("Using expectations config with no data_asset_name")
 
     # If the object is already a Dataset type, then this is purely a convenience method
     # and no conversion is needed
     if isinstance(data_asset, dataset.Dataset) and data_asset_type is None:
-        return data_asset.validate(*args, **kwargs)
+        return data_asset.validate(expectations_config=expectations_config, data_context=data_context, *args, **kwargs)
     elif data_asset_type is None:
         # Guess the GE data_asset_type based on the type of the data_asset
         if isinstance(data_asset, pd.DataFrame):
@@ -196,7 +199,7 @@ def validate(data_asset, expectations_config, data_asset_type=None, *args, **kwa
             raise ValueError("The validate util method only supports validation for subtypes of the provided data_asset_type.")
 
     data_asset_ = _convert_to_dataset_class(data_asset, data_asset_type, expectations_config)
-    return data_asset_.validate(*args, **kwargs)
+    return data_asset_.validate(*args, data_context=data_context, **kwargs)
 
 
 def build_slack_notification_request(validation_json=None):
@@ -300,19 +303,10 @@ class DotDict(dict):
     def __dir__(self):
         return self.keys()
 
-
-def script_relative_path(file_path):
-    '''
-    Useful for testing with local files. Use a path relative to where the
-    test resides and this function will return the absolute path
-    of that file. Otherwise it will be relative to script that
-    ran the test
-
-    Note this is expensive performance wise so if you are calling this many
-    times you may want to call it once and cache the base dir.
-    '''
-    # from http://bit.ly/2snyC6s
-
-    import inspect
-    scriptdir = inspect.stack()[1][1]
-    return os.path.join(os.path.dirname(os.path.abspath(scriptdir)), file_path)
+def safe_mmkdir(directory, exist_ok=True): #exist_ok is  always true; it's ignored, but left here to make porting later easier
+    """Simple wrapper since exist_ok is not available in python 2"""
+    try:
+        os.makedirs(directory)
+    except OSError as e:
+        if e.errno != errno.EEXIST:
+            raise

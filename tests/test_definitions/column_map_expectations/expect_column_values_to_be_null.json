@@ -9,6 +9,15 @@
         "no_null": ["a", "b", "c", "d"],
         "all_null": [null, null, null, null]
       },
+      "schemas": {
+        "spark": {
+          "one_null": "int",
+          "two_null": "int",
+          "three_null": "int",
+          "no_null": "string",
+          "all_null": "string"
+        }
+      },
       "tests": [
         {
           "title": "Basic positive case, BASIC result format",
