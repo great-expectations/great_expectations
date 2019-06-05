@@ -122,7 +122,7 @@ def test_register_validation_results(parameterized_config_data_context):
             }
         ]
     }
-    parameterized_config_data_context.register_validation_results(run_id, source_patient_data_results)
+    parameterized_config_data_context.register_validation_results(run_id, source_patient_data_results, PandasDataset({}))
     bound_parameters = parameterized_config_data_context._evaluation_parameter_store.get_run_parameters(run_id)
     assert bound_parameters == {
         'urn:great_expectations:validations:source_patient_data:expectations:expect_table_row_count_to_equal:result:observed_value': 1024
@@ -152,7 +152,7 @@ def test_register_validation_results(parameterized_config_data_context):
             }
         ]
     }
-    parameterized_config_data_context.register_validation_results(run_id, source_diabetes_data_results)
+    parameterized_config_data_context.register_validation_results(run_id, source_diabetes_data_results, PandasDataset({}))
     bound_parameters = parameterized_config_data_context._evaluation_parameter_store.get_run_parameters(run_id)
     assert bound_parameters == {
         'urn:great_expectations:validations:source_patient_data:expectations:expect_table_row_count_to_equal:result:observed_value': 1024, 
@@ -191,13 +191,14 @@ def test_compile(parameterized_config_data_context):
 def test_normalize_data_asset_names(tmp_path_factory):
     base_dir = tmp_path_factory.mktemp("test_normalize_data_asset_names")
     base_dir = str(base_dir)
-    context_dir = os.path.join(base_dir, "great_expectations")
+    os.makedirs(os.path.join(base_dir, "great_expectations"))
+    # context_dir = os.path.join(base_dir, "great_expectations")
     # asset_dir = context_dir.join("expectations/ds1/gen1/data_asset_1/")
     # os.makedirs(asset_dir)
     # with open(asset_dir("default.json"), "w") as config:
     #     json.dump({"data_asset_name": "data_assset_1"}, config)
 
-    context = DataContext(context_dir)
+    context = DataContext(base_dir)
 
     # assert context._normalize_data_asset_name("data_asset_1") == "ds1/gen1/data_asset_1"
     # NOTE: NORMALIZATION IS CURRENTLY A NO-OP

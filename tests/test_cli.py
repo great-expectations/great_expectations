@@ -59,34 +59,36 @@ def test_cli_validate_help():
 
   Validate a CSV file against an expectations configuration.
 
-  DATASET: Path to a file containing a CSV file to validate using the provided
-  expectations_config_file.
+  DATASET: Path to a file containing a CSV file to validate using the 
+  provided expectations_config_file.
 
   EXPECTATIONS_CONFIG_FILE: Path to a file containing a valid
   great_expectations expectations config to use to validate the data.
 
 Options:
   -p, --evaluation_parameters TEXT
-                                  Path to a file containing JSON object used to
-                                  evaluate parameters in expectations config.
-  -o, --result_format TEXT        Result format to use when building evaluation
-                                  responses.
+                                  Path to a file containing JSON object used
+                                  to evaluate parameters in expectations
+                                  config.
+  -o, --result_format TEXT        Result format to use when building
+                                  evaluation responses.
   -e, --catch_exceptions BOOLEAN  Specify whether to catch exceptions raised
-                                  during evaluation of expectations (defaults to
-                                  True).
+                                  during evaluation of expectations (defaults
+                                  to True).
   -f, --only_return_failures BOOLEAN
                                   Specify whether to only return expectations
-                                  that are not met during evaluation (defaults
-                                  to False).
+                                  that are not met during evaluation
+                                  (defaults to False).
   -m, --custom_dataset_module TEXT
                                   Path to a python module containing a custom
                                   dataset class.
   -c, --custom_dataset_class TEXT
-                                  Name of the custom dataset class to use during
-                                  evaluation.
+                                  Name of the custom dataset class to use
+                                  during evaluation.
   --help                          Show this message and exit.
-"""
-    assert result.output == expected_help_message
+""".replace(" ", "").replace("\t", "").replace("\n", "")
+    output = str(result.output).replace(" ", "").replace("\t", "").replace("\n", "")
+    assert output == expected_help_message
 
 
 def test_cli_validate_missing_positional_arguments():
