@@ -376,7 +376,7 @@ class DataContext(object):
                 # TODO: better error handling if base directory doesn't exist or isn't configured
                 try:
                     os.makedirs(os.path.join(self.context_root_directory, result_store["filesystem"]["base_directory"], run_id))
-                except IOError as e:
+                except OSError as e:
                     if e.errno != errno.EEXIST:
                         raise
                 if isinstance(data_asset, DataAsset):
@@ -416,7 +416,7 @@ class DataContext(object):
                     logger.info("Storing dataset to file")
                     try:
                         os.makedirs(os.path.join(self.context_root_directory, data_asset_snapshot_store["filesystem"]["base_directory"], run_id))
-                    except IOError as e:
+                    except OSError as e:
                         if e.errno != errno.EEXIST:
                             raise
 
