@@ -375,7 +375,7 @@ class DataContext(object):
                 logger.info("Storing result to file")
                 # TODO: better error handling if base directory doesn't exist or isn't configured
                 try:
-                    os.makedirs(os.path.join(self.context_root_directory, result_store["filesystem"]["base_directory"], run_id))
+                    os.makedirs(os.path.join(self.context_root_directory, "great_expectations", result_store["filesystem"]["base_directory"], run_id))
                 except OSError as e:
                     if e.errno != errno.EEXIST:
                         raise
@@ -384,13 +384,13 @@ class DataContext(object):
                 else:
                     data_asset_name = "_untitled"
 
-                with open(os.path.join(self.context_root_directory, result_store["filesystem"]["base_directory"],
+                with open(os.path.join(self.context_root_directory, "great_expectations", result_store["filesystem"]["base_directory"],
                                        run_id, data_asset_name + ".json"), "w") as outfile:
                     json.dump(validation_results, outfile)
             elif isinstance(result_store, dict) and "s3" in result_store:
                 bucket = result_store["s3"]["bucket"]
                 key_prefix = result_store["s3"]["key_prefix"]
-                key = key_prefix + "validations/{run_id}".format(run_id=run_id) + ".json"
+                key = os.path.join(key_prefix, "validations/{run_id}".format(run_id=run_id), ".json")
                 validation_results["meta"]["result_reference"] = "s3://{bucket}/{key}".format(bucket=bucket, key=key)
                 try:
                     import boto3
@@ -415,19 +415,19 @@ class DataContext(object):
                 if isinstance(data_asset_snapshot_store, dict) and "filesystem" in data_asset_snapshot_store:
                     logger.info("Storing dataset to file")
                     try:
-                        os.makedirs(os.path.join(self.context_root_directory, data_asset_snapshot_store["filesystem"]["base_directory"], run_id))
+                        os.makedirs(os.path.join(self.context_root_directory, "great_expectations", data_asset_snapshot_store["filesystem"]["base_directory"], run_id))
                     except OSError as e:
                         if e.errno != errno.EEXIST:
                             raise
 
-                    data_asset.to_csv(os.path.join(self.context_root_directory, data_asset_snapshot_store["filesystem"]["base_directory"],
+                    data_asset.to_csv(os.path.join(self.context_root_directory, "great_expectations", data_asset_snapshot_store["filesystem"]["base_directory"],
                                                    run_id,
                                                    data_asset.get_data_asset_name() + ".csv.gz"), compression="gzip")
                 elif isinstance(data_asset_snapshot_store, dict) and "s3" in data_asset_snapshot_store:
                     bucket = data_asset_snapshot_store["s3"]["bucket"]
                     key_prefix = data_asset_snapshot_store["s3"]["key_prefix"]
-                    key = key_prefix + "snapshots/{run_id}/{data_asset_name}".format(run_id=run_id,
-                                                                                     data_asset_name=data_asset.get_data_asset_name()) + ".csv.gz"
+                    key = os.path.join(key_prefix, "snapshots/{run_id}/{data_asset_name}".format(run_id=run_id,
+                                                                                     data_asset_name=data_asset.get_data_asset_name()), ".csv.gz")
                     validation_results["meta"]["data_asset_snapshot"] = "s3://{bucket}/{key}".format(bucket=bucket, key=key)
 
                     try:
@@ -695,10 +695,11 @@ result_store:
     
     
 # Uncomment the lines below to save snapshots of data assets that fail validation.
+# Only filesystem or s3 should be uncommented 
 
-data_asset_snapshot_store:
-  filesystem:
-    base_directory: uncommitted/snapshots/
+# data_asset_snapshot_store:
+#   filesystem:
+#     base_directory: uncommitted/snapshots/
 #   s3:
 #     bucket:
 #     key_prefix:
