@@ -20,10 +20,10 @@ try:
 except ImportError:
     from urlparse import urlparse
 
-from .datasource.sqlalchemy_source import SqlAlchemyDatasource
-from .datasource.dbt_source import DBTDatasource
-from .datasource.pandas_source import PandasCSVDatasource
-from .datasource.spark_source import SparkDFDatasource
+from great_expectations.datasource.sqlalchemy_source import SqlAlchemyDatasource
+from great_expectations.datasource.dbt_source import DBTDatasource
+from great_expectations.datasource import PandasCSVDatasource
+from great_expectations.datasource import SparkDFDatasource
 
 from .expectation_explorer import ExpectationExplorer
 

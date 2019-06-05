@@ -9,8 +9,8 @@ import pandas as pd
 import sqlalchemy as sa
 
 from great_expectations.data_context import DataContext
-from great_expectations.data_context.datasource.pandas_source import PandasCSVDatasource
-from great_expectations.data_context.datasource.sqlalchemy_source import SqlAlchemyDatasource
+from great_expectations.datasource import PandasCSVDatasource
+from great_expectations.datasource.sqlalchemy_source import SqlAlchemyDatasource
 
 from great_expectations.dataset import PandasDataset, SqlAlchemyDataset
 
