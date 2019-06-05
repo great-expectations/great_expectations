@@ -376,8 +376,8 @@ class DataContext(object):
                                        run_id), "w") as outfile:
                     json.dump(validation_results, outfile)
             elif isinstance(result_store, dict) and "s3" in result_store:
-                bucket = result_store["bucket"]
-                key_prefix = result_store["key_prefix"]
+                bucket = result_store["s3"]["bucket"]
+                key_prefix = result_store["s3"]["key_prefix"]
                 key = key_prefix + "validations/{run_id}".format(run_id=run_id) + ".json"
                 validation_results["meta"]["result_reference"] = "s3://{bucket}/{key}".format(bucket=bucket, key=key)
                 try:
@@ -402,10 +402,10 @@ class DataContext(object):
             if isinstance(data_asset, PandasDataset):
                 if isinstance(data_asset_snapshot_store, string_types):
                     logger.info("Storing dataset to file")
-                    self.to_csv(data_asset_snapshot_store)
+                    data_asset.to_csv(data_asset_snapshot_store)
                 elif isinstance(data_asset_snapshot_store, dict) and "s3" in data_asset_snapshot_store:
-                    bucket = data_asset_snapshot_store["bucket"]
-                    key_prefix = data_asset_snapshot_store["key_prefix"]
+                    bucket = data_asset_snapshot_store["s3"]["bucket"]
+                    key_prefix = data_asset_snapshot_store["s3"]["key_prefix"]
                     key = key_prefix + "snapshots/{run_id}/{data_asset_name}".format(run_id=run_id,
                                                                                      data_asset_name=data_asset.get_data_asset_name()) + ".csv.gz"
                     validation_results["meta"]["data_asset_snapshot"] = "s3://{bucket}/{key}".format(bucket=bucket, key=key)
@@ -428,10 +428,10 @@ class DataContext(object):
 
         if "meta" not in validation_results or "data_asset_name" not in validation_results["meta"]:
             logger.warning("No data_asset_name found in validation results; evaluation parameters cannot be registered.")
-            return
+            return validation_results
         elif validation_results["meta"]["data_asset_name"] not in self._compiled_parameters["data_assets"]:
             # This is fine; short-circuit since we do not need to register any results from this dataset.
-            return
+            return validation_results
         else:
             data_asset_name = validation_results["meta"]["data_asset_name"]
         
