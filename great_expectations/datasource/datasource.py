@@ -5,7 +5,7 @@ from six import string_types
 
 import logging
 
-from ...util import safe_mmkdir
+from great_expectations.util import safe_mmkdir
 
 logger = logging.getLogger(__name__)
 yaml = YAML()

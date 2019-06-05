@@ -9,8 +9,8 @@ import pandas as pd
 import sqlalchemy as sa
 
 from great_expectations.data_context import DataContext
-from great_expectations.data_context.datasource.pandas_source import PandasCSVDatasource
-from great_expectations.data_context.datasource.sqlalchemy_source import SqlAlchemyDatasource
+from great_expectations.datasource import PandasDatasource
+from great_expectations.datasource.sqlalchemy_source import SqlAlchemyDatasource
 
 from great_expectations.dataset import PandasDataset, SqlAlchemyDataset
 
@@ -58,7 +58,7 @@ def test_create_pandas_datasource(data_context, tmp_path_factory):
     assert data_context_file_config["datasources"][name] == data_context_config["datasources"][name]
 
 def test_standalone_pandas_datasource(test_folder_connection_path):
-    datasource = PandasCSVDatasource('PandasCSV', base_directory=test_folder_connection_path)
+    datasource = PandasDatasource('PandasCSV', base_directory=test_folder_connection_path)
 
     assert datasource.list_available_data_asset_names() == [{"generator": "default", "available_data_asset_names": {"test"}}]
     manual_batch_kwargs = datasource.build_batch_kwargs(os.path.join(str(test_folder_connection_path), "test.csv"))

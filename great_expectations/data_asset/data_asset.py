@@ -21,6 +21,7 @@ from great_expectations.dataset.autoinspect import columns_exist
 
 logger = logging.getLogger("DataAsset")
 
+
 class DataAsset(object):
 
     def __init__(self, *args, **kwargs):
@@ -50,7 +51,6 @@ class DataAsset(object):
         self._batch_kwargs = batch_kwargs
         if autoinspect_func is not None:
             autoinspect_func(self)
-
 
     def autoinspect(self, autoinspect_func=columns_exist):
         autoinspect_func(self)
@@ -728,21 +728,6 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         else:
             raise ValueError("Unable to save config: filepath or data_context must be available.")
 
-    ######BEFORE MERGE --- MOVE THIS TO THE CORRECT LOCATION########
-    def _save_dataset(self, dataset_store):
-        raise NotImplementedError
-
-    def _save_result(self, result, result_store):
-        if isinstance(result_store, string_types):
-            logger.info("Storing dataset to file")
-            with open(result_store, 'w+') as file:
-                json.dump(result, file)
-        else:
-            ##### WARNING -- ASSUMING S3 ########
-            logger.info("Storing to s3")
-            result_store.put(Body=json.dumps(result).encode('utf-8'))
-
-
     def validate(self, 
                  expectations_config=None, 
                  run_id=None,
@@ -750,10 +735,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                  evaluation_parameters=None,
                  catch_exceptions=True, 
                  result_format=None, 
-                 only_return_failures=False,
-                 save_dataset_on_failure=None,
-                 result_store=None,
-                 result_callback=None):
+                 only_return_failures=False):
         """Generates a JSON-formatted report describing the outcome of all expectations.
 
             Use the default expectations_config=None to validate the expectations config associated with the DataAsset.
@@ -949,9 +931,6 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             }            
         }
 
-        if data_context is not None:
-            data_context.register_validation_results(run_id, result)
-
         if evaluation_parameters is not None:
             result.update({"evaluation_parameters": evaluation_parameters})
 
@@ -963,25 +942,8 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         if self._batch_kwargs is not None:
             result["meta"].update({"batch_kwargs": self._batch_kwargs})
 
-        if save_dataset_on_failure is not None and result["success"] == False:
-            ##### WARNING: HACKED FOR DEMO #######
-            bucket = save_dataset_on_failure.bucket_name
-            key = save_dataset_on_failure.key
-            result["meta"]["dataset_reference"] = "s3://{bucket}/{key}".format(bucket=bucket, key=key)
-            self._save_dataset(save_dataset_on_failure)
-
-        if result_store is not None:
-            ##### WARNING: HACKED FOR DEMO #######
-            if isinstance(result_store, string_types):
-                logger.info("Storing result to file")
-            else: #TODO: hack - assumes S3
-                bucket = result_store.bucket_name
-                key = result_store.key
-                result["meta"]["result_reference"] = "s3://{bucket}/{key}".format(bucket=bucket, key=key)
-            self._save_result(result, result_store = result_store)
-
-        if result_callback is not None:
-            result_callback(result)
+        if data_context is not None:
+            data_context.register_validation_results(run_id, result, self)
 
         self._data_context = validate__data_context
         self._interactive_evaluation = validate__interactive_evaluation
