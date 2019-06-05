@@ -11,14 +11,14 @@ import great_expectations.dataset.autoinspect as autoinspect
 
 def test_no_autoinspection():
     df = ge.dataset.PandasDataset({"a": [1, 2, 3]}, autoinspect_func=None)
-    config = df.get_expectations_config()
+    config = df.get_expectations()
 
     assert len(config["expectations"]) == 0
 
 
 def test_default_no_autoinspection():
     df = ge.dataset.PandasDataset({"a": [1, 2, 3]})
-    config = df.get_expectations_config()
+    config = df.get_expectations()
 
     assert len(config["expectations"]) == 0
 
@@ -27,12 +27,12 @@ def test_default_no_autoinspection():
 def test_autoinspect_existing_dataset(dataset_type):
     # Get a basic dataset with no expectations
     df = get_dataset(dataset_type, {"a": [1, 2, 3]}, autoinspect_func=None)
-    config = df.get_expectations_config()
+    config = df.get_expectations()
     assert len(config["expectations"]) == 0
 
     # Run autoinspect
     df.autoinspect(autoinspect.columns_exist)
-    config = df.get_expectations_config()
+    config = df.get_expectations()
 
     # Ensure that autoinspect worked
     assert config["expectations"] == \
@@ -43,7 +43,7 @@ def test_autoinspect_existing_dataset(dataset_type):
 def test_autoinspect_columns_exist(dataset_type):
     df = get_dataset(
         dataset_type, {"a": [1, 2, 3]}, autoinspect_func=autoinspect.columns_exist)
-    config = df.get_expectations_config()
+    config = df.get_expectations()
 
     assert len(config["expectations"]) == 1
     assert config["expectations"] == \
