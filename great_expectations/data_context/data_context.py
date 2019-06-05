@@ -35,11 +35,12 @@ yaml.default_flow_style = False
 
 
 class DataContext(object):
-    #TODO: update class documentation
-    """A generic DataContext, exposing the base API including constructor with `options` parameter, list_datasets,
-    and get_dataset.
+    """A DataContext represents a Great Expectations project. It captures essential information such as
+    expectations configurations.
 
-    Warning: this feature is new in v0.4 and may change based on community feedback.
+    The DataContext is configured via a yml file that should be stored in a file called great_expectations/great_expectations.yml
+    under the context_root_dir passed during initialization.
+    
     """
 
     def __init__(self, context_root_dir=None, expectation_explorer=False):
@@ -190,7 +191,7 @@ class DataContext(object):
             )
         return data_asset_names
 
-    def get_data_asset(self, datasource_name, data_asset_name, batch_kwargs=None, **kwargs):
+    def get_batch(self, datasource_name, data_asset_name, batch_kwargs=None, **kwargs):
         data_asset_name = self._normalize_data_asset_name(data_asset_name)
         # datasource_name = find(data_asset_name.split("/")[0]
         datasource = self.get_datasource(datasource_name)
@@ -198,7 +199,6 @@ class DataContext(object):
             raise Exception("Can't find datasource {0:s} in the config - please check your great_expectations.yml")
 
         data_asset = datasource.get_data_asset(data_asset_name, batch_kwargs, **kwargs)
-        # data_asset._initialize_expectations(self.get_data_asset_config(data_asset_name))
         return data_asset
 
     def add_datasource(self, name, type_, **kwargs):
@@ -330,22 +330,17 @@ class DataContext(object):
             if options == 1:
                 return last_found_config
 
-        
         # We allow "new" configs to be considered normalized out of the box
         return data_asset_name
         # raise ExpectationsConfigNotFoundError(data_asset_name)
 
-    def get_expectations_config(self, data_asset_name, batch_kwargs=None):
-        return self.get_data_asset_config(data_asset_name)
-
-    def get_data_asset_config(self, data_asset_name):
+    def get_expectations(self, data_asset_name, batch_kwargs=None):
         config_file_path = os.path.join(self.expectations_directory, data_asset_name + '.json')
         if os.path.isfile(config_file_path):
             with open(os.path.join(self.expectations_directory, data_asset_name + '.json')) as json_file:
                 return json.load(json_file)
         else:
-            #TODO (Eugene): Would it be better to return None if the file does not exist? Currently this method acts as
-            # get_or_create
+            # TODO: Should this return None? Currently this method acts as get_or_create
             return {
                 'data_asset_name': data_asset_name,
                 'meta': {
@@ -354,15 +349,17 @@ class DataContext(object):
                 'expectations': [],
              } 
 
-    def save_data_asset_config(self, data_asset_config):
-        data_asset_name = data_asset_config['data_asset_name']
+    def save_expectations(self, expectations, data_asset_name=None):
+        if data_asset_name is None:
+            data_asset_name = expectations['data_asset_name']
         config_file_path = os.path.join(self.expectations_directory, data_asset_name + '.json')
         safe_mmkdir(os.path.split(config_file_path)[0], exist_ok=True)
         with open(config_file_path, 'w') as outfile:
-            json.dump(data_asset_config, outfile)
+            json.dump(expectations, outfile)
         self._compiled = False
 
-    def bind_evaluation_parameters(self, run_id, expectations_config):
+    def bind_evaluation_parameters(self, run_id, expectations):
+        # TOOO: only return parameters requested by the given expectations
         return self._evaluation_parameter_store.get_run_parameters(run_id)
 
     def register_validation_results(self, run_id, validation_results, data_asset=None):
@@ -372,22 +369,18 @@ class DataContext(object):
         if "result_store" in self._project_config:
             result_store = self._project_config["result_store"]
             if isinstance(result_store, dict) and "filesystem" in result_store:
-                logger.info("Storing result to file")
-                # TODO: better error handling if base directory doesn't exist or isn't configured
-                try:
-                    os.makedirs(os.path.join(self.context_root_directory, result_store["filesystem"]["base_directory"], run_id))
-                except OSError as e:
-                    if e.errno != errno.EEXIST:
-                        raise
                 if isinstance(data_asset, DataAsset):
                     data_asset_name = data_asset.get_data_asset_name()
                 else:
                     data_asset_name = "_untitled"
-
-                with open(os.path.join(self.context_root_directory, result_store["filesystem"]["base_directory"],
-                                       run_id, data_asset_name + ".json"), "w") as outfile:
+                validation_filepath = os.path.join(self.context_root_directory, result_store["filesystem"]["base_directory"],
+                                       run_id, data_asset_name + ".json")
+                logger.info("Storing validation result: %s" % validation_filepath)
+                safe_mmkdir(os.path.join(self.context_root_directory, result_store["filesystem"]["base_directory"], run_id))
+                with open(validation_filepath, "w") as outfile:
                     json.dump(validation_results, outfile)
-            elif isinstance(result_store, dict) and "s3" in result_store:
+
+            if isinstance(result_store, dict) and "s3" in result_store:
                 bucket = result_store["s3"]["bucket"]
                 key_prefix = result_store["s3"]["key_prefix"]
                 key = key_prefix + "validations/{run_id}".format(run_id=run_id) + ".json"
@@ -414,16 +407,12 @@ class DataContext(object):
             if isinstance(data_asset, PandasDataset):
                 if isinstance(data_asset_snapshot_store, dict) and "filesystem" in data_asset_snapshot_store:
                     logger.info("Storing dataset to file")
-                    try:
-                        os.makedirs(os.path.join(self.context_root_directory, data_asset_snapshot_store["filesystem"]["base_directory"], run_id))
-                    except OSError as e:
-                        if e.errno != errno.EEXIST:
-                            raise
-
+                    safe_mmkdir(os.path.join(self.context_root_directory, data_asset_snapshot_store["filesystem"]["base_directory"], run_id))
                     data_asset.to_csv(os.path.join(self.context_root_directory, data_asset_snapshot_store["filesystem"]["base_directory"],
                                                    run_id,
                                                    data_asset.get_data_asset_name() + ".csv.gz"), compression="gzip")
-                elif isinstance(data_asset_snapshot_store, dict) and "s3" in data_asset_snapshot_store:
+
+                if isinstance(data_asset_snapshot_store, dict) and "s3" in data_asset_snapshot_store:
                     bucket = data_asset_snapshot_store["s3"]["bucket"]
                     key_prefix = data_asset_snapshot_store["s3"]["key_prefix"]
                     key = key_prefix + "snapshots/{run_id}/{data_asset_name}".format(run_id=run_id,
