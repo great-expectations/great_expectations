@@ -5,9 +5,9 @@ import pandas as pd
 
 from .datasource import Datasource
 from .filesystem_path_generator import FilesystemPathGenerator
-from ...dataset.pandas_dataset import PandasDataset
+from great_expectations.dataset.pandas_dataset import PandasDataset
 
-from ...exceptions import BatchKwargsError
+from great_expectations.exceptions import BatchKwargsError
 
 class PandasCSVDatasource(Datasource):
     """

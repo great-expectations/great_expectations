@@ -8,7 +8,7 @@ from sqlalchemy import create_engine, MetaData
 
 from .datasource import Datasource
 from .batch_generator import BatchGenerator
-from ...dataset.sqlalchemy_dataset import SqlAlchemyDataset
+from great_expectations.dataset.sqlalchemy_dataset import SqlAlchemyDataset
 
 logger = logging.getLogger(__name__)
 

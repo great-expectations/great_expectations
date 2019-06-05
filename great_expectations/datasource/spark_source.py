@@ -8,7 +8,7 @@ from .databricks_generator import DatabricksTableGenerator
 logger = logging.getLogger(__name__)
 
 try:
-    from ...dataset.sparkdf_dataset import SparkDFDataset
+    from great_expectations.dataset.sparkdf_dataset import SparkDFDataset
     from pyspark.sql import SparkSession
 except ImportError:
     logger.error("Unable to load pyspark; install optional spark dependency for support.")
