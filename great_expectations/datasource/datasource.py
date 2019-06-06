@@ -125,7 +125,7 @@ class Datasource(object):
                 raise ValueError("No generator or batch_kwargs available to provide a dataset.")
 
         if self._data_context is not None:
-            expectations_config = self._data_context.get_expectations_config(data_asset_name, batch_kwargs)
+            expectations_config = self._data_context.get_expectations(data_asset_name, batch_kwargs)
         else:
             expectations_config = None
 
