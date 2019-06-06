@@ -1,5 +1,6 @@
 import os
 import errno
+import hashlib
 
 from .batch_generator import BatchGenerator
 
@@ -27,34 +28,50 @@ class FilesystemPathGenerator(BatchGenerator):
         # If the data_asset_name is a file, then return the path.
         # Otherwise, use files in a subdir as batches
         if os.path.isdir(os.path.join(self._get_current_base_directory(), data_asset_name)):
+            return self._build_batch_kwargs_path_iter(os.listdir(os.path.join(self._get_current_base_directory(), data_asset_name)))
             # return self._build_batch_kwargs_path_iter(os.scandir(os.path.join(self._get_current_base_directory(), data_asset_name)))
-            return iter([{
-                "path": os.path.join(self._get_current_base_directory(), data_asset_name, x)
-            } for x in os.listdir(os.path.join(self._get_current_base_directory(), data_asset_name))])
+            # return iter([{
+            #     "path": os.path.join(self._get_current_base_directory(), data_asset_name, x)
+            # } for x in os.listdir(os.path.join(self._get_current_base_directory(), data_asset_name))])
         elif os.path.isfile(os.path.join(self._get_current_base_directory(), data_asset_name)):
+            path = os.path.join(self._get_current_base_directory(), data_asset_name)
+            with open(path,'rb') as f:
+                md5 = hashlib.md5(f.read()).hexdigest()
             return iter([
                 {
-                    "path": os.path.join(self._get_current_base_directory(), data_asset_name)
+                    "path": path,
+                    "md5": md5
                 }
                 ])
         elif os.path.isfile(os.path.join(self._get_current_base_directory(), data_asset_name + ".csv")):
+            path = os.path.join(self._get_current_base_directory(), data_asset_name + ".csv")
+            with open(path,'rb') as f:
+                md5 = hashlib.md5(f.read()).hexdigest()
             return iter([
                 {
-                    "path": os.path.join(self._get_current_base_directory(), data_asset_name + ".csv")
+                    "path": path,
+                    "md5": md5
                 }
                 ])
         else:
             raise IOError(os.path.join(self._base_directory, data_asset_name))
 
-    # Removed to support python2 (no scandir; listdir instead)
     # def _build_batch_kwargs_path_iter(self, path_iter):
-    #     try:
-    #         while True:
-    #             yield {
-    #                 "path": next(path_iter).path
-    #             }
-    #     except StopIteration:
-    #         return
+    def _build_batch_kwargs_path_iter(self, path_list):
+        for path in path_list:
+            with open(path,'rb') as f:
+                md5 = hashlib.md5(f.read()).hexdigest()
+            yield {
+                "path": path,
+                "md5": md5
+            }
+        # try:
+        #     while True:
+        #         yield {
+        #             "path": next(path_iter).path
+        #         }
+        # except StopIteration:
+        #     return
 
     # If base directory is a relative path, interpret it as relative to the data context's
     # context root directory (parent directory of great_expectation dir)
