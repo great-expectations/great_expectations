@@ -6,8 +6,7 @@
     <title>{% block title %}{% endblock %}</title>
 
     {# {# Remove this when not debugging: #}
-    <meta http-equiv="refresh" content="2"/>
-
+    {# <meta http-equiv="refresh" content="2"/> #}
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"/>
     <style>
       body {
@@ -65,23 +64,18 @@
         data-target="#navigation"
         data-offset="50"
     >
-
     {% include 'ge_info.j2' %}
-
     <div class="container">
       <div class="row">
-
         <div class="col-3">
           {% block navbar %}{% include 'navbar.j2' %}{% endblock %}
         </div>
-
         <div class="col-9">
           {% block sections %}{% include 'sections.j2' %}{% endblock %}
         </div>
 
       </div>
     </div>
-
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
