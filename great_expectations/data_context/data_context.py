@@ -376,10 +376,10 @@ class DataContext(object):
         if "result_store" in self._project_config:
             result_store = self._project_config["result_store"]
             if isinstance(result_store, dict) and "filesystem" in result_store:
-                validation_filepath = os.path.join(self.context_root_directory, result_store["filesystem"]["base_directory"],
+                validation_filepath = os.path.join(self.context_root_directory, "great_expectations", result_store["filesystem"]["base_directory"],
                                        run_id, data_asset_name + ".json")
                 logger.info("Storing validation result: %s" % validation_filepath)
-                safe_mmkdir(os.path.join(self.context_root_directory, result_store["filesystem"]["base_directory"], run_id))
+                safe_mmkdir(os.path.join(self.context_root_directory, "great_expectations", result_store["filesystem"]["base_directory"], run_id))
                 with open(validation_filepath, "w") as outfile:
                     json.dump(validation_results, outfile)
             if isinstance(result_store, dict) and "s3" in result_store:
@@ -410,8 +410,8 @@ class DataContext(object):
             if isinstance(data_asset, PandasDataset):
                 if isinstance(data_asset_snapshot_store, dict) and "filesystem" in data_asset_snapshot_store:
                     logger.info("Storing dataset to file")
-                    safe_mmkdir(os.path.join(self.context_root_directory, data_asset_snapshot_store["filesystem"]["base_directory"], run_id))
-                    data_asset.to_csv(os.path.join(self.context_root_directory, data_asset_snapshot_store["filesystem"]["base_directory"],
+                    safe_mmkdir(os.path.join(self.context_root_directory, "great_expectations", data_asset_snapshot_store["filesystem"]["base_directory"], run_id))
+                    data_asset.to_csv(os.path.join(self.context_root_directory, "great_expectations", data_asset_snapshot_store["filesystem"]["base_directory"],
                                                    run_id,
                                                    data_asset_name + ".csv.gz"), compression="gzip")
 
