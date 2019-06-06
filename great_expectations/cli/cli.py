@@ -283,6 +283,8 @@ it will walk you through configuring the database connection and next steps.
                                                                                                   dir_okay=True,
                                                                                                   readable=True),
                             show_default=True)
+        if path.startswith("./"):
+            path = path[2:]
 
         default_data_source_name = os.path.basename(path)
         data_source_name = click.prompt(msg_prompt_datasource_name, default=default_data_source_name, show_default=True)
@@ -328,6 +330,8 @@ it will walk you through configuring the database connection and next steps.
                                                                                                   dir_okay=True,
                                                                                                   readable=True),
                             show_default=True)
+        if path.startswith("./"):
+            path = path[2:]
 
         default_data_source_name = os.path.basename(path)
         data_source_name = click.prompt(msg_prompt_datasource_name, default=default_data_source_name, show_default=True)
