@@ -592,6 +592,18 @@ class DataAsset(object):
                                 discard_catch_exceptions_kwargs=True,
                                 suppress_warnings=False
                                 ):
+        warnings.warn("get_expectations_config is deprecated, and will be removed in a future release. " +
+                      "Please use get_expectations instead.", DeprecationWarning)
+        return self.get_expectations(discard_failed_expectations, discard_result_format_kwargs,
+                               discard_include_configs_kwargs, discard_catch_exceptions_kwargs, suppress_warnings)
+
+    def get_expectations(self,
+                         discard_failed_expectations=True,
+                         discard_result_format_kwargs=True,
+                         discard_include_configs_kwargs=True,
+                         discard_catch_exceptions_kwargs=True,
+                         suppress_warnings=False
+                         ):
         """Returns _expectation_config as a JSON object, and perform some cleaning along the way.
 
         Args:
@@ -608,7 +620,7 @@ class DataAsset(object):
             An expectation config.
 
         Note:
-            get_expectations_config does not affect the underlying config at all. The returned config is a copy of _expectations_config, not the original object.
+            get_expectations does not affect the underlying config at all. The returned config is a copy of _expectations_config, not the original object.
         """
         config = dict(self._expectations_config)
         config = copy.deepcopy(config)
@@ -653,7 +665,7 @@ class DataAsset(object):
 
         if not suppress_warnings:
             """
-WARNING: get_expectations_config discarded
+WARNING: get_expectations discarded
     12 failing expectations
     44 result_format kwargs
      0 include_config kwargs
@@ -661,7 +673,7 @@ WARNING: get_expectations_config discarded
 If you wish to change this behavior, please set discard_failed_expectations, discard_result_format_kwargs, discard_include_configs_kwargs, and discard_catch_exceptions_kwargs appropirately.
             """
             if any([discard_failed_expectations, discard_result_format_kwargs, discard_include_configs_kwargs, discard_catch_exceptions_kwargs]):
-                print("WARNING: get_expectations_config discarded")
+                print("WARNING: get_expectations discarded")
                 if discard_failed_expectations:
                     print("\t%d failing expectations" %
                           discards["failed_expectations"])
@@ -680,6 +692,20 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         return config
 
     def save_expectations_config(
+        self,
+        filepath=None,
+        discard_failed_expectations=True,
+        discard_result_format_kwargs=True,
+        discard_include_configs_kwargs=True,
+        discard_catch_exceptions_kwargs=True,
+        suppress_warnings=False
+    ):
+        warnings.warn("save_expectations_config is deprecated, and will be removed in a future release. " +
+                      "Please use save_expectations instead.", DeprecationWarning)
+        self.save_expectations(filepath, discard_failed_expectations, discard_result_format_kwargs,
+                               discard_include_configs_kwargs, discard_catch_exceptions_kwargs, suppress_warnings)
+
+    def save_expectations(
         self,
         filepath=None,
         discard_failed_expectations=True,
@@ -713,7 +739,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                   suppressed.
 
         """
-        expectations_config = self.get_expectations_config(
+        expectations_config = self.get_expectations(
             discard_failed_expectations,
             discard_result_format_kwargs,
             discard_include_configs_kwargs,
@@ -721,7 +747,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             suppress_warnings
         )
         if filepath is None and self._data_context is not None:
-            self._data_context.save_data_asset_config(expectations_config)
+            self._data_context.save_expectations(expectations_config)
         elif filepath is not None:
             expectation_config_str = json.dumps(expectations_config, indent=2)
             open(filepath, 'w').write(expectation_config_str)
@@ -812,7 +838,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         results = []
 
         if expectations_config is None:
-            expectations_config = self.get_expectations_config(
+            expectations_config = self.get_expectations(
                 discard_failed_expectations=False,
                 discard_result_format_kwargs=False,
                 discard_include_configs_kwargs=False,
@@ -943,7 +969,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             result["meta"].update({"batch_kwargs": self._batch_kwargs})
 
         if data_context is not None:
-            data_context.register_validation_results(run_id, result, self)
+            result = data_context.register_validation_results(run_id, result, self)
 
         self._data_context = validate__data_context
         self._interactive_evaluation = validate__interactive_evaluation

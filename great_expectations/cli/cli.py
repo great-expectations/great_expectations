@@ -175,9 +175,9 @@ OK to proceed?
 Time to create expectations for your data. This is done in Jupyter Notebook/Jupyter Lab. 
 
 Before we point you to the right notebook, what data does your project work with?    
-    1. Directory on local filesystem
+    1. Pandas data frames from local filesystem (CSV files)
     2. Relational database (SQL)
-    3. Spark DataFrames
+    3. Spark DataFrames from local filesystem (CSV files)
     4. None of the above
     """
 
@@ -247,7 +247,17 @@ To create expectations for your CSV files start Jupyter and open notebook
 great_expectations/notebooks/using_great_expectations_with_pandas.ipynb - 
 it will walk you through configuring the database connection and next steps. 
      """
+    msg_spark_go_to_notebook = """
+To create expectations for your CSV files start Jupyter and open the notebook
+great_expectations/notebooks/using_great_expectations_with_pandas.ipynb.
+it will walk you through configuring the database connection and next steps. 
 
+To launch with jupyter notebooks:
+    jupyter notebook great_expectations/notebooks/create_expectations_for_spark_dataframes.ipynb
+
+To launch with jupyter lab: 
+    jupyter lab great_expectations/notebooks/create_expectations_for_spark_dataframes.ipynb
+    """
     base_dir = os.path.join(target_directory, "great_expectations")
 
     cli_message("Great Expectations", color="cyan", figlet=True)
@@ -287,7 +297,7 @@ it will walk you through configuring the database connection and next steps.
         default_data_source_name = os.path.basename(path)
         data_source_name = click.prompt(msg_prompt_datasource_name, default=default_data_source_name, show_default=True)
 
-        cli_message(msg_filesys_go_to_notebook, color="blue")
+        cli_message(msg_spark_go_to_notebook, color="blue")
         context.add_datasource(data_source_name, "spark", base_directory=path)
 
     elif data_source_selection == "2":  # sqlalchemy

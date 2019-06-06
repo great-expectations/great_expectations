@@ -377,14 +377,14 @@ class TestRepeatedAppendExpectation(unittest.TestCase):
                             autoinspect_func=columns_exist)
 
         self.assertEqual(
-            len(my_df.get_expectations_config()['expectations']),
+            len(my_df.get_expectations()['expectations']),
             7
         )
 
         # For column_expectations, _append_expectation should only replace expectations where the expetation_type AND the column match
         my_df.expect_column_to_exist("PClass")
         self.assertEqual(
-            len(my_df.get_expectations_config()['expectations']),
+            len(my_df.get_expectations()['expectations']),
             7
         )
 
