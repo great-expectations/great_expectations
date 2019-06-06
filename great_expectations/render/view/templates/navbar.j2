@@ -1,0 +1,8 @@
+<nav id="navigation" class="navbar navbar-light bg-light sticky">
+    <nav class="nav nav-pills flex-column">
+        <a class="navbar-brand" href="#">MyTable</a>
+        {% for section in sections %}
+        <a class="nav-link" href="#section-{{loop.index}}">{{section['section_name']}}</a>
+        {% endfor %}
+    </nav>
+</nav>
