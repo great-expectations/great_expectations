@@ -12,8 +12,8 @@ def validation_results():
         return json.load(infile)
 
 def test_render_descriptive_page_model(validation_results):
-    print(json.dumps(DescriptivePageModel.render(validation_results)), indent=2)
-    assert True
+    print(json.dumps(DescriptivePageModel.render(validation_results), indent=2))
+    assert False
 
 def test_render_descriptive_page_view(validation_results):
     model = DescriptivePageModel.render(validation_results)

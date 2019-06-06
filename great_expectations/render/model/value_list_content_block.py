@@ -41,7 +41,7 @@ class ValueListContentBlock(ContentBlock):
 
                 new_block = {
                     "content_block_type": "graph",
-                    "graph": [chart.to_json()]
+                    "graph": chart.to_json()
                 }
 
         elif result_key == "partial_unexpected_list":
