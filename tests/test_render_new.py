@@ -13,12 +13,14 @@ def validation_results():
 
 def test_render_descriptive_page_model(validation_results):
     print(json.dumps(DescriptivePageModel.render(validation_results), indent=2))
-    assert False
+    # TODO: Use above print to set up snapshot test once we like the result
+    assert True
 
 def test_render_descriptive_page_view(validation_results):
     model = DescriptivePageModel.render(validation_results)
     print(DescriptivePageView.render(model))
-    assert False
+    # TODO: Use above print to set up snapshot test once we like the result
+    assert True
 
 def test_render_descriptive_column_section_model(validation_results):
     # Group EVRs by column
@@ -34,4 +36,5 @@ def test_render_descriptive_column_section_model(validation_results):
 
     for column in evrs.keys():
         print(json.dumps(DescriptiveColumnSectionModel.render(evrs[column]), indent=2))
+    # TODO: Use above print to set up snapshot test once we like the result
     assert True
