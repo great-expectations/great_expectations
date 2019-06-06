@@ -40,6 +40,6 @@ For a table, the header row and each item in table_rows should have the same num
 ``` json
 {
     "content_block_type": "graph",
-    "graph": [ vega_graph_specification (json) ]
+    "graph": vega_graph_specification (json)
 }
 ```
