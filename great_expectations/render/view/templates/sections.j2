@@ -6,18 +6,18 @@
         {% set section_loop = loop %}
         {% for content_block in section["content_blocks"] %}
             {% set content_block_loop = loop %}
-            {% block header %}{% include 'header.j2' %}{% endblock %}
 
-            {# {% if content_block["content_block_type"] == "header" %}
-            <div style="width:100%"><h4>{{content_block["content"][0]}}</h4></div> #}
+            {% if content_block["content_block_type"] == "header" %}
+                {% include 'header.j2' %}
 
-            {% if content_block["content_block_type"] == "text" %}
+            {% elif content_block["content_block_type"] == "text" %}
             <div style="width:100%">
                 <p>
                     {{content_block["content"][0]}}
-                    {# {{ lipsum(1, min=5, max=20) }} #}
                 </p>
             </div>
+            {% elif content_block["content_block_type"] == "value_list" %}
+                {% include 'value_list.j2' %}
 
             {% elif content_block["content_block_type"] == "bullet_list" %}
             <div style="width:100%">
@@ -38,7 +38,7 @@
             <div id="vis-{{section_loop.index}}-{{content_block_loop.index}}" style="width:45%"></div>
             <script>
             // Assign the specification to a local variable vlSpec.
-            const vlSpec = {{content_block["content"][0]}};
+            const vlSpec = {{content_block["graph"]}};
 
             // Embed the visualization in the container with id `vis`
             vegaEmbed('#vis-{{section_loop.index}}-{{loop.index}}', vlSpec, {actions: false}).then(result=>console.log(result)).catch(console.warn);
