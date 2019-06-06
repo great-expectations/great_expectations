@@ -1,3 +1,10 @@
+import json
+import os
+import logging
+import great_expectations as ge
+from datetime import datetime
+
+import tzlocal
 from IPython.core.display import display, HTML
 
 def set_data_source(context, data_source_type=None):
@@ -77,3 +84,34 @@ Read about how generators derive data assets from data sources: <a href="https:/
             """))
     elif len(available_data_assets) > 1:
         print(available_data_assets)
+
+def setup_notebook_logging():
+    def posix2local(timestamp, tz=tzlocal.get_localzone()):
+        """Seconds since the epoch -> local time as an aware datetime object."""
+        return datetime.fromtimestamp(timestamp, tz)
+
+    class Formatter(logging.Formatter):
+        def converter(self, timestamp):
+            return posix2local(timestamp)
+
+        def formatTime(self, record, datefmt=None):
+            dt = self.converter(record.created)
+            if datefmt:
+                s = dt.strftime(datefmt)
+            else:
+                t = dt.strftime(self.default_time_format)
+                s = self.default_msec_format % (t, record.msecs)
+            return s
+
+    logger = logging.getLogger()
+    chandler = logging.StreamHandler()
+    chandler.setLevel(logging.DEBUG)
+    chandler.setFormatter(Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s", "%Y-%m-%dT%H:%M:%S%z"))
+    logger.addHandler(chandler)
+    logger.setLevel(logging.INFO)
+    logger.setLevel(logging.INFO)
+    logging.debug("test")
+
+    # Filter warnings
+    import warnings
+    warnings.filterwarnings('ignore')
