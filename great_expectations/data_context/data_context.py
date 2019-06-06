@@ -366,26 +366,23 @@ class DataContext(object):
         """Process results of a validation run, including registering evaluation parameters that are now available
         and storing results and snapshots if so configured."""
 
-        if "result_store" in self._project_config:
-            if isinstance(data_asset, DataAsset):
-                data_asset_name = data_asset.get_data_asset_name()
-            else:
-                data_asset_name = "_untitled"
+        # TODO: harmonize with data_asset_name logic below
+        try:
+            data_asset_name = validation_results["meta"]["data_asset_name"]
+        except KeyError:
+            logger.warning("No data_asset_name found in validation results; using '_untitled'")
+            data_asset_name = "_untitled"
 
+        if "result_store" in self._project_config:
             result_store = self._project_config["result_store"]
             if isinstance(result_store, dict) and "filesystem" in result_store:
-                logger.info("Storing result to file")
-                # TODO: better error handling if base directory doesn't exist or isn't configured
-                try:
-                    os.makedirs(os.path.join(self.context_root_directory, "great_expectations", result_store["filesystem"]["base_directory"], run_id))
-                except OSError as e:
-                    if e.errno != errno.EEXIST:
-                        raise
-
-                with open(os.path.join(self.context_root_directory, "great_expectations", result_store["filesystem"]["base_directory"],
-                                       run_id, data_asset_name + ".json"), "w") as outfile:
+                validation_filepath = os.path.join(self.context_root_directory, result_store["filesystem"]["base_directory"],
+                                       run_id, data_asset_name + ".json")
+                logger.info("Storing validation result: %s" % validation_filepath)
+                safe_mmkdir(os.path.join(self.context_root_directory, result_store["filesystem"]["base_directory"], run_id))
+                with open(validation_filepath, "w") as outfile:
                     json.dump(validation_results, outfile)
-            elif isinstance(result_store, dict) and "s3" in result_store:
+            if isinstance(result_store, dict) and "s3" in result_store:
                 bucket = result_store["s3"]["bucket"]
                 key_prefix = result_store["s3"]["key_prefix"]
                 key = os.path.join(key_prefix, "validations/{run_id}/{data_asset_name}.json".format(run_id=run_id,
@@ -416,12 +413,13 @@ class DataContext(object):
                     safe_mmkdir(os.path.join(self.context_root_directory, data_asset_snapshot_store["filesystem"]["base_directory"], run_id))
                     data_asset.to_csv(os.path.join(self.context_root_directory, data_asset_snapshot_store["filesystem"]["base_directory"],
                                                    run_id,
-                                                   data_asset.get_data_asset_name() + ".csv.gz"), compression="gzip")
+                                                   data_asset_name + ".csv.gz"), compression="gzip")
+
                 if isinstance(data_asset_snapshot_store, dict) and "s3" in data_asset_snapshot_store:
                     bucket = data_asset_snapshot_store["s3"]["bucket"]
                     key_prefix = data_asset_snapshot_store["s3"]["key_prefix"]
-                    key = os.path.join(key_prefix, "snapshots/{run_id}/{data_asset_name}.csv.gz".format(run_id=run_id,
-                                                                                     data_asset_name=data_asset.get_data_asset_name()))
+                    key = key_prefix + "snapshots/{run_id}/{data_asset_name}".format(run_id=run_id,
+                                                                                     data_asset_name=data_asset_name) + ".csv.gz"
                     validation_results["meta"]["data_asset_snapshot"] = "s3://{bucket}/{key}".format(bucket=bucket, key=key)
 
                     try:
@@ -446,8 +444,6 @@ class DataContext(object):
         elif validation_results["meta"]["data_asset_name"] not in self._compiled_parameters["data_assets"]:
             # This is fine; short-circuit since we do not need to register any results from this dataset.
             return validation_results
-        else:
-            data_asset_name = validation_results["meta"]["data_asset_name"]
         
         for result in validation_results['results']:
             # Unoptimized: loop over all results and check if each is needed
@@ -689,7 +685,6 @@ result_store:
     
     
 # Uncomment the lines below to save snapshots of data assets that fail validation.
-# Only filesystem or s3 should be uncommented 
 
 # data_asset_snapshot_store:
 #   filesystem:
