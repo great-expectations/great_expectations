@@ -45,19 +45,7 @@
             </script>
 
             {% elif content_block["content_block_type"] == "table" %}
-            <div style="width:45%">
-                <table >
-                    {% set table = content_block["content"] %}
-                    {% for row in table %}
-                    <tr class="{{ loop.cycle('odd', 'even') }}" >
-                        {% set rowloop = loop %}
-                        {% for cell in row %}
-                            <td id="cell-{{ rowloop.index }}-{{ loop.index }}">{{ cell }}</td>
-                        {% endfor %}
-                    </tr>
-                    {% endfor %}
-                </table>
-            </div>
+                {% include 'table.j2' %}
 
             {% elif content_block["content_block_type"] == "example_list" %}
             {% endif %}
