@@ -13,32 +13,6 @@ from great_expectations.util import safe_mmkdir
 from great_expectations.dataset import PandasDataset, SqlAlchemyDataset
 
 
-@pytest.fixture(scope="module")
-def test_db_connection_string(tmp_path_factory):
-    df1 = pd.DataFrame(
-        {'col_1': [1, 2, 3, 4, 5], 'col_2': ['a', 'b', 'c', 'd', 'e']})
-    df2 = pd.DataFrame(
-        {'col_1': [0, 1, 2, 3, 4], 'col_2': ['b', 'c', 'd', 'e', 'f']})
-
-    path = tmp_path_factory.mktemp("db_context").join("test.db")
-    engine = sa.create_engine('sqlite:///' + str(path))
-    df1.to_sql('table_1', con=engine, index=True)
-    df2.to_sql('table_2', con=engine, index=True, schema='main')
-
-    # Return a connection string to this newly-created db
-    return 'sqlite:///' + str(path)
-
-
-@pytest.fixture(scope="module")
-def test_folder_connection_path(tmp_path_factory):
-    df1 = pd.DataFrame(
-        {'col_1': [1, 2, 3, 4, 5], 'col_2': ['a', 'b', 'c', 'd', 'e']})
-    path = tmp_path_factory.mktemp("csv_context")
-    df1.to_csv(path.join("test.csv"))
-
-    return str(path)
-
-
 @pytest.fixture()
 def parameterized_expectations_config():
     return {
@@ -100,17 +74,17 @@ def test_list_expectations_configs(data_context):
     assert data_context.list_expectations_configs() == ['parameterized_expectations_config_fixture']
 
 def test_get_existing_data_asset_config(parameterized_config_data_context):
-    data_asset_config = parameterized_config_data_context.get_data_asset_config('parameterized_expectations_config_fixture')
+    data_asset_config = parameterized_config_data_context.get_expectations('parameterized_expectations_config_fixture')
     assert data_asset_config['data_asset_name'] == 'parameterized_expectations_config_fixture'
     assert len(data_asset_config['expectations']) == 2
 
 def test_get_new_data_asset_config(parameterized_config_data_context):
-    data_asset_config = parameterized_config_data_context.get_data_asset_config('this_data_asset_config_does_not_exist')
+    data_asset_config = parameterized_config_data_context.get_expectations('this_data_asset_config_does_not_exist')
     assert data_asset_config['data_asset_name'] == 'this_data_asset_config_does_not_exist'
     assert len(data_asset_config['expectations']) == 0
 
 def test_save_data_asset_config(parameterized_config_data_context):
-    data_asset_config = parameterized_config_data_context.get_data_asset_config('this_data_asset_config_does_not_exist')
+    data_asset_config = parameterized_config_data_context.get_expectations('this_data_asset_config_does_not_exist')
     assert data_asset_config['data_asset_name'] == 'this_data_asset_config_does_not_exist'
     assert len(data_asset_config['expectations']) == 0
     data_asset_config['expectations'].append({
@@ -119,27 +93,9 @@ def test_save_data_asset_config(parameterized_config_data_context):
                 "value": 10
             }
         })
-    parameterized_config_data_context.save_data_asset_config(data_asset_config)
-    data_asset_config_saved = parameterized_config_data_context.get_data_asset_config('this_data_asset_config_does_not_exist')
+    parameterized_config_data_context.save_expectations(data_asset_config)
+    data_asset_config_saved = parameterized_config_data_context.get_expectations('this_data_asset_config_does_not_exist')
     assert data_asset_config['expectations'] == data_asset_config_saved['expectations']
-
-# def test_sqlalchemy_data_context(test_db_connection_string):
-#     context = get_data_context(
-#         'SqlAlchemy', test_db_connection_string, echo=False)
-
-#     assert context.list_datasets() == ['table_1', 'table_2']
-#     dataset1 = context.get_dataset('table_1')
-#     dataset2 = context.get_dataset('table_2', schema='main')
-#     assert isinstance(dataset1, SqlAlchemyDataset)
-#     assert isinstance(dataset2, SqlAlchemyDataset)
-
-
-# def test_pandas_data_context(test_folder_connection_path):
-#     context = get_data_context('PandasCSV', test_folder_connection_path)
-
-#     assert context.list_datasets() == ['test.csv']
-#     dataset = context.get_dataset('test.csv')
-#     assert isinstance(dataset, PandasDataset)
 
 def test_register_validation_results(parameterized_config_data_context):
     run_id = "460d61be-7266-11e9-8848-1681be663d3e"
@@ -164,9 +120,11 @@ def test_register_validation_results(parameterized_config_data_context):
                     "missing_count": 0
                 }
             }
-        ]
+        ],
+        "success": True
     }
-    parameterized_config_data_context.register_validation_results(run_id, source_patient_data_results)
+    res = parameterized_config_data_context.register_validation_results(run_id, source_patient_data_results)
+    assert res == source_patient_data_results # results should always be returned, and in this case not modified
     bound_parameters = parameterized_config_data_context._evaluation_parameter_store.get_run_parameters(run_id)
     assert bound_parameters == {
         'urn:great_expectations:validations:source_patient_data:expectations:expect_table_row_count_to_equal:result:observed_value': 1024
@@ -194,7 +152,8 @@ def test_register_validation_results(parameterized_config_data_context):
                     "missing_count": 0
                 }
             }
-        ]
+        ],
+        "success": True
     }
     parameterized_config_data_context.register_validation_results(run_id, source_diabetes_data_results)
     bound_parameters = parameterized_config_data_context._evaluation_parameter_store.get_run_parameters(run_id)
@@ -205,7 +164,6 @@ def test_register_validation_results(parameterized_config_data_context):
 
 def test_compile(parameterized_config_data_context):
     parameterized_config_data_context._compile()
-    print(parameterized_config_data_context._compiled_parameters)
     assert parameterized_config_data_context._compiled_parameters == {
         'raw': {
             'urn:great_expectations:validations:source_diabetes_data:expectations:expect_column_unique_value_count_to_be_between:columns:patient_nbr:result:observed_value', 
@@ -236,13 +194,14 @@ def test_compile(parameterized_config_data_context):
 def test_normalize_data_asset_names(tmp_path_factory):
     base_dir = tmp_path_factory.mktemp("test_normalize_data_asset_names")
     base_dir = str(base_dir)
-    context_dir = os.path.join(base_dir, "great_expectations")
+    os.makedirs(os.path.join(base_dir, "great_expectations"))
+    # context_dir = os.path.join(base_dir, "great_expectations")
     # asset_dir = context_dir.join("expectations/ds1/gen1/data_asset_1/")
     # os.makedirs(asset_dir)
     # with open(asset_dir("default.json"), "w") as config:
     #     json.dump({"data_asset_name": "data_assset_1"}, config)
 
-    context = DataContext(context_dir)
+    context = DataContext(base_dir)
 
     # assert context._normalize_data_asset_name("data_asset_1") == "ds1/gen1/data_asset_1"
     # NOTE: NORMALIZATION IS CURRENTLY A NO-OP

@@ -2,7 +2,7 @@ import time
 import logging
 
 from .batch_generator import BatchGenerator
-from ...dataset.sparkdf_dataset import SparkDFDataset
+from great_expectations.dataset.sparkdf_dataset import SparkDFDataset
 
 logger = logging.getLogger(__name__)
 

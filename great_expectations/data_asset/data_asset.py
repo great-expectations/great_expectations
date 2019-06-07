@@ -21,6 +21,7 @@ from great_expectations.dataset.autoinspect import columns_exist
 
 logger = logging.getLogger("DataAsset")
 
+
 class DataAsset(object):
 
     def __init__(self, *args, **kwargs):
@@ -50,7 +51,6 @@ class DataAsset(object):
         self._batch_kwargs = batch_kwargs
         if autoinspect_func is not None:
             autoinspect_func(self)
-
 
     def autoinspect(self, autoinspect_func=columns_exist):
         autoinspect_func(self)
@@ -206,7 +206,6 @@ class DataAsset(object):
                 # Add meta to return object
                 if meta is not None:
                     return_obj['meta'] = meta
-
 
                 return_obj = recursively_convert_to_json_serializable(
                     return_obj)
@@ -592,6 +591,18 @@ class DataAsset(object):
                                 discard_catch_exceptions_kwargs=True,
                                 suppress_warnings=False
                                 ):
+        warnings.warn("get_expectations_config is deprecated, and will be removed in a future release. " +
+                      "Please use get_expectations instead.", DeprecationWarning)
+        return self.get_expectations(discard_failed_expectations, discard_result_format_kwargs,
+                               discard_include_configs_kwargs, discard_catch_exceptions_kwargs, suppress_warnings)
+
+    def get_expectations(self,
+                         discard_failed_expectations=True,
+                         discard_result_format_kwargs=True,
+                         discard_include_configs_kwargs=True,
+                         discard_catch_exceptions_kwargs=True,
+                         suppress_warnings=False
+                         ):
         """Returns _expectation_config as a JSON object, and perform some cleaning along the way.
 
         Args:
@@ -608,7 +619,7 @@ class DataAsset(object):
             An expectation config.
 
         Note:
-            get_expectations_config does not affect the underlying config at all. The returned config is a copy of _expectations_config, not the original object.
+            get_expectations does not affect the underlying config at all. The returned config is a copy of _expectations_config, not the original object.
         """
         config = dict(self._expectations_config)
         config = copy.deepcopy(config)
@@ -653,7 +664,7 @@ class DataAsset(object):
 
         if not suppress_warnings:
             """
-WARNING: get_expectations_config discarded
+WARNING: get_expectations discarded
     12 failing expectations
     44 result_format kwargs
      0 include_config kwargs
@@ -661,7 +672,7 @@ WARNING: get_expectations_config discarded
 If you wish to change this behavior, please set discard_failed_expectations, discard_result_format_kwargs, discard_include_configs_kwargs, and discard_catch_exceptions_kwargs appropirately.
             """
             if any([discard_failed_expectations, discard_result_format_kwargs, discard_include_configs_kwargs, discard_catch_exceptions_kwargs]):
-                print("WARNING: get_expectations_config discarded")
+                print("WARNING: get_expectations discarded")
                 if discard_failed_expectations:
                     print("\t%d failing expectations" %
                           discards["failed_expectations"])
@@ -680,6 +691,20 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         return config
 
     def save_expectations_config(
+        self,
+        filepath=None,
+        discard_failed_expectations=True,
+        discard_result_format_kwargs=True,
+        discard_include_configs_kwargs=True,
+        discard_catch_exceptions_kwargs=True,
+        suppress_warnings=False
+    ):
+        warnings.warn("save_expectations_config is deprecated, and will be removed in a future release. " +
+                      "Please use save_expectations instead.", DeprecationWarning)
+        self.save_expectations(filepath, discard_failed_expectations, discard_result_format_kwargs,
+                               discard_include_configs_kwargs, discard_catch_exceptions_kwargs, suppress_warnings)
+
+    def save_expectations(
         self,
         filepath=None,
         discard_failed_expectations=True,
@@ -713,7 +738,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                   suppressed.
 
         """
-        expectations_config = self.get_expectations_config(
+        expectations_config = self.get_expectations(
             discard_failed_expectations,
             discard_result_format_kwargs,
             discard_include_configs_kwargs,
@@ -721,27 +746,12 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             suppress_warnings
         )
         if filepath is None and self._data_context is not None:
-            self._data_context.save_data_asset_config(expectations_config)
+            self._data_context.save_expectations(expectations_config)
         elif filepath is not None:
             expectation_config_str = json.dumps(expectations_config, indent=2)
             open(filepath, 'w').write(expectation_config_str)
         else:
             raise ValueError("Unable to save config: filepath or data_context must be available.")
-
-    ######BEFORE MERGE --- MOVE THIS TO THE CORRECT LOCATION########
-    def _save_dataset(self, dataset_store):
-        raise NotImplementedError
-
-    def _save_result(self, result, result_store):
-        if isinstance(result_store, string_types):
-            logger.info("Storing dataset to file")
-            with open(result_store, 'w+') as file:
-                json.dump(result, file)
-        else:
-            ##### WARNING -- ASSUMING S3 ########
-            logger.info("Storing to s3")
-            result_store.put(Body=json.dumps(result).encode('utf-8'))
-
 
     def validate(self, 
                  expectations_config=None, 
@@ -750,10 +760,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                  evaluation_parameters=None,
                  catch_exceptions=True, 
                  result_format=None, 
-                 only_return_failures=False,
-                 save_dataset_on_failure=None,
-                 result_store=None,
-                 result_callback=None):
+                 only_return_failures=False):
         """Generates a JSON-formatted report describing the outcome of all expectations.
 
             Use the default expectations_config=None to validate the expectations config associated with the DataAsset.
@@ -830,7 +837,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         results = []
 
         if expectations_config is None:
-            expectations_config = self.get_expectations_config(
+            expectations_config = self.get_expectations(
                 discard_failed_expectations=False,
                 discard_result_format_kwargs=False,
                 discard_include_configs_kwargs=False,
@@ -949,9 +956,6 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             }            
         }
 
-        if data_context is not None:
-            data_context.register_validation_results(run_id, result)
-
         if evaluation_parameters is not None:
             result.update({"evaluation_parameters": evaluation_parameters})
 
@@ -963,25 +967,8 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         if self._batch_kwargs is not None:
             result["meta"].update({"batch_kwargs": self._batch_kwargs})
 
-        if save_dataset_on_failure is not None and result["success"] == False:
-            ##### WARNING: HACKED FOR DEMO #######
-            bucket = save_dataset_on_failure.bucket_name
-            key = save_dataset_on_failure.key
-            result["meta"]["dataset_reference"] = "s3://{bucket}/{key}".format(bucket=bucket, key=key)
-            self._save_dataset(save_dataset_on_failure)
-
-        if result_store is not None:
-            ##### WARNING: HACKED FOR DEMO #######
-            if isinstance(result_store, string_types):
-                logger.info("Storing result to file")
-            else: #TODO: hack - assumes S3
-                bucket = result_store.bucket_name
-                key = result_store.key
-                result["meta"]["result_reference"] = "s3://{bucket}/{key}".format(bucket=bucket, key=key)
-            self._save_result(result, result_store = result_store)
-
-        if result_callback is not None:
-            result_callback(result)
+        if data_context is not None:
+            result = data_context.register_validation_results(run_id, result, self)
 
         self._data_context = validate__data_context
         self._interactive_evaluation = validate__interactive_evaluation
@@ -1219,6 +1206,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         new_function = self.expectation(argspec)(function)
         return new_function(self, *args, **kwargs)
+
 
 ValidationStatistics = namedtuple("ValidationStatistics", [
     "evaluated_expectations",

@@ -1,13 +1,46 @@
+# -*- coding: utf-8 -*-
+
 import pytest
+from six import PY3
 
 from ruamel.yaml import YAML
 yaml = YAML(typ='safe')
 import os
 import shutil
 
-from great_expectations.data_context import DataContext
-from great_expectations.data_context.datasource.sqlalchemy_source import SqlAlchemyDatasource
+import pandas as pd
+import sqlalchemy as sa
 
+from great_expectations.data_context import DataContext
+from great_expectations.datasource import PandasDatasource
+from great_expectations.datasource.sqlalchemy_source import SqlAlchemyDatasource
+
+from great_expectations.dataset import PandasDataset, SqlAlchemyDataset
+
+@pytest.fixture(scope="module")
+def test_folder_connection_path(tmp_path_factory):
+    df1 = pd.DataFrame(
+        {'col_1': [1, 2, 3, 4, 5], 'col_2': ['a', 'b', 'c', 'd', 'e']})
+    path = str(tmp_path_factory.mktemp("test_folder_connection_path"))
+    df1.to_csv(os.path.join(path, "test.csv"))
+
+    return str(path)
+
+@pytest.fixture(scope="module")
+def test_db_connection_string(tmp_path_factory):
+    df1 = pd.DataFrame(
+        {'col_1': [1, 2, 3, 4, 5], 'col_2': ['a', 'b', 'c', 'd', 'e']})
+    df2 = pd.DataFrame(
+        {'col_1': [0, 1, 2, 3, 4], 'col_2': ['b', 'c', 'd', 'e', 'f']})
+
+    basepath = str(tmp_path_factory.mktemp("db_context"))
+    path = os.path.join(basepath, "test.db")
+    engine = sa.create_engine('sqlite:///' + str(path))
+    df1.to_sql('table_1', con=engine, index=True)
+    df2.to_sql('table_2', con=engine, index=True, schema='main')
+
+    # Return a connection string to this newly-created db
+    return 'sqlite:///' + str(path)
 
 def test_create_pandas_datasource(data_context, tmp_path_factory):
     basedir = tmp_path_factory.mktemp('test_create_pandas_datasource')
@@ -26,6 +59,33 @@ def test_create_pandas_datasource(data_context, tmp_path_factory):
         data_context_file_config = yaml.load(data_context_config_file)
 
     assert data_context_file_config["datasources"][name] == data_context_config["datasources"][name]
+
+def test_standalone_pandas_datasource(test_folder_connection_path):
+    datasource = PandasDatasource('PandasCSV', base_directory=test_folder_connection_path)
+
+    assert datasource.list_available_data_asset_names() == [{"generator": "default", "available_data_asset_names": {"test"}}]
+    manual_batch_kwargs = datasource.build_batch_kwargs(os.path.join(str(test_folder_connection_path), "test.csv"))
+
+    # Get the default (filesystem) generator
+    generator = datasource.get_generator()
+    auto_batch_kwargs = generator.yield_batch_kwargs("test")
+
+    assert manual_batch_kwargs["path"] == auto_batch_kwargs["path"]
+
+    # Include some extra kwargs...
+    dataset = datasource.get_data_asset("test", batch_kwargs=auto_batch_kwargs, sep=",", header=0, index_col=0)
+    assert isinstance(dataset, PandasDataset)
+    assert (dataset["col_1"] == [1, 2, 3, 4, 5]).all()
+
+def test_standalone_sqlalchemy_datasource(test_db_connection_string):
+    datasource = SqlAlchemyDatasource(
+        'SqlAlchemy', connection_string=test_db_connection_string, echo=False)
+
+    assert datasource.list_available_data_asset_names() == [{"generator": "default", "available_data_asset_names": {"table_1", "table_2"}}]
+    dataset1 = datasource.get_data_asset("table_1")
+    dataset2 = datasource.get_data_asset("table_2", schema='main')
+    assert isinstance(dataset1, SqlAlchemyDataset)
+    assert isinstance(dataset2, SqlAlchemyDataset)
 
 
 def test_create_sqlalchemy_datasource(data_context):
@@ -111,3 +171,31 @@ def test_sqlalchemysource_templating(sqlitedb_engine):
     df = datasource.get_data_asset("test", col_name="animal_name")
     res = df.expect_column_to_exist("animal_name")
     assert res["success"] == True
+
+
+
+def test_pandas_source_readcsv(data_context, tmp_path_factory):
+    if not PY3:
+        # We don't specifically test py2 unicode reading since this test is about our handling of kwargs *to* read_csv
+        pytest.skip()
+    basedir = tmp_path_factory.mktemp('test_create_pandas_datasource')
+    shutil.copy("./tests/test_sets/unicode.csv", basedir)
+    data_context.add_datasource(name="mysource", type_="pandas", read_csv_kwargs={"encoding": "utf-8"}, base_directory=str(basedir))
+
+    batch = data_context.get_batch("mysource", "unicode")
+    assert len(batch["Μ"] == 1)
+    assert "😁" in list(batch["Μ"])
+
+    data_context.add_datasource(name="mysource2", type_="pandas", base_directory=str(basedir))
+    batch = data_context.get_batch("mysource2", "unicode")
+    assert "😁" in list(batch["Μ"])
+
+    data_context.add_datasource(name="mysource3", type_="pandas", read_csv_kwargs={"encoding": "utf-16"}, base_directory=str(basedir))
+    with pytest.raises(UnicodeError, match="UTF-16 stream does not start with BOM"):
+        batch = data_context.get_batch("mysource3", "unicode")
+
+    with pytest.raises(LookupError, match="unknown encoding: blarg"):
+        batch = data_context.get_batch("mysource", "unicode", encoding='blarg')
+
+    batch = data_context.get_batch("mysource2", "unicode", encoding='utf-8')
+    assert "😁" in list(batch["Μ"])
