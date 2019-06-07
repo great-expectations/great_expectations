@@ -172,9 +172,7 @@ OK to proceed?
     """
 
     msg_prompt_choose_data_source = """
-Time to create expectations for your data. This is done in Jupyter Notebook/Jupyter Lab. 
-
-Before we point you to the right notebook, what data does your project work with?    
+Configure a data source
     1. Pandas data frames from local filesystem (CSV files)
     2. Relational database (SQL)
     3. Spark DataFrames from local filesystem (CSV files)
