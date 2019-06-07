@@ -345,7 +345,7 @@ it will walk you through configuring the database connection and next steps.
 @cli.command()
 @click.argument('render_object')
 def render(render_object):
-    """Render a great expectations object
+    """Render a great expectations object.
     
     RENDER_OBJECT: path to a GE object to render
     """
