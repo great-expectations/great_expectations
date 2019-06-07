@@ -43,3 +43,12 @@ For a table, the header row and each item in table_rows should have the same num
     "graph": vega_graph_specification (json)
 }
 ```
+
+- text
+
+``` json
+{
+    "content_block_type": "text",
+    "text": text
+}
+```
