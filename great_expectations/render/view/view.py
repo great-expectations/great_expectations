@@ -12,7 +12,7 @@ class NoOpTemplate(object):
 class PrettyPrintTemplate(object):
     @classmethod
     def render(cls, document, indent=2):
-        print(json.dumps(document), indent=indent)
+        print(json.dumps(document, indent=indent))
 
 
 class View(object):
