@@ -2,7 +2,7 @@ import pytest
 
 import json
 
-from great_expectations.render.model import DescriptivePageRenderer, DescriptiveColumnSectionModel
+from great_expectations.render.renderer import DescriptivePageRenderer, DescriptiveColumnSectionRenderer
 from great_expectations.render.view import DescriptivePageView
 
 
@@ -11,18 +11,18 @@ def validation_results():
     with open("./tests/test_sets/expected_cli_results_default.json", "r") as infile:
         return json.load(infile)
 
-def test_render_descriptive_page_model(validation_results):
+def test_render_descriptive_page_renderer(validation_results):
     print(json.dumps(DescriptivePageRenderer.render(validation_results), indent=2))
     # TODO: Use above print to set up snapshot test once we like the result
     assert True
 
 def test_render_descriptive_page_view(validation_results):
-    model = DescriptivePageRenderer.render(validation_results)
-    print(DescriptivePageView.render(model))
+    renderer = DescriptivePageRenderer.render(validation_results)
+    print(DescriptivePageView.render(renderer))
     # TODO: Use above print to set up snapshot test once we like the result
     assert True
 
-def test_render_descriptive_column_section_model(validation_results):
+def test_render_descriptive_column_section_renderer(validation_results):
     # Group EVRs by column
     evrs = {}
     for evr in validation_results["results"]:
@@ -35,6 +35,6 @@ def test_render_descriptive_column_section_model(validation_results):
             pass
 
     for column in evrs.keys():
-        print(json.dumps(DescriptiveColumnSectionModel.render(evrs[column]), indent=2))
+        print(json.dumps(DescriptiveColumnSectionRenderer.render(evrs[column]), indent=2))
     # TODO: Use above print to set up snapshot test once we like the result
     assert True
