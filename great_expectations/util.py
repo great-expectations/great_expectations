@@ -230,7 +230,7 @@ def build_slack_notification_request(validation_json=None):
         if validation_json["success"]:
             status = "Success :tada:"
 
-        query["blocks"][0]["text"]["text"] = "*Validated batch from data_asset_name:* `{}`\n*Status: {}*\n{}".format(data_asset_name, status, check_details_text)
+        query["blocks"][0]["text"]["text"] = "*Validated batch from data asset:* `{}`\n*Status: {}*\n{}".format(data_asset_name, status, check_details_text)
         if "batch_kwargs" in validation_json["meta"]:
             query["blocks"][1]["text"]["text"] = "Batch kwargs: {}".format(json.dumps(validation_json["meta"]["batch_kwargs"], indent=2))
         
@@ -248,7 +248,7 @@ def build_slack_notification_request(validation_json=None):
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": "- *Validation Dataset*: {}".format(validation_json["meta"]["dataset_reference"])
+                    "text": "- *Validation data asset*: {}".format(validation_json["meta"]["dataset_reference"])
                 },
             }
             query["blocks"].append(dataset_element)
