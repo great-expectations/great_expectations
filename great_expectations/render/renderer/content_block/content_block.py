@@ -17,6 +17,11 @@ class ContentBlock(Renderer):
         else:
             return None
 
+    @classmethod
+    def list_available_expectations(cls):
+        expectations = [attr for attr in dir(cls) if attr[:7] == "expect_"]
+        return expectations
+
 class HeaderContentBlock(ContentBlock):
     pass
 

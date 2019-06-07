@@ -4,7 +4,7 @@ import json
 
 from great_expectations.render.renderer import DescriptivePageRenderer, DescriptiveColumnSectionRenderer, PrescriptiveColumnSectionRenderer
 from great_expectations.render.view import DescriptivePageView
-
+from great_expectations.render.renderer.content_block import ValueListContentBlock
 
 @pytest.fixture()
 def validation_results():
@@ -63,3 +63,8 @@ def test_render_prescriptive_column_section_renderer(expectations):
         print(json.dumps(PrescriptiveColumnSectionRenderer.render(exp_groups[column]), indent=2))
     # TODO: Use above print to set up snapshot test once we like the result
     assert True
+
+
+def test_content_block_list_available_expectations(expectations):
+    available_expectations = ValueListContentBlock.list_available_expectations()
+    assert available_expectations == ['expect_column_values_to_be_in_set']
