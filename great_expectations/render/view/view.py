@@ -6,27 +6,27 @@ from jinja2 import (
 
 class NoOpTemplate(object):
     @classmethod
-    def render(cls, model):
-        return model
+    def render(cls, document):
+        return document
 
 class PrettyPrintTemplate(object):
     @classmethod
-    def render(cls, model, indent=2):
-        print(json.dumps(model), indent=indent)
+    def render(cls, document, indent=2):
+        print(json.dumps(document), indent=indent)
 
 
 class View(object):
-    """Defines a method for converting a model to human-consumable form"""
+    """Defines a method for converting a document to human-consumable form"""
 
     _template = NoOpTemplate
 
     @classmethod
-    def render(cls, model, template=None):
+    def render(cls, document, template=None):
         if template is None:
             template = cls._template
 
         t = cls._get_template(template)
-        return t.render(model)
+        return t.render(document)
 
     @classmethod
     def _get_template(cls, template):

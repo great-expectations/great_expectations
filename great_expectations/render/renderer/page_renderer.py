@@ -1,5 +1,5 @@
 from .renderer import Renderer
-from .column_section_model import DescriptiveColumnSectionModel, PrescriptiveColumnSectionModel
+from .column_section_renderer import DescriptiveColumnSectionRenderer, PrescriptiveColumnSectionRenderer
 
 
 class PrescriptivePageRenderer(Renderer):
@@ -21,9 +21,9 @@ class PrescriptivePageRenderer(Renderer):
         ordered_columns = list(columns.keys())
 
         return {
-            "model_type": "PrescriptivePageRenderer",
+            "renderer_type": "PrescriptivePageRenderer",
             "sections": [
-                PrescriptiveColumnSectionModel.render(columns[column]) for column in ordered_columns
+                PrescriptiveColumnSectionRenderer.render(columns[column]) for column in ordered_columns
             ]
         }
 
@@ -48,8 +48,8 @@ class DescriptivePageRenderer(Renderer):
         ordered_columns = list(columns.keys())
 
         return {
-            "model_type": "DescriptivePageRenderer",
+            "renderer_type": "DescriptivePageRenderer",
             "sections": [
-                DescriptiveColumnSectionModel.render(columns[column]) for column in ordered_columns
+                DescriptiveColumnSectionRenderer.render(columns[column]) for column in ordered_columns
             ]
         }
