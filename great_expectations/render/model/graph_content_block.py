@@ -3,7 +3,7 @@ import altair as alt
 
 from .content_block import ContentBlock
 
-class ValueListContentBlock(ContentBlock):
+class GraphContentBlock(ContentBlock):
     """Render ValuesList Style Content Blocks
 
     Produces content blocks with type

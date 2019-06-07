@@ -2,6 +2,7 @@ import json
 
 from .renderer import Renderer
 from .value_list_content_block import ValueListContentBlock
+from .graph_content_block import GraphContentBlock
 from .table_content_block import TableContentBlock
 
 
@@ -86,12 +87,17 @@ class DescriptiveColumnSectionModel(ColumnSectionRenderer):
 
         new_block = None
 
-        # Further, the template for the content block should be packaged separately so that
-        # content block renderers can self-render and be includeed in the bigger templates
         if set_evr and "partial_unexpected_counts" in set_evr["result"]:
-            new_block = ValueListContentBlock.render(set_evr, "partial_unexpected_counts")
+            result_key = "partial_unexpected_counts"
         elif set_evr and "partial_unexpected_list" in set_evr["result"]:
-            new_block = ValueListContentBlock.render(set_evr, "partial_unexpected_list")
+            result_key = "partial_unexpected_list"
+        else:
+            return evrs, content_blocks
+
+        if len(set_evr["result"][result_key]) > 10:
+            new_block = ValueListContentBlock.render(set_evr, result_key)
+        else:
+            new_block = GraphContentBlock.render(set_evr, result_key)
 
         if new_block is not None:
             content_blocks.append(new_block)
