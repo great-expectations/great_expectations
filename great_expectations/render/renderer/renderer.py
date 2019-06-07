@@ -28,29 +28,26 @@ class Renderer(object):
 
     @classmethod
     def _find_ge_object_type(cls, ge_object):
-        # Decide whether this is a Validation Report or an Expectation Configuration
+        """We want upstream systems to have flexibility in what they provide
+        Options include an expectations config, a list of expectations, a single expectation,
+        a validation report, a list of evrs, or a single evr"""
+
         if isinstance(ge_object, list):
-            objects_type = "list"
+            if "result" in ge_object[0]:
+                return "evr_list"
+            elif "expectation_type" in ge_object[0]:
+                return "expectation_list"
         else:
-            objects_type = ""
-            ge_object = [ge_object]
-
-        if "results" in ge_object[0]:
-            objects_type += "validation"    
-            try:
-                data_asset_name = ge_object["meta"]["data_asset_name"]
-            except KeyError:
-                data_asset_name = None
-        elif "expectations" in ge_object[0]:
-            objects_type += "configuration"
-            try:
-                data_asset_name = ge_object["data_asset_name"]
-            except KeyError:
-                data_asset_name = None
-        else:
-            raise ValueError("Unrecognized great expectations object. Provide either an expectations config or a validation report.")
-
-        return objects_type, data_asset_name
+            if "results" in ge_object:
+                return "validation_report"
+            elif "expectations" in ge_object:
+                return "expectations"
+            elif "result" in ge_object:
+                return "evr"
+            elif "kwargs" in ge_object:
+                return "expectation"
+        
+        raise ValueError("Unrecognized great expectations object.")
 
     @classmethod
     def _find_evr_by_type(cls, evrs, type_):

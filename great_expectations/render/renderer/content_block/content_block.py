@@ -11,9 +11,12 @@ class ContentBlock(Renderer):
     @classmethod
     def render(cls, render_object, **kwargs):
         cls.validate_input(render_object)
-        object_type, data_asset_name = cls._find_ge_object_type(render_object)
+        object_type = cls._find_ge_object_type(render_object)
 
-        if object_type.startswith("list"):
+        if object_type in ["validation_report", "expectations"]:
+            raise ValueError("Provide an evr_list, expectation_list, expectation or evr to a content block")
+
+        if object_type in ["evr_list", "expectation_list"]:
             blocks = []
             for obj_ in render_object:
                 expectation_type = cls._get_expectation_type(obj_)
