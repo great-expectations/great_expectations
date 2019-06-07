@@ -1,4 +1,5 @@
 import pytest
+from six import PY3
 
 from ruamel.yaml import YAML
 yaml = YAML(typ='safe')
@@ -172,6 +173,9 @@ def test_sqlalchemysource_templating(sqlitedb_engine):
 
 
 def test_pandas_source_readcsv(data_context, tmp_path_factory):
+    if not PY3:
+        # We don't specifically test py2 unicode reading since this test is about our handling of kwargs *to* read_csv
+        pytest.skip()
     basedir = tmp_path_factory.mktemp('test_create_pandas_datasource')
     shutil.copy("./tests/test_sets/unicode.csv", basedir)
     data_context.add_datasource(name="mysource", type_="pandas", read_csv_kwargs={"encoding": "utf-8"}, base_directory=str(basedir))
