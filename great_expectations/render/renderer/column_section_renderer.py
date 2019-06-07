@@ -21,6 +21,8 @@ class ColumnSectionRenderer(Renderer):
             elif "expectation_config" in candidate_object:
                 # This is a validation (descriptive)
                 return candidate_object["expectation_config"]["kwargs"]["column"]
+            else:
+                raise ValueError("Provide a column section renderer an expectation, list of expectations, evr, or list of evrs.")
         except KeyError:
             return None
 
@@ -64,6 +66,8 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
             "expect_column_values_to_be_of_type"
         )
         if type_evr:
+            # Kinda weird to be pulling *descriptive* info out of expectation kwargs
+            # Maybe at least check success?
             type_ = type_evr["expectation_config"]["kwargs"]["type_"]
             new_block = {
                 "content_block_type": "text",
@@ -95,9 +99,9 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
             return evrs, content_blocks
 
         if len(set_evr["result"][result_key]) > 10:
-            new_block = ValueListContentBlock.render(set_evr, result_key)
+            new_block = ValueListContentBlock.render(set_evr, result_key=result_key)
         else:
-            new_block = GraphContentBlock.render(set_evr, result_key)
+            new_block = GraphContentBlock.render(set_evr, result_key=result_key)
 
         if new_block is not None:
             content_blocks.append(new_block)
@@ -137,4 +141,53 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
 
 
 class PrescriptiveColumnSectionRenderer(ColumnSectionRenderer):
-    pass
+
+    @classmethod
+    def _render_header(cls, expectations, content_blocks):
+        column = cls._get_column_name(expectations)
+
+        content_blocks.append({
+            "content_block_type": "header",
+            "header": column
+        })
+
+        return expectations, content_blocks
+
+    @classmethod
+    def _render_bullet_list(cls, expectations, content_blocks):
+        bullet_list = {
+            "content_block_type": "bullet_list",
+            "content": []
+        }
+        for expectation in expectations:
+            try:
+                bullet_point = ExpectationBulletPointSnippetRenderer().render(expectation)
+                assert bullet_point != None
+                bullet_list["content"].append(bullet_point)
+
+            except Exception as e:
+                bullet_list["content"].append("""
+<div class="alert alert-danger" role="alert">
+  Failed to render Expectation:<br/><pre>"""+json.dumps(expectation, indent=2)+"""</pre>
+  <p>"""+str(e)+"""
+</div>
+                """)
+
+        content_blocks.append(bullet_list)
+
+        return [], content_blocks
+
+    @classmethod
+    def render(cls, expectations):
+        column = cls._get_column_name(expectations)
+
+        remaining_expectations, content_blocks = cls._render_header(expectations, [])
+        # remaining_expectations, content_blocks = cls._render_column_type(
+            # remaining_expectations, content_blocks)
+        remaining_expectations, content_blocks = cls._render_bullet_list(
+            remaining_expectations, content_blocks)
+
+        return {
+            "section_name": column,
+            "content_blocks": content_blocks
+        }
