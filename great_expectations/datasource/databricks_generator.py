@@ -9,8 +9,7 @@ logger = logging.getLogger(__name__)
 try:
     from pyspark.sql import SparkSession
 except ImportError:
-    logger.error("Unable to load spark context; install optional spark dependency for support.")
-    raise
+    logger.debug("Unable to load spark context; install optional spark dependency for support.")
 
 class DatabricksTableGenerator(BatchGenerator):
     """Meant to be used in a Databricks notebook

@@ -1,15 +1,21 @@
 import os
 import time
+import logging
 
 from ruamel.yaml import YAML
 yaml = YAML(typ='safe')
 
-import sqlalchemy
-from sqlalchemy import create_engine, MetaData
-
 from .datasource import Datasource
 from .batch_generator import BatchGenerator
 from great_expectations.dataset.sqlalchemy_dataset import SqlAlchemyDataset
+
+logger = logging.getLogger(__name__)
+
+try:
+    import sqlalchemy
+    from sqlalchemy import create_engine, MetaData
+except ImportError:
+    logger.debug("Unable to import sqlalchemy.")
 
 class DBTModelGenerator(BatchGenerator):
     """This is a helper class that makes using great expectations with dbt easy!"""
