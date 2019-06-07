@@ -11,8 +11,8 @@ try:
     from great_expectations.dataset.sparkdf_dataset import SparkDFDataset
     from pyspark.sql import SparkSession
 except ImportError:
-    logger.error("Unable to load pyspark; install optional spark dependency for support.")
-    raise
+    # TODO: review logging more detail here
+    logger.debug("Unable to load pyspark; install optional spark dependency for support.")
 
 class SparkDFDatasource(Datasource):
     """For now, functions like PandasCSVDataContext

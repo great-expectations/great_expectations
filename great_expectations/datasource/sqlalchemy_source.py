@@ -3,14 +3,17 @@ import os
 import logging
 from string import Template
 
-import sqlalchemy
-from sqlalchemy import create_engine, MetaData
-
 from .datasource import Datasource
 from .batch_generator import BatchGenerator
 from great_expectations.dataset.sqlalchemy_dataset import SqlAlchemyDataset
 
 logger = logging.getLogger(__name__)
+
+try:
+    import sqlalchemy
+    from sqlalchemy import create_engine, MetaData
+except ImportError:
+    logger.debug("Unable to import sqlalchemy.")
 
 class QueryGenerator(BatchGenerator):
     """

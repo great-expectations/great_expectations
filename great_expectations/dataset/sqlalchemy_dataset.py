@@ -14,8 +14,7 @@ try:
     import sqlalchemy as sa
     from sqlalchemy.engine import reflection
 except ImportError:
-    logger.error("Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support")
-    raise
+    logger.debug("Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support")
 
 import pandas as pd
 

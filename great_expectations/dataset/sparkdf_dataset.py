@@ -25,8 +25,9 @@ logger = logging.getLogger(__name__)
 try:
     from pyspark.sql.functions import udf, col, stddev as stddev_
     import pyspark.sql.types as sparktypes
-except ImportError:
-    logger.error("Unable to load spark context; install optional spark dependency for support.")
+except ImportError as e:
+    logger.debug(str(e))
+    logger.debug("Unable to load spark context; install optional spark dependency for support.")
 
 class MetaSparkDFDataset(Dataset):
     """MetaSparkDFDataset is a thin layer between Dataset and SparkDFDataset.
