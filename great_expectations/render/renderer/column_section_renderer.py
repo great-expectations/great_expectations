@@ -24,7 +24,7 @@ class ColumnSectionRenderer(Renderer):
             return None
 
 
-class DescriptiveColumnSectionModel(ColumnSectionRenderer):
+class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
 
     @classmethod
     def render(cls, evrs, column=None):
@@ -130,5 +130,5 @@ class DescriptiveColumnSectionModel(ColumnSectionRenderer):
         return [], content_blocks
 
 
-class PrescriptiveColumnSectionModel(ColumnSectionRenderer):
+class PrescriptiveColumnSectionRenderer(ColumnSectionRenderer):
     pass
