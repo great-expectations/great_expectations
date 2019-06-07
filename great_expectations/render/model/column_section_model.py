@@ -1,11 +1,11 @@
 import json
 
-from .model import Model
+from .renderer import Renderer
 from .value_list_content_block import ValueListContentBlock
 from .table_content_block import TableContentBlock
 
 
-class ColumnSectionModel(Model):
+class ColumnSectionRenderer(Renderer):
     @classmethod
     def _get_column_name(cls, ge_object):
         # This is broken out for ease of locating future validation here
@@ -24,7 +24,7 @@ class ColumnSectionModel(Model):
             return None
 
 
-class DescriptiveColumnSectionModel(ColumnSectionModel):
+class DescriptiveColumnSectionModel(ColumnSectionRenderer):
 
     @classmethod
     def render(cls, evrs, column=None):
@@ -130,5 +130,5 @@ class DescriptiveColumnSectionModel(ColumnSectionModel):
         return [], content_blocks
 
 
-class PrescriptiveColumnSectionModel(ColumnSectionModel):
+class PrescriptiveColumnSectionModel(ColumnSectionRenderer):
     pass
