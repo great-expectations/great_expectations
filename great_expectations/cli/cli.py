@@ -20,6 +20,9 @@ from great_expectations.dataset import Dataset, PandasDataset
 from great_expectations.data_asset import FileDataAsset
 from great_expectations.data_context import DataContext
 
+from great_expectations.render.renderer import DescriptivePageRenderer
+from great_expectations.render.view import DescriptivePageView
+
 logger = logging.getLogger(__name__)
 
 
@@ -351,6 +354,20 @@ To launch with jupyter lab:
 
     else:
         cli_message(msg_unknown_data_source, color="blue")
+
+
+@cli.command()
+@click.argument('render_object')
+def render(render_object):
+    """Render a great expectations object.
+    
+    RENDER_OBJECT: path to a GE object to render
+    """
+    with open(render_object, "r") as infile:
+        raw = json.load(infile)
+
+    model = DescriptivePageRenderer.render(raw)
+    print(DescriptivePageView.render(model))
 
 
 def main():
