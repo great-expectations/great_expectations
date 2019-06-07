@@ -2,7 +2,7 @@
     <nav class="nav nav-pills flex-column">
         <a class="navbar-brand" href="#">MyTable</a>
         {% for section in sections %}
-        <a class="nav-link" href="#section-{{loop.index}}">{{section['section_name']}}</a>
+            <a class="nav-link" href="#section-{{loop.index}}">{{section['section_name']}}</a>
         {% endfor %}
     </nav>
 </nav>
