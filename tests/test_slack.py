@@ -70,7 +70,7 @@ def test_build_slack_notification_request_with_successful_validation(validation_
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": "*Validated dataset:* `diabetes_raw_csv`\n*Status: Success :tada:*\n33 of 44 expectations were met\n\n",
+                    "text": "*Validated batch from data asset:* `diabetes_raw_csv`\n*Status: Success :tada:*\n33 of 44 expectations were met\n\n",
                 },
             },
             {
@@ -84,7 +84,7 @@ def test_build_slack_notification_request_with_successful_validation(validation_
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": "- *Validation Dataset*: s3://my_bucket/blah.csv",
+                    "text": "- *Validation data asset*: s3://my_bucket/blah.csv",
                 },
             },
             {
@@ -116,7 +116,7 @@ def test_build_slack_notification_request_with_failed_validation(validation_json
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": "*Validated dataset:* `diabetes_raw_csv`\n*Status: Failed :x:*\n33 of 44 expectations were met\n\n",
+                    "text": "*Validated batch from data asset:* `diabetes_raw_csv`\n*Status: Failed :x:*\n33 of 44 expectations were met\n\n",
                 },
             },
             {
@@ -130,7 +130,7 @@ def test_build_slack_notification_request_with_failed_validation(validation_json
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": "- *Validation Dataset*: s3://my_bucket/blah.csv",
+                    "text": "- *Validation data asset*: s3://my_bucket/blah.csv",
                 },
             },
             {
@@ -164,14 +164,14 @@ def test_build_slack_notification_request_with_successful_validation_and_no_resu
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": "*Validated dataset:* `diabetes_raw_csv`\n*Status: Success :tada:*\n33 of 44 expectations were met\n\n",
+                    "text": "*Validated batch from data asset:* `diabetes_raw_csv`\n*Status: Success :tada:*\n33 of 44 expectations were met\n\n",
                 },
             },
             {
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": "- *Validation Dataset*: s3://my_bucket/blah.csv",
+                    "text": "- *Validation data asset*: s3://my_bucket/blah.csv",
                 },
             },
             {
@@ -205,7 +205,7 @@ def test_build_slack_notification_request_with_successful_validation_and_no_data
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": "*Validated dataset:* `diabetes_raw_csv`\n*Status: Success :tada:*\n33 of 44 expectations were met\n\n",
+                    "text": "*Validated batch from data asset:* `diabetes_raw_csv`\n*Status: Success :tada:*\n33 of 44 expectations were met\n\n",
                 },
             },
             {
