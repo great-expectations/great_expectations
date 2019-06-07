@@ -8,50 +8,51 @@ import errno
 from glob import glob
 from six import string_types
 
-from ..exceptions import ExpectationsConfigNotFoundError
 from ..version import __version__
-from ..dataset import PandasDataset
 from ..util import safe_mmkdir, read_csv
 
-from IPython.display import display
 import ipywidgets as widgets
 try:
     from urllib.parse import urlparse
 except ImportError:
     from urlparse import urlparse
 
-from .datasource.sqlalchemy_source import SqlAlchemyDatasource
-from .datasource.dbt_source import DBTDatasource
-from .datasource.pandas_source import PandasCSVDatasource
-from .datasource.spark_source import SparkDFDatasource
+from great_expectations.util import get_slack_callback
+from great_expectations.data_asset import DataAsset
+from great_expectations.dataset import PandasDataset
+from great_expectations.datasource.sqlalchemy_source import SqlAlchemyDatasource
+from great_expectations.datasource.dbt_source import DBTDatasource
+from great_expectations.datasource import PandasDatasource
+from great_expectations.datasource import SparkDFDatasource
 
 from .expectation_explorer import ExpectationExplorer
 
 logger = logging.getLogger(__name__)
 debug_view = widgets.Output(layout={'border': '3 px solid pink'})
 yaml = YAML()
+yaml.indent(mapping=2, sequence=4, offset=2)
 yaml.default_flow_style = False
 
-class DataContext(object):
-    #TODO: update class documentation
-    """A generic DataContext, exposing the base API including constructor with `options` parameter, list_datasets,
-    and get_dataset.
 
-    Warning: this feature is new in v0.4 and may change based on community feedback.
+class DataContext(object):
+    """A DataContext represents a Great Expectations project. It captures essential information such as
+    expectations configurations.
+
+    The DataContext is configured via a yml file that should be stored in a file called great_expectations/great_expectations.yml
+    under the context_root_dir passed during initialization.
+
     """
 
-    def __init__(self, options=None, expectation_explorer=False):
+    def __init__(self, context_root_dir=None, expectation_explorer=False):
         self._expectation_explorer = expectation_explorer
         self._datasources = {}
         if expectation_explorer:
             self._expectation_explorer_manager = ExpectationExplorer()
-        self.connect(options)
-
-    def connect(self, context_root_dir):
         # determine the "context root directory" - this is the parent of "great_expectations" dir
 
         if context_root_dir is None:
-            if os.path.isdir("../notebooks") and os.path.isdir("../../great_expectations") and os.path.isfile("../../great_expectations/great_expectations.yml"):
+            if (os.path.isdir("../notebooks") and os.path.isdir("../../great_expectations")
+                    and os.path.isfile("../../great_expectations/great_expectations.yml")):
                 self.context_root_directory = "../../"
             elif os.path.isdir("./great_expectations") and os.path.isfile("./great_expectations/great_expectations.yml"):
                 self.context_root_directory = "./"
@@ -71,7 +72,6 @@ class DataContext(object):
             # TODO: if one of these loads fails, be okay with that
             self.get_datasource(datasource)
 
-
         self._load_evaluation_parameter_store()
         self._compiled = False
 
@@ -85,9 +85,13 @@ class DataContext(object):
         except IOError as e:
             if e.errno != errno.ENOENT:
                 raise
-            base_config = yaml.load("{}")
-            # add comments the first time a data context is created
-            base_config.yaml_set_start_comment(PROJECT_HELP_COMMENT)
+            with open(os.path.join(self.context_root_directory, "great_expectations/great_expectations.yml"), "w") as template:
+                template.write(PROJECT_TEMPLATE)
+
+            with open(os.path.join(self.context_root_directory, "great_expectations/great_expectations.yml"),
+                      "r") as template:
+                base_config = yaml.load(template)
+
             return base_config
 
     def _save_project_config(self):
@@ -187,7 +191,7 @@ class DataContext(object):
             )
         return data_asset_names
 
-    def get_data_asset(self, datasource_name, data_asset_name, batch_kwargs=None, **kwargs):
+    def get_batch(self, datasource_name, data_asset_name, batch_kwargs=None, **kwargs):
         data_asset_name = self._normalize_data_asset_name(data_asset_name)
         # datasource_name = find(data_asset_name.split("/")[0]
         datasource = self.get_datasource(datasource_name)
@@ -195,7 +199,6 @@ class DataContext(object):
             raise Exception("Can't find datasource {0:s} in the config - please check your great_expectations.yml")
 
         data_asset = datasource.get_data_asset(data_asset_name, batch_kwargs, **kwargs)
-        # data_asset._initialize_expectations(self.get_data_asset_config(data_asset_name))
         return data_asset
 
     def add_datasource(self, name, type_, **kwargs):
@@ -215,7 +218,7 @@ class DataContext(object):
 
     def _get_datasource_class(self, datasource_type):
         if datasource_type == "pandas":
-            return PandasCSVDatasource
+            return PandasDatasource
         elif datasource_type == "dbt":
             return DBTDatasource
         elif datasource_type == "sqlalchemy":
@@ -225,7 +228,7 @@ class DataContext(object):
         else:
             try:
                 # Update to do dynamic loading based on plugin types
-                return PandasCSVDatasource
+                return PandasDatasource
             except ImportError:
                 raise
  
@@ -327,23 +330,17 @@ class DataContext(object):
             if options == 1:
                 return last_found_config
 
-        
         # We allow "new" configs to be considered normalized out of the box
         return data_asset_name
         # raise ExpectationsConfigNotFoundError(data_asset_name)
-                
 
-    def get_expectations_config(self, data_asset_name, batch_kwargs):
-        return self.get_data_asset_config(data_asset_name)
-
-    def get_data_asset_config(self, data_asset_name):
+    def get_expectations(self, data_asset_name, batch_kwargs=None):
         config_file_path = os.path.join(self.expectations_directory, data_asset_name + '.json')
         if os.path.isfile(config_file_path):
             with open(os.path.join(self.expectations_directory, data_asset_name + '.json')) as json_file:
                 return json.load(json_file)
         else:
-            #TODO (Eugene): Would it be better to return None if the file does not exist? Currently this method acts as
-            # get_or_create
+            # TODO: Should this return None? Currently this method acts as get_or_create
             return {
                 'data_asset_name': data_asset_name,
                 'meta': {
@@ -352,29 +349,101 @@ class DataContext(object):
                 'expectations': [],
              } 
 
-    def save_data_asset_config(self, data_asset_config):
-        data_asset_name = data_asset_config['data_asset_name']
+    def save_expectations(self, expectations, data_asset_name=None):
+        if data_asset_name is None:
+            data_asset_name = expectations['data_asset_name']
         config_file_path = os.path.join(self.expectations_directory, data_asset_name + '.json')
         safe_mmkdir(os.path.split(config_file_path)[0], exist_ok=True)
         with open(config_file_path, 'w') as outfile:
-            json.dump(data_asset_config, outfile)
+            json.dump(expectations, outfile)
         self._compiled = False
 
-    def bind_evaluation_parameters(self, run_id, expectations_config):
+    def bind_evaluation_parameters(self, run_id, expectations):
+        # TOOO: only return parameters requested by the given expectations
         return self._evaluation_parameter_store.get_run_parameters(run_id)
 
-    def register_validation_results(self, run_id, validation_results):
+    def register_validation_results(self, run_id, validation_results, data_asset=None):
+        """Process results of a validation run, including registering evaluation parameters that are now available
+        and storing results and snapshots if so configured."""
+
+        # TODO: harmonize with data_asset_name logic below
+        try:
+            data_asset_name = validation_results["meta"]["data_asset_name"]
+        except KeyError:
+            logger.warning("No data_asset_name found in validation results; using '_untitled'")
+            data_asset_name = "_untitled"
+
+        if "result_store" in self._project_config:
+            result_store = self._project_config["result_store"]
+            if isinstance(result_store, dict) and "filesystem" in result_store:
+                validation_filepath = os.path.join(self.context_root_directory, "great_expectations", result_store["filesystem"]["base_directory"],
+                                       run_id, data_asset_name + ".json")
+                logger.info("Storing validation result: %s" % validation_filepath)
+                safe_mmkdir(os.path.join(self.context_root_directory, "great_expectations", result_store["filesystem"]["base_directory"], run_id))
+                with open(validation_filepath, "w") as outfile:
+                    json.dump(validation_results, outfile)
+            if isinstance(result_store, dict) and "s3" in result_store:
+                bucket = result_store["s3"]["bucket"]
+                key_prefix = result_store["s3"]["key_prefix"]
+                key = os.path.join(key_prefix, "validations/{run_id}/{data_asset_name}.json".format(run_id=run_id,
+                                                                                     data_asset_name=data_asset_name))
+                validation_results["meta"]["result_reference"] = "s3://{bucket}/{key}".format(bucket=bucket, key=key)
+                try:
+                    import boto3
+                    s3 = boto3.resource('s3')
+                    result_s3 = s3.Object(bucket, key)
+                    result_s3.put(Body=json.dumps(validation_results).encode('utf-8'))
+                except ImportError:
+                    logger.error("Error importing boto3 for AWS support.")
+                except Exception:
+                    raise
+
+        if "result_callback" in self._project_config:
+            result_callback = self._project_config["result_callback"]
+            if isinstance(result_callback, dict) and "slack" in result_callback:
+                get_slack_callback(result_callback["slack"])(validation_results)
+            else:
+                logger.warning("Unrecognized result_callback configuration.")
+
+        if "data_asset_snapshot_store" in self._project_config and validation_results["success"] is False:
+            data_asset_snapshot_store = self._project_config["data_asset_snapshot_store"]
+            if isinstance(data_asset, PandasDataset):
+                if isinstance(data_asset_snapshot_store, dict) and "filesystem" in data_asset_snapshot_store:
+                    logger.info("Storing dataset to file")
+                    safe_mmkdir(os.path.join(self.context_root_directory, "great_expectations", data_asset_snapshot_store["filesystem"]["base_directory"], run_id))
+                    data_asset.to_csv(os.path.join(self.context_root_directory, "great_expectations", data_asset_snapshot_store["filesystem"]["base_directory"],
+                                                   run_id,
+                                                   data_asset_name + ".csv.gz"), compression="gzip")
+
+                if isinstance(data_asset_snapshot_store, dict) and "s3" in data_asset_snapshot_store:
+                    bucket = data_asset_snapshot_store["s3"]["bucket"]
+                    key_prefix = data_asset_snapshot_store["s3"]["key_prefix"]
+                    key = key_prefix + "snapshots/{run_id}/{data_asset_name}".format(run_id=run_id,
+                                                                                     data_asset_name=data_asset_name) + ".csv.gz"
+                    validation_results["meta"]["data_asset_snapshot"] = "s3://{bucket}/{key}".format(bucket=bucket, key=key)
+
+                    try:
+                        import boto3
+                        s3 = boto3.resource('s3')
+                        result_s3 = s3.Object(bucket, key)
+                        result_s3.put(Body=data_asset.to_csv(compression="gzip").encode('utf-8'))
+                    except ImportError:
+                        logger.error("Error importing boto3 for AWS support.")
+                    except Exception:
+                        raise
+            else:
+                logger.warning(
+                    "Unable to save data_asset of type: %s. Only PandasDataset is supported." % type(data_asset))
+
         if not self._compiled:
             self._compile()
 
         if "meta" not in validation_results or "data_asset_name" not in validation_results["meta"]:
             logger.warning("No data_asset_name found in validation results; evaluation parameters cannot be registered.")
-            return
+            return validation_results
         elif validation_results["meta"]["data_asset_name"] not in self._compiled_parameters["data_assets"]:
             # This is fine; short-circuit since we do not need to register any results from this dataset.
-            return
-        else:
-            data_asset_name = validation_results["meta"]["data_asset_name"]
+            return validation_results
         
         for result in validation_results['results']:
             # Unoptimized: loop over all results and check if each is needed
@@ -383,7 +452,8 @@ class DataContext(object):
                 # First, bind column-style parameters
                 if (("column" in result['expectation_config']['kwargs']) and 
                     ("columns" in self._compiled_parameters["data_assets"][data_asset_name][expectation_type]) and 
-                    (result['expectation_config']['kwargs']["column"] in self._compiled_parameters["data_assets"][data_asset_name][expectation_type]["columns"])):
+                    (result['expectation_config']['kwargs']["column"] in
+                     self._compiled_parameters["data_assets"][data_asset_name][expectation_type]["columns"])):
 
                     column = result['expectation_config']['kwargs']["column"]
                     # Now that we have a small search space, invert logic, and look for the parameters in our result
@@ -410,6 +480,8 @@ class DataContext(object):
                             self.store_validation_param(run_id, desired_param, result["result"]["details"])
                         else:
                             logger.warning("Unrecognized key for parameter %s" % desired_param)
+
+        return validation_results
 
     def store_validation_param(self, run_id, key, value):
         self._evaluation_parameter_store.set(run_id, key, value)
@@ -577,20 +649,56 @@ class DataContext(object):
             return return_obj
 
 
+PROJECT_HELP_COMMENT = """# Welcome to great expectations. 
+# This project configuration file allows you to define datasources, 
+# generators, integrations, and other configuration artifacts that
+# make it easier to use Great Expectations.
 
-
-PROJECT_HELP_COMMENT="""Welcome to great expectations. 
-This project configuration file allows you to define datasources, 
-generators, integrations, and other configuration artifacts that
-make it easier to use Great Expectations.
-
-For more help configuring great expectations, 
-see the documentation at: https://greatexpectations.io/config_file.html
+# For more help configuring great expectations, 
+# see the documentation at: https://greatexpectations.io/config_file.html
 
 """
 
+PROJECT_OPTIONAL_CONFIG_COMMENT = """
 
-PROFILE_COMMENT="""This file stores profiles with database access credentials. 
+# Configure additional data context options here.
+
+# Uncomment the lines below to enable s3 as a result store. If a result store is enabled,
+# validation results will be saved in the store according to run id.
+
+# For S3, ensure that appropriate credentials or assume_role permissions are set where
+# validation happens.
+
+
+result_store:
+  filesystem:
+    base_directory: uncommitted/validations/
+#   s3:
+#     bucket: <your bucket>
+#     key_prefix: <your key prefix>
+#   
+
+# Uncomment the lines below to enable a result callback.
+
+# result_callback:
+#   slack: https://slack.com/replace_with_your_webhook
+    
+    
+# Uncomment the lines below to save snapshots of data assets that fail validation.
+
+# data_asset_snapshot_store:
+#   filesystem:
+#     base_directory: uncommitted/snapshots/
+#   s3:
+#     bucket:
+#     key_prefix:
+
+"""
+
+PROJECT_TEMPLATE = PROJECT_HELP_COMMENT + "datasources: {}\n" + PROJECT_OPTIONAL_CONFIG_COMMENT
+
+
+PROFILE_COMMENT = """This file stores profiles with database access credentials. 
 Do not commit this file to version control. 
 
 A profile can optionally have a single parameter called 

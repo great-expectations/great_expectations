@@ -42,7 +42,7 @@ class TestDataAsset(unittest.TestCase):
 
         self.maxDiff = None
         self.assertEqual(
-            D.get_expectations_config(),
+            D.get_expectations(),
             {
                 "data_asset_name": None,
                 "data_asset_type": "Dataset",
@@ -64,7 +64,7 @@ class TestDataAsset(unittest.TestCase):
             'x', 2, 2, meta={"notes": "This expectation is for lolz."})
         k = 0
         self.assertEqual(result['success'], True)
-        config = df.get_expectations_config()
+        config = df.get_expectations()
         for expectation_config in config['expectations']:
             if expectation_config['expectation_type'] == 'expect_column_median_to_be_between':
                 k += 1
@@ -173,11 +173,11 @@ class TestDataAsset(unittest.TestCase):
         }
 
         self.assertEqual(
-            df.get_expectations_config(),
+            df.get_expectations(),
             output_config,
         )
 
-        df.save_expectations_config(directory_name+'/temp1.json')
+        df.save_expectations(directory_name + '/temp1.json')
         temp_file = open(directory_name+'/temp1.json')
         self.assertEqual(
             json.load(temp_file),
@@ -246,13 +246,13 @@ class TestDataAsset(unittest.TestCase):
         }
 
         self.assertEqual(
-            df.get_expectations_config(
+            df.get_expectations(
                 discard_failed_expectations=False
             ),
             output_config
         )
 
-        df.save_expectations_config(
+        df.save_expectations(
             directory_name+'/temp2.json',
             discard_failed_expectations=False
         )
@@ -318,7 +318,7 @@ class TestDataAsset(unittest.TestCase):
         }
 
         self.assertEqual(
-            df.get_expectations_config(
+            df.get_expectations(
                 discard_result_format_kwargs=False,
                 discard_include_configs_kwargs=False,
                 discard_catch_exceptions_kwargs=False,
@@ -327,7 +327,7 @@ class TestDataAsset(unittest.TestCase):
             msg="Second Test Set"
         )
 
-        df.save_expectations_config(
+        df.save_expectations(
             directory_name+'/temp3.json',
             discard_result_format_kwargs=False,
             discard_include_configs_kwargs=False,
@@ -963,7 +963,7 @@ class TestDataAsset(unittest.TestCase):
         )
 
         self.assertEqual(
-            my_df.get_expectations_config(discard_failed_expectations=False),
+            my_df.get_expectations(discard_failed_expectations=False),
             {
                 'expectations': [
                     {

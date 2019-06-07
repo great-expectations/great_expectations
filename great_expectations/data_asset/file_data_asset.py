@@ -9,7 +9,7 @@ from functools import wraps
 import numpy as np
 from six import PY3
 from itertools import compress
-from great_expectations.data_asset.base import DataAsset
+from great_expectations.data_asset.data_asset import DataAsset
 from great_expectations.data_asset.util import parse_result_format
 
 

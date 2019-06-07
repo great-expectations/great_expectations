@@ -131,7 +131,7 @@ This is how you always know what to expect from your data.
 
 .. code-block:: bash
 
-    >> my_df.save_expectations_config("my_titanic_expectations.json")
+    >> my_df.save_expectations("my_titanic_expectations.json")
 
 For more detail on how to control expectation output, please see :ref:`standard_arguments` and :ref:`result_format`.
 

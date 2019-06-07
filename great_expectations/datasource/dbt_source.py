@@ -9,7 +9,7 @@ from sqlalchemy import create_engine, MetaData
 
 from .datasource import Datasource
 from .batch_generator import BatchGenerator
-from ...dataset.sqlalchemy_dataset import SqlAlchemyDataset
+from great_expectations.dataset.sqlalchemy_dataset import SqlAlchemyDataset
 
 class DBTModelGenerator(BatchGenerator):
     """This is a helper class that makes using great expectations with dbt easy!"""

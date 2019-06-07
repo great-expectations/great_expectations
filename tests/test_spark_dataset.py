@@ -1,5 +1,5 @@
 import great_expectations as ge
-from great_expectations.data_context.datasource import SparkDFDatasource
+from great_expectations.datasource import SparkDFDatasource
 import pytest
 
 # context = ge.get_data_context('SparkCSV', './tests/test_sets')
