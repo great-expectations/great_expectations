@@ -230,8 +230,10 @@ def build_slack_notification_request(validation_json=None):
         if validation_json["success"]:
             status = "Success :tada:"
 
-        query["blocks"][0]["text"]["text"] = "*Validated dataset:* `{}`\n*Status: {}*\n{}".format(data_asset_name, status, check_details_text)
-
+        query["blocks"][0]["text"]["text"] = "*Validated batch from data_asset_name:* `{}`\n*Status: {}*\n{}".format(data_asset_name, status, check_details_text)
+        if "batch_kwargs" in validation_json["meta"]:
+            query["blocks"][1]["text"]["text"] = "Batch kwargs: {}".format(json.dumps(validation_json["meta"]["batch_kwargs"], indent=2))
+        
         if "result_reference" in validation_json["meta"]:
             report_element = {
                 "type": "section",
