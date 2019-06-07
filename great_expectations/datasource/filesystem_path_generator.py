@@ -28,7 +28,13 @@ class FilesystemPathGenerator(BatchGenerator):
         # If the data_asset_name is a file, then return the path.
         # Otherwise, use files in a subdir as batches
         if os.path.isdir(os.path.join(self._get_current_base_directory(), data_asset_name)):
-            return self._build_batch_kwargs_path_iter(os.listdir(os.path.join(self._get_current_base_directory(), data_asset_name)))
+            return self._build_batch_kwargs_path_iter(
+                [
+                    os.path.join(self._get_current_base_directory(), data_asset_name, path)
+                        for path in os.listdir(os.path.join(self._get_current_base_directory(), data_asset_name))
+                ]
+                
+                )
             # return self._build_batch_kwargs_path_iter(os.scandir(os.path.join(self._get_current_base_directory(), data_asset_name)))
             # return iter([{
             #     "path": os.path.join(self._get_current_base_directory(), data_asset_name, x)

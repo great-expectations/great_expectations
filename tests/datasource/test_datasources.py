@@ -168,3 +168,28 @@ def test_sqlalchemysource_templating(sqlitedb_engine):
     df = datasource.get_data_asset("test", col_name="animal_name")
     res = df.expect_column_to_exist("animal_name")
     assert res["success"] == True
+
+
+
+def test_pandas_source_readcsv(data_context, tmp_path_factory):
+    basedir = tmp_path_factory.mktemp('test_create_pandas_datasource')
+    shutil.copy("./tests/test_sets/unicode.csv", basedir)
+    data_context.add_datasource(name="mysource", type_="pandas", read_csv_kwargs={"encoding": "utf-8"}, base_directory=str(basedir))
+
+    batch = data_context.get_batch("mysource", "unicode")
+    assert len(batch["Μ"] == 1)
+    assert "😁" in list(batch["Μ"])
+
+    data_context.add_datasource(name="mysource2", type_="pandas", base_directory=str(basedir))
+    batch = data_context.get_batch("mysource2", "unicode")
+    assert "😁" in list(batch["Μ"])
+
+    data_context.add_datasource(name="mysource3", type_="pandas", read_csv_kwargs={"encoding": "utf-16"}, base_directory=str(basedir))
+    with pytest.raises(UnicodeError, match="UTF-16 stream does not start with BOM"):
+        batch = data_context.get_batch("mysource3", "unicode")
+
+    with pytest.raises(LookupError, match="unknown encoding: blarg"):
+        batch = data_context.get_batch("mysource", "unicode", encoding='blarg')
+
+    batch = data_context.get_batch("mysource2", "unicode", encoding='utf-8')
+    assert "😁" in list(batch["Μ"])
