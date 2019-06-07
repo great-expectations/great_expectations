@@ -2,13 +2,18 @@ import pytest
 
 import json
 
-from great_expectations.render.renderer import DescriptivePageRenderer, DescriptiveColumnSectionRenderer
+from great_expectations.render.renderer import DescriptivePageRenderer, DescriptiveColumnSectionRenderer, PrescriptiveColumnSectionRenderer
 from great_expectations.render.view import DescriptivePageView
 
 
 @pytest.fixture()
 def validation_results():
     with open("./tests/test_sets/expected_cli_results_default.json", "r") as infile:
+        return json.load(infile)
+
+@pytest.fixture()
+def expectations():
+    with open("./tests/test_sets/titanic_expectations.json", "r") as infile:
         return json.load(infile)
 
 def test_render_descriptive_page_renderer(validation_results):
@@ -36,5 +41,25 @@ def test_render_descriptive_column_section_renderer(validation_results):
 
     for column in evrs.keys():
         print(json.dumps(DescriptiveColumnSectionRenderer.render(evrs[column]), indent=2))
+    # TODO: Use above print to set up snapshot test once we like the result
+    assert True
+
+
+def test_render_prescriptive_column_section_renderer(expectations):
+    # Group expectations by column
+    exp_groups = {}
+    # print(json.dumps(expectations, indent=2))
+    for exp in expectations["expectations"]:
+        try:
+            column = exp["kwargs"]["column"]
+            if column not in exp_groups:
+                exp_groups[column] = []
+            exp_groups[column].append(exp)
+        except KeyError:
+            pass
+
+    for column in exp_groups.keys():
+        print(column)
+        print(json.dumps(PrescriptiveColumnSectionRenderer.render(exp_groups[column]), indent=2))
     # TODO: Use above print to set up snapshot test once we like the result
     assert True
