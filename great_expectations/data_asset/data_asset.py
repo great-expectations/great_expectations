@@ -207,7 +207,6 @@ class DataAsset(object):
                 if meta is not None:
                     return_obj['meta'] = meta
 
-
                 return_obj = recursively_convert_to_json_serializable(
                     return_obj)
 
@@ -1207,6 +1206,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         new_function = self.expectation(argspec)(function)
         return new_function(self, *args, **kwargs)
+
 
 ValidationStatistics = namedtuple("ValidationStatistics", [
     "evaluated_expectations",
