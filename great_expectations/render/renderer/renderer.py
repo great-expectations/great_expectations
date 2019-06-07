@@ -29,14 +29,20 @@ class Renderer(object):
     @classmethod
     def _find_ge_object_type(cls, ge_object):
         # Decide whether this is a Validation Report or an Expectation Configuration
-        if "results" in ge_object:
-            objects_type = "validation"    
+        if isinstance(ge_object, list):
+            objects_type = "list"
+        else:
+            objects_type = ""
+            ge_object = [ge_object]
+
+        if "results" in ge_object[0]:
+            objects_type += "validation"    
             try:
                 data_asset_name = ge_object["meta"]["data_asset_name"]
             except KeyError:
                 data_asset_name = None
-        elif "expectations" in ge_object:
-            objects_type = "configuration"
+        elif "expectations" in ge_object[0]:
+            objects_type += "configuration"
             try:
                 data_asset_name = ge_object["data_asset_name"]
             except KeyError:

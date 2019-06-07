@@ -24,6 +24,13 @@
 {
     "content_block_type": "bullet_list",
     "classes": classes (string)
+    "bullet_list": [
+        {
+            "template": "Values are betweeen $min and $max",
+            "params": { "min": 5,
+                        "max": 10 }
+        }
+    ]
 }
 
 - table
