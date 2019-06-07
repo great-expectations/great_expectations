@@ -54,20 +54,14 @@ class DataProfileView(View):
 class ColumnHeaderView(View):
     _template = "header.j2"
 
-
 class ValueListView(View):
-    @classmethod
-    def _get_template(cls, template="value_list.j2"):
-        return super(ValueListView, cls)._get_template(template)
+    _template="value_list.j2"
 
 class ColumnSectionView(View):
-    @classmethod
-    def _get_template(cls, template="section.j2"):
-        return super(ColumnSectionView, cls)._get_template(template)
+    _template = "section.j2"
 
 class PageView(View):
     _template = "page.j2"
-
 
 class DescriptivePageView(PageView):
     pass

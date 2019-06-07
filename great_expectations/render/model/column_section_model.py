@@ -128,3 +128,7 @@ class DescriptiveColumnSectionModel(ColumnSectionModel):
         if new_block is not None:
             content_blocks.append(new_block)
         return [], content_blocks
+
+
+class PrescriptiveColumnSectionModel(ColumnSectionModel):
+    pass
