@@ -27,7 +27,6 @@ try:
     import pyspark.sql.types as sparktypes
 except ImportError:
     logger.error("Unable to load spark context; install optional spark dependency for support.")
-    raise
 
 class MetaSparkDFDataset(Dataset):
     """MetaSparkDFDataset is a thin layer between Dataset and SparkDFDataset.
