@@ -2,7 +2,8 @@ import json
 import base64
 import hashlib
 
-class Model(object):
+
+class Renderer(object):
     @classmethod
     def render(cls, ge_object):
         return ge_object
@@ -50,12 +51,3 @@ class Model(object):
         for evr in evrs:
             if evr["expectation_config"]["expectation_type"] == type_:
                 return evr
-
-class EVRModel(Model):
-    pass
-
-class ExpectationsModel(Model):
-    pass
-
-class DataProfileModel(Model):
-    pass

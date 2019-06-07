@@ -1,6 +1,6 @@
-from .model import Model
+from .renderer import Renderer
 
-class ContentBlock(Model):
+class ContentBlock(Renderer):
     
     @classmethod
     def validate_input(cls, ge_object):

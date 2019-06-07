@@ -1,8 +1,8 @@
-from .model import Model
+from .renderer import Renderer
 from .column_section_model import DescriptiveColumnSectionModel, PrescriptiveColumnSectionModel
 
 
-class PrescriptivePageModel(Model):
+class PrescriptivePageRenderer(Renderer):
     
     @classmethod
     def render(cls, expectations):
@@ -21,14 +21,14 @@ class PrescriptivePageModel(Model):
         ordered_columns = list(columns.keys())
 
         return {
-            "model_type": "PrescriptivePageModel",
+            "model_type": "PrescriptivePageRenderer",
             "sections": [
                 PrescriptiveColumnSectionModel.render(columns[column]) for column in ordered_columns
             ]
         }
 
 
-class DescriptivePageModel(Model):
+class DescriptivePageRenderer(Renderer):
     
     @classmethod
     def render(cls, validation_results):
@@ -48,7 +48,7 @@ class DescriptivePageModel(Model):
         ordered_columns = list(columns.keys())
 
         return {
-            "model_type": "DescriptivePageModel",
+            "model_type": "DescriptivePageRenderer",
             "sections": [
                 DescriptiveColumnSectionModel.render(columns[column]) for column in ordered_columns
             ]

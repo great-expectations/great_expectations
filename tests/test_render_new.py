@@ -2,7 +2,7 @@ import pytest
 
 import json
 
-from great_expectations.render.model import DescriptivePageModel, DescriptiveColumnSectionModel
+from great_expectations.render.model import DescriptivePageRenderer, DescriptiveColumnSectionModel
 from great_expectations.render.view import DescriptivePageView
 
 
@@ -12,12 +12,12 @@ def validation_results():
         return json.load(infile)
 
 def test_render_descriptive_page_model(validation_results):
-    print(json.dumps(DescriptivePageModel.render(validation_results), indent=2))
+    print(json.dumps(DescriptivePageRenderer.render(validation_results), indent=2))
     # TODO: Use above print to set up snapshot test once we like the result
     assert True
 
 def test_render_descriptive_page_view(validation_results):
-    model = DescriptivePageModel.render(validation_results)
+    model = DescriptivePageRenderer.render(validation_results)
     print(DescriptivePageView.render(model))
     # TODO: Use above print to set up snapshot test once we like the result
     assert True
