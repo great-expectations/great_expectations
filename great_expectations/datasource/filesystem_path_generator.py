@@ -35,22 +35,22 @@ class FilesystemPathGenerator(BatchGenerator):
             # } for x in os.listdir(os.path.join(self._get_current_base_directory(), data_asset_name))])
         elif os.path.isfile(os.path.join(self._get_current_base_directory(), data_asset_name)):
             path = os.path.join(self._get_current_base_directory(), data_asset_name)
-            with open(path,'rb') as f:
-                md5 = hashlib.md5(f.read()).hexdigest()
+            # with open(path,'rb') as f:
+            #     md5 = hashlib.md5(f.read()).hexdigest()
             return iter([
                 {
                     "path": path,
-                    "md5": md5
+                    # "md5": md5
                 }
                 ])
         elif os.path.isfile(os.path.join(self._get_current_base_directory(), data_asset_name + ".csv")):
             path = os.path.join(self._get_current_base_directory(), data_asset_name + ".csv")
-            with open(path,'rb') as f:
-                md5 = hashlib.md5(f.read()).hexdigest()
+            # with open(path,'rb') as f:
+            #     md5 = hashlib.md5(f.read()).hexdigest()
             return iter([
                 {
                     "path": path,
-                    "md5": md5
+                    # "md5": md5
                 }
                 ])
         else:
@@ -59,11 +59,11 @@ class FilesystemPathGenerator(BatchGenerator):
     # def _build_batch_kwargs_path_iter(self, path_iter):
     def _build_batch_kwargs_path_iter(self, path_list):
         for path in path_list:
-            with open(path,'rb') as f:
-                md5 = hashlib.md5(f.read()).hexdigest()
+            # with open(path,'rb') as f:
+            #     md5 = hashlib.md5(f.read()).hexdigest()
             yield {
                 "path": path,
-                "md5": md5
+                # "md5": md5
             }
         # try:
         #     while True:
