@@ -1,4 +1,4 @@
-from .renderer import Renderer
+from ..renderer import Renderer
 
 class ContentBlock(Renderer):
     

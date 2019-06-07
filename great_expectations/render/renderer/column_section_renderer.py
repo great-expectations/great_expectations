@@ -1,9 +1,9 @@
 import json
 
 from .renderer import Renderer
-from .value_list_content_block import ValueListContentBlock
-from .graph_content_block import GraphContentBlock
-from .table_content_block import TableContentBlock
+from .content_block import ValueListContentBlock
+from .content_block import GraphContentBlock
+from .content_block import TableContentBlock
 
 
 class ColumnSectionRenderer(Renderer):
