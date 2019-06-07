@@ -20,7 +20,7 @@ from great_expectations.dataset import Dataset, PandasDataset
 from great_expectations.data_asset import FileDataAsset
 from great_expectations.data_context import DataContext
 
-from great_expectations.render.model import DescriptivePageRenderer
+from great_expectations.render.renderer import DescriptivePageRenderer
 from great_expectations.render.view import DescriptivePageView
 
 logger = logging.getLogger(__name__)

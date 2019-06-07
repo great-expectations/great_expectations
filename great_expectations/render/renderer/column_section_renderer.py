@@ -21,6 +21,8 @@ class ColumnSectionRenderer(Renderer):
             elif "expectation_config" in candidate_object:
                 # This is a validation (descriptive)
                 return candidate_object["expectation_config"]["kwargs"]["column"]
+            else:
+                raise ValueError("Provide a column section renderer an expectation, list of expectations, evr, or list of evrs.")
         except KeyError:
             return None
 
@@ -95,9 +97,9 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
             return evrs, content_blocks
 
         if len(set_evr["result"][result_key]) > 10:
-            new_block = ValueListContentBlock.render(set_evr, result_key)
+            new_block = ValueListContentBlock.render(set_evr, result_key=result_key)
         else:
-            new_block = GraphContentBlock.render(set_evr, result_key)
+            new_block = GraphContentBlock.render(set_evr, result_key=result_key)
 
         if new_block is not None:
             content_blocks.append(new_block)
