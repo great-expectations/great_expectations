@@ -19,27 +19,20 @@ class ContentBlock(Renderer):
                 "Provide an evr_list, expectation_list, expectation or evr to a content block")
 
         if object_type in ["evr_list", "expectation_list"]:
-            # print("xxxxxxxxx")
             blocks = []
             for obj_ in render_object:
-                # print("yyyyyyyyyy")
                 expectation_type = cls._get_expectation_type(obj_)
 
                 content_block_fn = getattr(cls, expectation_type, None)
-                # print(expectation_type, content_block_fn)
                 if content_block_fn is not None:
-                    # print("zzzzzz")
                     result = content_block_fn(obj_, **kwargs)
-                    # print(result)
                     blocks += result
-                    # print("B", blocks)
 
             return {
                 "content_block_type": cls._content_block_type,
                 cls._content_block_type: blocks
             }
         else:
-            # print("-----")
             expectation_type = cls._get_expectation_type(render_object)
 
             content_block_fn = getattr(cls, expectation_type, None)
