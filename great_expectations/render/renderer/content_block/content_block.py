@@ -18,7 +18,6 @@ class ContentBlock(Renderer):
             raise ValueError(
                 "Provide an evr_list, expectation_list, expectation or evr to a content block")
 
-        # print("??????")
         if object_type in ["evr_list", "expectation_list"]:
             # print("xxxxxxxxx")
             blocks = []

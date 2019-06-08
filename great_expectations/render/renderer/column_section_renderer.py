@@ -161,20 +161,20 @@ class PrescriptiveColumnSectionRenderer(ColumnSectionRenderer):
     @classmethod
     def _render_bullet_list(cls, expectations, content_blocks):
         content = BulletListContentBlock.render(expectations)
-        # print(content)
-        bullet_points = [Template(bullet_point["template"]).substitute(
-            bullet_point["params"]) for bullet_point in content["bullet_list"]]
-        # print(bullet_points)
-        try:
-            bullet_list = {
-                "content_block_type": "bullet_list",
-                "bullet_list": bullet_points,
-            }
-        except IndexError:
-            bullet_list = {
-                "content_block_type": "bullet_list",
-                "bullet_list": [],
-            }
+
+        # bullet_points = [Template(bullet_point["template"]).substitute(
+        #     bullet_point["params"]) for bullet_point in content["bullet_list"]]
+
+        # try:
+        #     bullet_list = {
+        #         "content_block_type": "bullet_list",
+        #         "bullet_list": content,
+        #     }
+        # except IndexError:
+        #     bullet_list = {
+        #         "content_block_type": "bullet_list",
+        #         "bullet_list": [],
+        #     }
         # bullet_list = BulletListContentBlock.render(expectations)
 #         for expectation in expectations:
 #             try:
@@ -190,7 +190,8 @@ class PrescriptiveColumnSectionRenderer(ColumnSectionRenderer):
 # </div>
 #                 """)
 
-        content_blocks.append(bullet_list)
+        content_blocks.append(content)
+        # content_blocks.append(bullet_list)
 
         return [], content_blocks
 
