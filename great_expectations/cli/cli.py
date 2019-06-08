@@ -20,7 +20,7 @@ from great_expectations.dataset import Dataset, PandasDataset
 from great_expectations.data_asset import FileDataAsset
 from great_expectations.data_context import DataContext
 
-from great_expectations.render.renderer import DescriptivePageRenderer
+from great_expectations.render.renderer import DescriptivePageRenderer, PrescriptivePageRenderer
 from great_expectations.render.view import DescriptivePageView
 
 logger = logging.getLogger(__name__)
@@ -60,7 +60,7 @@ def cli():
               help='Path to a python module containing a custom dataset class.')
 @click.option('--custom_dataset_class', '-c', default=None,
               help='Name of the custom dataset class to use during evaluation.')
-def validate(dataset, expectations_config_file, evaluation_parameters, result_format, 
+def validate(dataset, expectations_config_file, evaluation_parameters, result_format,
              catch_exceptions, only_return_failures, custom_dataset_module, custom_dataset_class):
     """Validate a CSV file against an expectations configuration.
 
@@ -126,14 +126,14 @@ validate the data.
 
     print(json.dumps(result, indent=2))
     sys.exit(result['statistics']['unsuccessful_expectations'])
- 
+
 
 @cli.command()
 @click.option('--target_directory', '-d', default="./",
               help='The root of the project directory where you want to initialize Great Expectations.')
 def init(target_directory):
     """Initialze a new Great Expectations project.
-    
+
     This guided input walks the user through setting up a project.
 
     It scaffolds directories, sets up notebooks, creates a project file, and
@@ -183,9 +183,9 @@ Configure a data source
     """
 
 #     msg_prompt_choose_data_source = """
-# Time to create expectations for your data. This is done in Jupyter Notebook/Jupyter Lab. 
-# 
-# Before we point you to the right notebook, what data does your project work with?    
+# Time to create expectations for your data. This is done in Jupyter Notebook/Jupyter Lab.
+#
+# Before we point you to the right notebook, what data does your project work with?
 #     1. Directory on local filesystem
 #     2. Relational database (SQL)
 #     3. DBT (data build tool) models
@@ -298,15 +298,18 @@ To launch with jupyter lab:
             path = path[2:]
 
         default_data_source_name = os.path.basename(path)
-        data_source_name = click.prompt(msg_prompt_datasource_name, default=default_data_source_name, show_default=True)
+        data_source_name = click.prompt(
+            msg_prompt_datasource_name, default=default_data_source_name, show_default=True)
 
         cli_message(msg_spark_go_to_notebook, color="blue")
         context.add_datasource(data_source_name, "spark", base_directory=path)
 
     elif data_source_selection == "2":  # sqlalchemy
-        data_source_name = click.prompt(msg_prompt_datasource_name, default="mydb", show_default=True)
+        data_source_name = click.prompt(
+            msg_prompt_datasource_name, default="mydb", show_default=True)
 
-        cli_message(msg_sqlalchemy_config_connection.format(data_source_name), color="blue")
+        cli_message(msg_sqlalchemy_config_connection.format(
+            data_source_name), color="blue")
 
         drivername = click.prompt("What is the driver for the sqlalchemy connection?", default="postgres",
                                   show_default=True)
@@ -333,7 +336,8 @@ To launch with jupyter lab:
 
         cli_message(msg_sqlalchemy_go_to_notebook, color="blue")
 
-        context.add_datasource(data_source_name, "sqlalchemy", profile=data_source_name)
+        context.add_datasource(
+            data_source_name, "sqlalchemy", profile=data_source_name)
 
     elif data_source_selection == "1":  # csv
         path = click.prompt(msg_prompt_filesys_enter_base_path, default='/data/', type=click.Path(exists=False,
@@ -345,7 +349,8 @@ To launch with jupyter lab:
             path = path[2:]
 
         default_data_source_name = os.path.basename(path)
-        data_source_name = click.prompt(msg_prompt_datasource_name, default=default_data_source_name, show_default=True)
+        data_source_name = click.prompt(
+            msg_prompt_datasource_name, default=default_data_source_name, show_default=True)
 
         cli_message(msg_filesys_go_to_notebook, color="blue")
         context.add_datasource(data_source_name, "pandas", base_directory=path)
@@ -358,13 +363,14 @@ To launch with jupyter lab:
 @click.argument('render_object')
 def render(render_object):
     """Render a great expectations object.
-    
+
     RENDER_OBJECT: path to a GE object to render
     """
     with open(render_object, "r") as infile:
         raw = json.load(infile)
 
-    model = DescriptivePageRenderer.render(raw)
+    # model = DescriptivePageRenderer.render(raw)
+    model = PrescriptivePageRenderer.render(raw)
     print(DescriptivePageView.render(model))
 
 
