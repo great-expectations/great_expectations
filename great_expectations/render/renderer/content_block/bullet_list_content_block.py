@@ -109,8 +109,6 @@ class BulletListContentBlock(ContentBlock):
 
     @classmethod
     def expect_column_values_to_be_between(cls, expectation, column_name=""):
-        # print(expectation[0])
-
         if (expectation["kwargs"]["min_value"] is None) and (expectation["kwargs"]["max_value"] is None):
             return [{
                 "template": column_name + " has a bogus $expectation_name expectation.",

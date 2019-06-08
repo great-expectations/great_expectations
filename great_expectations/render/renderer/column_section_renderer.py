@@ -161,37 +161,7 @@ class PrescriptiveColumnSectionRenderer(ColumnSectionRenderer):
     @classmethod
     def _render_bullet_list(cls, expectations, content_blocks):
         content = BulletListContentBlock.render(expectations)
-
-        # bullet_points = [Template(bullet_point["template"]).substitute(
-        #     bullet_point["params"]) for bullet_point in content["bullet_list"]]
-
-        # try:
-        #     bullet_list = {
-        #         "content_block_type": "bullet_list",
-        #         "bullet_list": content,
-        #     }
-        # except IndexError:
-        #     bullet_list = {
-        #         "content_block_type": "bullet_list",
-        #         "bullet_list": [],
-        #     }
-        # bullet_list = BulletListContentBlock.render(expectations)
-#         for expectation in expectations:
-#             try:
-#                 bullet_point = ExpectationBulletPointSnippetRenderer().render(expectation)
-#                 assert bullet_point != None
-#                 bullet_list["content"].append(bullet_point)
-
-#             except Exception as e:
-#                 bullet_list["content"].append("""
-# <div class="alert alert-danger" role="alert">
-#   Failed to render Expectation:<br/><pre>"""+json.dumps(expectation, indent=2)+"""</pre>
-#   <p>"""+str(e)+"""
-# </div>
-#                 """)
-
         content_blocks.append(content)
-        # content_blocks.append(bullet_list)
 
         return [], content_blocks
 
