@@ -19,9 +19,14 @@
             {% elif content_block["content_block_type"] == "bullet_list" %}
                 <div style="width:100%">
                     <p>
+                        {# {{content_block}} #}
+                        {# {{content_block["bullet_list"]}} #}
                         <ul>
                             {% for bullet_point in content_block["bullet_list"] %}
-                                <li>{{ bullet_point }}</li>
+                                {# <li>{{ bullet_point }}</li> #}
+                                {# <li>{{ Template(bullet_point["template"]).substitute(bullet_point["params"]) }}</li> #}
+                                <li>{{ bullet_point | render_template }}</li>
+
                             {% endfor %}
                         </ul>
                     </p>
