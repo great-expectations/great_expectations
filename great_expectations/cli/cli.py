@@ -141,18 +141,13 @@ def init(target_directory):
     """
 
     greeting_1 = """
-Welcome to Great Expectations! Always know what to expect from your data.
+Always know what to expect from your data.
 
-When you develop data pipelines, ML models, ETLs and other data products, 
-Great Expectations helps you express what you expect your data to look like 
-(e.g., "column X should not have more than 5% null values"). 
-It produces tests and documentation.
+If you're new to Great Expectations, this tutorial is a good place to start:
 
-When your data product runs in production, 
-Great Expectations uses the tests that you created to validate data and protect 
-your code against data that it was not written to deal with.
+    https://great-expectations.readthedocs.io/en/v%s/intro.html#how-do-i-get-started
 
-    """
+    """ % __version__
 
     msg_prompt_lets_begin = """
 Let's add Great Expectations to your project. 

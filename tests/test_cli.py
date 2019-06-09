@@ -1,5 +1,11 @@
-from __future__ import unicode_literals # Since our cli produces unicode output, but we want tests in python2 as well
+# Since our cli produces unicode output, but we want tests in python2 as well
+from __future__ import unicode_literals
 
+from click.testing import CliRunner
+import great_expectations.version
+from great_expectations.cli import cli
+import tempfile
+import pytest
 import json
 import os
 import shutil
@@ -11,13 +17,7 @@ try:
     from unittest import mock
 except ImportError:
     import mock
-import pytest
-import tempfile
 
-from great_expectations.cli import cli
-import great_expectations.version
-
-from click.testing import CliRunner
 
 def test_cli_command_entrance():
     runner = CliRunner()
@@ -37,6 +37,7 @@ Commands:
   render    Render a great expectations object.
   validate  Validate a CSV file against an expectations configuration.
 """
+
 
 def test_cli_command_bad_command():
     runner = CliRunner()
@@ -88,16 +89,18 @@ Options:
                                   during evaluation.
   --help                          Show this message and exit.
 """.replace(" ", "").replace("\t", "").replace("\n", "")
-    output = str(result.output).replace(" ", "").replace("\t", "").replace("\n", "")
+    output = str(result.output).replace(
+        " ", "").replace("\t", "").replace("\n", "")
     assert output == expected_help_message
 
 
 def test_cli_validate_missing_positional_arguments():
     runner = CliRunner()
-    
+
     result = runner.invoke(cli, ["validate"])
 
     assert "Error: Missing argument \"DATASET\"." in str(result.output)
+
 
 def test_cli_version():
     runner = CliRunner()
@@ -112,7 +115,7 @@ def test_validate_basic_operation():
         runner = CliRunner()
         with pytest.warns(UserWarning, match="No great_expectations version found in configuration object."):
             result = runner.invoke(cli, ["validate", "./tests/test_sets/Titanic.csv",
-                                        "./tests/test_sets/titanic_expectations.json"])
+                                         "./tests/test_sets/titanic_expectations.json"])
 
             assert result.exit_code == 1
             json_result = json.loads(str(result.output))
@@ -130,14 +133,14 @@ def test_validate_custom_dataset():
         runner = CliRunner()
         with pytest.warns(UserWarning, match="No great_expectations version found in configuration object."):
             result = runner.invoke(cli, ["validate",
-                                             "./tests/test_sets/Titanic.csv",
-                                             "./tests/test_sets/titanic_custom_expectations.json",
-                                             "-f", "True",
-                                             "-m", "./tests/test_fixtures/custom_dataset.py",
-                                             "-c", "CustomPandasDataset"])
+                                         "./tests/test_sets/Titanic.csv",
+                                         "./tests/test_sets/titanic_custom_expectations.json",
+                                         "-f", "True",
+                                         "-m", "./tests/test_fixtures/custom_dataset.py",
+                                         "-c", "CustomPandasDataset"])
 
             json_result = json.loads(result.output)
-           
+
     del json_result["meta"]["great_expectations.__version__"]
     del json_result["results"][0]["result"]['partial_unexpected_counts']
     with open('./tests/test_sets/expected_cli_results_custom.json', 'r') as f:
@@ -150,18 +153,18 @@ def test_cli_evaluation_parameters(capsys):
     with pytest.warns(UserWarning, match="No great_expectations version found in configuration object."):
         runner = CliRunner()
         result = runner.invoke(cli, ["validate",
-                                         "./tests/test_sets/Titanic.csv",
-                                         "./tests/test_sets/titanic_parameterized_expectations.json",
-                                         "--evaluation_parameters",
-                                         "./tests/test_sets/titanic_evaluation_parameters.json",
-                                         "-f", "True"])
+                                     "./tests/test_sets/Titanic.csv",
+                                     "./tests/test_sets/titanic_parameterized_expectations.json",
+                                     "--evaluation_parameters",
+                                     "./tests/test_sets/titanic_evaluation_parameters.json",
+                                     "-f", "True"])
         json_result = json.loads(result.output)
-
 
     with open('./tests/test_sets/titanic_evaluation_parameters.json', 'r') as f:
         expected_evaluation_parameters = json.load(f)
 
     assert json_result['evaluation_parameters'] == expected_evaluation_parameters
+
 
 def test_cli_init(tmp_path_factory):
     basedir = tmp_path_factory.mktemp("test_cli_init_diff")
@@ -170,14 +173,57 @@ def test_cli_init(tmp_path_factory):
     curdir = os.path.abspath(os.getcwd())
     os.chdir(basedir)
     runner = CliRunner()
-    result = runner.invoke(cli, ["init"], input="Y\n1\n%s\n\n" % str(os.path.join(basedir, "data")))
+    result = runner.invoke(cli, ["init"], input="Y\n1\n%s\n\n" % str(
+        os.path.join(basedir, "data")))
+
+    print(result.output)
 
     assert """Welcome to Great Expectations! Always know what to expect from your data.""" in result.output
 
-
     assert os.path.isdir(os.path.join(basedir, "great_expectations"))
-    assert os.path.isfile(os.path.join(basedir, "great_expectations/great_expectations.yml"))
-    config = yaml.load(open(os.path.join(basedir, "great_expectations/great_expectations.yml"), "r"))
+    assert os.path.isfile(os.path.join(
+        basedir, "great_expectations/great_expectations.yml"))
+    config = yaml.load(
+        open(os.path.join(basedir, "great_expectations/great_expectations.yml"), "r"))
     assert config["datasources"]["data"]["type"] == "pandas"
 
     os.chdir(curdir)
+
+    assert False
+
+
+# def test_cli_render(tmp_path_factory):
+#     runner = CliRunner()
+#     result = runner.invoke(cli, ["render"])
+
+#     print(result)
+#     print(result.output)
+#     assert False
+
+
+# def test_cli_profile(tmp_path_factory):
+#     runner = CliRunner()
+#     result = runner.invoke(cli, ["profile"])
+
+#     print(result)
+#     assert False
+
+#     # basedir = tmp_path_ factory.mktemp("test_cli_init_diff")
+#     # basedir = str(basedir)
+#     # os.makedirs(os.path.join(basedir, "data"))
+#     # curdir = os.path.abspath(os.getcwd())
+#     # os.chdir(basedir)
+#     # runner = CliRunner()
+#     # result = runner.invoke(cli, ["init"], input="Y\n1\n%s\n\n" % str(
+#     #     os.path.join(basedir, "data")))
+
+#     # assert """Welcome to Great Expectations! Always know what to expect from your data.""" in result.output
+
+#     # assert os.path.isdir(os.path.join(basedir, "great_expectations"))
+#     # assert os.path.isfile(os.path.join(
+#     #     basedir, "great_expectations/great_expectations.yml"))
+#     # config = yaml.load(
+#     #     open(os.path.join(basedir, "great_expectations/great_expectations.yml"), "r"))
+#     # assert config["datasources"]["data"]["type"] == "pandas"
+
+#     # os.chdir(curdir)
