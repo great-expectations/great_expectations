@@ -140,6 +140,7 @@ def init(target_directory):
     appends to a `.gitignore` file.
     """
 
+    #!!! This injects a version tag into the docs. We should test that those versioned docs exist in RTD.
     greeting_1 = """
 Always know what to expect from your data.
 
@@ -152,7 +153,7 @@ If you're new to Great Expectations, this tutorial is a good place to start:
 Let's add Great Expectations to your project, by scaffolding a new great_expectations directory:
 
     great_expectations
-        ├── great_expectations.yml        
+        ├── great_expectations.yml
         ├── datasources
         ├── expectations
         ├── fixtures
@@ -265,7 +266,7 @@ To launch with jupyter lab:
 
     _scaffold_directories_and_notebooks(base_dir)
     cli_message(
-        "\nDone. Later you can check out great_expectations/great_expectations.yml config file for useful options.",
+        "\nDone.",
         color="blue")
 
     context = DataContext('.')

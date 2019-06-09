@@ -4,7 +4,13 @@ import shutil
 
 from ..util import safe_mmkdir
 
+
 def _scaffold_directories_and_notebooks(base_dir):
+    #!!! FIXME: Check to see if the directory already exists. If it does, refuse with:
+    # `great_expectations/` already exists.
+    # If you're certain you want to re-initialize Great Expectations within this project,
+    # please delete the whole `great_expectations/` directory and run `great_expectations init` again.
+
     safe_mmkdir(base_dir, exist_ok=True)
     notebook_dir_name = "notebooks"
 
@@ -14,12 +20,14 @@ def _scaffold_directories_and_notebooks(base_dir):
         safe_mmkdir(os.path.join(base_dir, directory), exist_ok=True)
 
     for uncommitted_directory in ["validations", "credentials", "samples"]:
-        safe_mmkdir(os.path.join(base_dir, "uncommitted", uncommitted_directory), exist_ok=True)
+        safe_mmkdir(os.path.join(base_dir, "uncommitted",
+                                 uncommitted_directory), exist_ok=True)
 
     for notebook in glob.glob(script_relative_path("../init_notebooks/*.ipynb")):
         notebook_name = os.path.basename(notebook)
         shutil.copyfile(notebook, os.path.join(
             base_dir, notebook_dir_name, notebook_name))
+
 
 def script_relative_path(file_path):
     '''
