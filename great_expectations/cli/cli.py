@@ -146,12 +146,10 @@ Always know what to expect from your data.
 If you're new to Great Expectations, this tutorial is a good place to start:
 
     https://great-expectations.readthedocs.io/en/v%s/intro.html#how-do-i-get-started
-
     """ % __version__
 
     msg_prompt_lets_begin = """
-Let's add Great Expectations to your project. 
-We will add great_expectations directory that will look like that: 
+Let's add Great Expectations to your project, by scaffolding a new great_expectations directory:
 
     great_expectations
         ├── great_expectations.yml        
