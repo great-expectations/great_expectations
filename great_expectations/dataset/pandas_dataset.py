@@ -773,8 +773,12 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                 # jsonschema.validate raises an error if validation fails.
                 # So if we make it this far, we know that the validation succeeded.
                 return True
+            except jsonschema.ValidationError:
+                success = False
+            except jsonschema.SchemaError:
+                raise
             except:
-                return False
+                raise
 
         return column.map(matches_json_schema)
 
