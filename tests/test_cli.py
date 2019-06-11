@@ -178,7 +178,7 @@ def test_cli_init(tmp_path_factory):
 
     print(result.output)
 
-    assert """Welcome to Great Expectations! Always know what to expect from your data.""" in result.output
+    assert """Always know what to expect from your data.""" in result.output
 
     assert os.path.isdir(os.path.join(basedir, "great_expectations"))
     assert os.path.isfile(os.path.join(
@@ -188,9 +188,6 @@ def test_cli_init(tmp_path_factory):
     assert config["datasources"]["data"]["type"] == "pandas"
 
     os.chdir(curdir)
-
-    assert False
-
 
 # def test_cli_render(tmp_path_factory):
 #     runner = CliRunner()
