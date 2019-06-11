@@ -15,16 +15,18 @@
                 </div>
             {% elif content_block["content_block_type"] == "value_list" %}
                 {% include 'value_list.j2' %}
+
             {% elif content_block["content_block_type"] == "bullet_list" %}
                 <div style="width:100%">
                     <p>
                         <ul>
-                            {% for bullet_point in content_block["content"] %}
-                            <li>{{ bullet_point }}</li>
+                            {% for bullet_point in content_block["bullet_list"] %}
+                                <li>{{ bullet_point | render_template }}</li>
                             {% endfor %}
                         </ul>
                     </p>
                 </div>
+
             {% elif content_block["content_block_type"] == "graph" %}
                 <div id="vis-{{section_loop.index}}-{{content_block_loop.index}}" style="width:45%"></div>
                 <script>
