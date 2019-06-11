@@ -1,3 +1,4 @@
 from .value_list_content_block import ValueListContentBlock
 from .table_content_block import TableContentBlock
 from .graph_content_block import GraphContentBlock
+from .bullet_list_content_block import BulletListContentBlock
