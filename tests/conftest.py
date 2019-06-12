@@ -12,8 +12,6 @@ from great_expectations.data_context.util import safe_mmkdir
 
 from .test_utils import get_dataset, CONTEXTS
 
-# CONTEXTS = ['PandasDataset', 'SqlAlchemyDataset', 'SparkDFDataset']
-
 
 @pytest.fixture
 def empty_expectations_config():
