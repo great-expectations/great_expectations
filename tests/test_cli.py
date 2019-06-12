@@ -199,29 +199,10 @@ def test_cli_init(tmp_path_factory):
 #     assert False
 
 
-# def test_cli_profile(tmp_path_factory):
+# def test_cli_profile(empty_data_context, filesystem_csv):
 #     runner = CliRunner()
 #     result = runner.invoke(cli, ["profile"])
 
 #     print(result)
+#     print(result.output)
 #     assert False
-
-#     # basedir = tmp_path_ factory.mktemp("test_cli_init_diff")
-#     # basedir = str(basedir)
-#     # os.makedirs(os.path.join(basedir, "data"))
-#     # curdir = os.path.abspath(os.getcwd())
-#     # os.chdir(basedir)
-#     # runner = CliRunner()
-#     # result = runner.invoke(cli, ["init"], input="Y\n1\n%s\n\n" % str(
-#     #     os.path.join(basedir, "data")))
-
-#     # assert """Welcome to Great Expectations! Always know what to expect from your data.""" in result.output
-
-#     # assert os.path.isdir(os.path.join(basedir, "great_expectations"))
-#     # assert os.path.isfile(os.path.join(
-#     #     basedir, "great_expectations/great_expectations.yml"))
-#     # config = yaml.load(
-#     #     open(os.path.join(basedir, "great_expectations/great_expectations.yml"), "r"))
-#     # assert config["datasources"]["data"]["type"] == "pandas"
-
-#     # os.chdir(curdir)
