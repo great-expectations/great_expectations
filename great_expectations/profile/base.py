@@ -11,7 +11,7 @@ class DataSetProfiler(object):
         return issubclass(type(dataset), Dataset)
 
     @classmethod
-    def add_meta(cls, expectations_config):
+    def add_meta(cls, expectations_config, batch_kwargs=None):
         if not "meta" in expectations_config:
             expectations_config["meta"] = {}
 
@@ -19,8 +19,10 @@ class DataSetProfiler(object):
         expectations_config["meta"][class_name] = {
             "created_by": class_name,
             "created_at": time.time(),
-            # "batch_kwargs": {},
         }
+
+        if batch_kwargs != None:
+            expectations_config["meta"][class_name]["batch_kwargs"] = batch_kwargs
 
         print(expectations_config["meta"])
         return expectations_config
@@ -29,7 +31,9 @@ class DataSetProfiler(object):
     def profile(cls, dataset):
         assert cls.validate_dataset(dataset)
         expectations_config = cls._profile(dataset)
-        expectations_config = cls.add_meta(expectations_config)
+
+        batch_kwargs = dataset.get_batch_kwargs()
+        expectations_config = cls.add_meta(expectations_config, batch_kwargs)
         validation_results = None  # dataset.validate(expectations_config)
         return expectations_config, validation_results
 
