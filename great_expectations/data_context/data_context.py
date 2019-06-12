@@ -678,9 +678,11 @@ class DataContext(object):
                 #FIXME: There needs to be an affordance here to limit to 100 rows, or downsample, etc.
                 batch = self.get_batch(datasource_name=datasource_name, data_asset_name=name)
 
-                # expectations_config, evr_config = PseudoPandasProfiler.profile(batch)
-                expectations_config = PseudoPandasProfiler.profile(batch)
+                #Note: This logic is specific to DatasetProfilers, which profile a single batch. Multi-batch profilers will have more to unpack.
+                expectations_config, evr_config = PseudoPandasProfiler.profile(batch)
+
                 self.save_expectations(expectations_config, name)
+                # self.save_evrs(evr_config, name)
                 
                 duration = (datetime.datetime.now() - start_time).total_seconds()
 
@@ -689,7 +691,8 @@ class DataContext(object):
             #!!! FIXME: THIS IS WAAAAY TO GENERAL. As soon as BatchKwargsError is fully implemented, we'll want to switch to that.
             except:
                 #!!! FIXME: This error message could be a lot more helpful than it is
-                print("\tWARNING: Unable to load %s. Skipping profiling." % (name))
+                # print("\tWARNING: Unable to load %s. Skipping profiling." % (name))
+                print("\tWARNING: Something went wrong when profiling %s. (Perhaps a loading error?) Skipping." % (name))
 
 
 

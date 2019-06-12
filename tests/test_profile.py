@@ -29,11 +29,11 @@ def test_DataSetProfiler_methods():
 
 def test_ColumnsExistProfiler():
     toy_dataset = PandasDataset({"x": [1, 2, 3]})
-    results = ColumnsExistProfiler.profile(toy_dataset)
+    expectations_config, evr_config = ColumnsExistProfiler.profile(toy_dataset)
 
-    print(json.dumps(results, indent=2))
+    print(json.dumps(expectations_config, indent=2))
 
-    assert results == {
+    assert expectations_config == {
         "data_asset_name": None,
         "data_asset_type": "Dataset",
         "meta": {
@@ -55,9 +55,9 @@ def test_PseudoPandasProfiler():
     assert len(toy_dataset.get_expectations(
         suppress_warnings=True)["expectations"]) == 0
 
-    results = PseudoPandasProfiler.profile(toy_dataset)
+    expectations_config, evr_config = PseudoPandasProfiler.profile(toy_dataset)
 
-    print(json.dumps(results, indent=2))
+    print(json.dumps(expectations_config, indent=2))
 
     assert len(toy_dataset.get_expectations(
         suppress_warnings=True)["expectations"]) > 0
@@ -88,4 +88,19 @@ def test_context_profiler(empty_data_context, filesystem_csv_2):
     print(json.dumps(profiled_expectations, indent=2))
 
     assert len(profiled_expectations["expectations"]) > 0
-    # assert False
+
+
+# FIXME: This test needs a different home.
+def test_validate_on_a_context_loaded_batch(empty_data_context, filesystem_csv_2):
+    toy_dataset = PandasDataset({"x": [1, 2, 3]})
+    toy_dataset.validate()
+
+    empty_data_context.add_datasource(
+        "my_datasource", "pandas", base_directory=str(filesystem_csv_2))
+    not_so_empty_data_context = empty_data_context
+
+    # my_ds = not_so_empty_data_context.get_datasource("my_datasource")
+    # print(my_ds.list_available_data_asset_names())
+
+    my_batch = not_so_empty_data_context.get_batch("my_datasource", "f1")
+    my_batch.validate()
