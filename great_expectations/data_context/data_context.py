@@ -651,13 +651,13 @@ class DataContext(object):
             return return_obj
 
     def profile_datasource(self, datasource_name, profiler_name="PseudoPandasProfiling", max_data_assets=10):
-        # FIXME: I've include
         # logger.info("Profiling %s with %s" % (datasource_name, profiler_name))
         print("Profiling %s with %s" % (datasource_name, profiler_name))
         datasource = self.get_datasource(datasource_name)
         data_asset_names = datasource.list_available_data_asset_names()
 
         #!!! Abe 2019/06/11: This seems brittle. I don't understand why this object is packaged this way.
+        #!!! Note: need to review this to make sure the names are properly qualified.
         data_asset_name_list = list(data_asset_names[0]["available_data_asset_names"])
         # logger.info("Found %d named data assets" % (len(data_asset_name_list)))
         print("Found %d named data assets" % (len(data_asset_name_list)))
@@ -679,10 +679,10 @@ class DataContext(object):
                 batch = self.get_batch(datasource_name=datasource_name, data_asset_name=name)
 
                 #Note: This logic is specific to DatasetProfilers, which profile a single batch. Multi-batch profilers will have more to unpack.
-                expectations_config, evr_config = PseudoPandasProfiler.profile(batch)
+                expectations_config, validation_result = PseudoPandasProfiler.profile(batch)
 
-                self.save_expectations(expectations_config, name)
-                # self.save_evrs(evr_config, name)
+                self.save_expectations(expectations_config)#, name)
+                # self.save_validation_result(validation_result, name)
                 
                 duration = (datetime.datetime.now() - start_time).total_seconds()
 
