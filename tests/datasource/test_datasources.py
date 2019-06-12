@@ -63,7 +63,7 @@ def test_create_pandas_datasource(data_context, tmp_path_factory):
 def test_standalone_pandas_datasource(test_folder_connection_path):
     datasource = PandasDatasource('PandasCSV', base_directory=test_folder_connection_path)
 
-    assert datasource.list_available_data_asset_names() == [{"generator": "default", "available_data_asset_names": {"test"}}]
+    assert datasource.get_available_data_asset_names() == [{"generator": "default", "available_data_asset_names": {"test"}}]
     manual_batch_kwargs = datasource.build_batch_kwargs(os.path.join(str(test_folder_connection_path), "test.csv"))
 
     # Get the default (filesystem) generator
@@ -81,7 +81,7 @@ def test_standalone_sqlalchemy_datasource(test_db_connection_string):
     datasource = SqlAlchemyDatasource(
         'SqlAlchemy', connection_string=test_db_connection_string, echo=False)
 
-    assert datasource.list_available_data_asset_names() == [{"generator": "default", "available_data_asset_names": {"table_1", "table_2"}}]
+    assert datasource.get_available_data_asset_names() == [{"generator": "default", "available_data_asset_names": {"table_1", "table_2"}}]
     dataset1 = datasource.get_data_asset("table_1")
     dataset2 = datasource.get_data_asset("table_2", schema='main')
     assert isinstance(dataset1, SqlAlchemyDataset)

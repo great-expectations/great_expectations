@@ -196,7 +196,7 @@ class DataContext(object):
             data_asset_names.append(
                 {
                     "datasource": datasource_name,
-                    "generators": datasource.list_available_data_asset_names(generator_names[idx] if generator_names is not None else None) 
+                    "generators": datasource.get_available_data_asset_names(generator_names[idx] if generator_names is not None else None)
                 }
             )
         return data_asset_names
