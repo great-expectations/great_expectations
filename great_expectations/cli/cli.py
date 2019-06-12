@@ -368,6 +368,19 @@ def render(render_object):
     print(DescriptivePageView.render(model))
 
 
+@cli.command()
+@click.argument('datasource_name')
+def profile(datasource_name):
+    """Profile a great expectations object.
+
+    datasource_name: A datasource within this GE context to profile.
+    """
+
+    # FIXME: By default, this should iterate over all datasources
+    context = DataContext('.')
+    context.profile_datasource(datasource_name)
+
+
 def main():
     handler = logging.StreamHandler()
     formatter = logging.Formatter(
