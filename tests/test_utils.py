@@ -15,7 +15,7 @@ from pyspark.sql import SparkSession
 import pyspark.sql.types as sparktypes
 
 from great_expectations.dataset import PandasDataset, SqlAlchemyDataset, SparkDFDataset
-import great_expectations.dataset.autoinspect as autoinspect
+import great_expectations.profile.autoinspect as autoinspect
 
 CONTEXTS = ['PandasDataset', 'SqlAlchemyDataset']#, 'SparkDFDataset']
 

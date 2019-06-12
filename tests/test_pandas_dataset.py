@@ -5,7 +5,7 @@ import json
 import datetime
 import pandas as pd
 import great_expectations as ge
-import great_expectations.dataset.autoinspect as autoinspect
+import great_expectations.profile.autoinspect as autoinspect
 
 from .test_utils import assertDeepAlmostEqual
 
