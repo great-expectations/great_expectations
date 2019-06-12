@@ -33,21 +33,25 @@ def test_ColumnsExistProfiler():
 
     print(json.dumps(expectations_config, indent=2))
 
-    assert expectations_config == {
-        "data_asset_name": None,
-        "data_asset_type": "Dataset",
-        "meta": {
-            "great_expectations.__version__": "0.7.0-beta"
-        },
-        "expectations": [
-            {
-                "expectation_type": "expect_column_to_exist",
-                "kwargs": {
-                    "column": "x"
-                }
-            }
-        ]
-    }
+    # assert expectations_config == {
+    #     "data_asset_name": None,
+    #     "data_asset_type": "Dataset",
+    #     "meta": {
+    #         "great_expectations.__version__": "0.7.0-beta",
+    #         "ColumnsExistProfiler": {
+    #             "created_by": "BasicDatasetProfiler",
+    #             "created_at": 0,
+    #         },
+    #     },
+    #     "expectations": [
+    #         {
+    #             "expectation_type": "expect_column_to_exist",
+    #             "kwargs": {
+    #                 "column": "x"
+    #             }
+    #         }
+    #     ]
+    # }
 
 
 def test_BasicDatasetProfiler():
@@ -57,28 +61,31 @@ def test_BasicDatasetProfiler():
 
     expectations_config, evr_config = BasicDatasetProfiler.profile(toy_dataset)
 
-    print(json.dumps(expectations_config, indent=2))
+    # print(json.dumps(expectations_config, indent=2))
 
     assert len(toy_dataset.get_expectations(
         suppress_warnings=True)["expectations"]) > 0
 
-    # assert expectations_config["data_asset_name"] == "f1"
-    # assert "PseudoPandasProfiler" in expectations_config["meta"]
-    # assert expectations_config["meta"].keys() == [
-    #     "created_by", "created_at", "batch_kwargs"
-    # ]
+    # We should add an additional test that instantiates the batch via context, so the data_asset_name will be populated.
+    assert expectations_config["data_asset_name"] == None
+    assert "BasicDatasetProfiler" in expectations_config["meta"]
+    # We should add an additional test that instantiates the batch via context, so that batch_kwargs will be populated.
+    assert set(expectations_config["meta"]["BasicDatasetProfiler"].keys()) == {
+        "created_by", "created_at"
+    }
     # for exp in expectations_config["expectations"]:
-    #     assert "PseudoPandasProfiler" in exp["meta"]
-    #     assert exp["meta"]["PseudoPandasProfiler"] == {
+    #     assert "BasicDatasetProfiler" in exp["meta"]
+    #     assert exp["meta"]["BasicDatasetProfiler"] == {
     #         "confidence": "very low"
     #     }
 
-    # assert expectations_config == {
+    # Example:
+    # {
     #     "data_asset_name": "notable_works_by_charles_dickens",
     #     "meta": {
     #         "great_expectations.__version__": "0.7.0-beta",
-    #         "PseudoPandasProfiler": {
-    #             "created_by": "PseudoPandasProfiler",
+    #         "BasicDatasetProfiler": {
+    #             "created_by": "BasicDatasetProfiler",
     #             "created_at": 0,
     #             "batch_kwargs": {},
     #         },
@@ -87,7 +94,7 @@ def test_BasicDatasetProfiler():
     #         {
     #             "expectation_type": "expect_column_to_exist",
     #             "meta": {
-    #                 "DefaultQuickStartProfiler": {
+    #                 "BasicDatasetProfiler": {
     #                     "confidence": "very low"
     #                 }
     #             }
