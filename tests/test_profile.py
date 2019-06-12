@@ -1,5 +1,7 @@
 import pytest
 
+import json
+
 from great_expectations.profile.base import DataSetProfiler
 from great_expectations.profile.pseudo_pandas_profiling import PseudoPandasProfiler
 from great_expectations.dataset.pandas_dataset import PandasDataset
@@ -17,5 +19,12 @@ def test_DataSetProfiler_methods():
 
 def test_PseudoPandasProfiler():
     toy_dataset = PandasDataset({"x": [1, 2, 3]})
+    assert len(toy_dataset.get_expectations(
+        suppress_warnings=True)["expectations"]) == 0
 
-    PseudoPandasProfiler.profile(toy_dataset)
+    results = PseudoPandasProfiler.profile(toy_dataset)
+
+    print(json.dumps(results, indent=2))
+
+    assert len(toy_dataset.get_expectations(
+        suppress_warnings=True)["expectations"]) > 0
