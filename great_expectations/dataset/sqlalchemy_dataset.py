@@ -541,12 +541,21 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                                                 result_format=None, include_config=False, catch_exceptions=None, meta=None
                                                 ):
         # Postgres-only version
-        if isinstance(self.engine.dialect, sa.dialects.postgresql.dialect):
-            condition = sa.text(column + " ~ '" + regex + "'")
-        # Mysql
-        elif isinstance(self.engine.dialect, sa.dialects.mysql.dialect):
-            condition = sa.text(column + " REGEXP  '" + regex + "'")
-        else:
+        try:
+            # Postgres-only version
+            if isinstance(self.engine.dialect, sa.dialects.postgresql.dialect):
+                condition = sa.text(column + " ~ '" + regex + "'")
+        except AttributeError:
+            pass
+
+        try:
+            # Mysql
+            if isinstance(self.engine.dialect, sa.dialects.mysql.dialect):
+                condition = sa.text(column + " REGEXP  '" + regex + "'")
+        except AttributeError:
+            pass
+
+        if condition is None:
             logger.warning("Regex is not supported for dialect %s" % str(self.engine.dialect))
             raise NotImplementedError
 
@@ -559,13 +568,22 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                                                 mostly=None,
                                                 result_format=None, include_config=False, catch_exceptions=None, meta=None
                                                 ):
-        # Postgres-only version
-        if isinstance(self.engine.dialect, sa.dialects.postgresql.dialect):
-            condition = sa.text(column + " !~ '" + regex + "'")
-        # Mysql
-        elif isinstance(self.engine.dialect, sa.dialects.mysql.dialect):
-            condition = sa.text(column + " NOT REGEXP  '" + regex + "'")
-        else:
+        condition = None
+        try:
+            # Postgres-only version
+            if isinstance(self.engine.dialect, sa.dialects.postgresql.dialect):
+                condition = sa.text(column + " !~ '" + regex + "'")
+        except AttributeError:
+            pass
+
+        try:
+            # Mysql
+            if isinstance(self.engine.dialect, sa.dialects.mysql.dialect):
+                condition = sa.text(column + " NOT REGEXP  '" + regex + "'")
+        except AttributeError:
+            pass
+
+        if condition is None:
             logger.warning("Regex is not supported for dialect %s" % str(self.engine.dialect))
             raise NotImplementedError
 
@@ -582,31 +600,41 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         if match_on not in ["any", "all"]:
             raise ValueError("match_on must be any or all")
+
+        condition = None
+        try:
         # Postgres-only version
-        if isinstance(self.engine.dialect, sa.dialects.postgresql.dialect):
-            if match_on == "any":
-                condition = \
-                    sa.or_(
-                       *[sa.text(column + " ~ '" + regex + "'") for regex in regex_list]
-                    )
-            else:
-                condition = \
-                    sa.and_(
-                       *[sa.text(column + " ~ '" + regex + "'") for regex in regex_list]
-                    )
+            if isinstance(self.engine.dialect, sa.dialects.postgresql.dialect):
+                if match_on == "any":
+                    condition = \
+                        sa.or_(
+                        *[sa.text(column + " ~ '" + regex + "'") for regex in regex_list]
+                        )
+                else:
+                    condition = \
+                        sa.and_(
+                        *[sa.text(column + " ~ '" + regex + "'") for regex in regex_list]
+                        )
+        except AttributeError:
+            # this can simply indicate no mysql driver is loaded
+            pass
+        try:
         # Mysql
-        elif isinstance(self.engine.dialect, sa.dialects.mysql.dialect):
-            if match_on == "any":
-                condition = \
-                    sa.or_(
-                       *[sa.text(column + " REGEXP '" + regex + "'") for regex in regex_list]
-                    )
-            else:
-                condition = \
-                    sa.and_(
-                       *[sa.text(column + " REGEXP '" + regex + "'") for regex in regex_list]
-                    )
-        else:
+            if isinstance(self.engine.dialect, sa.dialects.mysql.dialect):
+                if match_on == "any":
+                    condition = \
+                        sa.or_(
+                        *[sa.text(column + " REGEXP '" + regex + "'") for regex in regex_list]
+                        )
+                else:
+                    condition = \
+                        sa.and_(
+                        *[sa.text(column + " REGEXP '" + regex + "'") for regex in regex_list]
+                        )
+        except AttributeError:
+            # this can simply indicate no mysql driver is loaded
+            pass
+        if condition is None:
             logger.warning("Regex is not supported for dialect %s" % str(self.engine.dialect))
             raise NotImplementedError
 
@@ -617,19 +645,29 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                                                      mostly=None,
                                                      result_format=None, include_config=False, catch_exceptions=None, meta=None):
 
-        # Postgres-only version
-        if isinstance(self.engine.dialect, sa.dialects.postgresql.dialect):
-            condition = \
-                sa.and_(
-                    *[sa.text(column + " !~ '" + regex + "'") for regex in regex_list]
-                )
+        condition = None
+        try:
+            if isinstance(self.engine.dialect, sa.dialects.postgresql.dialect):
+                condition = \
+                    sa.and_(
+                        *[sa.text(column + " !~ '" + regex + "'") for regex in regex_list]
+                    )
+        except AttributeError:
+            # this can simply indicate no postgres driver is loaded
+            pass
+
+        try:
         # Mysql
-        elif isinstance(self.engine.dialect, sa.dialects.mysql.dialect):
-            condition = \
-                sa.and_(
-                    *[sa.text(column + " NOT REGEXP '" + regex + "'") for regex in regex_list]
-                )
-        else:
+            if isinstance(self.engine.dialect, sa.dialects.mysql.dialect):
+                condition = \
+                    sa.and_(
+                        *[sa.text(column + " NOT REGEXP '" + regex + "'") for regex in regex_list]
+                    )
+        except AttributeError:
+            # this can simply indicate no mysql driver is loaded
+            pass
+
+        if condition is None:
             logger.warning("Regex is not supported for dialect %s" % str(self.engine.dialect))
             raise NotImplementedError
 
