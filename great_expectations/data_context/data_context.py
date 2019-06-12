@@ -676,7 +676,7 @@ class DataContext(object):
         # logger.info("Profiling %s with %s" % (datasource_name, profiler_name))
         print("Profiling %s with %s" % (datasource_name, profiler_name))
         datasource = self.get_datasource(datasource_name)
-        data_asset_names = datasource.list_available_data_asset_names()
+        data_asset_names = datasource.get_available_data_asset_names()
 
         #!!! Abe 2019/06/11: This seems brittle. I don't understand why this object is packaged this way.
         #!!! Note: need to review this to make sure the names are properly qualified.
