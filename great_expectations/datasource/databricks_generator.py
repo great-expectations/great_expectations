@@ -24,7 +24,7 @@ class DatabricksTableGenerator(BatchGenerator):
         self.spark = datasource.spark
         self.database = database
 
-    def list_available_data_asset_names(self):
+    def get_available_data_asset_names(self):
         tables = self.spark.sql('show tables in {}'.format(self.database))
         return set([row.tableName for row in tables.collect()])
 

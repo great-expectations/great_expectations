@@ -5,8 +5,6 @@ from six import string_types
 
 import logging
 
-from great_expectations.util import safe_mmkdir
-
 logger = logging.getLogger(__name__)
 yaml = YAML()
 yaml.default_flow_style = False
@@ -138,7 +136,7 @@ class Datasource(object):
     def _get_generator_class(self, type_):
         raise NotImplementedError
 
-    def list_available_data_asset_names(self, generator_names=None):
+    def get_available_data_asset_names(self, generator_names=None):
         available_data_asset_names = []
         if generator_names is None:
             generator_names = [generator["name"] for generator in self.list_generators()]
@@ -150,7 +148,7 @@ class Datasource(object):
             available_data_asset_names.append(
                 {
                     "generator": generator_name,
-                    "available_data_asset_names": generator.list_available_data_asset_names()
+                    "available_data_asset_names": generator.get_available_data_asset_names()
                 }
             )
         return available_data_asset_names

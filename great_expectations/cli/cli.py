@@ -23,8 +23,8 @@ from great_expectations.data_context import DataContext
 from great_expectations.render.renderer import DescriptivePageRenderer, PrescriptivePageRenderer
 from great_expectations.render.view import DescriptivePageView
 
-logger = logging.getLogger(__name__)
-
+# Take over the entire GE module logging namespace when running CLI
+logger = logging.getLogger("great_expectations")
 
 def cli_message(string, color, font="big", figlet=False):
     if colored:
@@ -253,6 +253,8 @@ To launch with jupyter notebooks:
 To launch with jupyter lab: 
     jupyter lab great_expectations/notebooks/create_expectations_for_spark_dataframes.ipynb
     """
+    context = DataContext.create('.')
+
     base_dir = os.path.join(target_directory, "great_expectations")
 
     cli_message("Great Expectations", color="cyan", figlet=True)
@@ -269,7 +271,6 @@ To launch with jupyter lab:
         "\nDone.",
         color="blue")
 
-    context = DataContext('.')
 
     # Shows a list of options to select from
 
@@ -291,7 +292,9 @@ To launch with jupyter lab:
         if path.startswith("./"):
             path = path[2:]
 
-        default_data_source_name = os.path.basename(path)
+        if path.endswith("/"):
+            basenamepath = path[:-1]
+        default_data_source_name = os.path.basename(basenamepath)
         data_source_name = click.prompt(
             msg_prompt_datasource_name, default=default_data_source_name, show_default=True)
 
@@ -370,8 +373,10 @@ def render(render_object):
 
 def main():
     handler = logging.StreamHandler()
+    # Just levelname and message Could re-add other info if we want
     formatter = logging.Formatter(
-        '%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
+        '%(levelname)s %(message)s')
+        # '%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
     handler.setFormatter(formatter)
     logger.addHandler(handler)
     logger.setLevel(logging.INFO)
