@@ -17,7 +17,8 @@ from collections import (
 
 from great_expectations.version import __version__
 from great_expectations.data_asset.util import DotDict, recursively_convert_to_json_serializable, parse_result_format
-from great_expectations.dataset.autoinspect import columns_exist
+# from great_expectations.dataset.autoinspect import columns_exist
+from great_expectations.profile.autoinspect import columns_exist
 
 logger = logging.getLogger("DataAsset")
 

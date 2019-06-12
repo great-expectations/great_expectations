@@ -7,7 +7,7 @@ import warnings
 import pandas as pd
 import numpy as np
 import great_expectations as ge
-import great_expectations.dataset.autoinspect as autoinspect
+import great_expectations.profile.autoinspect as autoinspect
 
 import unittest
 
