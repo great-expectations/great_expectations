@@ -1,7 +1,16 @@
+import os
+
 class GreatExpectationsError(Exception):
+    def __init__(self, message):
+        self. message = message  
+
+class DataContextError(GreatExpectationsError):
     pass
-  
-  
+    
+class ConfigNotFoundError(DataContextError):
+    def __init__(self, context_root_directory):
+        self.message = "No configuration found in %s" % str(os.path.join(context_root_directory, "great_expectations"))
+
 class ExpectationsConfigNotFoundError(GreatExpectationsError):
     def __init__(self, data_asset_name):
         self.data_asset_name = data_asset_name

@@ -45,6 +45,16 @@ def test_validate_using_data_context(dataset, data_context):
     assert res["success"] == False
     assert res["statistics"]["evaluated_expectations"] == 2
 
+
+def test_validate_using_data_context_path(dataset, data_context):
+    data_context_path = data_context.get_context_root_directory()
+    res = ge.validate(dataset, data_asset_name="parameterized_expectations_config_fixture", data_context=data_context_path)
+
+    # We should have now found the right config with expectations to evaluate
+    assert res["success"] == False
+    assert res["statistics"]["evaluated_expectations"] == 2
+
+
     
 def test_validate_invalid_parameters(dataset, basic_expectations_config, data_context):
     with pytest.raises(ValueError, match="Either an expectations config or a DataContext is required for validation."):

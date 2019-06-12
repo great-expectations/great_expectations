@@ -2,7 +2,7 @@ import os
 import glob
 import shutil
 
-from ..util import safe_mmkdir
+from great_expectations.data_context.util import safe_mmkdir
 
 
 def _scaffold_directories_and_notebooks(base_dir):
