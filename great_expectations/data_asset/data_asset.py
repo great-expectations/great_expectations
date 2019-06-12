@@ -1231,7 +1231,8 @@ def _calc_validation_statistics(validation_results):
     try:
         success_percent = successful_expectations / evaluated_expectations * 100
     except ZeroDivisionError:
-        success_percent = float("nan")
+        # success_percent = float("nan")
+        success_percent = None
 
     return ValidationStatistics(
         successful_expectations=successful_expectations,
