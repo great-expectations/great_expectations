@@ -713,6 +713,7 @@ class DataContext(object):
                 new_expectation_count = len(expectations_config["expectations"])
                 total_expectations += new_expectation_count
 
+                #We should be able to pass a parameter to make this a `_candidate_` file
                 self.save_expectations(expectations_config)#, name)
                 # self.save_validation_result(validation_result, name)
                 
