@@ -85,7 +85,8 @@ class PseudoPandasProfiler(DataSetProfiler):
         #             pass
 
                 else:
-                    print(column, cardinality)
+                    # print(column, cardinality)
+                    pass
 
             elif type_ == "float":
                 #         print(column, type_, cardinality)
@@ -106,9 +107,11 @@ class PseudoPandasProfiler(DataSetProfiler):
                     pass
 
                 else:
-                    print(column, type_, cardinality)
+                    # print(column, type_, cardinality)
+                    pass
 
             else:
-                print("??????", column, type_, cardinality)
+                # print("??????", column, type_, cardinality)
+                pass
 
         return df.get_expectations(suppress_warnings=True)
