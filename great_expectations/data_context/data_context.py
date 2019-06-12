@@ -651,6 +651,7 @@ class DataContext(object):
             return return_obj
 
     def profile_datasource(self, datasource_name, profiler_name="PseudoPandasProfiling", max_data_assets=10):
+        # FIXME: I've include
         # logger.info("Profiling %s with %s" % (datasource_name, profiler_name))
         print("Profiling %s with %s" % (datasource_name, profiler_name))
         datasource = self.get_datasource(datasource_name)
@@ -658,14 +659,14 @@ class DataContext(object):
 
         #!!! Abe 2019/06/11: This seems brittle. I don't understand why this object is packaged this way.
         data_asset_name_list = list(data_asset_names[0]["available_data_asset_names"])
-        # logger.info("\tFound %d named data assets" % (len(data_asset_name_list)))
-        print("\tFound %d named data assets" % (len(data_asset_name_list)))
+        # logger.info("Found %d named data assets" % (len(data_asset_name_list)))
+        print("Found %d named data assets" % (len(data_asset_name_list)))
         
         if max_data_assets == None or max_data_assets >= len(data_asset_name_list):
-            # logger.info("\tProfiling all %d." % (len(data_asset_name_list)))
+            # logger.info("Profiling all %d." % (len(data_asset_name_list)))
             print("Profiling all %d." % (len(data_asset_name_list)))
         else:
-            # logger.info("\tProfiling the first %d, alphabetically." % (max_data_assets))
+            # logger.info("Profiling the first %d, alphabetically." % (max_data_assets))
             print("Profiling the first %d, alphabetically." % (max_data_assets))
             data_asset_name_list.sort()
             data_asset_name_list = data_asset_name_list[:max_data_assets]
