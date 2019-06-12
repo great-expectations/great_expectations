@@ -17,7 +17,7 @@ import pyspark.sql.types as sparktypes
 from great_expectations.dataset import PandasDataset, SqlAlchemyDataset, SparkDFDataset
 import great_expectations.profile.autoinspect as autoinspect
 
-CONTEXTS = ['PandasDataset', 'SqlAlchemyDataset']#, 'SparkDFDataset']
+CONTEXTS = ['PandasDataset', 'SqlAlchemyDataset', 'SparkDFDataset']
 
 SQLITE_TYPES = {
         "varchar": sqlitetypes.VARCHAR,
