@@ -5,7 +5,7 @@ import os
 import shutil
 
 from great_expectations.profile.base import DataSetProfiler
-from great_expectations.profile.pseudo_pandas_profiling import PseudoPandasProfiler
+from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.profile.columns_exist import ColumnsExistProfiler
 from great_expectations.dataset.pandas_dataset import PandasDataset
 from great_expectations.data_context import DataContext
@@ -50,17 +50,49 @@ def test_ColumnsExistProfiler():
     }
 
 
-def test_PseudoPandasProfiler():
+def test_BasicDatasetProfiler():
     toy_dataset = PandasDataset({"x": [1, 2, 3]})
     assert len(toy_dataset.get_expectations(
         suppress_warnings=True)["expectations"]) == 0
 
-    expectations_config, evr_config = PseudoPandasProfiler.profile(toy_dataset)
+    expectations_config, evr_config = BasicDatasetProfiler.profile(toy_dataset)
 
     print(json.dumps(expectations_config, indent=2))
 
     assert len(toy_dataset.get_expectations(
         suppress_warnings=True)["expectations"]) > 0
+
+    # assert expectations_config["data_asset_name"] == "f1"
+    # assert "PseudoPandasProfiler" in expectations_config["meta"]
+    # assert expectations_config["meta"].keys() == [
+    #     "created_by", "created_at", "batch_kwargs"
+    # ]
+    # for exp in expectations_config["expectations"]:
+    #     assert "PseudoPandasProfiler" in exp["meta"]
+    #     assert exp["meta"]["PseudoPandasProfiler"] == {
+    #         "confidence": "very low"
+    #     }
+
+    # assert expectations_config == {
+    #     "data_asset_name": "notable_works_by_charles_dickens",
+    #     "meta": {
+    #         "great_expectations.__version__": "0.7.0-beta",
+    #         "PseudoPandasProfiler": {
+    #             "created_by": "PseudoPandasProfiler",
+    #             "created_at": 0,
+    #             "batch_kwargs": {},
+    #         },
+    #     },
+    #     "expectations": [
+    #         {
+    #             "expectation_type": "expect_column_to_exist",
+    #             "meta": {
+    #                 "DefaultQuickStartProfiler": {
+    #                     "confidence": "very low"
+    #                 }
+    #             }
+    #         }]
+    # }
 
 
 @pytest.fixture()
