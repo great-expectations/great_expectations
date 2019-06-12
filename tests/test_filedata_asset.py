@@ -3,7 +3,7 @@ from __future__ import division
 import warnings
 import pytest
 import great_expectations as ge
-import great_expectations.dataset.autoinspect as autoinspect
+import great_expectations.profile.autoinspect as autoinspect
 from .test_utils import assertDeepAlmostEqual
 
 

@@ -6,7 +6,7 @@ import pytest
 from .test_utils import get_dataset
 
 import great_expectations as ge
-import great_expectations.dataset.autoinspect as autoinspect
+import great_expectations.profile.autoinspect as autoinspect
 
 
 def test_no_autoinspection():
