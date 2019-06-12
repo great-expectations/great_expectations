@@ -89,6 +89,8 @@ def test_context_profiler(empty_data_context, filesystem_csv_2):
 
     assert len(profiled_expectations["expectations"]) > 0
 
+    # assert False
+
 
 # FIXME: This test needs a different home.
 # def test_validate_on_a_context_loaded_batch(empty_data_context, filesystem_csv_2):
