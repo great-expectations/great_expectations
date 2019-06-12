@@ -9,7 +9,7 @@ from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfil
 from great_expectations.profile.columns_exist import ColumnsExistProfiler
 from great_expectations.dataset.pandas_dataset import PandasDataset
 from great_expectations.data_context import DataContext
-from great_expectations.util import safe_mmkdir
+from great_expectations.data_context.util import safe_mmkdir
 
 # Tests to write:
 # test_cli_method_works  -> test_cli
