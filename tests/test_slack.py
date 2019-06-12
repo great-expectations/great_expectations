@@ -4,7 +4,7 @@ try:
 except ImportError:
     import mock
 
-from great_expectations import get_slack_callback, build_slack_notification_request
+from great_expectations.data_context.util import get_slack_callback, build_slack_notification_request
 
 
 @pytest.fixture
@@ -27,7 +27,7 @@ def test_get_slack_callback_returns_callable():
 
 
 def test_build_slack_notification_request_with_no_validation_json():
-    with mock.patch("uuid.uuid4") as mock_uuid:
+    with mock.patch("uuid.uuid1") as mock_uuid:
         mock_uuid.return_value = 99
         with mock.patch("datetime.datetime") as mock_datetime:
             mock_datetime.strftime.return_value = "05/05/19 12:12:12"
@@ -57,7 +57,7 @@ def test_build_slack_notification_request_with_no_validation_json():
 
 
 def test_build_slack_notification_request_with_successful_validation(validation_json):
-    with mock.patch("uuid.uuid4") as mock_uuid:
+    with mock.patch("uuid.uuid1") as mock_uuid:
         mock_uuid.return_value = 99
         with mock.patch("datetime.datetime") as mock_datetime:
             mock_datetime.strftime.return_value = "05/05/19 12:12:12"
@@ -103,7 +103,7 @@ def test_build_slack_notification_request_with_successful_validation(validation_
 def test_build_slack_notification_request_with_failed_validation(validation_json):
     validation_json["success"] = False
 
-    with mock.patch("uuid.uuid4") as mock_uuid:
+    with mock.patch("uuid.uuid1") as mock_uuid:
         mock_uuid.return_value = 99
         with mock.patch("datetime.datetime") as mock_datetime:
             mock_datetime.strftime.return_value = "05/05/19 12:12:12"
@@ -149,7 +149,7 @@ def test_build_slack_notification_request_with_failed_validation(validation_json
 def test_build_slack_notification_request_with_successful_validation_and_no_result_report(
     validation_json
 ):
-    with mock.patch("uuid.uuid4") as mock_uuid:
+    with mock.patch("uuid.uuid1") as mock_uuid:
         validation_json["meta"].pop("result_reference")
 
         mock_uuid.return_value = 99
@@ -190,7 +190,7 @@ def test_build_slack_notification_request_with_successful_validation_and_no_resu
 def test_build_slack_notification_request_with_successful_validation_and_no_dataset(
     validation_json
 ):
-    with mock.patch("uuid.uuid4") as mock_uuid:
+    with mock.patch("uuid.uuid1") as mock_uuid:
         validation_json["meta"].pop("dataset_reference")
 
         mock_uuid.return_value = 99

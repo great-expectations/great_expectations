@@ -4,11 +4,12 @@ import pandas as pd
 import json
 import logging
 import uuid
-import datetime
-import requests
 import errno
 
+from six import string_types
+
 import great_expectations.dataset as dataset
+from great_expectations.data_context import DataContext
 
 logger = logging.getLogger(__name__)
 
@@ -173,6 +174,9 @@ def validate(data_asset, expectations_config=None, data_asset_name=None, data_co
 
     if expectations_config is None:
         logger.info("Using expectations config from DataContext.")
+        # Allow data_context to be a string, and try loading it from path in that case
+        if isinstance(data_context, string_types):
+            data_context = DataContext(data_context)                
         expectations_config = data_context.get_expectations(data_asset_name)
     else:
         if data_asset_name in expectations_config:
@@ -209,101 +213,6 @@ def validate(data_asset, expectations_config=None, data_asset_name=None, data_co
     return data_asset_.validate(*args, data_context=data_context, **kwargs)
 
 
-def build_slack_notification_request(validation_json=None):
-    # Defaults
-    timestamp = datetime.datetime.strftime(datetime.datetime.now(), "%x %X")
-    status = "Failed :x:"
-    run_id = None
-    data_asset_name = "no_name_provided_" + str(uuid.uuid4())
-    title_block = {
-        "type": "section",
-        "text": {
-            "type": "mrkdwn",
-            "text": "No validation occurred. Please ensure you passed a validation_json.",
-        },
-    }
-
-    query = {"blocks": [title_block]}
-
-    if validation_json:
-        if "meta" in validation_json and "data_asset_name" in validation_json["meta"]:
-            data_asset_name = validation_json["meta"]["data_asset_name"]
-
-        n_checks_succeeded = validation_json["statistics"]["successful_expectations"]
-        n_checks = validation_json["statistics"]["evaluated_expectations"]
-        run_id = validation_json["meta"].get("run_id", None)
-        check_details_text = "{} of {} expectations were met\n\n".format(
-            n_checks_succeeded, n_checks)
-
-        if validation_json["success"]:
-            status = "Success :tada:"
-
-        query["blocks"][0]["text"]["text"] = "*Validated batch from data asset:* `{}`\n*Status: {}*\n{}".format(
-            data_asset_name, status, check_details_text)
-        if "batch_kwargs" in validation_json["meta"]:
-            query["blocks"][1]["text"]["text"] = "Batch kwargs: {}".format(
-                json.dumps(validation_json["meta"]["batch_kwargs"], indent=2))
-
-        if "result_reference" in validation_json["meta"]:
-            report_element = {
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": "- *Validation Report*: {}".format(validation_json["meta"]["result_reference"])},
-            }
-            query["blocks"].append(report_element)
-
-        if "dataset_reference" in validation_json["meta"]:
-            dataset_element = {
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": "- *Validation data asset*: {}".format(validation_json["meta"]["dataset_reference"])
-                },
-            }
-            query["blocks"].append(dataset_element)
-
-    footer_section = {
-        "type": "context",
-        "elements": [
-            {
-                "type": "mrkdwn",
-                "text": "Great Expectations run id {} ran at {}".format(run_id, timestamp),
-            }
-        ],
-    }
-    query["blocks"].append(footer_section)
-    return query
-
-
-def get_slack_callback(webhook):
-    def send_slack_notification(validation_json=None):
-        """
-            Post a slack notification.
-        """
-        session = requests.Session()
-        query = build_slack_notification_request(validation_json)
-
-        try:
-            response = session.post(url=webhook, json=query)
-        except requests.ConnectionError:
-            logger.warning(
-                'Failed to connect to Slack webhook at {url} '
-                'after {max_retries} retries.'.format(
-                    url=webhook, max_retries=10))
-        except Exception as e:
-            logger.error(str(e))
-        else:
-            if response.status_code != 200:
-                logger.warning(
-                    'Request to Slack webhook at {url} '
-                    'returned error {status_code}: {text}'.format(
-                        url=webhook,
-                        status_code=response.status_code,
-                        text=response.text))
-    return send_slack_notification
-
-
 class DotDict(dict):
     """dot.notation access to dictionary attributes"""
 
@@ -314,13 +223,3 @@ class DotDict(dict):
 
     def __dir__(self):
         return self.keys()
-
-
-# exist_ok is always true; it's ignored, but left here to make porting later easier
-def safe_mmkdir(directory, exist_ok=True):
-    """Simple wrapper since exist_ok is not available in python 2"""
-    try:
-        os.makedirs(directory)
-    except OSError as e:
-        if e.errno != errno.EEXIST:
-            raise

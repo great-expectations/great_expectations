@@ -8,8 +8,10 @@ import errno
 from glob import glob
 from six import string_types
 
-from ..version import __version__
-from ..util import safe_mmkdir, read_csv
+from .util import get_slack_callback, safe_mmkdir
+
+from great_expectations.version import __version__
+from great_expectations.exceptions import DataContextError, ConfigNotFoundError
 
 import ipywidgets as widgets
 try:
@@ -17,7 +19,6 @@ try:
 except ImportError:
     from urlparse import urlparse
 
-from great_expectations.util import get_slack_callback
 from great_expectations.data_asset import DataAsset
 from great_expectations.dataset import PandasDataset
 from great_expectations.datasource.sqlalchemy_source import SqlAlchemyDatasource
@@ -42,6 +43,23 @@ class DataContext(object):
     under the context_root_dir passed during initialization.
 
     """
+
+    @classmethod
+    def create(cls, context_root_dir=None):
+        if not os.path.isdir(context_root_dir):
+            logger.error("context_root_dir must a directory in which to initialize a new DataContext")
+            return
+        else:
+            try:
+                os.mkdir(os.path.join(context_root_dir, "great_expectations"))
+            except (FileExistsError, OSError):
+                raise DataContextError("Cannot create a DataContext object when a great_expectations directory already exists at the provided root directory.")
+
+            with open(os.path.join(context_root_dir, "great_expectations/great_expectations.yml"), "w") as template:
+                template.write(PROJECT_TEMPLATE)
+
+        return cls(context_root_dir)
+            
 
     def __init__(self, context_root_dir=None, expectation_explorer=False):
         self._expectation_explorer = expectation_explorer
@@ -83,16 +101,8 @@ class DataContext(object):
             with open(os.path.join(self.context_root_directory, "great_expectations/great_expectations.yml"), "r") as data:
                 return yaml.load(data)
         except IOError as e:
-            if e.errno != errno.ENOENT:
-                raise
-            with open(os.path.join(self.context_root_directory, "great_expectations/great_expectations.yml"), "w") as template:
-                template.write(PROJECT_TEMPLATE)
+            raise ConfigNotFoundError(self.context_root_directory)
 
-            with open(os.path.join(self.context_root_directory, "great_expectations/great_expectations.yml"),
-                      "r") as template:
-                base_config = yaml.load(template)
-
-            return base_config
 
     def _save_project_config(self):
         with open(os.path.join(self.context_root_directory, "great_expectations/great_expectations.yml"), "w") as data:
@@ -166,7 +176,7 @@ class DataContext(object):
         
         return datasource_config
 
-    def list_available_data_asset_names(self, datasource_names=None, generator_names=None):
+    def get_available_data_asset_names(self, datasource_names=None, generator_names=None):
         data_asset_names = []
         if datasource_names is None:
             datasource_names = [datasource["name"] for datasource in self.list_datasources()]
@@ -316,6 +326,18 @@ class DataContext(object):
         return [{"name": key, "type": value["type"]} for key, value in self._project_config["datasources"].items()]
 
     def _normalize_data_asset_name(self, data_asset_name, batch_kwargs=None):
+        """Normalizes data_asset_names for a data context
+        
+        A data_asset_name is defined per-project and consists of four components:
+          - a datasouce name
+          - a data_asset_name
+          - a sub-name, which by default is the name of the generator from which the data_asset is derived
+
+          - a generator name
+
+        It has a string representation consisting of each of those components delimited by a slash
+        """        
+
         configs = self.list_expectations_configs()
         if data_asset_name in configs:
             return data_asset_name
@@ -490,7 +512,7 @@ class DataContext(object):
         return self._evaluation_parameter_store.get(run_id, key)
 
     def _compile(self):
-        """Compiles all current expectation configurations in this context to be ready for reseult registration.
+        """Compiles all current expectation configurations in this context to be ready for result registration.
         
         Compilation only respects parameters with a URN structure beginning with urn:great_expectations:validations
         It splits parameters by the : (colon) character; valid URNs must have one of the following structures to be
@@ -614,33 +636,34 @@ class DataContext(object):
         else:
             raise ValueError("Only s3 urls are supported.")
 
-    def get_failed_dataset(self, validation_result, **kwargs):
-        try:
-            reference_url = validation_result["meta"]["dataset_reference"]
-        except KeyError:
-            raise ValueError("Validation result must have a dataset_reference in the meta object to fetch")
+    # TODO: refactor this into a snapshot getter based on project_config
+    # def get_failed_dataset(self, validation_result, **kwargs):
+    #     try:
+    #         reference_url = validation_result["meta"]["dataset_reference"]
+    #     except KeyError:
+    #         raise ValueError("Validation result must have a dataset_reference in the meta object to fetch")
         
-        if reference_url.startswith("s3://"):
-            try:
-                import boto3
-                s3 = boto3.client('s3')
-            except ImportError:
-                raise ImportError("boto3 is required for retrieving a dataset from s3")
+    #     if reference_url.startswith("s3://"):
+    #         try:
+    #             import boto3
+    #             s3 = boto3.client('s3')
+    #         except ImportError:
+    #             raise ImportError("boto3 is required for retrieving a dataset from s3")
         
-            parsed_url = urlparse(reference_url)
-            bucket = parsed_url.netloc
-            key = parsed_url.path[1:]
+    #         parsed_url = urlparse(reference_url)
+    #         bucket = parsed_url.netloc
+    #         key = parsed_url.path[1:]
             
-            s3_response_object = s3.get_object(Bucket=bucket, Key=key)
-            if key.endswith(".csv"):
-                # Materialize as dataset
-                # TODO: check the associated config for the correct data_asset_type to use
-                return read_csv(s3_response_object['Body'], **kwargs)
-            else:
-                return s3_response_object['Body']
+    #         s3_response_object = s3.get_object(Bucket=bucket, Key=key)
+    #         if key.endswith(".csv"):
+    #             # Materialize as dataset
+    #             # TODO: check the associated config for the correct data_asset_type to use
+    #             return read_csv(s3_response_object['Body'], **kwargs)
+    #         else:
+    #             return s3_response_object['Body']
 
-        else:
-            raise ValueError("Only s3 urls are supported.")
+    #     else:
+    #         raise ValueError("Only s3 urls are supported.")
 
     def update_return_obj(self, data_asset, return_obj):
         if self._expectation_explorer:
