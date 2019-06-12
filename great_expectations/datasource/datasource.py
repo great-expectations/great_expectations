@@ -136,7 +136,7 @@ class Datasource(object):
     def _get_generator_class(self, type_):
         raise NotImplementedError
 
-    def list_available_data_asset_names(self, generator_names=None):
+    def get_available_data_asset_names(self, generator_names=None):
         available_data_asset_names = []
         if generator_names is None:
             generator_names = [generator["name"] for generator in self.list_generators()]
