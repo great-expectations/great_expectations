@@ -14,7 +14,7 @@ class FilesystemPathGenerator(BatchGenerator):
         super(FilesystemPathGenerator, self).__init__(name, type_="filesystem", datasource=datasource)
         self._base_directory = base_directory
 
-    def list_available_data_asset_names(self):
+    def get_available_data_asset_names(self):
         known_assets = set()
         file_options = os.listdir(self._get_current_base_directory())
         for file_option in file_options:
