@@ -774,7 +774,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                 # So if we make it this far, we know that the validation succeeded.
                 return True
             except jsonschema.ValidationError:
-                success = False
+                return False
             except jsonschema.SchemaError:
                 raise
             except:
