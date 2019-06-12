@@ -102,6 +102,26 @@ def test_BasicDatasetProfiler():
     # }
 
 
+def test_BasicDatasetProfiler_with_context(empty_data_context, filesystem_csv_2):
+    empty_data_context.add_datasource(
+        "my_datasource", "pandas", base_directory=str(filesystem_csv_2))
+    not_so_empty_data_context = empty_data_context
+
+    batch = not_so_empty_data_context.get_batch("my_datasource", "f1")
+    expectations_config, evr_config = BasicDatasetProfiler.profile(batch)
+
+    print(batch.get_batch_kwargs())
+    # print(json.dumps(expectations_config, indent=2))
+
+    assert expectations_config["data_asset_name"] == "f1"
+    assert "BasicDatasetProfiler" in expectations_config["meta"]
+    assert set(expectations_config["meta"]["BasicDatasetProfiler"].keys()) == {
+        "created_by", "created_at", "batch_kwargs"
+    }
+
+    assert False
+
+
 @pytest.fixture()
 def filesystem_csv_2(tmp_path_factory):
     base_dir = tmp_path_factory.mktemp('test_files')
@@ -127,21 +147,3 @@ def test_context_profiler(empty_data_context, filesystem_csv_2):
     print(json.dumps(profiled_expectations, indent=2))
 
     assert len(profiled_expectations["expectations"]) > 0
-
-    # assert False
-
-
-# FIXME: This test needs a different home.
-# def test_validate_on_a_context_loaded_batch(empty_data_context, filesystem_csv_2):
-#     toy_dataset = PandasDataset({"x": [1, 2, 3]})
-#     toy_dataset.validate()
-
-#     empty_data_context.add_datasource(
-#         "my_datasource", "pandas", base_directory=str(filesystem_csv_2))
-#     not_so_empty_data_context = empty_data_context
-
-#     # my_ds = not_so_empty_data_context.get_datasource("my_datasource")
-#     # print(my_ds.list_available_data_asset_names())
-
-#     my_batch = not_so_empty_data_context.get_batch("my_datasource", "f1")
-#     my_batch.validate()
