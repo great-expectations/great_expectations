@@ -110,3 +110,5 @@ class PseudoPandasProfiler(DataSetProfiler):
 
             else:
                 print("??????", column, type_, cardinality)
+
+        return df.get_expectations(suppress_warnings=True)
