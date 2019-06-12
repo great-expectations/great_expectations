@@ -67,7 +67,7 @@ Uncomment the next cell and set data_source_name to one of these names.
     return data_source_name
 
 def list_available_data_asset_names(context, data_source_name):
-    available_data_assets = context.list_available_data_asset_names(datasource_names=[data_source_name])
+    available_data_assets = context.get_available_data_asset_names(datasource_names=[data_source_name])
 
     if len(available_data_assets) == 1 and\
         len(available_data_assets[0]['generators']) == 1:
