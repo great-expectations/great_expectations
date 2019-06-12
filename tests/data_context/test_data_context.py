@@ -212,7 +212,6 @@ def test_normalize_data_asset_names(tmp_path_factory):
     # NOTE: NORMALIZATION IS CURRENTLY A NO-OP
     assert context._normalize_data_asset_name("data_asset_1") == "data_asset_1"
 
-
 def test_normalize_data_asset_names_error(data_context):
     with pytest.raises(DataContextError, match="found too many components using delimeter '.'"):
         data_context._normalize_data_asset_name("this.should.never.work.because.it.is.so.long")
@@ -222,28 +221,6 @@ def test_normalize_data_asset_names_error(data_context):
     print(data_context.list_expectations_configs())
     
     assert False
-
-
-def test_normalize_data_asset_names_new(tmp_path_factory):
-
-
-
-
-    base_dir = tmp_path_factory.mktemp("test_normalize_data_asset_names")
-    base_dir = str(base_dir)
-    context = DataContext.create(base_dir)
-    # context_dir = os.path.join(base_dir, "great_expectations")
-    # asset_dir = context_dir.join("expectations/ds1/gen1/data_asset_1/")
-    # os.makedirs(asset_dir)
-    # with open(asset_dir("default.json"), "w") as config:
-    #     json.dump({"data_asset_name": "data_assset_1"}, config)
-
-    context = DataContext(base_dir)
-
-    # assert context._normalize_data_asset_name("data_asset_1") == "ds1/gen1/data_asset_1"
-    # NOTE: NORMALIZATION IS CURRENTLY A NO-OP
-    assert context._normalize_data_asset_name("data_asset_1") == "data_asset_1"
-
 
 def test_list_datasources(data_context):
     datasources = data_context.list_datasources()
