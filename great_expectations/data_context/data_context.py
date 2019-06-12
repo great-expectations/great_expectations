@@ -24,6 +24,7 @@ from great_expectations.datasource.sqlalchemy_source import SqlAlchemyDatasource
 from great_expectations.datasource.dbt_source import DBTDatasource
 from great_expectations.datasource import PandasDatasource
 from great_expectations.datasource import SparkDFDatasource
+from great_expectations.profile.pseudo_pandas_profiling import PseudoPandasProfiler
 
 from .expectation_explorer import ExpectationExplorer
 
@@ -647,6 +648,18 @@ class DataContext(object):
             return self._expectation_explorer_manager.create_expectation_widget(data_asset, return_obj)
         else:
             return return_obj
+
+    def profile_datasource(self, datasource_name, profiler_name="PseudoPandasProfiling"):
+        datasource = self.get_datasource(datasource_name)
+        data_asset_names = datasource.list_available_data_asset_names()
+
+        #!!! Abe 2019/06/11: This seems brittle. I don't understand why this object is packaged this way.
+        for name in data_asset_names[0]["available_data_asset_names"]:
+            batch = self.get_batch(datasource_name=datasource_name, data_asset_name=name)
+            # expectations_config, evr_config = PseudoPandasProfiler.profile(batch)
+            expectations_config = PseudoPandasProfiler.profile(batch)
+            self.save_expectations(expectations_config, name)
+
 
 
 PROJECT_HELP_COMMENT = """# Welcome to great expectations. 
