@@ -26,7 +26,7 @@ from great_expectations.datasource.sqlalchemy_source import SqlAlchemyDatasource
 from great_expectations.datasource.dbt_source import DBTDatasource
 from great_expectations.datasource import PandasDatasource
 from great_expectations.datasource import SparkDFDatasource
-from great_expectations.profile.pseudo_pandas_profiling import PseudoPandasProfiler
+from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 
 from .expectation_explorer import ExpectationExplorer
 
@@ -704,7 +704,7 @@ class DataContext(object):
                 batch = self.get_batch(datasource_name=datasource_name, data_asset_name=name)
 
                 #Note: This logic is specific to DatasetProfilers, which profile a single batch. Multi-batch profilers will have more to unpack.
-                expectations_config, validation_result = PseudoPandasProfiler.profile(batch)
+                expectations_config, validation_result = BasicDatasetProfiler.profile(batch)
 
                 row_count = batch.shape[0]
                 total_rows += row_count
@@ -729,8 +729,8 @@ class DataContext(object):
 
         total_duration = (datetime.datetime.now() - total_start_time).total_seconds()
         print("""
-Profiled %d of %d named data assets, with %d total rows and %d columns in %.2f sec.
-%d data assets were skipped.
+Profiled %d of %d named data assets, with %d total rows and %d columns in %.2f seconds.
+%d data assets were skipped due to errors.
 Generated, evaluated, and stored %d candidate Expectations.
 Note: You will need to review and revise Expectations before using them in production.""" % (
             len(data_asset_name_list),
