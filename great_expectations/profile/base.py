@@ -10,8 +10,9 @@ class DataSetProfiler(object):
     @classmethod
     def profile(cls, dataset):
         assert cls.validate_dataset(dataset)
-        expectations_config, evr_config = cls._profile(dataset)
-        return expectations_config, evr_config
+        expectations_config = cls._profile(dataset)
+        validation_results = None  # dataset.validate(expectations_config)
+        return expectations_config, validation_results
 
     @classmethod
     def _profile(cls, dataset):
