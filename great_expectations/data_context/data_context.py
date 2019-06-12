@@ -47,8 +47,7 @@ class DataContext(object):
     @classmethod
     def create(cls, context_root_dir=None):
         if not os.path.isdir(context_root_dir):
-            logger.error("context_root_dir must a directory in which to initialize a new DataContext")
-            return
+            raise DataContextError("context_root_dir must be a directory in which to initialize a new DataContext")
         else:
             try:
                 os.mkdir(os.path.join(context_root_dir, "great_expectations"))
@@ -196,7 +195,7 @@ class DataContext(object):
             data_asset_names.append(
                 {
                     "datasource": datasource_name,
-                    "generators": datasource.list_available_data_asset_names(generator_names[idx] if generator_names is not None else None) 
+                    "generators": datasource.get_available_data_asset_names(generator_names[idx] if generator_names is not None else None)
                 }
             )
         return data_asset_names
