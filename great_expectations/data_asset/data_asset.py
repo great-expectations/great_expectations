@@ -962,7 +962,8 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         if run_id is not None:
             result["meta"].update({"run_id": run_id})
         else:
-            result["meta"].update({"run_id": str(uuid.uuid4())})
+            run_id = str(uuid.uuid1())
+            result["meta"].update({"run_id": run_id})
 
         if self._batch_kwargs is not None:
             result["meta"].update({"batch_kwargs": self._batch_kwargs})
@@ -1230,7 +1231,8 @@ def _calc_validation_statistics(validation_results):
     try:
         success_percent = successful_expectations / evaluated_expectations * 100
     except ZeroDivisionError:
-        success_percent = float("nan")
+        # success_percent = float("nan")
+        success_percent = None
 
     return ValidationStatistics(
         successful_expectations=successful_expectations,
