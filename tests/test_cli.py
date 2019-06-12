@@ -34,6 +34,7 @@ Options:
 
 Commands:
   init      Initialze a new Great Expectations project.
+  profile   Profile a great expectations object.
   render    Render a great expectations object.
   validate  Validate a CSV file against an expectations configuration.
 """
