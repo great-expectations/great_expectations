@@ -42,7 +42,7 @@ def parameterized_expectations_config():
 
 def test_list_available_data_asset_names(empty_data_context, filesystem_csv):
     empty_data_context.add_datasource("my_datasource", "pandas", base_directory= str(filesystem_csv))
-    available_asset_names = empty_data_context.list_available_data_asset_names() 
+    available_asset_names = empty_data_context.get_available_data_asset_names()
 
     assert available_asset_names == [{
         "datasource": "my_datasource",

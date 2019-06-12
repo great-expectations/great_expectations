@@ -176,7 +176,7 @@ class DataContext(object):
         
         return datasource_config
 
-    def list_available_data_asset_names(self, datasource_names=None, generator_names=None):
+    def get_available_data_asset_names(self, datasource_names=None, generator_names=None):
         data_asset_names = []
         if datasource_names is None:
             datasource_names = [datasource["name"] for datasource in self.list_datasources()]
