@@ -7,6 +7,7 @@ import copy
 import errno
 from glob import glob
 from six import string_types
+import datetime
 
 from ..version import __version__
 from ..util import safe_mmkdir, read_csv
@@ -649,16 +650,45 @@ class DataContext(object):
         else:
             return return_obj
 
-    def profile_datasource(self, datasource_name, profiler_name="PseudoPandasProfiling"):
+    def profile_datasource(self, datasource_name, profiler_name="PseudoPandasProfiling", max_data_assets=10):
+        # logger.info("Profiling %s with %s" % (datasource_name, profiler_name))
+        print("Profiling %s with %s" % (datasource_name, profiler_name))
         datasource = self.get_datasource(datasource_name)
         data_asset_names = datasource.list_available_data_asset_names()
 
         #!!! Abe 2019/06/11: This seems brittle. I don't understand why this object is packaged this way.
-        for name in data_asset_names[0]["available_data_asset_names"]:
-            batch = self.get_batch(datasource_name=datasource_name, data_asset_name=name)
-            # expectations_config, evr_config = PseudoPandasProfiler.profile(batch)
-            expectations_config = PseudoPandasProfiler.profile(batch)
-            self.save_expectations(expectations_config, name)
+        data_asset_name_list = list(data_asset_names[0]["available_data_asset_names"])
+        # logger.info("\tFound %d named data assets" % (len(data_asset_name_list)))
+        print("\tFound %d named data assets" % (len(data_asset_name_list)))
+        
+        if max_data_assets == None or max_data_assets >= len(data_asset_name_list):
+            # logger.info("\tProfiling all %d." % (len(data_asset_name_list)))
+            print("Profiling all %d." % (len(data_asset_name_list)))
+        else:
+            # logger.info("\tProfiling the first %d, alphabetically." % (max_data_assets))
+            print("Profiling the first %d, alphabetically." % (max_data_assets))
+            data_asset_name_list.sort()
+            data_asset_name_list = data_asset_name_list[:max_data_assets]
+
+        for name in data_asset_name_list:
+            try:
+                start_time = datetime.datetime.now()
+
+                #FIXME: There needs to be an affordance here to limit to 100 rows, or downsample, etc.
+                batch = self.get_batch(datasource_name=datasource_name, data_asset_name=name)
+
+                # expectations_config, evr_config = PseudoPandasProfiler.profile(batch)
+                expectations_config = PseudoPandasProfiler.profile(batch)
+                self.save_expectations(expectations_config, name)
+                
+                duration = (datetime.datetime.now() - start_time).total_seconds()
+
+                print("\tProfiled %d rows from %s (%.3f sec)" % (batch.shape[0], name, duration))
+
+            #!!! FIXME: THIS IS WAAAAY TO GENERAL. As soon as BatchKwargsError is fully implemented, we'll want to switch to that.
+            except:
+                #!!! FIXME: This error message could be a lot more helpful than it is
+                print("\tWARNING: Unable to load %s. Skipping profiling." % (name))
 
 
 
