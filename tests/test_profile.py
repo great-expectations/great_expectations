@@ -91,16 +91,16 @@ def test_context_profiler(empty_data_context, filesystem_csv_2):
 
 
 # FIXME: This test needs a different home.
-def test_validate_on_a_context_loaded_batch(empty_data_context, filesystem_csv_2):
-    toy_dataset = PandasDataset({"x": [1, 2, 3]})
-    toy_dataset.validate()
+# def test_validate_on_a_context_loaded_batch(empty_data_context, filesystem_csv_2):
+#     toy_dataset = PandasDataset({"x": [1, 2, 3]})
+#     toy_dataset.validate()
 
-    empty_data_context.add_datasource(
-        "my_datasource", "pandas", base_directory=str(filesystem_csv_2))
-    not_so_empty_data_context = empty_data_context
+#     empty_data_context.add_datasource(
+#         "my_datasource", "pandas", base_directory=str(filesystem_csv_2))
+#     not_so_empty_data_context = empty_data_context
 
-    # my_ds = not_so_empty_data_context.get_datasource("my_datasource")
-    # print(my_ds.list_available_data_asset_names())
+#     # my_ds = not_so_empty_data_context.get_datasource("my_datasource")
+#     # print(my_ds.list_available_data_asset_names())
 
-    my_batch = not_so_empty_data_context.get_batch("my_datasource", "f1")
-    my_batch.validate()
+#     my_batch = not_so_empty_data_context.get_batch("my_datasource", "f1")
+#     my_batch.validate()

@@ -114,8 +114,4 @@ class PseudoPandasProfiler(DataSetProfiler):
                 # print("??????", column, type_, cardinality)
                 pass
 
-        expectations_config = df.get_expectations(suppress_warnings=True)
-        print(expectations_config)
-        evr_config = df.validate(expectations_config)
-
-        return expectations_config, evr_config
+        return df.get_expectations(suppress_warnings=True)
