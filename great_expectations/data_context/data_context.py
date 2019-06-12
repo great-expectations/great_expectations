@@ -681,8 +681,9 @@ class DataContext(object):
         #!!! Abe 2019/06/11: This seems brittle. I don't understand why this object is packaged this way.
         #!!! Note: need to review this to make sure the names are properly qualified.
         data_asset_name_list = list(data_asset_names[0]["available_data_asset_names"])
-        # logger.info("Found %d named data assets" % (len(data_asset_name_list)))
-        print("Found %d named data assets" % (len(data_asset_name_list)))
+        total_data_assets = len(data_asset_name_list)
+        # logger.info("Found %d named data assets" % (total_data_assets))
+        print("Found %d named data assets" % (total_data_assets))
         
         if max_data_assets == None or max_data_assets >= len(data_asset_name_list):
             # logger.info("Profiling all %d." % (len(data_asset_name_list)))
@@ -693,6 +694,8 @@ class DataContext(object):
             data_asset_name_list.sort()
             data_asset_name_list = data_asset_name_list[:max_data_assets]
 
+        total_columns, total_expectations, total_rows, skipped_data_assets = 0, 0, 0, 0
+        total_start_time = datetime.datetime.now()
         for name in data_asset_name_list:
             try:
                 start_time = datetime.datetime.now()
@@ -703,18 +706,41 @@ class DataContext(object):
                 #Note: This logic is specific to DatasetProfilers, which profile a single batch. Multi-batch profilers will have more to unpack.
                 expectations_config, validation_result = PseudoPandasProfiler.profile(batch)
 
+                row_count = batch.shape[0]
+                total_rows += row_count
+                new_column_count = len(set([exp["kwargs"]["column"] for exp in expectations_config["expectations"] if "column" in exp["kwargs"]]))
+                total_columns += new_column_count
+                new_expectation_count = len(expectations_config["expectations"])
+                total_expectations += new_expectation_count
+
                 self.save_expectations(expectations_config)#, name)
                 # self.save_validation_result(validation_result, name)
                 
                 duration = (datetime.datetime.now() - start_time).total_seconds()
 
-                print("\tProfiled %d rows from %s (%.3f sec)" % (batch.shape[0], name, duration))
+                print("\tProfiled %d rows from %s (%.3f sec)" % (row_count, name, duration))
 
             #!!! FIXME: THIS IS WAAAAY TO GENERAL. As soon as BatchKwargsError is fully implemented, we'll want to switch to that.
             except:
                 #!!! FIXME: This error message could be a lot more helpful than it is
                 # print("\tWARNING: Unable to load %s. Skipping profiling." % (name))
                 print("\tWARNING: Something went wrong when profiling %s. (Perhaps a loading error?) Skipping." % (name))
+                skipped_data_assets += 1
+
+        total_duration = (datetime.datetime.now() - total_start_time).total_seconds()
+        print("""
+Profiled %d of %d named data assets, with %d total rows and %d columns in %.2f sec.
+%d data assets were skipped.
+Generated, evaluated, and stored %d candidate Expectations.
+Note: You will need to review and revise Expectations before using them in production.""" % (
+            len(data_asset_name_list),
+            total_data_assets,
+            total_rows,
+            total_columns,
+            total_duration,
+            skipped_data_assets,
+            total_expectations,
+        ))
 
 
 
