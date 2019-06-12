@@ -12,9 +12,9 @@ import json
 import sqlalchemy as sa
 import pandas as pd
 
+from great_expectations.exceptions import DataContextError
 from great_expectations.data_context import DataContext
 from great_expectations.data_context.util import safe_mmkdir
-# get_data_context
 from great_expectations.dataset import PandasDataset, SqlAlchemyDataset
 
 
@@ -212,10 +212,26 @@ def test_normalize_data_asset_names(tmp_path_factory):
     # NOTE: NORMALIZATION IS CURRENTLY A NO-OP
     assert context._normalize_data_asset_name("data_asset_1") == "data_asset_1"
 
+
+def test_normalize_data_asset_names_error(data_context):
+    with pytest.raises(DataContextError, match="found too many components using delimeter '.'"):
+        data_context._normalize_data_asset_name("this.should.never.work.because.it.is.so.long")
+
+
+    print(data_context.get_available_data_asset_names())
+    print(data_context.list_expectations_configs())
+    
+    assert False
+
+
 def test_normalize_data_asset_names_new(tmp_path_factory):
+
+
+
+
     base_dir = tmp_path_factory.mktemp("test_normalize_data_asset_names")
     base_dir = str(base_dir)
-    os.makedirs(os.path.join(base_dir, "great_expectations"))
+    context = DataContext.create(base_dir)
     # context_dir = os.path.join(base_dir, "great_expectations")
     # asset_dir = context_dir.join("expectations/ds1/gen1/data_asset_1/")
     # os.makedirs(asset_dir)

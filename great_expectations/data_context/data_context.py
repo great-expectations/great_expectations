@@ -35,6 +35,31 @@ yaml.indent(mapping=2, sequence=4, offset=2)
 yaml.default_flow_style = False
 
 
+class DataAssetReference(object):
+    def __init__(self, datasource="default", generator="default", data_asset_name="default", expectations="default"):
+        self._datasource = datasource
+        self._generator = generator
+        self._data_asset_name = data_asset_name
+        self._expectations = expectations
+
+    @property
+    def datasource(self):
+        return self._datasource
+
+    @property
+    def generator(self):
+        return self._generator
+
+    @property
+    def data_asset_name(self):
+        return self._data_asset_name
+
+    @property
+    def expectations(self):
+        return self._expectations
+    
+
+
 class DataContext(object):
     """A DataContext represents a Great Expectations project. It captures essential information such as
     expectations configurations.
@@ -91,6 +116,7 @@ class DataContext(object):
 
         self._load_evaluation_parameter_store()
         self._compiled = False
+        self._data_asset_name_delimeter = "."
 
     def get_context_root_directory(self):
         return self.context_root_directory
@@ -328,14 +354,23 @@ class DataContext(object):
         """Normalizes data_asset_names for a data context
         
         A data_asset_name is defined per-project and consists of four components:
-          - a datasouce name
+          - a datasource name
+          - a generator_name
           - a data_asset_name
           - a sub-name, which by default is the name of the generator from which the data_asset is derived
 
           - a generator name
 
         It has a string representation consisting of each of those components delimited by a slash
-        """        
+        """
+        split_name = data_asset_name.split(self._data_asset_name_delimeter)
+
+        if len(split_name) > 4:
+            logger.error("Unable to parse ")
+            raise DataContextError("Invalid data_asset_name {data_asset_name}: found too many components using delimeter '{delimeter}'".format(
+                data_asset_name=data_asset_name,
+                delimeter=self._data_asset_name_delimeter
+            ))
 
         configs = self.list_expectations_configs()
         if data_asset_name in configs:
