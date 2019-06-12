@@ -111,11 +111,11 @@ def sqlitedb_engine():
 def empty_data_context(tmp_path_factory):
     context_path = tmp_path_factory.mktemp('empty_data_context')
     context_path = str(context_path)
+    context = ge.data_context.DataContext.create(context_path)
     asset_config_path = os.path.join(
         context_path, "great_expectations/expectations")
     safe_mmkdir(asset_config_path, exist_ok=True)
     return context
-
 
 
 @pytest.fixture()
