@@ -70,7 +70,7 @@ class QueryGenerator(BatchGenerator):
             logger.info("Adding query to temporary storage only.")
             self._queries[data_asset_name] = query
 
-    def list_available_data_asset_names(self):
+    def get_available_data_asset_names(self):
         if self._queries_path:
             defined_queries = [path for path in os.walk(self._queries_path) if path.endswith(".sql")]
         else:
