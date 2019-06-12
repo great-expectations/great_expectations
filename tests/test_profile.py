@@ -11,7 +11,6 @@ from great_expectations.dataset.pandas_dataset import PandasDataset
 from great_expectations.data_context import DataContext
 from great_expectations.util import safe_mmkdir
 
-
 # Tests to write:
 # test_cli_method_works  -> test_cli
 # test context-based profile methods
@@ -63,22 +62,6 @@ def test_PseudoPandasProfiler():
     assert len(toy_dataset.get_expectations(
         suppress_warnings=True)["expectations"]) > 0
 
-
-# @pytest.fixture()
-# def parameterized_config_data_context(tmp_path_factory):
-#     context_path = tmp_path_factory.mktemp("empty_context_dir")
-#     context_path = str(context_path)
-#     asset_config_path = os.path.join(
-#         context_path, "great_expectations/expectations")
-#     safe_mmkdir(asset_config_path, exist_ok=True)
-#     shutil.copy("./tests/test_fixtures/great_expectations_basic.yml",
-#                 str(context_path))
-#     shutil.copy("./tests/test_fixtures/expectations/parameterized_expectations_config_fixture.json",
-#                 str(asset_config_path))
-#     return DataContext(context_path)
-
-
-# parameterized_config_data_context):
 
 @pytest.fixture()
 def filesystem_csv_2(tmp_path_factory):
