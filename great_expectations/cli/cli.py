@@ -23,8 +23,8 @@ from great_expectations.data_context import DataContext
 from great_expectations.render.renderer import DescriptivePageRenderer, PrescriptivePageRenderer
 from great_expectations.render.view import DescriptivePageView
 
-logger = logging.getLogger(__name__)
-
+# Take over the entire GE module logging namespace when running CLI
+logger = logging.getLogger("great_expectations")
 
 def cli_message(string, color, font="big", figlet=False):
     if colored:
@@ -370,8 +370,10 @@ def render(render_object):
 
 def main():
     handler = logging.StreamHandler()
+    # Just levelname and message Could re-add other info if we want
     formatter = logging.Formatter(
-        '%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
+        '%(levelname)s %(message)s')
+        # '%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
     handler.setFormatter(formatter)
     logger.addHandler(handler)
     logger.setLevel(logging.INFO)
