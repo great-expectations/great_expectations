@@ -190,6 +190,9 @@ def test_cli_init(tmp_path_factory):
 
     os.chdir(curdir)
 
+    # assert False
+
+
 # def test_cli_render(tmp_path_factory):
 #     runner = CliRunner()
 #     result = runner.invoke(cli, ["render"])

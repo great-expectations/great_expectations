@@ -17,6 +17,9 @@ def add_datasource(context):
     #     dbt_profile = click.prompt(msg_prompt_dbt_choose_profile)
     #     log_message(msg_dbt_go_to_notebook, color="blue")
     #     context.add_datasource("dbt", "dbt", profile=dbt_profile)
+    if data_source_selection == "4":  # None of the above
+        return None
+
     if data_source_selection == "3":  # Spark
         path = click.prompt(
             msg_prompt_filesys_enter_base_path,
@@ -77,11 +80,17 @@ def add_datasource(context):
             data_source_name, "sqlalchemy", profile=data_source_name)
 
     elif data_source_selection == "1":  # csv
-        path = click.prompt(msg_prompt_filesys_enter_base_path, default='/data/', type=click.Path(exists=False,
-                                                                                                  file_okay=False,
-                                                                                                  dir_okay=True,
-                                                                                                  readable=True),
-                            show_default=True)
+        path = click.prompt(
+            msg_prompt_filesys_enter_base_path,
+            default='/data/',
+            type=click.Path(
+                exists=False,
+                file_okay=False,
+                dir_okay=True,
+                readable=True
+            ),
+            show_default=True
+        )
         if path.startswith("./"):
             path = path[2:]
 
@@ -94,6 +103,9 @@ def add_datasource(context):
 
     else:
         cli_message(msg_unknown_data_source, color="blue")
+        return None
+
+    return data_source_name
 
 
 msg_prompt_choose_data_source = """
