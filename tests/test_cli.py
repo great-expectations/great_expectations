@@ -1,6 +1,7 @@
 # Since our cli produces unicode output, but we want tests in python2 as well
 from __future__ import unicode_literals
 
+import great_expectations as ge
 from click.testing import CliRunner
 import great_expectations.version
 from great_expectations.cli import cli
@@ -171,6 +172,8 @@ def test_cli_init(tmp_path_factory):
     basedir = tmp_path_factory.mktemp("test_cli_init_diff")
     basedir = str(basedir)
     os.makedirs(os.path.join(basedir, "data"))
+    df = ge.read_csv("examples/data/Titanic.csv")
+    df.to_csv(os.path.join(basedir, "data", "titanic.csv"), index=None)
     curdir = os.path.abspath(os.getcwd())
     os.chdir(basedir)
 
@@ -191,7 +194,7 @@ def test_cli_init(tmp_path_factory):
 
     os.chdir(curdir)
 
-    # assert False
+    assert False
 
 
 # def test_cli_render(tmp_path_factory):

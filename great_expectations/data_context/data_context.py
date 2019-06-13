@@ -680,7 +680,7 @@ class DataContext(object):
         total_start_time = datetime.datetime.now()
 
         # logger.info("Profiling %s with %s" % (datasource_name, profiler_name))
-        print("Profiling %s with %s" % (datasource_name, profiler_name))
+        print("Profiling %s with %s..." % (datasource_name, profiler_name))
         datasource = self.get_datasource(datasource_name)
         data_asset_names = datasource.get_available_data_asset_names()
 
@@ -760,7 +760,7 @@ Note: You will need to review and revise Expectations before using them in produ
         #!!! FIXME: This seems to imply a whole new category of renderer: one that can take a datasource as input.
         #!!! FIXME: Not using renderer_name at all
 
-        print("Rendering %s with %s" % (datasource_name, renderer_name))
+        print("\nRendering %s with %s..." % (datasource_name, renderer_name))
         datasource = self.get_datasource(datasource_name)
         data_asset_names = datasource.get_available_data_asset_names()
 
