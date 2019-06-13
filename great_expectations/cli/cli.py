@@ -7,12 +7,6 @@ import json
 import logging
 import sys
 
-from pyfiglet import figlet_format
-
-try:
-    from termcolor import colored
-except ImportError:
-    colored = None
 
 from great_expectations import __version__, read_csv
 from great_expectations.dataset import Dataset, PandasDataset
@@ -22,37 +16,22 @@ from great_expectations.data_context import DataContext
 from great_expectations.render.renderer import DescriptivePageRenderer, PrescriptivePageRenderer
 from great_expectations.render.view import DescriptivePageView
 
+
+from .util import cli_message
 from .init import (
     scaffold_directories_and_notebooks,
     greeting_1,
     msg_prompt_lets_begin,
-    msg_prompt_choose_data_source,
-    msg_prompt_filesys_enter_base_path,
-    msg_prompt_datasource_name,
-    msg_spark_go_to_notebook,
-    msg_sqlalchemy_config_connection,
-    msg_sqlalchemy_go_to_notebook,
-    msg_prompt_filesys_enter_base_path,
-    msg_filesys_go_to_notebook,
-    msg_unknown_data_source,
+    # msg_spark_go_to_notebook,
+    # msg_sqlalchemy_go_to_notebook,
+    # msg_filesys_go_to_notebook,
 )
-# from .datasource import (
-
-# )
+from .datasource import (
+    add_datasource
+)
 
 # Take over the entire GE module logging namespace when running CLI
 logger = logging.getLogger("great_expectations")
-
-
-def cli_message(string, color, font="big", figlet=False):
-    if colored:
-        if not figlet:
-            six.print_(colored(string, color))
-        else:
-            six.print_(colored(figlet_format(
-                string, font=font), color))
-    else:
-        six.print_(string)
 
 
 @click.group()
@@ -158,7 +137,7 @@ def init(target_directory):
     appends to a `.gitignore` file.
     """
 
-    context = DataContext.create('.')
+    context = DataContext.create(target_directory)
     base_dir = os.path.join(target_directory, "great_expectations")
 
     cli_message("Great Expectations", color="cyan", figlet=True)
@@ -176,86 +155,7 @@ def init(target_directory):
 
     # Shows a list of options to select from
 
-    data_source_selection = click.prompt(msg_prompt_choose_data_source, type=click.Choice(["1", "2", "3", "4"]),
-                                         show_choices=False)
-
-    print(data_source_selection)
-
-    # if data_source_selection == "5": # dbt
-    #     dbt_profile = click.prompt(msg_prompt_dbt_choose_profile)
-    #     log_message(msg_dbt_go_to_notebook, color="blue")
-    #     context.add_datasource("dbt", "dbt", profile=dbt_profile)
-    if data_source_selection == "3":  # Spark
-        path = click.prompt(msg_prompt_filesys_enter_base_path, default='/data/', type=click.Path(exists=True,
-                                                                                                  file_okay=False,
-                                                                                                  dir_okay=True,
-                                                                                                  readable=True),
-                            show_default=True)
-        if path.startswith("./"):
-            path = path[2:]
-
-        if path.endswith("/"):
-            basenamepath = path[:-1]
-        default_data_source_name = os.path.basename(basenamepath)
-        data_source_name = click.prompt(
-            msg_prompt_datasource_name, default=default_data_source_name, show_default=True)
-
-        cli_message(msg_spark_go_to_notebook, color="blue")
-        context.add_datasource(data_source_name, "spark", base_directory=path)
-
-    elif data_source_selection == "2":  # sqlalchemy
-        data_source_name = click.prompt(
-            msg_prompt_datasource_name, default="mydb", show_default=True)
-
-        cli_message(msg_sqlalchemy_config_connection.format(
-            data_source_name), color="blue")
-
-        drivername = click.prompt("What is the driver for the sqlalchemy connection?", default="postgres",
-                                  show_default=True)
-        host = click.prompt("What is the host for the sqlalchemy connection?", default="localhost",
-                            show_default=True)
-        port = click.prompt("What is the port for the sqlalchemy connection?", default="5432",
-                            show_default=True)
-        username = click.prompt("What is the username for the sqlalchemy connection?", default="postgres",
-                                show_default=True)
-        password = click.prompt("What is the password for the sqlalchemy connection?", default="",
-                                show_default=False, hide_input=True)
-        database = click.prompt("What is the database name for the sqlalchemy connection?", default="postgres",
-                                show_default=True)
-
-        credentials = {
-            "drivername": drivername,
-            "host": host,
-            "port": port,
-            "username": username,
-            "password": password,
-            "database": database
-        }
-        context.add_profile_credentials(data_source_name, **credentials)
-
-        cli_message(msg_sqlalchemy_go_to_notebook, color="blue")
-
-        context.add_datasource(
-            data_source_name, "sqlalchemy", profile=data_source_name)
-
-    elif data_source_selection == "1":  # csv
-        path = click.prompt(msg_prompt_filesys_enter_base_path, default='/data/', type=click.Path(exists=False,
-                                                                                                  file_okay=False,
-                                                                                                  dir_okay=True,
-                                                                                                  readable=True),
-                            show_default=True)
-        if path.startswith("./"):
-            path = path[2:]
-
-        default_data_source_name = os.path.basename(path)
-        data_source_name = click.prompt(
-            msg_prompt_datasource_name, default=default_data_source_name, show_default=True)
-
-        cli_message(msg_filesys_go_to_notebook, color="blue")
-        context.add_datasource(data_source_name, "pandas", base_directory=path)
-
-    else:
-        cli_message(msg_unknown_data_source, color="blue")
+    add_datasource(context)
 
 
 @cli.command()
