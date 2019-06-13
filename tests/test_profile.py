@@ -73,11 +73,11 @@ def test_BasicDatasetProfiler():
     assert set(expectations_config["meta"]["BasicDatasetProfiler"].keys()) == {
         "created_by", "created_at"
     }
-    # for exp in expectations_config["expectations"]:
-    #     assert "BasicDatasetProfiler" in exp["meta"]
-    #     assert exp["meta"]["BasicDatasetProfiler"] == {
-    #         "confidence": "very low"
-    #     }
+    for exp in expectations_config["expectations"]:
+        assert "BasicDatasetProfiler" in exp["meta"]
+        assert exp["meta"]["BasicDatasetProfiler"] == {
+            "confidence": "very low"
+        }
 
     # Example:
     # {
@@ -119,7 +119,11 @@ def test_BasicDatasetProfiler_with_context(empty_data_context, filesystem_csv_2)
         "created_by", "created_at", "batch_kwargs"
     }
 
-    assert False
+    for exp in expectations_config["expectations"]:
+        assert "BasicDatasetProfiler" in exp["meta"]
+        assert exp["meta"]["BasicDatasetProfiler"] == {
+            "confidence": "very low"
+        }
 
 
 @pytest.fixture()
