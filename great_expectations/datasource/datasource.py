@@ -10,6 +10,14 @@ yaml = YAML()
 yaml.default_flow_style = False
 
 class Datasource(object):
+    """Datasources are responsible for connecting to data infrastructure. 
+    Each Datasource (within your DataContext) is a source of materialized data, such as a SQL database, S3 bucket, 
+    or local file directory.
+
+    Since opinionated DAG managers such as airflow, dbt, prefect.io, dagster can also act as sources of materialized data, 
+    they can also act as Datasources.
+    """
+
 
     @classmethod
     def from_configuration(cls, **kwargs):
