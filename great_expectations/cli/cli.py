@@ -14,7 +14,6 @@ try:
 except ImportError:
     colored = None
 
-from .supporting_methods import _scaffold_directories_and_notebooks
 from great_expectations import __version__, read_csv
 from great_expectations.dataset import Dataset, PandasDataset
 from great_expectations.data_asset import FileDataAsset
@@ -37,6 +36,9 @@ from .init import (
     msg_filesys_go_to_notebook,
     msg_unknown_data_source,
 )
+# from .datasource import (
+
+# )
 
 # Take over the entire GE module logging namespace when running CLI
 logger = logging.getLogger("great_expectations")
