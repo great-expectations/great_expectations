@@ -171,10 +171,10 @@ great_expectations/notebooks/using_great_expectations_with_pandas.ipynb.
 it will walk you through configuring the database connection and next steps.
 
 To launch with jupyter notebooks:
-    jupyter notebook great_expectations/notebooks/create_expectations_for_csv_files.ipynb
+    <blue>jupyter notebook great_expectations/notebooks/create_expectations_for_csv_files.ipynb</blue>
 
 To launch with jupyter lab:
-    jupyter lab great_expectations/notebooks/create_expectations_for_csv_files.ipynb
+    <blue>jupyter lab great_expectations/notebooks/create_expectations_for_csv_files.ipynb</blue>
 """
 
 msg_sqlalchemy_go_to_notebook = """
@@ -189,8 +189,8 @@ great_expectations/notebooks/using_great_expectations_with_pandas.ipynb.
 it will walk you through configuring the database connection and next steps.
 
 To launch with jupyter notebooks:
-    jupyter notebook great_expectations/notebooks/create_expectations_for_spark_dataframes.ipynb
+    <blue>jupyter notebook great_expectations/notebooks/create_expectations_for_spark_dataframes.ipynb</blue>
 
 To launch with jupyter lab:
-    jupyter lab great_expectations/notebooks/create_expectations_for_spark_dataframes.ipynb
+    <blue>jupyter lab great_expectations/notebooks/create_expectations_for_spark_dataframes.ipynb</blue>
 """

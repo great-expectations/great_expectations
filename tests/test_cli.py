@@ -33,7 +33,7 @@ Options:
   --help     Show this message and exit.
 
 Commands:
-  init      Initialze a new Great Expectations project.
+  init      Initialize a new Great Expectations project.
   profile   Profile a great expectations object.
   render    Render a great expectations object.
   validate  Validate a CSV file against an expectations configuration.
@@ -191,7 +191,7 @@ def test_cli_init(tmp_path_factory):
 
     os.chdir(curdir)
 
-    assert False
+    # assert False
 
 
 # def test_cli_render(tmp_path_factory):
