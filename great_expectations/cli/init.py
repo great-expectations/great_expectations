@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import os
 import glob
 import shutil
@@ -53,7 +55,7 @@ Always know what to expect from your data.
 
 If you're new to Great Expectations, this tutorial is a good place to start:
 
-    https://great-expectations.readthedocs.io/en/v%s/intro.html#how-do-i-get-started
+    <blue>https://great-expectations.readthedocs.io/en/v%s/intro.html#how-do-i-get-started</blue>
 """ % __version__
 
 msg_prompt_lets_begin = """
