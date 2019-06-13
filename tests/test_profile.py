@@ -108,9 +108,10 @@ def test_BasicDatasetProfiler_with_context(empty_data_context, filesystem_csv_2)
     not_so_empty_data_context = empty_data_context
 
     batch = not_so_empty_data_context.get_batch("my_datasource", "f1")
-    expectations_config, evr_config = BasicDatasetProfiler.profile(batch)
+    expectations_config, validation_results = BasicDatasetProfiler.profile(
+        batch)
 
-    print(batch.get_batch_kwargs())
+    # print(batch.get_batch_kwargs())
     # print(json.dumps(expectations_config, indent=2))
 
     assert expectations_config["data_asset_name"] == "f1"
@@ -124,6 +125,13 @@ def test_BasicDatasetProfiler_with_context(empty_data_context, filesystem_csv_2)
         assert exp["meta"]["BasicDatasetProfiler"] == {
             "confidence": "very low"
         }
+
+    print(json.dumps(validation_results, indent=2))
+
+    assert validation_results["meta"]["data_asset_name"] == "f1"
+    assert set(validation_results["meta"].keys()) == {
+        "great_expectations.__version__", "data_asset_name", "run_id", "batch_kwargs"
+    }
 
 
 @pytest.fixture()
@@ -140,14 +148,23 @@ def filesystem_csv_2(tmp_path_factory):
 def test_context_profiler(empty_data_context, filesystem_csv_2):
     empty_data_context.add_datasource(
         "my_datasource", "pandas", base_directory=str(filesystem_csv_2))
+    not_so_empty_data_context = empty_data_context
 
-    assert empty_data_context.list_expectations_configs() == []
-    empty_data_context.profile_datasource("my_datasource")
+    assert not_so_empty_data_context.list_expectations_configs() == []
+    not_so_empty_data_context.profile_datasource("my_datasource")
 
-    print(empty_data_context.list_expectations_configs())
-    assert empty_data_context.list_expectations_configs() != []
+    print(not_so_empty_data_context.list_expectations_configs())
+    assert not_so_empty_data_context.list_expectations_configs() != []
 
-    profiled_expectations = empty_data_context.get_expectations('f1')
+    profiled_expectations = not_so_empty_data_context.get_expectations('f1')
     print(json.dumps(profiled_expectations, indent=2))
 
     assert len(profiled_expectations["expectations"]) > 0
+
+    # print(json.dumps(validation_results, indent=2))
+
+    # # Note: deliberately not testing context file storage in this test.
+    # context_expectations_config = not_so_empty_data_context.get_expectations(
+    #     "my_datasource", "f1")
+
+    # assert context_expectations_config == profiled_expectations

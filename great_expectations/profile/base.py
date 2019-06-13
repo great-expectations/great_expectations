@@ -47,7 +47,7 @@ class DataSetProfiler(object):
 
         batch_kwargs = dataset.get_batch_kwargs()
         expectations_config = cls.add_meta(expectations_config, batch_kwargs)
-        validation_results = None  # dataset.validate(expectations_config)
+        validation_results = dataset.validate(expectations_config)
         return expectations_config, validation_results
 
     @classmethod
