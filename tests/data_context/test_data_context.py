@@ -222,6 +222,98 @@ def test_normalize_data_asset_names_error(data_context):
     
     assert False
 
+def test_normalize_data_asset_names_conditions():
+    "mydatasource/mygenerator/myasset/mypurpose"
+    "notadatasource/mygenerator/myasset/mypurpose"
+    "mydatasource/myasset"
+    "myasset"
+    # Ok if only one generator has an asset with name myasset and purpose mypurpose
+    # Bad if no such generator exists or multiple generators exist
+    "mydatasource/myasset/mypurpose"
+
+    # Ok if only one purpose exists for myasset
+    "mydatasource/mygenerator/myasset"
+
+    mydatasource/
+        default/
+            default/
+                default.json
+    myotherdatasource/
+        default/
+            default/
+                default.json
+
+    "mydatasource/default/default" -> ok
+    "mydatasource/default" -> ok
+    "mydatasource/default/default/default" -> properly normaized
+    "default" -> not ok; ambiguous
+
+    mydatasource/
+        default/
+            default/
+                default.json
+            myotherasset/
+                default.json
+            mythirdasset/
+                default.json
+                different_purpose.json
+    myotherdatasource/
+        default/
+            default/
+                default.json
+        my_other_generator/
+            default/
+                default.json
+                different_purpose.json
+    mythirddatasource/
+        default/
+            default/
+                default.json
+        my_other_generator/
+            default/
+                default.json
+        my_third_generator/
+            default/
+                default.json
+            
+    "myotherasset" -> ok. normalize to "mydatasource/default/myotherasset/default.json"
+    "mythirdasset" -> ambigous. both default and different_purpose are available
+    "myotherdatasource/default" -> ambiguous: two generators
+    "myotherdatasource/my_other_generator/default" -> ok. normalize to "myotherdatasource/my_other_generator/default/default"
+    "myotherdatasource/default/default" -> ambiguous (could be other_generator/default/default or default/default/default)
+    "myotherdatasource/default/different_purpose" -> ok. normalizse to "myotherdatasource/my_other_generator/default/different_purpose"
+
+
+    NO CONFIG, but a datasource produces: 
+      - "mydatasource/default/myasset"
+      - "mydatasource/default/myotherasset"
+      - "mydatasource/myothergenerator/myasset"
+    "mydatasource/myasset/mypurpose" -> ambiguous
+    "mydatasource/default/myasset" -> ok
+    "mydatasource/default/myotherasset" -> ok
+
+     - "mydatasource/myname/myname"
+    "mydatasource/myname/myname" -> ok -> "mydatasurce/myname/myname/default"
+
+
+
+     - "mydatasource/myname/myname"
+     - "mydatasource/myother/myname"
+    "mydatasource/myname/myname" -> ambigouous. could be "mydatasource/myname/myname/default" or could be "mydatasource/myother/myname/myname"
+
+    NO CONFIG, but a datasource produces: 
+      - "mydatasource/mygenerator/myasset"
+      - "mydatasource/mygenerator/myotherasset"
+      - "mydatasource/myothergenerator/myasset"
+    "mydatasource/myasset/mypurpose" -> ambiguous
+
+
+    NO CONFIG, but a datasource produces
+      - "mydatasource/mygenerator/myasset"
+      - "mydatasource/mygenerator/myotherasset"
+    "mydatasource/myasset/mypurpose" -> "mydatasource/mygenerator/myasset/mypurpose"
+
+
 def test_list_datasources(data_context):
     datasources = data_context.list_datasources()
 

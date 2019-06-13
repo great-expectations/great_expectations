@@ -137,7 +137,7 @@ class Datasource(object):
         raise NotImplementedError
 
     def get_available_data_asset_names(self, generator_names=None):
-        available_data_asset_names = []
+        available_data_asset_names = {}
         if generator_names is None:
             generator_names = [generator["name"] for generator in self.list_generators()]
         elif isinstance(generator_names, string_types):
@@ -145,12 +145,7 @@ class Datasource(object):
 
         for generator_name in generator_names:
             generator = self.get_generator(generator_name)
-            available_data_asset_names.append(
-                {
-                    "generator": generator_name,
-                    "available_data_asset_names": generator.get_available_data_asset_names()
-                }
-            )
+            available_data_asset_names[generator_name] = generator.get_available_data_asset_names()
         return available_data_asset_names
 
     def build_batch_kwargs(self, **kwargs):
