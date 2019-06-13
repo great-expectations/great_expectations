@@ -768,9 +768,9 @@ Note: You will need to review and revise Expectations before using them in produ
         
         for name in data_asset_name_list:
             try:
-                print(name)
-
-                print(glob(self.context_root_directory+"/great_expectations/uncommitted/validations/*/*"))
+                start_time = datetime.datetime.now()
+                # print(name)
+                # print(glob(self.context_root_directory+"/great_expectations/uncommitted/validations/*/*"))
 
                 evr_file_path = os.path.join(
                     self.context_root_directory, "great_expectations", "uncommitted", "validations", run_id, name+'.json'
@@ -786,6 +786,10 @@ Note: You will need to review and revise Expectations before using them in produ
                 safe_mmkdir(os.path.split(doc_file_path)[0], exist_ok=True)
                 with open(doc_file_path, 'w') as outfile:
                     outfile.write(rendered_page)
+
+                duration = (datetime.datetime.now() - start_time).total_seconds()
+
+                print("\tRendered %s.html (%.3f sec)" % (name, duration))
 
             except:
                 pass

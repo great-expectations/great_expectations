@@ -121,6 +121,8 @@ def add_datasource(context):
 
             context.render_datasource(data_source_name, run_id)
 
+            cli_message(msg_serve_docs)
+
         else:
             cli_message(
                 "Okay, skipping profiling for now. You can always do this later by running `great_expectations profile`."
@@ -221,4 +223,12 @@ To launch with jupyter notebooks:
 
 To launch with jupyter lab:
     <blue>jupyter lab great_expectations/notebooks/create_expectations_for_spark_dataframes.ipynb</blue>
+"""
+
+msg_serve_docs = """
+To view your docs using python 3, run:
+    <blue>(cd great_expectations/uncommitted/documents/; python -m http.server)</blue>
+
+For python 2, run 
+    <blue>(cd great_expectations/uncommitted/documents/; python -m SimpleHTTPServer)</blue>
 """
