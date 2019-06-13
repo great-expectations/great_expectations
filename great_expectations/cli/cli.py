@@ -7,6 +7,11 @@ import json
 import logging
 import sys
 
+from pyfiglet import figlet_format
+try:
+    from termcolor import colored
+except ImportError:
+    colored = None
 
 from great_expectations import __version__, read_csv
 from great_expectations.dataset import Dataset, PandasDataset
@@ -22,9 +27,6 @@ from .init import (
     scaffold_directories_and_notebooks,
     greeting_1,
     msg_prompt_lets_begin,
-    # msg_spark_go_to_notebook,
-    # msg_sqlalchemy_go_to_notebook,
-    # msg_filesys_go_to_notebook,
 )
 from .datasource import (
     add_datasource
@@ -121,15 +123,21 @@ validate the data.
         only_return_failures=only_return_failures,
     )
 
+    # Note: Should this be rendered through cli_message?
+    # Probably not, on the offchance that the JSON object contains <color> tags
     print(json.dumps(result, indent=2))
     sys.exit(result['statistics']['unsuccessful_expectations'])
 
 
 @cli.command()
-@click.option('--target_directory', '-d', default="./",
-              help='The root of the project directory where you want to initialize Great Expectations.')
+@click.option(
+    '--target_directory',
+    '-d',
+    default="./",
+    help='The root of the project directory where you want to initialize Great Expectations.'
+)
 def init(target_directory):
-    """Initialze a new Great Expectations project.
+    """Initialize a new Great Expectations project.
 
     This guided input walks the user through setting up a project.
 
@@ -140,18 +148,22 @@ def init(target_directory):
     context = DataContext.create(target_directory)
     base_dir = os.path.join(target_directory, "great_expectations")
 
-    cli_message("Great Expectations", color="cyan", figlet=True)
-    cli_message(greeting_1, color="blue")
+    six.print_(colored(
+        figlet_format("Great Expectations", font="big"),
+        color="cyan"
+    ))
+
+    cli_message(greeting_1)
 
     if not click.confirm(msg_prompt_lets_begin, default=True):
         cli_message(
-            "OK - run great_expectations init again when ready. Exiting...", color="blue")
+            "OK - run great_expectations init again when ready. Exiting..."
+        )
         exit(0)
 
     scaffold_directories_and_notebooks(base_dir)
     cli_message(
         "\nDone.",
-        color="blue",
     )
 
     datasource_name = add_datasource(context)
@@ -164,7 +176,7 @@ def init(target_directory):
             default=True
         ):
 
-            print()
+            cli_message("\n")
 
             context.profile_datasource(
                 datasource_name,
