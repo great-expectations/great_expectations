@@ -41,13 +41,14 @@ class DataSetProfiler(object):
         return expectations_config
 
     @classmethod
-    def profile(cls, dataset):
+    def profile(cls, dataset, run_id=None):
         assert cls.validate_dataset(dataset)
         expectations_config = cls._profile(dataset)
 
         batch_kwargs = dataset.get_batch_kwargs()
         expectations_config = cls.add_meta(expectations_config, batch_kwargs)
-        validation_results = dataset.validate(expectations_config)
+        validation_results = dataset.validate(
+            expectations_config, run_id=run_id)
         return expectations_config, validation_results
 
     @classmethod

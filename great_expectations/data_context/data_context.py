@@ -401,7 +401,7 @@ class DataContext(object):
             if isinstance(result_store, dict) and "filesystem" in result_store:
                 validation_filepath = os.path.join(self.context_root_directory, "great_expectations", result_store["filesystem"]["base_directory"],
                                        run_id, data_asset_name + ".json")
-                logger.info("Storing validation result: %s" % validation_filepath)
+                # logger.info("Storing validation result: %s" % validation_filepath)
                 safe_mmkdir(os.path.join(self.context_root_directory, "great_expectations", result_store["filesystem"]["base_directory"], run_id))
                 with open(validation_filepath, "w") as outfile:
                     json.dump(validation_results, outfile)
@@ -706,7 +706,8 @@ class DataContext(object):
                 batch = self.get_batch(datasource_name=datasource_name, data_asset_name=name)
 
                 #Note: This logic is specific to DatasetProfilers, which profile a single batch. Multi-batch profilers will have more to unpack.
-                expectations_config, validation_result = BasicDatasetProfiler.profile(batch)
+                expectations_config, validation_result = BasicDatasetProfiler.profile(
+                    batch, run_id=profiler_name+"_"+start_time.strftime("%Y%m%d_%H%M%S"))
 
                 row_count = batch.shape[0]
                 total_rows += row_count
@@ -716,7 +717,7 @@ class DataContext(object):
                 total_expectations += new_expectation_count
 
                 #We should be able to pass a parameter to make this a `_candidate_` file
-                self.save_expectations(expectations_config)#, name)
+                self.save_expectations(expectations_config)
                 # self.save_validation_result(validation_result, name)
                 
                 duration = (datetime.datetime.now() - start_time).total_seconds()
