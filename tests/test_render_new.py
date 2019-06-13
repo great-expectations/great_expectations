@@ -113,6 +113,4 @@ def test_context_render_data_source(empty_data_context, filesystem_csv_2):
 
     with open(doc_path+"/f1.html", "r") as doc_file:
         doc = doc_file.read()
-        print(doc)
-
-    assert False
+        assert "<title>Data documentation compiled by Great Expectations</title>" in doc

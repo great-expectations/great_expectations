@@ -767,24 +767,28 @@ Note: You will need to review and revise Expectations before using them in produ
         data_asset_name_list = list(data_asset_names[0]["available_data_asset_names"])
         
         for name in data_asset_name_list:
-            print(name)
+            try:
+                print(name)
 
-            print(glob(self.context_root_directory+"/great_expectations/uncommitted/validations/*/*"))
+                print(glob(self.context_root_directory+"/great_expectations/uncommitted/validations/*/*"))
 
-            evr_file_path = os.path.join(
-                self.context_root_directory, "great_expectations", "uncommitted", "validations", run_id, name+'.json'
-            )
-            validation_results = json.load(open(evr_file_path))
+                evr_file_path = os.path.join(
+                    self.context_root_directory, "great_expectations", "uncommitted", "validations", run_id, name+'.json'
+                )
+                validation_results = json.load(open(evr_file_path))
 
-            rendered_json = DescriptivePageRenderer.render(validation_results)
-            rendered_page = DescriptivePageView.render(rendered_json)
+                rendered_json = DescriptivePageRenderer.render(validation_results)
+                rendered_page = DescriptivePageView.render(rendered_json)
 
-            doc_file_path = os.path.join(
-                self.context_root_directory, "great_expectations", "uncommitted", "documents", name+'.html'
-            )
-            safe_mmkdir(os.path.split(doc_file_path)[0], exist_ok=True)
-            with open(doc_file_path, 'w') as outfile:
-                outfile.write(rendered_page)
+                doc_file_path = os.path.join(
+                    self.context_root_directory, "great_expectations", "uncommitted", "documents", name+'.html'
+                )
+                safe_mmkdir(os.path.split(doc_file_path)[0], exist_ok=True)
+                with open(doc_file_path, 'w') as outfile:
+                    outfile.write(rendered_page)
+
+            except:
+                pass
 
 
 
