@@ -21,7 +21,7 @@ class DataSetProfiler(object):
         return expectation
 
     @classmethod
-    def add_meta(cls, expectations_config, batch_kwargs=None):
+    def add_meta(cls, expectations_config, run_id=None, batch_kwargs=None):
         if not "meta" in expectations_config:
             expectations_config["meta"] = {}
 
@@ -30,6 +30,9 @@ class DataSetProfiler(object):
             "created_by": class_name,
             "created_at": time.time(),
         }
+
+        if run_id != None:
+            expectations_config["meta"][class_name]["run_id"] = run_id
 
         if batch_kwargs != None:
             expectations_config["meta"][class_name]["batch_kwargs"] = batch_kwargs
@@ -43,10 +46,15 @@ class DataSetProfiler(object):
     @classmethod
     def profile(cls, dataset, run_id=None):
         assert cls.validate_dataset(dataset)
-        expectations_config = cls._profile(dataset)
-
         batch_kwargs = dataset.get_batch_kwargs()
-        expectations_config = cls.add_meta(expectations_config, batch_kwargs)
+
+        expectations_config = cls._profile(dataset)
+        expectations_config = cls.add_meta(
+            expectations_config,
+            run_id=run_id,
+            batch_kwargs=batch_kwargs,
+        )
+
         validation_results = dataset.validate(
             expectations_config, run_id=run_id)
         return expectations_config, validation_results

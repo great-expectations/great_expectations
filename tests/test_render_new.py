@@ -93,3 +93,13 @@ def test_full_oobe_flow():
 
     with open('./test.html', 'w') as f:
         f.write(rendered_page)
+
+
+def test_context_render_data_source(empty_data_context, filesystem_csv_2):
+    empty_data_context.add_datasource(
+        "my_datasource", "pandas", base_directory=str(filesystem_csv_2))
+    empty_data_context.profile_datasource("my_datasource")
+    not_so_empty_data_context = empty_data_context
+
+    not_so_empty_data_context.render_datasource("my_datasource")
+    assert False

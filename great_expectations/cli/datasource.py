@@ -119,7 +119,7 @@ def add_datasource(context):
                 max_data_assets=20
             )
 
-            # context.render_datasource(datasource_name)
+            context.render_datasource(data_source_name)
 
         else:
             cli_message(

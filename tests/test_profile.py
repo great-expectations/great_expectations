@@ -109,15 +109,16 @@ def test_BasicDatasetProfiler_with_context(empty_data_context, filesystem_csv_2)
 
     batch = not_so_empty_data_context.get_batch("my_datasource", "f1")
     expectations_config, validation_results = BasicDatasetProfiler.profile(
-        batch)
+        batch, run_id="BasicDatasetProfiler_20190101_000000"
+    )
 
-    # print(batch.get_batch_kwargs())
+    print(batch.get_batch_kwargs())
     # print(json.dumps(expectations_config, indent=2))
 
     assert expectations_config["data_asset_name"] == "f1"
     assert "BasicDatasetProfiler" in expectations_config["meta"]
     assert set(expectations_config["meta"]["BasicDatasetProfiler"].keys()) == {
-        "created_by", "created_at", "batch_kwargs"
+        "created_by", "created_at", "run_id", "batch_kwargs"
     }
 
     for exp in expectations_config["expectations"]:

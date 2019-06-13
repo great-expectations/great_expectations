@@ -746,6 +746,24 @@ Note: You will need to review and revise Expectations before using them in produ
             total_expectations,
         ))
 
+    def render_datasource(self, datasource_name, renderer_name="DescriptiveDataSourceRenderer"):
+        #!!! FIXME: This seems to imply a whole new category of renderer: one that can take a datasource as input.
+        #!!! FIXME: Not using renderer_name at all
+
+        print("Rendering %s with %s" % (datasource_name, renderer_name))
+        datasource = self.get_datasource(datasource_name)
+        data_asset_names = datasource.get_available_data_asset_names()
+
+        data_asset_name_list = list(data_asset_names[0]["available_data_asset_names"])
+        
+        for name in data_asset_name_list:
+            print(name)
+            
+            # config_file_path = os.path.join(self.expectations_directory, data_asset_name + '.json')
+            # safe_mmkdir(os.path.split(config_file_path)[0], exist_ok=True)
+            # with open(config_file_path, 'w') as outfile:
+            #     json.dump(expectations, outfile)
+
 
 
 PROJECT_HELP_COMMENT = """# Welcome to great expectations. 
