@@ -151,11 +151,19 @@ def init(target_directory):
     scaffold_directories_and_notebooks(base_dir)
     cli_message(
         "\nDone.",
-        color="blue")
+        color="blue",
+    )
 
-    # Shows a list of options to select from
+    datasource_name = add_datasource(context)
 
-    add_datasource(context)
+    if datasource_name != None:
+        # print("???")
+        # print(datasource_name)
+
+        context.profile_datasource(
+            datasource_name,
+            max_data_assets=20
+        )
 
 
 @cli.command()
@@ -193,7 +201,9 @@ def profile(datasource_name, max_data_assets, profile_all_data_assets, target_di
     # FIXME: By default, this should iterate over all datasources
     context = DataContext(target_directory)
     context.profile_datasource(
-        datasource_name, max_data_assets=max_data_assets)
+        datasource_name,
+        max_data_assets=max_data_assets
+    )
 
 
 def main():
