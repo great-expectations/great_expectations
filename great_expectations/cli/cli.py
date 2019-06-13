@@ -23,6 +23,21 @@ from great_expectations.data_context import DataContext
 from great_expectations.render.renderer import DescriptivePageRenderer, PrescriptivePageRenderer
 from great_expectations.render.view import DescriptivePageView
 
+from .init import (
+    scaffold_directories_and_notebooks,
+    greeting_1,
+    msg_prompt_lets_begin,
+    msg_prompt_choose_data_source,
+    msg_prompt_filesys_enter_base_path,
+    msg_prompt_datasource_name,
+    msg_spark_go_to_notebook,
+    msg_sqlalchemy_config_connection,
+    msg_sqlalchemy_go_to_notebook,
+    msg_prompt_filesys_enter_base_path,
+    msg_filesys_go_to_notebook,
+    msg_unknown_data_source,
+)
+
 # Take over the entire GE module logging namespace when running CLI
 logger = logging.getLogger("great_expectations")
 
@@ -141,125 +156,10 @@ def init(target_directory):
     appends to a `.gitignore` file.
     """
 
-    #!!! This injects a version tag into the docs. We should test that those versioned docs exist in RTD.
-    greeting_1 = """
-Always know what to expect from your data.
-
-If you're new to Great Expectations, this tutorial is a good place to start:
-
-    https://great-expectations.readthedocs.io/en/v%s/intro.html#how-do-i-get-started
-    """ % __version__
-
-    msg_prompt_lets_begin = """
-Let's add Great Expectations to your project, by scaffolding a new great_expectations directory:
-
-    great_expectations
-        ├── great_expectations.yml
-        ├── datasources
-        ├── expectations
-        ├── fixtures
-        ├── notebooks
-        ├── plugins
-        ├── uncommitted
-        │   ├── validations
-        │   ├── credentials
-        │   └── samples
-        └── .gitignore
-
-OK to proceed?
-    """
-
-    msg_prompt_choose_data_source = """
-Configure a data source
-    1. Pandas data frames from local filesystem (CSV files)
-    2. Relational database (SQL)
-    3. Spark DataFrames from local filesystem (CSV files)
-    4. None of the above
-    """
-
-#     msg_prompt_choose_data_source = """
-# Time to create expectations for your data. This is done in Jupyter Notebook/Jupyter Lab.
-#
-# Before we point you to the right notebook, what data does your project work with?
-#     1. Directory on local filesystem
-#     2. Relational database (SQL)
-#     3. DBT (data build tool) models
-#     4. None of the above
-#     """
-
-
-#     msg_prompt_dbt_choose_profile = """
-# Please specify the name of the dbt profile (from your ~/.dbt/profiles.yml file Great Expectations \
-# should use to connect to the database
-#     """
-
-#     msg_dbt_go_to_notebook = """
-# To create expectations for your dbt models start Jupyter and open notebook
-# great_expectations/notebooks/using_great_expectations_with_dbt.ipynb -
-# it will walk you through next steps.
-#     """
-
-    msg_prompt_filesys_enter_base_path = """
-Enter the path of the root directory where the data files are stored
-(the path may be either absolute or relative to current directory)
-    """
-
-    msg_filesys_go_to_notebook = """
-To create expectations for your CSV files start Jupyter and open the notebook
-great_expectations/notebooks/using_great_expectations_with_pandas.ipynb.
-it will walk you through configuring the database connection and next steps.
-
-To launch with jupyter notebooks:
-    jupyter notebook great_expectations/notebooks/create_expectations_for_csv_files.ipynb
-
-To launch with jupyter lab:
-    jupyter lab great_expectations/notebooks/create_expectations_for_csv_files.ipynb
-    """
-
-    msg_prompt_datasource_name = """
-Give your new data source a short name
-    """
-
-    msg_sqlalchemy_config_connection = """
-Great Expectations relies on sqlalchemy to connect to relational databases.
-Please make sure that you have it installed.
-
-Next, we will configure database credentials and store them in the "{0:s}" section
-of this config file: great_expectations/uncommitted/credentials/profiles.yml:
-     """
-
-    msg_sqlalchemy_go_to_notebook = """
-To create expectations for your SQL queries start Jupyter and open notebook
-great_expectations/notebooks/using_great_expectations_with_sql.ipynb -
-it will walk you through configuring the database connection and next steps.
-"""
-
-    msg_unknown_data_source = """
-We are looking for more types of data types to support.
-Please create a GitHub issue here:
-https://github.com/great-expectations/great_expectations/issues/new
-In the meantime you can see what Great Expectations can do on CSV files.
-To create expectations for your CSV files start Jupyter and open notebook
-great_expectations/notebooks/using_great_expectations_with_pandas.ipynb -
-it will walk you through configuring the database connection and next steps.
-     """
-    msg_spark_go_to_notebook = """
-To create expectations for your CSV files start Jupyter and open the notebook
-great_expectations/notebooks/using_great_expectations_with_pandas.ipynb.
-it will walk you through configuring the database connection and next steps.
-
-To launch with jupyter notebooks:
-    jupyter notebook great_expectations/notebooks/create_expectations_for_spark_dataframes.ipynb
-
-To launch with jupyter lab:
-    jupyter lab great_expectations/notebooks/create_expectations_for_spark_dataframes.ipynb
-    """
     context = DataContext.create('.')
-
     base_dir = os.path.join(target_directory, "great_expectations")
 
     cli_message("Great Expectations", color="cyan", figlet=True)
-
     cli_message(greeting_1, color="blue")
 
     if not click.confirm(msg_prompt_lets_begin, default=True):
@@ -267,7 +167,7 @@ To launch with jupyter lab:
             "OK - run great_expectations init again when ready. Exiting...", color="blue")
         exit(0)
 
-    _scaffold_directories_and_notebooks(base_dir)
+    scaffold_directories_and_notebooks(base_dir)
     cli_message(
         "\nDone.",
         color="blue")
