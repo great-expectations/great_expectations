@@ -5,6 +5,11 @@ import logging
 logger = logging.getLogger(__name__)
 
 class BatchGenerator(object):
+    """A BatchGenerator bridges the worlds of datasource and DataAsset: it can introspect datasources and produce 
+    meaningful descriptions of "batches" of data from artifacts such as files on a filesystem or tables in a database, 
+    potentially including sampling or other actions, and produce Great Expectations DataAssets corresponding to those 
+    batches of data.
+    """
 
     def __init__(self, name, type_, datasource=None):
         self._name = name

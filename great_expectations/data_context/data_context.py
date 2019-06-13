@@ -105,11 +105,11 @@ class DataContext(object):
 
 
     @property
-    def data_asset_name_delimeter():
+    def data_asset_name_delimeter(self):
         return self._data_asset_name_delimeter
     
     @data_asset_name_delimeter.setter
-    def set_data_asset_name_delimeter(new_delimeter):
+    def data_asset_name_delimeter(self, new_delimeter):
         if new_delimeter not in ['.', '/']:
             raise DataContextError("Invalid delimeter: delimeter must be '.' or '/'")
         else:
@@ -122,7 +122,7 @@ class DataContext(object):
     #
     #####
 
-    def _build_normalized_data_asset_reference(datasource="default", generator="default", data_asset_name="default", expectations_purpose="default"):
+    def _build_normalized_data_asset_reference(self, datasource="default", generator="default", data_asset_name="default", expectations_purpose="default"):
         """Normalize the given parts of a data_asset_name into a project-specific normalized form"""
         return(
             datasource +
@@ -134,7 +134,7 @@ class DataContext(object):
             expectations_purpose
         )
 
-    def _get_normalized_data_asset_reference_filepath(data_asset_reference):
+    def _get_normalized_data_asset_reference_filepath(self, data_asset_reference):
         """Get the path where the project-normalized data_asset_name expectations are stored."""
         return os.path.join(
             self.get_context_root_directory, 
@@ -236,14 +236,15 @@ class DataContext(object):
                 datasource.get_available_data_asset_names(generator_names[idx] if generator_names is not None else None)
         return data_asset_names
 
-    def get_batch(self, datasource_name, data_asset_name, batch_kwargs=None, **kwargs):
-        data_asset_name = self._normalize_data_asset_name(data_asset_name)
-        # datasource_name = find(data_asset_name.split("/")[0]
+    def get_batch(self, data_asset_name, batch_kwargs=None, **kwargs):
+        datasource_name, generator_name, local_data_asset_name, expectations_purpose = \
+            self._normalize_data_asset_name(data_asset_name).split(self.data_asset_name_delimeter)[0]
+
         datasource = self.get_datasource(datasource_name)
         if not datasource:
             raise Exception("Can't find datasource {0:s} in the config - please check your great_expectations.yml")
 
-        data_asset = datasource.get_data_asset(data_asset_name, batch_kwargs, **kwargs)
+        data_asset = datasource.get_data_asset(local_data_asset_name, batch_kwargs, **kwargs)
         return data_asset
 
     def add_datasource(self, name, type_, **kwargs):
@@ -392,50 +393,69 @@ class DataContext(object):
 
             # If we haven't found a match, see if this is provided by exactly one datasource and generator
             available_names = self.get_available_data_asset_names()
-            n_providers = 0
+            provider_names = []
             for datasource_name in available_names.keys():
                 for generator in available_names[datasource_name].keys():
                     names_set = available_names[datasource_name][generator]
                     if unnormalized_name in names_set:
-                        n_providers += 1
-                        data_asset_reference = self._build_normalized_data_asset_reference(datasource_name, generator, unnormalized_name)
+                        provider_names.append(
+                            self._build_normalized_data_asset_reference(datasource_name, generator, unnormalized_name)
+                        )
             
-            if n_providers == 1:
-                return data_asset_reference
+            if len(provider_names) == 1:
+                return provider_names[0]
 
-            elif n_providers > 1:
-                raise DataContextError("Ambiguous data_asset_name {data_asset_name}: multiple generators provide data_asset_name {unnormalized_name}"
-                    .format(data_asset_name=data_asset_name, unnormalized_name=unnormalized_name))
- 
+            elif len(provider_names) > 1:
+                raise DataContextError("Ambiguous data_asset_name {data_asset_name}. Multiple candidates found: {provider_names}"
+                    .format(data_asset_name=data_asset_name, provider_names=provider_names))
+
             else:
                 raise DataContextError("Cannot find {data_asset_name} does not exist among currently-defined data assets.".format(data_asset_name=data_asset_name))
         
         elif len(split_name) == 2:
             # In this case, the name *must* refer to a datasource and a data_asset_name.
             # If the data_asset_name is already defined by config in that datasource, return that normalized name.
+            # TODO: add support for this to also refer to an unambiguous data_asset_name and purpose
             datasource_name = split_name[0]
             unnormalized_name = split_name[1]
+            provider_names = []
             for normalized_identifier in self.list_expectations_configs():
-                name_portion = normalized_identifier.split(self._data_asset_name_delimeter)[3]
-                if name_portion == unnormalized_name:
-                    return normalized_identifier
+                normalized_split = normalized_identifier.split(self._data_asset_name_delimeter)
+                curr_datasource_name = normalized_split[0]
+                if datasource_name != curr_datasource_name:
+                    continue
+                curr_generator_name = normalized_split[1]
+                curr_data_asset_name = normalized_split[2]
+                curr_expectations_purpose = normalized_split[3]
+                if curr_data_asset_name == unnormalized_name:
+                    provider_names.append(
+                        normalized_identifier
+                    )
+
+            if len(provider_names) == 1:
+                return provider_names[0]
+
+
             # If the data_asset_name is not already defined, but it exists among the valid names from exactly one generator, produce that name
-            
             available_names = self.get_available_data_asset_names(datasource_name)
-            n_providing_generators = 0
             for generator in available_names[datasource_name].keys():
                 names_set = available_names[datasource_name][generator]
                 if unnormalized_name in names_set:
-                    n_providing_generators += 1
-                    data_asset_reference = self._build_normalized_data_asset_reference(datasource_name, generator, unnormalized_name)
-            if n_providing_generators == 0:
+                    provider_names.append(
+                        self._build_normalized_data_asset_reference(datasource_name, generator, unnormalized_name)
+                    )
+
+            if len(provider_names) == 1:
+                return provider_names[0]
+            
+            elif len(provider_names) > 1:
+                raise DataContextError("Ambiguous data_asset_name {data_asset_name}. Multiple candidates found: {provider_names}"
+                    .format(data_asset_name=data_asset_name, provider_names=provider_names))
+ 
+            else:
                 raise DataContextError("No generator available to produce data_asset_name {data_asset_name} with datasource {datasource_name}"
                     .format(data_asset_name=data_asset_name, datasource_name=datasource_name))
-            elif n_providing_generators > 1:
-                raise DataContextError("Ambiguous data_asset_name {data_asset_name}: multiple generators provide data_asset_name {unnormalized_name}"
-                    .format(data_asset_name=data_asset_name, unnormalized_name=unnormalized_name))
-            else:
-                return data_asset_reference
+
 
         elif len(split_name) == 3:
             # In this case, the name could refer to 

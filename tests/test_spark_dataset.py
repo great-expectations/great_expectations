@@ -3,9 +3,9 @@ from great_expectations.datasource import SparkDFDatasource
 import pytest
 
 # context = ge.get_data_context('SparkCSV', './tests/test_sets')
-context = SparkDFDatasource(base_directory="./tests/test_sets")
-titanic_dataset = context.get_data_asset('Titanic.csv', header=True)
-strf_dataset = context.get_data_asset('strf_test.csv', header=True)
+datasource = SparkDFDatasource(base_directory="./tests/test_sets")
+titanic_dataset = datasource.get_data_asset('Titanic.csv', header=True)
+strf_dataset = datasource.get_data_asset('strf_test.csv', header=True)
 
 
 def test_expect_column_values_to_be_unique():
