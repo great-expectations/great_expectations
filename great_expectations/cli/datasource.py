@@ -114,12 +114,12 @@ def add_datasource(context):
 
             cli_message("")
 
-            context.profile_datasource(
+            run_id = context.profile_datasource(
                 data_source_name,
                 max_data_assets=20
             )
 
-            context.render_datasource(data_source_name)
+            context.render_datasource(data_source_name, run_id)
 
         else:
             cli_message(

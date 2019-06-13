@@ -28,6 +28,9 @@ from great_expectations.datasource import PandasDatasource
 from great_expectations.datasource import SparkDFDatasource
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 
+from great_expectations.render.renderer import DescriptivePageRenderer
+from great_expectations.render.view import DescriptivePageView
+
 from .expectation_explorer import ExpectationExplorer
 
 logger = logging.getLogger(__name__)
@@ -672,8 +675,9 @@ class DataContext(object):
         else:
             return return_obj
 
-    def profile_datasource(self, datasource_name, profiler_name="BasicDatasetProfiler", max_data_assets=10):
+    def profile_datasource(self, datasource_name, run_id=None, profiler_name="BasicDatasetProfiler", max_data_assets=10):
         #!!! FIXME: We're not actually using profiler_name to fetch the right profiler.
+        total_start_time = datetime.datetime.now()
 
         # logger.info("Profiling %s with %s" % (datasource_name, profiler_name))
         print("Profiling %s with %s" % (datasource_name, profiler_name))
@@ -686,7 +690,10 @@ class DataContext(object):
         total_data_assets = len(data_asset_name_list)
         # logger.info("Found %d named data assets" % (total_data_assets))
         print("Found %d named data assets" % (total_data_assets))
-        
+
+        if run_id == None:
+            run_id = profiler_name+"_"+total_start_time.strftime("%Y%m%d_%H%M%S")
+
         if max_data_assets == None or max_data_assets >= len(data_asset_name_list):
             # logger.info("Profiling all %d." % (len(data_asset_name_list)))
             print("Profiling all %d." % (len(data_asset_name_list)))
@@ -697,7 +704,6 @@ class DataContext(object):
             data_asset_name_list = data_asset_name_list[:max_data_assets]
 
         total_columns, total_expectations, total_rows, skipped_data_assets = 0, 0, 0, 0
-        total_start_time = datetime.datetime.now()
         for name in data_asset_name_list:
             try:
                 start_time = datetime.datetime.now()
@@ -707,7 +713,8 @@ class DataContext(object):
 
                 #Note: This logic is specific to DatasetProfilers, which profile a single batch. Multi-batch profilers will have more to unpack.
                 expectations_config, validation_result = BasicDatasetProfiler.profile(
-                    batch, run_id=profiler_name+"_"+start_time.strftime("%Y%m%d_%H%M%S"))
+                    batch, run_id=run_id
+                )
 
                 row_count = batch.shape[0]
                 total_rows += row_count
@@ -746,7 +753,10 @@ Note: You will need to review and revise Expectations before using them in produ
             total_expectations,
         ))
 
-    def render_datasource(self, datasource_name, renderer_name="DescriptiveDataSourceRenderer"):
+        return run_id
+
+    #FIXME: This method is implemented as demo-ware on a demo branch. Significant work needed to make it production-ready.
+    def render_datasource(self, datasource_name, run_id, renderer_name="DescriptiveDataSourceRenderer"):
         #!!! FIXME: This seems to imply a whole new category of renderer: one that can take a datasource as input.
         #!!! FIXME: Not using renderer_name at all
 
@@ -758,11 +768,23 @@ Note: You will need to review and revise Expectations before using them in produ
         
         for name in data_asset_name_list:
             print(name)
-            
-            # config_file_path = os.path.join(self.expectations_directory, data_asset_name + '.json')
-            # safe_mmkdir(os.path.split(config_file_path)[0], exist_ok=True)
-            # with open(config_file_path, 'w') as outfile:
-            #     json.dump(expectations, outfile)
+
+            print(glob(self.context_root_directory+"/great_expectations/uncommitted/validations/*/*"))
+
+            evr_file_path = os.path.join(
+                self.context_root_directory, "great_expectations", "uncommitted", "validations", run_id, name+'.json'
+            )
+            validation_results = json.load(open(evr_file_path))
+
+            rendered_json = DescriptivePageRenderer.render(validation_results)
+            rendered_page = DescriptivePageView.render(rendered_json)
+
+            doc_file_path = os.path.join(
+                self.context_root_directory, "great_expectations", "uncommitted", "documents", name+'.html'
+            )
+            safe_mmkdir(os.path.split(doc_file_path)[0], exist_ok=True)
+            with open(doc_file_path, 'w') as outfile:
+                outfile.write(rendered_page)
 
 
 

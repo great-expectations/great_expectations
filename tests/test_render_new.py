@@ -1,6 +1,8 @@
 import pytest
 
 import json
+import glob
+import os
 
 import great_expectations as ge
 from great_expectations.render.renderer import DescriptivePageRenderer, DescriptiveColumnSectionRenderer, PrescriptiveColumnSectionRenderer
@@ -91,15 +93,26 @@ def test_full_oobe_flow():
     rendered_page = DescriptivePageView.render(rendered_json)
     assert rendered_page != None
 
-    with open('./test.html', 'w') as f:
-        f.write(rendered_page)
+    # with open('./test.html', 'w') as f:
+    #     f.write(rendered_page)
 
 
 def test_context_render_data_source(empty_data_context, filesystem_csv_2):
     empty_data_context.add_datasource(
         "my_datasource", "pandas", base_directory=str(filesystem_csv_2))
-    empty_data_context.profile_datasource("my_datasource")
+    empty_data_context.profile_datasource("my_datasource", "my_run_id")
     not_so_empty_data_context = empty_data_context
 
-    not_so_empty_data_context.render_datasource("my_datasource")
+    not_so_empty_data_context.render_datasource("my_datasource", "my_run_id")
     # assert False
+
+    doc_path = os.path.join(
+        not_so_empty_data_context.context_root_directory, "great_expectations/uncommitted/documents"
+    )
+    print(glob.glob(doc_path+"/*"))
+
+    with open(doc_path+"/f1.html", "r") as doc_file:
+        doc = doc_file.read()
+        print(doc)
+
+    assert False
