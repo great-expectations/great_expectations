@@ -199,10 +199,22 @@ def test_cli_init(tmp_path_factory):
 #     assert False
 
 
-# def test_cli_profile(empty_data_context, filesystem_csv):
-#     runner = CliRunner()
-#     result = runner.invoke(cli, ["profile"])
+def test_cli_profile(empty_data_context, filesystem_csv_2):
+    empty_data_context.add_datasource(
+        "my_datasource", "pandas", base_directory=str(filesystem_csv_2))
+    not_so_empty_data_context = empty_data_context
 
-#     print(result)
-#     print(result.output)
-#     assert False
+    # print(not_so_empty_data_context.get_available_data_asset_names())
+
+    project_root_dir = not_so_empty_data_context.get_context_root_directory()
+    # print(project_root_dir)
+
+    runner = CliRunner()
+    result = runner.invoke(
+        cli, ["profile", "my_datasource", "-d", project_root_dir])
+
+    # print(result)
+    # print(result.output)
+
+    assert "Profiling my_datasource with BasicDatasetProfiler" in result.output
+    assert "Note: You will need to review and revise Expectations before using them in production." in result.output

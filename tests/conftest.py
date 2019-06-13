@@ -8,6 +8,7 @@ import numpy as np
 import sqlalchemy as sa
 
 import great_expectations as ge
+from great_expectations.dataset.pandas_dataset import PandasDataset
 from great_expectations.data_context.util import safe_mmkdir
 
 from .test_utils import get_dataset, CONTEXTS
@@ -149,4 +150,15 @@ def filesystem_csv(tmp_path_factory):
     with open(os.path.join(base_dir, "f3", "f3_20190102.csv"), "w") as outfile:
         outfile.writelines(["a,b,c\n"])
 
+    return base_dir
+
+
+@pytest.fixture()
+def filesystem_csv_2(tmp_path_factory):
+    base_dir = tmp_path_factory.mktemp('test_files')
+    base_dir = str(base_dir)
+
+    # Put a file in the directory
+    toy_dataset = PandasDataset({"x": [1, 2, 3]})
+    toy_dataset.to_csv(os.path.join(base_dir, "f1.csv"), index=None)
     return base_dir

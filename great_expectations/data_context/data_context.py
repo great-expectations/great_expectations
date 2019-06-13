@@ -672,7 +672,9 @@ class DataContext(object):
         else:
             return return_obj
 
-    def profile_datasource(self, datasource_name, profiler_name="PseudoPandasProfiling", max_data_assets=10):
+    def profile_datasource(self, datasource_name, profiler_name="BasicDatasetProfiler", max_data_assets=10):
+        #!!! FIXME: We're not actually using profiler_name to fetch the right profiler.
+
         # logger.info("Profiling %s with %s" % (datasource_name, profiler_name))
         print("Profiling %s with %s" % (datasource_name, profiler_name))
         datasource = self.get_datasource(datasource_name)
