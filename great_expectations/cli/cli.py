@@ -157,13 +157,26 @@ def init(target_directory):
     datasource_name = add_datasource(context)
 
     if datasource_name != None:
-        # print("???")
-        # print(datasource_name)
 
-        context.profile_datasource(
-            datasource_name,
-            max_data_assets=20
-        )
+        if click.confirm(
+            "Would you like to profile %s to create candidate expectations and documentation?\n" % (
+                datasource_name),
+            default=True
+        ):
+
+            print()
+
+            context.profile_datasource(
+                datasource_name,
+                max_data_assets=20
+            )
+
+            # context.render_all_datasources()
+
+        else:
+            cli_message(
+                "Okay, skipping profiling for now. You can always do this later by running `great_expectations profile`."
+            )
 
 
 @cli.command()
