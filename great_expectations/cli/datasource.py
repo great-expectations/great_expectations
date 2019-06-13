@@ -11,7 +11,7 @@ def add_datasource(context):
         show_choices=False
     )
 
-    print(data_source_selection)
+    cli_message(data_source_selection)
 
     # if data_source_selection == "5": # dbt
     #     dbt_profile = click.prompt(msg_prompt_dbt_choose_profile)
@@ -41,7 +41,7 @@ def add_datasource(context):
         data_source_name = click.prompt(
             msg_prompt_datasource_name, default=default_data_source_name, show_default=True)
 
-        cli_message(msg_spark_go_to_notebook, color="blue")
+        cli_message(msg_spark_go_to_notebook)
         context.add_datasource(data_source_name, "spark", base_directory=path)
 
     elif data_source_selection == "2":  # sqlalchemy
@@ -49,7 +49,7 @@ def add_datasource(context):
             msg_prompt_datasource_name, default="mydb", show_default=True)
 
         cli_message(msg_sqlalchemy_config_connection.format(
-            data_source_name), color="blue")
+            data_source_name))
 
         drivername = click.prompt("What is the driver for the sqlalchemy connection?", default="postgres",
                                   show_default=True)
@@ -74,7 +74,7 @@ def add_datasource(context):
         }
         context.add_profile_credentials(data_source_name, **credentials)
 
-        cli_message(msg_sqlalchemy_go_to_notebook, color="blue")
+        cli_message(msg_sqlalchemy_go_to_notebook)
 
         context.add_datasource(
             data_source_name, "sqlalchemy", profile=data_source_name)
@@ -98,11 +98,11 @@ def add_datasource(context):
         data_source_name = click.prompt(
             msg_prompt_datasource_name, default=default_data_source_name, show_default=True)
 
-        cli_message(msg_filesys_go_to_notebook, color="blue")
+        cli_message(msg_filesys_go_to_notebook)
         context.add_datasource(data_source_name, "pandas", base_directory=path)
 
     else:
-        cli_message(msg_unknown_data_source, color="blue")
+        cli_message(msg_unknown_data_source)
         return None
 
     return data_source_name
