@@ -187,7 +187,7 @@ def test_cli_init(tmp_path_factory):
         basedir, "great_expectations/great_expectations.yml"))
     config = yaml.load(
         open(os.path.join(basedir, "great_expectations/great_expectations.yml"), "r"))
-    assert config["datasources"]["data"]["type"] == "pandas"
+    assert config["datasources"]["data__dir"]["type"] == "pandas"
 
     os.chdir(curdir)
 
