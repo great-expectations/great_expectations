@@ -118,9 +118,10 @@ def data_context(tmp_path_factory):
     context_path = tmp_path_factory.mktemp('data_context')
     context_path = str(context_path)
     asset_config_path = os.path.join(context_path, "great_expectations/expectations")
-    safe_mmkdir(asset_config_path, exist_ok=True)
+    safe_mmkdir(os.path.join(asset_config_path, "mydatasource/mygenerator/parameterized_expectations_config_fixture"), exist_ok=True)
     shutil.copy("./tests/test_fixtures/great_expectations_basic.yml", str(os.path.join(context_path, "great_expectations/great_expectations.yml")))
-    shutil.copy("./tests/test_fixtures/expectations/parameterized_expectations_config_fixture.json", str(asset_config_path))
+    shutil.copy("./tests/test_fixtures/expectations/parameterized_expectations_config_fixture.json", 
+        os.path.join(asset_config_path, "mydatasource/mygenerator/parameterized_expectations_config_fixture/default.json"))
     return ge.data_context.DataContext(context_path)
 
 @pytest.fixture()
