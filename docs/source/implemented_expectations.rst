@@ -1,4 +1,4 @@
-.. _missing_expectations:
+.. _implemented_expectations:
 
 Implemented Expectations
 =====================
