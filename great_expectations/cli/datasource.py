@@ -20,7 +20,7 @@ def add_datasource(context):
     if data_source_selection == "4":  # None of the above
         return None
 
-    if data_source_selection == "3":  # Spark
+    elif data_source_selection == "3":  # Spark
         path = click.prompt(
             msg_prompt_filesys_enter_base_path,
             default='/data/',
@@ -41,7 +41,6 @@ def add_datasource(context):
         data_source_name = click.prompt(
             msg_prompt_datasource_name, default=default_data_source_name, show_default=True)
 
-        cli_message(msg_spark_go_to_notebook)
         context.add_datasource(data_source_name, "spark", base_directory=path)
 
     elif data_source_selection == "2":  # sqlalchemy
@@ -74,8 +73,6 @@ def add_datasource(context):
         }
         context.add_profile_credentials(data_source_name, **credentials)
 
-        cli_message(msg_sqlalchemy_go_to_notebook)
-
         context.add_datasource(
             data_source_name, "sqlalchemy", profile=data_source_name)
 
@@ -98,14 +95,42 @@ def add_datasource(context):
         data_source_name = click.prompt(
             msg_prompt_datasource_name, default=default_data_source_name, show_default=True)
 
-        cli_message(msg_filesys_go_to_notebook)
         context.add_datasource(data_source_name, "pandas", base_directory=path)
 
     else:
         cli_message(msg_unknown_data_source)
         return None
 
-    return data_source_name
+    if data_source_name != None:
+
+        if click.confirm(
+            "Would you like to profile %s to create candidate expectations and documentation?\n" % (
+                data_source_name),
+            default=True
+        ):
+
+            cli_message("\n")
+
+            context.profile_datasource(
+                data_source_name,
+                max_data_assets=20
+            )
+
+            # context.render_datasource(datasource_name)
+
+        else:
+            cli_message(
+                "Okay, skipping profiling for now. You can always do this later by running `great_expectations profile`."
+            )
+
+    if data_source_selection == "1":  # CSV
+        cli_message(msg_filesys_go_to_notebook)
+
+    elif data_source_selection == "2":  # SQL
+        cli_message(msg_sqlalchemy_go_to_notebook)
+
+    elif data_source_selection == "3":  # Spark
+        cli_message(msg_spark_go_to_notebook)
 
 
 msg_prompt_choose_data_source = """
