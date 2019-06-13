@@ -79,7 +79,7 @@ def add_datasource(context):
     elif data_source_selection == "1":  # csv
         path = click.prompt(
             msg_prompt_filesys_enter_base_path,
-            default='/data/',
+            # default='/data/',
             type=click.Path(
                 exists=False,
                 file_okay=False,
@@ -93,7 +93,10 @@ def add_datasource(context):
 
         default_data_source_name = os.path.basename(path)
         data_source_name = click.prompt(
-            msg_prompt_datasource_name, default=default_data_source_name, show_default=True)
+            msg_prompt_datasource_name,
+            default=default_data_source_name+"__dir",
+            show_default=True
+        )
 
         context.add_datasource(data_source_name, "pandas", base_directory=path)
 
@@ -104,12 +107,12 @@ def add_datasource(context):
     if data_source_name != None:
 
         if click.confirm(
-            "Would you like to profile %s to create candidate expectations and documentation?\n" % (
+            "\nWould you like to profile %s to create candidate expectations and documentation?\n" % (
                 data_source_name),
             default=True
         ):
 
-            cli_message("\n")
+            cli_message("")
 
             context.profile_datasource(
                 data_source_name,
