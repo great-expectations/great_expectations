@@ -90,6 +90,8 @@ class DataContext(object):
 
         self._load_evaluation_parameter_store()
         self._compiled = False
+        if new_delimiter not in ['.', '/']:
+            raise DataContextError("Invalid delimiter: delimiter must be '.' or '/'")
         self._data_asset_name_delimiter = data_asset_name_delimiter
 
     def get_context_root_directory(self):
