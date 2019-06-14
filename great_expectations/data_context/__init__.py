@@ -11,6 +11,7 @@ except ImportError:
 
 try:
     from .spark_context import SparkCSVDataContext
+    from .spark_parquet_context import SparkParquetContext
     from .databricks_context import DatabricksTableContext
 except ImportError:
     logger.info("Unable to load Spark contexts; install optional spark dependency for support")
@@ -30,6 +31,8 @@ def get_data_context(context_type, options, *args, **kwargs):
         return PandasCSVDataContext(options, *args, **kwargs)
     elif context_type == "SparkCSV":
         return SparkCSVDataContext(options, *args, **kwargs)
+    elif context_type == "SparkParquet":
+        return SparkParquetDataContext(options, *args, **kwargs)
     elif context_type == "DatabricksTable":
         return DatabricksTableContext(options, *args, **kwargs)
     else:
