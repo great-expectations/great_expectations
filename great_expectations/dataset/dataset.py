@@ -208,7 +208,7 @@ class Dataset(MetaDataset):
         """Override data_asset_type with "Dataset"
         """
         super(Dataset, self)._initialize_expectations(config=config, data_asset_name=data_asset_name)
-        self._expectations_config["data_asset_type"] = "Dataset"
+        self._expectation_suite["data_asset_type"] = "Dataset"
 
     @classmethod
     def column_map_expectation(cls, func):

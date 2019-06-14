@@ -1,6 +1,6 @@
 """
 Test the expectation decorator's ability to substitute parameters
-at evaluation time, and store parameters in expectations_config
+at evaluation time, and store parameters in expectation_suite
 """
 
 import pytest
@@ -55,7 +55,7 @@ def test_parameter_substitution(single_expectation_custom_data_asset):
     # Establish our expectation using that parameter
     result = single_expectation_custom_data_asset.expect_nothing(
         expectation_argument={"$PARAMETER": "upstream_dag_key"})
-    config = single_expectation_custom_data_asset.get_expectations()
+    config = single_expectation_custom_data_asset.get_expectation_suite()
 
     # Ensure our value has been substituted during evaluation, and set properly in the config
     assert result["result"]["details"]["expectation_argument"] == "upstream_dag_value"
@@ -71,7 +71,7 @@ def test_exploratory_parameter_substitution(single_expectation_custom_data_asset
     result = single_expectation_custom_data_asset.expect_nothing(
         expectation_argument={"$PARAMETER": "upstream_dag_key",
                               "$PARAMETER.upstream_dag_key": "temporary_value"})
-    config = single_expectation_custom_data_asset.get_expectations()
+    config = single_expectation_custom_data_asset.get_expectation_suite()
     # Ensure our value has been substituted during evaluation, and NOT stored in the config
     assert result["result"]["details"]["expectation_argument"] == "temporary_value"
     assert "evaluation_parameters" not in config or config["evaluation_parameters"] == {

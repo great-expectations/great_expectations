@@ -95,7 +95,7 @@ class SqlAlchemyDatasource(Datasource):
         to that table
       - if the batch_kwargs include a query key, the datasource will create a temporary table using that
         that query. The query can be parameterized according to the standard python Template engine, which
-        uses $parameter, with additional kwargs passed to the get_data_asset method.
+        uses $parameter, with additional kwargs passed to the get_batch method.
     """
 
     def __init__(self, name="default", data_context=None, profile=None, generators=None, **kwargs):
@@ -152,14 +152,14 @@ class SqlAlchemyDatasource(Datasource):
         else:
             raise ValueError("Unrecognized DataAssetGenerator type %s" % type_)
 
-    def _get_data_asset(self, data_asset_name, batch_kwargs, expectations_config, schema=None, **kwargs):
+    def _get_data_asset(self, data_asset_name, batch_kwargs, expectation_suite, schema=None, **kwargs):
         if "table" in batch_kwargs:
             return SqlAlchemyDataset(table_name=batch_kwargs["table"], 
                                      engine=self.engine,
                                      schema=schema,
                                      data_context=self._data_context,
                                      data_asset_name=data_asset_name,
-                                     expectations_config=expectations_config,
+                                     expectation_suite=expectation_suite,
                                      batch_kwargs=batch_kwargs)
 
         elif "query" in batch_kwargs:
@@ -168,7 +168,7 @@ class SqlAlchemyDatasource(Datasource):
                                      engine=self.engine,
                                      data_context=self._data_context,
                                      data_asset_name=data_asset_name,
-                                     expectations_config=expectations_config,
+                                     expectation_suite=expectation_suite,
                                      custom_sql=query,
                                      batch_kwargs=batch_kwargs)
     

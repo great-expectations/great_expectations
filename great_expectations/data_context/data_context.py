@@ -8,7 +8,7 @@ import errno
 from glob import glob
 from six import string_types
 
-from .util import DataAssetReference, get_slack_callback, safe_mmkdir
+from .util import NormalizedDataAssetName, get_slack_callback, safe_mmkdir
 
 from great_expectations.version import __version__
 from great_expectations.exceptions import DataContextError, ConfigNotFoundError
@@ -59,7 +59,7 @@ class DataContext(object):
 
         return cls(context_root_dir)
             
-    def __init__(self, context_root_dir=None, expectation_explorer=False, data_asset_name_delimeter = '/'):
+    def __init__(self, context_root_dir=None, expectation_explorer=False, data_asset_name_delimiter = '/'):
         self._expectation_explorer = expectation_explorer
         self._datasources = {}
         if expectation_explorer:
@@ -90,7 +90,7 @@ class DataContext(object):
 
         self._load_evaluation_parameter_store()
         self._compiled = False
-        self._data_asset_name_delimeter = data_asset_name_delimeter
+        self._data_asset_name_delimiter = data_asset_name_delimiter
 
     def get_context_root_directory(self):
         return self.context_root_directory
@@ -104,37 +104,45 @@ class DataContext(object):
 
 
     @property
-    def data_asset_name_delimeter(self):
-        return self._data_asset_name_delimeter
+    def data_asset_name_delimiter(self):
+        return self._data_asset_name_delimiter
     
-    @data_asset_name_delimeter.setter
-    def data_asset_name_delimeter(self, new_delimeter):
+    @data_asset_name_delimiter.setter
+    def data_asset_name_delimiter(self, new_delimeter):
         if new_delimeter not in ['.', '/']:
             raise DataContextError("Invalid delimeter: delimeter must be '.' or '/'")
         else:
-            self._data_asset_name_delimeter = new_delimeter
+            self._data_asset_name_delimiter = new_delimeter
 
-    
     #####
     #
     # Internal helper methods
     #
     #####
 
-    def _build_normalized_data_asset_reference(self, datasource="default", generator="default", data_asset_name="default", suite="default"):
-        """Normalize the given parts of a data_asset_name into a project-specific normalized form"""
-        return DataAssetReference(
-            datasource, generator, data_asset_name, suite
-        )
-
-    def _get_normalized_data_asset_reference_filepath(self, data_asset_reference):
+    def _get_normalized_data_asset_name_filepath(self, data_asset_name, base_path=None):
         """Get the path where the project-normalized data_asset_name expectations are stored."""
-        return os.path.join(
-            self.get_context_root_directory(), 
-            "great_expectations/expectations", 
-            "/".join(data_asset_reference) + ".json"
-            )
+        if base_path is None:
+            base_path  = os.path.join(self.get_context_root_directory(), "great_expectations/expectations")
 
+        # We need to ensure data_asset_name is a valid filepath no matter its current state
+        if isinstance(data_asset_name, NormalizedDataAssetName):
+            relative_path = "/".join(data_asset_name)
+        elif isinstance(data_asset_name, string_types):
+            # if our delimiter is not '/', we need to first replace any slashes that exist in the name
+            # to avoid extra layers of nesting (e.g. for dbt models)
+            relative_path = data_asset_name
+            if self.data_asset_name_delimiter != "/":
+                relative_path.replace("/", "__")
+                relative_path = relative_path.replace(self.data_asset_name_delimiter, "/")
+        else:
+            raise DataContextError("data_assset_name must be a NormalizedDataAssetName or string")
+
+        relative_path += ".json"
+        return os.path.join(
+            base_path,
+            relative_path
+            )
 
     def _save_project_config(self):
         with open(os.path.join(self.context_root_directory, "great_expectations/great_expectations.yml"), "w") as data:
@@ -142,7 +150,8 @@ class DataContext(object):
 
     def _get_all_profile_credentials(self):
         try:
-            with open(os.path.join(self.context_root_directory, "great_expectations/uncommitted/credentials/profiles.yml"), "r") as profiles_file:
+            with open(os.path.join(self.context_root_directory,
+                                   "great_expectations/uncommitted/credentials/profiles.yml"), "r") as profiles_file:
                 return yaml.load(profiles_file) or {}
         except IOError as e:
             if e.errno != errno.ENOENT:
@@ -236,9 +245,9 @@ class DataContext(object):
         if not datasource:
             raise Exception("Can't find datasource {0:s} in the config - please check your great_expectations.yml")
 
-        data_asset = datasource.get_data_asset(normalized_data_asset_name,
-            batch_kwargs, 
-            **kwargs)
+        data_asset = datasource.get_batch(normalized_data_asset_name,
+                                          batch_kwargs,
+                                          **kwargs)
         return data_asset
 
     def add_datasource(self, name, type_, **kwargs):
@@ -347,7 +356,7 @@ class DataContext(object):
             logger.exception("Failed to load evaluation_parameter_store class")
             raise
 
-    def list_expectations_configs(self):
+    def list_expectation_suites(self):
         root_path = self.expectations_directory
         result = [os.path.relpath(y, root_path)[:-5] for x in os.walk(root_path) for y in glob(os.path.join(x[0], '*.json'))]
         # result = [os.path.splitext(os.path.relpath(y, root_path))[0] for x in os.walk(root_path) for y in glob(os.path.join(x[0], '*.json'))]
@@ -369,24 +378,24 @@ class DataContext(object):
 
         It has a string representation consisting of each of those components delimited by a slash
         """
-        split_name = data_asset_name.split(self._data_asset_name_delimeter)
+        split_name = data_asset_name.split(self.data_asset_name_delimiter)
 
         if len(split_name) > 4:
             raise DataContextError("Invalid data_asset_name {data_asset_name}: found too many components using delimeter '{delimeter}'".format(
                 data_asset_name=data_asset_name,
-                delimeter=self._data_asset_name_delimeter
+                delimeter=self.data_asset_name_delimiter
             ))
         
         elif len(split_name) == 1:
             # In this case, the name *must* refer to a unique data_asset_name
             provider_names = []
-            unnormalized_name = split_name[0]
-            for normalized_identifier in self.list_expectations_configs():
-                normalized_split = normalized_identifier.split(self.data_asset_name_delimeter)
-                curr_datasource_name = normalized_split[3]
-                if unnormalized_name == curr_datasource_name:
+            generator_asset = split_name[0]
+            for normalized_identifier in self.list_expectation_suites():
+                normalized_split = normalized_identifier.split(self.data_asset_name_delimiter)
+                curr_generator_asset = normalized_split[2]
+                if generator_asset == curr_generator_asset:
                     provider_names.append(
-                        self._build_normalized_data_asset_reference(*normalized_split)
+                        NormalizedDataAssetName(*normalized_split)
                     )
             if len(provider_names) == 1:
                 return provider_names[0]
@@ -399,9 +408,9 @@ class DataContext(object):
             for datasource_name in available_names.keys():
                 for generator in available_names[datasource_name].keys():
                     names_set = available_names[datasource_name][generator]
-                    if unnormalized_name in names_set:
+                    if generator_asset in names_set:
                         provider_names.append(
-                            self._build_normalized_data_asset_reference(datasource_name, generator, unnormalized_name)
+                            NormalizedDataAssetName(datasource_name, generator, generator_asset, "default")
                         )
             
             if len(provider_names) == 1:
@@ -416,32 +425,30 @@ class DataContext(object):
                 # in this case, datasource_name from the loop above is still valid
                 if len(available_names[datasource_name]) == 1:
                     # in this case, generator from the inner loop above is also still valid
-                    return self._build_normalized_data_asset_reference(
-                        datasource_name,
-                        generator,
-                        unnormalized_name
-                    )
+                    return NormalizedDataAssetName(datasource_name, generator, generator_asset, "default")
             else:
                 raise DataContextError("Cannot find {data_asset_name} among currently-defined data assets.".format(data_asset_name=data_asset_name))
         
         elif len(split_name) == 2:
-            # In this case, the name *must* refer to a datasource and a data_asset_name.
-            # If the data_asset_name is already defined by config in that datasource, return that normalized name.
-            # TODO: add support for this to also refer to an unambiguous data_asset_name and purpose
+            # In this case, the name must be one of the following options:
+            #   (a) datasource_name/generator_asset
+            #   (b) generator_asset/suite
+
+            # If the data_asset_name is already defined by a config in that datasource, return that normalized name.
             datasource_name = split_name[0]
-            unnormalized_name = split_name[1]
+            generator_asset = split_name[1]
             provider_names = []
-            for normalized_identifier in self.list_expectations_configs():
-                normalized_split = normalized_identifier.split(self._data_asset_name_delimeter)
+            for normalized_identifier in self.list_expectation_suites():
+                normalized_split = normalized_identifier.split(self._data_asset_name_delimiter)
                 curr_datasource_name = normalized_split[0]
                 if datasource_name != curr_datasource_name:
                     continue
                 curr_generator_name = normalized_split[1]
                 curr_data_asset_name = normalized_split[2]
                 curr_curr_suite = normalized_split[3]
-                if curr_data_asset_name == unnormalized_name:
+                if curr_data_asset_name == generator_asset:
                     provider_names.append(
-                        self._build_normalized_data_asset_reference(*normalized_split)
+                        NormalizedDataAssetName(*normalized_split)
                     )
 
             if len(provider_names) == 1:
@@ -454,9 +461,9 @@ class DataContext(object):
             available_names = self.get_available_data_asset_names(datasource_name)
             for generator in available_names[datasource_name].keys():
                 names_set = available_names[datasource_name][generator]
-                if unnormalized_name in names_set:
+                if generator_asset in names_set:
                     provider_names.append(
-                        self._build_normalized_data_asset_reference(datasource_name, generator, unnormalized_name)
+                        NormalizedDataAssetName(datasource_name, generator, generator_asset, "default")
                     )
 
             if len(provider_names) == 1:
@@ -469,11 +476,7 @@ class DataContext(object):
              # Finally, if the name *would be* unambiguous but for not havding been defined yet allow the normalization
             if len(available_names) == 1:
                 # in this case, generator for the inner loop above is still valid
-                return self._build_normalized_data_asset_reference(
-                    datasource_name, # datasource
-                    generator, # generator
-                    unnormalized_name
-                )
+                return NormalizedDataAssetName(datasource_name, generator, generator_asset, "default")
             else:
                 raise ConfigNotFoundError("No generator available to produce data_asset_name {data_asset_name} with datasource {datasource_name}"
                     .format(data_asset_name=data_asset_name, datasource_name=datasource_name))
@@ -488,23 +491,23 @@ class DataContext(object):
             # If suite is defined, there must be exactly one
             # defined generator with that name and purpose
             datasource_name = split_name[0]
-            unnormalized_names = set([split_name[1], split_name[2]])
+            generator_assets = set([split_name[1], split_name[2]])
             provider_names = []
-            for normalized_identifier in self.list_expectations_configs():
-                normalized_split = normalized_identifier.split(self._data_asset_name_delimeter)
+            for normalized_identifier in self.list_expectation_suites():
+                normalized_split = normalized_identifier.split(self._data_asset_name_delimiter)
                 curr_datasource_name = normalized_split[0]
                 if datasource_name != curr_datasource_name:
                     continue
                 curr_generator_name = normalized_split[1]
                 curr_data_asset_name = normalized_split[2]
                 curr_curr_suite = normalized_split[3]
-                if ((curr_data_asset_name in unnormalized_names) and 
+                if ((curr_data_asset_name in generator_assets) and 
                     (
-                        curr_generator_name in unnormalized_names or
-                        curr_curr_suite in unnormalized_names
+                        curr_generator_name in generator_assets or
+                        curr_curr_suite in generator_assets
                     )):
                     provider_names.append(
-                        self._build_normalized_data_asset_reference(*normalized_split)
+                        NormalizedDataAssetName(*normalized_split)
                     )
 
             if len(provider_names) == 1:
@@ -518,7 +521,7 @@ class DataContext(object):
             available_names = self.get_available_data_asset_names(datasource_name)
             for generator in available_names[datasource_name].keys():
                 names_set = available_names[datasource_name][generator]
-                intersection = unnormalized_names.intersection(names_set)
+                intersection = generator_assets.intersection(names_set)
                 if len(intersection) > 1:
                     raise DataContextError("Ambiguous data_asset_name {data_asset_name}: multiple possible providers found."
                         .format(data_asset_name=data_asset_name))
@@ -526,11 +529,11 @@ class DataContext(object):
                     possible_name = intersection.pop()
                     if possible_name == split_name[1]: # we were given a name and purpose
                         provider_names.append(
-                            self._build_normalized_data_asset_reference(datasource_name, generator, possible_name, split_name[2])
+                            NormalizedDataAssetName(datasource_name, generator, possible_name, split_name[2])
                         )
                     elif possible_name == split_name[2] and split_name[1] == generator: # possible_name == split_name[2], we were given a generator and name
                         provider_names.append(
-                            self._build_normalized_data_asset_reference(datasource_name, generator, possible_name)
+                            NormalizedDataAssetName(datasource_name, generator, possible_name, "default")
                         )
             if len(provider_names) == 1:
                 return provider_names[0]
@@ -544,53 +547,53 @@ class DataContext(object):
                     .format(data_asset_name=data_asset_name, datasource_name=datasource_name))
 
         elif len(split_name) == 4:
-            return self._build_normalized_data_asset_reference(*split_name)
+            return NormalizedDataAssetName(*split_name)
             # # This must match an existing config or available data_asset
-            # for normalized_identifier in self.list_expectations_configs():
-            #     normalized_split = normalized_identifier.split(self._data_asset_name_delimeter)
+            # for normalized_identifier in self.list_expectation_suites():
+            #     normalized_split = normalized_identifier.split(self._data_asset_name_delimiter)
             #     if (split_name[0] == normalized_split[0] and split_name[1] == normalized_split[1] and
             #         split_name[2] == normalized_split[2] and split_name[3] == normalized_split[3]):
             #         return normalized_identifier
             
             # datasource_name = split_name[0]
             # generator_name = split_name[1]
-            # unnormalized_name = split_name[2]
+            # generator_asset = split_name[2]
             # purpose = split_name[3]
             # # If we haven't found a match yet, look in the available_data_assets
             # available_names = self.get_available_data_asset_names(datasource_name)
             # if generator_name in available_names[datasource_name] and 
-            #    unnormalized_name in available_names[datasource_name][generator_name]:
-            #    return self._build_normalized_data_asset_reference(datasource_name, generator_name, unnormalized_name, purpose)
+            #    generator_asset in available_names[datasource_name][generator_name]:
+            #    return NormalizedDataAssetName(datasource_name, generator_name, generator_asset, purpose)
 
             # raise DataContextError("Data asset {data_asset_name} could not be resolved in this DataContext.".format(data_asset_name=data_asset_name))
         
-    def get_expectations(self, data_asset_name, batch_kwargs=None):
-        if not isinstance(data_asset_name, DataAssetReference):
+    def get_expectation_suite(self, data_asset_name, batch_kwargs=None):
+        if not isinstance(data_asset_name, NormalizedDataAssetName):
             data_asset_name = self._normalize_data_asset_name(data_asset_name)
 
-        config_file_path = self._get_normalized_data_asset_reference_filepath(data_asset_name)
+        config_file_path = self._get_normalized_data_asset_name_filepath(data_asset_name)
         if os.path.isfile(config_file_path):
             with open(config_file_path, 'r') as json_file:
                 read_config = json.load(json_file)
             # update the data_asset_name to correspond to the current name (in case the config has been moved/renamed)
-            read_config["data_asset_name"] = self.data_asset_name_delimeter.join(data_asset_name)
+            read_config["data_asset_name"] = self.data_asset_name_delimiter.join(data_asset_name)
             return read_config
         else:
             # TODO: Should this return None? Currently this method acts as get_or_create
             return {
-                'data_asset_name': self.data_asset_name_delimeter.join(data_asset_name),
+                'data_asset_name': self.data_asset_name_delimiter.join(data_asset_name),
                 'meta': {
                     'great_expectations.__version__': __version__
                 },
                 'expectations': []
              } 
 
-    def save_expectations(self, expectations, data_asset_name=None):
+    def save_expectation_suite(self, expectations, data_asset_name=None):
         if data_asset_name is None:
             data_asset_name = expectations['data_asset_name']
-        if not isinstance(data_asset_name, DataAssetReference):
+        if not isinstance(data_asset_name, NormalizedDataAssetName):
             data_asset_name = self._normalize_data_asset_name(data_asset_name)
-        config_file_path = self._get_normalized_data_asset_reference_filepath(data_asset_name)
+        config_file_path = self._get_normalized_data_asset_name_filepath(data_asset_name)
         safe_mmkdir(os.path.dirname(config_file_path), exist_ok=True)
         with open(config_file_path, 'w') as outfile:
             json.dump(expectations, outfile)
@@ -614,10 +617,15 @@ class DataContext(object):
         if "result_store" in self._project_config:
             result_store = self._project_config["result_store"]
             if isinstance(result_store, dict) and "filesystem" in result_store:
-                validation_filepath = os.path.join(self.context_root_directory, "great_expectations", result_store["filesystem"]["base_directory"],
-                                       run_id, data_asset_name + ".json")
+                validation_filepath = self._get_normalized_data_asset_name_filepath(
+                    data_asset_name,
+                    base_path=os.path.join(self.context_root_directory,
+                                          "great_expectations",
+                                          result_store["filesystem"]["base_directory"],
+                                          run_id)
+                    )
                 logger.info("Storing validation result: %s" % validation_filepath)
-                safe_mmkdir(os.path.join(self.context_root_directory, "great_expectations", result_store["filesystem"]["base_directory"], run_id))
+                safe_mmkdir(os.path.dirname(validation_filepath))
                 with open(validation_filepath, "w") as outfile:
                     json.dump(validation_results, outfile)
             if isinstance(result_store, dict) and "s3" in result_store:
@@ -771,7 +779,7 @@ class DataContext(object):
             "data_assets": {}
         }
 
-        known_assets = self.list_expectations_configs()
+        known_assets = self.list_expectation_suites()
         config_paths = [y for x in os.walk(self.expectations_directory) for y in glob(os.path.join(x[0], '*.json'))]
 
         for config_file in config_paths:

@@ -57,14 +57,14 @@ def test_cli_validate_help():
     result = runner.invoke(cli, ["validate", "--help"])
 
     assert result.exit_code == 0
-    expected_help_message = """Usage: cli validate [OPTIONS] DATASET EXPECTATIONS_CONFIG_FILE
+    expected_help_message = """Usage: cli validate [OPTIONS] DATASET EXPECTATION_SUITE_FILE
 
   Validate a CSV file against an expectations configuration.
 
   DATASET: Path to a file containing a CSV file to validate using the 
-  provided expectations_config_file.
+  provided expectation_suite_file.
 
-  EXPECTATIONS_CONFIG_FILE: Path to a file containing a valid
+  EXPECTATION_SUITE_FILE: Path to a file containing a valid
   great_expectations expectations config to use to validate the data.
 
 Options:

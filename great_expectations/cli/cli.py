@@ -46,7 +46,7 @@ def cli():
 
 @cli.command()
 @click.argument('dataset')
-@click.argument('expectations_config_file')
+@click.argument('expectation_suite_file')
 @click.option('--evaluation_parameters', '-p', default=None,
               help='Path to a file containing JSON object used to evaluate parameters in expectations config.')
 @click.option('--result_format', '-o', default="SUMMARY",
@@ -60,13 +60,13 @@ def cli():
               help='Path to a python module containing a custom dataset class.')
 @click.option('--custom_dataset_class', '-c', default=None,
               help='Name of the custom dataset class to use during evaluation.')
-def validate(dataset, expectations_config_file, evaluation_parameters, result_format,
+def validate(dataset, expectation_suite_file, evaluation_parameters, result_format,
              catch_exceptions, only_return_failures, custom_dataset_module, custom_dataset_class):
     """Validate a CSV file against an expectations configuration.
 
-    DATASET: Path to a file containing a CSV file to validate using the provided expectations_config_file.
+    DATASET: Path to a file containing a CSV file to validate using the provided expectation_suite_file.
 
-    EXPECTATIONS_CONFIG_FILE: Path to a file containing a valid great_expectations expectations config to use to \
+    EXPECTATION_SUITE_FILE: Path to a file containing a valid great_expectations expectations config to use to \
 validate the data.
     """
 
@@ -77,9 +77,9 @@ validate the data.
     :param parsed_args: A Namespace object containing parsed arguments from the dispatch method.
     :return: The number of unsucessful expectations
     """
-    expectations_config_file = expectations_config_file
+    expectation_suite_file = expectation_suite_file
 
-    expectations_config = json.load(open(expectations_config_file))
+    expectation_suite = json.load(open(expectation_suite_file))
 
     if evaluation_parameters is not None:
         evaluation_parameters = json.load(
@@ -94,28 +94,28 @@ validate the data.
         custom_module = __import__(str(module_name))
         dataset_class = getattr(
             custom_module, custom_dataset_class)
-    elif "data_asset_type" in expectations_config:
-        if (expectations_config["data_asset_type"] == "Dataset" or
-                expectations_config["data_asset_type"] == "PandasDataset"):
+    elif "data_asset_type" in expectation_suite:
+        if (expectation_suite["data_asset_type"] == "Dataset" or
+                expectation_suite["data_asset_type"] == "PandasDataset"):
             dataset_class = PandasDataset
-        elif expectations_config["data_asset_type"].endswith("Dataset"):
+        elif expectation_suite["data_asset_type"].endswith("Dataset"):
             logger.info("Using PandasDataset to validate dataset of type %s." %
-                        expectations_config["data_asset_type"])
+                        expectation_suite["data_asset_type"])
             dataset_class = PandasDataset
-        elif expectations_config["data_asset_type"] == "FileDataAsset":
+        elif expectation_suite["data_asset_type"] == "FileDataAsset":
             dataset_class = FileDataAsset
         else:
             logger.critical("Unrecognized data_asset_type %s. You may need to specifcy custom_dataset_module and \
-                custom_dataset_class." % expectations_config["data_asset_type"])
+                custom_dataset_class." % expectation_suite["data_asset_type"])
             return -1
     else:
         dataset_class = PandasDataset
 
     if issubclass(dataset_class, Dataset):
-        da = read_csv(dataset, expectations_config=expectations_config,
+        da = read_csv(dataset, expectation_suite=expectation_suite,
                       dataset_class=dataset_class)
     else:
-        da = dataset_class(dataset, config=expectations_config)
+        da = dataset_class(dataset, config=expectation_suite)
 
     result = da.validate(
         evaluation_parameters=evaluation_parameters,

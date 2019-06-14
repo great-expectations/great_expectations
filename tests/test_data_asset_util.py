@@ -22,7 +22,7 @@ class TestDataAssetUtilMethods(unittest.TestCase):
         D.expect_column_kl_divergence_to_be_less_than("x", part, .6)
 
         # Dumping this JSON object verifies that everything is serializable
-        json.dumps(D.get_expectations(), indent=2)
+        json.dumps(D.get_expectation_suite(), indent=2)
 
         x = {
             'w': [

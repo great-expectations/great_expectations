@@ -10,10 +10,10 @@ Once you've constructed and stored Expectations, you can use them to validate ne
 
     >> import json
     >> import great_expectations as ge
-    >> my_expectations_config = json.load(file("my_titanic_expectations.json"))
+    >> my_expectation_suite = json.load(file("my_titanic_expectations.json"))
     >> my_df = ge.read_csv(
         "./tests/examples/titanic.csv",
-        expectations_config=my_expectations_config
+        expectation_suite=my_expectation_suite
     )
     >> my_df.validate()
 

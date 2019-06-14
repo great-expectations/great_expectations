@@ -156,7 +156,7 @@ class ExpectationOperator(BaseOperator):
         df = self._get_dataframe()
         config = self._load_json()
         self.log.info("Start dataset validation for set {set}".format(set=self.dataset_name))
-        results = df.validate(expectations_config=config)
+        results = df.validate(expectation_suite=config)
 
         self.log.info(pformat(results))
 

@@ -24,7 +24,7 @@ parameter, a Dataset, and evaluate and add expectations to that object.
     >> import great_expectations as ge
     >> df = ge.dataset.PandasDataset({"col": [1, 2, 3, 4, 5]})
     >> df.autoinspect(ge.dataset.autoinspect.columns_exist)
-    >> df.get_expectations()
+    >> df.get_expectation_suite()
         {'dataset_name': None,
          'meta': {'great_expectations.__version__': '0.4.4__develop'},
          'expectations': [
