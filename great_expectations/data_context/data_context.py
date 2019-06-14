@@ -29,7 +29,6 @@ from great_expectations.datasource import SparkDFDatasource
 from .expectation_explorer import ExpectationExplorer
 
 logger = logging.getLogger(__name__)
-debug_view = widgets.Output(layout={'border': '3 px solid pink'})
 yaml = YAML()
 yaml.indent(mapping=2, sequence=4, offset=2)
 yaml.default_flow_style = False
