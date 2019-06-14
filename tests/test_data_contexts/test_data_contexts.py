@@ -33,6 +33,16 @@ def test_folder_connection_path(tmpdir_factory):
     return str(path)
 
 
+@pytest.fixture(scope="module")
+def test_parquet_folder_connection_path(tmpdir_factory):
+    df1 = pd.DataFrame(
+        {'col_1': [1, 2, 3, 4, 5], 'col_2': ['a', 'b', 'c', 'd', 'e']})
+    path = tmpdir_factory.mktemp("parquet_context")
+    df1.to_parquet(path.join("test.parquet"))
+
+    return str(path)
+
+
 def test_invalid_data_context():
     # Test an unknown data context name
     with pytest.raises(ValueError) as err:
@@ -63,4 +73,11 @@ def test_spark_csv_data_context(test_folder_connection_path):
 
     assert context.list_datasets() == ['test.csv']
     dataset = context.get_dataset('test.csv')
+    assert isinstance(dataset, SparkDFDataset)
+
+def test_spark_parquet_data_context(test_parquet_folder_connection_path):
+    context = get_data_context('SparkParquet', test_parquet_folder_connection_path)
+
+    assert context.list_datasets() == ['test.parquet']
+    dataset = context.get_dataset('test.parquet')
     assert isinstance(dataset, SparkDFDataset)
