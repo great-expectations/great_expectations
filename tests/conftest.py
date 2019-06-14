@@ -126,7 +126,7 @@ def data_context(tmp_path_factory):
 
 @pytest.fixture()
 def filesystem_csv(tmp_path_factory):
-    base_dir = tmp_path_factory.mktemp('test_file_kwargs_generator')
+    base_dir = tmp_path_factory.mktemp('filesystem_csv')
     base_dir = str(base_dir)
     # Put a few files in the directory
     with open(os.path.join(base_dir, "f1.csv"), "w") as outfile:
