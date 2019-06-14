@@ -3,11 +3,14 @@ from ruamel.yaml import YAML
 import copy
 from six import string_types
 
+from ..data_context.util import DataAssetReference
+
 import logging
 
 logger = logging.getLogger(__name__)
 yaml = YAML()
 yaml.default_flow_style = False
+
 
 class Datasource(object):
     """Datasources are responsible for connecting to data infrastructure. 
@@ -17,7 +20,6 @@ class Datasource(object):
     Since opinionated DAG managers such as airflow, dbt, prefect.io, dagster can also act as sources of materialized data, 
     they can also act as Datasources.
     """
-
 
     @classmethod
     def from_configuration(cls, **kwargs):
@@ -123,21 +125,33 @@ class Datasource(object):
         return [{"name": key, "type": value["type"]} for key, value in self._datasource_config["generators"].items()]
 
     def get_data_asset(self, data_asset_name, batch_kwargs=None, **kwargs):
+        if isinstance(data_asset_name, DataAssetReference): # this richer type can include more metadata
+            generator_name = data_asset_name.generator
+            local_data_asset_name = data_asset_name.data_asset_name
+            if self._data_context is not None:
+                expectations_config = self._data_context.get_expectations(
+                    data_asset_name,
+                    batch_kwargs)
+            else:
+                expectations_config = None
+        else:
+            generator_name = "default"
+            local_data_asset_name = data_asset_name
+            expectations_config = None
+            if self._data_context is not None:
+                logger.warning("requesting a data_asset without a normalized data_asset_name; expectations_config will not be set")
+
         if batch_kwargs is None:
-            generator = self.get_generator()
+            generator = self.get_generator(generator_name)
             if generator is not None:
-                batch_kwargs = generator.yield_batch_kwargs(data_asset_name)
+                batch_kwargs = generator.yield_batch_kwargs(local_data_asset_name)
             else:
                 raise ValueError("No generator or batch_kwargs available to provide a dataset.")
+        elif not isinstance(batch_kwargs, dict):
+            batch_kwargs = self.build_batch_kwargs(batch_kwargs)
 
-        if self._data_context is not None:
-            expectations_config = self._data_context.get_expectations(data_asset_name, batch_kwargs)
-        else:
-            expectations_config = None
+        return self._get_data_asset(local_data_asset_name, batch_kwargs, expectations_config, **kwargs)
 
-        return self._get_data_asset(data_asset_name, batch_kwargs, expectations_config, **kwargs)
-
-    
     def _get_data_asset(self, data_asset_name, batch_kwargs, expectations_config, **kwargs):
         raise NotImplementedError
 
@@ -156,7 +170,7 @@ class Datasource(object):
             available_data_asset_names[generator_name] = generator.get_available_data_asset_names()
         return available_data_asset_names
 
-    def build_batch_kwargs(self, **kwargs):
+    def build_batch_kwargs(self, *args, **kwargs):
         raise NotImplementedError
 
     def get_data_context(self):
