@@ -583,14 +583,14 @@ class DataAsset(object):
 
         self.default_expectation_args[argument] = value
 
-    def get_expectation_suite(self,
+    def get_expectations_config(self,
                                 discard_failed_expectations=True,
                                 discard_result_format_kwargs=True,
                                 discard_include_configs_kwargs=True,
                                 discard_catch_exceptions_kwargs=True,
                                 suppress_warnings=False
                                 ):
-        warnings.warn("get_expectation_suite is deprecated, and will be removed in a future release. " +
+        warnings.warn("get_expectations_config is deprecated, and will be removed in a future release. " +
                       "Please use get_expectation_suite instead.", DeprecationWarning)
         return self.get_expectation_suite(discard_failed_expectations, discard_result_format_kwargs,
                                           discard_include_configs_kwargs, discard_catch_exceptions_kwargs, suppress_warnings)
@@ -689,7 +689,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         config["expectations"] = expectations
         return config
 
-    def save_expectation_suite(
+    def save_expectations_config(
         self,
         filepath=None,
         discard_failed_expectations=True,
@@ -698,7 +698,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         discard_catch_exceptions_kwargs=True,
         suppress_warnings=False
     ):
-        warnings.warn("save_expectation_suite is deprecated, and will be removed in a future release. " +
+        warnings.warn("save_expectations_config is deprecated, and will be removed in a future release. " +
                       "Please use save_expectation_suite instead.", DeprecationWarning)
         self.save_expectation_suite(filepath, discard_failed_expectations, discard_result_format_kwargs,
                                discard_include_configs_kwargs, discard_catch_exceptions_kwargs, suppress_warnings)

@@ -374,8 +374,8 @@ class DataContext(object):
         A data_asset_name is defined per-project and consists of four components:
           - a datasource name
           - a generator_name
-          - a data_asset_name
-          - a sub-name, which by default is the name of the generator from which the data_asset is derived
+          - a generator_asset
+          - an expectation_suite name
 
           - a generator name
 
