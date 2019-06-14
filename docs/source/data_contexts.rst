@@ -22,6 +22,7 @@ There are currently four types of data contexts:
   - :ref:`PandasCSVDataContext`: The PandasCSVDataContext ('PandasCSV') exposes a local directory containing files as datasets.
   - :ref:`SqlAlchemyDataContext`: The SqlAlchemyDataContext ('SqlAlchemy') exposes tables from a SQL-compliant database as datasets.
   - :ref:`SparkCSVDataContext`: The SparkCSVDataContext ('SparkCSV') exposes csv files accessible from a SparkSQL context.
+  - :ref:`SparkParquetDataContext`: The SparkParquetDataContext ('SparkParquet') exposes parquet files accessible from a SparkSQL context.
   - :ref:`DatabricksTableContext`: The DatabricksTableContext ('DatabricksTable') exposes tables from a databricks notebook.
 
 All data contexts expose the following methods:
@@ -50,6 +51,14 @@ The `options` parameter for a SqlAlchemyDataContext is the sqlalchemy connection
 ---------------------
 
 The `options` parameter for a SparkCSVDataContext is a directory from which to read a CSV file, and options to pass to the reader.
+
+
+.. _SparkParquetDataContext:
+
+`SparkParquetDataContext`
+-------------------------
+
+The `options` parameter for a SparkParquetDataContext is a directory from which to read a Parquet file, and options to pass to the reader.
 
 
 .. _DatabricksTableContext:
