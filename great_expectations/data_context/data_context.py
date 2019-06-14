@@ -108,11 +108,11 @@ class DataContext(object):
         return self._data_asset_name_delimiter
     
     @data_asset_name_delimiter.setter
-    def data_asset_name_delimiter(self, new_delimeter):
-        if new_delimeter not in ['.', '/']:
-            raise DataContextError("Invalid delimeter: delimeter must be '.' or '/'")
+    def data_asset_name_delimiter(self, new_delimiter):
+        if new_delimiter not in ['.', '/']:
+            raise DataContextError("Invalid delimiter: delimiter must be '.' or '/'")
         else:
-            self._data_asset_name_delimiter = new_delimeter
+            self._data_asset_name_delimiter = new_delimiter
 
     #####
     #
@@ -384,9 +384,9 @@ class DataContext(object):
         split_name = data_asset_name.split(self.data_asset_name_delimiter)
 
         if len(split_name) > 4:
-            raise DataContextError("Invalid data_asset_name {data_asset_name}: found too many components using delimeter '{delimeter}'".format(
+            raise DataContextError("Invalid data_asset_name {data_asset_name}: found too many components using delimiter '{delimiter}'".format(
                 data_asset_name=data_asset_name,
-                delimeter=self.data_asset_name_delimiter
+                delimiter=self.data_asset_name_delimiter
             ))
         
         elif len(split_name) == 1:

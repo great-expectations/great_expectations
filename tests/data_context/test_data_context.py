@@ -199,8 +199,9 @@ def test_compile(data_context):
     }
 
 def test_normalize_data_asset_names_error(data_context):
-    with pytest.raises(DataContextError, match="found too many components using delimeter '/'"):
+    with pytest.raises(DataContextError) as exc:
         data_context._normalize_data_asset_name("this/should/never/work/because/it/is/so/long")
+        assert "found too many components using delimiter '/'" in exc.message
 
     print(data_context.get_available_data_asset_names())
     print(data_context.list_expectation_suites())
@@ -208,7 +209,7 @@ def test_normalize_data_asset_names_error(data_context):
 
     assert True
 
-def test_normalize_data_asset_names_delimeters(data_context):
+def test_normalize_data_asset_names_delimiters(data_context):
     data_context.data_asset_name_delimiter = '.'
     assert data_context._normalize_data_asset_name("this.should.be.okay") == \
         NormalizedDataAssetName("this", "should", "be", "okay")
@@ -217,11 +218,13 @@ def test_normalize_data_asset_names_delimeters(data_context):
     assert data_context._normalize_data_asset_name("this/should/be/okay") == \
         NormalizedDataAssetName("this", "should", "be", "okay")
 
-    with pytest.raises(DataContextError, match="Invalid delimeter"):
+    with pytest.raises(DataContextError) as exc:
         data_context.data_asset_name_delimiter = "$"
+        assert "Invalid delimiter" in exc.message
 
-    with pytest.raises(DataContextError, match="Invalid delimeter"):
+    with pytest.raises(DataContextError) as exc:
         data_context.data_asset_name_delimiter = "//"
+        assert "Invalid delimiter" in exc.message
 
 def test_normalize_data_asset_names_conditions_single_name():
     pass

@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import os
 import copy
 import logging
@@ -6,10 +8,15 @@ logger = logging.getLogger(__name__)
 
 
 class BatchGenerator(object):
-    """A BatchGenerator bridges the worlds of datasource and DataAsset: it can introspect datasources and produce 
-    meaningful descriptions of "batches" of data from artifacts such as files on a filesystem or tables in a database, 
-    potentially including sampling or other actions, and produce Great Expectations DataAssets corresponding to those 
-    batches of data.
+    """Generators produce identifying information, called "batch_kwargs" that datasources 
+    can use to get individual batches of data. They add flexibility in how to obtain data 
+    such as with time-based partitioning, downsampling, or other techniques appropriate 
+    for the datasource.
+
+    For example, a generator could produce a SQL query that logically represents "rows in 
+    the Events table with a timestamp on February 7, 2012," which a SqlAlchemyDatasource 
+    could use to materialize a SqlAlchemyDataset corresponding to that batch of data and 
+    ready for validation.
     """
 
     def __init__(self, name, type_, datasource=None):
