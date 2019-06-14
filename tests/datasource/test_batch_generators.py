@@ -40,5 +40,6 @@ def test_file_kwargs_generator_error(data_context, filesystem_csv):
     base_dir = filesystem_csv
     data_context.add_datasource("default", "pandas", base_directory=str(base_dir))
 
-    with pytest.raises(DataContextError, match="f4"):
+    with pytest.raises(DataContextError) as exc:
         data_context.get_batch("f4")
+        assert "f4" in exc.message
