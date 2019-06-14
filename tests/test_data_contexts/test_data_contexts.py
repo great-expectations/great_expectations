@@ -4,7 +4,7 @@ import sqlalchemy as sa
 import pandas as pd
 
 from great_expectations import get_data_context
-from great_expectations.dataset import PandasDataset, SqlAlchemyDataset
+from great_expectations.dataset import PandasDataset, SqlAlchemyDataset, SparkDFDataset
 
 
 @pytest.fixture(scope="module")
@@ -57,3 +57,10 @@ def test_pandas_data_context(test_folder_connection_path):
     assert context.list_datasets() == ['test.csv']
     dataset = context.get_dataset('test.csv')
     assert isinstance(dataset, PandasDataset)
+
+def test_spark_csv_data_context(test_folder_connection_path):
+    context = get_data_context('SparkCSV', test_folder_connection_path)
+
+    assert context.list_datasets() == ['test.csv']
+    dataset = context.get_dataset('test.csv')
+    assert isinstance(dataset, SparkDFDataset)
