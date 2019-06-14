@@ -2,7 +2,6 @@ import time
 import logging
 
 from .batch_generator import BatchGenerator
-from great_expectations.dataset.sparkdf_dataset import SparkDFDataset
 
 logger = logging.getLogger(__name__)
 
@@ -10,6 +9,7 @@ try:
     from pyspark.sql import SparkSession
 except ImportError:
     logger.debug("Unable to load spark context; install optional spark dependency for support.")
+
 
 class DatabricksTableGenerator(BatchGenerator):
     """Meant to be used in a Databricks notebook

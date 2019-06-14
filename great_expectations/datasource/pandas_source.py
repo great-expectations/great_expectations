@@ -1,58 +1,26 @@
-import os
+import copy
 import time
 from six import string_types
 
 import pandas as pd
 
 from .datasource import Datasource
-from .filesystem_path_generator import SubdirPathGenerator
+from .filesystem_path_generator import SubdirReaderGenerator
 from .batch_generator import EmptyGenerator
 from great_expectations.dataset.pandas_dataset import PandasDataset
 
 from great_expectations.exceptions import BatchKwargsError
 
 
-# class MemoryPandasDatasource(Datasource):
-#     def __init__(self, name="default", data_context=None, generators=None):
-#         if generators is None:
-#             generators = {
-#                 "default": {"type": "empty_generator"}
-#             }
-#         super(MemoryPandasDatasource, self).__init__(name, type_="memory_pandas",
-#                                                      data_context=data_context,
-#                                                      generators=generators)
-#         self._build_generators()
-
-#     def _get_generator_class(self, type_):
-#         if type_ == "empty_generator":
-#             return EmptyGenerator
-#         else:
-#             raise ValueError("Unrecognized BatchGenerator type %s" % type_)
-
-#     def _get_data_asset(self, data_asset_name, batch_kwargs, expectations_config, **kwargs):
-#         df = batch_kwargs.pop("df", None)
-        
-#         return PandasDataset(df,
-#                              expectations_config=expectations_config,
-#                              data_context=self._data_context,
-#                              data_asset_name=data_asset_name,
-#                              batch_kwargs=batch_kwargs)
-
-#     def build_batch_kwargs(self, df, **kwargs):
-#         return {
-#             "df": df
-#         }
-
-
-class FilesystemPandasDatasource(Datasource):
+class PandasDatasource(Datasource):
     """
-    A FilesystemPandasDatasource makes it easy to create, manage and validate expectations on
+    A PandasDatasource makes it easy to create, manage and validate expectations on
     Pandas dataframes.
 
-    Use with the SubdirPathGenerator for simple cases.
+    Use with the SubdirReaderGenerator for simple cases.
     """
 
-    def __init__(self, name="default", data_context=None, generators=None, **kwargs):
+    def __init__(self, name="pandas", data_context=None, generators=None, **kwargs):
         if generators is None:
             # Provide a gentle way to build a datasource with a sane default,
             # including ability to specify the base_directory and reader_options
@@ -65,14 +33,14 @@ class FilesystemPandasDatasource(Datasource):
                     "reader_options": reader_options
                 }
             }
-        super(FilesystemPandasDatasource, self).__init__(name, type_="filesystem_pandas",
-                                                         data_context=data_context,
-                                                         generators=generators)
+        super(PandasDatasource, self).__init__(name, type_="pandas",
+                                               data_context=data_context,
+                                               generators=generators)
         self._build_generators()
 
     def _get_generator_class(self, type_):
         if type_ == "subdir_reader":
-            return SubdirPathGenerator
+            return SubdirReaderGenerator
         elif type_ == "memory":
             return EmptyGenerator
         else:
@@ -81,14 +49,15 @@ class FilesystemPandasDatasource(Datasource):
     def _get_data_asset(self, data_asset_name, batch_kwargs, expectations_config, **kwargs):
         batch_kwargs.update(kwargs)
         if "path" in batch_kwargs:
-            path = batch_kwargs.pop("path") # We need to remove from the reader
-            batch_kwargs.update(**kwargs)
+            reader_options = batch_kwargs.copy()
+            path = reader_options.pop("path")  # We need to remove from the reader
+            reader_options.pop("timestamp")    # ditto timestamp
             if path.endswith((".csv", ".tsv")):
-                df = pd.read_csv(path, **batch_kwargs)
+                df = pd.read_csv(path, **reader_options)
             elif path.endswith(".parquet"):
-                df = pd.read_parquet(path, **batch_kwargs)
+                df = pd.read_parquet(path, **reader_options)
             elif path.endswith((".xls", ".xlsx")):
-                df = pd.read_excel(path, **batch_kwargs)
+                df = pd.read_excel(path, **reader_options)
             else:
                 raise BatchKwargsError("Unrecognized path: no available reader.",
                                        batch_kwargs)

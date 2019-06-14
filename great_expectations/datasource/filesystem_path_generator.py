@@ -1,18 +1,34 @@
 import os
-import errno
-import hashlib
+import time
+import re
 
 from .batch_generator import BatchGenerator
 
 
-class SubdirPathGenerator(BatchGenerator):
-    """
+class SubdirReaderGenerator(BatchGenerator):
+    """The SubdirReaderGenerator inspects a filesytem and produces batch_kwargs with a path and timestamp.
+
+    SubdirReaderGenerator recognizes data_asset_name using two criteria:
+      - for files directly in 'base_directory' with recognized extensions (.csv), it uses the name of the file without
+        the extension
+      - for other files or directories in 'base_directory', is uses the file or directory name
+
+    For directories in 'base_directory', SubdirReaderGenerator iterates over
+
+    SubdirReaderGenerator also uses
+    SubdirReaderGenerator
     /data/users/users_20180101.csv
     /data/users/users_20180102.csv
     """
 
-    def __init__(self, name="default", datasource=None, base_directory="/data", reader_options={}):
-        super(SubdirPathGenerator, self).__init__(name, type_="subdir_reader", datasource=datasource)
+    def __init__(self, name="default",
+                 datasource=None,
+                 base_directory="/data",
+                 reader_options=None):
+        super(SubdirReaderGenerator, self).__init__(name, type_="subdir_reader", datasource=datasource)
+        if reader_options is None:
+            reader_options = {}
+
         self._reader_options = reader_options
         self._base_directory = base_directory
 
@@ -39,17 +55,16 @@ class SubdirPathGenerator(BatchGenerator):
                 known_assets.add(file_option)
         return known_assets
 
-    def _get_iterator(self, data_asset_name):
+    def _get_iterator(self, data_asset_name, **kwargs):
         # If the data_asset_name is a file, then return the path.
         # Otherwise, use files in a subdir as batches
         if os.path.isdir(os.path.join(self.base_directory, data_asset_name)):
             return self._build_batch_kwargs_path_iter(
                 [
                     os.path.join(self.base_directory, data_asset_name, path)
-                        for path in os.listdir(os.path.join(self.base_directory, data_asset_name))
+                    for path in os.listdir(os.path.join(self.base_directory, data_asset_name))
                 ]
-                
-                )
+            )
             # return self._build_batch_kwargs_path_iter(os.scandir(os.path.join(self.base_directory, data_asset_name)))
             # return iter([{
             #     "path": os.path.join(self.base_directory, data_asset_name, x)
@@ -83,7 +98,8 @@ class SubdirPathGenerator(BatchGenerator):
 
     def _build_batch_kwargs(self, path):
         batch_kwargs = {
-            "path": path
+            "path": path,
+            "timestamp": time.time()
         }
         batch_kwargs.update(self.reader_options)
         return batch_kwargs

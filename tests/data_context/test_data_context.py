@@ -324,21 +324,21 @@ def test_list_datasources(data_context):
     assert datasources == [
         {
             "name": "mydatasource",
-            "type": "filesystem_pandas"
+            "type": "pandas"
         }
     ]
 
-    data_context.add_datasource("second_pandas_source", "filesystem_pandas")
+    data_context.add_datasource("second_pandas_source", "pandas")
 
     datasources = data_context.list_datasources()
 
     assert datasources == [
         {
             "name": "mydatasource",
-            "type": "filesystem_pandas"
+            "type": "pandas"
         },
         {
             "name": "second_pandas_source",
-            "type": "filesystem_pandas"
+            "type": "pandas"
         }
     ]

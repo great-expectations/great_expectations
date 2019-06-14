@@ -17,8 +17,8 @@ class Datasource(object):
     Each Datasource (within your DataContext) is a source of materialized data, such as a SQL database, S3 bucket, 
     or local file directory.
 
-    Since opinionated DAG managers such as airflow, dbt, prefect.io, dagster can also act as sources of materialized data, 
-    they can also act as Datasources.
+    Since opinionated DAG managers such as airflow, dbt, prefect.io, dagster can also act as sources of
+    materialized data, they can also act as Datasources.
     """
 
     @classmethod
@@ -36,28 +36,37 @@ class Datasource(object):
             "generators": generators
         }
 
-        extra_config = self._load_datasource_config()
-        self._datasource_config.update(extra_config)
-        
+        # extra_config = self._load_datasource_config()
+        # self._datasource_config.update(extra_config)
+
+    @property
+    def data_context(self):
+        return self._data_context
+
+    @property
+    def name(self):
+        return self._name
+
     def _build_generators(self):
         for generator in self._datasource_config["generators"].keys():
             self.get_generator(generator)
 
-    def _load_datasource_config(self):
-        # For now, just use the data context config
-        return {}
-        # if self._data_context is None:
-        #     # Setup is done; no additional config to read
-        #     return {}
-        # try:
-        #     config_path = os.path.join(self._data_context.context_root_directory, "great_expectations/datasources", self._name, "config.yml")
-        #     with open(config_path, "r") as data:
-        #         extra_config = yaml.load(data) or {}
-        #     logger.info("Loading config from %s" % str(config_path))
-        #     return extra_config
-        # except FileNotFoundError:
-        #     logger.debug("No additional config file found.")
-        #     return {}
+    # def _load_datasource_config(self):
+    #     # For now, just use the data context config
+    #     return {}
+    #     # if self._data_context is None:
+    #     #     # Setup is done; no additional config to read
+    #     #     return {}
+    #     # try:
+    #     #     config_path = os.path.join(self._data_context.context_root_directory,
+    #                                      "great_expectations/datasources", self._name, "config.yml")
+    #     #     with open(config_path, "r") as data:
+    #     #         extra_config = yaml.load(data) or {}
+    #     #     logger.info("Loading config from %s" % str(config_path))
+    #     #     return extra_config
+    #     # except FileNotFoundError:
+    #     #     logger.debug("No additional config file found.")
+    #     #     return {}
 
     def get_credentials(self, profile_name):
         if self._data_context is not None:
@@ -66,10 +75,10 @@ class Datasource(object):
 
     def get_config(self):
         if self._data_context is not None:
-            self._save_config()
+            self.save_config()
         return self._datasource_config
 
-    def _save_config(self):
+    def save_config(self):
         # For now, just use the data context config
         if self._data_context is not None:
             self._data_context._save_project_config()
@@ -81,9 +90,11 @@ class Datasource(object):
         # if self._data_context is not None:
         #     base_config = copy.deepcopy(self._datasource_config)
         #     if "config_file" in base_config:
-        #         config_filepath = os.path.join(self._data_context.context_root_directory, base_config.pop["config_file"])
+        #         config_filepath = os.path.join(self._data_context.context_root_directory,
+        #                                        base_config.pop["config_file"])
         #     else:
-        #         config_filepath = os.path.join(self._data_context.context_root_directory, "great_expectations/datasources", self._name, "config.yml")
+        #         config_filepath = os.path.join(self._data_context.context_root_directory,
+        #                                        "great_expectations/datasources", self._name, "config.yml")
         # else:
         #     logger.warning("Unable to save config with no data context attached.")
 
@@ -95,11 +106,11 @@ class Datasource(object):
         data_asset_generator_class = self._get_generator_class(type_)
         generator = data_asset_generator_class(name=name, datasource=self, **kwargs)
         self._generators[name] = generator
-        if not "generators" in self._datasource_config:
+        if "generators" not in self._datasource_config:
             self._datasource_config["generators"] = {}
         self._datasource_config["generators"][name] = generator.get_config()
         if self._data_context is not None:
-            self._save_config()
+            self.save_config()
         return generator
 
     def get_generator(self, generator_name="default"):
@@ -114,7 +125,9 @@ class Datasource(object):
             generator_name = list(self._datasource_config["generators"])[0]
             generator_config = copy.deepcopy(self._datasource_config["generators"][generator_name])
         else:
-            raise ValueError("Unable to load generator %s -- no configuration found or invalid configuration." % generator_name)
+            raise ValueError(
+                "Unable to load generator %s -- no configuration found or invalid configuration." % generator_name
+            )
         type_ = generator_config.pop("type")
         generator_class = self._get_generator_class(type_)
         generator = generator_class(name=generator_name, datasource=self, **generator_config)
@@ -125,7 +138,7 @@ class Datasource(object):
         return [{"name": key, "type": value["type"]} for key, value in self._datasource_config["generators"].items()]
 
     def get_data_asset(self, data_asset_name, batch_kwargs=None, **kwargs):
-        if isinstance(data_asset_name, DataAssetReference): # this richer type can include more metadata
+        if isinstance(data_asset_name, DataAssetReference):  # this richer type can include more metadata
             generator_name = data_asset_name.generator
             local_data_asset_name = data_asset_name.data_asset_name
             if self._data_context is not None:
@@ -139,7 +152,9 @@ class Datasource(object):
             local_data_asset_name = data_asset_name
             expectations_config = None
             if self._data_context is not None:
-                logger.warning("requesting a data_asset without a normalized data_asset_name; expectations_config will not be set")
+                logger.warning(
+                    "Requesting a data_asset without a normalized data_asset_name; expectations_config will not be set"
+                )
 
         if batch_kwargs is None:
             generator = self.get_generator(generator_name)
@@ -175,5 +190,3 @@ class Datasource(object):
 
     def get_data_context(self):
         return self._data_context
-
-
