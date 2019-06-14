@@ -47,6 +47,8 @@ class SubdirReaderGenerator(BatchGenerator):
 
     def get_available_data_asset_names(self):
         known_assets = set()
+        if not os.path.isdir(self.base_directory):
+            return known_assets
         file_options = os.listdir(self.base_directory)
         for file_option in file_options:
             if file_option.endswith(".csv"):
