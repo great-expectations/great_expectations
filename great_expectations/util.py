@@ -19,7 +19,7 @@ def _convert_to_dataset_class(df, dataset_class, expectation_suite=None, autoins
     Convert a (pandas) dataframe to a great_expectations dataset, with (optional) expectation_suite
     """
     if expectation_suite is not None:
-        # Create a dataset of the new class type, and manually initialize expectations according to the provided configuration
+        # Create a dataset of the new class type, and manually initialize expectations according to the provided expectation suite
         new_df = dataset_class.from_dataset(df)
         new_df._initialize_expectations(expectation_suite)
     else:
@@ -77,7 +77,7 @@ def read_excel(
     Args:
         filename (string): path to file to read
         dataset_class (Dataset class): class to which to convert resulting Pandas df
-        expectation_suite (string): path to great_expectations config file
+        expectation_suite (string): path to great_expectations expectation suite file
 
     Returns:
         great_expectations dataset or ordered dict of great_expectations datasets,
@@ -106,7 +106,7 @@ def read_table(
     Args:
         filename (string): path to file to read
         dataset_class (Dataset class): class to which to convert resulting Pandas df
-        expectation_suite (string): path to great_expectations config file
+        expectation_suite (string): path to great_expectations expectation suite file
 
     Returns:
         great_expectations dataset
@@ -129,7 +129,7 @@ def read_parquet(
     Args:
         filename (string): path to file to read
         dataset_class (Dataset class): class to which to convert resulting Pandas df
-        expectation_suite (string): path to great_expectations config file
+        expectation_suite (string): path to great_expectations expectation suite file
 
     Returns:
         great_expectations dataset
@@ -151,7 +151,7 @@ def from_pandas(pandas_df,
         pandas_df (Pandas df): Pandas data frame
         dataset_class (Dataset class) = dataset.pandas_dataset.PandasDataset:
             class to which to convert resulting Pandas df
-        expectation_suite (string) = None: path to great_expectations config file
+        expectation_suite (string) = None: path to great_expectations expectation suite file
         autoinspect_func (function) = None: The autoinspection function that should 
             be run on the dataset to establish baseline expectations.
 
@@ -167,23 +167,23 @@ def from_pandas(pandas_df,
 
 
 def validate(data_asset, expectation_suite=None, data_asset_name=None, data_context=None, data_asset_type=None, *args, **kwargs):
-    """Validate the provided data asset using the provided config"""
+    """Validate the provided data asset using the provided expectation suite"""
     if expectation_suite is None and data_context is None:
         raise ValueError(
-            "Either an expectations config or a DataContext is required for validation.")
+            "Either an expectation suite or a DataContext is required for validation.")
 
     if expectation_suite is None:
-        logger.info("Using expectations config from DataContext.")
+        logger.info("Using expectation suite from DataContext.")
         # Allow data_context to be a string, and try loading it from path in that case
         if isinstance(data_context, string_types):
             data_context = DataContext(data_context)                
         expectation_suite = data_context.get_expectation_suite(data_asset_name)
     else:
         if data_asset_name in expectation_suite:
-            logger.info("Using expectations config with name %s" %
+            logger.info("Using expectation suite with name %s" %
                         expectation_suite["data_asset_name"])
         else:
-            logger.info("Using expectations config with no data_asset_name")
+            logger.info("Using expectation suite with no data_asset_name")
 
     # If the object is already a Dataset type, then this is purely a convenience method
     # and no conversion is needed

@@ -204,10 +204,11 @@ class Dataset(MetaDataset):
         """Returns: int"""
         raise NotImplementedError
 
-    def _initialize_expectations(self, config=None, data_asset_name=None):
+    def _initialize_expectations(self, expectation_suite=None, data_asset_name=None):
         """Override data_asset_type with "Dataset"
         """
-        super(Dataset, self)._initialize_expectations(config=config, data_asset_name=data_asset_name)
+        super(Dataset, self)._initialize_expectations(expectation_suite=expectation_suite,
+                                                      data_asset_name=data_asset_name)
         self._expectation_suite["data_asset_type"] = "Dataset"
 
     @classmethod
@@ -283,7 +284,11 @@ class Dataset(MetaDataset):
         new_function = self.column_aggregate_expectation(function)
         return new_function(self, *args, **kwargs)
 
-    ##### Table shape expectations #####
+    #####
+    #
+    # Table shape expectations
+    #
+    #####
 
     @DocInherit
     @DataAsset.expectation(["column"])

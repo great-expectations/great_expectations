@@ -16,17 +16,17 @@ CONTEXTS = ['PandasDataset', 'SqlAlchemyDataset', 'SparkDFDataset']
 
 @pytest.fixture
 def empty_expectation_suite():
-    config = {
-        'dataset_name': "empty_config_fixture",
+    expectation_suite = {
+        'dataset_name': "empty_suite_fixture",
         'meta': {},
         'expectations': []
     }
-    return config
+    return expectation_suite
 
 @pytest.fixture
 def basic_expectation_suite():
-    config = {
-        'dataset_name': "basic_config_fixture",
+    expectation_suite = {
+        'dataset_name': "basic_suite_fixture",
         'meta': {},
         'expectations': [
             {
@@ -55,7 +55,7 @@ def basic_expectation_suite():
             }
         ]
     }
-    return config
+    return expectation_suite
 
 @pytest.fixture
 def file_data_asset(tmp_path):

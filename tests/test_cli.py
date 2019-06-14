@@ -35,7 +35,7 @@ Options:
 Commands:
   init      Initialze a new Great Expectations project.
   render    Render a great expectations object.
-  validate  Validate a CSV file against an expectations configuration.
+  validate  Validate a CSV file against an expectation suite.
 """
 
 
@@ -59,13 +59,13 @@ def test_cli_validate_help():
     assert result.exit_code == 0
     expected_help_message = """Usage: cli validate [OPTIONS] DATASET EXPECTATION_SUITE_FILE
 
-  Validate a CSV file against an expectations configuration.
+  Validate a CSV file against an expectation suite.
 
-  DATASET: Path to a file containing a CSV file to validate using the 
+  DATASET: Path to a file containing a CSV file to validate using the
   provided expectation_suite_file.
 
   EXPECTATION_SUITE_FILE: Path to a file containing a valid
-  great_expectations expectations config to use to validate the data.
+  great_expectations expectations suite to use to validate the data.
 
 Options:
   -p, --evaluation_parameters TEXT

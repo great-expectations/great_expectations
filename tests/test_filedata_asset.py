@@ -22,7 +22,7 @@ def test_autoinspect_filedata_asset():
                 raise
 
 
-def test_expectation_config_filedata_asset():
+def test_expectation_suite_filedata_asset():
     # Load in data files
     file_path = './tests/test_sets/toy_data_complete.csv'
 
