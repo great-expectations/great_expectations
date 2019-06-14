@@ -236,7 +236,7 @@ class DataContext(object):
         if not datasource:
             raise Exception("Can't find datasource {0:s} in the config - please check your great_expectations.yml")
 
-        data_asset = datasource.get_data_asset(normalized_data_asset_name, 
+        data_asset = datasource.get_data_asset(normalized_data_asset_name,
             batch_kwargs, 
             **kwargs)
         return data_asset
@@ -488,7 +488,7 @@ class DataContext(object):
             # If suite is defined, there must be exactly one
             # defined generator with that name and purpose
             datasource_name = split_name[0]
-            unnormalized_names = set(split_name[1], split_name[2])
+            unnormalized_names = set([split_name[1], split_name[2]])
             provider_names = []
             for normalized_identifier in self.list_expectations_configs():
                 normalized_split = normalized_identifier.split(self._data_asset_name_delimeter)
