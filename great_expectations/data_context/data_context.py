@@ -318,7 +318,8 @@ class DataContext(object):
                     return self.dict[run_id]
                 else:
                     return {}
-
+        #####
+        #
         # If user wishes to provide their own implementation for this key value store (e.g.,
         # Redis-based), they should specify the following in the project config file:
         #
@@ -338,6 +339,8 @@ class DataContext(object):
         # 3. def set(self, name, value)
         #
         # We will load the module dynamically
+        #
+        #####
         try:
             config_block = self._project_config.get("evaluation_parameter_store")
             if not config_block or not config_block.get("type"):
@@ -435,48 +438,44 @@ class DataContext(object):
             #   (b) generator_asset/suite
 
             # If the data_asset_name is already defined by a config in that datasource, return that normalized name.
-            datasource_name = split_name[0]
-            generator_asset = split_name[1]
             provider_names = []
             for normalized_identifier in self.list_expectation_suites():
                 normalized_split = normalized_identifier.split(self._data_asset_name_delimiter)
                 curr_datasource_name = normalized_split[0]
-                if datasource_name != curr_datasource_name:
-                    continue
                 curr_generator_name = normalized_split[1]
-                curr_data_asset_name = normalized_split[2]
-                curr_curr_suite = normalized_split[3]
-                if curr_data_asset_name == generator_asset:
-                    provider_names.append(
-                        NormalizedDataAssetName(*normalized_split)
-                    )
+                curr_generator_asset = normalized_split[2]
+                curr_expectation_suite = normalized_split[3]
+                # Option 1:
+                if curr_datasource_name == split_name[0] and curr_generator_asset == split_name[1]:
+                    provider_names.append(NormalizedDataAssetName(*normalized_split))
+                # Option 2:
+                if curr_generator_asset == split_name[0] and curr_expectation_suite == split_name[1]:
+                    provider_names.append(NormalizedDataAssetName(*normalized_split))
 
             if len(provider_names) == 1:
                 return provider_names[0]
             elif len(provider_names) > 1:
                 raise DataContextError("Ambiguous data_asset_name {data_asset_name}. Multiple candidates found: {provider_names}"
                     .format(data_asset_name=data_asset_name, provider_names=provider_names))
-                    
-            # If the data_asset_name is not already defined, but it exists among the valid names from exactly one generator, produce that name
-            available_names = self.get_available_data_asset_names(datasource_name)
-            for generator in available_names[datasource_name].keys():
-                names_set = available_names[datasource_name][generator]
-                if generator_asset in names_set:
-                    provider_names.append(
-                        NormalizedDataAssetName(datasource_name, generator, generator_asset, "default")
-                    )
 
+            # If we haven't found a match, see if this is provided by exactly one datasource and generator
+            available_names = self.get_available_data_asset_names()
+            for datasource_name in available_names.keys():
+                for generator in available_names[datasource_name].keys():
+                    generator_assets = available_names[datasource_name][generator]
+                    if split_name[0] == datasource_name and split_name[1] in generator_assets:
+                        provider_names.append(NormalizedDataAssetName(datasource_name, generator, split_name[1], "default"))
+                    
+                    if split_name[0] in generator_assets:
+                        provider_names.append(NormalizedDataAssetName(datasource_name, generator, split_name[0], split_name[1]))
+                        
             if len(provider_names) == 1:
                 return provider_names[0]
             
             elif len(provider_names) > 1:
                 raise DataContextError("Ambiguous data_asset_name {data_asset_name}. Multiple candidates found: {provider_names}"
                     .format(data_asset_name=data_asset_name, provider_names=provider_names))
- 
-             # Finally, if the name *would be* unambiguous but for not havding been defined yet allow the normalization
-            if len(available_names) == 1:
-                # in this case, generator for the inner loop above is still valid
-                return NormalizedDataAssetName(datasource_name, generator, generator_asset, "default")
+
             else:
                 raise ConfigNotFoundError("No generator available to produce data_asset_name {data_asset_name} with datasource {datasource_name}"
                     .format(data_asset_name=data_asset_name, datasource_name=datasource_name))
