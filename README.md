@@ -10,6 +10,19 @@ Great Expectations
 *Always know what to expect from your data.*
 
 
+Coming soon...! (Temporary notice June 2019)
+--------------------------------------------------------------------------------
+
+We're making some major revisions to the project right now, so expect a BIG update to documentation by the end of June. 
+
+In the meantime, the Great Expectations Slack channel is the best place to get up-to-date information:
+
+https://tinyurl.com/great-expectations-slack
+
+Teaser: the next round of revisions doesn't change the existing behavior of Great Expectations at all, but it does add tons of new support for profiling, documenting, and deploying Expectations. It significantly raises the bar for making Great Expectations fully production-ready.
+
+
+
 What is great_expectations?
 --------------------------------------------------------------------------------
 
