@@ -13,8 +13,9 @@ DataAssetReference = namedtuple("DataAssetReference", [
     "datasource",
     "generator",
     "data_asset_name",
-    "expectations_purpose"
+    "suite"
 ])
+
 
 def build_slack_notification_request(validation_json=None):
     # Defaults
@@ -85,9 +86,7 @@ def build_slack_notification_request(validation_json=None):
 
 def get_slack_callback(webhook):
     def send_slack_notification(validation_json=None):
-        """
-            Post a slack notification.
-        """
+        """Post a slack notification."""
         session = requests.Session()
         query = build_slack_notification_request(validation_json)
 

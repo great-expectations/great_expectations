@@ -23,7 +23,7 @@ from great_expectations.data_asset import DataAsset
 from great_expectations.dataset import PandasDataset
 from great_expectations.datasource.sqlalchemy_source import SqlAlchemyDatasource
 from great_expectations.datasource.dbt_source import DBTDatasource
-from great_expectations.datasource import FilesystemPandasDatasource
+from great_expectations.datasource import PandasDatasource
 from great_expectations.datasource import SparkDFDatasource
 
 from .expectation_explorer import ExpectationExplorer
@@ -59,7 +59,6 @@ class DataContext(object):
 
         return cls(context_root_dir)
             
-
     def __init__(self, context_root_dir=None, expectation_explorer=False, data_asset_name_delimeter = '/'):
         self._expectation_explorer = expectation_explorer
         self._datasources = {}
@@ -122,10 +121,10 @@ class DataContext(object):
     #
     #####
 
-    def _build_normalized_data_asset_reference(self, datasource="default", generator="default", data_asset_name="default", expectations_purpose="default"):
+    def _build_normalized_data_asset_reference(self, datasource="default", generator="default", data_asset_name="default", suite="default"):
         """Normalize the given parts of a data_asset_name into a project-specific normalized form"""
         return DataAssetReference(
-            datasource, generator, data_asset_name, expectations_purpose
+            datasource, generator, data_asset_name, suite
         )
 
     def _get_normalized_data_asset_reference_filepath(self, data_asset_reference):
@@ -259,7 +258,7 @@ class DataContext(object):
 
     def _get_datasource_class(self, datasource_type):
         if datasource_type == "pandas":
-            return FilesystemPandasDatasource
+            return PandasDatasource
         elif datasource_type == "dbt":
             return DBTDatasource
         elif datasource_type == "sqlalchemy":
@@ -269,7 +268,7 @@ class DataContext(object):
         else:
             try:
                 # Update to do dynamic loading based on plugin types
-                return FilesystemPandasDatasource
+                return PandasDatasource
             except ImportError:
                 raise
  
@@ -439,7 +438,7 @@ class DataContext(object):
                     continue
                 curr_generator_name = normalized_split[1]
                 curr_data_asset_name = normalized_split[2]
-                curr_expectations_purpose = normalized_split[3]
+                curr_curr_suite = normalized_split[3]
                 if curr_data_asset_name == unnormalized_name:
                     provider_names.append(
                         self._build_normalized_data_asset_reference(*normalized_split)
@@ -486,7 +485,7 @@ class DataContext(object):
             # (b) a datasource, data_asset_name, and purpose
             # If a generator is specified, there must be exactly one defined
             # purpose with that name and generator
-            # If expectations_purpose is defined, there must be exactly one
+            # If suite is defined, there must be exactly one
             # defined generator with that name and purpose
             datasource_name = split_name[0]
             unnormalized_names = set(split_name[1], split_name[2])
@@ -498,11 +497,11 @@ class DataContext(object):
                     continue
                 curr_generator_name = normalized_split[1]
                 curr_data_asset_name = normalized_split[2]
-                curr_expectations_purpose = normalized_split[3]
+                curr_curr_suite = normalized_split[3]
                 if ((curr_data_asset_name in unnormalized_names) and 
                     (
                         curr_generator_name in unnormalized_names or
-                        curr_expectations_purpose in unnormalized_names
+                        curr_curr_suite in unnormalized_names
                     )):
                     provider_names.append(
                         self._build_normalized_data_asset_reference(*normalized_split)

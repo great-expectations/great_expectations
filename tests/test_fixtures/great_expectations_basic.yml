@@ -3,7 +3,7 @@
 datasources:
   # For example, this one.
   mydatasource:
-    type: filesystem_pandas
+    type: pandas
     base_directory: /data
     generators:
       # The name default is read if no datasource or generator is specified

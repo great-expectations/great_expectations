@@ -2,7 +2,7 @@ import os
 import logging
 
 from .datasource import Datasource
-from .filesystem_path_generator import SubdirPathGenerator
+from .filesystem_path_generator import SubdirReaderGenerator
 from .databricks_generator import DatabricksTableGenerator
 
 logger = logging.getLogger(__name__)
@@ -14,13 +14,16 @@ except ImportError:
     # TODO: review logging more detail here
     logger.debug("Unable to load pyspark; install optional spark dependency for support.")
 
+
 class SparkDFDatasource(Datasource):
-    """For now, functions like PandasCSVDataContext
+    """The SparkDFDatasource produces spark dataframes and supports generators capable of interacting with local
+    filesystem (the default subdir_reader generator) and databricks notebooks.
     """
 
     def __init__(self, name="default", data_context=None, generators=None, **kwargs):
         if generators is None:
-            # Provide a gentle way to build a datasource with a sane default, including ability to specify the base_directory
+            # Provide a gentle way to build a datasource with a sane default,
+            # including ability to specify the base_directory
             base_directory = kwargs.pop("base_directory", "/data")
             reader_options = kwargs.pop("reader_options", {})
             generators = {
@@ -31,11 +34,6 @@ class SparkDFDatasource(Datasource):
                 }
         }
         super(SparkDFDatasource, self).__init__(name, type_="spark", data_context=data_context, generators=generators)
-        # self._datasource_config.update(
-        #     {
-        #         "reader_options": reader_options or {}
-        #     }
-        # )
         try:
             self.spark = SparkSession.builder.getOrCreate()
         except Exception:
@@ -46,12 +44,11 @@ class SparkDFDatasource(Datasource):
 
     def _get_generator_class(self, type_):
         if type_ == "subdir_reader":
-            return SubdirPathGenerator
+            return SubdirReaderGenerator
         elif type_ == "databricks":
             return DatabricksTableGenerator
         else:
             raise ValueError("Unrecognized BatchGenerator type %s" % type_)
-
 
     def _get_data_asset(self, data_asset_name, batch_kwargs, expectations_config, caching=False, **kwargs):
         if self.spark is None:
@@ -71,8 +68,8 @@ class SparkDFDatasource(Datasource):
             df = self.spark.sql(batch_kwargs.query)
 
         return SparkDFDataset(df,
-            expectations_config=expectations_config,
-            data_context=self._data_context,
-            data_asset_name=data_asset_name,
-            batch_kwargs=batch_kwargs,
-            caching=caching)
+                              expectations_config=expectations_config,
+                              data_context=self._data_context,
+                              data_asset_name=data_asset_name,
+                              batch_kwargs=batch_kwargs,
+                              caching=caching)

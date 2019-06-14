@@ -12,7 +12,7 @@ import pandas as pd
 import sqlalchemy as sa
 
 from great_expectations.data_context import DataContext
-from great_expectations.datasource import FilesystemPandasDatasource
+from great_expectations.datasource import PandasDatasource
 from great_expectations.datasource.sqlalchemy_source import SqlAlchemyDatasource
 
 from great_expectations.dataset import PandasDataset, SqlAlchemyDataset
@@ -45,7 +45,7 @@ def test_db_connection_string(tmp_path_factory):
 def test_create_pandas_datasource(data_context, tmp_path_factory):
     basedir = tmp_path_factory.mktemp('test_create_pandas_datasource')
     name = "test_pandas_datasource"
-    type_ = "filesystem_pandas"
+    type_ = "pandas"
 
     data_context.add_datasource(name, type_, base_directory=str(basedir))
     data_context_config = data_context.get_config()
@@ -61,7 +61,7 @@ def test_create_pandas_datasource(data_context, tmp_path_factory):
     assert data_context_file_config["datasources"][name] == data_context_config["datasources"][name]
 
 def test_standalone_pandas_datasource(test_folder_connection_path):
-    datasource = FilesystemPandasDatasource('PandasCSV', base_directory=test_folder_connection_path)
+    datasource = PandasDatasource('PandasCSV', base_directory=test_folder_connection_path)
 
     assert datasource.get_available_data_asset_names() == {"default": {"test"}}
     manual_batch_kwargs = datasource.build_batch_kwargs(os.path.join(str(test_folder_connection_path), "test.csv"))
@@ -86,7 +86,6 @@ def test_standalone_sqlalchemy_datasource(test_db_connection_string):
     dataset2 = datasource.get_data_asset("table_2", schema='main')
     assert isinstance(dataset1, SqlAlchemyDataset)
     assert isinstance(dataset2, SqlAlchemyDataset)
-
 
 def test_create_sqlalchemy_datasource(data_context):
     name = "test_sqlalchemy_datasource"
@@ -171,8 +170,6 @@ def test_sqlalchemysource_templating(sqlitedb_engine):
     df = datasource.get_data_asset("test", col_name="animal_name")
     res = df.expect_column_to_exist("animal_name")
     assert res["success"] == True
-
-
 
 def test_pandas_source_readcsv(data_context, tmp_path_factory):
     if not PY3:

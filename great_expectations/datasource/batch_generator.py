@@ -31,7 +31,7 @@ class BatchGenerator(object):
 
     def _save_config(self):
         if self._datasource is not None:
-            self._datasource._save_config()
+            self._datasource.save_config()
         else:
             logger.warning("Unable to save generator config without a datasource attached.")
      
