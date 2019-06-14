@@ -4,6 +4,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 class BatchGenerator(object):
     """A BatchGenerator bridges the worlds of datasource and DataAsset: it can introspect datasources and produce 
     meaningful descriptions of "batches" of data from artifacts such as files on a filesystem or tables in a database, 
@@ -58,3 +59,12 @@ class BatchGenerator(object):
             # If we don't actually have an iterator we can generate, even after reseting, just return empty
             logger.warning("Unable to generate batch_kwargs for data_asset_name %s" % data_asset_name)
             return {}
+
+
+class EmptyGenerator(BatchGenerator):
+
+    def _get_iterator(self, data_asset_name, **kwargs):
+        return iter([])
+
+    def get_available_data_asset_names(self):
+        return set()

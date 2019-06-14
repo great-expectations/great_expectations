@@ -4,15 +4,17 @@ import hashlib
 
 from .batch_generator import BatchGenerator
 
-class FilesystemPathGenerator(BatchGenerator):
+
+class SubdirPathGenerator(BatchGenerator):
     """
     /data/users/users_20180101.csv
     /data/users/users_20180102.csv
     """
 
-    def __init__(self, name="default", datasource=None, base_directory="/data"):
-        super(FilesystemPathGenerator, self).__init__(name, type_="filesystem", datasource=datasource)
-        self._base_directory = base_directory
+    def __init__(self, name="default", datasource=None, reader_kwargs={}):
+        super(SubdirPathGenerator, self).__init__(name, type_="subdir_reader", datasource=datasource)
+        self.reader_kwargs = {}
+        self._base_directory = datasource.base_directory
 
     def get_available_data_asset_names(self):
         known_assets = set()
@@ -47,7 +49,9 @@ class FilesystemPathGenerator(BatchGenerator):
                 {
                     "path": path,
                     # "md5": md5
-                }
+                }.update(
+                    self._reader_kwargs
+                )
                 ])
         elif os.path.isfile(os.path.join(self._get_current_base_directory(), data_asset_name + ".csv")):
             path = os.path.join(self._get_current_base_directory(), data_asset_name + ".csv")

@@ -53,7 +53,8 @@ def test_validate_saves_result_inserts_run_id(empty_data_context, filesystem_csv
     # we should now be able to validate, and have validations saved.
     assert not_so_empty_data_context._project_config["result_store"]["filesystem"]["base_directory"] == "uncommitted/validations/"
 
-    my_batch = not_so_empty_data_context.get_batch("my_datasource", "f1")
+    my_batch = not_so_empty_data_context.get_batch("f1")
+    my_batch = not_so_empty_data_context.get_batch("my_datasource/f1")
 
     my_batch.expect_column_to_exist("a")
     with mock.patch("uuid.uuid1") as mock_uuid:
@@ -70,30 +71,28 @@ def test_list_available_data_asset_names(empty_data_context, filesystem_csv):
     empty_data_context.add_datasource("my_datasource", "pandas", base_directory= str(filesystem_csv))
     available_asset_names = empty_data_context.get_available_data_asset_names()
 
-    assert available_asset_names == [{
-        "datasource": "my_datasource",
-        "generators": [{
-            "generator": "default",
-            "available_data_asset_names": set(["f1", "f2", "f3"])
-        }]
-    }]
+    assert available_asset_names == {
+        "my_datasource": {
+            "default": set(["f1", "f2", "f3"])
+        }
+    }
 
 def test_list_expectations_configs(data_context):
-    assert data_context.list_expectations_configs() == ['parameterized_expectations_config_fixture']
+    assert data_context.list_expectations_configs() == ['mydatasource/mygenerator/parameterized_expectations_config_fixture/default']
 
 def test_get_existing_data_asset_config(data_context):
-    data_asset_config = data_context.get_expectations('parameterized_expectations_config_fixture')
-    assert data_asset_config['data_asset_name'] == 'parameterized_expectations_config_fixture'
+    data_asset_config = data_context.get_expectations('mydatasource/mygenerator/parameterized_expectations_config_fixture/default')
+    assert data_asset_config['data_asset_name'] == 'mydatasource/mygenerator/parameterized_expectations_config_fixture/default'
     assert len(data_asset_config['expectations']) == 2
 
 def test_get_new_data_asset_config(data_context):
     data_asset_config = data_context.get_expectations('this_data_asset_config_does_not_exist')
-    assert data_asset_config['data_asset_name'] == 'this_data_asset_config_does_not_exist'
+    assert data_asset_config['data_asset_name'] == 'mydatasource/mygenerator/this_data_asset_config_does_not_exist/default'
     assert len(data_asset_config['expectations']) == 0
 
 def test_save_data_asset_config(data_context):
     data_asset_config = data_context.get_expectations('this_data_asset_config_does_not_exist')
-    assert data_asset_config['data_asset_name'] == 'this_data_asset_config_does_not_exist'
+    assert data_asset_config['data_asset_name'] == 'mydatasource/mygenerator/this_data_asset_config_does_not_exist/default'
     assert len(data_asset_config['expectations']) == 0
     data_asset_config['expectations'].append({
             "expectation_type": "expect_table_row_count_to_equal",
@@ -199,19 +198,6 @@ def test_compile(data_context):
         }
     }
 
-def test_normalize_data_asset_names(tmp_path_factory):
-    base_dir = tmp_path_factory.mktemp("test_normalize_data_asset_names")
-    base_dir = str(base_dir)
-    context = DataContext.create(base_dir)
-    # asset_dir = context_dir.join("expectations/ds1/gen1/data_asset_1/")
-    # os.makedirs(asset_dir)
-    # with open(asset_dir("default.json"), "w") as config:
-    #     json.dump({"data_asset_name": "data_assset_1"}, config)
-
-    # assert context._normalize_data_asset_name("data_asset_1") == "ds1/gen1/data_asset_1"
-    # NOTE: NORMALIZATION IS CURRENTLY A NO-OP
-    assert context._normalize_data_asset_name("data_asset_1") == "data_asset_1"
-
 def test_normalize_data_asset_names_error(data_context):
     with pytest.raises(DataContextError, match="found too many components using delimeter '/'"):
         data_context._normalize_data_asset_name("this/should/never/work/because/it/is/so/long")
@@ -220,14 +206,16 @@ def test_normalize_data_asset_names_error(data_context):
     print(data_context.list_expectations_configs())
 
 
-    assert False
+    assert True
 
 def test_normalize_data_asset_names_delimeters(data_context):
     data_context.data_asset_name_delimeter = '.'
-    assert data_context._normalize_data_asset_name("this.should.be.okay") == data_context._build_normalized_data_asset_reference(this, should, be, okay)
+    assert data_context._normalize_data_asset_name("this.should.be.okay") == \
+        data_context._build_normalized_data_asset_reference("this", "should", "be", "okay")
 
     data_context.data_asset_name_delimeter = '/'
-    assert data_context._normalize_data_asset_name("this/should/be/okay") == data_context._build_normalized_data_asset_reference(this, should, be, okay)
+    assert data_context._normalize_data_asset_name("this/should/be/okay") == \
+        data_context._build_normalized_data_asset_reference("this", "should", "be", "okay")
 
     with pytest.raises(DataContextError, match="Invalid delimeter"):
         data_context.data_asset_name_delimeter = "$"
@@ -335,22 +323,22 @@ def test_list_datasources(data_context):
 
     assert datasources == [
         {
-            "name": "default",
-            "type": "pandas"
+            "name": "mydatasource",
+            "type": "filesystem_pandas"
         }
     ]
 
-    data_context.add_datasource("second_pandas_source", "pandas")
+    data_context.add_datasource("second_pandas_source", "filesystem_pandas")
 
     datasources = data_context.list_datasources()
 
     assert datasources == [
         {
-            "name": "default",
-            "type": "pandas"
+            "name": "mydatasource",
+            "type": "filesystem_pandas"
         },
         {
             "name": "second_pandas_source",
-            "type": "pandas"
+            "type": "filesystem_pandas"
         }
     ]

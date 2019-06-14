@@ -2,10 +2,10 @@
 # It has comments that should be preserved.
 datasources:
   # For example, this one.
-  default:
-    type: pandas
+  mydatasource:
+    type: filesystem_pandas
+    base_directory: /data
     generators:
       # The name default is read if no datasource or generator is specified
-      default:
-        type: filesystem
-        base_directory: /data
+      mygenerator:
+        type: subdir_reader

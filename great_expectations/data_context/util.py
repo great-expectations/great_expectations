@@ -5,9 +5,16 @@ import logging
 import os
 import json
 import errno
+from collections import namedtuple
 
 logger = logging.getLogger(__name__)
 
+DataAssetReference = namedtuple("DataAssetReference", [
+    "datasource",
+    "generator",
+    "data_asset_name",
+    "expectations_purpose"
+])
 
 def build_slack_notification_request(validation_json=None):
     # Defaults

@@ -2,7 +2,7 @@ import os
 import logging
 
 from .datasource import Datasource
-from .filesystem_path_generator import FilesystemPathGenerator
+from .filesystem_path_generator import SubdirPathGenerator
 from .databricks_generator import DatabricksTableGenerator
 
 logger = logging.getLogger(__name__)
@@ -23,7 +23,7 @@ class SparkDFDatasource(Datasource):
             # Provide a gentle way to build a datasource with a sane default, including ability to specify the base_directory
             base_directory = kwargs.pop("base_directory", "/data")
             generators = {
-                "default": {"type": "filesystem", "base_directory": base_directory}
+                "default": {"type": "subdir_reader"}
         }
         super(SparkDFDatasource, self).__init__(name, type_="spark", data_context=data_context, generators=generators)
         self._datasource_config.update(
@@ -40,8 +40,8 @@ class SparkDFDatasource(Datasource):
         self._build_generators()
 
     def _get_generator_class(self, type_):
-        if type_ == "filesystem":
-            return FilesystemPathGenerator
+        if type_ == "subdir_reader":
+            return SubdirPathGenerator
         elif type_ == "databricks":
             return DatabricksTableGenerator
         else:
