@@ -55,13 +55,13 @@ def test_parameter_substitution(single_expectation_custom_data_asset):
     # Establish our expectation using that parameter
     result = single_expectation_custom_data_asset.expect_nothing(
         expectation_argument={"$PARAMETER": "upstream_dag_key"})
-    config = single_expectation_custom_data_asset.get_expectation_suite()
+    suite = single_expectation_custom_data_asset.get_expectation_suite()
 
-    # Ensure our value has been substituted during evaluation, and set properly in the config
+    # Ensure our value has been substituted during evaluation, and set properly in the suite
     assert result["result"]["details"]["expectation_argument"] == "upstream_dag_value"
-    assert config["evaluation_parameters"] == {
+    assert suite["evaluation_parameters"] == {
         "upstream_dag_key": "upstream_dag_value"}
-    assert config["expectations"][0]["kwargs"] == {
+    assert suite["expectations"][0]["kwargs"] == {
         "expectation_argument": {"$PARAMETER": "upstream_dag_key"}}
 
 
@@ -71,12 +71,12 @@ def test_exploratory_parameter_substitution(single_expectation_custom_data_asset
     result = single_expectation_custom_data_asset.expect_nothing(
         expectation_argument={"$PARAMETER": "upstream_dag_key",
                               "$PARAMETER.upstream_dag_key": "temporary_value"})
-    config = single_expectation_custom_data_asset.get_expectation_suite()
-    # Ensure our value has been substituted during evaluation, and NOT stored in the config
+    suite = single_expectation_custom_data_asset.get_expectation_suite()
+    # Ensure our value has been substituted during evaluation, and NOT stored in the suite
     assert result["result"]["details"]["expectation_argument"] == "temporary_value"
-    assert "evaluation_parameters" not in config or config["evaluation_parameters"] == {
+    assert "evaluation_parameters" not in suite or suite["evaluation_parameters"] == {
     }
-    assert config["expectations"][0]["kwargs"] == {
+    assert suite["expectations"][0]["kwargs"] == {
         "expectation_argument": {"$PARAMETER": "upstream_dag_key"}}
 
     # Evaluating the expectation without the parameter should now fail, because no parameters were set

@@ -46,7 +46,7 @@ class DataAsset(object):
         batch_kwargs = kwargs.pop("batch_kwargs", None)
         super(DataAsset, self).__init__(*args, **kwargs)
         self._interactive_evaluation = interactive_evaluation
-        self._initialize_expectations(config=expectation_suite, data_asset_name=data_asset_name)
+        self._initialize_expectations(expectation_suite=expectation_suite, data_asset_name=data_asset_name)
         self._data_context = data_context
         self._batch_kwargs = batch_kwargs
         if autoinspect_func is not None:
@@ -183,7 +183,6 @@ class DataAsset(object):
                 else:
                     return_obj = {"stored_configuration": expectation_config}
 
-
                 # Append the expectation to the config.
                 self._append_expectation(expectation_config)
 
@@ -219,7 +218,7 @@ class DataAsset(object):
 
         return outer_wrapper
 
-    def _initialize_expectations(self, config=None, data_asset_name=None):
+    def _initialize_expectations(self, expectation_suite=None, data_asset_name=None):
         """Instantiates `_expectation_suite` as empty by default or with a specified expectation `config`.
         In addition, this always sets the `default_expectation_args` to:
             `include_config`: False,
@@ -231,7 +230,7 @@ class DataAsset(object):
         interoperability.
 
         Args:
-            config (json): \
+            expectation_suite (json): \
                 A json-serializable expectation config. \
                 If None, creates default `_expectation_suite` with an empty list of expectations and \
                 key value `data_asset_name` as `data_asset_name`.
@@ -240,9 +239,9 @@ class DataAsset(object):
                 The name to assign to `_expectation_suite.data_asset_name` if `config` is not provided.
 
         """
-        if config != None:
-            #!!! Should validate the incoming config with jsonschema here
-            self._expectation_suite = DotDict(copy.deepcopy(config))
+        if expectation_suite is not None:
+            # TODO: validate the incoming expectation_suite with jsonschema here
+            self._expectation_suite = DotDict(copy.deepcopy(expectation_suite))
             if data_asset_name is not None:
                 self._expectation_suite["data_asset_name"] = data_asset_name
 

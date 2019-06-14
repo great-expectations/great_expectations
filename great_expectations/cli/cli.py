@@ -62,16 +62,16 @@ def cli():
               help='Name of the custom dataset class to use during evaluation.')
 def validate(dataset, expectation_suite_file, evaluation_parameters, result_format,
              catch_exceptions, only_return_failures, custom_dataset_module, custom_dataset_class):
-    """Validate a CSV file against an expectations configuration.
+    """Validate a CSV file against an expectation suite.
 
     DATASET: Path to a file containing a CSV file to validate using the provided expectation_suite_file.
 
-    EXPECTATION_SUITE_FILE: Path to a file containing a valid great_expectations expectations config to use to \
+    EXPECTATION_SUITE_FILE: Path to a file containing a valid great_expectations expectations suite to use to \
 validate the data.
     """
 
     """
-    Read a dataset file and validate it using a config saved in another file. Uses parameters defined in the dispatch
+    Read a dataset file and validate it using an expectation suite saved in another file. Uses parameters defined in the dispatch
     method.
 
     :param parsed_args: A Namespace object containing parsed arguments from the dispatch method.
@@ -85,7 +85,7 @@ validate the data.
         evaluation_parameters = json.load(
             open(evaluation_parameters, "r"))
 
-    # Use a custom dataasset module and class if provided. Otherwise infer from the config.
+    # Use a custom dataasset module and class if provided. Otherwise infer from the expectation suite
     if custom_dataset_module:
         sys.path.insert(0, os.path.dirname(
             custom_dataset_module))
