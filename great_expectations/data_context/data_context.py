@@ -34,6 +34,7 @@ yaml = YAML()
 yaml.indent(mapping=2, sequence=4, offset=2)
 yaml.default_flow_style = False
 
+ALLOWED_DELIMITERS = ['.', '/']
 
 class DataContext(object):
     """A DataContext represents a Great Expectations project. It captures essential information such as
@@ -90,7 +91,7 @@ class DataContext(object):
 
         self._load_evaluation_parameter_store()
         self._compiled = False
-        if new_delimiter not in ['.', '/']:
+        if data_asset_name_delimiter not in ALLOWED_DELIMITERS:
             raise DataContextError("Invalid delimiter: delimiter must be '.' or '/'")
         self._data_asset_name_delimiter = data_asset_name_delimiter
 
@@ -101,7 +102,7 @@ class DataContext(object):
         try:
             with open(os.path.join(self.context_root_directory, "great_expectations/great_expectations.yml"), "r") as data:
                 return yaml.load(data)
-        except IOError as e:
+        except IOError:
             raise ConfigNotFoundError(self.context_root_directory)
 
 
@@ -111,7 +112,7 @@ class DataContext(object):
     
     @data_asset_name_delimiter.setter
     def data_asset_name_delimiter(self, new_delimiter):
-        if new_delimiter not in ['.', '/']:
+        if new_delimiter not in ALLOWED_DELIMITERS:
             raise DataContextError("Invalid delimiter: delimiter must be '.' or '/'")
         else:
             self._data_asset_name_delimiter = new_delimiter
@@ -129,7 +130,8 @@ class DataContext(object):
 
         # We need to ensure data_asset_name is a valid filepath no matter its current state
         if isinstance(data_asset_name, NormalizedDataAssetName):
-            relative_path = "/".join(data_asset_name)
+            name_parts = [name_part.replace("/", "__") for name_part in data_asset_name]
+            relative_path = "/".join(name_parts)
         elif isinstance(data_asset_name, string_types):
             # if our delimiter is not '/', we need to first replace any slashes that exist in the name
             # to avoid extra layers of nesting (e.g. for dbt models)
