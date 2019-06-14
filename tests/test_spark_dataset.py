@@ -3,8 +3,8 @@ from great_expectations.datasource import SparkDFDatasource
 import pytest
 
 datasource = SparkDFDatasource(base_directory="./tests/test_sets")
-titanic_dataset = datasource.get_data_asset('Titanic.csv', header=True)
-strf_dataset = datasource.get_data_asset('strf_test.csv', header=True)
+titanic_dataset = datasource.get_batch('Titanic.csv', header=True)
+strf_dataset = datasource.get_batch('strf_test.csv', header=True)
 
 
 def test_expect_column_values_to_be_unique():

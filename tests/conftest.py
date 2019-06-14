@@ -15,7 +15,7 @@ from .test_utils import get_dataset
 CONTEXTS = ['PandasDataset', 'SqlAlchemyDataset', 'SparkDFDataset']
 
 @pytest.fixture
-def empty_expectations_config():
+def empty_expectation_suite():
     config = {
         'dataset_name': "empty_config_fixture",
         'meta': {},
@@ -24,7 +24,7 @@ def empty_expectations_config():
     return config
 
 @pytest.fixture
-def basic_expectations_config():
+def basic_expectation_suite():
     config = {
         'dataset_name': "basic_config_fixture",
         'meta': {},
@@ -118,10 +118,10 @@ def data_context(tmp_path_factory):
     context_path = tmp_path_factory.mktemp('data_context')
     context_path = str(context_path)
     asset_config_path = os.path.join(context_path, "great_expectations/expectations")
-    safe_mmkdir(os.path.join(asset_config_path, "mydatasource/mygenerator/parameterized_expectations_config_fixture"), exist_ok=True)
+    safe_mmkdir(os.path.join(asset_config_path, "mydatasource/mygenerator/parameterized_expectation_suite_fixture"), exist_ok=True)
     shutil.copy("./tests/test_fixtures/great_expectations_basic.yml", str(os.path.join(context_path, "great_expectations/great_expectations.yml")))
-    shutil.copy("./tests/test_fixtures/expectations/parameterized_expectations_config_fixture.json", 
-        os.path.join(asset_config_path, "mydatasource/mygenerator/parameterized_expectations_config_fixture/default.json"))
+    shutil.copy("./tests/test_fixtures/expectation_suites/parameterized_expectation_suite_fixture.json", 
+        os.path.join(asset_config_path, "mydatasource/mygenerator/parameterized_expectation_suite_fixture/default.json"))
     return ge.data_context.DataContext(context_path)
 
 @pytest.fixture()

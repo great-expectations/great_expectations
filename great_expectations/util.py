@@ -14,14 +14,14 @@ from great_expectations.data_context import DataContext
 logger = logging.getLogger(__name__)
 
 
-def _convert_to_dataset_class(df, dataset_class, expectations_config=None, autoinspect_func=None):
+def _convert_to_dataset_class(df, dataset_class, expectation_suite=None, autoinspect_func=None):
     """
-    Convert a (pandas) dataframe to a great_expectations dataset, with (optional) expectations_config
+    Convert a (pandas) dataframe to a great_expectations dataset, with (optional) expectation_suite
     """
-    if expectations_config is not None:
+    if expectation_suite is not None:
         # Create a dataset of the new class type, and manually initialize expectations according to the provided configuration
         new_df = dataset_class.from_dataset(df)
-        new_df._initialize_expectations(expectations_config)
+        new_df._initialize_expectations(expectation_suite)
     else:
         # Instantiate the new Dataset with default expectations
         new_df = dataset_class.from_dataset(df)
@@ -34,20 +34,20 @@ def _convert_to_dataset_class(df, dataset_class, expectations_config=None, autoi
 def read_csv(
     filename,
     dataset_class=dataset.pandas_dataset.PandasDataset,
-    expectations_config=None,
+    expectation_suite=None,
     autoinspect_func=None,
     *args, **kwargs
 ):
     df = pd.read_csv(filename, *args, **kwargs)
     df = _convert_to_dataset_class(
-        df, dataset_class, expectations_config, autoinspect_func)
+        df, dataset_class, expectation_suite, autoinspect_func)
     return df
 
 
 def read_json(
     filename,
     dataset_class=dataset.pandas_dataset.PandasDataset,
-    expectations_config=None,
+    expectation_suite=None,
     accessor_func=None,
     autoinspect_func=None,
     *args, **kwargs
@@ -61,14 +61,14 @@ def read_json(
         df = pd.read_json(filename, *args, **kwargs)
 
     df = _convert_to_dataset_class(
-        df, dataset_class, expectations_config, autoinspect_func)
+        df, dataset_class, expectation_suite, autoinspect_func)
     return df
 
 
 def read_excel(
     filename,
     dataset_class=dataset.pandas_dataset.PandasDataset,
-    expectations_config=None,
+    expectation_suite=None,
     autoinspect_func=None,
     *args, **kwargs
 ):
@@ -77,7 +77,7 @@ def read_excel(
     Args:
         filename (string): path to file to read
         dataset_class (Dataset class): class to which to convert resulting Pandas df
-        expectations_config (string): path to great_expectations config file
+        expectation_suite (string): path to great_expectations config file
 
     Returns:
         great_expectations dataset or ordered dict of great_expectations datasets,
@@ -87,17 +87,17 @@ def read_excel(
     if isinstance(df, dict):
         for key in df:
             df[key] = _convert_to_dataset_class(
-                df[key], dataset_class, expectations_config, autoinspect_func)
+                df[key], dataset_class, expectation_suite, autoinspect_func)
     else:
         df = _convert_to_dataset_class(
-            df, dataset_class, expectations_config, autoinspect_func)
+            df, dataset_class, expectation_suite, autoinspect_func)
     return df
 
 
 def read_table(
     filename,
     dataset_class=dataset.pandas_dataset.PandasDataset,
-    expectations_config=None,
+    expectation_suite=None,
     autoinspect_func=None,
     *args, **kwargs
 ):
@@ -106,21 +106,21 @@ def read_table(
     Args:
         filename (string): path to file to read
         dataset_class (Dataset class): class to which to convert resulting Pandas df
-        expectations_config (string): path to great_expectations config file
+        expectation_suite (string): path to great_expectations config file
 
     Returns:
         great_expectations dataset
     """
     df = pd.read_table(filename, *args, **kwargs)
     df = _convert_to_dataset_class(
-        df, dataset_class, expectations_config, autoinspect_func)
+        df, dataset_class, expectation_suite, autoinspect_func)
     return df
 
 
 def read_parquet(
     filename,
     dataset_class=dataset.pandas_dataset.PandasDataset,
-    expectations_config=None,
+    expectation_suite=None,
     autoinspect_func=None,
     *args, **kwargs
 ):
@@ -129,20 +129,20 @@ def read_parquet(
     Args:
         filename (string): path to file to read
         dataset_class (Dataset class): class to which to convert resulting Pandas df
-        expectations_config (string): path to great_expectations config file
+        expectation_suite (string): path to great_expectations config file
 
     Returns:
         great_expectations dataset
     """
     df = pd.read_parquet(filename, *args, **kwargs)
     df = _convert_to_dataset_class(
-        df, dataset_class, expectations_config, autoinspect_func)
+        df, dataset_class, expectation_suite, autoinspect_func)
     return df
 
 
 def from_pandas(pandas_df,
                 dataset_class=dataset.pandas_dataset.PandasDataset,
-                expectations_config=None,
+                expectation_suite=None,
                 autoinspect_func=None
                 ):
     """Read a Pandas data frame and return a great_expectations dataset.
@@ -151,7 +151,7 @@ def from_pandas(pandas_df,
         pandas_df (Pandas df): Pandas data frame
         dataset_class (Dataset class) = dataset.pandas_dataset.PandasDataset:
             class to which to convert resulting Pandas df
-        expectations_config (string) = None: path to great_expectations config file
+        expectation_suite (string) = None: path to great_expectations config file
         autoinspect_func (function) = None: The autoinspection function that should 
             be run on the dataset to establish baseline expectations.
 
@@ -161,34 +161,34 @@ def from_pandas(pandas_df,
     return _convert_to_dataset_class(
         pandas_df,
         dataset_class,
-        expectations_config,
+        expectation_suite,
         autoinspect_func
     )
 
 
-def validate(data_asset, expectations_config=None, data_asset_name=None, data_context=None, data_asset_type=None, *args, **kwargs):
+def validate(data_asset, expectation_suite=None, data_asset_name=None, data_context=None, data_asset_type=None, *args, **kwargs):
     """Validate the provided data asset using the provided config"""
-    if expectations_config is None and data_context is None:
+    if expectation_suite is None and data_context is None:
         raise ValueError(
             "Either an expectations config or a DataContext is required for validation.")
 
-    if expectations_config is None:
+    if expectation_suite is None:
         logger.info("Using expectations config from DataContext.")
         # Allow data_context to be a string, and try loading it from path in that case
         if isinstance(data_context, string_types):
             data_context = DataContext(data_context)                
-        expectations_config = data_context.get_expectations(data_asset_name)
+        expectation_suite = data_context.get_expectation_suite(data_asset_name)
     else:
-        if data_asset_name in expectations_config:
+        if data_asset_name in expectation_suite:
             logger.info("Using expectations config with name %s" %
-                        expectations_config["data_asset_name"])
+                        expectation_suite["data_asset_name"])
         else:
             logger.info("Using expectations config with no data_asset_name")
 
     # If the object is already a Dataset type, then this is purely a convenience method
     # and no conversion is needed
     if isinstance(data_asset, dataset.Dataset) and data_asset_type is None:
-        return data_asset.validate(expectations_config=expectations_config, data_context=data_context, *args, **kwargs)
+        return data_asset.validate(expectation_suite=expectation_suite, data_context=data_context, *args, **kwargs)
     elif data_asset_type is None:
         # Guess the GE data_asset_type based on the type of the data_asset
         if isinstance(data_asset, pd.DataFrame):
@@ -209,7 +209,7 @@ def validate(data_asset, expectations_config=None, data_asset_name=None, data_co
                 "The validate util method only supports validation for subtypes of the provided data_asset_type.")
 
     data_asset_ = _convert_to_dataset_class(
-        data_asset, data_asset_type, expectations_config)
+        data_asset, data_asset_type, expectation_suite)
     return data_asset_.validate(*args, data_context=data_context, **kwargs)
 
 

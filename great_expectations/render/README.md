@@ -208,7 +208,7 @@ The relationship from Expectation (or EVR) to snippet methods is one to one or n
 
 ```
 ge.render(
-    expectations_config=my_expectation_config,
+    expectation_suite=my_expectation_config,
     view_model=ge.render.view_models.default_html.prescriptive_data_docs
 )
 ```
@@ -219,7 +219,7 @@ ge.render(
 
 ```
 ge.render(
-    expectations_config=my_expectation_config,
+    expectation_suite=my_expectation_config,
     view_model=ge.render.view_models.slack
     render_to="json"
 )

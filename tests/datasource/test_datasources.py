@@ -73,7 +73,7 @@ def test_standalone_pandas_datasource(test_folder_connection_path):
     assert manual_batch_kwargs["path"] == auto_batch_kwargs["path"]
 
     # Include some extra kwargs...
-    dataset = datasource.get_data_asset("test", batch_kwargs=auto_batch_kwargs, sep=",", header=0, index_col=0)
+    dataset = datasource.get_batch("test", batch_kwargs=auto_batch_kwargs, sep=",", header=0, index_col=0)
     assert isinstance(dataset, PandasDataset)
     assert (dataset["col_1"] == [1, 2, 3, 4, 5]).all()
 
@@ -82,8 +82,8 @@ def test_standalone_sqlalchemy_datasource(test_db_connection_string):
         'SqlAlchemy', connection_string=test_db_connection_string, echo=False)
 
     assert datasource.get_available_data_asset_names() == {"default": {"table_1", "table_2"}}
-    dataset1 = datasource.get_data_asset("table_1")
-    dataset2 = datasource.get_data_asset("table_2", schema='main')
+    dataset1 = datasource.get_batch("table_1")
+    dataset2 = datasource.get_batch("table_2", schema='main')
     assert isinstance(dataset1, SqlAlchemyDataset)
     assert isinstance(dataset2, SqlAlchemyDataset)
 
@@ -167,7 +167,7 @@ def test_sqlalchemysource_templating(sqlitedb_engine):
     datasource = SqlAlchemyDatasource(engine=sqlitedb_engine)
     generator = datasource.get_generator()
     generator.add_query("test", "select 'cat' as ${col_name};")
-    df = datasource.get_data_asset("test", col_name="animal_name")
+    df = datasource.get_batch("test", col_name="animal_name")
     res = df.expect_column_to_exist("animal_name")
     assert res["success"] == True
 

@@ -29,7 +29,7 @@ class TestExpectationDecorators(unittest.TestCase):
         eds.no_op_expectation()
         eds.no_op_value_expectation('a')
 
-        config = eds.get_expectations()
+        config = eds.get_expectation_suite()
         self.assertEqual({'expectation_type': 'no_op_expectation', 'kwargs': {}},
                          config['expectations'][0])
 
@@ -49,7 +49,7 @@ class TestExpectationDecorators(unittest.TestCase):
         metadata = {'meta_key': 'meta_value'}
         eds = ExpectationOnlyDataAsset()
         out = eds.no_op_value_expectation('a', meta=metadata)
-        config = eds.get_expectations()
+        config = eds.get_expectation_suite()
 
         self.assertEqual({'success': True,
                           'meta': metadata},

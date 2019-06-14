@@ -9,10 +9,10 @@ from collections import namedtuple
 
 logger = logging.getLogger(__name__)
 
-DataAssetReference = namedtuple("DataAssetReference", [
+NormalizedDataAssetName = namedtuple("NormalizedDataAssetName", [
     "datasource",
     "generator",
-    "data_asset_name",
+    "generator_asset",
     "suite"
 ])
 
