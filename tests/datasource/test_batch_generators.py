@@ -2,14 +2,16 @@ import pytest
 
 import os
 
+from great_expectations.exceptions import DataContextError
+
 def test_file_kwargs_generator(data_context, filesystem_csv):
     base_dir = filesystem_csv
 
-    datasource = data_context.add_datasource("default", "pandas", base_directory=str(base_dir))
+    datasource = data_context.add_datasource("default", "filesystem_pandas", base_directory=str(base_dir))
     generator = datasource.get_generator("default")
     known_data_asset_names = datasource.get_available_data_asset_names()
 
-    assert known_data_asset_names[0]["available_data_asset_names"] == set([
+    assert known_data_asset_names["default"] == set([
         "f1", "f2", "f3"
     ])
 
@@ -34,7 +36,7 @@ def test_file_kwargs_generator(data_context, filesystem_csv):
 
 def test_file_kwargs_generator_error(data_context, filesystem_csv):
     base_dir = filesystem_csv
-    data_context.add_datasource("default", "pandas", base_directory=str(base_dir))
+    data_context.add_datasource("default", "filesystem_pandas", base_directory=str(base_dir))
 
-    with pytest.raises(IOError, match="f4"):
-        data_context.get_batch("default", "f4")
+    with pytest.raises(DataContextError, match="f4"):
+        data_context.get_batch("f4")
