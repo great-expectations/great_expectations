@@ -4,8 +4,8 @@ datasources:
   # For example, this one.
   mydatasource:
     type: pandas
-    base_directory: /data
     generators:
       # The name default is read if no datasource or generator is specified
       mygenerator:
         type: subdir_reader
+        base_directory: /data
