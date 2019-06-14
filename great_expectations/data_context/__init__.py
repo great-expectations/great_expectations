@@ -11,7 +11,7 @@ except ImportError:
 
 try:
     from .spark_context import SparkCSVDataContext
-    from .spark_parquet_context import SparkParquetContext
+    from .spark_parquet_context import SparkParquetDataContext
     from .databricks_context import DatabricksTableContext
 except ImportError:
     logger.info("Unable to load Spark contexts; install optional spark dependency for support")
