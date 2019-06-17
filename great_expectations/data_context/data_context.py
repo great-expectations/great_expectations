@@ -672,9 +672,8 @@ class DataContext(object):
         else:
             return return_obj
 
-    def profile_datasource(self, datasource_name, profiler_name="PseudoPandasProfiling", max_data_assets=10):
-        # logger.info("Profiling %s with %s" % (datasource_name, profiler_name))
-        print("Profiling %s with %s" % (datasource_name, profiler_name))
+    def profile_datasource(self, datasource_name, profiler=BasicDatasetProfiler, max_data_assets=10):
+        logger.info("Profiling %s with %s" % (datasource_name, profiler.__name__))
         datasource = self.get_datasource(datasource_name)
         data_asset_names = datasource.get_available_data_asset_names()
 
@@ -682,15 +681,12 @@ class DataContext(object):
         #!!! Note: need to review this to make sure the names are properly qualified.
         data_asset_name_list = list(data_asset_names[0]["available_data_asset_names"])
         total_data_assets = len(data_asset_name_list)
-        # logger.info("Found %d named data assets" % (total_data_assets))
-        print("Found %d named data assets" % (total_data_assets))
-        
+        logger.info("Found %d named data assets" % (total_data_assets))
+                
         if max_data_assets == None or max_data_assets >= len(data_asset_name_list):
-            # logger.info("Profiling all %d." % (len(data_asset_name_list)))
-            print("Profiling all %d." % (len(data_asset_name_list)))
+            logger.info("Profiling all %d." % (len(data_asset_name_list)))
         else:
-            # logger.info("Profiling the first %d, alphabetically." % (max_data_assets))
-            print("Profiling the first %d, alphabetically." % (max_data_assets))
+            logger.info("Profiling the first %d, alphabetically." % (max_data_assets))
             data_asset_name_list.sort()
             data_asset_name_list = data_asset_name_list[:max_data_assets]
 
@@ -704,7 +700,7 @@ class DataContext(object):
                 batch = self.get_batch(datasource_name=datasource_name, data_asset_name=name)
 
                 #Note: This logic is specific to DatasetProfilers, which profile a single batch. Multi-batch profilers will have more to unpack.
-                expectations_config, validation_result = BasicDatasetProfiler.profile(batch)
+                expectations_config, validation_result = profiler.profile(batch)
 
                 row_count = batch.shape[0]
                 total_rows += row_count
@@ -719,17 +715,16 @@ class DataContext(object):
                 
                 duration = (datetime.datetime.now() - start_time).total_seconds()
 
-                print("\tProfiled %d rows from %s (%.3f sec)" % (row_count, name, duration))
+                logger.info("\tProfiled %d rows from %s (%.3f sec)" % (row_count, name, duration))
 
             #!!! FIXME: THIS IS WAAAAY TO GENERAL. As soon as BatchKwargsError is fully implemented, we'll want to switch to that.
+            # TODO: ^^^
             except:
-                #!!! FIXME: This error message could be a lot more helpful than it is
-                # print("\tWARNING: Unable to load %s. Skipping profiling." % (name))
-                print("\tWARNING: Something went wrong when profiling %s. (Perhaps a loading error?) Skipping." % (name))
+                logger.warning("\tSomething went wrong when profiling %s. (Perhaps a loading error?) Skipping." % (name))
                 skipped_data_assets += 1
 
         total_duration = (datetime.datetime.now() - total_start_time).total_seconds()
-        print("""
+        logger.info("""
 Profiled %d of %d named data assets, with %d total rows and %d columns in %.2f seconds.
 %d data assets were skipped due to errors.
 Generated, evaluated, and stored %d candidate Expectations.
