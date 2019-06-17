@@ -17,19 +17,19 @@ CONTEXTS = ['PandasDataset', 'SqlAlchemyDataset', 'SparkDFDataset']
 
 
 @pytest.fixture
-def empty_expectations_config():
-    config = {
-        'dataset_name': "empty_config_fixture",
+def empty_expectation_suite():
+    expectation_suite = {
+        'dataset_name': "empty_suite_fixture",
         'meta': {},
         'expectations': []
     }
-    return config
+    return expectation_suite
 
 
 @pytest.fixture
-def basic_expectations_config():
-    config = {
-        'dataset_name': "basic_config_fixture",
+def basic_expectation_suite():
+    expectation_suite = {
+        'dataset_name': "basic_suite_fixture",
         'meta': {},
         'expectations': [
             {
@@ -58,7 +58,7 @@ def basic_expectations_config():
             }
         ]
     }
-    return config
+    return expectation_suite
 
 
 @pytest.fixture
@@ -126,19 +126,17 @@ def data_context(tmp_path_factory):
     # This data_context is *manually* created to have the config we want, vs created with DataContext.create
     context_path = tmp_path_factory.mktemp('data_context')
     context_path = str(context_path)
-    asset_config_path = os.path.join(
-        context_path, "great_expectations/expectations")
-    safe_mmkdir(asset_config_path, exist_ok=True)
-    shutil.copy("./tests/test_fixtures/great_expectations_basic.yml",
-                str(os.path.join(context_path, "great_expectations/great_expectations.yml")))
-    shutil.copy("./tests/test_fixtures/expectations/parameterized_expectations_config_fixture.json",
-                str(asset_config_path))
+    asset_config_path = os.path.join(context_path, "great_expectations/expectations")
+    safe_mmkdir(os.path.join(asset_config_path, "mydatasource/mygenerator/parameterized_expectation_suite_fixture"), exist_ok=True)
+    shutil.copy("./tests/test_fixtures/great_expectations_basic.yml", str(os.path.join(context_path, "great_expectations/great_expectations.yml")))
+    shutil.copy("./tests/test_fixtures/expectation_suites/parameterized_expectation_suite_fixture.json", 
+        os.path.join(asset_config_path, "mydatasource/mygenerator/parameterized_expectation_suite_fixture/default.json"))
     return ge.data_context.DataContext(context_path)
 
 
 @pytest.fixture()
 def filesystem_csv(tmp_path_factory):
-    base_dir = tmp_path_factory.mktemp('test_file_kwargs_generator')
+    base_dir = tmp_path_factory.mktemp('filesystem_csv')
     base_dir = str(base_dir)
     # Put a few files in the directory
     with open(os.path.join(base_dir, "f1.csv"), "w") as outfile:

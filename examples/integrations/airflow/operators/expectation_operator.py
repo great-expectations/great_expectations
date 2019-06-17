@@ -32,7 +32,7 @@ class ExpectationOperator(BaseOperator):
         Validate provided dataset using great_expectations.
         :param dataset: Name of the dataset being loaded
         :type str
-        :param expectations_json: file pointing to expectation config or json string
+        :param expectations_json: file pointing to expectation suite or json string
         :type str
         :param fail_on_error: True if airflow job should fail when expectations fail
         :type bool
@@ -137,15 +137,15 @@ class ExpectationOperator(BaseOperator):
 
     def _load_json(self):
         """
-        Load expectation config based on operator parameters. If provided expectations_json is a file the config will
-        be loaded from this file. Otherwise we'll try to load the config as a string.
+        Load expectation suite based on operator parameters. If provided expectations_json is a file the suite will
+        be loaded from this file. Otherwise we'll try to load the expectation suite as a string.
         :return:
         """
         if os.path.isfile(self.expectations_json):
-            self.log.info("Loading expectation config from file {file}".format(file=self.expectations_json))
+            self.log.info("Loading expectation suite from file {file}".format(file=self.expectations_json))
             return json.load(open(self.expectations_json))
         else:
-            self.log.info("Loading expectation config from string")
+            self.log.info("Loading expectation suite from string")
             return json.loads(self.expectations_json)
 
     def _store_results(self, results):
@@ -154,9 +154,9 @@ class ExpectationOperator(BaseOperator):
 
     def execute(self, context):
         df = self._get_dataframe()
-        config = self._load_json()
+        suite = self._load_json()
         self.log.info("Start dataset validation for set {set}".format(set=self.dataset_name))
-        results = df.validate(expectations_config=config)
+        results = df.validate(expectation_suite=suite)
 
         self.log.info(pformat(results))
 

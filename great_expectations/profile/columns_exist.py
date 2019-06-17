@@ -34,4 +34,4 @@ class ColumnsExistProfiler(DatasetProfiler):
         create_multiple_expectations(
             dataset, table_columns, "expect_column_to_exist")
 
-        return dataset.get_expectations(suppress_warnings=True)
+        return dataset.get_expectation_suite(suppress_warnings=True)

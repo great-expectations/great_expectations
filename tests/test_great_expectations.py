@@ -193,11 +193,11 @@ class TestValidation(unittest.TestCase):
     def test_validate(self):
 
         with open("./tests/test_sets/titanic_expectations.json") as f:
-            my_expectations_config = json.load(f)
+            my_expectation_suite = json.load(f)
 
         my_df = ge.read_csv(
             "./tests/test_sets/Titanic.csv",
-            expectations_config=my_expectations_config
+            expectation_suite=my_expectation_suite
         )
         my_df.set_default_expectation_argument("result_format", "COMPLETE")
 
@@ -274,7 +274,7 @@ class TestValidation(unittest.TestCase):
             }]
         }
         results = df.validate(
-            expectations_config=validation_config_non_existent_expectation)['results']
+            expectation_suite=validation_config_non_existent_expectation)['results']
 
         self.assertIn(
             "object has no attribute 'non_existent_expectation'",
@@ -301,7 +301,7 @@ class TestValidation(unittest.TestCase):
             }]
         }
 
-        results = df.validate(expectations_config=validation_config_invalid_parameter)[
+        results = df.validate(expectation_suite=validation_config_invalid_parameter)[
             'results']
         print(results[0]['exception_info'])
         self.assertIn(
@@ -370,20 +370,20 @@ class TestRepeatedAppendExpectation(unittest.TestCase):
     def test_validate(self):
 
         with open("./tests/test_sets/titanic_expectations.json") as f:
-            my_expectations_config = json.load(f)
+            my_expectation_suite = json.load(f)
 
         my_df = ge.read_csv("./tests/test_sets/Titanic.csv",
                             profiler=ge.profile.ColumnsExistProfiler)
 
         self.assertEqual(
-            len(my_df.get_expectations()['expectations']),
+            len(my_df.get_expectation_suite()['expectations']),
             7
         )
 
         # For column_expectations, _append_expectation should only replace expectations where the expetation_type AND the column match
         my_df.expect_column_to_exist("PClass")
         self.assertEqual(
-            len(my_df.get_expectations()['expectations']),
+            len(my_df.get_expectation_suite()['expectations']),
             7
         )
 

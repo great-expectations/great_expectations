@@ -16,7 +16,7 @@ profiler class that will evaluate a dataset object and add expectations to it.
     >> import great_expectations as ge
     >> df = ge.dataset.PandasDataset({"col": [1, 2, 3, 4, 5]})
     >> df.profile(ge.profile.ColumnsExistProfiler)
-    >> df.get_expectations()
+    >> df.get_expectation_suite()
         {'dataset_name': None,
          'meta': {'great_expectations.__version__': '0.4.4__develop'},
          'expectations': [

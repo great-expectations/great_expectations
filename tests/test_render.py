@@ -28,11 +28,11 @@
 #         from great_expectations import render
 
 #     def test_prescriptive_expectation_renderer(self):
-#         expectations_config = json.load(
+#         expectation_suite = json.load(
 #             open('tests/test_fixtures/rendering_fixtures/expectation_suite_3.json')
 #         )
 #         results = render.view_models.PrescriptiveExpectationPageRenderer().render(
-#             expectations_config,
+#             expectation_suite,
 #         )
 #         assert results != None
 #         assert "<li> is a required field.</li>" in results
@@ -75,7 +75,7 @@
 #     def test_render_modes(self):
 #         # df = ge.read_csv("examples/data/Meteorite_Landings.csv")
 #         # df.autoinspect(ge.dataset.autoinspect.pseudo_pandas_profiling)
-#         # expectations_list = df.get_expectations_config()["expectations"]
+#         # expectations_list = df.get_expectation_suite()["expectations"]
 
 #         expectations_list = json.load(
 #             open('tests/test_fixtures/rendering_fixtures/expectation_suite_3.json')

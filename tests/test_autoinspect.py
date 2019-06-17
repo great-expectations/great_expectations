@@ -11,31 +11,31 @@ import great_expectations as ge
 
 def test_no_autoinspection():
     df = ge.dataset.PandasDataset({"a": [1, 2, 3]}, profiler=None)
-    config = df.get_expectations()
+    suite = df.get_expectation_suite()
 
-    assert len(config["expectations"]) == 0
+    assert len(suite["expectations"]) == 0
 
 
 def test_default_no_autoinspection():
     df = ge.dataset.PandasDataset({"a": [1, 2, 3]})
-    config = df.get_expectations()
+    suite = df.get_expectation_suite()
 
-    assert len(config["expectations"]) == 0
+    assert len(suite["expectations"]) == 0
 
 
 @pytest.mark.parametrize("dataset_type", CONTEXTS)
 def test_autoinspect_existing_dataset(dataset_type):
     # Get a basic dataset with no expectations
     df = get_dataset(dataset_type, {"a": [1, 2, 3]}, profiler=None)
-    config = df.get_expectations()
-    assert len(config["expectations"]) == 0
+    suite = df.get_expectation_suite()
+    assert len(suite["expectations"]) == 0
 
     # Run autoinspect
     df.profile(ge.profile.ColumnsExistProfiler)
-    config = df.get_expectations()
+    suite = df.get_expectation_suite()
 
     # Ensure that autoinspect worked
-    assert config["expectations"] == \
+    assert suite["expectations"] == \
         [{'expectation_type': 'expect_column_to_exist', 'kwargs': {'column': 'a'}}]
 
 
@@ -43,10 +43,10 @@ def test_autoinspect_existing_dataset(dataset_type):
 def test_autoinspect_columns_exist(dataset_type):
     df = get_dataset(
         dataset_type, {"a": [1, 2, 3]}, profiler=ge.profile.ColumnsExistProfiler)
-    config = df.get_expectations()
+    suite = df.get_expectation_suite()
 
-    assert len(config["expectations"]) == 1
-    assert config["expectations"] == \
+    assert len(suite["expectations"]) == 1
+    assert suite["expectations"] == \
         [{'expectation_type': 'expect_column_to_exist', 'kwargs': {'column': 'a'}}]
 
 

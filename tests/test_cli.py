@@ -9,6 +9,8 @@ import pytest
 import json
 import os
 import shutil
+import logging
+import sys
 from ruamel.yaml import YAML
 yaml = YAML()
 yaml.default_flow_style = False
@@ -36,7 +38,7 @@ Commands:
   init      Initialize a new Great Expectations project.
   profile   Profile a great expectations object.
   render    Render a great expectations object.
-  validate  Validate a CSV file against an expectations configuration.
+  validate  Validate a CSV file against an expectation suite.
 """
 
 
@@ -58,15 +60,15 @@ def test_cli_validate_help():
     result = runner.invoke(cli, ["validate", "--help"])
 
     assert result.exit_code == 0
-    expected_help_message = """Usage: cli validate [OPTIONS] DATASET EXPECTATIONS_CONFIG_FILE
+    expected_help_message = """Usage: cli validate [OPTIONS] DATASET EXPECTATION_SUITE_FILE
 
-  Validate a CSV file against an expectations configuration.
+  Validate a CSV file against an expectation suite.
 
-  DATASET: Path to a file containing a CSV file to validate using the 
-  provided expectations_config_file.
+  DATASET: Path to a file containing a CSV file to validate using the
+  provided expectation_suite_file.
 
-  EXPECTATIONS_CONFIG_FILE: Path to a file containing a valid
-  great_expectations expectations config to use to validate the data.
+  EXPECTATION_SUITE_FILE: Path to a file containing a valid
+  great_expectations expectations suite to use to validate the data.
 
 Options:
   -p, --evaluation_parameters TEXT
@@ -203,22 +205,29 @@ def test_cli_init(tmp_path_factory):
 #     assert False
 
 
-def test_cli_profile(empty_data_context, filesystem_csv_2):
+def test_cli_profile(empty_data_context, filesystem_csv_2, capsys):
     empty_data_context.add_datasource(
         "my_datasource", "pandas", base_directory=str(filesystem_csv_2))
     not_so_empty_data_context = empty_data_context
 
-    # print(not_so_empty_data_context.get_available_data_asset_names())
-
     project_root_dir = not_so_empty_data_context.get_context_root_directory()
     # print(project_root_dir)
 
+    # For some reason, even with this logging change (which is required and done in main of the cli)
+    # the click cli runner does not pick up output; capsys appears to intercept it first
+    logger = logging.getLogger("great_expectations")
+    handler = logging.StreamHandler(stream=sys.stdout)
+    formatter = logging.Formatter(
+        '%(levelname)s %(message)s')
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+    logger.setLevel(logging.INFO)
     runner = CliRunner()
     result = runner.invoke(
         cli, ["profile", "my_datasource", "-d", project_root_dir])
 
-    # print(result)
-    # print(result.output)
-
-    assert "Profiling my_datasource with BasicDatasetProfiler" in result.output
-    assert "Note: You will need to review and revise Expectations before using them in production." in result.output
+    captured = capsys.readouterr()
+    
+    assert "Profiling my_datasource with BasicDatasetProfiler" in captured.out
+    assert "Note: You will need to review and revise Expectations before using them in production." in captured.out
+    logger.removeHandler(handler)
