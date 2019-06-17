@@ -10,7 +10,9 @@ import sqlalchemy as sa
 import great_expectations as ge
 from great_expectations.data_context.util import safe_mmkdir
 
-from .test_utils import get_dataset, CONTEXTS
+from .test_utils import get_dataset
+
+CONTEXTS = ['PandasDataset', 'SqlAlchemyDataset', 'SparkDFDataset']
 
 
 @pytest.fixture

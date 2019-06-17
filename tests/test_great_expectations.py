@@ -12,7 +12,6 @@ import pandas as pd
 import re
 
 import great_expectations as ge
-from great_expectations.profile.autoinspect import columns_exist
 from great_expectations.dataset import PandasDataset, MetaPandasDataset
 from great_expectations.data_asset.data_asset import (
     _calc_validation_statistics,
@@ -374,7 +373,7 @@ class TestRepeatedAppendExpectation(unittest.TestCase):
             my_expectations_config = json.load(f)
 
         my_df = ge.read_csv("./tests/test_sets/Titanic.csv",
-                            autoinspect_func=columns_exist)
+                            profiler=ge.profile.ColumnsExistProfiler)
 
         self.assertEqual(
             len(my_df.get_expectations()['expectations']),

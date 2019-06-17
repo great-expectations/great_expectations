@@ -3,23 +3,24 @@ from __future__ import division
 import warnings
 import pytest
 import great_expectations as ge
-import great_expectations.profile.autoinspect as autoinspect
 from .test_utils import assertDeepAlmostEqual
 
 
 def test_autoinspect_filedata_asset():
-    #Expect a warning to be raised since a file object doesn't have a columns attribute
+    #Expect an error to be raised since a file object doesn't have a columns attribute
     warnings.simplefilter('always', UserWarning)
     file_path = './tests/test_sets/toy_data_complete.csv'
     my_file_data = ge.data_asset.FileDataAsset(file_path)
 
-    with pytest.raises(UserWarning):
-        with warnings.catch_warnings(record=True):
-            warnings.simplefilter("error")
-            try:
-                my_file_data.autoinspect(autoinspect.columns_exist)
-            except:
-                raise
+    with pytest.raises(AssertionError):
+        my_file_data.profile(ge.profile.ColumnsExistProfiler)
+
+        # with warnings.catch_warnings(record=True):
+        #     warnings.simplefilter("error")
+        #     try:
+        #         my_file_data.profile(ge.profile.ColumnsExistProfiler)
+        #     except:
+        #         raise
 
 
 def test_expectation_config_filedata_asset():
