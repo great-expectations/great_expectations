@@ -82,7 +82,7 @@ def test_content_block_list_available_expectations(expectations):
 def test_full_oobe_flow():
     df = ge.read_csv("examples/data/Titanic.csv")
     # df = ge.read_csv("examples/data/Meteorite_Landings.csv")
-    df.autoinspect(BasicDatasetProfiler.profile)
+    df.profile(BasicDatasetProfiler)
     # df.autoinspect(ge.dataset.autoinspect.columns_exist)
     evrs = df.validate()  # ["results"]
     # print(json.dumps(evrs, indent=2))

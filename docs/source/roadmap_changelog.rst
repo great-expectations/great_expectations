@@ -9,10 +9,16 @@ Planned Features
 * Improved variable typing
 * Support for non-tabular datasources (e.g. JSON, XML, AVRO)
 
-v.0.6.1__develop
+v.0.7.0__develop
 ________________
-
-
+* Name clarifications: we've stopped using the overloaded terms "expectations
+  config" and "config" and instead use "expectation suite" to refer to a
+  collection (or suite!) of expectations that can be used for validating a
+  data asset.
+* Major refactor of autoinspect. Autoinspect is now built around a module
+  called "profile" which provides a class-based structure for building
+  expectation suites. There is no longer a default  "autoinspect_func" --
+  calling autoinspect requires explicitly passing the desired profiler.
 
 v.0.6.1
 ________________

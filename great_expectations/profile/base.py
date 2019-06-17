@@ -42,6 +42,7 @@ class DataSetProfiler(object):
 
     @classmethod
     def profile(cls, dataset):
+        # TODO: Consider raising a more descriptive error here
         assert cls.validate_dataset(dataset)
         expectations_config = cls._profile(dataset)
 
