@@ -17,7 +17,6 @@ from collections import (
 
 from great_expectations.version import __version__
 from great_expectations.data_asset.util import DotDict, recursively_convert_to_json_serializable, parse_result_format
-from great_expectations.dataset.autoinspect import columns_exist
 
 logger = logging.getLogger("DataAsset")
 
@@ -28,32 +27,39 @@ class DataAsset(object):
         """
         Initialize the DataAsset.
 
-        :param autoinspect_func (function) = None: The autoinspection function that should be run on the data_asset to
-            establish baseline expectations.
+        :param profiler (profiler class) = None: The profiler that should be run on the data_asset to
+            build a baseline expectation suite.
 
         Note: DataAsset is designed to support multiple inheritance (e.g. PandasDataset inherits from both a
         Pandas DataFrame and Dataset which inherits from DataAsset), so it accepts generic *args and **kwargs arguments so that they can also be
         passed to other parent classes. In python 2, there isn't a clean way to include all of *args, **kwargs, and a
-        named kwarg...so we use the inelegant solution of popping from kwargs, leaving the support for the autoinspect_func
+        named kwarg...so we use the inelegant solution of popping from kwargs, leaving the support for the profiler
         parameter not obvious from the signature.
 
         """
         interactive_evaluation = kwargs.pop("interactive_evaluation", True)
-        autoinspect_func = kwargs.pop("autoinspect_func", None)
+        profiler = kwargs.pop("profiler", None)
         expectations_config = kwargs.pop("expectations_config", None)
         data_asset_name = kwargs.pop("data_asset_name", None)
         data_context = kwargs.pop("data_context", None)
         batch_kwargs = kwargs.pop("batch_kwargs", None)
+        if "autoinspect_func" in kwargs:
+            warnings.warn("Autoinspect_func is no longer supported; use a profiler instead (migration is easy!).")
         super(DataAsset, self).__init__(*args, **kwargs)
         self._interactive_evaluation = interactive_evaluation
         self._initialize_expectations(config=expectations_config, data_asset_name=data_asset_name)
         self._data_context = data_context
         self._batch_kwargs = batch_kwargs
-        if autoinspect_func is not None:
-            autoinspect_func(self)
+        if profiler is not None:
+            profiler.profile(self)
 
-    def autoinspect(self, autoinspect_func=columns_exist):
-        autoinspect_func(self)
+    def autoinspect(self, profiler):
+        warnings.warn("The term autoinspect is deprecated and will be removed in a future release. Please use 'profile'\
+        instead.")
+        profiler.profile(self)
+
+    def profile(self, profiler):
+        profiler.profile(self)
 
     @classmethod
     def expectation(cls, method_arg_names):

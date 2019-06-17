@@ -7,11 +7,12 @@ import copy
 import errno
 from glob import glob
 from six import string_types
+import datetime
 
 from .util import get_slack_callback, safe_mmkdir
 
 from great_expectations.version import __version__
-from great_expectations.exceptions import DataContextError, ConfigNotFoundError
+from great_expectations.exceptions import DataContextError, ConfigNotFoundError, ProfilerError
 
 import ipywidgets as widgets
 try:
@@ -20,11 +21,12 @@ except ImportError:
     from urlparse import urlparse
 
 from great_expectations.data_asset import DataAsset
-from great_expectations.dataset import PandasDataset
+from great_expectations.dataset import Dataset, PandasDataset
 from great_expectations.datasource.sqlalchemy_source import SqlAlchemyDatasource
 from great_expectations.datasource.dbt_source import DBTDatasource
 from great_expectations.datasource import PandasDatasource
 from great_expectations.datasource import SparkDFDatasource
+from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 
 from .expectation_explorer import ExpectationExplorer
 
@@ -669,6 +671,80 @@ class DataContext(object):
             return self._expectation_explorer_manager.create_expectation_widget(data_asset, return_obj)
         else:
             return return_obj
+
+    def profile_datasource(self, datasource_name, profiler=BasicDatasetProfiler, max_data_assets=10):
+        logger.info("Profiling %s with %s" % (datasource_name, profiler.__name__))
+        datasource = self.get_datasource(datasource_name)
+        data_asset_names = datasource.get_available_data_asset_names()
+        # TODO: This is fixed in a different PR. JPC -- merge
+        #!!! Abe 2019/06/11: This seems brittle. I don't understand why this object is packaged this way.
+        #!!! Note: need to review this to make sure the names are properly qualified.
+        data_asset_name_list = list(data_asset_names[0]["available_data_asset_names"])
+        total_data_assets = len(data_asset_name_list)
+        logger.info("Found %d named data assets" % (total_data_assets))
+                
+        if max_data_assets == None or max_data_assets >= len(data_asset_name_list):
+            logger.info("Profiling all %d." % (len(data_asset_name_list)))
+        else:
+            logger.info("Profiling the first %d, alphabetically." % (max_data_assets))
+            data_asset_name_list.sort()
+            data_asset_name_list = data_asset_name_list[:max_data_assets]
+
+        total_columns, total_expectations, total_rows, skipped_data_assets = 0, 0, 0, 0
+        total_start_time = datetime.datetime.now()
+        for name in data_asset_name_list:
+            try:
+                start_time = datetime.datetime.now()
+
+                #FIXME: There needs to be an affordance here to limit to 100 rows, or downsample, etc.
+                batch = self.get_batch(datasource_name=datasource_name, data_asset_name=name)
+
+                if not profiler.validate(batch):
+                    raise ProfilerError("batch %s is not a valid batch for the %s profiler" % (name, profiler.__name__))
+  
+                #Note: This logic is specific to DatasetProfilers, which profile a single batch. Multi-batch profilers will have more to unpack.
+                expectations_config, validation_result = profiler.profile(batch)
+
+                if isinstance(batch, Dataset):
+                    # For datasets, we can produce some more detailed statistics
+                    row_count = batch.get_row_count()
+                    total_rows += row_count
+                    new_column_count = len(set([exp["kwargs"]["column"] for exp in expectations_config["expectations"] if "column" in exp["kwargs"]]))
+                    total_columns += new_column_count
+                
+                new_expectation_count = len(expectations_config["expectations"])
+                total_expectations += new_expectation_count
+
+                #We should be able to pass a parameter to make this a `_candidate_` file
+                self.save_expectations(expectations_config)#, name)
+                # self.save_validation_result(validation_result, name)
+                
+                duration = (datetime.datetime.now() - start_time).total_seconds()
+
+                logger.info("\tProfiled %d rows from %s (%.3f sec)" % (row_count, name, duration))
+
+            #!!! FIXME: THIS IS WAAAAY TO GENERAL. As soon as BatchKwargsError is fully implemented, we'll want to switch to that.
+            # TODO: ^^^
+            except ProfilerError as err:
+                logger.warning(err.message)
+            except:
+                logger.warning("\tSomething went wrong when profiling %s. (Perhaps a loading error?) Skipping." % (name))
+                skipped_data_assets += 1
+
+        total_duration = (datetime.datetime.now() - total_start_time).total_seconds()
+        logger.info("""
+Profiled %d of %d named data assets, with %d total rows and %d columns in %.2f seconds.
+Generated, evaluated, and stored %d candidate Expectations.
+Note: You will need to review and revise Expectations before using them in production.""" % (
+            len(data_asset_name_list),
+            total_data_assets,
+            total_rows,
+            total_columns,
+            total_duration,
+            total_expectations,
+        ))
+        if skipped_data_assets > 0:
+            logger.warning("Skipped %d data assets due to errors." % skipped_data_assets)
 
 
 PROJECT_HELP_COMMENT = """# Welcome to great expectations. 

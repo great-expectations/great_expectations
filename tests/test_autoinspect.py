@@ -4,13 +4,13 @@ Tests for autoinspection framework.
 
 import pytest
 from .test_utils import get_dataset
+from .conftest import CONTEXTS
 
 import great_expectations as ge
-import great_expectations.dataset.autoinspect as autoinspect
 
 
 def test_no_autoinspection():
-    df = ge.dataset.PandasDataset({"a": [1, 2, 3]}, autoinspect_func=None)
+    df = ge.dataset.PandasDataset({"a": [1, 2, 3]}, profiler=None)
     config = df.get_expectations()
 
     assert len(config["expectations"]) == 0
@@ -23,15 +23,15 @@ def test_default_no_autoinspection():
     assert len(config["expectations"]) == 0
 
 
-@pytest.mark.parametrize("dataset_type", ["PandasDataset", "SqlAlchemyDataset"])
+@pytest.mark.parametrize("dataset_type", CONTEXTS)
 def test_autoinspect_existing_dataset(dataset_type):
     # Get a basic dataset with no expectations
-    df = get_dataset(dataset_type, {"a": [1, 2, 3]}, autoinspect_func=None)
+    df = get_dataset(dataset_type, {"a": [1, 2, 3]}, profiler=None)
     config = df.get_expectations()
     assert len(config["expectations"]) == 0
 
     # Run autoinspect
-    df.autoinspect(autoinspect.columns_exist)
+    df.profile(ge.profile.ColumnsExistProfiler)
     config = df.get_expectations()
 
     # Ensure that autoinspect worked
@@ -39,10 +39,10 @@ def test_autoinspect_existing_dataset(dataset_type):
         [{'expectation_type': 'expect_column_to_exist', 'kwargs': {'column': 'a'}}]
 
 
-@pytest.mark.parametrize("dataset_type", ["PandasDataset", "SqlAlchemyDataset"])
+@pytest.mark.parametrize("dataset_type", CONTEXTS)
 def test_autoinspect_columns_exist(dataset_type):
     df = get_dataset(
-        dataset_type, {"a": [1, 2, 3]}, autoinspect_func=autoinspect.columns_exist)
+        dataset_type, {"a": [1, 2, 3]}, profiler=ge.profile.ColumnsExistProfiler)
     config = df.get_expectations()
 
     assert len(config["expectations"]) == 1
@@ -52,4 +52,4 @@ def test_autoinspect_columns_exist(dataset_type):
 
 def test_autoinspect_warning():
     with pytest.raises(NotImplementedError):
-        ge.dataset.Dataset(autoinspect_func=autoinspect.columns_exist)
+        ge.dataset.Dataset(profiler=ge.profile.ColumnsExistProfiler)

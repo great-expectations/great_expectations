@@ -160,12 +160,12 @@ Let's add Great Expectations to your project, by scaffolding a new great_expecta
         ├── notebooks
         ├── plugins
         ├── uncommitted
-        │   ├── validations        
-        │   ├── credentials        
-        │   └── samples        
+        │   ├── validations
+        │   ├── credentials
+        │   └── samples
         └── .gitignore
-    
-OK to proceed?    
+
+OK to proceed?
     """
 
     msg_prompt_choose_data_source = """
@@ -199,58 +199,58 @@ Configure a data source
 #     """
 
     msg_prompt_filesys_enter_base_path = """
-Enter the path of the root directory where the data files are stored 
-(the path may be either absolute or relative to current directory)          
+Enter the path of the root directory where the data files are stored
+(the path may be either absolute or relative to current directory)
     """
 
     msg_filesys_go_to_notebook = """
 To create expectations for your CSV files start Jupyter and open the notebook
 great_expectations/notebooks/using_great_expectations_with_pandas.ipynb.
-it will walk you through configuring the database connection and next steps. 
+it will walk you through configuring the database connection and next steps.
 
 To launch with jupyter notebooks:
     jupyter notebook great_expectations/notebooks/create_expectations_for_csv_files.ipynb
 
-To launch with jupyter lab: 
+To launch with jupyter lab:
     jupyter lab great_expectations/notebooks/create_expectations_for_csv_files.ipynb
     """
 
     msg_prompt_datasource_name = """
-Give your new data source a short name    
+Give your new data source a short name
     """
 
     msg_sqlalchemy_config_connection = """
 Great Expectations relies on sqlalchemy to connect to relational databases.
-Please make sure that you have it installed.         
+Please make sure that you have it installed.
 
 Next, we will configure database credentials and store them in the "{0:s}" section
 of this config file: great_expectations/uncommitted/credentials/profiles.yml:
      """
 
     msg_sqlalchemy_go_to_notebook = """
-To create expectations for your SQL queries start Jupyter and open notebook 
-great_expectations/notebooks/using_great_expectations_with_sql.ipynb - 
-it will walk you through configuring the database connection and next steps. 
+To create expectations for your SQL queries start Jupyter and open notebook
+great_expectations/notebooks/using_great_expectations_with_sql.ipynb -
+it will walk you through configuring the database connection and next steps.
 """
 
     msg_unknown_data_source = """
-We are looking for more types of data types to support. 
-Please create a GitHub issue here: 
+We are looking for more types of data types to support.
+Please create a GitHub issue here:
 https://github.com/great-expectations/great_expectations/issues/new
 In the meantime you can see what Great Expectations can do on CSV files.
 To create expectations for your CSV files start Jupyter and open notebook
-great_expectations/notebooks/using_great_expectations_with_pandas.ipynb - 
-it will walk you through configuring the database connection and next steps. 
+great_expectations/notebooks/using_great_expectations_with_pandas.ipynb -
+it will walk you through configuring the database connection and next steps.
      """
     msg_spark_go_to_notebook = """
 To create expectations for your CSV files start Jupyter and open the notebook
 great_expectations/notebooks/using_great_expectations_with_pandas.ipynb.
-it will walk you through configuring the database connection and next steps. 
+it will walk you through configuring the database connection and next steps.
 
 To launch with jupyter notebooks:
     jupyter notebook great_expectations/notebooks/create_expectations_for_spark_dataframes.ipynb
 
-To launch with jupyter lab: 
+To launch with jupyter lab:
     jupyter lab great_expectations/notebooks/create_expectations_for_spark_dataframes.ipynb
     """
     context = DataContext.create('.')
@@ -369,6 +369,27 @@ def render(render_object):
     # model = DescriptivePageRenderer.render(raw)
     model = PrescriptivePageRenderer.render(raw)
     print(DescriptivePageView.render(model))
+
+
+@cli.command()
+@click.argument('datasource_name')
+@click.option('--max_data_assets', '-m', default=10,
+              help='Maximum number of named data assets to profile.')
+@click.option('--profile_all_data_assets', '-A', is_flag=True, default=False,
+              help='Profile ALL data assets within the target data source. If True, this will override --max_data_assets.')
+def profile(datasource_name, max_data_assets, profile_all_data_assets):
+    """Profile a great expectations object.
+
+    datasource_name: A datasource within this GE context to profile.
+    """
+
+    if profile_all_data_assets:
+        max_data_assets = None
+
+    # FIXME: By default, this should iterate over all datasources
+    context = DataContext('.')
+    context.profile_datasource(
+        datasource_name, max_data_assets=max_data_assets)
 
 
 def main():

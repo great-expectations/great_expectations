@@ -25,7 +25,7 @@ Advanced
 
    standard_arguments
    result_format
-   autoinspection
+   profiling
    evaluation_parameters
    custom_expectations
    conventions
@@ -40,6 +40,7 @@ Module Docs
    data_asset_module
    dataset_module
    data_context_module
+   profile_module
 
 Indices and tables
 ------------------
