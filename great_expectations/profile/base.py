@@ -1,14 +1,21 @@
 import json
 import time
 
+from ..data_asset import DataAsset
 from ..dataset import Dataset
 
 
-class DataSetProfiler(object):
+class DataAssetProfiler(object):
 
     @classmethod
-    def validate_dataset(cls, dataset):
-        return issubclass(type(dataset), Dataset)
+    def validate(cls, data_asset):
+        return isinstance(data_asset, DataAsset)
+
+class DatasetProfiler(object):
+
+    @classmethod
+    def validate(cls, dataset):
+        return isinstance(dataset, Dataset)
 
     @classmethod
     def add_expectation_meta(cls, expectation):
@@ -43,7 +50,7 @@ class DataSetProfiler(object):
     @classmethod
     def profile(cls, dataset):
         # TODO: Consider raising a more descriptive error here
-        assert cls.validate_dataset(dataset)
+        assert cls.validate(dataset)
         expectations_config = cls._profile(dataset)
 
         batch_kwargs = dataset.get_batch_kwargs()

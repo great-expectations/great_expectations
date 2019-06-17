@@ -1,4 +1,4 @@
-from .base import DataSetProfiler
+from .base import DatasetProfiler
 
 import warnings
 from six import string_types
@@ -6,7 +6,7 @@ from six import string_types
 from ..dataset.util import create_multiple_expectations
 
 
-class ColumnsExistProfiler(DataSetProfiler):
+class ColumnsExistProfiler(DatasetProfiler):
 
     @classmethod
     def _profile(cls, dataset):
