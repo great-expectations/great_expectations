@@ -10,7 +10,8 @@ from sqlalchemy.dialects.sqlite import dialect as sqliteDialect
 from sqlalchemy.dialects.postgresql import dialect as postgresqlDialect
 
 from great_expectations.dataset import SqlAlchemyDataset, PandasDataset, SparkDFDataset
-from ..test_utils import CONTEXTS, get_dataset, candidate_test_is_on_temporary_notimplemented_list, evaluate_json_test
+from ..conftest import CONTEXTS
+from ..test_utils import get_dataset, candidate_test_is_on_temporary_notimplemented_list, evaluate_json_test
 
 logger = logging.getLogger(__name__)
 
