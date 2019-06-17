@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import os
 import json
 import logging
@@ -44,7 +46,7 @@ class DataContext(object):
     The DataContext is configured via a yml file that should be stored in a file called
     great_expectations/great_expectations.yml under the context_root_dir passed during initialization.
 
-    DataContexts use data sources you’re already familiar with. Convenience libraries called generators
+    DataContexts use data sources you're already familiar with. Convenience libraries called generators
     help introspect data stores and data execution frameworks airflow, dbt, dagster, prefect.io) to produce
     batches of data ready for analysis. This lets you fetch, validate, profile, and document your data in
     a way that’s meaningful within your existing infrastructure and work environment.
