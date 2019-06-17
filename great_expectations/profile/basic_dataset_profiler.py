@@ -1,7 +1,7 @@
-from .base import DataSetProfiler
+from .base import DatasetProfiler
 
 
-class BasicDatasetProfiler(DataSetProfiler):
+class BasicDatasetProfiler(DatasetProfiler):
     """A profiler inspired by the beloved pandas_profiling project
     """
 

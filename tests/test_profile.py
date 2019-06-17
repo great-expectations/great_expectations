@@ -4,7 +4,7 @@ import json
 import os
 import shutil
 
-from great_expectations.profile.base import DataSetProfiler
+from great_expectations.profile.base import DatasetProfiler
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.profile.columns_exist import ColumnsExistProfiler
 from great_expectations.dataset.pandas_dataset import PandasDataset
@@ -20,11 +20,11 @@ from great_expectations.data_context.util import safe_mmkdir
 def test_DataSetProfiler_methods():
     toy_dataset = PandasDataset({"x": [1, 2, 3]})
 
-    assert DataSetProfiler.validate_dataset(1) == False
-    assert DataSetProfiler.validate_dataset(toy_dataset)
+    assert DatasetProfiler.validate(1) == False
+    assert DatasetProfiler.validate(toy_dataset)
 
     with pytest.raises(NotImplementedError) as e_info:
-        DataSetProfiler.profile(toy_dataset)
+        DatasetProfiler.profile(toy_dataset)
 
 
 def test_ColumnsExistProfiler():
