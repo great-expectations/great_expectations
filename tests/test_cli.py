@@ -33,7 +33,7 @@ Options:
   --help     Show this message and exit.
 
 Commands:
-  init      Initialze a new Great Expectations project.
+  init      Initialize a new Great Expectations project.
   profile   Profile a great expectations object.
   render    Render a great expectations object.
   validate  Validate a CSV file against an expectations configuration.
@@ -173,6 +173,7 @@ def test_cli_init(tmp_path_factory):
     os.makedirs(os.path.join(basedir, "data"))
     curdir = os.path.abspath(os.getcwd())
     os.chdir(basedir)
+
     runner = CliRunner()
     result = runner.invoke(cli, ["init"], input="Y\n1\n%s\n\n" % str(
         os.path.join(basedir, "data")))
@@ -186,9 +187,12 @@ def test_cli_init(tmp_path_factory):
         basedir, "great_expectations/great_expectations.yml"))
     config = yaml.load(
         open(os.path.join(basedir, "great_expectations/great_expectations.yml"), "r"))
-    assert config["datasources"]["data"]["type"] == "pandas"
+    assert config["datasources"]["data__dir"]["type"] == "pandas"
 
     os.chdir(curdir)
+
+    # assert False
+
 
 # def test_cli_render(tmp_path_factory):
 #     runner = CliRunner()
@@ -199,10 +203,22 @@ def test_cli_init(tmp_path_factory):
 #     assert False
 
 
-# def test_cli_profile(empty_data_context, filesystem_csv):
-#     runner = CliRunner()
-#     result = runner.invoke(cli, ["profile"])
+def test_cli_profile(empty_data_context, filesystem_csv_2):
+    empty_data_context.add_datasource(
+        "my_datasource", "pandas", base_directory=str(filesystem_csv_2))
+    not_so_empty_data_context = empty_data_context
 
-#     print(result)
-#     print(result.output)
-#     assert False
+    # print(not_so_empty_data_context.get_available_data_asset_names())
+
+    project_root_dir = not_so_empty_data_context.get_context_root_directory()
+    # print(project_root_dir)
+
+    runner = CliRunner()
+    result = runner.invoke(
+        cli, ["profile", "my_datasource", "-d", project_root_dir])
+
+    # print(result)
+    # print(result.output)
+
+    assert "Profiling my_datasource with BasicDatasetProfiler" in result.output
+    assert "Note: You will need to review and revise Expectations before using them in production." in result.output

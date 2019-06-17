@@ -107,7 +107,8 @@ def get_slack_callback(webhook):
 def safe_mmkdir(directory, exist_ok=True):
     """Simple wrapper since exist_ok is not available in python 2"""
     if not exist_ok:
-        raise ValueError("This wrapper should only be used for exist_ok=True; it is designed to make porting easier later")
+        raise ValueError(
+            "This wrapper should only be used for exist_ok=True; it is designed to make porting easier later")
     try:
         os.makedirs(directory)
     except OSError as e:
