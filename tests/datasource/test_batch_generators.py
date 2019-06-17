@@ -3,6 +3,7 @@ import pytest
 import os
 
 from great_expectations.exceptions import DataContextError
+from great_expectations.datasource import SubdirReaderGenerator, GlobReaderGenerator
 
 def test_file_kwargs_generator(data_context, filesystem_csv):
     base_dir = filesystem_csv
@@ -43,3 +44,84 @@ def test_file_kwargs_generator_error(data_context, filesystem_csv):
     with pytest.raises(DataContextError) as exc:
         data_context.get_batch("f4")
         assert "f4" in exc.message
+
+def test_glob_reader_generator(tmp_path_factory):
+    """Provides an example of how glob generator works: we specify our own
+    names for data_assets, and an associated glob; the generator
+    will take care of providing batches consististing of one file per
+    batch corresponding to the glob."""
+    
+    basedir = tmp_path_factory.mktemp("test_glob_reader_generator")
+
+    with open(os.path.join(basedir, "f1.blarg"), "w") as outfile:
+        outfile.write("\n\n\n")
+    with open(os.path.join(basedir, "f2.csv"), "w") as outfile:
+        outfile.write("\n\n\n")
+    with open(os.path.join(basedir, "f3.blarg"), "w") as outfile:
+        outfile.write("\n\n\n")
+    with open(os.path.join(basedir, "f4.blarg"), "w") as outfile:
+        outfile.write("\n\n\n")
+    with open(os.path.join(basedir, "f5.blarg"), "w") as outfile:
+        outfile.write("\n\n\n")
+    with open(os.path.join(basedir, "f6.blarg"), "w") as outfile:
+        outfile.write("\n\n\n")
+    with open(os.path.join(basedir, "f7.xls"), "w") as outfile:
+        outfile.write("\n\n\n")
+    with open(os.path.join(basedir, "f8.parquet"), "w") as outfile:
+        outfile.write("\n\n\n")
+    with open(os.path.join(basedir, "f9.xls"), "w") as outfile:
+        outfile.write("\n\n\n")
+    with open(os.path.join(basedir, "f0.json"), "w") as outfile:
+        outfile.write("\n\n\n")
+
+    g2 = GlobReaderGenerator(base_directory=basedir, asset_globs={
+        "blargs": "*.blarg",
+        "fs": "f*"
+    })
+
+    g2_assets = g2.get_available_data_asset_names()
+    assert g2_assets == set(["blargs", "fs"])
+
+    blargs_kwargs = [x["path"] for x in g2.get_iterator("blargs")]
+    real_blargs = [
+        os.path.join(basedir, "f1.blarg"),
+        os.path.join(basedir, "f3.blarg"),
+        os.path.join(basedir, "f4.blarg"),
+        os.path.join(basedir, "f5.blarg"),
+        os.path.join(basedir, "f6.blarg")
+    ]
+    for kwargs in real_blargs:
+        assert kwargs in blargs_kwargs
+    assert len(blargs_kwargs) == len (real_blargs)
+    
+def test_file_kwargs_generator_extensions(tmp_path_factory):
+    """csv, xls, parquet, json should be recognized file extensions"""
+    basedir = tmp_path_factory.mktemp("test_file_kwargs_generator_extensions")
+
+    with open(os.path.join(basedir, "f1.blarg"), "w") as outfile:
+        outfile.write("\n\n\n")
+    with open(os.path.join(basedir, "f2.csv"), "w") as outfile:
+        outfile.write("\n\n\n")
+    with open(os.path.join(basedir, "f3.blarg"), "w") as outfile:
+        outfile.write("\n\n\n")
+    with open(os.path.join(basedir, "f4.blarg"), "w") as outfile:
+        outfile.write("\n\n\n")
+    with open(os.path.join(basedir, "f5.blarg"), "w") as outfile:
+        outfile.write("\n\n\n")
+    with open(os.path.join(basedir, "f6.blarg"), "w") as outfile:
+        outfile.write("\n\n\n")
+    with open(os.path.join(basedir, "f7.xls"), "w") as outfile:
+        outfile.write("\n\n\n")
+    with open(os.path.join(basedir, "f8.parquet"), "w") as outfile:
+        outfile.write("\n\n\n")
+    with open(os.path.join(basedir, "f9.xls"), "w") as outfile:
+        outfile.write("\n\n\n")
+    with open(os.path.join(basedir, "f0.json"), "w") as outfile:
+        outfile.write("\n\n\n")
+
+    g1 = SubdirReaderGenerator(base_directory=basedir)
+
+    g1_assets = g1.get_available_data_asset_names()
+    assert g1_assets == set([
+        "f1.blarg", "f2", "f3.blarg", "f4.blarg", "f5.blarg", "f6.blarg", "f7", "f8", "f9", "f0"
+    ])

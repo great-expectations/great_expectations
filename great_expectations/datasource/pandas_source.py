@@ -4,8 +4,8 @@ from six import string_types
 
 import pandas as pd
 
-from .datasource import Datasource
-from .filesystem_path_generator import SubdirReaderGenerator
+from .datasource import Datasource, ReaderMethods
+from .filesystem_path_generator import SubdirReaderGenerator, GlobReaderGenerator
 from .batch_generator import EmptyGenerator
 from great_expectations.dataset.pandas_dataset import PandasDataset
 
@@ -41,6 +41,8 @@ class PandasDatasource(Datasource):
     def _get_generator_class(self, type_):
         if type_ == "subdir_reader":
             return SubdirReaderGenerator
+        elif type_ == "glob_reader":
+            return GlobReaderGenerator
         elif type_ == "memory":
             return EmptyGenerator
         else:
@@ -52,15 +54,29 @@ class PandasDatasource(Datasource):
             reader_options = batch_kwargs.copy()
             path = reader_options.pop("path")  # We need to remove from the reader
             reader_options.pop("timestamp")    # ditto timestamp
-            if path.endswith((".csv", ".tsv")):
-                df = pd.read_csv(path, **reader_options)
-            elif path.endswith(".parquet"):
-                df = pd.read_parquet(path, **reader_options)
-            elif path.endswith((".xls", ".xlsx")):
-                df = pd.read_excel(path, **reader_options)
+
+            reader_method = reader_options.pop("reader_method", None)
+            if reader_method is None:
+                reader_method = self._guess_reader_method_from_path(path)
+                if reader_method is None:
+                    raise BatchKwargsError("Unable to determine reader for path: %s" % path, batch_kwargs)
             else:
-                raise BatchKwargsError("Unrecognized path: no available reader.",
-                                       batch_kwargs)
+                try:
+                    reader_method = ReaderMethods[reader_method]
+                except KeyError:
+                    raise BatchKwargsError("Unknown reader method: %s" % reader_method, batch_kwargs)
+
+            if reader_method == ReaderMethods.CSV:
+                df = pd.read_csv(path, **reader_options)
+            elif reader_method == ReaderMethods.parquet:
+                df = pd.read_parquet(path, **reader_options)
+            elif reader_method == ReaderMethods.excel:
+                df = pd.read_excel(path, **reader_options)
+            elif reader_method == ReaderMethods.JSON:
+                df = pd.read_json(path, **reader_options)
+            else:
+                raise BatchKwargsError("Unsupported reader: %s" % reader_method.name, batch_kwargs)
+
         elif "df" in batch_kwargs and isinstance(batch_kwargs["df"], (pd.DataFrame, pd.Series)):
             df = batch_kwargs.pop("df")  # We don't want to store the actual dataframe in kwargs
         else:
