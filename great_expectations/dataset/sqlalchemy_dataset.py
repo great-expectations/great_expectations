@@ -552,6 +552,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                                                 mostly=None,
                                                 result_format=None, include_config=False, catch_exceptions=None, meta=None
                                                 ):
+        condition = None
         try:
             # Postgres-only version
             if isinstance(self.engine.dialect, sa.dialects.postgresql.dialect):
@@ -579,8 +580,6 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                                                 mostly=None,
                                                 result_format=None, include_config=False, catch_exceptions=None, meta=None
                                                 ):
-
-        
         condition = None
         try:
             # Postgres-only version
@@ -616,7 +615,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         condition = None
         try:
-        # Postgres-only version
+            # Postgres-only version
             if isinstance(self.engine.dialect, sa.dialects.postgresql.dialect):
                 if match_on == "any":
                     condition = \
@@ -632,7 +631,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             # this can simply indicate no mysql driver is loaded
             pass
         try:
-        # Mysql
+            # Mysql
             if isinstance(self.engine.dialect, sa.dialects.mysql.dialect):
                 if match_on == "any":
                     condition = \
