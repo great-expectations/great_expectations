@@ -1,6 +1,7 @@
 import pytest
 
-from .test_utils import CONTEXTS, get_dataset
+from .conftest import CONTEXTS
+from .test_utils import get_dataset
 
 
 data = {

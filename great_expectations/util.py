@@ -14,7 +14,7 @@ from great_expectations.data_context import DataContext
 logger = logging.getLogger(__name__)
 
 
-def _convert_to_dataset_class(df, dataset_class, expectation_suite=None, autoinspect_func=None):
+def _convert_to_dataset_class(df, dataset_class, expectation_suite=None, profiler=None):
     """
     Convert a (pandas) dataframe to a great_expectations dataset, with (optional) expectation_suite
     """
@@ -25,8 +25,8 @@ def _convert_to_dataset_class(df, dataset_class, expectation_suite=None, autoins
     else:
         # Instantiate the new Dataset with default expectations
         new_df = dataset_class.from_dataset(df)
-        if autoinspect_func is not None:
-            new_df.autoinspect(autoinspect_func)
+        if profiler is not None:
+            new_df.profile(profiler)
 
     return new_df
 
@@ -35,12 +35,12 @@ def read_csv(
     filename,
     dataset_class=dataset.pandas_dataset.PandasDataset,
     expectation_suite=None,
-    autoinspect_func=None,
+    profiler=None,
     *args, **kwargs
 ):
     df = pd.read_csv(filename, *args, **kwargs)
     df = _convert_to_dataset_class(
-        df, dataset_class, expectation_suite, autoinspect_func)
+        df, dataset_class, expectation_suite, profiler)
     return df
 
 
@@ -49,7 +49,7 @@ def read_json(
     dataset_class=dataset.pandas_dataset.PandasDataset,
     expectation_suite=None,
     accessor_func=None,
-    autoinspect_func=None,
+    profiler=None,
     *args, **kwargs
 ):
     if accessor_func != None:
@@ -61,7 +61,7 @@ def read_json(
         df = pd.read_json(filename, *args, **kwargs)
 
     df = _convert_to_dataset_class(
-        df, dataset_class, expectation_suite, autoinspect_func)
+        df, dataset_class, expectation_suite, profiler)
     return df
 
 
@@ -69,7 +69,7 @@ def read_excel(
     filename,
     dataset_class=dataset.pandas_dataset.PandasDataset,
     expectation_suite=None,
-    autoinspect_func=None,
+    profiler=None,
     *args, **kwargs
 ):
     """Read a file using Pandas read_excel and return a great_expectations dataset.
@@ -87,10 +87,10 @@ def read_excel(
     if isinstance(df, dict):
         for key in df:
             df[key] = _convert_to_dataset_class(
-                df[key], dataset_class, expectation_suite, autoinspect_func)
+                df[key], dataset_class, expectation_suite, profiler)
     else:
         df = _convert_to_dataset_class(
-            df, dataset_class, expectation_suite, autoinspect_func)
+            df, dataset_class, expectation_suite, profiler)
     return df
 
 
@@ -98,7 +98,7 @@ def read_table(
     filename,
     dataset_class=dataset.pandas_dataset.PandasDataset,
     expectation_suite=None,
-    autoinspect_func=None,
+    profiler=None,
     *args, **kwargs
 ):
     """Read a file using Pandas read_table and return a great_expectations dataset.
@@ -113,7 +113,7 @@ def read_table(
     """
     df = pd.read_table(filename, *args, **kwargs)
     df = _convert_to_dataset_class(
-        df, dataset_class, expectation_suite, autoinspect_func)
+        df, dataset_class, expectation_suite, profiler)
     return df
 
 
@@ -121,7 +121,7 @@ def read_parquet(
     filename,
     dataset_class=dataset.pandas_dataset.PandasDataset,
     expectation_suite=None,
-    autoinspect_func=None,
+    profiler=None,
     *args, **kwargs
 ):
     """Read a file using Pandas read_parquet and return a great_expectations dataset.
@@ -136,14 +136,14 @@ def read_parquet(
     """
     df = pd.read_parquet(filename, *args, **kwargs)
     df = _convert_to_dataset_class(
-        df, dataset_class, expectation_suite, autoinspect_func)
+        df, dataset_class, expectation_suite, profiler)
     return df
 
 
 def from_pandas(pandas_df,
                 dataset_class=dataset.pandas_dataset.PandasDataset,
                 expectation_suite=None,
-                autoinspect_func=None
+                profiler=None
                 ):
     """Read a Pandas data frame and return a great_expectations dataset.
 
@@ -152,8 +152,8 @@ def from_pandas(pandas_df,
         dataset_class (Dataset class) = dataset.pandas_dataset.PandasDataset:
             class to which to convert resulting Pandas df
         expectation_suite (string) = None: path to great_expectations expectation suite file
-        autoinspect_func (function) = None: The autoinspection function that should 
-            be run on the dataset to establish baseline expectations.
+        profiler (profiler class) = None: The profiler that should 
+            be run on the dataset to establish a baseline expectation suite.
 
     Returns:
         great_expectations dataset
@@ -162,7 +162,7 @@ def from_pandas(pandas_df,
         pandas_df,
         dataset_class,
         expectation_suite,
-        autoinspect_func
+        profiler
     )
 
 

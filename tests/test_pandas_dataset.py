@@ -5,7 +5,7 @@ import json
 import datetime
 import pandas as pd
 import great_expectations as ge
-import great_expectations.dataset.autoinspect as autoinspect
+from great_expectations.profile import ColumnsExistProfiler
 
 from .test_utils import assertDeepAlmostEqual
 
@@ -450,7 +450,7 @@ def test_ge_pandas_sampling():
     })
 
     # Put some simple expectations on the data frame
-    df.autoinspect(autoinspect_func=autoinspect.columns_exist)
+    df.profile(profiler=ColumnsExistProfiler)
     df.expect_column_values_to_be_in_set("A", [1, 2, 3, 4])
     df.expect_column_values_to_be_in_set("B", [5, 6, 7, 8])
     df.expect_column_values_to_be_in_set("C", ['a', 'b', 'c', 'd'])
@@ -560,7 +560,7 @@ def test_ge_pandas_automatic_failure_removal():
     })
 
     # Put some simple expectations on the data frame
-    df.autoinspect(autoinspect.columns_exist)
+    df.profile(ge.profile.ColumnsExistProfiler)
     df.expect_column_values_to_be_in_set("A", [1, 2, 3, 4])
     df.expect_column_values_to_be_in_set("B", [5, 6, 7, 8])
     df.expect_column_values_to_be_in_set("C", ['w', 'x', 'y', 'z'])
