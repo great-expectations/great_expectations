@@ -13,11 +13,9 @@ from great_expectations.exceptions import BatchKwargsError
 
 
 class PandasDatasource(Datasource):
-    """
-    A PandasDatasource makes it easy to create, manage and validate expectations on
-    Pandas dataframes.
-
-    Use with the SubdirReaderGenerator for simple cases.
+    """The PandasDatasource produces PandasDataset objects and supports generators capable of 
+    interacting with the local filesystem (the default subdir_reader generator), and from
+    existing in-memory dataframes.
     """
 
     def __init__(self, name="pandas", data_context=None, generators=None, **kwargs):
@@ -79,6 +77,7 @@ class PandasDatasource(Datasource):
 
         elif "df" in batch_kwargs and isinstance(batch_kwargs["df"], (pd.DataFrame, pd.Series)):
             df = batch_kwargs.pop("df")  # We don't want to store the actual dataframe in kwargs
+            batch_kwargs["PandasInMemoryDF"] = True
         else:
             raise BatchKwargsError("Invalid batch_kwargs: path or df is required for a PandasDatasource",
                                    batch_kwargs)
