@@ -18,7 +18,7 @@ except ImportError:
 
 
 class SparkDFDatasource(Datasource):
-    """The SparkDFDatasource produces spark dataframes and supports generators capable of interacting with local
+    """The SparkDFDatasource produces SparkDFDatasets and supports generators capable of interacting with local
     filesystem (the default subdir_reader generator) and databricks notebooks.
     """
 
