@@ -2,7 +2,8 @@ import json
 import os
 from collections import OrderedDict
 
-from ..test_utils import CONTEXTS, get_dataset, candidate_getter_is_on_temporary_notimplemented_list
+from ..conftest import CONTEXTS
+from ..test_utils import get_dataset, candidate_getter_is_on_temporary_notimplemented_list
 
 import pytest
 import numpy as np

@@ -6,6 +6,7 @@ import great_expectations as ge
 from great_expectations.render.renderer import DescriptivePageRenderer, DescriptiveColumnSectionRenderer, PrescriptiveColumnSectionRenderer
 from great_expectations.render.view import DescriptivePageView
 from great_expectations.render.renderer.content_block import ValueListContentBlock
+from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 
 
 @pytest.fixture()
@@ -81,7 +82,7 @@ def test_content_block_list_available_expectations(expectations):
 def test_full_oobe_flow():
     df = ge.read_csv("examples/data/Titanic.csv")
     # df = ge.read_csv("examples/data/Meteorite_Landings.csv")
-    df.autoinspect(ge.dataset.autoinspect.pseudo_pandas_profiling)
+    df.profile(BasicDatasetProfiler)
     # df.autoinspect(ge.dataset.autoinspect.columns_exist)
     evrs = df.validate()  # ["results"]
     # print(json.dumps(evrs, indent=2))

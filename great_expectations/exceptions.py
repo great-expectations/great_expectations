@@ -6,6 +6,9 @@ class GreatExpectationsError(Exception):
 
 class DataContextError(GreatExpectationsError):
     pass
+
+class ProfilerError(GreatExpectationsError):
+    pass
     
 class ConfigNotFoundError(DataContextError):
     def __init__(self, context_root_directory):

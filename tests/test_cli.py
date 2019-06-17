@@ -9,6 +9,8 @@ import pytest
 import json
 import os
 import shutil
+import logging
+import sys
 from ruamel.yaml import YAML
 yaml = YAML()
 yaml.default_flow_style = False
@@ -33,7 +35,8 @@ Options:
   --help     Show this message and exit.
 
 Commands:
-  init      Initialze a new Great Expectations project.
+  init      Initialize a new Great Expectations project.
+  profile   Profile a great expectations object.
   render    Render a great expectations object.
   validate  Validate a CSV file against an expectation suite.
 """
@@ -172,6 +175,7 @@ def test_cli_init(tmp_path_factory):
     os.makedirs(os.path.join(basedir, "data"))
     curdir = os.path.abspath(os.getcwd())
     os.chdir(basedir)
+
     runner = CliRunner()
     result = runner.invoke(cli, ["init"], input="Y\n1\n%s\n\n" % str(
         os.path.join(basedir, "data")))
@@ -185,9 +189,12 @@ def test_cli_init(tmp_path_factory):
         basedir, "great_expectations/great_expectations.yml"))
     config = yaml.load(
         open(os.path.join(basedir, "great_expectations/great_expectations.yml"), "r"))
-    assert config["datasources"]["data"]["type"] == "pandas"
+    assert config["datasources"]["data__dir"]["type"] == "pandas"
 
     os.chdir(curdir)
+
+    # assert False
+
 
 # def test_cli_render(tmp_path_factory):
 #     runner = CliRunner()
@@ -198,29 +205,29 @@ def test_cli_init(tmp_path_factory):
 #     assert False
 
 
-# def test_cli_profile(tmp_path_factory):
-#     runner = CliRunner()
-#     result = runner.invoke(cli, ["profile"])
+def test_cli_profile(empty_data_context, filesystem_csv_2, capsys):
+    empty_data_context.add_datasource(
+        "my_datasource", "pandas", base_directory=str(filesystem_csv_2))
+    not_so_empty_data_context = empty_data_context
 
-#     print(result)
-#     assert False
+    project_root_dir = not_so_empty_data_context.get_context_root_directory()
+    # print(project_root_dir)
 
-#     # basedir = tmp_path_ factory.mktemp("test_cli_init_diff")
-#     # basedir = str(basedir)
-#     # os.makedirs(os.path.join(basedir, "data"))
-#     # curdir = os.path.abspath(os.getcwd())
-#     # os.chdir(basedir)
-#     # runner = CliRunner()
-#     # result = runner.invoke(cli, ["init"], input="Y\n1\n%s\n\n" % str(
-#     #     os.path.join(basedir, "data")))
+    # For some reason, even with this logging change (which is required and done in main of the cli)
+    # the click cli runner does not pick up output; capsys appears to intercept it first
+    logger = logging.getLogger("great_expectations")
+    handler = logging.StreamHandler(stream=sys.stdout)
+    formatter = logging.Formatter(
+        '%(levelname)s %(message)s')
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+    logger.setLevel(logging.INFO)
+    runner = CliRunner()
+    result = runner.invoke(
+        cli, ["profile", "my_datasource", "-d", project_root_dir])
 
-#     # assert """Welcome to Great Expectations! Always know what to expect from your data.""" in result.output
-
-#     # assert os.path.isdir(os.path.join(basedir, "great_expectations"))
-#     # assert os.path.isfile(os.path.join(
-#     #     basedir, "great_expectations/great_expectations.yml"))
-#     # config = yaml.load(
-#     #     open(os.path.join(basedir, "great_expectations/great_expectations.yml"), "r"))
-#     # assert config["datasources"]["data"]["type"] == "pandas"
-
-#     # os.chdir(curdir)
+    captured = capsys.readouterr()
+    
+    assert "Profiling my_datasource with BasicDatasetProfiler" in captured.out
+    assert "Note: You will need to review and revise Expectations before using them in production." in captured.out
+    logger.removeHandler(handler)
