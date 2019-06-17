@@ -11,11 +11,10 @@ import shutil
 import pandas as pd
 import sqlalchemy as sa
 
+from great_expectations.exceptions import BatchKwargsError
 from great_expectations.data_context import DataContext
-from great_expectations.datasource import PandasDatasource
-from great_expectations.datasource.sqlalchemy_source import SqlAlchemyDatasource
-
-from great_expectations.dataset import PandasDataset, SqlAlchemyDataset
+from great_expectations.datasource import PandasDatasource, SqlAlchemyDatasource, SparkDFDatasource
+from great_expectations.dataset import PandasDataset, SqlAlchemyDataset, SparkDFDataset
 
 @pytest.fixture(scope="module")
 def test_folder_connection_path(tmp_path_factory):
@@ -44,13 +43,13 @@ def test_db_connection_string(tmp_path_factory):
 
 
 @pytest.fixture(scope="module")
-def test_parquet_folder_connection_path(tmpdir_factory):
+def test_parquet_folder_connection_path(tmp_path_factory):
     df1 = pd.DataFrame(
         {'col_1': [1, 2, 3, 4, 5], 'col_2': ['a', 'b', 'c', 'd', 'e']})
-    path = tmpdir_factory.mktemp("parquet_context")
-    df1.to_parquet(path.join("test.parquet"))
+    basepath = tmp_path_factory.mktemp("parquet_context")
+    df1.to_parquet(os.path.join(basepath, "test.parquet"))
 
-    return str(path)
+    return str(basepath)
 
 def test_create_pandas_datasource(data_context, tmp_path_factory):
     basedir = tmp_path_factory.mktemp('test_create_pandas_datasource')
@@ -207,9 +206,63 @@ def test_pandas_source_readcsv(data_context, tmp_path_factory):
     batch = data_context.get_batch("mysource2/unicode", encoding='utf-8')
     assert "😁" in list(batch["Μ"])
 
-def test_spark_parquet_data_context(test_parquet_folder_connection_path):
-    dastasource = SparkDFDatasource('SparkParquet', base_directory=test_parquet_folder_connection_path)
+def test_standalone_spark_parquet_datasource(test_parquet_folder_connection_path):
+    datasource = SparkDFDatasource('SparkParquet', base_directory=test_parquet_folder_connection_path)
 
-    assert context.list_datasets() == ['test.parquet']
-    dataset = context.get_dataset('test.parquet')
+    assert datasource.get_available_data_asset_names() == {
+        "default": set(['test'])
+    }
+    dataset = datasource.get_batch('test')
     assert isinstance(dataset, SparkDFDataset)
+    # NOTE: below is a great example of CSV vs. Parquet typing: pandas reads content as string, spark as int
+    assert dataset.spark_df.head()['col_1'] == 1
+    
+def test_standalone_spark_csv_datasource(test_folder_connection_path):
+    datasource = SparkDFDatasource('SparkParquet', base_directory=test_folder_connection_path)
+    assert datasource.get_available_data_asset_names() == {
+        "default": set(['test'])
+    }
+    dataset = datasource.get_batch('test', header=True)
+    assert isinstance(dataset, SparkDFDataset)
+    # NOTE: below is a great example of CSV vs. Parquet typing: pandas reads content as string, spark as int
+    assert dataset.spark_df.head()['col_1'] == '1'
+
+def test_invalid_reader_sparkdf_datasource(tmp_path_factory):
+    basepath = tmp_path_factory.mktemp("test_invalid_reader_sparkdf_datasource")
+    datasource = SparkDFDatasource('mysparksource', base_directory=basepath)
+
+    with open(os.path.join(basepath, "idonotlooklikeacsvbutiam.notrecognized"), "w") as newfile:
+        newfile.write("a,b\n1,2\n3,4\n")
+
+    with pytest.raises(BatchKwargsError) as exc:
+        datasource.get_batch("idonotlooklikeacsvbutiam.notrecognized")
+        assert "Unable to determine reader for path" in exc.message
+
+    with pytest.raises(BatchKwargsError) as exc:
+        datasource.get_batch("idonotlooklikeacsvbutiam.notrecognized", reader_method="blarg")
+        assert "Unknown reader method: blarg" in exc.message
+
+    with pytest.raises(BatchKwargsError) as exc:
+        datasource.get_batch("idonotlooklikeacsvbutiam.notrecognized", reader_method="excel")
+        assert "Unsupported reader: excel" in exc.message
+
+    dataset = datasource.get_batch("idonotlooklikeacsvbutiam.notrecognized", reader_method="csv", header=True)
+    assert dataset.spark_df.head()["a"] == "1"
+
+def test_invalid_reader_pandas_datasource(tmp_path_factory):
+    basepath = tmp_path_factory.mktemp("test_invalid_reader_pandas_datasource")
+    datasource = PandasDatasource('mypandassource', base_directory=basepath)
+
+    with open(os.path.join(basepath, "idonotlooklikeacsvbutiam.notrecognized"), "w") as newfile:
+        newfile.write("a,b\n1,2\n3,4\n")
+
+    with pytest.raises(BatchKwargsError) as exc:
+        datasource.get_batch("idonotlooklikeacsvbutiam.notrecognized")
+        assert "Unable to determine reader for path" in exc.message
+
+    with pytest.raises(BatchKwargsError) as exc:
+        datasource.get_batch("idonotlooklikeacsvbutiam.notrecognized", reader_method="blarg")
+        assert "Unknown reader method: blarg" in exc.message
+
+    dataset = datasource.get_batch("idonotlooklikeacsvbutiam.notrecognized", reader_method="csv", header=0)
+    assert dataset["a"][0] == 1

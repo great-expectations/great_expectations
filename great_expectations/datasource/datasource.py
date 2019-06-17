@@ -1,16 +1,28 @@
 import os
-from ruamel.yaml import YAML
+
 import copy
+from enum import Enum
 from six import string_types
 
-from ..data_context.util import NormalizedDataAssetName
-
 import logging
+
+from ruamel.yaml import YAML
+
+from ..data_context.util import NormalizedDataAssetName
 
 logger = logging.getLogger(__name__)
 yaml = YAML()
 yaml.default_flow_style = False
 
+class ReaderMethods(Enum):
+    CSV = 1
+    csv = 1
+    parquet = 2
+    excel = 3
+    xls = 3
+    xlsx = 3
+    JSON = 4
+    json = 4
 
 class Datasource(object):
     """Datasources are responsible for connecting to data infrastructure. 
@@ -197,3 +209,15 @@ class Datasource(object):
 
     def get_data_context(self):
         return self._data_context
+
+    def _guess_reader_method_from_path(self, path):
+        if path.endswith(".csv") or path.endswith(".tsv"):
+            return ReaderMethods.CSV
+        elif path.endswith(".parquet"):
+            return ReaderMethods.parquet
+        elif path.endswith(".xlsx") or path.endswith(".xls"):
+            return ReaderMethods.excel
+        elif path.endswith(".json"):
+            return ReaderMethods.JSON
+        else:
+            return None
