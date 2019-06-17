@@ -20,8 +20,8 @@ class BasicDatasetProfiler(DatasetProfiler):
         else:
             type_ = "unknown"
 
-        unique = df.expect_column_unique_value_count_to_be_between(column, 0, None)[
-            'result']['observed_value']
+        # unique = df.expect_column_unique_value_count_to_be_between(column, 0, None)[
+        #     'result']['observed_value']
         pct_unique = df.expect_column_proportion_of_unique_values_to_be_between(
             column, 0, None)['result']['observed_value']
 
@@ -35,23 +35,24 @@ class BasicDatasetProfiler(DatasetProfiler):
             cardinality = "lots"
 
         else:
-            if unique == 0:
-                cardinality = "none"
+            cardinality = "complicated"
+            # if unique == 0:
+            #     cardinality = "none"
 
-            elif unique == 1:
-                cardinality = "one"
+            # elif unique == 1:
+            #     cardinality = "one"
 
-            elif unique == 2:
-                cardinality = "two"
+            # elif unique == 2:
+            #     cardinality = "two"
 
-            elif unique < 10:
-                cardinality = "very few"
+            # elif unique < 10:
+            #     cardinality = "very few"
 
-            elif unique < 200:
-                cardinality = "few"
+            # elif unique < 200:
+            #     cardinality = "few"
 
-            else:
-                cardinality = "unknown"
+            # else:
+            #     cardinality = "unknown"
     #             print(
     #                 column, '\t',
     #                 unique,
@@ -96,7 +97,7 @@ class BasicDatasetProfiler(DatasetProfiler):
                 # Check for leading and tralining whitespace.
                 #!!! It would be nice to build additional Expectations here, but
                 #!!! the default logic for remove_expectations prevents us.
-                df.expect_column_values_to_not_match_regex(column, "^\s+|\s+$")
+                df.expect_column_values_to_not_match_regex(column, r"^\s+|\s+$")
 
                 if cardinality == "unique":
                     df.expect_column_values_to_be_unique(column)
