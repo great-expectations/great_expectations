@@ -42,6 +42,16 @@ def test_db_connection_string(tmp_path_factory):
     # Return a connection string to this newly-created db
     return 'sqlite:///' + str(path)
 
+
+@pytest.fixture(scope="module")
+def test_parquet_folder_connection_path(tmpdir_factory):
+    df1 = pd.DataFrame(
+        {'col_1': [1, 2, 3, 4, 5], 'col_2': ['a', 'b', 'c', 'd', 'e']})
+    path = tmpdir_factory.mktemp("parquet_context")
+    df1.to_parquet(path.join("test.parquet"))
+
+    return str(path)
+
 def test_create_pandas_datasource(data_context, tmp_path_factory):
     basedir = tmp_path_factory.mktemp('test_create_pandas_datasource')
     name = "test_pandas_datasource"
@@ -196,3 +206,10 @@ def test_pandas_source_readcsv(data_context, tmp_path_factory):
 
     batch = data_context.get_batch("mysource2/unicode", encoding='utf-8')
     assert "😁" in list(batch["Μ"])
+
+def test_spark_parquet_data_context(test_parquet_folder_connection_path):
+    dastasource = SparkDFDatasource('SparkParquet', base_directory=test_parquet_folder_connection_path)
+
+    assert context.list_datasets() == ['test.parquet']
+    dataset = context.get_dataset('test.parquet')
+    assert isinstance(dataset, SparkDFDataset)
