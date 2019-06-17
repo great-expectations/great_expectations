@@ -7,7 +7,7 @@ Standard arguments for expectations
 All Expectations return a json-serializable dictionary when evaluated, and share four standard (optional) arguments:
 
  - :ref:`result_format`: controls what information is returned from the evaluation of the expectation expectation.
- - :ref:`include_config`: If true, then the expectation config itself is returned as part of the result object.
+ - :ref:`include_config`: If true, then the expectation suite itself is returned as part of the result object.
  - :ref:`catch_exceptions`: If true, execution will not fail if the Expectation encounters an error. Instead, it will \
    return success = False and provide an informative error message.
  - :ref:`meta`: allows user-supplied meta-data to be stored with an expectation.
@@ -23,7 +23,7 @@ See :ref:`result_format` for more information.
 `include_config`
 ------------------------------------------------------------------------------
 
-All Expectations accept a boolean `include_config` parameter. If true, then the expectation config itself is returned as part of the result object
+All Expectations accept a boolean `include_config` parameter. If true, then the expectation suite itself is returned as part of the result object
 
 .. code-block:: bash
 

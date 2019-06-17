@@ -278,7 +278,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
     # get an attribute error when trying to access them (I think this could be done in __finalize__?)
     _internal_names = pd.DataFrame._internal_names + [
         '_batch_kwargs',
-        '_expectations_config',
+        '_expectation_suite',
         'caching',
         'default_expectation_args',
         'discard_subset_failing_expectations'
@@ -294,7 +294,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
     def __finalize__(self, other, method=None, **kwargs):
         if isinstance(other, PandasDataset):
-            self._initialize_expectations(other.get_expectations(
+            self._initialize_expectations(other.get_expectation_suite(
                 discard_failed_expectations=False,
                 discard_result_format_kwargs=False,
                 discard_include_configs_kwargs=False,

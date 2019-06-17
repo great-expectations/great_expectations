@@ -58,14 +58,14 @@ def test_ColumnsExistProfiler():
 
 def test_BasicDatasetProfiler():
     toy_dataset = PandasDataset({"x": [1, 2, 3]})
-    assert len(toy_dataset.get_expectations(
+    assert len(toy_dataset.get_expectation_suite(
         suppress_warnings=True)["expectations"]) == 0
 
     expectations_config, evr_config = BasicDatasetProfiler.profile(toy_dataset)
 
     # print(json.dumps(expectations_config, indent=2))
 
-    assert len(toy_dataset.get_expectations(
+    assert len(toy_dataset.get_expectation_suite(
         suppress_warnings=True)["expectations"]) > 0
 
     # We should add an additional test that instantiates the batch via context, so the data_asset_name will be populated.
@@ -113,14 +113,14 @@ def test_BasicDatasetProfiler_with_context(empty_data_context, filesystem_csv_2)
         "my_datasource", "pandas", base_directory=str(filesystem_csv_2))
     not_so_empty_data_context = empty_data_context
 
-    batch = not_so_empty_data_context.get_batch("my_datasource", "f1")
+    batch = not_so_empty_data_context.get_batch("my_datasource/f1")
     expectations_config, validation_results = BasicDatasetProfiler.profile(
         batch)
 
     # print(batch.get_batch_kwargs())
     # print(json.dumps(expectations_config, indent=2))
 
-    assert expectations_config["data_asset_name"] == "f1"
+    assert expectations_config["data_asset_name"] == "my_datasource/default/f1/default"
     assert "BasicDatasetProfiler" in expectations_config["meta"]
     assert set(expectations_config["meta"]["BasicDatasetProfiler"].keys()) == {
         "created_by", "created_at", "batch_kwargs"
@@ -134,7 +134,7 @@ def test_BasicDatasetProfiler_with_context(empty_data_context, filesystem_csv_2)
 
     print(json.dumps(validation_results, indent=2))
 
-    assert validation_results["meta"]["data_asset_name"] == "f1"
+    assert validation_results["meta"]["data_asset_name"] == "my_datasource/default/f1/default"
     assert set(validation_results["meta"].keys()) == {
         "great_expectations.__version__", "data_asset_name", "run_id", "batch_kwargs"
     }
@@ -145,13 +145,13 @@ def test_context_profiler(empty_data_context, filesystem_csv_2):
         "my_datasource", "pandas", base_directory=str(filesystem_csv_2))
     not_so_empty_data_context = empty_data_context
 
-    assert not_so_empty_data_context.list_expectations_configs() == []
+    assert not_so_empty_data_context.list_expectation_suites() == []
     not_so_empty_data_context.profile_datasource("my_datasource")
 
-    print(not_so_empty_data_context.list_expectations_configs())
-    assert not_so_empty_data_context.list_expectations_configs() != []
+    print(not_so_empty_data_context.list_expectation_suites())
+    assert not_so_empty_data_context.list_expectation_suites() != []
 
-    profiled_expectations = not_so_empty_data_context.get_expectations('f1')
+    profiled_expectations = not_so_empty_data_context.get_expectation_suite('f1')
     print(json.dumps(profiled_expectations, indent=2))
 
     # FIXME: REVISIT THIS TEST FOR CONTENT
@@ -161,7 +161,7 @@ def test_context_profiler(empty_data_context, filesystem_csv_2):
     # print(json.dumps(validation_results, indent=2))
 
     # # Note: deliberately not testing context file storage in this test.
-    # context_expectations_config = not_so_empty_data_context.get_expectations(
+    # context_expectations_config = not_so_empty_data_context.get_expectation_suite(
     #     "my_datasource", "f1")
 
     # assert context_expectations_config == profiled_expectations

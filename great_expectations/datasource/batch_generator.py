@@ -1,10 +1,23 @@
+# -*- coding: utf-8 -*-
+
 import os
 import copy
 import logging
 
 logger = logging.getLogger(__name__)
 
+
 class BatchGenerator(object):
+    """Generators produce identifying information, called "batch_kwargs" that datasources 
+    can use to get individual batches of data. They add flexibility in how to obtain data 
+    such as with time-based partitioning, downsampling, or other techniques appropriate 
+    for the datasource.
+
+    For example, a generator could produce a SQL query that logically represents "rows in 
+    the Events table with a timestamp on February 7, 2012," which a SqlAlchemyDatasource 
+    could use to materialize a SqlAlchemyDataset corresponding to that batch of data and 
+    ready for validation.
+    """
 
     def __init__(self, name, type_, datasource=None):
         self._name = name
@@ -25,7 +38,7 @@ class BatchGenerator(object):
 
     def _save_config(self):
         if self._datasource is not None:
-            self._datasource._save_config()
+            self._datasource.save_config()
         else:
             logger.warning("Unable to save generator config without a datasource attached.")
      
@@ -53,3 +66,12 @@ class BatchGenerator(object):
             # If we don't actually have an iterator we can generate, even after reseting, just return empty
             logger.warning("Unable to generate batch_kwargs for data_asset_name %s" % data_asset_name)
             return {}
+
+
+class EmptyGenerator(BatchGenerator):
+
+    def _get_iterator(self, data_asset_name, **kwargs):
+        return iter([])
+
+    def get_available_data_asset_names(self):
+        return set()
