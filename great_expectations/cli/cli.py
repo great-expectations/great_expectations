@@ -26,6 +26,7 @@ from great_expectations.render.view import DescriptivePageView
 # Take over the entire GE module logging namespace when running CLI
 logger = logging.getLogger("great_expectations")
 
+
 def cli_message(string, color, font="big", figlet=False):
     if colored:
         if not figlet:
@@ -271,7 +272,6 @@ To launch with jupyter lab:
         "\nDone.",
         color="blue")
 
-
     # Shows a list of options to select from
 
     data_source_selection = click.prompt(msg_prompt_choose_data_source, type=click.Choice(["1", "2", "3", "4"]),
@@ -377,7 +377,9 @@ def render(render_object):
               help='Maximum number of named data assets to profile.')
 @click.option('--profile_all_data_assets', '-A', is_flag=True, default=False,
               help='Profile ALL data assets within the target data source. If True, this will override --max_data_assets.')
-def profile(datasource_name, max_data_assets, profile_all_data_assets):
+@click.option('--target_directory', '-d', default="./",
+              help='The root of a project directory containing a great_expectations/ config.')
+def profile(datasource_name, max_data_assets, profile_all_data_assets, target_directory):
     """Profile a great expectations object.
 
     datasource_name: A datasource within this GE context to profile.
@@ -387,7 +389,7 @@ def profile(datasource_name, max_data_assets, profile_all_data_assets):
         max_data_assets = None
 
     # FIXME: By default, this should iterate over all datasources
-    context = DataContext('.')
+    context = DataContext(target_directory)
     context.profile_datasource(
         datasource_name, max_data_assets=max_data_assets)
 
@@ -397,7 +399,7 @@ def main():
     # Just levelname and message Could re-add other info if we want
     formatter = logging.Formatter(
         '%(levelname)s %(message)s')
-        # '%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
+    # '%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
     handler.setFormatter(formatter)
     logger.addHandler(handler)
     logger.setLevel(logging.INFO)
