@@ -32,6 +32,8 @@ def test_ColumnsExistProfiler():
     expectations_config, evr_config = ColumnsExistProfiler.profile(toy_dataset)
 
     print(json.dumps(expectations_config, indent=2))
+    # FIXME: REVISIT THIS TEST FOR CONTENT
+    # TODO: REVISIT THIS TEST FOR CONTENT
 
     # assert expectations_config == {
     #     "data_asset_name": None,
@@ -78,6 +80,10 @@ def test_BasicDatasetProfiler():
         assert exp["meta"]["BasicDatasetProfiler"] == {
             "confidence": "very low"
         }
+
+    # FIXME: REVISIT THIS TEST FOR CONTENT
+    # TODO: REVISIT THIS TEST FOR CONTENT
+
 
     # Example:
     # {
@@ -159,6 +165,8 @@ def test_context_profiler(empty_data_context, filesystem_csv_2):
     profiled_expectations = not_so_empty_data_context.get_expectations('f1')
     print(json.dumps(profiled_expectations, indent=2))
 
+    # FIXME: REVISIT THIS TEST FOR CONTENT
+    # TODO: REVISIT THIS TEST FOR CONTENT
     assert len(profiled_expectations["expectations"]) > 0
 
     # print(json.dumps(validation_results, indent=2))
