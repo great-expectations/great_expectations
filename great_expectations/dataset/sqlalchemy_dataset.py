@@ -5,10 +5,21 @@ import uuid
 from functools import wraps
 import inspect
 import logging
-import sys
 import warnings
+from datetime import datetime
+
+import pandas as pd
+
+from dateutil.parser import parse
+
+
+from .dataset import Dataset
+from great_expectations.data_asset import DataAsset
+from great_expectations.data_asset.util import DocInherit, parse_result_format
+
 
 logger = logging.getLogger(__name__)
+
 
 try:
     import sqlalchemy as sa
@@ -16,13 +27,8 @@ try:
 except ImportError:
     logger.debug("Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support")
 
-import pandas as pd
 
-from dateutil.parser import parse
-from datetime import datetime
 
-from .dataset import Dataset
-from great_expectations.data_asset.util import DocInherit, parse_result_format
 
 class MetaSqlAlchemyDataset(Dataset):
 
@@ -138,8 +144,7 @@ class MetaSqlAlchemyDataset(Dataset):
                         col = x[column]
                     maybe_limited_unexpected_list.append(datetime.strftime(col, output_strftime_format))
             else:
-                maybe_limited_unexpected_list = [x[column]
-                                             for x in unexpected_query_results.fetchall()]
+                maybe_limited_unexpected_list = [x[column] for x in unexpected_query_results.fetchall()]
 
             success_count = nonnull_count - count_results['unexpected_count']
             success, percent_success = self._calc_map_expectation_success(
@@ -212,7 +217,6 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         if custom_sql:
             self.create_temporary_table(table_name, custom_sql)
-
 
         try:
             insp = reflection.Inspector.from_engine(self.engine)
@@ -422,6 +426,72 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                                             ):
 
         return sa.column(column) != None
+
+
+    @DocInherit
+    @DataAsset.expectation(['column', 'type_', 'mostly'])
+    def expect_column_values_to_be_of_type(
+        self,
+        column,
+        type_,
+        mostly=None,
+        result_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
+        try:
+            col_data = [col for col in self.columns if col["name"] == column]
+            return {
+                    "success": issubclass(col_data["type"], getattr(sa, type_)),
+                    "details": {
+                        "observed_type": col_data["type"].__name__
+                    }
+                }
+        except KeyError:
+            return {
+                "success": False,
+                "details": {
+                    "message": "No database column metadata available for column: %s" % column
+                }
+            }
+        except AttributeError:
+            return {
+                "success": False,
+                "details": {
+                    "message": "Unrecognized sqlalchemy type: %s" % type_
+                }
+            }
+
+    @DocInherit
+    @DataAsset.expectation(['column', 'type_', 'mostly'])
+    def expect_column_values_to_be_in_type_list(
+        self,
+        column,
+        type_list,
+        mostly=None,
+        result_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
+        try:
+            col_data = [col for col in self.columns if col["name"] == column]
+            types = tuple([getattr(sa, type_) for type_ in type_list])
+            return {
+                    "success": issubclass(col_data["type"], types),
+                    "details": {
+                        "observed_type-type": col_data["type"].__name__
+                    }
+                }
+        except KeyError:
+            return {
+                "success": False,
+                "details": {
+                    "message": "No database column metadata available for column: %s" % column
+                }
+            }
+        except AttributeError:
+            return {
+                "success": False,
+                "details": {
+                    "message": "Unrecognized sqlalchemy type in type list: %s" % str(type_list)
+                }
+            }
 
     @DocInherit
     @MetaSqlAlchemyDataset.column_map_expectation

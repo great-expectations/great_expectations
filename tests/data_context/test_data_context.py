@@ -52,7 +52,7 @@ def test_validate_saves_result_inserts_run_id(empty_data_context, filesystem_csv
     not_so_empty_data_context = empty_data_context
 
     # we should now be able to validate, and have validations saved.
-    assert not_so_empty_data_context._project_config["result_store"]["filesystem"]["base_directory"] == "great_expectations/uncommitted/validations/"
+    assert not_so_empty_data_context._project_config["result_store"]["filesystem"]["base_directory"] == "uncommitted/validations/"
 
     my_batch = not_so_empty_data_context.get_batch("f1")
     my_batch = not_so_empty_data_context.get_batch("my_datasource/f1")
@@ -63,8 +63,8 @@ def test_validate_saves_result_inserts_run_id(empty_data_context, filesystem_csv
         mock_datetime.utcnow.return_value = datetime(1955, 11, 5)
         validation_result = my_batch.validate()
 
-    with open(os.path.join(not_so_empty_data_context.get_context_root_directory(), 
-              "great_expectations/uncommitted/validations/1955-11-05T00:00:00/my_datasource/default/f1/default.json")) as infile:
+    with open(os.path.join(not_so_empty_data_context.root_directory, 
+              "uncommitted/validations/1955-11-05T00:00:00/my_datasource/default/f1/default.json")) as infile:
         saved_validation_result = json.load(infile)
     
     assert validation_result == saved_validation_result
