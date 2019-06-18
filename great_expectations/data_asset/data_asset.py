@@ -6,7 +6,7 @@ from functools import wraps
 import traceback
 import warnings
 import logging
-import uuid
+import datetime
 from six import PY3, string_types
 from collections import namedtuple
 
@@ -967,7 +967,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         if run_id is not None:
             result["meta"].update({"run_id": run_id})
         else:
-            run_id = str(uuid.uuid1())
+            run_id = datetime.datetime.utcnow().isoformat()
             result["meta"].update({"run_id": run_id})
 
         if self._batch_kwargs is not None:

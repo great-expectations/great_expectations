@@ -655,7 +655,6 @@ class DataContext(object):
                 validation_filepath = self._get_normalized_data_asset_name_filepath(
                     data_asset_name,
                     base_path=os.path.join(self.context_root_directory,
-                                          "great_expectations",
                                           result_store["filesystem"]["base_directory"],
                                           run_id)
                     )
@@ -868,18 +867,65 @@ class DataContext(object):
 
         self._compiled = True
 
-    def review_validation_result(self, url, failed_only=False):
-        url = url.strip()
-        if url.startswith("s3://"):
+    def get_validation_result(self, data_asset_name, run_id=None, failed_only=False):
+        """Get validation results from a configured store."""
+
+        if "result_store" not in self._project_config:
+            logger.warning("Unable to get validation results: no result store configured.")
+            return []
+        
+        data_asset_name = self._normalize_data_asset_name(data_asset_name)        
+        result_store = self._project_config["result_store"]
+        if "filesystem" in result_store and isinstance(result_store["filesystem"], dict):
+            if "base_directory" not in result_store["filesystem"]:
+                raise DataContextError("Invalid result_store configuration: 'base_directory' is required for a filesystem store.")
+            
+            base_directory = result_store["filesystem"]["base_directory"]
+            if not os.path.isabs(base_directory):
+                base_directory = os.path.join(self.get_context_root_directory(), base_directory)
+            
+            if run_id is None:  # Get most recent run_id
+                runs = [ name for name in os.listdir(base_directory) if os.path.isdir(os.path.join(base_directory, name)) ]
+                run_id = sorted(runs)[-1]
+            
+            validation_path = os.path.join(
+                base_directory,
+                run_id,
+                self._get_normalized_data_asset_name_filepath(data_asset_name, base_path="")
+            )
+            with open(validation_path, "r") as infile:
+                results_dict = json.load(infile)
+
+            if failed_only:
+                failed_results_list = [result for result in results_dict["results"] if not result["success"]]
+                results_dict["results"] = failed_results_list
+                return results_dict
+            else:
+                return results_dict
+    
+        elif "s3" in result_store and isinstance(result_store["s3"], dict):
+            # FIXME: this code is untested
+            if "bucket" not in result_store["s3"] or "key_prefix" not in result_store["s3"]:
+                raise DataContextError("Invalid result_store configuration: 'bucket' and 'key_prefix' are required for an s3 store.")
+
             try:
                 import boto3
                 s3 = boto3.client('s3')
             except ImportError:
                 raise ImportError("boto3 is required for retrieving a dataset from s3")
         
-            parsed_url = urlparse(url)
-            bucket = parsed_url.netloc
-            key = parsed_url.path[1:]
+            bucket = result_store["s3"]["bucket"]
+            key_prefix = result_store["s3"]["key_prefix"]
+
+            if run_id is None:  # Get most recent run_id
+                all_objects = s3.list_objects(Bucket = 'bucket-name') 
+                validations  = [ name for name in all_objects if name.startswith(key_prefix)]
+                runs = [ validation.split('/')[0] for validation in validations ]
+                run_id = sorted(runs)[-1]  
+
+            key = os.path.join(key_prefix, "validations", run_id, self._get_normalized_data_asset_name_filepath(
+                data_asset_name, base_path=""
+            ))
             
             s3_response_object = s3.get_object(Bucket=bucket, Key=key)
             object_content = s3_response_object['Body'].read()
@@ -893,7 +939,7 @@ class DataContext(object):
             else:
                 return results_dict
         else:
-            raise ValueError("Only s3 urls are supported.")
+            raise DataContextError("Invalid result_store configuration: only 'filesystem' and 's3' are supported.")
 
     # TODO: refactor this into a snapshot getter based on project_config
     # def get_failed_dataset(self, validation_result, **kwargs):
@@ -931,7 +977,7 @@ class DataContext(object):
             return return_obj
 
     def profile_datasource(self, datasource_name, generator_name=None, profiler=BasicDatasetProfiler, max_data_assets=10):
-        logger.info("Profiling %s with %s" % (datasource_name, profiler.__name__))
+        logger.info("Profiling '%s' with '%s'" % (datasource_name, profiler.__name__))
         data_asset_names = self.get_available_data_asset_names(datasource_name)
         if generator_name is None:
             if len(data_asset_names[datasource_name].keys()) == 1:
@@ -960,7 +1006,7 @@ class DataContext(object):
                 batch = self.get_batch(data_asset_name=NormalizedDataAssetName(datasource_name, generator_name, name, profiler.__name__))
 
                 if not profiler.validate(batch):
-                    raise ProfilerError("batch %s is not a valid batch for the %s profiler" % (name, profiler.__name__))
+                    raise ProfilerError("batch '%s' is not a valid batch for the '%s' profiler" % (name, profiler.__name__))
   
                 #Note: This logic is specific to DatasetProfilers, which profile a single batch. Multi-batch profilers will have more to unpack.
                 expectation_suite, validation_result = profiler.profile(batch)
@@ -1000,6 +1046,7 @@ Note: You will need to review and revise Expectations before using them in produ
         ))
         if skipped_data_assets > 0:
             logger.warning("Skipped %d data assets due to errors." % skipped_data_assets)
+
         return data_asset_name_list
 
 PROJECT_HELP_COMMENT = """# Welcome to great expectations. 
@@ -1030,7 +1077,7 @@ PROJECT_OPTIONAL_CONFIG_COMMENT = """
 
 result_store:
   filesystem:
-    base_directory: uncommitted/validations/
+    base_directory: great_expectations/uncommitted/validations/
 #   s3:
 #     bucket: <your bucket>
 #     key_prefix: <your key prefix>
@@ -1046,7 +1093,7 @@ result_store:
 
 # data_asset_snapshot_store:
 #   filesystem:
-#     base_directory: uncommitted/snapshots/
+#     base_directory: great_expectations/uncommitted/snapshots/
 #   s3:
 #     bucket:
 #     key_prefix:

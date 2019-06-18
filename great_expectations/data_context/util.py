@@ -22,7 +22,7 @@ def build_slack_notification_request(validation_json=None):
     timestamp = datetime.datetime.strftime(datetime.datetime.now(), "%x %X")
     status = "Failed :x:"
     run_id = None
-    data_asset_name = "no_name_provided_" + str(uuid.uuid1())
+    data_asset_name = "no_name_provided_" + datetime.datetime.utcnow().isoformat()
     title_block = {
         "type": "section",
         "text": {

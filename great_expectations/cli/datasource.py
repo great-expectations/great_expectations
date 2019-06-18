@@ -2,6 +2,7 @@ import os
 import click
 
 from .util import cli_message
+from great_expectations.render import DescriptivePageView
 
 
 def add_datasource(context):
@@ -34,7 +35,7 @@ def add_datasource(context):
         else:
             basenamepath = path
 
-        default_data_source_name = os.path.basename(basenamepath)
+        default_data_source_name = os.path.basename(basenamepath) + "__dir"
         data_source_name = click.prompt(
             msg_prompt_datasource_name,
             default=default_data_source_name,
@@ -115,7 +116,7 @@ def add_datasource(context):
                 data_source_name),
             default=True
         ):
-            context.profile_datasource(
+            data_asset_names = context.profile_datasource(
                 data_source_name,
                 max_data_assets=20
             )
@@ -123,9 +124,10 @@ def add_datasource(context):
                 "\nWould you like to view render html documentation for the profiled datasource?\n",
                 default = True
             ):
-                for validation_
-                cli_message("Rendering validation result: %s" % validation_result_name)
-                DescriptivePageRenderer.render(validation_results)
+                for data_asset in data_asset_names:
+                    validation_result = context.get_validation_result(data_asset)
+                    cli_message("Rendering validation result: %s" % data_asset)
+                    DescriptivePageView.render(validation_result)
     
         else:
             cli_message(
