@@ -91,7 +91,10 @@ def add_datasource(context):
         if path.startswith("./"):
             path = path[2:]
 
-        default_data_source_name = os.path.basename(path)
+        if path.endswith("/"):
+            basenamepath = path[:-1]
+
+        default_data_source_name = os.path.basename(basenamepath)
         data_source_name = click.prompt(
             msg_prompt_datasource_name,
             default=default_data_source_name+"__dir",

@@ -981,12 +981,11 @@ class DataContext(object):
 
                 logger.info("\tProfiled %d rows from %s (%.3f sec)" % (row_count, name, duration))
 
-            #!!! FIXME: THIS IS WAAAAY TO GENERAL. As soon as BatchKwargsError is fully implemented, we'll want to switch to that.
-            # TODO: ^^^
             except ProfilerError as err:
                 logger.warning(err.message)
-            except Exception as exc:
-                logger.warning("\tSomething went wrong when profiling %s. (Perhaps a loading error?) Skipping." % (name))
+            except IOError as exc:
+                logger.warning("\IOError while profiling %s. (Perhaps a loading error?) Skipping." % (name))
+                logger.debug(str(exc))
                 skipped_data_assets += 1
 
         total_duration = (datetime.datetime.now() - total_start_time).total_seconds()
