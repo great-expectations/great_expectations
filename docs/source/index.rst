@@ -31,6 +31,7 @@ Advanced
    conventions
    roadmap_changelog
    implemented_expectations
+   migrating_versions
 
 Module Docs
 -------------
