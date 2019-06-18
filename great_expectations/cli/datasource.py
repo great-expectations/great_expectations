@@ -13,19 +13,13 @@ def add_datasource(context):
 
     cli_message(data_source_selection)
 
-    # if data_source_selection == "5": # dbt
-    #     dbt_profile = click.prompt(msg_prompt_dbt_choose_profile)
-    #     log_message(msg_dbt_go_to_notebook, color="blue")
-    #     context.add_datasource("dbt", "dbt", profile=dbt_profile)
-    if data_source_selection == "4":  # None of the above
-        return None
-
-    elif data_source_selection == "3":  # Spark
+    if data_source_selection == "1":  # pandas
+        print("This init script will configure a local ")
         path = click.prompt(
             msg_prompt_filesys_enter_base_path,
-            default='/data/',
+            # default='/data/',
             type=click.Path(
-                exists=True,
+                exists=False,
                 file_okay=False,
                 dir_okay=True,
                 readable=True
@@ -37,11 +31,17 @@ def add_datasource(context):
 
         if path.endswith("/"):
             basenamepath = path[:-1]
+        else:
+            basenamepath = path
+
         default_data_source_name = os.path.basename(basenamepath)
         data_source_name = click.prompt(
-            msg_prompt_datasource_name, default=default_data_source_name, show_default=True)
+            msg_prompt_datasource_name,
+            default=default_data_source_name,
+            show_default=True
+        )
 
-        context.add_datasource(data_source_name, "spark", base_directory=path)
+        context.add_datasource(data_source_name, "pandas", base_directory=path)
 
     elif data_source_selection == "2":  # sqlalchemy
         data_source_name = click.prompt(
@@ -76,12 +76,12 @@ def add_datasource(context):
         context.add_datasource(
             data_source_name, "sqlalchemy", profile=data_source_name)
 
-    elif data_source_selection == "1":  # csv
+    elif data_source_selection == "3":  # Spark
         path = click.prompt(
             msg_prompt_filesys_enter_base_path,
-            # default='/data/',
+            default='/data/',
             type=click.Path(
-                exists=False,
+                exists=True,
                 file_okay=False,
                 dir_okay=True,
                 readable=True
@@ -93,43 +93,46 @@ def add_datasource(context):
 
         if path.endswith("/"):
             basenamepath = path[:-1]
-
         default_data_source_name = os.path.basename(basenamepath)
         data_source_name = click.prompt(
-            msg_prompt_datasource_name,
-            default=default_data_source_name+"__dir",
-            show_default=True
-        )
+            msg_prompt_datasource_name, default=default_data_source_name, show_default=True)
 
-        context.add_datasource(data_source_name, "pandas", base_directory=path)
+        context.add_datasource(data_source_name, "spark", base_directory=path)
 
-    else:
+    # if data_source_selection == "5": # dbt
+    #     dbt_profile = click.prompt(msg_prompt_dbt_choose_profile)
+    #     log_message(msg_dbt_go_to_notebook, color="blue")
+    #     context.add_datasource("dbt", "dbt", profile=dbt_profile)
+    if data_source_selection == "4":  # None of the above
         cli_message(msg_unknown_data_source)
+        print("Skipping datasource configuration. You can add a datasource later by editing the great_expectations.yml file.")
         return None
 
     if data_source_name != None:
 
         if click.confirm(
-            "\nWould you like to profile %s to create candidate expectations and documentation?\n" % (
+            "\nWould you like to profile '%s' to create candidate expectations and documentation?\n" % (
                 data_source_name),
             default=True
         ):
-
-            cli_message("")
-
             context.profile_datasource(
                 data_source_name,
                 max_data_assets=20
             )
-
-            # context.render_datasource(datasource_name)
-
+            if click.confirm(
+                "\nWould you like to view render html documentation for the profiled datasource?\n",
+                default = True
+            ):
+                for validation_
+                cli_message("Rendering validation result: %s" % validation_result_name)
+                DescriptivePageRenderer.render(validation_results)
+    
         else:
             cli_message(
                 "Okay, skipping profiling for now. You can always do this later by running `great_expectations profile`."
             )
 
-    if data_source_selection == "1":  # CSV
+    if data_source_selection == "1":  # Pandas
         cli_message(msg_filesys_go_to_notebook)
 
     elif data_source_selection == "2":  # SQL
@@ -140,23 +143,12 @@ def add_datasource(context):
 
 
 msg_prompt_choose_data_source = """
-Configure a data source
-    1. Pandas data frames from local filesystem (CSV files)
+Configure a data source:
+    1. Pandas data frames (including local filesystem)
     2. Relational database (SQL)
-    3. Spark DataFrames from local filesystem (CSV files)
-    4. None of the above
+    3. Spark DataFrames
+    4. Skip datasource configuration
 """
-
-#     msg_prompt_choose_data_source = """
-# Time to create expectations for your data. This is done in Jupyter Notebook/Jupyter Lab.
-#
-# Before we point you to the right notebook, what data does your project work with?
-#     1. Directory on local filesystem
-#     2. Relational database (SQL)
-#     3. DBT (data build tool) models
-#     4. None of the above
-#     """
-
 
 #     msg_prompt_dbt_choose_profile = """
 # Please specify the name of the dbt profile (from your ~/.dbt/profiles.yml file Great Expectations \

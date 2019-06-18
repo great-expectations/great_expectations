@@ -941,7 +941,7 @@ class DataContext(object):
 
         data_asset_name_list = list(data_asset_names[datasource_name][generator_name])
         total_data_assets = len(data_asset_name_list)
-        logger.info("Found %d data assets using generator %s" % (total_data_assets, generator_name))
+        logger.info("Found %d data assets using generator '%s'" % (total_data_assets, generator_name))
                 
         if max_data_assets == None or max_data_assets >= len(data_asset_name_list):
             logger.info("Profiling all %d." % (len(data_asset_name_list)))
@@ -976,15 +976,13 @@ class DataContext(object):
                 total_expectations += new_expectation_count
 
                 self.save_expectation_suite(expectation_suite)
-                
                 duration = (datetime.datetime.now() - start_time).total_seconds()
-
                 logger.info("\tProfiled %d rows from %s (%.3f sec)" % (row_count, name, duration))
 
             except ProfilerError as err:
                 logger.warning(err.message)
             except IOError as exc:
-                logger.warning("\IOError while profiling %s. (Perhaps a loading error?) Skipping." % (name))
+                logger.warning("IOError while profiling %s. (Perhaps a loading error?) Skipping." % (name))
                 logger.debug(str(exc))
                 skipped_data_assets += 1
 
@@ -1002,7 +1000,7 @@ Note: You will need to review and revise Expectations before using them in produ
         ))
         if skipped_data_assets > 0:
             logger.warning("Skipped %d data assets due to errors." % skipped_data_assets)
-
+        return data_asset_name_list
 
 PROJECT_HELP_COMMENT = """# Welcome to great expectations. 
 # This project configuration file allows you to define datasources, 

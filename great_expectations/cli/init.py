@@ -53,7 +53,7 @@ Always know what to expect from your data.
 If you're new to Great Expectations, this tutorial is a good place to start:
 
     <blue>https://great-expectations.readthedocs.io/en/latest/intro.html#how-do-i-get-started</blue>
-""" % __version__
+"""
 
 msg_prompt_lets_begin = """
 Let's add Great Expectations to your project, by scaffolding a new great_expectations directory:
