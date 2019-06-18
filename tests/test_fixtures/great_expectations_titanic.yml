@@ -8,8 +8,8 @@ datasources:
       # The name default is read if no datasource or generator is specified
       mygenerator:
         type: subdir_reader
-        base_directory: data
+        base_directory: ../data
 
 result_store:
   filesystem:
-    base_directory: great_expectations/validations
+    base_directory: uncommitted/validations

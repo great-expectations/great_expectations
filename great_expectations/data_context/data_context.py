@@ -75,19 +75,26 @@ class DataContext(object):
     """
 
     @classmethod
-    def create(cls, context_root_dir=None):
-        if not os.path.isdir(context_root_dir):
-            raise DataContextError("context_root_dir must be a directory in which to initialize a new DataContext")
+    def create(cls, project_root_dir=None):
+        """Build a new great_expectations directory and DataContext object in 
+        the provided project_root_dir.
+
+        `create` will not create a new "great_expectations" directory in the provided folder,
+        provided one does not already exist. Then, it will initialize a new DataContext
+        in that folder and write the resulting config.
+        """
+        if not os.path.isdir(project_root_dir):
+            raise DataContextError("project_root_dir must be a directory in which to initialize a new DataContext")
         else:
             try:
-                os.mkdir(os.path.join(context_root_dir, "great_expectations"))
+                os.mkdir(os.path.join(project_root_dir, "great_expectations"))
             except (FileExistsError, OSError):
                 raise DataContextError("Cannot create a DataContext object when a great_expectations directory already exists at the provided root directory.")
 
-            with open(os.path.join(context_root_dir, "great_expectations/great_expectations.yml"), "w") as template:
+            with open(os.path.join(project_root_dir, "great_expectations/great_expectations.yml"), "w") as template:
                 template.write(PROJECT_TEMPLATE)
 
-        return cls(context_root_dir)
+        return cls(os.path.join(project_root_dir, "great_expectations"))
             
     def __init__(self, context_root_dir=None, expectation_explorer=False, data_asset_name_delimiter = '/'):
         self._expectation_explorer = expectation_explorer
@@ -97,18 +104,19 @@ class DataContext(object):
         # determine the "context root directory" - this is the parent of "great_expectations" dir
 
         if context_root_dir is None:
-            if (os.path.isdir("../notebooks") and os.path.isdir("../../great_expectations")
-                    and os.path.isfile("../../great_expectations/great_expectations.yml")):
-                self.context_root_directory = "../../"
+            if (os.path.isdir("../notebooks") and os.path.isfile("../great_expectations.yml")):
+                context_root_dir = "../"
             elif os.path.isdir("./great_expectations") and os.path.isfile("./great_expectations/great_expectations.yml"):
-                self.context_root_directory = "./"
+                context_root_dir = "./great_expectations"
+            elif os.path.isdir("./") and os.path.isfile("./great_expectations.yml"):
+                context_root_dir = "./"
             else:
                 raise("Unable to locate context root directory. Please provide a directory name.")
 
-        self.context_root_directory = os.path.abspath(context_root_dir)
+        self._context_root_directory = os.path.abspath(context_root_dir)
 
-        self.expectations_directory = os.path.join(self.context_root_directory, "great_expectations/expectations")
-        self.plugin_store_directory = os.path.join(self.context_root_directory, "great_expectations/plugins/store")
+        self.expectations_directory = os.path.join(self.root_directory, "expectations")
+        self.plugin_store_directory = os.path.join(self.root_directory, "plugins/store")
         sys.path.append(self.plugin_store_directory)
         
         self._project_config = self._load_project_config()
@@ -124,15 +132,16 @@ class DataContext(object):
             raise DataContextError("Invalid delimiter: delimiter must be '.' or '/'")
         self._data_asset_name_delimiter = data_asset_name_delimiter
 
-    def get_context_root_directory(self):
-        return self.context_root_directory
+    @property
+    def root_directory(self):
+        return self._context_root_directory
 
     def _load_project_config(self):
         try:
-            with open(os.path.join(self.context_root_directory, "great_expectations/great_expectations.yml"), "r") as data:
+            with open(os.path.join(self.root_directory, "great_expectations.yml"), "r") as data:
                 return yaml.load(data)
         except IOError:
-            raise ConfigNotFoundError(self.context_root_directory)
+            raise ConfigNotFoundError(self.root_directory)
 
 
     @property
@@ -155,7 +164,7 @@ class DataContext(object):
     def _get_normalized_data_asset_name_filepath(self, data_asset_name, base_path=None):
         """Get the path where the project-normalized data_asset_name expectations are stored."""
         if base_path is None:
-            base_path  = os.path.join(self.get_context_root_directory(), "great_expectations/expectations")
+            base_path  = os.path.join(self.root_directory, "expectations")
 
         # We need to ensure data_asset_name is a valid filepath no matter its current state
         if isinstance(data_asset_name, NormalizedDataAssetName):
@@ -178,13 +187,13 @@ class DataContext(object):
             )
 
     def _save_project_config(self):
-        with open(os.path.join(self.context_root_directory, "great_expectations/great_expectations.yml"), "w") as data:
+        with open(os.path.join(self.root_directory, "great_expectations.yml"), "w") as data:
             yaml.dump(self._project_config, data)
 
     def _get_all_profile_credentials(self):
         try:
-            with open(os.path.join(self.context_root_directory,
-                                   "great_expectations/uncommitted/credentials/profiles.yml"), "r") as profiles_file:
+            with open(os.path.join(self.root_directory,
+                                   "uncommitted/credentials/profiles.yml"), "r") as profiles_file:
                 return yaml.load(profiles_file) or {}
         except IOError as e:
             if e.errno != errno.ENOENT:
@@ -204,7 +213,7 @@ class DataContext(object):
     def add_profile_credentials(self, profile_name, **kwargs):
         profiles = self._get_all_profile_credentials()
         profiles[profile_name] = dict(**kwargs)
-        profiles_filepath = os.path.join(self.context_root_directory, "great_expectations/uncommitted/credentials/profiles.yml")
+        profiles_filepath = os.path.join(self.root_directory, "uncommitted/credentials/profiles.yml")
         safe_mmkdir(os.path.dirname(profiles_filepath), exist_ok=True)
         if not os.path.isfile(profiles_filepath):
             logger.info("Creating new profiles store at {profiles_filepath}".format(profiles_filepath=profiles_filepath))
@@ -222,11 +231,11 @@ class DataContext(object):
         """
         datasource_config = {}
         defined_config_path = None
-        default_config_path = os.path.join(self.context_root_directory, "datasources", datasource_name, "config.yml")
+        default_config_path = os.path.join(self.root_directory, "datasources", datasource_name, "config.yml")
         if datasource_name in self._project_config["datasources"]:
             base_datasource_config = copy.deepcopy(self._project_config["datasources"][datasource_name])
             if "config_file" in base_datasource_config:
-                defined_config_path = os.path.join(self.context_root_directory, base_datasource_config.pop("config_file"))
+                defined_config_path = os.path.join(self.root_directory, base_datasource_config.pop("config_file"))
             datasource_config.update(base_datasource_config)
         
         try:
@@ -654,7 +663,7 @@ class DataContext(object):
             if isinstance(result_store, dict) and "filesystem" in result_store:
                 validation_filepath = self._get_normalized_data_asset_name_filepath(
                     data_asset_name,
-                    base_path=os.path.join(self.context_root_directory,
+                    base_path=os.path.join(self.root_directory,
                                           result_store["filesystem"]["base_directory"],
                                           run_id)
                     )
@@ -690,8 +699,8 @@ class DataContext(object):
             if isinstance(data_asset, PandasDataset):
                 if isinstance(data_asset_snapshot_store, dict) and "filesystem" in data_asset_snapshot_store:
                     logger.info("Storing dataset to file")
-                    safe_mmkdir(os.path.join(self.context_root_directory, "great_expectations", data_asset_snapshot_store["filesystem"]["base_directory"], run_id))
-                    data_asset.to_csv(os.path.join(self.context_root_directory, "great_expectations", data_asset_snapshot_store["filesystem"]["base_directory"],
+                    safe_mmkdir(os.path.join(self.root_directory, data_asset_snapshot_store["filesystem"]["base_directory"], run_id))
+                    data_asset.to_csv(os.path.join(self.root_directory, data_asset_snapshot_store["filesystem"]["base_directory"],
                                                    run_id,
                                                    data_asset_name + ".csv.gz"), compression="gzip")
 
@@ -882,7 +891,7 @@ class DataContext(object):
             
             base_directory = result_store["filesystem"]["base_directory"]
             if not os.path.isabs(base_directory):
-                base_directory = os.path.join(self.get_context_root_directory(), base_directory)
+                base_directory = os.path.join(self.root_directory, base_directory)
             
             if run_id is None:  # Get most recent run_id
                 runs = [ name for name in os.listdir(base_directory) if os.path.isdir(os.path.join(base_directory, name)) ]
@@ -1077,7 +1086,7 @@ PROJECT_OPTIONAL_CONFIG_COMMENT = """
 
 result_store:
   filesystem:
-    base_directory: great_expectations/uncommitted/validations/
+    base_directory: uncommitted/validations/
 #   s3:
 #     bucket: <your bucket>
 #     key_prefix: <your key prefix>
@@ -1093,7 +1102,7 @@ result_store:
 
 # data_asset_snapshot_store:
 #   filesystem:
-#     base_directory: great_expectations/uncommitted/snapshots/
+#     base_directory: uncommitted/snapshots/
 #   s3:
 #     bucket:
 #     key_prefix:

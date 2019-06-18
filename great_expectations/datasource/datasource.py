@@ -85,8 +85,8 @@ class Datasource(object):
     #     #     # Setup is done; no additional config to read
     #     #     return {}
     #     # try:
-    #     #     config_path = os.path.join(self._data_context.context_root_directory,
-    #                                      "great_expectations/datasources", self._name, "config.yml")
+    #     #     config_path = os.path.join(self._data_context.root_directory,
+    #                                      "datasources", self._name, "config.yml")
     #     #     with open(config_path, "r") as data:
     #     #         extra_config = yaml.load(data) or {}
     #     #     logger.info("Loading config from %s" % str(config_path))
@@ -117,11 +117,11 @@ class Datasource(object):
         # if self._data_context is not None:
         #     base_config = copy.deepcopy(self._datasource_config)
         #     if "config_file" in base_config:
-        #         config_filepath = os.path.join(self._data_context.context_root_directory,
+        #         config_filepath = os.path.join(self._data_context.root_directory,
         #                                        base_config.pop["config_file"])
         #     else:
-        #         config_filepath = os.path.join(self._data_context.context_root_directory,
-        #                                        "great_expectations/datasources", self._name, "config.yml")
+        #         config_filepath = os.path.join(self._data_context.root_directory,
+        #                                        "datasources", self._name, "config.yml")
         # else:
         #     logger.warning("Unable to save config with no data context attached.")
 

@@ -42,7 +42,7 @@ class GlobReaderGenerator(BatchGenerator):
         if os.path.isabs(self._base_directory) or self._datasource.get_data_context() is None:
             return self._base_directory
         else:
-            return os.path.join(self._datasource.get_data_context().get_context_root_directory(), self._base_directory)
+            return os.path.join(self._datasource.get_data_context().root_directory, self._base_directory)
 
     def get_available_data_asset_names(self):
         known_assets = set()
@@ -121,7 +121,7 @@ class SubdirReaderGenerator(BatchGenerator):
         if os.path.isabs(self._base_directory) or self._datasource.get_data_context() is None:
             return self._base_directory
         else:
-            return os.path.join(self._datasource.get_data_context().get_context_root_directory(), self._base_directory)
+            return os.path.join(self._datasource.get_data_context().root_directory, self._base_directory)
 
     def get_available_data_asset_names(self):
         known_assets = set()

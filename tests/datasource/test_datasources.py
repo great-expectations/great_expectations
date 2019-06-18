@@ -64,7 +64,7 @@ def test_create_pandas_datasource(data_context, tmp_path_factory):
 
     # We should now see updated configs
     # Finally, we should be able to confirm that the folder structure is as expected
-    with open(os.path.join(data_context.context_root_directory, "great_expectations/great_expectations.yml"), "r") as data_context_config_file:
+    with open(os.path.join(data_context.root_directory, "great_expectations.yml"), "r") as data_context_config_file:
         data_context_file_config = yaml.load(data_context_config_file)
 
     assert data_context_file_config["datasources"][name] == data_context_config["datasources"][name]
@@ -135,7 +135,7 @@ def test_create_sqlalchemy_datasource(data_context):
     assert isinstance(source, SqlAlchemyDatasource)
 
     # Finally, we should be able to confirm that the folder structure is as expected
-    with open(os.path.join(data_context.context_root_directory, "great_expectations/uncommitted/credentials/profiles.yml"), "r") as profiles_file:
+    with open(os.path.join(data_context.root_directory, "uncommitted/credentials/profiles.yml"), "r") as profiles_file:
         profiles = yaml.load(profiles_file)
     
     assert profiles == {
@@ -166,7 +166,7 @@ def test_create_sparkdf_datasource(data_context, tmp_path_factory):
     assert data_context_config["datasources"][name]["generators"]["default"]["reader_options"]["sep"] == "|"
 
     # Note that pipe is special in yml, so let's also check to see that it was properly serialized
-    with open(os.path.join(data_context.get_context_root_directory(), "great_expectations/great_expectations.yml"), "r") as configfile:
+    with open(os.path.join(data_context.root_directory, "great_expectations.yml"), "r") as configfile:
         lines = configfile.readlines()
         assert "          sep: '|'\n" in lines
         assert "          header: false\n" in lines

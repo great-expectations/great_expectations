@@ -211,7 +211,7 @@ def test_cli_profile(empty_data_context, filesystem_csv_2, capsys):
         "my_datasource", "pandas", base_directory=str(filesystem_csv_2))
     not_so_empty_data_context = empty_data_context
 
-    project_root_dir = not_so_empty_data_context.get_context_root_directory()
+    project_root_dir = not_so_empty_data_context.root_directory
     # print(project_root_dir)
 
     # For some reason, even with this logging change (which is required and done in main of the cli)
