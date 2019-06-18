@@ -8,4 +8,4 @@ datasources:
       # The name default is read if no datasource or generator is specified
       mygenerator:
         type: subdir_reader
-        base_directory: /data
+        base_directory: ../data

@@ -24,11 +24,12 @@ class QueryGenerator(BatchGenerator):
     """
 
     def __init__(self, datasource, name="default"):
+        # TODO: Add tests for QueryGenerator
         super(QueryGenerator, self).__init__(name=name, type_="queries", datasource=datasource)
         self.meta = MetaData()
         if datasource is not None and datasource.data_context is not None:
-            self._queries_path = os.path.join(self._datasource.data_context.context_root_directory,
-                                              "great_expectations/datasources",
+            self._queries_path = os.path.join(self._datasource.data_context.root_directory,
+                                              "datasources",
                                               self._datasource.name,
                                               "generators",
                                               self._name,

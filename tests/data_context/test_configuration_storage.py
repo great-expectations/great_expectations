@@ -22,9 +22,9 @@ datasources:
 def test_preserve_comments(data_context):
     data_context.add_datasource("test_datasource", "pandas")
 
-    context_root_dir = data_context.get_context_root_directory()
+    context_root_dir = data_context.root_directory
 
-    with open(os.path.join(context_root_dir, "great_expectations/great_expectations.yml"), "r") as infile:
+    with open(os.path.join(context_root_dir, "great_expectations.yml"), "r") as infile:
         lines = infile.readlines()
 
     assert lines[0] == "# This is a basic configuration for testing.\n"

@@ -47,7 +47,7 @@ def test_validate_using_data_context(dataset, data_context):
 
 
 def test_validate_using_data_context_path(dataset, data_context):
-    data_context_path = data_context.get_context_root_directory()
+    data_context_path = data_context.root_directory
     res = ge.validate(dataset, data_asset_name="parameterized_expectation_suite_fixture", data_context=data_context_path)
 
     # We should have now found the right suite with expectations to evaluate
