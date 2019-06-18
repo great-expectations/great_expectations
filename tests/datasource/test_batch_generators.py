@@ -51,7 +51,7 @@ def test_glob_reader_generator(tmp_path_factory):
     will take care of providing batches consististing of one file per
     batch corresponding to the glob."""
     
-    basedir = tmp_path_factory.mktemp("test_glob_reader_generator")
+    basedir = str(tmp_path_factory.mktemp("test_glob_reader_generator"))
 
     with open(os.path.join(basedir, "f1.blarg"), "w") as outfile:
         outfile.write("\n\n\n")
@@ -96,7 +96,7 @@ def test_glob_reader_generator(tmp_path_factory):
     
 def test_file_kwargs_generator_extensions(tmp_path_factory):
     """csv, xls, parquet, json should be recognized file extensions"""
-    basedir = tmp_path_factory.mktemp("test_file_kwargs_generator_extensions")
+    basedir = str(tmp_path_factory.mktemp("test_file_kwargs_generator_extensions"))
 
     with open(os.path.join(basedir, "f1.blarg"), "w") as outfile:
         outfile.write("\n\n\n")

@@ -46,10 +46,10 @@ def test_db_connection_string(tmp_path_factory):
 def test_parquet_folder_connection_path(tmp_path_factory):
     df1 = pd.DataFrame(
         {'col_1': [1, 2, 3, 4, 5], 'col_2': ['a', 'b', 'c', 'd', 'e']})
-    basepath = tmp_path_factory.mktemp("parquet_context")
+    basepath = str(tmp_path_factory.mktemp("parquet_context"))
     df1.to_parquet(os.path.join(basepath, "test.parquet"))
 
-    return str(basepath)
+    return basepath
 
 def test_create_pandas_datasource(data_context, tmp_path_factory):
     basedir = tmp_path_factory.mktemp('test_create_pandas_datasource')
@@ -228,7 +228,7 @@ def test_standalone_spark_csv_datasource(test_folder_connection_path):
     assert dataset.spark_df.head()['col_1'] == '1'
 
 def test_invalid_reader_sparkdf_datasource(tmp_path_factory):
-    basepath = tmp_path_factory.mktemp("test_invalid_reader_sparkdf_datasource")
+    basepath = str(tmp_path_factory.mktemp("test_invalid_reader_sparkdf_datasource"))
     datasource = SparkDFDatasource('mysparksource', base_directory=basepath)
 
     with open(os.path.join(basepath, "idonotlooklikeacsvbutiam.notrecognized"), "w") as newfile:
@@ -250,7 +250,7 @@ def test_invalid_reader_sparkdf_datasource(tmp_path_factory):
     assert dataset.spark_df.head()["a"] == "1"
 
 def test_invalid_reader_pandas_datasource(tmp_path_factory):
-    basepath = tmp_path_factory.mktemp("test_invalid_reader_pandas_datasource")
+    basepath = str(tmp_path_factory.mktemp("test_invalid_reader_pandas_datasource"))
     datasource = PandasDatasource('mypandassource', base_directory=basepath)
 
     with open(os.path.join(basepath, "idonotlooklikeacsvbutiam.notrecognized"), "w") as newfile:
