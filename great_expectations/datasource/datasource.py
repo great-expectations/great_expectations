@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import os
 
 import copy
@@ -34,12 +36,12 @@ class Datasource(object):
 
     To bridge the gap between those worlds, Datasources interact closely with *generators* which
     are aware of a source of data and can produce produce identifying information, called 
-    “batch_kwargs” that datasources can use to get individual batches of data. They add flexibility 
+    "batch_kwargs" that datasources can use to get individual batches of data. They add flexibility 
     in how to obtain data such as with time-based partitioning, downsampling, or other techniques
     appropriate for the datasource.
 
-    For example, a generator could produce a SQL query that logically represents “rows in the Events
-    table with a timestamp on February 7, 2012,” which a SqlAlchemyDatasource could use to materialize
+    For example, a generator could produce a SQL query that logically represents "rows in the Events
+    table with a timestamp on February 7, 2012," which a SqlAlchemyDatasource could use to materialize
     a SqlAlchemyDataset corresponding to that batch of data and ready for validation. 
 
     Since opinionated DAG managers such as airflow, dbt, prefect.io, dagster can also act as datasources
