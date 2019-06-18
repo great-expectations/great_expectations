@@ -59,7 +59,7 @@ class DataContext(object):
       - The datasource actually connects to a source of materialized data and returns Great Expectations
         DataAssets connected to a compute environment and ready for validation.
 
-      - The Generator knows how to intropsect datasources and produce identifying "batch_kwargs" that define
+      - The Generator knows how to introspect datasources and produce identifying "batch_kwargs" that define
         particular slices of data.
 
       - The generator_asset is a specific name -- often a table name or other name familiar to users -- that
