@@ -121,7 +121,7 @@
       "tests": [{
           "title": "type mismatch: null observed_value",
           "exact_match_out": false,
-	        "suppress_test_for": ["SQLAlchemy"],
+	        "suppress_test_for": ["sqlalchemy"],
           "in": {
             "column": "s",
             "min_value": 0,
@@ -144,7 +144,7 @@
             "success": true,
             "observed_value": 0.5
           },
-          "suppress_test_for": ["postgresql", "Spark"],
+          "suppress_test_for": ["postgresql", "spark"],
           "_comment": "postgresql will not allow coercing the boolean type to an average"
         },
         {
@@ -159,7 +159,7 @@
             "success": true,
             "observed_value": 0.5
           },
-          "suppress_test_for": ["postgresql", "Spark"],
+          "suppress_test_for": ["postgresql", "spark"],
           "_comment": "postgresql will not allow coercing the boolean type to an average"
         },
         {
