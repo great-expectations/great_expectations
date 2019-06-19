@@ -20,6 +20,42 @@
           "b": "bool",
           "s": "float64",
           "s1": "int64"
+        },
+        "postgresql": {
+          "x": "integer",
+          "y": "float",
+          "z": "text",
+          "n": "text",
+          "b": "boolean",
+          "s": "float",
+          "s1": "bigint"
+        },
+        "spark": {
+          "x": "integer",
+          "y": "float",
+          "z": "string",
+          "n": "string",
+          "b": "boolean",
+          "s": "float",
+          "s1": "long"
+        },
+        "sqlite": {
+          "x": "integer",
+          "y": "float",
+          "z": "varchar",
+          "n": "varchar",
+          "b": "boolean",
+          "s": "float",
+          "s1": "integer"
+        },
+        "mysql": {
+          "x": "integer",
+          "y": "float",
+          "z": "varchar",
+          "n": "varchar",
+          "b": "boolean",
+          "s": "float",
+          "s1": "bigint"
         }
       },
       "tests": [
@@ -34,10 +70,24 @@
             "success": true,
             "unexpected_list": [],
             "unexpected_index_list": []
-          }
+          },
+          "only_for": ["pandas"]
         },
         {
-          "title": "Negative, Python ints are not ",
+          "_note": "type name here works for tested sqlalchemy types; for sqlalchemy note we do not expect unexpected_list or unexpected_index_list since there are no column_map semantics for type",
+          "title": "Basic non-python integer Positive Test",
+          "exact_match_out": false,
+          "in": {
+            "column": "x",
+            "type_": "INTEGER"
+          },
+          "out": {
+            "success": true
+          },
+          "only_for": ["sqlalchemy"]
+        },
+        {
+          "title": "Negative, Python ints are not string",
           "exact_match_out": false,
           "in":
           {
@@ -49,7 +99,38 @@
             "success":false,
             "unexpected_list":[1,2,4],
             "unexpected_index_list":[0,1,2]
-          }
+          },
+          "only_for": ["pandas"]
+        },
+        {
+          "_note": "type name here works for tested sqlalchemy types; for sqlalchemy note we do not expect unexpected_list or unexpected_index_list since there are no column_map semantics for type",
+          "title": "Negative, sql ints are not text",
+          "exact_match_out": false,
+          "in":
+          {
+            "column":"x",
+            "type_":"TEXT"
+          },
+          "out":
+          {
+            "success":false
+          },
+          "only_for": ["postgresql", "mysql"]
+        },
+        {
+          "_note": "type name here works for tested sqlalchemy types; for sqlalchemy note we do not expect unexpected_list or unexpected_index_list since there are no column_map semantics for type",
+          "title": "Negative, sqlite integer is not varchar",
+          "exact_match_out": false,
+          "in":
+          {
+            "column":"x",
+            "type_":"VARCHAR"
+          },
+          "out":
+          {
+            "success":false
+          },
+          "only_for": ["sqlite"]
         },
         {
           "title": "Positive, floats",
@@ -64,17 +145,68 @@
             "success":true,
             "unexpected_list":[],
             "unexpected_index_list":[]
-          }
+          },
+          "only_for": ["pandas"]
+        },
+        {
+          "_note": "type name here works for tested sqlalchemy types; for sqlalchemy note we do not expect unexpected_list or unexpected_index_list since there are no column_map semantics for type",
+          "title": "Positive, floats",
+          "exact_match_out": false,
+          "in":
+          {
+            "column":"y",
+            "type_":"DOUBLE_PRECISION"
+          },
+          "out":
+          {
+            "success":true
+          },
+          "only_for": ["postgres"]
         },
         {
           "title": "Positive, strings",
           "exact_match_out": false,
           "in":{"column":"z","type_":"string"},
-          "out":{"success":true, "unexpected_list":[], "unexpected_index_list":[]}},
+          "out":{"success":true, "unexpected_list":[], "unexpected_index_list":[]},
+          "only_for": ["pandas"]
+        },
+        {
+          "_note": "type name here works for tested sqlalchemy types; for sqlalchemy note we do not expect unexpected_list or unexpected_index_list since there are no column_map semantics for type",
+          "title": "Positive, TEXT",
+          "exact_match_out": false,
+          "in":{"column":"z","type_":"TEXT"},
+          "out":{"success":true},
+          "only_for": ["postgresql", "mysql"]
+        },
+        {
+          "_note": "type name here works for tested sqlalchemy types; for sqlalchemy note we do not expect unexpected_list or unexpected_index_list since there are no column_map semantics for type",
+          "title": "Positive, VARCHAR",
+          "exact_match_out": false,
+          "in":{"column":"z","type_":"VARCHAR"},
+          "out":{"success":true},
+          "only_for": ["sqlite"]
+        },
         {
           "title": "Negative, python floats are not python bools",
           "exact_match_out": false,
           "in":{"column":"b","type_":"boolean"},
-          "out":{"success":true, "unexpected_list":[], "unexpected_index_list":[]}}]
-    }]
+          "out":{
+            "success":true, 
+            "unexpected_list":[], 
+            "unexpected_index_list":[]
+          },
+          "only_for": ["pandas"]
+        },
+        {
+          "_note": "type name here works for tested sqlalchemy types; for sqlalchemy note we do not expect unexpected_list or unexpected_index_list since there are no column_map semantics for type",
+          "title": "Negative, sqlalchemy floats are not BOOLEAN",
+          "exact_match_out": false,
+          "in":{"column":"b","type_":"BOOLEAN"},
+          "out":{
+            "success":true
+          },
+          "only_for": ["sqlalchemy"]
+        }
+    ]  
+  }]
 }

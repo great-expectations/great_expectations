@@ -49,7 +49,7 @@
       },{
         "title": "Multi-type column, contains 2 and '2'. Suppressed for SQAlchemy ",
         "exact_match_out": false,
-        "suppress_test_for": ["SQLAlchemy"],
+        "suppress_test_for": ["sqlalchemy"],
         "in": {
           "column": "c",
           "mostly": 0.3
