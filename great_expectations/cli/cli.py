@@ -14,6 +14,7 @@ except ImportError:
     colored = None
 
 from great_expectations import __version__, read_csv
+from great_expectations.exceptions import DataContextError
 from great_expectations.dataset import Dataset, PandasDataset
 from great_expectations.data_asset import FileDataAsset
 from great_expectations.data_context import DataContext
@@ -144,8 +145,12 @@ def init(target_directory):
     It scaffolds directories, sets up notebooks, creates a project file, and
     appends to a `.gitignore` file.
     """
+    try:
+        context = DataContext.create(target_directory)
+    except DataContextError as err:
+        logger.critical(err.message)
+        sys.exit(-1)
 
-    context = DataContext.create(target_directory)
     base_dir = os.path.join(target_directory, "great_expectations")
 
     six.print_(colored(
