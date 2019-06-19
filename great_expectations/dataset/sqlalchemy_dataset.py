@@ -13,14 +13,11 @@ import pandas as pd
 
 from dateutil.parser import parse
 
-
 from .dataset import Dataset
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
 
-
 logger = logging.getLogger(__name__)
-
 
 try:
     import sqlalchemy as sa
@@ -442,17 +439,14 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         try:
             col_data = [col for col in self.columns if col["name"] == column][0]
             col_type = type(col_data["type"])
+        except IndexError:
+            raise ValueError("Unrecognized column: %s" % column)
         except KeyError:
-            return {
-                "success": False,
-                "details": {
-                    "message": "No database column metadata available for column: %s" % column
-                }
-            }
+            raise ValueError("No database type data available for column: %s" % column)
 
         try:
             # Our goal is to be as explicit as possible. We will match the dialect
-            # if that is possible. If there is not dialect available, we *will*
+            # if that is possible. If there is no dialect available, we *will*
             # match against a top-level SqlAlchemy type if that's possible.
             #
             # This is intended to be a conservative approach.
@@ -474,12 +468,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 }
 
         except AttributeError:
-            return {
-                "success": False,
-                "details": {
-                    "message": "Unrecognized sqlalchemy type: %s" % type_
-                }
-            }
+            raise ValueError("Unrecognized sqlalchemy type: %s" % type_)
 
     @DocInherit
     @DataAsset.expectation(['column', 'type_', 'mostly'])
@@ -493,43 +482,52 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         try:
             col_data = [col for col in self.columns if col["name"] == column][0]
             col_type = type(col_data["type"])
+        except IndexError:
+            raise ValueError("Unrecognized column: %s" % column)
         except KeyError:
-            return {
-                "success": False,
-                "details": {
-                    "message": "No database column metadata available for column: %s" % column
-                }
-            }
-           
-        try:
-            # Our goal is to be as explicit as possible. We will match the dialect
-            # if that is possible. If there is not dialect available, we *will*
-            # match against a top-level SqlAlchemy type.
-            #
-            # This is intended to be a conservative approach.
-            #
-            # In particular, we *exclude* types that would be valid under an ORM
-            # such as "float" for postgresql with this approach
+            raise ValueError("No database type data available for column: %s" % column)
 
-            if not self.dialect:
-                logger.warning("No sqlalchemy dialect found; relying in top-level sqlalchemy types.")
-                types = tuple([getattr(sa, type_) for type_ in type_list])
-            else:
-                types = tuple([getattr(self.dialect, type_) for type_ in type_list])
-            
-            return {
-                    "success": issubclass(col_type, types),
-                    "details": {
-                        "observed_type-type": col_type.__name__
-                    }
-                }
-        except AttributeError:
-            return {
-                "success": False,
+        # Our goal is to be as explicit as possible. We will match the dialect
+        # if that is possible. If there is no dialect available, we *will*
+        # match against a top-level SqlAlchemy type.
+        #
+        # This is intended to be a conservative approach.
+        #
+        # In particular, we *exclude* types that would be valid under an ORM
+        # such as "float" for postgresql with this approach
+
+        if not self.dialect:
+            logger.warning("No sqlalchemy dialect found; relying in top-level sqlalchemy types.")
+            types = []
+            for type_ in type_list:
+                try:
+                    type_class = getattr(sa, type_)
+                    types.append(type_class)
+                except AttributeError:
+                    logger.warning("Unrecognized type: %s" % type_)
+            if len(types) == 0:
+                raise ValueError("No recognized sqlalchemy types in type_list")
+            types = tuple(types)
+        else:
+            types = []
+            for type_ in type_list:
+                try:
+                    type_class = getattr(self.dialect, type_)
+                    types.append(type_class)
+                except AttributeError:
+                    logger.warning("Unrecognized type: %s" % type_)
+            if len(types) == 0:
+                raise ValueError("No recognized sqlalchemy types in type_list for dialect %s" % 
+                    self.dialect.__name__)
+            types = tuple(types)
+        
+        return {
+                "success": issubclass(col_type, types),
                 "details": {
-                    "message": "Unrecognized sqlalchemy type in type list: %s" % str(type_list)
+                    "observed_type-type": col_type.__name__
                 }
-            }
+        }
+
 
     @DocInherit
     @MetaSqlAlchemyDataset.column_map_expectation

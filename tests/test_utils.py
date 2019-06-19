@@ -28,11 +28,12 @@ SQLITE_TYPES = {
         "date": sqlitetypes.DATE,
         "float": sqlitetypes.FLOAT,
         "bool": sqlitetypes.BOOLEAN,  # TODO: remove this option to be more explicit
-        "boolean": sqlitetypes.BOOLEAN  # TODO: remove this option to be more explicit
+        "boolean": sqlitetypes.BOOLEAN 
 }
 
 POSTGRESQL_TYPES = {
-        "text": postgresqltypes.TEXT,
+        "text": postgresqltypes.TEXT,   # TODO: remove this option to be more explicit
+        "TEXT": postgresqltypes.TEXT,
         "char": postgresqltypes.CHAR,
         "int": postgresqltypes.INTEGER,  # TODO: remove this option to be more explicit
         "integer": postgresqltypes.INTEGER,
@@ -123,18 +124,10 @@ def get_dataset(dataset_type, data, schemas=None, profiler=ColumnsExistProfiler,
             pandas_schema = {key:np.dtype(value) for (key, value) in schemas["pandas"].items()}
             df = df.astype(pandas_schema)
         return PandasDataset(df, profiler=profiler, caching=caching)
-    elif dataset_type == 'SqlAlchemyDataset':
-        # Create a new database
 
-        # Try to use a local postgres instance (e.g. on Travis); this will allow more testing than sqlite
-        try:
-            engine = create_engine('postgresql://postgres@localhost/test_ci')
-            conn = engine.connect()
-        except SQLAlchemyError:
-            warnings.warn("Falling back to sqlite database.")
-            engine = create_engine('sqlite://')
-            conn = engine.connect()
-
+    elif dataset_type == "sqlite":
+        engine = create_engine('sqlite://')
+        conn = engine.connect()
         # Add the data to the database as a new table
         df = pd.DataFrame(data)
 
@@ -151,7 +144,20 @@ def get_dataset(dataset_type, data, schemas=None, profiler=ColumnsExistProfiler,
                 elif type == "datetime":
                     df[col] = pd.to_datetime(df[col])
 
-        elif schemas and "postgresql" in schemas and isinstance(engine.dialect, postgresqltypes.dialect):
+        tablename = "test_data_" + ''.join([random.choice(string.ascii_letters + string.digits) for n in range(8)])
+        df.to_sql(name=tablename, con=conn, index=False, dtype=sql_dtypes)
+
+        # Build a SqlAlchemyDataset using that database
+        return SqlAlchemyDataset(tablename, engine=conn, profiler=profiler, caching=caching)
+
+    elif dataset_type == 'postgresql':
+        # Create a new database
+        engine = create_engine('postgresql://postgres@localhost/test_ci')
+        conn = engine.connect()
+        df = pd.DataFrame(data)
+
+        sql_dtypes = {}
+        if schemas and "postgresql" in schemas and isinstance(engine.dialect, postgresqltypes.dialect):
             schema = schemas["postgresql"]
             sql_dtypes = {col : POSTGRESQL_TYPES[dtype] for (col, dtype) in schema.items()}
             for col in schema:
@@ -163,7 +169,19 @@ def get_dataset(dataset_type, data, schemas=None, profiler=ColumnsExistProfiler,
                 elif type == "timestamp":
                     df[col] = pd.to_datetime(df[col])
 
-        elif schemas and "mysql" in schemas and isinstance(engine.dialect, mysqltypes.dialect):
+        tablename = "test_data_" + ''.join([random.choice(string.ascii_letters + string.digits) for n in range(8)])
+        df.to_sql(name=tablename, con=conn, index=False, dtype=sql_dtypes)
+
+        # Build a SqlAlchemyDataset using that database
+        return SqlAlchemyDataset(tablename, engine=conn, profiler=profiler, caching=caching)
+
+    elif dataset_type == 'mysql':
+        engine = create_engine('mysql://root@localhost/test_ci')
+        conn = engine.connect()
+        df = pd.DataFrame(data)
+
+        sql_dtypes = {}
+        if schemas and "mysql" in schemas and isinstance(engine.dialect, mysqltypes.dialect):
             schema = schemas["mysql"]
             sql_dtypes = {col : MYSQL_TYPES[dtype] for (col, dtype) in schema.items()}
             for col in schema:
@@ -219,7 +237,7 @@ def get_dataset(dataset_type, data, schemas=None, profiler=ColumnsExistProfiler,
         raise ValueError("Unknown dataset_type " + str(dataset_type))
 
 def candidate_getter_is_on_temporary_notimplemented_list(context, getter):
-    if context == 'SqlAlchemyDataset':
+    if context in ["sqlite", "postgresql", "mysql"]:
         return getter in [
             'get_column_modes',
             'get_column_stdev',
@@ -230,7 +248,7 @@ def candidate_getter_is_on_temporary_notimplemented_list(context, getter):
         ]
 
 def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type):
-    if context == "SqlAlchemyDataset":
+    if context in ["sqlite", "postgresql", "mysql"]:
         return expectation_type in [
             # "expect_column_to_exist",
             # "expect_table_row_count_to_be_between",
