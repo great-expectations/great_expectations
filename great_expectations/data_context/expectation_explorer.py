@@ -39,13 +39,13 @@ class ExpectationExplorer(object):
             'expect_table_row_count_to_equal': ['value'],
             'expect_column_values_to_match_strftime_format': ['strftime_format', 'mostly'],
             ######
-            'expect_column_values_to_be_between': ['min_value', 'max_value', 'allow_cross_type_comparisons', 'parse_strings_as_datetimes', 'output_strftime_format', 'mostly'],
+            'expect_column_values_to_be_between': ['min_value', 'max_value', 'parse_strings_as_datetimes', 'output_strftime_format', 'mostly', 'allow_cross_type_comparisons'],
             'expect_column_max_to_be_between': ['min_value', 'max_value', 'parse_strings_as_datetimes', 'output_strftime_format'],
             'expect_column_min_to_be_between': ['min_value', 'max_value', 'parse_strings_as_datetimes', 'output_strftime_format'],
             'expect_table_columns_to_match_ordered_list': ['column_list'],
             ####
             'expect_column_pair_values_to_be_equal': ['ignore_row_if'],
-            'expect_column_pair_values_A_to_be_greater_than_B': ['or_equal', 'allow_cross_type_comparisons', 'ignore_row_if'],
+            'expect_column_pair_values_A_to_be_greater_than_B': ['or_equal', 'ignore_row_if', 'allow_cross_type_comparisons'],
             'expect_column_pair_values_to_be_in_set': ['value_pairs_set', 'ignore_row_if'],
             'expect_multicolumn_values_to_be_unique': ['ignore_row_if'],
             'expect_column_values_to_be_of_type': ['type_', 'mostly'],
