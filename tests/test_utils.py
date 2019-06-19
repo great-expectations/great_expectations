@@ -28,11 +28,12 @@ SQLITE_TYPES = {
         "date": sqlitetypes.DATE,
         "float": sqlitetypes.FLOAT,
         "bool": sqlitetypes.BOOLEAN,  # TODO: remove this option to be more explicit
-        "boolean": sqlitetypes.BOOLEAN  # TODO: remove this option to be more explicit
+        "boolean": sqlitetypes.BOOLEAN 
 }
 
 POSTGRESQL_TYPES = {
-        "text": postgresqltypes.TEXT,
+        "text": postgresqltypes.TEXT,   # TODO: remove this option to be more explicit
+        "TEXT": postgresqltypes.TEXT,
         "char": postgresqltypes.CHAR,
         "int": postgresqltypes.INTEGER,  # TODO: remove this option to be more explicit
         "integer": postgresqltypes.INTEGER,
