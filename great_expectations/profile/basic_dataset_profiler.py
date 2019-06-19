@@ -6,22 +6,31 @@ class BasicDatasetProfiler(DatasetProfiler):
     """
 
     @classmethod
-    def _get_column_type_and_cardinality(cls, df, column):
+    def _get_column_type(cls, df, column):
+        try:
+            if df.expect_column_values_to_be_of_type(column, "int")["success"]:
+                type_ = "int"
 
-        if df.expect_column_values_to_be_of_type(column, "int")["success"]:
-            type_ = "int"
+            elif df.expect_column_values_to_be_of_type(column, "float")["success"]:
+                type_ = "float"
 
-        elif df.expect_column_values_to_be_of_type(column, "float")["success"]:
-            type_ = "float"
+            elif df.expect_column_values_to_be_of_type(column, "string")["success"]:
+                type_ = "string"
 
-        elif df.expect_column_values_to_be_of_type(column, "string")["success"]:
-            type_ = "string"
-
-        else:
+            else:
+                type_ = "unknown"
+        except NotImplementedError:
             type_ = "unknown"
 
-        # unique = df.expect_column_unique_value_count_to_be_between(column, 0, None)[
-        #     'result']['observed_value']
+        return type_
+
+    @classmethod
+    def _get_column_cardinality(cls, df, column):
+
+        num_rows = df.expect_table_row_count_to_be_between(min_value=0, max_value=None)[
+            'result']['observed_value']
+        num_unique = df.expect_column_unique_value_count_to_be_between(column, 0, None)[
+            'result']['observed_value']
         pct_unique = df.expect_column_proportion_of_unique_values_to_be_between(
             column, 0, None)['result']['observed_value']
 
@@ -36,40 +45,40 @@ class BasicDatasetProfiler(DatasetProfiler):
 
         else:
             cardinality = "complicated"
-            # if unique == 0:
-            #     cardinality = "none"
+            if num_unique == 0:
+                cardinality = "none"
 
-            # elif unique == 1:
-            #     cardinality = "one"
+            elif num_unique == 1:
+                cardinality = "one"
 
-            # elif unique == 2:
-            #     cardinality = "two"
+            elif num_unique == 2:
+                cardinality = "two"
 
-            # elif unique < 10:
-            #     cardinality = "very few"
+            elif num_unique < 20:
+                cardinality = "very few"
 
-            # elif unique < 200:
-            #     cardinality = "few"
+            elif num_unique < 200:
+                cardinality = "few"
 
-            # else:
-            #     cardinality = "unknown"
-    #             print(
-    #                 column, '\t',
-    #                 unique,
-    #                 pct_unique
-    #             )
+            else:
+                cardinality = "unknown"
+                print(
+                    column, '\t',
+                    num_unique,
+                    pct_unique
+                )
 
-        return (type_, cardinality)
+        return cardinality
 
     @classmethod
     def _profile(cls, dataset):
         df = dataset
 
-        for column in df.columns:
+        for column in df.get_table_columns():
             df.expect_column_to_exist(column)
 
-            type_, cardinality = cls._get_column_type_and_cardinality(
-                df, column)
+            type_ = cls._get_column_type(df, column)
+            cardinality= cls._get_column_cardinality(df, column)
             df.expect_column_values_to_not_be_null(column)
             df.expect_column_values_to_be_in_set(
                 column, [], result_format="SUMMARY")
@@ -81,9 +90,10 @@ class BasicDatasetProfiler(DatasetProfiler):
                     df.expect_column_values_to_be_unique(column)
                     df.expect_column_values_to_be_increasing(column)
 
-        #         elif cardinality == "very few":
-        # #             print(df[column].value_counts())
-        #             pass
+                elif cardinality in ["one", "two", "very few", "few"]:
+                    # TODO: df.expect_column_values_to_not_be_in_set(column, value_set=????)
+                    # Need to figure out how to get the value set
+                    pass
 
                 else:
                     # print(column, cardinality)
