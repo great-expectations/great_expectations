@@ -3,6 +3,7 @@ import pytest
 import shutil
 import os
 import json
+import warnings
 
 import numpy as np
 import sqlalchemy as sa
@@ -13,8 +14,19 @@ from great_expectations.data_context.util import safe_mmkdir
 
 from .test_utils import get_dataset
 
-CONTEXTS = ['PandasDataset', 'SqlAlchemyDataset', 'SparkDFDataset']
-
+CONTEXTS = ['PandasDataset', 'sqlite', 'SparkDFDataset']
+try:
+    engine = sa.create_engine('postgresql://postgres@localhost/test_ci')
+    conn = engine.connect()
+    CONTEXTS += ['postgresql']
+except (ImportError, sa.exc.SQLAlchemyError):
+    warnings.warn("No postgres context available for testing.")
+try:
+    engine = sa.create_engine('mysql://root@localhost/test_ci')
+    conn = engine.connect()
+    CONTEXTS += ['mysql']
+except (ImportError, sa.exc.SQLAlchemyError):
+    warnings.warn("No mysql context available for testing.")
 
 @pytest.fixture
 def empty_expectation_suite():

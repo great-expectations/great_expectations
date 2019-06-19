@@ -183,7 +183,7 @@ def test_column_fallback():
 
 @pytest.fixture
 def unexpected_count_df():
-    return  get_dataset("SqlAlchemyDataset", {"a": [1, 2, 1, 2, 1, 2, 1, 2, 1, 2]})
+    return  get_dataset("sqlite", {"a": [1, 2, 1, 2, 1, 2, 1, 2, 1, 2]})
 
 
 def test_sqlalchemy_dataset_unexpected_count_calculations(unexpected_count_df):
