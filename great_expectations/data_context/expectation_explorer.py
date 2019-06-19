@@ -74,9 +74,12 @@ class ExpectationExplorer(object):
                     'expect_column_sum_to_be_between'
                 ]
             },
-
             'mixed': {
-                'unbounded': ['expect_column_values_to_be_between']
+                'unbounded': [
+                    'expect_column_values_to_be_between',
+                    'expect_column_min_to_be_between',
+                    'expect_column_max_to_be_between'
+                ]
             }
         }
         self.debug_view = widgets.Output(layout={'border': '3 px solid pink'})
@@ -662,9 +665,9 @@ class ExpectationExplorer(object):
         ge_df = expectation_state['ge_df']
         exception_widget = expectation_state['exception_widget']
         expectation_type = expectation_state['expectation_type']
-        min_value_widget_dict = expectation_state['kwargs'].get('min_value')
+        min_value_widget_dict = expectation_state['kwargs'].get('min_value', {})
         min_value_widget = min_value_widget_dict.get('kwarg_widget') if min_value_widget_dict else None
-        max_value_widget_dict = expectation_state['kwargs'].get('max_value')
+        max_value_widget_dict = expectation_state['kwargs'].get('max_value', {})
         max_value_widget = max_value_widget_dict.get('kwarg_widget') if max_value_widget_dict else None
 
         # integer
@@ -719,7 +722,35 @@ class ExpectationExplorer(object):
                     step=0.01,
                     disabled=False
                 )
+        elif expectation_type in list(chain.from_iterable(self.min_max_subtypes['mixed'].values())):
+            min_value_type = type(min_value)
+            min_value_str = str(min_value)
+            max_value = expectation_kwargs.get('max_value')
+            max_value_type = type(max_value)
 
+            if min_value_type is int or min_value_type is float:
+                min_value_type_option = 'number'
+            elif min_value_type is str:
+                min_value_type_option = 'string'
+            else:
+                min_value_type_option = 'other'
+
+            if not expectation_kwargs.get('allow_cross_type_comparisons') and min_value_type != max_value_type and (min_value and max_value):
+                with exception_widget:
+                    print('Error: min_value and max_value are of different types. To allow comparison between different types, set allow_cross_type_comparisons to True.')
+                return
+
+            min_value_input = self.generate_text_widget(
+                value=min_value_str,
+                description='min_value',
+                placeholder='press enter to confirm...',
+                disabled=min_value_type_option=='other'
+            )
+            min_value_widget_dict['widget_input'] = min_value_input
+            widget_value_type = self.generate_radio_buttons_widget(options=['string', 'number', 'other'], value=min_value_type_option, description='type')
+            min_value_widget_dict['widget_value_type'] = widget_value_type
+            min_value_widget = widgets.HBox([min_value_input, widget_value_type])
+ 
         if min_value_widget and max_value_widget:
             @exception_widget.capture(clear_output=True)
             def on_min_value_change(change):
@@ -733,8 +764,11 @@ class ExpectationExplorer(object):
                                 (min_value_widget, 'max'))
             expectation_state['kwargs']['max_value'] = {'kwarg_widget': max_value_widget}
 
-        min_value_widget_dict = {'kwarg_widget': min_value_widget} if min_value_widget else self.generate_expectation_kwarg_fallback_widget_dict(
-            expectation_kwarg_name='min_value', **{'min_value': min_value})
+        if min_value_widget:
+            min_value_widget_dict['kwarg_widget'] = min_value_widget
+        else:
+            min_value_widget_dict = self.generate_expectation_kwarg_fallback_widget_dict(expectation_kwarg_name='min_value', **{'min_value': min_value})
+
         expectation_state['kwargs']['min_value'] = min_value_widget_dict
 
         return min_value_widget_dict
