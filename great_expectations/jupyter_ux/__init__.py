@@ -68,11 +68,12 @@ Uncomment the next cell and set data_source_name to one of these names.
 
 def list_available_data_asset_names(context, data_source_name):
     available_data_assets = context.get_available_data_asset_names(datasource_names=[data_source_name])
-
-    if len(available_data_assets) == 1 and\
-        len(available_data_assets[0]['generators']) == 1:
-        if len(available_data_assets[0]['generators'][0]['available_data_asset_names']) > 0:
-            print(available_data_assets[0]['generators'][0]['available_data_asset_names'])
+    available_data_assets[data_source_name].keys()
+    if len(available_data_assets.keys()) == 1 and \
+            len(list(available_data_assets[data_source_name].keys())) == 1:
+        if len(available_data_assets[data_source_name][list(available_data_assets[data_source_name].keys())[0]]) > 0:
+            print(
+                list(available_data_assets[data_source_name][list(available_data_assets[data_source_name].keys())[0]]))
         else:
             display(HTML("""
 <p>
@@ -82,7 +83,7 @@ No data assets found in this data source.
 Read about how generators derive data assets from data sources: <a href="https://great-expectations.readthedocs.io/en/latest/how_to_add_data_source.html">Data assets</a>
 </p>
             """))
-    elif len(available_data_assets) > 1:
+    else:
         print(available_data_assets)
 
 def setup_notebook_logging():
