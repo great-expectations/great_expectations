@@ -206,9 +206,15 @@ To launch with jupyter lab:
 """
 
 msg_sqlalchemy_go_to_notebook = """
-To create expectations for your SQL queries start Jupyter and open notebook
-great_expectations/notebooks/using_great_expectations_with_sql.ipynb -
+To create expectations for your SQL data assets start Jupyter and open the notebook
+great_expectations/notebooks/create_expectations_sql.ipynb.
 it will walk you through configuring the database connection and next steps.
+
+To launch with jupyter notebooks:
+    <blue>jupyter notebook great_expectations/notebooks/create_expectations_sql.ipynb</blue>
+
+To launch with jupyter lab:
+    <blue>jupyter lab great_expectations/notebooks/create_expectations_sql.ipynb</blue>
 """
 
 msg_spark_go_to_notebook = """
