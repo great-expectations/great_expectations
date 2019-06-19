@@ -1,24 +1,51 @@
+# -*- coding: utf-8 -*-
+
 import os
-from ruamel.yaml import YAML
+
 import copy
+from enum import Enum
 from six import string_types
 
-from ..data_context.util import NormalizedDataAssetName
-
 import logging
+
+from ruamel.yaml import YAML
+
+from ..data_context.util import NormalizedDataAssetName
 
 logger = logging.getLogger(__name__)
 yaml = YAML()
 yaml.default_flow_style = False
 
+class ReaderMethods(Enum):
+    CSV = 1
+    csv = 1
+    parquet = 2
+    excel = 3
+    xls = 3
+    xlsx = 3
+    JSON = 4
+    json = 4
 
 class Datasource(object):
-    """Datasources are responsible for connecting to data infrastructure. 
-    Each Datasource (within your DataContext) is a source of materialized data, such as a SQL database, S3 bucket, 
-    or local file directory.
+    """Datasources are responsible for connecting to data infrastructure. Each Datasource is a source 
+    of materialized data, such as a SQL database, S3 bucket, or local file directory.
 
-    Since opinionated DAG managers such as airflow, dbt, prefect.io, dagster can also act as sources of
-    materialized data, they can also act as Datasources.
+    Each Datasource also provides access to Great Expectations data assets that are connected to
+    a specific compute environment, such as a SQL database, a Spark cluster, or a local in-memory
+    Pandas Dataframe.
+
+    To bridge the gap between those worlds, Datasources interact closely with *generators* which
+    are aware of a source of data and can produce produce identifying information, called 
+    "batch_kwargs" that datasources can use to get individual batches of data. They add flexibility 
+    in how to obtain data such as with time-based partitioning, downsampling, or other techniques
+    appropriate for the datasource.
+
+    For example, a generator could produce a SQL query that logically represents "rows in the Events
+    table with a timestamp on February 7, 2012," which a SqlAlchemyDatasource could use to materialize
+    a SqlAlchemyDataset corresponding to that batch of data and ready for validation. 
+
+    Since opinionated DAG managers such as airflow, dbt, prefect.io, dagster can also act as datasources
+    and/or generators for a more generic datasource.
     """
 
     @classmethod
@@ -58,8 +85,8 @@ class Datasource(object):
     #     #     # Setup is done; no additional config to read
     #     #     return {}
     #     # try:
-    #     #     config_path = os.path.join(self._data_context.context_root_directory,
-    #                                      "great_expectations/datasources", self._name, "config.yml")
+    #     #     config_path = os.path.join(self._data_context.root_directory,
+    #                                      "datasources", self._name, "config.yml")
     #     #     with open(config_path, "r") as data:
     #     #         extra_config = yaml.load(data) or {}
     #     #     logger.info("Loading config from %s" % str(config_path))
@@ -90,11 +117,11 @@ class Datasource(object):
         # if self._data_context is not None:
         #     base_config = copy.deepcopy(self._datasource_config)
         #     if "config_file" in base_config:
-        #         config_filepath = os.path.join(self._data_context.context_root_directory,
+        #         config_filepath = os.path.join(self._data_context.root_directory,
         #                                        base_config.pop["config_file"])
         #     else:
-        #         config_filepath = os.path.join(self._data_context.context_root_directory,
-        #                                        "great_expectations/datasources", self._name, "config.yml")
+        #         config_filepath = os.path.join(self._data_context.root_directory,
+        #                                        "datasources", self._name, "config.yml")
         # else:
         #     logger.warning("Unable to save config with no data context attached.")
 
@@ -197,3 +224,15 @@ class Datasource(object):
 
     def get_data_context(self):
         return self._data_context
+
+    def _guess_reader_method_from_path(self, path):
+        if path.endswith(".csv") or path.endswith(".tsv"):
+            return ReaderMethods.CSV
+        elif path.endswith(".parquet"):
+            return ReaderMethods.parquet
+        elif path.endswith(".xlsx") or path.endswith(".xls"):
+            return ReaderMethods.excel
+        elif path.endswith(".json"):
+            return ReaderMethods.JSON
+        else:
+            return None
