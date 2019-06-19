@@ -33,7 +33,7 @@
         "success": true,
         "observed_value": 1.1547005383792517
       },
-      "suppress_test_for": ["Spark"]
+      "suppress_test_for": ["spark"]
     },
       {
         "title": "Basic Negative test",

@@ -7,6 +7,7 @@ import inspect
 import logging
 import warnings
 from datetime import datetime
+from importlib import import_module
 
 import pandas as pd
 
@@ -210,6 +211,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 # Currently we do no error handling if the engine doesn't work out of the box.
                 raise err
 
+        self.dialect = import_module("sqlalchemy.dialects." + self.engine.dialect.name)
         if schema is not None and custom_sql is not None:
             # temporary table will be written to temp schema, so don't allow
             # a user-defined schema
@@ -438,13 +440,8 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         result_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
         try:
-            col_data = [col for col in self.columns if col["name"] == column]
-            return {
-                    "success": issubclass(col_data["type"], getattr(sa, type_)),
-                    "details": {
-                        "observed_type": col_data["type"].__name__
-                    }
-                }
+            col_data = [col for col in self.columns if col["name"] == column][0]
+            col_type = type(col_data["type"])
         except KeyError:
             return {
                 "success": False,
@@ -452,6 +449,30 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                     "message": "No database column metadata available for column: %s" % column
                 }
             }
+
+        try:
+            # Our goal is to be as explicit as possible. We will match the dialect
+            # if that is possible. If there is not dialect available, we *will*
+            # match against a top-level SqlAlchemy type if that's possible.
+            #
+            # This is intended to be a conservative approach.
+            #
+            # In particular, we *exclude* types that would be valid under an ORM
+            # such as "float" for postgresql with this approach
+
+            if not self.dialect:
+                logger.warning("No sqlalchemy dialect found; relying in top-level sqlalchemy types.")
+                success = issubclass(col_type, getattr(sa, type_))
+            else:
+                success = issubclass(col_type, getattr(self.dialect, type_))
+                
+            return {
+                    "success": success,
+                    "details": {
+                        "observed_type": col_type.__name__
+                    }
+                }
+
         except AttributeError:
             return {
                 "success": False,
@@ -470,14 +491,8 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         result_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
         try:
-            col_data = [col for col in self.columns if col["name"] == column]
-            types = tuple([getattr(sa, type_) for type_ in type_list])
-            return {
-                    "success": issubclass(col_data["type"], types),
-                    "details": {
-                        "observed_type-type": col_data["type"].__name__
-                    }
-                }
+            col_data = [col for col in self.columns if col["name"] == column][0]
+            col_type = type(col_data["type"])
         except KeyError:
             return {
                 "success": False,
@@ -485,6 +500,29 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                     "message": "No database column metadata available for column: %s" % column
                 }
             }
+           
+        try:
+            # Our goal is to be as explicit as possible. We will match the dialect
+            # if that is possible. If there is not dialect available, we *will*
+            # match against a top-level SqlAlchemy type.
+            #
+            # This is intended to be a conservative approach.
+            #
+            # In particular, we *exclude* types that would be valid under an ORM
+            # such as "float" for postgresql with this approach
+
+            if not self.dialect:
+                logger.warning("No sqlalchemy dialect found; relying in top-level sqlalchemy types.")
+                types = tuple([getattr(sa, type_) for type_ in type_list])
+            else:
+                types = tuple([getattr(self.dialect, type_) for type_ in type_list])
+            
+            return {
+                    "success": issubclass(col_type, types),
+                    "details": {
+                        "observed_type-type": col_type.__name__
+                    }
+                }
         except AttributeError:
             return {
                 "success": False,

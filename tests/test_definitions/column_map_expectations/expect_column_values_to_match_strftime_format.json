@@ -131,7 +131,7 @@
       {
         "title": "Negative test - input already datetimes",
         "exact_match_out" : false,
-        "suppress_test_for": ["Pandas"],
+        "suppress_test_for": ["pandas"],
         "in":{
           "column": "e",
           "strftime_format": "%Y-%m-%d",
