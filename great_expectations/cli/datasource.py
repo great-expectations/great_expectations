@@ -42,7 +42,7 @@ def add_datasource(context):
             show_default=True
         )
 
-        context.add_datasource(data_source_name, "pandas", base_directory=path)
+        context.add_datasource(data_source_name, "pandas", base_directory=os.path.join("..", path))
 
     elif data_source_selection == "2":  # sqlalchemy
         data_source_name = click.prompt(
@@ -120,14 +120,14 @@ def add_datasource(context):
                 data_source_name,
                 max_data_assets=20
             )
-            if click.confirm(
-                "\nWould you like to view render html documentation for the profiled datasource?\n",
-                default = True
-            ):
-                for data_asset in data_asset_names:
-                    validation_result = context.get_validation_result(data_asset)
-                    cli_message("Rendering validation result: %s" % data_asset)
-                    DescriptivePageView.render(validation_result)
+            # if click.confirm(
+            #     "\nWould you like to view render html documentation for the profiled datasource?\n",
+            #     default = True
+            # ):
+            #     for data_asset in data_asset_names:
+            #         validation_result = context.get_validation_result(data_asset)
+            #         cli_message("Rendering validation result: %s" % data_asset)
+            #         DescriptivePageView.render(validation_result)
     
         else:
             cli_message(
