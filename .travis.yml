@@ -29,6 +29,7 @@ matrix:
   #   env: PANDAS=latest
 services:
   - postgresql
+  - mysql
 install:
   # - ./travis-java.sh
   - pip install --only-binary=numpy,scipy numpy scipy
@@ -36,6 +37,7 @@ install:
   - pip install -r requirements-dev.txt
 before_script:
   - psql -c 'create database test_ci;' -U postgres
+  - mysql -u root --password="" -e 'create database test_ci;'
 script:
   - pytest --cov=great_expectations tests/
 after_success:
