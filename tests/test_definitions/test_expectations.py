@@ -35,12 +35,12 @@ def pytest_generate_tests(metafunc):
                 test_configuration = json.load(file, object_pairs_hook=OrderedDict)
 
                 for d in test_configuration['datasets']:
-                    skip = False
+                    skip_expectation = False
                     # Pass the test if we are in a test condition that is a known exception
                     if candidate_test_is_on_temporary_notimplemented_list(c, test_configuration["expectation_type"]):
-                        skip = True
+                        skip_expectation = True
 
-                    if skip:
+                    if skip_expectation:
                         schemas = data_asset = None
                     else:
                         schemas = d["schemas"] if "schemas" in d else None
@@ -48,6 +48,7 @@ def pytest_generate_tests(metafunc):
 
                     for test in d["tests"]:
                         generate_test = True
+                        skip_test = False
                         if 'only_for' in test:
                             # if we're not on the "only_for" list, then never even generate the test
                             generate_test = False
@@ -95,21 +96,21 @@ def pytest_generate_tests(metafunc):
                                 isinstance(data_asset, SparkDFDataset)
                             )
                         ):
-                            skip = True
+                            skip_test = True
                         # Known condition: SqlAlchemy does not support allow_cross_type_comparisons
                         if 'allow_cross_type_comparisons' in test['in'] and isinstance(data_asset, SqlAlchemyDataset):
-                            skip = True
+                            skip_test = True
 
                         parametrized_tests.append({
                             "expectation_type": test_configuration["expectation_type"],
                             "dataset": data_asset,
                             "test": test,
-                            "skip": skip,
+                            "skip": skip_expectation or skip_test,
                         })
 
                         ids.append(expectation_category + "/" +
                             c+":"+test_configuration["expectation_type"]+":"+test["title"])
-
+                        
     metafunc.parametrize(
         "test_case",
         parametrized_tests,
