@@ -24,8 +24,8 @@
         "postgresql": {
           "x": "integer",
           "y": "float",
-          "z": "text",
-          "n": "text",
+          "z": "TEXT",
+          "n": "TEXT",
           "b": "boolean",
           "s": "TEXT",
           "s1": "TEXT"
@@ -51,8 +51,8 @@
         "mysql": {
           "x": "integer",
           "y": "float",
-          "z": "varchar",
-          "n": "varchar",
+          "z": "TEXT",
+          "n": "TEXT",
           "b": "boolean",
           "s": "TEXT",
           "s1": "TEXT"
