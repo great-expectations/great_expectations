@@ -22,38 +22,38 @@
           "s1": "str"
         },
         "postgresql": {
-          "x": "integer",
-          "y": "float",
+          "x": "INTEGER",
+          "y": "DOUBLE_PRECISION",
           "z": "TEXT",
           "n": "TEXT",
-          "b": "boolean",
+          "b": "BOOLEAN",
           "s": "TEXT",
           "s1": "TEXT"
         },
         "spark": {
-          "x": "integer",
-          "y": "float",
-          "z": "string",
-          "n": "string",
-          "b": "boolean",
-          "s": "string",
-          "s1": "string"
+          "x": "IntegerType",
+          "y": "FloatType",
+          "z": "StringType",
+          "n": "StringType",
+          "b": "BooleanType",
+          "s": "StringType",
+          "s1": "StringType"
         },
         "sqlite": {
-          "x": "integer",
-          "y": "float",
-          "z": "varchar",
-          "n": "varchar",
-          "b": "boolean",
-          "s": "varchar",
-          "s1": "varchar"
+          "x": "INTEGER",
+          "y": "FLOAT",
+          "z": "VARCHAR",
+          "n": "VARCHAR",
+          "b": "BOOLEAN",
+          "s": "VARCHAR",
+          "s1": "VARCHAR"
         },
         "mysql": {
-          "x": "integer",
-          "y": "float",
+          "x": "INTEGER",
+          "y": "FLOAT",
           "z": "TEXT",
           "n": "TEXT",
-          "b": "boolean",
+          "b": "BOOLEAN",
           "s": "TEXT",
           "s1": "TEXT"
         }
