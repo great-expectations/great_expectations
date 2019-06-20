@@ -322,6 +322,10 @@ def test_normalize_data_asset_names_conditions_single_name():
     #   - "mydatasource/mygenerator/myotherasset"
     # "mydatasource/myasset/mypurpose" -> "mydatasource/mygenerator/myasset/mypurpose"
 
+    # tables vs queries
+    # df = context.get_batch("moviedb/tables/ratings")
+    # df = context.get_batch("moviedb/queries/mynewquery", query="select * from ratings limit 100")
+
 
 def test_list_datasources(data_context):
     datasources = data_context.list_datasources()
