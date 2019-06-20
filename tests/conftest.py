@@ -15,18 +15,31 @@ from great_expectations.data_context.util import safe_mmkdir
 from .test_utils import get_dataset
 
 CONTEXTS = ['PandasDataset', 'sqlite', 'SparkDFDataset']
+
+#####
+#
+# Postgresql Context
+#
+#####
 try:
     engine = sa.create_engine('postgresql://postgres@localhost/test_ci')
     conn = engine.connect()
     CONTEXTS += ['postgresql']
 except (ImportError, sa.exc.SQLAlchemyError):
     warnings.warn("No postgres context available for testing.")
-try:
-    engine = sa.create_engine('mysql://root@localhost/test_ci')
-    conn = engine.connect()
-    CONTEXTS += ['mysql']
-except (ImportError, sa.exc.SQLAlchemyError):
-    warnings.warn("No mysql context available for testing.")
+
+#####
+#
+# MySQL context -- TODO FIXME enable these tests
+#
+#####
+
+# try:
+#     engine = sa.create_engine('mysql://root@localhost/test_ci')
+#     conn = engine.connect()
+#     CONTEXTS += ['mysql']
+# except (ImportError, sa.exc.SQLAlchemyError):
+#     warnings.warn("No mysql context available for testing.")
 
 @pytest.fixture
 def empty_expectation_suite():
