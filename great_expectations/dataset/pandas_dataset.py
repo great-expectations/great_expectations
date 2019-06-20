@@ -118,12 +118,6 @@ class MetaPandasDataset(Dataset):
                 except KeyError:
                     pass
 
-            # FIXME: refactor column_map_expectation
-            if (func.__name__ in ['expect_column_values_to_be_in_set'] and
-                result_format["result_format"] == "PROFILE" and
-                "value_set" in kwargs and kwargs["value_set"] == []):
-                return_obj["result"]["unexpected_counts"] = self.get_column_value_counts(column)
-
             return return_obj
 
         inner_wrapper.__name__ = func.__name__

@@ -1136,9 +1136,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                     }
                 )
 
-        # TODO FIXME : clean up the approach by refactor of column_map_expectation
-        # if result_format['result_format'] == 'SUMMARY':
-        if result_format['result_format'] in ['SUMMARY', 'PROFILE']:
+        if result_format['result_format'] == 'SUMMARY':
             return return_obj
 
         return_obj['result'].update(
