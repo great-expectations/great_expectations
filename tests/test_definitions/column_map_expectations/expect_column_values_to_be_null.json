@@ -11,11 +11,11 @@
       },
       "schemas": {
         "spark": {
-          "one_null": "int",
-          "two_null": "int",
-          "three_null": "int",
-          "no_null": "string",
-          "all_null": "string"
+          "one_null": "IntegerType",
+          "two_null": "IntegerType",
+          "three_null": "IntegerType",
+          "no_null": "StringType",
+          "all_null": "StringType"
         }
       },
       "tests": [

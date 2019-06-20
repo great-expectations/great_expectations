@@ -12,22 +12,22 @@
     },
     "schemas": {
       "sqlite": {
-        "w": "int",
-        "x": "int",
-        "y": "int",
-        "z": "varchar",
-        "zz": "datetime",
-        "a": "int",
-        "b": "int"
+        "w": "INTEGER",
+        "x": "INTEGER",
+        "y": "INTEGER",
+        "z": "VARCHAR",
+        "zz": "DATETIME",
+        "a": "INTEGER",
+        "b": "INTEGER"
       },
       "postgresql": {
-        "w": "int",
-        "x": "int",
-        "y": "int",
-        "z": "text",
-        "zz": "timestamp",
-        "a": "int",
-        "b": "int"
+        "w": "INTEGER",
+        "x": "INTEGER",
+        "y": "INTEGER",
+        "z": "TEXT",
+        "zz": "TIMESTAMP",
+        "a": "INTEGER",
+        "b": "INTEGER"
       }
     },
     "tests" : [{
@@ -106,7 +106,7 @@
     },{
       "title": "Test on a series containing dates",
       "exact_match_out" : false,
-      "suppress_test_for": ["SQLAlchemy"],
+      "suppress_test_for": ["sqlalchemy"],
       "in": {
         "column": "zz",
         "min_value": "2/1/2016",
@@ -120,7 +120,7 @@
     },{
       "title": "Test on a series containing dates, with an output_strftime_format value",
       "exact_match_out" : false,
-      "suppress_test_for": ["SQLAlchemy"],
+      "suppress_test_for": ["sqlalchemy"],
       "in": {
         "column": "zz",
         "min_value": "2/1/2016",

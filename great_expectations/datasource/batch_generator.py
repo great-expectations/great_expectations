@@ -17,6 +17,15 @@ class BatchGenerator(object):
     the Events table with a timestamp on February 7, 2012," which a SqlAlchemyDatasource 
     could use to materialize a SqlAlchemyDataset corresponding to that batch of data and 
     ready for validation.
+
+    A batch is a sample from a data asset, sliced according to a particular rule. For 
+    example, an hourly slide of the Events table or “most recent `users` records.” 
+    
+    A Batch is the primary unit of validation in the Great Expectations DataContext. 
+    Batches include metadata that identifies how they were constructed--the same “batch_kwargs”
+    assembled by the generator, While not every datasource will enable re-fetching a
+    specific batch of data, GE can store snapshots of batches or store metadata from an
+    external data version control system. 
     """
 
     def __init__(self, name, type_, datasource=None):

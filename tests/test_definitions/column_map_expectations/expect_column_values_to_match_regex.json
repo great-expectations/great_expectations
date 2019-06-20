@@ -8,9 +8,9 @@
     },
     "schemas": {
       "spark": {
-        "a": "string",
-        "b": "string",
-        "c": "string"
+        "a": "StringType",
+        "b": "StringType",
+        "c": "StringType"
       }
     },
     "tests": [{

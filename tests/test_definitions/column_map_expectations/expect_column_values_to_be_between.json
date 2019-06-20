@@ -22,20 +22,20 @@
     },
     "schemas": {
       "sqlite": {
-        "x": "int",
-        "y": "varchar",
-        "z": "int",
-        "ts": "datetime",
-        "alpha": "varchar",
-        "numeric": "int"
+        "x": "INTEGER",
+        "y": "VARCHAR",
+        "z": "INTEGER",
+        "ts": "DATETIME",
+        "alpha": "VARCHAR",
+        "numeric": "INTEGER"
       },
       "postgresql": {
-        "x": "int",
-        "y": "text",
-        "z": "int",
-        "ts": "timestamp",
-        "alpha": "text",
-        "numeric": "int"
+        "x": "INTEGER",
+        "y": "TEXT",
+        "z": "INTEGER",
+        "ts": "TIMESTAMP",
+        "alpha": "TEXT",
+        "numeric": "INTEGER"
       }
     },
     "tests": [

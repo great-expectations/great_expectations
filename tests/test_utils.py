@@ -11,6 +11,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.exc import SQLAlchemyError
 import sqlalchemy.dialects.sqlite as sqlitetypes
 import sqlalchemy.dialects.postgresql as postgresqltypes
+import sqlalchemy.dialects.mysql as mysqltypes
 from pyspark.sql import SparkSession
 import pyspark.sql.types as sparktypes
 
@@ -18,37 +19,53 @@ from great_expectations.dataset import PandasDataset, SqlAlchemyDataset, SparkDF
 from great_expectations.profile import ColumnsExistProfiler
 
 SQLITE_TYPES = {
-        "varchar": sqlitetypes.VARCHAR,
-        "char": sqlitetypes.CHAR,
-        "int": sqlitetypes.INTEGER,
-        "smallint": sqlitetypes.SMALLINT,
-        "datetime": sqlitetypes.DATETIME(truncate_microseconds=True),
-        "date": sqlitetypes.DATE,
-        "float": sqlitetypes.FLOAT,
-        "bool": sqlitetypes.BOOLEAN
+        "VARCHAR": sqlitetypes.VARCHAR,
+        "CHAR": sqlitetypes.CHAR,
+        "INTEGER": sqlitetypes.INTEGER,
+        "SMALLINT": sqlitetypes.SMALLINT,
+        "DATETIME": sqlitetypes.DATETIME(truncate_microseconds=True),
+        "DATE": sqlitetypes.DATE,
+        "FLOAT": sqlitetypes.FLOAT,
+        "BOOLEAN": sqlitetypes.BOOLEAN 
 }
 
 POSTGRESQL_TYPES = {
-        "text": postgresqltypes.TEXT,
-        "char": postgresqltypes.CHAR,
-        "int": postgresqltypes.INTEGER,
-        "smallint": postgresqltypes.SMALLINT,
-        "timestamp": postgresqltypes.TIMESTAMP,
-        "date": postgresqltypes.DATE,
-        "float": postgresqltypes.FLOAT,
-        "bool": postgresqltypes.BOOLEAN
+        "TEXT": postgresqltypes.TEXT,
+        "CHAR": postgresqltypes.CHAR,
+        "INTEGER": postgresqltypes.INTEGER,
+        "SMALLINT": postgresqltypes.SMALLINT,
+        "BIGINT": postgresqltypes.BIGINT,
+        "TIMESTAMP": postgresqltypes.TIMESTAMP,
+        "DATE": postgresqltypes.DATE,
+        "DOUBLE_PRECISION": postgresqltypes.DOUBLE_PRECISION,
+        "BOOLEAN": postgresqltypes.BOOLEAN
+}
+
+MYSQL_TYPES = {
+        "TEXT": mysqltypes.TEXT,
+        "CHAR": mysqltypes.CHAR,
+        "INTEGER": mysqltypes.INTEGER,
+        "SMALLINT": mysqltypes.SMALLINT,
+        "BIGINT": mysqltypes.BIGINT,
+        "TIMESTAMP": mysqltypes.TIMESTAMP,
+        "DATE": mysqltypes.DATE,
+        "FLOAT": mysqltypes.FLOAT,
+        "BOOLEAN": mysqltypes.BOOLEAN
 }
 
 SPARK_TYPES = {
-    "string": sparktypes.StringType,
-    "int": sparktypes.IntegerType,
-    "date": sparktypes.DateType,
-    "timestamp": sparktypes.TimestampType,
-    "float": sparktypes.DoubleType,
-    "bool": sparktypes.BooleanType,
-    "object": sparktypes.DataType,
-    "null": sparktypes.NullType
+    "StringType": sparktypes.StringType,
+    "IntegerType": sparktypes.IntegerType,
+    "LongType": sparktypes.LongType,
+    "DateType": sparktypes.DateType,
+    "TimestampType": sparktypes.TimestampType,
+    "FloatType": sparktypes.FloatType,
+    "DoubleType": sparktypes.DoubleType,
+    "BooleanType": sparktypes.BooleanType,
+    "DataType": sparktypes.DataType,
+    "NullType": sparktypes.NullType
 }
+
 
 # Taken from the following stackoverflow:
 # https://stackoverflow.com/questions/23549419/assert-that-two-dictionaries-are-almost-equal
@@ -99,18 +116,10 @@ def get_dataset(dataset_type, data, schemas=None, profiler=ColumnsExistProfiler,
             pandas_schema = {key:np.dtype(value) for (key, value) in schemas["pandas"].items()}
             df = df.astype(pandas_schema)
         return PandasDataset(df, profiler=profiler, caching=caching)
-    elif dataset_type == 'SqlAlchemyDataset':
-        # Create a new database
 
-        # Try to use a local postgres instance (e.g. on Travis); this will allow more testing than sqlite
-        try:
-            engine = create_engine('postgresql://postgres@localhost/test_ci')
-            conn = engine.connect()
-        except SQLAlchemyError:
-            warnings.warn("Falling back to sqlite database.")
-            engine = create_engine('sqlite://')
-            conn = engine.connect()
-
+    elif dataset_type == "sqlite":
+        engine = create_engine('sqlite://')
+        conn = engine.connect()
         # Add the data to the database as a new table
         df = pd.DataFrame(data)
 
@@ -120,22 +129,60 @@ def get_dataset(dataset_type, data, schemas=None, profiler=ColumnsExistProfiler,
             sql_dtypes = {col : SQLITE_TYPES[dtype] for (col,dtype) in schema.items()}
             for col in schema:
                 type = schema[col]
-                if type == "int":
+                if type in ["INTEGER", "SMALLINT", "BIGINT"]:
                     df[col] = pd.to_numeric(df[col],downcast='signed')
-                elif type == "float":
+                elif type in ["FLOAT", "DOUBLE", "DOUBLE_PRECISION"]:
                     df[col] = pd.to_numeric(df[col],downcast='float')
-                elif type == "datetime":
+                elif type in ["DATETIME", "TIMESTAMP"]:
                     df[col] = pd.to_datetime(df[col])
-        elif schemas and "postgresql" in schemas and isinstance(engine.dialect, postgresqltypes.dialect):
+
+        tablename = "test_data_" + ''.join([random.choice(string.ascii_letters + string.digits) for n in range(8)])
+        df.to_sql(name=tablename, con=conn, index=False, dtype=sql_dtypes)
+
+        # Build a SqlAlchemyDataset using that database
+        return SqlAlchemyDataset(tablename, engine=conn, profiler=profiler, caching=caching)
+
+    elif dataset_type == 'postgresql':
+        # Create a new database
+        engine = create_engine('postgresql://postgres@localhost/test_ci')
+        conn = engine.connect()
+        df = pd.DataFrame(data)
+
+        sql_dtypes = {}
+        if schemas and "postgresql" in schemas and isinstance(engine.dialect, postgresqltypes.dialect):
             schema = schemas["postgresql"]
             sql_dtypes = {col : POSTGRESQL_TYPES[dtype] for (col, dtype) in schema.items()}
             for col in schema:
                 type = schema[col]
-                if type == "int":
+                if type in ["INTEGER", "SMALLINT", "BIGINT"]:
                     df[col] = pd.to_numeric(df[col],downcast='signed')
-                elif type == "float":
+                elif type in ["FLOAT", "DOUBLE", "DOUBLE_PRECISION"]:
                     df[col] = pd.to_numeric(df[col],downcast='float')
-                elif type == "timestamp":
+                elif type in ["DATETIME", "TIMESTAMP"]:
+                    df[col] = pd.to_datetime(df[col])
+
+        tablename = "test_data_" + ''.join([random.choice(string.ascii_letters + string.digits) for n in range(8)])
+        df.to_sql(name=tablename, con=conn, index=False, dtype=sql_dtypes)
+
+        # Build a SqlAlchemyDataset using that database
+        return SqlAlchemyDataset(tablename, engine=conn, profiler=profiler, caching=caching)
+
+    elif dataset_type == 'mysql':
+        engine = create_engine('mysql://root@localhost/test_ci')
+        conn = engine.connect()
+        df = pd.DataFrame(data)
+
+        sql_dtypes = {}
+        if schemas and "mysql" in schemas and isinstance(engine.dialect, mysqltypes.dialect):
+            schema = schemas["mysql"]
+            sql_dtypes = {col : MYSQL_TYPES[dtype] for (col, dtype) in schema.items()}
+            for col in schema:
+                type = schema[col]
+                if type in ["INTEGER", "SMALLINT", "BIGINT"]:
+                    df[col] = pd.to_numeric(df[col],downcast='signed')
+                elif type in ["FLOAT", "DOUBLE", "DOUBLE_PRECISION"]:
+                    df[col] = pd.to_numeric(df[col],downcast='float')
+                elif type in ["DATETIME", "TIMESTAMP"]:
                     df[col] = pd.to_datetime(df[col])
 
         tablename = "test_data_" + ''.join([random.choice(string.ascii_letters + string.digits) for n in range(8)])
@@ -182,7 +229,7 @@ def get_dataset(dataset_type, data, schemas=None, profiler=ColumnsExistProfiler,
         raise ValueError("Unknown dataset_type " + str(dataset_type))
 
 def candidate_getter_is_on_temporary_notimplemented_list(context, getter):
-    if context == 'SqlAlchemyDataset':
+    if context in ["sqlite", "postgresql", "mysql"]:
         return getter in [
             'get_column_modes',
             'get_column_stdev',
@@ -193,7 +240,7 @@ def candidate_getter_is_on_temporary_notimplemented_list(context, getter):
         ]
 
 def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type):
-    if context == "SqlAlchemyDataset":
+    if context in ["sqlite", "postgresql", "mysql"]:
         return expectation_type in [
             # "expect_column_to_exist",
             # "expect_table_row_count_to_be_between",
@@ -202,8 +249,8 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
             # "expect_column_values_to_be_unique",
             # "expect_column_values_to_not_be_null",
             # "expect_column_values_to_be_null",
-            "expect_column_values_to_be_of_type",
-            "expect_column_values_to_be_in_type_list",
+            # "expect_column_values_to_be_of_type",
+            # "expect_column_values_to_be_in_type_list",
             # "expect_column_values_to_be_in_set",
             # "expect_column_values_to_not_be_in_set",
             # "expect_column_distinct_values_to_equal_set",
@@ -263,7 +310,7 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
             # "expect_column_values_to_not_match_regex",
             "expect_column_values_to_match_regex_list",
             "expect_column_values_to_not_match_regex_list",
-            "expect_column_values_to_match_strftime_format",
+            # "expect_column_values_to_match_strftime_format",
             "expect_column_values_to_be_dateutil_parseable",
             "expect_column_values_to_be_json_parseable",
             "expect_column_values_to_match_json_schema",

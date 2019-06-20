@@ -27,11 +27,9 @@ def test_get_slack_callback_returns_callable():
 
 
 def test_build_slack_notification_request_with_no_validation_json():
-    with mock.patch("uuid.uuid1") as mock_uuid:
-        mock_uuid.return_value = 99
-        with mock.patch("datetime.datetime") as mock_datetime:
-            mock_datetime.strftime.return_value = "05/05/19 12:12:12"
-            obs = build_slack_notification_request(None)
+    with mock.patch("datetime.datetime") as mock_datetime:
+        mock_datetime.strftime.return_value = "05/05/19 12:12:12"
+        obs = build_slack_notification_request(None)
 
     assert isinstance(obs, dict)
     assert obs == {
@@ -57,11 +55,9 @@ def test_build_slack_notification_request_with_no_validation_json():
 
 
 def test_build_slack_notification_request_with_successful_validation(validation_json):
-    with mock.patch("uuid.uuid1") as mock_uuid:
-        mock_uuid.return_value = 99
-        with mock.patch("datetime.datetime") as mock_datetime:
-            mock_datetime.strftime.return_value = "05/05/19 12:12:12"
-            obs = build_slack_notification_request(validation_json)
+    with mock.patch("datetime.datetime") as mock_datetime:
+        mock_datetime.strftime.return_value = "05/05/19 12:12:12"
+        obs = build_slack_notification_request(validation_json)
 
     assert isinstance(obs, dict)
     assert obs == {
@@ -102,12 +98,9 @@ def test_build_slack_notification_request_with_successful_validation(validation_
 
 def test_build_slack_notification_request_with_failed_validation(validation_json):
     validation_json["success"] = False
-
-    with mock.patch("uuid.uuid1") as mock_uuid:
-        mock_uuid.return_value = 99
-        with mock.patch("datetime.datetime") as mock_datetime:
-            mock_datetime.strftime.return_value = "05/05/19 12:12:12"
-            obs = build_slack_notification_request(validation_json)
+    with mock.patch("datetime.datetime") as mock_datetime:
+        mock_datetime.strftime.return_value = "05/05/19 12:12:12"
+        obs = build_slack_notification_request(validation_json)
 
     assert isinstance(obs, dict)
     assert obs == {
@@ -149,13 +142,10 @@ def test_build_slack_notification_request_with_failed_validation(validation_json
 def test_build_slack_notification_request_with_successful_validation_and_no_result_report(
     validation_json
 ):
-    with mock.patch("uuid.uuid1") as mock_uuid:
-        validation_json["meta"].pop("result_reference")
-
-        mock_uuid.return_value = 99
-        with mock.patch("datetime.datetime") as mock_datetime:
-            mock_datetime.strftime.return_value = "05/05/19 12:12:12"
-            obs = build_slack_notification_request(validation_json)
+    validation_json["meta"].pop("result_reference")
+    with mock.patch("datetime.datetime") as mock_datetime:
+        mock_datetime.strftime.return_value = "05/05/19 12:12:12"
+        obs = build_slack_notification_request(validation_json)
 
     assert isinstance(obs, dict)
     assert obs == {
@@ -190,13 +180,10 @@ def test_build_slack_notification_request_with_successful_validation_and_no_resu
 def test_build_slack_notification_request_with_successful_validation_and_no_dataset(
     validation_json
 ):
-    with mock.patch("uuid.uuid1") as mock_uuid:
-        validation_json["meta"].pop("dataset_reference")
-
-        mock_uuid.return_value = 99
-        with mock.patch("datetime.datetime") as mock_datetime:
-            mock_datetime.strftime.return_value = "05/05/19 12:12:12"
-            obs = build_slack_notification_request(validation_json)
+    validation_json["meta"].pop("dataset_reference")
+    with mock.patch("datetime.datetime") as mock_datetime:
+        mock_datetime.strftime.return_value = "05/05/19 12:12:12"
+        obs = build_slack_notification_request(validation_json)
 
     assert isinstance(obs, dict)
     assert obs == {

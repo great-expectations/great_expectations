@@ -30,7 +30,8 @@ Advanced
    custom_expectations
    conventions
    roadmap_changelog
-   missing_expectations
+   implemented_expectations
+   migrating_versions
 
 Module Docs
 -------------

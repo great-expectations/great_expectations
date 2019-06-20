@@ -10,11 +10,11 @@
             },
             "schemas": {
                 "SparkDFDataset": {
-                  "x": "float",
-                  "y": "int",
-                  "z": "int",
-                  "n": "int",
-                  "b": "bool"
+                  "x": "FloatType",
+                  "y": "IntegerType",
+                  "z": "IntegerType",
+                  "n": "IntegerType",
+                  "b": "BooleanType"
                 }
             }
         },
@@ -27,10 +27,10 @@
             },
             "schemas": {
                 "SparkDFDataset": {
-                  "a": "int",
-                  "b": "string",
-                  "c": "string",
-                  "d": "string"
+                  "a": "IntegerType",
+                  "b": "StringType",
+                  "c": "StringType",
+                  "d": "StringType"
                 }
             }
         },
@@ -42,9 +42,9 @@
             },
             "schemas": {
                 "SparkDFDataset": {
-                    "a": "int",
-                    "b": "string",
-                    "c": "int"
+                    "a": "IntegerType",
+                    "b": "StringType",
+                    "c": "IntegerType"
                 }
             }
         }

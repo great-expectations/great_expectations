@@ -1,7 +1,9 @@
 import os
 import logging
 
-from .datasource import Datasource
+from ..exceptions import BatchKwargsError
+
+from .datasource import Datasource, ReaderMethods
 from .filesystem_path_generator import SubdirReaderGenerator
 from .databricks_generator import DatabricksTableGenerator
 
@@ -16,7 +18,7 @@ except ImportError:
 
 
 class SparkDFDatasource(Datasource):
-    """The SparkDFDatasource produces spark dataframes and supports generators capable of interacting with local
+    """The SparkDFDatasource produces SparkDFDatasets and supports generators capable of interacting with local
     filesystem (the default subdir_reader generator) and databricks notebooks.
     """
 
@@ -51,19 +53,39 @@ class SparkDFDatasource(Datasource):
             raise ValueError("Unrecognized BatchGenerator type %s" % type_)
 
     def _get_data_asset(self, data_asset_name, batch_kwargs, expectation_suite, caching=False, **kwargs):
+        """class-private implementation of get_data_asset"""
         if self.spark is None:
             logger.error("No spark session available")
             return None
 
+        batch_kwargs.update(kwargs)
+        reader_options = batch_kwargs.copy()
         if "path" in batch_kwargs:
-            path = batch_kwargs.pop("path")  # We remove this so it is not used as a reader option
+            path = reader_options.pop("path")  # We remove this so it is not used as a reader option
+            reader_options.pop("timestamp")    # ditto timestamp
+            reader_method = reader_options.pop("reader_method", None)
+            if reader_method is None:
+                reader_method = self._guess_reader_method_from_path(path)
+                if reader_method is None:
+                    raise BatchKwargsError("Unable to determine reader for path: %s" % path, batch_kwargs)
+            else:
+                try:
+                    reader_method = ReaderMethods[reader_method]
+                except KeyError:
+                    raise BatchKwargsError("Unknown reader method: %s" % reader_method, batch_kwargs)
+
             reader = self.spark.read
-            batch_kwargs.update(kwargs)
 
-            for option in batch_kwargs.items():
+            for option in reader_options.items():
                 reader = reader.option(*option)
-            df = reader.csv(os.path.join(path))
 
+            if reader_method == ReaderMethods.CSV:
+                df = reader.csv(path)
+            elif reader_method == ReaderMethods.parquet:
+                df = reader.parquet(path)
+            else:
+                raise BatchKwargsError("Unsupported reader: %s" % reader_method.name, batch_kwargs)
+            
         elif "query" in batch_kwargs:
             df = self.spark.sql(batch_kwargs.query)
 
