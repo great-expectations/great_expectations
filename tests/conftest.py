@@ -99,19 +99,24 @@ def dataset(request):
             "naturals": "float64"
         },
         "postgresql": {
-            "infinities": "float",
-            "nulls": "float",
-            "naturals": "float"
+            "infinities": "DOUBLE_PRECISION",
+            "nulls": "DOUBLE_PRECISION",
+            "naturals": "DOUBLE_PRECISION"
         },
         "sqlite": {
-            "infinities": "float",
-            "nulls": "float",
-            "naturals": "float"
+            "infinities": "FLOAT",
+            "nulls": "FLOAT",
+            "naturals": "FLOAT"
+        },
+        "mysql": {
+            "infinities": "FLOAT",
+            "nulls": "FLOAT",
+            "naturals": "FLOAT"
         },
         "spark": {
-            "infinities": "float",
-            "nulls": "float",
-            "naturals": "float"
+            "infinities": "FloatType",
+            "nulls": "FloatType",
+            "naturals": "FloatType"
         }
     }
     return get_dataset(request.param, data, schemas=schemas)

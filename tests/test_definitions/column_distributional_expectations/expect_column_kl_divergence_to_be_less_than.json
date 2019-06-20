@@ -113,11 +113,11 @@
     },
     "schemas": {
       "spark": {
-        "norm_0_1": "float",
-        "norm_1_1": "float",
-        "norm_10_1": "float",
-        "bimodal": "float",
-        "categorical_fixed": "string"
+        "norm_0_1": "FloatType",
+        "norm_1_1": "FloatType",
+        "norm_10_1": "FloatType",
+        "bimodal": "FloatType",
+        "categorical_fixed": "StringType"
       }
     },
     "tests": [
@@ -383,8 +383,8 @@
     },
     "schemas": {
       "spark": {
-        "x": "float",
-        "y": "float"
+        "x": "FloatType",
+        "y": "FloatType"
       }
     },
     "tests": [
@@ -498,7 +498,7 @@
       "z": [-0.5, 0.5, 0.5, 1.5, 1.5, 1.5, 1.5, 2.5, 2.5, 3.5]
     },
     "schemas": {
-      "z": "float"
+      "z": "FloatType"
     },
     "tests": [
       {
@@ -686,8 +686,8 @@
     },
     "schemas": {
       "spark": {
-        "x": "float",
-        "x2": "float"
+        "x": "FloatType",
+        "x2": "FloatType"
       }
     },
     "tests": [

@@ -12,31 +12,31 @@
     },
     "schemas": {
       "sqlite": {
-        "w": "int",
-        "x": "int",
-        "y": "int",
-        "z": "varchar",
-        "zz": "datetime",
-        "a": "int",
-        "b": "int"
+        "w": "INTEGER",
+        "x": "INTEGER",
+        "y": "INTEGER",
+        "z": "VARCHAR",
+        "zz": "DATETIME",
+        "a": "INTEGER",
+        "b": "INTEGER"
       },
       "postgresql": {
-        "w": "int",
-        "x": "int",
-        "y": "int",
-        "z": "text",
-        "zz": "timestamp",
-        "a": "int",
-        "b": "int"
+        "w": "INTEGER",
+        "x": "INTEGER",
+        "y": "INTEGER",
+        "z": "TEXT",
+        "zz": "TIMESTAMP",
+        "a": "INTEGER",
+        "b": "INTEGER"
       },
       "spark": {
-        "w": "int",
-        "x": "int",
-        "y": "int",
-        "z": "string",
-        "zz": "string",
-        "a": "int",
-        "b": "int"
+        "w": "IntegerType",
+        "x": "IntegerType",
+        "y": "IntegerType",
+        "z": "StringType",
+        "zz": "StringType",
+        "a": "IntegerType",
+        "b": "IntegerType"
       }
     },
     "tests" : [{

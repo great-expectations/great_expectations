@@ -22,40 +22,40 @@
           "s1": "int64"
         },
         "postgresql": {
-          "x": "integer",
-          "y": "float",
-          "z": "text",
-          "n": "text",
-          "b": "boolean",
-          "s": "float",
-          "s1": "bigint"
+          "x": "INTEGER",
+          "y": "DOUBLE_PRECISION",
+          "z": "TEXT",
+          "n": "TEXT",
+          "b": "BOOLEAN",
+          "s": "DOUBLE_PRECISION",
+          "s1": "BIGINT"
         },
         "spark": {
-          "x": "integer",
-          "y": "float",
-          "z": "string",
-          "n": "string",
-          "b": "boolean",
-          "s": "float",
-          "s1": "long"
+          "x": "IntegerType",
+          "y": "FloatType",
+          "z": "StringType",
+          "n": "StringType",
+          "b": "BooleanType",
+          "s": "FloatType",
+          "s1": "LongType"
         },
         "sqlite": {
-          "x": "integer",
-          "y": "float",
-          "z": "varchar",
-          "n": "varchar",
-          "b": "boolean",
-          "s": "float",
-          "s1": "integer"
+          "x": "INTEGER",
+          "y": "FLOAT",
+          "z": "VARCHAR",
+          "n": "VARCHAR",
+          "b": "BOOLEAN",
+          "s": "FLOAT",
+          "s1": "INTEGER"
         },
         "mysql": {
-          "x": "integer",
-          "y": "float",
-          "z": "varchar",
-          "n": "varchar",
-          "b": "boolean",
-          "s": "float",
-          "s1": "bigint"
+          "x": "INTEGER",
+          "y": "FLOAT",
+          "z": "TEXT",
+          "n": "TEXT",
+          "b": "BOOLEAN",
+          "s": "FLOAT",
+          "s1": "BIGINT"
         }
       },
       "tests": [
@@ -119,7 +119,7 @@
         },
         {
           "_note": "type name here works for tested sqlalchemy types; for sqlalchemy note we do not expect unexpected_list or unexpected_index_list since there are no column_map semantics for type",
-          "title": "Negative, sqlite integer is not varchar",
+          "title": "Negative, sqlite integer is not VARCHAR",
           "exact_match_out": false,
           "in":
           {

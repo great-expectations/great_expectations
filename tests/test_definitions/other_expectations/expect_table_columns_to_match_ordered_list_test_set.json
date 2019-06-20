@@ -9,9 +9,9 @@
       },
       "schemas": {
         "spark": {
-          "c1": "int",
-          "c2": "string",
-          "c3": "string"
+          "c1": "IntegerType",
+          "c2": "StringType",
+          "c3": "StringType"
         }
       },
     "tests": [{
