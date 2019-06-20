@@ -10,11 +10,11 @@
       },
       "schemas": {
         "spark": {
-          "x": "float",
-          "y": "int",
-          "z": "int",
-          "n": "int",
-          "b": "bool"
+          "x": "FloatType",
+          "y": "IntegerType",
+          "z": "IntegerType",
+          "n": "IntegerType",
+          "b": "BooleanType"
         }
       },
       "tests": [{
@@ -205,7 +205,7 @@
       },
       "schemas": {
         "spark": {
-          "empty_column": "int"
+          "empty_column": "IntegerType"
         }
       },
       "tests": [{

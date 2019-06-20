@@ -125,7 +125,7 @@
       },
       "schemas": {
         "postgresql": {
-          "empty_column": "text"
+          "empty_column": "TEXT"
         }
       },
       "tests": [{
@@ -147,10 +147,10 @@
     },
     "schemas": {
       "sqlite": {
-        "dates": "datetime"
+        "dates": "DATETIME"
       },
       "postgresql": {
-        "dates": "timestamp"
+        "dates": "TIMESTAMP"
       },
       "pandas": {
         "dates": "datetime64"
