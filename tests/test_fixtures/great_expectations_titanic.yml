@@ -9,3 +9,7 @@ datasources:
       mygenerator:
         type: subdir_reader
         base_directory: ../data
+
+result_store:
+  filesystem:
+    base_directory: uncommitted/validations

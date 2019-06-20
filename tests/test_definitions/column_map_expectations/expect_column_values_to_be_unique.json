@@ -13,14 +13,14 @@
     },
     "schemas": {
       "spark": {
-        "a": "string",
-        "b": "string",
-        "c": "int",
-        "d": "string",
-        "n": "int",
-        "unique": "int",
-        "null": "null",
-        "mult_dup": "string"
+        "a": "StringType",
+        "b": "StringType",
+        "c": "IntegerType",
+        "d": "StringType",
+        "n": "IntegerType",
+        "unique": "IntegerType",
+        "null": "NullType",
+        "mult_dup": "StringType"
       }
     },
     "tests" : [
@@ -49,7 +49,7 @@
       },{
         "title": "Multi-type column, contains 2 and '2'. Suppressed for SQAlchemy ",
         "exact_match_out": false,
-        "suppress_test_for": ["SQLAlchemy"],
+        "suppress_test_for": ["sqlalchemy"],
         "in": {
           "column": "c",
           "mostly": 0.3

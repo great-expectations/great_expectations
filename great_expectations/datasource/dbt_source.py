@@ -79,12 +79,12 @@ class DBTDatasource(SqlAlchemyDatasource):
         })
         self._datasource_config.update(kwargs)
 
-        with open(os.path.join(self._data_context.get_context_root_directory(),
+        with open(os.path.join(self._data_context.root_directory,
                                self._datasource_config["project_filepath"]), "r") as f:
             self._dbt_project = yaml.load(f) or {}
             
         self.dbt_target_path = os.path.join(
-            self._data_context.get_context_root_directory(),
+            self._data_context.root_directory,
             self._dbt_project["target-path"],
             "compiled",
             self._dbt_project["name"],

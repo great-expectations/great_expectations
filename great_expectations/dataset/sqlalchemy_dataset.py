@@ -5,8 +5,17 @@ import uuid
 from functools import wraps
 import inspect
 import logging
-import sys
 import warnings
+from datetime import datetime
+from importlib import import_module
+
+import pandas as pd
+
+from dateutil.parser import parse
+
+from .dataset import Dataset
+from great_expectations.data_asset import DataAsset
+from great_expectations.data_asset.util import DocInherit, parse_result_format
 
 logger = logging.getLogger(__name__)
 
@@ -16,13 +25,8 @@ try:
 except ImportError:
     logger.debug("Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support")
 
-import pandas as pd
 
-from dateutil.parser import parse
-from datetime import datetime
 
-from .dataset import Dataset
-from great_expectations.data_asset.util import DocInherit, parse_result_format
 
 class MetaSqlAlchemyDataset(Dataset):
 
@@ -138,8 +142,7 @@ class MetaSqlAlchemyDataset(Dataset):
                         col = x[column]
                     maybe_limited_unexpected_list.append(datetime.strftime(col, output_strftime_format))
             else:
-                maybe_limited_unexpected_list = [x[column]
-                                             for x in unexpected_query_results.fetchall()]
+                maybe_limited_unexpected_list = [x[column] for x in unexpected_query_results.fetchall()]
 
             success_count = nonnull_count - count_results['unexpected_count']
             success, percent_success = self._calc_map_expectation_success(
@@ -205,6 +208,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 # Currently we do no error handling if the engine doesn't work out of the box.
                 raise err
 
+        self.dialect = import_module("sqlalchemy.dialects." + self.engine.dialect.name)
         if schema is not None and custom_sql is not None:
             # temporary table will be written to temp schema, so don't allow
             # a user-defined schema
@@ -212,7 +216,6 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         if custom_sql:
             self.create_temporary_table(table_name, custom_sql)
-
 
         try:
             insp = reflection.Inspector.from_engine(self.engine)
@@ -423,6 +426,109 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         return sa.column(column) != None
 
+
+    @DocInherit
+    @DataAsset.expectation(['column', 'type_', 'mostly'])
+    def expect_column_values_to_be_of_type(
+        self,
+        column,
+        type_,
+        mostly=None,
+        result_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
+        try:
+            col_data = [col for col in self.columns if col["name"] == column][0]
+            col_type = type(col_data["type"])
+        except IndexError:
+            raise ValueError("Unrecognized column: %s" % column)
+        except KeyError:
+            raise ValueError("No database type data available for column: %s" % column)
+
+        try:
+            # Our goal is to be as explicit as possible. We will match the dialect
+            # if that is possible. If there is no dialect available, we *will*
+            # match against a top-level SqlAlchemy type if that's possible.
+            #
+            # This is intended to be a conservative approach.
+            #
+            # In particular, we *exclude* types that would be valid under an ORM
+            # such as "float" for postgresql with this approach
+
+            if not self.dialect:
+                logger.warning("No sqlalchemy dialect found; relying in top-level sqlalchemy types.")
+                success = issubclass(col_type, getattr(sa, type_))
+            else:
+                success = issubclass(col_type, getattr(self.dialect, type_))
+                
+            return {
+                    "success": success,
+                    "details": {
+                        "observed_type": col_type.__name__
+                    }
+                }
+
+        except AttributeError:
+            raise ValueError("Unrecognized sqlalchemy type: %s" % type_)
+
+    @DocInherit
+    @DataAsset.expectation(['column', 'type_', 'mostly'])
+    def expect_column_values_to_be_in_type_list(
+        self,
+        column,
+        type_list,
+        mostly=None,
+        result_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
+        try:
+            col_data = [col for col in self.columns if col["name"] == column][0]
+            col_type = type(col_data["type"])
+        except IndexError:
+            raise ValueError("Unrecognized column: %s" % column)
+        except KeyError:
+            raise ValueError("No database type data available for column: %s" % column)
+
+        # Our goal is to be as explicit as possible. We will match the dialect
+        # if that is possible. If there is no dialect available, we *will*
+        # match against a top-level SqlAlchemy type.
+        #
+        # This is intended to be a conservative approach.
+        #
+        # In particular, we *exclude* types that would be valid under an ORM
+        # such as "float" for postgresql with this approach
+
+        if not self.dialect:
+            logger.warning("No sqlalchemy dialect found; relying in top-level sqlalchemy types.")
+            types = []
+            for type_ in type_list:
+                try:
+                    type_class = getattr(sa, type_)
+                    types.append(type_class)
+                except AttributeError:
+                    logger.warning("Unrecognized type: %s" % type_)
+            if len(types) == 0:
+                raise ValueError("No recognized sqlalchemy types in type_list")
+            types = tuple(types)
+        else:
+            types = []
+            for type_ in type_list:
+                try:
+                    type_class = getattr(self.dialect, type_)
+                    types.append(type_class)
+                except AttributeError:
+                    logger.warning("Unrecognized type: %s" % type_)
+            if len(types) == 0:
+                raise ValueError("No recognized sqlalchemy types in type_list for dialect %s" % 
+                    self.dialect.__name__)
+            types = tuple(types)
+        
+        return {
+                "success": issubclass(col_type, types),
+                "details": {
+                    "observed_type-type": col_type.__name__
+                }
+        }
+
+
     @DocInherit
     @MetaSqlAlchemyDataset.column_map_expectation
     def expect_column_values_to_be_in_set(self,
@@ -552,6 +658,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                                                 mostly=None,
                                                 result_format=None, include_config=False, catch_exceptions=None, meta=None
                                                 ):
+        condition = None
         try:
             # Postgres-only version
             if isinstance(self.engine.dialect, sa.dialects.postgresql.dialect):
@@ -579,8 +686,6 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                                                 mostly=None,
                                                 result_format=None, include_config=False, catch_exceptions=None, meta=None
                                                 ):
-
-        
         condition = None
         try:
             # Postgres-only version
@@ -616,7 +721,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         condition = None
         try:
-        # Postgres-only version
+            # Postgres-only version
             if isinstance(self.engine.dialect, sa.dialects.postgresql.dialect):
                 if match_on == "any":
                     condition = \
@@ -632,7 +737,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             # this can simply indicate no mysql driver is loaded
             pass
         try:
-        # Mysql
+            # Mysql
             if isinstance(self.engine.dialect, sa.dialects.mysql.dialect):
                 if match_on == "any":
                     condition = \

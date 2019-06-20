@@ -1,8 +1,11 @@
-.. _missing_expectations:
+.. _implemented_expectations:
 
-Missing Expectations
+Implemented Expectations
 =====================
 
+Because Great Expectations can run against different platforms, not all expectations have been implemented
+for all platforms. This table details which are implemented. Note we love pull-requests to help us fill
+out the missing implementations!
 
 
 +-----------------------------------------------------------------------------+----------+----------+----------+
@@ -22,9 +25,9 @@ Missing Expectations
 +-----------------------------------------------------------------------------+----------+----------+----------+
 |`expect_column_values_to_be_null`                                            | True     | True     | True     |
 +-----------------------------------------------------------------------------+----------+----------+----------+
-|`expect_column_values_to_be_of_type`                                         | True     | False    | False    |
+|`expect_column_values_to_be_of_type`                                         | True     | True     | False    |
 +-----------------------------------------------------------------------------+----------+----------+----------+
-|`expect_column_values_to_be_in_type_list`                                    | True     | False    | False    |
+|`expect_column_values_to_be_in_type_list`                                    | True     | True     | False    |
 +-----------------------------------------------------------------------------+----------+----------+----------+
 |`expect_column_values_to_be_in_set`                                          | True     | True     | True     |
 +-----------------------------------------------------------------------------+----------+----------+----------+
