@@ -58,12 +58,13 @@ def basic_expectation_suite():
         'meta': {},
         'expectations': [
             # Removing this from list of expectations, since mysql doesn't support infinities and we want generic fixtures
-            # {
-            #     "expectation_type": "expect_column_to_exist",
-            #     "kwargs": {
-            #         "column": "infinities"
-            #     }
-            # },
+            # TODO: mysql cannot handle columns with infinities....re-handle this case
+            {
+                "expectation_type": "expect_column_to_exist",
+                "kwargs": {
+                    "column": "infinities"
+                }
+            },
             {
                 "expectation_type": "expect_column_to_exist",
                 "kwargs": {
