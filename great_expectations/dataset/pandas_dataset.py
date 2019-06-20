@@ -451,7 +451,13 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         # Build one type list with each specified type list from type_map
         target_type_list = list()
         for type_ in type_list:
-            target_type_list += type_map[type_]
+            try:
+                target_type_list += type_map[type_]
+            except KeyError:
+                logger.warning("Unrecognized type: %s" % type_)
+
+        if len(target_type_list) == 0:
+            raise ValueError("No recognized pandas types in type_list")
 
         return column.map(lambda x: isinstance(x, tuple(target_type_list)))
 
