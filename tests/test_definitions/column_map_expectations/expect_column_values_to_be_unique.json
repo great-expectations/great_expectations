@@ -13,14 +13,14 @@
     },
     "schemas": {
       "spark": {
-        "a": "string",
-        "b": "string",
-        "c": "int",
-        "d": "string",
-        "n": "int",
-        "unique": "int",
-        "null": "null",
-        "mult_dup": "string"
+        "a": "StringType",
+        "b": "StringType",
+        "c": "IntegerType",
+        "d": "StringType",
+        "n": "IntegerType",
+        "unique": "IntegerType",
+        "null": "NullType",
+        "mult_dup": "StringType"
       }
     },
     "tests" : [

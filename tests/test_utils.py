@@ -19,59 +19,51 @@ from great_expectations.dataset import PandasDataset, SqlAlchemyDataset, SparkDF
 from great_expectations.profile import ColumnsExistProfiler
 
 SQLITE_TYPES = {
-        "varchar": sqlitetypes.VARCHAR,
-        "char": sqlitetypes.CHAR,
-        "int": sqlitetypes.INTEGER,  # TODO: remove this option to be more explicit
-        "integer": sqlitetypes.INTEGER,
-        "smallint": sqlitetypes.SMALLINT,
-        "datetime": sqlitetypes.DATETIME(truncate_microseconds=True),
-        "date": sqlitetypes.DATE,
-        "float": sqlitetypes.FLOAT,
-        "bool": sqlitetypes.BOOLEAN,  # TODO: remove this option to be more explicit
-        "boolean": sqlitetypes.BOOLEAN 
+        "VARCHAR": sqlitetypes.VARCHAR,
+        "CHAR": sqlitetypes.CHAR,
+        "INTEGER": sqlitetypes.INTEGER,
+        "SMALLINT": sqlitetypes.SMALLINT,
+        "DATETIME": sqlitetypes.DATETIME(truncate_microseconds=True),
+        "DATE": sqlitetypes.DATE,
+        "FLOAT": sqlitetypes.FLOAT,
+        "BOOLEAN": sqlitetypes.BOOLEAN 
 }
 
 POSTGRESQL_TYPES = {
-        "text": postgresqltypes.TEXT,   # TODO: remove this option to be more explicit
         "TEXT": postgresqltypes.TEXT,
-        "char": postgresqltypes.CHAR,
-        "int": postgresqltypes.INTEGER,  # TODO: remove this option to be more explicit
-        "integer": postgresqltypes.INTEGER,
-        "smallint": postgresqltypes.SMALLINT,
-        "bigint": postgresqltypes.BIGINT,
-        "timestamp": postgresqltypes.TIMESTAMP,
-        "date": postgresqltypes.DATE,
-        "float": postgresqltypes.FLOAT,
+        "CHAR": postgresqltypes.CHAR,
+        "INTEGER": postgresqltypes.INTEGER,
+        "SMALLINT": postgresqltypes.SMALLINT,
+        "BIGINT": postgresqltypes.BIGINT,
+        "TIMESTAMP": postgresqltypes.TIMESTAMP,
+        "DATE": postgresqltypes.DATE,
         "DOUBLE_PRECISION": postgresqltypes.DOUBLE_PRECISION,
-        "bool": postgresqltypes.BOOLEAN,  #TODO: remove this option to be more explicit
-        "boolean": postgresqltypes.BOOLEAN
+        "BOOLEAN": postgresqltypes.BOOLEAN
 }
 
 MYSQL_TYPES = {
-        "text": mysqltypes.TEXT,
-        "char": mysqltypes.CHAR,
-        "integer": mysqltypes.INTEGER,
-        "smallint": mysqltypes.SMALLINT,
-        "bigint": mysqltypes.BIGINT,
-        "timestamp": mysqltypes.TIMESTAMP,
-        "date": mysqltypes.DATE,
-        "float": mysqltypes.FLOAT,
-        "boolean": mysqltypes.BOOLEAN
+        "TEXT": mysqltypes.TEXT,
+        "CHAR": mysqltypes.CHAR,
+        "INTEGER": mysqltypes.INTEGER,
+        "SMALLINT": mysqltypes.SMALLINT,
+        "BIGINT": mysqltypes.BIGINT,
+        "TIMESTAMP": mysqltypes.TIMESTAMP,
+        "DATE": mysqltypes.DATE,
+        "FLOAT": mysqltypes.FLOAT,
+        "BOOLEAN": mysqltypes.BOOLEAN
 }
 
 SPARK_TYPES = {
-    "string": sparktypes.StringType,
-    "int": sparktypes.IntegerType,  #TODO: remove this option to be more explicit
-    "integer": sparktypes.IntegerType,
-    "long": sparktypes.LongType,
-    "date": sparktypes.DateType,
-    "timestamp": sparktypes.TimestampType,
-    "float": sparktypes.FloatType,
-    "double": sparktypes.DoubleType,
-    "bool": sparktypes.BooleanType,
-    "object": sparktypes.DataType,  #TODO: remove this option to be more explicit
-    "data": sparktypes.DataType,
-    "null": sparktypes.NullType
+    "StringType": sparktypes.StringType,
+    "IntegerType": sparktypes.IntegerType,
+    "LongType": sparktypes.LongType,
+    "DateType": sparktypes.DateType,
+    "TimestampType": sparktypes.TimestampType,
+    "FloatType": sparktypes.FloatType,
+    "DoubleType": sparktypes.DoubleType,
+    "BooleanType": sparktypes.BooleanType,
+    "DataType": sparktypes.DataType,
+    "NullType": sparktypes.NullType
 }
 
 
@@ -137,11 +129,11 @@ def get_dataset(dataset_type, data, schemas=None, profiler=ColumnsExistProfiler,
             sql_dtypes = {col : SQLITE_TYPES[dtype] for (col,dtype) in schema.items()}
             for col in schema:
                 type = schema[col]
-                if type in ["int", "integer", "smallint", "bigint"]:
+                if type in ["INTEGER", "SMALLINT", "BIGINT"]:
                     df[col] = pd.to_numeric(df[col],downcast='signed')
-                elif type in ["float", "double"]:
+                elif type in ["FLOAT", "DOUBLE", "DOUBLE_PRECISION"]:
                     df[col] = pd.to_numeric(df[col],downcast='float')
-                elif type == "datetime":
+                elif type in ["DATETIME", "TIMESTAMP"]:
                     df[col] = pd.to_datetime(df[col])
 
         tablename = "test_data_" + ''.join([random.choice(string.ascii_letters + string.digits) for n in range(8)])
@@ -162,11 +154,11 @@ def get_dataset(dataset_type, data, schemas=None, profiler=ColumnsExistProfiler,
             sql_dtypes = {col : POSTGRESQL_TYPES[dtype] for (col, dtype) in schema.items()}
             for col in schema:
                 type = schema[col]
-                if type in ["int", "integer", "smallint", "bigint"]:
+                if type in ["INTEGER", "SMALLINT", "BIGINT"]:
                     df[col] = pd.to_numeric(df[col],downcast='signed')
-                elif type in ["float", "double"]:
+                elif type in ["FLOAT", "DOUBLE", "DOUBLE_PRECISION"]:
                     df[col] = pd.to_numeric(df[col],downcast='float')
-                elif type == "timestamp":
+                elif type in ["DATETIME", "TIMESTAMP"]:
                     df[col] = pd.to_datetime(df[col])
 
         tablename = "test_data_" + ''.join([random.choice(string.ascii_letters + string.digits) for n in range(8)])
@@ -186,11 +178,11 @@ def get_dataset(dataset_type, data, schemas=None, profiler=ColumnsExistProfiler,
             sql_dtypes = {col : MYSQL_TYPES[dtype] for (col, dtype) in schema.items()}
             for col in schema:
                 type = schema[col]
-                if type in ["int", "integer", "smallint", "bigint"]:
+                if type in ["INTEGER", "SMALLINT", "BIGINT"]:
                     df[col] = pd.to_numeric(df[col],downcast='signed')
-                elif type in ["float", "double"]:
+                elif type in ["FLOAT", "DOUBLE", "DOUBLE_PRECISION"]:
                     df[col] = pd.to_numeric(df[col],downcast='float')
-                elif type == "timestamp":
+                elif type in ["DATETIME", "TIMESTAMP"]:
                     df[col] = pd.to_datetime(df[col])
 
         tablename = "test_data_" + ''.join([random.choice(string.ascii_letters + string.digits) for n in range(8)])

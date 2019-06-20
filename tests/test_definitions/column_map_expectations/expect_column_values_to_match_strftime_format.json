@@ -11,12 +11,12 @@
       },
       "schemas": {
         "spark": {
-          "a": "string",
-          "b": "string",
-          "c": "string",
-          "d": "int",
-          "e": "timestamp",
-          "f": "string"
+          "a": "StringType",
+          "b": "StringType",
+          "c": "StringType",
+          "d": "IntegerType",
+          "e": "TimestampType",
+          "f": "StringType"
         }
       },
       "tests": [{

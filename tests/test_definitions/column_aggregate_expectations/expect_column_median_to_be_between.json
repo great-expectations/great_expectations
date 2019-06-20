@@ -24,9 +24,9 @@
       },
       "schemas": {
         "spark": {
-          "a": "int",
-          "b": "int",
-          "c": "int"
+          "a": "IntegerType",
+          "b": "IntegerType",
+          "c": "IntegerType"
         }
       },
       "tests": [
@@ -162,7 +162,7 @@
       },
       "schemas": {
         "spark": {
-          "empty_column": "int"
+          "empty_column": "IntegerType"
         }
       },
       "tests": [{
