@@ -166,6 +166,12 @@ class MetaSqlAlchemyDataset(Dataset):
                     del return_obj['result']['partial_unexpected_list']
                 except KeyError:
                     pass
+            
+            # FIXME: refactor column_map_expectation
+            if (func.__name__ in ['expect_column_values_to_be_in_set'] and
+                result_format["result_format"] == "PROFILE" and
+                "value_set" in kwargs and kwargs["value_set"] == []):
+                return_obj["result"]["unexpected_counts"] = self.get_column_value_counts(column)
 
             return return_obj
 
