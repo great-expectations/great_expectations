@@ -51,8 +51,8 @@
         "mysql": {
           "x": "integer",
           "y": "float",
-          "z": "varchar",
-          "n": "varchar",
+          "z": "TEXT",
+          "n": "TEXT",
           "b": "boolean",
           "s": "float",
           "s1": "bigint"
