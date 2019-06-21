@@ -16,6 +16,8 @@ from .test_utils import get_dataset
 
 CONTEXTS = ['PandasDataset', 'sqlite', 'SparkDFDataset']
 
+### TODO: make it easier to turn off Spark as well
+
 #####
 #
 # Postgresql Context
