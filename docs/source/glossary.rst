@@ -58,6 +58,7 @@ Datetime and JSON parsing
 Aggregate functions
 --------------------------------------------------------------------------------
 
+* :func:`expect_column_distinct_values_to_be_in_set <great_expectations.dataset.dataset.Dataset.expect_column_distinct_values_to_be_in_set>`
 * :func:`expect_column_distinct_values_to_contain_set <great_expectations.dataset.dataset.Dataset.expect_column_distinct_values_to_contain_set>`
 * :func:`expect_column_distinct_values_to_equal_set <great_expectations.dataset.dataset.Dataset.expect_column_distinct_values_to_equal_set>`
 * :func:`expect_column_mean_to_be_between <great_expectations.dataset.dataset.Dataset.expect_column_mean_to_be_between>`
