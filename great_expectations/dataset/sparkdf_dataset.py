@@ -218,13 +218,16 @@ class SparkDFDataset(MetaSparkDFDataset):
             .count()\
             .orderBy(column)\
             .collect()
-        # assuming this won't get too big
-        return pd.Series(
+        series = pd.Series(
             [row['count'] for row in value_counts],
-            index=[row[column] for row in value_counts],
-            # don't know about including name here
-            name=column,
+            index=pd.Index(
+                data=[row[column] for row in value_counts],
+                name="value"
+            ),
+            name="count"
         )
+        series.sort_index(inplace=True)
+        return series
 
     def get_column_unique_count(self, column):
         return self.get_column_value_counts(column).shape[0]
