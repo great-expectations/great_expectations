@@ -43,7 +43,7 @@ class QueryGenerator(BatchGenerator):
 
     def _get_iterator(self, data_asset_name, **kwargs):
         if self._queries_path:
-            if data_asset_name in [path for path in os.walk(self._queries_path) if str(path).endswith(".sql")]:
+            if data_asset_name in [path[:-4] for path in os.listdir(self._queries_path) if str(path).endswith(".sql")]:
                 with open(os.path.join(self._queries_path, data_asset_name) + ".sql", "r") as data:
                     return iter([{
                         "query": data.read(),

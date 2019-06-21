@@ -177,6 +177,9 @@ def recursively_convert_to_json_serializable(test_obj):
         # Note: Use np.floating to avoid FutureWarning from numpy
         return float(round(test_obj, sys.float_info.dig))
 
+    elif isinstance(test_obj, pd.Series):
+        return recursively_convert_to_json_serializable(test_obj.to_dict())
+
     elif isinstance(test_obj, pd.DataFrame):
         return recursively_convert_to_json_serializable(test_obj.to_dict(orient='records'))
 

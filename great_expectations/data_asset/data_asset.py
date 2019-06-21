@@ -1136,7 +1136,6 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                     }
                 )
 
-
         if result_format['result_format'] == 'SUMMARY':
             return return_obj
 
