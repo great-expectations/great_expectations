@@ -72,7 +72,7 @@ class ValueListView(View):
 
 
 class ColumnSectionView(View):
-    _template = "section.j2"
+    _template = "sections.j2"
 
 
 class PageView(View):

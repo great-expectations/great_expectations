@@ -195,7 +195,7 @@ def render(render_object):
               help='Maximum number of named data assets to profile.')
 @click.option('--profile_all_data_assets', '-A', is_flag=True, default=False,
               help='Profile ALL data assets within the target data source. If True, this will override --max_data_assets.')
-@click.option('--target_directory', '-d', default="./",
+@click.option('--target_directory', '-d', default="./great_expectations",
               help='The root of a project directory containing a great_expectations/ config.')
 def profile(datasource_name, max_data_assets, profile_all_data_assets, target_directory):
     """Profile a great expectations object.
