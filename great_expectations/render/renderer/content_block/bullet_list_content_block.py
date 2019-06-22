@@ -283,3 +283,29 @@ class BulletListContentBlock(ContentBlock):
             "template": "Values must always be unique across columns: $column_list_str",
             "params": params
         }]
+
+    @classmethod
+    def expect_table_row_count_to_be_between(cls, expectation):
+        params = substitute_none_for_missing(
+            expectation["kwargs"],
+            ["column_A", "column_B", "parse_strings_as_datetimes",
+                "ignore_row_if", "mostly", "or_equal"]
+        )
+
+        if params["min_value"] is not None and params["max_value"] is not None:
+            return [{
+                "template": "Must have between $min_value and $max_value rows.",
+                "params": params
+            }]
+
+        elif params["min_value"] is None:
+            return [{
+                "template": "Must have less than than $max_value rows.",
+                "params": params
+            }]
+
+        elif params["max_value"] is None:
+            return [{
+                "template": "Must have more than $min_value rows.",
+                "params": params
+            }]
