@@ -10,6 +10,7 @@ from datetime import datetime
 from importlib import import_module
 
 import pandas as pd
+import numpy as np
 
 from dateutil.parser import parse
 
@@ -323,6 +324,35 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             # An odd number of column values, we can just take the center value
             column_median = column_values[1][0]  # True center value
         return column_median
+
+    def get_column_ntiles(self, column, ntiles):
+        expected_ntiles = np.linspace(0, 1, len(ntiles))
+        if not np.allclose(expected_ntiles, ntiles):
+            raise ValueError("For SqlAlchemy requested ntiles must be evenly spaced.")
+
+        # For sql, our logic works as follows:
+        #   First, we divide the values into n_ntiles - 1 groups (corresponding to the ranges
+        #   logically between (inclusive) each of the requested ntiles).
+        #   Next, we take the minimum and maximum of each range, and return the minimum for all ranges
+        #   *and* the maximum of the last range.
+
+        # To correspond more closely to interpolation='nearest' in pandas, 
+        # we would need to determine whether the min or max of ntile_k is closer to the true
+        # break point then choose that one.
+
+        inner = sa.select([
+                sa.column(column),
+                sa.func.ntile(len(ntiles)-1).over(order_by=sa.column(column)).label("ntile")
+            ]).select_from(self._table).where(sa.column(column) != None).alias("ntiles")
+        ntiles_query = sa.select([
+            sa.func.min(sa.column(column)),
+            sa.func.max(sa.column(column)),
+            sa.column("ntile")
+        ]).select_from(inner).group_by(sa.column("ntile")).order_by(sa.column("ntile"))
+
+        ntile_vals = self.engine.execute(ntiles_query).fetchall()
+        ntile_val_list = [ntile_val[0] for ntile_val in ntile_vals] + [ntile_vals[-1][1]]
+        return ntile_val_list
 
     def get_column_hist(self, column, bins):
         # TODO: this is **terribly** inefficient; consider refactor
