@@ -4,7 +4,6 @@ from .content_block import ContentBlock
 
 
 def substitute_none_for_missing(kwargs, kwarg_list):
-    print(kwargs)
     new_kwargs = copy.deepcopy(kwargs)
     for kwarg in kwarg_list:
         if not kwarg in new_kwargs:
@@ -228,3 +227,16 @@ class BulletListContentBlock(ContentBlock):
                     "template": "Values in $column_A must be greater than or equal to those in $column_B at least $mostly % of the time.",
                     "params": params
                 }]
+
+    @classmethod
+    def expect_table_columns_to_match_ordered_list(cls, expectation):
+        params = substitute_none_for_missing(
+            expectation["kwargs"],
+            ["column_list"]
+        )
+
+        params["column_list_str"] = ", ".join(params["column_list"])
+        return [{
+            "template": "This table should have these columns in this order: $column_list_str",
+            "params": params
+        }]
