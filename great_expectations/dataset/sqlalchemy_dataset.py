@@ -355,6 +355,12 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         ntile_val_list[-1] = ntile_vals[-1][1]
         return ntile_val_list
 
+    def get_column_stdev(self, column):
+        res = self.engine.execute(sa.select([
+                sa.func.stddev_samp(sa.column(column))
+            ]).select_from(self._table).where(sa.column(column) != None)).fetchone()
+        return float(res[0])
+
     def get_column_hist(self, column, bins):
         # TODO: this is **terribly** inefficient; consider refactor
         """return a list of counts corresponding to bins"""

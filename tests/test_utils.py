@@ -229,10 +229,14 @@ def get_dataset(dataset_type, data, schemas=None, profiler=ColumnsExistProfiler,
         raise ValueError("Unknown dataset_type " + str(dataset_type))
 
 def candidate_getter_is_on_temporary_notimplemented_list(context, getter):
-    if context in ["sqlite", "postgresql", "mysql"]:
+    if context in ["sqlite"]:
         return getter in [
             'get_column_modes',
-            'get_column_stdev',
+            'get_column_stdev'
+        ]
+    if context in ["postgresql", "mysql"]:
+        return getter in [
+            'get_column_modes'
         ]
     if context == 'SparkDFDataset':
         return getter in []
