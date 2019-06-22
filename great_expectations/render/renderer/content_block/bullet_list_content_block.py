@@ -4,6 +4,19 @@ from .content_block import ContentBlock
 
 
 def substitute_none_for_missing(kwargs, kwarg_list):
+    """Utility function to plug Nones in when optional parameters are not specified in expectation kwargs.
+
+    Example:
+        Input:
+            kwargs={"a":1, "b":2},
+            kwarg_list=["c", "d"]
+
+        Output: {"a":1, "b":2, "c": None, "d": None}
+
+    This is helpful for standardizing the input objects for rendering functions.
+    The alternative is lots of awkward `if "some_param" not in kwargs or kwargs["some_param"] == None:` clauses in renderers.
+    """
+
     new_kwargs = copy.deepcopy(kwargs)
     for kwarg in kwarg_list:
         if not kwarg in new_kwargs:
@@ -14,6 +27,7 @@ def substitute_none_for_missing(kwargs, kwarg_list):
 class BulletListContentBlock(ContentBlock):
     _content_block_type = "bullet_list"
 
+    # Note: I don't think we should include `column_name`, since it'll already be present in the expectation object.
     @classmethod
     def expect_column_to_exist(cls, expectation, column_name=""):
         params = substitute_none_for_missing(
@@ -28,13 +42,14 @@ class BulletListContentBlock(ContentBlock):
             }]
 
         else:
-            #!!! FIXME:
+            #!!! FIXME: this works for 4th, 5th, 6th, etc, but is dumb about 1th, 2th, and 3th.
             params["column_indexth"] = str(params["column_index"])+"th"
             return [{
                 "template": "$column must be the $column_indexth field.",
                 "params": params,
             }]
 
+    # Abe 2019/06/22: I haven't touched this method. It still uses old conventions that I think should be deprecated.
     @classmethod
     def expect_column_value_lengths_to_be_between(cls, expectation, column_name=""):
         if (expectation["kwargs"]["min_value"] is None) and (expectation["kwargs"]["max_value"] is None):
@@ -100,6 +115,7 @@ class BulletListContentBlock(ContentBlock):
                     }
                 }]
 
+    # Abe 2019/06/22: I haven't touched this method. It still uses old conventions that I think should be deprecated.
     @classmethod
     def expect_column_unique_value_count_to_be_between(cls, expectation, column_name=""):
         if (expectation["kwargs"]["min_value"] is None) and (expectation["kwargs"]["max_value"] is None):
@@ -134,6 +150,8 @@ class BulletListContentBlock(ContentBlock):
                 }
             }]
 
+    # NOTE: This method is a pretty good example of good usage of `params`.
+    # NOTE: I think `column_name` should be deprecated.
     @classmethod
     def expect_column_values_to_be_between(cls, expectation, column_name=""):
         params = substitute_none_for_missing(
@@ -142,7 +160,25 @@ class BulletListContentBlock(ContentBlock):
         )
 
         if (params["min_value"] is None) and (params["max_value"] is None):
-            #!!! Not sure why we're using a different pattern for templating column names...
+            # Note: I'm not sure why we're using a different pattern for templating column names...
+            # This would probably be better as `"$column has a bogus $expectation_name expectation.",`
+
+            # Related issue: are we going to want to allow for different styles of parameters?
+            # For example, I could imagine wanting one color of syntax highlighting for variable names,
+            # and a different color for expectations.
+            # In that case, perhaps returning something like this would work?
+            # {
+            #     "template": "$column has a bogus $expectation_name expectation.",
+            #     "params": {
+            #         "column": "my_column",
+            #         "expectation_name": "expect_column_values_to_be_between",
+            #     },
+            #     "param_types": {
+            #         "column": "variable"
+            #         "expectation_name": "expectation"
+            #     }
+            # }
+            # Thoughtfully enumerating values for the param_types k/v object will be important.
             return [{
                 "template": column_name + " has a bogus $expectation_name expectation.",
                 "params": {
@@ -237,6 +273,8 @@ class BulletListContentBlock(ContentBlock):
                 "ignore_row_if", "mostly", ]
         )
 
+        # NOTE: This renderer doesn't do anything with "ignore_row_if"
+
         if (params["column_A"] is None) or (params["column_B"] is None):
             # FIXME: this string is wrong
             return [{
@@ -253,8 +291,11 @@ class BulletListContentBlock(ContentBlock):
             }]
 
         else:
+            # Note: this pattern for type conversion seems to work reasonably well.
+            # Note: I'm not 100% sure that this is the right place to encode details like how many decimals to show.
+            params["mostly_pct"] = ".1f" % (params["mostly"]*100)
             return [{
-                "template": "Values in $column_A and $column_B must be equal at least $mostly % of the time.",
+                "template": "Values in $column_A and $column_B must be equal at least $mostly_pct % of the time.",
                 "params": params
             }]
 
@@ -265,6 +306,8 @@ class BulletListContentBlock(ContentBlock):
             ["column_list"]
         )
 
+        # FIXME: This is slightly wrong, since the whole string (including commas) will get syntax highlighting.
+        # It would be better to have each element highlighted separately, but I need to research methods to do this elegantly.
         params["column_list_str"] = ", ".join(params["column_list"])
         return [{
             "template": "This table should have these columns in this order: $column_list_str",
@@ -278,6 +321,8 @@ class BulletListContentBlock(ContentBlock):
             ["column_list", "ignore_row_if"]
         )
 
+        # FIXME: This is slightly wrong, since the whole string (including commas) will get syntax highlighting.
+        # It would be better to have each element highlighted separately, but I need to research methods to do this elegantly.
         params["column_list_str"] = ", ".join(params["column_list"])
         return [{
             "template": "Values must always be unique across columns: $column_list_str",
@@ -308,3 +353,40 @@ class BulletListContentBlock(ContentBlock):
                 "template": "Must have more than $min_value rows.",
                 "params": params
             }]
+
+    @classmethod
+    def expect_table_row_count_to_be_between(cls, expectation):
+        params = substitute_none_for_missing(
+            expectation["kwargs"],
+            ["min_value", "max_value"]
+        )
+
+        if params["min_value"] is not None and params["max_value"] is not None:
+            return [{
+                "template": "Must have between $min_value and $max_value rows.",
+                "params": params
+            }]
+
+        elif params["min_value"] is None:
+            return [{
+                "template": "Must have less than than $max_value rows.",
+                "params": params
+            }]
+
+        elif params["max_value"] is None:
+            return [{
+                "template": "Must have more than $min_value rows.",
+                "params": params
+            }]
+
+    @classmethod
+    def expect_table_row_count_to_equal(cls, expectation):
+        params = substitute_none_for_missing(
+            expectation["kwargs"],
+            ["value"]
+        )
+
+        return [{
+            "template": "Must have exactly $value rows.",
+            "params": params
+        }]
