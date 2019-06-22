@@ -342,17 +342,45 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         inner = sa.select([
                 sa.column(column),
-                sa.func.ntile(len(ntiles)).over(order_by=sa.column(column)).label("ntile")
+                sa.func.ntile(len(ntiles)-1).over(order_by=sa.column(column)).label("ntile")
             ]).select_from(self._table).where(sa.column(column) != None).alias("ntiles")
         ntiles_query = sa.select([
             sa.func.min(sa.column(column)),
             sa.func.max(sa.column(column)),
+            sa.func.count(column),
             sa.column("ntile")
         ]).select_from(inner).group_by(sa.column("ntile")).order_by(sa.column("ntile"))
 
         ntile_vals = self.engine.execute(ntiles_query).fetchall()
-        ntile_val_list = [ntile_val[0] for ntile_val in ntile_vals]
-        ntile_val_list[-1] = ntile_vals[-1][1]
+
+        # We can be more precise by using the count to get the "nearest" interpolation
+        # method used in numpy / pandas
+        # Always include the min of the first bin (the 0th percentile)
+        ntile_val_list = [ntile_vals[0][0]]
+        max_is_closer = (len(ntile_val_list) % 2 == 1)
+        for idx in range(len(ntile_vals) - 1):
+            bin_count = ntile_vals[idx][2]
+            next_bin_count = ntile_vals[idx+1][2]
+            if bin_count > next_bin_count:
+                max_is_closer = True
+            elif bin_count < next_bin_count:
+                max_is_closer = False
+                continue
+
+            if max_is_closer:
+                ntile_val_list.append(ntile_vals[idx][1]) # Append *max* of *this* bin
+            else:
+                ntile_val_list.append(ntile_vals[idx+1][0]) # Append *min* of *next* bin
+
+        # Below (commented out) alternative is simpler (no interpolation) logic
+        # ntile_val_list = [ntile_val[0] for ntile_val in ntile_vals]
+
+        # If we ended having taken max of last, we need min of the last bin as well
+        if not max_is_closer:
+            ntile_val_list.append(ntile_vals[-1][0])
+
+        # Always include the max of the last bin (the 100th percentile)
+        ntile_val_list.append(ntile_vals[-1][1])
         return ntile_val_list
 
     def get_column_stdev(self, column):

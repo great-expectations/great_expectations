@@ -26,7 +26,7 @@
             },
             "out": {
               "success": true,
-              "observed_value": [-3.401968681942055, 3.585407817418151]
+              "observed_value": [-3.40197, 3.58541]
             },
             "tolerance": 0.1,
             "_note": "The large tolerance here documents implementation differences between pandas, sql, and spark wrt interpolation behavior / specific ntile calculation"
@@ -40,7 +40,7 @@
             },
             "out": {
               "success": true,
-              "observed_value": [-3.401968681942055, -0.7002520937780202, -0.03871410517044196, 0.6211562156677246, 3.585407817418151]
+              "observed_value": [-3.40197, -0.70025, -0.03871, 0.62116, 3.58541]
             },
             "tolerance": 0.1,
             "_note": "The large tolerance here documents implementation differences between pandas, sql, and spark wrt interpolation behavior / specific ntile calculation"
