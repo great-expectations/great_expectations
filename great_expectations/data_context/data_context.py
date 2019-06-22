@@ -60,10 +60,12 @@ class DataContext(object):
                 template.write(PROJECT_TEMPLATE)
 
         return cls(context_root_dir)
-            
+        
     def __init__(self, context_root_dir=None, expectation_explorer=False, data_asset_name_delimiter = '/'):
         self._expectation_explorer = expectation_explorer
         self._datasources = {}
+
+        #TODO: add method to toggle expectation_explorer
         if expectation_explorer:
             self._expectation_explorer_manager = ExpectationExplorer()
         # determine the "context root directory" - this is the parent of "great_expectations" dir
