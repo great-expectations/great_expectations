@@ -4,6 +4,7 @@ from .content_block import ContentBlock
 
 
 def substitute_none_for_missing(kwargs, kwarg_list):
+    print(kwargs)
     new_kwargs = copy.deepcopy(kwargs)
     for kwarg in kwarg_list:
         if not kwarg in new_kwargs:
@@ -16,10 +17,24 @@ class BulletListContentBlock(ContentBlock):
 
     @classmethod
     def expect_column_to_exist(cls, expectation, column_name=""):
-        return [{
-            "template": column_name + " is a required field.",
-            "params": {}
-        }]
+        params = substitute_none_for_missing(
+            expectation["kwargs"],
+            ["column", "column_index"],
+        )
+
+        if params["column_index"] == None:
+            return [{
+                "template": "$column is a required field.",
+                "params": params,
+            }]
+
+        else:
+            #!!! FIXME:
+            params["column_indexth"] = str(params["column_index"])+"th"
+            return [{
+                "template": "$column must be the $column_indexth field.",
+                "params": params,
+            }]
 
     @classmethod
     def expect_column_value_lengths_to_be_between(cls, expectation, column_name=""):

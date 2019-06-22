@@ -1,21 +1,22 @@
 {
   "expectation_type": "expect_column_to_exist",
-  "datasets":[
+  "datasets": [
     {
-      "data": {"b": [1, 2, 3, 4]},
-      "tests":
-        [{
+      "data": { "b": [1, 2, 3, 4] },
+      "tests": [
+        {
           "title": "This test should never run!",
           "exact_match_out": false,
           "suppress_test_for": ["pandas", "sqlalchemy", "spark"],
-          "in": ["a"],
-          "kwargs": {},
+          "in": { "column": "a" },
           "out": {
             "success": true,
-            "meta":{
+            "meta": {
               "notes": "If successful, this test will NOT be executed."
             }
           }
-        }]
-      }
-    ]}
+        }
+      ]
+    }
+  ]
+}
