@@ -2765,17 +2765,17 @@ class Dataset(MetaDataset):
         na_counts = test_df.isnull().sum()
 
         # Handle NaN: if we expected something that's not there, it's just not there.
-        test_df[column] = test_df[column].fillna(0)
+        test_df["count"] = test_df["count"].fillna(0)
         # Handle NaN: if something's there that was not expected, substitute the relevant value for tail_weight_holdout
-        if na_counts['expected'] > 0:
+        if na_counts["expected"] > 0:
             # Scale existing expected values
-            test_df['expected'] = test_df['expected'] * (1 - tail_weight_holdout)
+            test_df["expected"] = test_df["expected"] * (1 - tail_weight_holdout)
             # Fill NAs with holdout.
-            test_df['expected'] = test_df['expected'].fillna(
-                element_count * (tail_weight_holdout / na_counts['expected']))
+            test_df["expected"] = test_df["expected"].fillna(
+                element_count * (tail_weight_holdout / na_counts["expected"]))
 
         test_result = stats.chisquare(
-            test_df[column], test_df['expected'])[1]
+            test_df["count"], test_df["expected"])[1]
 
         return {
             "success": test_result > p,
@@ -2784,11 +2784,11 @@ class Dataset(MetaDataset):
                 "details": {
                     "observed_partition": {
                         "values": test_df.index.tolist(),
-                        "weights": test_df[column].tolist()
+                        "weights": test_df["count"].tolist()
                     },
                     "expected_partition": {
                         "values": test_df.index.tolist(),
-                        "weights": test_df['expected'].tolist()
+                        "weights": test_df["expected"].tolist()
                     }
                 }
             }
@@ -3028,7 +3028,7 @@ class Dataset(MetaDataset):
             na_counts = test_df.isnull().sum()
 
             # Handle NaN: if we expected something that's not there, it's just not there.
-            pk = test_df[column].fillna(0)
+            pk = test_df["count"].fillna(0)
             # Handle NaN: if something's there that was not expected, substitute the relevant value for tail_weight_holdout
             if na_counts['expected'] > 0:
                 # Scale existing expected values
