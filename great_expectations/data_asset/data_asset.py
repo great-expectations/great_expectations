@@ -63,6 +63,10 @@ class DataAsset(object):
     def profile(self, profiler):
         profiler.profile(self)
 
+    #TODO: add warning if no expectation_explorer_manager and how to turn on
+    def edit_expectation_suite(self):
+        return self._data_context._expectation_explorer_manager.edit_expectation_suite(self)
+
     @classmethod
     def expectation(cls, method_arg_names):
         """Manages configuration and running of expectation objects.
@@ -760,6 +764,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         else:
             raise ValueError("Unable to save config: filepath or data_context must be available.")
 
+    #TODO: when validate is called and expectation editor is in data_context, need to bypass widget creation
     def validate(self, 
                  expectation_suite=None, 
                  run_id=None,
@@ -894,6 +899,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
                 result = expectation_method(
                     catch_exceptions=catch_exceptions,
+                    include_config=True,
                     **evaluation_args
                 )
 
