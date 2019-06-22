@@ -197,6 +197,7 @@ class BulletListContentBlock(ContentBlock):
         )
 
         if (params["column_A"] is None) or (params["column_B"] is None):
+            # FIXME: this string is wrong
             return [{
                 "template": " has a bogus $expectation_name expectation.",
                 "params": {
@@ -227,6 +228,35 @@ class BulletListContentBlock(ContentBlock):
                     "template": "Values in $column_A must be greater than or equal to those in $column_B at least $mostly % of the time.",
                     "params": params
                 }]
+
+    @classmethod
+    def expect_column_pair_values_to_be_equal(cls, expectation):
+        params = substitute_none_for_missing(
+            expectation["kwargs"],
+            ["column_A", "column_B",
+                "ignore_row_if", "mostly", ]
+        )
+
+        if (params["column_A"] is None) or (params["column_B"] is None):
+            # FIXME: this string is wrong
+            return [{
+                "template": " has a bogus $expectation_name expectation.",
+                "params": {
+                    "expectation_name": "expect_column_pair_values_to_be_equal"
+                }
+            }]
+
+        if params["mostly"] == None:
+            return [{
+                "template": "Values in $column_A and $column_B must always be equal.",
+                "params": params
+            }]
+
+        else:
+            return [{
+                "template": "Values in $column_A and $column_B must be equal at least $mostly % of the time.",
+                "params": params
+            }]
 
     @classmethod
     def expect_table_columns_to_match_ordered_list(cls, expectation):
