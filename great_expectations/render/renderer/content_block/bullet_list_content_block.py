@@ -6,7 +6,10 @@ class BulletListContentBlock(ContentBlock):
 
     @classmethod
     def expect_column_to_exist(cls, expectation, column_name=""):
-        return [column_name + " is a required field."]
+        return [{
+            "template": column_name + " is a required field.",
+            "params": {}
+        }]
 
     @classmethod
     def expect_column_value_lengths_to_be_between(cls, expectation, column_name=""):
