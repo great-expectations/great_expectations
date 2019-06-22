@@ -270,3 +270,16 @@ class BulletListContentBlock(ContentBlock):
             "template": "This table should have these columns in this order: $column_list_str",
             "params": params
         }]
+
+    @classmethod
+    def expect_multicolumn_values_to_be_unique(cls, expectation):
+        params = substitute_none_for_missing(
+            expectation["kwargs"],
+            ["column_list", "ignore_row_if"]
+        )
+
+        params["column_list_str"] = ", ".join(params["column_list"])
+        return [{
+            "template": "Values must always be unique across columns: $column_list_str",
+            "params": params
+        }]
