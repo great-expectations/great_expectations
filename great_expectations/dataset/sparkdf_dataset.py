@@ -23,7 +23,7 @@ from scipy import stats
 logger = logging.getLogger(__name__)
 
 try:
-    from pyspark.sql.functions import udf, col, stddev as stddev_
+    from pyspark.sql.functions import udf, col, stddev_samp
     import pyspark.sql.types as sparktypes
 except ImportError as e:
     logger.debug(str(e))
@@ -250,7 +250,7 @@ class SparkDFDataset(MetaSparkDFDataset):
         return self.spark_df.approxQuantile(column, list(ntiles), 0)
 
     def get_column_stdev(self, column):
-        return self.spark_df.select(stddev_(col(column))).collect()[0][0]
+        return self.spark_df.select(stddev_samp(col(column))).collect()[0][0]
 
     def get_column_hist(self, column, bins):
         """return a list of counts corresponding to bins"""
