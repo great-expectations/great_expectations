@@ -288,8 +288,7 @@ class BulletListContentBlock(ContentBlock):
     def expect_table_row_count_to_be_between(cls, expectation):
         params = substitute_none_for_missing(
             expectation["kwargs"],
-            ["column_A", "column_B", "parse_strings_as_datetimes",
-                "ignore_row_if", "mostly", "or_equal"]
+            ["min_value", "max_value"]
         )
 
         if params["min_value"] is not None and params["max_value"] is not None:
