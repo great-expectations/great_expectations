@@ -5,8 +5,9 @@ import json
 
 
 def test_all_expectations_using_test_definitions():
-
-    test_files = glob.glob("tests/test_definitions/*/expect*.json")
+    test_files = glob.glob(
+        "tests/test_definitions/*/expect_*.json"
+    )
 
     all_true = True
     failure_count, total_count = 0, 0
@@ -28,10 +29,12 @@ def test_all_expectations_using_test_definitions():
                         fake_expectation)
 
                     assert render_result != None
-                    assert set(render_result.keys()) == set(
-                        'template', 'params')
+                    assert type(render_result) == list
+                    for el in render_result:
+                        assert set(el.keys()) == {
+                            'template', 'params'}
 
-                except:
+                except AssertionError:
                     print(fake_expectation)
                     all_true = False
                     failure_count += 1
