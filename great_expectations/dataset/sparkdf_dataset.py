@@ -246,6 +246,9 @@ class SparkDFDataset(MetaSparkDFDataset):
         result = self.spark_df.approxQuantile(column, [0.5, 0.5 + (1 / (2 + (2 * self.get_row_count())))], 0)
         return np.mean(result)
 
+    def get_column_ntiles(self, column, ntiles):
+        return self.spark_df.approxQuantile(column, list(ntiles), 0)
+
     def get_column_stdev(self, column):
         return self.spark_df.select(stddev_(col(column))).collect()[0][0]
 
