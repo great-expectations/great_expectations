@@ -1,4 +1,14 @@
+import copy
+
 from .content_block import ContentBlock
+
+
+def substitute_none_for_missing(kwargs, kwarg_list):
+    new_kwargs = copy.deepcopy(kwargs)
+    for kwarg in kwarg_list:
+        if not kwarg in new_kwargs:
+            new_kwargs[kwarg] = None
+    return new_kwargs
 
 
 class BulletListContentBlock(ContentBlock):
@@ -112,7 +122,13 @@ class BulletListContentBlock(ContentBlock):
 
     @classmethod
     def expect_column_values_to_be_between(cls, expectation, column_name=""):
-        if (expectation["kwargs"]["min_value"] is None) and (expectation["kwargs"]["max_value"] is None):
+        params = substitute_none_for_missing(
+            expectation["kwargs"],
+            ["column", "min_value", "max_value", "mostly"]
+        )
+
+        if (params["min_value"] is None) and (params["max_value"] is None):
+            #!!! Not sure why we're using a different pattern for templating column names...
             return [{
                 "template": column_name + " has a bogus $expectation_name expectation.",
                 "params": {
@@ -120,57 +136,40 @@ class BulletListContentBlock(ContentBlock):
                 }
             }]
 
-        if "mostly" in expectation["kwargs"]:
-            if expectation["kwargs"]["min_value"] is not None and expectation["kwargs"]["max_value"] is not None:
+        if "mostly" in params:
+            if params["min_value"] is not None and params["max_value"] is not None:
                 return [{
                     "template": column_name + " must be between $min and $max at least $mostly% of the time.",
-                    "params": {
-                        "min": expectation["kwargs"]["min_value"],
-                        "max": expectation["kwargs"]["max_value"],
-                        "mostly": expectation["kwargs"]["mostly"]
-                    }
+                    "params": params
                 }]
 
-            elif expectation["kwargs"]["min_value"] is None:
+            elif params["min_value"] is None:
                 return [{
                     "template": column_name + " must be less than $max at least $mostly% of the time.",
-                    "params": {
-                        "max": expectation["kwargs"]["max_value"],
-                        "mostly": expectation["kwargs"]["mostly"]
-                    }
+                    "params": params
                 }]
 
-            elif expectation["kwargs"]["max_value"] is None:
+            elif params["max_value"] is None:
                 return [{
                     "template": column_name + " must be more than $min at least $mostly% of the time.",
-                    "params": {
-                        "min": expectation["kwargs"]["min_value"],
-                        "mostly": expectation["kwargs"]["mostly"]
-                    }
+                    "params": params
                 }]
 
         else:
-            if expectation["kwargs"]["min_value"] is not None and expectation["kwargs"]["max_value"] is not None:
+            if params["min_value"] is not None and params["max_value"] is not None:
                 return [{
                     "template": column_name + " must always be between $min and $max.",
-                    "params": {
-                        "min": expectation["kwargs"]["min_value"],
-                        "max": expectation["kwargs"]["max_value"]
-                    }
+                    "params": params
                 }]
 
-            elif expectation["kwargs"]["min_value"] is None:
+            elif params["min_value"] is None:
                 return [{
                     "template": column_name + " must always be less than $max.",
-                    "params": {
-                        "max": expectation["kwargs"]["max_value"]
-                    }
+                    "params": params
                 }]
 
-            elif expectation["kwargs"]["max_value"] is None:
+            elif params["max_value"] is None:
                 return [{
                     "template": column_name + " must always be more than $min.",
-                    "params": {
-                        "min": expectation["kwargs"]["min_value"]
-                    }
+                    "params": params
                 }]
