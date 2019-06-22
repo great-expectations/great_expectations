@@ -344,7 +344,11 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         return len(nonnull_values)
 
     def get_column_value_counts(self, column):
-        return self[column].value_counts()
+        cnts =  self[column].value_counts()
+        cnts.sort_index(inplace=True)
+        cnts.name = "count"
+        cnts.index.name = "value"
+        return cnts
 
     def get_column_unique_count(self, column):
         return self.get_column_value_counts(column).shape[0]

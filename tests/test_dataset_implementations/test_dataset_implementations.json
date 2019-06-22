@@ -151,30 +151,68 @@
             "expected": 3
         },
         {
+            "_note": "this test tests the value of this method *after serialization* see python test_get_column_value_counts for series test",
             "func": "get_column_value_counts",
             "dataset": "d2",
             "kwargs": {
                 "column": "b"
             },
-            "expected": {
-                "a": 1,
-                "b": 2,
-                "c": 3,
-                "d": 4
-            }
+            "expected": [
+                {
+                    "value": "a",
+                    "count": 1
+                },
+                {
+                    "value": "b",
+                    "count": 2
+                },
+                {
+                    "value": "c",
+                    "count": 3
+                },
+                {
+                    "value": "d",
+                    "count": 4
+                }
+            ]
         },
         {
+            "_note": "this test tests the value of this method *after serialization* see python test_get_column_value_counts for series test",
             "func": "get_column_value_counts",
             "dataset": "d2",
             "kwargs": {
                 "column": "c"
             },
-            "expected": {
-                "a": 1,
-                "b": 2,
-                "c": 3,
-                "d": 1
-            }
+            "expected": [
+                {
+                    "value": "a",
+                    "count": 1
+                },
+                {
+                    "value": "b",
+                    "count": 2
+                },
+                {
+                    "value": "c",
+                    "count": 3
+                },
+                {
+                    "value": "d",
+                    "count": 1
+                }
+            ]
+        },
+        {
+            "_note": "this test tests the value of this method *after serialization* see python test_get_column_value_counts for series test",
+            "func": "get_column_value_counts",
+            "dataset": "d1",
+            "kwargs": {
+                "column": "y"
+            },
+            "expected": [{
+                "value": 5,
+                "count": 2
+            }]
         },
         {
             "func": "get_column_max",

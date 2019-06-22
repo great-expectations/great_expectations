@@ -184,8 +184,8 @@ def render(render_object):
     with open(render_object, "r") as infile:
         raw = json.load(infile)
 
-    # model = DescriptivePageRenderer.render(raw)
-    model = PrescriptivePageRenderer.render(raw)
+    model = DescriptivePageRenderer.render(raw)
+    # model = PrescriptivePageRenderer.render(raw)
     print(DescriptivePageView.render(model))
 
 

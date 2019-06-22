@@ -94,7 +94,7 @@ class BasicDatasetProfiler(DatasetProfiler):
 
             type_ = cls._get_column_type(df, column)
             cardinality= cls._get_column_cardinality(df, column)
-            df.expect_column_values_to_not_be_null(column, mostly=0.0)
+            df.expect_column_values_to_not_be_null(column, mostly=0)
             df.expect_column_values_to_be_in_set(
                 column, [], result_format="SUMMARY")
 
