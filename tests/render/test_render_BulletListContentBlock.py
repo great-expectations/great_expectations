@@ -6,7 +6,7 @@ import json
 
 def test_all_expectations_using_test_definitions():
     test_files = glob.glob(
-        "tests/test_definitions/*/expect_*.json"
+        "tests/test_definitions/*/expect*.json"
     )
 
     all_true = True
@@ -27,6 +27,7 @@ def test_all_expectations_using_test_definitions():
                 try:
                     render_result = BulletListContentBlock.render(
                         fake_expectation)
+                    print(render_result)
 
                     assert render_result != None
                     assert type(render_result) == list
