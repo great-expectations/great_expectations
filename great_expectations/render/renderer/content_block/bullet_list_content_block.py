@@ -173,3 +173,43 @@ class BulletListContentBlock(ContentBlock):
                     "template": column_name + " must always be more than $min.",
                     "params": params
                 }]
+
+    @classmethod
+    def expect_column_pair_values_A_to_be_greater_than_B(cls, expectation):
+        params = substitute_none_for_missing(
+            expectation["kwargs"],
+            ["column_A", "column_B", "parse_strings_as_datetimes",
+                "ignore_row_if", "mostly", "or_equal"]
+        )
+
+        if (params["column_A"] is None) or (params["column_B"] is None):
+            return [{
+                "template": " has a bogus $expectation_name expectation.",
+                "params": {
+                    "expectation_name": "expect_column_pair_values_A_to_be_greater_than_B"
+                }
+            }]
+
+        if params["mostly"] == None:
+            if params["or_equal"] in [None, False]:
+                return [{
+                    "template": "Values in $column_A must always be greater than those in $column_B.",
+                    "params": params
+                }]
+            else:
+                return [{
+                    "template": "Values in $column_A must always be greater than or equal to those in $column_B.",
+                    "params": params
+                }]
+
+        else:
+            if params["or_equal"] in [None, False]:
+                return [{
+                    "template": "Values in $column_A must be greater than those in $column_B at least $mostly % of the time.",
+                    "params": params
+                }]
+            else:
+                return [{
+                    "template": "Values in $column_A must be greater than or equal to those in $column_B at least $mostly % of the time.",
+                    "params": params
+                }]
