@@ -2212,6 +2212,7 @@ class Dataset(MetaDataset):
                                          result_format=None, include_config=False, catch_exceptions=None, meta=None
                                          ):
         """Expect the column standard deviation to be between a minimum value and a maximum value.
+        Uses sample standard deviation (normalized by N-1).
 
         expect_column_stdev_to_be_between is a :func:`column_aggregate_expectation <great_expectations.data_asset.dataset.Dataset.column_aggregate_expectation>`.
 
