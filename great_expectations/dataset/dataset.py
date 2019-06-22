@@ -1683,13 +1683,22 @@ class Dataset(MetaDataset):
               "result": {
                 "observed_value": [1,2,3],
                 "details": {
-                    "value_counts": {
-                        "1": 1,
-                        "2": 2,
-                        "3": 3
+                  "value_counts": [
+                    {
+                      "value": 1,
+                      "count": 1
+                    },
+                    {
+                      "value": 2,
+                      "count": 1
+                    },
+                    {
+                      "value": 3,
+                      "count": 1
                     }
+                  ]
                 }
-              },
+              }
             }
 
         expect_column_distinct_values_to_be_in_set is a :func:`column_aggregate_expectation <great_expectations.data_asset.dataset.Dataset.column_aggregate_expectation>`.
