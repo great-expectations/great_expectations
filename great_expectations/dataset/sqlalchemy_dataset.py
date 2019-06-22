@@ -342,7 +342,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         inner = sa.select([
                 sa.column(column),
-                sa.func.ntile(len(ntiles)-1).over(order_by=sa.column(column)).label("ntile")
+                sa.func.ntile(len(ntiles)).over(order_by=sa.column(column)).label("ntile")
             ]).select_from(self._table).where(sa.column(column) != None).alias("ntiles")
         ntiles_query = sa.select([
             sa.func.min(sa.column(column)),
@@ -351,7 +351,8 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         ]).select_from(inner).group_by(sa.column("ntile")).order_by(sa.column("ntile"))
 
         ntile_vals = self.engine.execute(ntiles_query).fetchall()
-        ntile_val_list = [ntile_val[0] for ntile_val in ntile_vals] + [ntile_vals[-1][1]]
+        ntile_val_list = [ntile_val[0] for ntile_val in ntile_vals]
+        ntile_val_list[-1] = ntile_vals[-1][1]
         return ntile_val_list
 
     def get_column_hist(self, column, bins):
