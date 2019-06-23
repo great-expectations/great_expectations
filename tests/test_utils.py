@@ -229,15 +229,17 @@ def get_dataset(dataset_type, data, schemas=None, profiler=ColumnsExistProfiler,
         raise ValueError("Unknown dataset_type " + str(dataset_type))
 
 def candidate_getter_is_on_temporary_notimplemented_list(context, getter):
-    if context in ["sqlite", "postgresql", "mysql"]:
+    if context in ["sqlite"]:
         return getter in [
             'get_column_modes',
-            'get_column_stdev',
+            'get_column_stdev'
+        ]
+    if context in ["postgresql", "mysql"]:
+        return getter in [
+            'get_column_modes'
         ]
     if context == 'SparkDFDataset':
-        return getter in [
-            'get_column_median',
-        ]
+        return getter in []
 
 def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type):
     if context in ["sqlite", "postgresql", "mysql"]:
@@ -269,8 +271,9 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
             "expect_column_values_to_be_dateutil_parseable",
             "expect_column_values_to_be_json_parseable",
             "expect_column_values_to_match_json_schema",
-            #"expect_column_mean_to_be_between",
-            #"expect_column_median_to_be_between",
+            # "expect_column_mean_to_be_between",
+            # "expect_column_median_to_be_between",
+            # "expect_column_ntiles_to_be_between",
             "expect_column_stdev_to_be_between",
             #"expect_column_unique_value_count_to_be_between",
             #"expect_column_proportion_of_unique_values_to_be_between",
@@ -317,7 +320,8 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
             "expect_column_values_to_be_json_parseable",
             "expect_column_values_to_match_json_schema",
             # "expect_column_mean_to_be_between",
-            "expect_column_median_to_be_between",
+            # "expect_column_median_to_be_between",            
+            # "expect_column_ntiles_to_be_between",
             # "expect_column_stdev_to_be_between",
             # "expect_column_unique_value_count_to_be_between",
             # "expect_column_proportion_of_unique_values_to_be_between",

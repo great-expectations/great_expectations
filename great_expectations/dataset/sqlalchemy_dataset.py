@@ -10,6 +10,7 @@ from datetime import datetime
 from importlib import import_module
 
 import pandas as pd
+import numpy as np
 
 from dateutil.parser import parse
 
@@ -328,6 +329,70 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             # An odd number of column values, we can just take the center value
             column_median = column_values[1][0]  # True center value
         return column_median
+
+    def get_column_ntiles(self, column, ntiles):
+        expected_ntiles = np.linspace(0, 1, len(ntiles))
+        if not np.allclose(expected_ntiles, ntiles):
+            raise ValueError("For SqlAlchemy requested ntiles must be evenly spaced.")
+
+        # For sql, our logic works as follows:
+        #   First, we divide the values into n_ntiles - 1 groups (corresponding to the ranges
+        #   logically between (inclusive) each of the requested ntiles).
+        #   Next, we take the minimum and maximum of each range, and return the minimum for all ranges
+        #   *and* the maximum of the last range.
+
+        # To correspond more closely to interpolation='nearest' in pandas, 
+        # we would need to determine whether the min or max of ntile_k is closer to the true
+        # break point then choose that one.
+
+        inner = sa.select([
+                sa.column(column),
+                sa.func.ntile(len(ntiles)-1).over(order_by=sa.column(column)).label("ntile")
+            ]).select_from(self._table).where(sa.column(column) != None).alias("ntiles")
+        ntiles_query = sa.select([
+            sa.func.min(sa.column(column)),
+            sa.func.max(sa.column(column)),
+            sa.func.count(column),
+            sa.column("ntile")
+        ]).select_from(inner).group_by(sa.column("ntile")).order_by(sa.column("ntile"))
+
+        ntile_vals = self.engine.execute(ntiles_query).fetchall()
+
+        # We can be more precise by using the count to get the "nearest" interpolation
+        # method used in numpy / pandas
+        # Always include the min of the first bin (the 0th percentile)
+        ntile_val_list = [ntile_vals[0][0]]
+        max_is_closer = (len(ntile_val_list) % 2 == 1)
+        for idx in range(len(ntile_vals) - 1):
+            bin_count = ntile_vals[idx][2]
+            next_bin_count = ntile_vals[idx+1][2]
+            if bin_count > next_bin_count:
+                max_is_closer = True
+            elif bin_count < next_bin_count:
+                max_is_closer = False
+                continue
+
+            if max_is_closer:
+                ntile_val_list.append(ntile_vals[idx][1]) # Append *max* of *this* bin
+            else:
+                ntile_val_list.append(ntile_vals[idx+1][0]) # Append *min* of *next* bin
+
+        # Below (commented out) alternative is simpler (no interpolation) logic
+        # ntile_val_list = [ntile_val[0] for ntile_val in ntile_vals]
+
+        # If we ended having taken max of last, we need min of the last bin as well
+        if not max_is_closer:
+            ntile_val_list.append(ntile_vals[-1][0])
+
+        # Always include the max of the last bin (the 100th percentile)
+        ntile_val_list.append(ntile_vals[-1][1])
+        return ntile_val_list
+
+    def get_column_stdev(self, column):
+        res = self.engine.execute(sa.select([
+                sa.func.stddev_samp(sa.column(column))
+            ]).select_from(self._table).where(sa.column(column) != None)).fetchone()
+        return float(res[0])
 
     def get_column_hist(self, column, bins):
         # TODO: this is **terribly** inefficient; consider refactor
