@@ -218,7 +218,7 @@ class ExpectationExplorer(object):
             lambda current_widget_dict, ge_kwarg_value: setattr(current_widget_dict['kwarg_widget'], 'value', ge_kwarg_value)
         )(current_widget_dict, new_ge_kwarg_value)
 
-    def update_expectation_state(self, existing_expectation_state, expectation_validation_result):
+    def update_expectation_state(self, existing_expectation_state, expectation_validation_result, validation_time):
         expectation_editor_widget = existing_expectation_state.get(
             'editor_widget')
         new_ge_expectation_kwargs = expectation_validation_result['expectation_config']['kwargs']
@@ -253,6 +253,9 @@ class ExpectationExplorer(object):
                     widget_dict['kwarg_widget'],)
 
         self.update_result(data_asset_name=data_asset_name, new_result=expectation_validation_result, column=column)
+        # TODO: This is messy. Figure out better way of storing/accessing UI elements
+        validation_time_widget = expectation_editor_widget.children[0].children[0].children[0].children[-1]
+        validation_time_widget.value = f'<div><strong>Date/Time Validated (UTC): </strong>{validation_time}</div>'
         return expectation_editor_widget
 
     # widget generators for general input fields
@@ -1289,23 +1292,29 @@ class ExpectationExplorer(object):
         return widgets.HTML(value=f'<span><strong>Expectation Type: </strong>{expectation_type}</span>')
 
     def generate_basic_expectation_info_box(
-        self, expectation_type, success_widget, column=None):
+        self, data_asset_name, expectation_type, success_widget, validation_time, column=None):
         if column:
             return widgets.VBox(
                 [
+                    widgets.HTML(value=f'<div><strong>Data Asset Name: </strong>{data_asset_name}</div>'),
                     self.generate_column_widget(column=column),
                     self.generate_expectation_type_widget(expectation_type),
-                    success_widget
+                    success_widget,
+                    widgets.HTML(value=f'<div><strong>Date/Time Validated (UTC): </strong>{validation_time}</div>'),
                 ],
-                layout=widgets.Layout(margin='10px', width='30%')
+                layout=widgets.Layout(margin='10px', width='40%')
             )
         else:
             return widgets.VBox(
                 [
+                    widgets.HTML(
+                        value=f'<div><strong>Data Asset Name: </strong>{data_asset_name}</div>'),
                     self.generate_expectation_type_widget(expectation_type),
-                    success_widget
+                    success_widget,
+                    widgets.HTML(
+                        value=f'<div><strong>Date/Time Validated (UTC): </strong>{validation_time}</div>'),
                 ],
-                layout=widgets.Layout(margin='10px', width='30%')
+                layout=widgets.Layout(margin='10px', width='40%')
             )
 
     def generate_expectation_result_detail_widgets(self, *, result={}):
@@ -1330,6 +1339,7 @@ class ExpectationExplorer(object):
             expectation_validation_result,
             collapsed=False
     ):
+        validation_time = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M")
         data_asset_name = data_asset.get_data_asset_name()
         data_asset_state = self.state['data_assets'].get(data_asset_name)
         expectation_type = expectation_validation_result['expectation_config']['expectation_type']
@@ -1343,7 +1353,7 @@ class ExpectationExplorer(object):
                 column=column
             )
             if existing_expectation_state:
-                return self.update_expectation_state(existing_expectation_state, expectation_validation_result)
+                return self.update_expectation_state(existing_expectation_state, expectation_validation_result, validation_time)
         else:
             self.initialize_data_asset_state(data_asset)
 
@@ -1389,7 +1399,7 @@ class ExpectationExplorer(object):
 
         # widget with basic info (column, expectation_type)
         basic_expectation_info_box = self.generate_basic_expectation_info_box(
-            expectation_type, success_widget, column)
+            data_asset_name, expectation_type, success_widget, validation_time, column)
 
         # collect widget dicts for kwarg inputs
         expectation_kwarg_input_widget_dicts = []
@@ -1408,7 +1418,7 @@ class ExpectationExplorer(object):
                          for dict in expectation_kwarg_input_widget_dicts]
         expectation_kwarg_input_box = widgets.VBox(
             children=kwarg_widgets,
-            layout=widgets.Layout(margin='10px', width='70%')
+            layout=widgets.Layout(margin='10px', width='60%')
         )
 
         # top-level widget container
@@ -1446,7 +1456,9 @@ class ExpectationExplorer(object):
         # update expectation_suite_editor
         expectation_suite_editor = self.state['data_assets'][data_asset_name].get('expectation_suite_editor')
         if expectation_suite_editor:
-            expectation_suite_editor.children = self.generate_expectation_suite_editor_widgets(data_asset)
+            expectation_suite = data_asset.get_expectation_suite(
+                discard_failed_expectations=False)
+            expectation_suite_editor.children = self.generate_expectation_suite_editor_widgets(data_asset, expectation_suite)
 
         return expectation_editor_widget
 
@@ -1476,10 +1488,8 @@ class ExpectationExplorer(object):
 
         return list(set(expectation_types))
 
-    def generate_expectation_suite_editor_widgets(self, data_asset):
+    def generate_expectation_suite_editor_widgets(self, data_asset, expectation_suite):
         data_asset_name = data_asset.get_data_asset_name()
-        expectation_suite = data_asset.get_expectation_suite(
-            discard_failed_expectations=False)
         column_names = self.get_column_names(data_asset_name)
         column_accordions = []
         data_asset_state = self.state['data_assets'].get(data_asset_name)
@@ -1493,12 +1503,14 @@ class ExpectationExplorer(object):
         summary_widget_content = """\
             <div>
                 <h1>Expectation Suite Editor</h1>
+                <hr>
                 <ul>
                     <li><strong>Data Asset Name</strong>: {data_asset_name}</li>
                     <li><strong>Great Expectations Version</strong>: {ge_version}</li>
                     <li><strong>Column Count</strong>: {column_count}</li>
                     <li><strong>Expectation Count</strong>: {expectation_count}</li>
                 </ul>
+                <hr>
                 <h2>Columns:</h2>
             </div>\
         """.format(
@@ -1546,7 +1558,7 @@ class ExpectationExplorer(object):
             editor_widget = getattr(data_asset, expectation_type)(
                 include_config=True, **expectation_kwargs)
 
-        expectation_suite_editor_widgets = self.generate_expectation_suite_editor_widgets(data_asset)
+        expectation_suite_editor_widgets = self.generate_expectation_suite_editor_widgets(data_asset, expectation_suite)
         ###################
         expectation_suite_editor = widgets.VBox(
             children=expectation_suite_editor_widgets,
