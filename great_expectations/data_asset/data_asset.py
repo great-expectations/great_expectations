@@ -52,7 +52,7 @@ class DataAsset(object):
         self._batch_kwargs = batch_kwargs
         if profiler is not None:
             profiler.profile(self)
-        if data_context and data_context._expectation_explorer_manager:
+        if data_context and hasattr(data_context, '_expectation_explorer_manager'):
             self.set_default_expectation_argument("include_config", True)
 
     def autoinspect(self, profiler):
