@@ -115,11 +115,12 @@ class Dataset(MetaDataset):
 
     # getter functions with hashable arguments - can be cached
     hashable_getters = [
+        'get_column_min',
         'get_column_max',
         'get_column_mean',
-        'get_column_median',
-        'get_column_min',
         'get_column_modes',
+        'get_column_median',
+        'get_column_ntiles',
         'get_column_nonnull_count',
         'get_column_stdev',
         'get_column_sum',
@@ -190,6 +191,16 @@ class Dataset(MetaDataset):
 
     def get_column_median(self, column):
         """Returns: any"""
+        raise NotImplementedError
+
+    def get_column_ntiles(self, column, ntiles):
+        """Get the values in column closest to the requested percentiles
+        Args:
+            ntiles (list of float): the percentiles to return
+        
+        Returns:
+            List[any]: the nearest values in the dataset to those ntiles
+        """
         raise NotImplementedError
 
     def get_column_stdev(self, column):
@@ -1672,13 +1683,22 @@ class Dataset(MetaDataset):
               "result": {
                 "observed_value": [1,2,3],
                 "details": {
-                    "value_counts": {
-                        "1": 1,
-                        "2": 2,
-                        "3": 3
+                  "value_counts": [
+                    {
+                      "value": 1,
+                      "count": 1
+                    },
+                    {
+                      "value": 2,
+                      "count": 1
+                    },
+                    {
+                      "value": 3,
+                      "count": 1
                     }
+                  ]
                 }
-              },
+              }
             }
 
         expect_column_distinct_values_to_be_in_set is a :func:`column_aggregate_expectation <great_expectations.data_asset.dataset.Dataset.column_aggregate_expectation>`.
@@ -2081,6 +2101,110 @@ class Dataset(MetaDataset):
 
     @DocInherit
     @MetaDataset.column_aggregate_expectation
+    def expect_column_ntiles_to_be_between(
+        self,
+        column,
+        ntile_ranges,
+        result_format=None,
+        include_config=False,
+        catch_exceptions=None,
+        meta=None,
+    ):
+        """Expect column quantiles to be between provided minimum and maximum values.
+
+        The ntile_ranges are specified as a list of ranges, and the number of such ranges determines which ntiles should be computed and compared.
+        `expect_column_ntiles_to_be_between` evenly spaces ntiles between the 0th and 100th percentile (*inclusive*).
+
+        For each provided range:
+            * min_value and max_value are both inclusive.
+            * If min_value is None, then max_value is treated as an upper bound
+            * If max_value is None, then min_value is treated as a lower bound
+
+        For example:
+        ::
+            # my_df.my_col = [1,2,2,3,3,3,4]
+            >>> my_df.expect_column_ntiles_to_be_between(
+                "my_col",
+                [[0,1], [2,3], [3,4], [4,5]]
+            )
+            {
+              "success": True,
+                "result": {
+                  "observed_value": [1, 2, 3, 4],
+                  "element_count": 7,
+                  "missing_count": 0,
+                  "missing_percent": 0.0,
+                  "details": {
+                    "ntiles": [0.0, 0.3333333333333333, 0.6666666666666666, 1.0],
+                    "success_details": [true, true, true, true]
+                  }
+                }
+              }
+            }
+
+        `expect_column_ntiles_to_be_between` can be computationally intensive for large datasets.
+
+        expect_column_ntiles_to_be_between is a :func:`column_aggregate_expectation <great_expectations.data_asset.dataset.Dataset.column_aggregate_expectation>`.
+
+        Args:
+            column (str): \
+                The column name.
+            ntile_ranges (List[List or Tuple]): \
+                Value ranges for the column values corresponding to ntiles evenly spaced between 0th and 100th percentile.
+
+        Other Parameters:
+            result_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`result_format <result_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
+
+        Returns:
+            A JSON-serializable expectation result object.
+
+            Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+        Notes:
+            These fields in the result object are customized for this expectation:
+            ::
+            details.ntiles
+            details.success_details
+
+        See Also:
+            expect_column_min_to_be_between
+            expect_column_max_to_be_between
+            expect_column_median_to_be_between
+        """
+        if len(ntile_ranges) < 2:
+            raise ValueError("At least two ranges must be provided (for 0th and 100th percentile)")
+
+        ntiles = np.linspace(0, 1, len(ntile_ranges))
+        ntile_vals = self.get_column_ntiles(column, ntiles)
+        # We explicity allow "None" to be interpreted as infinity
+        comparison_ntile_ranges = [[lower_bound or -np.inf, upper_bound or np.inf] for (lower_bound, upper_bound) in ntile_ranges]
+        success_details = [range_[0] <= ntile_vals[idx] <= range_[1] for idx, range_ in enumerate(comparison_ntile_ranges)]
+
+        return {
+            "success": np.all(success_details),
+            "result": {
+                "observed_value": ntile_vals,
+                "details": {
+                    "ntiles": ntiles,
+                    "success_details": success_details
+                }
+            }
+        }
+
+    @DocInherit
+    @MetaDataset.column_aggregate_expectation
     def expect_column_stdev_to_be_between(self,
                                          column,
                                          min_value=None,
@@ -2088,6 +2212,7 @@ class Dataset(MetaDataset):
                                          result_format=None, include_config=False, catch_exceptions=None, meta=None
                                          ):
         """Expect the column standard deviation to be between a minimum value and a maximum value.
+        Uses sample standard deviation (normalized by N-1).
 
         expect_column_stdev_to_be_between is a :func:`column_aggregate_expectation <great_expectations.data_asset.dataset.Dataset.column_aggregate_expectation>`.
 

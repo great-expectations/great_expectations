@@ -23,7 +23,7 @@ from scipy import stats
 logger = logging.getLogger(__name__)
 
 try:
-    from pyspark.sql.functions import udf, col, stddev as stddev_
+    from pyspark.sql.functions import udf, col, stddev_samp
     import pyspark.sql.types as sparktypes
 except ImportError as e:
     logger.debug(str(e))
@@ -238,13 +238,22 @@ class SparkDFDataset(MetaSparkDFDataset):
         return list(s[s == s.max()].index)
 
     def get_column_median(self, column):
-        # TODO this doesn't actually work e.g. median([1, 2, 3, 4]) -> 2.0
-        raise NotImplementedError
-        result = self.spark_df.approxQuantile(column, [0.5], 0)
-        return result[0] if len(result) > 0 else None
+        # We will get the two middle values by choosing an epsilon to add
+        # to the 50th percentile such that we always get exactly the middle two values
+        # (i.e. 0 < epsilon < 1 / (2 * values))
+
+        # Note that this can be an expensive computation; we are not exposing
+        # spark's ability to estimate.
+        # We add two to 2 * n_values to maintain a legitimate percentile 
+        # in the degnerate case when n_values = 0
+        result = self.spark_df.approxQuantile(column, [0.5, 0.5 + (1 / (2 + (2 * self.get_row_count())))], 0)
+        return np.mean(result)
+
+    def get_column_ntiles(self, column, ntiles):
+        return self.spark_df.approxQuantile(column, list(ntiles), 0)
 
     def get_column_stdev(self, column):
-        return self.spark_df.select(stddev_(col(column))).collect()[0][0]
+        return self.spark_df.select(stddev_samp(col(column))).collect()[0][0]
 
     def get_column_hist(self, column, bins):
         """return a list of counts corresponding to bins"""

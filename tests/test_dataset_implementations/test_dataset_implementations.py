@@ -26,7 +26,7 @@ def test_implementations(context, test):
     should_skip = (
         candidate_getter_is_on_temporary_notimplemented_list(context, test['func'])
         or
-        context in test.get('supress_test_for', [])
+        context in test.get('suppress_test_for', [])
     )
     if should_skip:
         pytest.skip()
