@@ -284,11 +284,16 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             ]).where(sa.column(column) != None) \
               .group_by(sa.column(column)) \
               .select_from(self._table)).fetchall()
-        return pd.Series(
+        series = pd.Series(
             [row[1] for row in results],
-            index=[row[0] for row in results],
-            name=column
+            index=pd.Index(
+                data=[row[0] for row in results],
+                name="value"
+            ),
+            name="count"
         )
+        series.sort_index(inplace=True)
+        return series
 
     def get_column_mean(self, column):
         return self.engine.execute(
