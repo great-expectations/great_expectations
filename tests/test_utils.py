@@ -402,7 +402,12 @@ def evaluate_json_test(data_asset, expectation_type, test):
 
             elif key == 'observed_value':
                 if 'tolerance' in test:
-                    assert np.allclose(result['result']['observed_value'], value, rtol=test['tolerance'])
+                    if isinstance(value, dict):
+                        assert set(value.keys()) == set(result["result"]["observed_value"].keys())
+                        for k,v in value.items():
+                            assert np.allclose(result["result"]["observed_value"][k], v, rtol=test["tolerance"])
+                    else:
+                        assert np.allclose(result['result']['observed_value'], value, rtol=test['tolerance'])
                 else:
                     assert value == result['result']['observed_value']
 
