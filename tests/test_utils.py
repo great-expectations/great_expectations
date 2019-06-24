@@ -255,6 +255,7 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
             # "expect_column_values_to_be_in_type_list",
             # "expect_column_values_to_be_in_set",
             # "expect_column_values_to_not_be_in_set",
+            # "expect_column_distinct_values_to_be_in_set",
             # "expect_column_distinct_values_to_equal_set",
             # "expect_column_distinct_values_to_contain_set",
             # "expect_column_values_to_be_between",
@@ -302,6 +303,7 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
             "expect_column_values_to_be_in_type_list",
             # "expect_column_values_to_be_in_set",
             # "expect_column_values_to_not_be_in_set",
+            # "expect_column_distinct_values_to_be_in_set",
             # "expect_column_distinct_values_to_equal_set",
             # "expect_column_distinct_values_to_contain_set",
             "expect_column_values_to_be_between",
@@ -417,6 +419,10 @@ def evaluate_json_test(data_asset, expectation_type, test):
 
             elif key == 'details':
                 assert result['result']['details'] == value
+
+            elif key == "value_counts":
+                for val_count in value:
+                    assert val_count in result["result"]["details"]["value_counts"]
 
             elif key.startswith("observed_cdf"):
                 if "x_-1" in key:

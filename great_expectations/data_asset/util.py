@@ -178,7 +178,14 @@ def recursively_convert_to_json_serializable(test_obj):
         return float(round(test_obj, sys.float_info.dig))
 
     elif isinstance(test_obj, pd.Series):
-        return recursively_convert_to_json_serializable(test_obj.to_dict())
+        # Converting a series is tricky since the index may not be a string, but all json
+        # keys must be strings. So, we use a very ugly serialization strategy
+        index_name = test_obj.index.name or "index"
+        value_name = test_obj.name or "value"
+        return [{
+            index_name: recursively_convert_to_json_serializable(idx),
+            value_name: recursively_convert_to_json_serializable(val)
+        } for idx, val in test_obj.iteritems()]
 
     elif isinstance(test_obj, pd.DataFrame):
         return recursively_convert_to_json_serializable(test_obj.to_dict(orient='records'))
