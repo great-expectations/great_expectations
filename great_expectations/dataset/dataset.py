@@ -2101,10 +2101,10 @@ class Dataset(MetaDataset):
 
     @DocInherit
     @MetaDataset.column_aggregate_expectation
-    def expect_column_ntiles_to_be_between(
+    def expect_column_quantile_values_to_be_between(
         self,
         column,
-        ntile_ranges,
+        quantile_value_ranges,
         result_format=None,
         include_config=False,
         catch_exceptions=None,
@@ -2112,8 +2112,10 @@ class Dataset(MetaDataset):
     ):
         """Expect column quantiles to be between provided minimum and maximum values.
 
-        The ntile_ranges are specified as a list of ranges, and the number of such ranges determines which ntiles should be computed and compared.
-        `expect_column_ntiles_to_be_between` evenly spaces ntiles between the 0th and 100th percentile (*inclusive*).
+        The quantile_value_ranges are specified as a list of ranges, and the number of such ranges determines which
+         ntiles should be computed and compared.
+        `expect_column_quantile_values_to_be_between` evenly spaces ntiles between
+        the 0th and 100th percentile (*inclusive*).
 
         For each provided range:
             * min_value and max_value are both inclusive.
@@ -2123,7 +2125,7 @@ class Dataset(MetaDataset):
         For example:
         ::
             # my_df.my_col = [1,2,2,3,3,3,4]
-            >>> my_df.expect_column_ntiles_to_be_between(
+            >>> my_df.expect_column_quantile_values_to_be_between(
                 "my_col",
                 [[0,1], [2,3], [3,4], [4,5]]
             )
@@ -2142,14 +2144,14 @@ class Dataset(MetaDataset):
               }
             }
 
-        `expect_column_ntiles_to_be_between` can be computationally intensive for large datasets.
+        `expect_column_quantile_values_to_be_between` can be computationally intensive for large datasets.
 
-        expect_column_ntiles_to_be_between is a :func:`column_aggregate_expectation <great_expectations.data_asset.dataset.Dataset.column_aggregate_expectation>`.
+        expect_column_quantile_values_to_be_between is a :func:`column_aggregate_expectation <great_expectations.data_asset.dataset.Dataset.column_aggregate_expectation>`.
 
         Args:
             column (str): \
                 The column name.
-            ntile_ranges (List[List or Tuple]): \
+            quantile_value_ranges (List[List or Tuple]): \
                 Value ranges for the column values corresponding to ntiles evenly spaced between 0th and 100th percentile.
 
         Other Parameters:
@@ -2183,21 +2185,27 @@ class Dataset(MetaDataset):
             expect_column_max_to_be_between
             expect_column_median_to_be_between
         """
-        if len(ntile_ranges) < 2:
+        if len(quantile_value_ranges) < 2:
             raise ValueError("At least two ranges must be provided (for 0th and 100th percentile)")
 
-        ntiles = np.linspace(0, 1, len(ntile_ranges))
-        ntile_vals = self.get_column_ntiles(column, ntiles)
-        # We explicity allow "None" to be interpreted as infinity
-        comparison_ntile_ranges = [[lower_bound or -np.inf, upper_bound or np.inf] for (lower_bound, upper_bound) in ntile_ranges]
-        success_details = [range_[0] <= ntile_vals[idx] <= range_[1] for idx, range_ in enumerate(comparison_ntile_ranges)]
+        quantiles = np.linspace(0, 1, len(quantile_value_ranges))
+        quantile_vals = self.get_column_ntiles(column, quantiles)
+        # We explicitly allow "None" to be interpreted as +/- infinity
+        comparison_quantile_ranges = [
+            [lower_bound or -np.inf, upper_bound or np.inf]
+            for (lower_bound, upper_bound) in quantile_value_ranges
+        ]
+        success_details = [
+            range_[0] <= quantile_vals[idx] <= range_[1]
+            for idx, range_ in enumerate(comparison_quantile_ranges)
+        ]
 
         return {
             "success": np.all(success_details),
             "result": {
-                "observed_value": ntile_vals,
+                "observed_value": quantile_vals,
                 "details": {
-                    "ntiles": ntiles,
+                    "quantiles": quantiles,
                     "success_details": success_details
                 }
             }
@@ -3206,7 +3214,7 @@ class Dataset(MetaDataset):
 
             #Adjust expected_weights to account for tail_weight and internal_weight
             if "tail_weights" in partition_object:
-	                partition_tail_weight_holdout = np.sum(partition_object["tail_weights"])
+                partition_tail_weight_holdout = np.sum(partition_object["tail_weights"])
             else:
                 partition_tail_weight_holdout = 0
 
