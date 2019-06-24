@@ -29,12 +29,8 @@ matrix:
 services:
   - postgresql
   - mysql
-addons:
-  apt:
-    packages:
-      - oracle-java8-set-default
 install:
-  # - ./travis-java.sh
+  - ./travis-java.sh
   - pip install --only-binary=numpy,scipy numpy scipy
   - if [ "$PANDAS" = "latest" ]; then pip install pandas; else pip install pandas==$PANDAS; fi
   - pip install -r requirements-dev.txt
