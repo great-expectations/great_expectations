@@ -330,10 +330,51 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             column_median = column_values[1][0]  # True center value
         return column_median
 
-    def get_column_ntiles(self, column, ntiles):
-        expected_ntiles = np.linspace(0, 1, len(ntiles))
-        if not np.allclose(expected_ntiles, ntiles):
-            raise ValueError("For SqlAlchemy requested ntiles must be evenly spaced.")
+    def get_column_quantiles(self, column, quantiles):
+        # expected_quantiles = np.linspace(0, 1, len(quantiles))
+        # if not np.allclose(expected_quantiles, quantiles):
+        #     raise ValueError("For SqlAlchemy requested ntiles must be evenly spaced.")
+
+        # in sql, we can't just ask for arbitrary quantiles easily. So we'll ask for a superset
+        # of the needed quantiles by computing the minimum gap, then evenly spacing our request
+        # such that all requested quantiles are covered
+        divisor = np.min(np.diff(quantiles))
+        if divisor < 0:
+            raise ValueError("Requested quantiles must be provided in ascending order")
+
+        while not np.all(
+            np.logical_or(
+                np.isclose(
+                    np.ones(len(quantiles)),
+                    np.mod(quantiles / divisor, 1)
+                ), 
+                np.isclose(
+                    np.zeros(len(quantiles)),
+                    np.mod(quantiles / divisor, 1)
+                )
+            )
+        ):
+            divisor = divisor / (1 / np.min(np.mod(quantiles/divisor, 1)))
+            if 1 / divisor > 200:
+                raise ValueError("SQLAlchemy requires evenly spaced bins, and generating evenly spaced\
+                bins that would produce the requested quantiles would require more than 200 bins. Please\
+                select a different set of quantiles.")
+        sql_ntiles = np.linspace(0, 1, int((1/divisor) + 1))
+
+        quantile_indices = []
+        curr_quantile_index = 0
+        for k in range(len(sql_ntiles)):
+            if np.allclose(sql_ntiles[k], quantiles[curr_quantile_index]):
+                quantile_indices.append(k)
+                curr_quantile_index += 1
+
+        if curr_quantile_index < len(quantiles) - 1:
+            # We didn't find matching indices using this split. This just means they chose
+            # a split too complicated for us in sql. For now, we just bail
+            raise ValueError("Unable to build an evenly-spaced quantile split based on the requested\
+            quantiles. Sqlalchemy quantiles must be able to be spaced such that fewer than 200 bins\
+            are required.")
+
 
         # For sql, our logic works as follows:
         #   First, we divide the values into n_ntiles - 1 groups (corresponding to the ranges
@@ -347,7 +388,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         inner = sa.select([
                 sa.column(column),
-                sa.func.ntile(len(ntiles)-1).over(order_by=sa.column(column)).label("ntile")
+                sa.func.ntile(len(sql_ntiles)-1).over(order_by=sa.column(column)).label("ntile")
             ]).select_from(self._table).where(sa.column(column) != None).alias("ntiles")
         ntiles_query = sa.select([
             sa.func.min(sa.column(column)),
@@ -386,6 +427,8 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         # Always include the max of the last bin (the 100th percentile)
         ntile_val_list.append(ntile_vals[-1][1])
+        ntile_val_list = [ntile_val_list[k] for k in range(len(ntile_val_list)) if k in quantile_indices]
+
         return ntile_val_list
 
     def get_column_stdev(self, column):
