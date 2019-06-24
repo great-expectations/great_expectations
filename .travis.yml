@@ -1,25 +1,25 @@
+dist: xenial
 language: python
 os:
   - linux
 matrix:
   include:
-  - dist: trusty
-    python: 2.7
-    env: PANDAS=0.22.0
-  - dist: trusty
-    python: 2.7
-    env: PANDAS=0.23.4
-  - dist: trusty
-    python: 2.7
-    env: PANDAS=latest
-  - dist: trusty
-    python: 3.6
-    env: PANDAS=0.22.0
-  - dist: trusty
-    python: 3.6
-    env: PANDAS=0.23.4
-  - dist: trusty
-    python: 3.6
+#  - dist: trusty
+#    python: 2.7
+#    env: PANDAS=0.22.0
+#  - dist: trusty
+#    python: 2.7
+#    env: PANDAS=0.23.4
+#  - dist: trusty
+#    python: 2.7
+#    env: PANDAS=latest
+#  - dist: trusty
+#    python: 3.6
+#    env: PANDAS=0.22.0
+#  - dist: trusty
+#    python: 3.6
+#    env: PANDAS=0.23.4
+-   python: 3.6
     env: PANDAS=latest
   # - dist: xenial
   #   python: 3.7
@@ -30,6 +30,10 @@ matrix:
 services:
   - postgresql
   - mysql
+addons:
+  apt:
+    packages:
+      - oracle-java8-set-default
 install:
   # - ./travis-java.sh
   - pip install --only-binary=numpy,scipy numpy scipy
