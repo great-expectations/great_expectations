@@ -19,38 +19,38 @@ from great_expectations.dataset import PandasDataset, SqlAlchemyDataset, SparkDF
 from great_expectations.profile import ColumnsExistProfiler
 
 SQLITE_TYPES = {
-        "VARCHAR": sqlitetypes.VARCHAR,
-        "CHAR": sqlitetypes.CHAR,
-        "INTEGER": sqlitetypes.INTEGER,
-        "SMALLINT": sqlitetypes.SMALLINT,
-        "DATETIME": sqlitetypes.DATETIME(truncate_microseconds=True),
-        "DATE": sqlitetypes.DATE,
-        "FLOAT": sqlitetypes.FLOAT,
-        "BOOLEAN": sqlitetypes.BOOLEAN 
+    "VARCHAR": sqlitetypes.VARCHAR,
+    "CHAR": sqlitetypes.CHAR,
+    "INTEGER": sqlitetypes.INTEGER,
+    "SMALLINT": sqlitetypes.SMALLINT,
+    "DATETIME": sqlitetypes.DATETIME(truncate_microseconds=True),
+    "DATE": sqlitetypes.DATE,
+    "FLOAT": sqlitetypes.FLOAT,
+    "BOOLEAN": sqlitetypes.BOOLEAN
 }
 
 POSTGRESQL_TYPES = {
-        "TEXT": postgresqltypes.TEXT,
-        "CHAR": postgresqltypes.CHAR,
-        "INTEGER": postgresqltypes.INTEGER,
-        "SMALLINT": postgresqltypes.SMALLINT,
-        "BIGINT": postgresqltypes.BIGINT,
-        "TIMESTAMP": postgresqltypes.TIMESTAMP,
-        "DATE": postgresqltypes.DATE,
-        "DOUBLE_PRECISION": postgresqltypes.DOUBLE_PRECISION,
-        "BOOLEAN": postgresqltypes.BOOLEAN
+    "TEXT": postgresqltypes.TEXT,
+    "CHAR": postgresqltypes.CHAR,
+    "INTEGER": postgresqltypes.INTEGER,
+    "SMALLINT": postgresqltypes.SMALLINT,
+    "BIGINT": postgresqltypes.BIGINT,
+    "TIMESTAMP": postgresqltypes.TIMESTAMP,
+    "DATE": postgresqltypes.DATE,
+    "DOUBLE_PRECISION": postgresqltypes.DOUBLE_PRECISION,
+    "BOOLEAN": postgresqltypes.BOOLEAN
 }
 
 MYSQL_TYPES = {
-        "TEXT": mysqltypes.TEXT,
-        "CHAR": mysqltypes.CHAR,
-        "INTEGER": mysqltypes.INTEGER,
-        "SMALLINT": mysqltypes.SMALLINT,
-        "BIGINT": mysqltypes.BIGINT,
-        "TIMESTAMP": mysqltypes.TIMESTAMP,
-        "DATE": mysqltypes.DATE,
-        "FLOAT": mysqltypes.FLOAT,
-        "BOOLEAN": mysqltypes.BOOLEAN
+    "TEXT": mysqltypes.TEXT,
+    "CHAR": mysqltypes.CHAR,
+    "INTEGER": mysqltypes.INTEGER,
+    "SMALLINT": mysqltypes.SMALLINT,
+    "BIGINT": mysqltypes.BIGINT,
+    "TIMESTAMP": mysqltypes.TIMESTAMP,
+    "DATE": mysqltypes.DATE,
+    "FLOAT": mysqltypes.FLOAT,
+    "BOOLEAN": mysqltypes.BOOLEAN
 }
 
 SPARK_TYPES = {
@@ -273,7 +273,7 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
             "expect_column_values_to_match_json_schema",
             # "expect_column_mean_to_be_between",
             # "expect_column_median_to_be_between",
-            # "expect_column_ntiles_to_be_between",
+            # "expect_column_quantile_values_to_be_between",
             "expect_column_stdev_to_be_between",
             #"expect_column_unique_value_count_to_be_between",
             #"expect_column_proportion_of_unique_values_to_be_between",
@@ -321,7 +321,7 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
             "expect_column_values_to_match_json_schema",
             # "expect_column_mean_to_be_between",
             # "expect_column_median_to_be_between",            
-            # "expect_column_ntiles_to_be_between",
+            # "expect_column_quantile_values_to_be_between",
             # "expect_column_stdev_to_be_between",
             # "expect_column_unique_value_count_to_be_between",
             # "expect_column_proportion_of_unique_values_to_be_between",

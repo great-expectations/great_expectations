@@ -1,5 +1,5 @@
 {
-  "expectation_type" : "expect_column_ntiles_to_be_between",
+  "expectation_type" : "expect_column_quantile_values_to_be_between",
   "datasets" : [{
     "_notes": "continuous",
     "data" : {
@@ -22,7 +22,7 @@
             "exact_match_out": false,
             "in": {
               "column": "norm_0_1",
-              "ntile_ranges": [[null, -3], [3, null]]
+              "quantile_value_ranges": [[null, -3], [3, null]]
             },
             "out": {
               "success": true,
@@ -36,7 +36,7 @@
             "exact_match_out": false,
             "in": {
               "column": "norm_0_1",
-              "ntile_ranges": [[null, -3], [-0.8, -0.6], [-0.1, 0.1], [0.6, 0.8], [3, null]]
+              "quantile_value_ranges": [[null, -3], [-0.8, -0.6], [-0.1, 0.1], [0.6, 0.8], [3, null]]
             },
             "out": {
               "success": true,
@@ -50,7 +50,7 @@
             "exact_match_out": false,
             "in": {
               "column": "norm_1_1",
-              "ntile_ranges": [[null, -3], [-0.8, -0.6], [-0.1, 0.1], [0.6, 0.8], [3, null]]
+              "quantile_value_ranges": [[null, -3], [-0.8, -0.6], [-0.1, 0.1], [0.6, 0.8], [3, null]]
             },
             "out": {
               "success": false

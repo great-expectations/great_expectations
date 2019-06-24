@@ -27,6 +27,7 @@ try:
     engine = sa.create_engine('postgresql://postgres@localhost/test_ci')
     conn = engine.connect()
     CONTEXTS += ['postgresql']
+    conn.close()
 except (ImportError, sa.exc.SQLAlchemyError):
     warnings.warn("No postgres context available for testing.")
 
@@ -40,6 +41,7 @@ except (ImportError, sa.exc.SQLAlchemyError):
 #     engine = sa.create_engine('mysql://root@localhost/test_ci')
 #     conn = engine.connect()
 #     CONTEXTS += ['mysql']
+#     conn.close()
 # except (ImportError, sa.exc.SQLAlchemyError):
 #     warnings.warn("No mysql context available for testing.")
 
