@@ -27,9 +27,8 @@ def substitute_none_for_missing(kwargs, kwarg_list):
 class BulletListContentBlock(ContentBlock):
     _content_block_type = "bullet_list"
 
-    # Note: I don't think we should include `column_name`, since it'll already be present in the expectation object.
     @classmethod
-    def expect_column_to_exist(cls, expectation, column_name=""):
+    def expect_column_to_exist(cls, expectation):
         params = substitute_none_for_missing(
             expectation["kwargs"],
             ["column", "column_index"],
@@ -49,105 +48,85 @@ class BulletListContentBlock(ContentBlock):
                 "params": params,
             }]
 
-    # Abe 2019/06/22: I haven't touched this method. It still uses old conventions that I think should be deprecated.
     @classmethod
-    def expect_column_value_lengths_to_be_between(cls, expectation, column_name=""):
-        if (expectation["kwargs"]["min_value"] is None) and (expectation["kwargs"]["max_value"] is None):
+    def expect_column_value_lengths_to_be_between(cls, expectation):
+        params = substitute_none_for_missing(
+            expectation["kwargs"],
+            ["column", "min_value", "max_value", "mostly"],
+        )
+
+        if (params["min_value"] is None) and (params["max_value"] is None):
             return [{
-                "template": column_name + " has a bogus $expectation_name expectation.",
-                "params": {
-                    "expectation_name": "expect_column_value_lengths_to_be_between"
-                }
+                "template": "$column has a bogus `expect_column_value_lengths_to_be_between` expectation.",
+                "params": params,
             }]
 
-        if "mostly" in expectation["kwargs"]:
-            if expectation["kwargs"]["min_value"] is not None and expectation["kwargs"]["max_value"] is not None:
+        if "mostly" in params:
+            if params["min_value"] is not None and params["max_value"] is not None:
                 return [{
-                    "template": column_name + " must be between $min and $max characters long at least $mostly% of the time.",
-                    "params": {
-                        "min": expectation["kwargs"]["min_value"],
-                        "max": expectation["kwargs"]["max_value"],
-                        "mostly": expectation["kwargs"]["mostly"]
-                    }
+                    "template": "$column must be between $min_value and $max_value characters long at least $mostly% of the time.",
+                    "params": params,
                 }]
 
-            elif expectation["kwargs"]["min_value"] is None:
+            elif params["min_value"] is None:
                 return [{
-                    "template": column_name + " must be less than $max characters long at least $mostly% of the time.",
-                    "params": {
-                        "max": expectation["kwargs"]["max_value"],
-                        "mostly": expectation["kwargs"]["mostly"]
-                    }
+                    "template": "$column must be less than $max_value characters long at least $mostly% of the time.",
+                    "params": params,
                 }]
 
-            elif expectation["kwargs"]["max_value"] is None:
+            elif params["max_value"] is None:
                 return [{
-                    "template": column_name + " must be more than $min characters long at least $mostly% of the time.",
-                    "params": {
-                        "min": expectation["kwargs"]["min_value"],
-                        "mostly": expectation["kwargs"]["mostly"]
-                    }
+                    "template": "$column must be more than $min_value characters long at least $mostly% of the time.",
+                    "params": params
                 }]
 
         else:
-            if expectation["kwargs"]["min_value"] is not None and expectation["kwargs"]["max_value"] is not None:
+            if params["min_value"] is not None and params["max_value"] is not None:
                 return [{
-                    "template": column_name + " must always be between $min and $max characters long.",
-                    "params": {
-                        "min": expectation["kwargs"]["min_value"],
-                        "max": expectation["kwargs"]["max_value"]
-                    }
+                    "template": "$column must always be between $min_value and $max_value characters long.",
+                    "params": params
                 }]
 
-            elif expectation["kwargs"]["min_value"] is None:
+            elif params["min_value"] is None:
                 return [{
-                    "template": column_name + " must always be less than $max characters long.",
-                    "params": {
-                        "max": expectation["kwargs"]["max_value"]
-                    }
+                    "template": "$column must always be less than $max_value characters long.",
+                    "params": params
                 }]
 
-            elif expectation["kwargs"]["max_value"] is None:
+            elif params["max_value"] is None:
                 return [{
-                    "template": column_name + " must always be more than $min characters long.",
-                    "params": {
-                        "min": expectation["kwargs"]["min_value"]
-                    }
+                    "template": "$column must always be more than $min_value characters long.",
+                    "params": params
                 }]
 
-    # Abe 2019/06/22: I haven't touched this method. It still uses old conventions that I think should be deprecated.
     @classmethod
-    def expect_column_unique_value_count_to_be_between(cls, expectation, column_name=""):
-        if (expectation["kwargs"]["min_value"] is None) and (expectation["kwargs"]["max_value"] is None):
+    def expect_column_unique_value_count_to_be_between(cls, expectation):
+        params = substitute_none_for_missing(
+            expectation["kwargs"],
+            ["column", "min_value", "max_value", "mostly"],
+        )
+
+        if (params["min_value"] is None) and (params["max_value"] is None):
             return [{
-                "template": column_name + " has a bogus $expectation_name expectation.",
-                "params": {
-                    "expectation_name": "expect_column_unique_value_count_to_be_between"
-                }
+                "template": "$column has a bogus `expect_column_unique_value_count_to_be_between` expectation.",
+                "params": params
             }]
 
-        elif expectation["kwargs"]["min_value"] is None:
+        elif params["min_value"] is None:
             return [{
-                "template": column_name + " must have fewer than $max unique values.",
-                "params": {
-                    "max": expectation["kwargs"]["max_value"]
-                }
+                "template": "$column must have fewer than $max_value unique values.",
+                "params": params
             }]
 
-        elif expectation["kwargs"]["max_value"] is None:
+        elif params["max_value"] is None:
             return [{
-                "template": column_name + " must have at least $min unique values.",
-                "params": {
-                    "min": expectation["kwargs"]["min_value"]
-                }
+                "template": "$column must have at least $min_value unique values.",
+                "params": params
             }]
         else:
             return [{
-                "template": column_name + " must have between $min and $max unique values.",
-                "params": {
-                    "min": expectation["kwargs"]["min_value"],
-                    "max": expectation["kwargs"]["min_value"]
-                }
+                "template": "$column must have between $min_value and $max_value unique values.",
+                "params": params
             }]
 
     # NOTE: This method is a pretty good example of good usage of `params`.
@@ -233,12 +212,9 @@ class BulletListContentBlock(ContentBlock):
         )
 
         if (params["column_A"] is None) or (params["column_B"] is None):
-            # FIXME: this string is wrong
             return [{
-                "template": " has a bogus $expectation_name expectation.",
-                "params": {
-                    "expectation_name": "expect_column_pair_values_A_to_be_greater_than_B"
-                }
+                "template": "$column has a bogus `expect_column_pair_values_A_to_be_greater_than_B` expectation.",
+                "params": params
             }]
 
         if params["mostly"] == None:
@@ -354,30 +330,30 @@ class BulletListContentBlock(ContentBlock):
                 "params": params
             }]
 
-    @classmethod
-    def expect_table_row_count_to_be_between(cls, expectation):
-        params = substitute_none_for_missing(
-            expectation["kwargs"],
-            ["min_value", "max_value"]
-        )
+    # @classmethod
+    # def expect_table_row_count_to_be_between(cls, expectation):
+    #     params = substitute_none_for_missing(
+    #         expectation["kwargs"],
+    #         ["min_value", "max_value"]
+    #     )
 
-        if params["min_value"] is not None and params["max_value"] is not None:
-            return [{
-                "template": "Must have between $min_value and $max_value rows.",
-                "params": params
-            }]
+    #     if params["min_value"] is not None and params["max_value"] is not None:
+    #         return [{
+    #             "template": "Must have between $min_value and $max_value rows.",
+    #             "params": params
+    #         }]
 
-        elif params["min_value"] is None:
-            return [{
-                "template": "Must have less than than $max_value rows.",
-                "params": params
-            }]
+    #     elif params["min_value"] is None:
+    #         return [{
+    #             "template": "Must have less than than $max_value rows.",
+    #             "params": params
+    #         }]
 
-        elif params["max_value"] is None:
-            return [{
-                "template": "Must have more than $min_value rows.",
-                "params": params
-            }]
+    #     elif params["max_value"] is None:
+    #         return [{
+    #             "template": "Must have more than $min_value rows.",
+    #             "params": params
+    #         }]
 
     @classmethod
     def expect_table_row_count_to_equal(cls, expectation):
