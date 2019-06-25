@@ -9,6 +9,7 @@ from datetime import datetime
 from dateutil.parser import parse
 
 from .dataset import Dataset
+from .pandas_dataset import PandasDataset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
 from great_expectations.dataset.util import (
     is_valid_partition_object,
@@ -172,6 +173,18 @@ class SparkDFDataset(MetaSparkDFDataset):
         # Creation of the Spark Dataframe is done outside this class
         self.spark_df = spark_df
         super(SparkDFDataset, self).__init__(*args, **kwargs)
+
+    def head(self, n=5):
+        """Returns a *PandasDataset* with the first *n* rows of the given Dataset"""
+        return PandasDataset(
+            self.spark_df.limit(n).toPandas(), 
+            expectation_suite=self.get_expectation_suite(
+                discard_failed_expectations=False,
+                discard_result_format_kwargs=False,
+                discard_catch_exceptions_kwargs=False,
+                discard_include_configs_kwargs=False
+            )
+        )
 
     def get_row_count(self):
         return self.spark_df.count()

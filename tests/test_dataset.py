@@ -3,6 +3,7 @@ import pytest
 from .conftest import CONTEXTS
 from .test_utils import get_dataset
 
+from great_expectations.dataset import PandasDataset
 
 data = {
     "a": [2.0, 5.0],
@@ -32,3 +33,16 @@ def test_caching(context):
     dataset = get_dataset(context, data, schemas=schemas.get(context))
     with pytest.raises(AttributeError):
         dataset.get_column_max.cache_info()
+
+@pytest.mark.parametrize('context', CONTEXTS)
+def test_head(context):
+    dataset = get_dataset(context, data, schemas=schemas.get(context), caching=True)
+    dataset.expect_column_mean_to_be_between("b", 5, 5)
+    head = dataset.head(1)
+    assert isinstance(head, PandasDataset)
+    assert len(head) == 1
+    assert list(head.columns) == ["a", "b", "c", "d"]
+    assert head["a"][0] == 2.0
+    suite = head.get_expectation_suite()
+    print(suite)
+    assert len(suite["expectations"]) == 5
