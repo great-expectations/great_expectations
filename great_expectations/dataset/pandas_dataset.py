@@ -471,6 +471,9 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                                           mostly=None,
                                           parse_strings_as_datetimes=None,
                                           result_format=None, include_config=False, catch_exceptions=None, meta=None):
+        if value_set is None:
+            # Vacuously true
+            return np.ones(len(column), dtype=np.bool_)
         if parse_strings_as_datetimes:
             parsed_value_set = self._parse_value_set(value_set)
         else:
@@ -983,6 +986,10 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                                                ignore_row_if="both_values_are_missing",
                                                result_format=None, include_config=False, catch_exceptions=None, meta=None
                                                ):
+        if value_pairs_set is None:
+            # vacuously true
+            return np.ones(len(column_A), dtype=np.bool_)
+        
         temp_df = pd.DataFrame({"A": column_A, "B": column_B})
         value_pairs_set = {(x, y) for x, y in value_pairs_set}
 

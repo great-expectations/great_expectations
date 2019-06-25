@@ -47,6 +47,44 @@
         }
       },
       {
+        "title": "Vacuously true - universal set",
+        "exact_match_out": false,
+        "in": {
+          "column": "dist1",
+          "value_set": null
+        },
+        "out": {
+          "success": true,
+          "observed_value": [1,2,3,4,5,6,7,8],
+          "value_counts": [
+            {"value": 1,
+              "count": 1
+            },
+            {"value": 2,
+              "count": 1
+              },
+            {"value": 3,
+              "count": 1
+            },
+            {"value": 4,
+              "count": 1
+            },
+            {"value": 5,
+              "count": 1
+            },
+            {"value": 6,
+              "count": 1
+            },
+            {"value": 7,
+              "count": 1
+            },
+            {"value": 8,
+              "count": 1
+            }
+          ]
+        }
+      },
+      {
         "title": "Positive test with null values in column",
         "exact_match_out": false,
         "in": {
