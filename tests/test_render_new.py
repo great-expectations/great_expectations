@@ -4,7 +4,7 @@ import json
 
 import great_expectations as ge
 from great_expectations.render.renderer import DescriptivePageRenderer, DescriptiveColumnSectionRenderer, PrescriptiveColumnSectionRenderer
-from great_expectations.render.view import DescriptivePageView
+from great_expectations.render.view import PageView
 from great_expectations.render.renderer.content_block import ValueListContentBlockRenderer
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 
@@ -29,7 +29,7 @@ def test_render_descriptive_page_renderer(validation_results):
 
 def test_render_descriptive_page_view(validation_results):
     renderer = DescriptivePageRenderer.render(validation_results)
-    print(DescriptivePageView.render(renderer))
+    print(PageView.render(renderer))
     # TODO: Use above print to set up snapshot test once we like the result
     assert True
 
@@ -79,16 +79,29 @@ def test_content_block_list_available_expectations(expectations):
     assert available_expectations == ['expect_column_values_to_be_in_set']
 
 
+# def test_render_profiled_fixtures():
+
+#     evrs = json.read(file())
+
+#     rendered_json = DescriptivePageRenderer.render(evrs)
+#     rendered_page = PageView.render(rendered_json)
+#     assert rendered_page != None
+
+#     with open('./test.html', 'w') as f:
+#         f.write(rendered_page)
+
+
 def test_full_oobe_flow():
     df = ge.read_csv("examples/data/Titanic.csv")
     # df = ge.read_csv("examples/data/Meteorite_Landings.csv")
+    # df = ge.read_csv("examples/data/adult.data")
     df.profile(BasicDatasetProfiler)
     # df.autoinspect(ge.dataset.autoinspect.columns_exist)
     evrs = df.validate()  # ["results"]
     # print(json.dumps(evrs, indent=2))
 
     rendered_json = DescriptivePageRenderer.render(evrs)
-    rendered_page = DescriptivePageView.render(rendered_json)
+    rendered_page = PageView.render(rendered_json)
     assert rendered_page != None
 
     with open('./test.html', 'w') as f:
