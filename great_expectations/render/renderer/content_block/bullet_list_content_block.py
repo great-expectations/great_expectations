@@ -189,38 +189,38 @@ class BulletListContentBlock(ContentBlock):
         if "mostly" in params:
             if params["min_value"] is not None and params["max_value"] is not None:
                 return [{
-                    "template": column_name + " must be between $min and $max at least $mostly% of the time.",
+                    "template": column_name + " must be between $min_value and $max_value at least $mostly% of the time.",
                     "params": params
                 }]
 
             elif params["min_value"] is None:
                 return [{
-                    "template": column_name + " must be less than $max at least $mostly% of the time.",
+                    "template": column_name + " must be less than $max_value at least $mostly% of the time.",
                     "params": params
                 }]
 
             elif params["max_value"] is None:
                 return [{
-                    "template": column_name + " must be more than $min at least $mostly% of the time.",
+                    "template": column_name + " must be more than $min_value at least $mostly% of the time.",
                     "params": params
                 }]
 
         else:
             if params["min_value"] is not None and params["max_value"] is not None:
                 return [{
-                    "template": column_name + " must always be between $min and $max.",
+                    "template": column_name + " must always be between $min_value and $max_value.",
                     "params": params
                 }]
 
             elif params["min_value"] is None:
                 return [{
-                    "template": column_name + " must always be less than $max.",
+                    "template": column_name + " must always be less than $max_value.",
                     "params": params
                 }]
 
             elif params["max_value"] is None:
                 return [{
-                    "template": column_name + " must always be more than $min.",
+                    "template": column_name + " must always be more than $min_value.",
                     "params": params
                 }]
 

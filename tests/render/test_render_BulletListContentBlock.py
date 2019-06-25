@@ -2,6 +2,7 @@ from great_expectations.render.renderer.content_block import BulletListContentBl
 
 import glob
 import json
+from string import Template as pTemplate
 
 
 def test_all_expectations_using_test_definitions():
@@ -48,6 +49,9 @@ def test_all_expectations_using_test_definitions():
                     for el in render_result:
                         assert set(el.keys()) == {
                             'template', 'params'}
+                        pTemplate(el["template"]).substitute(
+                            el["params"]
+                        )
 
                 except AssertionError:
                     # If the assertions fail, then print the expectation to allow debugging.
