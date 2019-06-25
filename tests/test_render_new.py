@@ -3,7 +3,12 @@ import pytest
 import json
 
 import great_expectations as ge
-from great_expectations.render.renderer import DescriptivePageRenderer, DescriptiveColumnSectionRenderer, PrescriptiveColumnSectionRenderer
+from great_expectations.render.renderer import (
+    DescriptivePageRenderer,
+    DescriptiveColumnSectionRenderer,
+    PrescriptiveColumnSectionRenderer,
+    PrescriptivePageRenderer,
+)
 from great_expectations.render.view import PageView
 from great_expectations.render.renderer.content_block import ValueListContentBlockRenderer
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
@@ -79,16 +84,22 @@ def test_content_block_list_available_expectations(expectations):
     assert available_expectations == ['expect_column_values_to_be_in_set']
 
 
-# def test_render_profiled_fixtures():
+def test_render_profiled_fixtures():
+    expectations = json.load(
+        open('tests/render/fixtures/BasicDatasetProfiler_expectations.json')
+    )
 
-#     evrs = json.read(file())
+    rendered_json = PrescriptivePageRenderer.render(expectations)
+    # print(json.dumps(rendered_json, indent=2))
+    rendered_page = PageView.render(rendered_json)
+    assert rendered_page != None
 
-#     rendered_json = DescriptivePageRenderer.render(evrs)
-#     rendered_page = PageView.render(rendered_json)
-#     assert rendered_page != None
+    with open('./test.html', 'w') as f:
+        f.write(rendered_page)
 
-#     with open('./test.html', 'w') as f:
-#         f.write(rendered_page)
+    # print(rendered_page)
+
+    # assert False
 
 
 def test_full_oobe_flow():
@@ -101,8 +112,10 @@ def test_full_oobe_flow():
     # print(json.dumps(evrs, indent=2))
 
     rendered_json = DescriptivePageRenderer.render(evrs)
+    # print(json.dumps(rendered_json, indent=2))
     rendered_page = PageView.render(rendered_json)
     assert rendered_page != None
 
-    with open('./test.html', 'w') as f:
-        f.write(rendered_page)
+    # assert False
+    # with open('./test.html', 'w') as f:
+    #     f.write(rendered_page)
