@@ -1,9 +1,10 @@
-from .content_block import ContentBlock
+from .content_block import ContentBlockRenderer
 
-class TableContentBlock(ContentBlock):
+
+class TableContentBlockRenderer(ContentBlockRenderer):
 
     @classmethod
-    def render(cls, ge_object, header_row = []):
+    def render(cls, ge_object, header_row=[]):
         """Each expectation method should return a list of rows"""
         if isinstance(ge_object, list):
             table_entries = []
@@ -18,8 +19,8 @@ class TableContentBlock(ContentBlock):
             expectation_type = cls._get_expectation_type(ge_object)
             extra_rows_fn = getattr(cls, expectation_type, None)
             if extra_rows_fn is not None:
-                    rows = extra_rows_fn(ge_object)
-                    table_entries.extend(rows)
+                rows = extra_rows_fn(ge_object)
+                table_entries.extend(rows)
 
         return {
             "content_block_type": "table",
@@ -60,12 +61,14 @@ class TableContentBlock(ContentBlock):
     def expect_column_values_to_not_be_null(cls, ge_object):
         return [
             ["Missing (n)", ge_object["result"]["unexpected_count"]],
-            ["Missing (%)", "%.1f%%" % ge_object["result"]["unexpected_percent"]]
+            ["Missing (%)", "%.1f%%" %
+             ge_object["result"]["unexpected_percent"]]
         ]
 
     @classmethod
     def expect_column_values_to_be_null(cls, ge_object):
         return [
             ["Populated (n)", ge_object["result"]["unexpected_count"]],
-            ["Populated (%)", "%.1f%%" % ge_object["result"]["unexpected_percent"]]
+            ["Populated (%)", "%.1f%%" %
+             ge_object["result"]["unexpected_percent"]]
         ]

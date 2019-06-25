@@ -1,7 +1,7 @@
 from ..renderer import Renderer
 
 
-class ContentBlock(Renderer):
+class ContentBlockRenderer(Renderer):
 
     _content_block_type = "text"
 
@@ -47,9 +47,9 @@ class ContentBlock(Renderer):
         return expectations
 
 
-class HeaderContentBlock(ContentBlock):
+class HeaderContentBlockRenderer(ContentBlockRenderer):
     pass
 
 
-class ColumnTypeContentBlock(ContentBlock):
+class ColumnTypeContentBlockRenderer(ContentBlockRenderer):
     pass
