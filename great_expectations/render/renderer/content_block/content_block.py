@@ -28,6 +28,10 @@ class ContentBlockRenderer(Renderer):
                     result = content_block_fn(obj_, **kwargs)
                     blocks += result
 
+                else:
+                    result = cls.missing_content_block_fn(obj_, **kwargs)
+                    blocks += result
+
             return {
                 "content_block_type": cls._content_block_type,
                 cls._content_block_type: blocks
@@ -45,6 +49,10 @@ class ContentBlockRenderer(Renderer):
     def list_available_expectations(cls):
         expectations = [attr for attr in dir(cls) if attr[:7] == "expect_"]
         return expectations
+
+    @classmethod
+    def missing_content_block_fn(cls, obj, **kwargs):
+        return []
 
 
 class HeaderContentBlockRenderer(ContentBlockRenderer):
