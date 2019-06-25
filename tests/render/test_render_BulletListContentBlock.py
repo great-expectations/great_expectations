@@ -23,10 +23,14 @@ def test_all_expectations_using_test_definitions():
 
             for test in dataset["tests"]:
                 # Construct an expectation from the test.
-                fake_expectation = {
-                    "expectation_type": test_definitions["expectation_type"],
-                    "kwargs": test["in"],
-                }
+                if type(test["in"]) == dict:
+                    fake_expectation = {
+                        "expectation_type": test_definitions["expectation_type"],
+                        "kwargs": test["in"],
+                    }
+                else:
+                    # This would be a good place to put a kwarg-to-arg converter
+                    continue
 
                 try:
                     # Attempt to render it
@@ -52,10 +56,15 @@ def test_all_expectations_using_test_definitions():
                     all_true = False
                     failure_count += 1
 
+                except Exception as e:
+                    print(fake_expectation)
+                    raise(e)
+
                 total_count += 1
 
     # print(len(types))
     # print(len(set(types)))
     print(total_count-failure_count, "of", total_count,
           "suceeded (", 1-failure_count*1./total_count, ")")
+
     assert all_true
