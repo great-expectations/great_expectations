@@ -543,6 +543,10 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                                           parse_strings_as_datetimes=None,
                                           result_format=None, include_config=False, catch_exceptions=None, meta=None
                                           ):
+        if value_set is None:
+            # vacuously true
+            return True
+
         if parse_strings_as_datetimes:
             parsed_value_set = self._parse_value_set(value_set)
         else:

@@ -302,6 +302,9 @@ class SparkDFDataset(MetaSparkDFDataset):
             catch_exceptions=None,
             meta=None,
     ):
+        if value_set is None:
+            # vacuously true
+            return column.withColumn('__success', lambda x: True)
         if parse_strings_as_datetimes:
             column = self._apply_dateutil_parse(column)
             value_set = [parse(value) if isinstance(value, string_types) else value for value in value_set]
