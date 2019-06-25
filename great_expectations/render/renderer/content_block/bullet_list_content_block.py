@@ -293,7 +293,7 @@ class BulletListContentBlock(ContentBlock):
         else:
             # Note: this pattern for type conversion seems to work reasonably well.
             # Note: I'm not 100% sure that this is the right place to encode details like how many decimals to show.
-            params["mostly_pct"] = ".1f" % (params["mostly"]*100)
+            params["mostly_pct"] = "%.1f" % (params["mostly"]*100,)
             return [{
                 "template": "Values in $column_A and $column_B must be equal at least $mostly_pct % of the time.",
                 "params": params

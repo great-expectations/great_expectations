@@ -8,7 +8,8 @@
           "title": "This test should never run!",
           "exact_match_out": false,
           "suppress_test_for": ["pandas", "sqlalchemy", "spark"],
-          "in": { "column": "a" },
+          "in": ["a"],
+          "kwargs": {},
           "out": {
             "success": true,
             "meta": {
