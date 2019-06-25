@@ -1737,19 +1737,28 @@ class Dataset(MetaDataset):
         See Also:
             expect_column_distinct_values_to_contain_set
         """
-        if parse_strings_as_datetimes:
-            parsed_value_set = self._parse_value_set(value_set)
-        else:
-            parsed_value_set = value_set
 
         observed_value_counts = self.get_column_value_counts(column)
-        expected_value_set = set(parsed_value_set)
-        observed_value_set = set(observed_value_counts.index)
+
+        if value_set is None:
+            # Vacuously true
+            success = True
+            parsed_observed_value_set = set(observed_value_counts.index)
+        else:
+            if parse_strings_as_datetimes:
+                parsed_value_set = self._parse_value_set(value_set)
+                parsed_observed_value_set = set(self._parse_value_set(observed_value_counts.index))
+            else:
+                parsed_value_set = value_set
+                parsed_observed_value_set = set(observed_value_counts.index)
+
+            expected_value_set = set(parsed_value_set)
+            success = parsed_observed_value_set.issubset(expected_value_set)
 
         return {
-            "success": observed_value_set.issubset(expected_value_set),
+            "success": success,
             "result": {
-                "observed_value": sorted(list(observed_value_set)),
+                "observed_value": sorted(list(parsed_observed_value_set)),
                 "details": {
                     "value_counts": observed_value_counts
                 }
