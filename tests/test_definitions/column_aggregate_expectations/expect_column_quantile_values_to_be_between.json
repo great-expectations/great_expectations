@@ -22,11 +22,17 @@
             "exact_match_out": false,
             "in": {
               "column": "norm_0_1",
-              "quantile_value_ranges": [[null, -3], [3, null]]
+              "quantile_ranges": {
+                "quantiles": [0.0, 1.0],
+                "value_ranges": [[null, -3], [3, null]]
+              }
             },
             "out": {
               "success": true,
-              "observed_value": [-3.40197, 3.58541]
+              "observed_value": {
+                "quantiles": [0.0, 1.0],
+                "values": [-3.40197, 3.58541]
+              }
             },
             "tolerance": 0.1,
             "_note": "The large tolerance here documents implementation differences between pandas, sql, and spark wrt interpolation behavior / specific ntile calculation"
@@ -36,21 +42,50 @@
             "exact_match_out": false,
             "in": {
               "column": "norm_0_1",
-              "quantile_value_ranges": [[null, -3], [-0.8, -0.6], [-0.1, 0.1], [0.6, 0.8], [3, null]]
+              "quantile_ranges": {
+                "quantiles": [0.0, 0.25, 0.5, 0.75, 1.0],
+                "value_ranges": [[null, -3], [-0.8, -0.6], [-0.1, 0.1], [0.6, 0.8], [3, null]]
+              }
             },
             "out": {
               "success": true,
-              "observed_value": [-3.40197, -0.70025, -0.03871, 0.62116, 3.58541]
+              "observed_value": {
+                "quantiles": [0.0, 0.25, 0.5, 0.75, 1.0],
+                "values": [-3.40197, -0.70025, -0.03871, 0.62116, 3.58541]
+              }
             },
             "tolerance": 0.1,
             "_note": "The large tolerance here documents implementation differences between pandas, sql, and spark wrt interpolation behavior / specific ntile calculation"
         },
         {
+          "title": "Basic positive test: uneven spacing",
+          "exact_match_out": false,
+          "in": {
+            "column": "norm_0_1",
+            "quantile_ranges": {
+              "quantiles": [0.0, 0.05, 0.25, 0.5, 0.75, 0.95, 1.0],
+              "value_ranges": [[null, -3], [-2, -1.5], [-0.8, -0.6], [-0.1, 0.1], [0.6, 0.8], [1.5, 2], [3, null]]
+            }
+          },
+          "out": {
+            "success": true,
+            "observed_value": {
+              "quantiles": [0.0, 0.05, 0.25, 0.5, 0.75, 0.95, 1.0],
+              "values": [-3.40196868, -1.72089571, -0.70115633, -0.04059954,  0.62130846, 1.6855355 ,  3.58540782]
+            }
+          },
+          "tolerance": 0.1,
+          "_note": "The large tolerance here documents implementation differences between pandas, sql, and spark wrt interpolation behavior / specific ntile calculation"
+      },
+        {
             "title": "Basic negative test: normal quartiles, wrong distribution",
             "exact_match_out": false,
             "in": {
               "column": "norm_1_1",
-              "quantile_value_ranges": [[null, -3], [-0.8, -0.6], [-0.1, 0.1], [0.6, 0.8], [3, null]]
+              "quantile_ranges": {
+                "quantiles": [0.0, 0.25, 0.5, 0.75, 1.0],
+                "value_ranges": [[null, -3], [-0.8, -0.6], [-0.1, 0.1], [0.6, 0.8], [3, null]]
+              }
             },
             "out": {
               "success": false

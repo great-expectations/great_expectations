@@ -155,3 +155,24 @@ def test_get_column_value_counts(context):
     expected.index.name = "value"
     expected.name = "count"
     assert res.equals(expected)
+
+def test_sqlalchemy_quantiles():
+    # We should be able to provide really weird quantile requests that cause a value error. Hopefully we're conservative enough that noone would want these...
+    data = {
+            "x": [2.0, 5.0],
+            "y": [5, 5],
+            "z": [0, 10],
+            "n": [0, None],
+            "b": [True, False]
+        }
+    dataset = get_dataset('sqlite', data, None)
+    # Illegal, must be in ascending order
+    with pytest.raises(ValueError) as exc:
+        quantiles = dataset.get_column_quantiles("x", [0.0, 0.5, 0.7, 0.5])
+        assert "quantiles must be provided in ascending order" in str(exc)
+
+    # Getting such specific quantiles would require more bins that we'll allow in sql (200)
+    with pytest.raises(ValueError) as exc:
+        quantiles = dataset.get_column_quantiles("x", [0.0, 0.31, 0.3113, 0.400431, 0.673458])
+        assert "would require more than 200 bins" in str(exc)
+    

@@ -244,13 +244,13 @@ class SparkDFDataset(MetaSparkDFDataset):
 
         # Note that this can be an expensive computation; we are not exposing
         # spark's ability to estimate.
-        # We add two to 2 * n_values to maintain a legitimate percentile 
+        # We add two to 2 * n_values to maintain a legitimate quantile 
         # in the degnerate case when n_values = 0
         result = self.spark_df.approxQuantile(column, [0.5, 0.5 + (1 / (2 + (2 * self.get_row_count())))], 0)
         return np.mean(result)
 
-    def get_column_ntiles(self, column, ntiles):
-        return self.spark_df.approxQuantile(column, list(ntiles), 0)
+    def get_column_quantiles(self, column, quantiles):
+        return self.spark_df.approxQuantile(column, list(quantiles), 0)
 
     def get_column_stdev(self, column):
         return self.spark_df.select(stddev_samp(col(column))).collect()[0][0]
