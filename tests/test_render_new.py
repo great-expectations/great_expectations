@@ -5,7 +5,7 @@ import json
 import great_expectations as ge
 from great_expectations.render.renderer import DescriptivePageRenderer, DescriptiveColumnSectionRenderer, PrescriptiveColumnSectionRenderer
 from great_expectations.render.view import DescriptivePageView
-from great_expectations.render.renderer.content_block import ValueListContentBlock
+from great_expectations.render.renderer.content_block import ValueListContentBlockRenderer
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 
 
@@ -75,7 +75,7 @@ def test_render_prescriptive_column_section_renderer(expectations):
 
 
 def test_content_block_list_available_expectations(expectations):
-    available_expectations = ValueListContentBlock.list_available_expectations()
+    available_expectations = ValueListContentBlockRenderer.list_available_expectations()
     assert available_expectations == ['expect_column_values_to_be_in_set']
 
 
