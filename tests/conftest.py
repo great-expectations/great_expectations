@@ -41,6 +41,7 @@ except (ImportError, sa.exc.SQLAlchemyError):
 # except (ImportError, sa.exc.SQLAlchemyError):
 #     warnings.warn("No mysql context available for testing.")
 
+
 @pytest.fixture
 def empty_expectation_suite():
     expectation_suite = {
@@ -166,11 +167,14 @@ def titanic_data_context(tmp_path_factory):
     project_path = str(tmp_path_factory.mktemp('titanic_data_context'))
     context_path = os.path.join(project_path, "great_expectations")
     safe_mmkdir(os.path.join(context_path, "expectations"), exist_ok=True)
-    safe_mmkdir(os.path.join(context_path, "unexpected/validations"), exist_ok=True)
+    safe_mmkdir(os.path.join(
+        context_path, "unexpected/validations"), exist_ok=True)
     data_path = os.path.join(context_path, "../data")
     safe_mmkdir(os.path.join(data_path), exist_ok=True)
-    shutil.copy("./tests/test_fixtures/great_expectations_titanic.yml", str(os.path.join(context_path, "great_expectations.yml")))
-    shutil.copy("./tests/test_sets/Titanic.csv", str(os.path.join(context_path, "../data/Titanic.csv")))
+    shutil.copy("./tests/test_fixtures/great_expectations_titanic.yml",
+                str(os.path.join(context_path, "great_expectations.yml")))
+    shutil.copy("./tests/test_sets/Titanic.csv",
+                str(os.path.join(context_path, "../data/Titanic.csv")))
     return ge.data_context.DataContext(context_path)
 
 
@@ -180,10 +184,12 @@ def data_context(tmp_path_factory):
     project_path = str(tmp_path_factory.mktemp('data_context'))
     context_path = os.path.join(project_path, "great_expectations")
     asset_config_path = os.path.join(context_path, "expectations")
-    safe_mmkdir(os.path.join(asset_config_path, "mydatasource/mygenerator/parameterized_expectation_suite_fixture"), exist_ok=True)
-    shutil.copy("./tests/test_fixtures/great_expectations_basic.yml", str(os.path.join(context_path, "great_expectations.yml")))
-    shutil.copy("./tests/test_fixtures/expectation_suites/parameterized_expectation_suite_fixture.json", 
-        os.path.join(asset_config_path, "mydatasource/mygenerator/parameterized_expectation_suite_fixture/default.json"))
+    safe_mmkdir(os.path.join(asset_config_path,
+                             "mydatasource/mygenerator/parameterized_expectation_suite_fixture"), exist_ok=True)
+    shutil.copy("./tests/test_fixtures/great_expectations_basic.yml",
+                str(os.path.join(context_path, "great_expectations.yml")))
+    shutil.copy("./tests/test_fixtures/expectation_suites/parameterized_expectation_suite_fixture.json",
+                os.path.join(asset_config_path, "mydatasource/mygenerator/parameterized_expectation_suite_fixture/default.json"))
     return ge.data_context.DataContext(context_path)
 
 
