@@ -2,10 +2,10 @@ import json
 from string import Template
 
 from .renderer import Renderer
-from .content_block import ValueListContentBlock
-from .content_block import GraphContentBlock
-from .content_block import TableContentBlock
-from .content_block import BulletListContentBlock
+from .content_block import ValueListContentBlockRenderer
+from .content_block import GraphContentBlockRenderer
+from .content_block import TableContentBlockRenderer
+from .content_block import PrescriptiveBulletListContentBlockRenderer
 
 
 class ColumnSectionRenderer(Renderer):
@@ -45,7 +45,6 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
         cls._render_values_set(evrs, content_blocks)
         cls._render_unrecognized(evrs, content_blocks)
 
-
         # FIXME: shown here as an example of bullet list
         content_blocks["summary_list"] = {
             "content_block_type": "bullet_list",
@@ -60,7 +59,6 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
                 }
             ]
         }
-
 
         return {
             "section_name": column,
@@ -105,9 +103,11 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
             evrs,
             "expect_column_values_to_not_be_null"
         )
-        evrs = [evr for evr in [unique_n, unique_proportion, null_evr] if evr is not None]
+        evrs = [evr for evr in [
+            unique_n, unique_proportion, null_evr] if evr is not None]
         if len(evrs) > 0:
-            content_blocks["overview_table"] = TableContentBlock.render(evrs)
+            content_blocks["overview_table"] = TableContentBlockRenderer.render(
+                evrs)
 
     @classmethod
     def _render_stats_table(cls, evrs, content_blocks):
@@ -125,7 +125,8 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
         )
         evrs = [evr for evr in [min_evr, mean_evr, max_evr] if evr is not None]
         if len(evrs) > 0:
-            content_blocks["stats_table"] = TableContentBlock.render(evrs)
+            content_blocks["stats_table"] = TableContentBlockRenderer.render(
+                evrs)
 
     @classmethod
     def _render_values_set(cls, evrs, content_blocks):
@@ -145,10 +146,10 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
             return
 
         if len(set_evr["result"][result_key]) > 10:
-            content_blocks["value_list"] = ValueListContentBlock.render(
+            content_blocks["value_list"] = ValueListContentBlockRenderer.render(
                 set_evr, result_key=result_key)
         else:
-            content_blocks["value_graph"] = GraphContentBlock.render(
+            content_blocks["value_graph"] = GraphContentBlockRenderer.render(
                 set_evr, result_key=result_key)
 
     @classmethod
@@ -197,7 +198,8 @@ class PrescriptiveColumnSectionRenderer(ColumnSectionRenderer):
 
     @classmethod
     def _render_bullet_list(cls, expectations, content_blocks):
-        content = BulletListContentBlock.render(expectations)
+        content = PrescriptiveBulletListContentBlockRenderer.render(
+            expectations)
         content_blocks.append(content)
 
         return [], content_blocks

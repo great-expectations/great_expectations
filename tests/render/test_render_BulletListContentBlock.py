@@ -1,5 +1,5 @@
 from great_expectations.render.renderer.content_block import (
-    BulletListContentBlock,
+    PrescriptiveBulletListContentBlockRenderer,
 )
 from great_expectations.render.renderer.content_block.bullet_list_content_block import (
     substitute_none_for_missing,
@@ -55,7 +55,7 @@ def test_all_expectations_using_test_definitions():
 
                 try:
                     # Attempt to render it
-                    render_result = BulletListContentBlock.render(
+                    render_result = PrescriptiveBulletListContentBlockRenderer.render(
                         fake_expectation)
                     # print(fake_expectation)
 

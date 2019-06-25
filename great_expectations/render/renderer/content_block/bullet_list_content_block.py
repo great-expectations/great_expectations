@@ -1,6 +1,6 @@
 import copy
 
-from .content_block import ContentBlock
+from .content_block import ContentBlockRenderer
 
 
 def substitute_none_for_missing(kwargs, kwarg_list):
@@ -24,11 +24,18 @@ def substitute_none_for_missing(kwargs, kwarg_list):
     return new_kwargs
 
 
-class BulletListContentBlock(ContentBlock):
+# ---> # class PrescriptiveBulletListContentBlockRenderer(BulletListContentBlockRenderer):
+# class DescriptiveBulletListContentBlockRenderer(BulletListContentBlockRenderer):
+# class FailedExpectationBulletListContentBlockRenderer(BulletListContentBlockRenderer):
+
+
+# class FailedExpectationFancyBulletListContentBlockRenderer(BulletListFancyContentBlockRenderer):
+class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
+    # class BulletListContentBlock(ContentBlock):
     _content_block_type = "bullet_list"
 
     @classmethod
-    def expect_column_to_exist(cls, expectation):
+    def expect_column_to_exist(cls, expectation, styling=None):
         params = substitute_none_for_missing(
             expectation["kwargs"],
             ["column", "column_index"],
@@ -44,8 +51,18 @@ class BulletListContentBlock(ContentBlock):
             #!!! FIXME: this works for 4th, 5th, 6th, etc, but is dumb about 1th, 2th, and 3th.
             params["column_indexth"] = str(params["column_index"])+"th"
             return [{
-                "template": "$column must be the $column_indexth field.",
+                "template": "$column must be the $column_indexth field",
                 "params": params,
+                "styling": {
+                    "classes"
+                    "tooltip": "blah",
+                    "params": {
+                        "min_value": {
+                            "classes": ["my_css_value_class"],
+                            "tooltip_text": "testing",
+                        }
+                    }
+                }
             }]
 
     @classmethod
