@@ -24,14 +24,11 @@ def substitute_none_for_missing(kwargs, kwarg_list):
     return new_kwargs
 
 
-# ---> # class PrescriptiveBulletListContentBlockRenderer(BulletListContentBlockRenderer):
 # class DescriptiveBulletListContentBlockRenderer(BulletListContentBlockRenderer):
 # class FailedExpectationBulletListContentBlockRenderer(BulletListContentBlockRenderer):
+# class FailedExpectationBulletListContentBlockRenderer(BulletListContentBlockRenderer):
 
-
-# class FailedExpectationFancyBulletListContentBlockRenderer(BulletListFancyContentBlockRenderer):
 class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
-    # class BulletListContentBlock(ContentBlock):
     _content_block_type = "bullet_list"
 
     @classmethod

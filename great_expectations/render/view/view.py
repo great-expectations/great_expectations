@@ -79,5 +79,5 @@ class PageView(View):
     _template = "page.j2"
 
 
-class DescriptivePageView(PageView):
-    pass
+# class DescriptivePageView(PageView):
+#     pass

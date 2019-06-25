@@ -1,1 +1,1 @@
-from .view import DescriptivePageView
+from .view import PageView

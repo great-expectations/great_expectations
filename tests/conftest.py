@@ -14,7 +14,7 @@ from great_expectations.data_context.util import safe_mmkdir
 
 from .test_utils import get_dataset
 
-CONTEXTS = ['PandasDataset', 'sqlite', 'SparkDFDataset']
+CONTEXTS = ['PandasDataset', 'sqlite']  # , 'SparkDFDataset']
 
 #####
 #
