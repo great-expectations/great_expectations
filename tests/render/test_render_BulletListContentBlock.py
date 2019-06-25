@@ -1,8 +1,28 @@
-from great_expectations.render.renderer.content_block import BulletListContentBlock
+from great_expectations.render.renderer.content_block import (
+    BulletListContentBlock,
+)
+from great_expectations.render.renderer.content_block.bullet_list_content_block import (
+    substitute_none_for_missing,
+)
 
 import glob
 import json
 from string import Template as pTemplate
+
+
+def test_substitute_none_for_missing():
+    assert substitute_none_for_missing(
+        kwargs={"a": 1, "b": 2},
+        kwarg_list=["c", "d"]
+    ) == {"a": 1, "b": 2, "c": None, "d": None}
+
+    my_kwargs = {"a": 1, "b": 2}
+    substitute_none_for_missing(
+        kwargs={"a": 1, "b": 2},
+        kwarg_list=["c", "d"]
+    ) == {"a": 1, "b": 2, "c": None, "d": None}
+    assert my_kwargs == {"a": 1, "b": 2}, \
+        "substitute_none_for_missing should not change input kwargs in place."
 
 
 def test_all_expectations_using_test_definitions():
@@ -39,7 +59,7 @@ def test_all_expectations_using_test_definitions():
                         fake_expectation)
                     # print(fake_expectation)
 
-                    # Assert that the rendered result matches the intended format.
+                    # Assert that the rendered result matches the intended format
                     # Note: THIS DOES NOT TEST CONTENT AT ALL.
                     # Abe 6/22/2019: For the moment, I think it's fine to not test content.
                     # I'm on the fence about the right end state for testing renderers at this level.
@@ -49,6 +69,8 @@ def test_all_expectations_using_test_definitions():
                     for el in render_result:
                         assert set(el.keys()) == {
                             'template', 'params'}
+
+                        # Assert that the template is renderable, with all the right arguments, etc.
                         pTemplate(el["template"]).substitute(
                             el["params"]
                         )
