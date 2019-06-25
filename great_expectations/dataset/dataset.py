@@ -120,7 +120,7 @@ class Dataset(MetaDataset):
         'get_column_mean',
         'get_column_modes',
         'get_column_median',
-        'get_column_ntiles',
+        'get_column_quantiles',
         'get_column_nonnull_count',
         'get_column_stdev',
         'get_column_sum',
@@ -193,13 +193,13 @@ class Dataset(MetaDataset):
         """Returns: any"""
         raise NotImplementedError
 
-    def get_column_ntiles(self, column, ntiles):
-        """Get the values in column closest to the requested percentiles
+    def get_column_quantiles(self, column, quantiles):
+        """Get the values in column closest to the requested quantiles
         Args:
-            ntiles (list of float): the percentiles to return
+            quantiles (list of float): the quantiles to return
         
         Returns:
-            List[any]: the nearest values in the dataset to those ntiles
+            List[any]: the nearest values in the dataset to those quantiles
         """
         raise NotImplementedError
 
@@ -2104,40 +2104,48 @@ class Dataset(MetaDataset):
     def expect_column_quantile_values_to_be_between(
         self,
         column,
-        quantile_value_ranges,
+        quantile_ranges,
         result_format=None,
         include_config=False,
         catch_exceptions=None,
         meta=None,
     ):
-        """Expect column quantiles to be between provided minimum and maximum values.
+        """Expect specific provided column quantiles to be between provided minimum and maximum values.
 
-        The quantile_value_ranges are specified as a list of ranges, and the number of such ranges determines which
-         ntiles should be computed and compared.
-        `expect_column_quantile_values_to_be_between` evenly spaces ntiles between
-        the 0th and 100th percentile (*inclusive*).
+        `quantile_ranges` must be a dictionary with two keys:
+           `quantiles`: (list of float) increasing ordered list of desired quantile values
+           `value_ranges`: (list of lists): Each element in this list consists of a list with two values, a lower
+               and upper bound (inclusive) for the corresponding quantile.
+
 
         For each provided range:
             * min_value and max_value are both inclusive.
-            * If min_value is None, then max_value is treated as an upper bound
-            * If max_value is None, then min_value is treated as a lower bound
+            * If min_value is None, then max_value is treated as an upper bound only
+            * If max_value is None, then min_value is treated as a lower bound only
+
+        The length of the quantiles list and quantile_values list must be equal.
 
         For example:
         ::
             # my_df.my_col = [1,2,2,3,3,3,4]
             >>> my_df.expect_column_quantile_values_to_be_between(
                 "my_col",
-                [[0,1], [2,3], [3,4], [4,5]]
+                {
+                    "quantiles": [0., 0.333, 0.6667, 1.],
+                    "value_ranges": [[0,1], [2,3], [3,4], [4,5]]
+                }
             )
             {
               "success": True,
                 "result": {
-                  "observed_value": [1, 2, 3, 4],
+                  "observed_value": {
+                    "quantiles: [0., 0.333, 0.6667, 1.],
+                    "values": [1, 2, 3, 4],
+                  }
                   "element_count": 7,
                   "missing_count": 0,
                   "missing_percent": 0.0,
                   "details": {
-                    "ntiles": [0.0, 0.3333333333333333, 0.6666666666666666, 1.0],
                     "success_details": [true, true, true, true]
                   }
                 }
@@ -2151,8 +2159,8 @@ class Dataset(MetaDataset):
         Args:
             column (str): \
                 The column name.
-            quantile_value_ranges (List[List or Tuple]): \
-                Value ranges for the column values corresponding to ntiles evenly spaced between 0th and 100th percentile.
+            quantile_ranges (dictionary): \
+                Quantiles and associated value ranges for the column. See above for details.
 
         Other Parameters:
             result_format (str or None): \
@@ -2177,7 +2185,6 @@ class Dataset(MetaDataset):
         Notes:
             These fields in the result object are customized for this expectation:
             ::
-            details.ntiles
             details.success_details
 
         See Also:
@@ -2185,11 +2192,12 @@ class Dataset(MetaDataset):
             expect_column_max_to_be_between
             expect_column_median_to_be_between
         """
-        if len(quantile_value_ranges) < 2:
-            raise ValueError("At least two ranges must be provided (for 0th and 100th percentile)")
+        quantiles = quantile_ranges["quantiles"]
+        quantile_value_ranges = quantile_ranges["value_ranges"]
+        if len(quantiles) != len(quantile_value_ranges):
+            raise ValueError("quntile_values and quantiles must have the same number of elements")
 
-        quantiles = np.linspace(0, 1, len(quantile_value_ranges))
-        quantile_vals = self.get_column_ntiles(column, quantiles)
+        quantile_vals = self.get_column_quantiles(column, quantiles)
         # We explicitly allow "None" to be interpreted as +/- infinity
         comparison_quantile_ranges = [
             [lower_bound or -np.inf, upper_bound or np.inf]
@@ -2203,9 +2211,11 @@ class Dataset(MetaDataset):
         return {
             "success": np.all(success_details),
             "result": {
-                "observed_value": quantile_vals,
-                "details": {
+                "observed_value": {
                     "quantiles": quantiles,
+                    "values": quantile_vals
+                },
+                "details": {
                     "success_details": success_details
                 }
             }
