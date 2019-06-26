@@ -207,6 +207,20 @@ class Dataset(MetaDataset):
         """Returns: float"""
         raise NotImplementedError
 
+    def get_column_partition(self, column, bins='uniform', n_bins=10):
+        if bins == 'uniform':
+            # TODO: in the event that we shift the compute model for
+            # min and max to have a single pass, use that instead of
+            # quantiles for clarity
+            min_, max_ = self.get_column_quantiles(column, [0.0, 1.0])
+            bins = np.linspace(start=min_, stop=max_, num=n_bins+1)
+        elif bins in ['ntile', 'quantile', 'percentile']:
+            bins = self.get_column_quantiles(column, np.linspace(
+                start=0, stop=1, num=n_bins+1))
+        else:
+            raise ValueError("Invalid parameter for bins argument")
+        return bins
+
     def get_column_hist(self, column, bins):
         """Returns: List[int], a list of counts corresponding to bins"""
         raise NotImplementedError
