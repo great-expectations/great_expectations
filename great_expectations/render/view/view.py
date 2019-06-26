@@ -22,6 +22,9 @@ class PrettyPrintTemplate(object):
         print(json.dumps(document, indent=indent))
 
 
+# Abe 2019/06/26: This View should probably actually be called JinjaView or something similar.
+# Down the road, I expect to wind up with class hierarchy along the lines of:
+#   View > JinjaView > GEContentBlockJinjaView
 class View(object):
     """Defines a method for converting a document to human-consumable form"""
 
@@ -51,18 +54,6 @@ class View(object):
         return env.get_template(template)
 
 
-# class EVRView(View):
-#     pass
-
-
-# class ExpectationsView(View):
-#     pass
-
-
-# class DataProfileView(View):
-#     pass
-
-
 class ColumnHeaderView(View):
     _template = "header.j2"
 
@@ -77,7 +68,3 @@ class ColumnSectionView(View):
 
 class PageView(View):
     _template = "page.j2"
-
-
-# class DescriptivePageView(PageView):
-#     pass
