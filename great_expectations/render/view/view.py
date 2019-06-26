@@ -51,16 +51,16 @@ class View(object):
         return env.get_template(template)
 
 
-class EVRView(View):
-    pass
+# class EVRView(View):
+#     pass
 
 
-class ExpectationsView(View):
-    pass
+# class ExpectationsView(View):
+#     pass
 
 
-class DataProfileView(View):
-    pass
+# class DataProfileView(View):
+#     pass
 
 
 class ColumnHeaderView(View):

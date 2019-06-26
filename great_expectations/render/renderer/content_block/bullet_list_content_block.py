@@ -54,7 +54,7 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
 
         if params["column_index"] == None:
             return [{
-                "template": "$column is a required field.",
+                "template": "{{column}} is a required field.",
                 "params": params,
             }]
 

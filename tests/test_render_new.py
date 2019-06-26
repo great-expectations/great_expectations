@@ -97,9 +97,9 @@ def test_render_profiled_fixtures():
     with open('./test.html', 'w') as f:
         f.write(rendered_page)
 
-    # print(rendered_page)
+    print(rendered_page)
 
-    # assert False
+    assert False
 
 
 def test_full_oobe_flow():
