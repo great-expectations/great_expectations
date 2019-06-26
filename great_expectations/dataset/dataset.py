@@ -3150,6 +3150,15 @@ class Dataset(MetaDataset):
             expect_column_bootstrapped_ks_test_p_value_to_be_greater_than
 
         """
+        if partition_object is None:
+            # NOTE: we are *not* specifying a tail_weight_holdout by default.
+            bins = self.get_column_partition(column)
+            weights = self.get_column_hist(column, bins)
+            partition_object = {
+                "bins": bins,
+                "weights": weights
+            }
+
         if not is_valid_partition_object(partition_object):
             raise ValueError("Invalid partition object.")
 
@@ -3204,8 +3213,13 @@ class Dataset(MetaDataset):
             else:
                 observed_value = kl_divergence
 
+            if threshold is None:
+                success = True
+            else:
+                success = kl_divergence <= threshold
+
             return_obj = {
-                "success": kl_divergence <= threshold,
+                "success": success,
                 "result": {
                     "observed_value": observed_value,
                     "details": {
@@ -3325,8 +3339,13 @@ class Dataset(MetaDataset):
             else:
                 observed_value = kl_divergence
 
+            if threshold is None:
+                success = True
+            else:
+                success = kl_divergence <= threshold
+
             return_obj = {
-                    "success": kl_divergence <= threshold,
+                    "success": success,
                     "result": {
                         "observed_value": observed_value,
                         "details": {
