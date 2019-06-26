@@ -1,14 +1,14 @@
 {# {% if not nowrap %}{% extends "widget.j2" %}{% endif %} #}
 {% block sections %}
     {% for section in sections %}
-    <div id="section-{{loop.index}}" class="ge-section" style="clear:both; margin-bottom: 50px;">
+    <div id="section-{{loop.index}}" class="ge-section container-fluid" style="clear:both; margin-bottom: 50px;">
         {% set section_loop = loop %}
         {% for content_block in section["content_blocks"] %}
             {% set content_block_loop = loop %}
             {% if content_block["content_block_type"] == "header" %}
                 {% include 'header.j2' %}
             {% elif content_block["content_block_type"] == "text" %}
-                <div style="width:100%">
+                <div class="col-12">
                     <p>
                         {{content_block["content"][0]}}
                     </p>
@@ -17,15 +17,13 @@
                 {% include 'value_list.j2' %}
 
             {% elif content_block["content_block_type"] == "bullet_list" %}
-                <div style="width:100%">
-                    <p>
-                        <ul>
-                            {% for bullet_point in content_block["bullet_list"] %}
-                                {# <li>{{ bullet_point | render_template }}</li> #}
-                                <li>{{ bullet_point }}</li>
-                            {% endfor %}
-                        </ul>
-                    </p>
+                <div class="col-12">
+                    <ul>
+                        {% for bullet_point in content_block["bullet_list"] %}
+                            {# <li>{{ bullet_point | render_template }}</li> #}
+                            <li>{{ bullet_point }}</li>
+                        {% endfor %}
+                    </ul>
                 </div>
 
             {% elif content_block["content_block_type"] == "graph" %}
