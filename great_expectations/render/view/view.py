@@ -7,7 +7,23 @@ from jinja2 import (
 
 
 def render_template(template):
-    return pTemplate(template["template"]).substitute(template["params"])
+    if "styling" in template:
+        # print("aaaa")
+        params = template["params"]
+        for parameter, parameter_styling in template["styling"]["params"].items():
+            print(parameter, parameter_styling)
+            params[parameter] = pTemplate('<span style="background-color:#ddd; padding:5px; border-radius:3px;" $classes$attributes>$content</span>').substitute({
+                "classes": parameter_styling.get("classes", ""),
+                "attributes": parameter_styling.get("attributes", ""),
+                "style": parameter_styling.get("style", ""),
+                "content": params[parameter],
+            })
+        string = pTemplate(template["template"]).substitute(params)
+        print(string)
+        return string
+
+    else:
+        return pTemplate(template["template"]).substitute(template["params"])
 
 
 class NoOpTemplate(object):
