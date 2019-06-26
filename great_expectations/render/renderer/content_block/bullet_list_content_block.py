@@ -1,4 +1,5 @@
 import copy
+import datetime
 
 from .content_block import ContentBlockRenderer
 
@@ -40,7 +41,9 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
             },
             "styling": {
                 "params": {
-                    "expectation_type": None
+                    "expectation_type": {
+                        "classes": ""
+                    }
                 }
             },
         }]
@@ -53,9 +56,23 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
         )
 
         if params["column_index"] == None:
+            # return [{
+            #     "template": "{{column}} is a required field.",
+            #     "params": params,
+            # }]
             return [{
-                "template": "{{column}} is a required field.",
+                "template": "$column is a required field "+str(datetime.datetime.now()),
                 "params": params,
+                "styling": {
+                    # "classes"
+                    "tooltip": "blah",
+                    "params": {
+                        "column": {
+                            "classes": "my_css_value_class",
+                            "tooltip_text": "testing",
+                        }
+                    }
+                }
             }]
 
         else:
@@ -65,12 +82,16 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
                 "template": "$column must be the $column_indexth field",
                 "params": params,
                 "styling": {
-                    "classes"
+                    # "classes"
                     "tooltip": "blah",
                     "params": {
-                        "min_value": {
-                            "classes": ["my_css_value_class"],
+                        "column": {
+                            "classes": ["class_A"],
                             "tooltip_text": "testing",
+                        },
+                        "column_index": {
+                            "classes": ["class_B"],
+                            "tooltip_text": "testing msg B",
                         }
                     }
                 }
