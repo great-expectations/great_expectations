@@ -419,8 +419,6 @@ class DataContext(object):
           - a generator_asset
           - an expectation_suite name
 
-          - a generator name
-
         It has a string representation consisting of each of those components delimited by a slash
         """
         if isinstance(data_asset_name, NormalizedDataAssetName):
