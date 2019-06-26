@@ -20,7 +20,7 @@ from great_expectations.data_asset import FileDataAsset
 from great_expectations.data_context import DataContext
 
 from great_expectations.render.renderer import DescriptivePageRenderer, PrescriptivePageRenderer
-from great_expectations.render.view import DescriptivePageView
+from great_expectations.render.view import PageView
 
 
 from .util import cli_message
@@ -186,7 +186,7 @@ def render(render_object):
 
     model = DescriptivePageRenderer.render(raw)
     # model = PrescriptivePageRenderer.render(raw)
-    print(DescriptivePageView.render(model))
+    print(PageView.render(model))
 
 
 @cli.command()

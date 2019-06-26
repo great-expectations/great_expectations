@@ -22,6 +22,7 @@
                         <ul>
                             {% for bullet_point in content_block["bullet_list"] %}
                                 <li>{{ bullet_point | render_template }}</li>
+                                {# <li>{{ bullet_point }}</li> #}
                             {% endfor %}
                         </ul>
                     </p>
