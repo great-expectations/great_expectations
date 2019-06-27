@@ -2,15 +2,16 @@ import pytest
 
 from .conftest import CONTEXTS
 from .test_utils import get_dataset
+from collections import OrderedDict
 
 from great_expectations.dataset import PandasDataset
 
-data = {
+data = OrderedDict({
     "a": [2.0, 5.0],
     "b": [5, 5],
     "c": [0, 10],
     "d": [0, None],
-}
+})
 schemas = {
     "SparkDFDataset": {
         "a": "float",
