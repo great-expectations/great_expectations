@@ -316,11 +316,13 @@ class SparkDFDataset(MetaSparkDFDataset):
 
         if added_min:
             below_bins = hist.pop(0)
+            bins.pop(0)
             if below_bins > 0:
                 logger.warning("Discarding histogram values below lowest bin.")
         
         if added_max:
             above_bins = hist.pop(-1)
+            bins.pop(-1)
             if above_bins > 0:
                 logger.warning("Discarding histogram values above highest bin.")
 
