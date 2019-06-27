@@ -1003,8 +1003,8 @@ class Dataset(MetaDataset):
 
         Notes:
             * min_value and max_value are both inclusive.
-            * If min_value is None, then max_value is treated as an upper bound, and the number of acceptable rows has no minimum.
-            * If max_value is None, then min_value is treated as a lower bound, and the number of acceptable rows has no maximum.
+            * If min_value is None, then max_value is treated as an upper bound, and there is no minimum value checked.
+            * If max_value is None, then min_value is treated as a lower bound, and there is no maximum value checked.
 
         See Also:
             expect_column_value_lengths_to_be_between
@@ -2814,7 +2814,6 @@ class Dataset(MetaDataset):
             * If max_value is None, then min_value is treated as a lower bound
 
         """
-        # TODO spark tests
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
 
