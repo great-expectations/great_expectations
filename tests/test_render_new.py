@@ -105,7 +105,7 @@ def test_render_profiled_fixtures():
 
 
 def test_render_template():
-    assert render.view.view.render_template({
+    assert render.view.view.render_string_template({
         "template": "It was the $first_adj of times; it was the $second_adj of times.",
         "params": {
             "first_adj": "best",
@@ -113,16 +113,7 @@ def test_render_template():
         }
     }) == "It was the best of times; it was the worst of times."
 
-    # assert render.view.view.render_template({
-    #     "template": "It was the $first_adj of times; it was the $second_adj of times.",
-    #     "params": {
-    #         "first_adj": "best",
-    #         "second_adj": "worst",
-    #     },
-    #     "styling": {}
-    # }) == "It was the best of times; it was the worst of times."
-
-    assert render.view.view.render_template({
+    assert render.view.view.render_string_template({
         "template": "It was the $first_adj of times; it was the $second_adj of times.",
         "params": {
             "first_adj": "best",
@@ -135,7 +126,7 @@ def test_render_template():
         }
     }) == 'It was the <span class="badge badge-warning" >best</span> of times; it was the <span class="badge badge-warning" >worst</span> of times.'
 
-    assert render.view.view.render_template({
+    assert render.view.view.render_string_template({
         "template": "It was the $first_adj of times; it was the $second_adj of times.",
         "params": {
             "first_adj": "best",
@@ -153,7 +144,7 @@ def test_render_template():
         }
     }) == 'It was the <span class="badge-error" >best</span> of times; it was the <span class="badge badge-warning" >worst</span> of times.'
 
-    assert render.view.view.render_template({
+    assert render.view.view.render_string_template({
         "template": "It was the $first_adj of times; it was the $second_adj of times.",
         "params": {
             "first_adj": "best",
@@ -168,7 +159,7 @@ def test_render_template():
         }
     }) == 'It was the <span class="badge badge-warning" >best</span> of times; it was the worst of times.'
 
-    assert render.view.view.render_template({
+    assert render.view.view.render_string_template({
         "template": "It was the $first_adj of times; it was the $second_adj of times.",
         "params": {
             "first_adj": "best",

@@ -66,7 +66,7 @@ def render_styling(styling):
     return styling_string
 
 
-def render_styling_from_template(template):
+def render_styling_from_string_template(template):
     # NOTE: We should add some kind of type-checking to template
     """This method is a thin wrapper use to call `render_styling` from within jinja templates.
     """
@@ -77,7 +77,7 @@ def render_styling_from_template(template):
         return ""
 
 
-def render_template(template):
+def render_string_template(template):
     # NOTE: We should add some kind of type-checking to template
 
     if "styling" in template:
@@ -156,8 +156,8 @@ class View(object):
             ),
             autoescape=select_autoescape(['html', 'xml'])
         )
-        env.filters['render_template'] = render_template
-        env.filters['render_styling'] = render_styling_from_template
+        env.filters['render_string_template'] = render_string_template
+        env.filters['render_styling'] = render_styling_from_string_template
         return env.get_template(template)
 
 
