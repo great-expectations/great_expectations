@@ -108,8 +108,8 @@ def pytest_generate_tests(metafunc):
                             "skip": skip_expectation or skip_test,
                         })
 
-                        ids.append(expectation_category + "/" +
-                            c+":"+test_configuration["expectation_type"]+":"+test["title"])
+                        ids.append(c + "/" + expectation_category + "/"
+                            + test_configuration["expectation_type"] + ":" + test["title"])
                         
     metafunc.parametrize(
         "test_case",

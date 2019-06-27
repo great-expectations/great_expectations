@@ -10,6 +10,7 @@ from datetime import datetime
 from dateutil.parser import parse
 
 from .dataset import Dataset
+from .pandas_dataset import PandasDataset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
 from great_expectations.dataset.util import (
     is_valid_partition_object,
@@ -24,7 +25,7 @@ from scipy import stats
 logger = logging.getLogger(__name__)
 
 try:
-    from pyspark.sql.functions import udf, col, stddev_samp
+    from pyspark.sql.functions import udf, col, lit, stddev_samp
     import pyspark.sql.types as sparktypes
     from pyspark.ml.feature import Bucketizer
 except ImportError as e:
@@ -175,6 +176,18 @@ class SparkDFDataset(MetaSparkDFDataset):
         self.spark_df = spark_df
         super(SparkDFDataset, self).__init__(*args, **kwargs)
 
+    def head(self, n=5):
+        """Returns a *PandasDataset* with the first *n* rows of the given Dataset"""
+        return PandasDataset(
+            self.spark_df.limit(n).toPandas(),
+            expectation_suite=self.get_expectation_suite(
+                discard_failed_expectations=False,
+                discard_result_format_kwargs=False,
+                discard_catch_exceptions_kwargs=False,
+                discard_include_configs_kwargs=False
+            )
+        )
+
     def get_row_count(self):
         return self.spark_df.count()
 
@@ -260,7 +273,7 @@ class SparkDFDataset(MetaSparkDFDataset):
 
         # Note that this can be an expensive computation; we are not exposing
         # spark's ability to estimate.
-        # We add two to 2 * n_values to maintain a legitimate quantile 
+        # We add two to 2 * n_values to maintain a legitimate quantile
         # in the degnerate case when n_values = 0
         result = self.spark_df.approxQuantile(column, [0.5, 0.5 + (1 / (2 + (2 * self.get_row_count())))], 0)
         return np.mean(result)
@@ -313,7 +326,7 @@ class SparkDFDataset(MetaSparkDFDataset):
         hist = [0] * (len(bins) - 1)
         for row in hist_rows:
             hist[int(row["buckets"])] = row["count"]
-        
+
         hist[-2] += upper_bound_count
 
         if added_min:
@@ -321,7 +334,7 @@ class SparkDFDataset(MetaSparkDFDataset):
             bins.pop(0)
             if below_bins > 0:
                 logger.warning("Discarding histogram values below lowest bin.")
-        
+
         if added_max:
             above_bins = hist.pop(-1)
             bins.pop(-1)
@@ -329,17 +342,6 @@ class SparkDFDataset(MetaSparkDFDataset):
                 logger.warning("Discarding histogram values above highest bin.")
 
         return hist
-
-        # hist = []
-        # for i in range(0, len(bins) - 1):
-        #     # all bins except last are half-open
-        #     if i == len(bins) - 2:
-        #         max_strictly = False
-        #     else:
-        #         max_strictly = True
-        #     hist.append(
-        #         self.get_column_count_in_range(column, min_val=bins[i], max_val=bins[i + 1], max_strictly=max_strictly)
-        #     )
 
     def get_column_count_in_range(self, column, min_val=None, max_val=None, min_strictly=False, max_strictly=True):
         if min_val is None and max_val is None:
@@ -382,6 +384,9 @@ class SparkDFDataset(MetaSparkDFDataset):
             catch_exceptions=None,
             meta=None,
     ):
+        if value_set is None:
+            # vacuously true
+            return column.withColumn('__success', lit(True))
         if parse_strings_as_datetimes:
             column = self._apply_dateutil_parse(column)
             value_set = [parse(value) if isinstance(value, string_types) else value for value in value_set]
