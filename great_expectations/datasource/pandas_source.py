@@ -51,7 +51,7 @@ class PandasDatasource(Datasource):
         if "path" in batch_kwargs:
             reader_options = batch_kwargs.copy()
             path = reader_options.pop("path")  # We need to remove from the reader
-            reader_options.pop("timestamp")    # ditto timestamp
+            reader_options.pop("timestamp", "")    # ditto timestamp (but missing ok)
 
             reader_method = reader_options.pop("reader_method", None)
             if reader_method is None:

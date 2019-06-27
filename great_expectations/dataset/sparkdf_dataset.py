@@ -24,7 +24,7 @@ from scipy import stats
 logger = logging.getLogger(__name__)
 
 try:
-    from pyspark.sql.functions import udf, col, stddev as stddev_
+    from pyspark.sql.functions import udf, col, lit, stddev as stddev_
     import pyspark.sql.types as sparktypes
 except ImportError as e:
     logger.debug(str(e))
@@ -317,7 +317,7 @@ class SparkDFDataset(MetaSparkDFDataset):
     ):
         if value_set is None:
             # vacuously true
-            return column.withColumn('__success', lambda x: True)
+            return column.withColumn('__success', lit(True))
         if parse_strings_as_datetimes:
             column = self._apply_dateutil_parse(column)
             value_set = [parse(value) if isinstance(value, string_types) else value for value in value_set]
