@@ -207,6 +207,20 @@ class Dataset(MetaDataset):
         """Returns: float"""
         raise NotImplementedError
 
+    def get_column_partition(self, column, bins='uniform', n_bins=10):
+        if bins == 'uniform':
+            # TODO: in the event that we shift the compute model for
+            # min and max to have a single pass, use that instead of
+            # quantiles for clarity
+            min_, max_ = self.get_column_quantiles(column, [0.0, 1.0])
+            bins = np.linspace(start=min_, stop=max_, num=n_bins+1)
+        elif bins in ['ntile', 'quantile', 'percentile']:
+            bins = self.get_column_quantiles(column, np.linspace(
+                start=0, stop=1, num=n_bins+1))
+        else:
+            raise ValueError("Invalid parameter for bins argument")
+        return bins
+
     def get_column_hist(self, column, bins):
         """Returns: List[int], a list of counts corresponding to bins"""
         raise NotImplementedError
@@ -3145,6 +3159,15 @@ class Dataset(MetaDataset):
             expect_column_bootstrapped_ks_test_p_value_to_be_greater_than
 
         """
+        if partition_object is None:
+            # NOTE: we are *not* specifying a tail_weight_holdout by default.
+            bins = self.get_column_partition(column)
+            weights = self.get_column_hist(column, bins)
+            partition_object = {
+                "bins": bins,
+                "weights": weights
+            }
+
         if not is_valid_partition_object(partition_object):
             raise ValueError("Invalid partition object.")
 
@@ -3199,8 +3222,13 @@ class Dataset(MetaDataset):
             else:
                 observed_value = kl_divergence
 
+            if threshold is None:
+                success = True
+            else:
+                success = kl_divergence <= threshold
+
             return_obj = {
-                "success": kl_divergence <= threshold,
+                "success": success,
                 "result": {
                     "observed_value": observed_value,
                     "details": {
@@ -3320,8 +3348,13 @@ class Dataset(MetaDataset):
             else:
                 observed_value = kl_divergence
 
+            if threshold is None:
+                success = True
+            else:
+                success = kl_divergence <= threshold
+
             return_obj = {
-                    "success": kl_divergence <= threshold,
+                    "success": success,
                     "result": {
                         "observed_value": observed_value,
                         "details": {
