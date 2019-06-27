@@ -29,7 +29,7 @@ matrix:
   #   python: 3.7
   #   env: PANDAS=latest
 services:
-  - postgresql
+  - postgresql: "9.4"
   - mysql
 install:
 #   - ./travis-java.sh
