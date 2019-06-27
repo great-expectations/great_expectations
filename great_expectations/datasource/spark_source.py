@@ -62,7 +62,7 @@ class SparkDFDatasource(Datasource):
         reader_options = batch_kwargs.copy()
         if "path" in batch_kwargs:
             path = reader_options.pop("path")  # We remove this so it is not used as a reader option
-            reader_options.pop("timestamp")    # ditto timestamp
+            reader_options.pop("timestamp", "")    # ditto timestamp (but missing ok)
             reader_method = reader_options.pop("reader_method", None)
             if reader_method is None:
                 reader_method = self._guess_reader_method_from_path(path)
