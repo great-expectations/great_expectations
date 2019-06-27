@@ -353,7 +353,11 @@ def test_list_datasources(data_context):
     ]
 
 def test_data_context_result_store(titanic_data_context):
-    data_asset_names = titanic_data_context.profile_datasource("mydatasource")
-    for data_asset_name in data_asset_names:
+    """
+    Test that validation results can be correctly fetched from the configured results store
+    """
+    profiling_results = titanic_data_context.profile_datasource("mydatasource")
+    for profiling_result in profiling_results:
+        data_asset_name = profiling_result[1]['meta']['data_asset_name']
         validation_result = titanic_data_context.get_validation_result(data_asset_name)
         assert data_asset_name in validation_result["meta"]["data_asset_name"]

@@ -461,7 +461,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             try:
                 target_type_list += type_map[type_]
             except KeyError:
-                logger.warning("Unrecognized type: %s" % type_)
+                logger.debug("Unrecognized type: %s" % type_)
 
         if len(target_type_list) == 0:
             raise ValueError("No recognized pandas types in type_list")

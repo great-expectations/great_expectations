@@ -6,6 +6,8 @@ import os
 import json
 import logging
 import sys
+import warnings
+warnings.filterwarnings('ignore')
 
 from pyfiglet import figlet_format
 try:
@@ -35,7 +37,6 @@ from .datasource import (
 
 # Take over the entire GE module logging namespace when running CLI
 logger = logging.getLogger("great_expectations")
-
 
 @click.group()
 @click.version_option(version=__version__)
@@ -184,8 +185,8 @@ def render(render_object):
     with open(render_object, "r") as infile:
         raw = json.load(infile)
 
-    # model = DescriptivePageRenderer.render(raw)
-    model = PrescriptivePageRenderer.render(raw)
+    model = DescriptivePageRenderer.render(raw)
+    # model = PrescriptivePageRenderer.render(raw)
     print(DescriptivePageView.render(model))
 
 
@@ -218,7 +219,7 @@ def main():
     handler = logging.StreamHandler()
     # Just levelname and message Could re-add other info if we want
     formatter = logging.Formatter(
-        '%(levelname)s %(message)s')
+        ' %(message)s')
     # '%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
     handler.setFormatter(formatter)
     logger.addHandler(handler)
