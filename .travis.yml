@@ -28,6 +28,8 @@ matrix:
   # - dist: xenial
   #   python: 3.7
   #   env: PANDAS=latest
+addons:
+  postgresql: "9.4"
 services:
   - postgresql
   - mysql
