@@ -2,6 +2,7 @@ import pytest
 
 import json
 import os
+import copy
 from collections import OrderedDict
 
 import numpy as np
@@ -35,7 +36,8 @@ def test_implementations(context, test):
     schema = test_datasets[test['dataset']]['schemas'].get(context)
     dataset = get_dataset(context, data, schemas=schema)
     func = getattr(dataset, test['func'])
-    result = func(**test.get('kwargs', {}))
+    run_kwargs = copy.deepcopy(test.get('kwargs', {}))
+    result = func(**run_kwargs)
 
     # NOTE: we cannot serialize pd.Series to json directly,
     # so we're going to test our preferred serialization.
@@ -49,8 +51,11 @@ def test_implementations(context, test):
     if 'tolerance' in test:
         assert np.allclose(test['expected'], result, test['tolerance'])
     elif isinstance(test['expected'], list):
-        for item in test['expected']:
-            assert item in result
+        if len(test['expected']) > 0 and isinstance(test['expected'][0], dict):
+            for item in test['expected']:
+                assert item in result
+        else:
+            assert test['expected'] == result
     else:
         assert test['expected'] == result
 

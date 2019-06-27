@@ -454,18 +454,43 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         return float(res[0])
 
     def get_column_hist(self, column, bins):
-        # TODO: this is **terribly** inefficient; consider refactor
         """return a list of counts corresponding to bins"""
-        hist = []
-        for i in range(0, len(bins) - 1):
-            # all bins except last are half-open
-            if i == len(bins) - 2:
-                max_strictly = False
-            else:
-                max_strictly = True
-            hist.append(
-                self.get_column_count_in_range(column, min_val=bins[i], max_val=bins[i + 1], max_strictly=max_strictly)
+        case_conditions = [] 
+        for idx in range(len(bins)-2):
+            case_conditions.append(
+                sa.func.sum(
+                    sa.case(
+                        [
+                            (sa.and_(
+                                bins[idx] <= sa.column(column),
+                                sa.column(column) < bins[idx+1]
+                            ), 1)
+                        ], else_=0
+                    )
+                ).label("bin_" + str(idx))
             )
+        case_conditions.append(
+            sa.func.sum(
+                sa.case(
+                    [
+                        (sa.and_(
+                            bins[-2] <= sa.column(column),
+                            sa.column(column) <= bins[-1]
+                        ), 1)
+                    ], else_=0
+                )
+            ).label("bin_" + str(len(bins)-1))
+        )
+
+        query = sa.select(
+            case_conditions
+        )\
+        .where(
+            sa.column(column) != None,
+        )\
+        .select_from(self._table)
+
+        hist = list(self.engine.execute(query).fetchone())
         return hist
 
     def get_column_count_in_range(self, column, min_val=None, max_val=None, min_strictly=False, max_strictly=True):
