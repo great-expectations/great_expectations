@@ -6,66 +6,85 @@ from jinja2 import (
 )
 
 
+def render_styling(styling):
+    """Adds styling information suitable for an html tag
+
+    styling = {
+        "classes": ["alert", "alert-warning"],
+        "attributes": {
+            "role": "alert",
+            "data-toggle": "popover",
+        },
+        "styles" : {
+            "padding" : "10px",
+            "border-radius" : "2px",
+        }
+    }
+
+    returns a string similar to:
+    'class="alert alert-warning" role="alert" data-toggle="popover" style="padding: 10px; border-radius: 2px"'
+
+    (Note: `render_styling` makes no guarantees about)
+
+    "classes", "attributes" and "styles" are all optional parameters.
+    If they aren't present, they simply won't be rendered.
+
+    Other dictionary keys are also allowed and ignored.
+    This makes it possible for styling objects to be nested, so that different DOM elements
+
+    #NOTE: We should add some kind of type-checking to styling
+    """
+
+    class_list = styling.get("classes", None)
+    if class_list == None:
+        class_str = ""
+    else:
+        class_str = 'class="'+' '.join(class_list)+'" '
+
+    attribute_dict = styling.get("attributes", None)
+    if attribute_dict == None:
+        attribute_str = ""
+    else:
+        attribute_str = ""
+        for k, v in attribute_dict.items():
+            attribute_str += k+'="'+v+'" '
+
+    # TODO: Implement something for `style` here...
+    style_str = ""
+
+    styling_string = pTemplate('$classes$attributes$style').substitute({
+        "classes": class_str,
+        "attributes": attribute_str,
+        "style": style_str,
+    })
+
+    return styling_string
+
+
 def render_styling_from_template(template):
+    # NOTE: We should add some kind of type-checking to template
+    """This method is a thin wrapper use to call `render_styling` from within jinja templates.
+    """
     if "styling" in template:
-
-        class_list = template["styling"].get("classes", None)
-        if class_list == None:
-            class_str = ""
-        else:
-            class_str = 'class="'+' '.join(class_list)+'" '
-
-        attribute_dict = template["styling"].get("attributes", None)
-        if attribute_dict == None:
-            attribute_str = ""
-        else:
-            attribute_str = ""
-            for k, v in attribute_dict.items():
-                attribute_str += k+'="'+v+'" '
-
-        # TODO: Implement something for `style` here...
-        styling_str = ""
-
-        string = pTemplate('$classes$attributes$style').substitute({
-            "classes": class_str,
-            "attributes": attribute_str,
-            "style": styling_str,
-        })
-
-        return string
+        return render_styling(template["styling"])
 
     else:
         return ""
 
 
 def render_template(template):
+    # NOTE: We should add some kind of type-checking to template
+
     if "styling" in template:
-        # print("aaaa")
         params = template["params"]
         for parameter, parameter_styling in template["styling"]["params"].items():
 
-            class_list = parameter_styling.get("classes", None)
-            if class_list == None:
-                class_str = ""
-            else:
-                class_str = 'class="'+' '.join(class_list)+'" '
-
-            attribute_dict = parameter_styling.get("attributes", None)
-            if attribute_dict == None:
-                attribute_str = ""
-            else:
-                attribute_str = ""
-                for k, v in attribute_dict.items():
-                    attribute_str += k+'="'+v+'" '
-
-            params[parameter] = pTemplate('<span $classes$attributes$style>$content</span>').substitute({
-                "classes": class_str,
-                "attributes": attribute_str,
-                "style": parameter_styling.get("style", ""),
+            params[parameter] = pTemplate('<span $styling>$content</span>').substitute({
+                "styling": render_styling(parameter_styling),
                 "content": params[parameter],
             })
+
         string = pTemplate(template["template"]).substitute(params)
-        # print(string)
         return string
 
     else:
