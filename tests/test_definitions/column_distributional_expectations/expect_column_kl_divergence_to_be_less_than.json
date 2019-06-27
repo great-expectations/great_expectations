@@ -201,7 +201,9 @@
         },
         "out": {
           "success": true
-        }
+        },
+        "suppress_test_for": ["sqlite"],
+        "_notes": "this test is suppressed for sqlite since it generates partitions, which may not be possible when sqlite doesn't support the ntile windowing function"
       },
       {
         "title": "norm_0_1_auto_inf partition - tail weights - should fail with no internal holdout",
