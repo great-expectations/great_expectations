@@ -347,105 +347,13 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         return column_median
 
     def get_column_quantiles(self, column, quantiles):
-        # expected_quantiles = np.linspace(0, 1, len(quantiles))
-        # if not np.allclose(expected_quantiles, quantiles):
-        #     raise ValueError("For SqlAlchemy requested ntiles must be evenly spaced.")
-
-        # in sql, we can't just ask for arbitrary quantiles easily. So we'll ask for a superset
-        # of the needed quantiles by computing the minimum gap, then evenly spacing our request
-        # such that all requested quantiles are covered
-        divisor = np.min(np.diff(quantiles))
-        if divisor < 0:
-            raise ValueError("Requested quantiles must be provided in ascending order")
-
-        while not np.all(
-            np.logical_or(
-                np.isclose(
-                    np.ones(len(quantiles)),
-                    np.mod(quantiles / divisor, 1)
-                ), 
-                np.isclose(
-                    np.zeros(len(quantiles)),
-                    np.mod(quantiles / divisor, 1)
-                )
+        selects = []
+        for quantile in quantiles:
+            selects.append(
+                sa.func.percentile_disc(quantile).within_group(sa.column(column).asc())
             )
-        ):
-            divisor = divisor / (1 / np.min(np.mod(quantiles/divisor, 1)))
-            if 1 / divisor > 200:
-                raise ValueError("SQLAlchemy requires evenly spaced bins, and generating evenly spaced\
-                bins that would produce the requested quantiles would require more than 200 bins. Please\
-                select a different set of quantiles.")
-        sql_ntiles = np.linspace(0, 1, int((1/divisor) + 1))
-
-        quantile_indices = []
-        curr_quantile_index = 0
-        for k in range(len(sql_ntiles)):
-            if np.allclose(sql_ntiles[k], quantiles[curr_quantile_index]):
-                quantile_indices.append(k)
-                curr_quantile_index += 1
-
-        if curr_quantile_index < len(quantiles) - 1:
-            # We didn't find matching indices using this split. This just means they chose
-            # a split too complicated for us in sql. For now, we just bail
-            raise ValueError("Unable to build an evenly-spaced quantile split based on the requested\
-            quantiles. Sqlalchemy quantiles must be able to be spaced such that fewer than 200 bins\
-            are required.")
-
-
-        # For sql, our logic works as follows:
-        #   First, we divide the values into n_ntiles - 1 groups (corresponding to the ranges
-        #   logically between (inclusive) each of the requested ntiles).
-        #   Next, we take the minimum and maximum of each range, and return the minimum for all ranges
-        #   *and* the maximum of the last range.
-
-        # To correspond more closely to interpolation='nearest' in pandas, 
-        # we would need to determine whether the min or max of ntile_k is closer to the true
-        # break point then choose that one.
-
-        inner = sa.select([
-                sa.column(column),
-                sa.func.ntile(len(sql_ntiles)-1).over(order_by=sa.column(column)).label("ntile")
-            ]).select_from(self._table).where(sa.column(column) != None).alias("ntiles")
-        ntiles_query = sa.select([
-            sa.func.min(sa.column(column)),
-            sa.func.max(sa.column(column)),
-            sa.func.count(column),
-            sa.column("ntile")
-        ]).select_from(inner).group_by(sa.column("ntile")).order_by(sa.column("ntile"))
-
-        ntile_vals = self.engine.execute(ntiles_query).fetchall()
-
-        # We can be more precise by using the count to get the "nearest" interpolation
-        # method used in numpy / pandas
-        # Always include the min of the first bin (the 0th percentile)
-        ntile_val_list = [ntile_vals[0][0]]
-        max_is_closer = (len(ntile_val_list) % 2 == 1)
-        for idx in range(len(ntile_vals) - 1):
-            bin_count = ntile_vals[idx][2]
-            next_bin_count = ntile_vals[idx+1][2]
-            if bin_count > next_bin_count:
-                max_is_closer = True
-            elif bin_count < next_bin_count:
-                max_is_closer = False
-                continue
-
-            if max_is_closer:
-                ntile_val_list.append(ntile_vals[idx][1]) # Append *max* of *this* bin
-            else:
-                ntile_val_list.append(ntile_vals[idx+1][0]) # Append *min* of *next* bin
-
-        # Below (commented out) alternative is simpler (no interpolation) logic
-        # ntile_val_list = [ntile_val[0] for ntile_val in ntile_vals]
-
-        # If we ended having taken max of last, we need min of the last bin as well
-        if not max_is_closer:
-            ntile_val_list.append(ntile_vals[-1][0])
-
-        # Always include the max of the last bin (the 100th percentile)
-        ntile_val_list.append(ntile_vals[-1][1])
-        ntile_val_list = [ntile_val_list[k] for k in range(len(ntile_val_list)) if k in quantile_indices]
-
-        return ntile_val_list
+        quantiles = self.engine.execute(sa.select(selects).select_from(self._table)).fetchone()
+        return list(quantiles)
 
     def get_column_stdev(self, column):
         res = self.engine.execute(sa.select([
@@ -455,8 +363,25 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
     def get_column_hist(self, column, bins):
         """return a list of counts corresponding to bins"""
-        case_conditions = [] 
-        for idx in range(len(bins)-2):
+        case_conditions = []
+        idx = 0
+        if isinstance(bins, (np.ndarray)):
+            bins = bins.tolist()
+
+        # If we have an infinte lower bound, don't express that in sql
+        if (bins[0] == -np.inf) or (bins[0] == -float("inf")):
+            case_conditions.append(
+                sa.func.sum(
+                    sa.case(
+                        [
+                            (sa.column(column) < bins[idx+1], 1)
+                        ], else_=0
+                    )
+                ).label("bin_" + str(idx))
+            )
+            idx += 1
+
+        for idx in range(idx, len(bins)-2):
             case_conditions.append(
                 sa.func.sum(
                     sa.case(
@@ -469,18 +394,30 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                     )
                 ).label("bin_" + str(idx))
             )
-        case_conditions.append(
-            sa.func.sum(
-                sa.case(
-                    [
-                        (sa.and_(
-                            bins[-2] <= sa.column(column),
-                            sa.column(column) <= bins[-1]
-                        ), 1)
-                    ], else_=0
-                )
-            ).label("bin_" + str(len(bins)-1))
-        )
+
+        if (bins[-1] == np.inf) or (bins[-1] == float("inf")):
+            case_conditions.append(
+                sa.func.sum(
+                    sa.case(
+                        [
+                            (bins[-2] <= sa.column(column), 1)
+                        ], else_=0
+                    )
+                ).label("bin_" + str(len(bins)-1))
+            )
+        else:    
+            case_conditions.append(
+                sa.func.sum(
+                    sa.case(
+                        [
+                            (sa.and_(
+                                bins[-2] <= sa.column(column),
+                                sa.column(column) <= bins[-1]
+                            ), 1)
+                        ], else_=0
+                    )
+                ).label("bin_" + str(len(bins)-1))
+            )
 
         query = sa.select(
             case_conditions

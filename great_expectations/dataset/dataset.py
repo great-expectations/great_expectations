@@ -212,8 +212,13 @@ class Dataset(MetaDataset):
             # TODO: in the event that we shift the compute model for
             # min and max to have a single pass, use that instead of
             # quantiles for clarity
+            # min_ = self.get_column_min(column)
+            # max_ = self.get_column_max(column)
             min_, max_ = self.get_column_quantiles(column, [0.0, 1.0])
-            bins = np.linspace(start=min_, stop=max_, num=n_bins+1)
+            # PRECISION NOTE: some implementations of quantiles could produce
+            # varying levels of precision (e.g. a NUMERIC column producing
+            # Decimal from a SQLAlchemy source, so we cast to float for numpy)
+            bins = np.linspace(start=float(min_), stop=float(max_), num=n_bins+1)
         elif bins in ['ntile', 'quantile', 'percentile']:
             bins = self.get_column_quantiles(column, np.linspace(
                 start=0, stop=1, num=n_bins+1))
@@ -3162,7 +3167,7 @@ class Dataset(MetaDataset):
         if partition_object is None:
             # NOTE: we are *not* specifying a tail_weight_holdout by default.
             bins = self.get_column_partition(column)
-            weights = self.get_column_hist(column, bins)
+            weights = list(np.array(self.get_column_hist(column, bins)) / self.get_row_count())
             partition_object = {
                 "bins": bins,
                 "weights": weights
@@ -3171,7 +3176,7 @@ class Dataset(MetaDataset):
         if not is_valid_partition_object(partition_object):
             raise ValueError("Invalid partition object.")
 
-        if (not isinstance(threshold, (int, float))) or (threshold < 0):
+        if threshold is not None and ((not isinstance(threshold, (int, float))) or (threshold < 0)):
             raise ValueError(
                 "Threshold must be specified, greater than or equal to zero.")
 
