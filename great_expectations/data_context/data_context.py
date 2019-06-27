@@ -10,6 +10,7 @@ import errno
 from glob import glob
 from six import string_types
 import datetime
+import shutil
 
 from .util import NormalizedDataAssetName, get_slack_callback, safe_mmkdir
 
@@ -29,6 +30,9 @@ from great_expectations.datasource.dbt_source import DBTDatasource
 from great_expectations.datasource import PandasDatasource
 from great_expectations.datasource import SparkDFDatasource
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
+from great_expectations.render.renderer import DescriptivePageRenderer, PrescriptivePageRenderer
+from great_expectations.render.view import DescriptivePageView
+
 
 from .expectation_explorer import ExpectationExplorer
 
@@ -116,6 +120,8 @@ class DataContext(object):
         self._context_root_directory = os.path.abspath(context_root_dir)
 
         self.expectations_directory = os.path.join(self.root_directory, "expectations")
+        self.fixtures_validations_directory = os.path.join(self.root_directory, "fixtures/validations")
+        self.data_doc_directory = os.path.join(self.root_directory, "data_documentation")
         self.plugin_store_directory = os.path.join(self.root_directory, "plugins/store")
         sys.path.append(self.plugin_store_directory)
         
@@ -154,6 +160,49 @@ class DataContext(object):
             raise DataContextError("Invalid delimiter: delimiter must be '.' or '/'")
         else:
             self._data_asset_name_delimiter = new_delimiter
+
+    def get_validation_filepath(self, full_data_asset_name, run_id):
+        """Get the local path where a validation result is stored, given full asset name and run id"""
+        if "result_store" in self._project_config:
+            result_store = self._project_config["result_store"]
+            if isinstance(result_store, dict) and "filesystem" in result_store:
+                validation_filepath = self._get_normalized_data_asset_name_filepath(
+                    full_data_asset_name,
+                    base_path=os.path.join(self.root_directory,
+                                           result_store["filesystem"]["base_directory"],
+                                           run_id)
+                )
+        else:
+            raise ("The data context has no filesystem result_store")
+
+        return validation_filepath
+
+    def get_validation_doc_filepath(self, full_data_asset_name):
+        """Get the local path where a the rendered html doc for a validation result is stored,
+         given full asset name"""
+        validation_filepath = os.path.join(self.data_doc_directory,
+                                           full_data_asset_name
+                                           ) + ".html"
+
+        return validation_filepath
+
+    def move_validation_to_fixtures(self, full_data_asset_name, run_id):
+        """
+        Move validation results from uncommitted to fixtures/validations to make available for the data doc renderer
+
+        :param full_data_asset_name: fully qualified data asset name
+        :param run_id: run id
+        :return: --
+        """
+        source_filepath = self.get_validation_filepath(full_data_asset_name, run_id)
+
+        destination_filepath = os.path.join(
+            self.fixtures_validations_directory,
+            full_data_asset_name,
+        ) + ".json"
+
+        safe_mmkdir(os.path.dirname(destination_filepath))
+        shutil.move(source_filepath, destination_filepath)
 
     #####
     #
@@ -667,7 +716,7 @@ class DataContext(object):
                                           result_store["filesystem"]["base_directory"],
                                           run_id)
                     )
-                logger.info("Storing validation result: %s" % validation_filepath)
+                logger.debug("Storing validation result: %s" % validation_filepath)
                 safe_mmkdir(os.path.dirname(validation_filepath))
                 with open(validation_filepath, "w") as outfile:
                     json.dump(validation_results, outfile)
@@ -985,8 +1034,27 @@ class DataContext(object):
         else:
             return return_obj
 
+    def render_full_static_site(self):
+        """
+        Render the static site for the project.
+        """
+
+        #TODO: this is a temporary implementation and should be replaced with a rendered specific for this purpose
+        validation_filepaths = [y for x in os.walk(self.fixtures_validations_directory) for y in glob(os.path.join(x[0], '*.json'))]
+        for validation_filepath in validation_filepaths:
+            with open(validation_filepath, "r") as infile:
+                validation = json.load(infile)
+
+            data_asset_name = validation['meta']['data_asset_name']
+            model = DescriptivePageRenderer.render(validation)
+            out_filepath = self.get_validation_doc_filepath(data_asset_name)
+            safe_mmkdir(os.path.dirname(out_filepath))
+            with open(out_filepath, 'w') as writer:
+                    writer.write(DescriptivePageView.render(model))
+
     def profile_datasource(self, datasource_name, generator_name=None, profiler=BasicDatasetProfiler, max_data_assets=10):
         logger.info("Profiling '%s' with '%s'" % (datasource_name, profiler.__name__))
+        profiling_results = []
         data_asset_names = self.get_available_data_asset_names(datasource_name)
         if generator_name is None:
             if len(data_asset_names[datasource_name].keys()) == 1:
@@ -1019,6 +1087,7 @@ class DataContext(object):
   
                 #Note: This logic is specific to DatasetProfilers, which profile a single batch. Multi-batch profilers will have more to unpack.
                 expectation_suite, validation_result = profiler.profile(batch)
+                profiling_results.append((expectation_suite, validation_result))
 
                 if isinstance(batch, Dataset):
                     # For datasets, we can produce some more detailed statistics
@@ -1056,7 +1125,7 @@ Note: You will need to review and revise Expectations before using them in produ
         if skipped_data_assets > 0:
             logger.warning("Skipped %d data assets due to errors." % skipped_data_assets)
 
-        return data_asset_name_list
+        return profiling_results
 
 PROJECT_HELP_COMMENT = """# Welcome to great expectations. 
 # This project configuration file allows you to define datasources, 

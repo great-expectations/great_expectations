@@ -33,7 +33,7 @@ def scaffold_directories_and_notebooks(base_dir):
 
     open(os.path.join(base_dir, ".gitignore"), 'w').write("uncommitted/")
 
-    for directory in [notebook_dir_name, "expectations", "datasources", "uncommitted", "plugins", "fixtures"]:
+    for directory in [notebook_dir_name, "expectations", "datasources", "data_documentation", "uncommitted", "plugins", "fixtures"]:
         safe_mmkdir(os.path.join(base_dir, directory), exist_ok=True)
 
     for uncommitted_directory in ["validations", "credentials", "samples"]:
@@ -60,6 +60,7 @@ Let's add Great Expectations to your project, by scaffolding a new great_expecta
 
     great_expectations
         ├── great_expectations.yml
+        ├── data_documentation
         ├── datasources
         ├── expectations
         ├── fixtures

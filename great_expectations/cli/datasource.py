@@ -111,24 +111,62 @@ def add_datasource(context):
 
     if data_source_name != None:
 
-        if click.confirm(
-            "\nWould you like to profile '%s' to create candidate expectations and documentation?\n" % (
-                data_source_name),
+        cli_message(
+"""
+Would you like to profile '%s' to create candidate expectations and documentation?
+
+Please note: 
+As of v0.7.0, profiling is still a beta feature in Great Expectations.  
+This generation of profilers will evaluate the entire data source (without sampling) and may be very time consuming. 
+As a rule of thumb, we recommend starting with data smaller than 100MB.
+
+As a backup option please visit <blue>https://great-expectations.readthedocs.io/en/latest/profiling.html</blue> for instructions for profiling limited subsets within data sources.
+            """ % (data_source_name)
+        )
+        if click.confirm("Proceed?",
             default=True
         ):
-            data_asset_names = context.profile_datasource(
+            profiling_results = context.profile_datasource(
                 data_source_name,
                 max_data_assets=20
             )
-            # if click.confirm(
-            #     "\nWould you like to view render html documentation for the profiled datasource?\n",
-            #     default = True
-            # ):
-            #     for data_asset in data_asset_names:
-            #         validation_result = context.get_validation_result(data_asset)
-            #         cli_message("Rendering validation result: %s" % data_asset)
-            #         DescriptivePageView.render(validation_result)
-    
+
+            print("\nProfiling results are saved:")
+            for profiling_result in profiling_results:
+                data_asset_name = profiling_result[1]['meta']['data_asset_name']
+                run_id = profiling_result[1]['meta']['run_id']
+
+                print("  {0:s}".format(context.get_validation_filepath(data_asset_name, run_id)))
+
+            cli_message(
+"""
+
+To generate documentation from the data you just profiled, the profiling results should be moved from 
+great_expectations/uncommitted (ignored by git) to great_expectations/fixtures. Before proceeding,
+make sure that this data does not contain sensitive information.
+
+To learn more: <blue>https://great-expectations.readthedocs.io/en/latest/intro.html#data_documentation</blue>
+"""
+            )
+            if click.confirm("Proceed?",
+                default = True
+            ):
+                cli_message("Rendering...")
+
+                for profiling_result in profiling_results:
+                    data_asset_name = profiling_result[1]['meta']['data_asset_name']
+                    run_id = profiling_result[1]['meta']['run_id']
+                    context.move_validation_to_fixtures(data_asset_name, run_id)
+
+                context.render_full_static_site()
+                cli_message(
+ """
+To view the generated data documentation, start a web server:
+  cd great_expectations/data_documentation
+  python -m SimpleHTTPServer (if Python 2) or python3 -m http.server (if Python 3)
+and open http://localhost:8000 in your browser 
+""")
+
         else:
             cli_message(
                 "Okay, skipping profiling for now. You can always do this later by running `great_expectations profile`."
@@ -192,36 +230,33 @@ it will walk you through configuring the database connection and next steps.
 
 msg_filesys_go_to_notebook = """
 To create expectations for your CSV files start Jupyter and open the notebook
-great_expectations/notebooks/using_great_expectations_with_pandas.ipynb.
-it will walk you through configuring the database connection and next steps.
+that will walk you through next steps.
 
 To launch with jupyter notebooks:
-    <blue>jupyter notebook great_expectations/notebooks/create_expectations_for_csv_files.ipynb</blue>
+    <blue>jupyter notebook great_expectations/notebooks/create_expectations.ipynb</blue>
 
 To launch with jupyter lab:
-    <blue>jupyter lab great_expectations/notebooks/create_expectations_for_csv_files.ipynb</blue>
+    <blue>jupyter lab great_expectations/notebooks/create_expectations.ipynb</blue>
 """
 
 msg_sqlalchemy_go_to_notebook = """
 To create expectations for your SQL data assets start Jupyter and open the notebook
-great_expectations/notebooks/create_expectations_sql.ipynb.
-it will walk you through configuring the database connection and next steps.
+that will walk you through next steps.
 
 To launch with jupyter notebooks:
-    <blue>jupyter notebook great_expectations/notebooks/create_expectations_sql.ipynb</blue>
+    <blue>jupyter notebook great_expectations/notebooks/create_expectations.ipynb</blue>
 
 To launch with jupyter lab:
-    <blue>jupyter lab great_expectations/notebooks/create_expectations_sql.ipynb</blue>
+    <blue>jupyter lab great_expectations/notebooks/create_expectations.ipynb</blue>
 """
 
 msg_spark_go_to_notebook = """
 To create expectations for your CSV files start Jupyter and open the notebook
-great_expectations/notebooks/using_great_expectations_with_pandas.ipynb.
-it will walk you through configuring the database connection and next steps.
+that will walk you through next steps.
 
 To launch with jupyter notebooks:
-    <blue>jupyter notebook great_expectations/notebooks/create_expectations_for_spark_dataframes.ipynb</blue>
+    <blue>jupyter notebook great_expectations/notebooks/create_expectations.ipynb</blue>
 
 To launch with jupyter lab:
-    <blue>jupyter lab great_expectations/notebooks/create_expectations_for_spark_dataframes.ipynb</blue>
+    <blue>jupyter lab great_expectations/notebooks/create_expectations.ipynb</blue>
 """
