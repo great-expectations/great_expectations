@@ -2,6 +2,7 @@ from __future__ import division
 
 import inspect
 import re
+import copy
 import logging
 from six import PY3, string_types
 from functools import wraps
@@ -272,6 +273,7 @@ class SparkDFDataset(MetaSparkDFDataset):
 
     def get_column_hist(self, column, bins):
         """return a list of counts corresponding to bins"""
+        bins = list(copy.deepcopy(bins))  # take a copy since we are inserting and popping
         if bins[0] == -np.inf or bins[0] == -float("inf"):
             added_min = False
             bins[0] = -float("inf")
