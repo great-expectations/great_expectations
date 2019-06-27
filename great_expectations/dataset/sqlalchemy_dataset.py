@@ -14,6 +14,7 @@ import pandas as pd
 from dateutil.parser import parse
 
 from .dataset import Dataset
+from .pandas_dataset import PandasDataset
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
 
@@ -227,6 +228,21 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         # Only call super once connection is established and table_name and columns known to allow autoinspection
         super(SqlAlchemyDataset, self).__init__(*args, **kwargs)
+
+    def head(self, n=5):
+        """Returns a *PandasDataset* with the first *n* rows of the given Dataset"""
+        return PandasDataset(
+            pd.read_sql(
+                sa.select(["*"]).select_from(self._table).limit(n),
+                con=self.engine
+            ), 
+            expectation_suite=self.get_expectation_suite(
+                discard_failed_expectations=False,
+                discard_result_format_kwargs=False,
+                discard_catch_exceptions_kwargs=False,
+                discard_include_configs_kwargs=False
+            )
+        )
 
     def get_row_count(self):
         count_query = sa.select([sa.func.count()]).select_from(
@@ -543,6 +559,10 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                                           parse_strings_as_datetimes=None,
                                           result_format=None, include_config=False, catch_exceptions=None, meta=None
                                           ):
+        if value_set is None:
+            # vacuously true
+            return True
+
         if parse_strings_as_datetimes:
             parsed_value_set = self._parse_value_set(value_set)
         else:

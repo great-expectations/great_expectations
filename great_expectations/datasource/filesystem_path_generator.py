@@ -124,38 +124,47 @@ class SubdirReaderGenerator(BatchGenerator):
             return os.path.join(self._datasource.get_data_context().root_directory, self._base_directory)
 
     def get_available_data_asset_names(self):
-        known_assets = set()
         if not os.path.isdir(self.base_directory):
-            return known_assets
-        file_options = os.listdir(self.base_directory)
-        for file_option in file_options:
-            option_name = None
-            for extension in KNOWN_EXTENSIONS:
-                if file_option.endswith(extension):
-                    option_name = file_option[:-len(extension)]
-            if option_name is None:
-                option_name = file_option
-            known_assets.add(option_name)
+            return set()
+        known_assets = self._get_valid_file_options(valid_options=set(), base_directory=self.base_directory)
         return known_assets
+
+    def _get_valid_file_options(self, valid_options=set(), base_directory=None):
+        if base_directory is None:
+            base_directory = self.base_directory
+        file_options = os.listdir(base_directory)
+        for file_option in file_options:
+            for extension in KNOWN_EXTENSIONS:
+                if file_option.endswith(extension) and not file_option.startswith("."):
+                    valid_options.add(file_option[:-len(extension)])
+                elif os.path.isdir(os.path.join(self.base_directory, file_option)):
+                    subdir_options = self._get_valid_file_options(valid_options=set(), base_directory=os.path.join(base_directory, file_option))
+                    if len(subdir_options) > 0:
+                        valid_options.add(file_option)
+                # Make sure there's at least one valid file inside the subdir
+        return valid_options
 
     def _get_iterator(self, generator_asset, **kwargs):
         # If the generator_asset is a file, then return the path.
         # Otherwise, use files in a subdir as batches
         if os.path.isdir(os.path.join(self.base_directory, generator_asset)):
-            return self._build_batch_kwargs_path_iter(
-                [
-                    os.path.join(self.base_directory, generator_asset, path)
-                    for path in os.listdir(os.path.join(self.base_directory, generator_asset))
-                ]
-            )
+            subdir_options = os.listdir(os.path.join(self.base_directory, generator_asset))
+            batches = []
+            for file_option in subdir_options:
+                for extension in KNOWN_EXTENSIONS:
+                    if file_option.endswith(extension) and not file_option.startswith("."):
+                        batches.append(os.path.join(self.base_directory, generator_asset, file_option))
+            
+            return self._build_batch_kwargs_path_iter(batches)
             # return self._build_batch_kwargs_path_iter(os.scandir(os.path.join(self.base_directory, generator_asset)))
             # return iter([{
             #     "path": os.path.join(self.base_directory, generator_asset, x)
             # } for x in os.listdir(os.path.join(self.base_directory, generator_asset))])
-        elif os.path.isfile(os.path.join(self.base_directory, generator_asset)):
-            path = os.path.join(self.base_directory, generator_asset)
+        # ONLY allow KNOWN_EXPTENSIONS
+        # elif os.path.isfile(os.path.join(self.base_directory, generator_asset)):
+        #     path = os.path.join(self.base_directory, generator_asset)
 
-            return iter([self._build_batch_kwargs(path)])
+        #     return iter([self._build_batch_kwargs(path)])
         else:
             for extension in KNOWN_EXTENSIONS:
                 path = os.path.join(self.base_directory, generator_asset + extension)
