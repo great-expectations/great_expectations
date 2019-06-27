@@ -6,12 +6,12 @@ from collections import OrderedDict
 
 from great_expectations.dataset import PandasDataset
 
-data = OrderedDict({
-    "a": [2.0, 5.0],
-    "b": [5, 5],
-    "c": [0, 10],
-    "d": [0, None],
-})
+data = OrderedDict([
+    ["a", [2.0, 5.0]],
+    ["b", [5, 5]],
+    ["c", [0, 10]],
+    ["d", [0, None]]
+])
 schemas = {
     "SparkDFDataset": {
         "a": "float",
@@ -45,5 +45,4 @@ def test_head(context):
     assert list(head.columns) == ["a", "b", "c", "d"]
     assert head["a"][0] == 2.0
     suite = head.get_expectation_suite()
-    print(suite)
     assert len(suite["expectations"]) == 5

@@ -110,8 +110,8 @@ def assertDeepAlmostEqual(expected, actual, *args, **kwargs):
 def get_dataset(dataset_type, data, schemas=None, profiler=ColumnsExistProfiler, caching=False):
     """Utility to create datasets for json-formatted tests.
     """
+    df = pd.DataFrame(data)
     if dataset_type == 'PandasDataset':
-        df = pd.DataFrame(data)
         if schemas and "pandas" in schemas:
             pandas_schema = {key:np.dtype(value) for (key, value) in schemas["pandas"].items()}
             df = df.astype(pandas_schema)
@@ -121,7 +121,6 @@ def get_dataset(dataset_type, data, schemas=None, profiler=ColumnsExistProfiler,
         engine = create_engine('sqlite://')
         conn = engine.connect()
         # Add the data to the database as a new table
-        df = pd.DataFrame(data)
 
         sql_dtypes = {}
         if schemas and "sqlite" in schemas and isinstance(engine.dialect, sqlitetypes.dialect):
@@ -146,7 +145,6 @@ def get_dataset(dataset_type, data, schemas=None, profiler=ColumnsExistProfiler,
         # Create a new database
         engine = create_engine('postgresql://postgres@localhost/test_ci')
         conn = engine.connect()
-        df = pd.DataFrame(data)
 
         sql_dtypes = {}
         if schemas and "postgresql" in schemas and isinstance(engine.dialect, postgresqltypes.dialect):
@@ -170,7 +168,6 @@ def get_dataset(dataset_type, data, schemas=None, profiler=ColumnsExistProfiler,
     elif dataset_type == 'mysql':
         engine = create_engine('mysql://root@localhost/test_ci')
         conn = engine.connect()
-        df = pd.DataFrame(data)
 
         sql_dtypes = {}
         if schemas and "mysql" in schemas and isinstance(engine.dialect, mysqltypes.dialect):
