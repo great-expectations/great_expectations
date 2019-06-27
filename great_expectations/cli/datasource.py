@@ -162,8 +162,8 @@ To learn more: <blue>https://great-expectations.readthedocs.io/en/latest/intro.h
                 cli_message(
  """
 To view the generated data documentation, start a web server:
-  cd great_expectations/data_documentation
-  python -m SimpleHTTPServer (if Python 2) or python3 -m http.server (if Python 3)
+<blue>cd great_expectations/data_documentation; python -m SimpleHTTPServer</blue> (if Python 2) or 
+<blue>cd great_expectations/data_documentation; python3 -m http.server</blue> (if Python 3)
 and open http://localhost:8000 in your browser 
 """)
 
