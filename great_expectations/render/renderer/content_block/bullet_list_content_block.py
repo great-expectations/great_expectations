@@ -40,9 +40,19 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
                 "expectation_type": expectation["expectation_type"],
             },
             "styling": {
+                # "classes": ["badge", "badge-danger"],
+                "classes": ["alert", "alert-warning"],
+                "attributes": {
+                    "role": "alert",
+                    # "data-container": "body",
+                    "data-toggle": "popover",
+                    "data-placement": "bottom",
+                    "data-trigger": "hover",
+                    "data-content": expectation["expectation_type"],
+                },
                 "params": {
                     "expectation_type": {
-                        "classes": ""
+                        "classes": ["badge", "badge-warning"],
                     }
                 }
             },
