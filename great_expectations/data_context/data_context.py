@@ -161,21 +161,73 @@ class DataContext(object):
         else:
             self._data_asset_name_delimiter = new_delimiter
 
-    def get_validation_filepath(self, full_data_asset_name, run_id):
+    def get_validation_location(self, data_asset_name, run_id):
         """Get the local path where a validation result is stored, given full asset name and run id"""
-        if "result_store" in self._project_config:
-            result_store = self._project_config["result_store"]
-            if isinstance(result_store, dict) and "filesystem" in result_store:
-                validation_filepath = self._get_normalized_data_asset_name_filepath(
-                    full_data_asset_name,
-                    base_path=os.path.join(self.root_directory,
-                                           result_store["filesystem"]["base_directory"],
-                                           run_id)
-                )
-        else:
-            raise ("The data context has no filesystem result_store")
 
-        return validation_filepath
+        result = {}
+
+        if "result_store" not in self._project_config:
+            logger.warning("Unable to get validation results: no result store configured.")
+            return {}
+
+        data_asset_name = self._normalize_data_asset_name(data_asset_name)
+        result_store = self._project_config["result_store"]
+        if "filesystem" in result_store and isinstance(result_store["filesystem"], dict):
+            if "base_directory" not in result_store["filesystem"]:
+                raise DataContextError(
+                    "Invalid result_store configuration: 'base_directory' is required for a filesystem store.")
+
+            base_directory = result_store["filesystem"]["base_directory"]
+            if not os.path.isabs(base_directory):
+                base_directory = os.path.join(self.root_directory, base_directory)
+
+            if run_id is None:  # Get most recent run_id
+                runs = [name for name in os.listdir(base_directory) if
+                        os.path.isdir(os.path.join(base_directory, name))]
+                run_id = sorted(runs)[-1]
+
+            validation_path = os.path.join(
+                base_directory,
+                run_id,
+                self._get_normalized_data_asset_name_filepath(data_asset_name, base_path="")
+            )
+
+            result['filepath'] = validation_path
+
+
+        elif "s3" in result_store and isinstance(result_store["s3"], dict):
+            # FIXME: this code is untested
+            if "bucket" not in result_store["s3"] or "key_prefix" not in result_store["s3"]:
+                raise DataContextError(
+                    "Invalid result_store configuration: 'bucket' and 'key_prefix' are required for an s3 store.")
+
+            try:
+                import boto3
+                s3 = boto3.client('s3')
+            except ImportError:
+                raise ImportError("boto3 is required for retrieving a dataset from s3")
+
+            bucket = result_store["s3"]["bucket"]
+            key_prefix = result_store["s3"]["key_prefix"]
+
+            if run_id is None:  # Get most recent run_id
+                all_objects = s3.list_objects(Bucket='bucket-name')
+                validations = [name for name in all_objects if name.startswith(key_prefix)]
+                runs = [validation.split('/')[0] for validation in validations]
+                run_id = sorted(runs)[-1]
+
+            key = os.path.join(key_prefix, "validations", run_id, self._get_normalized_data_asset_name_filepath(
+                data_asset_name, base_path=""
+            ))
+
+            result['bucket'] = bucket
+            result['key'] = key
+
+        else:
+            raise DataContextError("Invalid result_store configuration: only 'filesystem' and 's3' are supported.")
+
+
+        return result
 
     def get_validation_doc_filepath(self, full_data_asset_name):
         """Get the local path where a the rendered html doc for a validation result is stored,
@@ -194,7 +246,7 @@ class DataContext(object):
         :param run_id: run id
         :return: --
         """
-        source_filepath = self.get_validation_filepath(full_data_asset_name, run_id)
+        source_filepath = self.get_validation_location(full_data_asset_name, run_id)['filepath']
 
         destination_filepath = os.path.join(
             self.fixtures_validations_directory,
@@ -210,7 +262,7 @@ class DataContext(object):
     #
     #####
 
-    def _get_normalized_data_asset_name_filepath(self, data_asset_name, base_path=None):
+    def _get_normalized_data_asset_name_filepath(self, data_asset_name, base_path=None, file_extension=".json"):
         """Get the path where the project-normalized data_asset_name expectations are stored."""
         if base_path is None:
             base_path  = os.path.join(self.root_directory, "expectations")
@@ -229,7 +281,7 @@ class DataContext(object):
         else:
             raise DataContextError("data_assset_name must be a NormalizedDataAssetName or string")
 
-        relative_path += ".json"
+        relative_path += file_extension
         return os.path.join(
             base_path,
             relative_path
@@ -928,29 +980,10 @@ class DataContext(object):
     def get_validation_result(self, data_asset_name, run_id=None, failed_only=False):
         """Get validation results from a configured store."""
 
-        if "result_store" not in self._project_config:
-            logger.warning("Unable to get validation results: no result store configured.")
-            return []
-        
-        data_asset_name = self._normalize_data_asset_name(data_asset_name)        
-        result_store = self._project_config["result_store"]
-        if "filesystem" in result_store and isinstance(result_store["filesystem"], dict):
-            if "base_directory" not in result_store["filesystem"]:
-                raise DataContextError("Invalid result_store configuration: 'base_directory' is required for a filesystem store.")
-            
-            base_directory = result_store["filesystem"]["base_directory"]
-            if not os.path.isabs(base_directory):
-                base_directory = os.path.join(self.root_directory, base_directory)
-            
-            if run_id is None:  # Get most recent run_id
-                runs = [ name for name in os.listdir(base_directory) if os.path.isdir(os.path.join(base_directory, name)) ]
-                run_id = sorted(runs)[-1]
-            
-            validation_path = os.path.join(
-                base_directory,
-                run_id,
-                self._get_normalized_data_asset_name_filepath(data_asset_name, base_path="")
-            )
+        validation_location = self.get_validation_location(data_asset_name, run_id)
+
+        if 'filepath' in validation_location:
+            validation_path = validation_location['filepath']
             with open(validation_path, "r") as infile:
                 results_dict = json.load(infile)
 
@@ -961,10 +994,7 @@ class DataContext(object):
             else:
                 return results_dict
     
-        elif "s3" in result_store and isinstance(result_store["s3"], dict):
-            # FIXME: this code is untested
-            if "bucket" not in result_store["s3"] or "key_prefix" not in result_store["s3"]:
-                raise DataContextError("Invalid result_store configuration: 'bucket' and 'key_prefix' are required for an s3 store.")
+        elif 'bucket' in validation_location: # s3
 
             try:
                 import boto3
@@ -972,19 +1002,8 @@ class DataContext(object):
             except ImportError:
                 raise ImportError("boto3 is required for retrieving a dataset from s3")
         
-            bucket = result_store["s3"]["bucket"]
-            key_prefix = result_store["s3"]["key_prefix"]
-
-            if run_id is None:  # Get most recent run_id
-                all_objects = s3.list_objects(Bucket = 'bucket-name') 
-                validations  = [ name for name in all_objects if name.startswith(key_prefix)]
-                runs = [ validation.split('/')[0] for validation in validations ]
-                run_id = sorted(runs)[-1]  
-
-            key = os.path.join(key_prefix, "validations", run_id, self._get_normalized_data_asset_name_filepath(
-                data_asset_name, base_path=""
-            ))
-            
+            bucket = validation_location["bucket"]
+            key = validation_location["key"]
             s3_response_object = s3.get_object(Bucket=bucket, Key=key)
             object_content = s3_response_object['Body'].read()
             
