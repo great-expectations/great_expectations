@@ -6,20 +6,66 @@ from jinja2 import (
 )
 
 
+def render_styling_from_template(template):
+    if "styling" in template:
+
+        class_list = template["styling"].get("classes", None)
+        if class_list == None:
+            class_str = ""
+        else:
+            class_str = 'class="'+' '.join(class_list)+'" '
+
+        attribute_dict = template["styling"].get("attributes", None)
+        if attribute_dict == None:
+            attribute_str = ""
+        else:
+            attribute_str = ""
+            for k, v in attribute_dict.items():
+                attribute_str += k+'="'+v+'" '
+
+        # TODO: Implement something for `style` here...
+        styling_str = ""
+
+        string = pTemplate('$classes$attributes$style').substitute({
+            "classes": class_str,
+            "attributes": attribute_str,
+            "style": styling_str,
+        })
+
+        return string
+
+    else:
+        return ""
+
+
 def render_template(template):
     if "styling" in template:
         # print("aaaa")
         params = template["params"]
         for parameter, parameter_styling in template["styling"]["params"].items():
-            print(parameter, parameter_styling)
-            params[parameter] = pTemplate('<span style="background-color:#ddd; padding:5px; border-radius:3px;" $classes$attributes>$content</span>').substitute({
-                "classes": parameter_styling.get("classes", ""),
-                "attributes": parameter_styling.get("attributes", ""),
+
+            class_list = parameter_styling.get("classes", None)
+            if class_list == None:
+                class_str = ""
+            else:
+                class_str = 'class="'+' '.join(class_list)+'" '
+
+            attribute_dict = parameter_styling.get("attributes", None)
+            if attribute_dict == None:
+                attribute_str = ""
+            else:
+                attribute_str = ""
+                for k, v in attribute_dict.items():
+                    attribute_str += k+'="'+v+'" '
+
+            params[parameter] = pTemplate('<span $classes$attributes$style>$content</span>').substitute({
+                "classes": class_str,
+                "attributes": attribute_str,
                 "style": parameter_styling.get("style", ""),
                 "content": params[parameter],
             })
         string = pTemplate(template["template"]).substitute(params)
-        print(string)
+        # print(string)
         return string
 
     else:
@@ -67,6 +113,7 @@ class View(object):
             autoescape=select_autoescape(['html', 'xml'])
         )
         env.filters['render_template'] = render_template
+        env.filters['render_styling'] = render_styling_from_template
         return env.get_template(template)
 
 
