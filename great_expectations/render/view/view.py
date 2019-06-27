@@ -50,7 +50,14 @@ def render_styling(styling):
             attribute_str += k+'="'+v+'" '
 
     # TODO: Implement something for `style` here...
-    style_str = ""
+    style_dict = styling.get("styles", None)
+    print(style_dict)
+    if style_dict == None:
+        style_str = ""
+    else:
+        style_str = 'style="'
+        style_str += " ".join([k+':'+v+';' for k, v in style_dict.items()])
+        style_str += '" '
 
     styling_string = pTemplate('$classes$attributes$style').substitute({
         "classes": class_str,
@@ -76,19 +83,39 @@ def render_template(template):
     # NOTE: We should add some kind of type-checking to template
 
     if "styling" in template:
-        params = template["params"]
-        for parameter, parameter_styling in template["styling"]["params"].items():
 
-            params[parameter] = pTemplate('<span $styling>$content</span>').substitute({
-                "styling": render_styling(parameter_styling),
-                "content": params[parameter],
-            })
+        params = template["params"]
+
+        # Apply default styling
+        if "default" in template["styling"]:
+            default_parameter_styling = template["styling"]["default"]
+
+            for parameter in template["params"].keys():
+
+                # If this param has styling that over-rides the default, skip it here and get it in the next loop.
+                if "params" in template["styling"]:
+                    if parameter in template["styling"]["params"]:
+                        continue
+
+                params[parameter] = pTemplate('<span $styling>$content</span>').substitute({
+                    "styling": render_styling(default_parameter_styling),
+                    "content": params[parameter],
+                })
+
+        # Apply param-specific styling
+        if "params" in template["styling"]:
+            # params = template["params"]
+            for parameter, parameter_styling in template["styling"]["params"].items():
+
+                params[parameter] = pTemplate('<span $styling>$content</span>').substitute({
+                    "styling": render_styling(parameter_styling),
+                    "content": params[parameter],
+                })
 
         string = pTemplate(template["template"]).substitute(params)
         return string
 
-    else:
-        return pTemplate(template["template"]).substitute(template["params"])
+    return pTemplate(template["template"]).substitute(template["params"])
 
 
 class NoOpTemplate(object):
