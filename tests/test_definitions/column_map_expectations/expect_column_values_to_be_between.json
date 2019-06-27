@@ -21,6 +21,14 @@
       "numeric": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
     },
     "schemas": {
+      "spark": {
+        "x": "IntegerType",
+        "y": "StringType",
+        "z": "IntegerType",
+        "ts": "TimestampType",
+        "alpha": "StringType",
+        "numeric": "IntegerType"
+      },
       "sqlite": {
         "x": "INTEGER",
         "y": "VARCHAR",
@@ -356,9 +364,9 @@
         "exact_match_out": false,
         "out": {
           "unexpected_list": [
-            "Jan 01 1970 12:00:01",
-            "Dec 31 1999 12:00:01",
-            "Jan 01 2001 12:00:01"
+            "Jan 01 1970 12:00",
+            "Dec 31 1999 12:00",
+            "Jan 01 2001 12:00"
           ],
           "unexpected_index_list": [
             0, 1, 9
@@ -370,7 +378,7 @@
           "max_value": "Dec 31 2000",
           "min_value": "Jan 01 2000",
           "parse_strings_as_datetimes": true,
-          "output_strftime_format" : "%b %d %Y %H:%M:%S"
+          "output_strftime_format" : "%b %d %Y %H:%M"
         }
       },
       {
@@ -418,7 +426,8 @@
             9
           ],
           "success": false
-        }
+        },
+        "suppress_test_for": ["spark"]
       },
       {
         "title": "Test allow_cross_type_comparisons again",
@@ -435,7 +444,8 @@
             0, 1, 2, 3, 4, 5, 6, 7, 8, 9
           ],
           "success": false
-        }
+        },
+        "suppress_test_for": ["spark"]
       },
       {
         "title": "Verify that min_value=max_value=None raises an error",

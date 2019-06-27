@@ -7,6 +7,14 @@
       "s3":["cool","calm","collected","casual", null],
       "s4":[1,2,3,4,5]
     },
+    "schemas": {
+      "spark": {
+        "s1": "StringType",
+        "s2": "StringType",
+        "s3": "StringType",
+        "s4": "IntegerType"
+      }
+    },
     "tests": [{
       "title": "Positive test, exact min and max",
       "exact_match_out" : false,
