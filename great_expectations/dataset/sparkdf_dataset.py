@@ -2,6 +2,7 @@ from __future__ import division
 
 import inspect
 import re
+import copy
 import logging
 from six import PY3, string_types
 from functools import wraps
@@ -24,8 +25,9 @@ from scipy import stats
 logger = logging.getLogger(__name__)
 
 try:
-    from pyspark.sql.functions import udf, col, lit, stddev as stddev_
+    from pyspark.sql.functions import udf, col, lit, stddev_samp
     import pyspark.sql.types as sparktypes
+    from pyspark.ml.feature import Bucketizer
 except ImportError as e:
     logger.debug(str(e))
     logger.debug("Unable to load spark context; install optional spark dependency for support.")
@@ -206,6 +208,20 @@ class SparkDFDataset(MetaSparkDFDataset):
     def get_column_sum(self, column):
         return self.spark_df.select(column).groupBy().sum().collect()[0][0]
 
+    # TODO: consider getting all basic statistics in one go:
+    def _describe_column(self, column):
+        # temp_column = self.spark_df.select(column).where(col(column).isNotNull())
+        # return self.spark_df.select(
+        #     [
+        #         count(temp_column),
+        #         mean(temp_column),
+        #         stddev(temp_column),
+        #         min(temp_column),
+        #         max(temp_column)
+        #     ]
+        # )
+        pass
+
     def get_column_max(self, column, parse_strings_as_datetimes=False):
         temp_column = self.spark_df.select(column).where(col(column).isNotNull())
         if parse_strings_as_datetimes:
@@ -251,30 +267,94 @@ class SparkDFDataset(MetaSparkDFDataset):
         return list(s[s == s.max()].index)
 
     def get_column_median(self, column):
-        # TODO this doesn't actually work e.g. median([1, 2, 3, 4]) -> 2.0
-        raise NotImplementedError
-        result = self.spark_df.approxQuantile(column, [0.5], 0)
-        return result[0] if len(result) > 0 else None
+        # We will get the two middle values by choosing an epsilon to add
+        # to the 50th percentile such that we always get exactly the middle two values
+        # (i.e. 0 < epsilon < 1 / (2 * values))
+
+        # Note that this can be an expensive computation; we are not exposing
+        # spark's ability to estimate.
+        # We add two to 2 * n_values to maintain a legitimate quantile 
+        # in the degnerate case when n_values = 0
+        result = self.spark_df.approxQuantile(column, [0.5, 0.5 + (1 / (2 + (2 * self.get_row_count())))], 0)
+        return np.mean(result)
+
+    def get_column_quantiles(self, column, quantiles):
+        return self.spark_df.approxQuantile(column, list(quantiles), 0)
 
     def get_column_stdev(self, column):
-        return self.spark_df.select(stddev_(col(column))).collect()[0][0]
+        return self.spark_df.select(stddev_samp(col(column))).collect()[0][0]
 
     def get_column_hist(self, column, bins):
         """return a list of counts corresponding to bins"""
-        hist = []
-        for i in range(0, len(bins) - 1):
-            # all bins except last are half-open
-            if i == len(bins) - 2:
-                max_strictly = False
-            else:
-                max_strictly = True
-            hist.append(
-                self.get_column_count_in_range(column, min_val=bins[i], max_val=bins[i + 1], max_strictly=max_strictly)
-            )
+        bins = list(copy.deepcopy(bins))  # take a copy since we are inserting and popping
+        if bins[0] == -np.inf or bins[0] == -float("inf"):
+            added_min = False
+            bins[0] = -float("inf")
+        else:
+            added_min = True
+            bins.insert(0, -float("inf"))
+
+        if bins[-1] == np.inf or bins[-1] == float("inf"):
+            added_max = False
+            bins[-1] = float("inf")
+        else:
+            added_max = True
+            bins.append(float("inf"))
+
+        temp_column = self.spark_df.select(column).where(col(column).isNotNull())
+        bucketizer = Bucketizer(
+            splits=bins, inputCol=column, outputCol="buckets")
+        bucketed = bucketizer.setHandleInvalid("skip").transform(temp_column)
+
+        # This is painful to do, but: bucketizer cannot handle values outside of a range
+        # (hence adding -/+ infinity above)
+
+        # Further, it *always* follows the numpy convention of lower_bound <= bin < upper_bound
+        # for all but the last bin
+
+        # But, since the last bin in our case will often be +infinity, we need to
+        # find the number of values exactly equal to the upper bound to add those
+
+        # We'll try for an optimization by asking for it at the same time
+        if added_max == True:
+            upper_bound_count = temp_column.select(column).filter(col(column) == bins[-2]).count()
+        else:
+            upper_bound_count = 0
+
+        hist_rows = bucketed.groupBy("buckets").count().collect()
+        # Spark only returns buckets that have nonzero counts.
+        hist = [0] * (len(bins) - 1)
+        for row in hist_rows:
+            hist[int(row["buckets"])] = row["count"]
+        
+        hist[-2] += upper_bound_count
+
+        if added_min:
+            below_bins = hist.pop(0)
+            bins.pop(0)
+            if below_bins > 0:
+                logger.warning("Discarding histogram values below lowest bin.")
+        
+        if added_max:
+            above_bins = hist.pop(-1)
+            bins.pop(-1)
+            if above_bins > 0:
+                logger.warning("Discarding histogram values above highest bin.")
+
         return hist
 
+        # hist = []
+        # for i in range(0, len(bins) - 1):
+        #     # all bins except last are half-open
+        #     if i == len(bins) - 2:
+        #         max_strictly = False
+        #     else:
+        #         max_strictly = True
+        #     hist.append(
+        #         self.get_column_count_in_range(column, min_val=bins[i], max_val=bins[i + 1], max_strictly=max_strictly)
+        #     )
+
     def get_column_count_in_range(self, column, min_val=None, max_val=None, min_strictly=False, max_strictly=True):
-        # TODO this logic could probably go in the non-underscore version if we want to cache
         if min_val is None and max_val is None:
             raise ValueError('Must specify either min or max value')
         if min_val is not None and max_val is not None and min_val > max_val:

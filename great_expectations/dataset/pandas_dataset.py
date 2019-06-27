@@ -359,6 +359,9 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
     def get_column_median(self, column):
         return self[column].median()
 
+    def get_column_quantiles(self, column, quantiles):
+        return self[column].quantile(quantiles, interpolation='nearest').tolist()
+
     def get_column_stdev(self, column):
         return self[column].std()
 
