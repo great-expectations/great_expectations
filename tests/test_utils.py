@@ -19,38 +19,39 @@ from great_expectations.dataset import PandasDataset, SqlAlchemyDataset, SparkDF
 from great_expectations.profile import ColumnsExistProfiler
 
 SQLITE_TYPES = {
-        "VARCHAR": sqlitetypes.VARCHAR,
-        "CHAR": sqlitetypes.CHAR,
-        "INTEGER": sqlitetypes.INTEGER,
-        "SMALLINT": sqlitetypes.SMALLINT,
-        "DATETIME": sqlitetypes.DATETIME(truncate_microseconds=True),
-        "DATE": sqlitetypes.DATE,
-        "FLOAT": sqlitetypes.FLOAT,
-        "BOOLEAN": sqlitetypes.BOOLEAN 
+    "VARCHAR": sqlitetypes.VARCHAR,
+    "CHAR": sqlitetypes.CHAR,
+    "INTEGER": sqlitetypes.INTEGER,
+    "SMALLINT": sqlitetypes.SMALLINT,
+    "DATETIME": sqlitetypes.DATETIME(truncate_microseconds=True),
+    "DATE": sqlitetypes.DATE,
+    "FLOAT": sqlitetypes.FLOAT,
+    "BOOLEAN": sqlitetypes.BOOLEAN
 }
 
 POSTGRESQL_TYPES = {
-        "TEXT": postgresqltypes.TEXT,
-        "CHAR": postgresqltypes.CHAR,
-        "INTEGER": postgresqltypes.INTEGER,
-        "SMALLINT": postgresqltypes.SMALLINT,
-        "BIGINT": postgresqltypes.BIGINT,
-        "TIMESTAMP": postgresqltypes.TIMESTAMP,
-        "DATE": postgresqltypes.DATE,
-        "DOUBLE_PRECISION": postgresqltypes.DOUBLE_PRECISION,
-        "BOOLEAN": postgresqltypes.BOOLEAN
+    "TEXT": postgresqltypes.TEXT,
+    "CHAR": postgresqltypes.CHAR,
+    "INTEGER": postgresqltypes.INTEGER,
+    "SMALLINT": postgresqltypes.SMALLINT,
+    "BIGINT": postgresqltypes.BIGINT,
+    "TIMESTAMP": postgresqltypes.TIMESTAMP,
+    "DATE": postgresqltypes.DATE,
+    "DOUBLE_PRECISION": postgresqltypes.DOUBLE_PRECISION,
+    "BOOLEAN": postgresqltypes.BOOLEAN,
+    "NUMERIC": postgresqltypes.NUMERIC
 }
 
 MYSQL_TYPES = {
-        "TEXT": mysqltypes.TEXT,
-        "CHAR": mysqltypes.CHAR,
-        "INTEGER": mysqltypes.INTEGER,
-        "SMALLINT": mysqltypes.SMALLINT,
-        "BIGINT": mysqltypes.BIGINT,
-        "TIMESTAMP": mysqltypes.TIMESTAMP,
-        "DATE": mysqltypes.DATE,
-        "FLOAT": mysqltypes.FLOAT,
-        "BOOLEAN": mysqltypes.BOOLEAN
+    "TEXT": mysqltypes.TEXT,
+    "CHAR": mysqltypes.CHAR,
+    "INTEGER": mysqltypes.INTEGER,
+    "SMALLINT": mysqltypes.SMALLINT,
+    "BIGINT": mysqltypes.BIGINT,
+    "TIMESTAMP": mysqltypes.TIMESTAMP,
+    "DATE": mysqltypes.DATE,
+    "FLOAT": mysqltypes.FLOAT,
+    "BOOLEAN": mysqltypes.BOOLEAN
 }
 
 SPARK_TYPES = {
@@ -155,7 +156,8 @@ def get_dataset(dataset_type, data, schemas=None, profiler=ColumnsExistProfiler,
                 if type in ["INTEGER", "SMALLINT", "BIGINT"]:
                     df[col] = pd.to_numeric(df[col],downcast='signed')
                 elif type in ["FLOAT", "DOUBLE", "DOUBLE_PRECISION"]:
-                    df[col] = pd.to_numeric(df[col],downcast='float')
+                    df[col] = pd.to_numeric(df[col])
+                    #df[col] = pd.to_numeric(df[col],downcast='float')
                 elif type in ["DATETIME", "TIMESTAMP"]:
                     df[col] = pd.to_datetime(df[col])
 
@@ -226,15 +228,17 @@ def get_dataset(dataset_type, data, schemas=None, profiler=ColumnsExistProfiler,
         raise ValueError("Unknown dataset_type " + str(dataset_type))
 
 def candidate_getter_is_on_temporary_notimplemented_list(context, getter):
-    if context in ["sqlite", "postgresql", "mysql"]:
+    if context in ["sqlite"]:
         return getter in [
             'get_column_modes',
-            'get_column_stdev',
+            'get_column_stdev'
+        ]
+    if context in ["postgresql", "mysql"]:
+        return getter in [
+            'get_column_modes'
         ]
     if context == 'SparkDFDataset':
-        return getter in [
-            'get_column_median',
-        ]
+        return getter in []
 
 def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type):
     if context in ["sqlite", "postgresql", "mysql"]:
@@ -266,8 +270,9 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
             "expect_column_values_to_be_dateutil_parseable",
             "expect_column_values_to_be_json_parseable",
             "expect_column_values_to_match_json_schema",
-            #"expect_column_mean_to_be_between",
-            #"expect_column_median_to_be_between",
+            # "expect_column_mean_to_be_between",
+            # "expect_column_median_to_be_between",
+            # "expect_column_quantile_values_to_be_between",
             "expect_column_stdev_to_be_between",
             #"expect_column_unique_value_count_to_be_between",
             #"expect_column_proportion_of_unique_values_to_be_between",
@@ -314,7 +319,8 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
             "expect_column_values_to_be_json_parseable",
             "expect_column_values_to_match_json_schema",
             # "expect_column_mean_to_be_between",
-            "expect_column_median_to_be_between",
+            # "expect_column_median_to_be_between",            
+            # "expect_column_quantile_values_to_be_between",
             # "expect_column_stdev_to_be_between",
             # "expect_column_unique_value_count_to_be_between",
             # "expect_column_proportion_of_unique_values_to_be_between",
@@ -395,7 +401,12 @@ def evaluate_json_test(data_asset, expectation_type, test):
 
             elif key == 'observed_value':
                 if 'tolerance' in test:
-                    assert np.allclose(result['result']['observed_value'], value, rtol=test['tolerance'])
+                    if isinstance(value, dict):
+                        assert set(value.keys()) == set(result["result"]["observed_value"].keys())
+                        for k,v in value.items():
+                            assert np.allclose(result["result"]["observed_value"][k], v, rtol=test["tolerance"])
+                    else:
+                        assert np.allclose(result['result']['observed_value'], value, rtol=test['tolerance'])
                 else:
                     assert value == result['result']['observed_value']
 

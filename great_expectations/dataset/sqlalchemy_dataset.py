@@ -10,6 +10,7 @@ from datetime import datetime
 from importlib import import_module
 
 import pandas as pd
+import numpy as np
 
 from dateutil.parser import parse
 
@@ -345,19 +346,88 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             column_median = column_values[1][0]  # True center value
         return column_median
 
-    def get_column_hist(self, column, bins):
-        # TODO: this is **terribly** inefficient; consider refactor
-        """return a list of counts corresponding to bins"""
-        hist = []
-        for i in range(0, len(bins) - 1):
-            # all bins except last are half-open
-            if i == len(bins) - 2:
-                max_strictly = False
-            else:
-                max_strictly = True
-            hist.append(
-                self.get_column_count_in_range(column, min_val=bins[i], max_val=bins[i + 1], max_strictly=max_strictly)
+    def get_column_quantiles(self, column, quantiles):
+        selects = []
+        for quantile in quantiles:
+            selects.append(
+                sa.func.percentile_disc(quantile).within_group(sa.column(column).asc())
             )
+        quantiles = self.engine.execute(sa.select(selects).select_from(self._table)).fetchone()
+        return list(quantiles)
+
+    def get_column_stdev(self, column):
+        res = self.engine.execute(sa.select([
+                sa.func.stddev_samp(sa.column(column))
+            ]).select_from(self._table).where(sa.column(column) != None)).fetchone()
+        return float(res[0])
+
+    def get_column_hist(self, column, bins):
+        """return a list of counts corresponding to bins"""
+        case_conditions = []
+        idx = 0
+        if isinstance(bins, (np.ndarray)):
+            bins = bins.tolist()
+
+        # If we have an infinte lower bound, don't express that in sql
+        if (bins[0] == -np.inf) or (bins[0] == -float("inf")):
+            case_conditions.append(
+                sa.func.sum(
+                    sa.case(
+                        [
+                            (sa.column(column) < bins[idx+1], 1)
+                        ], else_=0
+                    )
+                ).label("bin_" + str(idx))
+            )
+            idx += 1
+
+        for idx in range(idx, len(bins)-2):
+            case_conditions.append(
+                sa.func.sum(
+                    sa.case(
+                        [
+                            (sa.and_(
+                                bins[idx] <= sa.column(column),
+                                sa.column(column) < bins[idx+1]
+                            ), 1)
+                        ], else_=0
+                    )
+                ).label("bin_" + str(idx))
+            )
+
+        if (bins[-1] == np.inf) or (bins[-1] == float("inf")):
+            case_conditions.append(
+                sa.func.sum(
+                    sa.case(
+                        [
+                            (bins[-2] <= sa.column(column), 1)
+                        ], else_=0
+                    )
+                ).label("bin_" + str(len(bins)-1))
+            )
+        else:    
+            case_conditions.append(
+                sa.func.sum(
+                    sa.case(
+                        [
+                            (sa.and_(
+                                bins[-2] <= sa.column(column),
+                                sa.column(column) <= bins[-1]
+                            ), 1)
+                        ], else_=0
+                    )
+                ).label("bin_" + str(len(bins)-1))
+            )
+
+        query = sa.select(
+            case_conditions
+        )\
+        .where(
+            sa.column(column) != None,
+        )\
+        .select_from(self._table)
+
+        hist = list(self.engine.execute(query).fetchone())
         return hist
 
     def get_column_count_in_range(self, column, min_val=None, max_val=None, min_strictly=False, max_strictly=True):
