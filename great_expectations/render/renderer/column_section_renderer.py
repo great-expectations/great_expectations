@@ -154,6 +154,7 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
     @classmethod
     def _render_unrecognized(cls, evrs, content_blocks):
         unrendered_blocks = []
+        new_block = None
         for evr in evrs:
             if evr["expectation_config"]["expectation_type"] not in [
                 "expect_column_to_exist",
