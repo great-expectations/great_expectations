@@ -136,7 +136,7 @@ As a backup option please visit <blue>https://great-expectations.readthedocs.io/
                 data_asset_name = profiling_result[1]['meta']['data_asset_name']
                 run_id = profiling_result[1]['meta']['run_id']
 
-                print("  {0:s}".format(context.get_validation_filepath(data_asset_name, run_id)))
+                print("  {0:s}".format(context.get_validation_location(data_asset_name, run_id)['filepath']))
 
             cli_message(
 """
