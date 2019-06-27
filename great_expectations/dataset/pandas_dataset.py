@@ -98,6 +98,18 @@ class MetaPandasDataset(Dataset):
                 nonnull_values[boolean_mapped_success_values == False])
             unexpected_index_list = list(
                 nonnull_values[boolean_mapped_success_values == False].index)
+            
+            if "output_strftime_format" in kwargs:
+                output_strftime_format = kwargs["output_strftime_format"]
+                parsed_unexpected_list = []
+                for val in unexpected_list:
+                    if val is None:
+                        parsed_unexpected_list.append(val)
+                    else:
+                        if isinstance(val, string_types):
+                            val = parse(val)
+                        parsed_unexpected_list.append(datetime.strftime(val, output_strftime_format))
+                unexpected_list = parsed_unexpected_list
 
             success, percent_success = self._calc_map_expectation_success(
                 success_count, nonnull_count, mostly)
