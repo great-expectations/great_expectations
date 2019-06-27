@@ -170,6 +170,33 @@
         }
       },
       {
+        "title": "norm_0_1_auto_inf partition - null threshold should always succeed",
+        "exact_match_out": false,
+        "in": {
+          "column": "norm_0_1",
+          "partition_object": {
+            "bins": [ -Infinity, -3.2412673400690726, -2.987910238971794, -2.734553137874516, -2.481196036777238, -2.2278389356799595, -1.974481834582681, -1.7211247334854027, -1.4677676323881244, -1.214410531290846, -0.9610534301935676, -0.7076963290962892, -0.45433922799901083, -0.2009821269017329, 0.05237497419554549, 0.30573207529282387, 0.5590891763901022, 0.8124462774873806, 1.065803378584659, 1.3191604796819374, 1.5725175807792158, 1.8258746818764942, 2.0792317829737725, 2.332588884071051, 2.5859459851683293, 2.839303086265607, 3.092660187362885, 3.3460172884601636, 3.599374389557442, 3.852731490654721, Infinity],
+            "weights": [ 0.005, 0.00099, 0.0, 0.00297, 0.00297, 0.010889999999999999, 0.01287, 0.028710000000000003, 0.04554, 0.052469999999999996, 0.0693, 0.10196999999999999, 0.08613, 0.09207, 0.1089, 0.08811, 0.08514, 0.06336, 0.0396, 0.03762, 0.02277, 0.01683, 0.010889999999999999, 0.00594, 0.00198, 0.00099, 0.0, 0.0, 0.00099, 0.005 ]
+          },
+          "threshold": null
+        },
+        "out": {
+          "success": true
+        }
+      },
+      {
+        "title": "norm_0_1_auto_inf partition - null threshold *and* partition object supports profiling",
+        "exact_match_out": false,
+        "in": {
+          "column": "norm_0_1",
+          "partition_object": null,
+          "threshold": null
+        },
+        "out": {
+          "success": false
+        }
+      },
+      {
         "title": "norm_0_1_auto_inf partition - tail weights - should fail with no internal holdout",
         "exact_match_out": false,
         "in": {
@@ -595,22 +622,6 @@
           "partition_object": {},
           "threshold": 0.5,
           "tail_weight_holdout": 0.1,
-          "catch_exceptions": true
-        },
-        "out": {
-          "traceback_substring": "ValueError"
-        }
-      },
-      {
-        "title": "missing threshold",
-        "exact_match_out": false,
-        "in": {
-          "column": "z",
-          "partition_object": {
-            "bins": [0, 1, 2, 3],
-            "weights": [0.2, 0.4, 0.2],
-            "tail_weights": [0.1, 0.1]
-          },
           "catch_exceptions": true
         },
         "out": {

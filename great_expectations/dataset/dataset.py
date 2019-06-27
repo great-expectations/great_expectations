@@ -3162,10 +3162,7 @@ class Dataset(MetaDataset):
         if not is_valid_partition_object(partition_object):
             raise ValueError("Invalid partition object.")
 
-        if (not (
-            isinstance(threshold, (int, float)) or
-            threshold is None # we allow None here because it can signal the desire for no bound
-            )) or (threshold < 0):
+        if threshold is not None and ((not isinstance(threshold, (int, float))) or (threshold < 0)):
             raise ValueError(
                 "Threshold must be specified, greater than or equal to zero.")
 
