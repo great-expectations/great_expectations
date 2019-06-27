@@ -25,7 +25,7 @@ from scipy import stats
 logger = logging.getLogger(__name__)
 
 try:
-    from pyspark.sql.functions import udf, col, lit, stddev_samp
+    from pyspark.sql.functions import udf, col, lit, stddev_samp, length as length_, when, year
     import pyspark.sql.types as sparktypes
     from pyspark.ml.feature import Bucketizer
 except ImportError as e:
@@ -117,6 +117,18 @@ class MetaSparkDFDataset(Dataset):
                     for row
                     in unexpected_df.collect()
                 ]
+
+                if "output_strftime_format" in kwargs:
+                    output_strftime_format = kwargs["output_strftime_format"]
+                    parsed_maybe_limited_unexpected_list = []
+                    for val in maybe_limited_unexpected_list:
+                        if val is None:
+                            parsed_maybe_limited_unexpected_list.append(val)
+                        else:
+                            if isinstance(val, string_types):
+                                val = parse(val)
+                            parsed_maybe_limited_unexpected_list.append(datetime.strftime(val, output_strftime_format))
+                    maybe_limited_unexpected_list = parsed_maybe_limited_unexpected_list
 
             success, percent_success = self._calc_map_expectation_success(
                 success_count, nonnull_count, mostly)
@@ -421,6 +433,57 @@ class SparkDFDataset(MetaSparkDFDataset):
 
     @DocInherit
     @MetaSparkDFDataset.column_map_expectation
+    def expect_column_values_to_be_between(self,
+                                           column,
+                                           min_value=None, max_value=None,
+                                           parse_strings_as_datetimes=None,
+                                           output_strftime_format=None,
+                                           allow_cross_type_comparisons=None,
+                                           mostly=None,
+                                           result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                           ):
+        # NOTE: This function is implemented using native functions instead of UDFs, which is a faster
+        # implementation. Please ensure new spark implementations migrate to the new style where possible
+        if allow_cross_type_comparisons:
+            raise ValueError("Cross-type comparisons are not valid for SparkDFDataset")
+        
+        if parse_strings_as_datetimes:
+            min_value = parse(min_value)
+            max_value = parse(max_value)
+
+        if min_value is None and max_value is None:
+            return column.withColumn('__success', lit(True))
+        elif min_value is None:
+            return column.withColumn('__success', when(column[0] <= max_value, lit(True)).otherwise(lit(False)))
+        elif max_value is None:
+            return column.withColumn('__success', when(column[0] >= min_value, lit(True)).otherwise(lit(False)))
+        else:
+            if min_value > max_value:
+                raise ValueError("minvalue cannot be greater than max_value")
+        
+        return column.withColumn('__success', when((min_value <= column[0]) & (column[0] <= max_value), lit(True)).otherwise(lit(False)))
+
+    @DocInherit
+    @MetaSparkDFDataset.column_map_expectation
+    def expect_column_value_lengths_to_be_between(self, column, min_value=None, max_value=None,
+                                                  mostly=None,
+                                                  result_format=None, include_config=False, catch_exceptions=None, meta=None):
+        if min_value is None and max_value is None:
+            return column.withColumn('__success', lit(True))
+        elif min_value is None:
+            return column.withColumn('__success', when(length_(column[0]) <= max_value, lit(True)).otherwise(lit(False)))
+        elif max_value is None:
+            return column.withColumn('__success', when(length_(column[0]) >= min_value, lit(True)).otherwise(lit(False)))
+        # FIXME: whether the below condition is enforced seems to be somewhat inconsistent
+        
+        # else:
+        #     if min_value > max_value:
+        #         raise ValueError("minvalue cannot be greater than max_value")
+
+        return column.withColumn('__success', when((min_value <= length_(column[0])) & (length_(column[0]) <= max_value), lit(True)).otherwise(lit(False)))
+
+    @DocInherit
+    @MetaSparkDFDataset.column_map_expectation
     def expect_column_values_to_be_unique(
         self,
         column,
@@ -447,8 +510,7 @@ class SparkDFDataset(MetaSparkDFDataset):
         catch_exceptions=None,
         meta=None,
     ):
-        success_udf = udf(lambda x: len(x) == value)
-        return column.withColumn('__success', success_udf(column[0]))
+        return column.withColumn('__success', when(length_(column[0]) == value, lit(True)).otherwise(lit(False)))
 
     @DocInherit
     @MetaSparkDFDataset.column_map_expectation

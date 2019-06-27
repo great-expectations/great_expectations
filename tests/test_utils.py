@@ -3,7 +3,9 @@ from __future__ import division
 import random
 import string
 import warnings
+import copy
 
+from dateutil.parser import parse
 import pandas as pd
 import numpy as np
 import pytest
@@ -128,12 +130,12 @@ def get_dataset(dataset_type, data, schemas=None, profiler=ColumnsExistProfiler,
             schema = schemas["sqlite"]
             sql_dtypes = {col : SQLITE_TYPES[dtype] for (col,dtype) in schema.items()}
             for col in schema:
-                type = schema[col]
-                if type in ["INTEGER", "SMALLINT", "BIGINT"]:
-                    df[col] = pd.to_numeric(df[col],downcast='signed')
-                elif type in ["FLOAT", "DOUBLE", "DOUBLE_PRECISION"]:
-                    df[col] = pd.to_numeric(df[col],downcast='float')
-                elif type in ["DATETIME", "TIMESTAMP"]:
+                type_ = schema[col]
+                if type_ in ["INTEGER", "SMALLINT", "BIGINT"]:
+                    df[col] = pd.to_numeric(df[col], downcast='signed')
+                elif type_ in ["FLOAT", "DOUBLE", "DOUBLE_PRECISION"]:
+                    df[col] = pd.to_numeric(df[col])
+                elif type_ in ["DATETIME", "TIMESTAMP"]:
                     df[col] = pd.to_datetime(df[col])
 
         tablename = "test_data_" + ''.join([random.choice(string.ascii_letters + string.digits) for n in range(8)])
@@ -152,13 +154,12 @@ def get_dataset(dataset_type, data, schemas=None, profiler=ColumnsExistProfiler,
             schema = schemas["postgresql"]
             sql_dtypes = {col : POSTGRESQL_TYPES[dtype] for (col, dtype) in schema.items()}
             for col in schema:
-                type = schema[col]
-                if type in ["INTEGER", "SMALLINT", "BIGINT"]:
-                    df[col] = pd.to_numeric(df[col],downcast='signed')
-                elif type in ["FLOAT", "DOUBLE", "DOUBLE_PRECISION"]:
+                type_ = schema[col]
+                if type_ in ["INTEGER", "SMALLINT", "BIGINT"]:
+                    df[col] = pd.to_numeric(df[col], downcast='signed')
+                elif type_ in ["FLOAT", "DOUBLE", "DOUBLE_PRECISION"]:
                     df[col] = pd.to_numeric(df[col])
-                    #df[col] = pd.to_numeric(df[col],downcast='float')
-                elif type in ["DATETIME", "TIMESTAMP"]:
+                elif type_ in ["DATETIME", "TIMESTAMP"]:
                     df[col] = pd.to_datetime(df[col])
 
         tablename = "test_data_" + ''.join([random.choice(string.ascii_letters + string.digits) for n in range(8)])
@@ -176,12 +177,12 @@ def get_dataset(dataset_type, data, schemas=None, profiler=ColumnsExistProfiler,
             schema = schemas["mysql"]
             sql_dtypes = {col : MYSQL_TYPES[dtype] for (col, dtype) in schema.items()}
             for col in schema:
-                type = schema[col]
-                if type in ["INTEGER", "SMALLINT", "BIGINT"]:
-                    df[col] = pd.to_numeric(df[col],downcast='signed')
-                elif type in ["FLOAT", "DOUBLE", "DOUBLE_PRECISION"]:
-                    df[col] = pd.to_numeric(df[col],downcast='float')
-                elif type in ["DATETIME", "TIMESTAMP"]:
+                type_ = schema[col]
+                if type_ in ["INTEGER", "SMALLINT", "BIGINT"]:
+                    df[col] = pd.to_numeric(df[col], downcast='signed')
+                elif type_ in ["FLOAT", "DOUBLE", "DOUBLE_PRECISION"]:
+                    df[col] = pd.to_numeric(df[col])
+                elif type_ in ["DATETIME", "TIMESTAMP"]:
                     df[col] = pd.to_datetime(df[col])
 
         tablename = "test_data_" + ''.join([random.choice(string.ascii_letters + string.digits) for n in range(8)])
@@ -192,16 +193,54 @@ def get_dataset(dataset_type, data, schemas=None, profiler=ColumnsExistProfiler,
 
     elif dataset_type == 'SparkDFDataset':
         spark = SparkSession.builder.getOrCreate()
-        data_reshaped = list(zip(*[v for _, v in data.items()]))
+        # We need to allow null values in some column types that do not support them natively, so we skip
+        # use of df in this case.
+        data_reshaped = list(zip(*[v for _, v in data.items()]))  # create a list of rows
         if schemas and 'spark' in schemas:
             schema = schemas['spark']
             # sometimes first method causes Spark to throw a TypeError
             try:
                 spark_schema = sparktypes.StructType([
-                    sparktypes.StructField(column, SPARK_TYPES[schema[column]]())
+                    sparktypes.StructField(column, SPARK_TYPES[schema[column]](), True)
                     for column in schema
                 ])
-                spark_df = spark.createDataFrame(data_reshaped, spark_schema)
+                # We create these every time, which is painful for testing
+                # However nuance around null treatment as well as the desire
+                # for real datetime support in tests makes this necessary
+                data = copy.deepcopy(data)
+                if "ts" in data:
+                    print(data)
+                    print(schema)
+                for col in schema:
+                    type_ = schema[col]
+                    if type_ in ["IntegerType", "LongType"]:
+                        # Ints cannot be None...but None can be valid in Spark (as Null)
+                        vals = []
+                        for val in data[col]:
+                            if val is None:
+                                vals.append(val)
+                            else:
+                                vals.append(int(val))
+                        data[col] = vals
+                    elif type_ in ["FloatType", "DoubleType"]:
+                        vals = []
+                        for val in data[col]:
+                            if val is None:
+                                vals.append(val)
+                            else:
+                                vals.append(float(val))
+                        data[col] = vals
+                    elif type_ in ["DateType", "TimestampType"]:
+                        vals = []
+                        for val in data[col]:
+                            if val is None:
+                                vals.append(val)
+                            else:
+                                vals.append(parse(val))
+                        data[col] = vals
+                # Do this again, now that we have done type conversion using the provided schema
+                data_reshaped = list(zip(*[v for _, v in data.items()]))  # create a list of rows
+                spark_df = spark.createDataFrame(data_reshaped, schema=spark_schema)
             except TypeError:
                 string_schema = sparktypes.StructType([
                     sparktypes.StructField(column, sparktypes.StringType())
@@ -226,6 +265,7 @@ def get_dataset(dataset_type, data, schemas=None, profiler=ColumnsExistProfiler,
 
     else:
         raise ValueError("Unknown dataset_type " + str(dataset_type))
+
 
 def candidate_getter_is_on_temporary_notimplemented_list(context, getter):
     if context in ["sqlite"]:
@@ -305,10 +345,10 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
             # "expect_column_distinct_values_to_be_in_set",
             # "expect_column_distinct_values_to_equal_set",
             # "expect_column_distinct_values_to_contain_set",
-            "expect_column_values_to_be_between",
+            # "expect_column_values_to_be_between",
             "expect_column_values_to_be_increasing",
             "expect_column_values_to_be_decreasing",
-            "expect_column_value_lengths_to_be_between",
+            # "expect_column_value_lengths_to_be_between",
             # "expect_column_value_lengths_to_equal",
             # "expect_column_values_to_match_regex",
             # "expect_column_values_to_not_match_regex",
