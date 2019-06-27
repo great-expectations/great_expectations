@@ -439,8 +439,25 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
     def get_column_hist(self, column, bins):
         """return a list of counts corresponding to bins"""
-        case_conditions = [] 
-        for idx in range(len(bins)-2):
+        case_conditions = []
+        idx = 0
+        if isinstance(bins, (np.ndarray)):
+            bins = bins.tolist()
+
+        # If we have an infinte lower bound, don't express that in sql
+        if (bins[0] == -np.inf) or (bins[0] == -float("inf")):
+            case_conditions.append(
+                sa.func.sum(
+                    sa.case(
+                        [
+                            (sa.column(column) < bins[idx+1], 1)
+                        ], else_=0
+                    )
+                ).label("bin_" + str(idx))
+            )
+            idx += 1
+
+        for idx in range(idx, len(bins)-2):
             case_conditions.append(
                 sa.func.sum(
                     sa.case(
@@ -453,18 +470,30 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                     )
                 ).label("bin_" + str(idx))
             )
-        case_conditions.append(
-            sa.func.sum(
-                sa.case(
-                    [
-                        (sa.and_(
-                            bins[-2] <= sa.column(column),
-                            sa.column(column) <= bins[-1]
-                        ), 1)
-                    ], else_=0
-                )
-            ).label("bin_" + str(len(bins)-1))
-        )
+
+        if (bins[-1] == np.inf) or (bins[-1] == float("inf")):
+            case_conditions.append(
+                sa.func.sum(
+                    sa.case(
+                        [
+                            (bins[-2] <= sa.column(column), 1)
+                        ], else_=0
+                    )
+                ).label("bin_" + str(len(bins)-1))
+            )
+        else:    
+            case_conditions.append(
+                sa.func.sum(
+                    sa.case(
+                        [
+                            (sa.and_(
+                                bins[-2] <= sa.column(column),
+                                sa.column(column) <= bins[-1]
+                            ), 1)
+                        ], else_=0
+                    )
+                ).label("bin_" + str(len(bins)-1))
+            )
 
         query = sa.select(
             case_conditions

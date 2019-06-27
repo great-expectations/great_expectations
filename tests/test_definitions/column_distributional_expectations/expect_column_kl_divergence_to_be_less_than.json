@@ -118,6 +118,13 @@
         "norm_10_1": "FloatType",
         "bimodal": "FloatType",
         "categorical_fixed": "StringType"
+      },
+      "postgresql": {
+        "norm_0_1": "NUMERIC",
+        "norm_1_1": "NUMERIC",
+        "norm_10_1": "NUMERIC",
+        "bimodal": "NUMERIC",
+        "categorical_fixed": "TEXT"
       }
     },
     "tests": [
@@ -193,7 +200,7 @@
           "threshold": null
         },
         "out": {
-          "success": false
+          "success": true
         }
       },
       {

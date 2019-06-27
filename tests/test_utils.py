@@ -38,7 +38,8 @@ POSTGRESQL_TYPES = {
     "TIMESTAMP": postgresqltypes.TIMESTAMP,
     "DATE": postgresqltypes.DATE,
     "DOUBLE_PRECISION": postgresqltypes.DOUBLE_PRECISION,
-    "BOOLEAN": postgresqltypes.BOOLEAN
+    "BOOLEAN": postgresqltypes.BOOLEAN,
+    "NUMERIC": postgresqltypes.NUMERIC
 }
 
 MYSQL_TYPES = {
@@ -157,7 +158,8 @@ def get_dataset(dataset_type, data, schemas=None, profiler=ColumnsExistProfiler,
                 if type in ["INTEGER", "SMALLINT", "BIGINT"]:
                     df[col] = pd.to_numeric(df[col],downcast='signed')
                 elif type in ["FLOAT", "DOUBLE", "DOUBLE_PRECISION"]:
-                    df[col] = pd.to_numeric(df[col],downcast='float')
+                    df[col] = pd.to_numeric(df[col])
+                    #df[col] = pd.to_numeric(df[col],downcast='float')
                 elif type in ["DATETIME", "TIMESTAMP"]:
                     df[col] = pd.to_datetime(df[col])
 
