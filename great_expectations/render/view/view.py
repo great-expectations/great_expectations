@@ -49,9 +49,7 @@ def render_styling(styling):
         for k, v in attribute_dict.items():
             attribute_str += k+'="'+v+'" '
 
-    # TODO: Implement something for `style` here...
     style_dict = styling.get("styles", None)
-    print(style_dict)
     if style_dict == None:
         style_str = ""
     else:
