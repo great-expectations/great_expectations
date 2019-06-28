@@ -425,7 +425,21 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
         )
 
         return [{
-            "template": "The proportion of unique values in $column should be between $min_value and $max_value.",
+            "template": "$column must have between $min_value and $max_value% unique values.",
+            "params": params,
+            "styling": styling,
+        }]
+
+    @classmethod
+    def expect_column_values_to_be_unique(cls, expectation, styling=None):
+        # TODO: thoroughly review this method. It was implemented quickly and hackily.
+        params = substitute_none_for_missing(
+            expectation["kwargs"],
+            ["column", ],
+        )
+
+        return [{
+            "template": "$column values must be unique.",
             "params": params,
             "styling": styling,
         }]
