@@ -2,10 +2,10 @@
     <h4>{{content_block["header"]}}</h4>
     <table style="width: 100%">
         {% for row in content_block["table_rows"] %}
-        <tr class="{{ loop.cycle('odd', 'even') }}" >
+        <tr>
             {% set rowloop = loop %}
             {% for cell in row %}
-                <td id="cell-{{ rowloop.index }}-{{ loop.index }}">{{ cell }}</td>
+                <td id="cell-{{ rowloop.index }}-{{ loop.index }}">{{ cell | render_string_template }}</td>
             {% endfor %}
         </tr>
         {% endfor %}
