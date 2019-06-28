@@ -200,7 +200,9 @@ class PrescriptiveColumnSectionRenderer(ColumnSectionRenderer):
     @classmethod
     def _render_bullet_list(cls, expectations, content_blocks):
         content = PrescriptiveBulletListContentBlockRenderer.render(
-            expectations)
+            expectations,
+            include_column_name=False,
+        )
         content_blocks.append(content)
 
         return [], content_blocks
