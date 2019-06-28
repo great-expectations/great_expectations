@@ -3,6 +3,7 @@ import logging
 
 from ..data_asset import DataAsset
 from ..dataset import Dataset
+from great_expectations.exceptions import GreatExpectationsError
 
 logger = logging.getLogger(__name__)
 
@@ -52,8 +53,7 @@ class DatasetProfiler(object):
     @classmethod
     def profile(cls, data_asset, run_id=None):
         if not cls.validate(data_asset):
-            logger.error("Invalid data_asset for profiler; aborting")
-            return
+            raise GreatExpectationsError("Invalid data_asset for profiler; aborting")
 
         expectation_suite = cls._profile(data_asset)
 
