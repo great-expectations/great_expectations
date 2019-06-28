@@ -44,22 +44,22 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
     }
 
     @classmethod
-    def _missing_content_block_fn(cls, expectation, **kwargs):
+    def _missing_content_block_fn(cls, expectation, styling, **kwargs):
         return [{
             "template": "Couldn't render expectation of type $expectation_type",
             "params": {
                 "expectation_type": expectation["expectation_type"],
             },
+            # "styling": styling,
             "styling": {
-                # "classes": ["badge", "badge-danger"],
                 "classes": ["alert", "alert-warning"],
                 "attributes": {
                     "role": "alert",
                     # "data-container": "body",
-                    "data-toggle": "popover",
-                    "data-placement": "bottom",
-                    "data-trigger": "hover",
-                    "data-content": expectation["expectation_type"],
+                    # "data-toggle": "popover",
+                    # "data-placement": "bottom",
+                    # "data-trigger": "hover",
+                    # "data-content": expectation["expectation_type"],
                 },
                 "params": {
                     "expectation_type": {
@@ -78,7 +78,7 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
 
         if params["column_index"] == None:
             return [{
-                "template": "$column is a required field "+str(datetime.datetime.now()),
+                "template": "$column is a required field.",
                 "params": params,
                 "styling": styling
             }]
@@ -367,4 +367,25 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
         return [{
             "template": "Must have exactly $value rows.",
             "params": params
+        }]
+
+    @classmethod
+    def expect_column_distinct_values_to_be_in_set(cls, expectation, styling=None):
+        # TODO: thoroughly review this method. It was implemented quickly and hackily.
+        params = substitute_none_for_missing(
+            expectation["kwargs"],
+            ["column", "value_set"],
+        )
+
+        for i, v in enumerate(params["value_set"]):
+            params["v__"+str(i)] = v
+        values_string = " ".join(
+            ["$v__"+str(i) for i, v in enumerate(params["value_set"])]
+        )
+        print(expectation)
+        print(values_string)
+        return [{
+            "template": "$column values must belong to this set: "+values_string+".",
+            "params": params,
+            "styling": styling,
         }]
