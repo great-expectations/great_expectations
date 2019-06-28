@@ -443,3 +443,22 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
             "params": params,
             "styling": styling,
         }]
+
+    @classmethod
+    def expect_column_values_to_be_in_type_list(cls, expectation, styling=None):
+        # TODO: thoroughly review this method. It was implemented quickly and hackily.
+        params = substitute_none_for_missing(
+            expectation["kwargs"],
+            ["column", "type_list", "mostly"],
+        )
+
+        for i, v in enumerate(params["type_list"]):
+            params["v__"+str(i)] = v
+        values_string = " ".join(
+            ["$v__"+str(i) for i, v in enumerate(params["type_list"])]
+        )
+        return [{
+            "template": "$column values must belong to this set: "+values_string+".",
+            "params": params,
+            "styling": styling,
+        }]
