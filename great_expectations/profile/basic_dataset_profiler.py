@@ -157,4 +157,4 @@ class BasicDatasetProfiler(DatasetProfiler):
                 # print("??????", column, type_, cardinality)
                 pass
 
-        return df.get_expectation_suite(suppress_warnings=True)
+        return df.get_expectation_suite(suppress_warnings=True, discard_failed_expectations=False)
