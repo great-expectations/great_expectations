@@ -234,7 +234,7 @@ class DataAsset(object):
 
         return outer_wrapper
 
-    def _initialize_expectations(self, expectation_suite=None, data_asset_name=None, expectation_suite_name="default"):
+    def _initialize_expectations(self, expectation_suite=None, data_asset_name=None, expectation_suite_name=None):
         """Instantiates `_expectation_suite` as empty by default or with a specified expectation `config`.
         In addition, this always sets the `default_expectation_args` to:
             `include_config`: False,
@@ -281,6 +281,8 @@ class DataAsset(object):
                 self._expectation_suite["expectation_suite_name"] = expectation_suite_name
 
         else:
+            if expectation_suite_name is None:
+                expectation_suite_name = "default"
             self._expectation_suite = get_empty_expectation_suite(data_asset_name, expectation_suite_name)
 
         self.default_expectation_args = {
