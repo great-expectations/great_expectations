@@ -595,7 +595,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                     type_class = getattr(sa, type_)
                     types.append(type_class)
                 except AttributeError:
-                    logger.warning("Unrecognized type: %s" % type_)
+                    logger.debug("Unrecognized type: %s" % type_)
             if len(types) == 0:
                 raise ValueError("No recognized sqlalchemy types in type_list")
             types = tuple(types)
@@ -606,7 +606,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                     type_class = getattr(self.dialect, type_)
                     types.append(type_class)
                 except AttributeError:
-                    logger.warning("Unrecognized type: %s" % type_)
+                    logger.debug("Unrecognized type: %s" % type_)
             if len(types) == 0:
                 raise ValueError("No recognized sqlalchemy types in type_list for dialect %s" % 
                     self.dialect.__name__)
