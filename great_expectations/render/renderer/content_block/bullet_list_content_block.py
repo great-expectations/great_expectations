@@ -407,9 +407,9 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
         )
 
         if include_column_name:
-            template_str = "$column values must match not this regular expression: $regex."
+            template_str = "$column values must not match this regular expression: $regex."
         else:
-            template_str = "values must match not this regular expression: $regex."
+            template_str = "values must not match this regular expression: $regex."
 
         return [{
             "template": template_str,
