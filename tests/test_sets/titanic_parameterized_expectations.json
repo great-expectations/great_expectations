@@ -72,5 +72,6 @@
       }
     }
   ],
-  "dataset_name": null
+  "data_asset_name": null,
+  "expectation_suite_name": "default"
 }

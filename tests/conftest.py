@@ -48,7 +48,8 @@ except (ImportError, sa.exc.SQLAlchemyError):
 @pytest.fixture
 def empty_expectation_suite():
     expectation_suite = {
-        'dataset_name': "empty_suite_fixture",
+        'data_asset_name': "empty_suite_fixture",
+        'expectation_suite_name': "default",
         'meta': {},
         'expectations': []
     }
@@ -58,7 +59,8 @@ def empty_expectation_suite():
 @pytest.fixture
 def basic_expectation_suite():
     expectation_suite = {
-        'dataset_name': "basic_suite_fixture",
+        'data_asset_name': "basic_suite_fixture",
+        'expectation_suite_name': "default",
         'meta': {},
         'expectations': [
             # Removing this from list of expectations, since mysql doesn't support infinities and we want generic fixtures

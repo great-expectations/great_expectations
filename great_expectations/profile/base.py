@@ -1,15 +1,18 @@
-import json
 import time
+import logging
 
 from ..data_asset import DataAsset
 from ..dataset import Dataset
+from great_expectations.exceptions import GreatExpectationsError
 
+logger = logging.getLogger(__name__)
 
 class DataAssetProfiler(object):
 
     @classmethod
     def validate(cls, data_asset):
         return isinstance(data_asset, DataAsset)
+
 
 class DatasetProfiler(object):
 
@@ -28,35 +31,36 @@ class DatasetProfiler(object):
         return expectation
 
     @classmethod
-    def add_meta(cls, expectations_config, batch_kwargs=None):
-        if not "meta" in expectations_config:
-            expectations_config["meta"] = {}
+    def add_meta(cls, expectation_suite, batch_kwargs=None):
+        if not "meta" in expectation_suite:
+            expectation_suite["meta"] = {}
 
         class_name = str(cls.__name__)
-        expectations_config["meta"][class_name] = {
+        expectation_suite["meta"][class_name] = {
             "created_by": class_name,
             "created_at": time.time(),
         }
 
-        if batch_kwargs != None:
-            expectations_config["meta"][class_name]["batch_kwargs"] = batch_kwargs
+        if batch_kwargs is not None:
+            expectation_suite["meta"][class_name]["batch_kwargs"] = batch_kwargs
 
         new_expectations = [cls.add_expectation_meta(
-            exp) for exp in expectations_config["expectations"]]
-        expectations_config["expectations"] = new_expectations
+            exp) for exp in expectation_suite["expectations"]]
+        expectation_suite["expectations"] = new_expectations
 
-        return expectations_config
+        return expectation_suite
 
     @classmethod
-    def profile(cls, dataset):
-        # TODO: Consider raising a more descriptive error here
-        assert cls.validate(dataset)
-        expectations_config = cls._profile(dataset)
+    def profile(cls, data_asset, run_id=None):
+        if not cls.validate(data_asset):
+            raise GreatExpectationsError("Invalid data_asset for profiler; aborting")
 
-        batch_kwargs = dataset.get_batch_kwargs()
-        expectations_config = cls.add_meta(expectations_config, batch_kwargs)
-        validation_results = dataset.validate(expectations_config, result_format="SUMMARY")
-        return expectations_config, validation_results
+        expectation_suite = cls._profile(data_asset)
+
+        batch_kwargs = data_asset.get_batch_kwargs()
+        expectation_suite = cls.add_meta(expectation_suite, batch_kwargs)
+        validation_results = data_asset.validate(expectation_suite, run_id=run_id, result_format="SUMMARY")
+        return expectation_suite, validation_results
 
     @classmethod
     def _profile(cls, dataset):
