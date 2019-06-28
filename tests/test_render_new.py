@@ -101,7 +101,7 @@ def test_render_profiled_fixtures():
 
     # print(rendered_page)
 
-    assert False
+    # assert False
 
 
 def test_render_template():
