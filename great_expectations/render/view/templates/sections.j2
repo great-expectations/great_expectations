@@ -21,7 +21,6 @@
                     <ul>
                         {% for bullet_point in content_block["bullet_list"] %}
                             <li {{ bullet_point | render_styling }}>{{ bullet_point | render_string_template }}</li>
-                            {# <li>{{ bullet_point }}</li> #}
                         {% endfor %}
                     </ul>
                 </div>

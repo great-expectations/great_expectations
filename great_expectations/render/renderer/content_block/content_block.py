@@ -39,7 +39,11 @@ class ContentBlockRenderer(Renderer):
                     blocks += result
 
                 else:
-                    result = cls._missing_content_block_fn(obj_, **kwargs)
+                    result = cls._missing_content_block_fn(
+                        obj_,
+                        cls._get_content_block_styling(),
+                        **kwargs
+                    )
                     blocks += result
 
             return {
@@ -64,7 +68,7 @@ class ContentBlockRenderer(Renderer):
         return expectations
 
     @classmethod
-    def _missing_content_block_fn(cls, obj, **kwargs):
+    def _missing_content_block_fn(cls, obj, styling, **kwargs):
         return []
 
     @classmethod

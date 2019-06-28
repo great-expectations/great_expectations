@@ -1,1 +1,2165 @@
-{"data_asset_name": "public_healthcare_datasets__dir/default/tetanusvaricella/BasicDatasetProfiler", "meta": {"great_expectations.__version__": "0.7.0-beta", "BasicDatasetProfiler": {"created_by": "BasicDatasetProfiler", "created_at": 1561474689.4609768, "batch_kwargs": {"path": "/Users/eugenemandel/project_data/public_healthcare_datasets/tetanusvaricella/tetvardata.csv", "timestamp": 1561474688.693565}}}, "expectations": [{"expectation_type": "expect_column_to_exist", "kwargs": {"column": "Reporting Area", "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_values_to_be_in_type_list", "kwargs": {"column": "Reporting Area", "type_list": ["string", "VARCHAR", "TEXT"], "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_unique_value_count_to_be_between", "kwargs": {"column": "Reporting Area", "min_value": 0, "max_value": null, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_proportion_of_unique_values_to_be_between", "kwargs": {"column": "Reporting Area", "min_value": 0, "max_value": null, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_values_to_not_be_null", "kwargs": {"column": "Reporting Area", "mostly": 0, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_values_to_not_match_regex", "kwargs": {"column": "Reporting Area", "regex": "^\\s+|\\s+$", "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_distinct_values_to_be_in_set", "kwargs": {"column": "Reporting Area", "value_set": [], "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_to_exist", "kwargs": {"column": "MMWR Year", "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_values_to_be_in_type_list", "kwargs": {"column": "MMWR Year", "type_list": ["int", "INTEGER", "BIGINT"], "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_unique_value_count_to_be_between", "kwargs": {"column": "MMWR Year", "min_value": 0, "max_value": null, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_proportion_of_unique_values_to_be_between", "kwargs": {"column": "MMWR Year", "min_value": 0, "max_value": null, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_values_to_not_be_null", "kwargs": {"column": "MMWR Year", "mostly": 0, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_distinct_values_to_be_in_set", "kwargs": {"column": "MMWR Year", "value_set": [], "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_to_exist", "kwargs": {"column": "MMWR Week", "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_values_to_be_in_type_list", "kwargs": {"column": "MMWR Week", "type_list": ["int", "INTEGER", "BIGINT"], "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_unique_value_count_to_be_between", "kwargs": {"column": "MMWR Week", "min_value": 0, "max_value": null, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_proportion_of_unique_values_to_be_between", "kwargs": {"column": "MMWR Week", "min_value": 0, "max_value": null, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_values_to_not_be_null", "kwargs": {"column": "MMWR Week", "mostly": 0, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_distinct_values_to_be_in_set", "kwargs": {"column": "MMWR Week", "value_set": [], "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_to_exist", "kwargs": {"column": "Tetanus, Current week", "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_values_to_be_in_type_list", "kwargs": {"column": "Tetanus, Current week", "type_list": ["float", "DOUBLE_PRECISION"], "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_unique_value_count_to_be_between", "kwargs": {"column": "Tetanus, Current week", "min_value": 0, "max_value": null, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_proportion_of_unique_values_to_be_between", "kwargs": {"column": "Tetanus, Current week", "min_value": 0, "max_value": null, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_values_to_not_be_null", "kwargs": {"column": "Tetanus, Current week", "mostly": 0, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_to_exist", "kwargs": {"column": "Tetanus, Current week, flag", "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_values_to_be_in_type_list", "kwargs": {"column": "Tetanus, Current week, flag", "type_list": ["string", "VARCHAR", "TEXT"], "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_unique_value_count_to_be_between", "kwargs": {"column": "Tetanus, Current week, flag", "min_value": 0, "max_value": null, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_proportion_of_unique_values_to_be_between", "kwargs": {"column": "Tetanus, Current week, flag", "min_value": 0, "max_value": null, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_values_to_not_be_null", "kwargs": {"column": "Tetanus, Current week, flag", "mostly": 0, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_values_to_not_match_regex", "kwargs": {"column": "Tetanus, Current week, flag", "regex": "^\\s+|\\s+$", "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_distinct_values_to_be_in_set", "kwargs": {"column": "Tetanus, Current week, flag", "value_set": [], "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_to_exist", "kwargs": {"column": "Tetanus, Previous 52 weeks Med", "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_values_to_be_in_type_list", "kwargs": {"column": "Tetanus, Previous 52 weeks Med", "type_list": ["float", "DOUBLE_PRECISION"], "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_unique_value_count_to_be_between", "kwargs": {"column": "Tetanus, Previous 52 weeks Med", "min_value": 0, "max_value": null, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_proportion_of_unique_values_to_be_between", "kwargs": {"column": "Tetanus, Previous 52 weeks Med", "min_value": 0, "max_value": null, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_values_to_not_be_null", "kwargs": {"column": "Tetanus, Previous 52 weeks Med", "mostly": 0, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_distinct_values_to_be_in_set", "kwargs": {"column": "Tetanus, Previous 52 weeks Med", "value_set": [], "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_to_exist", "kwargs": {"column": "Tetanus, Previous 52 weeks Med, flag", "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_values_to_be_in_type_list", "kwargs": {"column": "Tetanus, Previous 52 weeks Med, flag", "type_list": ["string", "VARCHAR", "TEXT"], "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_unique_value_count_to_be_between", "kwargs": {"column": "Tetanus, Previous 52 weeks Med, flag", "min_value": 0, "max_value": null, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_proportion_of_unique_values_to_be_between", "kwargs": {"column": "Tetanus, Previous 52 weeks Med, flag", "min_value": 0, "max_value": null, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_values_to_not_be_null", "kwargs": {"column": "Tetanus, Previous 52 weeks Med, flag", "mostly": 0, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_values_to_not_match_regex", "kwargs": {"column": "Tetanus, Previous 52 weeks Med, flag", "regex": "^\\s+|\\s+$", "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_distinct_values_to_be_in_set", "kwargs": {"column": "Tetanus, Previous 52 weeks Med, flag", "value_set": [], "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_to_exist", "kwargs": {"column": "Tetanus, Previous 52 weeks Max", "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_values_to_be_in_type_list", "kwargs": {"column": "Tetanus, Previous 52 weeks Max", "type_list": ["float", "DOUBLE_PRECISION"], "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_unique_value_count_to_be_between", "kwargs": {"column": "Tetanus, Previous 52 weeks Max", "min_value": 0, "max_value": null, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_proportion_of_unique_values_to_be_between", "kwargs": {"column": "Tetanus, Previous 52 weeks Max", "min_value": 0, "max_value": null, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_values_to_not_be_null", "kwargs": {"column": "Tetanus, Previous 52 weeks Max", "mostly": 0, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_distinct_values_to_be_in_set", "kwargs": {"column": "Tetanus, Previous 52 weeks Max", "value_set": [], "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_to_exist", "kwargs": {"column": "Tetanus, Previous 52 weeks Max, flag", "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_values_to_be_in_type_list", "kwargs": {"column": "Tetanus, Previous 52 weeks Max, flag", "type_list": ["string", "VARCHAR", "TEXT"], "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_unique_value_count_to_be_between", "kwargs": {"column": "Tetanus, Previous 52 weeks Max, flag", "min_value": 0, "max_value": null, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_proportion_of_unique_values_to_be_between", "kwargs": {"column": "Tetanus, Previous 52 weeks Max, flag", "min_value": 0, "max_value": null, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_values_to_not_be_null", "kwargs": {"column": "Tetanus, Previous 52 weeks Max, flag", "mostly": 0, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_values_to_not_match_regex", "kwargs": {"column": "Tetanus, Previous 52 weeks Max, flag", "regex": "^\\s+|\\s+$", "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_distinct_values_to_be_in_set", "kwargs": {"column": "Tetanus, Previous 52 weeks Max, flag", "value_set": [], "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_to_exist", "kwargs": {"column": "Tetanus, Cum 2018", "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_values_to_be_in_type_list", "kwargs": {"column": "Tetanus, Cum 2018", "type_list": ["float", "DOUBLE_PRECISION"], "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_unique_value_count_to_be_between", "kwargs": {"column": "Tetanus, Cum 2018", "min_value": 0, "max_value": null, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_proportion_of_unique_values_to_be_between", "kwargs": {"column": "Tetanus, Cum 2018", "min_value": 0, "max_value": null, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_values_to_not_be_null", "kwargs": {"column": "Tetanus, Cum 2018", "mostly": 0, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_to_exist", "kwargs": {"column": "Tetanus, Cum 2018, flag", "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_values_to_be_in_type_list", "kwargs": {"column": "Tetanus, Cum 2018, flag", "type_list": ["string", "VARCHAR", "TEXT"], "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_unique_value_count_to_be_between", "kwargs": {"column": "Tetanus, Cum 2018, flag", "min_value": 0, "max_value": null, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_proportion_of_unique_values_to_be_between", "kwargs": {"column": "Tetanus, Cum 2018, flag", "min_value": 0, "max_value": null, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_values_to_not_be_null", "kwargs": {"column": "Tetanus, Cum 2018, flag", "mostly": 0, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_values_to_not_match_regex", "kwargs": {"column": "Tetanus, Cum 2018, flag", "regex": "^\\s+|\\s+$", "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_distinct_values_to_be_in_set", "kwargs": {"column": "Tetanus, Cum 2018, flag", "value_set": [], "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_to_exist", "kwargs": {"column": "Tetanus, Cum 2017", "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_values_to_be_in_type_list", "kwargs": {"column": "Tetanus, Cum 2017", "type_list": ["float", "DOUBLE_PRECISION"], "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_unique_value_count_to_be_between", "kwargs": {"column": "Tetanus, Cum 2017", "min_value": 0, "max_value": null, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_proportion_of_unique_values_to_be_between", "kwargs": {"column": "Tetanus, Cum 2017", "min_value": 0, "max_value": null, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_values_to_not_be_null", "kwargs": {"column": "Tetanus, Cum 2017", "mostly": 0, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_to_exist", "kwargs": {"column": "Tetanus, Cum 2017, flag", "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_values_to_be_in_type_list", "kwargs": {"column": "Tetanus, Cum 2017, flag", "type_list": ["string", "VARCHAR", "TEXT"], "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_unique_value_count_to_be_between", "kwargs": {"column": "Tetanus, Cum 2017, flag", "min_value": 0, "max_value": null, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_proportion_of_unique_values_to_be_between", "kwargs": {"column": "Tetanus, Cum 2017, flag", "min_value": 0, "max_value": null, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_values_to_not_be_null", "kwargs": {"column": "Tetanus, Cum 2017, flag", "mostly": 0, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_values_to_not_match_regex", "kwargs": {"column": "Tetanus, Cum 2017, flag", "regex": "^\\s+|\\s+$", "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_distinct_values_to_be_in_set", "kwargs": {"column": "Tetanus, Cum 2017, flag", "value_set": [], "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_to_exist", "kwargs": {"column": "Varicella morbidity , Current week", "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_values_to_be_in_type_list", "kwargs": {"column": "Varicella morbidity , Current week", "type_list": ["float", "DOUBLE_PRECISION"], "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_unique_value_count_to_be_between", "kwargs": {"column": "Varicella morbidity , Current week", "min_value": 0, "max_value": null, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_proportion_of_unique_values_to_be_between", "kwargs": {"column": "Varicella morbidity , Current week", "min_value": 0, "max_value": null, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_values_to_not_be_null", "kwargs": {"column": "Varicella morbidity , Current week", "mostly": 0, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_to_exist", "kwargs": {"column": "Varicella morbidity , Current week, flag", "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_values_to_be_in_type_list", "kwargs": {"column": "Varicella morbidity , Current week, flag", "type_list": ["string", "VARCHAR", "TEXT"], "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_unique_value_count_to_be_between", "kwargs": {"column": "Varicella morbidity , Current week, flag", "min_value": 0, "max_value": null, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_proportion_of_unique_values_to_be_between", "kwargs": {"column": "Varicella morbidity , Current week, flag", "min_value": 0, "max_value": null, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_values_to_not_be_null", "kwargs": {"column": "Varicella morbidity , Current week, flag", "mostly": 0, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_values_to_not_match_regex", "kwargs": {"column": "Varicella morbidity , Current week, flag", "regex": "^\\s+|\\s+$", "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_distinct_values_to_be_in_set", "kwargs": {"column": "Varicella morbidity , Current week, flag", "value_set": [], "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_to_exist", "kwargs": {"column": "Varicella morbidity , Previous 52 weeks Med", "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_values_to_be_in_type_list", "kwargs": {"column": "Varicella morbidity , Previous 52 weeks Med", "type_list": ["float", "DOUBLE_PRECISION"], "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_unique_value_count_to_be_between", "kwargs": {"column": "Varicella morbidity , Previous 52 weeks Med", "min_value": 0, "max_value": null, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_proportion_of_unique_values_to_be_between", "kwargs": {"column": "Varicella morbidity , Previous 52 weeks Med", "min_value": 0, "max_value": null, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_values_to_not_be_null", "kwargs": {"column": "Varicella morbidity , Previous 52 weeks Med", "mostly": 0, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_distinct_values_to_be_in_set", "kwargs": {"column": "Varicella morbidity , Previous 52 weeks Med", "value_set": [], "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_to_exist", "kwargs": {"column": "Varicella morbidity , Previous 52 weeks Med, flag", "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_values_to_be_in_type_list", "kwargs": {"column": "Varicella morbidity , Previous 52 weeks Med, flag", "type_list": ["string", "VARCHAR", "TEXT"], "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_unique_value_count_to_be_between", "kwargs": {"column": "Varicella morbidity , Previous 52 weeks Med, flag", "min_value": 0, "max_value": null, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_proportion_of_unique_values_to_be_between", "kwargs": {"column": "Varicella morbidity , Previous 52 weeks Med, flag", "min_value": 0, "max_value": null, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_values_to_not_be_null", "kwargs": {"column": "Varicella morbidity , Previous 52 weeks Med, flag", "mostly": 0, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_values_to_not_match_regex", "kwargs": {"column": "Varicella morbidity , Previous 52 weeks Med, flag", "regex": "^\\s+|\\s+$", "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_distinct_values_to_be_in_set", "kwargs": {"column": "Varicella morbidity , Previous 52 weeks Med, flag", "value_set": [], "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_to_exist", "kwargs": {"column": "Varicella morbidity , Previous 52 weeks Max", "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_values_to_be_in_type_list", "kwargs": {"column": "Varicella morbidity , Previous 52 weeks Max", "type_list": ["float", "DOUBLE_PRECISION"], "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_unique_value_count_to_be_between", "kwargs": {"column": "Varicella morbidity , Previous 52 weeks Max", "min_value": 0, "max_value": null, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_proportion_of_unique_values_to_be_between", "kwargs": {"column": "Varicella morbidity , Previous 52 weeks Max", "min_value": 0, "max_value": null, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_values_to_not_be_null", "kwargs": {"column": "Varicella morbidity , Previous 52 weeks Max", "mostly": 0, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_distinct_values_to_be_in_set", "kwargs": {"column": "Varicella morbidity , Previous 52 weeks Max", "value_set": [], "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_to_exist", "kwargs": {"column": "Varicella morbidity , Previous 52 weeks Max, flag", "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_values_to_be_in_type_list", "kwargs": {"column": "Varicella morbidity , Previous 52 weeks Max, flag", "type_list": ["string", "VARCHAR", "TEXT"], "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_unique_value_count_to_be_between", "kwargs": {"column": "Varicella morbidity , Previous 52 weeks Max, flag", "min_value": 0, "max_value": null, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_proportion_of_unique_values_to_be_between", "kwargs": {"column": "Varicella morbidity , Previous 52 weeks Max, flag", "min_value": 0, "max_value": null, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_values_to_not_be_null", "kwargs": {"column": "Varicella morbidity , Previous 52 weeks Max, flag", "mostly": 0, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_values_to_not_match_regex", "kwargs": {"column": "Varicella morbidity , Previous 52 weeks Max, flag", "regex": "^\\s+|\\s+$", "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_distinct_values_to_be_in_set", "kwargs": {"column": "Varicella morbidity , Previous 52 weeks Max, flag", "value_set": [], "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_to_exist", "kwargs": {"column": "Varicella morbidity , Cum 2018", "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_values_to_be_in_type_list", "kwargs": {"column": "Varicella morbidity , Cum 2018", "type_list": ["float", "DOUBLE_PRECISION"], "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_unique_value_count_to_be_between", "kwargs": {"column": "Varicella morbidity , Cum 2018", "min_value": 0, "max_value": null, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_proportion_of_unique_values_to_be_between", "kwargs": {"column": "Varicella morbidity , Cum 2018", "min_value": 0, "max_value": null, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_values_to_not_be_null", "kwargs": {"column": "Varicella morbidity , Cum 2018", "mostly": 0, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_to_exist", "kwargs": {"column": "Varicella morbidity , Cum 2018, flag", "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_values_to_be_in_type_list", "kwargs": {"column": "Varicella morbidity , Cum 2018, flag", "type_list": ["string", "VARCHAR", "TEXT"], "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_unique_value_count_to_be_between", "kwargs": {"column": "Varicella morbidity , Cum 2018, flag", "min_value": 0, "max_value": null, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_proportion_of_unique_values_to_be_between", "kwargs": {"column": "Varicella morbidity , Cum 2018, flag", "min_value": 0, "max_value": null, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_values_to_not_be_null", "kwargs": {"column": "Varicella morbidity , Cum 2018, flag", "mostly": 0, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_values_to_not_match_regex", "kwargs": {"column": "Varicella morbidity , Cum 2018, flag", "regex": "^\\s+|\\s+$", "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_distinct_values_to_be_in_set", "kwargs": {"column": "Varicella morbidity , Cum 2018, flag", "value_set": [], "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_to_exist", "kwargs": {"column": "Varicella morbidity , Cum 2017", "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_values_to_be_in_type_list", "kwargs": {"column": "Varicella morbidity , Cum 2017", "type_list": ["float", "DOUBLE_PRECISION"], "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_unique_value_count_to_be_between", "kwargs": {"column": "Varicella morbidity , Cum 2017", "min_value": 0, "max_value": null, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_proportion_of_unique_values_to_be_between", "kwargs": {"column": "Varicella morbidity , Cum 2017", "min_value": 0, "max_value": null, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_values_to_not_be_null", "kwargs": {"column": "Varicella morbidity , Cum 2017", "mostly": 0, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_to_exist", "kwargs": {"column": "Varicella morbidity , Cum 2017, flag", "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_values_to_be_in_type_list", "kwargs": {"column": "Varicella morbidity , Cum 2017, flag", "type_list": ["string", "VARCHAR", "TEXT"], "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_unique_value_count_to_be_between", "kwargs": {"column": "Varicella morbidity , Cum 2017, flag", "min_value": 0, "max_value": null, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_proportion_of_unique_values_to_be_between", "kwargs": {"column": "Varicella morbidity , Cum 2017, flag", "min_value": 0, "max_value": null, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_values_to_not_be_null", "kwargs": {"column": "Varicella morbidity , Cum 2017, flag", "mostly": 0, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_values_to_not_match_regex", "kwargs": {"column": "Varicella morbidity , Cum 2017, flag", "regex": "^\\s+|\\s+$", "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_distinct_values_to_be_in_set", "kwargs": {"column": "Varicella morbidity , Cum 2017, flag", "value_set": [], "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_to_exist", "kwargs": {"column": "Location 1", "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_values_to_be_in_type_list", "kwargs": {"column": "Location 1", "type_list": ["string", "VARCHAR", "TEXT"], "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_unique_value_count_to_be_between", "kwargs": {"column": "Location 1", "min_value": 0, "max_value": null, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_proportion_of_unique_values_to_be_between", "kwargs": {"column": "Location 1", "min_value": 0, "max_value": null, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_values_to_not_be_null", "kwargs": {"column": "Location 1", "mostly": 0, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_values_to_not_match_regex", "kwargs": {"column": "Location 1", "regex": "^\\s+|\\s+$", "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_to_exist", "kwargs": {"column": "Location 2", "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_values_to_be_in_type_list", "kwargs": {"column": "Location 2", "type_list": ["string", "VARCHAR", "TEXT"], "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_unique_value_count_to_be_between", "kwargs": {"column": "Location 2", "min_value": 0, "max_value": null, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_proportion_of_unique_values_to_be_between", "kwargs": {"column": "Location 2", "min_value": 0, "max_value": null, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_values_to_not_be_null", "kwargs": {"column": "Location 2", "mostly": 0, "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_values_to_not_match_regex", "kwargs": {"column": "Location 2", "regex": "^\\s+|\\s+$", "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}, {"expectation_type": "expect_column_values_to_be_unique", "kwargs": {"column": "Location 2", "result_format": "SUMMARY"}, "meta": {"BasicDatasetProfiler": {"confidence": "very low"}}}], "data_asset_type": "Dataset"}
+{
+    "data_asset_name": "public_healthcare_datasets__dir/default/tetanusvaricella/BasicDatasetProfiler",
+    "meta": {
+        "great_expectations.__version__": "0.7.0-beta",
+        "BasicDatasetProfiler": {
+            "created_by": "BasicDatasetProfiler",
+            "created_at": 1561474689.4609768,
+            "batch_kwargs": {
+                "path": "/Users/eugenemandel/project_data/public_healthcare_datasets/tetanusvaricella/tetvardata.csv",
+                "timestamp": 1561474688.693565
+            }
+        }
+    },
+    "expectations": [
+        {
+            "expectation_type": "expect_column_to_exist",
+            "kwargs": {
+                "column": "Reporting Area",
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_be_in_type_list",
+            "kwargs": {
+                "column": "Reporting Area",
+                "type_list": [
+                    "string",
+                    "VARCHAR",
+                    "TEXT"
+                ],
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_unique_value_count_to_be_between",
+            "kwargs": {
+                "column": "Reporting Area",
+                "min_value": 0,
+                "max_value": null,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_proportion_of_unique_values_to_be_between",
+            "kwargs": {
+                "column": "Reporting Area",
+                "min_value": 0,
+                "max_value": null,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_not_be_null",
+            "kwargs": {
+                "column": "Reporting Area",
+                "mostly": 0,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_not_match_regex",
+            "kwargs": {
+                "column": "Reporting Area",
+                "regex": "^\\s+|\\s+$",
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_distinct_values_to_be_in_set",
+            "kwargs": {
+                "column": "Reporting Area",
+                "value_set": [
+                    "A",
+                    "B",
+                    1,
+                    2,
+                    3
+                ],
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_to_exist",
+            "kwargs": {
+                "column": "MMWR Year",
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_be_in_type_list",
+            "kwargs": {
+                "column": "MMWR Year",
+                "type_list": [
+                    "int",
+                    "INTEGER",
+                    "BIGINT"
+                ],
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_unique_value_count_to_be_between",
+            "kwargs": {
+                "column": "MMWR Year",
+                "min_value": 0,
+                "max_value": null,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_proportion_of_unique_values_to_be_between",
+            "kwargs": {
+                "column": "MMWR Year",
+                "min_value": 0,
+                "max_value": null,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_not_be_null",
+            "kwargs": {
+                "column": "MMWR Year",
+                "mostly": 0,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_distinct_values_to_be_in_set",
+            "kwargs": {
+                "column": "MMWR Year",
+                "value_set": [],
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_to_exist",
+            "kwargs": {
+                "column": "MMWR Week",
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_be_in_type_list",
+            "kwargs": {
+                "column": "MMWR Week",
+                "type_list": [
+                    "int",
+                    "INTEGER",
+                    "BIGINT"
+                ],
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_unique_value_count_to_be_between",
+            "kwargs": {
+                "column": "MMWR Week",
+                "min_value": 0,
+                "max_value": null,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_proportion_of_unique_values_to_be_between",
+            "kwargs": {
+                "column": "MMWR Week",
+                "min_value": 0,
+                "max_value": null,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_not_be_null",
+            "kwargs": {
+                "column": "MMWR Week",
+                "mostly": 0,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_distinct_values_to_be_in_set",
+            "kwargs": {
+                "column": "MMWR Week",
+                "value_set": [],
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_to_exist",
+            "kwargs": {
+                "column": "Tetanus, Current week",
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_be_in_type_list",
+            "kwargs": {
+                "column": "Tetanus, Current week",
+                "type_list": [
+                    "float",
+                    "DOUBLE_PRECISION"
+                ],
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_unique_value_count_to_be_between",
+            "kwargs": {
+                "column": "Tetanus, Current week",
+                "min_value": 0,
+                "max_value": null,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_proportion_of_unique_values_to_be_between",
+            "kwargs": {
+                "column": "Tetanus, Current week",
+                "min_value": 0,
+                "max_value": null,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_not_be_null",
+            "kwargs": {
+                "column": "Tetanus, Current week",
+                "mostly": 0,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_to_exist",
+            "kwargs": {
+                "column": "Tetanus, Current week, flag",
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_be_in_type_list",
+            "kwargs": {
+                "column": "Tetanus, Current week, flag",
+                "type_list": [
+                    "string",
+                    "VARCHAR",
+                    "TEXT"
+                ],
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_unique_value_count_to_be_between",
+            "kwargs": {
+                "column": "Tetanus, Current week, flag",
+                "min_value": 0,
+                "max_value": null,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_proportion_of_unique_values_to_be_between",
+            "kwargs": {
+                "column": "Tetanus, Current week, flag",
+                "min_value": 0,
+                "max_value": null,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_not_be_null",
+            "kwargs": {
+                "column": "Tetanus, Current week, flag",
+                "mostly": 0,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_not_match_regex",
+            "kwargs": {
+                "column": "Tetanus, Current week, flag",
+                "regex": "^\\s+|\\s+$",
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_distinct_values_to_be_in_set",
+            "kwargs": {
+                "column": "Tetanus, Current week, flag",
+                "value_set": [],
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_to_exist",
+            "kwargs": {
+                "column": "Tetanus, Previous 52 weeks Med",
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_be_in_type_list",
+            "kwargs": {
+                "column": "Tetanus, Previous 52 weeks Med",
+                "type_list": [
+                    "float",
+                    "DOUBLE_PRECISION"
+                ],
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_unique_value_count_to_be_between",
+            "kwargs": {
+                "column": "Tetanus, Previous 52 weeks Med",
+                "min_value": 0,
+                "max_value": null,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_proportion_of_unique_values_to_be_between",
+            "kwargs": {
+                "column": "Tetanus, Previous 52 weeks Med",
+                "min_value": 0,
+                "max_value": null,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_not_be_null",
+            "kwargs": {
+                "column": "Tetanus, Previous 52 weeks Med",
+                "mostly": 0,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_distinct_values_to_be_in_set",
+            "kwargs": {
+                "column": "Tetanus, Previous 52 weeks Med",
+                "value_set": [],
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_to_exist",
+            "kwargs": {
+                "column": "Tetanus, Previous 52 weeks Med, flag",
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_be_in_type_list",
+            "kwargs": {
+                "column": "Tetanus, Previous 52 weeks Med, flag",
+                "type_list": [
+                    "string",
+                    "VARCHAR",
+                    "TEXT"
+                ],
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_unique_value_count_to_be_between",
+            "kwargs": {
+                "column": "Tetanus, Previous 52 weeks Med, flag",
+                "min_value": 0,
+                "max_value": null,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_proportion_of_unique_values_to_be_between",
+            "kwargs": {
+                "column": "Tetanus, Previous 52 weeks Med, flag",
+                "min_value": 0,
+                "max_value": null,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_not_be_null",
+            "kwargs": {
+                "column": "Tetanus, Previous 52 weeks Med, flag",
+                "mostly": 0,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_not_match_regex",
+            "kwargs": {
+                "column": "Tetanus, Previous 52 weeks Med, flag",
+                "regex": "^\\s+|\\s+$",
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_distinct_values_to_be_in_set",
+            "kwargs": {
+                "column": "Tetanus, Previous 52 weeks Med, flag",
+                "value_set": [],
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_to_exist",
+            "kwargs": {
+                "column": "Tetanus, Previous 52 weeks Max",
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_be_in_type_list",
+            "kwargs": {
+                "column": "Tetanus, Previous 52 weeks Max",
+                "type_list": [
+                    "float",
+                    "DOUBLE_PRECISION"
+                ],
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_unique_value_count_to_be_between",
+            "kwargs": {
+                "column": "Tetanus, Previous 52 weeks Max",
+                "min_value": 0,
+                "max_value": null,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_proportion_of_unique_values_to_be_between",
+            "kwargs": {
+                "column": "Tetanus, Previous 52 weeks Max",
+                "min_value": 0,
+                "max_value": null,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_not_be_null",
+            "kwargs": {
+                "column": "Tetanus, Previous 52 weeks Max",
+                "mostly": 0,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_distinct_values_to_be_in_set",
+            "kwargs": {
+                "column": "Tetanus, Previous 52 weeks Max",
+                "value_set": [],
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_to_exist",
+            "kwargs": {
+                "column": "Tetanus, Previous 52 weeks Max, flag",
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_be_in_type_list",
+            "kwargs": {
+                "column": "Tetanus, Previous 52 weeks Max, flag",
+                "type_list": [
+                    "string",
+                    "VARCHAR",
+                    "TEXT"
+                ],
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_unique_value_count_to_be_between",
+            "kwargs": {
+                "column": "Tetanus, Previous 52 weeks Max, flag",
+                "min_value": 0,
+                "max_value": null,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_proportion_of_unique_values_to_be_between",
+            "kwargs": {
+                "column": "Tetanus, Previous 52 weeks Max, flag",
+                "min_value": 0,
+                "max_value": null,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_not_be_null",
+            "kwargs": {
+                "column": "Tetanus, Previous 52 weeks Max, flag",
+                "mostly": 0,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_not_match_regex",
+            "kwargs": {
+                "column": "Tetanus, Previous 52 weeks Max, flag",
+                "regex": "^\\s+|\\s+$",
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_distinct_values_to_be_in_set",
+            "kwargs": {
+                "column": "Tetanus, Previous 52 weeks Max, flag",
+                "value_set": [],
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_to_exist",
+            "kwargs": {
+                "column": "Tetanus, Cum 2018",
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_be_in_type_list",
+            "kwargs": {
+                "column": "Tetanus, Cum 2018",
+                "type_list": [
+                    "float",
+                    "DOUBLE_PRECISION"
+                ],
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_unique_value_count_to_be_between",
+            "kwargs": {
+                "column": "Tetanus, Cum 2018",
+                "min_value": 0,
+                "max_value": null,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_proportion_of_unique_values_to_be_between",
+            "kwargs": {
+                "column": "Tetanus, Cum 2018",
+                "min_value": 0,
+                "max_value": null,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_not_be_null",
+            "kwargs": {
+                "column": "Tetanus, Cum 2018",
+                "mostly": 0,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_to_exist",
+            "kwargs": {
+                "column": "Tetanus, Cum 2018, flag",
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_be_in_type_list",
+            "kwargs": {
+                "column": "Tetanus, Cum 2018, flag",
+                "type_list": [
+                    "string",
+                    "VARCHAR",
+                    "TEXT"
+                ],
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_unique_value_count_to_be_between",
+            "kwargs": {
+                "column": "Tetanus, Cum 2018, flag",
+                "min_value": 0,
+                "max_value": null,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_proportion_of_unique_values_to_be_between",
+            "kwargs": {
+                "column": "Tetanus, Cum 2018, flag",
+                "min_value": 0,
+                "max_value": null,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_not_be_null",
+            "kwargs": {
+                "column": "Tetanus, Cum 2018, flag",
+                "mostly": 0,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_not_match_regex",
+            "kwargs": {
+                "column": "Tetanus, Cum 2018, flag",
+                "regex": "^\\s+|\\s+$",
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_distinct_values_to_be_in_set",
+            "kwargs": {
+                "column": "Tetanus, Cum 2018, flag",
+                "value_set": [],
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_to_exist",
+            "kwargs": {
+                "column": "Tetanus, Cum 2017",
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_be_in_type_list",
+            "kwargs": {
+                "column": "Tetanus, Cum 2017",
+                "type_list": [
+                    "float",
+                    "DOUBLE_PRECISION"
+                ],
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_unique_value_count_to_be_between",
+            "kwargs": {
+                "column": "Tetanus, Cum 2017",
+                "min_value": 0,
+                "max_value": null,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_proportion_of_unique_values_to_be_between",
+            "kwargs": {
+                "column": "Tetanus, Cum 2017",
+                "min_value": 0,
+                "max_value": null,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_not_be_null",
+            "kwargs": {
+                "column": "Tetanus, Cum 2017",
+                "mostly": 0,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_to_exist",
+            "kwargs": {
+                "column": "Tetanus, Cum 2017, flag",
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_be_in_type_list",
+            "kwargs": {
+                "column": "Tetanus, Cum 2017, flag",
+                "type_list": [
+                    "string",
+                    "VARCHAR",
+                    "TEXT"
+                ],
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_unique_value_count_to_be_between",
+            "kwargs": {
+                "column": "Tetanus, Cum 2017, flag",
+                "min_value": 0,
+                "max_value": null,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_proportion_of_unique_values_to_be_between",
+            "kwargs": {
+                "column": "Tetanus, Cum 2017, flag",
+                "min_value": 0,
+                "max_value": null,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_not_be_null",
+            "kwargs": {
+                "column": "Tetanus, Cum 2017, flag",
+                "mostly": 0,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_not_match_regex",
+            "kwargs": {
+                "column": "Tetanus, Cum 2017, flag",
+                "regex": "^\\s+|\\s+$",
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_distinct_values_to_be_in_set",
+            "kwargs": {
+                "column": "Tetanus, Cum 2017, flag",
+                "value_set": [],
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_to_exist",
+            "kwargs": {
+                "column": "Varicella morbidity , Current week",
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_be_in_type_list",
+            "kwargs": {
+                "column": "Varicella morbidity , Current week",
+                "type_list": [
+                    "float",
+                    "DOUBLE_PRECISION"
+                ],
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_unique_value_count_to_be_between",
+            "kwargs": {
+                "column": "Varicella morbidity , Current week",
+                "min_value": 0,
+                "max_value": null,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_proportion_of_unique_values_to_be_between",
+            "kwargs": {
+                "column": "Varicella morbidity , Current week",
+                "min_value": 0,
+                "max_value": null,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_not_be_null",
+            "kwargs": {
+                "column": "Varicella morbidity , Current week",
+                "mostly": 0,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_to_exist",
+            "kwargs": {
+                "column": "Varicella morbidity , Current week, flag",
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_be_in_type_list",
+            "kwargs": {
+                "column": "Varicella morbidity , Current week, flag",
+                "type_list": [
+                    "string",
+                    "VARCHAR",
+                    "TEXT"
+                ],
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_unique_value_count_to_be_between",
+            "kwargs": {
+                "column": "Varicella morbidity , Current week, flag",
+                "min_value": 0,
+                "max_value": null,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_proportion_of_unique_values_to_be_between",
+            "kwargs": {
+                "column": "Varicella morbidity , Current week, flag",
+                "min_value": 0,
+                "max_value": null,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_not_be_null",
+            "kwargs": {
+                "column": "Varicella morbidity , Current week, flag",
+                "mostly": 0,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_not_match_regex",
+            "kwargs": {
+                "column": "Varicella morbidity , Current week, flag",
+                "regex": "^\\s+|\\s+$",
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_distinct_values_to_be_in_set",
+            "kwargs": {
+                "column": "Varicella morbidity , Current week, flag",
+                "value_set": [],
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_to_exist",
+            "kwargs": {
+                "column": "Varicella morbidity , Previous 52 weeks Med",
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_be_in_type_list",
+            "kwargs": {
+                "column": "Varicella morbidity , Previous 52 weeks Med",
+                "type_list": [
+                    "float",
+                    "DOUBLE_PRECISION"
+                ],
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_unique_value_count_to_be_between",
+            "kwargs": {
+                "column": "Varicella morbidity , Previous 52 weeks Med",
+                "min_value": 0,
+                "max_value": null,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_proportion_of_unique_values_to_be_between",
+            "kwargs": {
+                "column": "Varicella morbidity , Previous 52 weeks Med",
+                "min_value": 0,
+                "max_value": null,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_not_be_null",
+            "kwargs": {
+                "column": "Varicella morbidity , Previous 52 weeks Med",
+                "mostly": 0,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_distinct_values_to_be_in_set",
+            "kwargs": {
+                "column": "Varicella morbidity , Previous 52 weeks Med",
+                "value_set": [],
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_to_exist",
+            "kwargs": {
+                "column": "Varicella morbidity , Previous 52 weeks Med, flag",
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_be_in_type_list",
+            "kwargs": {
+                "column": "Varicella morbidity , Previous 52 weeks Med, flag",
+                "type_list": [
+                    "string",
+                    "VARCHAR",
+                    "TEXT"
+                ],
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_unique_value_count_to_be_between",
+            "kwargs": {
+                "column": "Varicella morbidity , Previous 52 weeks Med, flag",
+                "min_value": 0,
+                "max_value": null,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_proportion_of_unique_values_to_be_between",
+            "kwargs": {
+                "column": "Varicella morbidity , Previous 52 weeks Med, flag",
+                "min_value": 0,
+                "max_value": null,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_not_be_null",
+            "kwargs": {
+                "column": "Varicella morbidity , Previous 52 weeks Med, flag",
+                "mostly": 0,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_not_match_regex",
+            "kwargs": {
+                "column": "Varicella morbidity , Previous 52 weeks Med, flag",
+                "regex": "^\\s+|\\s+$",
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_distinct_values_to_be_in_set",
+            "kwargs": {
+                "column": "Varicella morbidity , Previous 52 weeks Med, flag",
+                "value_set": [],
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_to_exist",
+            "kwargs": {
+                "column": "Varicella morbidity , Previous 52 weeks Max",
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_be_in_type_list",
+            "kwargs": {
+                "column": "Varicella morbidity , Previous 52 weeks Max",
+                "type_list": [
+                    "float",
+                    "DOUBLE_PRECISION"
+                ],
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_unique_value_count_to_be_between",
+            "kwargs": {
+                "column": "Varicella morbidity , Previous 52 weeks Max",
+                "min_value": 0,
+                "max_value": null,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_proportion_of_unique_values_to_be_between",
+            "kwargs": {
+                "column": "Varicella morbidity , Previous 52 weeks Max",
+                "min_value": 0,
+                "max_value": null,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_not_be_null",
+            "kwargs": {
+                "column": "Varicella morbidity , Previous 52 weeks Max",
+                "mostly": 0,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_distinct_values_to_be_in_set",
+            "kwargs": {
+                "column": "Varicella morbidity , Previous 52 weeks Max",
+                "value_set": [],
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_to_exist",
+            "kwargs": {
+                "column": "Varicella morbidity , Previous 52 weeks Max, flag",
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_be_in_type_list",
+            "kwargs": {
+                "column": "Varicella morbidity , Previous 52 weeks Max, flag",
+                "type_list": [
+                    "string",
+                    "VARCHAR",
+                    "TEXT"
+                ],
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_unique_value_count_to_be_between",
+            "kwargs": {
+                "column": "Varicella morbidity , Previous 52 weeks Max, flag",
+                "min_value": 0,
+                "max_value": null,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_proportion_of_unique_values_to_be_between",
+            "kwargs": {
+                "column": "Varicella morbidity , Previous 52 weeks Max, flag",
+                "min_value": 0,
+                "max_value": null,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_not_be_null",
+            "kwargs": {
+                "column": "Varicella morbidity , Previous 52 weeks Max, flag",
+                "mostly": 0,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_not_match_regex",
+            "kwargs": {
+                "column": "Varicella morbidity , Previous 52 weeks Max, flag",
+                "regex": "^\\s+|\\s+$",
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_distinct_values_to_be_in_set",
+            "kwargs": {
+                "column": "Varicella morbidity , Previous 52 weeks Max, flag",
+                "value_set": [],
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_to_exist",
+            "kwargs": {
+                "column": "Varicella morbidity , Cum 2018",
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_be_in_type_list",
+            "kwargs": {
+                "column": "Varicella morbidity , Cum 2018",
+                "type_list": [
+                    "float",
+                    "DOUBLE_PRECISION"
+                ],
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_unique_value_count_to_be_between",
+            "kwargs": {
+                "column": "Varicella morbidity , Cum 2018",
+                "min_value": 0,
+                "max_value": null,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_proportion_of_unique_values_to_be_between",
+            "kwargs": {
+                "column": "Varicella morbidity , Cum 2018",
+                "min_value": 0,
+                "max_value": null,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_not_be_null",
+            "kwargs": {
+                "column": "Varicella morbidity , Cum 2018",
+                "mostly": 0,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_to_exist",
+            "kwargs": {
+                "column": "Varicella morbidity , Cum 2018, flag",
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_be_in_type_list",
+            "kwargs": {
+                "column": "Varicella morbidity , Cum 2018, flag",
+                "type_list": [
+                    "string",
+                    "VARCHAR",
+                    "TEXT"
+                ],
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_unique_value_count_to_be_between",
+            "kwargs": {
+                "column": "Varicella morbidity , Cum 2018, flag",
+                "min_value": 0,
+                "max_value": null,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_proportion_of_unique_values_to_be_between",
+            "kwargs": {
+                "column": "Varicella morbidity , Cum 2018, flag",
+                "min_value": 0,
+                "max_value": null,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_not_be_null",
+            "kwargs": {
+                "column": "Varicella morbidity , Cum 2018, flag",
+                "mostly": 0,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_not_match_regex",
+            "kwargs": {
+                "column": "Varicella morbidity , Cum 2018, flag",
+                "regex": "^\\s+|\\s+$",
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_distinct_values_to_be_in_set",
+            "kwargs": {
+                "column": "Varicella morbidity , Cum 2018, flag",
+                "value_set": [],
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_to_exist",
+            "kwargs": {
+                "column": "Varicella morbidity , Cum 2017",
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_be_in_type_list",
+            "kwargs": {
+                "column": "Varicella morbidity , Cum 2017",
+                "type_list": [
+                    "float",
+                    "DOUBLE_PRECISION"
+                ],
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_unique_value_count_to_be_between",
+            "kwargs": {
+                "column": "Varicella morbidity , Cum 2017",
+                "min_value": 0,
+                "max_value": null,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_proportion_of_unique_values_to_be_between",
+            "kwargs": {
+                "column": "Varicella morbidity , Cum 2017",
+                "min_value": 0,
+                "max_value": null,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_not_be_null",
+            "kwargs": {
+                "column": "Varicella morbidity , Cum 2017",
+                "mostly": 0,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_to_exist",
+            "kwargs": {
+                "column": "Varicella morbidity , Cum 2017, flag",
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_be_in_type_list",
+            "kwargs": {
+                "column": "Varicella morbidity , Cum 2017, flag",
+                "type_list": [
+                    "string",
+                    "VARCHAR",
+                    "TEXT"
+                ],
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_unique_value_count_to_be_between",
+            "kwargs": {
+                "column": "Varicella morbidity , Cum 2017, flag",
+                "min_value": 0,
+                "max_value": null,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_proportion_of_unique_values_to_be_between",
+            "kwargs": {
+                "column": "Varicella morbidity , Cum 2017, flag",
+                "min_value": 0,
+                "max_value": null,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_not_be_null",
+            "kwargs": {
+                "column": "Varicella morbidity , Cum 2017, flag",
+                "mostly": 0,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_not_match_regex",
+            "kwargs": {
+                "column": "Varicella morbidity , Cum 2017, flag",
+                "regex": "^\\s+|\\s+$",
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_distinct_values_to_be_in_set",
+            "kwargs": {
+                "column": "Varicella morbidity , Cum 2017, flag",
+                "value_set": [],
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_to_exist",
+            "kwargs": {
+                "column": "Location 1",
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_be_in_type_list",
+            "kwargs": {
+                "column": "Location 1",
+                "type_list": [
+                    "string",
+                    "VARCHAR",
+                    "TEXT"
+                ],
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_unique_value_count_to_be_between",
+            "kwargs": {
+                "column": "Location 1",
+                "min_value": 0,
+                "max_value": null,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_proportion_of_unique_values_to_be_between",
+            "kwargs": {
+                "column": "Location 1",
+                "min_value": 0,
+                "max_value": null,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_not_be_null",
+            "kwargs": {
+                "column": "Location 1",
+                "mostly": 0,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_not_match_regex",
+            "kwargs": {
+                "column": "Location 1",
+                "regex": "^\\s+|\\s+$",
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_to_exist",
+            "kwargs": {
+                "column": "Location 2",
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_be_in_type_list",
+            "kwargs": {
+                "column": "Location 2",
+                "type_list": [
+                    "string",
+                    "VARCHAR",
+                    "TEXT"
+                ],
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_unique_value_count_to_be_between",
+            "kwargs": {
+                "column": "Location 2",
+                "min_value": 0,
+                "max_value": null,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_proportion_of_unique_values_to_be_between",
+            "kwargs": {
+                "column": "Location 2",
+                "min_value": 0,
+                "max_value": null,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_not_be_null",
+            "kwargs": {
+                "column": "Location 2",
+                "mostly": 0,
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_not_match_regex",
+            "kwargs": {
+                "column": "Location 2",
+                "regex": "^\\s+|\\s+$",
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_be_unique",
+            "kwargs": {
+                "column": "Location 2",
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                    "confidence": "very low"
+                }
+            }
+        }
+    ],
+    "data_asset_type": "Dataset"
+}
