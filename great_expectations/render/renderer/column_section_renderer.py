@@ -137,7 +137,7 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
         # Relatedly, this will change to grab values_list and to use expect_column_distinct_values_to_be_in_set
         set_evr = cls._find_evr_by_type(
             evrs,
-            "expect_column_values_to_be_in_set"
+            "expect_column_distinct_values_to_be_in_set"
         )
 
         if set_evr and "partial_unexpected_counts" in set_evr["result"]:
@@ -147,7 +147,7 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
         else:
             return
 
-        if len(set_evr["result"][result_key]) > 10:
+        if len(set_evr["result"][result_key]) < 10:
             content_blocks.append(
                 ValueListContentBlockRenderer.render(
                     set_evr,
@@ -191,7 +191,9 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
 
         if new_block is not None:
             unrendered_blocks.append(new_block)
-        content_blocks.append(unrendered_blocks)
+
+        # print(unrendered_blocks)
+        content_blocks += unrendered_blocks
 
 
 class PrescriptiveColumnSectionRenderer(ColumnSectionRenderer):
