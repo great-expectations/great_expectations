@@ -161,10 +161,13 @@ class DataContext(object):
     #
     #####
 
-    def _get_normalized_data_asset_name_filepath(self, data_asset_name, base_path=None):
+    def _get_normalized_data_asset_name_filepath(self, data_asset_name,
+                                                 expectation_suite_name,
+                                                 base_path=None,
+                                                 file_extension=".json"):
         """Get the path where the project-normalized data_asset_name expectations are stored."""
         if base_path is None:
-            base_path  = os.path.join(self.root_directory, "expectations")
+            base_path = os.path.join(self.root_directory, "expectations")
 
         # We need to ensure data_asset_name is a valid filepath no matter its current state
         if isinstance(data_asset_name, NormalizedDataAssetName):
@@ -180,10 +183,12 @@ class DataContext(object):
         else:
             raise DataContextError("data_assset_name must be a NormalizedDataAssetName or string")
 
-        relative_path += ".json"
+        expectation_suite_name += file_extension
+
         return os.path.join(
             base_path,
-            relative_path
+            relative_path,
+            expectation_suite_name
             )
 
     def _save_project_config(self):
@@ -402,220 +407,263 @@ class DataContext(object):
             raise
 
     def list_expectation_suites(self):
-        root_path = self.expectations_directory
-        result = [os.path.relpath(y, root_path)[:-5] for x in os.walk(root_path) for y in glob(os.path.join(x[0], '*.json'))]
-        # result = [os.path.splitext(os.path.relpath(y, root_path))[0] for x in os.walk(root_path) for y in glob(os.path.join(x[0], '*.json'))]
-        return result
+        """Returns currently-defined expectation suites available in a nested dictionary structure
+        reflecting the namespace provided by this DataContext.
+
+        The dictionary has the following shape:
+        {
+          datasource: {
+            generator: {
+              generator_asset: [list_of_expectation_suites]
+            }
+          }
+          ...
+        }
+        """
+
+        expectation_suites_dict = {}
+
+        # First, we construct the *actual* defined expectation suites
+        for datasource in os.listdir(self.expectations_directory):
+            datasource_path = os.path.join(self.expectations_directory, datasource)
+            if not os.path.isdir(datasource_path):
+                continue
+            if datasource not in expectation_suites_dict:
+                expectation_suites_dict[datasource] = {}
+            for generator in os.listdir(datasource_path):
+                generator_path = os.path.join(datasource_path, generator)
+                if not os.path.isdir(generator_path):
+                    continue
+                if generator not in expectation_suites_dict[datasource]:
+                    expectation_suites_dict[datasource][generator] = {}
+                for generator_asset in os.listdir(generator_path):
+                    generator_asset_path = os.path.join(generator_path, generator_asset)
+                    if os.path.isdir(generator_asset_path):
+                        candidate_suites = os.listdir(generator_asset_path)
+                        expectation_suites_dict[datasource][generator][generator_asset] = [
+                            suite_name[:-5] for suite_name in candidate_suites if suite_name.endswith(".json")
+                        ]
+
+        return expectation_suites_dict
 
     def list_datasources(self):
         return [{"name": key, "type": value["type"]} for key, value in self._project_config["datasources"].items()]
 
-    def _normalize_data_asset_name(self, data_asset_name, batch_kwargs=None):
-        """Normalizes data_asset_names for a data context
+    def _normalize_data_asset_name(self, data_asset_name):
+        """Normalizes data_asset_names for a data context.
         
-        A data_asset_name is defined per-project and consists of four components:
+        A data_asset_name is defined per-project and consists of three components that together define a "namespace"
+        for data assets, encompassing both expectation suites and batches.
+
+        Within a namespace, an expectation suite effectively defines candidate "types" for batches of data, and
+        validating a batch of data determines whether that instance is of the candidate type.
+
+        The data_asset_name namespace consists of three components:
+
           - a datasource name
           - a generator_name
           - a generator_asset
-          - an expectation_suite name
 
-          - a generator name
+        It has a string representation consisting of each of those components delimited by a character defined in the
+        data_context ('/' by default).
 
-        It has a string representation consisting of each of those components delimited by a slash
+        Args:
+            data_asset_name (str): The (unnormalized) data asset name to normalize. The name will be split \
+                according to the currently-configured data_asset_name_delimiter
+
+        Returns:
+            NormalizedDataAssetName
         """
         if isinstance(data_asset_name, NormalizedDataAssetName):
             return data_asset_name
 
         split_name = data_asset_name.split(self.data_asset_name_delimiter)
+        existing_expectation_suites = self.list_expectation_suites()
+        existing_namespaces = []
+        for datasource in existing_expectation_suites.keys():
+            for generator in existing_expectation_suites[datasource].keys():
+                for generator_asset in existing_expectation_suites[datasource][generator]:
+                    existing_namespaces.append(
+                        NormalizedDataAssetName(
+                            datasource,
+                            generator,
+                            generator_asset
+                        )
+                    )
 
-        if len(split_name) > 4:
-            raise DataContextError("Invalid data_asset_name {data_asset_name}: found too many components using delimiter '{delimiter}'".format(
+        if len(split_name) > 3:
+            raise DataContextError(
+                "Invalid data_asset_name '{data_asset_name}': found too many components using delimiter '{delimiter}'"
+                .format(
                 data_asset_name=data_asset_name,
                 delimiter=self.data_asset_name_delimiter
-            ))
+                )
+            )
         
         elif len(split_name) == 1:
             # In this case, the name *must* refer to a unique data_asset_name
             provider_names = []
             generator_asset = split_name[0]
-            for normalized_identifier in self.list_expectation_suites():
-                normalized_split = normalized_identifier.split(self.data_asset_name_delimiter)
-                curr_generator_asset = normalized_split[2]
+            for normalized_identifier in existing_namespaces:
+                curr_generator_asset = normalized_identifier[2]
                 if generator_asset == curr_generator_asset:
                     provider_names.append(
-                        NormalizedDataAssetName(*normalized_split)
+                        normalized_identifier
                     )
-            if len(provider_names) == 1:
-                return provider_names[0]
-            elif len(provider_names) > 1:
-                raise DataContextError("Ambiguous data_asset_name {data_asset_name}. Multiple candidates found: {provider_names}"
-                    .format(data_asset_name=data_asset_name, provider_names=provider_names))
                     
-            # If we haven't found a match, see if this is provided by exactly one datasource and generator
+            # NOTE: Current behavior choice is to continue searching to see whether the namespace is ambiguous
+            # based on configured generators *even* if there is *only one* namespace with expectation suites
+            # in it.
+
+            # If generators' namespaces are enormous or if they are slow to provide all their available names,
+            # that behavior could become unwieldy, and perhaps should be revisited by using the escape hatch
+            # commented out below.
+
+            # if len(provider_names) == 1:
+            #     return provider_names[0]
+            #
+            # elif len(provider_names) > 1:
+            #     raise DataContextError(
+            #         "Ambiguous data_asset_name '{data_asset_name}'. Multiple candidates found: {provider_names}"
+            #         .format(data_asset_name=data_asset_name, provider_names=provider_names)
+            #     )
+                    
             available_names = self.get_available_data_asset_names()
-            for datasource_name in available_names.keys():
-                for generator in available_names[datasource_name].keys():
-                    names_set = available_names[datasource_name][generator]
+            for datasource in available_names.keys():
+                for generator in available_names[datasource].keys():
+                    names_set = available_names[datasource][generator]
                     if generator_asset in names_set:
                         provider_names.append(
-                            NormalizedDataAssetName(datasource_name, generator, generator_asset, "default")
+                            NormalizedDataAssetName(datasource, generator, generator_asset)
                         )
             
             if len(provider_names) == 1:
                 return provider_names[0]
 
             elif len(provider_names) > 1:
-                raise DataContextError("Ambiguous data_asset_name {data_asset_name}. Multiple candidates found: {provider_names}"
-                    .format(data_asset_name=data_asset_name, provider_names=provider_names))
+                raise DataContextError(
+                    "Ambiguous data_asset_name '{data_asset_name}'. Multiple candidates found: {provider_names}"
+                    .format(data_asset_name=data_asset_name, provider_names=provider_names)
+                )
 
-            # Finally, if the name *would be* unambiguous but for not havding been defined yet allow the normalization
-            if len(available_names) == 1:
-                # in this case, datasource_name from the loop above is still valid
-                if len(available_names[datasource_name]) == 1:
-                    # in this case, generator from the inner loop above is also still valid
-                    return NormalizedDataAssetName(datasource_name, generator, generator_asset, "default")
-            else:
-                raise DataContextError("Cannot find {data_asset_name} among currently-defined data assets.".format(data_asset_name=data_asset_name))
+            # If we are here, then the data_asset_name does not belong to any configured datasource or generator
+            # If there is only a single datasource and generator, we assume the user wants to create a new
+            # namespace.
+            if (len(available_names.keys()) == 1 and # in this case, we know that the datasource name is valid
+                    len(available_names[datasource].keys()) == 1):
+                logger.info("Normalizing to a new generator name.")
+                return NormalizedDataAssetName(
+                    datasource,
+                    generator,
+                    generator_asset
+                )
         
+            if len(available_names.keys()) == 0:
+                raise DataContextError(
+                    "No datasource configured: a datasource is required to normalize an incomplete data_asset_name"
+                )
+
+            raise DataContextError(
+                "Ambiguous data_asset_name: no existing data_asset has the provided name, no generator provides it, "
+                " and there are multiple datasources and/or generators configured."
+            )
+
         elif len(split_name) == 2:
-            # In this case, the name must be one of the following options:
-            #   (a) datasource_name/generator_asset
-            #   (b) generator_asset/suite
+            # In this case, the name must be a datasource_name/generator_asset
 
             # If the data_asset_name is already defined by a config in that datasource, return that normalized name.
             provider_names = []
-            for normalized_identifier in self.list_expectation_suites():
-                normalized_split = normalized_identifier.split(self._data_asset_name_delimiter)
-                curr_datasource_name = normalized_split[0]
-                curr_generator_name = normalized_split[1]
-                curr_generator_asset = normalized_split[2]
-                curr_expectation_suite = normalized_split[3]
-                # Option 1:
+            for normalized_identifier in existing_namespaces:
+                curr_datasource_name = normalized_identifier[0]
+                curr_generator_asset = normalized_identifier[2]
                 if curr_datasource_name == split_name[0] and curr_generator_asset == split_name[1]:
-                    provider_names.append(NormalizedDataAssetName(*normalized_split))
-                # Option 2:
-                if curr_generator_asset == split_name[0] and curr_expectation_suite == split_name[1]:
-                    provider_names.append(NormalizedDataAssetName(*normalized_split))
+                    provider_names.append(normalized_identifier)
 
-            if len(provider_names) == 1:
-                return provider_names[0]
-            elif len(provider_names) > 1:
-                raise DataContextError("Ambiguous data_asset_name {data_asset_name}. Multiple candidates found: {provider_names}"
-                    .format(data_asset_name=data_asset_name, provider_names=provider_names))
+            # NOTE: Current behavior choice is to continue searching to see whether the namespace is ambiguous
+            # based on configured generators *even* if there is *only one* namespace with expectation suites
+            # in it.
 
-            # If we haven't found a match, see if this is provided by exactly one datasource and generator
+            # If generators' namespaces are enormous or if they are slow to provide all their available names,
+            # that behavior could become unwieldy, and perhaps should be revisited by using the escape hatch
+            # commented out below.
+
+            # if len(provider_names) == 1:
+            #     return provider_names[0]
+            #
+            # elif len(provider_names) > 1:
+            #     raise DataContextError(
+            #         "Ambiguous data_asset_name '{data_asset_name}'. Multiple candidates found: {provider_names}"
+            #         .format(data_asset_name=data_asset_name, provider_names=provider_names)
+            #     )
+
             available_names = self.get_available_data_asset_names()
             for datasource_name in available_names.keys():
                 for generator in available_names[datasource_name].keys():
                     generator_assets = available_names[datasource_name][generator]
                     if split_name[0] == datasource_name and split_name[1] in generator_assets:
-                        provider_names.append(NormalizedDataAssetName(datasource_name, generator, split_name[1], "default"))
-                    
-                    if split_name[0] in generator_assets:
-                        provider_names.append(NormalizedDataAssetName(datasource_name, generator, split_name[0], split_name[1]))
+                        provider_names.append(NormalizedDataAssetName(datasource_name, generator, split_name[1]))
                         
             if len(provider_names) == 1:
                 return provider_names[0]
             
             elif len(provider_names) > 1:
-                raise DataContextError("Ambiguous data_asset_name {data_asset_name}. Multiple candidates found: {provider_names}"
-                    .format(data_asset_name=data_asset_name, provider_names=provider_names))
+                raise DataContextError(
+                    "Ambiguous data_asset_name '{data_asset_name}'. Multiple candidates found: {provider_names}"
+                    .format(data_asset_name=data_asset_name, provider_names=provider_names)
+                )
 
-            else:
-                raise ConfigNotFoundError("No generator available to produce data_asset_name {data_asset_name} with datasource {datasource_name}"
-                    .format(data_asset_name=data_asset_name, datasource_name=datasource_name))
-
-
-        elif len(split_name) == 3:
-            # In this case, the name could refer to 
-            # (a) a datasource, generator, and data_asset_name, or
-            # (b) a datasource, data_asset_name, and purpose
-            # If a generator is specified, there must be exactly one defined
-            # purpose with that name and generator
-            # If suite is defined, there must be exactly one
-            # defined generator with that name and purpose
-            datasource_name = split_name[0]
-            generator_assets = set([split_name[1], split_name[2]])
-            provider_names = []
-            for normalized_identifier in self.list_expectation_suites():
-                normalized_split = normalized_identifier.split(self._data_asset_name_delimiter)
-                curr_datasource_name = normalized_split[0]
-                if datasource_name != curr_datasource_name:
-                    continue
-                curr_generator_name = normalized_split[1]
-                curr_data_asset_name = normalized_split[2]
-                curr_curr_suite = normalized_split[3]
-                if ((curr_data_asset_name in generator_assets) and 
-                    (
-                        curr_generator_name in generator_assets or
-                        curr_curr_suite in generator_assets
-                    )):
-                    provider_names.append(
-                        NormalizedDataAssetName(*normalized_split)
+            # If we are here, then the data_asset_name does not belong to any configured datasource or generator
+            # If there is only a single generator for their provided datasource, we allow the user to create a new
+            # namespace.
+            if split_name[0] in available_names and len(available_names[split_name[0]]) == 1:
+                logger.info("Normalizing to a new generator name.")
+                return NormalizedDataAssetName(
+                    split_name[0],
+                    list(available_names[split_name[0]].keys())[0],
+                    split_name[1]
                     )
 
-            if len(provider_names) == 1:
-                return provider_names[0]
-
-            elif len(provider_names) > 1:
-                raise DataContextError("Ambiguous data_asset_name {data_asset_name}: multiple providers found."
-                        .format(data_asset_name=data_asset_name))
-
-            # If the data_asset_name is not already defined, but it exists among the valid names from exactly one generator, or the named generator, provide that name
-            available_names = self.get_available_data_asset_names(datasource_name)
-            for generator in available_names[datasource_name].keys():
-                names_set = available_names[datasource_name][generator]
-                intersection = generator_assets.intersection(names_set)
-                if len(intersection) > 1:
-                    raise DataContextError("Ambiguous data_asset_name {data_asset_name}: multiple possible providers found."
-                        .format(data_asset_name=data_asset_name))
-                elif len(intersection) == 1:
-                    possible_name = intersection.pop()
-                    if possible_name == split_name[1]: # we were given a name and purpose
-                        provider_names.append(
-                            NormalizedDataAssetName(datasource_name, generator, possible_name, split_name[2])
+            if len(available_names.keys()) == 0:
+                raise DataContextError(
+                    "No datasource configured: a datasource is required to normalize an incomplete data_asset_name"
                         )
-                    elif possible_name == split_name[2] and split_name[1] == generator: # possible_name == split_name[2], we were given a generator and name
-                        provider_names.append(
-                            NormalizedDataAssetName(datasource_name, generator, possible_name, "default")
-                        )
-            if len(provider_names) == 1:
-                return provider_names[0]
-     
-            elif len(provider_names) > 1:
-                raise DataContextError("Ambiguous data_asset_name {data_asset_name}. Multiple candidates found: {provider_names}"
-                    .format(data_asset_name=data_asset_name, provider_names=provider_names))
 
-            else:
-                raise ConfigNotFoundError("No generator available to produce data_asset_name {data_asset_name} with datasource {datasource_name}"
-                    .format(data_asset_name=data_asset_name, datasource_name=datasource_name))
+            raise DataContextError(
+                "No generator available to produce data_asset_name '{data_asset_name}' "
+                "with datasource '{datasource_name}'"
+                .format(data_asset_name=data_asset_name, datasource_name=datasource_name)
+            )
 
-        elif len(split_name) == 4:
+        elif len(split_name) == 3:
+            # In this case, we *do* check that the datasource and generator names are valid, but
+            # allow the user to define a new generator asset
+            datasources = [datasource["name"] for datasource in self.list_datasources()]
+            if split_name[0] in datasources:
+                datasource = self.get_datasource(split_name[0])
+                generators = [generator["name"] for generator in datasource.list_generators()]
+                if split_name[1] in generators:
             return NormalizedDataAssetName(*split_name)
-            # # This must match an existing config or available data_asset
-            # for normalized_identifier in self.list_expectation_suites():
-            #     normalized_split = normalized_identifier.split(self._data_asset_name_delimiter)
-            #     if (split_name[0] == normalized_split[0] and split_name[1] == normalized_split[1] and
-            #         split_name[2] == normalized_split[2] and split_name[3] == normalized_split[3]):
-            #         return normalized_identifier
-            
-            # datasource_name = split_name[0]
-            # generator_name = split_name[1]
-            # generator_asset = split_name[2]
-            # purpose = split_name[3]
-            # # If we haven't found a match yet, look in the available_data_assets
-            # available_names = self.get_available_data_asset_names(datasource_name)
-            # if generator_name in available_names[datasource_name] and 
-            #    generator_asset in available_names[datasource_name][generator_name]:
-            #    return NormalizedDataAssetName(datasource_name, generator_name, generator_asset, purpose)
 
-            # raise DataContextError("Data asset {data_asset_name} could not be resolved in this DataContext.".format(data_asset_name=data_asset_name))
+            raise DataContextError(
+                "Invalid data_asset_name: no configured datasource '{datasource_name}' "
+                "with generator '{generator_name}'"
+                .format(datasource_name=split_name[0], generator_name=split_name[1])
+            )
+            
+    def get_expectation_suite(self, data_asset_name, expectation_suite_name="default"):
+        """Get or create a named expectation suite for the provided data_asset_name.
+
+        Args:
+            data_asset_name (str or NormalizedDataAssetName): the data asset name to which the expectation suite belongs
+            expectation_suite_name (str): the name for the expectation suite
         
-    def get_expectation_suite(self, data_asset_name, batch_kwargs=None):
+        Returns:
+            expectation_suite
+        """
         if not isinstance(data_asset_name, NormalizedDataAssetName):
             data_asset_name = self._normalize_data_asset_name(data_asset_name)
 
-        config_file_path = self._get_normalized_data_asset_name_filepath(data_asset_name)
+        config_file_path = self._get_normalized_data_asset_name_filepath(data_asset_name, expectation_suite_name)
         if os.path.isfile(config_file_path):
             with open(config_file_path, 'r') as json_file:
                 read_config = json.load(json_file)
@@ -626,21 +674,44 @@ class DataContext(object):
             # TODO: Should this return None? Currently this method acts as get_or_create
             return {
                 'data_asset_name': self.data_asset_name_delimiter.join(data_asset_name),
+                'expectation_suite_name': expectation_suite_name,
                 'meta': {
                     'great_expectations.__version__': __version__
                 },
                 'expectations': []
              } 
 
-    def save_expectation_suite(self, expectations, data_asset_name=None):
+    def save_expectation_suite(self, expectation_suite, data_asset_name=None, expectation_suite_name=None):
+        """Save the provided expectation suite into the DataContext.
+
+        Args:
+            expectation_suite: the suite to save
+            data_asset_name: the data_asset_name for this expectation suite. If no name is provided, the name will\
+                be read from the suite
+            expectation_suite_name: the name of this expectation suite. If no name is provided the name will \
+                be read from the suite
+
+        Returns:
+            None
+        """
         if data_asset_name is None:
-            data_asset_name = expectations['data_asset_name']
+            try:
+                data_asset_name = expectation_suite['data_asset_name']
+            except KeyError:
+                raise DataContextError(
+                    "data_asset_name must either be specified or present in the provided expectation suite")
+        if expectation_suite_name is None:
+            try:
+                expectation_suite_name = expectation_suite['expectation_suite_name']
+            except KeyError:
+                raise DataContextError(
+                    "expectation_suite_name must either be specified or present in the provided expectation suite")
         if not isinstance(data_asset_name, NormalizedDataAssetName):
             data_asset_name = self._normalize_data_asset_name(data_asset_name)
-        config_file_path = self._get_normalized_data_asset_name_filepath(data_asset_name)
+        config_file_path = self._get_normalized_data_asset_name_filepath(data_asset_name, expectation_suite_name)
         safe_mmkdir(os.path.dirname(config_file_path), exist_ok=True)
         with open(config_file_path, 'w') as outfile:
-            json.dump(expectations, outfile)
+            json.dump(expectation_suite, outfile)
         self._compiled = False
 
     def bind_evaluation_parameters(self, run_id, expectations):
