@@ -31,6 +31,7 @@ class TestDataAsset(unittest.TestCase):
             D._expectation_suite,
             {
                 "data_asset_name": None,
+                "expectation_suite_name": "default",
                 "data_asset_type": "Dataset",
                 "meta": {
                     "great_expectations.__version__": ge.__version__
@@ -44,6 +45,7 @@ class TestDataAsset(unittest.TestCase):
             D.get_expectation_suite(),
             {
                 "data_asset_name": None,
+                "expectation_suite_name": "default",
                 "data_asset_type": "Dataset",
                 "meta": {
                     "great_expectations.__version__": ge.__version__
@@ -165,6 +167,7 @@ class TestDataAsset(unittest.TestCase):
                 }
             ],
             "data_asset_name": None,
+            "expectation_suite_name": "default",
             "data_asset_type": "Dataset",
             "meta": {
                 "great_expectations.__version__": ge.__version__
@@ -238,6 +241,7 @@ class TestDataAsset(unittest.TestCase):
                 }
             ],
             "data_asset_name": None,
+            "expectation_suite_name": "default",
             "data_asset_type": "Dataset",
             "meta": {
                 "great_expectations.__version__": ge.__version__
@@ -311,6 +315,7 @@ class TestDataAsset(unittest.TestCase):
             ],
             "data_asset_name": None,
             "data_asset_type": "Dataset",
+            "expectation_suite_name": "default",
             "meta": {
                 "great_expectations.__version__": ge.__version__
             }
@@ -975,6 +980,7 @@ class TestDataAsset(unittest.TestCase):
                     }
                 ],
                 'data_asset_name': None,
+                "expectation_suite_name": "default",
                 "data_asset_type": "Dataset",
                 "meta": {
                     "great_expectations.__version__": ge.__version__
