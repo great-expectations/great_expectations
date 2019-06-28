@@ -85,23 +85,46 @@ def test_content_block_list_available_expectations(expectations):
     assert available_expectations == ['expect_column_values_to_be_in_set']
 
 
-def test_render_profiled_fixtures():
+def test_render_profiled_fixture_expectations():
     # TODO: Make this a fixture
     expectations = json.load(
         open('tests/render/fixtures/BasicDatasetProfiler_expectations.json')
     )
 
     rendered_json = PrescriptivePageRenderer.render(expectations)
+
     # print(json.dumps(rendered_json, indent=2))
+    # with open('./test.json', 'w') as f:
+    #     f.write(json.dumps(rendered_json, indent=2))
+
     rendered_page = PageView.render(rendered_json)
     assert rendered_page != None
 
+    # print(rendered_page)
+    # with open('./test.html', 'w') as f:
+    #     f.write(rendered_page)
+
+
+def test_render_profiled_fixture_evrs():
+    # TODO: Make this a fixture
+    evrs = json.load(
+        open('tests/render/fixtures/BasicDatasetProfiler_evrs.json')
+    )
+
+    rendered_json = DescriptivePageRenderer.render(evrs)
+
+    # print(json.dumps(rendered_json, indent=2))
+    # with open('./test.json', 'w') as f:
+    #     f.write(json.dumps(rendered_json, indent=2))
+
+    rendered_page = PageView.render(rendered_json)
+    assert rendered_page != None
+
+    # print(rendered_page)
     with open('./test.html', 'w') as f:
         f.write(rendered_page)
 
-    # print(rendered_page)
-
-    # assert False
+    assert False
 
 
 def test_render_template():

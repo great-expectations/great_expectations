@@ -37,7 +37,7 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
         if column is None:
             column = cls._get_column_name(evrs)
 
-        content_blocks = {}
+        content_blocks = []
         cls._render_header(evrs, column, content_blocks)
         cls._render_column_type(evrs, content_blocks)
         cls._render_overview_table(evrs, content_blocks)
@@ -46,7 +46,7 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
         cls._render_unrecognized(evrs, content_blocks)
 
         # FIXME: shown here as an example of bullet list
-        content_blocks["summary_list"] = {
+        content_blocks.append({
             "content_block_type": "bullet_list",
             "bullet_list": [
                 {
@@ -58,7 +58,7 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
                     "params": {}
                 }
             ]
-        }
+        })
 
         return {
             "section_name": column,
@@ -67,10 +67,10 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
 
     @classmethod
     def _render_header(cls, evrs, column_name, content_blocks):
-        content_blocks["header"] = {
+        content_blocks.append({
             "content_block_type": "header",
             "header": column_name,
-        }
+        })
 
     @classmethod
     def _render_column_type(cls, evrs, content_blocks):
@@ -87,7 +87,7 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
                 "content_block_type": "text",
                 "content": [type_]
             }
-            content_blocks["column_type"] = new_block
+            content_blocks.append(new_block)
 
     @classmethod
     def _render_overview_table(cls, evrs, content_blocks):
@@ -106,8 +106,9 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
         evrs = [evr for evr in [
             unique_n, unique_proportion, null_evr] if evr is not None]
         if len(evrs) > 0:
-            content_blocks["overview_table"] = TableContentBlockRenderer.render(
-                evrs)
+            content_blocks.append(
+                TableContentBlockRenderer.render(evrs)
+            )
 
     @classmethod
     def _render_stats_table(cls, evrs, content_blocks):
@@ -125,8 +126,9 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
         )
         evrs = [evr for evr in [min_evr, mean_evr, max_evr] if evr is not None]
         if len(evrs) > 0:
-            content_blocks["stats_table"] = TableContentBlockRenderer.render(
-                evrs)
+            content_blocks.append(
+                TableContentBlockRenderer.render(evrs)
+            )
 
     @classmethod
     def _render_values_set(cls, evrs, content_blocks):
@@ -146,11 +148,19 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
             return
 
         if len(set_evr["result"][result_key]) > 10:
-            content_blocks["value_list"] = ValueListContentBlockRenderer.render(
-                set_evr, result_key=result_key)
+            content_blocks.append(
+                ValueListContentBlockRenderer.render(
+                    set_evr,
+                    result_key=result_key
+                )
+            )
         else:
-            content_blocks["value_graph"] = GraphContentBlockRenderer.render(
-                set_evr, result_key=result_key)
+            content_blocks.append(
+                GraphContentBlockRenderer.render(
+                    set_evr,
+                    result_key=result_key
+                )
+            )
 
     @classmethod
     def _render_unrecognized(cls, evrs, content_blocks):
@@ -181,7 +191,7 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
 
         if new_block is not None:
             unrendered_blocks.append(new_block)
-        content_blocks["other_blocks"] = unrendered_blocks
+        content_blocks.append(unrendered_blocks)
 
 
 class PrescriptiveColumnSectionRenderer(ColumnSectionRenderer):
