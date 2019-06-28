@@ -441,7 +441,7 @@ class SparkDFDataset(MetaSparkDFDataset):
             max_value = parse(max_value)
 
         if min_value is None and max_value is None:
-            return column.withColumn('__success', lit(True))
+            raise ValueError("min_value and max_value cannot both be None")
         elif min_value is None:
             return column.withColumn('__success', when(column[0] <= max_value, lit(True)).otherwise(lit(False)))
         elif max_value is None:
