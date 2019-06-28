@@ -877,7 +877,7 @@ class DataContext(object):
             data_asset_name = "_untitled"
 
         try:
-            data_asset_name = self._normalize_data_asset_name(data_asset_name)
+            normalized_data_asset_name = self._normalize_data_asset_name(data_asset_name)
         except DataContextError:
             logger.warning(
                 "Registering validation results for a data_asset_name that cannot be normalized in this context."
@@ -888,7 +888,7 @@ class DataContext(object):
             result_store = self._project_config["result_store"]
             if isinstance(result_store, dict) and "filesystem" in result_store:
                 validation_filepath = self._get_normalized_data_asset_name_filepath(
-                    data_asset_name,
+                    normalized_data_asset_name,
                     expectation_suite_name,
                     base_path=os.path.join(
                         self.root_directory,
@@ -908,7 +908,7 @@ class DataContext(object):
                     "validations/{run_id}/{data_asset_name}".format(
                         run_id=run_id,
                         data_asset_name=self._get_normalized_data_asset_name_filepath(
-                            data_asset_name,
+                            normalized_data_asset_name,
                             expectation_suite_name,
                             base_path=""
                         )
@@ -944,7 +944,7 @@ class DataContext(object):
                     )
                     data_asset.to_csv(
                         self._get_normalized_data_asset_name_filepath(
-                            data_asset_name,
+                            normalized_data_asset_name,
                             expectation_suite_name,
                             base_path=os.path.join(
                                 self.root_directory,
@@ -964,7 +964,7 @@ class DataContext(object):
                         "validations/{run_id}/{data_asset_name}.csv.gz".format(
                             run_id=run_id,
                             data_asset_name=self._get_normalized_data_asset_name_filepath(
-                                data_asset_name,
+                                normalized_data_asset_name,
                                 expectation_suite_name,
                                 base_path="",
                                 file_extension=".csv.gz"
