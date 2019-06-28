@@ -11,6 +11,7 @@ import logging
 from ruamel.yaml import YAML
 
 from ..data_context.util import NormalizedDataAssetName
+from great_expectations.version import __version__
 
 logger = logging.getLogger(__name__)
 yaml = YAML()
@@ -197,25 +198,30 @@ class Datasource(object):
 
         return [{"name": key, "type": value["type"]} for key, value in self._datasource_config["generators"].items()]
 
-    def get_batch(self, data_asset_name, batch_kwargs=None, **kwargs):
+    def get_batch(self, data_asset_name, expectation_suite_name="default", batch_kwargs=None, **kwargs):
         if isinstance(data_asset_name, NormalizedDataAssetName):  # this richer type can include more metadata
             generator_name = data_asset_name.generator
             generator_asset = data_asset_name.generator_asset
             if self._data_context is not None:
                 expectation_suite = self._data_context.get_expectation_suite(
                     data_asset_name,
-                    batch_kwargs)
-                # In this case, we want to ensure we don't overwrite the name below; use the full data_asset_name
-                data_asset_name = self._data_context.data_asset_name_delimiter.join(data_asset_name)
+                    expectation_suite_name
+                )
             else:
                 expectation_suite = None
                 # If data_context is not set, we cannot definitely use a fully normalized data_asset reference.
                 # This would mean someone got a normalized name without a data context which is unusual
-                logger.warning("Using NormalizedDataAssetName type without a data_context could result in unexpected behavior: \
-                    using '/' as a default delimiter.")
-                data_asset_name = "/".join(data_asset_name)
+                logger.warning(
+                    "Using NormalizedDataAssetName type without a data_context could result in unexpected behavior: "
+                    "using '/' as a default delimiter."
+                )
         else:
-            generator_name = "default"
+            generators = [generator["name"] for generator in self.list_generators()]
+            if len(generators) == 1:
+                generator_name = generators[0]
+            elif "default" in generators:
+                generator_name = "default"
+
             generator_asset = data_asset_name
             expectation_suite = None
             if self._data_context is not None:
@@ -232,9 +238,9 @@ class Datasource(object):
         elif not isinstance(batch_kwargs, dict):
             batch_kwargs = self.build_batch_kwargs(batch_kwargs)
 
-        return self._get_data_asset(data_asset_name, batch_kwargs, expectation_suite, **kwargs)
+        return self._get_data_asset(batch_kwargs, expectation_suite, **kwargs)
 
-    def _get_data_asset(self, data_asset_name, batch_kwargs, expectation_suite, **kwargs):
+    def _get_data_asset(self, batch_kwargs, expectation_suite, **kwargs):
         raise NotImplementedError
 
     def _get_generator_class(self, type_):

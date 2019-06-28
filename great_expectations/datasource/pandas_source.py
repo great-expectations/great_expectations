@@ -46,7 +46,7 @@ class PandasDatasource(Datasource):
         else:
             raise ValueError("Unrecognized BatchGenerator type %s" % type_)
 
-    def _get_data_asset(self, data_asset_name, batch_kwargs, expectation_suite, **kwargs):
+    def _get_data_asset(self, batch_kwargs, expectation_suite, **kwargs):
         batch_kwargs.update(kwargs)
         if "path" in batch_kwargs:
             reader_options = batch_kwargs.copy()
@@ -85,7 +85,6 @@ class PandasDatasource(Datasource):
         return PandasDataset(df,
                              expectation_suite=expectation_suite,
                              data_context=self._data_context,
-                             data_asset_name=data_asset_name,
                              batch_kwargs=batch_kwargs)
 
     def build_batch_kwargs(self, *args, **kwargs):
