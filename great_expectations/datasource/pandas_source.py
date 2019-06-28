@@ -6,7 +6,7 @@ import pandas as pd
 
 from .datasource import Datasource, ReaderMethods
 from .filesystem_path_generator import SubdirReaderGenerator, GlobReaderGenerator
-from .batch_generator import EmptyGenerator
+from .batch_generator import InMemoryGenerator
 from great_expectations.dataset.pandas_dataset import PandasDataset
 
 from great_expectations.exceptions import BatchKwargsError
@@ -42,7 +42,7 @@ class PandasDatasource(Datasource):
         elif type_ == "glob_reader":
             return GlobReaderGenerator
         elif type_ == "memory":
-            return EmptyGenerator
+            return InMemoryGenerator
         else:
             raise ValueError("Unrecognized BatchGenerator type %s" % type_)
 
