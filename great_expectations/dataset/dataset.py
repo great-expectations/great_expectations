@@ -409,9 +409,12 @@ class Dataset(MetaDataset):
 
         """
         columns = self.get_table_columns()
-        if list(columns) == list(column_list):
+        if column_list is None or list(columns) == list(column_list):
             return {
-                "success": True
+                "success": True,
+                "result": {
+                    "observed_value": list(columns)
+            }
             }
         else:
             # In the case of differing column lengths between the defined expectation and the observed column set, the
@@ -426,7 +429,12 @@ class Dataset(MetaDataset):
                            "Found": v} for i, k, v in compared_lists if k != v]
             return {
                 "success": False,
-                "details": {"mismatched": mismatched}
+                "result": {
+                    "observed_value": list(columns),
+                    "details": {
+                        "mismatched": mismatched
+                    }
+                }
             }
 
     @DocInherit
