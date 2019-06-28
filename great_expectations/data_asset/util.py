@@ -206,7 +206,7 @@ def recursively_convert_to_json_serializable(test_obj):
         raise TypeError('%s is of type %s which cannot be serialized.' % (
             str(test_obj), type(test_obj).__name__))
 
-def get_empty_expectation_suite(data_asset_name=None, expectation_suite_name=None):
+def get_empty_expectation_suite(data_asset_name=None, expectation_suite_name="default"):
     return DotDict({
         'data_asset_name': data_asset_name,
         'expectation_suite_name': expectation_suite_name,
