@@ -200,23 +200,41 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
 
         if "mostly" in params:
             if params["min_value"] is not None and params["max_value"] is not None:
-                template_str = "$column must be between $min_value and $max_value at least $mostly% of the time."
+                if include_column_name:
+                    template_str = "$column must be between $min_value and $max_value at least $mostly% of the time."
+                else:
+                    template_str = "must be between $min_value and $max_value at least $mostly% of the time."
 
             elif params["min_value"] is None:
-                template_str = "$column must be less than $max_value at least $mostly% of the time."
+                if include_column_name:
+                    template_str = "$column must be less than $max_value at least $mostly% of the time."
+                else:
+                    template_str = "must be less than $max_value at least $mostly% of the time."
 
             elif params["max_value"] is None:
-                template_str = "$column must be more than $min_value at least $mostly% of the time."
+                if include_column_name:
+                    template_str = "$column must be more than $min_value at least $mostly% of the time."
+                else:
+                    template_str = "must be less than $max_value at least $mostly% of the time."
 
         else:
             if params["min_value"] is not None and params["max_value"] is not None:
-                template_str = "$column must always be between $min_value and $max_value."
+                if include_column_name:
+                    template_str = "$column must always be between $min_value and $max_value."
+                else:
+                    template_str = "must always be between $min_value and $max_value."
 
             elif params["min_value"] is None:
-                template_str = "$column must always be less than $max_value."
+                if include_column_name:
+                    template_str = "$column must always be less than $max_value."
+                else:
+                    template_str = "must always be less than $max_value."
 
             elif params["max_value"] is None:
-                template_str = "$column must always be more than $min_value."
+                if include_column_name:
+                    template_str = "$column must always be more than $min_value."
+                else:
+                    template_str = "must always be more than $min_value."
 
         return [{
             "template": template_str,
@@ -369,7 +387,10 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
             ["$v__"+str(i) for i, v in enumerate(params["value_set"])]
         )
 
-        template_str = "$column values must belong to this set: "+values_string+"."
+        if include_column_name:
+            template_str = "$column values must belong to this set: "+values_string+"."
+        else:
+            template_str = "values must belong to this set: "+values_string+"."
 
         return [{
             "template": template_str,
@@ -404,7 +425,10 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
             ["column", "mostly"],
         )
 
-        template_str = "$column values must never be null."
+        if include_column_name:
+            template_str = "$column values must never be null."
+        else:
+            template_str = "values must never be null."
 
         return [{
             "template": template_str,
@@ -420,7 +444,10 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
             ["column", "min_value", "max_value"],
         )
 
-        template_str = "$column must have between $min_value and $max_value% unique values."
+        if include_column_name:
+            template_str = "$column must have between $min_value and $max_value% unique values."
+        else:
+            template_str = "must have between $min_value and $max_value% unique values."
 
         return [{
             "template": template_str,
@@ -436,7 +463,10 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
             ["column", ],
         )
 
-        template_str = "$column values must be unique."
+        if include_column_name:
+            template_str = "$column values must be unique."
+        else:
+            template_str = "values must be unique."
 
         return [{
             "template": template_str,
@@ -458,7 +488,10 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
             ["$v__"+str(i) for i, v in enumerate(params["type_list"])]
         )
 
-        template_str = "$column values must belong to this set: "+values_string+"."
+        if include_column_name:
+            template_str = "$column values must belong to this set: "+values_string+"."
+        else:
+            template_str = "values must belong to this set: "+values_string+"."
 
         return [{
             "template": template_str,
