@@ -414,7 +414,7 @@ class Dataset(MetaDataset):
                 "success": True,
                 "result": {
                     "observed_value": list(columns)
-            }
+                }
             }
         else:
             # In the case of differing column lengths between the defined expectation and the observed column set, the
@@ -2318,16 +2318,21 @@ class Dataset(MetaDataset):
             expect_column_mean_to_be_between
             expect_column_median_to_be_between
         """
-        if min_value is None and max_value is None:
-            raise ValueError("min_value and max_value cannot both be None")
+        # if min_value is None and max_value is None:
+        #     raise ValueError("min_value and max_value cannot both be None")
 
         column_stdev = self.get_column_stdev(column)
+        if min_value is None and max_value is None:
+            success = True
+        elif min_value is None:
+            success = column_stdev <= max_value
+        elif max_value is None:
+            success = column_stdev >= min_value
+        else:
+            success = min_value <= column_stdev <= max_value
 
         return {
-            "success": (
-                ((min_value is None) or (min_value <= column_stdev)) and
-                ((max_value is None) or (column_stdev <= max_value))
-            ),
+            "success": success,
             "result": {
                 "observed_value": column_stdev
             }
