@@ -69,20 +69,6 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
             },
         }]
 
-    # @classmethod
-    # def _get_content_block_styling(cls):
-    #     return {
-    #         # "styles": {},
-    #         "classes": ["col-12"],
-    #     }
-
-    # @classmethod
-    # def _get_element_styling(cls):
-    #     return {
-    #         # "styles": {},
-    #         "classes": ["col-12"],
-    #     }
-
     @classmethod
     def expect_column_to_exist(cls, expectation, styling=None):
         params = substitute_none_for_missing(
@@ -91,24 +77,10 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
         )
 
         if params["column_index"] == None:
-            # return [{
-            #     "template": "{{column}} is a required field.",
-            #     "params": params,
-            # }]
             return [{
                 "template": "$column is a required field "+str(datetime.datetime.now()),
                 "params": params,
                 "styling": styling
-                # {
-                #     # "classes"
-                #     "tooltip": "blah",
-                #     "params": {
-                #         "column": {
-                #             "classes": "my_css_value_class",
-                #             "tooltip_text": "testing",
-                #         }
-                #     }
-                # }
             }]
 
         else:
@@ -118,20 +90,6 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
                 "template": "$column must be the $column_indexth field",
                 "params": params,
                 "styling": styling,
-                # "styling": {
-                #     # "classes"
-                #     "tooltip": "blah",
-                #     "params": {
-                #         "column": {
-                #             "classes": ["class_A"],
-                #             "tooltip_text": "testing",
-                #         },
-                #         "column_index": {
-                #             "classes": ["class_B"],
-                #             "tooltip_text": "testing msg B",
-                #         }
-                #     }
-                # }
             }]
 
     @classmethod
@@ -227,25 +185,6 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
         )
 
         if (params["min_value"] is None) and (params["max_value"] is None):
-            # Note: I'm not sure why we're using a different pattern for templating column names...
-            # This would probably be better as `"$column has a bogus $expectation_name expectation.",`
-
-            # Related issue: are we going to want to allow for different styles of parameters?
-            # For example, I could imagine wanting one color of syntax highlighting for variable names,
-            # and a different color for expectations.
-            # In that case, perhaps returning something like this would work?
-            # {
-            #     "template": "$column has a bogus $expectation_name expectation.",
-            #     "params": {
-            #         "column": "my_column",
-            #         "expectation_name": "expect_column_values_to_be_between",
-            #     },
-            #     "param_types": {
-            #         "column": "variable"
-            #         "expectation_name": "expectation"
-            #     }
-            # }
-            # Thoughtfully enumerating values for the param_types k/v object will be important.
             return [{
                 "template": column_name + " has a bogus $expectation_name expectation.",
                 "params": {
@@ -417,31 +356,6 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
                 "template": "Must have more than $min_value rows.",
                 "params": params
             }]
-
-    # @classmethod
-    # def expect_table_row_count_to_be_between(cls, expectation):
-    #     params = substitute_none_for_missing(
-    #         expectation["kwargs"],
-    #         ["min_value", "max_value"]
-    #     )
-
-    #     if params["min_value"] is not None and params["max_value"] is not None:
-    #         return [{
-    #             "template": "Must have between $min_value and $max_value rows.",
-    #             "params": params
-    #         }]
-
-    #     elif params["min_value"] is None:
-    #         return [{
-    #             "template": "Must have less than than $max_value rows.",
-    #             "params": params
-    #         }]
-
-    #     elif params["max_value"] is None:
-    #         return [{
-    #             "template": "Must have more than $min_value rows.",
-    #             "params": params
-    #         }]
 
     @classmethod
     def expect_table_row_count_to_equal(cls, expectation):
