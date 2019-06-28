@@ -270,3 +270,14 @@ class Datasource(object):
             return ReaderMethods.JSON
         else:
             return None
+
+    @staticmethod
+    def get_empty_expectation_suite(data_asset_name=None, expectation_suite_name=None):
+        return {
+            'data_asset_name': data_asset_name,
+            'expectation_suite_name': expectation_suite_name,
+            'meta': {
+                'great_expectations.__version__': __version__
+            },
+            'expectations': []
+        }
