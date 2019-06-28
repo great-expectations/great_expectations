@@ -70,6 +70,9 @@ def render_styling_from_string_template(template):
     # NOTE: We should add some kind of type-checking to template
     """This method is a thin wrapper use to call `render_styling` from within jinja templates.
     """
+    if type(template) != dict:
+        return template
+
     if "styling" in template:
         return render_styling(template["styling"])
 
@@ -79,6 +82,8 @@ def render_styling_from_string_template(template):
 
 def render_string_template(template):
     # NOTE: We should add some kind of type-checking to template
+    if type(template) != dict:
+        return template
 
     if "styling" in template:
 
