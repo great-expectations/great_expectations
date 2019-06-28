@@ -158,6 +158,7 @@ class View(object):
         )
         env.filters['render_string_template'] = render_string_template
         env.filters['render_styling'] = render_styling_from_string_template
+        # env.filters['render_styling'] = render_styling
         return env.get_template(template)
 
 

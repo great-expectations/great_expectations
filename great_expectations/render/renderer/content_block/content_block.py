@@ -34,7 +34,8 @@ class ContentBlockRenderer(Renderer):
 
             return {
                 "content_block_type": cls._content_block_type,
-                cls._content_block_type: blocks
+                cls._content_block_type: blocks,
+                "styling": cls._get_styling(),
             }
         else:
             expectation_type = cls._get_expectation_type(render_object)
@@ -44,6 +45,10 @@ class ContentBlockRenderer(Renderer):
                 return content_block_fn(render_object, **kwargs)
             else:
                 return None
+
+    @classmethod
+    def _get_styling(cls):
+        pass
 
     @classmethod
     def list_available_expectations(cls):
