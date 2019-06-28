@@ -17,7 +17,7 @@
                 {% include 'value_list.j2' %}
 
             {% elif content_block["content_block_type"] == "bullet_list" %}
-                <div class="col-12">
+                <div {{ content_block | render_styling }}>
                     <ul>
                         {% for bullet_point in content_block["bullet_list"] %}
                             <li {{ bullet_point | render_styling }}>{{ bullet_point | render_string_template }}</li>

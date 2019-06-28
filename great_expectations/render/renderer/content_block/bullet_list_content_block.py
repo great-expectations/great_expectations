@@ -59,6 +59,13 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
         }]
 
     @classmethod
+    def _get_styling(cls):
+        return {
+            # "styles": {},
+            "classes": ["col-12"],
+        }
+
+    @classmethod
     def expect_column_to_exist(cls, expectation, styling=None):
         params = substitute_none_for_missing(
             expectation["kwargs"],
