@@ -189,7 +189,7 @@ class DataContext(object):
             base_path,
             relative_path,
             expectation_suite_name
-            )
+        )
 
     def _save_project_config(self):
         with open(os.path.join(self.root_directory, "great_expectations.yml"), "w") as data:
@@ -298,6 +298,17 @@ class DataContext(object):
         return data_asset
 
     def add_datasource(self, name, type_, **kwargs):
+        """Add a new datasource to the data context.
+
+        The type_ parameter must match one of the recognized types for the DataContext
+
+        Args:
+            name (str): the name for the new datasource to add
+            type_ (str): the type of datasource to add
+
+        Returns:
+            datasource (Datasource)
+        """
         datasource_class = self._get_datasource_class(type_)
         datasource = datasource_class(name=name, data_context=self, **kwargs)
         self._datasources[name] = datasource
@@ -329,6 +340,14 @@ class DataContext(object):
                 raise
  
     def get_datasource(self, datasource_name="default"):
+        """Get the named datasource
+
+        Args:
+            datasource_name (str): the name of the datasource from the configuration
+
+        Returns:
+            datasource (Datasource)
+        """
         if datasource_name in self._datasources:
             return self._datasources[datasource_name]
         elif datasource_name in self._project_config["datasources"]:
@@ -337,7 +356,9 @@ class DataContext(object):
         #     datasource_name = list(self._project_config["datasources"])[0]
         #     datasource_config = copy.deepcopy(self._project_config["datasources"][datasource_name])
         else:
-            raise ValueError("Unable to load datasource %s -- no configuration found or invalid configuration." % datasource_name)
+            raise ValueError(
+                "Unable to load datasource %s -- no configuration found or invalid configuration." % datasource_name
+            )
         type_ = datasource_config.pop("type")
         datasource_class= self._get_datasource_class(type_)
         datasource = datasource_class(name=datasource_name, data_context=self, **datasource_config)
@@ -447,6 +468,11 @@ class DataContext(object):
         return expectation_suites_dict
 
     def list_datasources(self):
+        """List currently-configured datasources on this context.
+
+        Returns:
+            List(dict): each dictionary includes "name" and "type" keys
+        """
         return [{"name": key, "type": value["type"]} for key, value in self._project_config["datasources"].items()]
 
     def _normalize_data_asset_name(self, data_asset_name):
@@ -495,8 +521,8 @@ class DataContext(object):
             raise DataContextError(
                 "Invalid data_asset_name '{data_asset_name}': found too many components using delimiter '{delimiter}'"
                 .format(
-                data_asset_name=data_asset_name,
-                delimiter=self.data_asset_name_delimiter
+                        data_asset_name=data_asset_name,
+                        delimiter=self.data_asset_name_delimiter
                 )
             )
         
@@ -510,7 +536,7 @@ class DataContext(object):
                     provider_names.append(
                         normalized_identifier
                     )
-                    
+
             # NOTE: Current behavior choice is to continue searching to see whether the namespace is ambiguous
             # based on configured generators *even* if there is *only one* namespace with expectation suites
             # in it.
@@ -557,7 +583,7 @@ class DataContext(object):
                     generator,
                     generator_asset
                 )
-        
+
             if len(available_names.keys()) == 0:
                 raise DataContextError(
                     "No datasource configured: a datasource is required to normalize an incomplete data_asset_name"
@@ -602,7 +628,7 @@ class DataContext(object):
                     generator_assets = available_names[datasource_name][generator]
                     if split_name[0] == datasource_name and split_name[1] in generator_assets:
                         provider_names.append(NormalizedDataAssetName(datasource_name, generator, split_name[1]))
-                        
+
             if len(provider_names) == 1:
                 return provider_names[0]
             
@@ -621,12 +647,12 @@ class DataContext(object):
                     split_name[0],
                     list(available_names[split_name[0]].keys())[0],
                     split_name[1]
-                    )
+                )
 
             if len(available_names.keys()) == 0:
                 raise DataContextError(
                     "No datasource configured: a datasource is required to normalize an incomplete data_asset_name"
-                        )
+                )
 
             raise DataContextError(
                 "No generator available to produce data_asset_name '{data_asset_name}' "
@@ -642,21 +668,21 @@ class DataContext(object):
                 datasource = self.get_datasource(split_name[0])
                 generators = [generator["name"] for generator in datasource.list_generators()]
                 if split_name[1] in generators:
-            return NormalizedDataAssetName(*split_name)
+                    return NormalizedDataAssetName(*split_name)
 
             raise DataContextError(
                 "Invalid data_asset_name: no configured datasource '{datasource_name}' "
                 "with generator '{generator_name}'"
                 .format(datasource_name=split_name[0], generator_name=split_name[1])
             )
-            
+
     def get_expectation_suite(self, data_asset_name, expectation_suite_name="default"):
         """Get or create a named expectation suite for the provided data_asset_name.
 
         Args:
             data_asset_name (str or NormalizedDataAssetName): the data asset name to which the expectation suite belongs
             expectation_suite_name (str): the name for the expectation suite
-        
+
         Returns:
             expectation_suite
         """
