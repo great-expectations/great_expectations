@@ -1268,6 +1268,7 @@ class DataContext(object):
                     data_asset_name=NormalizedDataAssetName(datasource_name, generator_name, name),
                     expectation_suite_name=profiler.__name__
                 )
+                batch.discard_subset_failing_expectations = False
 
                 if not profiler.validate(batch):
                     raise ProfilerError(

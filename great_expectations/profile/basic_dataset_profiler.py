@@ -74,29 +74,21 @@ class BasicDatasetProfiler(DatasetProfiler):
         return cardinality
 
     @classmethod
-    def _get_value_set(cls, df, column):
-        partition_object = {
-            "values": ["GE_DUMMY_VAL"],
-            "weights": [1.0]
-        }
-
-        df.expect_column_kl_divergence_to_be_less_than(column, partition_object=partition_object,
-                                                   threshold=0, result_format='COMPLETE')
-
-    @classmethod
     def _profile(cls, dataset):
 
 
         df = dataset
 
+        df.expect_table_row_count_to_be_between(min_value=0, max_value=None)
+        df.expect_table_columns_to_match_ordered_list(None)
+
         for column in df.get_table_columns():
-            df.expect_column_to_exist(column)
+            # df.expect_column_to_exist(column)
 
             type_ = cls._get_column_type(df, column)
             cardinality= cls._get_column_cardinality(df, column)
-            df.expect_column_values_to_not_be_null(column, mostly=0)
-            df.expect_column_values_to_be_in_set(
-                column, [], result_format="SUMMARY")
+            df.expect_column_values_to_not_be_null(column, mostly=0.5) # The renderer will show a warning for columns that do not meet this expectation
+            df.expect_column_values_to_be_in_set(column, [], result_format="SUMMARY")
 
             if type_ == "int":
                 if cardinality == "unique":
@@ -113,6 +105,7 @@ class BasicDatasetProfiler(DatasetProfiler):
                     df.expect_column_max_to_be_between(column, min_value=0, max_value=0)
                     df.expect_column_mean_to_be_between(column, min_value=0, max_value=0)
                     df.expect_column_median_to_be_between(column, min_value=0, max_value=0)
+                    df.expect_column_stdev_to_be_between(column, min_value=0, max_value=None)
                     df.expect_column_quantile_values_to_be_between(column,
                                                                    quantile_ranges={
                                                                        "quantiles": [0.05, 0.25, 0.5, 0.75, 0.95],
@@ -142,6 +135,8 @@ class BasicDatasetProfiler(DatasetProfiler):
                                                                        "value_ranges": [[None, None], [None, None], [None, None], [None, None], [None, None]]
                                                                    }
                                                                    )
+                    df.expect_column_kl_divergence_to_be_less_than(column, partition_object=None,
+                                                           threshold=None, result_format='COMPLETE')
 
             elif type_ == "string":
                 # Check for leading and tralining whitespace.
