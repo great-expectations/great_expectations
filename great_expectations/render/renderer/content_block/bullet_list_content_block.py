@@ -103,6 +103,7 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
             return [{
                 "template": "$column has a bogus `expect_column_value_lengths_to_be_between` expectation.",
                 "params": params,
+                "styling": styling,
             }]
 
         if "mostly" in params:
@@ -110,37 +111,43 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
                 return [{
                     "template": "$column must be between $min_value and $max_value characters long at least $mostly% of the time.",
                     "params": params,
+                    "styling": styling,
                 }]
 
             elif params["min_value"] is None:
                 return [{
                     "template": "$column must be less than $max_value characters long at least $mostly% of the time.",
                     "params": params,
+                    "styling": styling,
                 }]
 
             elif params["max_value"] is None:
                 return [{
                     "template": "$column must be more than $min_value characters long at least $mostly% of the time.",
-                    "params": params
+                    "params": params,
+                    "styling": styling,
                 }]
 
         else:
             if params["min_value"] is not None and params["max_value"] is not None:
                 return [{
                     "template": "$column must always be between $min_value and $max_value characters long.",
-                    "params": params
+                    "params": params,
+                    "styling": styling,
                 }]
 
             elif params["min_value"] is None:
                 return [{
                     "template": "$column must always be less than $max_value characters long.",
-                    "params": params
+                    "params": params,
+                    "styling": styling,
                 }]
 
             elif params["max_value"] is None:
                 return [{
                     "template": "$column must always be more than $min_value characters long.",
-                    "params": params
+                    "params": params,
+                    "styling": styling,
                 }]
 
     @classmethod
@@ -153,7 +160,8 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
         if (params["min_value"] is None) and (params["max_value"] is None):
             return [{
                 "template": "$column has a bogus `expect_column_unique_value_count_to_be_between` expectation.",
-                "params": params
+                "params": params,
+                "styling": styling,
             }]
 
         elif params["min_value"] is None:
@@ -172,62 +180,68 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
         else:
             return [{
                 "template": "$column must have between $min_value and $max_value unique values.",
-                "params": params
+                "params": params,
+                "styling": styling,
             }]
 
     # NOTE: This method is a pretty good example of good usage of `params`.
-    # NOTE: I think `column_name` should be deprecated.
     @classmethod
-    def expect_column_values_to_be_between(cls, expectation, column_name="", styling=None):
+    def expect_column_values_to_be_between(cls, expectation, styling=None):
         params = substitute_none_for_missing(
             expectation["kwargs"],
             ["column", "min_value", "max_value", "mostly"]
         )
 
         if (params["min_value"] is None) and (params["max_value"] is None):
+            params["expectation_name"] = "expect_column_values_to_be_between"
             return [{
-                "template": column_name + " has a bogus $expectation_name expectation.",
-                "params": {
-                    "expectation_name": "expect_column_values_to_be_between"
-                }
+                "template": "$column has a bogus $expectation_name expectation.",
+                "params": params,
+                "styling": styling,
             }]
 
         if "mostly" in params:
             if params["min_value"] is not None and params["max_value"] is not None:
                 return [{
-                    "template": column_name + " must be between $min_value and $max_value at least $mostly% of the time.",
-                    "params": params
+                    "template": "$column must be between $min_value and $max_value at least $mostly% of the time.",
+                    "params": params,
+                    "styling": styling,
                 }]
 
             elif params["min_value"] is None:
                 return [{
-                    "template": column_name + " must be less than $max_value at least $mostly% of the time.",
-                    "params": params
+                    "template": "$column must be less than $max_value at least $mostly% of the time.",
+                    "params": params,
+                    "styling": styling,
                 }]
 
             elif params["max_value"] is None:
                 return [{
-                    "template": column_name + " must be more than $min_value at least $mostly% of the time.",
-                    "params": params
+                    "template": "$column must be more than $min_value at least $mostly% of the time.",
+                    "params": params,
+                    "styling": styling,
                 }]
 
         else:
             if params["min_value"] is not None and params["max_value"] is not None:
                 return [{
-                    "template": column_name + " must always be between $min_value and $max_value.",
-                    "params": params
+                    "template": "$column must always be between $min_value and $max_value.",
+                    "params": params,
+                    "styling": styling,
                 }]
 
             elif params["min_value"] is None:
                 return [{
-                    "template": column_name + " must always be less than $max_value.",
-                    "params": params
+                    "template": "$column must always be less than $max_value.",
+                    "params": params,
+                    "styling": styling,
                 }]
 
             elif params["max_value"] is None:
                 return [{
-                    "template": column_name + " must always be more than $min_value.",
-                    "params": params
+                    "template": "$column must always be more than $min_value.",
+                    "params": params,
+                    "styling": styling,
                 }]
 
     @classmethod
@@ -241,31 +255,36 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
         if (params["column_A"] is None) or (params["column_B"] is None):
             return [{
                 "template": "$column has a bogus `expect_column_pair_values_A_to_be_greater_than_B` expectation.",
-                "params": params
+                "params": params,
+                "styling": styling,
             }]
 
         if params["mostly"] == None:
             if params["or_equal"] in [None, False]:
                 return [{
                     "template": "Values in $column_A must always be greater than those in $column_B.",
-                    "params": params
+                    "params": params,
+                    "styling": styling,
                 }]
             else:
                 return [{
                     "template": "Values in $column_A must always be greater than or equal to those in $column_B.",
-                    "params": params
+                    "params": params,
+                    "styling": styling,
                 }]
 
         else:
             if params["or_equal"] in [None, False]:
                 return [{
                     "template": "Values in $column_A must be greater than those in $column_B at least $mostly % of the time.",
-                    "params": params
+                    "params": params,
+                    "styling": styling,
                 }]
             else:
                 return [{
                     "template": "Values in $column_A must be greater than or equal to those in $column_B at least $mostly % of the time.",
-                    "params": params
+                    "params": params,
+                    "styling": styling,
                 }]
 
     @classmethod
@@ -284,13 +303,15 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
                 "template": " has a bogus $expectation_name expectation.",
                 "params": {
                     "expectation_name": "expect_column_pair_values_to_be_equal"
-                }
+                },
+                "styling": styling,
             }]
 
         if params["mostly"] == None:
             return [{
                 "template": "Values in $column_A and $column_B must always be equal.",
-                "params": params
+                "params": params,
+                "styling": styling,
             }]
 
         else:
@@ -299,7 +320,8 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
             params["mostly_pct"] = "%.1f" % (params["mostly"]*100,)
             return [{
                 "template": "Values in $column_A and $column_B must be equal at least $mostly_pct % of the time.",
-                "params": params
+                "params": params,
+                "styling": styling,
             }]
 
     @classmethod
@@ -314,7 +336,8 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
         params["column_list_str"] = ", ".join(params["column_list"])
         return [{
             "template": "This table should have these columns in this order: $column_list_str",
-            "params": params
+            "params": params,
+            "styling": styling,
         }]
 
     @classmethod
@@ -329,7 +352,8 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
         params["column_list_str"] = ", ".join(params["column_list"])
         return [{
             "template": "Values must always be unique across columns: $column_list_str",
-            "params": params
+            "params": params,
+            "styling": styling,
         }]
 
     @classmethod
@@ -342,19 +366,22 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
         if params["min_value"] is not None and params["max_value"] is not None:
             return [{
                 "template": "Must have between $min_value and $max_value rows.",
-                "params": params
+                "params": params,
+                "styling": styling,
             }]
 
         elif params["min_value"] is None:
             return [{
                 "template": "Must have less than than $max_value rows.",
-                "params": params
+                "params": params,
+                "styling": styling,
             }]
 
         elif params["max_value"] is None:
             return [{
                 "template": "Must have more than $min_value rows.",
-                "params": params
+                "params": params,
+                "styling": styling,
             }]
 
     @classmethod
