@@ -41,13 +41,14 @@ class DataAsset(object):
         profiler = kwargs.pop("profiler", None)
         expectation_suite = kwargs.pop("expectation_suite", None)
         data_asset_name = kwargs.pop("data_asset_name", None)
+        expectation_suite_name = kwargs.pop("expectation_suite_name", None)
         data_context = kwargs.pop("data_context", None)
         batch_kwargs = kwargs.pop("batch_kwargs", None)
         if "autoinspect_func" in kwargs:
             warnings.warn("Autoinspect_func is no longer supported; use a profiler instead (migration is easy!).")
         super(DataAsset, self).__init__(*args, **kwargs)
         self._interactive_evaluation = interactive_evaluation
-        self._initialize_expectations(expectation_suite=expectation_suite, data_asset_name=data_asset_name)
+        self._initialize_expectations(expectation_suite=expectation_suite, data_asset_name=data_asset_name, expectation_suite_name=expectation_suite_name)
         self._data_context = data_context
         self._batch_kwargs = batch_kwargs
         if profiler is not None:
@@ -224,7 +225,7 @@ class DataAsset(object):
 
         return outer_wrapper
 
-    def _initialize_expectations(self, expectation_suite=None, data_asset_name=None):
+    def _initialize_expectations(self, expectation_suite=None, data_asset_name=None, expectation_suite_name="default"):
         """Instantiates `_expectation_suite` as empty by default or with a specified expectation `config`.
         In addition, this always sets the `default_expectation_args` to:
             `include_config`: False,
@@ -242,18 +243,35 @@ class DataAsset(object):
                 key value `data_asset_name` as `data_asset_name`.
 
             data_asset_name (string): \
-                The name to assign to `_expectation_suite.data_asset_name` if `config` is not provided.
+                The name to assign to `_expectation_suite.data_asset_name`
 
+            expectation_suite_name (string): \
+                The name to assign to the `expectation_suite.expectation_suite_name`
+
+        Returns:
+            None
         """
         if expectation_suite is not None:
             # TODO: validate the incoming expectation_suite with jsonschema here
             self._expectation_suite = DotDict(copy.deepcopy(expectation_suite))
             if data_asset_name is not None:
+                if self._expectation_suite["data_asset_name"] != data_asset_name:
+                    logger.warning(
+                        "Overriding existing data_asset_name {n1} with new name {n2}"
+                        .format(n1=self._expectation_suite["data_asset_name"], n2=data_asset_name)
+                    )
                 self._expectation_suite["data_asset_name"] = data_asset_name
+            if self._expectation_suite["expectation_suite_name"] != expectation_suite_name:
+                logger.warning(
+                    "Overriding existing expectation_suite_name {n1} with new name {n2}"
+                    .format(n1=self._expectation_suite["expectation_suite_name"], n2=expectation_suite_name)
+                )
+            self._expectation_suite["expectation_suite_name"] = expectation_suite_name
 
         else:
             self._expectation_suite = DotDict({
                 "data_asset_name": data_asset_name,
+                "expectation_suite_name": expectation_suite_name,
                 "data_asset_type": self.__class__.__name__,
                 "meta": {
                     "great_expectations.__version__": __version__,
@@ -934,17 +952,8 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                     abbrev_results.append(exp)
             results = abbrev_results
 
-        # TODO: refactor this once we've settled on the correct naming convetion everywhere
-        data_asset_name = None
-        if "data_asset_name" in expectation_suite:
-            data_asset_name = expectation_suite["data_asset_name"]
-        elif "dataset_name" in expectation_suite:
-            data_asset_name = expectation_suite["dataset_name"]
-        elif "meta" in expectation_suite:
-            if "data_asset_name" in expectation_suite["meta"]:
-                data_asset_name = expectation_suite["meta"]["data_asset_name"]
-            elif "dataset_name" in expectation_suite["meta"]:
-                data_asset_name = expectation_suite["meta"]["dataset_name"]
+        data_asset_name = expectation_suite.get("data_asset_name", None)
+        expectation_suite_name = expectation_suite.get("expectation_suite_name", "default")
 
         result = {
             "results": results,
@@ -957,7 +966,8 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             },
             "meta": {
                 "great_expectations.__version__": __version__,
-                "data_asset_name": data_asset_name
+                "data_asset_name": data_asset_name,
+                "expectation_suite_name": expectation_suite_name
             }            
         }
 
@@ -1018,10 +1028,15 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
     def get_data_asset_name(self):
         """Gets the current name of this data_asset as stored in the expectations configuration."""
-        if "data_asset_name" in self._expectation_suite:
-            return self._expectation_suite['data_asset_name']
-        else:
-            return None
+        return self._expectation_suite.get("data_asset_name", None)
+
+    def set_expectation_suite_name(self, expectation_suite_name):
+        """Sets the expectation_suite name of this data_asset as stored in the expectations configuration."""
+        self._expectation_suite["expectation_suite_name"] = expectation_suite_name
+    
+    def get_expectation_suite_name(self):
+        """Gets the current expectation_suite name of this data_asset as stored in the expectations configuration."""
+        return self._expectation_suite.get("expectation_suite_name", None)
 
     def _build_evaluation_parameters(self, expectation_args, evaluation_parameters):
         """Build a dictionary of parameters to evaluate, using the provided evaluation_paramters,
