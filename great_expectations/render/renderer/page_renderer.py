@@ -3,7 +3,7 @@ from .column_section_renderer import DescriptiveColumnSectionRenderer, Prescript
 
 
 class PrescriptivePageRenderer(Renderer):
-    
+
     @classmethod
     def render(cls, expectations):
         # Group expectations by column
@@ -29,7 +29,7 @@ class PrescriptivePageRenderer(Renderer):
 
 
 class DescriptivePageRenderer(Renderer):
-    
+
     @classmethod
     def render(cls, validation_results):
         # Group EVRs by column
@@ -39,13 +39,17 @@ class DescriptivePageRenderer(Renderer):
                 column = evr["expectation_config"]["kwargs"]["column"]
             else:
                 column = "_nocolumn"
-        
+
             if column not in columns:
                 columns[column] = []
             columns[column].append(evr)
-    
+
         # TODO: in general, there should be a mechanism for imposing order here.
         ordered_columns = list(columns.keys())
+
+        # FIXME: This is a hack to limit output on one training file
+        # if "Reporting Area" in ordered_columns:
+        #     ordered_columns = ["Reporting Area"]
 
         return {
             "renderer_type": "DescriptivePageRenderer",

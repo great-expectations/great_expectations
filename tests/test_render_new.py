@@ -101,8 +101,8 @@ def test_render_profiled_fixture_expectations():
     assert rendered_page != None
 
     # print(rendered_page)
-    # with open('./test.html', 'w') as f:
-    #     f.write(rendered_page)
+    with open('./test.html', 'w') as f:
+        f.write(rendered_page)
 
 
 def test_render_profiled_fixture_evrs():
@@ -113,7 +113,7 @@ def test_render_profiled_fixture_evrs():
 
     rendered_json = DescriptivePageRenderer.render(evrs)
 
-    # print(json.dumps(rendered_json, indent=2))
+    print(json.dumps(rendered_json, indent=2))
     # with open('./test.json', 'w') as f:
     #     f.write(json.dumps(rendered_json, indent=2))
 
@@ -121,10 +121,10 @@ def test_render_profiled_fixture_evrs():
     assert rendered_page != None
 
     # print(rendered_page)
-    with open('./test.html', 'w') as f:
-        f.write(rendered_page)
+    # with open('./test.html', 'w') as f:
+    #     f.write(rendered_page)
 
-    assert False
+    # assert False
 
 
 def test_render_template():
