@@ -1,5 +1,11 @@
 from .renderer import Renderer
-from .column_section_renderer import DescriptiveColumnSectionRenderer, PrescriptiveColumnSectionRenderer
+from .column_section_renderer import (
+    DescriptiveColumnSectionRenderer,
+    PrescriptiveColumnSectionRenderer,
+)
+from .other_section_renderer import (
+    DescriptiveOverviewSectionRenderer,
+)
 
 
 class PrescriptivePageRenderer(Renderer):
@@ -53,7 +59,8 @@ class DescriptivePageRenderer(Renderer):
 
         return {
             "renderer_type": "DescriptivePageRenderer",
-            "sections": [
-                DescriptiveColumnSectionRenderer.render(columns[column]) for column in ordered_columns
-            ]
+            "sections":
+                [DescriptiveOverviewSectionRenderer.render(validation_results)] +
+                [DescriptiveColumnSectionRenderer.render(
+                    columns[column]) for column in ordered_columns]
         }
