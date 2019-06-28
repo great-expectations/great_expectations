@@ -288,7 +288,7 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
                 }]
 
     @classmethod
-    def expect_column_pair_values_to_be_equal(cls, expectation):
+    def expect_column_pair_values_to_be_equal(cls, expectation, styling=None):
         params = substitute_none_for_missing(
             expectation["kwargs"],
             ["column_A", "column_B",
@@ -325,7 +325,7 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
             }]
 
     @classmethod
-    def expect_table_columns_to_match_ordered_list(cls, expectation):
+    def expect_table_columns_to_match_ordered_list(cls, expectation, styling=None):
         params = substitute_none_for_missing(
             expectation["kwargs"],
             ["column_list"]
@@ -341,7 +341,7 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
         }]
 
     @classmethod
-    def expect_multicolumn_values_to_be_unique(cls, expectation):
+    def expect_multicolumn_values_to_be_unique(cls, expectation, styling=None):
         params = substitute_none_for_missing(
             expectation["kwargs"],
             ["column_list", "ignore_row_if"]
@@ -357,7 +357,7 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
         }]
 
     @classmethod
-    def expect_table_row_count_to_be_between(cls, expectation):
+    def expect_table_row_count_to_be_between(cls, expectation, styling=None):
         params = substitute_none_for_missing(
             expectation["kwargs"],
             ["min_value", "max_value"]
@@ -385,7 +385,7 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
             }]
 
     @classmethod
-    def expect_table_row_count_to_equal(cls, expectation):
+    def expect_table_row_count_to_equal(cls, expectation, styling=None):
         params = substitute_none_for_missing(
             expectation["kwargs"],
             ["value"]
