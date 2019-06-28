@@ -655,12 +655,12 @@ class DataContext(object):
         
         elif len(split_name) == 1:
             # In this case, the name *must* refer to a unique data_asset_name
-            provider_names = []
+            provider_names = set()
             generator_asset = split_name[0]
             for normalized_identifier in existing_namespaces:
                 curr_generator_asset = normalized_identifier[2]
                 if generator_asset == curr_generator_asset:
-                    provider_names.append(
+                    provider_names.add(
                         normalized_identifier
                     )
 
@@ -686,12 +686,12 @@ class DataContext(object):
                 for generator in available_names[datasource].keys():
                     names_set = available_names[datasource][generator]
                     if generator_asset in names_set:
-                        provider_names.append(
+                        provider_names.add(
                             NormalizedDataAssetName(datasource, generator, generator_asset)
                         )
             
             if len(provider_names) == 1:
-                return provider_names[0]
+                return provider_names.pop()
 
             elif len(provider_names) > 1:
                 raise DataContextError(
@@ -725,12 +725,12 @@ class DataContext(object):
             # In this case, the name must be a datasource_name/generator_asset
 
             # If the data_asset_name is already defined by a config in that datasource, return that normalized name.
-            provider_names = []
+            provider_names = set()
             for normalized_identifier in existing_namespaces:
                 curr_datasource_name = normalized_identifier[0]
                 curr_generator_asset = normalized_identifier[2]
                 if curr_datasource_name == split_name[0] and curr_generator_asset == split_name[1]:
-                    provider_names.append(normalized_identifier)
+                    provider_names.add(normalized_identifier)
 
             # NOTE: Current behavior choice is to continue searching to see whether the namespace is ambiguous
             # based on configured generators *even* if there is *only one* namespace with expectation suites
@@ -754,10 +754,10 @@ class DataContext(object):
                 for generator in available_names[datasource_name].keys():
                     generator_assets = available_names[datasource_name][generator]
                     if split_name[0] == datasource_name and split_name[1] in generator_assets:
-                        provider_names.append(NormalizedDataAssetName(datasource_name, generator, split_name[1]))
+                        provider_names.add(NormalizedDataAssetName(datasource_name, generator, split_name[1]))
 
             if len(provider_names) == 1:
-                return provider_names[0]
+                return provider_names.pop()
             
             elif len(provider_names) > 1:
                 raise DataContextError(
