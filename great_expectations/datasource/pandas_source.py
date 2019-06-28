@@ -6,7 +6,7 @@ import pandas as pd
 
 from .datasource import Datasource, ReaderMethods
 from .filesystem_path_generator import SubdirReaderGenerator, GlobReaderGenerator
-from .batch_generator import EmptyGenerator
+from .batch_generator import InMemoryGenerator
 from great_expectations.dataset.pandas_dataset import PandasDataset
 
 from great_expectations.exceptions import BatchKwargsError
@@ -42,11 +42,11 @@ class PandasDatasource(Datasource):
         elif type_ == "glob_reader":
             return GlobReaderGenerator
         elif type_ == "memory":
-            return EmptyGenerator
+            return InMemoryGenerator
         else:
             raise ValueError("Unrecognized BatchGenerator type %s" % type_)
 
-    def _get_data_asset(self, data_asset_name, batch_kwargs, expectation_suite, **kwargs):
+    def _get_data_asset(self, batch_kwargs, expectation_suite, **kwargs):
         batch_kwargs.update(kwargs)
         if "path" in batch_kwargs:
             reader_options = batch_kwargs.copy()
@@ -85,7 +85,6 @@ class PandasDatasource(Datasource):
         return PandasDataset(df,
                              expectation_suite=expectation_suite,
                              data_context=self._data_context,
-                             data_asset_name=data_asset_name,
                              batch_kwargs=batch_kwargs)
 
     def build_batch_kwargs(self, *args, **kwargs):
