@@ -59,6 +59,17 @@
       "out":{
         "success": false
       }
-    }]
+    },{
+      "title": "Null list provides vacuously true expectation",
+      "exact_match_out": false,
+      "in":{
+        "column_list": null
+      },
+      "out":{
+        "success": true,
+        "observed_value": ["c1", "c2", "c3"]
+      }
+    }
+  ]
   }]
 }
