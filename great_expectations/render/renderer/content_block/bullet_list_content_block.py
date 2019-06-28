@@ -32,8 +32,19 @@ def substitute_none_for_missing(kwargs, kwarg_list):
 class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
     _content_block_type = "bullet_list"
 
+    _default_element_styling = {
+        "default": {
+            "classes": ["badge", "badge-secondary"]
+        },
+        "params": {
+            "column": {
+                "classes": ["badge", "badge-primary"]
+            }
+        }
+    }
+
     @classmethod
-    def missing_content_block_fn(cls, expectation, **kwargs):
+    def _missing_content_block_fn(cls, expectation, **kwargs):
         return [{
             "template": "Couldn't render expectation of type $expectation_type",
             "params": {
@@ -58,12 +69,19 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
             },
         }]
 
-    @classmethod
-    def _get_styling(cls):
-        return {
-            # "styles": {},
-            "classes": ["col-12"],
-        }
+    # @classmethod
+    # def _get_content_block_styling(cls):
+    #     return {
+    #         # "styles": {},
+    #         "classes": ["col-12"],
+    #     }
+
+    # @classmethod
+    # def _get_element_styling(cls):
+    #     return {
+    #         # "styles": {},
+    #         "classes": ["col-12"],
+    #     }
 
     @classmethod
     def expect_column_to_exist(cls, expectation, styling=None):
@@ -80,16 +98,17 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
             return [{
                 "template": "$column is a required field "+str(datetime.datetime.now()),
                 "params": params,
-                "styling": {
-                    # "classes"
-                    "tooltip": "blah",
-                    "params": {
-                        "column": {
-                            "classes": "my_css_value_class",
-                            "tooltip_text": "testing",
-                        }
-                    }
-                }
+                "styling": styling
+                # {
+                #     # "classes"
+                #     "tooltip": "blah",
+                #     "params": {
+                #         "column": {
+                #             "classes": "my_css_value_class",
+                #             "tooltip_text": "testing",
+                #         }
+                #     }
+                # }
             }]
 
         else:
@@ -98,24 +117,25 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
             return [{
                 "template": "$column must be the $column_indexth field",
                 "params": params,
-                "styling": {
-                    # "classes"
-                    "tooltip": "blah",
-                    "params": {
-                        "column": {
-                            "classes": ["class_A"],
-                            "tooltip_text": "testing",
-                        },
-                        "column_index": {
-                            "classes": ["class_B"],
-                            "tooltip_text": "testing msg B",
-                        }
-                    }
-                }
+                "styling": styling,
+                # "styling": {
+                #     # "classes"
+                #     "tooltip": "blah",
+                #     "params": {
+                #         "column": {
+                #             "classes": ["class_A"],
+                #             "tooltip_text": "testing",
+                #         },
+                #         "column_index": {
+                #             "classes": ["class_B"],
+                #             "tooltip_text": "testing msg B",
+                #         }
+                #     }
+                # }
             }]
 
     @classmethod
-    def expect_column_value_lengths_to_be_between(cls, expectation):
+    def expect_column_value_lengths_to_be_between(cls, expectation, styling=None):
         params = substitute_none_for_missing(
             expectation["kwargs"],
             ["column", "min_value", "max_value", "mostly"],
@@ -166,7 +186,7 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
                 }]
 
     @classmethod
-    def expect_column_unique_value_count_to_be_between(cls, expectation):
+    def expect_column_unique_value_count_to_be_between(cls, expectation, styling=None):
         params = substitute_none_for_missing(
             expectation["kwargs"],
             ["column", "min_value", "max_value", "mostly"],
@@ -181,13 +201,15 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
         elif params["min_value"] is None:
             return [{
                 "template": "$column must have fewer than $max_value unique values.",
-                "params": params
+                "params": params,
+                "styling": styling,
             }]
 
         elif params["max_value"] is None:
             return [{
                 "template": "$column must have at least $min_value unique values.",
-                "params": params
+                "params": params,
+                "styling": styling,
             }]
         else:
             return [{
@@ -198,7 +220,7 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
     # NOTE: This method is a pretty good example of good usage of `params`.
     # NOTE: I think `column_name` should be deprecated.
     @classmethod
-    def expect_column_values_to_be_between(cls, expectation, column_name=""):
+    def expect_column_values_to_be_between(cls, expectation, column_name="", styling=None):
         params = substitute_none_for_missing(
             expectation["kwargs"],
             ["column", "min_value", "max_value", "mostly"]
@@ -270,7 +292,7 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
                 }]
 
     @classmethod
-    def expect_column_pair_values_A_to_be_greater_than_B(cls, expectation):
+    def expect_column_pair_values_A_to_be_greater_than_B(cls, expectation, styling=None):
         params = substitute_none_for_missing(
             expectation["kwargs"],
             ["column_A", "column_B", "parse_strings_as_datetimes",
