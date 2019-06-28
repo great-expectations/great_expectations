@@ -101,8 +101,8 @@ def test_render_profiled_fixture_expectations():
     assert rendered_page != None
 
     # print(rendered_page)
-    # with open('./test.html', 'w') as f:
-    #     f.write(rendered_page)
+    with open('./test_render_profiled_fixture_expectations.html', 'w') as f:
+        f.write(rendered_page)
 
 
 def test_render_profiled_fixture_evrs():
@@ -121,7 +121,7 @@ def test_render_profiled_fixture_evrs():
     assert rendered_page != None
 
     # print(rendered_page)
-    with open('./test.html', 'w') as f:
+    with open('./test_render_profiled_fixture_evrs.html', 'w') as f:
         f.write(rendered_page)
 
     # assert False

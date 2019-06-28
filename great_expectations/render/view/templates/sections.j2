@@ -1,43 +1,45 @@
 {# {% if not nowrap %}{% extends "widget.j2" %}{% endif %} #}
 {% block sections %}
     {% for section in sections %}
-    <div id="section-{{loop.index}}" class="ge-section container-fluid" style="clear:both; margin-bottom: 50px;">
-        {% set section_loop = loop %}
-        {% for content_block in section["content_blocks"] %}
-            {% set content_block_loop = loop %}
-            {% if content_block["content_block_type"] == "header" %}
-                {% include 'header.j2' %}
-            {% elif content_block["content_block_type"] == "text" %}
-                <div class="col-12">
-                    <p>
-                        {{content_block["content"][0]}}
-                    </p>
-                </div>
-            {% elif content_block["content_block_type"] == "value_list" %}
-                {% include 'value_list.j2' %}
+    <div id="section-{{loop.index}}" class="container-fluid" style="clear:both; margin-bottom: 50px;">
+        <div class="row">
+            {% set section_loop = loop %}
+            {% for content_block in section["content_blocks"] %}
+                {% set content_block_loop = loop %}
+                {% if content_block["content_block_type"] == "header" %}
+                    {% include 'header.j2' %}
+                {% elif content_block["content_block_type"] == "text" %}
+                    <div class="col-12">
+                        <p>
+                            {{content_block["content"][0]}}
+                        </p>
+                    </div>
+                {% elif content_block["content_block_type"] == "value_list" %}
+                    {% include 'value_list.j2' %}
 
-            {% elif content_block["content_block_type"] == "bullet_list" %}
-                <div {{ content_block | render_styling }}>
-                    <ul>
-                        {% for bullet_point in content_block["bullet_list"] %}
-                            <li {{ bullet_point | render_styling }}>{{ bullet_point | render_string_template }}</li>
-                        {% endfor %}
-                    </ul>
-                </div>
+                {% elif content_block["content_block_type"] == "bullet_list" %}
+                    <div {{ content_block | render_styling }}>
+                        <ul>
+                            {% for bullet_point in content_block["bullet_list"] %}
+                                <li {{ bullet_point | render_styling }}>{{ bullet_point | render_string_template }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
 
-            {% elif content_block["content_block_type"] == "graph" %}
-                <div id="vis-{{section_loop.index}}-{{content_block_loop.index}}" style="width:45%"></div>
-                <script>
-                    // Assign the specification to a local variable vlSpec.
-                    const vlSpec = {{content_block["graph"]}};
-                    // Embed the visualization in the container with id `vis`
-                    vegaEmbed('#vis-{{section_loop.index}}-{{loop.index}}', vlSpec, {actions: false}).then(result=>console.log(result)).catch(console.warn);
-                </script>
-            {% elif content_block["content_block_type"] == "table" %}
-                {% include 'table.j2' %}
-            {% elif content_block["content_block_type"] == "example_list" %}
-            {% endif %}
-        {% endfor %}
+                {% elif content_block["content_block_type"] == "graph" %}
+                    <div id="vis-{{section_loop.index}}-{{content_block_loop.index}}" style="width:45%"></div>
+                    <script>
+                        // Assign the specification to a local variable vlSpec.
+                        const vlSpec = {{content_block["graph"]}};
+                        // Embed the visualization in the container with id `vis`
+                        vegaEmbed('#vis-{{section_loop.index}}-{{loop.index}}', vlSpec, {actions: false}).then(result=>console.log(result)).catch(console.warn);
+                    </script>
+                {% elif content_block["content_block_type"] == "table" %}
+                    {% include 'table.j2' %}
+                {% elif content_block["content_block_type"] == "example_list" %}
+                {% endif %}
+            {% endfor %}
+        </div>
     </div>
     {% endfor %}
 {% endblock %} 
