@@ -52,7 +52,7 @@ class SparkDFDatasource(Datasource):
         else:
             raise ValueError("Unrecognized BatchGenerator type %s" % type_)
 
-    def _get_data_asset(self, data_asset_name, batch_kwargs, expectation_suite, caching=False, **kwargs):
+    def _get_data_asset(self, batch_kwargs, expectation_suite, caching=True, **kwargs):
         """class-private implementation of get_data_asset"""
         if self.spark is None:
             logger.error("No spark session available")
@@ -92,6 +92,5 @@ class SparkDFDatasource(Datasource):
         return SparkDFDataset(df,
                               expectation_suite=expectation_suite,
                               data_context=self._data_context,
-                              data_asset_name=data_asset_name,
                               batch_kwargs=batch_kwargs,
                               caching=caching)
