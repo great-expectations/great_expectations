@@ -12,8 +12,7 @@ logger = logging.getLogger(__name__)
 NormalizedDataAssetName = namedtuple("NormalizedDataAssetName", [
     "datasource",
     "generator",
-    "generator_asset",
-    "suite"
+    "generator_asset"
 ])
 
 
