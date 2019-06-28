@@ -79,21 +79,30 @@ def test_list_available_data_asset_names(empty_data_context, filesystem_csv):
     }
 
 def test_list_expectation_suites(data_context):
-    assert data_context.list_expectation_suites() == ['mydatasource/mygenerator/parameterized_expectation_suite_fixture/default']
+    assert data_context.list_expectation_suites() == {
+        "mydatasource" : {
+            "mygenerator": {
+                "parameterized_expectation_suite_fixture": ["default"]
+            }
+        }
+    }
 
 def test_get_existing_data_asset_config(data_context):
-    data_asset_config = data_context.get_expectation_suite('mydatasource/mygenerator/parameterized_expectation_suite_fixture/default')
-    assert data_asset_config['data_asset_name'] == 'mydatasource/mygenerator/parameterized_expectation_suite_fixture/default'
+    data_asset_config = data_context.get_expectation_suite('mydatasource/mygenerator/parameterized_expectation_suite_fixture', 'default')
+    assert data_asset_config['data_asset_name'] == 'mydatasource/mygenerator/parameterized_expectation_suite_fixture'
+    assert data_asset_config['expectation_suite_name'] == 'default'
     assert len(data_asset_config['expectations']) == 2
 
 def test_get_new_data_asset_config(data_context):
     data_asset_config = data_context.get_expectation_suite('this_data_asset_config_does_not_exist')
-    assert data_asset_config['data_asset_name'] == 'mydatasource/mygenerator/this_data_asset_config_does_not_exist/default'
+    assert data_asset_config['data_asset_name'] == 'mydatasource/mygenerator/this_data_asset_config_does_not_exist'
+    assert data_asset_config['expectation_suite_name'] == 'default'
     assert len(data_asset_config['expectations']) == 0
 
 def test_save_data_asset_config(data_context):
     data_asset_config = data_context.get_expectation_suite('this_data_asset_config_does_not_exist')
-    assert data_asset_config['data_asset_name'] == 'mydatasource/mygenerator/this_data_asset_config_does_not_exist/default'
+    assert data_asset_config['data_asset_name'] == 'mydatasource/mygenerator/this_data_asset_config_does_not_exist'
+    assert data_asset_config["expectation_suite_name"] == "default"
     assert len(data_asset_config['expectations']) == 0
     data_asset_config['expectations'].append({
             "expectation_type": "expect_table_row_count_to_equal",
@@ -108,7 +117,10 @@ def test_save_data_asset_config(data_context):
 def test_register_validation_results(data_context):
     run_id = "460d61be-7266-11e9-8848-1681be663d3e"
     source_patient_data_results = {
-        "meta": {"data_asset_name": "source_patient_data"},
+        "meta": {
+            "data_asset_name": "source_patient_data",
+            "expectation_suite_name": "default"
+        },
         "results": [
             {
                 "expectation_config": {
@@ -138,7 +150,10 @@ def test_register_validation_results(data_context):
         'urn:great_expectations:validations:source_patient_data:expectations:expect_table_row_count_to_equal:result:observed_value': 1024
     }
     source_diabetes_data_results = {
-        "meta": {"data_asset_name": "source_diabetes_data"},
+        "meta": {
+            "data_asset_name": "source_diabetes_data",
+            "expectation_suite_name": "default"
+        },
         "results": [
             {
                 "expectation_config": {
@@ -204,14 +219,18 @@ def test_normalize_data_asset_names_error(data_context):
         data_context._normalize_data_asset_name("this/should/never/work/because/it/is/so/long")
         assert "found too many components using delimiter '/'" in exc.message
 
-def test_normalize_data_asset_names_delimiters(data_context):
+def test_normalize_data_asset_names_delimiters(empty_data_context, filesystem_csv):
+    empty_data_context.add_datasource(
+        "my_datasource", "pandas", base_directory=str(filesystem_csv))
+    data_context = empty_data_context
+
     data_context.data_asset_name_delimiter = '.'
-    assert data_context._normalize_data_asset_name("this.should.be.okay") == \
-        NormalizedDataAssetName("this", "should", "be", "okay")
+    assert data_context._normalize_data_asset_name("my_datasource.default.f1") == \
+        NormalizedDataAssetName("my_datasource", "default", "f1")
 
     data_context.data_asset_name_delimiter = '/'
-    assert data_context._normalize_data_asset_name("this/should/be/okay") == \
-        NormalizedDataAssetName("this", "should", "be", "okay")
+    assert data_context._normalize_data_asset_name("my_datasource/default/f1") == \
+        NormalizedDataAssetName("my_datasource", "default", "f1")
 
     with pytest.raises(DataContextError) as exc:
         data_context.data_asset_name_delimiter = "$"
@@ -221,7 +240,7 @@ def test_normalize_data_asset_names_delimiters(data_context):
         data_context.data_asset_name_delimiter = "//"
         assert "Invalid delimiter" in exc.message
 
-def test_normalize_data_asset_names_conditions_single_name(empty_data_context, filesystem_csv, tmp_path_factory):
+def test_normalize_data_asset_names_conditions(empty_data_context, filesystem_csv, tmp_path_factory):
     # If no datasource is configured, nothing should be allowed to normalize:
     with pytest.raises(DataContextError) as exc:    
         empty_data_context._normalize_data_asset_name("f1")
@@ -376,5 +395,5 @@ def test_data_context_result_store(titanic_data_context):
     profiling_results = titanic_data_context.profile_datasource("mydatasource")
     for profiling_result in profiling_results:
         data_asset_name = profiling_result[1]['meta']['data_asset_name']
-        validation_result = titanic_data_context.get_validation_result(data_asset_name)
+        validation_result = titanic_data_context.get_validation_result(data_asset_name, "BasicDatasetProfiler")
         assert data_asset_name in validation_result["meta"]["data_asset_name"]

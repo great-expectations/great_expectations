@@ -235,24 +235,24 @@ def test_invalid_reader_sparkdf_datasource(tmp_path_factory):
         newfile.write("a,b\n1,2\n3,4\n")
 
     with pytest.raises(BatchKwargsError) as exc:
-        datasource.get_batch("idonotlooklikeacsvbutiam.notrecognized", {
+        datasource.get_batch("idonotlooklikeacsvbutiam.notrecognized", expectation_suite_name="default", batch_kwargs={
             "path": os.path.join(basepath, "idonotlooklikeacsvbutiam.notrecognized")
         })
         assert "Unable to determine reader for path" in exc.message
 
     with pytest.raises(BatchKwargsError) as exc:
-        datasource.get_batch("idonotlooklikeacsvbutiam.notrecognized", {
+        datasource.get_batch("idonotlooklikeacsvbutiam.notrecognized", expectation_suite_name="default", batch_kwargs={
             "path": os.path.join(basepath, "idonotlooklikeacsvbutiam.notrecognized")
         }, reader_method="blarg")
         assert "Unknown reader method: blarg" in exc.message
 
     with pytest.raises(BatchKwargsError) as exc:
-        datasource.get_batch("idonotlooklikeacsvbutiam.notrecognized", {
+        datasource.get_batch("idonotlooklikeacsvbutiam.notrecognized", expectation_suite_name="default", batch_kwargs={
             "path": os.path.join(basepath, "idonotlooklikeacsvbutiam.notrecognized")
         }, reader_method="excel")
         assert "Unsupported reader: excel" in exc.message
 
-    dataset = datasource.get_batch("idonotlooklikeacsvbutiam.notrecognized", {
+    dataset = datasource.get_batch("idonotlooklikeacsvbutiam.notrecognized", expectation_suite_name="default", batch_kwargs={
             "path": os.path.join(basepath, "idonotlooklikeacsvbutiam.notrecognized")
         },
         reader_method="csv", header=True)
@@ -266,18 +266,18 @@ def test_invalid_reader_pandas_datasource(tmp_path_factory):
         newfile.write("a,b\n1,2\n3,4\n")
 
     with pytest.raises(BatchKwargsError) as exc:
-        datasource.get_batch("idonotlooklikeacsvbutiam.notrecognized", {
+        datasource.get_batch("idonotlooklikeacsvbutiam.notrecognized", expectation_suite_name="default", batch_kwargs={
             "path": os.path.join(basepath, "idonotlooklikeacsvbutiam.notrecognized")
         })
         assert "Unable to determine reader for path" in exc.message
 
     with pytest.raises(BatchKwargsError) as exc:
-        datasource.get_batch("idonotlooklikeacsvbutiam.notrecognized", {
+        datasource.get_batch("idonotlooklikeacsvbutiam.notrecognized", expectation_suite_name="default", batch_kwargs={
             "path": os.path.join(basepath, "idonotlooklikeacsvbutiam.notrecognized")
         }, reader_method="blarg")
         assert "Unknown reader method: blarg" in exc.message
 
-    dataset = datasource.get_batch("idonotlooklikeacsvbutiam.notrecognized", {
+    dataset = datasource.get_batch("idonotlooklikeacsvbutiam.notrecognized", expectation_suite_name="default", batch_kwargs={
             "path": os.path.join(basepath, "idonotlooklikeacsvbutiam.notrecognized")
         }, reader_method="csv", header=0)
     assert dataset["a"][0] == 1
