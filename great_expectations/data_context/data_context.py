@@ -22,9 +22,9 @@ try:
 except ImportError:
     from urlparse import urlparse
 
+from great_expectations.data_asset.util import get_empty_expectation_suite
 from great_expectations.dataset import Dataset, PandasDataset
 from great_expectations.datasource import (
-    Datasource,
     PandasDatasource,
     SqlAlchemyDatasource,
     SparkDFDatasource,
@@ -819,7 +819,10 @@ class DataContext(object):
             read_config["data_asset_name"] = self.data_asset_name_delimiter.join(data_asset_name)
             return read_config
         else:
-            return Datasource.get_empty_expectation_suite(self.data_asset_name_delimiter.join(data_asset_name), expectation_suite_name)
+            return get_empty_expectation_suite(
+                self.data_asset_name_delimiter.join(data_asset_name),
+                expectation_suite_name
+            )
 
     def save_expectation_suite(self, expectation_suite, data_asset_name=None, expectation_suite_name=None):
         """Save the provided expectation suite into the DataContext.

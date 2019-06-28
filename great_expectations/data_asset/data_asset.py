@@ -16,7 +16,12 @@ from collections import (
 )
 
 from great_expectations.version import __version__
-from great_expectations.data_asset.util import DotDict, recursively_convert_to_json_serializable, parse_result_format
+from great_expectations.data_asset.util import (
+    DotDict,
+    recursively_convert_to_json_serializable,
+    parse_result_format,
+    get_empty_expectation_suite
+)
 
 logger = logging.getLogger("DataAsset")
 
@@ -48,7 +53,11 @@ class DataAsset(object):
             warnings.warn("Autoinspect_func is no longer supported; use a profiler instead (migration is easy!).")
         super(DataAsset, self).__init__(*args, **kwargs)
         self._interactive_evaluation = interactive_evaluation
-        self._initialize_expectations(expectation_suite=expectation_suite, data_asset_name=data_asset_name, expectation_suite_name=expectation_suite_name)
+        self._initialize_expectations(
+            expectation_suite=expectation_suite,
+            data_asset_name=data_asset_name,
+            expectation_suite_name=expectation_suite_name
+        )
         self._data_context = data_context
         self._batch_kwargs = batch_kwargs
         if profiler is not None:
@@ -254,6 +263,7 @@ class DataAsset(object):
         if expectation_suite is not None:
             # TODO: validate the incoming expectation_suite with jsonschema here
             self._expectation_suite = DotDict(copy.deepcopy(expectation_suite))
+
             if data_asset_name is not None:
                 if self._expectation_suite["data_asset_name"] != data_asset_name:
                     logger.warning(
@@ -261,23 +271,17 @@ class DataAsset(object):
                         .format(n1=self._expectation_suite["data_asset_name"], n2=data_asset_name)
                     )
                 self._expectation_suite["data_asset_name"] = data_asset_name
-            if self._expectation_suite["expectation_suite_name"] != expectation_suite_name:
-                logger.warning(
-                    "Overriding existing expectation_suite_name {n1} with new name {n2}"
-                    .format(n1=self._expectation_suite["expectation_suite_name"], n2=expectation_suite_name)
-                )
-            self._expectation_suite["expectation_suite_name"] = expectation_suite_name
+
+            if expectation_suite_name is not None:
+                if self._expectation_suite["expectation_suite_name"] != expectation_suite_name:
+                    logger.warning(
+                        "Overriding existing expectation_suite_name {n1} with new name {n2}"
+                        .format(n1=self._expectation_suite["expectation_suite_name"], n2=expectation_suite_name)
+                    )
+                self._expectation_suite["expectation_suite_name"] = expectation_suite_name
 
         else:
-            self._expectation_suite = DotDict({
-                "data_asset_name": data_asset_name,
-                "expectation_suite_name": expectation_suite_name,
-                "data_asset_type": self.__class__.__name__,
-                "meta": {
-                    "great_expectations.__version__": __version__,
-                },
-                "expectations": []
-            })
+            self._expectation_suite = get_empty_expectation_suite(data_asset_name, expectation_suite_name)
 
         self.default_expectation_args = {
             "include_config": False,
