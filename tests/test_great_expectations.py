@@ -263,7 +263,8 @@ class TestValidation(unittest.TestCase):
         })
 
         validation_config_non_existent_expectation = {
-            "dataset_name": None,
+            "data_asset_name": None,
+            "expectation_suite_name": "default",
             "meta": {
                 "great_expectations.__version__": ge.__version__
             },
@@ -288,7 +289,8 @@ class TestValidation(unittest.TestCase):
         })
 
         validation_config_invalid_parameter = {
-            "dataset_name": None,
+            "data_asset_name": None,
+            "expectation_suite_name": "default",
             "meta": {
                 "great_expectations.__version__": ge.__version__
             },

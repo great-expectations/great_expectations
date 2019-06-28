@@ -54,7 +54,6 @@ def test_validate_saves_result_inserts_run_id(empty_data_context, filesystem_csv
     # we should now be able to validate, and have validations saved.
     assert not_so_empty_data_context._project_config["result_store"]["filesystem"]["base_directory"] == "uncommitted/validations/"
 
-    my_batch = not_so_empty_data_context.get_batch("f1")
     my_batch = not_so_empty_data_context.get_batch("my_datasource/f1")
 
     my_batch.expect_column_to_exist("a")
