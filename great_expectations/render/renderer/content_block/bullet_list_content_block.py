@@ -96,65 +96,43 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
         }]
 
     @classmethod
-    def expect_column_value_lengths_to_be_between(cls, expectation, styling=None, **kwargs):
+    def expect_column_value_lengths_to_be_between(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation["kwargs"],
             ["column", "min_value", "max_value", "mostly"],
         )
 
         if (params["min_value"] is None) and (params["max_value"] is None):
-            return [{
-                "template": "$column has a bogus `expect_column_value_lengths_to_be_between` expectation.",
-                "params": params,
-                "styling": styling,
-            }]
+            template_str = "$column has a bogus `expect_column_value_lengths_to_be_between` expectation."
 
         if "mostly" in params:
             if params["min_value"] is not None and params["max_value"] is not None:
-                return [{
-                    "template": "$column must be between $min_value and $max_value characters long at least $mostly% of the time.",
-                    "params": params,
-                    "styling": styling,
-                }]
+                template_str = "$column must be between $min_value and $max_value characters long at least $mostly% of the time."
 
             elif params["min_value"] is None:
-                return [{
-                    "template": "$column must be less than $max_value characters long at least $mostly% of the time.",
-                    "params": params,
-                    "styling": styling,
-                }]
+                template_str = "$column must be less than $max_value characters long at least $mostly% of the time."
 
             elif params["max_value"] is None:
-                return [{
-                    "template": "$column must be more than $min_value characters long at least $mostly% of the time.",
-                    "params": params,
-                    "styling": styling,
-                }]
+                template_str = "$column must be more than $min_value characters long at least $mostly% of the time."
 
         else:
             if params["min_value"] is not None and params["max_value"] is not None:
-                return [{
-                    "template": "$column must always be between $min_value and $max_value characters long.",
-                    "params": params,
-                    "styling": styling,
-                }]
+                template_str = "$column must always be between $min_value and $max_value characters long."
 
             elif params["min_value"] is None:
-                return [{
-                    "template": "$column must always be less than $max_value characters long.",
-                    "params": params,
-                    "styling": styling,
-                }]
+                template_str = "$column must always be less than $max_value characters long."
 
             elif params["max_value"] is None:
-                return [{
-                    "template": "$column must always be more than $min_value characters long.",
-                    "params": params,
-                    "styling": styling,
-                }]
+                template_str = "$column must always be more than $min_value characters long."
+
+        return [{
+            "template": template_str,
+            "params": params,
+            "styling": styling,
+        }]
 
     @classmethod
-    def expect_column_unique_value_count_to_be_between(cls, expectation, styling=None, **kwargs):
+    def expect_column_unique_value_count_to_be_between(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation["kwargs"],
             ["column", "min_value", "max_value", "mostly"],
@@ -189,7 +167,7 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
 
     # NOTE: This method is a pretty good example of good usage of `params`.
     @classmethod
-    def expect_column_values_to_be_between(cls, expectation, styling=None, **kwargs):
+    def expect_column_values_to_be_between(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation["kwargs"],
             ["column", "min_value", "max_value", "mostly"]
@@ -248,7 +226,7 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
                 }]
 
     @classmethod
-    def expect_column_pair_values_A_to_be_greater_than_B(cls, expectation, styling=None, **kwargs):
+    def expect_column_pair_values_A_to_be_greater_than_B(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation["kwargs"],
             ["column_A", "column_B", "parse_strings_as_datetimes",
@@ -291,7 +269,7 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
                 }]
 
     @classmethod
-    def expect_column_pair_values_to_be_equal(cls, expectation, styling=None, **kwargs):
+    def expect_column_pair_values_to_be_equal(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation["kwargs"],
             ["column_A", "column_B",
@@ -328,7 +306,7 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
             }]
 
     @classmethod
-    def expect_table_columns_to_match_ordered_list(cls, expectation, styling=None, **kwargs):
+    def expect_table_columns_to_match_ordered_list(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation["kwargs"],
             ["column_list"]
@@ -344,7 +322,7 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
         }]
 
     @classmethod
-    def expect_multicolumn_values_to_be_unique(cls, expectation, styling=None, **kwargs):
+    def expect_multicolumn_values_to_be_unique(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation["kwargs"],
             ["column_list", "ignore_row_if"]
@@ -360,7 +338,7 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
         }]
 
     @classmethod
-    def expect_table_row_count_to_be_between(cls, expectation, styling=None, **kwargs):
+    def expect_table_row_count_to_be_between(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation["kwargs"],
             ["min_value", "max_value"]
@@ -388,7 +366,7 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
             }]
 
     @classmethod
-    def expect_table_row_count_to_equal(cls, expectation, styling=None, **kwargs):
+    def expect_table_row_count_to_equal(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation["kwargs"],
             ["value"]
@@ -400,7 +378,7 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
         }]
 
     @classmethod
-    def expect_column_distinct_values_to_be_in_set(cls, expectation, styling=None, **kwargs):
+    def expect_column_distinct_values_to_be_in_set(cls, expectation, styling=None, include_column_name=True):
         # TODO: thoroughly review this method. It was implemented quickly and hackily.
         params = substitute_none_for_missing(
             expectation["kwargs"],
