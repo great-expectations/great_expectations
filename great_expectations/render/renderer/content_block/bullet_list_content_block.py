@@ -382,10 +382,50 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
         values_string = " ".join(
             ["$v__"+str(i) for i, v in enumerate(params["value_set"])]
         )
-        print(expectation)
-        print(values_string)
         return [{
             "template": "$column values must belong to this set: "+values_string+".",
+            "params": params,
+            "styling": styling,
+        }]
+
+    @classmethod
+    def expect_column_values_to_not_match_regex(cls, expectation, styling=None):
+        # TODO: thoroughly review this method. It was implemented quickly and hackily.
+        params = substitute_none_for_missing(
+            expectation["kwargs"],
+            ["column", "regex", "mostly"],
+        )
+
+        return [{
+            "template": "$column values must match not this regular expression: $regex.",
+            "params": params,
+            "styling": styling,
+        }]
+
+    @classmethod
+    def expect_column_values_to_not_be_null(cls, expectation, styling=None):
+        # TODO: thoroughly review this method. It was implemented quickly and hackily.
+        params = substitute_none_for_missing(
+            expectation["kwargs"],
+            ["column", "mostly"],
+        )
+
+        return [{
+            "template": "$column values must never be null.",
+            "params": params,
+            "styling": styling,
+        }]
+
+    @classmethod
+    def expect_column_proportion_of_unique_values_to_be_between(cls, expectation, styling=None):
+        # TODO: thoroughly review this method. It was implemented quickly and hackily.
+        params = substitute_none_for_missing(
+            expectation["kwargs"],
+            ["column", "min_value", "max_value"],
+        )
+
+        return [{
+            "template": "The proportion of unique values in $column should be between $min_value and $max_value.",
             "params": params,
             "styling": styling,
         }]
