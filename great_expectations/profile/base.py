@@ -50,7 +50,7 @@ class DatasetProfiler(object):
         return expectation_suite
 
     @classmethod
-    def profile(cls, data_asset):
+    def profile(cls, data_asset, run_id=None):
         if not cls.validate(data_asset):
             logger.error("Invalid data_asset for profiler; aborting")
             return
@@ -59,7 +59,7 @@ class DatasetProfiler(object):
 
         batch_kwargs = data_asset.get_batch_kwargs()
         expectation_suite = cls.add_meta(expectation_suite, batch_kwargs)
-        validation_results = data_asset.validate(expectation_suite, result_format="SUMMARY")
+        validation_results = data_asset.validate(expectation_suite, run_id=run_id, result_format="SUMMARY")
         return expectation_suite, validation_results
 
     @classmethod

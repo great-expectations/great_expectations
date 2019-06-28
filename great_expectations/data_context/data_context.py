@@ -1258,6 +1258,7 @@ class DataContext(object):
 
         total_columns, total_expectations, total_rows, skipped_data_assets = 0, 0, 0, 0
         total_start_time = datetime.datetime.now()
+        run_id = total_start_time.isoformat()
         for name in data_asset_name_list:
             try:
                 start_time = datetime.datetime.now()
@@ -1275,7 +1276,7 @@ class DataContext(object):
   
                 # Note: This logic is specific to DatasetProfilers, which profile a single batch. Multi-batch profilers
                 # will have more to unpack.
-                expectation_suite, validation_result = profiler.profile(batch)
+                expectation_suite, validation_result = profiler.profile(batch, run_id=run_id)
                 profiling_results.append((expectation_suite, validation_result))
 
                 if isinstance(batch, Dataset):
