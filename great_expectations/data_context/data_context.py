@@ -247,16 +247,19 @@ class DataContext(object):
 
         return result
 
-    def get_validation_doc_filepath(self, full_data_asset_name):
+    def get_validation_doc_filepath(self, data_asset_name, expectation_suite_name):
         """Get the local path where a the rendered html doc for a validation result is stored,
          given full asset name"""
-        validation_filepath = os.path.join(self.data_doc_directory,
-                                           full_data_asset_name
-                                           ) + ".html"
+        validation_filepath = self._get_normalized_data_asset_name_filepath(
+            data_asset_name,
+            expectation_suite_name,
+            base_path=self.data_doc_directory,
+            file_extension=".html"
+        )
 
         return validation_filepath
 
-    def move_validation_to_fixtures(self, full_data_asset_name, run_id):
+    def move_validation_to_fixtures(self, data_asset_name, expectation_suite_name, run_id):
         """
         Move validation results from uncommitted to fixtures/validations to make available for the data doc renderer
 
@@ -264,12 +267,14 @@ class DataContext(object):
         :param run_id: run id
         :return: --
         """
-        source_filepath = self.get_validation_location(full_data_asset_name, run_id)['filepath']
+        source_filepath = self.get_validation_location(data_asset_name, expectation_suite_name, run_id)['filepath']
 
-        destination_filepath = os.path.join(
-            self.fixtures_validations_directory,
-            full_data_asset_name,
-        ) + ".json"
+        destination_filepath = self._get_normalized_data_asset_name_filepath(
+            data_asset_name,
+            expectation_suite_name,
+            base_path=self.fixtures_validations_directory,
+            file_extension=".json"
+        )
 
         safe_mmkdir(os.path.dirname(destination_filepath))
         shutil.move(source_filepath, destination_filepath)
@@ -879,9 +884,6 @@ class DataContext(object):
             )
 
         expectation_suite_name = validation_results["meta"].get("expectation_suite_name", "default")
-        print("FOO!!!!")
-        print(expectation_suite_name)
-        print(json.dumps(validation_results, indent=2))
         if "result_store" in self._project_config:
             result_store = self._project_config["result_store"]
             if isinstance(result_store, dict) and "filesystem" in result_store:
@@ -1226,8 +1228,9 @@ class DataContext(object):
                 validation = json.load(infile)
 
             data_asset_name = validation['meta']['data_asset_name']
+            expectation_suite_name = validation['meta']['expectation_suite_name']
             model = DescriptivePageRenderer.render(validation)
-            out_filepath = self.get_validation_doc_filepath(data_asset_name)
+            out_filepath = self.get_validation_doc_filepath(data_asset_name, expectation_suite_name)
             safe_mmkdir(os.path.dirname(out_filepath))
             with open(out_filepath, 'w') as writer:
                     writer.write(DescriptivePageView.render(model))
@@ -1264,9 +1267,6 @@ class DataContext(object):
                     data_asset_name=NormalizedDataAssetName(datasource_name, generator_name, name),
                     expectation_suite_name=profiler.__name__
                 )
-
-                print("BAR!!!!")
-                print(json.dumps(batch.get_expectation_suite(), indent=2))
 
                 if not profiler.validate(batch):
                     raise ProfilerError(

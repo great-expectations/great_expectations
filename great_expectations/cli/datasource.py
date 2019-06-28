@@ -134,9 +134,10 @@ As a backup option please visit <blue>https://great-expectations.readthedocs.io/
             print("\nProfiling results are saved:")
             for profiling_result in profiling_results:
                 data_asset_name = profiling_result[1]['meta']['data_asset_name']
+                expectation_suite_name = profiling_result[1]['meta']['expectation_suite_name']
                 run_id = profiling_result[1]['meta']['run_id']
 
-                print("  {0:s}".format(context.get_validation_location(data_asset_name, run_id)['filepath']))
+                print("  {0:s}".format(context.get_validation_location(data_asset_name, expectation_suite_name, run_id)['filepath']))
 
             cli_message(
 """
@@ -155,8 +156,9 @@ To learn more: <blue>https://great-expectations.readthedocs.io/en/latest/intro.h
 
                 for profiling_result in profiling_results:
                     data_asset_name = profiling_result[1]['meta']['data_asset_name']
+                    expectation_suite_name = profiling_result[1]['meta']['expectation_suite_name']
                     run_id = profiling_result[1]['meta']['run_id']
-                    context.move_validation_to_fixtures(data_asset_name, run_id)
+                    context.move_validation_to_fixtures(data_asset_name, expectation_suite_name, run_id)
 
                 context.render_full_static_site()
                 cli_message(
