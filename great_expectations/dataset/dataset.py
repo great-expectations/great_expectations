@@ -3167,7 +3167,7 @@ class Dataset(MetaDataset):
         if partition_object is None:
             # NOTE: we are *not* specifying a tail_weight_holdout by default.
             bins = self.get_column_partition(column)
-            weights = list(np.array(self.get_column_hist(column, bins)) / self.get_row_count())
+            weights = list(np.array(self.get_column_hist(column, bins)) / self.get_column_nonnull_count(column))
             partition_object = {
                 "bins": bins,
                 "weights": weights
