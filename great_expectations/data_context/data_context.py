@@ -13,7 +13,6 @@ import datetime
 
 from .util import NormalizedDataAssetName, get_slack_callback, safe_mmkdir
 
-from great_expectations.version import __version__
 from great_expectations.exceptions import DataContextError, ConfigNotFoundError, ProfilerError
 
 import ipywidgets as widgets
@@ -22,12 +21,14 @@ try:
 except ImportError:
     from urlparse import urlparse
 
-from great_expectations.data_asset import DataAsset
 from great_expectations.dataset import Dataset, PandasDataset
-from great_expectations.datasource.sqlalchemy_source import SqlAlchemyDatasource
-from great_expectations.datasource.dbt_source import DBTDatasource
-from great_expectations.datasource import PandasDatasource
-from great_expectations.datasource import SparkDFDatasource
+from great_expectations.datasource import (
+    Datasource,
+    PandasDatasource,
+    SqlAlchemyDatasource,
+    SparkDFDatasource,
+    DBTDatasource
+)
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 
 from .expectation_explorer import ExpectationExplorer
@@ -38,6 +39,7 @@ yaml.indent(mapping=2, sequence=4, offset=2)
 yaml.default_flow_style = False
 
 ALLOWED_DELIMITERS = ['.', '/']
+
 
 class DataContext(object):
     """A DataContext represents a Great Expectations project. It captures essential information such as
@@ -285,14 +287,17 @@ class DataContext(object):
                 datasource.get_available_data_asset_names(generator_names[idx] if generator_names is not None else None)
         return data_asset_names
 
-    def get_batch(self, data_asset_name, batch_kwargs=None, **kwargs):
+    def get_batch(self, data_asset_name, expectation_suite_name="default", batch_kwargs=None, **kwargs):
         normalized_data_asset_name = self._normalize_data_asset_name(data_asset_name)
 
         datasource = self.get_datasource(normalized_data_asset_name.datasource)
         if not datasource:
-            raise DataContextError("Can't find datasource {0:s} in the config - please check your great_expectations.yml")
+            raise DataContextError(
+                "Can't find datasource {0:s} in the config - please check your great_expectations.yml"
+            )
 
         data_asset = datasource.get_batch(normalized_data_asset_name,
+                                          expectation_suite_name,
                                           batch_kwargs,
                                           **kwargs)
         return data_asset
@@ -697,15 +702,7 @@ class DataContext(object):
             read_config["data_asset_name"] = self.data_asset_name_delimiter.join(data_asset_name)
             return read_config
         else:
-            # TODO: Should this return None? Currently this method acts as get_or_create
-            return {
-                'data_asset_name': self.data_asset_name_delimiter.join(data_asset_name),
-                'expectation_suite_name': expectation_suite_name,
-                'meta': {
-                    'great_expectations.__version__': __version__
-                },
-                'expectations': []
-             } 
+            return Datasource.get_empty_expectation_suite(self.data_asset_name_delimiter.join(data_asset_name), expectation_suite_name)
 
     def save_expectation_suite(self, expectation_suite, data_asset_name=None, expectation_suite_name=None):
         """Save the provided expectation suite into the DataContext.
@@ -748,22 +745,35 @@ class DataContext(object):
         """Process results of a validation run, including registering evaluation parameters that are now available
         and storing results and snapshots if so configured."""
 
-        # TODO: harmonize with data_asset_name logic below
         try:
             data_asset_name = validation_results["meta"]["data_asset_name"]
         except KeyError:
             logger.warning("No data_asset_name found in validation results; using '_untitled'")
             data_asset_name = "_untitled"
 
+        try:
+            data_asset_name = self._normalize_data_asset_name(data_asset_name)
+        except DataContextError:
+            logger.warning(
+                "Registering validation results for a data_asset_name that cannot be normalized in this context."
+            )
+
+        expectation_suite_name = validation_results["meta"].get("expectation_suite_name", "default")
+        print("FOO!!!!")
+        print(expectation_suite_name)
+        print(json.dumps(validation_results, indent=2))
         if "result_store" in self._project_config:
             result_store = self._project_config["result_store"]
             if isinstance(result_store, dict) and "filesystem" in result_store:
                 validation_filepath = self._get_normalized_data_asset_name_filepath(
                     data_asset_name,
-                    base_path=os.path.join(self.root_directory,
-                                          result_store["filesystem"]["base_directory"],
-                                          run_id)
+                    expectation_suite_name,
+                    base_path=os.path.join(
+                        self.root_directory,
+                        result_store["filesystem"]["base_directory"],
+                        run_id
                     )
+                )
                 logger.info("Storing validation result: %s" % validation_filepath)
                 safe_mmkdir(os.path.dirname(validation_filepath))
                 with open(validation_filepath, "w") as outfile:
@@ -771,8 +781,17 @@ class DataContext(object):
             if isinstance(result_store, dict) and "s3" in result_store:
                 bucket = result_store["s3"]["bucket"]
                 key_prefix = result_store["s3"]["key_prefix"]
-                key = os.path.join(key_prefix, "validations/{run_id}/{data_asset_name}.json".format(run_id=run_id,
-                                                                                     data_asset_name=data_asset_name))
+                key = os.path.join(
+                    key_prefix,
+                    "validations/{run_id}/{data_asset_name}".format(
+                        run_id=run_id,
+                        data_asset_name=self._get_normalized_data_asset_name_filepath(
+                            data_asset_name,
+                            expectation_suite_name,
+                            base_path=""
+                        )
+                    )
+                )
                 validation_results["meta"]["result_reference"] = "s3://{bucket}/{key}".format(bucket=bucket, key=key)
                 try:
                     import boto3
@@ -796,17 +815,43 @@ class DataContext(object):
             if isinstance(data_asset, PandasDataset):
                 if isinstance(data_asset_snapshot_store, dict) and "filesystem" in data_asset_snapshot_store:
                     logger.info("Storing dataset to file")
-                    safe_mmkdir(os.path.join(self.root_directory, data_asset_snapshot_store["filesystem"]["base_directory"], run_id))
-                    data_asset.to_csv(os.path.join(self.root_directory, data_asset_snapshot_store["filesystem"]["base_directory"],
-                                                   run_id,
-                                                   data_asset_name + ".csv.gz"), compression="gzip")
+                    safe_mmkdir(os.path.join(
+                        self.root_directory,
+                        data_asset_snapshot_store["filesystem"]["base_directory"],
+                        run_id)
+                    )
+                    data_asset.to_csv(
+                        self._get_normalized_data_asset_name_filepath(
+                            data_asset_name,
+                            expectation_suite_name,
+                            base_path=os.path.join(
+                                self.root_directory,
+                                data_asset_snapshot_store["filesystem"]["base_directory"],
+                                run_id
+                            ),
+                            file_extension=".csv.gz"
+                        ),
+                        compression="gzip"
+                    )
 
                 if isinstance(data_asset_snapshot_store, dict) and "s3" in data_asset_snapshot_store:
                     bucket = data_asset_snapshot_store["s3"]["bucket"]
                     key_prefix = data_asset_snapshot_store["s3"]["key_prefix"]
-                    key = key_prefix + "snapshots/{run_id}/{data_asset_name}".format(run_id=run_id,
-                                                                                     data_asset_name=data_asset_name) + ".csv.gz"
-                    validation_results["meta"]["data_asset_snapshot"] = "s3://{bucket}/{key}".format(bucket=bucket, key=key)
+                    key = os.path.join(
+                        key_prefix,
+                        "validations/{run_id}/{data_asset_name}.csv.gz".format(
+                            run_id=run_id,
+                            data_asset_name=self._get_normalized_data_asset_name_filepath(
+                                data_asset_name,
+                                expectation_suite_name,
+                                base_path="",
+                                file_extension=".csv.gz"
+                            )
+                        )
+                    )
+                    validation_results["meta"]["data_asset_snapshot"] = "s3://{bucket}/{key}".format(
+                        bucket=bucket,
+                        key=key)
 
                     try:
                         import boto3
@@ -814,7 +859,7 @@ class DataContext(object):
                         result_s3 = s3.Object(bucket, key)
                         result_s3.put(Body=data_asset.to_csv(compression="gzip").encode('utf-8'))
                     except ImportError:
-                        logger.error("Error importing boto3 for AWS support.")
+                        logger.error("Error importing boto3 for AWS support. Unable to save to result store.")
                     except Exception:
                         raise
             else:
@@ -973,7 +1018,7 @@ class DataContext(object):
 
         self._compiled = True
 
-    def get_validation_result(self, data_asset_name, run_id=None, failed_only=False):
+    def get_validation_result(self, data_asset_name, expectation_suite_name="default", run_id=None, failed_only=False):
         """Get validation results from a configured store."""
 
         if "result_store" not in self._project_config:
@@ -997,7 +1042,7 @@ class DataContext(object):
             validation_path = os.path.join(
                 base_directory,
                 run_id,
-                self._get_normalized_data_asset_name_filepath(data_asset_name, base_path="")
+                self._get_normalized_data_asset_name_filepath(data_asset_name, expectation_suite_name, base_path="")
             )
             with open(validation_path, "r") as infile:
                 results_dict = json.load(infile)
@@ -1030,7 +1075,9 @@ class DataContext(object):
                 run_id = sorted(runs)[-1]  
 
             key = os.path.join(key_prefix, "validations", run_id, self._get_normalized_data_asset_name_filepath(
-                data_asset_name, base_path=""
+                data_asset_name,
+                expectation_suite_name,
+                base_path=""
             ))
             
             s3_response_object = s3.get_object(Bucket=bucket, Key=key)
@@ -1082,7 +1129,11 @@ class DataContext(object):
         else:
             return return_obj
 
-    def profile_datasource(self, datasource_name, generator_name=None, profiler=BasicDatasetProfiler, max_data_assets=10):
+    def profile_datasource(self,
+                           datasource_name,
+                           generator_name=None,
+                           profiler=BasicDatasetProfiler,
+                           max_data_assets=10):
         logger.info("Profiling '%s' with '%s'" % (datasource_name, profiler.__name__))
         data_asset_names = self.get_available_data_asset_names(datasource_name)
         if generator_name is None:
@@ -1095,7 +1146,7 @@ class DataContext(object):
         total_data_assets = len(data_asset_name_list)
         logger.info("Found %d data assets using generator '%s'" % (total_data_assets, generator_name))
                 
-        if max_data_assets == None or max_data_assets >= len(data_asset_name_list):
+        if max_data_assets is None or max_data_assets >= len(data_asset_name_list):
             logger.info("Profiling all %d." % (len(data_asset_name_list)))
         else:
             logger.info("Profiling the first %d, alphabetically." % (max_data_assets))
@@ -1108,13 +1159,19 @@ class DataContext(object):
             try:
                 start_time = datetime.datetime.now()
 
-                #FIXME: There needs to be an affordance here to limit to 100 rows, or downsample, etc.
-                batch = self.get_batch(data_asset_name=NormalizedDataAssetName(datasource_name, generator_name, name, profiler.__name__))
+                # FIXME: There needs to be an affordance here to limit to 100 rows, or downsample, etc.
+                batch = self.get_batch(
+                    data_asset_name=NormalizedDataAssetName(datasource_name, generator_name, name),
+                    expectation_suite_name=profiler.__name__
+                )
 
                 if not profiler.validate(batch):
-                    raise ProfilerError("batch '%s' is not a valid batch for the '%s' profiler" % (name, profiler.__name__))
+                    raise ProfilerError(
+                        "batch '%s' is not a valid batch for the '%s' profiler" % (name, profiler.__name__)
+                    )
   
-                #Note: This logic is specific to DatasetProfilers, which profile a single batch. Multi-batch profilers will have more to unpack.
+                # Note: This logic is specific to DatasetProfilers, which profile a single batch. Multi-batch profilers
+                # will have more to unpack.
                 expectation_suite, validation_result = profiler.profile(batch)
 
                 if isinstance(batch, Dataset):
