@@ -145,13 +145,12 @@ def test_context_profiler(empty_data_context, filesystem_csv_2):
         "my_datasource", "pandas", base_directory=str(filesystem_csv_2))
     not_so_empty_data_context = empty_data_context
 
-    assert not_so_empty_data_context.list_expectation_suites() == []
+    assert not_so_empty_data_context.list_expectation_suites() == {}
     not_so_empty_data_context.profile_datasource("my_datasource")
 
-    print(not_so_empty_data_context.list_expectation_suites())
-    assert not_so_empty_data_context.list_expectation_suites() != []
+    assert "my_datasource" in not_so_empty_data_context.list_expectation_suites()
 
-    profiled_expectations = not_so_empty_data_context.get_expectation_suite('f1')
+    profiled_expectations = not_so_empty_data_context.get_expectation_suite('f1', "default")
     print(json.dumps(profiled_expectations, indent=2))
 
     # FIXME: REVISIT THIS TEST FOR CONTENT

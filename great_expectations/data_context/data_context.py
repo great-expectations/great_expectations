@@ -218,7 +218,11 @@ class DataContext(object):
             if run_id is None:  # Get most recent run_id
                 all_objects = s3.list_objects(Bucket=bucket)
                 # Remove the key_prefix and first slash from the name
-                validations = [name[len(key_prefix) + 1:] for name in all_objects if name.startswith(key_prefix)]
+                validations = [
+                    name[len(key_prefix) + 1:] 
+                    for name in all_objects 
+                    if name.startswith(key_prefix) and len(name) > len(key_prefix) + 1
+                ]
                 # run id is the first section after the word "validations"
                 runs = [validation.split('/')[1] for validation in validations]
                 run_id = sorted(runs)[-1]
@@ -1257,6 +1261,9 @@ class DataContext(object):
                     data_asset_name=NormalizedDataAssetName(datasource_name, generator_name, name),
                     expectation_suite_name=profiler.__name__
                 )
+
+                print("BAR!!!!")
+                print(json.dumps(batch.get_expectation_suite(), indent=2))
 
                 if not profiler.validate(batch):
                     raise ProfilerError(
