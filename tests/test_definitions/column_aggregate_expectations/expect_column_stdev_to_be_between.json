@@ -21,7 +21,20 @@
           "success": true,
           "observed_value": 1.1547005383792517
         }
-      },{
+      },
+      {
+        "title": "Vacuously true",
+        "exact_match_out": false,
+        "tolerance": 0.000000000001,
+        "in": {
+          "column": "dist1"
+        },
+        "out": {
+          "success": true,
+          "observed_value": 1.1547005383792517
+        }
+      },
+      {
       "title" : "Positive test, exact min and max",
       "exact_match_out" : false,
       "in": {
@@ -125,19 +138,6 @@
             "missing_count": 1,
             "missing_percent": 0.3333333333333333
           }
-        }
-      },{
-        "title": "Test exception, both min and max null",
-        "exact_match_out": false,
-        "in": {
-          "column": "missing",
-          "min_value": null,
-          "max_value": null,
-          "catch_exceptions": true
-        },
-        "out": {},
-        "error": {
-          "traceback_substring": "min_value and max_value cannot both be None"
         }
       }]
   }]
