@@ -1,5 +1,5 @@
-<div style="width:45%">
-    <table>
+<div {{ content_block | render_styling }}>
+    <table style="width: 100%">
         {% for row in content_block["table_rows"] %}
         <tr class="{{ loop.cycle('odd', 'even') }}" >
             {% set rowloop = loop %}
