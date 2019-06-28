@@ -498,8 +498,8 @@ class Dataset(MetaDataset):
             raise ValueError("min_value and max_value must be integers")
 
         # check that min_value or max_value is set
-        if min_value is None and max_value is None:
-            raise Exception('Must specify either or both of min_value and max_value')
+        # if min_value is None and max_value is None:
+        #     raise Exception('Must specify either or both of min_value and max_value')
 
         row_count = self.get_row_count()
 
@@ -511,6 +511,9 @@ class Dataset(MetaDataset):
 
         elif min_value is not None and max_value is None:
             outcome = row_count >= min_value
+
+        else:
+            outcome = True
 
         return {
             'success': outcome,
