@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 yaml = YAML()
 yaml.default_flow_style = False
 
+
 class ReaderMethods(Enum):
     CSV = 1
     csv = 1
@@ -25,6 +26,7 @@ class ReaderMethods(Enum):
     xlsx = 3
     JSON = 4
     json = 4
+
 
 class Datasource(object):
     """Datasources are responsible for connecting to data infrastructure. Each Datasource is a source 
@@ -106,7 +108,14 @@ class Datasource(object):
         return self._datasource_config
 
     def save_config(self):
-        # For now, just use the data context config
+        """Save the datasource config.
+
+        If there is no attached DataContext, a datasource will save its config in the current directory
+        in a file called "great_expectations.yml
+
+        Returns:
+            None
+        """
         if self._data_context is not None:
             self._data_context._save_project_config()
         else:
@@ -130,6 +139,18 @@ class Datasource(object):
         #     yaml.safe_dump(self._datasource_config, data_file)
 
     def add_generator(self, name, type_, **kwargs):
+        """Add a generator to the datasource.
+
+        The generator type_ must be one of the recognized types for the datasource.
+
+        Args:
+            name (str): the name of the new generator to add
+            type_ (str): the type of the new generator to add
+            kwargs: additional keyword arguments will be passed directly to the new generator's constructor
+
+        Returns:
+             generator (Generator)
+        """
         data_asset_generator_class = self._get_generator_class(type_)
         generator = data_asset_generator_class(name=name, datasource=self, **kwargs)
         self._generators[name] = generator
@@ -142,6 +163,12 @@ class Datasource(object):
 
     def get_generator(self, generator_name="default"):
         """Get the (named) generator from a datasource)
+
+        Args:
+            generator_name (str): name of generator (default value is 'default')
+
+        Returns:
+            generator (Generator)
         """     
         if generator_name in self._generators:
             return self._generators[generator_name]
@@ -162,6 +189,12 @@ class Datasource(object):
         return generator
 
     def list_generators(self):
+        """List currently-configured generators for this datasource.
+
+        Returns:
+            List(dict): each dictionary includes "name" and "type" keys
+        """
+
         return [{"name": key, "type": value["type"]} for key, value in self._datasource_config["generators"].items()]
 
     def get_batch(self, data_asset_name, batch_kwargs=None, **kwargs):
@@ -225,7 +258,8 @@ class Datasource(object):
     def get_data_context(self):
         return self._data_context
 
-    def _guess_reader_method_from_path(self, path):
+    @staticmethod
+    def _guess_reader_method_from_path(path):
         if path.endswith(".csv") or path.endswith(".tsv"):
             return ReaderMethods.CSV
         elif path.endswith(".parquet"):
