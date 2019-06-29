@@ -1233,7 +1233,7 @@ class DataContext(object):
             out_filepath = self.get_validation_doc_filepath(data_asset_name, expectation_suite_name)
             safe_mmkdir(os.path.dirname(out_filepath))
             with open(out_filepath, 'w') as writer:
-                    writer.write(DescriptivePageView.render(model))
+                    writer.write(PageView.render(model))
 
     def profile_datasource(self, datasource_name, generator_name=None, profiler=BasicDatasetProfiler, max_data_assets=10):
         logger.info("Profiling '%s' with '%s'" % (datasource_name, profiler.__name__))
