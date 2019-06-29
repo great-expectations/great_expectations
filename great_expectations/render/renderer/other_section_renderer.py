@@ -1,5 +1,6 @@
 import json
 from string import Template
+from collections import defaultdict
 
 from .renderer import Renderer
 from .content_block import(
@@ -24,6 +25,7 @@ class DescriptiveOverviewSectionRenderer(Renderer):
         cls._render_dataset_info(evrs, content_blocks)
         cls._render_variable_types(evrs, content_blocks)
         cls._render_warnings(evrs, content_blocks)
+        cls._render_expectation_types(evrs, content_blocks)
 
         return {
             "section_name": column,
@@ -57,7 +59,10 @@ class DescriptiveOverviewSectionRenderer(Renderer):
             "header": "Dataset info",
             "table_rows": table_rows,
             "styling": {
-                "classes": ["col-6"]
+                "classes": ["col-6"],
+                "styles": {
+                    "margin-top": "20px"
+                }
             },
         })
 
@@ -80,7 +85,32 @@ class DescriptiveOverviewSectionRenderer(Renderer):
             "header": "Variable types",
             "table_rows": table_rows,
             "styling": {
-                "classes": ["col-6"]
+                "classes": ["col-6"],
+                "styles": {
+                    "margin-top": "20px"
+                }
+            },
+        })
+
+    @classmethod
+    def _render_expectation_types(cls, evrs, content_blocks):
+
+        type_counts = defaultdict(int)
+
+        for evr in evrs["results"]:
+            type_counts[evr["expectation_config"]["expectation_type"]] += 1
+
+        table_rows = sorted(type_counts.items(), key=lambda kv: -1*kv[1])
+
+        content_blocks.append({
+            "content_block_type": "table",
+            "header": "Expectation types",
+            "table_rows": table_rows,
+            "styling": {
+                "classes": ["col-12"],
+                "styles": {
+                    "margin-top": "20px"
+                }
             },
         })
 
