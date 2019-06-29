@@ -12,6 +12,7 @@ import os
 import shutil
 import logging
 import sys
+import re
 from ruamel.yaml import YAML
 yaml = YAML()
 yaml.default_flow_style = False
@@ -187,6 +188,11 @@ def test_cli_init(tmp_path_factory, filesystem_csv_2):
         os.path.join(basedir, "data")))
 
     print(result.output)
+    print("result.output length:", len(result.output))
+
+    assert len(result.output) < 10000, "CLI output is unreasonably long."
+    assert len(re.findall(
+        "{", result.output)) < 100, "CLI contains way more '{' than we would reasonably expect."
 
     assert """Always know what to expect from your data.""" in result.output
 
