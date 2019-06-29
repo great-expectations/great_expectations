@@ -1,5 +1,6 @@
 import json
 from string import Template as pTemplate
+import datetime
 
 from jinja2 import (
     Template, Environment, BaseLoader, PackageLoader, select_autoescape
@@ -164,7 +165,11 @@ class View(object):
         env.filters['render_string_template'] = render_string_template
         env.filters['render_styling'] = render_styling_from_string_template
         # env.filters['render_styling'] = render_styling
-        return env.get_template(template)
+
+        template = env.get_template(template)
+        template.globals['now'] = datetime.datetime.utcnow
+
+        return template
 
 
 class ColumnHeaderView(View):
