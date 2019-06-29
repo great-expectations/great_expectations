@@ -34,7 +34,6 @@ class FancyDescriptiveColumnSectionRenderer(ColumnSectionRenderer):
 
         content_blocks = []
         cls._render_header(evrs, content_blocks)
-        # cls._render_expectation_types(evrs, content_blocks)
         # cls._render_column_type(evrs, content_blocks)
         cls._render_overview_table(evrs, content_blocks)
         cls._render_stats_table(evrs, content_blocks)
@@ -48,22 +47,23 @@ class FancyDescriptiveColumnSectionRenderer(ColumnSectionRenderer):
         # cls._render_frequency(evrs, content_blocks)
         # cls._render_composition(evrs, content_blocks)
 
-        cls._render_unrecognized(evrs, content_blocks)
+        cls._render_expectation_types(evrs, content_blocks)
+        # cls._render_unrecognized(evrs, content_blocks)
 
         # FIXME: shown here as an example of bullet list
-        content_blocks.append({
-            "content_block_type": "bullet_list",
-            "bullet_list": [
-                {
-                    "template": "i1",
-                    "params": {}
-                },
-                {
-                    "template": "i2",
-                    "params": {}
-                }
-            ]
-        })
+        # content_blocks.append({
+        #     "content_block_type": "bullet_list",
+        #     "bullet_list": [
+        #         {
+        #             "template": "i1",
+        #             "params": {}
+        #         },
+        #         {
+        #             "template": "i2",
+        #             "params": {}
+        #         }
+        #     ]
+        # })
 
         return {
             "section_name": column,
@@ -122,21 +122,41 @@ class FancyDescriptiveColumnSectionRenderer(ColumnSectionRenderer):
 
     @classmethod
     def _render_expectation_types(cls, evrs, content_blocks):
-        # NOTE: This function is an exact dupe of other_section_renderer.DescriptiveOverviewSectionRenderer._render_expectation_types
+        # NOTE: The evr-fetching function is an exact dupe of the code other_section_renderer.DescriptiveOverviewSectionRenderer._render_expectation_types
+        # TODO: Pull this code out into an EVR class
 
         type_counts = defaultdict(int)
 
         for evr in evrs:
             type_counts[evr["expectation_config"]["expectation_type"]] += 1
 
-        table_rows = sorted(type_counts.items(), key=lambda kv: -1*kv[1])
+        bullet_list = sorted(type_counts.items(), key=lambda kv: -1*kv[1])
+
+        bullet_list = [{
+            "template": "$expectation_type $expectation_count",
+            "params": {
+                "expectation_type": tr[0],
+                "expectation_count": tr[1],
+            },
+            "styling": {
+                "classes": ["list-group-item", "d-flex", "justify-content-between", "align-items-center"],
+                "params": {
+                    "expectation_count": {
+                        "classes": ["badge", "badge-secondary", "badge-pill"],
+                    }
+                }
+            }
+        } for tr in bullet_list]
 
         content_blocks.append({
-            "content_block_type": "table",
+            "content_block_type": "bullet_list",
             "header": "Expectation types",
-            "table_rows": table_rows,
+            "bullet_list": bullet_list,
             "styling": {
                 "classes": ["col-12"],
+                "dom_parent": {
+                    "classes": ["list-group"],
+                },
                 "styles": {
                     "margin-top": "20px"
                 }

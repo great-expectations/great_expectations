@@ -40,6 +40,8 @@ def render_styling(styling):
     if class_list == None:
         class_str = ""
     else:
+        if type(class_list) == str:
+            raise TypeError("classes must be a list, not a string.")
         class_str = 'class="'+' '.join(class_list)+'" '
 
     attribute_dict = styling.get("attributes", None)
@@ -163,8 +165,8 @@ class View(object):
             autoescape=select_autoescape(['html', 'xml'])
         )
         env.filters['render_string_template'] = render_string_template
-        env.filters['render_styling'] = render_styling_from_string_template
-        # env.filters['render_styling'] = render_styling
+        env.filters['render_styling_from_string_template'] = render_styling_from_string_template
+        env.filters['render_styling'] = render_styling
 
         template = env.get_template(template)
         template.globals['now'] = datetime.datetime.utcnow
