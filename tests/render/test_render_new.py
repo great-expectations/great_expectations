@@ -218,6 +218,8 @@ def test_full_oobe_flow():
     rendered_page = PageView.render(rendered_json)
     assert rendered_page != None
 
+    print(rendered_page)
+    with open('./test_full_oobe_flow.html', 'w') as f:
+        f.write(rendered_page)
+
     # assert False
-    # with open('./test.html', 'w') as f:
-    #     f.write(rendered_page)
