@@ -16,6 +16,8 @@ from .test_utils import get_dataset
 
 CONTEXTS = ['PandasDataset', 'sqlite']  # , 'SparkDFDataset']
 
+### TODO: make it easier to turn off Spark as well
+
 #####
 #
 # Postgresql Context
@@ -25,6 +27,7 @@ try:
     engine = sa.create_engine('postgresql://postgres@localhost/test_ci')
     conn = engine.connect()
     CONTEXTS += ['postgresql']
+    conn.close()
 except (ImportError, sa.exc.SQLAlchemyError):
     warnings.warn("No postgres context available for testing.")
 
@@ -38,6 +41,7 @@ except (ImportError, sa.exc.SQLAlchemyError):
 #     engine = sa.create_engine('mysql://root@localhost/test_ci')
 #     conn = engine.connect()
 #     CONTEXTS += ['mysql']
+#     conn.close()
 # except (ImportError, sa.exc.SQLAlchemyError):
 #     warnings.warn("No mysql context available for testing.")
 
@@ -45,7 +49,8 @@ except (ImportError, sa.exc.SQLAlchemyError):
 @pytest.fixture
 def empty_expectation_suite():
     expectation_suite = {
-        'dataset_name': "empty_suite_fixture",
+        'data_asset_name': "empty_suite_fixture",
+        'expectation_suite_name': "default",
         'meta': {},
         'expectations': []
     }
@@ -55,7 +60,8 @@ def empty_expectation_suite():
 @pytest.fixture
 def basic_expectation_suite():
     expectation_suite = {
-        'dataset_name': "basic_suite_fixture",
+        'data_asset_name': "basic_suite_fixture",
+        'expectation_suite_name': "default",
         'meta': {},
         'expectations': [
             # Removing this from list of expectations, since mysql doesn't support infinities and we want generic fixtures

@@ -120,7 +120,8 @@ def test_BasicDatasetProfiler_with_context(empty_data_context, filesystem_csv_2)
     # print(batch.get_batch_kwargs())
     # print(json.dumps(expectations_config, indent=2))
 
-    assert expectations_config["data_asset_name"] == "my_datasource/default/f1/default"
+    assert expectations_config["data_asset_name"] == "my_datasource/default/f1"
+    assert expectations_config["expectation_suite_name"] == "default"
     assert "BasicDatasetProfiler" in expectations_config["meta"]
     assert set(expectations_config["meta"]["BasicDatasetProfiler"].keys()) == {
         "created_by", "created_at", "batch_kwargs"
@@ -132,11 +133,9 @@ def test_BasicDatasetProfiler_with_context(empty_data_context, filesystem_csv_2)
             "confidence": "very low"
         }
 
-    print(json.dumps(validation_results, indent=2))
-
-    assert validation_results["meta"]["data_asset_name"] == "my_datasource/default/f1/default"
+    assert validation_results["meta"]["data_asset_name"] == "my_datasource/default/f1"
     assert set(validation_results["meta"].keys()) == {
-        "great_expectations.__version__", "data_asset_name", "run_id", "batch_kwargs"
+        "great_expectations.__version__", "data_asset_name", "expectation_suite_name", "run_id", "batch_kwargs"
     }
 
 
@@ -145,14 +144,12 @@ def test_context_profiler(empty_data_context, filesystem_csv_2):
         "my_datasource", "pandas", base_directory=str(filesystem_csv_2))
     not_so_empty_data_context = empty_data_context
 
-    assert not_so_empty_data_context.list_expectation_suites() == []
+    assert not_so_empty_data_context.list_expectation_suites() == {}
     not_so_empty_data_context.profile_datasource("my_datasource")
 
-    print(not_so_empty_data_context.list_expectation_suites())
-    assert not_so_empty_data_context.list_expectation_suites() != []
+    assert "my_datasource" in not_so_empty_data_context.list_expectation_suites()
 
-    profiled_expectations = not_so_empty_data_context.get_expectation_suite('f1')
-    print(json.dumps(profiled_expectations, indent=2))
+    profiled_expectations = not_so_empty_data_context.get_expectation_suite('f1', "BasicDatasetProfiler")
 
     # FIXME: REVISIT THIS TEST FOR CONTENT
     # TODO: REVISIT THIS TEST FOR CONTENT

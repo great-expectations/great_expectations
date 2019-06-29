@@ -12,8 +12,7 @@ logger = logging.getLogger(__name__)
 NormalizedDataAssetName = namedtuple("NormalizedDataAssetName", [
     "datasource",
     "generator",
-    "generator_asset",
-    "suite"
+    "generator_asset"
 ])
 
 
@@ -22,7 +21,7 @@ def build_slack_notification_request(validation_json=None):
     timestamp = datetime.datetime.strftime(datetime.datetime.now(), "%x %X")
     status = "Failed :x:"
     run_id = None
-    data_asset_name = "no_name_provided_" + datetime.datetime.utcnow().isoformat()
+
     title_block = {
         "type": "section",
         "text": {
@@ -34,8 +33,9 @@ def build_slack_notification_request(validation_json=None):
     query = {"blocks": [title_block]}
 
     if validation_json:
-        if "meta" in validation_json and "data_asset_name" in validation_json["meta"]:
-            data_asset_name = validation_json["meta"]["data_asset_name"]
+        if "meta" in validation_json:
+            data_asset_name = validation_json["meta"].get("data_asset_name", "no_name_provided_" + datetime.datetime.utcnow().isoformat())
+            expectation_suite_name = validation_json["meta"].get("expectation_suite_name", "default")
 
         n_checks_succeeded = validation_json["statistics"]["successful_expectations"]
         n_checks = validation_json["statistics"]["evaluated_expectations"]
