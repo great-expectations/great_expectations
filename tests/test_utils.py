@@ -3,7 +3,9 @@ from __future__ import division
 import random
 import string
 import warnings
+import copy
 
+from dateutil.parser import parse
 import pandas as pd
 import numpy as np
 import pytest
@@ -19,38 +21,39 @@ from great_expectations.dataset import PandasDataset, SqlAlchemyDataset, SparkDF
 from great_expectations.profile import ColumnsExistProfiler
 
 SQLITE_TYPES = {
-        "VARCHAR": sqlitetypes.VARCHAR,
-        "CHAR": sqlitetypes.CHAR,
-        "INTEGER": sqlitetypes.INTEGER,
-        "SMALLINT": sqlitetypes.SMALLINT,
-        "DATETIME": sqlitetypes.DATETIME(truncate_microseconds=True),
-        "DATE": sqlitetypes.DATE,
-        "FLOAT": sqlitetypes.FLOAT,
-        "BOOLEAN": sqlitetypes.BOOLEAN 
+    "VARCHAR": sqlitetypes.VARCHAR,
+    "CHAR": sqlitetypes.CHAR,
+    "INTEGER": sqlitetypes.INTEGER,
+    "SMALLINT": sqlitetypes.SMALLINT,
+    "DATETIME": sqlitetypes.DATETIME(truncate_microseconds=True),
+    "DATE": sqlitetypes.DATE,
+    "FLOAT": sqlitetypes.FLOAT,
+    "BOOLEAN": sqlitetypes.BOOLEAN
 }
 
 POSTGRESQL_TYPES = {
-        "TEXT": postgresqltypes.TEXT,
-        "CHAR": postgresqltypes.CHAR,
-        "INTEGER": postgresqltypes.INTEGER,
-        "SMALLINT": postgresqltypes.SMALLINT,
-        "BIGINT": postgresqltypes.BIGINT,
-        "TIMESTAMP": postgresqltypes.TIMESTAMP,
-        "DATE": postgresqltypes.DATE,
-        "DOUBLE_PRECISION": postgresqltypes.DOUBLE_PRECISION,
-        "BOOLEAN": postgresqltypes.BOOLEAN
+    "TEXT": postgresqltypes.TEXT,
+    "CHAR": postgresqltypes.CHAR,
+    "INTEGER": postgresqltypes.INTEGER,
+    "SMALLINT": postgresqltypes.SMALLINT,
+    "BIGINT": postgresqltypes.BIGINT,
+    "TIMESTAMP": postgresqltypes.TIMESTAMP,
+    "DATE": postgresqltypes.DATE,
+    "DOUBLE_PRECISION": postgresqltypes.DOUBLE_PRECISION,
+    "BOOLEAN": postgresqltypes.BOOLEAN,
+    "NUMERIC": postgresqltypes.NUMERIC
 }
 
 MYSQL_TYPES = {
-        "TEXT": mysqltypes.TEXT,
-        "CHAR": mysqltypes.CHAR,
-        "INTEGER": mysqltypes.INTEGER,
-        "SMALLINT": mysqltypes.SMALLINT,
-        "BIGINT": mysqltypes.BIGINT,
-        "TIMESTAMP": mysqltypes.TIMESTAMP,
-        "DATE": mysqltypes.DATE,
-        "FLOAT": mysqltypes.FLOAT,
-        "BOOLEAN": mysqltypes.BOOLEAN
+    "TEXT": mysqltypes.TEXT,
+    "CHAR": mysqltypes.CHAR,
+    "INTEGER": mysqltypes.INTEGER,
+    "SMALLINT": mysqltypes.SMALLINT,
+    "BIGINT": mysqltypes.BIGINT,
+    "TIMESTAMP": mysqltypes.TIMESTAMP,
+    "DATE": mysqltypes.DATE,
+    "FLOAT": mysqltypes.FLOAT,
+    "BOOLEAN": mysqltypes.BOOLEAN
 }
 
 SPARK_TYPES = {
@@ -110,8 +113,8 @@ def assertDeepAlmostEqual(expected, actual, *args, **kwargs):
 def get_dataset(dataset_type, data, schemas=None, profiler=ColumnsExistProfiler, caching=False):
     """Utility to create datasets for json-formatted tests.
     """
+    df = pd.DataFrame(data)
     if dataset_type == 'PandasDataset':
-        df = pd.DataFrame(data)
         if schemas and "pandas" in schemas:
             pandas_schema = {key:np.dtype(value) for (key, value) in schemas["pandas"].items()}
             df = df.astype(pandas_schema)
@@ -121,19 +124,18 @@ def get_dataset(dataset_type, data, schemas=None, profiler=ColumnsExistProfiler,
         engine = create_engine('sqlite://')
         conn = engine.connect()
         # Add the data to the database as a new table
-        df = pd.DataFrame(data)
 
         sql_dtypes = {}
         if schemas and "sqlite" in schemas and isinstance(engine.dialect, sqlitetypes.dialect):
             schema = schemas["sqlite"]
             sql_dtypes = {col : SQLITE_TYPES[dtype] for (col,dtype) in schema.items()}
             for col in schema:
-                type = schema[col]
-                if type in ["INTEGER", "SMALLINT", "BIGINT"]:
-                    df[col] = pd.to_numeric(df[col],downcast='signed')
-                elif type in ["FLOAT", "DOUBLE", "DOUBLE_PRECISION"]:
-                    df[col] = pd.to_numeric(df[col],downcast='float')
-                elif type in ["DATETIME", "TIMESTAMP"]:
+                type_ = schema[col]
+                if type_ in ["INTEGER", "SMALLINT", "BIGINT"]:
+                    df[col] = pd.to_numeric(df[col], downcast='signed')
+                elif type_ in ["FLOAT", "DOUBLE", "DOUBLE_PRECISION"]:
+                    df[col] = pd.to_numeric(df[col])
+                elif type_ in ["DATETIME", "TIMESTAMP"]:
                     df[col] = pd.to_datetime(df[col])
 
         tablename = "test_data_" + ''.join([random.choice(string.ascii_letters + string.digits) for n in range(8)])
@@ -146,19 +148,18 @@ def get_dataset(dataset_type, data, schemas=None, profiler=ColumnsExistProfiler,
         # Create a new database
         engine = create_engine('postgresql://postgres@localhost/test_ci')
         conn = engine.connect()
-        df = pd.DataFrame(data)
 
         sql_dtypes = {}
         if schemas and "postgresql" in schemas and isinstance(engine.dialect, postgresqltypes.dialect):
             schema = schemas["postgresql"]
             sql_dtypes = {col : POSTGRESQL_TYPES[dtype] for (col, dtype) in schema.items()}
             for col in schema:
-                type = schema[col]
-                if type in ["INTEGER", "SMALLINT", "BIGINT"]:
-                    df[col] = pd.to_numeric(df[col],downcast='signed')
-                elif type in ["FLOAT", "DOUBLE", "DOUBLE_PRECISION"]:
-                    df[col] = pd.to_numeric(df[col],downcast='float')
-                elif type in ["DATETIME", "TIMESTAMP"]:
+                type_ = schema[col]
+                if type_ in ["INTEGER", "SMALLINT", "BIGINT"]:
+                    df[col] = pd.to_numeric(df[col], downcast='signed')
+                elif type_ in ["FLOAT", "DOUBLE", "DOUBLE_PRECISION"]:
+                    df[col] = pd.to_numeric(df[col])
+                elif type_ in ["DATETIME", "TIMESTAMP"]:
                     df[col] = pd.to_datetime(df[col])
 
         tablename = "test_data_" + ''.join([random.choice(string.ascii_letters + string.digits) for n in range(8)])
@@ -170,19 +171,18 @@ def get_dataset(dataset_type, data, schemas=None, profiler=ColumnsExistProfiler,
     elif dataset_type == 'mysql':
         engine = create_engine('mysql://root@localhost/test_ci')
         conn = engine.connect()
-        df = pd.DataFrame(data)
 
         sql_dtypes = {}
         if schemas and "mysql" in schemas and isinstance(engine.dialect, mysqltypes.dialect):
             schema = schemas["mysql"]
             sql_dtypes = {col : MYSQL_TYPES[dtype] for (col, dtype) in schema.items()}
             for col in schema:
-                type = schema[col]
-                if type in ["INTEGER", "SMALLINT", "BIGINT"]:
-                    df[col] = pd.to_numeric(df[col],downcast='signed')
-                elif type in ["FLOAT", "DOUBLE", "DOUBLE_PRECISION"]:
-                    df[col] = pd.to_numeric(df[col],downcast='float')
-                elif type in ["DATETIME", "TIMESTAMP"]:
+                type_ = schema[col]
+                if type_ in ["INTEGER", "SMALLINT", "BIGINT"]:
+                    df[col] = pd.to_numeric(df[col], downcast='signed')
+                elif type_ in ["FLOAT", "DOUBLE", "DOUBLE_PRECISION"]:
+                    df[col] = pd.to_numeric(df[col])
+                elif type_ in ["DATETIME", "TIMESTAMP"]:
                     df[col] = pd.to_datetime(df[col])
 
         tablename = "test_data_" + ''.join([random.choice(string.ascii_letters + string.digits) for n in range(8)])
@@ -193,16 +193,54 @@ def get_dataset(dataset_type, data, schemas=None, profiler=ColumnsExistProfiler,
 
     elif dataset_type == 'SparkDFDataset':
         spark = SparkSession.builder.getOrCreate()
-        data_reshaped = list(zip(*[v for _, v in data.items()]))
+        # We need to allow null values in some column types that do not support them natively, so we skip
+        # use of df in this case.
+        data_reshaped = list(zip(*[v for _, v in data.items()]))  # create a list of rows
         if schemas and 'spark' in schemas:
             schema = schemas['spark']
             # sometimes first method causes Spark to throw a TypeError
             try:
                 spark_schema = sparktypes.StructType([
-                    sparktypes.StructField(column, SPARK_TYPES[schema[column]]())
+                    sparktypes.StructField(column, SPARK_TYPES[schema[column]](), True)
                     for column in schema
                 ])
-                spark_df = spark.createDataFrame(data_reshaped, spark_schema)
+                # We create these every time, which is painful for testing
+                # However nuance around null treatment as well as the desire
+                # for real datetime support in tests makes this necessary
+                data = copy.deepcopy(data)
+                if "ts" in data:
+                    print(data)
+                    print(schema)
+                for col in schema:
+                    type_ = schema[col]
+                    if type_ in ["IntegerType", "LongType"]:
+                        # Ints cannot be None...but None can be valid in Spark (as Null)
+                        vals = []
+                        for val in data[col]:
+                            if val is None:
+                                vals.append(val)
+                            else:
+                                vals.append(int(val))
+                        data[col] = vals
+                    elif type_ in ["FloatType", "DoubleType"]:
+                        vals = []
+                        for val in data[col]:
+                            if val is None:
+                                vals.append(val)
+                            else:
+                                vals.append(float(val))
+                        data[col] = vals
+                    elif type_ in ["DateType", "TimestampType"]:
+                        vals = []
+                        for val in data[col]:
+                            if val is None:
+                                vals.append(val)
+                            else:
+                                vals.append(parse(val))
+                        data[col] = vals
+                # Do this again, now that we have done type conversion using the provided schema
+                data_reshaped = list(zip(*[v for _, v in data.items()]))  # create a list of rows
+                spark_df = spark.createDataFrame(data_reshaped, schema=spark_schema)
             except TypeError:
                 string_schema = sparktypes.StructType([
                     sparktypes.StructField(column, sparktypes.StringType())
@@ -228,16 +266,19 @@ def get_dataset(dataset_type, data, schemas=None, profiler=ColumnsExistProfiler,
     else:
         raise ValueError("Unknown dataset_type " + str(dataset_type))
 
+
 def candidate_getter_is_on_temporary_notimplemented_list(context, getter):
-    if context in ["sqlite", "postgresql", "mysql"]:
+    if context in ["sqlite"]:
         return getter in [
             'get_column_modes',
-            'get_column_stdev',
+            'get_column_stdev'
+        ]
+    if context in ["postgresql", "mysql"]:
+        return getter in [
+            'get_column_modes'
         ]
     if context == 'SparkDFDataset':
-        return getter in [
-            'get_column_median',
-        ]
+        return getter in []
 
 def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type):
     if context in ["sqlite", "postgresql", "mysql"]:
@@ -269,8 +310,9 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
             "expect_column_values_to_be_dateutil_parseable",
             "expect_column_values_to_be_json_parseable",
             "expect_column_values_to_match_json_schema",
-            #"expect_column_mean_to_be_between",
-            #"expect_column_median_to_be_between",
+            # "expect_column_mean_to_be_between",
+            # "expect_column_median_to_be_between",
+            # "expect_column_quantile_values_to_be_between",
             "expect_column_stdev_to_be_between",
             #"expect_column_unique_value_count_to_be_between",
             #"expect_column_proportion_of_unique_values_to_be_between",
@@ -303,10 +345,10 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
             # "expect_column_distinct_values_to_be_in_set",
             # "expect_column_distinct_values_to_equal_set",
             # "expect_column_distinct_values_to_contain_set",
-            "expect_column_values_to_be_between",
+            # "expect_column_values_to_be_between",
             "expect_column_values_to_be_increasing",
             "expect_column_values_to_be_decreasing",
-            "expect_column_value_lengths_to_be_between",
+            # "expect_column_value_lengths_to_be_between",
             # "expect_column_value_lengths_to_equal",
             # "expect_column_values_to_match_regex",
             # "expect_column_values_to_not_match_regex",
@@ -317,7 +359,8 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
             "expect_column_values_to_be_json_parseable",
             "expect_column_values_to_match_json_schema",
             # "expect_column_mean_to_be_between",
-            "expect_column_median_to_be_between",
+            # "expect_column_median_to_be_between",            
+            # "expect_column_quantile_values_to_be_between",
             # "expect_column_stdev_to_be_between",
             # "expect_column_unique_value_count_to_be_between",
             # "expect_column_proportion_of_unique_values_to_be_between",
@@ -398,7 +441,12 @@ def evaluate_json_test(data_asset, expectation_type, test):
 
             elif key == 'observed_value':
                 if 'tolerance' in test:
-                    assert np.allclose(result['result']['observed_value'], value, rtol=test['tolerance'])
+                    if isinstance(value, dict):
+                        assert set(value.keys()) == set(result["result"]["observed_value"].keys())
+                        for k,v in value.items():
+                            assert np.allclose(result["result"]["observed_value"][k], v, rtol=test["tolerance"])
+                    else:
+                        assert np.allclose(result['result']['observed_value'], value, rtol=test['tolerance'])
                 else:
                     assert value == result['result']['observed_value']
 

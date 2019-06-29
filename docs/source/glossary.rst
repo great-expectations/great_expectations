@@ -63,6 +63,7 @@ Aggregate functions
 * :func:`expect_column_distinct_values_to_equal_set <great_expectations.dataset.dataset.Dataset.expect_column_distinct_values_to_equal_set>`
 * :func:`expect_column_mean_to_be_between <great_expectations.dataset.dataset.Dataset.expect_column_mean_to_be_between>`
 * :func:`expect_column_median_to_be_between <great_expectations.dataset.dataset.Dataset.expect_column_median_to_be_between>`
+* :func:`expect_column_quantile_values_to_be_between <great_expectations.dataset.dataset.Dataset.expect_column_quantile_values_to_be_between>`
 * :func:`expect_column_stdev_to_be_between <great_expectations.dataset.dataset.Dataset.expect_column_stdev_to_be_between>`
 * :func:`expect_column_unique_value_count_to_be_between <great_expectations.dataset.dataset.Dataset.expect_column_unique_value_count_to_be_between>`
 * :func:`expect_column_proportion_of_unique_values_to_be_between <great_expectations.dataset.dataset.Dataset.expect_column_proportion_of_unique_values_to_be_between>`

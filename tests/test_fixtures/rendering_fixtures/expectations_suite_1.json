@@ -1,5 +1,6 @@
 {
-    "dataset_name": null,
+    "data_asset_name": null,
+    "expectation_suite_name": "default",
     "meta": {
         "great_expectations.__version__": "0.4.5"
     },
