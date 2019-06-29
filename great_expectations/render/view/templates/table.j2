@@ -1,4 +1,4 @@
-<div {{ content_block | render_styling }}>
+<div {{ content_block | render_styling_from_string_template }}>
     <h5>{{content_block["header"]}}</h5>
     <table style="width: 100%">
         {% for row in content_block["table_rows"] %}

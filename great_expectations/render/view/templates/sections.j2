@@ -18,10 +18,20 @@
                     {% include 'value_list.j2' %}
 
                 {% elif content_block["content_block_type"] == "bullet_list" %}
-                    <div {{ content_block | render_styling }}>
+                    <div {{ content_block | render_styling_from_string_template }}>
+                        {% if "header" in content_block %}
+                        <h5>{{ content_block["header"] }}</h5>
+                        {% endif %}
+                        {% if "sub_header" in content_block %}
+                        <h6>{{ content_block["sub_header"] }}</h6>
+                        {% endif %}
+                        {% if "styling" in content_block and "dom_parent" in content_block["styling"] %}
+                        <ul {{ content_block["styling"]["dom_parent"] | render_styling }}>
+                        {% else %}
                         <ul>
+                        {% endif %}
                             {% for bullet_point in content_block["bullet_list"] %}
-                                <li {{ bullet_point | render_styling }}>{{ bullet_point | render_string_template }}</li>
+                                <li {{ bullet_point | render_styling_from_string_template }}>{{ bullet_point | render_string_template }}</li>
                             {% endfor %}
                         </ul>
                     </div>
