@@ -203,14 +203,31 @@ def test_cli_init(tmp_path_factory, filesystem_csv_2):
         open(os.path.join(basedir, "great_expectations/great_expectations.yml"), "r"))
     assert config["datasources"]["data__dir"]["type"] == "pandas"
 
-    assert os.path.isfile(os.path.join(
-        basedir, "great_expectations/data_documentation/data__dir/default/Titanic/BasicDatasetProfiler.html"))
+    assert os.path.isfile(
+        os.path.join(
+            basedir,
+            "great_expectations/expectations/data__dir/default/Titanic/BasicDatasetProfiler.json"
+        )
+    )
 
-    assert os.path.isfile(os.path.join(
-        basedir, "great_expectations/expectations/data__dir/default/Titanic/BasicDatasetProfiler.json"))
+    assert os.path.isfile(
+        os.path.join(
+            basedir,
+            "great_expectations/fixtures/validations/data__dir/default/Titanic/BasicDatasetProfiler.json")
+    )
 
-    assert os.path.isfile(os.path.join(
-        basedir, "great_expectations/fixtures/validations/data__dir/default/Titanic/BasicDatasetProfiler.json"))
+    assert os.path.isfile(
+        os.path.join(
+            basedir,
+            "great_expectations/data_documentation/data__dir/default/Titanic/BasicDatasetProfiler.html")
+    )
+
+    assert os.path.getsize(
+        os.path.join(
+            basedir,
+            "great_expectations/data_documentation/data__dir/default/Titanic/BasicDatasetProfiler.html"
+        )
+    ) > 0
 
     os.chdir(curdir)
 
