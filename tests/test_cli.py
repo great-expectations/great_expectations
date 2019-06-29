@@ -1,6 +1,7 @@
 # Since our cli produces unicode output, but we want tests in python2 as well
 from __future__ import unicode_literals
 
+from datetime import datetime
 from click.testing import CliRunner
 import great_expectations.version
 from great_expectations.cli import cli
@@ -15,7 +16,6 @@ from ruamel.yaml import YAML
 yaml = YAML()
 yaml.default_flow_style = False
 
-from datetime import datetime
 try:
     from unittest import mock
 except ImportError:
@@ -170,11 +170,16 @@ def test_cli_evaluation_parameters(capsys):
     assert json_result['evaluation_parameters'] == expected_evaluation_parameters
 
 
-def test_cli_init(tmp_path_factory):
+def test_cli_init(tmp_path_factory, filesystem_csv_2):
     basedir = tmp_path_factory.mktemp("test_cli_init_diff")
     basedir = str(basedir)
     os.makedirs(os.path.join(basedir, "data"))
     curdir = os.path.abspath(os.getcwd())
+    shutil.copy(
+        "./tests/test_sets/Titanic.csv",
+        str(os.path.join(basedir, "data/Titanic.csv"))
+    )
+
     os.chdir(basedir)
 
     runner = CliRunner()
@@ -191,6 +196,15 @@ def test_cli_init(tmp_path_factory):
     config = yaml.load(
         open(os.path.join(basedir, "great_expectations/great_expectations.yml"), "r"))
     assert config["datasources"]["data__dir"]["type"] == "pandas"
+
+    assert os.path.isfile(os.path.join(
+        basedir, "great_expectations/data_documentation/data__dir/default/Titanic/BasicDatasetProfiler.html"))
+
+    assert os.path.isfile(os.path.join(
+        basedir, "great_expectations/expectations/data__dir/default/Titanic/BasicDatasetProfiler.json"))
+
+    assert os.path.isfile(os.path.join(
+        basedir, "great_expectations/fixtures/validations/data__dir/default/Titanic/BasicDatasetProfiler.json"))
 
     os.chdir(curdir)
 
@@ -228,7 +242,7 @@ def test_cli_profile(empty_data_context, filesystem_csv_2, capsys):
         cli, ["profile", "my_datasource", "-d", project_root_dir])
 
     captured = capsys.readouterr()
-    
+
     assert "Profiling 'my_datasource' with 'BasicDatasetProfiler'" in captured.out
     assert "Note: You will need to review and revise Expectations before using them in production." in captured.out
     logger.removeHandler(handler)
