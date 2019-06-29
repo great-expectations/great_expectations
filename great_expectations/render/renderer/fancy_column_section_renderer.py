@@ -34,7 +34,7 @@ class FancyDescriptiveColumnSectionRenderer(ColumnSectionRenderer):
 
         content_blocks = []
         cls._render_header(evrs, content_blocks)
-        cls._render_expectation_types(evrs, content_blocks)
+        # cls._render_expectation_types(evrs, content_blocks)
         # cls._render_column_type(evrs, content_blocks)
         cls._render_overview_table(evrs, content_blocks)
         cls._render_stats_table(evrs, content_blocks)
@@ -159,36 +159,57 @@ class FancyDescriptiveColumnSectionRenderer(ColumnSectionRenderer):
         )
         evrs = [evr for evr in [
             unique_n, unique_proportion, null_evr] if evr is not None]
+
         if len(evrs) > 0:
-            content_blocks.append(
-                TableContentBlockRenderer.render(evrs)
-            )
+            new_content_block = TableContentBlockRenderer.render(evrs)
+            new_content_block["header"] = "Properties"
+            new_content_block["styling"] = {
+                "classes": ["col-4"],
+                "styles": {
+                    "margin-top": "20px"
+                }
+            }
+            content_blocks.append(new_content_block)
 
     @classmethod
     def _render_stats_table(cls, evrs, content_blocks):
-        min_evr = cls._find_evr_by_type(
-            evrs,
-            "expect_column_min_to_be_between"
-        )
-        mean_evr = cls._find_evr_by_type(
-            evrs,
-            "expect_column_mean_to_be_between"
-        )
-        max_evr = cls._find_evr_by_type(
-            evrs,
-            "expect_column_max_to_be_between"
-        )
-        evrs = [evr for evr in [min_evr, mean_evr, max_evr] if evr is not None]
+        # min_evr = cls._find_evr_by_type(
+        #     evrs,
+        #     "expect_column_min_to_be_between"
+        # )
+        # mean_evr = cls._find_evr_by_type(
+        #     evrs,
+        #     "expect_column_mean_to_be_between"
+        # )
+        # max_evr = cls._find_evr_by_type(
+        #     evrs,
+        #     "expect_column_max_to_be_between"
+        # )
+        # evrs = [evr for evr in [min_evr, mean_evr, max_evr] if evr is not None]
 
-        # "Mean", "446"
-        # "Minimum", "1"
-        # "Maximum", "891"
-        # "Zeros (%)", "0.0%"
+        # if len(evrs) > 0:
+        #     content_blocks.append(
+        #         TableContentBlockRenderer.render(evrs)
+        #     )
 
-        if len(evrs) > 0:
-            content_blocks.append(
-                TableContentBlockRenderer.render(evrs)
-            )
+        table_rows = [
+            ["Mean", "446", ],
+            ["Minimum", "1", ],
+            ["Maximum", "891", ],
+            ["Zeros (%)", "0.0%", ],
+        ]
+
+        content_blocks.append({
+            "content_block_type": "table",
+            "header": "Statistics",
+            "table_rows": table_rows,
+            "styling": {
+                "classes": ["col-4"],
+                "styles": {
+                    "margin-top": "20px"
+                }
+            },
+        })
 
     @classmethod
     def _render_values_set(cls, evrs, content_blocks):
