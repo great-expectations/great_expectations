@@ -35,6 +35,9 @@ class DescriptiveOverviewSectionRenderer(Renderer):
         content_blocks.append({
             "content_block_type": "header",
             "header": "Overview",
+            "styling": {
+                "classes": ["col-12"]
+            }
         })
 
     @classmethod

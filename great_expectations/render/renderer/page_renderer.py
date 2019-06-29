@@ -3,6 +3,9 @@ from .column_section_renderer import (
     DescriptiveColumnSectionRenderer,
     PrescriptiveColumnSectionRenderer,
 )
+from .fancy_column_section_renderer import (
+    FancyDescriptiveColumnSectionRenderer,
+)
 from .other_section_renderer import (
     DescriptiveOverviewSectionRenderer,
 )
@@ -61,6 +64,6 @@ class DescriptivePageRenderer(Renderer):
             "renderer_type": "DescriptivePageRenderer",
             "sections":
                 [DescriptiveOverviewSectionRenderer.render(validation_results)] +
-                [DescriptiveColumnSectionRenderer.render(
+                [FancyDescriptiveColumnSectionRenderer.render(
                     columns[column]) for column in ordered_columns]
         }
