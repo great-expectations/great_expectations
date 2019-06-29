@@ -1,5 +1,6 @@
 import json
 from string import Template
+from collections import defaultdict
 
 from .renderer import Renderer
 from .content_block import ValueListContentBlockRenderer
@@ -33,6 +34,7 @@ class FancyDescriptiveColumnSectionRenderer(ColumnSectionRenderer):
 
         content_blocks = []
         cls._render_header(evrs, content_blocks)
+        cls._render_expectation_types(evrs, content_blocks)
         # cls._render_column_type(evrs, content_blocks)
         cls._render_overview_table(evrs, content_blocks)
         cls._render_stats_table(evrs, content_blocks)
@@ -71,34 +73,75 @@ class FancyDescriptiveColumnSectionRenderer(ColumnSectionRenderer):
     @classmethod
     def _render_header(cls, evrs, content_blocks):
 
-        column_name = get_column_name_from_evr_list(evrs)
-        column_type = get_hacky_column_type_from_evr_list(evrs)
+        # NOTE: This logic is brittle
+        try:
+            column_name = evrs[0]["expectation_config"]["kwargs"]["column"]
+        except KeyError:
+            column_name = "Table-level expectations"
+
+        try:
+            column_type_list = cls._find_evr_by_type(
+                evrs, "expect_column_values_to_be_in_type_list"
+            )["expectation_config"]["kwargs"]["type_list"]
+            print(column_type_list)
+            column_type = ", ".join(column_type_list)
+
+        except TypeError:
+            column_type = "None"
+
+        # assert False
 
         content_blocks.append({
             "content_block_type": "header",
             "header": column_name,
             "sub_header": column_type,
+            # {
+            #     "template": column_type,
+            # },
             "styling": {
-                "classes": ["col-4"]
+                "classes": ["col-12"]
             }
         })
 
+    # @classmethod
+    # def _render_column_type(cls, evrs, content_blocks):
+    #     new_block = None
+    #     type_evr = cls._find_evr_by_type(
+    #         evrs,
+    #         "expect_column_values_to_be_of_type"
+    #     )
+    #     if type_evr:
+    #         # Kinda weird to be pulling *descriptive* info out of expectation kwargs
+    #         # Maybe at least check success?
+    #         type_ = type_evr["expectation_config"]["kwargs"]["type_"]
+    #         new_block = {
+    #             "content_block_type": "text",
+    #             "content": [type_]
+    #         }
+    #         content_blocks.append(new_block)
+
     @classmethod
-    def _render_column_type(cls, evrs, content_blocks):
-        new_block = None
-        type_evr = cls._find_evr_by_type(
-            evrs,
-            "expect_column_values_to_be_of_type"
-        )
-        if type_evr:
-            # Kinda weird to be pulling *descriptive* info out of expectation kwargs
-            # Maybe at least check success?
-            type_ = type_evr["expectation_config"]["kwargs"]["type_"]
-            new_block = {
-                "content_block_type": "text",
-                "content": [type_]
-            }
-            content_blocks.append(new_block)
+    def _render_expectation_types(cls, evrs, content_blocks):
+        # NOTE: This function is an exact dupe of other_section_renderer.DescriptiveOverviewSectionRenderer._render_expectation_types
+
+        type_counts = defaultdict(int)
+
+        for evr in evrs:
+            type_counts[evr["expectation_config"]["expectation_type"]] += 1
+
+        table_rows = sorted(type_counts.items(), key=lambda kv: -1*kv[1])
+
+        content_blocks.append({
+            "content_block_type": "table",
+            "header": "Expectation types",
+            "table_rows": table_rows,
+            "styling": {
+                "classes": ["col-12"],
+                "styles": {
+                    "margin-top": "20px"
+                }
+            },
+        })
 
     @classmethod
     def _render_overview_table(cls, evrs, content_blocks):
