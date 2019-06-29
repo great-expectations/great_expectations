@@ -32,7 +32,7 @@ from great_expectations.datasource import (
 )
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.renderer import DescriptivePageRenderer, PrescriptivePageRenderer
-from great_expectations.render.view import DescriptivePageView
+from great_expectations.render.view import PageView
 
 
 from .expectation_explorer import ExpectationExplorer
