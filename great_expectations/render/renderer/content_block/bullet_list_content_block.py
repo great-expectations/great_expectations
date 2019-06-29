@@ -307,10 +307,16 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
             ["column_list"]
         )
 
-        # FIXME: This is slightly wrong, since the whole string (including commas) will get syntax highlighting.
-        # It would be better to have each element highlighted separately, but I need to research methods to do this elegantly.
-        params["column_list_str"] = ", ".join(params["column_list"])
-        template_str = "This table should have these columns in this order: $column_list_str"
+        if params["column_list"] == None:
+            # NOTE: I don't know how I feel about these underspecified expectation messages.
+            template_str = "This table should have a list of columns in a specific order, but that order is not specified."
+
+        else:
+            # FIXME: This is slightly wrong, since the whole string (including commas) will get syntax highlighting.
+            # It would be better to have each element highlighted separately.
+            # See `expect_column_distinct_values_to_be_in_set`
+            params["column_list_str"] = ", ".join(params["column_list"])
+            template_str = "This table should have these columns in this order: $column_list_str"
 
         return [{
             "template": template_str,
@@ -381,16 +387,25 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
             ["column", "value_set"],
         )
 
-        for i, v in enumerate(params["value_set"]):
-            params["v__"+str(i)] = v
-        values_string = " ".join(
-            ["$v__"+str(i) for i, v in enumerate(params["value_set"])]
-        )
+        if params["value_set"] == None:
 
-        if include_column_name:
-            template_str = "$column values must belong to this set: "+values_string+"."
+            if include_column_name:
+                template_str = "$column values must belong to a set, but that set is not specified."
+            else:
+                template_str = "values must belong to a set, but that set is not specified."
+
         else:
-            template_str = "values must belong to this set: "+values_string+"."
+
+            for i, v in enumerate(params["value_set"]):
+                params["v__"+str(i)] = v
+            values_string = " ".join(
+                ["$v__"+str(i) for i, v in enumerate(params["value_set"])]
+            )
+
+            if include_column_name:
+                template_str = "$column values must belong to this set: "+values_string+"."
+            else:
+                template_str = "values must belong to this set: "+values_string+"."
 
         return [{
             "template": template_str,
@@ -489,8 +504,10 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
         )
 
         if include_column_name:
+            # NOTE: Localization will be tricky for this template_str.
             template_str = "$column values must belong to this set: "+values_string+"."
         else:
+            # NOTE: Localization will be tricky for this template_str.
             template_str = "values must belong to this set: "+values_string+"."
 
         return [{
