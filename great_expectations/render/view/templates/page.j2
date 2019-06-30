@@ -48,7 +48,7 @@
         </div>
         <div class="col-9">
         {% for section in sections %}
-          {% set section_loop = loop %}
+          {% set section_loop = loop -%}
           {% include 'section.j2' %}
         {% endfor %}
         </div>
