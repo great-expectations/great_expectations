@@ -213,7 +213,7 @@ def test_rendering_components_with_styling():
     <h5 id="content-block-2-subheader"  >
         <span class="yy" >aaa</span> <span class="xx" >bbb</span> <span class="xx" >ccc</span>
     </h5>
-    <table id="content-block-2-body" hello="hi" class="body_foo" body="baz" style="body:bar;" >
+    <table id="content-block-2-body" class="body_foo" body="baz" style="body:bar;" >
         <tr>
             <td id="cell-1-1">Mean</td><td id="cell-1-2">446</td></tr><tr>
             <td id="cell-2-1">Minimum</td><td id="cell-2-2">1</td></tr></table>
@@ -269,7 +269,7 @@ def test_render_table_component():
     <h4 id="section-1-content-block-2-header"  >
         Overview
     </h4>
-    <table id="section-1-content-block-2-body" hello="hi" >
+    <table id="section-1-content-block-2-body" >
         <tr>
             <td id="cell-1-1">Mean</td><td id="cell-1-2">446</td></tr><tr>
             <td id="cell-2-1">Minimum</td><td id="cell-2-2">1</td></tr></table>

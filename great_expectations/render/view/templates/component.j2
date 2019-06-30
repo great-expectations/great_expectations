@@ -60,7 +60,7 @@
             vegaEmbed('#{{content_block_id}}-body', vlSpec, {actions: false}).then(result=>console.log(result)).catch(console.warn);
         </script>
     {%- elif content_block["content_block_type"] == "table" -%}
-        <table id="{{content_block_id}}-body" hello="hi" {{ content_block_body_styling }}>
+        <table id="{{content_block_id}}-body" {{ content_block_body_styling }}>
         {% for row in content_block["table_rows"] -%}
             <tr>
             {% set rowloop = loop -%}
