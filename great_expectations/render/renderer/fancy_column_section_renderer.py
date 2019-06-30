@@ -154,12 +154,20 @@ class FancyDescriptiveColumnSectionRenderer(ColumnSectionRenderer):
             "bullet_list": bullet_list,
             "styling": {
                 "classes": ["col-12"],
-                "dom_parent": {
-                    "classes": ["list-group"],
-                },
                 "styles": {
                     "margin-top": "20px"
-                }
+                },
+                "header": {
+                    "attributes": {
+                        "data-toggle": "collapse",
+                        "href": "#section-{{section_loop}}-content-block-{{content_block_loop}}",
+                        "aria-expanded": "false",
+                        "aria-controls": "collapseExample",
+                    },
+                },
+                "body": {
+                    "classes": ["list-group"],
+                },
             },
         })
 
@@ -184,10 +192,17 @@ class FancyDescriptiveColumnSectionRenderer(ColumnSectionRenderer):
             new_content_block = TableContentBlockRenderer.render(evrs)
             new_content_block["header"] = "Properties"
             new_content_block["styling"] = {
-                "classes": ["col-4"],
+                "classes": ["col-4", ],
                 "styles": {
                     "margin-top": "20px"
+                },
+                "body": {
+                    "classes": ["table"],
+                    "styles": {
+                        "width": "100%"
+                    },
                 }
+
             }
             content_blocks.append(new_content_block)
 

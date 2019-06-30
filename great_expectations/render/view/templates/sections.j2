@@ -6,7 +6,8 @@
             {% set section_loop = loop %}
             {% for content_block in section["content_blocks"] %}
                 {% set content_block_loop = loop %}
-                {% if content_block["content_block_type"] == "header" %}
+                {% include 'content_block.j2' %}
+                {# {% if content_block["content_block_type"] == "header" %}
                     {% include 'header.j2' %}
                 {% elif content_block["content_block_type"] == "text" %}
                     <div class="col-12">
@@ -47,7 +48,7 @@
                 {% elif content_block["content_block_type"] == "table" %}
                     {% include 'table.j2' %}
                 {% elif content_block["content_block_type"] == "example_list" %}
-                {% endif %}
+                {% endif %} #}
             {% endfor %}
         </div>
     </div>

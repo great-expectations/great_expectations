@@ -59,9 +59,12 @@ class DescriptiveOverviewSectionRenderer(Renderer):
             "header": "Dataset info",
             "table_rows": table_rows,
             "styling": {
-                "classes": ["col-6"],
+                "classes": ["col-6", "table-responsive"],
                 "styles": {
                     "margin-top": "20px"
+                },
+                "body": {
+                    "classes": ["table", "table-sm"]
                 }
             },
         })
@@ -85,9 +88,12 @@ class DescriptiveOverviewSectionRenderer(Renderer):
             "header": "Variable types",
             "table_rows": table_rows,
             "styling": {
-                "classes": ["col-6"],
+                "classes": ["col-6", "table-responsive", ],
                 "styles": {
                     "margin-top": "20px"
+                },
+                "body": {
+                    "classes": ["table", "table-sm"]
                 }
             },
         })
@@ -169,6 +175,9 @@ class DescriptiveOverviewSectionRenderer(Renderer):
                 "classes": ["col-12"],
                 "styles": {
                     "margin-top": "20px"
+                },
+                "body": {
+                    "classes": ["table", "table-sm"]
                 }
             },
         })
