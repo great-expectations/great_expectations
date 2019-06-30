@@ -219,6 +219,11 @@ def test_rendering_components_with_styling():
                 "styles": {"header": "bar"},
                 "attributes": {"header": "baz"},
             },
+            "subheader": {
+                "classes": ["subheader_foo"],
+                "styles": {"subheader": "bar"},
+                "attributes": {"subheader": "baz"},
+            },
             "body": {
                 "classes": ["body_foo"],
                 "styles": {"body": "bar"},
@@ -238,7 +243,7 @@ def test_rendering_components_with_styling():
     <h4 id="section-1-content-block-2-header" class="header_foo" header="baz" style="header:bar;" >
         <span class="y" >AAA</span> <span class="x" >BBB</span> <span class="x" >CCC</span>
     </h4>
-    <h5 id="section-1-content-block-2-subheader" >
+    <h5 id="section-1-content-block-2-subheader" class="subheader_foo" subheader="baz" style="subheader:bar;" >
         <span class="yy" >aaa</span> <span class="xx" >bbb</span> <span class="xx" >ccc</span>
     </h5>
     <table id="section-1-content-block-2-body" class="body_foo" body="baz" style="body:bar;" >
