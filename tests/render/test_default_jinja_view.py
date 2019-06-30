@@ -48,6 +48,8 @@ def test_render_DefaultJinjaPageView(document_snapshot, html_snapshot):
     html = DefaultJinjaPageView.render(document_snapshot)
     print(html)
     # TODO: Use above print to set up snapshot test once we like the result
+
+    assert "This is a beta feature! Expect changes in API, behavior, and design." in html
     assert html == html_snapshot
 
 
@@ -88,15 +90,16 @@ def test_render_DefaultJinjaPageView(document_snapshot, html_snapshot):
 #     rendered_doc = ge.render.view.view.DefaultJinjaSectionView.render(section)
 
 
-# def test_render_header_component():
-#     header_component_content = {
-#         # "component_type": "header",
-#         "content_block_type": "header",
-#         "header": "Overview",
-#     }
-#     rendered_doc = ge.render.view.view.DefaultJinjaComponentView.render(
-#         content_block=header_component_content,
-#         section_loop=1,
-#         content_block_loop=2,
-#     )
-#     print(rendered_doc)
+def test_render_header_component():
+    header_component_content = {
+        # "component_type": "header",
+        "content_block_type": "header",
+        "header": "Overview",
+    }
+    rendered_doc = ge.render.view.view.DefaultJinjaComponentView.render(
+        {"content_block": header_component_content},
+        section_loop=1,
+        content_block_loop=2,
+    )
+    print(rendered_doc)
+    assert False
