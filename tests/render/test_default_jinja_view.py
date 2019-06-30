@@ -31,12 +31,24 @@ def document_snapshot():
         return json.load(infile)
 
 
-def test_render_descriptive_page_view(validation_results, document_snapshot):
-    document = DescriptivePageRenderer.render(validation_results)
-    print(json.dumps(document, indent=2))
-    # print(DefaultJinjaPageView.render(renderer))
+@pytest.fixture()
+def html_snapshot():
+    with open("./tests/render/fixtures/html_snapshot.html", "r") as infile:
+        return infile.read()
+
+
+# def test_render_descriptive_page_view(validation_results, document_snapshot):
+#     document = DescriptivePageRenderer.render(validation_results)
+#     print(json.dumps(document, indent=2))
+#     # print(DefaultJinjaPageView.render(renderer))
+#     # TODO: Use above print to set up snapshot test once we like the result
+#     # assert document == document_snapshot
+
+def test_render_DefaultJinjaPageView(document_snapshot, html_snapshot):
+    html = DefaultJinjaPageView.render(document_snapshot)
+    print(html)
     # TODO: Use above print to set up snapshot test once we like the result
-    # assert document == document_snapshot
+    assert html == html_snapshot
 
 
 # def test_render_section_page():
@@ -78,8 +90,13 @@ def test_render_descriptive_page_view(validation_results, document_snapshot):
 
 # def test_render_header_component():
 #     header_component_content = {
-#         "component_type": "header",
+#         # "component_type": "header",
+#         "content_block_type": "header",
 #         "header": "Overview",
 #     }
 #     rendered_doc = ge.render.view.view.DefaultJinjaComponentView.render(
-#         header_component_content)
+#         content_block=header_component_content,
+#         section_loop=1,
+#         content_block_loop=2,
+#     )
+#     print(rendered_doc)

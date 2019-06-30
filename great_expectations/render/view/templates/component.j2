@@ -34,7 +34,7 @@
             {{ content_block["header"] }}
         </h3>
     {% elif content_block["content_block_type"] == "text" %}
-        <p id="section-{{section_loop.index}}-content-block-{{content_block_loop.index}}-body" {{ content_block_body_styling }}>
+        <p id="{{content-block-id}}-body" {{ content_block_body_styling }}>
             {{content_block["content"][0]}}
         </p>
     {% elif content_block["content_block_type"] == "value_list" %}
