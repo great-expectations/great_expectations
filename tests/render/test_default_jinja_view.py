@@ -92,6 +92,51 @@ def test_render_DefaultJinjaPageView(document_snapshot, html_snapshot):
 #     rendered_doc = ge.render.view.view.DefaultJinjaSectionView.render(section)
 
 
+def test_rendering_components_without_sectino_loop_index():
+    header_component_content = {
+        # "component_type": "header",
+        "content_block_type": "header",
+        "header": "Overview",
+    }
+    rendered_doc = ge.render.view.view.DefaultJinjaComponentView.render({
+        "content_block": header_component_content,
+        "content_block_loop": {"index": 2},
+    })
+    print(rendered_doc)
+    assert rendered_doc == \
+        """
+<div id="content-block-2" >
+    <h3 id="content-block-2-header"  >
+        Overview
+    </h3>
+</div>"""
+
+    rendered_doc = ge.render.view.view.DefaultJinjaComponentView.render({
+        "content_block": header_component_content,
+    })
+    print(rendered_doc)
+    assert rendered_doc == \
+        """
+<div id="content-block" >
+    <h3 id="content-block-header"  >
+        Overview
+    </h3>
+</div>"""
+
+    rendered_doc = ge.render.view.view.DefaultJinjaComponentView.render({
+        "content_block": header_component_content,
+        "section_loop": {"index": 3},
+    })
+    print(rendered_doc)
+    assert rendered_doc == \
+        """
+<div id="content-block" >
+    <h3 id="content-block-header"  >
+        Overview
+    </h3>
+</div>"""
+
+
 def test_render_header_component():
     header_component_content = {
         # "component_type": "header",
@@ -105,7 +150,8 @@ def test_render_header_component():
     })
     print(rendered_doc)
     assert rendered_doc == \
-        """<div id="section-1-content-block-2" >
+        """
+<div id="section-1-content-block-2" >
     <h3 id="section-1-content-block-2-header"  >
         Overview
     </h3>
@@ -113,7 +159,7 @@ def test_render_header_component():
 
 
 def test_render_table_component():
-    header_component_content = {
+    table_component_content = {
         # "component_type": "header",
         "content_block_type": "table",
         "header": "Overview",
@@ -126,13 +172,14 @@ def test_render_table_component():
         }
     }
     rendered_doc = ge.render.view.view.DefaultJinjaComponentView.render({
-        "content_block": header_component_content,
+        "content_block": table_component_content,
         "section_loop": {"index": 1},
         "content_block_loop": {"index": 2},
     })
     print(rendered_doc)
     assert rendered_doc == \
-        """<div id="section-1-content-block-2" class="col-4" >
+        """
+<div id="section-1-content-block-2" class="col-4" >
     <h4 id="section-1-content-block-2-header"  >
         Overview
     </h4>
