@@ -137,6 +137,92 @@ def test_rendering_components_without_section_loop_index():
 </div>"""
 
 
+def test_rendering_components_with_styling():
+    # Medium-complicated example to verify that all the things are correctly piped to all the places
+
+    header_component_content = {
+        # "component_type": "table",
+        "content_block_type": "table",
+        "header": {
+            "template": "$var1 $var2 $var3",
+            "params": {
+                "var1": "AAA",
+                "var2": "BBB",
+                "var3": "CCC",
+            },
+            "styling": {
+                "default": {
+                    "classes": ["x"]
+                },
+                "params": {
+                    "var1": {
+                        "classes": ["y"]
+                    }
+                }
+            }
+        },
+        "subheader": {
+            "template": "$var1 $var2 $var3",
+            "params": {
+                "var1": "aaa",
+                "var2": "bbb",
+                "var3": "ccc",
+            },
+            "styling": {
+                "default": {
+                    "classes": ["xx"]
+                },
+                "params": {
+                    "var1": {
+                        "classes": ["yy"]
+                    }
+                }
+            }
+        },
+        "table_rows": [
+            ["Mean", "446"],
+            ["Minimum", "1"],
+        ],
+        "styling": {
+            "classes": ["root_foo"],
+            "styles": {"root": "bar"},
+            "attributes": {"root": "baz"},
+            "header": {
+                "classes": ["header_foo"],
+                "styles": {"header": "bar"},
+                "attributes": {"header": "baz"},
+            },
+            "body": {
+                "classes": ["body_foo"],
+                "styles": {"body": "bar"},
+                "attributes": {"body": "baz"},
+            }
+        }
+    }
+    rendered_doc = ge.render.view.view.DefaultJinjaComponentView.render({
+        "content_block": header_component_content,
+        "content_block_loop": {"index": 2},
+    })
+    print(rendered_doc)
+    assert rendered_doc == \
+        """
+<div id="content-block-2" class="root_foo" root="baz" style="root:bar;" >
+    <h4 id="content-block-2-header" class="header_foo" header="baz" style="header:bar;"  >
+        <span class="y" >AAA</span> <span class="x" >BBB</span> <span class="x" >CCC</span>
+    </h4>
+    <h5 id="content-block-2-subheader"  >
+        <span class="yy" >aaa</span> <span class="xx" >bbb</span> <span class="xx" >ccc</span>
+    </h5>
+    <table id="content-block-2-body" hello="hi" class="body_foo" body="baz" style="body:bar;" >
+        <tr>
+            <td id="cell-1-1">Mean</td><td id="cell-1-2">446</td></tr><tr>
+            <td id="cell-2-1">Minimum</td><td id="cell-2-2">1</td></tr></table>
+</div>"""
+
+
+### Test all the component types ###
+
+
 def test_render_header_component():
     header_component_content = {
         # "component_type": "header",
