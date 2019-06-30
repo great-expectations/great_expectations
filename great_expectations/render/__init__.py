@@ -1,1 +1,1 @@
-from .view import PageView
+from .view import DefaultJinjaPageView

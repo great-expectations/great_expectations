@@ -139,7 +139,7 @@ class PrettyPrintTemplate(object):
 # Abe 2019/06/26: This View should probably actually be called JinjaView or something similar.
 # Down the road, I expect to wind up with class hierarchy along the lines of:
 #   View > JinjaView > GEContentBlockJinjaView
-class View(object):
+class DefaultJinjaView(object):
     """Defines a method for converting a document to human-consumable form"""
 
     _template = NoOpTemplate
@@ -174,17 +174,13 @@ class View(object):
         return template
 
 
-class ColumnHeaderView(View):
-    _template = "header.j2"
-
-
-class ValueListView(View):
-    _template = "value_list.j2"
-
-
-class ColumnSectionView(View):
-    _template = "sections.j2"
-
-
-class PageView(View):
+class DefaultJinjaPageView(DefaultJinjaView):
     _template = "page.j2"
+
+
+class DefaultJinjaSectionView(DefaultJinjaView):
+    _template = "section.j2"
+
+
+class DefaultJinjaComponentView(DefaultJinjaView):
+    _template = "component.j2"
