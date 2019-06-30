@@ -145,12 +145,12 @@ class DefaultJinjaView(object):
     _template = NoOpTemplate
 
     @classmethod
-    def render(cls, document, template=None):
+    def render(cls, document, template=None, **kwargs):
         if template is None:
             template = cls._template
 
         t = cls._get_template(template)
-        return t.render(document)
+        return t.render(document, **kwargs)
 
     @classmethod
     def _get_template(cls, template):
