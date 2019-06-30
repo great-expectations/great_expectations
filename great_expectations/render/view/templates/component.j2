@@ -19,10 +19,10 @@
 
 <div id="{{content_block_id}}" {{ content_block | render_styling_from_string_template }}>
     {% if "header" in content_block and content_block["content_block_type"] != "header" -%}
-        <h4 id="{{content_block_id}}-header" {{ content_block_header_styling }} >
-            {{ content_block["header"] }}
-        </h4>
-    {%- endif -%}
+    <h4 id="{{content_block_id}}-header" {{ content_block_header_styling }} >
+        {{ content_block["header"] }}
+    </h4>
+    {% endif -%}
     {%- if "subheader" in content_block -%}
         <h5 id="{{content_block_id}}-subheader" {{ content_block_subheader_styling }} >
             {{ content_block["subheader"] }}
@@ -55,14 +55,14 @@
         </script>
     {%- elif content_block["content_block_type"] == "table" -%}
         <table id="{{content_block_id}}-body" hello="hi" {{ content_block_body_styling }}>
-            {% for row in content_block["table_rows"] -%}
+        {% for row in content_block["table_rows"] -%}
             <tr>
-                {% set rowloop = loop -%}
-                {% for cell in row -%}
-                    <td id="cell-{{ rowloop.index }}-{{ loop.index }}">{{ cell | render_string_template }}</td>
-                {% endfor -%}
+            {% set rowloop = loop -%}
+            {% for cell in row -%}
+                <td id="cell-{{ rowloop.index }}-{{ loop.index }}">{{ cell | render_string_template }}</td>
+            {%- endfor -%}
             </tr>
-            {% endfor -%}
+        {%- endfor -%}
         </table>
     {%- elif content_block["content_block_type"] == "example_list" -%}
     {% endif %}
