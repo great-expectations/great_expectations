@@ -150,7 +150,7 @@ class FancyDescriptiveColumnSectionRenderer(ColumnSectionRenderer):
 
         content_blocks.append({
             "content_block_type": "bullet_list",
-            "header": "Expectation types",
+            "header": 'Expectation types <span class="mr-3 triangle"></span>',
             "bullet_list": bullet_list,
             "styling": {
                 "classes": ["col-12"],
@@ -158,15 +158,20 @@ class FancyDescriptiveColumnSectionRenderer(ColumnSectionRenderer):
                     "margin-top": "20px"
                 },
                 "header": {
+                    # "classes": ["collapsed"],
                     "attributes": {
                         "data-toggle": "collapse",
-                        "href": "#section-{{section_loop.index}}-content-block-{{content_block_loop.index}}",
-                        "aria-expanded": "false",
+                        "href": "#{{content_block_id}}-body",
+                        "role": "button",
+                        "aria-expanded": "true",
                         "aria-controls": "collapseExample",
                     },
+                    "styles": {
+                        "cursor": "pointer",
+                    }
                 },
                 "body": {
-                    "classes": ["list-group"],
+                    "classes": ["list-group", "collapse"],
                 },
             },
         })

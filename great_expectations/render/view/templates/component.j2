@@ -26,7 +26,7 @@
 {% endif -%}
 <div id="{{content_block_id}}" {{ content_block | render_styling_from_string_template }}>
     {% if "header" in content_block and content_block["content_block_type"] != "header" -%}
-    <h4 id="{{content_block_id}}-header" {{ content_block_header_styling }}>
+    <h4 id="{{content_block_id}}-header" {{ content_block_header_styling | replace("{{content_block_id}}", content_block_id) }}>
         {{ content_block["header"] | render_string_template }}
     </h4>
     {% endif -%}
