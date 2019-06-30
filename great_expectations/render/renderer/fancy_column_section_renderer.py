@@ -99,7 +99,10 @@ class FancyDescriptiveColumnSectionRenderer(ColumnSectionRenderer):
             #     "template": column_type,
             # },
             "styling": {
-                "classes": ["col-12"]
+                "classes": ["col-12"],
+                "header": {
+                    "classes": ["alert", "alert-secondary"]
+                }
             }
         })
 
@@ -158,7 +161,8 @@ class FancyDescriptiveColumnSectionRenderer(ColumnSectionRenderer):
                     "margin-top": "20px"
                 },
                 "header": {
-                    # "classes": ["collapsed"],
+                    # "classes": ["alert", "alert-secondary"],
+                    "classes": ["collapsed"],
                     "attributes": {
                         "data-toggle": "collapse",
                         "href": "#{{content_block_id}}-body",
