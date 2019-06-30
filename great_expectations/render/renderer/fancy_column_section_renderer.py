@@ -160,7 +160,7 @@ class FancyDescriptiveColumnSectionRenderer(ColumnSectionRenderer):
                 "header": {
                     "attributes": {
                         "data-toggle": "collapse",
-                        "href": "#section-{{section_loop}}-content-block-{{content_block_loop}}",
+                        "href": "#section-{{section_loop.index}}-content-block-{{content_block_loop.index}}",
                         "aria-expanded": "false",
                         "aria-controls": "collapseExample",
                     },
@@ -197,7 +197,7 @@ class FancyDescriptiveColumnSectionRenderer(ColumnSectionRenderer):
                     "margin-top": "20px"
                 },
                 "body": {
-                    "classes": ["table"],
+                    "classes": ["table", "table-sm", "table-unbordered"],
                     "styles": {
                         "width": "100%"
                     },
@@ -242,6 +242,9 @@ class FancyDescriptiveColumnSectionRenderer(ColumnSectionRenderer):
                 "classes": ["col-4"],
                 "styles": {
                     "margin-top": "20px"
+                },
+                "body": {
+                    "classes": ["table", "table-sm", "table-unbordered"],
                 }
             },
         })
