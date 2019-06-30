@@ -65,7 +65,7 @@
             <tr>
             {% set rowloop = loop -%}
             {% for cell in row -%}
-                <td id="cell-{{ rowloop.index }}-{{ loop.index }}">{{ cell | render_string_template }}</td>
+                <td id="{{content_block_id}}-cell-{{ rowloop.index }}-{{ loop.index }}">{{ cell | render_string_template }}</td>
             {%- endfor -%}
             </tr>
         {%- endfor -%}

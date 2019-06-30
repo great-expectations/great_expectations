@@ -201,22 +201,23 @@ def test_rendering_components_with_styling():
     }
     rendered_doc = ge.render.view.view.DefaultJinjaComponentView.render({
         "content_block": header_component_content,
+        "section_loop": {"index": 1},
         "content_block_loop": {"index": 2},
     })
     print(rendered_doc)
     assert rendered_doc == \
         """
-<div id="content-block-2" class="root_foo" root="baz" style="root:bar;" >
-    <h4 id="content-block-2-header" class="header_foo" header="baz" style="header:bar;"  >
+<div id="section-1-content-block-2" class="root_foo" root="baz" style="root:bar;" >
+    <h4 id="section-1-content-block-2-header" class="header_foo" header="baz" style="header:bar;"  >
         <span class="y" >AAA</span> <span class="x" >BBB</span> <span class="x" >CCC</span>
     </h4>
-    <h5 id="content-block-2-subheader"  >
+    <h5 id="section-1-content-block-2-subheader"  >
         <span class="yy" >aaa</span> <span class="xx" >bbb</span> <span class="xx" >ccc</span>
     </h5>
-    <table id="content-block-2-body" class="body_foo" body="baz" style="body:bar;" >
+    <table id="section-1-content-block-2-body" class="body_foo" body="baz" style="body:bar;" >
         <tr>
-            <td id="cell-1-1">Mean</td><td id="cell-1-2">446</td></tr><tr>
-            <td id="cell-2-1">Minimum</td><td id="cell-2-2">1</td></tr></table>
+            <td id="section-1-content-block-2-cell-1-1">Mean</td><td id="section-1-content-block-2-cell-1-2">446</td></tr><tr>
+            <td id="section-1-content-block-2-cell-2-1">Minimum</td><td id="section-1-content-block-2-cell-2-2">1</td></tr></table>
 </div>"""
 
 
@@ -271,8 +272,8 @@ def test_render_table_component():
     </h4>
     <table id="section-1-content-block-2-body" >
         <tr>
-            <td id="cell-1-1">Mean</td><td id="cell-1-2">446</td></tr><tr>
-            <td id="cell-2-1">Minimum</td><td id="cell-2-2">1</td></tr></table>
+            <td id="section-1-content-block-2-cell-1-1">Mean</td><td id="section-1-content-block-2-cell-1-2">446</td></tr><tr>
+            <td id="section-1-content-block-2-cell-2-1">Minimum</td><td id="section-1-content-block-2-cell-2-2">1</td></tr></table>
 </div>"""
 
 # TODO: Add tests for the remaining component types
