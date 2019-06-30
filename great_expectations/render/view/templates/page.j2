@@ -22,6 +22,12 @@
         overflow-y: auto;
         top: 15px;
       }
+
+      .ge-section {
+        clear:both;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+      }
     </style>
 
     <script src="https://cdn.jsdelivr.net/npm/vega@5.3.5/build/vega.js"></script>
@@ -41,7 +47,10 @@
           {% block navbar %}{% include 'navbar.j2' %}{% endblock %}
         </div>
         <div class="col-9">
-          {% block sections %}{% include 'sections.j2' %}{% endblock %}
+        {% for section in sections %}
+          {% set section_loop = loop %}
+          {% include 'section.j2' %}
+        {% endfor %}
         </div>
 
       </div>
