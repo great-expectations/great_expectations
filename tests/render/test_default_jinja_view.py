@@ -92,7 +92,7 @@ def test_render_DefaultJinjaPageView(document_snapshot, html_snapshot):
 #     rendered_doc = ge.render.view.view.DefaultJinjaSectionView.render(section)
 
 
-def test_rendering_components_without_sectino_loop_index():
+def test_rendering_components_without_section_loop_index():
     header_component_content = {
         # "component_type": "header",
         "content_block_type": "header",
@@ -188,3 +188,10 @@ def test_render_table_component():
             <td id="cell-1-1">Mean</td><td id="cell-1-2">446</td></tr><tr>
             <td id="cell-2-1">Minimum</td><td id="cell-2-2">1</td></tr></table>
 </div>"""
+
+# TODO: Add tests for the remaining component types
+# * text
+# * value_list
+# * bullet_list
+# * graph
+# * example_list
