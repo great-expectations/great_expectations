@@ -10,7 +10,7 @@ from great_expectations.render.renderer import (
     PrescriptiveColumnSectionRenderer,
     PrescriptivePageRenderer,
 )
-from great_expectations.render.view import PageView
+from great_expectations.render.view import DefaultJinjaPageView
 from great_expectations.render.renderer.content_block import ValueListContentBlockRenderer
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 
@@ -35,7 +35,7 @@ def test_render_descriptive_page_renderer(validation_results):
 
 def test_render_descriptive_page_view(validation_results):
     renderer = DescriptivePageRenderer.render(validation_results)
-    print(PageView.render(renderer))
+    print(DefaultJinjaPageView.render(renderer))
     # TODO: Use above print to set up snapshot test once we like the result
     assert True
 
@@ -97,7 +97,7 @@ def test_render_profiled_fixture_expectations():
     # with open('./test.json', 'w') as f:
     #     f.write(json.dumps(rendered_json, indent=2))
 
-    rendered_page = PageView.render(rendered_json)
+    rendered_page = DefaultJinjaPageView.render(rendered_json)
     assert rendered_page != None
 
     # print(rendered_page)
@@ -119,7 +119,7 @@ def test_render_profiled_fixture_evrs():
     # with open('./test.json', 'w') as f:
     #     f.write(json.dumps(rendered_json, indent=2))
 
-    rendered_page = PageView.render(rendered_json)
+    rendered_page = DefaultJinjaPageView.render(rendered_json)
     assert rendered_page != None
 
     # print(rendered_page)
@@ -219,7 +219,7 @@ def test_full_oobe_flow():
 
     rendered_json = DescriptivePageRenderer.render(evrs)
     # print(json.dumps(rendered_json, indent=2))
-    rendered_page = PageView.render(rendered_json)
+    rendered_page = DefaultJinjaPageView.render(rendered_json)
     assert rendered_page != None
 
     print(rendered_page)

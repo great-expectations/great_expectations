@@ -2,7 +2,7 @@ import os
 import click
 
 from .util import cli_message
-from great_expectations.render import PageView
+from great_expectations.render import DefaultJinjaPageView
 
 
 def add_datasource(context):
