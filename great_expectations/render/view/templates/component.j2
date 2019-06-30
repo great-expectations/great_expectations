@@ -1,4 +1,12 @@
-{% set content_block_id = "section-"~section_loop.index~"-content-block-"~content_block_loop.index -%}
+{% if content_block_loop is defined -%}
+    {%- if section_loop is defined -%}
+        {%- set content_block_id = "section-"~section_loop.index~"-content-block-"~content_block_loop.index -%}
+    {%- else -%}
+        {%- set content_block_id = "content-block-"~content_block_loop.index -%}
+    {%- endif -%}
+{%- else -%}
+    {%- set content_block_id = "content-block" -%}
+{% endif %}
 {% if "styling" in content_block and "header" in content_block["styling"] -%}
     {% set content_block_header_styling = content_block["styling"]["header"] | render_styling -%}
 {% else -%}
