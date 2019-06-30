@@ -106,17 +106,48 @@ class DescriptiveOverviewSectionRenderer(Renderer):
         for evr in evrs["results"]:
             type_counts[evr["expectation_config"]["expectation_type"]] += 1
 
-        table_rows = sorted(type_counts.items(), key=lambda kv: -1*kv[1])
+        # table_rows = sorted(type_counts.items(), key=lambda kv: -1*kv[1])
+        bullet_list = sorted(type_counts.items(), key=lambda kv: -1*kv[1])
+
+        bullet_list = [{
+            "template": "$expectation_type $expectation_count",
+            "params": {
+                "expectation_type": tr[0],
+                "expectation_count": tr[1],
+            },
+            "styling": {
+                "classes": ["list-group-item", "d-flex", "justify-content-between", "align-items-center"],
+                "params": {
+                    "expectation_count": {
+                        "classes": ["badge", "badge-secondary", "badge-pill"],
+                    }
+                }
+            }
+        } for tr in bullet_list]
 
         content_blocks.append({
-            "content_block_type": "table",
+            "content_block_type": "bullet_list",
             "header": "Expectation types",
-            "table_rows": table_rows,
+            "bullet_list": bullet_list,
             "styling": {
                 "classes": ["col-12"],
                 "styles": {
                     "margin-top": "20px"
-                }
+                },
+                "header": {
+                    "attributes": {
+                        "data-toggle": "collapse",
+                        "href": "#section-1-content-block-5-body",
+                        "aria-expanded": "false",
+                        "aria-controls": "collapseExample",
+                    },
+                    "styles": {
+                        "cursor": "pointer"
+                    }
+                },
+                "body": {
+                    "classes": ["list-group"],
+                },
             },
         })
 
