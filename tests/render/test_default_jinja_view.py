@@ -55,41 +55,68 @@ def test_render_DefaultJinjaPageView(document_snapshot, html_snapshot):
     assert html == html_snapshot
 
 
-# def test_render_section_page():
-#     section = {
-#         "section_name": None,
-#         "component_content": [
-#             {
-#                 "component_type": "header",
-#                 "header": "Overview",
-#             },
-#             {
-#                 "component_type": "table",
-#                 "header": "Dataset info",
-#                 "table_rows": [
-#                     ["Number of variables", "12"],
-#                     ["Number of observations", "891"],
-#                 ],
-#                 "styling": {
-#                     "classes": [
-#                         "col-6",
-#                         "table-responsive"
-#                     ],
-#                     "styles": {
-#                         "margin-top": "20px"
-#                     },
-#                     "body": {
-#                         "classes": [
-#                             "table",
-#                             "table-sm"
-#                         ]
-#                     }
-#                 }
-#             }
-#         ]
-#     }
+def test_render_section_page():
+    section = {
+        "section_name": None,
+        "content_blocks": [
+            {
+                "content_block_type": "header",
+                "header": "Overview",
+            },
+            {
+                "content_block_type": "table",
+                "header": "Dataset info",
+                "table_rows": [
+                    ["Number of variables", "12"],
+                    ["Number of observations", "891"],
+                ],
+                "styling": {
+                    "classes": [
+                        "col-6",
+                        "table-responsive"
+                    ],
+                    "styles": {
+                        "margin-top": "20px"
+                    },
+                    "body": {
+                        "classes": [
+                            "table",
+                            "table-sm"
+                        ]
+                    }
+                }
+            }
+        ]
+    }
 
-#     rendered_doc = ge.render.view.view.DefaultJinjaSectionView.render(section)
+    rendered_doc = ge.render.view.view.DefaultJinjaSectionView.render({
+        "section": section,
+        "section_loop": {"index": 1},
+    })
+
+    print(rendered_doc)
+    assert rendered_doc == """\
+<div id="section-1" class="ge-section container-fluid">
+    <div class="row">
+        
+<div id="content-block-1" >
+    <h3 id="content-block-1-header" >
+        Overview
+    </h3>
+</div>
+        
+<div id="content-block-2" class="col-6 table-responsive" style="margin-top:20px;" >
+    <h4 id="content-block-2-header" >
+        Dataset info
+    </h4>
+    <table id="content-block-2-body" class="table table-sm" >
+        <tr>
+            <td id="content-block-2-cell-1-1">Number of variables</td><td id="content-block-2-cell-1-2">12</td></tr><tr>
+            <td id="content-block-2-cell-2-1">Number of observations</td><td id="content-block-2-cell-2-2">891</td></tr></table>
+</div>
+        
+    </div>
+</div>"""
 
 
 def test_rendering_components_without_section_loop_index():
@@ -106,7 +133,7 @@ def test_rendering_components_without_section_loop_index():
     assert rendered_doc == \
         """
 <div id="content-block-2" >
-    <h3 id="content-block-2-header"  >
+    <h3 id="content-block-2-header" >
         Overview
     </h3>
 </div>"""
@@ -118,7 +145,7 @@ def test_rendering_components_without_section_loop_index():
     assert rendered_doc == \
         """
 <div id="content-block" >
-    <h3 id="content-block-header"  >
+    <h3 id="content-block-header" >
         Overview
     </h3>
 </div>"""
@@ -131,7 +158,7 @@ def test_rendering_components_without_section_loop_index():
     assert rendered_doc == \
         """
 <div id="content-block" >
-    <h3 id="content-block-header"  >
+    <h3 id="content-block-header" >
         Overview
     </h3>
 </div>"""
@@ -208,10 +235,10 @@ def test_rendering_components_with_styling():
     assert rendered_doc == \
         """
 <div id="section-1-content-block-2" class="root_foo" root="baz" style="root:bar;" >
-    <h4 id="section-1-content-block-2-header" class="header_foo" header="baz" style="header:bar;"  >
+    <h4 id="section-1-content-block-2-header" class="header_foo" header="baz" style="header:bar;" >
         <span class="y" >AAA</span> <span class="x" >BBB</span> <span class="x" >CCC</span>
     </h4>
-    <h5 id="section-1-content-block-2-subheader"  >
+    <h5 id="section-1-content-block-2-subheader" >
         <span class="yy" >aaa</span> <span class="xx" >bbb</span> <span class="xx" >ccc</span>
     </h5>
     <table id="section-1-content-block-2-body" class="body_foo" body="baz" style="body:bar;" >
@@ -239,7 +266,7 @@ def test_render_header_component():
     assert rendered_doc == \
         """
 <div id="section-1-content-block-2" >
-    <h3 id="section-1-content-block-2-header"  >
+    <h3 id="section-1-content-block-2-header" >
         Overview
     </h3>
 </div>"""
@@ -267,7 +294,7 @@ def test_render_table_component():
     assert rendered_doc == \
         """
 <div id="section-1-content-block-2" class="col-4" >
-    <h4 id="section-1-content-block-2-header"  >
+    <h4 id="section-1-content-block-2-header" >
         Overview
     </h4>
     <table id="section-1-content-block-2-body" >
