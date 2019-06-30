@@ -49,7 +49,7 @@ def test_render_DefaultJinjaPageView(document_snapshot, html_snapshot):
     # print(html)
     # TODO: Use above print to set up snapshot test once we like the result
 
-    # open("./tests/render/fixtures/html_snapshot.html", "w").write(html)
+    open("./tests/render/fixtures/html_snapshot.html", "w").write(html)
 
     assert "This is a beta feature! Expect changes in API, behavior, and design." in html
     assert html == html_snapshot
@@ -109,4 +109,35 @@ def test_render_header_component():
     <h3 id="section-1-content-block-2-header"  >
         Overview
     </h3>
+</div>"""
+
+
+def test_render_table_component():
+    header_component_content = {
+        # "component_type": "header",
+        "content_block_type": "table",
+        "header": "Overview",
+        "table_rows": [
+            ["Mean", "446"],
+            ["Minimum", "1"],
+        ],
+        "styling": {
+            "classes": ["col-4"],
+        }
+    }
+    rendered_doc = ge.render.view.view.DefaultJinjaComponentView.render({
+        "content_block": header_component_content,
+        "section_loop": {"index": 1},
+        "content_block_loop": {"index": 2},
+    })
+    print(rendered_doc)
+    assert rendered_doc == \
+        """<div id="section-1-content-block-2" class="col-4" >
+    <h4 id="section-1-content-block-2-header"  >
+        Overview
+    </h4>
+    <table id="section-1-content-block-2-body" hello="hi" >
+        <tr>
+            <td id="cell-1-1">Mean</td><td id="cell-1-2">446</td></tr><tr>
+            <td id="cell-2-1">Minimum</td><td id="cell-2-2">1</td></tr></table>
 </div>"""
