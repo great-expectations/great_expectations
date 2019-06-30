@@ -44,7 +44,11 @@
             {{content_block["content"][0]}}
         </p>
     {%- elif content_block["content_block_type"] == "value_list" -%}
-        {% include 'value_list.j2' -%}
+        <p id="{{content-block-id}}-body" {{ content_block_body_styling }}>
+        {% for value_count in content_block["value_list"] %}
+            <span class="param-span">{{value_count["value"]}}</span>
+        {% endfor %}
+        </p>
     {%- elif content_block["content_block_type"] == "bullet_list" -%}
         <ul id="{{content_block_id}}-body" {{ content_block_body_styling }}>
             {% for bullet_point in content_block["bullet_list"] -%}
