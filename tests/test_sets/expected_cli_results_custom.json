@@ -1,6 +1,7 @@
 { 
   "meta": {
     "data_asset_name": null,
+    "expectation_suite_name": "default",
     "run_id": "1955-11-05T00:00:00"
   },
   "results": [

@@ -77,7 +77,10 @@ class BatchGenerator(object):
             return {}
 
 
-class EmptyGenerator(BatchGenerator):
+class InMemoryGenerator(BatchGenerator):
+
+    def __init__(self, name="default", datasource=None):
+        super(InMemoryGenerator, self).__init__(name, type_="memory", datasource=datasource)
 
     def _get_iterator(self, data_asset_name, **kwargs):
         return iter([])

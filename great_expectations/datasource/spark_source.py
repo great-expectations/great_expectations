@@ -52,7 +52,7 @@ class SparkDFDatasource(Datasource):
         else:
             raise ValueError("Unrecognized BatchGenerator type %s" % type_)
 
-    def _get_data_asset(self, data_asset_name, batch_kwargs, expectation_suite, caching=False, **kwargs):
+    def _get_data_asset(self, batch_kwargs, expectation_suite, caching=True, **kwargs):
         """class-private implementation of get_data_asset"""
         if self.spark is None:
             logger.error("No spark session available")
@@ -62,7 +62,7 @@ class SparkDFDatasource(Datasource):
         reader_options = batch_kwargs.copy()
         if "path" in batch_kwargs:
             path = reader_options.pop("path")  # We remove this so it is not used as a reader option
-            reader_options.pop("timestamp")    # ditto timestamp
+            reader_options.pop("timestamp", "")    # ditto timestamp (but missing ok)
             reader_method = reader_options.pop("reader_method", None)
             if reader_method is None:
                 reader_method = self._guess_reader_method_from_path(path)
@@ -92,6 +92,5 @@ class SparkDFDatasource(Datasource):
         return SparkDFDataset(df,
                               expectation_suite=expectation_suite,
                               data_context=self._data_context,
-                              data_asset_name=data_asset_name,
                               batch_kwargs=batch_kwargs,
                               caching=caching)

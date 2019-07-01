@@ -98,17 +98,30 @@ def test_file_kwargs_generator_extensions(tmp_path_factory):
     """csv, xls, parquet, json should be recognized file extensions"""
     basedir = str(tmp_path_factory.mktemp("test_file_kwargs_generator_extensions"))
 
+    # Do not include: invalid extension
     with open(os.path.join(basedir, "f1.blarg"), "w") as outfile:
         outfile.write("\n\n\n")
+    # Include
     with open(os.path.join(basedir, "f2.csv"), "w") as outfile:
         outfile.write("\n\n\n")
-    with open(os.path.join(basedir, "f3.blarg"), "w") as outfile:
+    # Do not include: valid subdir, but no valid files in it
+    os.mkdir(os.path.join(basedir, "f3"))
+    with open(os.path.join(basedir, "f3", "f3_1.blarg"), "w") as outfile:
         outfile.write("\n\n\n")
-    with open(os.path.join(basedir, "f4.blarg"), "w") as outfile:
+    with open(os.path.join(basedir, "f3", "f3_2.blarg"), "w") as outfile:
         outfile.write("\n\n\n")
-    with open(os.path.join(basedir, "f5.blarg"), "w") as outfile:
+    # Include: valid subdir with valid files
+    os.mkdir(os.path.join(basedir, "f4"))
+    with open(os.path.join(basedir, "f4", "f4_1.csv"), "w") as outfile:
         outfile.write("\n\n\n")
-    with open(os.path.join(basedir, "f6.blarg"), "w") as outfile:
+    with open(os.path.join(basedir, "f4", "f4_2.csv"), "w") as outfile:
+        outfile.write("\n\n\n")
+    # Do not include: valid extension, but dot prefix
+    with open(os.path.join(basedir, ".f5.csv"), "w") as outfile:
+        outfile.write("\n\n\n")
+    
+    #Include: valid extensions
+    with open(os.path.join(basedir, "f6.tsv"), "w") as outfile:
         outfile.write("\n\n\n")
     with open(os.path.join(basedir, "f7.xls"), "w") as outfile:
         outfile.write("\n\n\n")
@@ -123,5 +136,5 @@ def test_file_kwargs_generator_extensions(tmp_path_factory):
 
     g1_assets = g1.get_available_data_asset_names()
     assert g1_assets == set([
-        "f1.blarg", "f2", "f3.blarg", "f4.blarg", "f5.blarg", "f6.blarg", "f7", "f8", "f9", "f0"
+        "f2", "f4", "f6", "f7", "f8", "f9", "f0"
     ])

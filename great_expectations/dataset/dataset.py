@@ -115,11 +115,12 @@ class Dataset(MetaDataset):
 
     # getter functions with hashable arguments - can be cached
     hashable_getters = [
+        'get_column_min',
         'get_column_max',
         'get_column_mean',
-        'get_column_median',
-        'get_column_min',
         'get_column_modes',
+        'get_column_median',
+        'get_column_quantiles',
         'get_column_nonnull_count',
         'get_column_stdev',
         'get_column_sum',
@@ -192,9 +193,38 @@ class Dataset(MetaDataset):
         """Returns: any"""
         raise NotImplementedError
 
+    def get_column_quantiles(self, column, quantiles):
+        """Get the values in column closest to the requested quantiles
+        Args:
+            quantiles (list of float): the quantiles to return
+        
+        Returns:
+            List[any]: the nearest values in the dataset to those quantiles
+        """
+        raise NotImplementedError
+
     def get_column_stdev(self, column):
         """Returns: float"""
         raise NotImplementedError
+
+    def get_column_partition(self, column, bins='uniform', n_bins=10):
+        if bins == 'uniform':
+            # TODO: in the event that we shift the compute model for
+            # min and max to have a single pass, use that instead of
+            # quantiles for clarity
+            # min_ = self.get_column_min(column)
+            # max_ = self.get_column_max(column)
+            min_, max_ = self.get_column_quantiles(column, [0.0, 1.0])
+            # PRECISION NOTE: some implementations of quantiles could produce
+            # varying levels of precision (e.g. a NUMERIC column producing
+            # Decimal from a SQLAlchemy source, so we cast to float for numpy)
+            bins = np.linspace(start=float(min_), stop=float(max_), num=n_bins+1)
+        elif bins in ['ntile', 'quantile', 'percentile']:
+            bins = self.get_column_quantiles(column, np.linspace(
+                start=0, stop=1, num=n_bins+1))
+        else:
+            raise ValueError("Invalid parameter for bins argument")
+        return bins
 
     def get_column_hist(self, column, bins):
         """Returns: List[int], a list of counts corresponding to bins"""
@@ -204,11 +234,12 @@ class Dataset(MetaDataset):
         """Returns: int"""
         raise NotImplementedError
 
-    def _initialize_expectations(self, expectation_suite=None, data_asset_name=None):
+    def _initialize_expectations(self, expectation_suite=None, data_asset_name=None, expectation_suite_name="default"):
         """Override data_asset_type with "Dataset"
         """
         super(Dataset, self)._initialize_expectations(expectation_suite=expectation_suite,
-                                                      data_asset_name=data_asset_name)
+                                                      data_asset_name=data_asset_name,
+                                                      expectation_suite_name=expectation_suite_name)
         self._expectation_suite["data_asset_type"] = "Dataset"
 
     @classmethod
@@ -378,9 +409,12 @@ class Dataset(MetaDataset):
 
         """
         columns = self.get_table_columns()
-        if list(columns) == list(column_list):
+        if column_list is None or list(columns) == list(column_list):
             return {
-                "success": True
+                "success": True,
+                "result": {
+                    "observed_value": list(columns)
+                }
             }
         else:
             # In the case of differing column lengths between the defined expectation and the observed column set, the
@@ -395,7 +429,12 @@ class Dataset(MetaDataset):
                            "Found": v} for i, k, v in compared_lists if k != v]
             return {
                 "success": False,
-                "details": {"mismatched": mismatched}
+                "result": {
+                    "observed_value": list(columns),
+                    "details": {
+                        "mismatched": mismatched
+                    }
+                }
             }
 
     @DocInherit
@@ -459,8 +498,8 @@ class Dataset(MetaDataset):
             raise ValueError("min_value and max_value must be integers")
 
         # check that min_value or max_value is set
-        if min_value is None and max_value is None:
-            raise Exception('Must specify either or both of min_value and max_value')
+        # if min_value is None and max_value is None:
+        #     raise Exception('Must specify either or both of min_value and max_value')
 
         row_count = self.get_row_count()
 
@@ -472,6 +511,9 @@ class Dataset(MetaDataset):
 
         elif min_value is not None and max_value is None:
             outcome = row_count >= min_value
+
+        else:
+            outcome = True
 
         return {
             'success': outcome,
@@ -973,8 +1015,8 @@ class Dataset(MetaDataset):
 
         Notes:
             * min_value and max_value are both inclusive.
-            * If min_value is None, then max_value is treated as an upper bound, and the number of acceptable rows has no minimum.
-            * If max_value is None, then min_value is treated as a lower bound, and the number of acceptable rows has no maximum.
+            * If min_value is None, then max_value is treated as an upper bound, and there is no minimum value checked.
+            * If max_value is None, then min_value is treated as a lower bound, and there is no maximum value checked.
 
         See Also:
             expect_column_value_lengths_to_be_between
@@ -1672,13 +1714,22 @@ class Dataset(MetaDataset):
               "result": {
                 "observed_value": [1,2,3],
                 "details": {
-                    "value_counts": {
-                        "1": 1,
-                        "2": 2,
-                        "3": 3
+                  "value_counts": [
+                    {
+                      "value": 1,
+                      "count": 1
+                    },
+                    {
+                      "value": 2,
+                      "count": 1
+                    },
+                    {
+                      "value": 3,
+                      "count": 1
                     }
+                  ]
                 }
-              },
+              }
             }
 
         expect_column_distinct_values_to_be_in_set is a :func:`column_aggregate_expectation <great_expectations.data_asset.dataset.Dataset.column_aggregate_expectation>`.
@@ -1717,19 +1768,28 @@ class Dataset(MetaDataset):
         See Also:
             expect_column_distinct_values_to_contain_set
         """
-        if parse_strings_as_datetimes:
-            parsed_value_set = self._parse_value_set(value_set)
-        else:
-            parsed_value_set = value_set
 
         observed_value_counts = self.get_column_value_counts(column)
-        expected_value_set = set(parsed_value_set)
-        observed_value_set = set(observed_value_counts.index)
+
+        if value_set is None:
+            # Vacuously true
+            success = True
+            parsed_observed_value_set = set(observed_value_counts.index)
+        else:
+            if parse_strings_as_datetimes:
+                parsed_value_set = self._parse_value_set(value_set)
+                parsed_observed_value_set = set(self._parse_value_set(observed_value_counts.index))
+            else:
+                parsed_value_set = value_set
+                parsed_observed_value_set = set(observed_value_counts.index)
+
+            expected_value_set = set(parsed_value_set)
+            success = parsed_observed_value_set.issubset(expected_value_set)
 
         return {
-            "success": observed_value_set.issubset(expected_value_set),
+            "success": success,
             "result": {
-                "observed_value": sorted(list(observed_value_set)),
+                "observed_value": sorted(list(parsed_observed_value_set)),
                 "details": {
                     "value_counts": observed_value_counts
                 }
@@ -2081,6 +2141,128 @@ class Dataset(MetaDataset):
 
     @DocInherit
     @MetaDataset.column_aggregate_expectation
+    def expect_column_quantile_values_to_be_between(
+        self,
+        column,
+        quantile_ranges,
+        result_format=None,
+        include_config=False,
+        catch_exceptions=None,
+        meta=None,
+    ):
+        """Expect specific provided column quantiles to be between provided minimum and maximum values.
+
+        `quantile_ranges` must be a dictionary with two keys:
+           `quantiles`: (list of float) increasing ordered list of desired quantile values
+           `value_ranges`: (list of lists): Each element in this list consists of a list with two values, a lower
+               and upper bound (inclusive) for the corresponding quantile.
+
+
+        For each provided range:
+            * min_value and max_value are both inclusive.
+            * If min_value is None, then max_value is treated as an upper bound only
+            * If max_value is None, then min_value is treated as a lower bound only
+
+        The length of the quantiles list and quantile_values list must be equal.
+
+        For example:
+        ::
+            # my_df.my_col = [1,2,2,3,3,3,4]
+            >>> my_df.expect_column_quantile_values_to_be_between(
+                "my_col",
+                {
+                    "quantiles": [0., 0.333, 0.6667, 1.],
+                    "value_ranges": [[0,1], [2,3], [3,4], [4,5]]
+                }
+            )
+            {
+              "success": True,
+                "result": {
+                  "observed_value": {
+                    "quantiles: [0., 0.333, 0.6667, 1.],
+                    "values": [1, 2, 3, 4],
+                  }
+                  "element_count": 7,
+                  "missing_count": 0,
+                  "missing_percent": 0.0,
+                  "details": {
+                    "success_details": [true, true, true, true]
+                  }
+                }
+              }
+            }
+
+        `expect_column_quantile_values_to_be_between` can be computationally intensive for large datasets.
+
+        expect_column_quantile_values_to_be_between is a :func:`column_aggregate_expectation <great_expectations.data_asset.dataset.Dataset.column_aggregate_expectation>`.
+
+        Args:
+            column (str): \
+                The column name.
+            quantile_ranges (dictionary): \
+                Quantiles and associated value ranges for the column. See above for details.
+
+        Other Parameters:
+            result_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                For more detail, see :ref:`result_format <result_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+                For more detail, see :ref:`meta`.
+
+        Returns:
+            A JSON-serializable expectation result object.
+
+            Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+        Notes:
+            These fields in the result object are customized for this expectation:
+            ::
+            details.success_details
+
+        See Also:
+            expect_column_min_to_be_between
+            expect_column_max_to_be_between
+            expect_column_median_to_be_between
+        """
+        quantiles = quantile_ranges["quantiles"]
+        quantile_value_ranges = quantile_ranges["value_ranges"]
+        if len(quantiles) != len(quantile_value_ranges):
+            raise ValueError("quntile_values and quantiles must have the same number of elements")
+
+        quantile_vals = self.get_column_quantiles(column, quantiles)
+        # We explicitly allow "None" to be interpreted as +/- infinity
+        comparison_quantile_ranges = [
+            [lower_bound or -np.inf, upper_bound or np.inf]
+            for (lower_bound, upper_bound) in quantile_value_ranges
+        ]
+        success_details = [
+            range_[0] <= quantile_vals[idx] <= range_[1]
+            for idx, range_ in enumerate(comparison_quantile_ranges)
+        ]
+
+        return {
+            "success": np.all(success_details),
+            "result": {
+                "observed_value": {
+                    "quantiles": quantiles,
+                    "values": quantile_vals
+                },
+                "details": {
+                    "success_details": success_details
+                }
+            }
+        }
+
+    @DocInherit
+    @MetaDataset.column_aggregate_expectation
     def expect_column_stdev_to_be_between(self,
                                          column,
                                          min_value=None,
@@ -2088,6 +2270,7 @@ class Dataset(MetaDataset):
                                          result_format=None, include_config=False, catch_exceptions=None, meta=None
                                          ):
         """Expect the column standard deviation to be between a minimum value and a maximum value.
+        Uses sample standard deviation (normalized by N-1).
 
         expect_column_stdev_to_be_between is a :func:`column_aggregate_expectation <great_expectations.data_asset.dataset.Dataset.column_aggregate_expectation>`.
 
@@ -2135,16 +2318,21 @@ class Dataset(MetaDataset):
             expect_column_mean_to_be_between
             expect_column_median_to_be_between
         """
-        if min_value is None and max_value is None:
-            raise ValueError("min_value and max_value cannot both be None")
+        # if min_value is None and max_value is None:
+        #     raise ValueError("min_value and max_value cannot both be None")
 
         column_stdev = self.get_column_stdev(column)
+        if min_value is None and max_value is None:
+            success = True
+        elif min_value is None:
+            success = column_stdev <= max_value
+        elif max_value is None:
+            success = column_stdev >= min_value
+        else:
+            success = min_value <= column_stdev <= max_value
 
         return {
-            "success": (
-                ((min_value is None) or (min_value <= column_stdev)) and
-                ((max_value is None) or (column_stdev <= max_value))
-            ),
+            "success": success,
             "result": {
                 "observed_value": column_stdev
             }
@@ -2643,7 +2831,6 @@ class Dataset(MetaDataset):
             * If max_value is None, then min_value is treated as a lower bound
 
         """
-        # TODO spark tests
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
 
@@ -2993,10 +3180,19 @@ class Dataset(MetaDataset):
             expect_column_bootstrapped_ks_test_p_value_to_be_greater_than
 
         """
+        if partition_object is None:
+            # NOTE: we are *not* specifying a tail_weight_holdout by default.
+            bins = self.get_column_partition(column)
+            weights = list(np.array(self.get_column_hist(column, bins)) / self.get_column_nonnull_count(column))
+            partition_object = {
+                "bins": bins,
+                "weights": weights
+            }
+
         if not is_valid_partition_object(partition_object):
             raise ValueError("Invalid partition object.")
 
-        if (not isinstance(threshold, (int, float))) or (threshold < 0):
+        if threshold is not None and ((not isinstance(threshold, (int, float))) or (threshold < 0)):
             raise ValueError(
                 "Threshold must be specified, greater than or equal to zero.")
 
@@ -3047,8 +3243,13 @@ class Dataset(MetaDataset):
             else:
                 observed_value = kl_divergence
 
+            if threshold is None:
+                success = True
+            else:
+                success = kl_divergence <= threshold
+
             return_obj = {
-                "success": kl_divergence <= threshold,
+                "success": success,
                 "result": {
                     "observed_value": observed_value,
                     "details": {
@@ -3081,7 +3282,7 @@ class Dataset(MetaDataset):
 
             #Adjust expected_weights to account for tail_weight and internal_weight
             if "tail_weights" in partition_object:
-	                partition_tail_weight_holdout = np.sum(partition_object["tail_weights"])
+                partition_tail_weight_holdout = np.sum(partition_object["tail_weights"])
             else:
                 partition_tail_weight_holdout = 0
 
@@ -3168,8 +3369,13 @@ class Dataset(MetaDataset):
             else:
                 observed_value = kl_divergence
 
+            if threshold is None:
+                success = True
+            else:
+                success = kl_divergence <= threshold
+
             return_obj = {
-                    "success": kl_divergence <= threshold,
+                    "success": success,
                     "result": {
                         "observed_value": observed_value,
                         "details": {
