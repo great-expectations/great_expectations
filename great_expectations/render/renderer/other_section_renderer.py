@@ -54,7 +54,20 @@ class DescriptiveOverviewSectionRenderer(Renderer):
         )
         if row_count_evr != None:
             table_rows.append([
-                "Number of observations",
+                {
+                    "template": "Number of observations",
+                    "params": {},
+                    "styling": {
+                        "attributes": {
+                            "data-toggle": "popover",
+                            "data-trigger": "hover",
+                            "data-placement": "top",
+                            "data-content": "expect_table_row_count_to_be_between",
+                            "container": "body",
+                        }
+
+                    }
+                },
                 row_count_evr["result"]["observed_value"]
             ])
 

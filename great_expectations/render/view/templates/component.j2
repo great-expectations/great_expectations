@@ -1,3 +1,8 @@
+{%- if section_loop is defined -%}
+    {%- set section_id = "section-"~section_loop.index -%}
+{%- else -%}
+    {%- set section_id = None -%}
+{%- endif -%}
 {% if content_block_loop is defined -%}
     {%- if section_loop is defined -%}
         {%- set content_block_id = "section-"~section_loop.index~"-content-block-"~content_block_loop.index -%}
@@ -26,7 +31,7 @@
 {% endif -%}
 <div id="{{content_block_id}}" {{ content_block | render_styling_from_string_template }}>
     {% if "header" in content_block and content_block["content_block_type"] != "header" -%}
-    <h4 id="{{content_block_id}}-header" {{ content_block_header_styling | replace("{{content_block_id}}", content_block_id) }}>
+    <h4 id="{{content_block_id}}-header" {{ content_block_header_styling | replace("{{section_id}}", section_id) | replace("{{content_block_id}}", content_block_id) }}>
         {{ content_block["header"] | render_string_template }}
     </h4>
     {% endif -%}
@@ -64,12 +69,18 @@
             vegaEmbed('#{{content_block_id}}-body', vlSpec, {actions: false}).then(result=>console.log(result)).catch(console.warn);
         </script>
     {%- elif content_block["content_block_type"] == "table" -%}
-        <table id="{{content_block_id}}-body" {{ content_block_body_styling }}>
+        <table id="{{content_block_id}}-body" {{ content_block_body_styling | replace("{{section_id}}", section_id) | replace("{{content_block_id}}", content_block_id) }}>
         {% for row in content_block["table_rows"] -%}
             <tr>
             {% set rowloop = loop -%}
             {% for cell in row -%}
-                <td id="{{content_block_id}}-cell-{{ rowloop.index }}-{{ loop.index }}">{{ cell | render_string_template }}</td>
+                {% if cell is mapping and "styling" in cell -%}
+                    {% set cell_styling = cell["styling"] | render_styling | replace("{{section_id}}", section_id) | replace("{{content_block_id}}", content_block_id) -%}
+                {% else -%}
+                    {% set cell_styling = "" -%}
+                {% endif -%}
+
+                <td id="{{content_block_id}}-cell-{{ rowloop.index }}-{{ loop.index }}" {{ cell_styling }}>{{ cell | render_string_template }}</td>
             {%- endfor -%}
             </tr>
         {%- endfor -%}
