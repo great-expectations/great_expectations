@@ -111,8 +111,8 @@ def test_render_section_page():
     </h4>
     <table id="content-block-2-body" class="table table-sm" >
         <tr>
-            <td id="content-block-2-cell-1-1">Number of variables</td><td id="content-block-2-cell-1-2">12</td></tr><tr>
-            <td id="content-block-2-cell-2-1">Number of observations</td><td id="content-block-2-cell-2-2">891</td></tr></table>
+            <td id="content-block-2-cell-1-1" >Number of variables</td><td id="content-block-2-cell-1-2" >12</td></tr><tr>
+            <td id="content-block-2-cell-2-1" >Number of observations</td><td id="content-block-2-cell-2-2" >891</td></tr></table>
 </div>
         
     </div>
@@ -248,8 +248,8 @@ def test_rendering_components_with_styling():
     </h5>
     <table id="section-1-content-block-2-body" class="body_foo" body="baz" style="body:bar;" >
         <tr>
-            <td id="section-1-content-block-2-cell-1-1">Mean</td><td id="section-1-content-block-2-cell-1-2">446</td></tr><tr>
-            <td id="section-1-content-block-2-cell-2-1">Minimum</td><td id="section-1-content-block-2-cell-2-2">1</td></tr></table>
+            <td id="section-1-content-block-2-cell-1-1" >Mean</td><td id="section-1-content-block-2-cell-1-2" >446</td></tr><tr>
+            <td id="section-1-content-block-2-cell-2-1" >Minimum</td><td id="section-1-content-block-2-cell-2-2" >1</td></tr></table>
 </div>"""
 
 
@@ -304,8 +304,8 @@ def test_render_table_component():
     </h4>
     <table id="section-1-content-block-2-body" >
         <tr>
-            <td id="section-1-content-block-2-cell-1-1">Mean</td><td id="section-1-content-block-2-cell-1-2">446</td></tr><tr>
-            <td id="section-1-content-block-2-cell-2-1">Minimum</td><td id="section-1-content-block-2-cell-2-2">1</td></tr></table>
+            <td id="section-1-content-block-2-cell-1-1" >Mean</td><td id="section-1-content-block-2-cell-1-2" >446</td></tr><tr>
+            <td id="section-1-content-block-2-cell-2-1" >Minimum</td><td id="section-1-content-block-2-cell-2-2" >1</td></tr></table>
 </div>"""
 
 # TODO: Add tests for the remaining component types
