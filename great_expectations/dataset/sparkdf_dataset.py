@@ -2,6 +2,7 @@ from __future__ import division
 
 import inspect
 import re
+import copy
 import logging
 from six import PY3, string_types
 from functools import wraps
@@ -9,6 +10,7 @@ from datetime import datetime
 from dateutil.parser import parse
 
 from .dataset import Dataset
+from .pandas_dataset import PandasDataset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
 from great_expectations.dataset.util import (
     is_valid_partition_object,
@@ -23,8 +25,9 @@ from scipy import stats
 logger = logging.getLogger(__name__)
 
 try:
-    from pyspark.sql.functions import udf, col, stddev as stddev_
+    from pyspark.sql.functions import udf, col, lit, stddev_samp, length as length_, when, year
     import pyspark.sql.types as sparktypes
+    from pyspark.ml.feature import Bucketizer
 except ImportError as e:
     logger.debug(str(e))
     logger.debug("Unable to load spark context; install optional spark dependency for support.")
@@ -115,6 +118,18 @@ class MetaSparkDFDataset(Dataset):
                     in unexpected_df.collect()
                 ]
 
+                if "output_strftime_format" in kwargs:
+                    output_strftime_format = kwargs["output_strftime_format"]
+                    parsed_maybe_limited_unexpected_list = []
+                    for val in maybe_limited_unexpected_list:
+                        if val is None:
+                            parsed_maybe_limited_unexpected_list.append(val)
+                        else:
+                            if isinstance(val, string_types):
+                                val = parse(val)
+                            parsed_maybe_limited_unexpected_list.append(datetime.strftime(val, output_strftime_format))
+                    maybe_limited_unexpected_list = parsed_maybe_limited_unexpected_list
+
             success, percent_success = self._calc_map_expectation_success(
                 success_count, nonnull_count, mostly)
 
@@ -173,6 +188,18 @@ class SparkDFDataset(MetaSparkDFDataset):
         self.spark_df = spark_df
         super(SparkDFDataset, self).__init__(*args, **kwargs)
 
+    def head(self, n=5):
+        """Returns a *PandasDataset* with the first *n* rows of the given Dataset"""
+        return PandasDataset(
+            self.spark_df.limit(n).toPandas(),
+            expectation_suite=self.get_expectation_suite(
+                discard_failed_expectations=False,
+                discard_result_format_kwargs=False,
+                discard_catch_exceptions_kwargs=False,
+                discard_include_configs_kwargs=False
+            )
+        )
+
     def get_row_count(self):
         return self.spark_df.count()
 
@@ -192,6 +219,20 @@ class SparkDFDataset(MetaSparkDFDataset):
 
     def get_column_sum(self, column):
         return self.spark_df.select(column).groupBy().sum().collect()[0][0]
+
+    # TODO: consider getting all basic statistics in one go:
+    def _describe_column(self, column):
+        # temp_column = self.spark_df.select(column).where(col(column).isNotNull())
+        # return self.spark_df.select(
+        #     [
+        #         count(temp_column),
+        #         mean(temp_column),
+        #         stddev(temp_column),
+        #         min(temp_column),
+        #         max(temp_column)
+        #     ]
+        # )
+        pass
 
     def get_column_max(self, column, parse_strings_as_datetimes=False):
         temp_column = self.spark_df.select(column).where(col(column).isNotNull())
@@ -238,30 +279,83 @@ class SparkDFDataset(MetaSparkDFDataset):
         return list(s[s == s.max()].index)
 
     def get_column_median(self, column):
-        # TODO this doesn't actually work e.g. median([1, 2, 3, 4]) -> 2.0
-        raise NotImplementedError
-        result = self.spark_df.approxQuantile(column, [0.5], 0)
-        return result[0] if len(result) > 0 else None
+        # We will get the two middle values by choosing an epsilon to add
+        # to the 50th percentile such that we always get exactly the middle two values
+        # (i.e. 0 < epsilon < 1 / (2 * values))
+
+        # Note that this can be an expensive computation; we are not exposing
+        # spark's ability to estimate.
+        # We add two to 2 * n_values to maintain a legitimate quantile
+        # in the degnerate case when n_values = 0
+        result = self.spark_df.approxQuantile(column, [0.5, 0.5 + (1 / (2 + (2 * self.get_row_count())))], 0)
+        return np.mean(result)
+
+    def get_column_quantiles(self, column, quantiles):
+        return self.spark_df.approxQuantile(column, list(quantiles), 0)
 
     def get_column_stdev(self, column):
-        return self.spark_df.select(stddev_(col(column))).collect()[0][0]
+        return self.spark_df.select(stddev_samp(col(column))).collect()[0][0]
 
     def get_column_hist(self, column, bins):
         """return a list of counts corresponding to bins"""
-        hist = []
-        for i in range(0, len(bins) - 1):
-            # all bins except last are half-open
-            if i == len(bins) - 2:
-                max_strictly = False
-            else:
-                max_strictly = True
-            hist.append(
-                self.get_column_count_in_range(column, min_val=bins[i], max_val=bins[i + 1], max_strictly=max_strictly)
-            )
+        bins = list(copy.deepcopy(bins))  # take a copy since we are inserting and popping
+        if bins[0] == -np.inf or bins[0] == -float("inf"):
+            added_min = False
+            bins[0] = -float("inf")
+        else:
+            added_min = True
+            bins.insert(0, -float("inf"))
+
+        if bins[-1] == np.inf or bins[-1] == float("inf"):
+            added_max = False
+            bins[-1] = float("inf")
+        else:
+            added_max = True
+            bins.append(float("inf"))
+
+        temp_column = self.spark_df.select(column).where(col(column).isNotNull())
+        bucketizer = Bucketizer(
+            splits=bins, inputCol=column, outputCol="buckets")
+        bucketed = bucketizer.setHandleInvalid("skip").transform(temp_column)
+
+        # This is painful to do, but: bucketizer cannot handle values outside of a range
+        # (hence adding -/+ infinity above)
+
+        # Further, it *always* follows the numpy convention of lower_bound <= bin < upper_bound
+        # for all but the last bin
+
+        # But, since the last bin in our case will often be +infinity, we need to
+        # find the number of values exactly equal to the upper bound to add those
+
+        # We'll try for an optimization by asking for it at the same time
+        if added_max == True:
+            upper_bound_count = temp_column.select(column).filter(col(column) == bins[-2]).count()
+        else:
+            upper_bound_count = 0
+
+        hist_rows = bucketed.groupBy("buckets").count().collect()
+        # Spark only returns buckets that have nonzero counts.
+        hist = [0] * (len(bins) - 1)
+        for row in hist_rows:
+            hist[int(row["buckets"])] = row["count"]
+
+        hist[-2] += upper_bound_count
+
+        if added_min:
+            below_bins = hist.pop(0)
+            bins.pop(0)
+            if below_bins > 0:
+                logger.warning("Discarding histogram values below lowest bin.")
+
+        if added_max:
+            above_bins = hist.pop(-1)
+            bins.pop(-1)
+            if above_bins > 0:
+                logger.warning("Discarding histogram values above highest bin.")
+
         return hist
 
     def get_column_count_in_range(self, column, min_val=None, max_val=None, min_strictly=False, max_strictly=True):
-        # TODO this logic could probably go in the non-underscore version if we want to cache
         if min_val is None and max_val is None:
             raise ValueError('Must specify either min or max value')
         if min_val is not None and max_val is not None and min_val > max_val:
@@ -302,6 +396,9 @@ class SparkDFDataset(MetaSparkDFDataset):
             catch_exceptions=None,
             meta=None,
     ):
+        if value_set is None:
+            # vacuously true
+            return column.withColumn('__success', lit(True))
         if parse_strings_as_datetimes:
             column = self._apply_dateutil_parse(column)
             value_set = [parse(value) if isinstance(value, string_types) else value for value in value_set]
@@ -322,6 +419,57 @@ class SparkDFDataset(MetaSparkDFDataset):
     ):
         success_udf = udf(lambda x: x not in value_set)
         return column.withColumn('__success', success_udf(column[0]))
+
+    @DocInherit
+    @MetaSparkDFDataset.column_map_expectation
+    def expect_column_values_to_be_between(self,
+                                           column,
+                                           min_value=None, max_value=None,
+                                           parse_strings_as_datetimes=None,
+                                           output_strftime_format=None,
+                                           allow_cross_type_comparisons=None,
+                                           mostly=None,
+                                           result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                           ):
+        # NOTE: This function is implemented using native functions instead of UDFs, which is a faster
+        # implementation. Please ensure new spark implementations migrate to the new style where possible
+        if allow_cross_type_comparisons:
+            raise ValueError("Cross-type comparisons are not valid for SparkDFDataset")
+        
+        if parse_strings_as_datetimes:
+            min_value = parse(min_value)
+            max_value = parse(max_value)
+
+        if min_value is None and max_value is None:
+            raise ValueError("min_value and max_value cannot both be None")
+        elif min_value is None:
+            return column.withColumn('__success', when(column[0] <= max_value, lit(True)).otherwise(lit(False)))
+        elif max_value is None:
+            return column.withColumn('__success', when(column[0] >= min_value, lit(True)).otherwise(lit(False)))
+        else:
+            if min_value > max_value:
+                raise ValueError("minvalue cannot be greater than max_value")
+        
+        return column.withColumn('__success', when((min_value <= column[0]) & (column[0] <= max_value), lit(True)).otherwise(lit(False)))
+
+    @DocInherit
+    @MetaSparkDFDataset.column_map_expectation
+    def expect_column_value_lengths_to_be_between(self, column, min_value=None, max_value=None,
+                                                  mostly=None,
+                                                  result_format=None, include_config=False, catch_exceptions=None, meta=None):
+        if min_value is None and max_value is None:
+            return column.withColumn('__success', lit(True))
+        elif min_value is None:
+            return column.withColumn('__success', when(length_(column[0]) <= max_value, lit(True)).otherwise(lit(False)))
+        elif max_value is None:
+            return column.withColumn('__success', when(length_(column[0]) >= min_value, lit(True)).otherwise(lit(False)))
+        # FIXME: whether the below condition is enforced seems to be somewhat inconsistent
+        
+        # else:
+        #     if min_value > max_value:
+        #         raise ValueError("minvalue cannot be greater than max_value")
+
+        return column.withColumn('__success', when((min_value <= length_(column[0])) & (length_(column[0]) <= max_value), lit(True)).otherwise(lit(False)))
 
     @DocInherit
     @MetaSparkDFDataset.column_map_expectation
@@ -351,8 +499,7 @@ class SparkDFDataset(MetaSparkDFDataset):
         catch_exceptions=None,
         meta=None,
     ):
-        success_udf = udf(lambda x: len(x) == value)
-        return column.withColumn('__success', success_udf(column[0]))
+        return column.withColumn('__success', when(length_(column[0]) == value, lit(True)).otherwise(lit(False)))
 
     @DocInherit
     @MetaSparkDFDataset.column_map_expectation

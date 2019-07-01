@@ -24,7 +24,18 @@
         "success":true,
         "observed_value": 4
       }
-    },{
+    },
+    {
+      "title": "Vacuously true",
+      "exact_match_out" : false,
+      "in":{
+      },
+      "out":{
+        "success":true,
+        "observed_value": 4
+      }
+    },
+    {
       "title": "Basic negative test",
       "exact_match_out" : false,
       "in":{

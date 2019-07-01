@@ -1,5 +1,6 @@
 {
     "data_asset_name": "mydataset/mygenerator/parameterized_expectation_suite_fixture/default",
+    "expectation_suite_name": "default",
     "data_asset_type": "Dataset",
     "meta": {
     },

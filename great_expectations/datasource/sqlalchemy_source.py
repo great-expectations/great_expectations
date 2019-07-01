@@ -153,24 +153,21 @@ class SqlAlchemyDatasource(Datasource):
         else:
             raise ValueError("Unrecognized DataAssetGenerator type %s" % type_)
 
-    def _get_data_asset(self, data_asset_name, batch_kwargs, expectation_suite, schema=None, **kwargs):
+    def _get_data_asset(self, batch_kwargs, expectation_suite, schema=None, **kwargs):
         if "table" in batch_kwargs:
             return SqlAlchemyDataset(table_name=batch_kwargs["table"], 
                                      engine=self.engine,
                                      schema=schema,
                                      data_context=self._data_context,
-                                     data_asset_name=data_asset_name,
                                      expectation_suite=expectation_suite,
                                      batch_kwargs=batch_kwargs)
 
         elif "query" in batch_kwargs:
             query = Template(batch_kwargs["query"]).safe_substitute(**kwargs)
-            return SqlAlchemyDataset(table_name=data_asset_name, 
+            return SqlAlchemyDataset(custom_sql=query,
                                      engine=self.engine,
                                      data_context=self._data_context,
-                                     data_asset_name=data_asset_name,
                                      expectation_suite=expectation_suite,
-                                     custom_sql=query,
                                      batch_kwargs=batch_kwargs)
     
         else:
