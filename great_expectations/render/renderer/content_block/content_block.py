@@ -1,9 +1,15 @@
 from ..renderer import Renderer
 
 
-class ContentBlock(Renderer):
+class ContentBlockRenderer(Renderer):
 
     _content_block_type = "text"
+
+    _default_content_block_styling = {
+        "classes": ["col-12"]
+    }
+
+    _default_element_styling = {}
 
     @classmethod
     def validate_input(cls, render_object):
@@ -25,14 +31,29 @@ class ContentBlock(Renderer):
 
                 content_block_fn = getattr(cls, expectation_type, None)
                 if content_block_fn is not None:
-                    result = content_block_fn(obj_, **kwargs)
+                    result = content_block_fn(
+                        obj_,
+                        styling=cls._get_element_styling(),
+                        **kwargs
+                    )
+                    blocks += result
+
+                else:
+                    result = cls._missing_content_block_fn(
+                        obj_,
+                        cls._get_content_block_styling(),
+                        **kwargs
+                    )
                     blocks += result
 
             return {
                 "content_block_type": cls._content_block_type,
-                cls._content_block_type: blocks
+                cls._content_block_type: blocks,
+                # TODO: This should probably be overridable via a parameter
+                "styling": cls._get_content_block_styling(),
             }
         else:
+            # TODO: Styling is not currently applied to non-list objects. It should be.
             expectation_type = cls._get_expectation_type(render_object)
 
             content_block_fn = getattr(cls, expectation_type, None)
@@ -46,10 +67,22 @@ class ContentBlock(Renderer):
         expectations = [attr for attr in dir(cls) if attr[:7] == "expect_"]
         return expectations
 
+    @classmethod
+    def _missing_content_block_fn(cls, obj, styling, **kwargs):
+        return []
 
-class HeaderContentBlock(ContentBlock):
+    @classmethod
+    def _get_content_block_styling(cls):
+        return cls._default_content_block_styling
+
+    @classmethod
+    def _get_element_styling(cls):
+        return cls._default_element_styling
+
+
+class HeaderContentBlockRenderer(ContentBlockRenderer):
     pass
 
 
-class ColumnTypeContentBlock(ContentBlock):
+class ColumnTypeContentBlockRenderer(ContentBlockRenderer):
     pass

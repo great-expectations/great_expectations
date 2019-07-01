@@ -1,3 +1,5 @@
+# TODO: See if any of the tests in here can/should be rehabilitated
+
 # See test_render_new.py
 
 # import pytest
@@ -14,12 +16,12 @@
 
 # def test_render_single_evr(simple_pandas_dataframe):
 #     res = simple_pandas_dataframe.expect_column_values_to_be_in_set("a", [1,2,3], include_config=True, result_format="SUMMARY")
-#     html = render.view_models.DescriptiveEvrColumnSectionRenderer.render([res], res["expectation_config"]["expectation_type"], 
+#     html = render.view_models.DescriptiveEvrColumnSectionRenderer.render([res], res["expectation_config"]["expectation_type"],
 #         mode='widget')
 #     print(html)
 #     with open('./test.html', 'w') as f:
 #         f.write(html)
-    
+
 #     assert True
 
 # class TestPageRenderers(unittest.TestCase):

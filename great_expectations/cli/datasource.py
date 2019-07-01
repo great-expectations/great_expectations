@@ -2,7 +2,7 @@ import os
 import click
 
 from .util import cli_message
-from great_expectations.render import DescriptivePageView
+from great_expectations.render import DefaultJinjaPageView
 
 
 def add_datasource(context):
@@ -42,7 +42,8 @@ def add_datasource(context):
             show_default=True
         )
 
-        context.add_datasource(data_source_name, "pandas", base_directory=os.path.join("..", path))
+        context.add_datasource(data_source_name, "pandas",
+                               base_directory=os.path.join("..", path))
 
     elif data_source_selection == "2":  # sqlalchemy
         data_source_name = click.prompt(
@@ -112,7 +113,7 @@ def add_datasource(context):
     if data_source_name != None:
 
         cli_message(
-"""
+            """
 Would you like to profile '%s' to create candidate expectations and documentation?
 
 Please note: 
@@ -124,8 +125,8 @@ As a backup option please visit <blue>https://great-expectations.readthedocs.io/
             """ % (data_source_name)
         )
         if click.confirm("Proceed?",
-            default=True
-        ):
+                         default=True
+                         ):
             profiling_results = context.profile_datasource(
                 data_source_name,
                 max_data_assets=20
@@ -137,10 +138,11 @@ As a backup option please visit <blue>https://great-expectations.readthedocs.io/
                 expectation_suite_name = profiling_result[1]['meta']['expectation_suite_name']
                 run_id = profiling_result[1]['meta']['run_id']
 
-                print("  {0:s}".format(context.get_validation_location(data_asset_name, expectation_suite_name, run_id)['filepath']))
+                print("  {0:s}".format(context.get_validation_location(
+                    data_asset_name, expectation_suite_name, run_id)['filepath']))
 
             cli_message(
-"""
+                """
 
 To generate documentation from the data you just profiled, the profiling results should be moved from 
 great_expectations/uncommitted (ignored by git) to great_expectations/fixtures. Before proceeding,
@@ -150,19 +152,20 @@ To learn more: <blue>https://great-expectations.readthedocs.io/en/latest/intro.h
 """
             )
             if click.confirm("Proceed?",
-                default = True
-            ):
+                             default=True
+                             ):
                 cli_message("Rendering...")
 
                 for profiling_result in profiling_results:
                     data_asset_name = profiling_result[1]['meta']['data_asset_name']
                     expectation_suite_name = profiling_result[1]['meta']['expectation_suite_name']
                     run_id = profiling_result[1]['meta']['run_id']
-                    context.move_validation_to_fixtures(data_asset_name, expectation_suite_name, run_id)
+                    context.move_validation_to_fixtures(
+                        data_asset_name, expectation_suite_name, run_id)
 
                 context.render_full_static_site()
                 cli_message(
- """
+                    """
 To view the generated data documentation, start a web server:
 <blue>cd great_expectations/data_documentation; python -m SimpleHTTPServer</blue> (if Python 2) or 
 <blue>cd great_expectations/data_documentation; python3 -m http.server</blue> (if Python 3)
