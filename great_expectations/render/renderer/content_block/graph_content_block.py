@@ -1,9 +1,10 @@
 import pandas as pd
 import altair as alt
 
-from .content_block import ContentBlock
+from .content_block import ContentBlockRenderer
 
-class GraphContentBlock(ContentBlock):
+
+class GraphContentBlockRenderer(ContentBlockRenderer):
     """Render ValuesList Style Content Blocks
 
     Produces content blocks with type

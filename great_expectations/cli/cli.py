@@ -1,5 +1,22 @@
 # -*- coding: utf-8 -*-
 
+from .datasource import (
+    add_datasource
+)
+from .init import (
+    scaffold_directories_and_notebooks,
+    greeting_1,
+    msg_prompt_lets_begin,
+)
+from .util import cli_message
+from great_expectations.render.view import DefaultJinjaPageView
+from great_expectations.render.renderer import DescriptivePageRenderer, PrescriptivePageRenderer
+from great_expectations.data_context import DataContext
+from great_expectations.data_asset import FileDataAsset
+from great_expectations.dataset import Dataset, PandasDataset
+from great_expectations.exceptions import DataContextError
+from great_expectations import __version__, read_csv
+from pyfiglet import figlet_format
 import click
 import six
 import os
@@ -9,34 +26,15 @@ import sys
 import warnings
 warnings.filterwarnings('ignore')
 
-from pyfiglet import figlet_format
 try:
     from termcolor import colored
 except ImportError:
     colored = None
 
-from great_expectations import __version__, read_csv
-from great_expectations.exceptions import DataContextError
-from great_expectations.dataset import Dataset, PandasDataset
-from great_expectations.data_asset import FileDataAsset
-from great_expectations.data_context import DataContext
-
-from great_expectations.render.renderer import DescriptivePageRenderer, PrescriptivePageRenderer
-from great_expectations.render.view import DescriptivePageView
-
-
-from .util import cli_message
-from .init import (
-    scaffold_directories_and_notebooks,
-    greeting_1,
-    msg_prompt_lets_begin,
-)
-from .datasource import (
-    add_datasource
-)
 
 # Take over the entire GE module logging namespace when running CLI
 logger = logging.getLogger("great_expectations")
+
 
 @click.group()
 @click.version_option(version=__version__)
@@ -187,7 +185,7 @@ def render(render_object):
 
     model = DescriptivePageRenderer.render(raw)
     # model = PrescriptivePageRenderer.render(raw)
-    print(DescriptivePageView.render(model))
+    print(DefaultJinjaPageView.render(model))
 
 
 @cli.command()

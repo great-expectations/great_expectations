@@ -6,8 +6,8 @@
     <title>{% block title %}{% endblock %}</title>
 
     {# {# Remove this when not debugging: #}
-    {# <meta http-equiv="refresh" content="2"/> #}
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"/>
+    {# <meta http-equiv="refresh" content="1"/> #}
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css"/>
     <style>
       body {
         position: relative;
@@ -22,36 +22,34 @@
         overflow-y: auto;
         top: 15px;
       }
-      .param-span{
-        background:#eef;
-        padding:5px;
+
+      .ge-section {
+        clear:both;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
       }
 
-      .ge-section{
-        display: flex;
-        flex-flow: row wrap;
-        margin-left: -8px; /* Adjustment for the gutter */
-        width: 100%;
+      .triangle {
+        border: solid #222;
+        border-width: 0 1px 1px 0;
+        display: inline;
+        cursor: pointer;
+        padding: 3px;
+        position: absolute;
+        right: 0;
+        margin-top: 10px;
+
+        transform: rotate(40deg);
+        -webkit-transform: rotate(40deg);
+        transition: .3s transform ease-in-out;
       }
 
-      .ge-section div{
-        flex: auto;
-        {# height: 250px; #}
-        min-width: 150px;
-        margin: 0 8px 8px 0; /* Some gutter */
-        {# background-color: #004;         #}
-        {# border: 1px solid black; #}
+      .collapsed .triangle{
+        transform: rotate(-140deg);
+        -webkit-transform: rotate(-140deg);
+        transition: .3s transform ease-in-out;
       }
 
-      tr{
-        padding: 2px;
-      }
-      tr.even{
-        background:#ddd;
-      }
-      td{
-        padding: 1px 10px 1px 10px;
-      }
     </style>
 
     <script src="https://cdn.jsdelivr.net/npm/vega@5.3.5/build/vega.js"></script>
@@ -71,7 +69,10 @@
           {% block navbar %}{% include 'navbar.j2' %}{% endblock %}
         </div>
         <div class="col-9">
-          {% block sections %}{% include 'sections.j2' %}{% endblock %}
+        {% for section in sections %}
+          {% set section_loop = loop -%}
+          {% include 'section.j2' %}
+        {% endfor %}
         </div>
 
       </div>
@@ -79,5 +80,10 @@
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    <script>
+      $(function () {
+        $('[data-toggle="popover"]').popover()
+      })
+    </script>
   </body>
 </html>
