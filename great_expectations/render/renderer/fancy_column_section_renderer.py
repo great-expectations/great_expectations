@@ -317,13 +317,16 @@ class FancyDescriptiveColumnSectionRenderer(ColumnSectionRenderer):
         bars = alt.Chart(df).mark_bar().encode(
             x='bins:O',
             y="weights:Q"
-        ).properties(height=240, width=240)
+        ).properties(height=200)
 
-        chart = (bars).properties(height=240)
+        chart = bars
 
         new_block = {
             "content_block_type": "graph",
-            "graph": chart.to_json()
+            "graph": chart.to_json(),
+            "styling": {
+                "classes": ["col-4"]
+            }
         }
         content_blocks.append(new_block)
 
