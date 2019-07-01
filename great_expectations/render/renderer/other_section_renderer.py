@@ -51,7 +51,7 @@ class DescriptiveOverviewSectionRenderer(Renderer):
             ["Number of variables", len(cls._get_column_list_from_evrs(evrs)),],
             ["Number of observations", "?" if not expect_table_row_count_to_be_between_evr else expect_table_row_count_to_be_between_evr["result"]["observed_value"], ],
             ["Missing cells", cls._get_percentage_missing_cells_str(evrs), ], # "866 (8.1%)"
-            ["Duplicate rows", "0 (0.0%)", ],
+            # ["Duplicate rows", "0 (0.0%)", ], #TODO: bring back when we have an expectation for this
         ]
 
         content_blocks.append({
