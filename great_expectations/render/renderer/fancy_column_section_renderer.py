@@ -295,14 +295,12 @@ class FancyDescriptiveColumnSectionRenderer(ColumnSectionRenderer):
 
     @classmethod
     def _render_histogram(cls, evrs, content_blocks):
-        # FIXME: Eugene, here's where the logic for using "cardinality" in form of which expectations are defined
-        # should determine which blocks are generated
-        # Relatedly, this will change to grab values_list and to use expect_column_distinct_values_to_be_in_set
+        # NOTE: This code is very brittle
         kl_divergence_evr = cls._find_evr_by_type(
             evrs,
             "expect_column_kl_divergence_to_be_less_than"
         )
-        print(json.dumps(kl_divergence_evr, indent=2))
+        # print(json.dumps(kl_divergence_evr, indent=2))
         if kl_divergence_evr == None:
             return
 
@@ -329,7 +327,7 @@ class FancyDescriptiveColumnSectionRenderer(ColumnSectionRenderer):
         }
         content_blocks.append(new_block)
 
-        # TODO:
+        # TODO: A deprecated version of this code lives in this method. We should review carefully, keep any bits that are useful, then delete.
         # content_blocks.append(
         #     GraphContentBlockRenderer.render(
         #         kl_divergence_evr,
