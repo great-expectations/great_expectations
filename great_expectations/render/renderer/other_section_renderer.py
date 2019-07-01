@@ -47,7 +47,7 @@ class DescriptiveOverviewSectionRenderer(Renderer):
         expect_table_row_count_to_be_between_evr = cls._find_evr_by_type(evrs['results'], "expect_table_row_count_to_be_between")
 
         table_rows = [
-            ["Number of variables", "12", ],
+            ["Number of variables", len(cls._get_column_list_from_evrs(evrs)),],
             ["Number of observations", "?" if not expect_table_row_count_to_be_between_evr else expect_table_row_count_to_be_between_evr["result"]["observed_value"], ],
             ["Missing cells", "866 (8.1%)", ],
             ["Duplicate rows", "0 (0.0%)", ],
