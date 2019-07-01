@@ -5,16 +5,34 @@ Changelog and Roadmap
 
 Planned Features
 ----------------
-* Improved project initialization and data contexts
 * Improved variable typing
 * Support for non-tabular datasources (e.g. JSON, XML, AVRO)
 
 v.0.7.0__develop
 ________________
+Version 0.7 of Great Expectations introduces several major new features
+and a large number of improvements, including breaking API changes.
+
+The core vocabulary of expectations remains consistent. Upgrading to 
+the new version of GE will primarily require changes to code that
+uses data contexts; existing expectation suites will require only changes
+to top-level names.
+
 * Name clarifications: we've stopped using the overloaded terms "expectations
   config" and "config" and instead use "expectation suite" to refer to a
   collection (or suite!) of expectations that can be used for validating a
   data asset.
+
+  - Expectation Suites include several top level keys that are useful \
+    for organizing content in a data context: data_asset_name, \
+    expectation_suite_name, and data_asset_type. When a data_asset is \
+    validated, those keys will be placed in the `meta` key of the \
+    validation result.
+
+* Major update of Data Contexsts. Data Contexts now offer significantly \
+  more support for building and maintaining expectation suites and \
+  interacting with existing pipeline systems. Read more: :py:mod:`great_expectations.data_context`
+
 * Major refactor of autoinspect. Autoinspect is now built around a module
   called "profile" which provides a class-based structure for building
   expectation suites. There is no longer a default  "autoinspect_func" --
@@ -23,8 +41,8 @@ ________________
 v.0.6.1
 ________________
 * Re-add testing (and support) for py2
-* NOTE: Support for SqlAlchemyDataset and SparkDFDataset is enabled via optional install
- (e.g. `pip install great_expectations[sqlalchemy]` or `pip install great_expectations[spark]`)
+* NOTE: Support for SqlAlchemyDataset and SparkDFDataset is enabled via optional install \
+  (e.g. ``pip install great_expectations[sqlalchemy]`` or ``pip install great_expectations[spark]``)
 
 v.0.6.0
 ------------
@@ -39,22 +57,21 @@ v.0.6.0
 
 v.0.5.1
 ---------------
-* Fix issue where no result_format available for expect_column_values_to_be_null caused error
+* **Fix** issue where no result_format available for expect_column_values_to_be_null caused error
 * Use vectorized computation in pandas (#443, #445; thanks @RoyalTS)
 
 
 v.0.5.0
 ----------------
 * Restructured class hierarchy to have a more generic DataAsset parent that maintains expectation logic separate \
-    from the tabular organization of Dataset expectations
+  from the tabular organization of Dataset expectations
 * Added new FileDataAsset and associated expectations (#416 thanks @anhollis)
 * Added support for date/datetime type columns in some SQLAlchemy expectations (#413)
 * Added support for a multicolumn expectation, expect multicolumn values to be unique (#408)
-* Optimization: You can now disable `partial_unexpected_counts` by setting the \
-    `partial_unexpected_count` value to 0 in the result_format argument, and we do not compute it when it would
-    not be returned. (#431, thanks @eugmandel)
-* Fix: Correct error in unexpected_percent computations for sqlalchemy when unexpected values exceed limit (#424)
-* Fix: Pass meta object to expectation result (#415, thanks @jseeman)
+* **Optimization**: You can now disable `partial_unexpected_counts` by setting the `partial_unexpected_count` value to \
+  0 in the result_format argument, and we do not compute it when it would not be returned. (#431, thanks @eugmandel)
+* **Fix**: Correct error in unexpected_percent computations for sqlalchemy when unexpected values exceed limit (#424)
+* **Fix**: Pass meta object to expectation result (#415, thanks @jseeman)
 * Add support for multicolumn expectations, with `expect_multicolumn_values_to_be_unique` as an example (#406)
 * Add dataset class to from_pandas to simplify using custom datasets (#404, thanks @jtilly)
 * Add schema support for sqlalchemy data context (#410, thanks @rahulj51)
@@ -79,7 +96,7 @@ v.0.4.5
 * Add support for custom schema in SqlAlchemyDataset (#370, thanks @elsander)
 * Use getfullargspec to avoid deprecation warnings.
 * Add expect_column_values_to_be_unique to SqlAlchemyDataset
-* Fix map expectations for categorical columns (thanks @eugmandel)
+* **Fix** map expectations for categorical columns (thanks @eugmandel)
 * Improve internal testing suite (thanks @anhollis and @ccnobbli)
 * Consistently use value_set instead of mixing value_set and values_set (thanks @njsmith8)
 
@@ -87,8 +104,8 @@ v.0.4.4
 ----------------
 * Improve CLI help and set CLI return value to the number of unmet expectations
 * Add error handling for empty columns to SqlAlchemyDataset, and associated tests
-* Fix broken support for older pandas versions (#346)
-* Fix pandas deepcopy issue (#342)
+* **Fix** broken support for older pandas versions (#346)
+* **Fix** pandas deepcopy issue (#342)
 
 v.0.4.3
 -------
@@ -101,16 +118,16 @@ v.0.4.3
 * Add support for parameterized expectations
 * Improve support for custom expectations with better error messages (thanks @syk0saje)
 * Implement expect_column_value_lenghts_to_[be_between|equal] for SQAlchemy (thanks @ccnobbli)
-* Fix PandasDataset subclasses to inherit child class
+* **Fix** PandasDataset subclasses to inherit child class
 
 v.0.4.2
 -------
-* Fix bugs in expect_column_values_to_[not]_be_null: computing unexpected value percentages and handling all-null (thanks @ccnobbli)
+* **Fix** bugs in expect_column_values_to_[not]_be_null: computing unexpected value percentages and handling all-null (thanks @ccnobbli)
 * Support mysql use of Decimal type (thanks @bouke-nederstigt)
 * Add new expectation expect_column_values_to_not_match_regex_list.
   * Change behavior of expect_column_values_to_match_regex_list to use python re.findall in PandasDataset, relaxing \
   matching of individuals expressions to allow matches anywhere in the string.
-* Fix documentation errors and other small errors (thanks @roblim, @ccnobbli)
+* **Fix** documentation errors and other small errors (thanks @roblim, @ccnobbli)
 
 v.0.4.1
 -------
@@ -118,7 +135,8 @@ v.0.4.1
 
 v.0.4.0
 -------
-* Initial implementation of data context API and SqlAlchemyDataset including implementations of the following expectations:
+* Initial implementation of data context API and SqlAlchemyDataset including implementations of the following \
+expectations:
   * expect_column_to_exist
   * expect_table_row_count_to_be
   * expect_table_row_count_to_be_between
@@ -132,10 +150,13 @@ v.0.4.0
   * expect_column_sum_to_be
   * expect_column_unique_value_count_to_be_between
   * expect_column_proportion_of_unique_values_to_be_between
-* Major refactor of output_format to new result_format parameter. See docs for full details.
+* Major refactor of output_format to new result_format parameter. See docs for full details:
   * exception_list and related uses of the term exception have been renamed to unexpected
-  * the output formats are explicitly hierarchical now, with BOOLEAN_ONLY < BASIC < SUMMARY < COMPLETE. `column_aggregate_expectation`s now return element count and related information included at the BASIC level or higher.
-* New expectation available for parameterized distributions--expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than (what a name! :) -- (thanks @ccnobbli)
+  * Output formats are explicitly hierarchical now, with BOOLEAN_ONLY < BASIC < SUMMARY < COMPLETE. \
+    All *column_aggregate_expectation*s now return element count and related information included at the BASIC \
+    level or higher.
+* New expectation available for parameterized distributions--\
+  expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than (what a name! :) -- (thanks @ccnobbli)
 * ge.from_pandas() utility (thanks @schrockn)
 * Pandas operations on a PandasDataset now return another PandasDataset (thanks @dlwhite5)
 * expect_column_to_exist now takes a column_index parameter to specify column order (thanks @louispotok)
@@ -150,7 +171,7 @@ v.0.3.2
 
 v.0.3.1
 --------
-* Fix infinite recursion error when building custom expectations
+* **Fix** infinite recursion error when building custom expectations
 * Catch dateutil parsing overflow errors
 
 v.0.2

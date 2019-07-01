@@ -4,6 +4,4 @@
 Migrating between Versions
 ===========================
 
-
-
 TODO: Describe datacontext -> datasource migration
