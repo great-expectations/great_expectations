@@ -16,7 +16,6 @@ from .util import NormalizedDataAssetName, get_slack_callback, safe_mmkdir
 
 from great_expectations.exceptions import DataContextError, ConfigNotFoundError, ProfilerError
 
-import ipywidgets as widgets
 try:
     from urllib.parse import urlparse
 except ImportError:
@@ -46,38 +45,10 @@ ALLOWED_DELIMITERS = ['.', '/']
 
 
 class DataContext(object):
-    """A DataContext represents a Great Expectations project. It captures essential information such as
-    expectation suites, datasources, notification settings, and data fixtures.
+    """A DataContext manages resources including datasources, generators, and expectation suites.
 
-    The DataContext is configured via a yml file that should be stored in a file called
-    great_expectations/great_expectations.yml under the context_root_dir passed during initialization.
-
-    DataContexts use data sources you're already familiar with. Convenience libraries called generators
-    help introspect data stores and data execution frameworks airflow, dbt, dagster, prefect.io) to produce
-    batches of data ready for analysis. This lets you fetch, validate, profile, and document your data in
-    a way that’s meaningful within your existing infrastructure and work environment.
-
-    DataContexts use a datasource-based namespace, where each accessible type of data has a four-part
-    normaled data_asset_name, consisting of:
-    
-    **datasource / generator / generator_asset / expectation_suite**
-
-      - The datasource actually connects to a source of materialized data and returns Great Expectations
-        DataAssets connected to a compute environment and ready for validation.
-
-      - The Generator knows how to introspect datasources and produce identifying "batch_kwargs" that define
-        particular slices of data.
-
-      - The generator_asset is a specific name -- often a table name or other name familiar to users -- that
-        generators can slice into batches.
-
-      - The expectation_suite is a collection of expectations ready to be applied to a batch of data. Since
-        in many projects it is useful to have different expectations evaluate in different contexts--profiling 
-        vs. testing; warning vs. error; high vs. low compute; ML model or dashboard--suites provide a namespace 
-        option for selecting which expectations a DataContext returns.
-
-    In many simple projects, the datasource, generator and/or expectation_suite can be ommitted and a
-    sensible default (usually "default") will be used.
+    Use the `create` classmethod to create a new empty config, or instantiate the DataContext
+    by passing the path to an existing data context root directory. See :py:mod:`data_context` for more information.
     """
 
     @classmethod
@@ -558,7 +529,10 @@ class DataContext(object):
         """Returns currently-defined expectation suites available in a nested dictionary structure
         reflecting the namespace provided by this DataContext.
 
-        The dictionary has the following shape:
+        The dictionary has the following shape
+
+        :: json
+
         {
           datasource: {
             generator: {
@@ -567,6 +541,7 @@ class DataContext(object):
           }
           ...
         }
+
         """
 
         expectation_suites_dict = {}

@@ -36,10 +36,10 @@ class DataAsset(object):
             build a baseline expectation suite.
 
         Note: DataAsset is designed to support multiple inheritance (e.g. PandasDataset inherits from both a
-        Pandas DataFrame and Dataset which inherits from DataAsset), so it accepts generic *args and **kwargs arguments so that they can also be
-        passed to other parent classes. In python 2, there isn't a clean way to include all of *args, **kwargs, and a
-        named kwarg...so we use the inelegant solution of popping from kwargs, leaving the support for the profiler
-        parameter not obvious from the signature.
+        Pandas DataFrame and Dataset which inherits from DataAsset), so it accepts generic *args and **kwargs arguments
+        so that they can also be passed to other parent classes. In python 2, there isn't a clean way to include all of
+        *args, **kwargs, and a named kwarg...so we use the inelegant solution of popping from kwargs, leaving the
+        support for the profiler parameter not obvious from the signature.
 
         """
         interactive_evaluation = kwargs.pop("interactive_evaluation", True)
@@ -179,7 +179,7 @@ class DataAsset(object):
                 exception_message = None
 
                 # Finally, execute the expectation method itself
-                if self._interactive_evaluation == True:
+                if self._interactive_evaluation:
                     try:
                         return_obj = func(self, **evaluation_args)
                 

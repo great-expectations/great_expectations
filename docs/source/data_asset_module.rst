@@ -3,16 +3,13 @@
 Data Asset Module
 ==================================
 
-great_expectations.data_asset.base
-----------------------------------
-
-.. automodule:: great_expectations.data_asset.base
+.. automodule:: great_expectations.data_asset.data_asset
     :members:
     :undoc-members:
     :show-inheritance:
     :exclude-members: DataAsset
 
-    .. autoclass:: great_expectations.data_asset.base.DataAsset
+    .. autoclass:: great_expectations.data_asset.data_asset.DataAsset
 
 great_expectations.data_asset.file_data_asset
 ---------------------------------------------
