@@ -45,9 +45,20 @@ class DescriptiveOverviewSectionRenderer(Renderer):
     @classmethod
     def _render_dataset_info(cls, evrs, content_blocks):
 
-        table_rows = [
-            ["Number of variables", "12", ],
-            ["Number of observations", "891", ],
+        table_rows = []
+        table_rows.append(["Number of variables", "12", ])
+
+        row_count_evr = cls._find_evr_by_type(
+            evrs["results"],
+            "expect_table_row_count_to_be_between"
+        )
+        if row_count_evr != None:
+            table_rows.append([
+                "Number of observations",
+                row_count_evr["result"]["observed_value"]
+            ])
+
+        table_rows += [
             ["Missing cells", "866 (8.1%)", ],
             ["Duplicate rows", "0 (0.0%)", ],
             ["Total size in memory",	"83.6 KiB", ],
