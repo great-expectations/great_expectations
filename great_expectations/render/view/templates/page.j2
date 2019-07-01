@@ -13,7 +13,7 @@
         position: relative;
       }
       .container {
-        margin-top: 50px;
+        padding-top: 50px;
       }
       .sticky {
         position: -webkit-sticky;
@@ -50,6 +50,9 @@
         transition: .3s transform ease-in-out;
       }
 
+      .popover {
+        max-width: 100%;
+      }
     </style>
 
     <script src="https://cdn.jsdelivr.net/npm/vega@5.3.5/build/vega.js"></script>
@@ -78,8 +81,8 @@
       </div>
     </div>
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.15.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
     <script>
       $(function () {
         $('[data-toggle="popover"]').popover()
