@@ -1,5 +1,6 @@
 import json
 from string import Template
+import warnings
 from collections import defaultdict
 
 from .renderer import Renderer
@@ -49,7 +50,7 @@ class DescriptiveOverviewSectionRenderer(Renderer):
         table_rows = [
             ["Number of variables", len(cls._get_column_list_from_evrs(evrs)),],
             ["Number of observations", "?" if not expect_table_row_count_to_be_between_evr else expect_table_row_count_to_be_between_evr["result"]["observed_value"], ],
-            ["Missing cells", "866 (8.1%)", ],
+            ["Missing cells", cls._get_percentage_missing_cells_str(evrs), ], # "866 (8.1%)"
             ["Duplicate rows", "0 (0.0%)", ],
         ]
 
@@ -211,3 +212,16 @@ class DescriptiveOverviewSectionRenderer(Renderer):
                 }
             },
         })
+
+    @classmethod
+    def _get_percentage_missing_cells_str(cls, evrs):
+
+        columns = cls._get_column_list_from_evrs(evrs)
+
+        expect_column_values_to_not_be_null_evrs = cls._find_all_evrs_by_type(evrs["results"], "expect_column_values_to_not_be_null")
+
+        if len(columns) > len(expect_column_values_to_not_be_null_evrs):
+            warnings.warn("Cannot get % of missing cells - not all columns have expect_column_values_to_not_be_null expectations")
+            return "?"
+
+        return "{0:.2f}%".format(sum([evr["result"]["unexpected_percent"] for evr in expect_column_values_to_not_be_null_evrs])/len(columns)*100)
