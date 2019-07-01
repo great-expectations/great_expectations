@@ -44,14 +44,13 @@ class DescriptiveOverviewSectionRenderer(Renderer):
 
     @classmethod
     def _render_dataset_info(cls, evrs, content_blocks):
+        expect_table_row_count_to_be_between_evr = cls._find_evr_by_type(evrs['results'], "expect_table_row_count_to_be_between")
 
         table_rows = [
             ["Number of variables", "12", ],
-            ["Number of observations", "891", ],
+            ["Number of observations", "?" if not expect_table_row_count_to_be_between_evr else expect_table_row_count_to_be_between_evr["result"]["observed_value"], ],
             ["Missing cells", "866 (8.1%)", ],
             ["Duplicate rows", "0 (0.0%)", ],
-            ["Total size in memory",	"83.6 KiB", ],
-            ["Average record size in memory", "96.1 B", ],
         ]
 
         content_blocks.append({
