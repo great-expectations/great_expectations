@@ -2,6 +2,9 @@ import json
 from string import Template
 from collections import defaultdict
 
+import pandas as pd
+import altair as alt
+
 from .renderer import Renderer
 from .content_block import ValueListContentBlockRenderer
 from .content_block import GraphContentBlockRenderer
@@ -40,7 +43,7 @@ class FancyDescriptiveColumnSectionRenderer(ColumnSectionRenderer):
         cls._render_values_set(evrs, content_blocks)
 
         # cls._render_statistics(evrs, content_blocks)
-        # cls._render_histogram(evrs, content_blocks)
+        cls._render_histogram(evrs, content_blocks)
         # cls._render_common_values(evrs, content_blocks)
         # cls._render_extreme_values(evrs, content_blocks)
 
@@ -289,6 +292,50 @@ class FancyDescriptiveColumnSectionRenderer(ColumnSectionRenderer):
                     result_key=result_key
                 )
             )
+
+    @classmethod
+    def _render_histogram(cls, evrs, content_blocks):
+        # FIXME: Eugene, here's where the logic for using "cardinality" in form of which expectations are defined
+        # should determine which blocks are generated
+        # Relatedly, this will change to grab values_list and to use expect_column_distinct_values_to_be_in_set
+        kl_divergence_evr = cls._find_evr_by_type(
+            evrs,
+            "expect_column_kl_divergence_to_be_less_than"
+        )
+        print(json.dumps(kl_divergence_evr, indent=2))
+        if kl_divergence_evr == None:
+            return
+
+        bins = kl_divergence_evr["result"]["details"]["observed_partition"]["bins"]
+        bin_medians = [round((v+bins[i+1])/2, 1)
+                       for i, v in enumerate(bins[:-1])]
+
+        df = pd.DataFrame({
+            "bins": bin_medians,
+            "weights": kl_divergence_evr["result"]["details"]["observed_partition"]["weights"],
+        })
+        df.weights *= 100
+
+        bars = alt.Chart(df).mark_bar().encode(
+            x='bins:O',
+            y="weights:Q"
+        ).properties(height=240, width=240)
+
+        chart = (bars).properties(height=240)
+
+        new_block = {
+            "content_block_type": "graph",
+            "graph": chart.to_json()
+        }
+        content_blocks.append(new_block)
+
+        # TODO:
+        # content_blocks.append(
+        #     GraphContentBlockRenderer.render(
+        #         kl_divergence_evr,
+        #         # result_key=result_key
+        #     )
+        # )
 
     @classmethod
     def _render_unrecognized(cls, evrs, content_blocks):
