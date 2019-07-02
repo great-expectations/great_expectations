@@ -1,6 +1,7 @@
 import pytest
 
 import json
+from collections import OrderedDict
 
 import great_expectations as ge
 import great_expectations.render as render
@@ -16,19 +17,19 @@ from great_expectations.render.view import DefaultJinjaPageView
 @pytest.fixture()
 def validation_results():
     with open("./tests/test_sets/expected_cli_results_default.json", "r") as infile:
-        return json.load(infile)
+        return json.load(infileobject_pairs_hook=OrderedDict)
 
 
 @pytest.fixture()
 def expectations():
     with open("./tests/test_sets/titanic_expectations.json", "r") as infile:
-        return json.load(infile)
+        return json.load(infileobject_pairs_hook=OrderedDict)
 
 
 @pytest.fixture()
 def document_snapshot():
     with open("./tests/render/fixtures/document_snapshot.json", "r") as infile:
-        return json.load(infile)
+        return json.load(infile, object_pairs_hook=OrderedDict)
 
 
 @pytest.fixture()
