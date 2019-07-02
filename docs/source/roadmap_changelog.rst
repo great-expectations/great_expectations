@@ -7,6 +7,8 @@ Planned Features
 ----------------
 * Improved variable typing
 * Support for non-tabular datasources (e.g. JSON, XML, AVRO)
+* Conditional expectations
+* Multi-batch expectations
 
 v.0.7.0__develop
 ________________

@@ -48,7 +48,8 @@ class DataContext(object):
     """A DataContext manages resources including datasources, generators, and expectation suites.
 
     Use the `create` classmethod to create a new empty config, or instantiate the DataContext
-    by passing the path to an existing data context root directory. See :py:mod:`data_context` for more information.
+    by passing the path to an existing data context root directory. See :py:mod:`great_expectations.data_context`
+    for more information.
     """
 
     @classmethod
@@ -151,7 +152,7 @@ class DataContext(object):
     @property
     def data_asset_name_delimiter(self):
         """Configurable delimiter character used to parse data asset name strings into \
-        ``NormalizedDataAssetName``objects."""
+        ``NormalizedDataAssetName`` objects."""
         return self._data_asset_name_delimiter
     
     @data_asset_name_delimiter.setter
@@ -464,17 +465,15 @@ class DataContext(object):
             generator_names: list of generators for which to provide available data_asset_name objects.
 
         Returns:
-            data_asset_names (dict): Dictionary describing availalbe data assets. Dictionary has the following shape:
+            data_asset_names (dict): Dictionary describing availalbe data assets. Dictionary has the following shape::
 
-        :: json
-
-        {
-          datasource_name: {
-            generator_name: [ data_asset_1, data_asset_2, ... ]
-            ...
-          }
-          ...
-        }
+            {
+              datasource_name: {
+                generator_name: [ data_asset_1, data_asset_2, ... ]
+                ...
+              }
+              ...
+            }
 
         """
         data_asset_names = {}
@@ -519,7 +518,7 @@ class DataContext(object):
 
         Args:
             data_asset_name: name of the data asset. The name will be normalized. \
-            (See :method:`_normalize_data_asset_name` )
+            (See :py:meth:`_normalize_data_asset_name` )
             expectation_suite_name: name of the expectation suite to attach to the data_asset returned
             batch_kwargs: key-value pairs describing the batch of data the datasource should fetch. \
             (See :class:`BatchGenerator` ) If no batch_kwargs are specified, then the context will get the next
@@ -546,7 +545,7 @@ class DataContext(object):
     def add_datasource(self, name, type_, **kwargs):
         """Add a new datasource to the data context.
 
-        The type_ parameter must match one of the recognized types for the DataContext
+        The type\_ parameter must match one of the recognized types for the DataContext
 
         Args:
             name (str): the name for the new datasource to add
@@ -687,18 +686,17 @@ class DataContext(object):
         """Returns currently-defined expectation suites available in a nested dictionary structure
         reflecting the namespace provided by this DataContext.
 
-        The dictionary has the following shape
+        Returns:
+            Dictionary of currently-defined expectation suites::
 
-        :: json
-
-        {
-          datasource: {
-            generator: {
-              generator_asset: [list_of_expectation_suites]
+            {
+              datasource: {
+                generator: {
+                  generator_asset: [list_of_expectation_suites]
+                }
+              }
+              ...
             }
-          }
-          ...
-        }
 
         """
 
