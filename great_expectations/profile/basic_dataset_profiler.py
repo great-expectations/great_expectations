@@ -16,13 +16,13 @@ class BasicDatasetProfiler(DatasetProfiler):
     def _get_column_type(cls, df, column):
         # list of types is used to support pandas and sqlalchemy
         try:
-            if df.expect_column_values_to_be_in_type_list(column, type_list=["int", "INTEGER", "BIGINT"])["success"]:
+            if df.expect_column_values_to_be_in_type_list(column, type_list=list(DatasetProfiler.INT_TYPE_NAMES))["success"]:
                 type_ = "int"
 
-            elif df.expect_column_values_to_be_in_type_list(column, type_list=["float", "DOUBLE_PRECISION"])["success"]:
+            elif df.expect_column_values_to_be_in_type_list(column, type_list=list(DatasetProfiler.FLOAT_TYPE_NAMES))["success"]:
                 type_ = "float"
 
-            elif df.expect_column_values_to_be_in_type_list(column, type_list=["string", "VARCHAR", "TEXT"])["success"]:
+            elif df.expect_column_values_to_be_in_type_list(column, type_list=list(DatasetProfiler.STRING_TYPE_NAMES))["success"]:
                 type_ = "string"
 
             else:
