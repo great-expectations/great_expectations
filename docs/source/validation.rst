@@ -4,7 +4,22 @@
 Validation
 ================================================================================
 
-Once you've constructed and stored Expectations, you can use them to validate new data.
+Once you've constructed and stored Expectations, you can use them to validate new data. Validation generates a report
+that details any specific deviations from expected values.
+
+We recommend using a :ref:`data_context` to manage expectation suites and coordinate validation across runs.
+
+
+Validation Result
+----------------------------
+
+The report contains information about:
+
+  - the overall sucess (the `success` field),
+  - summary statistics of the expectations (the `statistics` field), and
+  - the detailed results of each expectation (the `results` field).
+
+An example report looks like the following:
 
 .. code-block:: bash
 
@@ -85,13 +100,6 @@ Once you've constructed and stored Expectations, you can use them to validate ne
           "success_percent": 90.0,
       }
     }
-
-Calling great_expectations's ``validate`` method generates a JSON-formatted report.
-The report contains information about:
-
-  - the overall sucess (the `success` field),
-  - summary statistics of the expectations (the `statistics` field), and
-  - the detailed results of each expectation (the `results` field).
 
 
 Command-line validation
@@ -177,10 +185,15 @@ Deployment patterns
 
 Useful deployment patterns include:
 
-* Include validation at the end of a complex data transformation, to verify that no cases were lost, duplicated, or improperly merged.
-* Include validation at the *beginning* of a script applying a machine learning model to a new batch of data, to verify that its distributed similarly to the training and testing set.
-* Automatically trigger table-level validation when new data is dropped to an FTP site or S3 bucket, and send the validation report to the uploader and bucket owner by email.
+* Include validation at the end of a complex data transformation, to verify that \
+  no cases were lost, duplicated, or improperly merged.
+* Include validation at the *beginning* of a script applying a machine learning model to a new batch of data, to \
+  verify that its distributed similarly to the training and testing set.
+* Automatically trigger table-level validation when new data is dropped to an FTP site or S3 bucket, and send the \
+  validation report to the uploader and bucket owner by email.
 * Schedule database validation jobs using cron, then capture errors and warnings (if any) and post them to Slack.
-* Validate as part of an Airflow task: if Expectations are violated, raise an error and stop DAG propagation until the problem is resolved. Alternatively, you can implement expectations that raise warnings without halting the DAG.
+* Validate as part of an Airflow task: if Expectations are violated, raise an error and stop DAG propagation until \
+  the problem is resolved. Alternatively, you can implement expectations that raise warnings without halting the DAG.
 
-For certain deployment patterns, it may be useful to parameterize expectations, and supply evaluation parameters at validation time. See :ref:`evaluation_parameters` for more information.
+For certain deployment patterns, it may be useful to parameterize expectations, and supply evaluation parameters at \
+validation time. See :ref:`evaluation_parameters` for more information.

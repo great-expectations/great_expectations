@@ -7,8 +7,9 @@ Core Concepts
    :maxdepth: 2
 
    expectations
+   validation
    DataContext <data_context>
    Datasource <datasources>
-   validation
+   custom_expectations
    glossary
 
