@@ -52,7 +52,7 @@ Always know what to expect from your data.
 
 If you're new to Great Expectations, this tutorial is a good place to start:
 
-    <blue>https://great-expectations.readthedocs.io/en/latest/intro.html#how-do-i-get-started</blue>
+    <blue>https://great-expectations.readthedocs.io/en/latest/getting_started.html?src=cli</blue>
 """
 
 msg_prompt_lets_begin = """
