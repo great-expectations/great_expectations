@@ -10,38 +10,13 @@ Welcome to Great Expectations!
    :maxdepth: 2
 
    intro
-   data_contexts
-   expectations
-   distributional_expectations
-   validation
-   workflow_advantages
-   glossary
-
-Advanced
-------------------
-
-.. toctree::
-   :maxdepth: 2
-
-   standard_arguments
-   result_format
-   profiling
-   evaluation_parameters
-   custom_expectations
-   conventions
+   getting_started
+   core_concepts
+   guides
+   get_in_touch
+   contributing
    roadmap_changelog
-   implemented_expectations
-   migrating_versions
-
-Module Docs
--------------
-.. toctree::
-   :maxdepth: 2
-
-   data_asset_module
-   dataset_module
-   data_context_module
-   profile_module
+   module_docs
 
 Indices and tables
 ------------------

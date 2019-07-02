@@ -95,8 +95,7 @@ def test_render_section_page():
     })
 
     print(rendered_doc)
-    assert rendered_doc == """\
-<div id="section-1" class="ge-section container-fluid">
+    assert rendered_doc == """<div id="section-1" class="ge-section container-fluid">
     <div class="row">
         
 <div id="content-block-1" >
@@ -111,8 +110,8 @@ def test_render_section_page():
     </h4>
     <table id="content-block-2-body" class="table table-sm" >
         <tr>
-            <td id="content-block-2-cell-1-1">Number of variables</td><td id="content-block-2-cell-1-2">12</td></tr><tr>
-            <td id="content-block-2-cell-2-1">Number of observations</td><td id="content-block-2-cell-2-2">891</td></tr></table>
+            <td id="content-block-2-cell-1-1" >Number of variables</td><td id="content-block-2-cell-1-2" >12</td></tr><tr>
+            <td id="content-block-2-cell-2-1" >Number of observations</td><td id="content-block-2-cell-2-2" >891</td></tr></table>
 </div>
         
     </div>
@@ -248,8 +247,8 @@ def test_rendering_components_with_styling():
     </h5>
     <table id="section-1-content-block-2-body" class="body_foo" body="baz" style="body:bar;" >
         <tr>
-            <td id="section-1-content-block-2-cell-1-1">Mean</td><td id="section-1-content-block-2-cell-1-2">446</td></tr><tr>
-            <td id="section-1-content-block-2-cell-2-1">Minimum</td><td id="section-1-content-block-2-cell-2-2">1</td></tr></table>
+            <td id="section-1-content-block-2-cell-1-1" >Mean</td><td id="section-1-content-block-2-cell-1-2" >446</td></tr><tr>
+            <td id="section-1-content-block-2-cell-2-1" >Minimum</td><td id="section-1-content-block-2-cell-2-2" >1</td></tr></table>
 </div>"""
 
 
@@ -304,9 +303,80 @@ def test_render_table_component():
     </h4>
     <table id="section-1-content-block-2-body" >
         <tr>
-            <td id="section-1-content-block-2-cell-1-1">Mean</td><td id="section-1-content-block-2-cell-1-2">446</td></tr><tr>
-            <td id="section-1-content-block-2-cell-2-1">Minimum</td><td id="section-1-content-block-2-cell-2-2">1</td></tr></table>
+            <td id="section-1-content-block-2-cell-1-1" >Mean</td><td id="section-1-content-block-2-cell-1-2" >446</td></tr><tr>
+            <td id="section-1-content-block-2-cell-2-1" >Minimum</td><td id="section-1-content-block-2-cell-2-2" >1</td></tr></table>
 </div>"""
+
+
+def test_render_value_list():
+    value_list_component_content = {
+        'content_block_type': 'value_list',
+        'header': 'Example values',
+        'value_list': [{
+            'template': '$value',
+            'params': {'value': '0'},
+            'styling': {'default': {'classes': ['badge', 'badge-info']}}
+        }, {
+            'template': '$value',
+            'params': {'value': '1'},
+            'styling': {'default': {'classes': ['badge', 'badge-info']}}
+        }],
+        'styling': {
+            'classes': ['col-4'],
+            'styles': {'margin-top': '20px'}
+        }
+    }
+
+    rendered_doc = ge.render.view.view.DefaultJinjaComponentView.render({
+        "content_block": value_list_component_content,
+        "section_loop": {"index": 1},
+        "content_block_loop": {"index": 2},
+    })
+    print(rendered_doc)
+    assert rendered_doc == """
+<div id="section-1-content-block-2" class="col-4" style="margin-top:20px;" >
+    <h4 id="section-1-content-block-2-header" >
+        Example values
+    </h4>
+    <p id="section-1-content-block-2-body" >
+        <span class="badge badge-info" >0</span>
+        <span class="badge badge-info" >1</span>
+        </p>
+</div>"""
+
+
+def test_render_graph():
+    graph_component_content = {
+        "content_block_type": "graph",
+        "header": "Histogram",
+        "graph": "{\"$schema\": \"https://vega.github.io/schema/vega-lite/v2.6.0.json\", \"autosize\": \"fit\", \"config\": {\"view\": {\"height\": 300, \"width\": 400}}, \"data\": {\"name\": \"data-a681d02fb484e64eadd9721b37015d5b\"}, \"datasets\": {\"data-a681d02fb484e64eadd9721b37015d5b\": [{\"bins\": 3.7, \"weights\": 5.555555555555555}, {\"bins\": 10.8, \"weights\": 3.439153439153439}, {\"bins\": 17.9, \"weights\": 17.857142857142858}, {\"bins\": 25.0, \"weights\": 24.206349206349206}, {\"bins\": 32.0, \"weights\": 16.137566137566136}, {\"bins\": 39.1, \"weights\": 12.3015873015873}, {\"bins\": 46.2, \"weights\": 9.788359788359788}, {\"bins\": 53.3, \"weights\": 5.423280423280423}, {\"bins\": 60.4, \"weights\": 3.439153439153439}, {\"bins\": 67.5, \"weights\": 1.8518518518518516}]}, \"encoding\": {\"x\": {\"field\": \"bins\", \"type\": \"ordinal\"}, \"y\": {\"field\": \"weights\", \"type\": \"quantitative\"}}, \"height\": 200, \"mark\": \"bar\", \"width\": 200}",
+        "styling": {
+            "classes": ["col-4"]
+        }
+    }
+
+    rendered_doc = ge.render.view.view.DefaultJinjaComponentView.render({
+        "content_block": graph_component_content,
+        "section_loop": {"index": 1},
+        "content_block_loop": {"index": 2},
+    })
+    print(rendered_doc)
+    assert rendered_doc == """
+<div id="section-1-content-block-2" class="col-4" >
+    <h4 id="section-1-content-block-2-header" >
+        Histogram
+    </h4>
+    <div id="section-1-content-block-2-body" ></div>
+        <script>
+            // Assign the specification to a local variable vlSpec.
+            const vlSpec = {"$schema": "https://vega.github.io/schema/vega-lite/v2.6.0.json", "autosize": "fit", "config": {"view": {"height": 300, "width": 400}}, "data": {"name": "data-a681d02fb484e64eadd9721b37015d5b"}, "datasets": {"data-a681d02fb484e64eadd9721b37015d5b": [{"bins": 3.7, "weights": 5.555555555555555}, {"bins": 10.8, "weights": 3.439153439153439}, {"bins": 17.9, "weights": 17.857142857142858}, {"bins": 25.0, "weights": 24.206349206349206}, {"bins": 32.0, "weights": 16.137566137566136}, {"bins": 39.1, "weights": 12.3015873015873}, {"bins": 46.2, "weights": 9.788359788359788}, {"bins": 53.3, "weights": 5.423280423280423}, {"bins": 60.4, "weights": 3.439153439153439}, {"bins": 67.5, "weights": 1.8518518518518516}]}, "encoding": {"x": {"field": "bins", "type": "ordinal"}, "y": {"field": "weights", "type": "quantitative"}}, "height": 200, "mark": "bar", "width": 200};
+            // Embed the visualization in the container with id `vis`
+            vegaEmbed('#section-1-content-block-2-body', vlSpec, {
+                actions: false
+            }).then(result=>console.log(result)).catch(console.warn);
+        </script>
+</div>"""
+
 
 # TODO: Add tests for the remaining component types
 # * text
