@@ -268,6 +268,7 @@ class FancyDescriptiveColumnSectionRenderer(ColumnSectionRenderer):
             "expect_column_values_to_be_in_set"
         )
 
+        # FIXME: This logic is very brittle. It will work on profiled EVRs, but not much else.
         if set_evr and "partial_unexpected_counts" in set_evr["result"]:
             result_key = "partial_unexpected_counts"
         elif set_evr and "partial_unexpected_list" in set_evr["result"]:
@@ -294,13 +295,13 @@ class FancyDescriptiveColumnSectionRenderer(ColumnSectionRenderer):
                 },
                 "styling": {
                     "default": {
-                        "classes": ["badge", "badge-secondary"]
+                        "classes": ["badge", "badge-info"]
                     }
                 }
             } for value in values],
             "styling": {
                 "classes": classes,
-                "styles" : {
+                "styles": {
                     "margin-top": "20px",
                 }
             }
@@ -346,13 +347,17 @@ class FancyDescriptiveColumnSectionRenderer(ColumnSectionRenderer):
         bars = alt.Chart(df).mark_bar().encode(
             x='bins:O',
             y="weights:Q"
-        ).properties(width=286, height=180)
+        ).properties(width=240, height=200)
 
-        chart = bars
+        # chart = bars
+        chart = json.loads(bars.to_json())
+        # print(json.dumps(chart, indent=2))
+        # del chart["config"]
+        print(json.dumps(chart, indent=2))
 
         new_block = {
             "content_block_type": "graph",
-            "graph": chart.to_json(),
+            "graph": json.dumps(chart),
             "styling": {
                 "classes": ["col-6"]
             }

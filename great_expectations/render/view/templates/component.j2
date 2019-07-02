@@ -67,7 +67,9 @@
             // Assign the specification to a local variable vlSpec.
             const vlSpec = {{content_block["graph"]}};
             // Embed the visualization in the container with id `vis`
-            vegaEmbed('#{{content_block_id}}-body', vlSpec, {actions: false}).then(result=>console.log(result)).catch(console.warn);
+            vegaEmbed('#{{content_block_id}}-body', vlSpec, {
+                actions: false
+            }).then(result=>console.log(result)).catch(console.warn);
         </script>
     {%- elif content_block["content_block_type"] == "table" -%}
         <table id="{{content_block_id}}-body" {{ content_block_body_styling | replace("{{section_id}}", section_id) | replace("{{content_block_id}}", content_block_id) }}>
