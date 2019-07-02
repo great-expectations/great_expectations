@@ -235,6 +235,9 @@ class DescriptiveOverviewSectionRenderer(Renderer):
     def _get_percentage_missing_cells_str(cls, evrs):
 
         columns = cls._get_column_list_from_evrs(evrs)
+        if not columns or len(columns) == 9:
+            warnings.warn("Cannot get % of missing cells - column list is empty")
+            return "?"
 
         expect_column_values_to_not_be_null_evrs = cls._find_all_evrs_by_type(evrs["results"], "expect_column_values_to_not_be_null")
 
