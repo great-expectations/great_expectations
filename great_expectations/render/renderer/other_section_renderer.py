@@ -38,7 +38,10 @@ class DescriptiveOverviewSectionRenderer(Renderer):
             "content_block_type": "header",
             "header": "Overview",
             "styling": {
-                "classes": ["col-12"]
+                "classes": ["col-12", ],
+                "header": {
+                    "classes": ["alert", "alert-secondary"]
+                }
             }
         })
 
