@@ -45,13 +45,14 @@
         {{ content_block["header"] }}
     </h3>
     {%- elif content_block["content_block_type"] == "text" -%}
-        <p id="{{content-block-id}}-body" {{ content_block_body_styling }}>
+        <p id="{{content_sblock_id}}-body" {{ content_block_body_styling }}>
             {{content_block["content"][0]}}
         </p>
     {%- elif content_block["content_block_type"] == "value_list" -%}
-        <p id="{{content-block-id}}-body" {{ content_block_body_styling }}>
-        {% for value_count in content_block["value_list"] %}
-            <span class="param-span">{{value_count["value"]}}</span>
+        <p id="{{content_block_id}}-body" {{ content_block_body_styling }}>
+        {% for value in content_block["value_list"] %}
+            {# <span class="param-span">{{value}}</span> #}
+            {{ value | render_string_template }}
         {% endfor %}
         </p>
     {%- elif content_block["content_block_type"] == "bullet_list" -%}
