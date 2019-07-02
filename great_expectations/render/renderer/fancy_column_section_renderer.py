@@ -87,7 +87,6 @@ class FancyDescriptiveColumnSectionRenderer(ColumnSectionRenderer):
             column_type_list = cls._find_evr_by_type(
                 evrs, "expect_column_values_to_be_in_type_list"
             )["expectation_config"]["kwargs"]["type_list"]
-            print(column_type_list)
             column_type = ", ".join(column_type_list)
 
         except TypeError:
@@ -307,7 +306,7 @@ class FancyDescriptiveColumnSectionRenderer(ColumnSectionRenderer):
                 }
             }
         }
-        print(new_block)
+        # print(new_block)
 
         content_blocks.append(new_block)
 

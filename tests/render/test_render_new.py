@@ -153,4 +153,4 @@ def test_full_oobe_flow():
     with open('./test_full_oobe_flow.html', 'w') as f:
         f.write(rendered_page)
 
-    assert False
+    # assert False
