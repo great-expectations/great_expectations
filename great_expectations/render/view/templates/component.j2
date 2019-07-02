@@ -50,10 +50,9 @@
         </p>
     {%- elif content_block["content_block_type"] == "value_list" -%}
         <p id="{{content_block_id}}-body" {{ content_block_body_styling }}>
-        {% for value in content_block["value_list"] %}
-            {# <span class="param-span">{{value}}</span> #}
+        {% for value in content_block["value_list"] -%}
             {{ value | render_string_template }}
-        {% endfor %}
+        {% endfor -%}
         </p>
     {%- elif content_block["content_block_type"] == "bullet_list" -%}
         <ul id="{{content_block_id}}-body" {{ content_block_body_styling }}>
