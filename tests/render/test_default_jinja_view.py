@@ -55,6 +55,33 @@ def test_render_DefaultJinjaPageView(document_snapshot, html_snapshot):
     assert html == html_snapshot
 
 
+def test_render_DefaultJinjaPageView_meta_info():
+    validation_results = {
+        "results": [],
+        "statistics": {
+            "evaluated_expectations": 156,
+            "successful_expectations": 139,
+            "unsuccessful_expectations": 17,
+            "success_percent": 89.1025641025641
+        },
+        "meta": {
+            "great_expectations.__version__": "0.7.0-beta",
+            "data_asset_name": "public_healthcare_datasets__dir/default/tetanusvaricella",
+            "run_id": "2019-06-25T14:58:09.960521",
+            "batch_kwargs": {
+                "path": "/Users/eugenemandel/project_data/public_healthcare_datasets/tetanusvaricella/tetvardata.csv",
+                "timestamp": 1561474688.693565
+            }
+        }
+    }
+    document = DescriptivePageRenderer.render(validation_results)
+    html = DefaultJinjaPageView.render(document)
+    print(html)
+    # TODO: Use above print to set up snapshot test once we like the result
+
+    assert '<a class="navbar-brand" href="#">tetanusvaricella</a>' in html
+
+
 def test_render_section_page():
     section = {
         "section_name": None,

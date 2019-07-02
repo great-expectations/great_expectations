@@ -15,7 +15,7 @@ from great_expectations.profile.base import DatasetProfiler
 class DescriptiveOverviewSectionRenderer(Renderer):
 
     @classmethod
-    def render(cls, evrs, column=None):
+    def render(cls, evrs, section_name=None):
 
         content_blocks = []
         # NOTE: I don't love the way this builds content_blocks as a side effect.
@@ -29,7 +29,7 @@ class DescriptiveOverviewSectionRenderer(Renderer):
         cls._render_expectation_types(evrs, content_blocks)
 
         return {
-            "section_name": column,
+            "section_name": section_name,
             "content_blocks": content_blocks
         }
 
@@ -39,7 +39,10 @@ class DescriptiveOverviewSectionRenderer(Renderer):
             "content_block_type": "header",
             "header": "Overview",
             "styling": {
-                "classes": ["col-12"]
+                "classes": ["col-12", ],
+                "header": {
+                    "classes": ["alert", "alert-secondary"]
+                }
             }
         })
 
