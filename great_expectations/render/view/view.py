@@ -1,6 +1,7 @@
 import json
 from string import Template as pTemplate
 import datetime
+from collections import OrderedDict
 
 from jinja2 import (
     Template, Environment, BaseLoader, PackageLoader, select_autoescape
@@ -73,7 +74,7 @@ def render_styling_from_string_template(template):
     # NOTE: We should add some kind of type-checking to template
     """This method is a thin wrapper use to call `render_styling` from within jinja templates.
     """
-    if type(template) != dict:
+    if not isinstance(template, (dict, OrderedDict)):
         return template
 
     if "styling" in template:

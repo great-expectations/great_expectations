@@ -5,7 +5,6 @@ from collections import defaultdict
 import pandas as pd
 import altair as alt
 import jinja2
-import html
 
 from .renderer import Renderer
 from .content_block import ValueListContentBlockRenderer
