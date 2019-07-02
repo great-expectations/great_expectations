@@ -4,6 +4,8 @@ from collections import defaultdict
 
 import pandas as pd
 import altair as alt
+import jinja2
+import html
 
 from .renderer import Renderer
 from .content_block import ValueListContentBlockRenderer
@@ -128,31 +130,40 @@ class FancyDescriptiveColumnSectionRenderer(ColumnSectionRenderer):
 
     @classmethod
     def _render_expectation_types(cls, evrs, content_blocks):
-        # NOTE: The evr-fetching function is an exact dupe of the code other_section_renderer.DescriptiveOverviewSectionRenderer._render_expectation_types
-        # TODO: Pull this code out into an EVR class
+        # NOTE: The evr-fetching function is an kinda similar to the code other_section_renderer.DescriptiveOverviewSectionRenderer._render_expectation_types
 
-        type_counts = defaultdict(int)
+        # type_counts = defaultdict(int)
 
-        for evr in evrs:
-            type_counts[evr["expectation_config"]["expectation_type"]] += 1
+        # for evr in evrs:
+        #     type_counts[evr["expectation_config"]["expectation_type"]] += 1
 
-        bullet_list = sorted(type_counts.items(), key=lambda kv: -1*kv[1])
+        # bullet_list = sorted(type_counts.items(), key=lambda kv: -1*kv[1])
 
         bullet_list = [{
-            "template": "$expectation_type $expectation_count",
+            "template": "$expectation_type $is_passing",
             "params": {
-                "expectation_type": tr[0],
-                "expectation_count": tr[1],
+                "expectation_type": evr["expectation_config"]["expectation_type"],
+                "is_passing": str(evr["success"]),
             },
             "styling": {
                 "classes": ["list-group-item", "d-flex", "justify-content-between", "align-items-center"],
                 "params": {
-                    "expectation_count": {
+                    "is_passing": {
                         "classes": ["badge", "badge-secondary", "badge-pill"],
                     }
-                }
+                },
+                # TODO: Adding popovers was a nice idea, but didn't pan out well in the first experiment.
+                # "attributes": {
+                #     "data-toggle": "popover",
+                #     "data-trigger": "hover",
+                #     "data-placement": "top",
+                #     # "data-content": jinja2.utils.htmlsafe_json_dumps(evr["expectation_config"], indent=2),
+                #     # TODO: This is a hack to get around the fact that `data-content` doesn't like arguments bracketed by {}.
+                #     "data-content": "<pre>"+html.escape(json.dumps(evr["expectation_config"], indent=2))[1:-1]+"</pre>",
+                #     "container": "body",
+                # }
             }
-        } for tr in bullet_list]
+        } for evr in evrs]
 
         content_blocks.append({
             "content_block_type": "bullet_list",

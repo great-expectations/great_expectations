@@ -65,7 +65,6 @@ class DescriptiveOverviewSectionRenderer(Renderer):
                             "data-content": "expect_table_row_count_to_be_between",
                             "container": "body",
                         }
-
                     }
                 },
                 row_count_evr["result"]["observed_value"]
