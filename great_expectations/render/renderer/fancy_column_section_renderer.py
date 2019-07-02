@@ -56,21 +56,6 @@ class FancyDescriptiveColumnSectionRenderer(ColumnSectionRenderer):
         cls._render_expectation_types(evrs, content_blocks)
         # cls._render_unrecognized(evrs, content_blocks)
 
-        # FIXME: shown here as an example of bullet list
-        # content_blocks.append({
-        #     "content_block_type": "bullet_list",
-        #     "bullet_list": [
-        #         {
-        #             "template": "i1",
-        #             "params": {}
-        #         },
-        #         {
-        #             "template": "i2",
-        #             "params": {}
-        #         }
-        #     ]
-        # })
-
         return {
             "section_name": column,
             "content_blocks": content_blocks
