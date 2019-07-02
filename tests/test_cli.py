@@ -231,7 +231,7 @@ def test_cli_init(tmp_path_factory, filesystem_csv_2):
 
     os.chdir(curdir)
     print(result)
-    assert False
+    # assert False
 
 
 # def test_cli_render(tmp_path_factory):

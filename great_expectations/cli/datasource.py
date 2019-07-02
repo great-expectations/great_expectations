@@ -153,7 +153,7 @@ To learn more: <blue>https://great-expectations.readthedocs.io/en/latest/intro.h
             if click.confirm("Move the profiled data?",
                              default=True
                              ):
-                cli_message("\nRendering...")
+                cli_message("\nMoving files...")
 
                 for profiling_result in profiling_results:
                     data_asset_name = profiling_result[1]['meta']['data_asset_name']
@@ -162,10 +162,12 @@ To learn more: <blue>https://great-expectations.readthedocs.io/en/latest/intro.h
                     context.move_validation_to_fixtures(
                         data_asset_name, expectation_suite_name, run_id)
 
-            if click.confirm("Build documentation using the profiled data?",
+                cli_message("\nDone.")
+
+            if click.confirm("\nBuild documentation using the profiled data?",
                              default=True
                              ):
-                cli_message("\nRendering...")
+                cli_message("\Building documentation...")
 
                 context.render_full_static_site()
                 cli_message(
@@ -176,8 +178,7 @@ To view the generated data documentation in python 2, start a web server, run th
 Or to view in python 3, run this from the command line:
     <green>cd great_expectations/data_documentation; python3 -m http.server</green>
 
-Then open <blue>http://localhost:8000</blue> in your browser.
-""")
+Then open <blue>http://localhost:8000</blue> in your browser.""")
 
         else:
             cli_message(
