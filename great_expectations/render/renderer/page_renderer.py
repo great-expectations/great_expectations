@@ -60,8 +60,14 @@ class DescriptivePageRenderer(Renderer):
         # if "Reporting Area" in ordered_columns:
         #     ordered_columns = ["Reporting Area"]
 
+        if "data_asset_name" in validation_results["meta"]:
+            data_asset_name = validation_results["meta"]["data_asset_name"]
+        else:
+            data_asset_name = None
+
         return {
             "renderer_type": "DescriptivePageRenderer",
+            "data_asset_name": data_asset_name,
             "sections":
                 [
                     DescriptiveOverviewSectionRenderer.render(
