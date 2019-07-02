@@ -7,6 +7,7 @@ from ..exceptions import BatchKwargsError
 from .datasource import Datasource, ReaderMethods
 from great_expectations.datasource.generator.filesystem_path_generator import SubdirReaderGenerator
 from great_expectations.datasource.generator.databricks_generator import DatabricksTableGenerator
+from great_expectations.datasource.generator.in_memory_generator import InMemoryGenerator
 
 logger = logging.getLogger(__name__)
 
@@ -50,6 +51,8 @@ class SparkDFDatasource(Datasource):
             return SubdirReaderGenerator
         elif type_ == "databricks":
             return DatabricksTableGenerator
+        elif type_ == "memory":
+            return InMemoryGenerator
         else:
             raise ValueError("Unrecognized BatchGenerator type %s" % type_)
 

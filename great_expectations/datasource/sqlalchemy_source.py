@@ -4,6 +4,7 @@ from string import Template
 
 from .datasource import Datasource
 from great_expectations.dataset.sqlalchemy_dataset import SqlAlchemyDataset
+from .generator.query_generator import QueryGenerator
 
 logger = logging.getLogger(__name__)
 
