@@ -119,7 +119,7 @@ Please note: As of v0.7.0, profiling is still a beta feature in Great Expectatio
 This generation of profilers will evaluate the entire data source (without sampling) and may be very time consuming. 
 As a rule of thumb, we recommend starting with data smaller than 100MB.
 
-As a backup option, please visit <blue>https://great-expectations.readthedocs.io/en/latest/profiling.html</blue> for instructions to profile limited subsets within data sources.
+For other options, please visit <blue>https://great-expectations.readthedocs.io/en/latest/profiling.html</blue>.
             """ % (data_source_name)
         )
         if click.confirm("Proceed?",
@@ -130,7 +130,7 @@ As a backup option, please visit <blue>https://great-expectations.readthedocs.io
                 max_data_assets=20
             )
 
-            print("\nDone.\nProfiling results are saved here:")
+            print("\nDone.\n\nProfiling results are saved here:")
             for profiling_result in profiling_results:
                 data_asset_name = profiling_result[1]['meta']['data_asset_name']
                 expectation_suite_name = profiling_result[1]['meta']['expectation_suite_name']
@@ -150,7 +150,7 @@ Before committing, please make sure that this data does not contain sensitive in
 To learn more: <blue>https://great-expectations.readthedocs.io/en/latest/intro.html#data_documentation</blue>
 """
             )
-            if click.confirm("Proceed?",
+            if click.confirm("Move the profiled data?",
                              default=True
                              ):
                 cli_message("\nRendering...")
@@ -161,6 +161,11 @@ To learn more: <blue>https://great-expectations.readthedocs.io/en/latest/intro.h
                     run_id = profiling_result[1]['meta']['run_id']
                     context.move_validation_to_fixtures(
                         data_asset_name, expectation_suite_name, run_id)
+
+            if click.confirm("Build documentation using the profiled data?",
+                             default=True
+                             ):
+                cli_message("\nRendering...")
 
                 context.render_full_static_site()
                 cli_message(
