@@ -127,8 +127,10 @@ v.0.4.2
 * **Fix** bugs in expect_column_values_to_[not]_be_null: computing unexpected value percentages and handling all-null (thanks @ccnobbli)
 * Support mysql use of Decimal type (thanks @bouke-nederstigt)
 * Add new expectation expect_column_values_to_not_match_regex_list.
+
   * Change behavior of expect_column_values_to_match_regex_list to use python re.findall in PandasDataset, relaxing \
-  matching of individuals expressions to allow matches anywhere in the string.
+    matching of individuals expressions to allow matches anywhere in the string.
+
 * **Fix** documentation errors and other small errors (thanks @roblim, @ccnobbli)
 
 v.0.4.1
@@ -138,7 +140,8 @@ v.0.4.1
 v.0.4.0
 -------
 * Initial implementation of data context API and SqlAlchemyDataset including implementations of the following \
-expectations:
+  expectations:
+
   * expect_column_to_exist
   * expect_table_row_count_to_be
   * expect_table_row_count_to_be_between
@@ -152,11 +155,14 @@ expectations:
   * expect_column_sum_to_be
   * expect_column_unique_value_count_to_be_between
   * expect_column_proportion_of_unique_values_to_be_between
+
 * Major refactor of output_format to new result_format parameter. See docs for full details:
+
   * exception_list and related uses of the term exception have been renamed to unexpected
   * Output formats are explicitly hierarchical now, with BOOLEAN_ONLY < BASIC < SUMMARY < COMPLETE. \
-    All *column_aggregate_expectation*s now return element count and related information included at the BASIC \
-    level or higher.
+    All *column_aggregate_expectation* expectations now return element count and related information included at the \
+    BASIC level or higher.
+
 * New expectation available for parameterized distributions--\
   expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than (what a name! :) -- (thanks @ccnobbli)
 * ge.from_pandas() utility (thanks @schrockn)

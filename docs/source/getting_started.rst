@@ -3,10 +3,6 @@
 Getting Started
 ==================
 
-.. toctree::
-   :maxdepth: 2
-
-
 Requirements
 ------------
 
@@ -39,6 +35,13 @@ Then go to the root directory of the project you want to use Great Expectations 
 
 :ref:`tutorial_init`
 
+
 :ref:`tutorial_create_expectations`
 
 
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+
+   tutorial_init
+   tutorial_create_expectations

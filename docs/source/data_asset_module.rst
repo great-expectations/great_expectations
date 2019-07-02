@@ -33,7 +33,7 @@ great_expectations.data_asset.file_data_asset
 great_expectations.data_asset.util
 ----------------------------------
 
-.. automodule:: great_expectations.dataset.util
+.. automodule:: great_expectations.data_asset.util
     :members:
     :undoc-members:
     :show-inheritance:

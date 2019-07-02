@@ -9,6 +9,7 @@ import logging
 from ruamel.yaml import YAML
 
 from ..data_context.util import NormalizedDataAssetName
+from great_expectations.exceptions import BatchKwargsError
 
 logger = logging.getLogger(__name__)
 yaml = YAML()
@@ -186,11 +187,11 @@ class Datasource(object):
     def add_generator(self, name, type_, **kwargs):
         """Add a generator to the datasource.
 
-        The generator type_ must be one of the recognized types for the datasource.
+        The generator type\_ must be one of the recognized types for the datasource.
 
         Args:
             name (str): the name of the new generator to add
-            type_ (str): the type of the new generator to add
+            type\_ (str): the type of the new generator to add
             kwargs: additional keyword arguments will be passed directly to the new generator's constructor
 
         Returns:
@@ -214,7 +215,7 @@ class Datasource(object):
 
         Returns:
             generator (Generator)
-        """     
+        """
         if generator_name in self._generators:
             return self._generators[generator_name]
         elif generator_name in self._datasource_config["generators"]:
@@ -288,6 +289,10 @@ class Datasource(object):
                 generator_name = generators[0]
             elif "default" in generators:
                 generator_name = "default"
+            elif batch_kwargs is None:
+                raise BatchKwargsError(
+                    "No generator name provided or guessable, but no batch_kwargs were provided.", None
+                )
 
             generator_asset = data_asset_name
             expectation_suite = None
@@ -297,6 +302,7 @@ class Datasource(object):
                 )
 
         if batch_kwargs is None:
+            # noinspection PyUnboundLocalVariable
             generator = self.get_generator(generator_name)
             if generator is not None:
                 batch_kwargs = generator.yield_batch_kwargs(generator_asset)
@@ -336,23 +342,21 @@ class Datasource(object):
         raise NotImplementedError
 
     def get_available_data_asset_names(self, generator_names=None):
-        """
-        Returns a dictionary of data_asset_names that the specified generator can provide. Note that some generators,
+        """Returns a dictionary of data_asset_names that the specified generator can provide. Note that some generators,
         such as the "no-op" in-memory generator may not be capable of describing specific named data assets, and some
-        generators (such as fileystem glob generators) require thge user to configure data asset names.
+        generators (such as filesystem glob generators) require the user to configure data asset names.
 
         Args:
             generator_names: the generators for which to fetch available data asset names.
 
         Returns:
-            dictionary consisting of sets of generator assets available for the specified generators
+            dictionary consisting of sets of generator assets available for the specified generators:
+            ::
 
-        :: json
-
-        {
-          generator_name: [ data_asset_1, data_asset_2, ... ]
-          ...
-        }
+                {
+                  generator_name: [ data_asset_1, data_asset_2, ... ]
+                  ...
+                }
 
         """
         available_data_asset_names = {}
