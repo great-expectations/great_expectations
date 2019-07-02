@@ -371,7 +371,10 @@ class FancyDescriptiveColumnSectionRenderer(ColumnSectionRenderer):
             "header": "Histogram",
             "graph": json.dumps(chart),
             "styling": {
-                "classes": ["col-4"]
+                "classes": ["col-4"],
+                "styles": {
+                    "margin-top": "20px",
+                }
             }
         }
         # print(json.dumps(new_block))
