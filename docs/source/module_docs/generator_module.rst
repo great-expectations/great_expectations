@@ -10,7 +10,7 @@ Generator Module
     :show-inheritance:
     :exclude-members: BatchGenerator
 
-    .. autoclass:: great_expectations.datasource.batch_generator.BatchGenerator
+    .. autoclass:: great_expectations.datasource.generator.batch_generator.BatchGenerator
         :members:
         :undoc-members:
 

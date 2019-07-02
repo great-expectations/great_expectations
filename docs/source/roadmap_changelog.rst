@@ -30,7 +30,7 @@ to top-level names.
  * Major refactor of autoinspect. Autoinspect is now built around a module
    called "profile" which provides a class-based structure for building
    expectation suites. There is no longer a default  "autoinspect_func" --
-   calling autoinspect requires explicitly passing the desired profiler. See :ref:`profile`
+   calling autoinspect requires explicitly passing the desired profiler. See :ref:`profiling`
 
  * New "Compile to Docs" feature produces beautiful documentation from expectations and expectation
    validation reports, helping keep teams on the same page.

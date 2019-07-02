@@ -19,5 +19,5 @@ In version 0.7, GE introduced several new features, and significantly changed th
  - When upgrading from prior versions, the new :ref:`datasource` objects provide the same functionality that compute-
    environment-specific data context objects provided before, but with significantly more flexibility.
 
- - The term "autoinspect" is no longer used directly, having been replaced by a much more flexible :ref:`profile`
+ - The term "autoinspect" is no longer used directly, having been replaced by a much more flexible :ref:`profiling`
    feature.
