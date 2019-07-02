@@ -263,12 +263,9 @@ class FancyDescriptiveColumnSectionRenderer(ColumnSectionRenderer):
 
     @classmethod
     def _render_values_set(cls, evrs, content_blocks):
-        # FIXME: Eugene, here's where the logic for using "cardinality" in form of which expectations are defined
-        # should determine which blocks are generated
-        # Relatedly, this will change to grab values_list and to use expect_column_distinct_values_to_be_in_set
         set_evr = cls._find_evr_by_type(
             evrs,
-            "expect_column_distinct_values_to_be_in_set"
+            "expect_column_values_to_be_in_set"
         )
 
         if set_evr and "partial_unexpected_counts" in set_evr["result"]:
@@ -278,20 +275,52 @@ class FancyDescriptiveColumnSectionRenderer(ColumnSectionRenderer):
         else:
             return
 
-        if len(set_evr["result"][result_key]) < 10:
-            content_blocks.append(
-                ValueListContentBlockRenderer.render(
-                    set_evr,
-                    result_key=result_key
-                )
-            )
+        partial_unexpected_counts = set_evr["result"]["partial_unexpected_counts"]
+        values = [str(v["value"]) for v in partial_unexpected_counts]
+
+        if len(" ".join(values)) > 100:
+            classes = ["col-12"]
         else:
-            content_blocks.append(
-                GraphContentBlockRenderer.render(
-                    set_evr,
-                    result_key=result_key
-                )
-            )
+            classes = ["col-4"]
+
+        # TODO: This approach to styling is way too complicated for a simple values lists.
+        new_block = {
+            "content_block_type": "value_list",
+            "header": "Example values",
+            "value_list": [{
+                "template": "$value",
+                "params": {
+                    "value": value
+                },
+                "styling": {
+                    "default": {
+                        "classes": ["badge", "badge-secondary"]
+                    }
+                }
+            } for value in values],
+            "styling": {
+                "classes": classes,
+                "styles" : {
+                    "margin-top": "20px",
+                }
+            }
+        }
+        print(new_block)
+
+        content_blocks.append(new_block)
+
+        # if len(set_evr["result"][result_key]) < 10:
+        # new_block = ValueListContentBlockRenderer.render(
+        #     set_evr,
+        #     result_key=result_key
+        # )
+        # else:
+        #     content_blocks.append(
+        #         GraphContentBlockRenderer.render(
+        #             set_evr,
+        #             result_key=result_key
+        #         )
+        #     )
 
     @classmethod
     def _render_histogram(cls, evrs, content_blocks):
@@ -317,7 +346,7 @@ class FancyDescriptiveColumnSectionRenderer(ColumnSectionRenderer):
         bars = alt.Chart(df).mark_bar().encode(
             x='bins:O',
             y="weights:Q"
-        ).properties(height=200)
+        ).properties(width=286, height=180)
 
         chart = bars
 
@@ -325,7 +354,7 @@ class FancyDescriptiveColumnSectionRenderer(ColumnSectionRenderer):
             "content_block_type": "graph",
             "graph": chart.to_json(),
             "styling": {
-                "classes": ["col-4"]
+                "classes": ["col-6"]
             }
         }
         content_blocks.append(new_block)
