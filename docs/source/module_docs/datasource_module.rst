@@ -13,11 +13,6 @@ Datasource Module
         :members:
         :undoc-members:
 
-    .. autoclass:: great_expectations.datasource.batch_generator.BatchGenerator
-        :members:
-        :undoc-members:
-        :show-inheritance:
-
 
 great_expectations.datasource.pandas_source
 ---------------------------------------------

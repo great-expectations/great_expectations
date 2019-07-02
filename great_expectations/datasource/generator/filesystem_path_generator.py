@@ -7,6 +7,7 @@ from great_expectations.exceptions import BatchKwargsError
 
 KNOWN_EXTENSIONS = ['.csv', '.tsv', '.parquet', '.xls', '.xlsx', '.json']
 
+
 class GlobReaderGenerator(BatchGenerator):
     def __init__(self, name="default",
                  datasource=None,
