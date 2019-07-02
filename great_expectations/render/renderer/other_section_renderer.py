@@ -47,9 +47,29 @@ class DescriptiveOverviewSectionRenderer(Renderer):
     def _render_dataset_info(cls, evrs, content_blocks):
         expect_table_row_count_to_be_between_evr = cls._find_evr_by_type(evrs['results'], "expect_table_row_count_to_be_between")
 
-        table_rows = [
-            ["Number of variables", len(cls._get_column_list_from_evrs(evrs)),],
-            ["Number of observations", "?" if not expect_table_row_count_to_be_between_evr else expect_table_row_count_to_be_between_evr["result"]["observed_value"], ],
+        table_rows = []
+        table_rows.append(["Number of variables", len(cls._get_column_list_from_evrs(evrs)), ])
+
+        table_rows.append([
+            {
+                "template": "Number of observations",
+                "params": {},
+                "styling": {
+                    "attributes": {
+                        "data-toggle": "popover",
+                        "data-trigger": "hover",
+                        "data-placement": "top",
+                        "data-content": "expect_table_row_count_to_be_between",
+                        "container": "body",
+                    }
+
+                }
+            },
+            "?" if not expect_table_row_count_to_be_between_evr else expect_table_row_count_to_be_between_evr["result"][
+                "observed_value"]
+        ])
+
+        table_rows += [
             ["Missing cells", cls._get_percentage_missing_cells_str(evrs), ], # "866 (8.1%)"
             # ["Duplicate rows", "0 (0.0%)", ], #TODO: bring back when we have an expectation for this
         ]
@@ -121,7 +141,7 @@ class DescriptiveOverviewSectionRenderer(Renderer):
 
         content_blocks.append({
             "content_block_type": "bullet_list",
-            "header": "Expectation types",
+            "header": 'Expectation types <span class="mr-3 triangle"></span>',
             "bullet_list": bullet_list,
             "styling": {
                 "classes": ["col-12"],
@@ -129,10 +149,11 @@ class DescriptiveOverviewSectionRenderer(Renderer):
                     "margin-top": "20px"
                 },
                 "header": {
+                    "classes": ["collapsed"],
                     "attributes": {
                         "data-toggle": "collapse",
-                        "href": "#section-1-content-block-5-body",
-                        "aria-expanded": "false",
+                        "href": "#{{content_block_id}}-body",
+                        "aria-expanded": "true",
                         "aria-controls": "collapseExample",
                     },
                     "styles": {
@@ -140,7 +161,7 @@ class DescriptiveOverviewSectionRenderer(Renderer):
                     }
                 },
                 "body": {
-                    "classes": ["list-group"],
+                    "classes": ["list-group", "collapse"],
                 },
             },
         })

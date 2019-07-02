@@ -33,7 +33,7 @@ def render_styling(styling):
     Other dictionary keys are also allowed and ignored.
     This makes it possible for styling objects to be nested, so that different DOM elements
 
-    #NOTE: We should add some kind of type-checking to styling
+    # NOTE: We should add some kind of type-checking to styling
     """
 
     class_list = styling.get("classes", None)
@@ -89,7 +89,6 @@ def render_string_template(template):
         return template
 
     if "styling" in template:
-
         params = template["params"]
 
         # Apply default styling

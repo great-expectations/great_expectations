@@ -3,6 +3,9 @@
 Introduction
 ==================
 
+.. toctree::
+   :maxdepth: 2
+
 *Always know what to expect from your data.*
 
 What is great\_expectations?
@@ -31,75 +34,32 @@ To get more done with data, faster. Teams use great\_expectations to
 -  Codify assumptions used to build models when sharing with distributed
    teams or other analysts.
 
-How do I get started?
----------------------
+Workflow advantages
+-------------------
 
-It's easy! Just use pip install:
+Most data science and data engineering teams end up building some form of pipeline testing, eventually. Unfortunately, many teams don't get around to it until late in the game, long after early lessons from data exploration and model development have been forgotten.
 
-::
+In the meantime, data pipelines often become deep stacks of unverified assumptions. Mysterious (and sometimes embarrassing) bugs crop up more and more frequently. Resolving them requires painstaking exploration of upstream data, often leading to frustrating negotiations about data specs across teams.
 
-    $ pip install great_expectations
+It's not unusual to see data teams grind to a halt for weeks (or even months!) to pay down accumulated pipeline debt. This work is never fun---after all, it's just data cleaning: no new products shipped; no new insights kindled. Even worse, it's re-cleaning old data that you thought you'd already dealt with. In our experience, servicing pipeline debt is one of the biggest productivity and morale killers on data teams.
 
-You can also clone the repository, which includes examples of using
-great\_expectations.
+We strongly believe that most of this pain is avoidable. We built Great Expectations to make it very, very simple to
 
-::
+1. set up your testing framework early,
+2. capture those early learnings while they're still fresh, and
+3. systematically validate new data against them.
 
-    $ git clone https://github.com/great-expectations/great_expectations.git
-    $ pip install great_expectations/
+It's the best tool we know of for managing the complexity that inevitably grows within data pipelines. We hope it helps you as much as it's helped us.
 
-What expectations are available?
---------------------------------
+Good night and good luck!
 
-Expectations include:
 
-- ``expect_table_row_count_to_equal``
-- ``expect_column_values_to_be_unique``
-- ``expect_column_values_to_be_in_set``
-- ``expect_column_mean_to_be_between``
-- ...and many more
+Use Cases
+------------
 
-Visit the `glossary of
-expectations <http://great-expectations.readthedocs.io/en/latest/glossary.html>`__
-for a complete list of expectations that are currently part of the great
-expectations vocabulary.
+TODO!!!
 
-Can I contribute?
------------------
 
-Absolutely. Yes, please. Start
-`here <https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING.md>`__,
-and don't be shy with questions!
-
-How do I learn more?
---------------------
-
-For full documentation, visit `Great Expectations on
-readthedocs.io <http://great-expectations.readthedocs.io/en/latest/>`__.
-
-`Down with Pipeline
-Debt! <https://medium.com/@expectgreatdata/down-with-pipeline-debt-introducing-great-expectations-862ddc46782a>`__
-explains the core philosophy behind Great Expectations. Please give it a
-read, and clap, follow, and share while you're at it.
-
-For quick, hands-on introductions to Great Expectations' key features,
-check out our walkthrough videos:
-
--  `Introduction to Great
-   Expectations <https://www.youtube.com/watch?v=-_0tG7ACNU4>`__
--  `Using Distributional
-   Expectations <https://www.youtube.com/watch?v=l3DYPVZAUmw&t=20s>`__
-
-What's the best way to get in touch with the Great Expectations team?
----------------------------------------------------------------------
-
-`Issues on
-GitHub <https://github.com/great-expectations/great_expectations/issues>`__.
-If you have questions, comments, feature requests, etc., `opening an
-issue <https://github.com/great-expectations/great_expectations/issues/new>`__
-is definitely the best path forward.
-
-We also have a slack channel, which you can join here: https://tinyurl.com/great-expectations-slack
 
 
 Great Expectations doesn't do X. Is it right for my use case?
@@ -112,3 +72,7 @@ or `open a new
 issue <https://github.com/great-expectations/great_expectations/issues/new>`__
 and we'll see what we can do. Great Expectations is under active
 development, so your use case might be supported soon.
+
+
+
+
