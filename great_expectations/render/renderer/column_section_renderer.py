@@ -33,9 +33,11 @@ class ColumnSectionRenderer(Renderer):
 class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
 
     @classmethod
-    def render(cls, evrs, column=None):
-        if column is None:
+    def render(cls, evrs, section_name=None):
+        if section_name is None:
             column = cls._get_column_name(evrs)
+        else:
+            column = section_name
 
         content_blocks = []
         cls._render_header(evrs, column, content_blocks)

@@ -63,7 +63,16 @@ class DescriptivePageRenderer(Renderer):
         return {
             "renderer_type": "DescriptivePageRenderer",
             "sections":
-                [DescriptiveOverviewSectionRenderer.render(validation_results)] +
-                [FancyDescriptiveColumnSectionRenderer.render(
-                    columns[column]) for column in ordered_columns]
+                [
+                    DescriptiveOverviewSectionRenderer.render(
+                        validation_results,
+                        section_name="Overview"
+                    )
+                ] +
+                [
+                    FancyDescriptiveColumnSectionRenderer.render(
+                        columns[column],
+                        section_name=column
+                    ) for column in ordered_columns
+                ]
         }

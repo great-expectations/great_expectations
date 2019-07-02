@@ -14,7 +14,7 @@ from .content_block import(
 class DescriptiveOverviewSectionRenderer(Renderer):
 
     @classmethod
-    def render(cls, evrs, column=None):
+    def render(cls, evrs, section_name=None):
 
         content_blocks = []
         # NOTE: I don't love the way this builds content_blocks as a side effect.
@@ -28,7 +28,7 @@ class DescriptiveOverviewSectionRenderer(Renderer):
         cls._render_expectation_types(evrs, content_blocks)
 
         return {
-            "section_name": column,
+            "section_name": section_name,
             "content_blocks": content_blocks
         }
 
