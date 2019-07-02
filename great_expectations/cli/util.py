@@ -13,5 +13,15 @@ def cli_message(string):
         colored("\g<1>", "blue"),
         string
     )
+    mod_string = re.sub(
+        "<green>(.*?)</green>",
+        colored("\g<1>", "green"),
+        mod_string
+    )
+    mod_string = re.sub(
+        "<yellow>(.*?)</yellow>",
+        colored("\g<1>", "yellow"),
+        mod_string
+    )
 
     six.print_(colored(mod_string))
