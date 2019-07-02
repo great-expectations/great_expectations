@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import os
-
 import copy
 from enum import Enum
 from six import string_types
@@ -52,9 +50,28 @@ class Datasource(object):
 
     @classmethod
     def from_configuration(cls, **kwargs):
+        """
+        Build a new datasource from a configuration dictionary.
+
+        Args:
+            **kwargs: configuration key-value pairs
+
+        Returns:
+            datasource (Datasource): the newly-created datasource
+
+        """
         return cls(**kwargs)
 
     def __init__(self, name, type_, data_context=None, generators=None):
+        """
+        Build a new datasource.
+
+        Args:
+            name: the name for the datasource
+            type_: the type of the datasource
+            data_context: data context to which to connect
+            generators: generators to add to the datasource
+        """
         self._data_context = data_context
         self._name = name
         self._generators = {}
@@ -70,13 +87,25 @@ class Datasource(object):
 
     @property
     def data_context(self):
+        """
+        Property for attached DataContext
+        """
         return self._data_context
 
     @property
     def name(self):
+        """
+        Property for datasource name
+        """
         return self._name
 
     def _build_generators(self):
+        """
+        Build generator objects from the datasource configuration.
+
+        Returns:
+            None
+        """
         for generator in self._datasource_config["generators"].keys():
             self.get_generator(generator)
 
@@ -98,11 +127,27 @@ class Datasource(object):
     #     #     return {}
 
     def get_credentials(self, profile_name):
+        """
+        Return credentials for the named profile from the attached data context.
+
+        Args:
+            profile_name:
+
+        Returns:
+
+        """
         if self._data_context is not None:
             return self._data_context.get_profile_credentials(profile_name)
-        return {}
+        else:
+            raise ValueError("Cannot retrieve credentials without a DataContext.")
 
     def get_config(self):
+        """
+        Get the current configuration.
+
+        Returns:
+            datasource configuration dictionary
+        """
         if self._data_context is not None:
             self.save_config()
         return self._datasource_config
@@ -198,6 +243,29 @@ class Datasource(object):
         return [{"name": key, "type": value["type"]} for key, value in self._datasource_config["generators"].items()]
 
     def get_batch(self, data_asset_name, expectation_suite_name="default", batch_kwargs=None, **kwargs):
+        """
+        Get a batch of data from the datasource.
+
+        If a DataContext is attached, then expectation_suite_name can be used to define an expectation suite to
+        attach to the data_asset being fetched. Otherwise, the expectation suite will be empty.
+
+        If no batch_kwargs are specified, the next kwargs for the named data_asset will be fetched from the generator
+        first.
+
+        Specific datasource types implement the internal _get_data_asset method to use appropriate batch_kwargs to
+        construct and return GE data_asset objects.
+
+        Args:
+            data_asset_name: the name of the data asset for which to fetch data.
+            expectation_suite_name: the name of the expectation suite to attach to the batch
+            batch_kwargs: dictionary of key-value pairs describing the batch to get, or a single identifier if \
+            that can be unambiguously translated to batch_kwargs
+            **kwargs: Additional key-value pairs to pass to the datasource, such as reader parameters
+
+        Returns:
+            A data_asset consisting of the specified batch of data with the named expectation suite connected.
+
+        """
         if isinstance(data_asset_name, NormalizedDataAssetName):  # this richer type can include more metadata
             generator_name = data_asset_name.generator
             generator_asset = data_asset_name.generator_asset
@@ -240,12 +308,53 @@ class Datasource(object):
         return self._get_data_asset(batch_kwargs, expectation_suite, **kwargs)
 
     def _get_data_asset(self, batch_kwargs, expectation_suite, **kwargs):
+        """
+        Internal implementation of batch fetch logic. Note that this must be overridden by datasource implementations.
+
+        Args:
+            batch_kwargs: the identifing information to use to fetch the batch.
+            expectation_suite: the expectation suite to attach to the batch.
+            **kwargs: additional key-value pairs to use when fetching the batch of data
+
+        Returns:
+            A data_asset consisting of the specified batch of data with the named expectation suite connected.
+
+        """
         raise NotImplementedError
 
     def _get_generator_class(self, type_):
+        """
+        Gets the generator class associated with the named type. Generators must be capable of producing batch_kwargs
+        that the associated datasource can understand.
+
+        Args:
+            type_: the name of the generator class type
+
+        Returns:
+            the class of the generator with that name
+        """
         raise NotImplementedError
 
     def get_available_data_asset_names(self, generator_names=None):
+        """
+        Returns a dictionary of data_asset_names that the specified generator can provide. Note that some generators,
+        such as the "no-op" in-memory generator may not be capable of describing specific named data assets, and some
+        generators (such as fileystem glob generators) require thge user to configure data asset names.
+
+        Args:
+            generator_names: the generators for which to fetch available data asset names.
+
+        Returns:
+            dictionary consisting of sets of generator assets available for the specified generators
+
+        :: json
+
+        {
+          generator_name: [ data_asset_1, data_asset_2, ... ]
+          ...
+        }
+
+        """
         available_data_asset_names = {}
         if generator_names is None:
             generator_names = [generator["name"] for generator in self.list_generators()]
@@ -258,13 +367,37 @@ class Datasource(object):
         return available_data_asset_names
 
     def build_batch_kwargs(self, *args, **kwargs):
+        """
+        Datasource-specific logic that can handle translation of in-line batch identification information to
+        batch_kwargs understandable by the provided datasource.
+
+        For example, a PandasDatasource may construct a filesystem path from positional arguments to provide
+        an easy way of specifying the batch needed by the user.
+
+        Args:
+            *args: positional arguments used by the datasource
+            **kwargs: key-value pairs used by the datasource
+
+        Returns:
+            a batch_kwargs dictionary understandable by the datasource
+        """
         raise NotImplementedError
 
     def get_data_context(self):
+        """Getter for the currently-configured data context."""
         return self._data_context
 
     @staticmethod
     def _guess_reader_method_from_path(path):
+        """Static helper for parsing reader types from file path extensions.
+
+        Args:
+            path (str): the to use to guess
+
+        Returns:
+            ReaderMethod to use for the filepath
+
+        """
         if path.endswith(".csv") or path.endswith(".tsv"):
             return ReaderMethods.CSV
         elif path.endswith(".parquet"):
