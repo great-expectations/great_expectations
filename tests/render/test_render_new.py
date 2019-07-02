@@ -146,8 +146,8 @@ def test_full_oobe_flow():
     # print(json.dumps(rendered_json, indent=2))
     rendered_page = DefaultJinjaPageView.render(rendered_json)
     assert rendered_page != None
+    # print(rendered_page)
 
-    print(rendered_page)
     # TODO: Add an gitignored directory for test output files.
     # TODO: Add a pytest CLI switch to produce or not produce these files.
     with open('./test_full_oobe_flow.html', 'w') as f:

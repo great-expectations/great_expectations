@@ -2,6 +2,9 @@ import json
 from string import Template
 from collections import defaultdict
 
+import pandas as pd
+import altair as alt
+
 from .renderer import Renderer
 from .content_block import ValueListContentBlockRenderer
 from .content_block import GraphContentBlockRenderer
@@ -37,10 +40,11 @@ class FancyDescriptiveColumnSectionRenderer(ColumnSectionRenderer):
         # cls._render_column_type(evrs, content_blocks)
         cls._render_overview_table(evrs, content_blocks)
         cls._render_stats_table(evrs, content_blocks)
+
+        cls._render_histogram(evrs, content_blocks)
         cls._render_values_set(evrs, content_blocks)
 
         # cls._render_statistics(evrs, content_blocks)
-        # cls._render_histogram(evrs, content_blocks)
         # cls._render_common_values(evrs, content_blocks)
         # cls._render_extreme_values(evrs, content_blocks)
 
@@ -83,7 +87,6 @@ class FancyDescriptiveColumnSectionRenderer(ColumnSectionRenderer):
             column_type_list = cls._find_evr_by_type(
                 evrs, "expect_column_values_to_be_in_type_list"
             )["expectation_config"]["kwargs"]["type_list"]
-            print(column_type_list)
             column_type = ", ".join(column_type_list)
 
         except TypeError:
@@ -260,14 +263,12 @@ class FancyDescriptiveColumnSectionRenderer(ColumnSectionRenderer):
 
     @classmethod
     def _render_values_set(cls, evrs, content_blocks):
-        # FIXME: Eugene, here's where the logic for using "cardinality" in form of which expectations are defined
-        # should determine which blocks are generated
-        # Relatedly, this will change to grab values_list and to use expect_column_distinct_values_to_be_in_set
         set_evr = cls._find_evr_by_type(
             evrs,
-            "expect_column_distinct_values_to_be_in_set"
+            "expect_column_values_to_be_in_set"
         )
 
+        # FIXME: This logic is very brittle. It will work on profiled EVRs, but not much else.
         if set_evr and "partial_unexpected_counts" in set_evr["result"]:
             result_key = "partial_unexpected_counts"
         elif set_evr and "partial_unexpected_list" in set_evr["result"]:
@@ -275,20 +276,103 @@ class FancyDescriptiveColumnSectionRenderer(ColumnSectionRenderer):
         else:
             return
 
-        if len(set_evr["result"][result_key]) < 10:
-            content_blocks.append(
-                ValueListContentBlockRenderer.render(
-                    set_evr,
-                    result_key=result_key
-                )
-            )
+        partial_unexpected_counts = set_evr["result"]["partial_unexpected_counts"]
+        values = [str(v["value"]) for v in partial_unexpected_counts]
+
+        if len(" ".join(values)) > 100:
+            classes = ["col-12"]
         else:
-            content_blocks.append(
-                GraphContentBlockRenderer.render(
-                    set_evr,
-                    result_key=result_key
-                )
-            )
+            classes = ["col-4"]
+
+        # TODO: This approach to styling is way too complicated for a simple values lists.
+        new_block = {
+            "content_block_type": "value_list",
+            "header": "Example values",
+            "value_list": [{
+                "template": "$value",
+                "params": {
+                    "value": value
+                },
+                "styling": {
+                    "default": {
+                        "classes": ["badge", "badge-info"]
+                    }
+                }
+            } for value in values],
+            "styling": {
+                "classes": classes,
+                "styles": {
+                    "margin-top": "20px",
+                }
+            }
+        }
+        # print(new_block)
+
+        content_blocks.append(new_block)
+
+        # if len(set_evr["result"][result_key]) < 10:
+        # new_block = ValueListContentBlockRenderer.render(
+        #     set_evr,
+        #     result_key=result_key
+        # )
+        # else:
+        #     content_blocks.append(
+        #         GraphContentBlockRenderer.render(
+        #             set_evr,
+        #             result_key=result_key
+        #         )
+        #     )
+
+    @classmethod
+    def _render_histogram(cls, evrs, content_blocks):
+        # NOTE: This code is very brittle
+        kl_divergence_evr = cls._find_evr_by_type(
+            evrs,
+            "expect_column_kl_divergence_to_be_less_than"
+        )
+        # print(json.dumps(kl_divergence_evr, indent=2))
+        if kl_divergence_evr == None:
+            return
+
+        bins = kl_divergence_evr["result"]["details"]["observed_partition"]["bins"]
+        bin_medians = [round((v+bins[i+1])/2, 1)
+                       for i, v in enumerate(bins[:-1])]
+
+        df = pd.DataFrame({
+            "bins": bin_medians,
+            "weights": kl_divergence_evr["result"]["details"]["observed_partition"]["weights"],
+        })
+        df.weights *= 100
+
+        bars = alt.Chart(df).mark_bar().encode(
+            x='bins:O',
+            y="weights:Q"
+        ).properties(width=200, height=200, autosize="fit")
+
+        # chart = bars
+        chart = json.loads(bars.to_json())
+        # print(json.dumps(chart, indent=2))
+        # del chart["config"]
+        # print(json.dumps(chart, indent=2))
+
+        new_block = {
+            "content_block_type": "graph",
+            "header": "Histogram",
+            "graph": json.dumps(chart),
+            "styling": {
+                "classes": ["col-4"]
+            }
+        }
+        # print(json.dumps(new_block))
+        content_blocks.append(new_block)
+
+        # TODO: A deprecated version of this code lives in this method. We should review carefully, keep any bits that are useful, then delete.
+        # content_blocks.append(
+        #     GraphContentBlockRenderer.render(
+        #         kl_divergence_evr,
+        #         # result_key=result_key
+        #     )
+        # )
 
     @classmethod
     def _render_unrecognized(cls, evrs, content_blocks):
