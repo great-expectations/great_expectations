@@ -1,12 +1,11 @@
-import copy
 import time
 from six import string_types
 
 import pandas as pd
 
 from .datasource import Datasource, ReaderMethods
-from .filesystem_path_generator import SubdirReaderGenerator, GlobReaderGenerator
-from .batch_generator import InMemoryGenerator
+from great_expectations.datasource.generator.filesystem_path_generator import SubdirReaderGenerator, GlobReaderGenerator
+from great_expectations.datasource.generator.batch_generator import InMemoryGenerator
 from great_expectations.dataset.pandas_dataset import PandasDataset
 
 from great_expectations.exceptions import BatchKwargsError
