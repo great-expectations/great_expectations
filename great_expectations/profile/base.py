@@ -16,10 +16,6 @@ class DataAssetProfiler(object):
 
 class DatasetProfiler(object):
 
-    INT_TYPE_NAMES = set(["INTEGER", "int", "SMALLINT", "BIGINT", "IntegerType", "LongType"])
-    FLOAT_TYPE_NAMES = set(["FLOAT", "DOUBLE_PRECISION", "NUMERIC", "FloatType", "DoubleType", "float"])
-    STRING_TYPE_NAMES = set(["CHAR", "VARCHAR", "TEXT", "StringType", "string", "str"])
-
     @classmethod
     def validate(cls, dataset):
         return isinstance(dataset, Dataset)

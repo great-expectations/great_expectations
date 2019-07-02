@@ -10,7 +10,8 @@ from .content_block import(
     TableContentBlockRenderer,
     PrescriptiveBulletListContentBlockRenderer
 )
-from great_expectations.profile.base import DatasetProfiler
+from great_expectations.dataset.dataset import Dataset
+
 
 class DescriptiveOverviewSectionRenderer(Renderer):
 
@@ -265,11 +266,11 @@ class DescriptiveOverviewSectionRenderer(Renderer):
             else: # assuming expect_column_values_to_be_of_type
                 expected_types = set([evr["expectation_config"]["kwargs"]["type_"]])
 
-            if DatasetProfiler.INT_TYPE_NAMES.issubset(expected_types):
+            if Dataset.INT_TYPE_NAMES.issubset(expected_types):
                 column_types[column] = "int"
-            elif DatasetProfiler.FLOAT_TYPE_NAMES.issubset(expected_types):
+            elif Dataset.FLOAT_TYPE_NAMES.issubset(expected_types):
                 column_types[column] = "float"
-            elif DatasetProfiler.STRING_TYPE_NAMES.issubset(expected_types):
+            elif Dataset.STRING_TYPE_NAMES.issubset(expected_types):
                 column_types[column] = "string"
             else:
                 warnings.warn("The expected type list is not a subset of any of the profiler type sets: {0:s}".format(str(expected_types)))
