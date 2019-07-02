@@ -1479,14 +1479,17 @@ class Dataset(MetaDataset):
         """
         raise NotImplementedError
 
-    def expect_column_values_to_not_match_regex_list(self, column, regex_list,
-                                                     mostly=None,
-                                                     result_format=None, include_config=False, catch_exceptions=None, meta=None):
-        """Expect the column entries to be strings that do not match any of a list of regular expressions. Matches can \
+    def expect_column_values_to_not_match_regex_list(
+            self,
+            column, regex_list,
+            mostly=None,
+            result_format=None, include_config=False, catch_exceptions=None,
+            meta=None):
+        """Expect the column entries to be strings that do not match any of a list of regular expressions. Matches can
         be anywhere in the string.
 
-
-        expect_column_values_to_not_match_regex_list is a :func:`column_map_expectation <great_expectations.data_asset.dataset.Dataset.column_map_expectation>`.
+        expect_column_values_to_not_match_regex_list is a \
+        :func:`column_map_expectation <great_expectations.dataset.dataset.MetaDataset.column_map_expectation>`.
 
         Args:
             column (str): \
@@ -1501,7 +1504,7 @@ class Dataset(MetaDataset):
 
         Other Parameters:
             result_format (str or None): \
-                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`. \
                 For more detail, see :ref:`result_format <result_format>`.
             include_config (boolean): \
                 If True, then include the expectation config as part of the result object. \
@@ -1510,8 +1513,8 @@ class Dataset(MetaDataset):
                 If True, then catch exceptions and include them as part of the result object. \
                 For more detail, see :ref:`catch_exceptions`.
             meta (dict or None): \
-                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
-                For more detail, see :ref:`meta`.
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+                modification. For more detail, see :ref:`meta`.
 
         Returns:
             A JSON-serializable expectation result object.
@@ -2290,13 +2293,16 @@ class Dataset(MetaDataset):
         # noinspection PyUnresolvedReferences
         """Expect specific provided column quantiles to be between provided minimum and maximum values.
 
-        `quantile_ranges` must be a dictionary with two keys:
-           `quantiles`: (list of float) increasing ordered list of desired quantile values
-           `value_ranges`: (list of lists): Each element in this list consists of a list with two values, a lower
-               and upper bound (inclusive) for the corresponding quantile.
+        ``quantile_ranges`` must be a dictionary with two keys:
+
+            * ``quantiles``: (list of float) increasing ordered list of desired quantile values
+
+            * ``value_ranges``: (list of lists): Each element in this list consists of a list with two values, a lower \
+              and upper bound (inclusive) for the corresponding quantile.
 
 
         For each provided range:
+
             * min_value and max_value are both inclusive.
             * If min_value is None, then max_value is treated as an upper bound only
             * If max_value is None, then min_value is treated as a lower bound only
@@ -2305,6 +2311,7 @@ class Dataset(MetaDataset):
 
         For example:
         ::
+
             # my_df.my_col = [1,2,2,3,3,3,4]
             >>> my_df.expect_column_quantile_values_to_be_between(
                 "my_col",
@@ -2332,7 +2339,8 @@ class Dataset(MetaDataset):
 
         `expect_column_quantile_values_to_be_between` can be computationally intensive for large datasets.
 
-        expect_column_quantile_values_to_be_between is a :func:`column_aggregate_expectation <great_expectations.data_asset.dataset.Dataset.column_aggregate_expectation>`.
+        expect_column_quantile_values_to_be_between is a \
+        :func:`column_aggregate_expectation <great_expectations.dataset.MetaDataset.column_aggregate_expectation>`.
 
         Args:
             column (str): \

@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 """A DataContext represents a Great Expectations project. It organizes storage and access for
 expectation suites, datasources, notification settings, and data fixtures.
 
@@ -6,9 +8,8 @@ as well as managed expectation suites should be stored in version control.
 
 DataContexts use data sources you're already familiar with. Generators help introspect data stores and data execution
 frameworks (such as airflow, nifi, dbt, or dagster) to describe and produce batches of data ready for analysis. This
-enables fetching, validation, profiling, and documentation of  your data in a way that’s meaningful within your
-existing
-infrastructure and work environment.
+enables fetching, validation, profiling, and documentation of  your data in a way that is meaningful within your
+existing infrastructure and work environment.
 
 DataContexts use a datasource-based namespace, where each accessible type of data has a three-part
 normalized *data_asset_name*, consisting of *datasource/generator/generator_asset*.
@@ -30,7 +31,7 @@ option for selecting which expectations a DataContext returns.
 In many simple projects, the datasource or generator name may be omitted and the DataContext will infer
 the correct name when there is no ambiguity.
 
-Similarly, if no expectation suite name is provided, the DataContext will assume the name "default"
+Similarly, if no expectation suite name is provided, the DataContext will assume the name "default".
 """
 
 
