@@ -40,10 +40,11 @@ class FancyDescriptiveColumnSectionRenderer(ColumnSectionRenderer):
         # cls._render_column_type(evrs, content_blocks)
         cls._render_overview_table(evrs, content_blocks)
         cls._render_stats_table(evrs, content_blocks)
+
+        cls._render_histogram(evrs, content_blocks)
         cls._render_values_set(evrs, content_blocks)
 
         # cls._render_statistics(evrs, content_blocks)
-        cls._render_histogram(evrs, content_blocks)
         # cls._render_common_values(evrs, content_blocks)
         # cls._render_extreme_values(evrs, content_blocks)
 
@@ -347,21 +348,23 @@ class FancyDescriptiveColumnSectionRenderer(ColumnSectionRenderer):
         bars = alt.Chart(df).mark_bar().encode(
             x='bins:O',
             y="weights:Q"
-        ).properties(width=240, height=200)
+        ).properties(width=200, height=200, autosize="fit")
 
         # chart = bars
         chart = json.loads(bars.to_json())
         # print(json.dumps(chart, indent=2))
         # del chart["config"]
-        print(json.dumps(chart, indent=2))
+        # print(json.dumps(chart, indent=2))
 
         new_block = {
             "content_block_type": "graph",
+            "header": "Histogram",
             "graph": json.dumps(chart),
             "styling": {
-                "classes": ["col-6"]
+                "classes": ["col-4"]
             }
         }
+        # print(json.dumps(new_block))
         content_blocks.append(new_block)
 
         # TODO: A deprecated version of this code lives in this method. We should review carefully, keep any bits that are useful, then delete.
