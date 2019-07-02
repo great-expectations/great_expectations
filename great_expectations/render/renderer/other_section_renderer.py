@@ -1,7 +1,7 @@
 import json
 from string import Template
 import warnings
-from collections import defaultdict
+from collections import defaultdict, Counter
 
 from .renderer import Renderer
 from .content_block import(
@@ -10,7 +10,7 @@ from .content_block import(
     TableContentBlockRenderer,
     PrescriptiveBulletListContentBlockRenderer
 )
-
+from great_expectations.profile.base import DatasetProfiler
 
 class DescriptiveOverviewSectionRenderer(Renderer):
 
@@ -72,16 +72,10 @@ class DescriptiveOverviewSectionRenderer(Renderer):
     @classmethod
     def _render_variable_types(cls, evrs, content_blocks):
 
-        table_rows = [
-            ["Numeric", "5", ],
-            ["Categorical", "5", ],
-            ["Boolean", "1", ],
-            ["Date", "0", ],
-            ["URL", "0", ],
-            ["Text (Unique)", "1", ],
-            ["Rejected", "0", ],
-            ["Unsupported", "0", ],
-        ]
+        column_types = cls._get_column_types(evrs)
+        #TODO: check if we have the information to make this statement. Do all columns have type expectations?
+        column_type_counter = Counter(column_types.values())
+        table_rows = [[type, str(column_type_counter[type])] for type in ["int", "float", "string", "--"]]
 
         content_blocks.append({
             "content_block_type": "table",
@@ -225,3 +219,33 @@ class DescriptiveOverviewSectionRenderer(Renderer):
             return "?"
 
         return "{0:.2f}%".format(sum([evr["result"]["unexpected_percent"] for evr in expect_column_values_to_not_be_null_evrs])/len(columns)*100)
+
+    @classmethod
+    def _get_column_types(cls, evrs):
+        columns = cls._get_column_list_from_evrs(evrs)
+
+        type_evrs = cls._find_all_evrs_by_type(evrs["results"], "expect_column_values_to_be_in_type_list") +\
+            cls._find_all_evrs_by_type(evrs["results"], "expect_column_values_to_be_of_type")
+
+        column_types = {}
+        for column in columns:
+            column_types[column] = "--"
+
+        for evr in type_evrs:
+            column = evr["expectation_config"]["kwargs"]["column"]
+            if evr["expectation_config"]["expectation_type"] == "expect_column_values_to_be_in_type_list":
+                expected_types = set(evr["expectation_config"]["kwargs"]["type_list"])
+            else: # assuming expect_column_values_to_be_of_type
+                expected_types = set([evr["expectation_config"]["kwargs"]["type_"]])
+
+            if DatasetProfiler.INT_TYPE_NAMES.issubset(expected_types):
+                column_types[column] = "int"
+            elif DatasetProfiler.FLOAT_TYPE_NAMES.issubset(expected_types):
+                column_types[column] = "float"
+            elif DatasetProfiler.STRING_TYPE_NAMES.issubset(expected_types):
+                column_types[column] = "string"
+            else:
+                warnings.warn("The expected type list is not a subset of any of the profiler type sets: {0:s}".format(str(expected_types)))
+                column_types[column] = "--"
+
+        return column_types
