@@ -33,9 +33,11 @@ def get_column_name_from_evr_list(evr_list):
 class FancyDescriptiveColumnSectionRenderer(ColumnSectionRenderer):
 
     @classmethod
-    def render(cls, evrs, column=None):
-        if column is None:
+    def render(cls, evrs, section_name=None):
+        if section_name is None:
             column = cls._get_column_name(evrs)
+        else:
+            column = section_name
 
         content_blocks = []
         cls._render_header(evrs, content_blocks)
