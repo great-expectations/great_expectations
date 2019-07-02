@@ -57,9 +57,15 @@ Good night and good luck!
 Use Cases
 ------------
 
-TODO!!!
-
-
+* Automating verification of new data deliveries purchased from a vendor before using them for \
+  analytics.
+* Packaging tests for whether new data meets assumptions when sharing notebooks that generate \
+  reports or analysis.
+* Making implicit knowledge explicit and reducing the number of "data integration meetings" and \
+  round-trips to subject-matter experts to elicit necessary context and requirements while buiding \
+  a new pipeline.
+* Discovering new unit tests based on edge cases in data.
+* ... and many more
 
 
 Great Expectations doesn't do X. Is it right for my use case?
@@ -72,7 +78,3 @@ or `open a new
 issue <https://github.com/great-expectations/great_expectations/issues/new>`__
 and we'll see what we can do. Great Expectations is under active
 development, so your use case might be supported soon.
-
-
-
-
