@@ -1,4 +1,4 @@
-.. _datasources:
+.. _datasource:
 
 Datasources
 ============

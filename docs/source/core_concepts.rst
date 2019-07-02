@@ -6,10 +6,9 @@ Core Concepts
 .. toctree::
    :maxdepth: 2
 
-   expectations
-   validation
-   DataContext <data_context>
-   Datasource <datasources>
-   custom_expectations
-   glossary
-
+   /core_concepts/expectations
+   /core_concepts/validation
+   /core_concepts/data_context
+   /core_concepts/datasource
+   /core_concepts/custom_expectations
+   /core_concepts/glossary

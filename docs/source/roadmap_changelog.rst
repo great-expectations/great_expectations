@@ -57,15 +57,20 @@ to top-level names.
    ``expect_column_values_to_be_between`` ``None`` and ``None``. This makes it possible to progressively
    tighten expectations while using them as the basis for profiling results and documentation.
 
- * Bugfixes and improvements
+ * Bugfixes and improvements:
+
    * New expectations:
+
      * expect_column_quantile_values_to_be_between
      * expect_column_distinct_values_to_be_in_set
+
    * Added support for ``head`` method on all current backends, returning a PandasDataset
    * More implemented expectations for SparkDF Dataset with optimizations
+
      * expect_column_values_to_be_between
      * expect_column_median_to_be_between
      * expect_column_value_lengths_to_be_between
+
    * Optimized histogram fetching for SqlalchemyDataset and SparkDFDataset
    * Added cross-platform internal partition method, paving path for improved profiling
    * Fixed bug with outputstrftime not being honored in PandasDataset
