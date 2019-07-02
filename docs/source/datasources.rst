@@ -23,4 +23,6 @@ a SqlAlchemyDataset corresponding to that batch of data and ready for validation
 Since opinionated DAG managers such as airflow, dbt, prefect.io, dagster can also act as datasources
 and/or generators for a more generic datasource.
 
+Batch Kwargs: see :ref:`batch_generator`
+
 See datasource module docs :ref:`datasource_module`

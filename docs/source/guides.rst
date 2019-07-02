@@ -8,6 +8,7 @@ Guides
 
    glossary
    implemented_expectations
+   batch_generator
    distributional_expectations
    standard_arguments
    result_format

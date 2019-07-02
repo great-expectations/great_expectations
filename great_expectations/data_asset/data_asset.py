@@ -100,8 +100,8 @@ class DataAsset(object):
                     Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
                     For more detail, see :ref:`result_format <result_format>`.
                 * meta (dict or None): \
-                    A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
-                    For more detail, see :ref:`meta`.
+                    A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+                    modification. For more detail, see :ref:`meta`.
         """
         def outer_wrapper(func):
             @wraps(func)
@@ -158,8 +158,10 @@ class DataAsset(object):
                 expectation_args = copy.deepcopy(all_args)
 
                 if "evaluation_parameters" in self._expectation_suite:
-                    evaluation_args = self._build_evaluation_parameters(expectation_args,
-                                                                        self._expectation_suite["evaluation_parameters"])  # This will be passed to the evaluation
+                    evaluation_args = self._build_evaluation_parameters(
+                        expectation_args,
+                        self._expectation_suite["evaluation_parameters"]
+                    )
                 else:
                     evaluation_args = self._build_evaluation_parameters(
                         expectation_args, None)
@@ -194,7 +196,7 @@ class DataAsset(object):
                             }
 
                         else:
-                            raise(err)
+                            raise err
 
                 else:
                     return_obj = {"stored_configuration": expectation_config}
@@ -297,7 +299,8 @@ class DataAsset(object):
            If `expectation_config` is a column expectation, this drops existing expectations that are specific to \
            that column and only if it is the same expectation type as `expectation_config`. Otherwise, if it's not a \
            column expectation, this drops existing expectations of the same type as `expectation config`. \
-           After expectations of the same type are dropped, `expectation_config` is appended to `DataAsset._expectation_suite`.
+           After expectations of the same type are dropped, `expectation_config` is appended to \
+           `DataAsset._expectation_suite`.
 
            Args:
                expectation_config (json): \
@@ -318,9 +321,9 @@ class DataAsset(object):
         # Drop existing expectations with the same expectation_type.
         # For column_expectations, _append_expectation should only replace expectations
         # where the expectation_type AND the column match
-        #!!! This is good default behavior, but
-        #!!!    it needs to be documented, and
-        #!!!    we need to provide syntax to override it.
+        # !!! This is good default behavior, but
+        # !!!    it needs to be documented, and
+        # !!!    we need to provide syntax to override it.
 
         if 'column' in expectation_config['kwargs']:
             column = expectation_config['kwargs']['column']
@@ -441,20 +444,21 @@ class DataAsset(object):
             A list of indexes for matching expectation objects.
             If there are no matches, the list will be empty.
         """
-        if expectation_kwargs == None:
+        if expectation_kwargs is None:
             expectation_kwargs = {}
 
-        if "column" in expectation_kwargs and column != None and column != expectation_kwargs["column"]:
+        if "column" in expectation_kwargs and column is not None and column is not expectation_kwargs["column"]:
             raise ValueError("Conflicting column names in remove_expectation: %s and %s" % (
                 column, expectation_kwargs["column"]))
 
-        if column != None:
+        if column is not None:
             expectation_kwargs["column"] = column
 
         match_indexes = []
         for i, exp in enumerate(self._expectation_suite.expectations):
-            if expectation_type == None or (expectation_type == exp['expectation_type']):
-                # if column == None or ('column' not in exp['kwargs']) or (exp['kwargs']['column'] == column) or (exp['kwargs']['column']==:
+            if expectation_type is None or (expectation_type == exp['expectation_type']):
+                # if column == None or ('column' not in exp['kwargs']) or
+                # (exp['kwargs']['column'] == column) or (exp['kwargs']['column']==:
                 match = True
 
                 for k, v in expectation_kwargs.items():
@@ -481,9 +485,12 @@ class DataAsset(object):
             expectation_type=None                : The name of the expectation type to be matched.
             column=None                          : The name of the column to be matched.
             expectation_kwargs=None              : A dictionary of kwargs to match against.
-            discard_result_format_kwargs=True    : In returned expectation object(s), suppress the `result_format` parameter.
-            discard_include_configs_kwargs=True  : In returned expectation object(s), suppress the `include_configs` parameter.
-            discard_catch_exceptions_kwargs=True : In returned expectation object(s), suppress the `catch_exceptions` parameter.
+            discard_result_format_kwargs=True    : In returned expectation object(s), \
+            suppress the `result_format` parameter.
+            discard_include_configs_kwargs=True  : In returned expectation object(s), \
+            suppress the `include_configs` parameter.
+            discard_catch_exceptions_kwargs=True : In returned expectation object(s), \
+            suppress the `catch_exceptions` parameter.
 
         Returns:
             A list of matching expectation objects.
@@ -526,7 +533,8 @@ class DataAsset(object):
         Note:
             If remove_expectation doesn't find any matches, it raises a ValueError.
             If remove_expectation finds more than one matches and remove_multiple_matches!=True, it raises a ValueError.
-            If dry_run=True, then `remove_expectation` acts as a thin layer to find_expectations, with the default values for discard_result_format_kwargs, discard_include_configs_kwargs, and discard_catch_exceptions_kwargs
+            If dry_run=True, then `remove_expectation` acts as a thin layer to find_expectations, with the default \
+            values for discard_result_format_kwargs, discard_include_configs_kwargs, and discard_catch_exceptions_kwargs
         """
 
         match_indexes = self.find_expectation_indexes(
@@ -609,7 +617,7 @@ class DataAsset(object):
         See also:
             get_default_expectation_arguments
         """
-        #!!! Maybe add a validation check here?
+        # !!! Maybe add a validation check here?
 
         self.default_expectation_args[argument] = value
 
@@ -622,8 +630,12 @@ class DataAsset(object):
                                 ):
         warnings.warn("get_expectations_config is deprecated, and will be removed in a future release. " +
                       "Please use get_expectation_suite instead.", DeprecationWarning)
-        return self.get_expectation_suite(discard_failed_expectations, discard_result_format_kwargs,
-                                          discard_include_configs_kwargs, discard_catch_exceptions_kwargs, suppress_warnings)
+        return self.get_expectation_suite(
+            discard_failed_expectations,
+            discard_result_format_kwargs,
+            discard_include_configs_kwargs,
+            discard_catch_exceptions_kwargs,
+            suppress_warnings)
 
     def get_expectation_suite(self,
                               discard_failed_expectations=True,
@@ -643,12 +655,15 @@ class DataAsset(object):
                 In returned expectation objects, suppress the `include_configs` parameter. Defaults to `True`.
             discard_catch_exceptions_kwargs (boolean): \
                 In returned expectation objects, suppress the `catch_exceptions` parameter.  Defaults to `True`.
+            suppress_warnings (boolean): \
+                If true, do not print warning message about information discarded before return
 
         Returns:
             An expectation config.
 
         Note:
-            get_expectation_suite does not affect the underlying config at all. The returned config is a copy of _expectation_suite, not the original object.
+            get_expectation_suite does not affect the underlying config at all. The returned config is a copy of \
+            _expectation_suite, not the original object.
         """
         config = dict(self._expectation_suite)
         config = copy.deepcopy(config)
@@ -664,7 +679,7 @@ class DataAsset(object):
                 # Instead of retaining expectations IFF success==True, it discard expectations IFF success==False.
                 # In cases where expectation["success"] is missing or None, expectations are *retained*.
                 # Such a case could occur if expectations were loaded from a config file and never run.
-                if "success_on_last_run" in expectation and expectation["success_on_last_run"] == False:
+                if "success_on_last_run" in expectation and expectation["success_on_last_run"] is False:
                     discards["failed_expectations"] += 1
                 else:
                     new_expectations.append(expectation)
@@ -672,7 +687,8 @@ class DataAsset(object):
             expectations = new_expectations
 
         for expectation in expectations:
-            # FIXME: Factor this out into a new function. The logic is duplicated in remove_expectation, which calls _copy_and_clean_up_expectation
+            # FIXME: Factor this out into a new function. The logic is duplicated in remove_expectation,
+            #  which calls _copy_and_clean_up_expectation
             if "success_on_last_run" in expectation:
                 del expectation["success_on_last_run"]
 
@@ -692,15 +708,10 @@ class DataAsset(object):
                     discards["catch_exceptions"] += 1
 
         if not suppress_warnings:
-            """
-WARNING: get_expectation_suite discarded
-    12 failing expectations
-    44 result_format kwargs
-     0 include_config kwargs
-     1 catch_exceptions kwargs
-If you wish to change this behavior, please set discard_failed_expectations, discard_result_format_kwargs, discard_include_configs_kwargs, and discard_catch_exceptions_kwargs appropirately.
-            """
-            if any([discard_failed_expectations, discard_result_format_kwargs, discard_include_configs_kwargs, discard_catch_exceptions_kwargs]):
+            if any([discard_failed_expectations,
+                    discard_result_format_kwargs,
+                    discard_include_configs_kwargs,
+                    discard_catch_exceptions_kwargs]):
                 print("WARNING: get_expectation_suite discarded")
                 if discard_failed_expectations:
                     print("\t%d failing expectations" %
@@ -714,7 +725,9 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                 if discard_catch_exceptions_kwargs:
                     print("\t%d catch_exceptions kwargs" %
                           discards["catch_exceptions"])
-                print("If you wish to change this behavior, please set discard_failed_expectations, discard_result_format_kwargs, discard_include_configs_kwargs, and discard_catch_exceptions_kwargs appropirately.")
+                print(
+                    "If you wish to change this behavior, please set discard_failed_expectations, discard_result "
+                    "format_kwargs, discard_include_configs_kwargs, and discard_catch_exceptions_kwargs appropriately.")
 
         config["expectations"] = expectations
         return config
@@ -730,8 +743,9 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
     ):
         warnings.warn("save_expectations_config is deprecated, and will be removed in a future release. " +
                       "Please use save_expectation_suite instead.", DeprecationWarning)
-        self.save_expectation_suite(filepath, discard_failed_expectations, discard_result_format_kwargs,
-                               discard_include_configs_kwargs, discard_catch_exceptions_kwargs, suppress_warnings)
+        self.save_expectation_suite(
+            filepath, discard_failed_expectations, discard_result_format_kwargs,
+            discard_include_configs_kwargs, discard_catch_exceptions_kwargs, suppress_warnings)
 
     def save_expectation_suite(
         self,
@@ -746,8 +760,8 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
            Writes the DataAsset's expectation config to the specified JSON ``filepath``. Failing expectations \
            can be excluded from the JSON expectations config with ``discard_failed_expectations``. The kwarg key-value \
-           pairs :ref:`result_format`, :ref:`include_config`, and :ref:`catch_exceptions` are optionally excluded from the JSON \
-           expectations config.
+           pairs :ref:`result_format`, :ref:`include_config`, and :ref:`catch_exceptions` are optionally excluded from \
+           the JSON expectations config.
 
            Args:
                filepath (string): \
@@ -756,12 +770,14 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                    If True, excludes expectations that do not return ``success = True``. \
                    If False, all expectations are written to the JSON config file.
                discard_result_format_kwargs (boolean): \
-                   If True, the :ref:`result_format` attribute for each expectation is not written to the JSON config file. \
-               discard_include_configs_kwargs (boolean): \
-                   If True, the :ref:`include_config` attribute for each expectation is not written to the JSON config file.\
-               discard_catch_exceptions_kwargs (boolean): \
-                   If True, the :ref:`catch_exceptions` attribute for each expectation is not written to the JSON config \
+                   If True, the :ref:`result_format` attribute for each expectation is not written to the JSON config \
                    file.
+               discard_include_configs_kwargs (boolean): \
+                   If True, the :ref:`include_config` attribute for each expectation is not written to the JSON config \
+                   file.
+               discard_catch_exceptions_kwargs (boolean): \
+                   If True, the :ref:`catch_exceptions` attribute for each expectation is not written to the JSON \
+                   config file.
                suppress_warnings (boolean): \
                   It True, all warnings raised by Great Expectations, as a result of dropped expectations, are \
                   suppressed.
@@ -798,17 +814,22 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                 expectation_suite (json or None): \
                     If None, uses the expectations config generated with the DataAsset during the current session. \
                     If a JSON file, validates those expectations.
+                run_id (str): \
+                    A string used to identify this validation result as part of a collection of validations. See \
+                    DataContext for more information.
+                data_context (DataContext): \
+                    A datacontext object to use as part of validation for binding evaluation parameters and \
+                    registering validation results.
                 evaluation_parameters (dict or None): \
-                    If None, uses the evaluation_paramters from the expectation_suite provided or as part of the data_asset.
-                    If a dict, uses the evaluation parameters in the dictionary.
+                    If None, uses the evaluation_paramters from the expectation_suite provided or as part of the \
+                    data_asset. If a dict, uses the evaluation parameters in the dictionary.
                 catch_exceptions (boolean): \
-                    If True, exceptions raised by tests will not end validation and will be described in the returned report.
+                    If True, exceptions raised by tests will not end validation and will be described in the returned \
+                    report.
                 result_format (string or None): \
                     If None, uses the default value ('BASIC' or as specified). \
-                    If string, the returned expectation output follows the specified format ('BOOLEAN_ONLY','BASIC', etc.).
-                include_config (boolean): \
-                    If True, the returned results include the config information associated with each expectation, if \
-                    it exists.
+                    If string, the returned expectation output follows the specified format ('BOOLEAN_ONLY','BASIC', \
+                    etc.).
                 only_return_failures (boolean): \
                     If True, expectation results are only returned when ``success = False`` \
 
@@ -844,14 +865,14 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                 }
 
            Notes:
-               If the configuration object was built with a different version of great expectations then the current environment. \
-               If no version was found in the configuration file.
+               If the configuration object was built with a different version of great expectations then the \
+               current environment. If no version was found in the configuration file.
 
            Raises:
                AttributeError - if 'catch_exceptions'=None and an expectation throws an AttributeError
         """
         validate__interactive_evaluation = self._interactive_evaluation
-        if self._interactive_evaluation == False:
+        if not self._interactive_evaluation:
             # Turn this off for an explicit call to validate
             self._interactive_evaluation = True
 
@@ -896,7 +917,9 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         try:
             if expectation_suite['meta']['great_expectations.__version__'] != __version__:
                 warnings.warn(
-                    "WARNING: This configuration object was built using version %s of great_expectations, but is currently being valided by version %s." % (expectation_suite['meta']['great_expectations.__version__'], __version__))
+                    "WARNING: This configuration object was built using version %s of great_expectations, but "
+                    "is currently being valided by version %s."
+                    % (expectation_suite['meta']['great_expectations.__version__'], __version__))
         except KeyError:
             warnings.warn(
                 "WARNING: No great_expectations version found in configuration object.")
@@ -934,7 +957,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                     }
 
                 else:
-                    raise(err)
+                    raise err
 
             # if include_config:
             result["expectation_config"] = copy.deepcopy(expectation)
@@ -954,7 +977,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
         if only_return_failures:
             abbrev_results = []
             for exp in results:
-                if exp["success"] == False:
+                if not exp["success"]:
                     abbrev_results.append(exp)
             results = abbrev_results
 
@@ -1065,7 +1088,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
                                               value["$PARAMETER"]]
                 elif evaluation_parameters is not None and value["$PARAMETER"] in evaluation_parameters:
                     evaluation_args[key] = evaluation_parameters[value['$PARAMETER']]
-                elif self._interactive_evaluation == False:
+                elif not self._interactive_evaluation:
                     pass
                 else:
                     raise KeyError(
@@ -1073,7 +1096,12 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         return evaluation_args
 
-    ##### Output generation #####
+    ###
+    #
+    # Output generation
+    #
+    ###
+
     def _format_map_output(
         self,
         result_format,
@@ -1182,8 +1210,9 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             nonnull_count (int): \
                 The number of nonnull values in the column
             mostly (float or None): \
-                A value between 0 and 1 (or None), indicating the percentage of successes required to pass the expectation as a whole\
-                If mostly=None, then all values must succeed in order for the expectation as a whole to succeed.
+                A value between 0 and 1 (or None), indicating the percentage of successes required to pass the \
+                expectation as a whole. If mostly=None, then all values must succeed in order for the expectation as \
+                a whole to succeed.
 
         Returns:
             success (boolean), percent_success (float)
@@ -1193,7 +1222,7 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             # percent_success = float(success_count)/nonnull_count
             percent_success = success_count / nonnull_count
 
-            if mostly != None:
+            if mostly is not None:
                 success = bool(percent_success >= mostly)
 
             else:
@@ -1205,7 +1234,11 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
 
         return success, percent_success
 
-    ##### Iterative testing for custom expectations #####
+    ###
+    #
+    # Iterative testing for custom expectations
+    #
+    ###
 
     def test_expectation_function(self, function, *args, **kwargs):
         """Test a generic expectation function
@@ -1219,8 +1252,9 @@ If you wish to change this behavior, please set discard_failed_expectations, dis
             A JSON-serializable expectation result object.
 
         Notes:
-            This function is a thin layer to allow quick testing of new expectation functions, without having to define custom classes, etc.
-            To use developed expectations from the command-line tool, you'll still need to define custom classes, etc.
+            This function is a thin layer to allow quick testing of new expectation functions, without having to \
+            define custom classes, etc. To use developed expectations from the command-line tool, you will still need \
+            to define custom classes, etc.
 
             Check out :ref:`custom_expectations` for more information.
         """
