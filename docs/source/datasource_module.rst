@@ -1,15 +1,46 @@
 .. _datasource_module:
 
-Datasources
-===========
+Datasource Module
+==================
 
 .. automodule:: great_expectations.datasource
     :members:
     :undoc-members:
     :show-inheritance:
-    :exclude-members: DataContext
+    :exclude-members: Datasource, BatchGenerator
 
     .. autoclass:: great_expectations.datasource.Datasource
         :members:
         :undoc-members:
+
+    .. autoclass:: great_expectations.datasource.batch_generator.BatchGenerator
+        :members:
+        :undoc-members:
         :show-inheritance:
+
+
+great_expectations.datasource.pandas_source
+---------------------------------------------
+
+.. autoclass:: great_expectations.datasource.pandas_source.PandasDatasource
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+great_expectations.datasource.sqlalchemy_source
+------------------------------------------------
+
+.. autoclass:: great_expectations.datasource.sqlalchemy_source.SqlAlchemyDatasource
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+great_expectations.datasource.spark_source
+---------------------------------------------
+
+.. autoclass:: great_expectations.datasource.spark_source.SparkDFDatasource
+    :members:
+    :undoc-members:
+    :show-inheritance:
