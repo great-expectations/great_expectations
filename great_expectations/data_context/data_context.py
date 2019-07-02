@@ -456,8 +456,7 @@ class DataContext(object):
         return datasource_config
 
     def get_available_data_asset_names(self, datasource_names=None, generator_names=None):
-        """
-        Inspect datasource and generators to provide available data_asset objects.
+        """Inspect datasource and generators to provide available data_asset objects.
 
         Args:
             datasource_names: list of datasources for which to provide available data_asset_name objects. If None, \
@@ -465,15 +464,16 @@ class DataContext(object):
             generator_names: list of generators for which to provide available data_asset_name objects.
 
         Returns:
-            data_asset_names (dict): Dictionary describing availalbe data assets. Dictionary has the following shape::
+            data_asset_names (dict): Dictionary describing available data assets
+            ::
 
-            {
-              datasource_name: {
-                generator_name: [ data_asset_1, data_asset_2, ... ]
-                ...
-              }
-              ...
-            }
+                {
+                  datasource_name: {
+                    generator_name: [ data_asset_1, data_asset_2, ... ]
+                    ...
+                  }
+                  ...
+                }
 
         """
         data_asset_names = {}

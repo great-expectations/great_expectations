@@ -1815,77 +1815,77 @@ class Dataset(MetaDataset):
         # noinspection PyUnresolvedReferences
         """Expect the set of distinct column values to be contained by a given set.
 
-                The success value for this expectation will match that of expect_column_values_to_be_in_set. However,
-                expect_column_distinct_values_to_be_in_set is a \
-                :func:`column_aggregate_expectation \
-                <great_expectations.dataset.dataset.MetaDataset.column_aggregate_expectation>`.
+        The success value for this expectation will match that of expect_column_values_to_be_in_set. However,
+        expect_column_distinct_values_to_be_in_set is a \
+        :func:`column_aggregate_expectation \
+        <great_expectations.dataset.dataset.MetaDataset.column_aggregate_expectation>`.
 
-                For example:
-                ::
+        For example:
+        ::
 
-                    # my_df.my_col = [1,2,2,3,3,3]
-                    >>> my_df.expect_column_distinct_values_to_be_in_set(
-                        "my_col",
-                        [2, 3, 4]
-                    )
+            # my_df.my_col = [1,2,2,3,3,3]
+            >>> my_df.expect_column_distinct_values_to_be_in_set(
+                "my_col",
+                [2, 3, 4]
+            )
+            {
+              "success": false
+              "result": {
+                "observed_value": [1,2,3],
+                "details": {
+                  "value_counts": [
                     {
-                      "success": false
-                      "result": {
-                        "observed_value": [1,2,3],
-                        "details": {
-                          "value_counts": [
-                            {
-                              "value": 1,
-                              "count": 1
-                            },
-                            {
-                              "value": 2,
-                              "count": 1
-                            },
-                            {
-                              "value": 3,
-                              "count": 1
-                            }
-                          ]
-                        }
-                      }
+                      "value": 1,
+                      "count": 1
+                    },
+                    {
+                      "value": 2,
+                      "count": 1
+                    },
+                    {
+                      "value": 3,
+                      "count": 1
                     }
+                  ]
+                }
+              }
+            }
 
-                Args:
-                    column (str): \
-                        The column name.
-                    value_set (set-like): \
-                        A set of objects used for comparison.
+        Args:
+            column (str): \
+                The column name.
+            value_set (set-like): \
+                A set of objects used for comparison.
 
-                Keyword Args:
-                    parse_strings_as_datetimes (boolean or None) : If True values provided in value_set will be parsed \
-                    as datetimes before making comparisons.
+        Keyword Args:
+            parse_strings_as_datetimes (boolean or None) : If True values provided in value_set will be parsed \
+            as datetimes before making comparisons.
 
-                Other Parameters:
-                    result_format (str or None): \
-                        Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`. \
-                        For more detail, see :ref:`result_format <result_format>`.
-                    include_config (boolean): \
-                        If True, then include the expectation config as part of the result object. \
-                        For more detail, see :ref:`include_config`.
-                    catch_exceptions (boolean or None): \
-                        If True, then catch exceptions and include them as part of the result object. \
-                        For more detail, see :ref:`catch_exceptions`.
-                    meta (dict or None): \
-                        A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
-                        modification. For more detail, see :ref:`meta`.
+        Other Parameters:
+            result_format (str or None): \
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`. \
+                For more detail, see :ref:`result_format <result_format>`.
+            include_config (boolean): \
+                If True, then include the expectation config as part of the result object. \
+                For more detail, see :ref:`include_config`.
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see :ref:`catch_exceptions`.
+            meta (dict or None): \
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+                modification. For more detail, see :ref:`meta`.
 
-                Returns:
-                    A JSON-serializable expectation result object.
+        Returns:
+            A JSON-serializable expectation result object.
 
-                    Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
-                    :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+            Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
+            :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
 
-                See Also:
-                    :func:`expect_column_distinct_values_to_contain_set \
-                    <great_expectations.dataset.dataset.Dataset.expect_column_distinct_values_to_contain_set>`
+        See Also:
+            :func:`expect_column_distinct_values_to_contain_set \
+            <great_expectations.dataset.dataset.Dataset.expect_column_distinct_values_to_contain_set>`
 
-                """
+        """
 
         observed_value_counts = self.get_column_value_counts(column)
 

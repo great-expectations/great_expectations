@@ -9,7 +9,6 @@ Module Docs
    data_asset_module
    dataset_module
    data_context_module
+   datasource_module
    profile_module
-
-
-
+   render_module
