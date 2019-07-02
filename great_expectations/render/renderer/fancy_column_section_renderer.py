@@ -217,46 +217,46 @@ class FancyDescriptiveColumnSectionRenderer(ColumnSectionRenderer):
 
     @classmethod
     def _render_stats_table(cls, evrs, content_blocks):
-        # min_evr = cls._find_evr_by_type(
-        #     evrs,
-        #     "expect_column_min_to_be_between"
-        # )
-        # mean_evr = cls._find_evr_by_type(
-        #     evrs,
-        #     "expect_column_mean_to_be_between"
-        # )
-        # max_evr = cls._find_evr_by_type(
-        #     evrs,
-        #     "expect_column_max_to_be_between"
-        # )
-        # evrs = [evr for evr in [min_evr, mean_evr, max_evr] if evr is not None]
+        table_rows = []
 
-        # if len(evrs) > 0:
-        #     content_blocks.append(
-        #         TableContentBlockRenderer.render(evrs)
-        #     )
+        mean_evr = cls._find_evr_by_type(
+            evrs,
+            "expect_column_mean_to_be_between"
+        )
+        mean_value = "{:.2f}".format(mean_evr['result']['observed_value']) if mean_evr else None
+        if mean_value: table_rows.append(["Mean", mean_value])
 
-        table_rows = [
-            ["Mean", "446", ],
-            ["Minimum", "1", ],
-            ["Maximum", "891", ],
-            ["Zeros (%)", "0.0%", ],
-        ]
+        min_evr = cls._find_evr_by_type(
+            evrs,
+            "expect_column_min_to_be_between"
+        )
+        min_value = "{:.2f}".format(min_evr['result']['observed_value']) if min_evr else None
+        if min_value: table_rows.append(["Minimum", min_value])
 
-        content_blocks.append({
-            "content_block_type": "table",
-            "header": "Statistics",
-            "table_rows": table_rows,
-            "styling": {
-                "classes": ["col-4"],
-                "styles": {
-                    "margin-top": "20px"
+        max_evr = cls._find_evr_by_type(
+            evrs,
+            "expect_column_max_to_be_between"
+        )
+        max_value = "{:.2f}".format(max_evr['result']['observed_value']) if max_evr else None
+        if max_value: table_rows.append(["Maximum", max_value])
+
+        if len(table_rows) > 0:
+            content_blocks.append({
+                "content_block_type": "table",
+                "header": "Statistics",
+                "table_rows": table_rows,
+                "styling": {
+                    "classes": ["col-4"],
+                    "styles": {
+                        "margin-top": "20px"
+                    },
+                    "body": {
+                        "classes": ["table", "table-sm", "table-unbordered"],
+                    }
                 },
-                "body": {
-                    "classes": ["table", "table-sm", "table-unbordered"],
-                }
-            },
-        })
+            })
+        else:
+            return
 
     @classmethod
     def _render_values_set(cls, evrs, content_blocks):
