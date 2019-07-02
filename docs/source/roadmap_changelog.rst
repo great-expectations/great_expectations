@@ -12,7 +12,7 @@ Planned Features
 
 v.0.7.0__develop
 ________________
-Version 0.7 of Great Expectations introduces several major new features
+Version 0.7 of Great Expectations is HUGE. It introduces several major new features
 and a large number of improvements, including breaking API changes.
 
 The core vocabulary of expectations remains consistent. Upgrading to 
@@ -20,25 +20,62 @@ the new version of GE will primarily require changes to code that
 uses data contexts; existing expectation suites will require only changes
 to top-level names.
 
-* Name clarifications: we've stopped using the overloaded terms "expectations
-  config" and "config" and instead use "expectation suite" to refer to a
-  collection (or suite!) of expectations that can be used for validating a
-  data asset.
+ * Major update of Data Contexts. Data Contexts now offer significantly \
+   more support for building and maintaining expectation suites and \
+   interacting with existing pipeline systems, including providing a namespace for objects.\
+   They can handle integrating, registering, and storing validation results, and
+   provide a namespace for data assets, making **batches** first-class citizens in GE.
+   Read more: :ref:`data_context` or :py:mod:`great_expectations.data_context`
 
-  - Expectation Suites include several top level keys that are useful \
-    for organizing content in a data context: data_asset_name, \
-    expectation_suite_name, and data_asset_type. When a data_asset is \
-    validated, those keys will be placed in the `meta` key of the \
-    validation result.
+ * Major refactor of autoinspect. Autoinspect is now built around a module
+   called "profile" which provides a class-based structure for building
+   expectation suites. There is no longer a default  "autoinspect_func" --
+   calling autoinspect requires explicitly passing the desired profiler. See :ref:`profile`
 
-* Major update of Data Contexsts. Data Contexts now offer significantly \
-  more support for building and maintaining expectation suites and \
-  interacting with existing pipeline systems. Read more: :py:mod:`great_expectations.data_context`
+ * New "Compile to Docs" feature produces beautiful documentation from expectations and expectation
+   validation reports, helping keep teams on the same page.
 
-* Major refactor of autoinspect. Autoinspect is now built around a module
-  called "profile" which provides a class-based structure for building
-  expectation suites. There is no longer a default  "autoinspect_func" --
-  calling autoinspect requires explicitly passing the desired profiler.
+ * Name clarifications: we've stopped using the overloaded terms "expectations
+   config" and "config" and instead use "expectation suite" to refer to a
+   collection (or suite!) of expectations that can be used for validating a
+   data asset.
+
+   - Expectation Suites include several top level keys that are useful \
+     for organizing content in a data context: data_asset_name, \
+     expectation_suite_name, and data_asset_type. When a data_asset is \
+     validated, those keys will be placed in the `meta` key of the \
+     validation result.
+
+ * Major enhancement to the CLI tool including `init`, `render` and more flexibility with `validate`
+
+ * Added helper notebooks to make it easy to get started. Each notebook acts as a combination of \
+   tutorial and code scaffolding, to help you quickly learn best practices by applying them to \
+   your own data.
+
+ * Relaxed constraints on expectation parameter values, making it possible to declare many column
+   aggregate expectations in a way that is always "vacuously" true, such as
+   ``expect_column_values_to_be_between`` ``None`` and ``None``. This makes it possible to progressively
+   tighten expectations while using them as the basis for profiling results and documentation.
+
+ * Bugfixes and improvements
+   * New expectations:
+     * expect_column_quantile_values_to_be_between
+     * expect_column_distinct_values_to_be_in_set
+   * Added support for ``head`` method on all current backends, returning a PandasDataset
+   * More implemented expectations for SparkDF Dataset with optimizations
+     * expect_column_values_to_be_between
+     * expect_column_median_to_be_between
+     * expect_column_value_lengths_to_be_between
+   * Optimized histogram fetching for SqlalchemyDataset and SparkDFDataset
+   * Added cross-platform internal partition method, paving path for improved profiling
+   * Fixed bug with outputstrftime not being honored in PandasDataset
+   * Fixed series naming for column value counts
+   * Standardized naming for expect_column_values_to_be_of_type
+   * Standardized and made explicit use of sample normalization in stdev calculation
+   * Added from_dataset helper
+   * Internal testing improvements
+   * Documentation reorganization and improvements
+   * Introduce custom exceptions for more detailed error logs
 
 v.0.6.1
 ________________

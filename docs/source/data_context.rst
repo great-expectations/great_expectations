@@ -10,7 +10,7 @@ The DataContext is configured via a yml file stored in a directory called great_
 as well as managed expectation suites should be stored in version control.
 
 DataContexts use data sources you're already familiar with. Generators help introspect data stores and data execution
-frameworks (such as airflow, nifi, dbt, or dagster) to describe and produce batches of data ready for analysis. This
+frameworks (such as airflow, Nifi, dbt, or dagster) to describe and produce batches of data ready for analysis. This
 enables fetching, validation, profiling, and documentation of  your data in a way that is meaningful within your
 existing infrastructure and work environment.
 
