@@ -196,8 +196,9 @@
             "catch_exceptions": true
           },
           "out": {
-            "traceback_substring": "ValueError"
-          }
+            "success": true
+          },
+          "_note": "vacuously true"
      }]},
     {
       "data": {
