@@ -118,8 +118,6 @@ def render_string_template(template):
                 })
 
         string = pTemplate(template["template"]).substitute(params)
-        print(template)
-        print(string)
         return string
 
     return pTemplate(template["template"]).substitute(template["params"])
