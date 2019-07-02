@@ -47,7 +47,7 @@ class DescriptivePageRenderer(Renderer):
             if "column" in evr["expectation_config"]["kwargs"]:
                 column = evr["expectation_config"]["kwargs"]["column"]
             else:
-                column = "_nocolumn"
+                column = "Table-level Expectations"
 
             if column not in columns:
                 columns[column] = []
