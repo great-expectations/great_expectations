@@ -6,8 +6,9 @@ Core Concepts
 .. toctree::
    :maxdepth: 2
 
-   data_contexts
    expectations
+   data_context
+   datasources
    distributional_expectations
    validation
    glossary
