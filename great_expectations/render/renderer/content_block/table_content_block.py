@@ -62,7 +62,7 @@ class TableContentBlockRenderer(ContentBlockRenderer):
         return [
             ["Missing (n)", ge_object["result"]["unexpected_count"]],
             ["Missing (%)", "%.1f%%" %
-             ge_object["result"]["unexpected_percent"]]
+             (ge_object["result"]["unexpected_percent"] * 100.0)]
         ]
 
     @classmethod

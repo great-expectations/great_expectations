@@ -1,6 +1,7 @@
 import json
 from string import Template
-from collections import defaultdict
+import warnings
+from collections import defaultdict, Counter
 
 from .renderer import Renderer
 from .content_block import(
@@ -9,6 +10,7 @@ from .content_block import(
     TableContentBlockRenderer,
     PrescriptiveBulletListContentBlockRenderer
 )
+from great_expectations.dataset.dataset import Dataset
 
 
 class DescriptiveOverviewSectionRenderer(Renderer):
@@ -47,37 +49,33 @@ class DescriptiveOverviewSectionRenderer(Renderer):
 
     @classmethod
     def _render_dataset_info(cls, evrs, content_blocks):
+        expect_table_row_count_to_be_between_evr = cls._find_evr_by_type(evrs['results'], "expect_table_row_count_to_be_between")
 
         table_rows = []
-        table_rows.append(["Number of variables", "12", ])
+        table_rows.append(["Number of variables", len(cls._get_column_list_from_evrs(evrs)), ])
 
-        row_count_evr = cls._find_evr_by_type(
-            evrs["results"],
-            "expect_table_row_count_to_be_between"
-        )
-        if row_count_evr != None:
-            table_rows.append([
-                {
-                    "template": "Number of observations",
-                    "params": {},
-                    "styling": {
-                        "attributes": {
-                            "data-toggle": "popover",
-                            "data-trigger": "hover",
-                            "data-placement": "top",
-                            "data-content": "expect_table_row_count_to_be_between",
-                            "container": "body",
-                        }
+        table_rows.append([
+            {
+                "template": "Number of observations",
+                "params": {},
+                "styling": {
+                    "attributes": {
+                        "data-toggle": "popover",
+                        "data-trigger": "hover",
+                        "data-placement": "top",
+                        "data-content": "expect_table_row_count_to_be_between",
+                        "container": "body",
                     }
-                },
-                row_count_evr["result"]["observed_value"]
-            ])
+
+                }
+            },
+            "?" if not expect_table_row_count_to_be_between_evr else expect_table_row_count_to_be_between_evr["result"][
+                "observed_value"]
+        ])
 
         table_rows += [
-            ["Missing cells", "866 (8.1%)", ],
-            ["Duplicate rows", "0 (0.0%)", ],
-            ["Total size in memory",	"83.6 KiB", ],
-            ["Average record size in memory", "96.1 B", ],
+            ["Missing cells", cls._get_percentage_missing_cells_str(evrs), ], # "866 (8.1%)"
+            # ["Duplicate rows", "0 (0.0%)", ], #TODO: bring back when we have an expectation for this
         ]
 
         content_blocks.append({
@@ -98,16 +96,10 @@ class DescriptiveOverviewSectionRenderer(Renderer):
     @classmethod
     def _render_variable_types(cls, evrs, content_blocks):
 
-        table_rows = [
-            ["Numeric", "5", ],
-            ["Categorical", "5", ],
-            ["Boolean", "1", ],
-            ["Date", "0", ],
-            ["URL", "0", ],
-            ["Text (Unique)", "1", ],
-            ["Rejected", "0", ],
-            ["Unsupported", "0", ],
-        ]
+        column_types = cls._get_column_types(evrs)
+        #TODO: check if we have the information to make this statement. Do all columns have type expectations?
+        column_type_counter = Counter(column_types.values())
+        table_rows = [[type, str(column_type_counter[type])] for type in ["int", "float", "string", "--"]]
 
         content_blocks.append({
             "content_block_type": "table",
@@ -239,3 +231,49 @@ class DescriptiveOverviewSectionRenderer(Renderer):
                 }
             },
         })
+
+    @classmethod
+    def _get_percentage_missing_cells_str(cls, evrs):
+
+        columns = cls._get_column_list_from_evrs(evrs)
+        if not columns or len(columns) == 9:
+            warnings.warn("Cannot get % of missing cells - column list is empty")
+            return "?"
+
+        expect_column_values_to_not_be_null_evrs = cls._find_all_evrs_by_type(evrs["results"], "expect_column_values_to_not_be_null")
+
+        if len(columns) > len(expect_column_values_to_not_be_null_evrs):
+            warnings.warn("Cannot get % of missing cells - not all columns have expect_column_values_to_not_be_null expectations")
+            return "?"
+
+        return "{0:.2f}%".format(sum([evr["result"]["unexpected_percent"] for evr in expect_column_values_to_not_be_null_evrs])/len(columns)*100)
+
+    @classmethod
+    def _get_column_types(cls, evrs):
+        columns = cls._get_column_list_from_evrs(evrs)
+
+        type_evrs = cls._find_all_evrs_by_type(evrs["results"], "expect_column_values_to_be_in_type_list") +\
+            cls._find_all_evrs_by_type(evrs["results"], "expect_column_values_to_be_of_type")
+
+        column_types = {}
+        for column in columns:
+            column_types[column] = "--"
+
+        for evr in type_evrs:
+            column = evr["expectation_config"]["kwargs"]["column"]
+            if evr["expectation_config"]["expectation_type"] == "expect_column_values_to_be_in_type_list":
+                expected_types = set(evr["expectation_config"]["kwargs"]["type_list"])
+            else: # assuming expect_column_values_to_be_of_type
+                expected_types = set([evr["expectation_config"]["kwargs"]["type_"]])
+
+            if Dataset.INT_TYPE_NAMES.issubset(expected_types):
+                column_types[column] = "int"
+            elif Dataset.FLOAT_TYPE_NAMES.issubset(expected_types):
+                column_types[column] = "float"
+            elif Dataset.STRING_TYPE_NAMES.issubset(expected_types):
+                column_types[column] = "string"
+            else:
+                warnings.warn("The expected type list is not a subset of any of the profiler type sets: {0:s}".format(str(expected_types)))
+                column_types[column] = "--"
+
+        return column_types

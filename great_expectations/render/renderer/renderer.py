@@ -54,3 +54,25 @@ class Renderer(object):
         for evr in evrs:
             if evr["expectation_config"]["expectation_type"] == type_:
                 return evr
+
+
+    @classmethod
+    def _find_all_evrs_by_type(cls, evrs, type_, column_=None):
+        ret = []
+        for evr in evrs:
+            if evr["expectation_config"]["expectation_type"] == type_\
+                    and (not column_ or column_ == evr["expectation_config"]["kwargs"].get("column")):
+                ret.append(evr)
+
+        return ret
+
+    @classmethod
+    def _get_column_list_from_evrs(cls, evrs):
+        # Group EVRs by column
+        columns = list(set([evr["expectation_config"]["kwargs"]["column"] for evr in evrs["results"] if "column" in evr["expectation_config"]["kwargs"]]))
+
+        # TODO: in general, there should be a mechanism for imposing order here.
+        ordered_columns = columns
+
+        return ordered_columns
+
