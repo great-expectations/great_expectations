@@ -5,7 +5,7 @@ import pandas as pd
 
 from .datasource import Datasource, ReaderMethods
 from great_expectations.datasource.generator.filesystem_path_generator import SubdirReaderGenerator, GlobReaderGenerator
-from great_expectations.datasource.generator.batch_generator import InMemoryGenerator
+from great_expectations.datasource.generator.in_memory_generator import InMemoryGenerator
 from great_expectations.dataset.pandas_dataset import PandasDataset
 
 from great_expectations.exceptions import BatchKwargsError

@@ -180,6 +180,7 @@ def test_sqlalchemysource_templating(sqlitedb_engine):
     res = df.expect_column_to_exist("animal_name")
     assert res["success"] == True
 
+
 def test_pandas_source_readcsv(data_context, tmp_path_factory):
     if not PY3:
         # We don't specifically test py2 unicode reading since this test is about our handling of kwargs *to* read_csv
@@ -205,6 +206,7 @@ def test_pandas_source_readcsv(data_context, tmp_path_factory):
 
     batch = data_context.get_batch("mysource2/unicode", encoding='utf-8')
     assert "😁" in list(batch["Μ"])
+
 
 def test_standalone_spark_parquet_datasource(test_parquet_folder_connection_path):
     datasource = SparkDFDatasource('SparkParquet', base_directory=test_parquet_folder_connection_path)
