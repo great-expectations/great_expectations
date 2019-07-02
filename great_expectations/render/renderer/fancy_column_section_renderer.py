@@ -44,6 +44,7 @@ class FancyDescriptiveColumnSectionRenderer(ColumnSectionRenderer):
         cls._render_overview_table(evrs, content_blocks)
         cls._render_stats_table(evrs, content_blocks)
 
+        cls._render_bar_chart_table(evrs, content_blocks)
         cls._render_histogram(evrs, content_blocks)
         cls._render_values_set(evrs, content_blocks)
 
@@ -347,7 +348,7 @@ class FancyDescriptiveColumnSectionRenderer(ColumnSectionRenderer):
         ).properties(width=200, height=200, autosize="fit")
 
         # chart = bars
-        chart = json.loads(bars.to_json())
+        chart = bars.to_json()
         # print(json.dumps(chart, indent=2))
         # del chart["config"]
         # print(json.dumps(chart, indent=2))
@@ -355,7 +356,59 @@ class FancyDescriptiveColumnSectionRenderer(ColumnSectionRenderer):
         new_block = {
             "content_block_type": "graph",
             "header": "Histogram",
-            "graph": json.dumps(chart),
+            "graph": chart,
+            "styling": {
+                "classes": ["col-4"],
+                "styles": {
+                    "margin-top": "20px",
+                }
+            }
+        }
+        # print(json.dumps(new_block))
+        content_blocks.append(new_block)
+
+        # TODO: A deprecated version of this code lives in this method. We should review carefully, keep any bits that are useful, then delete.
+        # content_blocks.append(
+        #     GraphContentBlockRenderer.render(
+        #         kl_divergence_evr,
+        #         # result_key=result_key
+        #     )
+        # )
+
+    @classmethod
+    def _render_bar_chart_table(cls, evrs, content_blocks):
+        distinct_values_set_evr = cls._find_evr_by_type(
+            evrs,
+            "expect_column_distinct_values_to_be_in_set"
+        )
+        # print(json.dumps(kl_divergence_evr, indent=2))
+        if distinct_values_set_evr == None:
+            return
+
+        value_count_dicts = distinct_values_set_evr['result']['details']['value_counts']
+        values = [value_count_dict['value'] for value_count_dict in value_count_dicts]
+        counts = [value_count_dict['count'] for value_count_dict in value_count_dicts]
+
+        df = pd.DataFrame({
+            "values": values,
+            "counts": counts,
+        })
+
+        bars = alt.Chart(df).mark_bar().encode(
+            x='counts:Q',
+            y="values:O"
+        ).properties(width=200, height=200, autosize="fit")
+
+        # chart = bars
+        chart = bars.to_json()
+        # print(json.dumps(chart, indent=2))
+        # del chart["config"]
+        # print(json.dumps(chart, indent=2))
+
+        new_block = {
+            "content_block_type": "graph",
+            "header": "Value Counts",
+            "graph": chart,
             "styling": {
                 "classes": ["col-4"],
                 "styles": {
