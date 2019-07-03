@@ -44,9 +44,9 @@ class FancyDescriptiveColumnSectionRenderer(ColumnSectionRenderer):
         cls._render_overview_table(evrs, content_blocks)
         cls._render_stats_table(evrs, content_blocks)
 
-        cls._render_bar_chart_table(evrs, content_blocks)
         cls._render_histogram(evrs, content_blocks)
         cls._render_values_set(evrs, content_blocks)
+        cls._render_bar_chart_table(evrs, content_blocks)
 
         # cls._render_statistics(evrs, content_blocks)
         # cls._render_common_values(evrs, content_blocks)
@@ -333,17 +333,22 @@ class FancyDescriptiveColumnSectionRenderer(ColumnSectionRenderer):
             return
 
         bins = kl_divergence_evr["result"]["details"]["observed_partition"]["bins"]
-        bin_medians = [round((v+bins[i+1])/2, 1)
-                       for i, v in enumerate(bins[:-1])]
+        # bin_medians = [round((v+bins[i+1])/2, 1)
+        #                for i, v in enumerate(bins[:-1])]
+        # bin_medians = [(round(bins[i], 1), round(bins[i+1], 1)) for i, v in enumerate(bins[:-1])]
+        bins_x1 = [round(value, 1) for value in bins[:-1]]
+        bins_x2 = [round(value, 1) for value in bins[1:]]
 
         df = pd.DataFrame({
-            "bins": bin_medians,
+            "bin_min": bins_x1,
+            "bin_max": bins_x2,
             "weights": kl_divergence_evr["result"]["details"]["observed_partition"]["weights"],
         })
         df.weights *= 100
 
         bars = alt.Chart(df).mark_bar().encode(
-            x='bins:O',
+            x='bin_min:O',
+            x2='bin_max:O',
             y="weights:Q"
         ).properties(width=200, height=200, autosize="fit")
 
@@ -390,13 +395,13 @@ class FancyDescriptiveColumnSectionRenderer(ColumnSectionRenderer):
         counts = [value_count_dict['count'] for value_count_dict in value_count_dicts]
 
         df = pd.DataFrame({
-            "values": values,
-            "counts": counts,
+            "value": values,
+            "count": counts,
         })
 
-        bars = alt.Chart(df).mark_bar().encode(
-            x='counts:Q',
-            y="values:O"
+        bars = alt.Chart(df).mark_bar(size=20).encode(
+            x='count:Q',
+            y="value:O"
         ).properties(width=200, height=200, autosize="fit")
 
         # chart = bars
