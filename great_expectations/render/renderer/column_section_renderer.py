@@ -409,7 +409,7 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
         bars = alt.Chart(df).mark_bar(size=20).encode(
             x='count:Q',
             y="value:O"
-        ).properties(width=200, height=200, autosize="fit")
+        ).properties(width=200, autosize="fit")
 
         chart = bars.to_json()
 
