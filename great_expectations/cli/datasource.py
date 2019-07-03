@@ -129,7 +129,7 @@ Please note: As of v0.7.0, profiling is still a beta feature in Great Expectatio
 This generation of profilers will evaluate the entire data source (without sampling) and may be very time consuming. 
 As a rule of thumb, we recommend starting with data smaller than 100MB.
 
-To learn more about profiling, visit <blue>http://docs.greatexpectations.io/en/latest/guides/profiling.html?utm_source=cli&utm_medium=init&utm_campaign={1:s}</blue>.
+To learn more about profiling, visit <blue>https://docs.greatexpectations.io/en/latest/guides/profiling.html?utm_source=cli&utm_medium=init&utm_campaign={1:s}</blue>.
             """.format(data_source_name, __version__)
         )
         if click.confirm("Proceed?",
@@ -158,7 +158,7 @@ great_expectations/uncommitted (ignored by git) to great_expectations/fixtures.
 
 Before committing, please make sure that this data does not contain sensitive information!
 
-To learn more: <blue>http://docs.greatexpectations.io/en/latest/guides/data_documentation.html?utm_source=cli&utm_medium=init&utm_campaign={0:s}</blue>
+To learn more: <blue>https://docs.greatexpectations.io/en/latest/guides/data_documentation.html?utm_source=cli&utm_medium=init&utm_campaign={0:s}</blue>
 """.format(__version__)
             )
             if click.confirm("Move the profiled data?",
