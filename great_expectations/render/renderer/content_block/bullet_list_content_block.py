@@ -185,46 +185,30 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
         )
 
         if (params["min_value"] is None) and (params["max_value"] is None):
-            params["expectation_name"] = "expect_column_values_to_be_between"
-            template_str = "$column has a bogus $expectation_name expectation."
+            template_str = "may have any numerical value."
 
-        if "mostly" in params:
+        elif "mostly" in params:
             if params["min_value"] is not None and params["max_value"] is not None:
-                if include_column_name:
-                    template_str = "$column must be between $min_value and $max_value at least $mostly% of the time."
-                else:
-                    template_str = "must be between $min_value and $max_value at least $mostly% of the time."
+                template_str = "must be between $min_value and $max_value at least $mostly% of the time."
 
             elif params["min_value"] is None:
-                if include_column_name:
-                    template_str = "$column must be less than $max_value at least $mostly% of the time."
-                else:
-                    template_str = "must be less than $max_value at least $mostly% of the time."
+                template_str = "must be less than $max_value at least $mostly% of the time."
 
             elif params["max_value"] is None:
-                if include_column_name:
-                    template_str = "$column must be more than $min_value at least $mostly% of the time."
-                else:
-                    template_str = "must be less than $max_value at least $mostly% of the time."
+                template_str = "must be less than $max_value at least $mostly% of the time."
 
         else:
             if params["min_value"] is not None and params["max_value"] is not None:
-                if include_column_name:
-                    template_str = "$column must always be between $min_value and $max_value."
-                else:
-                    template_str = "must always be between $min_value and $max_value."
+                template_str = "must always be between $min_value and $max_value."
 
             elif params["min_value"] is None:
-                if include_column_name:
-                    template_str = "$column must always be less than $max_value."
-                else:
-                    template_str = "must always be less than $max_value."
+                template_str = "must always be less than $max_value."
 
             elif params["max_value"] is None:
-                if include_column_name:
-                    template_str = "$column must always be more than $min_value."
-                else:
-                    template_str = "must always be more than $min_value."
+                template_str = "must always be more than $min_value."
+
+        if include_column_name:
+            template_str = "$column " + template_str
 
         return [{
             "template": template_str,
@@ -243,7 +227,7 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
         if (params["column_A"] is None) or (params["column_B"] is None):
             template_str = "$column has a bogus `expect_column_pair_values_A_to_be_greater_than_B` expectation."
 
-        if params["mostly"] == None:
+        if params["mostly"] is None:
             if params["or_equal"] in [None, False]:
                 template_str = "Values in $column_A must always be greater than those in $column_B."
             else:
