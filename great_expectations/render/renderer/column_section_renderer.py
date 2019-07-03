@@ -217,8 +217,18 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
         quantiles = quantile_evr["result"]["observed_value"]["quantiles"]
         quantile_ranges = quantile_evr["result"]["observed_value"]["values"]
 
+        quantile_strings = {
+            .25: "Q1",
+            .75: "Q3",
+            .50: "Median"
+        }
+
         for idx, quantile in enumerate(quantiles):
-            table_rows.append([f'{int(quantile * 100)}-th', quantile_ranges[idx]])
+            quantile_string = quantile_strings.get(quantile)
+            table_rows.append([
+                quantile_string if quantile_string else f'{int(quantile * 100)}-th',
+                quantile_ranges[idx]
+            ])
 
         content_blocks.append({
             "content_block_type": "table",
