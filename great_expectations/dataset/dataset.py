@@ -2157,9 +2157,6 @@ class Dataset(MetaDataset):
             <great_expectations.dataset.dataset.Dataset.expect_column_stdev_to_be_between>`
 
         """
-        # if min_value is None and max_value is None:
-        #     raise ValueError("min_value and max_value cannot both be None")
-
         if min_value is not None and not isinstance(min_value, Number):
             raise ValueError("min_value must be a number")
 
@@ -2176,26 +2173,26 @@ class Dataset(MetaDataset):
                     'observed_value': col_avg
                 }
             }
+
+        if min_value is not None and max_value is not None:
+            success = (min_value <= col_avg) and (col_avg <= max_value)
+
+        elif min_value is None and max_value is not None:
+            success = (col_avg <= max_value)
+
+        elif min_value is not None and max_value is None:
+            success = (min_value <= col_avg)
+
         else:
-            if min_value is not None and max_value is not None:
-                success = (min_value <= col_avg) and (col_avg <= max_value)
+            # in this case min_value and max_value are both None
+            success = True
 
-            elif min_value is None and max_value is not None:
-                success = (col_avg <= max_value)
-
-            elif min_value is not None and max_value is None:
-                success = (min_value <= col_avg)
-
-            else:
-                # in this case min_value and max_value are both None
-                success = True
-
-            return {
-                'success': success,
-                'result': {
-                    'observed_value': col_avg
-                }
+        return {
+            'success': success,
+            'result': {
+                'observed_value': col_avg
             }
+        }
 
     # noinspection PyUnusedLocal
     @DocInherit
@@ -2485,11 +2482,9 @@ class Dataset(MetaDataset):
             <great_expectations.dataset.dataset.Dataset.expect_column_median_to_be_between>`
 
         """
-        # if min_value is None and max_value is None:
-        #     raise ValueError("min_value and max_value cannot both be None")
-
         column_stdev = self.get_column_stdev(column)
         if min_value is None and max_value is None:
+            # vacuously true
             success = True
         elif min_value is None:
             success = column_stdev <= max_value
@@ -2565,12 +2560,8 @@ class Dataset(MetaDataset):
             <great_expectations.dataset.dataset.Dataset.expect_column_proportion_of_unique_values_to_be_between>`
 
         """
-        if min_value is None and max_value is None:
-            raise ValueError("min_value and max_value cannot both be None")
-
         unique_value_count = self.get_column_unique_count(column)
 
-        # Handle possible missing values
         if unique_value_count is None:
             return {
                 'success': False,
@@ -2578,16 +2569,23 @@ class Dataset(MetaDataset):
                     'observed_value': unique_value_count
                 }
             }
+
+        if min_value is None and max_value is None:
+            # vacuously true
+            success = True
+        elif min_value is None:
+            success = unique_value_count <= max_value
+        elif max_value is None:
+            success = min_value <= unique_value_count
         else:
-            return {
-                "success": (
-                    ((min_value is None) or (min_value <= unique_value_count)) and
-                    ((max_value is None) or (unique_value_count <= max_value))
-                ),
-                "result": {
-                    "observed_value": unique_value_count
-                }
+            success = min_value <= unique_value_count <= max_value
+
+        return {
+            "success": success,
+            "result": {
+                "observed_value": unique_value_count
             }
+        }
 
     # noinspection PyUnusedLocal
     @DocInherit
@@ -2653,9 +2651,6 @@ class Dataset(MetaDataset):
             <great_expectations.dataset.dataset.Dataset.expect_column_unique_value_count_to_be_between>`
 
         """
-        if min_value is None and max_value is None:
-            raise ValueError("min_value and max_value cannot both be None")
-
         unique_value_count = self.get_column_unique_count(column)
         total_value_count = self.get_column_nonnull_count(column)
 
@@ -2664,11 +2659,18 @@ class Dataset(MetaDataset):
         else:
             proportion_unique = None
 
+        if min_value is None and max_value is None:
+            # vacuously true
+            success = True
+        elif min_value is None:
+            success = proportion_unique <= max_value
+        elif max_value is None:
+            success = min_value <= proportion_unique
+        else:
+            success = min_value <= proportion_unique <= max_value
+
         return {
-            "success": (
-                ((min_value is None) or (min_value <= proportion_unique)) and
-                ((max_value is None) or (proportion_unique <= max_value))
-            ),
+            "success": success,
             "result": {
                 "observed_value": proportion_unique
             }
@@ -2806,9 +2808,6 @@ class Dataset(MetaDataset):
             * If max_value is None, then min_value is treated as a lower bound
 
         """
-        # if min_value is None and max_value is None:
-        #     raise ValueError("min_value and max_value cannot both be None")
-
         col_sum = self.get_column_sum(column)
 
         # Handle possible missing values
@@ -2819,26 +2818,26 @@ class Dataset(MetaDataset):
                     'observed_value': col_sum
                 }
             }
+
+        if min_value is not None and max_value is not None:
+            success = (min_value <= col_sum) and (col_sum <= max_value)
+
+        elif min_value is None and max_value is not None:
+            success = (col_sum <= max_value)
+
+        elif min_value is not None and max_value is None:
+            success = (min_value <= col_sum)
+
         else:
-            if min_value is not None and max_value is not None:
-                success = (min_value <= col_sum) and (col_sum <= max_value)
+            # vacuously true
+            success = True
 
-            elif min_value is None and max_value is not None:
-                success = (col_sum <= max_value)
-
-            elif min_value is not None and max_value is None:
-                success = (min_value <= col_sum)
-
-            else:
-                # vacuously true
-                success = True
-
-            return {
-                'success': success,
-                'result': {
-                    'observed_value': col_sum
-                }
+        return {
+            'success': success,
+            'result': {
+                'observed_value': col_sum
             }
+        }
 
     # noinspection PyUnusedLocal
     @DocInherit
@@ -2907,9 +2906,6 @@ class Dataset(MetaDataset):
             * If max_value is None, then min_value is treated as a lower bound
 
         """
-        # if min_value is None and max_value is None:
-        #     raise ValueError("min_value and max_value cannot both be None")
-
         if parse_strings_as_datetimes:
             if min_value:
                 min_value = parse(min_value)
@@ -3009,9 +3005,6 @@ class Dataset(MetaDataset):
             * If max_value is None, then min_value is treated as a lower bound
 
         """
-        # if min_value is None and max_value is None:
-        #     raise ValueError("min_value and max_value cannot both be None")
-
         if parse_strings_as_datetimes:
             if min_value:
                 min_value = parse(min_value)
