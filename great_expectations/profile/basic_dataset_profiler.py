@@ -94,11 +94,6 @@ class BasicDatasetProfiler(DatasetProfiler):
             if type_ == "int":
                 if cardinality == "unique":
                     df.expect_column_values_to_be_unique(column)
-                    try:
-                        df.expect_column_values_to_be_increasing(column)
-                    except NotImplementedError:
-                        warnings.warn("NotImplementedError: expect_column_values_to_be_increasing")
-
                 elif cardinality in ["one", "two", "very few", "few"]:
                     df.expect_column_distinct_values_to_be_in_set(column, value_set=None, result_format="SUMMARY")
                 else:
@@ -119,10 +114,6 @@ class BasicDatasetProfiler(DatasetProfiler):
             elif type_ == "float":
                 if cardinality == "unique":
                     df.expect_column_values_to_be_unique(column)
-                    try:
-                        df.expect_column_values_to_be_increasing(column)
-                    except NotImplementedError:
-                        warnings.warn("NotImplementedError: expect_column_values_to_be_increasing")
 
                 elif cardinality in ["one", "two", "very few", "few"]:
                     df.expect_column_distinct_values_to_be_in_set(column, value_set=None, result_format="SUMMARY")
