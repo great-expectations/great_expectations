@@ -1,15 +1,12 @@
 import pytest
 
 import json
-import os
-import shutil
+from collections import OrderedDict
 
 from great_expectations.profile.base import DatasetProfiler
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.profile.columns_exist import ColumnsExistProfiler
 from great_expectations.dataset.pandas_dataset import PandasDataset
-from great_expectations.data_context import DataContext
-from great_expectations.data_context.util import safe_mmkdir
 import great_expectations as ge
 from .test_utils import assertDeepAlmostEqual
 
@@ -165,14 +162,16 @@ def test_context_profiler(empty_data_context, filesystem_csv_2):
 
     # assert context_expectations_config == profiled_expectations
 
+
+# noinspection PyPep8Naming
 def test_BasicDatasetProfiler_on_titanic():
     """
     A snapshot test for BasicDatasetProfiler.
-    We are rinning the profiler on the Titanic dataset
+    We are running the profiler on the Titanic dataset
     and comparing the EVRs to ones retrieved from a
     previously stored file.
     """
-    df = ge.read_csv("examples/data/Titanic.csv")
+    df = ge.read_csv("./tests/test_sets/Titanic.csv")
     df.profile(BasicDatasetProfiler)
     evrs = df.validate(result_format="SUMMARY")  # ["results"]
 
@@ -180,7 +179,7 @@ def test_BasicDatasetProfiler_on_titanic():
     #     file.write(json.dumps(evrs))
 
     with open('tests/test_sets/expected_evrs_BasicDatasetProfiler_on_titanic.json', 'r') as file:
-        expected_evrs = json.load(file)
+        expected_evrs = json.load(file, object_pairs_hook=OrderedDict)
 
     expected_evrs.pop("meta")
     evrs.pop("meta")
