@@ -5,7 +5,6 @@ from string import Template
 
 from .renderer import Renderer
 from .content_block import ValueListContentBlockRenderer
-from .content_block import GraphContentBlockRenderer
 from .content_block import TableContentBlockRenderer
 from .content_block import PrescriptiveBulletListContentBlockRenderer
 
@@ -313,22 +312,8 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
                 }
             }
         }
-        # print(new_block)
 
         content_blocks.append(new_block)
-
-        # if len(set_evr["result"][result_key]) < 10:
-        # new_block = ValueListContentBlockRenderer.render(
-        #     set_evr,
-        #     result_key=result_key
-        # )
-        # else:
-        #     content_blocks.append(
-        #         GraphContentBlockRenderer.render(
-        #             set_evr,
-        #             result_key=result_key
-        #         )
-        #     )
 
     @classmethod
     def _render_histogram(cls, evrs, content_blocks):
@@ -361,11 +346,7 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
             y="weights:Q"
         ).properties(width=200, height=200, autosize="fit")
 
-        # chart = bars
         chart = bars.to_json()
-        # print(json.dumps(chart, indent=2))
-        # del chart["config"]
-        # print(json.dumps(chart, indent=2))
 
         new_block = {
             "content_block_type": "graph",
@@ -378,16 +359,8 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
                 }
             }
         }
-        # print(json.dumps(new_block))
-        content_blocks.append(new_block)
 
-        # TODO: A deprecated version of this code lives in this method. We should review carefully, keep any bits that are useful, then delete.
-        # content_blocks.append(
-        #     GraphContentBlockRenderer.render(
-        #         kl_divergence_evr,
-        #         # result_key=result_key
-        #     )
-        # )
+        content_blocks.append(new_block)
 
     @classmethod
     def _render_bar_chart_table(cls, evrs, content_blocks):
@@ -415,11 +388,7 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
             y="value:O"
         ).properties(width=200, height=200, autosize="fit")
 
-        # chart = bars
         chart = bars.to_json()
-        # print(json.dumps(chart, indent=2))
-        # del chart["config"]
-        # print(json.dumps(chart, indent=2))
 
         new_block = {
             "content_block_type": "graph",
@@ -432,16 +401,8 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
                 }
             }
         }
-        # print(json.dumps(new_block))
-        content_blocks.append(new_block)
 
-        # TODO: A deprecated version of this code lives in this method. We should review carefully, keep any bits that are useful, then delete.
-        # content_blocks.append(
-        #     GraphContentBlockRenderer.render(
-        #         kl_divergence_evr,
-        #         # result_key=result_key
-        #     )
-        # )
+        content_blocks.append(new_block)
 
     @classmethod
     def _render_unrecognized(cls, evrs, content_blocks):
