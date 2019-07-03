@@ -148,7 +148,7 @@ class DataContext(object):
         # TODO: these paths should be configurable
         self.expectations_directory = os.path.join(self.root_directory, "expectations")
         self.fixtures_validations_directory = os.path.join(self.root_directory, "fixtures/validations")
-        self.data_doc_directory = os.path.join(self.root_directory, "data_documentation")
+        self.data_doc_directory = os.path.join(self.root_directory, "uncommitted/documentation")
         self.plugin_store_directory = os.path.join(self.root_directory, "plugins/store")
         sys.path.append(self.plugin_store_directory)
         
@@ -1454,6 +1454,7 @@ class DataContext(object):
 
         # TODO: this is a temporary implementation and should be replaced with a rendered specific for this purpose
         validation_filepaths = [y for x in os.walk(self.fixtures_validations_directory) for y in glob(os.path.join(x[0], '*.json'))]
+        print(validation_filepaths)
         for validation_filepath in validation_filepaths:
             with open(validation_filepath, "r") as infile:
                 validation = json.load(infile)
@@ -1463,6 +1464,7 @@ class DataContext(object):
             model = DescriptivePageRenderer.render(validation)
             out_filepath = self.get_validation_doc_filepath(data_asset_name, expectation_suite_name)
             safe_mmkdir(os.path.dirname(out_filepath))
+            print(out_filepath)
             with open(out_filepath, 'w') as writer:
                 writer.write(DefaultJinjaPageView.render(model))
 
