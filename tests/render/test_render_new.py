@@ -105,7 +105,7 @@ def test_render_profiled_fixture_expectations():
     # print(rendered_page)
     # TODO: Add an gitignored directory for test output files.
     # TODO: Add a pytest CLI switch to produce or not produce these files.
-    with open('./test_render_profiled_fixture_expectations.html', 'w') as f:
+    with open('/tmp/test_render_profiled_fixture_expectations.html', 'w') as f:
         f.write(rendered_page)
 
 
@@ -127,7 +127,7 @@ def test_render_profiled_fixture_evrs():
     # print(rendered_page)
     # TODO: Add an gitignored directory for test output files.
     # TODO: Add a pytest CLI switch to produce or not produce these files.
-    with open('./test_render_profiled_fixture_evrs.html', 'w') as f:
+    with open('/tmp/test_render_profiled_fixture_evrs.html', 'w') as f:
         f.write(rendered_page)
 
     # assert False
@@ -150,7 +150,7 @@ def test_full_oobe_flow():
 
     # TODO: Add an gitignored directory for test output files.
     # TODO: Add a pytest CLI switch to produce or not produce these files.
-    with open('./test_full_oobe_flow.html', 'w') as f:
+    with open('/tmp/test_full_oobe_flow.html', 'w') as f:
         f.write(rendered_page)
 
     # assert False
