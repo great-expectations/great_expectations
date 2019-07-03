@@ -36,10 +36,10 @@ class BasicDatasetProfiler(DatasetProfiler):
     @classmethod
     def _get_column_cardinality(cls, df, column):
 
-        num_unique = df.expect_column_unique_value_count_to_be_between(column, 0, None)[
+        num_unique = df.expect_column_unique_value_count_to_be_between(column, None, None)[
             'result']['observed_value']
         pct_unique = df.expect_column_proportion_of_unique_values_to_be_between(
-            column, 0, None)['result']['observed_value']
+            column, None, None)['result']['observed_value']
 
 
         if pct_unique == 1.0:
