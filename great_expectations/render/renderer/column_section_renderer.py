@@ -100,23 +100,6 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
             }
         })
 
-    # @classmethod
-    # def _render_column_type(cls, evrs, content_blocks):
-    #     new_block = None
-    #     type_evr = cls._find_evr_by_type(
-    #         evrs,
-    #         "expect_column_values_to_be_of_type"
-    #     )
-    #     if type_evr:
-    #         # Kinda weird to be pulling *descriptive* info out of expectation kwargs
-    #         # Maybe at least check success?
-    #         type_ = type_evr["expectation_config"]["kwargs"]["type_"]
-    #         new_block = {
-    #             "content_block_type": "text",
-    #             "content": [type_]
-    #         }
-    #         content_blocks.append(new_block)
-
     @classmethod
     def _render_expectation_types(cls, evrs, content_blocks):
         # NOTE: The evr-fetching function is an kinda similar to the code other_section_renderer.DescriptiveOverviewSectionRenderer._render_expectation_types
