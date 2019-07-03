@@ -102,11 +102,11 @@ class BasicDatasetProfiler(DatasetProfiler):
                 elif cardinality in ["one", "two", "very few", "few"]:
                     df.expect_column_distinct_values_to_be_in_set(column, value_set=None, result_format="SUMMARY")
                 else:
-                    df.expect_column_min_to_be_between(column, min_value=0, max_value=0)
-                    df.expect_column_max_to_be_between(column, min_value=0, max_value=0)
-                    df.expect_column_mean_to_be_between(column, min_value=0, max_value=0)
-                    df.expect_column_median_to_be_between(column, min_value=0, max_value=0)
-                    df.expect_column_stdev_to_be_between(column, min_value=0, max_value=None)
+                    df.expect_column_min_to_be_between(column, min_value=None, max_value=None)
+                    df.expect_column_max_to_be_between(column, min_value=None, max_value=None)
+                    df.expect_column_mean_to_be_between(column, min_value=None, max_value=None)
+                    df.expect_column_median_to_be_between(column, min_value=None, max_value=None)
+                    df.expect_column_stdev_to_be_between(column, min_value=None, max_value=None)
                     df.expect_column_quantile_values_to_be_between(column,
                                                                    quantile_ranges={
                                                                        "quantiles": [0.05, 0.25, 0.5, 0.75, 0.95],
@@ -128,10 +128,10 @@ class BasicDatasetProfiler(DatasetProfiler):
                     df.expect_column_distinct_values_to_be_in_set(column, value_set=None, result_format="SUMMARY")
 
                 else:
-                    df.expect_column_min_to_be_between(column, min_value=0, max_value=0)
-                    df.expect_column_max_to_be_between(column, min_value=0, max_value=0)
-                    df.expect_column_mean_to_be_between(column, min_value=0, max_value=0)
-                    df.expect_column_median_to_be_between(column, min_value=0, max_value=0)
+                    df.expect_column_min_to_be_between(column, min_value=None, max_value=None)
+                    df.expect_column_max_to_be_between(column, min_value=None, max_value=None)
+                    df.expect_column_mean_to_be_between(column, min_value=None, max_value=None)
+                    df.expect_column_median_to_be_between(column, min_value=None, max_value=None)
                     df.expect_column_quantile_values_to_be_between(column,
                                                                    quantile_ranges={
                                                                        "quantiles": [0.05, 0.25, 0.5, 0.75, 0.95],
