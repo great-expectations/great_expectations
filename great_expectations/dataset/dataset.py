@@ -170,7 +170,7 @@ class Dataset(MetaDataset):
     def __init__(self, *args, **kwargs):
         # NOTE: using caching makes the strong assumption that the user will not modify the core data store
         # (e.g. self.spark_df) over the lifetime of the dataset instance
-        self.caching = kwargs.pop("caching", False)
+        self.caching = kwargs.pop("caching", True)
 
         super(Dataset, self).__init__(*args, **kwargs)
 
@@ -233,7 +233,8 @@ class Dataset(MetaDataset):
         """Get the values in column closest to the requested quantiles
         Args:
             column (string): name of column
-            quantiles (list of float): the quantiles to return
+            quantiles (tuple of float): the quantiles to return. quantiles \
+            *must* be a tuple to ensure caching is possible
         
         Returns:
             List[any]: the nearest values in the dataset to those quantiles
@@ -257,8 +258,8 @@ class Dataset(MetaDataset):
         """
         if bins == 'uniform':
             # TODO: in the event that we shift the compute model for
-            # min and max to have a single pass, use that instead of
-            # quantiles for clarity
+            #  min and max to have a single pass, use that instead of
+            #  quantiles for clarity
             # min_ = self.get_column_min(column)
             # max_ = self.get_column_max(column)
             min_, max_ = self.get_column_quantiles(column, (0.0, 1.0))
@@ -276,7 +277,12 @@ class Dataset(MetaDataset):
         return bins
 
     def get_column_hist(self, column, bins):
-        """Returns: List[int], a list of counts corresponding to bins"""
+        """Get a histogram of column values
+        Args:
+            column: the column for which to generate the histogram
+            bins (tuple): the bins to slice the histogram. bins *must* be a tuple to ensure caching is possible
+
+        Returns: List[int], a list of counts corresponding to bins"""
         raise NotImplementedError
 
     def get_column_count_in_range(self, column, min_val=None, max_val=None, min_strictly=False, max_strictly=True):
