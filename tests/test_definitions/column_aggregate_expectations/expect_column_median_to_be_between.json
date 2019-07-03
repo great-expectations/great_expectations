@@ -142,7 +142,7 @@
           }
         },
         {
-          "title": "Test exception, both min and max null",
+          "title": "Vacuously true: both min and max null",
           "exact_match_out": false,
           "in": {
             "column": "c",
@@ -150,9 +150,8 @@
             "max_value": null,
             "catch_exceptions": true
           },
-          "out": {},
-          "error": {
-            "traceback_substring": "min_value and max_value cannot both be None"
+          "out": {
+            "success": true
           }
         }
       ]},
