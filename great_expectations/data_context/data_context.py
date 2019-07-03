@@ -1236,7 +1236,7 @@ class DataContext(object):
                     writer.write(DefaultJinjaPageView.render(model))
 
     def profile_datasource(self, datasource_name, generator_name=None, profiler=BasicDatasetProfiler, max_data_assets=10):
-        logger.info("Profiling '%s' with '%s'" % (datasource_name, profiler.__name__))
+        logger.info("\nProfiling '%s' with '%s'" % (datasource_name, profiler.__name__))
         profiling_results = []
         data_asset_names = self.get_available_data_asset_names(datasource_name)
         if generator_name is None:
