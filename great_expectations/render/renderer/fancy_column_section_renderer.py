@@ -32,14 +32,14 @@ def get_column_name_from_evr_list(evr_list):
 class FancyDescriptiveColumnSectionRenderer(ColumnSectionRenderer):
 
     @classmethod
-    def render(cls, evrs, section_name=None):
+    def render(cls, evrs, section_name=None, column_type=None):
         if section_name is None:
             column = cls._get_column_name(evrs)
         else:
             column = section_name
 
         content_blocks = []
-        cls._render_header(evrs, content_blocks)
+        cls._render_header(evrs, content_blocks, column_type)
         # cls._render_column_type(evrs, content_blocks)
         cls._render_overview_table(evrs, content_blocks)
         cls._render_stats_table(evrs, content_blocks)
@@ -64,7 +64,7 @@ class FancyDescriptiveColumnSectionRenderer(ColumnSectionRenderer):
         }
 
     @classmethod
-    def _render_header(cls, evrs, content_blocks):
+    def _render_header(cls, evrs, content_blocks, column_type=None):
 
         # NOTE: This logic is brittle
         try:
@@ -76,17 +76,17 @@ class FancyDescriptiveColumnSectionRenderer(ColumnSectionRenderer):
             column_type_list = cls._find_evr_by_type(
                 evrs, "expect_column_values_to_be_in_type_list"
             )["expectation_config"]["kwargs"]["type_list"]
-            column_type = ", ".join(column_type_list)
+            column_types = ", ".join(column_type_list)
 
         except TypeError:
-            column_type = "None"
+            column_types = "None"
 
         # assert False
 
         content_blocks.append({
             "content_block_type": "header",
-            "header": column_name,
-            "sub_header": column_type,
+            "header": f'{column_name} (type: {column_type})' if column_type else column_name,
+            "sub_header": column_types,
             # {
             #     "template": column_type,
             # },
