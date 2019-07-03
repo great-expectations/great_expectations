@@ -110,7 +110,7 @@ def assertDeepAlmostEqual(expected, actual, *args, **kwargs):
         raise exc
 
 
-def get_dataset(dataset_type, data, schemas=None, profiler=ColumnsExistProfiler, caching=False):
+def get_dataset(dataset_type, data, schemas=None, profiler=ColumnsExistProfiler, caching=True):
     """Utility to create datasets for json-formatted tests.
     """
     df = pd.DataFrame(data)
