@@ -158,12 +158,6 @@ def sqlitedb_engine():
 
 
 @pytest.fixture()
-def empty_directory(tmp_path_factory):
-    path = str(tmp_path_factory.mktemp('empty_directory'))
-    return path
-
-
-@pytest.fixture()
 def empty_data_context(tmp_path_factory):
     project_path = str(tmp_path_factory.mktemp('empty_data_context'))
     context = ge.data_context.DataContext.create(project_path)
