@@ -56,10 +56,6 @@ class DescriptivePageRenderer(Renderer):
         # TODO: in general, there should be a mechanism for imposing order here.
         ordered_columns = list(columns.keys())
 
-        # FIXME: This is a hack to limit output on one training file
-        # if "Reporting Area" in ordered_columns:
-        #     ordered_columns = ["Reporting Area"]
-
         if "data_asset_name" in validation_results["meta"] and validation_results["meta"]["data_asset_name"]:
             data_asset_name = validation_results["meta"]["data_asset_name"].split(
                 '/')[-1]
