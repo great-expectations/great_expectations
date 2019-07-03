@@ -17,6 +17,7 @@ from great_expectations.exceptions import DataContextError
 from great_expectations.data_context import DataContext
 from great_expectations.data_context.util import safe_mmkdir, NormalizedDataAssetName
 from great_expectations.dataset import PandasDataset, SqlAlchemyDataset
+from great_expectations.cli.init import scaffold_directories_and_notebooks
 
 
 @pytest.fixture()
@@ -397,3 +398,26 @@ def test_data_context_result_store(titanic_data_context):
         data_asset_name = profiling_result[1]['meta']['data_asset_name']
         validation_result = titanic_data_context.get_validation_result(data_asset_name, "BasicDatasetProfiler")
         assert data_asset_name in validation_result["meta"]["data_asset_name"]
+
+def test_render_full_static_site(filesystem_csv_2):
+
+    basedir = tmp_path_factory.mktemp("test_cli_init_diff")
+    basedir = str(basedir)
+    os.makedirs(os.path.join(basedir, "data"))
+    curdir = os.path.abspath(os.getcwd())
+    shutil.copy(
+        "./tests/test_sets/Titanic.csv",
+        str(os.path.join(basedir, "data/Titanic.csv"))
+    )
+
+    scaffold_directories_and_notebooks()
+    print(titanic_data_context._context_root_directory)
+    
+    print(titanic_data_context.list_datasources())
+
+    titanic_data_context.profile_datasource("mydatasource")
+    titanic_data_context.render_full_static_site()
+    
+
+
+    assert False

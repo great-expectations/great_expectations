@@ -22,6 +22,7 @@ try:
 except ImportError:
     import mock
 
+from great_expectations.cli.init import scaffold_directories_and_notebooks
 
 def test_cli_command_entrance():
     runner = CliRunner()
@@ -269,3 +270,13 @@ def test_cli_profile(empty_data_context, filesystem_csv_2, capsys):
     assert "Profiling 'my_datasource' with 'BasicDatasetProfiler'" in captured.out
     assert "Note: You will need to review and revise Expectations before using them in production." in captured.out
     logger.removeHandler(handler)
+
+
+def test_scaffold_directories_and_notebooks(empty_directory):
+    scaffold_directories_and_notebooks(empty_directory)
+    print(empty_directory)
+
+    assert set(os.listdir(empty_directory)) == set(['datasources', 'plugins', 'expectations', '.gitignore', 'fixtures', 'uncommitted', 'notebooks'])
+    assert set(os.listdir(os.path.join(empty_directory, "uncommitted"))) == \
+        set(['samples', 'documentation', 'validations', 'credentials'])
+
