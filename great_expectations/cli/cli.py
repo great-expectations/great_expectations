@@ -163,6 +163,7 @@ def init(target_directory):
         logger.critical(err.message)
         sys.exit(-1)
 
+    # TODO: There should be a method in the DataContext to get this directory.
     base_dir = os.path.join(target_directory, "great_expectations")
 
     six.print_(colored(
