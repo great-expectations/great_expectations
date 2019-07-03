@@ -508,10 +508,10 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
 
         if include_column_name:
             # NOTE: Localization will be tricky for this template_str.
-            template_str = "$column values must belong to this set: "+values_string+"."
+            template_str = "$column value types must belong to this set: "+values_string+"."
         else:
             # NOTE: Localization will be tricky for this template_str.
-            template_str = "values must belong to this set: "+values_string+"."
+            template_str = "value types must belong to this set: "+values_string+"."
 
         return [{
             "template": template_str,
