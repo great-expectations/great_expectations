@@ -7,7 +7,7 @@ from great_expectations.render import DefaultJinjaPageView
 
 def add_datasource(context):
     cli_message(
-"""
+        """
 ========== Datasources ==========
 
 See <blue>https://great-expectations.readthedocs.io/en/latest/core_concepts/datasource.html?src=cli</blue> for more information about datasources.
@@ -119,7 +119,7 @@ See <blue>https://great-expectations.readthedocs.io/en/latest/core_concepts/data
     if data_source_name != None:
 
         cli_message(
-"""
+            """
 ========== Profiling ==========
 
 Would you like to profile '%s' to create candidate expectations and documentation?
@@ -177,13 +177,13 @@ To learn more: <blue>https://great-expectations.readthedocs.io/en/latest/guides/
             if click.confirm("\nBuild documentation using the profiled data?",
                              default=True
                              ):
-                cli_message("\Building documentation...")
+                cli_message("\nBuilding documentation...")
 
                 context.render_full_static_site()
                 cli_message(
                     """
 To view the generated data documentation, open this file in a web browser:
-<green>great_expectations/data_documentation/index.html</green>
+    <green>great_expectations/data_documentation/index.html</green>
 """)
 
         else:

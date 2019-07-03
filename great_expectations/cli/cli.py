@@ -230,7 +230,7 @@ def main():
     handler = logging.StreamHandler()
     # Just levelname and message Could re-add other info if we want
     formatter = logging.Formatter(
-        ' %(message)s')
+        '%(message)s')
     # '%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
     handler.setFormatter(formatter)
     logger.addHandler(handler)
