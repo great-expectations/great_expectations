@@ -112,7 +112,8 @@ def render_string_template(template):
         if "params" in template["styling"]:
             # params = template["params"]
             for parameter, parameter_styling in template["styling"]["params"].items():
-
+                if parameter not in params:
+                    continue
                 params[parameter] = pTemplate('<span $styling>$content</span>').substitute({
                     "styling": render_styling(parameter_styling),
                     "content": params[parameter],
