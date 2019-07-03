@@ -11,7 +11,7 @@ def add_datasource(context):
         """
 ========== Datasources ==========
 
-See <blue>http://docs.greatexpectations.io/en/latest/core_concepts/datasource.html?utm_source=cli&utm_medium=init&utm_campaign={0:s}</blue> for more information about datasources.
+See <blue>https://docs.greatexpectations.io/en/latest/core_concepts/datasource.html?utm_source=cli&utm_medium=init&utm_campaign={0:s}</blue> for more information about datasources.
 """.format(__version__.replace(".", "_"))
     )
     data_source_selection = click.prompt(
