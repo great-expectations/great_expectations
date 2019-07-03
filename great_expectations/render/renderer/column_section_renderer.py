@@ -271,7 +271,7 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
     def _render_values_set(cls, evrs, content_blocks):
         set_evr = cls._find_evr_by_type(
             evrs,
-            "expect_column_values_to_be_in_set"
+            "expect_column_distinct_values_to_be_in_set"
         )
 
         # FIXME: This logic is very brittle. It will work on profiled EVRs, but not much else.
