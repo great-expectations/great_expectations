@@ -1458,7 +1458,6 @@ class DataContext(object):
 
         index_links = []
 
-        # TODO: this is a temporary implementation and should be replaced with a rendered specific for this purpose
         validation_filepaths = [y for x in os.walk(self.fixtures_validations_directory) for y in glob(os.path.join(x[0], '*.json'))]
         for validation_filepath in validation_filepaths:
             with open(validation_filepath, "r") as infile:
@@ -1469,7 +1468,7 @@ class DataContext(object):
             model = DescriptivePageRenderer.render(validation)
             out_filepath = self.get_validation_doc_filepath(data_asset_name, expectation_suite_name)
             safe_mmkdir(os.path.dirname(out_filepath))
-            print(out_filepath)
+
             with open(out_filepath, 'w') as writer:
                 writer.write(DefaultJinjaPageView.render(model))
 
