@@ -301,23 +301,19 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
             "expect_column_distinct_values_to_be_in_set"
         )
 
-        # FIXME: This logic is very brittle. It will work on profiled EVRs, but not much else.
         if set_evr and "partial_unexpected_counts" in set_evr["result"]:
-            result_key = "partial_unexpected_counts"
+            partial_unexpected_counts = set_evr["result"]["partial_unexpected_counts"]
+            values = [str(v["value"]) for v in partial_unexpected_counts]
         elif set_evr and "partial_unexpected_list" in set_evr["result"]:
-            result_key = "partial_unexpected_list"
+            values = [str(item) for item in set_evr["result"]["partial_unexpected_list"]]
         else:
             return
-
-        partial_unexpected_counts = set_evr["result"]["partial_unexpected_counts"]
-        values = [str(v["value"]) for v in partial_unexpected_counts]
 
         if len(" ".join(values)) > 100:
             classes = ["col-12"]
         else:
             classes = ["col-4"]
 
-        # TODO: This approach to styling is way too complicated for a simple values lists.
         new_block = {
             "content_block_type": "value_list",
             "header": "Example values",
