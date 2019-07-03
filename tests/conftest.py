@@ -14,7 +14,7 @@ from great_expectations.data_context.util import safe_mmkdir
 
 from .test_utils import get_dataset
 
-CONTEXTS = ['PandasDataset', 'sqlite', 'SparkDFDataset']
+CONTEXTS = ['PandasDataset', 'sqlite']#, 'SparkDFDataset']
 
 # TODO: make it easier to turn off Spark as well
 
@@ -155,6 +155,12 @@ def dataset(request):
 @pytest.fixture()
 def sqlitedb_engine():
     return sa.create_engine('sqlite://')
+
+
+@pytest.fixture()
+def empty_directory(tmp_path_factory):
+    path = str(tmp_path_factory.mktemp('empty_directory'))
+    return path
 
 
 @pytest.fixture()
