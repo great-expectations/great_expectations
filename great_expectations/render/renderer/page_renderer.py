@@ -3,9 +3,6 @@ from .column_section_renderer import (
     DescriptiveColumnSectionRenderer,
     PrescriptiveColumnSectionRenderer,
 )
-from .fancy_column_section_renderer import (
-    FancyDescriptiveColumnSectionRenderer,
-)
 from .other_section_renderer import (
     DescriptiveOverviewSectionRenderer,
 )
@@ -79,7 +76,7 @@ class DescriptivePageRenderer(Renderer):
                     )
                 ] +
                 [
-                    FancyDescriptiveColumnSectionRenderer.render(
+                    DescriptiveColumnSectionRenderer.render(
                         columns[column],
                         section_name=column,
                         column_type=column_types.get(column),
