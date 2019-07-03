@@ -31,7 +31,10 @@ from great_expectations.datasource import (
 )
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.renderer import DescriptivePageRenderer, PrescriptivePageRenderer
-from great_expectations.render.view import DefaultJinjaPageView
+from great_expectations.render.view import (
+    DefaultJinjaPageView,
+    DefaultJinjaIndexPageView,
+)
 
 
 from .expectation_explorer import ExpectationExplorer
@@ -1452,9 +1455,10 @@ class DataContext(object):
             None
         """
 
+        index_links = []
+
         # TODO: this is a temporary implementation and should be replaced with a rendered specific for this purpose
         validation_filepaths = [y for x in os.walk(self.fixtures_validations_directory) for y in glob(os.path.join(x[0], '*.json'))]
-        print(validation_filepaths)
         for validation_filepath in validation_filepaths:
             with open(validation_filepath, "r") as infile:
                 validation = json.load(infile)
@@ -1467,6 +1471,14 @@ class DataContext(object):
             print(out_filepath)
             with open(out_filepath, 'w') as writer:
                 writer.write(DefaultJinjaPageView.render(model))
+
+            index_links.append({
+                "data_asset_name" : data_asset_name,
+                "filepath" : out_filepath
+            })
+        
+        with open(os.path.join(self.data_doc_directory, "index.html"), "w") as writer:
+            writer.write(DefaultJinjaIndexPageView.render(index_links))
 
     def profile_datasource(self,
                            datasource_name,
