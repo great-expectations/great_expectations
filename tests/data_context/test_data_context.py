@@ -506,16 +506,26 @@ def test_render_full_static_site(tmp_path_factory, filesystem_csv_3):
 
     )
 
-    assert os.path.exists(os.path.join(
-        ge_directory,
-        "uncommitted/documentation/index.html"
-    ))
-
     with open(os.path.join(
         ge_directory,
         "uncommitted/documentation/titanic/default/Titanic/BasicDatasetProfiler.html"
     ), 'r') as f:
         # print(f.read())
         pass
+
+    assert os.path.exists(os.path.join(
+        ge_directory,
+        "uncommitted/documentation/index.html"
+    ))
+
+    shutil.copy(
+        os.path.join(
+            ge_directory,
+            "uncommitted/documentation/index.html"
+        ),
+        "test_output/index.html"
+
+    )
+
 
     assert False

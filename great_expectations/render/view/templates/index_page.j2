@@ -6,7 +6,7 @@
     <title>{% block title %}{% endblock %}</title>
 
     {# {# Remove this when not debugging: #}
-    {# <meta http-equiv="refresh" content="1"/> #}
+    <meta http-equiv="refresh" content="1"/>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css"/>
     <style>
       body {
@@ -65,17 +65,13 @@
         data-target="#navigation"
         data-offset="50"
     >
-    {% include 'breadcrumbs.j2' %}
     {% include 'ge_info.j2' %}
     <div class="container">
       <div class="row">
-        <div class="col-3">
-          {% block navbar %}{% include 'navbar.j2' %}{% endblock %}
-        </div>
-        <div class="col-9">
-        {% for section in sections %}
+        <div class="col-8 off-2">
+        {% for index_link in index_links %}
           {% set section_loop = loop -%}
-          {% include 'section.j2' %}
+          <li><a href="{{index_link.filepath}}">{{index_link.data_asset_name}}</a></li>
         {% endfor %}
         </div>
 

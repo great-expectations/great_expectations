@@ -1478,7 +1478,9 @@ class DataContext(object):
             })
         
         with open(os.path.join(self.data_doc_directory, "index.html"), "w") as writer:
-            writer.write(DefaultJinjaIndexPageView.render(index_links))
+            writer.write(DefaultJinjaIndexPageView.render({
+                "index_links": index_links
+            }))
 
     def profile_datasource(self,
                            datasource_name,
