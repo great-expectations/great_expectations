@@ -226,7 +226,7 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
         for idx, quantile in enumerate(quantiles):
             quantile_string = quantile_strings.get(quantile)
             table_rows.append([
-                quantile_string if quantile_string else quantile,
+                quantile_string if quantile_string else "{:3.2f}".format(quantile),
                 quantile_ranges[idx]
             ])
 
