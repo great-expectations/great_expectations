@@ -19,10 +19,7 @@ from great_expectations.data_asset.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
 from great_expectations.dataset.util import (
     is_valid_partition_object,
-    is_valid_categorical_partition_object,
-    is_valid_continuous_partition_object,
-    _scipy_distribution_positional_args_from_dict,
-    validate_distribution_parameters,
+    is_valid_categorical_partition_object
 )
 
 import pandas as pd
@@ -34,6 +31,39 @@ class MetaDataset(DataAsset):
     """
     Holds expectation decorators.
     """
+
+    @classmethod
+    def column_map_expectation(cls, func):
+        """Constructs an expectation using column-map semantics.
+
+        The column_map_expectation decorator handles boilerplate issues surrounding the common pattern of evaluating
+        truthiness of some condition on a per-row basis.
+
+        Args:
+            func (function): \
+                The function implementing a row-wise expectation. The function should take a column of data and \
+                return an equally-long column of boolean values corresponding to the truthiness of the \
+                underlying expectation.
+
+        Notes:
+            column_map_expectation intercepts and takes action based on the following parameters:
+            mostly (None or a float between 0 and 1): \
+                Return `"success": True` if at least mostly percent of values match the expectation. \
+                For more detail, see :ref:`mostly`.
+
+            column_map_expectation *excludes null values* from being passed to the function
+
+            Depending on the `result_format` selected, column_map_expectation can additional data to a return object, \
+            including `element_count`, `nonnull_values`, `nonnull_count`, `success_count`, `unexpected_list`, and \
+            `unexpected_index_list`. \
+            See :func:`_format_map_output <great_expectations.data_asset.dataset.Dataset._format_map_output>`
+
+        See also:
+            :func:`expect_column_values_to_be_in_set \
+            <great_expectations.dataset.dataset.Dataset.expect_column_values_to_be_in_set>` \
+            for an example of a column_map_expectation
+        """
+        raise NotImplementedError
 
     @classmethod
     def column_aggregate_expectation(cls, func):
@@ -51,7 +81,8 @@ class MetaDataset(DataAsset):
             column_aggregate_expectation *excludes null values* from being passed to the function
 
         See also:
-            :func:`expect_column_mean_to_be_between <great_expectations.data_asset.dataset.Dataset.expect_column_mean_to_be_between>` \
+            :func:`expect_column_mean_to_be_between \
+            <great_expectations.dataset.dataset.Dataset.expect_column_mean_to_be_between>` \
             for an example of a column_aggregate_expectation
         """
         if PY3:
@@ -111,6 +142,7 @@ class MetaDataset(DataAsset):
         return inner_wrapper
 
 
+# noinspection PyIncorrectDocstring
 class Dataset(MetaDataset):
 
     INT_TYPE_NAMES = set(["INTEGER", "int", "SMALLINT", "BIGINT", "IntegerType", "LongType"])
@@ -149,7 +181,7 @@ class Dataset(MetaDataset):
     
     @classmethod
     def from_dataset(cls, dataset=None):
-        """This base implementation naievely passes arguments on to the real constructor, which
+        """This base implementation naively passes arguments on to the real constructor, which
         is suitable really when a constructor knows to take its own type. In general, this should be overridden"""
         return cls(dataset)
 
@@ -200,6 +232,7 @@ class Dataset(MetaDataset):
     def get_column_quantiles(self, column, quantiles):
         """Get the values in column closest to the requested quantiles
         Args:
+            column (string): name of column
             quantiles (list of float): the quantiles to return
         
         Returns:
@@ -212,6 +245,16 @@ class Dataset(MetaDataset):
         raise NotImplementedError
 
     def get_column_partition(self, column, bins='uniform', n_bins=10):
+        """Get a partition of the range of values in the specified column.
+
+        Args:
+            column: the name of the column
+            bins: 'uniform' for evenly spaced bins or 'quantile' for bins spaced according to quantiles
+            n_bins: the number of bins to produce
+
+        Returns:
+            A list of bins
+        """
         if bins == 'uniform':
             # TODO: in the event that we shift the compute model for
             # min and max to have a single pass, use that instead of
@@ -224,8 +267,10 @@ class Dataset(MetaDataset):
             # Decimal from a SQLAlchemy source, so we cast to float for numpy)
             bins = np.linspace(start=float(min_), stop=float(max_), num=n_bins+1)
         elif bins in ['ntile', 'quantile', 'percentile']:
-            bins = self.get_column_quantiles(column, np.linspace(
-                start=0, stop=1, num=n_bins+1))
+            bins = self.get_column_quantiles(
+                column,
+                np.linspace(start=0, stop=1, num=n_bins+1)
+            )
         else:
             raise ValueError("Invalid parameter for bins argument")
         return bins
@@ -246,37 +291,6 @@ class Dataset(MetaDataset):
                                                       expectation_suite_name=expectation_suite_name)
         self._expectation_suite["data_asset_type"] = "Dataset"
 
-    @classmethod
-    def column_map_expectation(cls, func):
-        """Constructs an expectation using column-map semantics.
-
-        The column_map_expectation decorator handles boilerplate issues surrounding the common pattern of evaluating
-        truthiness of some condition on a per-row basis.
-
-        Args:
-            func (function): \
-                The function implementing a row-wise expectation. The function should take a column of data and \
-                return an equally-long column of boolean values corresponding to the truthiness of the \
-                underlying expectation.
-
-        Notes:
-            column_map_expectation intercepts and takes action based on the following parameters:
-            mostly (None or a float between 0 and 1): \
-                Return `"success": True` if at least mostly percent of values match the expectation. \
-                For more detail, see :ref:`mostly`.
-
-            column_map_expectation *excludes null values* from being passed to the function
-
-            Depending on the `result_format` selected, column_map_expectation can additional data to a return object, \
-            including `element_count`, `nonnull_values`, `nonnull_count`, `success_count`, `unexpected_list`, and \
-            `unexpected_index_list`. See :func:`_format_map_output <great_expectations.data_asset.dataset.Dataset._format_map_output>`
-
-        See also:
-            :func:`expect_column_values_to_be_unique <great_expectations.data_asset.dataset.Dataset.expect_column_values_to_be_unique>` \
-            for an example of a column_map_expectation
-        """
-        raise NotImplementedError
-
     def test_column_map_expectation_function(self, function, *args, **kwargs):
         """Test a column map expectation function
 
@@ -289,8 +303,9 @@ class Dataset(MetaDataset):
             A JSON-serializable expectation result object.
 
         Notes:
-            This function is a thin layer to allow quick testing of new expectation functions, without having to define custom classes, etc.
-            To use developed expectations from the command-line tool, you'll still need to define custom classes, etc.
+            This function is a thin layer to allow quick testing of new expectation functions, without having to \
+            define custom classes, etc. To use developed expectations from the command-line tool, you'll still need to \
+            define custom classes, etc.
 
             Check out :ref:`custom_expectations` for more information.
         """
@@ -310,8 +325,9 @@ class Dataset(MetaDataset):
             A JSON-serializable expectation result object.
 
         Notes:
-            This function is a thin layer to allow quick testing of new expectation functions, without having to define custom classes, etc.
-            To use developed expectations from the command-line tool, you'll still need to define custom classes, etc.
+            This function is a thin layer to allow quick testing of new expectation functions, without having to \
+            define custom classes, etc. To use developed expectations from the command-line tool, you'll still need to \
+            define custom classes, etc.
 
             Check out :ref:`custom_expectations` for more information.
         """
@@ -328,12 +344,16 @@ class Dataset(MetaDataset):
     @DocInherit
     @DataAsset.expectation(["column"])
     def expect_column_to_exist(
-        self, column, column_index=None, result_format=None, include_config=False, catch_exceptions=None, meta=None
+        self,
+        column, column_index=None,
+        result_format=None, include_config=False, catch_exceptions=None,
+        meta=None
     ):
         """Expect the specified column to exist.
 
-        expect_column_to_exist is a :func:`expectation <great_expectations.data_asset.dataset.Dataset.expectation>`, not a \
-        `column_map_expectation` or `column_aggregate_expectation`.
+        expect_column_to_exist is a :func:`expectation \
+        <great_expectations.data_asset.data_asset.DataAsset.expectation>`, not a
+        ``column_map_expectation`` or ``column_aggregate_expectation``.
 
         Args:
             column (str): \
@@ -384,8 +404,9 @@ class Dataset(MetaDataset):
     ):
         """Expect the columns to exactly match a specified list.
 
-        expect_table_columns_to_match_ordered_list is a :func:`expectation <great_expectations.data_asset.dataset.Dataset.expectation>`, not a \
-        `column_map_expectation` or `column_aggregate_expectation`.
+        expect_table_columns_to_match_ordered_list is a :func:`expectation \
+        <great_expectations.data_asset.data_asset.DataAsset.expectation>`, not a
+        ``column_map_expectation`` or ``column_aggregate_expectation``.
 
         Args:
             column_list (list of str): \
@@ -402,8 +423,8 @@ class Dataset(MetaDataset):
                 If True, then catch exceptions and include them as part of the result object. \
                 For more detail, see :ref:`catch_exceptions`.
             meta (dict or None): \
-                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
-                For more detail, see :ref:`meta`.
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+                modification. For more detail, see :ref:`meta`.
 
         Returns:
             A JSON-serializable expectation result object.
@@ -441,21 +462,20 @@ class Dataset(MetaDataset):
                 }
             }
 
+    # noinspection PyUnusedLocal
     @DocInherit
     @DataAsset.expectation(['min_value', 'max_value'])
     def expect_table_row_count_to_be_between(
         self,
-        min_value=None,
-        max_value=None,
-        result_format=None,
-        include_config=False,
-        catch_exceptions=None,
+        min_value=None, max_value=None,
+        result_format=None, include_config=False, catch_exceptions=None,
         meta=None,
     ):
         """Expect the number of rows to be between two values.
 
-        expect_table_row_count_to_be_between is a :func:`expectation <great_expectations.data_asset.dataset.Dataset.expectation>`, \
-        not a `column_map_expectation` or `column_aggregate_expectation`.
+        expect_table_row_count_to_be_between is a :func:`expectation \
+        <great_expectations.data_asset.data_asset.DataAsset.expectation>`, not a
+        ``column_map_expectation`` or ``column_aggregate_expectation``.
 
         Keyword Args:
             min_value (int or None): \
@@ -474,8 +494,8 @@ class Dataset(MetaDataset):
                 If True, then catch exceptions and include them as part of the result object. \
                 For more detail, see :ref:`catch_exceptions`.
             meta (dict or None): \
-                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
-                For more detail, see :ref:`meta`.
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+                modification. For more detail, see :ref:`meta`.
 
         Returns:
             A JSON-serializable expectation result object.
@@ -485,8 +505,10 @@ class Dataset(MetaDataset):
 
         Notes:
             * min_value and max_value are both inclusive.
-            * If min_value is None, then max_value is treated as an upper bound, and the number of acceptable rows has no minimum.
-            * If max_value is None, then min_value is treated as a lower bound, and the number of acceptable rows has no maximum.
+            * If min_value is None, then max_value is treated as an upper bound, and the number of acceptable rows has \
+              no minimum.
+            * If max_value is None, then min_value is treated as a lower bound, and the number of acceptable rows has \
+              no maximum.
 
         See Also:
             expect_table_row_count_to_equal
@@ -508,7 +530,7 @@ class Dataset(MetaDataset):
         row_count = self.get_row_count()
 
         if min_value is not None and max_value is not None:
-            outcome = row_count >= min_value and row_count <= max_value
+            outcome = min_value <= row_count <= max_value
 
         elif min_value is None and max_value is not None:
             outcome = row_count <= max_value
@@ -526,16 +548,20 @@ class Dataset(MetaDataset):
             }
         }
 
+    # noinspection PyUnusedLocal
     @DocInherit
     @DataAsset.expectation(['value'])
-    def expect_table_row_count_to_equal(self,
-                                        value,
-                                        result_format=None, include_config=False, catch_exceptions=None, meta=None
-                                        ):
+    def expect_table_row_count_to_equal(
+            self,
+            value,
+            result_format=None, include_config=False, catch_exceptions=None,
+            meta=None
+    ):
         """Expect the number of rows to equal a value.
 
-        expect_table_row_count_to_equal is a basic :func:`expectation <great_expectations.data_asset.dataset.Dataset.expectation>`, \
-        not a `column_map_expectation` or `column_aggregate_expectation`.
+        expect_table_row_count_to_equal is a :func:`expectation \
+        <great_expectations.data_asset.data_asset.DataAsset.expectation>`, not a
+        ``column_map_expectation`` or ``column_aggregate_expectation``.
 
         Args:
             value (int): \
@@ -552,8 +578,8 @@ class Dataset(MetaDataset):
                 If True, then catch exceptions and include them as part of the result object. \
                 For more detail, see :ref:`catch_exceptions`.
             meta (dict or None): \
-                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
-                For more detail, see :ref:`meta`.
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+                modification. For more detail, see :ref:`meta`.
 
         Returns:
             A JSON-serializable expectation result object.
@@ -579,7 +605,11 @@ class Dataset(MetaDataset):
             }
         }
 
-    ##### Missing values, unique values, and types #####
+    ###
+    #
+    # Missing values, unique values, and types
+    #
+    ###
 
     def expect_column_values_to_be_unique(self,
                                           column,
@@ -590,9 +620,11 @@ class Dataset(MetaDataset):
 
         This expectation detects duplicates. All duplicated values are counted as exceptions.
 
-        For example, `[1, 2, 3, 3, 3]` will return `[3, 3, 3]` in `result.exceptions_list`, with `unexpected_percent=0.6.`
+        For example, `[1, 2, 3, 3, 3]` will return `[3, 3, 3]` in `result.exceptions_list`, with \
+        `unexpected_percent = 0.6`.
 
-        expect_column_values_to_be_unique is a :func:`column_map_expectation <great_expectations.data_asset.dataset.Dataset.column_map_expectation>`.
+        expect_column_values_to_be_unique is a \
+        :func:`column_map_expectation <great_expectations.dataset.dataset.MetaDataset.column_map_expectation>`.
 
         Args:
             column (str): \
@@ -614,8 +646,8 @@ class Dataset(MetaDataset):
                 If True, then catch exceptions and include them as part of the result object. \
                 For more detail, see :ref:`catch_exceptions`.
             meta (dict or None): \
-                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
-                For more detail, see :ref:`meta`.
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+                modification. For more detail, see :ref:`meta`.
 
         Returns:
             A JSON-serializable expectation result object.
@@ -632,10 +664,11 @@ class Dataset(MetaDataset):
                                             ):
         """Expect column values to not be null.
 
-        To be counted as an exception, values must be explicitly null or missing, such as a NULL in PostgreSQL or an np.NaN in pandas.
-        Empty strings don't count as null unless they have been coerced to a null type.
+        To be counted as an exception, values must be explicitly null or missing, such as a NULL in PostgreSQL or an
+        np.NaN in pandas. Empty strings don't count as null unless they have been coerced to a null type.
 
-        expect_column_values_to_not_be_null is a :func:`column_map_expectation <great_expectations.data_asset.dataset.Dataset.column_map_expectation>`.
+        expect_column_values_to_not_be_null is a \
+        :func:`column_map_expectation <great_expectations.dataset.dataset.MetaDataset.column_map_expectation>`.
 
         Args:
             column (str): \
@@ -657,8 +690,8 @@ class Dataset(MetaDataset):
                 If True, then catch exceptions and include them as part of the result object. \
                 For more detail, see :ref:`catch_exceptions`.
             meta (dict or None): \
-                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
-                For more detail, see :ref:`meta`.
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+                modification. For more detail, see :ref:`meta`.
 
         Returns:
             A JSON-serializable expectation result object.
@@ -667,7 +700,8 @@ class Dataset(MetaDataset):
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
 
         See Also:
-            expect_column_values_to_be_null
+            :func:`expect_column_values_to_be_null \
+            <great_expectations.dataset.dataset.Dataset.expect_column_values_to_be_null>`
 
         """
         raise NotImplementedError
@@ -679,7 +713,8 @@ class Dataset(MetaDataset):
                                         ):
         """Expect column values to be null.
 
-        expect_column_values_to_be_null is a :func:`column_map_expectation <great_expectations.data_asset.dataset.Dataset.column_map_expectation>`.
+        expect_column_values_to_be_null is a \
+        :func:`column_map_expectation <great_expectations.dataset.dataset.MetaDataset.column_map_expectation>`.
 
         Args:
             column (str): \
@@ -701,8 +736,8 @@ class Dataset(MetaDataset):
                 If True, then catch exceptions and include them as part of the result object. \
                 For more detail, see :ref:`catch_exceptions`.
             meta (dict or None): \
-                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
-                For more detail, see :ref:`meta`.
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+                modification. For more detail, see :ref:`meta`.
 
         Returns:
             A JSON-serializable expectation result object.
@@ -711,7 +746,8 @@ class Dataset(MetaDataset):
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
 
         See Also:
-            expect_column_values_to_not_be_null
+            :func:`expect_column_values_to_not_be_null \
+            <great_expectations.dataset.dataset.Dataset.expect_column_values_to_not_be_null>`
 
         """
         raise NotImplementedError
@@ -725,7 +761,11 @@ class Dataset(MetaDataset):
     ):
         """Expect each column entry to be a specified data type.
 
-        expect_column_values_to_be_of_type is a :func:`column_map_expectation <great_expectations.data_asset.dataset.Dataset.column_map_expectation>`.
+        expect_column_values_to_be_of_type is a \
+        :func:`column_map_expectation <great_expectations.dataset.dataset.MetaDataset.column_map_expectation>` for \
+        pandas because rows can have different types. It is a \
+        :func:`column_aggregate_expectation \
+        <great_expectations.dataset.dataset.MetaDataset.column_aggregate_expectation>` for typed-column backends.
 
         Args:
             column (str): \
@@ -750,8 +790,8 @@ class Dataset(MetaDataset):
                 If True, then catch exceptions and include them as part of the result object. \
                 For more detail, see :ref:`catch_exceptions`.
             meta (dict or None): \
-                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
-                For more detail, see :ref:`meta`.
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+                modification. For more detail, see :ref:`meta`.
 
         Returns:
             A JSON-serializable expectation result object.
@@ -760,14 +800,13 @@ class Dataset(MetaDataset):
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
 
         Warning:
-            expect_column_values_to_be_of_type is slated for major changes in future versions of great_expectations.
-
-            As of v0.3, great_expectations is exclusively based on pandas, which handles typing in its own peculiar way.
-            Future versions of great_expectations will allow for Datasets in SQL, spark, etc.
-            When we make that change, we expect some breaking changes in parts of the codebase that are based strongly on pandas notions of typing.
+            expect_column_values_to_be_in_type_list is slated for further changes in future versions of \
+            great_expectations. In particular, this expectation is compute-engine dependent.
 
         See also:
-            expect_column_values_to_be_in_type_list
+            :func:`expect_column_values_to_be_in_type_list \
+            <great_expectations.dataset.dataset.Dataset.expect_column_values_to_be_in_type_list>`
+
         """
         raise NotImplementedError
 
@@ -780,7 +819,11 @@ class Dataset(MetaDataset):
     ):
         """Expect each column entry to match a list of specified data types.
 
-        expect_column_values_to_be_in_type_list is a :func:`column_map_expectation <great_expectations.data_asset.dataset.Dataset.column_map_expectation>`.
+        expect_column_values_to_be_of_type is a \
+        :func:`column_map_expectation <great_expectations.dataset.dataset.MetaDataset.column_map_expectation>` for \
+        pandas because rows can have different types. It is a \
+        :func:`column_aggregate_expectation \
+        <great_expectations.dataset.dataset.MetaDataset.column_aggregate_expectation>` for typed-column backends.
 
         Args:
             column (str): \
@@ -805,8 +848,8 @@ class Dataset(MetaDataset):
                 If True, then catch exceptions and include them as part of the result object. \
                 For more detail, see :ref:`catch_exceptions`.
             meta (dict or None): \
-                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
-                For more detail, see :ref:`meta`.
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+                modification. For more detail, see :ref:`meta`.
 
         Returns:
             A JSON-serializable expectation result object.
@@ -815,18 +858,21 @@ class Dataset(MetaDataset):
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
 
         Warning:
-            expect_column_values_to_be_in_type_list is slated for major changes in future versions of great_expectations.
-
-            As of v0.3, great_expectations is exclusively based on pandas, which handles typing in its own peculiar way.
-            Future versions of great_expectations will allow for Datasets in SQL, spark, etc.
-            When we make that change, we expect some breaking changes in parts of the codebase that are based strongly on pandas notions of typing.
+            expect_column_values_to_be_in_type_list is slated for further changes in future versions of \
+            great_expectations. In particular, this expectation is compute-engine dependent.
 
         See also:
-            expect_column_values_to_be_of_type
+            :func:`expect_column_values_to_be_of_type \
+            <great_expectations.dataset.dataset.Dataset.expect_column_values_to_be_of_type>`
+
         """
         raise NotImplementedError
 
-    ##### Sets and ranges #####
+    ###
+    #
+    # Sets and ranges
+    #
+    ####
 
     def expect_column_values_to_be_in_set(self,
                                           column,
@@ -835,6 +881,7 @@ class Dataset(MetaDataset):
                                           parse_strings_as_datetimes=None,
                                           result_format=None, include_config=False, catch_exceptions=None, meta=None
                                           ):
+        # noinspection PyUnresolvedReferences
         """Expect each column value to be in a given set.
 
         For example:
@@ -857,8 +904,8 @@ class Dataset(MetaDataset):
               },
             }
 
-        expect_column_values_to_be_in_set is a :func:`column_map_expectation <great_expectations.data_asset.dataset.Dataset.column_map_expectation>`.
-
+        expect_column_values_to_be_in_set is a \
+        :func:`column_map_expectation <great_expectations.dataset.dataset.MetaDataset.column_map_expectation>`.
 
         Args:
             column (str): \
@@ -884,8 +931,8 @@ class Dataset(MetaDataset):
                 If True, then catch exceptions and include them as part of the result object. \
                 For more detail, see :ref:`catch_exceptions`.
             meta (dict or None): \
-                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
-                For more detail, see :ref:`meta`.
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+                modification. For more detail, see :ref:`meta`.
 
         Returns:
             A JSON-serializable expectation result object.
@@ -894,7 +941,9 @@ class Dataset(MetaDataset):
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
 
         See Also:
-            expect_column_values_to_not_be_in_set
+            :func:`expect_column_values_to_not_be_in_set \
+            <great_expectations.dataset.dataset.Dataset.expect_column_values_to_not_be_in_set>`
+
         """
         raise NotImplementedError
 
@@ -905,6 +954,7 @@ class Dataset(MetaDataset):
                                               parse_strings_as_datetimes=None,
                                               result_format=None, include_config=False, catch_exceptions=None, meta=None
                                               ):
+        # noinspection PyUnresolvedReferences
         """Expect column entries to not be in the set.
 
         For example:
@@ -927,7 +977,8 @@ class Dataset(MetaDataset):
               },
             }
 
-        expect_column_values_to_not_be_in_set is a :func:`column_map_expectation <great_expectations.data_asset.dataset.Dataset.column_map_expectation>`.
+        expect_column_values_to_not_be_in_set is a \
+        :func:`column_map_expectation <great_expectations.dataset.dataset.MetaDataset.column_map_expectation>`.
 
         Args:
             column (str): \
@@ -951,8 +1002,8 @@ class Dataset(MetaDataset):
                 If True, then catch exceptions and include them as part of the result object. \
                 For more detail, see :ref:`catch_exceptions`.
             meta (dict or None): \
-                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
-                For more detail, see :ref:`meta`.
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+                modification. For more detail, see :ref:`meta`.
 
         Returns:
             A JSON-serializable expectation result object.
@@ -961,7 +1012,9 @@ class Dataset(MetaDataset):
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
 
         See Also:
-            expect_column_values_to_be_in_set
+            :func:`expect_column_values_to_be_in_set \
+            <great_expectations.dataset.dataset.Dataset.expect_column_values_to_be_in_set>`
+
         """
         raise NotImplementedError
 
@@ -977,7 +1030,8 @@ class Dataset(MetaDataset):
                                            ):
         """Expect column entries to be between a minimum value and a maximum value (inclusive).
 
-        expect_column_values_to_be_between is a :func:`column_map_expectation <great_expectations.data_asset.dataset.Dataset.column_map_expectation>`.
+        expect_column_values_to_be_between is a \
+        :func:`column_map_expectation <great_expectations.dataset.dataset.MetaDataset.column_map_expectation>`.
 
         Args:
             column (str): \
@@ -1008,8 +1062,8 @@ class Dataset(MetaDataset):
                 If True, then catch exceptions and include them as part of the result object. \
                 For more detail, see :ref:`catch_exceptions`.
             meta (dict or None): \
-                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
-                For more detail, see :ref:`meta`.
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+                modification. For more detail, see :ref:`meta`.
 
         Returns:
             A JSON-serializable expectation result object.
@@ -1023,7 +1077,8 @@ class Dataset(MetaDataset):
             * If max_value is None, then min_value is treated as a lower bound, and there is no maximum value checked.
 
         See Also:
-            expect_column_value_lengths_to_be_between
+            :func:`expect_column_value_lengths_to_be_between \
+            <great_expectations.dataset.dataset.Dataset.expect_column_value_lengths_to_be_between>`
 
         """
         raise NotImplementedError
@@ -1043,7 +1098,8 @@ class Dataset(MetaDataset):
         If `strictly=True`, then this expectation is only satisfied if each consecutive value
         is strictly increasing--equal values are treated as failures.
 
-        expect_column_values_to_be_increasing is a :func:`column_map_expectation <great_expectations.data_asset.dataset.Dataset.column_map_expectation>`.
+        expect_column_values_to_be_increasing is a \
+        :func:`column_map_expectation <great_expectations.dataset.dataset.MetaDataset.column_map_expectation>`.
 
         Args:
             column (str): \
@@ -1069,8 +1125,8 @@ class Dataset(MetaDataset):
                 If True, then catch exceptions and include them as part of the result object. \
                 For more detail, see :ref:`catch_exceptions`.
             meta (dict or None): \
-                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
-                For more detail, see :ref:`meta`.
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without
+                modification. For more detail, see :ref:`meta`.
 
         Returns:
             A JSON-serializable expectation result object.
@@ -1079,7 +1135,9 @@ class Dataset(MetaDataset):
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
 
         See Also:
-            expect_column_values_to_be_decreasing
+            :func:`expect_column_values_to_be_decreasing \
+            <great_expectations.dataset.dataset.Dataset.expect_column_values_to_be_decreasing>`
+
         """
         raise NotImplementedError
 
@@ -1098,7 +1156,8 @@ class Dataset(MetaDataset):
         If `strictly=True`, then this expectation is only satisfied if each consecutive value
         is strictly decreasing--equal values are treated as failures.
 
-        expect_column_values_to_be_decreasing is a :func:`column_map_expectation <great_expectations.data_asset.dataset.Dataset.column_map_expectation>`.
+        expect_column_values_to_be_decreasing is a \
+        :func:`column_map_expectation <great_expectations.dataset.dataset.MetaDataset.column_map_expectation>`.
 
         Args:
             column (str): \
@@ -1124,8 +1183,8 @@ class Dataset(MetaDataset):
                 If True, then catch exceptions and include them as part of the result object. \
                 For more detail, see :ref:`catch_exceptions`.
             meta (dict or None): \
-                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
-                For more detail, see :ref:`meta`.
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+                modification. For more detail, see :ref:`meta`.
 
         Returns:
             A JSON-serializable expectation result object.
@@ -1134,25 +1193,31 @@ class Dataset(MetaDataset):
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
 
         See Also:
-            expect_column_values_to_be_increasing
+            :func:`expect_column_values_to_be_increasing \
+            <great_expectations.dataset.dataset.Dataset.expect_column_values_to_be_increasing>`
 
         """
         raise NotImplementedError
 
-    ##### String matching #####
+    ###
+    #
+    # String matching
+    #
+    ###
 
-    def expect_column_value_lengths_to_be_between(self,
-                                                  column,
-                                                  min_value=None,
-                                                  max_value=None,
-                                                  mostly=None,
-                                                  result_format=None, include_config=False, catch_exceptions=None, meta=None
-                                                  ):
+    def expect_column_value_lengths_to_be_between(
+            self,
+            column,
+            min_value=None, max_value=None,
+            mostly=None,
+            result_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
         """Expect column entries to be strings with length between a minimum value and a maximum value (inclusive).
 
         This expectation only works for string-type values. Invoking it on ints or floats will raise a TypeError.
 
-        expect_column_value_lengths_to_be_between is a :func:`column_map_expectation <great_expectations.data_asset.dataset.Dataset.column_map_expectation>`.
+        expect_column_value_lengths_to_be_between is a \
+        :func:`column_map_expectation <great_expectations.dataset.dataset.MetaDataset.column_map_expectation>`.
 
         Args:
             column (str): \
@@ -1178,8 +1243,8 @@ class Dataset(MetaDataset):
                 If True, then catch exceptions and include them as part of the result object. \
                 For more detail, see :ref:`catch_exceptions`.
             meta (dict or None): \
-                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
-                For more detail, see :ref:`meta`.
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+                modification. For more detail, see :ref:`meta`.
 
         Returns:
             A JSON-serializable expectation result object.
@@ -1189,11 +1254,15 @@ class Dataset(MetaDataset):
 
         Notes:
             * min_value and max_value are both inclusive.
-            * If min_value is None, then max_value is treated as an upper bound, and the number of acceptable rows has no minimum.
-            * If max_value is None, then min_value is treated as a lower bound, and the number of acceptable rows has no maximum.
+            * If min_value is None, then max_value is treated as an upper bound, and the number of acceptable rows has \
+              no minimum.
+            * If max_value is None, then min_value is treated as a lower bound, and the number of acceptable rows has \
+              no maximum.
 
         See Also:
-            expect_column_value_lengths_to_equal
+            :func:`expect_column_value_lengths_to_equal \
+            <great_expectations.dataset.dataset.Dataset.expect_column_value_lengths_to_equal>`
+
         """
         raise NotImplementedError
 
@@ -1207,7 +1276,8 @@ class Dataset(MetaDataset):
 
         This expectation only works for string-type values. Invoking it on ints or floats will raise a TypeError.
 
-        expect_column_values_to_be_between is a :func:`column_map_expectation <great_expectations.data_asset.dataset.Dataset.column_map_expectation>`.
+        expect_column_values_to_be_between is a \
+        :func:`column_map_expectation <great_expectations.dataset.dataset.MetaDataset.column_map_expectation>`.
 
         Args:
             column (str): \
@@ -1231,8 +1301,8 @@ class Dataset(MetaDataset):
                 If True, then catch exceptions and include them as part of the result object. \
                 For more detail, see :ref:`catch_exceptions`.
             meta (dict or None): \
-                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
-                For more detail, see :ref:`meta`.
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+                modification. For more detail, see :ref:`meta`.
 
         Returns:
             A JSON-serializable expectation result object.
@@ -1241,10 +1311,11 @@ class Dataset(MetaDataset):
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
 
         See Also:
-            expect_column_value_lengths_to_be_between
+            :func:`expect_column_value_lengths_to_be_between \
+            <great_expectations.dataset.dataset.Dataset.expect_column_value_lengths_to_be_between>`
+
         """
         raise NotImplementedError
-
 
     def expect_column_values_to_match_regex(self,
                                             column,
@@ -1256,7 +1327,8 @@ class Dataset(MetaDataset):
         anywhere in the string, for example "[at]+" will identify the following strings as expected: "cat", "hat", \
         "aa", "a", and "t", and the following strings as unexpected: "fish", "dog".
 
-        expect_column_values_to_match_regex is a :func:`column_map_expectation <great_expectations.data_asset.dataset.Dataset.column_map_expectation>`.
+        expect_column_values_to_match_regex is a \
+        :func:`column_map_expectation <great_expectations.dataset.dataset.MetaDataset.column_map_expectation>`.
 
         Args:
             column (str): \
@@ -1280,8 +1352,8 @@ class Dataset(MetaDataset):
                 If True, then catch exceptions and include them as part of the result object. \
                 For more detail, see :ref:`catch_exceptions`.
             meta (dict or None): \
-                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
-                For more detail, see :ref:`meta`.
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+                modification. For more detail, see :ref:`meta`.
 
         Returns:
             A JSON-serializable expectation result object.
@@ -1290,22 +1362,28 @@ class Dataset(MetaDataset):
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
 
         See Also:
-            expect_column_values_to_not_match_regex
-            expect_column_values_to_match_regex_list
+            :func:`expect_column_values_to_not_match_regex \
+            <great_expectations.dataset.dataset.Dataset.expect_column_values_to_not_match_regex>`
+
+            :func:`expect_column_values_to_match_regex_list \
+            <great_expectations.dataset.dataset.Dataset.expect_column_values_to_match_regex_list>`
+
         """
         raise NotImplementedError
 
-    def expect_column_values_to_not_match_regex(self,
-                                                column,
-                                                regex,
-                                                mostly=None,
-                                                result_format=None, include_config=False, catch_exceptions=None, meta=None
-                                                ):
+    def expect_column_values_to_not_match_regex(
+            self,
+            column,
+            regex,
+            mostly=None,
+            result_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
         """Expect column entries to be strings that do NOT match a given regular expression. The regex must not match \
         any portion of the provided string. For example, "[at]+" would identify the following strings as expected: \
         "fish", "dog", and the following as unexpected: "cat", "hat".
 
-        expect_column_values_to_not_match_regex is a :func:`column_map_expectation <great_expectations.data_asset.dataset.Dataset.column_map_expectation>`.
+        expect_column_values_to_not_match_regex is a \
+        :func:`column_map_expectation <great_expectations.dataset.dataset.MetaDataset.column_map_expectation>`.
 
         Args:
             column (str): \
@@ -1329,8 +1407,8 @@ class Dataset(MetaDataset):
                 If True, then catch exceptions and include them as part of the result object. \
                 For more detail, see :ref:`catch_exceptions`.
             meta (dict or None): \
-                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
-                For more detail, see :ref:`meta`.
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+                modification. For more detail, see :ref:`meta`.
 
         Returns:
             A JSON-serializable expectation result object.
@@ -1339,22 +1417,26 @@ class Dataset(MetaDataset):
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
 
         See Also:
-            expect_column_values_to_match_regex
-            expect_column_values_to_match_regex_list
+            :func:`expect_column_values_to_match_regex \
+            <great_expectations.dataset.dataset.Dataset.expect_column_values_to_match_regex>`
+
+            :func:`expect_column_values_to_match_regex_list \
+            <great_expectations.dataset.dataset.Dataset.expect_column_values_to_match_regex_list>`
+
         """
         raise NotImplementedError
 
-    def expect_column_values_to_match_regex_list(self,
-                                                 column,
-                                                 regex_list,
-                                                 match_on="any",
-                                                 mostly=None,
-                                                 result_format=None, include_config=False, catch_exceptions=None, meta=None
-                                                 ):
-        """Expect the column entries to be strings that can be matched to either any of or all of a list of regular expressions.
-        Matches can be anywhere in the string.
+    def expect_column_values_to_match_regex_list(
+            self,
+            column, regex_list, match_on="any",
+            mostly=None,
+            result_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
+        """Expect the column entries to be strings that can be matched to either any of or all of a list of regular
+        expressions. Matches can be anywhere in the string.
 
-        expect_column_values_to_match_regex_list is a :func:`column_map_expectation <great_expectations.data_asset.dataset.Dataset.column_map_expectation>`.
+        expect_column_values_to_match_regex_list is a \
+        :func:`column_map_expectation <great_expectations.dataset.dataset.MetaDataset.column_map_expectation>`.
 
         Args:
             column (str): \
@@ -1382,8 +1464,8 @@ class Dataset(MetaDataset):
                 If True, then catch exceptions and include them as part of the result object. \
                 For more detail, see :ref:`catch_exceptions`.
             meta (dict or None): \
-                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
-                For more detail, see :ref:`meta`.
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+                modification. For more detail, see :ref:`meta`.
 
         Returns:
             A JSON-serializable expectation result object.
@@ -1392,19 +1474,26 @@ class Dataset(MetaDataset):
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
 
         See Also:
-            expect_column_values_to_match_regex
-            expect_column_values_to_not_match_regex
+            :func:`expect_column_values_to_match_regex \
+            <great_expectations.dataset.dataset.Dataset.expect_column_values_to_match_regex>`
+
+            :func:`expect_column_values_to_not_match_regex \
+            <great_expectations.dataset.dataset.Dataset.expect_column_values_to_not_match_regex>`
+
         """
         raise NotImplementedError
 
-    def expect_column_values_to_not_match_regex_list(self, column, regex_list,
-                                                     mostly=None,
-                                                     result_format=None, include_config=False, catch_exceptions=None, meta=None):
-        """Expect the column entries to be strings that do not match any of a list of regular expressions. Matches can \
+    def expect_column_values_to_not_match_regex_list(
+            self,
+            column, regex_list,
+            mostly=None,
+            result_format=None, include_config=False, catch_exceptions=None,
+            meta=None):
+        """Expect the column entries to be strings that do not match any of a list of regular expressions. Matches can
         be anywhere in the string.
 
-
-        expect_column_values_to_not_match_regex_list is a :func:`column_map_expectation <great_expectations.data_asset.dataset.Dataset.column_map_expectation>`.
+        expect_column_values_to_not_match_regex_list is a \
+        :func:`column_map_expectation <great_expectations.dataset.dataset.MetaDataset.column_map_expectation>`.
 
         Args:
             column (str): \
@@ -1419,7 +1508,7 @@ class Dataset(MetaDataset):
 
         Other Parameters:
             result_format (str or None): \
-                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`. \
                 For more detail, see :ref:`result_format <result_format>`.
             include_config (boolean): \
                 If True, then include the expectation config as part of the result object. \
@@ -1428,8 +1517,8 @@ class Dataset(MetaDataset):
                 If True, then catch exceptions and include them as part of the result object. \
                 For more detail, see :ref:`catch_exceptions`.
             meta (dict or None): \
-                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
-                For more detail, see :ref:`meta`.
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+                modification. For more detail, see :ref:`meta`.
 
         Returns:
             A JSON-serializable expectation result object.
@@ -1438,21 +1527,29 @@ class Dataset(MetaDataset):
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
 
         See Also:
-            expect_column_values_to_match_regex_list
+            :func:`expect_column_values_to_match_regex_list \
+            <great_expectations.dataset.dataset.Dataset.expect_column_values_to_match_regex_list>`
+
         """
         raise NotImplementedError
 
-    ##### Datetime and JSON parsing #####
+    ###
+    #
+    # Datetime and JSON parsing
+    #
+    ###
 
-    def expect_column_values_to_match_strftime_format(self,
-                                                      column,
-                                                      strftime_format,
-                                                      mostly=None,
-                                                      result_format=None, include_config=False, catch_exceptions=None, meta=None
-                                                      ):
+    def expect_column_values_to_match_strftime_format(
+            self,
+            column,
+            strftime_format,
+            mostly=None,
+            result_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
         """Expect column entries to be strings representing a date or time with a given format.
 
-        expect_column_values_to_match_strftime_format is a :func:`column_map_expectation <great_expectations.data_asset.dataset.Dataset.column_map_expectation>`.
+        expect_column_values_to_match_strftime_format is a \
+        :func:`column_map_expectation <great_expectations.dataset.dataset.MetaDataset.column_map_expectation>`.
 
         Args:
             column (str): \
@@ -1476,8 +1573,8 @@ class Dataset(MetaDataset):
                 If True, then catch exceptions and include them as part of the result object. \
                 For more detail, see :ref:`catch_exceptions`.
             meta (dict or None): \
-                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
-                For more detail, see :ref:`meta`.
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+                modification. For more detail, see :ref:`meta`.
 
         Returns:
             A JSON-serializable expectation result object.
@@ -1488,14 +1585,16 @@ class Dataset(MetaDataset):
         """
         raise NotImplementedError
 
-    def expect_column_values_to_be_dateutil_parseable(self,
-                                                      column,
-                                                      mostly=None,
-                                                      result_format=None, include_config=False, catch_exceptions=None, meta=None
-                                                      ):
-        """Expect column entries to be parseable using dateutil.
+    def expect_column_values_to_be_dateutil_parseable(
+            self,
+            column,
+            mostly=None,
+            result_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
+        """Expect column entries to be parsable using dateutil.
 
-        expect_column_values_to_be_dateutil_parseable is a :func:`column_map_expectation <great_expectations.data_asset.dataset.Dataset.column_map_expectation>`.
+        expect_column_values_to_be_dateutil_parseable is a \
+        :func:`column_map_expectation <great_expectations.dataset.dataset.MetaDataset.column_map_expectation>`.
 
         Args:
             column (str): \
@@ -1517,25 +1616,28 @@ class Dataset(MetaDataset):
                 If True, then catch exceptions and include them as part of the result object. \
                 For more detail, see :ref:`catch_exceptions`.
             meta (dict or None): \
-                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
-                For more detail, see :ref:`meta`.
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+                modification. For more detail, see :ref:`meta`.
 
         Returns:
             A JSON-serializable expectation result object.
 
             Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
         """
         raise NotImplementedError
 
-    def expect_column_values_to_be_json_parseable(self,
-                                                  column,
-                                                  mostly=None,
-                                                  result_format=None, include_config=False, catch_exceptions=None, meta=None
-                                                  ):
+    def expect_column_values_to_be_json_parseable(
+            self,
+            column,
+            mostly=None,
+            result_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
         """Expect column entries to be data written in JavaScript Object Notation.
 
-        expect_column_values_to_be_json_parseable is a :func:`column_map_expectation <great_expectations.data_asset.dataset.Dataset.column_map_expectation>`.
+        expect_column_values_to_be_json_parseable is a \
+        :func:`column_map_expectation <great_expectations.dataset.dataset.MetaDataset.column_map_expectation>`.
 
         Args:
             column (str): \
@@ -1557,8 +1659,8 @@ class Dataset(MetaDataset):
                 If True, then catch exceptions and include them as part of the result object. \
                 For more detail, see :ref:`catch_exceptions`.
             meta (dict or None): \
-                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
-                For more detail, see :ref:`meta`.
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+                modification. For more detail, see :ref:`meta`.
 
         Returns:
             A JSON-serializable expectation result object.
@@ -1567,19 +1669,23 @@ class Dataset(MetaDataset):
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
 
         See Also:
-            expect_column_values_to_match_json_schema
+            :func:`expect_column_values_to_match_json_schema \
+            <great_expectations.dataset.dataset.Dataset.expect_column_values_to_match_json_schema>`
+
         """
         raise NotImplementedError
 
-    def expect_column_values_to_match_json_schema(self,
-                                                  column,
-                                                  json_schema,
-                                                  mostly=None,
-                                                  result_format=None, include_config=False, catch_exceptions=None, meta=None
-                                                  ):
+    def expect_column_values_to_match_json_schema(
+            self,
+            column,
+            json_schema,
+            mostly=None,
+            result_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
         """Expect column entries to be JSON objects matching a given JSON schema.
 
-        expect_column_values_to_match_json_schema is a :func:`column_map_expectation <great_expectations.data_asset.dataset.Dataset.column_map_expectation>`.
+        expect_column_values_to_match_json_schema is a \
+        :func:`column_map_expectation <great_expectations.dataset.dataset.MetaDataset.column_map_expectation>`.
 
         Args:
             column (str): \
@@ -1601,8 +1707,8 @@ class Dataset(MetaDataset):
                 If True, then catch exceptions and include them as part of the result object. \
                 For more detail, see :ref:`catch_exceptions`.
             meta (dict or None): \
-                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
-                For more detail, see :ref:`meta`.
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+                modification. For more detail, see :ref:`meta`.
 
         Returns:
             A JSON-serializable expectation result object.
@@ -1611,45 +1717,51 @@ class Dataset(MetaDataset):
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
 
         See Also:
-            expect_column_values_to_be_json_parseable
+            :func:`expect_column_values_to_be_json_parseable \
+            <great_expectations.dataset.dataset.Dataset.expect_column_values_to_be_json_parseable>`
 
-            The JSON-schema docs at: http://json-schema.org/
+
+            The `JSON-schema docs <http://json-schema.org/>`_.
         """
         raise NotImplementedError
 
-    ##### Aggregate functions #####
+    ###
+    #
+    # Aggregate functions
+    #
+    ####
 
-    def expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than(self,
-                                                                                    column, distribution,
-                                                                                    p_value=0.05, params=None,
-                                                                                    result_format=None,
-                                                                                    include_config=False,
-                                                                                    catch_exceptions=None, meta=None):
+    def expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than(
+            self,
+            column,
+            distribution, p_value=0.05, params=None,
+            result_format=None, include_config=False, catch_exceptions=None, meta=None):
         """
         Expect the column values to be distributed similarly to a scipy distribution. \
 
-        This expectation compares the provided column to the specified continuous distribution with a parameteric \
+        This expectation compares the provided column to the specified continuous distribution with a parametric \
         Kolmogorov-Smirnov test. The K-S test compares the provided column to the cumulative density function (CDF) of \
         the specified scipy distribution. If you don't know the desired distribution shape parameters, use the \
         `ge.dataset.util.infer_distribution_parameters()` utility function to estimate them.
 
         It returns 'success'=True if the p-value from the K-S test is greater than or equal to the provided p-value.
 
-        expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than is a \
-        :func:`column_aggregate_expectation <great_expectations.data_asset.dataset.Dataset.column_aggregate_expectation>`.
+        ``expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than`` is a \
+        :func:`column_aggregate_expectation \
+        <great_expectations.dataset.dataset.MetaDataset.column_aggregate_expectation>`.
 
         Args:
             column (str): \
                 The column name.
             distribution (str): \
-                The scipy distribution name. See: https://docs.scipy.org/doc/scipy/reference/stats.html
+                The scipy distribution name. See: `<https://docs.scipy.org/doc/scipy/reference/stats.html>`_
             p_value (float): \
                 The threshold p-value for a passing test. Default is 0.05.
             params (dict or list) : \
                 A dictionary or positional list of shape parameters that describe the distribution you want to test the\
                 data against. Include key values specific to the distribution from the appropriate scipy \
                 distribution CDF function. 'loc' and 'scale' are used as translational parameters.\
-                See https://docs.scipy.org/doc/scipy/reference/stats.html#continuous-distributions
+                See `<https://docs.scipy.org/doc/scipy/reference/stats.html#continuous-distributions>`_
 
         Other Parameters:
             result_format (str or None): \
@@ -1662,8 +1774,8 @@ class Dataset(MetaDataset):
                 If True, then catch exceptions and include them as part of the result object. \
                 For more detail, see :ref:`catch_exceptions`.
             meta (dict or None): \
-                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
-                For more detail, see :ref:`meta`.
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+                modification. For more detail, see :ref:`meta`.
 
         Returns:
             A JSON-serializable expectation result object.
@@ -1677,33 +1789,40 @@ class Dataset(MetaDataset):
 
                 {
                     "details":
-                        "expected_params" (dict): The specified or inferred parameters of the distribution to test against
+                        "expected_params" (dict): The specified or inferred parameters of the distribution to test \
+                        against
                         "ks_results" (dict): The raw result of stats.kstest()
                 }
 
             * The Kolmogorov-Smirnov test's null hypothesis is that the column is similar to the provided distribution.
             * Supported scipy distributions:
-                -norm
-                -beta
-                -gamma
-                -uniform
-                -chi2
-                -expon
+
+              * norm
+              * beta
+              * gamma
+              * uniform
+              * chi2
+              * expon
 
         """
         raise NotImplementedError
 
+    # noinspection PyUnusedLocal
     @DocInherit
     @MetaDataset.column_aggregate_expectation
-    def expect_column_distinct_values_to_be_in_set(self,
-                                                   column,
-                                                   value_set,
-                                                   parse_strings_as_datetimes=None,
-                                                   result_format=None, include_config=False, catch_exceptions=None, meta=None):
+    def expect_column_distinct_values_to_be_in_set(
+            self,
+            column,
+            value_set,
+            parse_strings_as_datetimes=None,
+            result_format=None, include_config=False, catch_exceptions=None, meta=None):
+        # noinspection PyUnresolvedReferences
         """Expect the set of distinct column values to be contained by a given set.
 
-        The success value for this expectation will match that of expect_column_values_to_be_in_set, but this is an aggregate expectation
-        and so will provide aggregate semantics including an observed value.
+        The success value for this expectation will match that of expect_column_values_to_be_in_set. However,
+        expect_column_distinct_values_to_be_in_set is a \
+        :func:`column_aggregate_expectation \
+        <great_expectations.dataset.dataset.MetaDataset.column_aggregate_expectation>`.
 
         For example:
         ::
@@ -1736,9 +1855,6 @@ class Dataset(MetaDataset):
               }
             }
 
-        expect_column_distinct_values_to_be_in_set is a :func:`column_aggregate_expectation <great_expectations.data_asset.dataset.Dataset.column_aggregate_expectation>`.
-
-
         Args:
             column (str): \
                 The column name.
@@ -1746,12 +1862,12 @@ class Dataset(MetaDataset):
                 A set of objects used for comparison.
 
         Keyword Args:
-            parse_strings_as_datetimes (boolean or None) : If True values provided in value_set will be parsed as \
-                datetimes before making comparisons.
+            parse_strings_as_datetimes (boolean or None) : If True values provided in value_set will be parsed \
+            as datetimes before making comparisons.
 
         Other Parameters:
             result_format (str or None): \
-                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`. \
                 For more detail, see :ref:`result_format <result_format>`.
             include_config (boolean): \
                 If True, then include the expectation config as part of the result object. \
@@ -1760,8 +1876,8 @@ class Dataset(MetaDataset):
                 If True, then catch exceptions and include them as part of the result object. \
                 For more detail, see :ref:`catch_exceptions`.
             meta (dict or None): \
-                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
-                For more detail, see :ref:`meta`.
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+                modification. For more detail, see :ref:`meta`.
 
         Returns:
             A JSON-serializable expectation result object.
@@ -1770,7 +1886,9 @@ class Dataset(MetaDataset):
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
 
         See Also:
-            expect_column_distinct_values_to_contain_set
+            :func:`expect_column_distinct_values_to_contain_set \
+            <great_expectations.dataset.dataset.Dataset.expect_column_distinct_values_to_contain_set>`
+
         """
 
         observed_value_counts = self.get_column_value_counts(column)
@@ -1800,16 +1918,24 @@ class Dataset(MetaDataset):
             }
         }
 
+    # noinspection PyUnusedLocal
     @DocInherit
     @MetaDataset.column_aggregate_expectation
-    def expect_column_distinct_values_to_equal_set(self,
-                                                   column,
-                                                   value_set,
-                                                   parse_strings_as_datetimes=None,
-                                                   result_format=None, include_config=False, catch_exceptions=None, meta=None):
+    def expect_column_distinct_values_to_equal_set(
+            self,
+            column,
+            value_set,
+            parse_strings_as_datetimes=None,
+            result_format=None, include_config=False, catch_exceptions=None, meta=None):
+        # noinspection PyUnresolvedReferences
         """Expect the set of distinct column values to equal a given set.
 
-        In contrast to expect_column_distinct_values_to_contain_set() this ensures not only that a certain set of values are present in the column but that these _and only these values_ are present.
+        In contrast to expect_column_distinct_values_to_contain_set() this ensures not only that a certain set of \
+        values are present in the column but that these *and only these* values are present.
+
+        expect_column_distinct_values_to_equal_set is a \
+        :func:`column_aggregate_expectation \
+        <great_expectations.dataset.dataset.MetaDataset.column_aggregate_expectation>`.
 
         For example:
         ::
@@ -1825,9 +1951,6 @@ class Dataset(MetaDataset):
                 "observed_value": [1,2,3]
               },
             }
-
-        expect_column_distinct_values_to_equal_set is a :func:`column_aggregate_expectation <great_expectations.data_asset.dataset.Dataset.column_aggregate_expectation>`.
-
 
         Args:
             column (str): \
@@ -1850,8 +1973,8 @@ class Dataset(MetaDataset):
                 If True, then catch exceptions and include them as part of the result object. \
                 For more detail, see :ref:`catch_exceptions`.
             meta (dict or None): \
-                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
-                For more detail, see :ref:`meta`.
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+                modification. For more detail, see :ref:`meta`.
 
         Returns:
             A JSON-serializable expectation result object.
@@ -1860,7 +1983,9 @@ class Dataset(MetaDataset):
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
 
         See Also:
-            expect_column_distinct_values_to_contain_set
+            :func:`expect_column_distinct_values_to_contain_set \
+            <great_expectations.dataset.dataset.Dataset.expect_column_distinct_values_to_contain_set>`
+
         """
         if parse_strings_as_datetimes:
             parsed_value_set = self._parse_value_set(value_set)
@@ -1881,17 +2006,24 @@ class Dataset(MetaDataset):
             }
         }
 
-
+    # noinspection PyUnusedLocal
     @DocInherit
     @MetaDataset.column_aggregate_expectation
-    def expect_column_distinct_values_to_contain_set(self,
-                                                    column,
-                                                    value_set,
-                                                    parse_strings_as_datetimes=None,
-                                                    result_format=None, include_config=False, catch_exceptions=None, meta=None):
+    def expect_column_distinct_values_to_contain_set(
+            self,
+            column,
+            value_set,
+            parse_strings_as_datetimes=None,
+            result_format=None, include_config=False, catch_exceptions=None, meta=None):
+        # noinspection PyUnresolvedReferences
         """Expect the set of distinct column values to contain a given set.
 
-        In contrast to expect_column_values_to_be_in_set() this ensures not that all column values are members of the given set but that values from the set _must_ be present in the column
+        In contrast to expect_column_values_to_be_in_set() this ensures not that all column values are members of the
+        given set but that values from the set *must* be present in the column.
+
+        expect_column_distinct_values_to_contain_set is a \
+        :func:`column_aggregate_expectation \
+        <great_expectations.dataset.dataset.MetaDataset.column_aggregate_expectation>`.
 
         For example:
         ::
@@ -1907,9 +2039,6 @@ class Dataset(MetaDataset):
                 "observed_value": [1,2,3]
             },
             }
-
-        expect_column_distinct_values_to_contain_set is a :func:`column_aggregate_expectation <great_expectations.data_asset.dataset.Dataset.column_aggregate_expectation>`.
-
 
         Args:
             column (str): \
@@ -1932,8 +2061,8 @@ class Dataset(MetaDataset):
                 If True, then catch exceptions and include them as part of the result object. \
                 For more detail, see :ref:`catch_exceptions`.
             meta (dict or None): \
-                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
-                For more detail, see :ref:`meta`.
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+                modification. For more detail, see :ref:`meta`.
 
         Returns:
             A JSON-serializable expectation result object.
@@ -1942,7 +2071,9 @@ class Dataset(MetaDataset):
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
 
         See Also:
-            expect_column_distinct_values_to_equal_set
+            :func:`expect_column_distinct_values_to_equal_set \
+            <great_expectations.dataset.dataset.Dataset.expect_column_distinct_values_to_equal_set>`
+
         """
         if parse_strings_as_datetimes:
             parsed_value_set = self._parse_value_set(value_set)
@@ -1963,21 +2094,20 @@ class Dataset(MetaDataset):
             }
         }
 
+    # noinspection PyUnusedLocal
     @DocInherit
     @MetaDataset.column_aggregate_expectation
     def expect_column_mean_to_be_between(
         self,
         column,
-        min_value=None,
-        max_value=None,
-        result_format=None,
-        include_config=False,
-        catch_exceptions=None,
-        meta=None,
+        min_value=None, max_value=None,
+        result_format=None, include_config=False, catch_exceptions=None, meta=None,
     ):
         """Expect the column mean to be between a minimum value and a maximum value (inclusive).
 
-        expect_column_mean_to_be_between is a :func:`column_aggregate_expectation <great_expectations.data_asset.dataset.Dataset.column_aggregate_expectation>`.
+        expect_column_mean_to_be_between is a \
+        :func:`column_aggregate_expectation \
+        <great_expectations.dataset.dataset.MetaDataset.column_aggregate_expectation>`.
 
         Args:
             column (str): \
@@ -1998,8 +2128,8 @@ class Dataset(MetaDataset):
                 If True, then catch exceptions and include them as part of the result object. \
                 For more detail, see :ref:`catch_exceptions`.
             meta (dict or None): \
-                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
-                For more detail, see :ref:`meta`.
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+                modification. For more detail, see :ref:`meta`.
 
         Returns:
             A JSON-serializable expectation result object.
@@ -2020,16 +2150,20 @@ class Dataset(MetaDataset):
             * If max_value is None, then min_value is treated as a lower bound.
 
         See Also:
-            expect_column_median_to_be_between
-            expect_column_stdev_to_be_between
-        """
-        if min_value is None and max_value is None:
-            raise ValueError("min_value and max_value cannot both be None")
+            :func:`expect_column_median_to_be_between \
+            <great_expectations.dataset.dataset.Dataset.expect_column_median_to_be_between>`
 
-        if min_value is not None and not isinstance(min_value, (Number)):
+            :func:`expect_column_stdev_to_be_between \
+            <great_expectations.dataset.dataset.Dataset.expect_column_stdev_to_be_between>`
+
+        """
+        # if min_value is None and max_value is None:
+        #     raise ValueError("min_value and max_value cannot both be None")
+
+        if min_value is not None and not isinstance(min_value, Number):
             raise ValueError("min_value must be a number")
 
-        if max_value is not None and not isinstance(max_value, (Number)):
+        if max_value is not None and not isinstance(max_value, Number):
             raise ValueError("max_value must be a number")
 
         col_avg = self.get_column_mean(column)
@@ -2043,14 +2177,18 @@ class Dataset(MetaDataset):
                 }
             }
         else:
-            if min_value != None and max_value != None:
+            if min_value is not None and max_value is not None:
                 success = (min_value <= col_avg) and (col_avg <= max_value)
 
-            elif min_value == None and max_value != None:
+            elif min_value is None and max_value is not None:
                 success = (col_avg <= max_value)
 
-            elif min_value != None and max_value == None:
+            elif min_value is not None and max_value is None:
                 success = (min_value <= col_avg)
+
+            else:
+                # in this case min_value and max_value are both None
+                success = True
 
             return {
                 'success': success,
@@ -2059,21 +2197,21 @@ class Dataset(MetaDataset):
                 }
             }
 
+    # noinspection PyUnusedLocal
     @DocInherit
     @MetaDataset.column_aggregate_expectation
     def expect_column_median_to_be_between(
         self,
         column,
-        min_value=None,
-        max_value=None,
-        result_format=None,
-        include_config=False,
-        catch_exceptions=None,
+        min_value=None, max_value=None,
+        result_format=None, include_config=False, catch_exceptions=None,
         meta=None,
     ):
         """Expect the column median to be between a minimum value and a maximum value.
 
-        expect_column_median_to_be_between is a :func:`column_aggregate_expectation <great_expectations.data_asset.dataset.Dataset.column_aggregate_expectation>`.
+        expect_column_median_to_be_between is a \
+        :func:`column_aggregate_expectation \
+        <great_expectations.dataset.dataset.MetaDataset.column_aggregate_expectation>`.
 
         Args:
             column (str): \
@@ -2094,8 +2232,8 @@ class Dataset(MetaDataset):
                 If True, then catch exceptions and include them as part of the result object. \
                 For more detail, see :ref:`catch_exceptions`.
             meta (dict or None): \
-                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
-                For more detail, see :ref:`meta`.
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+                modification. For more detail, see :ref:`meta`.
 
         Returns:
             A JSON-serializable expectation result object.
@@ -2116,8 +2254,11 @@ class Dataset(MetaDataset):
             * If max_value is None, then min_value is treated as a lower bound
 
         See Also:
-            expect_column_mean_to_be_between
-            expect_column_stdev_to_be_between
+            :func:`expect_column_mean_to_be_between \
+            <great_expectations.dataset.dataset.Dataset.expect_column_mean_to_be_between>`
+
+            :func:`expect_column_stdev_to_be_between \
+            <great_expectations.dataset.dataset.Dataset.expect_column_stdev_to_be_between>`
 
         """
         if min_value is None and max_value is None:
@@ -2143,26 +2284,29 @@ class Dataset(MetaDataset):
                 }
             }
 
+    # noinspection PyUnusedLocal
     @DocInherit
     @MetaDataset.column_aggregate_expectation
     def expect_column_quantile_values_to_be_between(
         self,
         column,
         quantile_ranges,
-        result_format=None,
-        include_config=False,
-        catch_exceptions=None,
+        result_format=None, include_config=False, catch_exceptions=None,
         meta=None,
     ):
+        # noinspection PyUnresolvedReferences
         """Expect specific provided column quantiles to be between provided minimum and maximum values.
 
-        `quantile_ranges` must be a dictionary with two keys:
-           `quantiles`: (list of float) increasing ordered list of desired quantile values
-           `value_ranges`: (list of lists): Each element in this list consists of a list with two values, a lower
-               and upper bound (inclusive) for the corresponding quantile.
+        ``quantile_ranges`` must be a dictionary with two keys:
+
+            * ``quantiles``: (list of float) increasing ordered list of desired quantile values
+
+            * ``value_ranges``: (list of lists): Each element in this list consists of a list with two values, a lower \
+              and upper bound (inclusive) for the corresponding quantile.
 
 
         For each provided range:
+
             * min_value and max_value are both inclusive.
             * If min_value is None, then max_value is treated as an upper bound only
             * If max_value is None, then min_value is treated as a lower bound only
@@ -2171,6 +2315,7 @@ class Dataset(MetaDataset):
 
         For example:
         ::
+
             # my_df.my_col = [1,2,2,3,3,3,4]
             >>> my_df.expect_column_quantile_values_to_be_between(
                 "my_col",
@@ -2198,7 +2343,8 @@ class Dataset(MetaDataset):
 
         `expect_column_quantile_values_to_be_between` can be computationally intensive for large datasets.
 
-        expect_column_quantile_values_to_be_between is a :func:`column_aggregate_expectation <great_expectations.data_asset.dataset.Dataset.column_aggregate_expectation>`.
+        expect_column_quantile_values_to_be_between is a \
+        :func:`column_aggregate_expectation <great_expectations.dataset.MetaDataset.column_aggregate_expectation>`.
 
         Args:
             column (str): \
@@ -2217,8 +2363,8 @@ class Dataset(MetaDataset):
                 If True, then catch exceptions and include them as part of the result object. \
                 For more detail, see :ref:`catch_exceptions`.
             meta (dict or None): \
-                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
-                For more detail, see :ref:`meta`.
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+                modification. For more detail, see :ref:`meta`.
 
         Returns:
             A JSON-serializable expectation result object.
@@ -2232,9 +2378,15 @@ class Dataset(MetaDataset):
             details.success_details
 
         See Also:
-            expect_column_min_to_be_between
-            expect_column_max_to_be_between
-            expect_column_median_to_be_between
+            :func:`expect_column_min_to_be_between \
+            <great_expectations.dataset.dataset.Dataset.expect_column_min_to_be_between>`
+
+            :func:`expect_column_max_to_be_between \
+            <great_expectations.dataset.dataset.Dataset.expect_column_max_to_be_between>`
+
+            :func:`expect_column_median_to_be_between \
+            <great_expectations.dataset.dataset.Dataset.expect_column_median_to_be_between>`
+
         """
         quantiles = quantile_ranges["quantiles"]
         quantile_value_ranges = quantile_ranges["value_ranges"]
@@ -2265,18 +2417,21 @@ class Dataset(MetaDataset):
             }
         }
 
+    # noinspection PyUnusedLocal
     @DocInherit
     @MetaDataset.column_aggregate_expectation
-    def expect_column_stdev_to_be_between(self,
-                                         column,
-                                         min_value=None,
-                                         max_value=None,
-                                         result_format=None, include_config=False, catch_exceptions=None, meta=None
-                                         ):
+    def expect_column_stdev_to_be_between(
+            self,
+            column,
+            min_value=None, max_value=None,
+            result_format=None, include_config=False, catch_exceptions=None,
+            meta=None
+    ):
         """Expect the column standard deviation to be between a minimum value and a maximum value.
         Uses sample standard deviation (normalized by N-1).
 
-        expect_column_stdev_to_be_between is a :func:`column_aggregate_expectation <great_expectations.data_asset.dataset.Dataset.column_aggregate_expectation>`.
+        expect_column_stdev_to_be_between is a \
+        :func:`column_aggregate_expectation <great_expectations.dataset.MetaDataset.column_aggregate_expectation>`.
 
         Args:
             column (str): \
@@ -2288,7 +2443,7 @@ class Dataset(MetaDataset):
 
         Other Parameters:
             result_format (str or None): \
-                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`. \
                 For more detail, see :ref:`result_format <result_format>`.
             include_config (boolean): \
                 If True, then include the expectation config as part of the result object. \
@@ -2297,8 +2452,8 @@ class Dataset(MetaDataset):
                 If True, then catch exceptions and include them as part of the result object. \
                 For more detail, see :ref:`catch_exceptions`.
             meta (dict or None): \
-                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
-                For more detail, see :ref:`meta`.
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+                modification. For more detail, see :ref:`meta`.
 
         Returns:
             A JSON-serializable expectation result object.
@@ -2319,8 +2474,12 @@ class Dataset(MetaDataset):
             * If max_value is None, then min_value is treated as a lower bound
 
         See Also:
-            expect_column_mean_to_be_between
-            expect_column_median_to_be_between
+            :func:`expect_column_mean_to_be_between \
+            <great_expectations.dataset.dataset.Dataset.expect_column_mean_to_be_between>`
+
+            :func:`expect_column_median_to_be_between \
+            <great_expectations.dataset.dataset.Dataset.expect_column_median_to_be_between>`
+
         """
         # if min_value is None and max_value is None:
         #     raise ValueError("min_value and max_value cannot both be None")
@@ -2342,21 +2501,20 @@ class Dataset(MetaDataset):
             }
         }
 
+    # noinspection PyUnusedLocal
     @DocInherit
     @MetaDataset.column_aggregate_expectation
     def expect_column_unique_value_count_to_be_between(
         self,
         column,
-        min_value=None,
-        max_value=None,
-        result_format=None,
-        include_config=False,
-        catch_exceptions=None,
+        min_value=None, max_value=None,
+        result_format=None, include_config=False, catch_exceptions=None,
         meta=None,
     ):
         """Expect the number of unique values to be between a minimum value and a maximum value.
 
-        expect_column_unique_value_count_to_be_between is a :func:`column_aggregate_expectation <great_expectations.data_asset.dataset.Dataset.column_aggregate_expectation>`.
+        expect_column_unique_value_count_to_be_between is a \
+        :func:`column_aggregate_expectation <great_expectations.dataset.MetaDataset.column_aggregate_expectation>`.
 
         Args:
             column (str): \
@@ -2377,8 +2535,8 @@ class Dataset(MetaDataset):
                 If True, then catch exceptions and include them as part of the result object. \
                 For more detail, see :ref:`catch_exceptions`.
             meta (dict or None): \
-                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
-                For more detail, see :ref:`meta`.
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+                modification. For more detail, see :ref:`meta`.
 
         Returns:
             A JSON-serializable expectation result object.
@@ -2399,7 +2557,9 @@ class Dataset(MetaDataset):
             * If max_value is None, then min_value is treated as a lower bound
 
         See Also:
-            expect_column_proportion_of_unique_values_to_be_between
+            :func:`expect_column_proportion_of_unique_values_to_be_between \
+            <great_expectations.dataset.dataset.Dataset.expect_column_proportion_of_unique_values_to_be_between>`
+
         """
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
@@ -2425,22 +2585,24 @@ class Dataset(MetaDataset):
                 }
             }
 
+    # noinspection PyUnusedLocal
     @DocInherit
     @MetaDataset.column_aggregate_expectation
     def expect_column_proportion_of_unique_values_to_be_between(
         self,
         column,
-        min_value=0,
-        max_value=1,
-        result_format=None,
-        include_config=False,
-        catch_exceptions=None,
+        min_value=0, max_value=1,
+        result_format=None, include_config=False, catch_exceptions=None,
         meta=None,
     ):
         """Expect the proportion of unique values to be between a minimum value and a maximum value.
 
         For example, in a column containing [1, 2, 2, 3, 3, 3, 4, 4, 4, 4], there are 4 unique values and 10 total \
         values for a proportion of 0.4.
+
+        expect_column_proportion_of_unique_values_to_be_between is a \
+        :func:`column_aggregate_expectation <great_expectations.dataset.MetaDataset.column_aggregate_expectation>`.
+
 
         Args:
             column (str): \
@@ -2450,11 +2612,9 @@ class Dataset(MetaDataset):
             max_value (float or None): \
                 The maximum proportion of unique values. (Proportions are on the range 0 to 1)
 
-        expect_column_unique_value_count_to_be_between is a :func:`column_aggregate_expectation <great_expectations.data_asset.dataset.Dataset.column_aggregate_expectation>`.
-
         Other Parameters:
             result_format (str or None): \
-                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`. \
                 For more detail, see :ref:`result_format <result_format>`.
             include_config (boolean): \
                 If True, then include the expectation config as part of the result object. \
@@ -2463,8 +2623,8 @@ class Dataset(MetaDataset):
                 If True, then catch exceptions and include them as part of the result object. \
                 For more detail, see :ref:`catch_exceptions`.
             meta (dict or None): \
-                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
-                For more detail, see :ref:`meta`.
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+                modification. For more detail, see :ref:`meta`.
 
         Returns:
             A JSON-serializable expectation result object.
@@ -2485,7 +2645,9 @@ class Dataset(MetaDataset):
             * If max_value is None, then min_value is treated as a lower bound
 
         See Also:
-            expect_column_unique_value_count_to_be_between
+            :func:`expect_column_unique_value_count_to_be_between \
+            <great_expectations.dataset.dataset.Dataset.expect_column_unique_value_count_to_be_between>`
+
         """
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
@@ -2508,6 +2670,7 @@ class Dataset(MetaDataset):
             }
         }
 
+    # noinspection PyUnusedLocal
     @DocInherit
     @MetaDataset.column_aggregate_expectation
     def expect_column_most_common_value_to_be_in_set(
@@ -2515,14 +2678,13 @@ class Dataset(MetaDataset):
         column,
         value_set,
         ties_okay=None,
-        result_format=None,
-        include_config=False,
-        catch_exceptions=None,
+        result_format=None, include_config=False, catch_exceptions=None,
         meta=None,
     ):
         """Expect the most common value to be within the designated value set
 
-        expect_column_most_common_value_to_be_in_set is a :func:`column_aggregate_expectation <great_expectations.data_asset.dataset.Dataset.column_aggregate_expectation>`.
+        expect_column_most_common_value_to_be_in_set is a \
+        :func:`column_aggregate_expectation <great_expectations.dataset.MetaDataset.column_aggregate_expectation>`.
 
         Args:
             column (str): \
@@ -2532,7 +2694,8 @@ class Dataset(MetaDataset):
 
         Keyword Args:
             ties_okay (boolean or None): \
-                If True, then the expectation will still succeed if values outside the designated set are as common (but not more common) than designated values
+                If True, then the expectation will still succeed if values outside the designated set are as common \
+                (but not more common) than designated values
 
         Other Parameters:
             result_format (str or None): \
@@ -2545,8 +2708,8 @@ class Dataset(MetaDataset):
                 If True, then catch exceptions and include them as part of the result object. \
                 For more detail, see :ref:`catch_exceptions`.
             meta (dict or None): \
-                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
-                For more detail, see :ref:`meta`.
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+                modification. For more detail, see :ref:`meta`.
 
         Returns:
             A JSON-serializable expectation result object.
@@ -2582,21 +2745,20 @@ class Dataset(MetaDataset):
             }
         }
 
+    # noinspection PyUnusedLocal
     @DocInherit
     @MetaDataset.column_aggregate_expectation
     def expect_column_sum_to_be_between(
         self,
         column,
-        min_value=None,
-        max_value=None,
-        result_format=None,
-        include_config=False,
-        catch_exceptions=None,
-        meta=None,
+        min_value=None, max_value=None,
+        result_format=None, include_config=False, catch_exceptions=None,
+        meta=None
     ):
         """Expect the column to sum to be between an min and max value
 
-        expect_column_sum_to_be_between is a :func:`column_aggregate_expectation <great_expectations.data_asset.dataset.Dataset.column_aggregate_expectation>`.
+        expect_column_sum_to_be_between is a \
+        :func:`column_aggregate_expectation <great_expectations.dataset.MetaDataset.column_aggregate_expectation>`.
 
         Args:
             column (str): \
@@ -2617,8 +2779,8 @@ class Dataset(MetaDataset):
                 If True, then catch exceptions and include them as part of the result object. \
                 For more detail, see :ref:`catch_exceptions`.
             meta (dict or None): \
-                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
-                For more detail, see :ref:`meta`.
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+                modification. For more detail, see :ref:`meta`.
 
         Returns:
             A JSON-serializable expectation result object.
@@ -2640,9 +2802,8 @@ class Dataset(MetaDataset):
             * If max_value is None, then min_value is treated as a lower bound
 
         """
-        # TODO check for column type
-        if min_value is None and max_value is None:
-            raise ValueError("min_value and max_value cannot both be None")
+        # if min_value is None and max_value is None:
+        #     raise ValueError("min_value and max_value cannot both be None")
 
         col_sum = self.get_column_sum(column)
 
@@ -2664,6 +2825,10 @@ class Dataset(MetaDataset):
             elif min_value is not None and max_value is None:
                 success = (min_value <= col_sum)
 
+            else:
+                # vacuously true
+                success = True
+
             return {
                 'success': success,
                 'result': {
@@ -2671,6 +2836,7 @@ class Dataset(MetaDataset):
                 }
             }
 
+    # noinspection PyUnusedLocal
     @DocInherit
     @MetaDataset.column_aggregate_expectation
     def expect_column_min_to_be_between(
@@ -2680,14 +2846,13 @@ class Dataset(MetaDataset):
         max_value=None,
         parse_strings_as_datetimes=False,
         output_strftime_format=None,
-        result_format=None,
-        include_config=False,
-        catch_exceptions=None,
-        meta=None,
+        result_format=None, include_config=False, catch_exceptions=None,
+        meta=None
     ):
         """Expect the column to sum to be between an min and max value
 
-        expect_column_min_to_be_between is a :func:`column_aggregate_expectation <great_expectations.data_asset.dataset.Dataset.column_aggregate_expectation>`.
+        expect_column_min_to_be_between is a \
+        :func:`column_aggregate_expectation <great_expectations.dataset.MetaDataset.column_aggregate_expectation>`.
 
         Args:
             column (str): \
@@ -2699,13 +2864,14 @@ class Dataset(MetaDataset):
 
         Keyword Args:
             parse_strings_as_datetimes (Boolean or None): \
-                If True, parse min_value, max_values, and all non-null column values to datetimes before making comparisons.
+                If True, parse min_value, max_values, and all non-null column values to datetimes before making \
+                comparisons.
             output_strftime_format (str or None): \
                 A valid strfime format for datetime output. Only used if parse_strings_as_datetimes=True.
 
         Other Parameters:
             result_format (str or None): \
-                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`. \
                 For more detail, see :ref:`result_format <result_format>`.
             include_config (boolean): \
                 If True, then include the expectation config as part of the result object. \
@@ -2714,8 +2880,8 @@ class Dataset(MetaDataset):
                 If True, then catch exceptions and include them as part of the result object. \
                 For more detail, see :ref:`catch_exceptions`.
             meta (dict or None): \
-                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
-                For more detail, see :ref:`meta`.
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+                modification. For more detail, see :ref:`meta`.
 
         Returns:
             A JSON-serializable expectation result object.
@@ -2737,8 +2903,8 @@ class Dataset(MetaDataset):
             * If max_value is None, then min_value is treated as a lower bound
 
         """
-        if min_value is None and max_value is None:
-            raise ValueError("min_value and max_value cannot both be None")
+        # if min_value is None and max_value is None:
+        #     raise ValueError("min_value and max_value cannot both be None")
 
         if parse_strings_as_datetimes:
             if min_value:
@@ -2756,6 +2922,9 @@ class Dataset(MetaDataset):
             success = (col_min <= max_value)
         elif min_value is not None and max_value is None:
             success = (min_value <= col_min)
+        else:
+            # vacuously true
+            success = True
 
         if parse_strings_as_datetimes:
             if output_strftime_format:
@@ -2769,6 +2938,7 @@ class Dataset(MetaDataset):
             }
         }
 
+    # noinspection PyUnusedLocal
     @DocInherit
     @MetaDataset.column_aggregate_expectation
     def expect_column_max_to_be_between(
@@ -2778,14 +2948,13 @@ class Dataset(MetaDataset):
         max_value=None,
         parse_strings_as_datetimes=False,
         output_strftime_format=None,
-        result_format=None,
-        include_config=False,
-        catch_exceptions=None,
-        meta=None,
+        result_format=None, include_config=False, catch_exceptions=None,
+        meta=None
     ):
         """Expect the column max to be between an min and max value
 
-        expect_column_max_to_be_between is a :func:`column_aggregate_expectation <great_expectations.data_asset.dataset.Dataset.column_aggregate_expectation>`.
+        expect_column_max_to_be_between is a \
+        :func:`column_aggregate_expectation <great_expectations.dataset.MetaDataset.column_aggregate_expectation>`.
 
         Args:
             column (str): \
@@ -2797,7 +2966,8 @@ class Dataset(MetaDataset):
 
         Keyword Args:
             parse_strings_as_datetimes (Boolean or None): \
-                If True, parse min_value, max_values, and all non-null column values to datetimes before making comparisons.
+                If True, parse min_value, max_values, and all non-null column values to datetimes before making \
+                comparisons.
             output_strftime_format (str or None): \
                 A valid strfime format for datetime output. Only used if parse_strings_as_datetimes=True.
 
@@ -2812,8 +2982,8 @@ class Dataset(MetaDataset):
                 If True, then catch exceptions and include them as part of the result object. \
                 For more detail, see :ref:`catch_exceptions`.
             meta (dict or None): \
-                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
-                For more detail, see :ref:`meta`.
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+                modification. For more detail, see :ref:`meta`.
 
         Returns:
             A JSON-serializable expectation result object.
@@ -2835,8 +3005,8 @@ class Dataset(MetaDataset):
             * If max_value is None, then min_value is treated as a lower bound
 
         """
-        if min_value is None and max_value is None:
-            raise ValueError("min_value and max_value cannot both be None")
+        # if min_value is None and max_value is None:
+        #     raise ValueError("min_value and max_value cannot both be None")
 
         if parse_strings_as_datetimes:
             if min_value:
@@ -2854,6 +3024,9 @@ class Dataset(MetaDataset):
             success = (col_max <= max_value)
         elif min_value is not None and max_value is None:
             success = (min_value <= col_max)
+        else:
+            # vacuously true
+            success = True
 
         if parse_strings_as_datetimes:
             if output_strftime_format:
@@ -2868,7 +3041,13 @@ class Dataset(MetaDataset):
             }
         }
 
+    ###
+    #
     # Distributional expectations
+    #
+    ###
+
+    # noinspection PyUnusedLocal
     @DocInherit
     @MetaDataset.column_aggregate_expectation
     def expect_column_chisquare_test_p_value_to_be_greater_than(
@@ -2877,9 +3056,7 @@ class Dataset(MetaDataset):
         partition_object=None,
         p=0.05,
         tail_weight_holdout=0,
-        result_format=None,
-        include_config=False,
-        catch_exceptions=None,
+        result_format=None, include_config=False, catch_exceptions=None,
         meta=None,
     ):
         """Expect column values to be distributed similarly to the provided categorical partition. \
@@ -2887,7 +3064,9 @@ class Dataset(MetaDataset):
         This expectation compares categorical distributions using a Chi-squared test. \
         It returns `success=True` if values in the column match the distribution of the provided partition.
 
-        expect_column_chisquare_test_p_value_to_be_greater_than is a :func:`column_aggregate_expectation <great_expectations.data_asset.dataset.Dataset.column_aggregate_expectation>`.
+
+        expect_column_chisquare_test_p_value_to_be_greater_than is a \
+        :func:`column_aggregate_expectation <great_expectations.dataset.MetaDataset.column_aggregate_expectation>`.
 
         Args:
             column (str): \
@@ -2909,7 +3088,7 @@ class Dataset(MetaDataset):
 
         Other Parameters:
             result_format (str or None): \
-                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`. \
                 For more detail, see :ref:`result_format <result_format>`.
             include_config (boolean): \
                 If True, then include the expectation config as part of the result object. \
@@ -2918,8 +3097,8 @@ class Dataset(MetaDataset):
                 If True, then catch exceptions and include them as part of the result object. \
                 For more detail, see :ref:`catch_exceptions`.
             meta (dict or None): \
-                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
-                For more detail, see :ref:`meta`.
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+                modification. For more detail, see :ref:`meta`.
 
         Returns:
             A JSON-serializable expectation result object.
@@ -2950,7 +3129,8 @@ class Dataset(MetaDataset):
         expected_column = pd.Series(
             partition_object['weights'], index=partition_object['values'], name='expected') * element_count
         # Join along the indices to allow proper comparison of both types of possible missing values
-        # test_df = pd.concat([expected_column, observed_frequencies], axis=1, sort=True) # Sort parameter not available before pandas 0.23.0
+        # Sort parameter not available before pandas 0.23.0
+        # test_df = pd.concat([expected_column, observed_frequencies], axis=1, sort=True)
         test_df = pd.concat([expected_column, observed_frequencies], axis=1)
 
         na_counts = test_df.isnull().sum()
@@ -2985,14 +3165,14 @@ class Dataset(MetaDataset):
             }
         }
 
-    def expect_column_bootstrapped_ks_test_p_value_to_be_greater_than(self,
-                                                                      column,
-                                                                      partition_object=None,
-                                                                      p=0.05,
-                                                                      bootstrap_samples=None,
-                                                                      bootstrap_sample_size=None,
-                                                                      result_format=None, include_config=False, catch_exceptions=None, meta=None
-                                                                      ):
+    def expect_column_bootstrapped_ks_test_p_value_to_be_greater_than(
+            self,
+            column,
+            partition_object=None, p=0.05,
+            bootstrap_samples=None, bootstrap_sample_size=None,
+            result_format=None, include_config=False, catch_exceptions=None,
+            meta=None
+    ):
         """Expect column values to be distributed similarly to the provided continuous partition. This expectation \
         compares continuous distributions using a bootstrapped Kolmogorov-Smirnov test. It returns `success=True` if \
         values in the column match the distribution of the provided partition.
@@ -3001,7 +3181,8 @@ class Dataset(MetaDataset):
         using the provided weights. Consequently the test expects a piecewise uniform distribution using the bins from \
         the provided partition object.
 
-        expect_column_bootstrapped_ks_test_p_value_to_be_greater_than is a :func:`column_aggregate_expectation <great_expectations.data_asset.dataset.Dataset.column_aggregate_expectation>`.
+        ``expect_column_bootstrapped_ks_test_p_value_to_be_greater_than`` is a \
+        :func:`column_aggregate_expectation <great_expectations.dataset.MetaDataset.column_aggregate_expectation>`.
 
         Args:
             column (str): \
@@ -3032,8 +3213,8 @@ class Dataset(MetaDataset):
                 If True, then catch exceptions and include them as part of the result object. \
                 For more detail, see :ref:`catch_exceptions`.
             meta (dict or None): \
-                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
-                For more detail, see :ref:`meta`.
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+                modification. For more detail, see :ref:`meta`.
 
         Returns:
             A JSON-serializable expectation result object.
@@ -3070,6 +3251,7 @@ class Dataset(MetaDataset):
         """
         raise NotImplementedError
 
+    # noinspection PyUnusedLocal
     @DocInherit
     @MetaDataset.column_aggregate_expectation
     def expect_column_kl_divergence_to_be_less_than(
@@ -3079,10 +3261,8 @@ class Dataset(MetaDataset):
         threshold=None,
         tail_weight_holdout=0,
         internal_weight_holdout=0,
-        result_format=None,
-        include_config=False,
-        catch_exceptions=None,
-        meta=None,
+        result_format=None, include_config=False, catch_exceptions=None,
+        meta=None
     ):
         """Expect the Kulback-Leibler (KL) divergence (relative entropy) of the specified column with respect to the \
         partition object to be lower than the provided threshold.
@@ -3095,7 +3275,8 @@ class Dataset(MetaDataset):
 
         This expectation works on both categorical and continuous partitions. See notes below for details.
 
-        expect_column_kl_divergence_to_be_less_than is a :func:`column_aggregate_expectation <great_expectations.data_asset.dataset.Dataset.column_aggregate_expectation>`.
+        ``expect_column_kl_divergence_to_be_less_than`` is a \
+        :func:`column_aggregate_expectation <great_expectations.dataset.MetaDataset.column_aggregate_expectation>`.
 
         Args:
             column (str): \
@@ -3132,8 +3313,8 @@ class Dataset(MetaDataset):
                 If True, then catch exceptions and include them as part of the result object. \
                 For more detail, see :ref:`catch_exceptions`.
             meta (dict or None): \
-                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
-                For more detail, see :ref:`meta`.
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+                modification. For more detail, see :ref:`meta`.
 
         Returns:
             A JSON-serializable expectation result object.
@@ -3146,8 +3327,8 @@ class Dataset(MetaDataset):
             ::
 
                 {
-                  "observed_value": (float) The true KL divergence (relative entropy) or None if the value is calculated \
-                  as infinity, -infinity, or NaN
+                  "observed_value": (float) The true KL divergence (relative entropy) or None if the value is \
+                  calculated as infinity, -infinity, or NaN
                   "details": {
                     "observed_partition": (dict) The partition observed in the data
                     "expected_partition": (dict) The partition against which the data were compared,
@@ -3180,8 +3361,11 @@ class Dataset(MetaDataset):
           crash when encountered. The python None token will be serialized to null in json. 
 
         See also:
-            expect_column_chisquare_test_p_value_to_be_greater_than
-            expect_column_bootstrapped_ks_test_p_value_to_be_greater_than
+            :func:`expect_column_chisquare_test_p_value_to_be_greater_than \
+            <great_expectations.dataset.dataset.Dataset.expect_column_unique_value_count_to_be_between>`
+
+            :func:`expect_column_bootstrapped_ks_test_p_value_to_be_greater_than \
+            <great_expectations.dataset.dataset.Dataset.expect_column_unique_value_count_to_be_between>`
 
         """
         if partition_object is None:
@@ -3200,15 +3384,17 @@ class Dataset(MetaDataset):
             raise ValueError(
                 "Threshold must be specified, greater than or equal to zero.")
 
-        if (not isinstance(tail_weight_holdout, (int, float))) or (tail_weight_holdout < 0) or (tail_weight_holdout > 1):
+        if (not isinstance(tail_weight_holdout, (int, float))) or \
+                (tail_weight_holdout < 0) or (tail_weight_holdout > 1):
             raise ValueError(
                 "tail_weight_holdout must be between zero and one.")
 
-        if (not isinstance(internal_weight_holdout, (int, float))) or (internal_weight_holdout < 0) or (internal_weight_holdout > 1):
+        if (not isinstance(internal_weight_holdout, (int, float))) or \
+                (internal_weight_holdout < 0) or (internal_weight_holdout > 1):
             raise ValueError(
                 "internal_weight_holdout must be between zero and one.")
             
-        if(tail_weight_holdout != 0 and "tail_weights" in partition_object):
+        if tail_weight_holdout != 0 and "tail_weights" in partition_object:
             raise ValueError(
                 "tail_weight_holdout must be 0 when using tail_weights in partition object")
 
@@ -3222,14 +3408,16 @@ class Dataset(MetaDataset):
             observed_weights = self.get_column_value_counts(column) / self.get_column_nonnull_count(column)
             expected_weights = pd.Series(
                 partition_object['weights'], index=partition_object['values'], name='expected')
-            # test_df = pd.concat([expected_weights, observed_weights], axis=1, sort=True) # Sort not available before pandas 0.23.0
+            # Sort not available before pandas 0.23.0
+            # test_df = pd.concat([expected_weights, observed_weights], axis=1, sort=True)
             test_df = pd.concat([expected_weights, observed_weights], axis=1)
 
             na_counts = test_df.isnull().sum()
 
             # Handle NaN: if we expected something that's not there, it's just not there.
             pk = test_df["count"].fillna(0)
-            # Handle NaN: if something's there that was not expected, substitute the relevant value for tail_weight_holdout
+            # Handle NaN: if something's there that was not expected,
+            # substitute the relevant value for tail_weight_holdout
             if na_counts['expected'] > 0:
                 # Scale existing expected values
                 test_df['expected'] = test_df['expected'] * \
@@ -3242,7 +3430,7 @@ class Dataset(MetaDataset):
 
             kl_divergence = stats.entropy(pk, qk)
 
-            if(np.isinf(kl_divergence) or np.isnan(kl_divergence)):
+            if np.isinf(kl_divergence) or np.isnan(kl_divergence):
                 observed_value = None
             else:
                 observed_value = kl_divergence
@@ -3278,13 +3466,17 @@ class Dataset(MetaDataset):
             # Add in the frequencies observed above or below the provided partition
             # below_partition = len(np.where(column < partition_object['bins'][0])[0])
             # above_partition = len(np.where(column > partition_object['bins'][-1])[0])
-            below_partition = self.get_column_count_in_range(column, max_val=partition_object['bins'][0], max_strictly=True)
-            above_partition = self.get_column_count_in_range(column, min_val=partition_object['bins'][-1], min_strictly=True)
+            below_partition = self.get_column_count_in_range(
+                column, max_val=partition_object['bins'][0], max_strictly=True
+            )
+            above_partition = self.get_column_count_in_range(
+                column, min_val=partition_object['bins'][-1], min_strictly=True
+            )
 
-            #Observed Weights is just the histogram values divided by the total number of observations
+            # Observed Weights is just the histogram values divided by the total number of observations
             observed_weights = np.array(hist) / self.get_column_nonnull_count(column)
 
-            #Adjust expected_weights to account for tail_weight and internal_weight
+            # Adjust expected_weights to account for tail_weight and internal_weight
             if "tail_weights" in partition_object:
                 partition_tail_weight_holdout = np.sum(partition_object["tail_weights"])
             else:
@@ -3306,69 +3498,116 @@ class Dataset(MetaDataset):
             # We need to check cases to only add tail weight holdout if it makes sense based on the provided partition.
             if (partition_object['bins'][0] == -np.inf) and (partition_object['bins'][-1]) == np.inf:
                 if tail_weight_holdout > 0:
-                    raise ValueError("tail_weight_holdout cannot be used for partitions with infinite endpoints.")
+                    raise ValueError(
+                        "tail_weight_holdout cannot be used for partitions with infinite endpoints."
+                    )
                 if "tail_weights" in partition_object:
-                    raise ValueError("There can be no tail weights for partitions with one or both endpoints at infinity")
-                expected_bins = partition_object['bins'][1:-1] #Remove -inf and inf
+                    raise ValueError(
+                        "There can be no tail weights for partitions with one or both endpoints at infinity"
+                    )
+
+                # Remove -inf and inf
+                expected_bins = partition_object['bins'][1:-1]
                 
-                comb_expected_weights=expected_weights
-                expected_tail_weights=np.concatenate(([expected_weights[0]],[expected_weights[-1]])) #Set aside tail weights
-                expected_weights=expected_weights[1:-1] #Remove tail weights
+                comb_expected_weights = expected_weights
+                # Set aside tail weights
+                expected_tail_weights = np.concatenate(([expected_weights[0]], [expected_weights[-1]]))
+                # Remove tail weights
+                expected_weights = expected_weights[1:-1]
                 
-                comb_observed_weights=observed_weights
-                observed_tail_weights=np.concatenate(([observed_weights[0]],[observed_weights[-1]])) #Set aside tail weights
-                observed_weights=observed_weights[1:-1] #Remove tail weights
+                comb_observed_weights = observed_weights
+                # Set aside tail weights
+                observed_tail_weights = np.concatenate(([observed_weights[0]], [observed_weights[-1]]))
+                # Remove tail weights
+                observed_weights = observed_weights[1:-1]
                 
-                
-            elif (partition_object['bins'][0] == -np.inf):
+            elif partition_object['bins'][0] == -np.inf:
                 
                 if "tail_weights" in partition_object:
-                    raise ValueError("There can be no tail weights for partitions with one or both endpoints at infinity")
+                    raise ValueError(
+                        "There can be no tail weights for partitions with one or both endpoints at infinity"
+                    )
+
+                # Remove -inf
+                expected_bins = partition_object['bins'][1:]
                 
-                expected_bins = partition_object['bins'][1:] #Remove -inf
+                comb_expected_weights = np.concatenate((expected_weights, [tail_weight_holdout]))
+                # Set aside left tail weight and holdout
+                expected_tail_weights = np.concatenate(([expected_weights[0]], [tail_weight_holdout]))
+                # Remove left tail weight from main expected_weights
+                expected_weights = expected_weights[1:]
                 
-                comb_expected_weights=np.concatenate((expected_weights,[tail_weight_holdout]))
-                expected_tail_weights=np.concatenate(([expected_weights[0]],[tail_weight_holdout])) #Set aside left tail weight and holdout
-                expected_weights = expected_weights[1:] #Remove left tail weight from main expected_weights
-                
-                comb_observed_weights=np.concatenate((observed_weights,[above_partition / self.get_column_nonnull_count(column)]))
-                observed_tail_weights=np.concatenate(([observed_weights[0]],[above_partition / self.get_column_nonnull_count(column)])) #Set aside left tail weight and above parition weight
-                observed_weights=observed_weights[1:] #Remove left tail weight from main observed_weights
+                comb_observed_weights = np.concatenate(
+                    (observed_weights, [above_partition / self.get_column_nonnull_count(column)])
+                )
+                # Set aside left tail weight and above partition weight
+                observed_tail_weights = np.concatenate(
+                    ([observed_weights[0]], [above_partition / self.get_column_nonnull_count(column)])
+                )
+                # Remove left tail weight from main observed_weights
+                observed_weights = observed_weights[1:]
         
-            elif (partition_object['bins'][-1] == np.inf):
+            elif partition_object['bins'][-1] == np.inf:
 
                 if "tail_weights" in partition_object:
-                    raise ValueError("There can be no tail weights for partitions with one or both endpoints at infinity")
+                    raise ValueError(
+                        "There can be no tail weights for partitions with one or both endpoints at infinity"
+                    )
 
-                expected_bins = partition_object['bins'][:-1] #Remove inf
+                # Remove inf
+                expected_bins = partition_object['bins'][:-1]
 
-                comb_expected_weights=np.concatenate(([tail_weight_holdout],expected_weights))
-                expected_tail_weights=np.concatenate(([tail_weight_holdout],[expected_weights[-1]]))  #Set aside right tail weight and holdout
-                expected_weights = expected_weights[:-1] #Remove right tail weight from main expected_weights
+                comb_expected_weights = np.concatenate(([tail_weight_holdout], expected_weights))
+                # Set aside right tail weight and holdout
+                expected_tail_weights = np.concatenate(([tail_weight_holdout], [expected_weights[-1]]))
+                # Remove right tail weight from main expected_weights
+                expected_weights = expected_weights[:-1]
 
-                comb_observed_weights=np.concatenate(([below_partition/self.get_column_nonnull_count(column)],observed_weights))
-                observed_tail_weights=np.concatenate(([below_partition/self.get_column_nonnull_count(column)],[observed_weights[-1]])) #Set aside right tail weight and below partition weight
-                observed_weights=observed_weights[:-1] #Remove right tail weight from main observed_weights
+                comb_observed_weights = np.concatenate(
+                    ([below_partition/self.get_column_nonnull_count(column)], observed_weights)
+                )
+                # Set aside right tail weight and below partition weight
+                observed_tail_weights = np.concatenate(
+                    ([below_partition/self.get_column_nonnull_count(column)], [observed_weights[-1]])
+                )
+                # Remove right tail weight from main observed_weights
+                observed_weights = observed_weights[:-1]
             else:
-
-                expected_bins = partition_object['bins'] #No need to remove -inf or inf
+                # No need to remove -inf or inf
+                expected_bins = partition_object['bins']
 
                 if "tail_weights" in partition_object:
-                    tail_weights=partition_object["tail_weights"]
-                    comb_expected_weights=np.concatenate(([tail_weights[0]],expected_weights,[tail_weights[1]])) #Tack on tail weights
-                    expected_tail_weights=np.array(tail_weights) #Tail weights are just tail_weights
+                    tail_weights = partition_object["tail_weights"]
+                    # Tack on tail weights
+                    comb_expected_weights = np.concatenate(
+                        ([tail_weights[0]], expected_weights, [tail_weights[1]])
+                    )
+                    # Tail weights are just tail_weights
+                    expected_tail_weights = np.array(tail_weights)
                 else:
-                    comb_expected_weights=np.concatenate(([tail_weight_holdout / 2],expected_weights,[tail_weight_holdout / 2]))
-                    expected_tail_weights=np.concatenate(([tail_weight_holdout / 2],[tail_weight_holdout / 2])) #Tail weights are just tail_weight holdout divided eaually to both tails
+                    comb_expected_weights = np.concatenate(
+                        ([tail_weight_holdout / 2], expected_weights, [tail_weight_holdout / 2])
+                    )
+                    # Tail weights are just tail_weight holdout divided equally to both tails
+                    expected_tail_weights = np.concatenate(
+                         ([tail_weight_holdout / 2], [tail_weight_holdout / 2])
+                    )
 
-                comb_observed_weights=np.concatenate(([below_partition/self.get_column_nonnull_count(column)],observed_weights, [above_partition/self.get_column_nonnull_count(column)]))
-                observed_tail_weights=np.concatenate(([below_partition],[above_partition])) / self.get_column_nonnull_count(column) #Tail weights are just the counts on either side of the partition
-                #Main expected_weights and main observered weights had no tail_weights, so nothing needs to be removed.
+                comb_observed_weights = np.concatenate(
+                    ([below_partition/self.get_column_nonnull_count(column)],
+                     observed_weights,
+                     [above_partition/self.get_column_nonnull_count(column)])
+                )
+                # Tail weights are just the counts on either side of the partition
+                observed_tail_weights = np.concatenate(
+                    ([below_partition], [above_partition])
+                ) / self.get_column_nonnull_count(column)
 
-     
+                # Main expected_weights and main observed weights had no tail_weights, so nothing needs to be removed.
+
             kl_divergence = stats.entropy(comb_observed_weights, comb_expected_weights) 
             
-            if(np.isinf(kl_divergence) or np.isnan(kl_divergence)):
+            if np.isinf(kl_divergence) or np.isnan(kl_divergence):
                 observed_value = None
             else:
                 observed_value = kl_divergence
@@ -3387,12 +3626,12 @@ class Dataset(MetaDataset):
                                 # return expected_bins, since we used those bins to compute the observed_weights
                                 "bins": expected_bins,
                                 "weights": observed_weights.tolist(),
-                                "tail_weights":observed_tail_weights.tolist()
+                                "tail_weights": observed_tail_weights.tolist()
                             },
                             "expected_partition": {
                                 "bins": expected_bins,
                                 "weights": expected_weights.tolist(),
-                                "tail_weights":expected_tail_weights.tolist()
+                                "tail_weights": expected_tail_weights.tolist()
                             }
                         }
                     }
@@ -3400,14 +3639,19 @@ class Dataset(MetaDataset):
                 
         return return_obj
 
-    ### Column pairs ###
+    ###
+    #
+    # Column pairs
+    #
+    ###
 
-    def expect_column_pair_values_to_be_equal(self,
-                                              column_A,
-                                              column_B,
-                                              ignore_row_if="both_values_are_missing",
-                                              result_format=None, include_config=False, catch_exceptions=None, meta=None
-                                              ):
+    def expect_column_pair_values_to_be_equal(
+            self,
+            column_A, column_B,
+            ignore_row_if="both_values_are_missing",
+            result_format=None, include_config=False, catch_exceptions=None,
+            meta=None
+    ):
         """
         Expect the values in column A to be the same as column B.
 
@@ -3429,8 +3673,8 @@ class Dataset(MetaDataset):
                 If True, then catch exceptions and include them as part of the result object. \
                 For more detail, see :ref:`catch_exceptions`.
             meta (dict or None): \
-                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
-                For more detail, see :ref:`meta`.
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+                modification. For more detail, see :ref:`meta`.
 
         Returns:
             A JSON-serializable expectation result object.
@@ -3441,15 +3685,17 @@ class Dataset(MetaDataset):
         """
         raise NotImplementedError
 
-    def expect_column_pair_values_A_to_be_greater_than_B(self,
-                                                         column_A,
-                                                         column_B,
-                                                         or_equal=None,
-                                                         parse_strings_as_datetimes=False,
-                                                         allow_cross_type_comparisons=None,
-                                                         ignore_row_if="both_values_are_missing",
-                                                         result_format=None, include_config=False, catch_exceptions=None, meta=None
-                                                         ):
+    def expect_column_pair_values_A_to_be_greater_than_B(
+            self,
+            column_A,
+            column_B,
+            or_equal=None,
+            parse_strings_as_datetimes=False,
+            allow_cross_type_comparisons=None,
+            ignore_row_if="both_values_are_missing",
+            result_format=None, include_config=False, catch_exceptions=None,
+            meta=None
+    ):
         """
         Expect values in column A to be greater than column B.
 
@@ -3476,8 +3722,8 @@ class Dataset(MetaDataset):
                 If True, then catch exceptions and include them as part of the result object. \
                 For more detail, see :ref:`catch_exceptions`.
             meta (dict or None): \
-                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
-                For more detail, see :ref:`meta`.
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+                modification. For more detail, see :ref:`meta`.
 
         Returns:
             A JSON-serializable expectation result object.
@@ -3488,13 +3734,15 @@ class Dataset(MetaDataset):
         """
         raise NotImplementedError
 
-    def expect_column_pair_values_to_be_in_set(self,
-                                               column_A,
-                                               column_B,
-                                               value_pairs_set,
-                                               ignore_row_if="both_values_are_missing",
-                                               result_format=None, include_config=False, catch_exceptions=None, meta=None
-                                               ):
+    def expect_column_pair_values_to_be_in_set(
+            self,
+            column_A,
+            column_B,
+            value_pairs_set,
+            ignore_row_if="both_values_are_missing",
+            result_format=None, include_config=False, catch_exceptions=None,
+            meta=None
+    ):
         """
         Expect paired values from columns A and B to belong to a set of valid pairs.
 
@@ -3517,8 +3765,8 @@ class Dataset(MetaDataset):
                 If True, then catch exceptions and include them as part of the result object. \
                 For more detail, see :ref:`catch_exceptions`.
             meta (dict or None): \
-                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
-                For more detail, see :ref:`meta`.
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+                modification. For more detail, see :ref:`meta`.
 
         Returns:
             A JSON-serializable expectation result object.
@@ -3529,13 +3777,19 @@ class Dataset(MetaDataset):
         """
         raise NotImplementedError
 
-    ### Multicolumn pairs ###
+    ###
+    #
+    # Multicolumn pairs
+    #
+    ###
 
-    def expect_multicolumn_values_to_be_unique(self,
-                                              column_list,
-                                              ignore_row_if="all_values_are_missing",
-                                              result_format=None, include_config=False, catch_exceptions=None, meta=None
-                                              ):
+    def expect_multicolumn_values_to_be_unique(
+            self,
+            column_list,
+            ignore_row_if="all_values_are_missing",
+            result_format=None, include_config=False, catch_exceptions=None,
+            meta=None
+    ):
         """
         Expect the values for each row to be unique across the columns listed.
 
@@ -3556,8 +3810,8 @@ class Dataset(MetaDataset):
                 If True, then catch exceptions and include them as part of the result object. \
                 For more detail, see :ref:`catch_exceptions`.
             meta (dict or None): \
-                A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
-                For more detail, see :ref:`meta`.
+                A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+                modification. For more detail, see :ref:`meta`.
 
         Returns:
             A JSON-serializable expectation result object.

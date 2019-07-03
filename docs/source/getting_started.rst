@@ -3,14 +3,12 @@
 Getting Started
 ==================
 
-.. toctree::
-   :maxdepth: 2
-
-
 Requirements
 ------------
 
-TODO!!!
+Great expectations requires a python compute environment and access to data, either locally or \
+through a database or distributed cluster. The tutorials below walk you through getting started \
+with an example project.
 
 How do I get started?
 ---------------------
@@ -22,15 +20,6 @@ It's easy! Just use pip install:
     $ pip install great_expectations
 
 
-You can also clone the repository, which includes examples of using
-great\_expectations.
-
-::
-
-    $ git clone https://github.com/great-expectations/great_expectations.git
-    $ pip install great_expectations/
-
-
 Then go to the root directory of the project you want to use Great Expectations in and run:
 ::
 
@@ -39,6 +28,13 @@ Then go to the root directory of the project you want to use Great Expectations 
 
 :ref:`tutorial_init`
 
+
 :ref:`tutorial_create_expectations`
 
 
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+
+   tutorial_init
+   tutorial_create_expectations
