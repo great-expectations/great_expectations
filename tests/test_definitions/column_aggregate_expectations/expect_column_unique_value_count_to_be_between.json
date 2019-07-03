@@ -61,7 +61,7 @@
         }
       },
       {
-        "title": "Exception: null min and max",
+        "title": "Vacuously true: null min and max",
         "exact_match_out": false,
         "in": {
           "column": "dist1",
@@ -70,7 +70,7 @@
           "catch_exceptions": true
         },
         "out": {
-          "traceback_substring": "cannot both be None"
+          "success": "true"
         }
       }
     ]
