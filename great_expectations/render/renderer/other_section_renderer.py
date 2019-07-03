@@ -6,7 +6,6 @@ from collections import defaultdict, Counter
 from .renderer import Renderer
 from .content_block import(
     ValueListContentBlockRenderer,
-    GraphContentBlockRenderer,
     TableContentBlockRenderer,
     PrescriptiveBulletListContentBlockRenderer
 )
