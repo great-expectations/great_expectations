@@ -15,20 +15,6 @@ from .content_block import PrescriptiveBulletListContentBlockRenderer
 from .column_section_renderer import ColumnSectionRenderer
 
 
-def get_hacky_column_type_from_evr_list(evr_list):
-    for evr in evr_list:
-        # print(evr)
-        pass
-    # return
-
-
-def get_column_name_from_evr_list(evr_list):
-    for evr in evr_list:
-        # print(evr)
-        pass
-    pass
-
-
 class FancyDescriptiveColumnSectionRenderer(ColumnSectionRenderer):
 
     @classmethod
