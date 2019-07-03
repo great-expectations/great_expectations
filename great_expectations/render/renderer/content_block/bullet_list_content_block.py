@@ -102,48 +102,30 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
         )
 
         if (params["min_value"] is None) and (params["max_value"] is None):
-            if include_column_name:
-                template_str = "$column has a bogus `expect_column_value_lengths_to_be_between` expectation."
-            else:
-                template_str = "has a bogus `expect_column_value_lengths_to_be_between` expectation."
+            template_str = "values may have any length."
 
-        if "mostly" in params:
+        elif "mostly" in params:
             if params["min_value"] is not None and params["max_value"] is not None:
-                if include_column_name:
-                    template_str = "$column must be between $min_value and $max_value characters long at least $mostly% of the time."
-                else:
-                    template_str = "must be between $min_value and $max_value characters long at least $mostly% of the time."
+                template_str = "must be between $min_value and $max_value characters long at least $mostly% of the time."
 
             elif params["min_value"] is None:
-                if include_column_name:
-                    template_str = "$column must be less than $max_value characters long at least $mostly% of the time."
-                else:
-                    template_str = "must be less than $max_value characters long at least $mostly% of the time."
+                template_str = "must be less than $max_value characters long at least $mostly% of the time."
 
             elif params["max_value"] is None:
-                if include_column_name:
-                    template_str = "$column must be more than $min_value characters long at least $mostly% of the time."
-                else:
-                    template_str = "must be more than $min_value characters long at least $mostly% of the time."
+                template_str = "must be more than $min_value characters long at least $mostly% of the time."
 
         else:
             if params["min_value"] is not None and params["max_value"] is not None:
-                if include_column_name:
-                    template_str = "$column must always be between $min_value and $max_value characters long."
-                else:
-                    template_str = "must always be between $min_value and $max_value characters long."
+                template_str = "must always be between $min_value and $max_value characters long."
 
             elif params["min_value"] is None:
-                if include_column_name:
-                    template_str = "$column must always be less than $max_value characters long."
-                else:
-                    template_str = "must always be less than $max_value characters long."
+                template_str = "must always be less than $max_value characters long."
 
             elif params["max_value"] is None:
-                if include_column_name:
-                    template_str = "$column must always be more than $min_value characters long."
-                else:
-                    template_str = "must always be more than $min_value characters long."
+                template_str = "must always be more than $min_value characters long."
+
+        if include_column_name:
+            template_str = "$column " + template_str
 
         return [{
             "template": template_str,
