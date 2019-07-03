@@ -399,24 +399,27 @@ def test_data_context_result_store(titanic_data_context):
         validation_result = titanic_data_context.get_validation_result(data_asset_name, "BasicDatasetProfiler")
         assert data_asset_name in validation_result["meta"]["data_asset_name"]
 
-def test_render_full_static_site(filesystem_csv_2):
-
-    basedir = tmp_path_factory.mktemp("test_cli_init_diff")
-    basedir = str(basedir)
-    os.makedirs(os.path.join(basedir, "data"))
+def test_render_full_static_site(tmp_path_factory, filesystem_csv_2):
+    project_dir = tmp_path_factory.mktemp("project_dir")
+    os.makedirs(os.path.join(project_dir, "data"))
+    os.makedirs(os.path.join(project_dir, "data/titanic"))
     curdir = os.path.abspath(os.getcwd())
     shutil.copy(
         "./tests/test_sets/Titanic.csv",
-        str(os.path.join(basedir, "data/Titanic.csv"))
+        str(os.path.join(project_dir, "data/titanic/Titanic.csv"))
     )
+    context = DataContext.create(project_dir)
+    ge_directory = os.path.join(project_dir, "great_expectations")
+    scaffold_directories_and_notebooks(ge_directory)
+    context.add_datasource(
+        "titanic",
+        "pandas",
+        base_directory=os.path.join(project_dir, "data/titanic/")
+    )
+    print(project_dir)
 
-    scaffold_directories_and_notebooks()
-    print(titanic_data_context._context_root_directory)
-    
-    print(titanic_data_context.list_datasources())
-
-    titanic_data_context.profile_datasource("mydatasource")
-    titanic_data_context.render_full_static_site()
+    context.profile_datasource("titanic")
+    context.render_full_static_site()
     
 
 
