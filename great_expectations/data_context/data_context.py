@@ -11,6 +11,7 @@ from glob import glob
 from six import string_types
 import datetime
 import shutil
+from collections import OrderedDict
 
 from .util import NormalizedDataAssetName, get_slack_callback, safe_mmkdir
 
@@ -1477,9 +1478,23 @@ class DataContext(object):
                 "filepath" : out_filepath
             })
         
+        index_document = OrderedDict()
+        for il in index_links:
+            source, generator, asset = il["data_asset_name"].split('/')
+            if not source in index_document:
+                index_document[source] = []
+            index_document[source].append({
+                "data_asset_name" : il["data_asset_name"],
+                "source" : source,
+                "generator" : generator,
+                "asset" : asset,
+                "filepath" : il["filepath"],
+            })
+
+
         with open(os.path.join(self.data_doc_directory, "index.html"), "w") as writer:
             writer.write(DefaultJinjaIndexPageView.render({
-                "index_links": index_links
+                "sections": index_document
             }))
 
     def profile_datasource(self,

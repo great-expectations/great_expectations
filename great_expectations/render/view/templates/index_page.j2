@@ -68,10 +68,15 @@
     {% include 'ge_info.j2' %}
     <div class="container">
       <div class="row">
-        <div class="col-8 off-2">
-        {% for index_link in index_links %}
+        <div class="col-8 offset-2">
+        {% for section in sections %}
           {% set section_loop = loop -%}
-          <li><a href="{{index_link.filepath}}">{{index_link.data_asset_name}}</a></li>
+          <h3 class="alert alert-secondary">{{section}}</h3>
+          <ul>
+          {% for doc_link in sections[section] %}
+            <li><a href="{{doc_link.filepath}}">{{doc_link.asset}}</a></li>
+          {% endfor %}
+          </ul>
         {% endfor %}
         </div>
 
