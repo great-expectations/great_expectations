@@ -6,7 +6,7 @@ import errno
 from ruamel.yaml import YAML
 
 from .sqlalchemy_source import SqlAlchemyDatasource
-from .batch_generator import BatchGenerator
+from great_expectations.datasource.generator.batch_generator import BatchGenerator
 
 yaml = YAML(typ='safe')
 logger = logging.getLogger(__name__)

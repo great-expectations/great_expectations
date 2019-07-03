@@ -76,14 +76,3 @@ class BatchGenerator(object):
             logger.warning("Unable to generate batch_kwargs for data_asset_name %s" % data_asset_name)
             return {}
 
-
-class InMemoryGenerator(BatchGenerator):
-
-    def __init__(self, name="default", datasource=None):
-        super(InMemoryGenerator, self).__init__(name, type_="memory", datasource=datasource)
-
-    def _get_iterator(self, data_asset_name, **kwargs):
-        return iter([])
-
-    def get_available_data_asset_names(self):
-        return set()
