@@ -88,7 +88,7 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
 
         content_blocks.append({
             "content_block_type": "header",
-            "header": f'{column_name} (type: {column_type})' if column_type else column_name,
+            "header": "{column_name} (type: {column_type})".format(column_name=column_name, column_type=column_type) if column_type else column_name,
             "sub_header": column_types,
             # {
             #     "template": column_type,
