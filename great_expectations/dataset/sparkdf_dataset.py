@@ -32,6 +32,7 @@ except ImportError as e:
     logger.debug(str(e))
     logger.debug("Unable to load spark context; install optional spark dependency for support.")
 
+
 class MetaSparkDFDataset(Dataset):
     """MetaSparkDFDataset is a thin layer between Dataset and SparkDFDataset.
     This two-layer inheritance is required to make @classmethod decorators work.

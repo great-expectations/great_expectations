@@ -1,17 +1,19 @@
-import os
 import logging
+import time
+from six import string_types
 
 from ..exceptions import BatchKwargsError
 
 from .datasource import Datasource, ReaderMethods
-from .filesystem_path_generator import SubdirReaderGenerator
-from .databricks_generator import DatabricksTableGenerator
+from great_expectations.datasource.generator.filesystem_path_generator import SubdirReaderGenerator
+from great_expectations.datasource.generator.databricks_generator import DatabricksTableGenerator
+from great_expectations.datasource.generator.in_memory_generator import InMemoryGenerator
 
 logger = logging.getLogger(__name__)
 
 try:
     from great_expectations.dataset.sparkdf_dataset import SparkDFDataset
-    from pyspark.sql import SparkSession
+    from pyspark.sql import SparkSession, DataFrame
 except ImportError:
     # TODO: review logging more detail here
     logger.debug("Unable to load pyspark; install optional spark dependency for support.")
@@ -49,6 +51,8 @@ class SparkDFDatasource(Datasource):
             return SubdirReaderGenerator
         elif type_ == "databricks":
             return DatabricksTableGenerator
+        elif type_ == "memory":
+            return InMemoryGenerator
         else:
             raise ValueError("Unrecognized BatchGenerator type %s" % type_)
 
@@ -94,3 +98,21 @@ class SparkDFDatasource(Datasource):
                               data_context=self._data_context,
                               batch_kwargs=batch_kwargs,
                               caching=caching)
+
+    def build_batch_kwargs(self, *args, **kwargs):
+        if len(args) > 0:
+            if isinstance(args[0], DataFrame):
+                kwargs.update({
+                    "df": args[0],
+                    "timestamp": time.time()
+                })
+            elif isinstance(args[0], string_types):
+                kwargs.update({
+                    "path": args[0],
+                    "timestamp": time.time()
+                })
+        else:
+            kwargs.update({
+                "timestamp": time.time()
+            })
+        return kwargs
