@@ -159,25 +159,16 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
         )
 
         if (params["min_value"] is None) and (params["max_value"] is None):
-            if include_column_name:
-                template_str = "$column has a bogus `expect_column_unique_value_count_to_be_between` expectation."
-            else:
-                template_str = "has a bogus `expect_column_unique_value_count_to_be_between` expectation."
+            template_str = "may have any number of unique values."
         elif params["min_value"] is None:
-            if include_column_name:
-                template_str = "$column must have fewer than $max_value unique values."
-            else:
-                template_str = "must have fewer than $max_value unique values."
+            template_str = "must have fewer than $max_value unique values."
         elif params["max_value"] is None:
-            if include_column_name:
-                template_str = "$column must have at least $min_value unique values."
-            else:
-                template_str = "must have fewer than $max_value unique values."
+            template_str = "must have more than $min_value unique values."
         else:
-            if include_column_name:
-                template_str = "$column must have between $min_value and $max_value unique values."
-            else:
-                template_str = "must have between $min_value and $max_value unique values."
+            template_str = "must have between $min_value and $max_value unique values."
+
+        if include_column_name:
+            template_str = "$column " + template_str
 
         return [{
             "template": template_str,
