@@ -36,5 +36,5 @@ Then go to the root directory of the project you want to use Great Expectations 
    :maxdepth: 2
    :hidden:
 
-   tutorial_init
-   tutorial_create_expectations
+   /tutorials/cli_init
+   /tutorials/create_expectations
