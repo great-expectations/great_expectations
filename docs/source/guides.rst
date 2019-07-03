@@ -6,13 +6,13 @@ Guides
 .. toctree::
    :maxdepth: 2
 
-   glossary
-   implemented_expectations
-   distributional_expectations
-   standard_arguments
-   result_format
-   profiling
-   evaluation_parameters
-   custom_expectations
-   conventions
-   migrating_versions
+   /guides/profiling
+   /guides/data_documentation
+   /guides/batch_generator
+   /guides/implemented_expectations
+   /guides/distributional_expectations
+   /guides/standard_arguments
+   /guides/result_format
+   /guides/evaluation_parameters
+   /guides/conventions
+   /guides/migrating_versions

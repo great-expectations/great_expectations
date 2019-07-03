@@ -1,12 +1,12 @@
 import os
 import time
-import re
 import glob
 
-from .batch_generator import BatchGenerator
-from ..exceptions import BatchKwargsError
+from great_expectations.datasource.generator.batch_generator import BatchGenerator
+from great_expectations.exceptions import BatchKwargsError
 
 KNOWN_EXTENSIONS = ['.csv', '.tsv', '.parquet', '.xls', '.xlsx', '.json']
+
 
 class GlobReaderGenerator(BatchGenerator):
     def __init__(self, name="default",

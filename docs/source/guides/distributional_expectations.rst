@@ -19,14 +19,14 @@ parameterized distributions.
 The design is motivated by the following assumptions:
 
 * Encoding expectations into a simple object that allows for portable data pipeline testing is the top priority. \
-    In many circumstances the loss of precision associated with "compressing" data into an expectation may be beneficial \
-    because of its intentional simplicity as well as because it adds a very light layer of obfuscation over the data \
-    which may align with privacy preservation goals.
+  In many circumstances the loss of precision associated with "compressing" data into an expectation may be beneficial \
+  because of its intentional simplicity as well as because it adds a very light layer of obfuscation over the data \
+  which may align with privacy preservation goals.
 * While it should be possible to easily extend the framework with more rigorous statistical tests, great expectations \
-    should provide simple, reasonable defaults. Care should be taken in cases where robust statistical guarantees are \
-    expected.
+  should provide simple, reasonable defaults. Care should be taken in cases where robust statistical guarantees are \
+  expected.
 * Building and interpreting expectations should be intuitive: a more precise partition object implies a more precise \
-    expectation.
+  expectation.
 
 
 .. _partition_object:
@@ -91,15 +91,15 @@ Distributional expectations rely on three tests for their work.
 
 Kullback-Leibler (KL) divergence is available as an expectation for both categorical and continuous data (continuous data will be discretized according to the provided partition prior to computing divergence). Unlike KS and Chi-Squared tests which can use a p-value, you must provide a threshold for the relative entropy to use KL divergence. Further, KL divergence is not symmetric.
 
-* :func:`expect_column_kl_divergence_to_be_less_than <great_expectations.dataset.base.Dataset.expect_column_kl_divergence_to_be_less_than>`
+* :func:`expect_column_kl_divergence_to_be_less_than <great_expectations.dataset.dataset.Dataset.expect_column_kl_divergence_to_be_less_than>`
 
 For continuous data, the expect_column_bootstrapped_ks_test_p_value_to_be_greater_than expectation uses the Kolmogorov-Smirnov (KS) test, which compares the actual and expected cumulative densities of the data. Because of the partition_object's piecewise uniform approximation of the expected distribution, the test would be overly sensitive to differences when used with a sample of data of much larger than the size of the partition. The expectation consequently uses a bootstrapping method to sample the provided data with tunable specificity.
 
-* :func:`expect_column_bootstrapped_ks_test_p_value_to_be_greater_than <great_expectations.dataset.base.Dataset.expect_column_bootstrapped_ks_test_p_value_to_be_greater_than>`
+* :func:`expect_column_bootstrapped_ks_test_p_value_to_be_greater_than <great_expectations.dataset.dataset.Dataset.expect_column_bootstrapped_ks_test_p_value_to_be_greater_than>`
 
 For categorical data, the expect_column_chisquare_test_p_value_to_be_greater_than expectation uses the Chi-Squared test. The provided weights are scaled to the size of the data in the tested column at the time of the test.
 
-* :func:`expect_column_chisquare_test_p_value_to_be_greater_than <great_expectations.dataset.base.Dataset.expect_column_chisquare_test_p_value_to_be_greater_than>`
+* :func:`expect_column_chisquare_test_p_value_to_be_greater_than <great_expectations.dataset.dataset.Dataset.expect_column_chisquare_test_p_value_to_be_greater_than>`
 
 
 
