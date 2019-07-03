@@ -1483,7 +1483,7 @@ class DataContext(object):
             if not source in index_document:
                 index_document[source] = []
             index_document[source].append({
-                "data_asset_name" : il["data_asset_name"],
+                "data_asset_name" : asset,
                 "source" : source,
                 "generator" : generator,
                 "asset" : asset,
