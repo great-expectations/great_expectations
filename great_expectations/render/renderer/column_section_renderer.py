@@ -44,6 +44,7 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
         cls._render_header(evrs, content_blocks, column_type)
         # cls._render_column_type(evrs, content_blocks)
         cls._render_overview_table(evrs, content_blocks)
+        cls._render_quantile_table(evrs, content_blocks)
         cls._render_stats_table(evrs, content_blocks)
 
         cls._render_histogram(evrs, content_blocks)
@@ -200,6 +201,39 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
 
             }
             content_blocks.append(new_content_block)
+
+    @classmethod
+    def _render_quantile_table(cls, evrs, content_blocks):
+        table_rows = []
+
+        quantile_evr = cls._find_evr_by_type(
+            evrs,
+            "expect_column_quantile_values_to_be_between"
+        )
+
+        if not quantile_evr:
+            return
+
+        quantiles = quantile_evr["result"]["observed_value"]["quantiles"]
+        quantile_ranges = quantile_evr["result"]["observed_value"]["values"]
+
+        for idx, quantile in enumerate(quantiles):
+            table_rows.append([f'{int(quantile * 100)}-th', quantile_ranges[idx]])
+
+        content_blocks.append({
+            "content_block_type": "table",
+            "header": "Quantiles",
+            "table_rows": table_rows,
+            "styling": {
+                "classes": ["col-4"],
+                "styles": {
+                    "margin-top": "20px"
+                },
+                "body": {
+                    "classes": ["table", "table-sm", "table-unbordered"],
+                }
+            },
+        })
 
     @classmethod
     def _render_stats_table(cls, evrs, content_blocks):
