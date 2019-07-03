@@ -220,13 +220,13 @@ def test_cli_init(tmp_path_factory, filesystem_csv_2):
     assert os.path.isfile(
         os.path.join(
             basedir,
-            "great_expectations/data_documentation/data__dir/default/Titanic/BasicDatasetProfiler.html")
+            "great_expectations/uncommitted/documentation/data__dir/default/Titanic/BasicDatasetProfiler.html")
     )
 
     assert os.path.getsize(
         os.path.join(
             basedir,
-            "great_expectations/data_documentation/data__dir/default/Titanic/BasicDatasetProfiler.html"
+            "great_expectations/uncommitted/documentation/data__dir/default/Titanic/BasicDatasetProfiler.html"
         )
     ) > 0
 
