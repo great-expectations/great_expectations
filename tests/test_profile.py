@@ -144,7 +144,7 @@ def test_BasicDatasetProfiler_on_titanic():
     """
     df = ge.read_csv("./tests/test_sets/Titanic.csv")
     df.profile(BasicDatasetProfiler)
-    evrs = df.validate(result_format="SUMMARY")  # ["results"]
+    evrs = df.validate(result_format="BASIC")  # ["results"]
 
     # with open('tests/test_sets/expected_evrs_BasicDatasetProfiler_on_titanic.json', 'w+') as file:
     #     file.write(json.dumps(evrs))
