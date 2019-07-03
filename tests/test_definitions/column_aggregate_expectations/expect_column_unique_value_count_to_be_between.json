@@ -70,7 +70,7 @@
           "catch_exceptions": true
         },
         "out": {
-          "success": "true"
+          "success": true
         }
       }
     ]
