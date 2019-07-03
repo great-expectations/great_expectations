@@ -45,6 +45,8 @@ def html_snapshot():
 #     # TODO: Use above print to set up snapshot test once we like the result
 #     # assert document == document_snapshot
 
+
+# noinspection PyPep8Naming
 def test_render_DefaultJinjaPageView(document_snapshot, html_snapshot):
     html = DefaultJinjaPageView.render(document_snapshot)
     # print(html)
@@ -56,6 +58,7 @@ def test_render_DefaultJinjaPageView(document_snapshot, html_snapshot):
     assert html == html_snapshot
 
 
+# noinspection PyPep8Naming
 def test_render_DefaultJinjaPageView_meta_info():
     validation_results = {
         "results": [],

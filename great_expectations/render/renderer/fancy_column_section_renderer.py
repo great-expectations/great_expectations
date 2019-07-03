@@ -1,14 +1,8 @@
 import json
-from string import Template
-from collections import defaultdict
 
 import pandas as pd
 import altair as alt
-import jinja2
 
-from .renderer import Renderer
-from .content_block import ValueListContentBlockRenderer
-from .content_block import GraphContentBlockRenderer
 from .content_block import TableContentBlockRenderer
 from .content_block import PrescriptiveBulletListContentBlockRenderer
 
