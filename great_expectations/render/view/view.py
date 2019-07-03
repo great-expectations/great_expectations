@@ -86,7 +86,7 @@ def render_styling_from_string_template(template):
 
 def render_string_template(template):
     # NOTE: We should add some kind of type-checking to template
-    if type(template) != dict:
+    if not isinstance(template, (dict, OrderedDict)):
         return template
 
     if "styling" in template:
