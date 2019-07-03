@@ -497,14 +497,15 @@ def test_render_full_static_site(tmp_path_factory, filesystem_csv_3):
         "uncommitted/documentation/random/default/f2/BasicDatasetProfiler.html"
     ))
 
-    shutil.copy(
-        os.path.join(
-            ge_directory,
-            "uncommitted/documentation/random/default/f2/BasicDatasetProfiler.html"
-        ),
-        "test_output/f2_BasicDatasetProfiler.html"
+    # Store output files locally
+    # shutil.copy(
+    #     os.path.join(
+    #         ge_directory,
+    #         "uncommitted/documentation/random/default/f2/BasicDatasetProfiler.html"
+    #     ),
+    #     "test_output/f2_BasicDatasetProfiler.html"
 
-    )
+    # )
 
     with open(os.path.join(
         ge_directory,
