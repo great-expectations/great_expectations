@@ -400,7 +400,7 @@ def test_data_context_result_store(titanic_data_context):
         validation_result = titanic_data_context.get_validation_result(data_asset_name, "BasicDatasetProfiler")
         assert data_asset_name in validation_result["meta"]["data_asset_name"]
 
-def test_render_full_static_site(tmp_path_factory, filesystem_csv_2):
+def test_render_full_static_site(tmp_path_factory, filesystem_csv_3):
     project_dir = tmp_path_factory.mktemp("project_dir")
     print(project_dir)
 
@@ -411,6 +411,18 @@ def test_render_full_static_site(tmp_path_factory, filesystem_csv_2):
         "./tests/test_sets/Titanic.csv",
         str(os.path.join(project_dir, "data/titanic/Titanic.csv"))
     )
+
+    os.makedirs(os.path.join(project_dir, "data/random"))
+    curdir = os.path.abspath(os.getcwd())
+    shutil.copy(
+        os.path.join(filesystem_csv_3, "f1.csv"),
+        str(os.path.join(project_dir, "data/random/f1.csv"))
+    )
+    shutil.copy(
+        os.path.join(filesystem_csv_3, "f2.csv"),
+        str(os.path.join(project_dir, "data/random/f2.csv"))
+    )
+
     context = DataContext.create(project_dir)
     ge_directory = os.path.join(project_dir, "great_expectations")
     scaffold_directories_and_notebooks(ge_directory)
@@ -418,6 +430,11 @@ def test_render_full_static_site(tmp_path_factory, filesystem_csv_2):
         "titanic",
         "pandas",
         base_directory=os.path.join(project_dir, "data/titanic/")
+    )
+    context.add_datasource(
+        "random",
+        "pandas",
+        base_directory=os.path.join(project_dir, "data/random/")
     )
 
     context.profile_datasource("titanic")
@@ -433,9 +450,72 @@ def test_render_full_static_site(tmp_path_factory, filesystem_csv_2):
         glob_result[0],
         full_fixture_path+"BasicDatasetProfiler.json"
     )
+
+    context.profile_datasource("random")
+    os.mkdir(os.path.join(ge_directory,"fixtures/validations/random"))
+    os.mkdir(os.path.join(ge_directory,"fixtures/validations/random/default"))
+
+    glob_str = os.path.join(ge_directory,"uncommitted/validations/*/random/default/f*/BasicDatasetProfiler.json")
+    print(glob_str)
+    glob_result = glob(glob_str)
+
+    full_fixture_path = os.path.join(ge_directory,"fixtures/validations/random/default/f1/")
+    os.mkdir(full_fixture_path)
+    shutil.copy(
+        glob_result[0], #!!! This might switch the f1 and f2 files...
+        full_fixture_path+"BasicDatasetProfiler.json"
+    )
+    full_fixture_path = os.path.join(ge_directory,"fixtures/validations/random/default/f2/")
+    os.mkdir(full_fixture_path)
+    shutil.copy(
+        glob_result[1], #!!! This might switch the f1 and f2 files...
+        full_fixture_path+"BasicDatasetProfiler.json"
+    )
+    # for g in glob_result:
+    #     shutil.copy(
+    #         g,
+    #         full_fixture_path+"BasicDatasetProfiler.json"
+    #     )
+
     # os.mkdir(os.path.join(ge_directory,"fixtures")
     context.render_full_static_site()
     
-    assert os.exists(os.patch.join(""))
-    open()
+    assert os.path.exists(os.path.join(
+        ge_directory,
+        "fixtures/validations/titanic/default/Titanic/BasicDatasetProfiler.json"
+    ))
+    assert os.path.exists(os.path.join(
+        ge_directory,
+        "uncommitted/documentation/titanic/default/Titanic/BasicDatasetProfiler.html"
+    ))
+    assert os.path.exists(os.path.join(
+        ge_directory,
+        "uncommitted/documentation/random/default/f1/BasicDatasetProfiler.html"
+    ))
+    assert os.path.exists(os.path.join(
+        ge_directory,
+        "uncommitted/documentation/random/default/f2/BasicDatasetProfiler.html"
+    ))
+
+    shutil.copy(
+        os.path.join(
+            ge_directory,
+            "uncommitted/documentation/random/default/f2/BasicDatasetProfiler.html"
+        ),
+        "test_output/f2_BasicDatasetProfiler.html"
+
+    )
+
+    assert os.path.exists(os.path.join(
+        ge_directory,
+        "uncommitted/documentation/index.html"
+    ))
+
+    with open(os.path.join(
+        ge_directory,
+        "uncommitted/documentation/titanic/default/Titanic/BasicDatasetProfiler.html"
+    ), 'r') as f:
+        # print(f.read())
+        pass
+
     assert False
