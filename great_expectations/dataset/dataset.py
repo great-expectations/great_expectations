@@ -261,7 +261,7 @@ class Dataset(MetaDataset):
             # quantiles for clarity
             # min_ = self.get_column_min(column)
             # max_ = self.get_column_max(column)
-            min_, max_ = self.get_column_quantiles(column, [0.0, 1.0])
+            min_, max_ = self.get_column_quantiles(column, (0.0, 1.0))
             # PRECISION NOTE: some implementations of quantiles could produce
             # varying levels of precision (e.g. a NUMERIC column producing
             # Decimal from a SQLAlchemy source, so we cast to float for numpy)
@@ -269,7 +269,7 @@ class Dataset(MetaDataset):
         elif bins in ['ntile', 'quantile', 'percentile']:
             bins = self.get_column_quantiles(
                 column,
-                np.linspace(start=0, stop=1, num=n_bins+1)
+                tuple(np.linspace(start=0, stop=1, num=n_bins+1))
             )
         else:
             raise ValueError("Invalid parameter for bins argument")
@@ -2394,7 +2394,7 @@ class Dataset(MetaDataset):
         if len(quantiles) != len(quantile_value_ranges):
             raise ValueError("quntile_values and quantiles must have the same number of elements")
 
-        quantile_vals = self.get_column_quantiles(column, quantiles)
+        quantile_vals = self.get_column_quantiles(column, tuple(quantiles))
         # We explicitly allow "None" to be interpreted as +/- infinity
         comparison_quantile_ranges = [
             [lower_bound or -np.inf, upper_bound or np.inf]
@@ -3368,7 +3368,7 @@ class Dataset(MetaDataset):
         if partition_object is None:
             # NOTE: we are *not* specifying a tail_weight_holdout by default.
             bins = self.get_column_partition(column)
-            weights = list(np.array(self.get_column_hist(column, bins)) / self.get_column_nonnull_count(column))
+            weights = list(np.array(self.get_column_hist(column, tuple(bins))) / self.get_column_nonnull_count(column))
             partition_object = {
                 "bins": bins,
                 "weights": weights
@@ -3457,7 +3457,7 @@ class Dataset(MetaDataset):
         else:
             # Data are expected to be continuous; discretize first
             # Build the histogram first using expected bins so that the largest bin is >=
-            hist = np.array(self.get_column_hist(column, partition_object['bins']))
+            hist = np.array(self.get_column_hist(column, tuple(partition_object['bins'])))
             # np.histogram(column, partition_object['bins'], density=False)
             bin_edges = partition_object['bins']
             # Add in the frequencies observed above or below the provided partition
