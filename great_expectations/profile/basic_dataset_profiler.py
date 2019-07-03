@@ -17,13 +17,13 @@ class BasicDatasetProfiler(DatasetProfiler):
     def _get_column_type(cls, df, column):
         # list of types is used to support pandas and sqlalchemy
         try:
-            if df.expect_column_values_to_be_in_type_list(column, type_list=list(Dataset.INT_TYPE_NAMES))["success"]:
+            if df.expect_column_values_to_be_in_type_list(column, type_list=sorted(list(Dataset.INT_TYPE_NAMES)))["success"]:
                 type_ = "int"
 
-            elif df.expect_column_values_to_be_in_type_list(column, type_list=list(Dataset.FLOAT_TYPE_NAMES))["success"]:
+            elif df.expect_column_values_to_be_in_type_list(column, type_list=sorted(list(Dataset.FLOAT_TYPE_NAMES)))["success"]:
                 type_ = "float"
 
-            elif df.expect_column_values_to_be_in_type_list(column, type_list=list(Dataset.STRING_TYPE_NAMES))["success"]:
+            elif df.expect_column_values_to_be_in_type_list(column, type_list=sorted(list(Dataset.STRING_TYPE_NAMES)))["success"]:
                 type_ = "string"
 
             else:
@@ -70,7 +70,7 @@ class BasicDatasetProfiler(DatasetProfiler):
 
             else:
                 cardinality = "many"
-        print('col: {0:s}, num_unique: {1:d}, pct_unique: {2:f}, card: {3:s}'.format(column, num_unique,pct_unique, cardinality))
+        # print('col: {0:s}, num_unique: {1:d}, pct_unique: {2:f}, card: {3:s}'.format(column, num_unique,pct_unique, cardinality))
 
         return cardinality
 
