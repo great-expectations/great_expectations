@@ -10,6 +10,8 @@ from great_expectations.profile.columns_exist import ColumnsExistProfiler
 from great_expectations.dataset.pandas_dataset import PandasDataset
 from great_expectations.data_context import DataContext
 from great_expectations.data_context.util import safe_mmkdir
+import great_expectations as ge
+from .test_utils import assertDeepAlmostEqual
 
 # Tests to write:
 # test_cli_method_works  -> test_cli
@@ -162,3 +164,24 @@ def test_context_profiler(empty_data_context, filesystem_csv_2):
     #     "my_datasource", "f1")
 
     # assert context_expectations_config == profiled_expectations
+
+def test_BasicDatasetProfiler_on_titanic():
+    """
+    A snapshot test for BasicDatasetProfiler.
+    We are rinning the profiler on the Titanic dataset
+    and comparing the EVRs to ones retrieved from a
+    previously stored file.
+    """
+    df = ge.read_csv("examples/data/Titanic.csv")
+    df.profile(BasicDatasetProfiler)
+    evrs = df.validate(result_format="SUMMARY")  # ["results"]
+
+    # with open('tests/test_sets/expected_evrs_BasicDatasetProfiler_on_titanic.json', 'w+') as file:
+    #     file.write(json.dumps(evrs))
+
+    with open('tests/test_sets/expected_evrs_BasicDatasetProfiler_on_titanic.json', 'r') as file:
+        expected_evrs = json.load(file)
+
+    expected_evrs.pop("meta")
+    evrs.pop("meta")
+    assertDeepAlmostEqual(expected_evrs, evrs)
