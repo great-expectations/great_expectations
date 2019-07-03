@@ -171,65 +171,66 @@ class DescriptiveOverviewSectionRenderer(Renderer):
 
     @classmethod
     def _render_warnings(cls, evrs, content_blocks):
+        return
 
-        def render_warning_row(template, column, n, p, badge_label):
-            return [{
-                "template": template,
-                "params": {
-                    "column": column,
-                    "n": n,
-                    "p": p,
-                },
-                "styling": {
-                    "params": {
-                        "column": {
-                            "classes": ["badge", "badge-primary", ]
-                        }
-                    }
-                }
-            }, {
-                "template": "$badge_label",
-                "params": {
-                    "badge_label": badge_label,
-                },
-                "styling": {
-                    "params": {
-                        "badge_label": {
-                            "classes": ["badge", "badge-warning", ]
-                        }
-                    }
-                }
-            }]
+        # def render_warning_row(template, column, n, p, badge_label):
+        #     return [{
+        #         "template": template,
+        #         "params": {
+        #             "column": column,
+        #             "n": n,
+        #             "p": p,
+        #         },
+        #         "styling": {
+        #             "params": {
+        #                 "column": {
+        #                     "classes": ["badge", "badge-primary", ]
+        #                 }
+        #             }
+        #         }
+        #     }, {
+        #         "template": "$badge_label",
+        #         "params": {
+        #             "badge_label": badge_label,
+        #         },
+        #         "styling": {
+        #             "params": {
+        #                 "badge_label": {
+        #                     "classes": ["badge", "badge-warning", ]
+        #                 }
+        #             }
+        #         }
+        #     }]
 
-        table_rows = [
-            render_warning_row(
-                "$column has $n ($p%) missing values", "Age", 177, 19.9, "Missing"),
-            render_warning_row(
-                "$column has a high cardinality: $n distinct values", "Cabin", 148, None, "Warning"),
-            render_warning_row(
-                "$column has $n ($p%) missing values", "Cabin", 687, 77.1, "Missing"),
-            render_warning_row(
-                "$column has $n (< $p%) zeros", "Fare", 15, "0.1", "Zeros"),
-            render_warning_row(
-                "$column has $n (< $p%) zeros", "Parch", 678, "76.1", "Zeros"),
-            render_warning_row(
-                "$column has $n (< $p%) zeros", "SibSp", 608, "68.2", "Zeros"),
-        ]
+        # table_rows = [
+        #     render_warning_row(
+        #         "$column has $n ($p%) missing values", "Age", 177, 19.9, "Missing"),
+        #     render_warning_row(
+        #         "$column has a high cardinality: $n distinct values", "Cabin", 148, None, "Warning"),
+        #     render_warning_row(
+        #         "$column has $n ($p%) missing values", "Cabin", 687, 77.1, "Missing"),
+        #     render_warning_row(
+        #         "$column has $n (< $p%) zeros", "Fare", 15, "0.1", "Zeros"),
+        #     render_warning_row(
+        #         "$column has $n (< $p%) zeros", "Parch", 678, "76.1", "Zeros"),
+        #     render_warning_row(
+        #         "$column has $n (< $p%) zeros", "SibSp", 608, "68.2", "Zeros"),
+        # ]
 
-        content_blocks.append({
-            "content_block_type": "table",
-            "header": "Warnings",
-            "table_rows": table_rows,
-            "styling": {
-                "classes": ["col-12"],
-                "styles": {
-                    "margin-top": "20px"
-                },
-                "body": {
-                    "classes": ["table", "table-sm"]
-                }
-            },
-        })
+        # content_blocks.append({
+        #     "content_block_type": "table",
+        #     "header": "Warnings",
+        #     "table_rows": table_rows,
+        #     "styling": {
+        #         "classes": ["col-12"],
+        #         "styles": {
+        #             "margin-top": "20px"
+        #         },
+        #         "body": {
+        #             "classes": ["table", "table-sm"]
+        #         }
+        #     },
+        # })
 
     @classmethod
     def _get_percentage_missing_cells_str(cls, evrs):
