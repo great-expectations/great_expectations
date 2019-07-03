@@ -3,9 +3,6 @@ from .column_section_renderer import (
     DescriptiveColumnSectionRenderer,
     PrescriptiveColumnSectionRenderer,
 )
-from .fancy_column_section_renderer import (
-    FancyDescriptiveColumnSectionRenderer,
-)
 from .other_section_renderer import (
     DescriptiveOverviewSectionRenderer,
 )
@@ -62,6 +59,7 @@ class DescriptivePageRenderer(Renderer):
             columns[column].append(evr)
 
         ordered_columns = Renderer._get_column_list_from_evrs(validation_results)
+        column_types = DescriptiveOverviewSectionRenderer._get_column_types(validation_results)
 
         if "data_asset_name" in validation_results["meta"] and validation_results["meta"]["data_asset_name"]:
             data_asset_name = validation_results["meta"]["data_asset_name"].split(
@@ -80,9 +78,10 @@ class DescriptivePageRenderer(Renderer):
                     )
                 ] +
                 [
-                    FancyDescriptiveColumnSectionRenderer.render(
+                    DescriptiveColumnSectionRenderer.render(
                         columns[column],
-                        section_name=column
+                        section_name=column,
+                        column_type=column_types.get(column),
                     ) for column in ordered_columns
                 ]
         }
