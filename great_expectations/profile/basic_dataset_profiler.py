@@ -70,7 +70,7 @@ class BasicDatasetProfiler(DatasetProfiler):
 
             else:
                 cardinality = "many"
-        print('col: {0:s}, num_unique: {1:d}, pct_unique: {2:f}, card: {3:s}'.format(column, num_unique,pct_unique, cardinality))
+        # print('col: {0:s}, num_unique: {1:d}, pct_unique: {2:f}, card: {3:s}'.format(column, num_unique,pct_unique, cardinality))
 
         return cardinality
 
