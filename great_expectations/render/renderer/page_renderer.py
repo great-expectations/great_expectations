@@ -61,8 +61,9 @@ class DescriptivePageRenderer(Renderer):
         #     ordered_columns = ["Reporting Area"]
 
         if "data_asset_name" in validation_results["meta"] and validation_results["meta"]["data_asset_name"]:
-            data_asset_name = validation_results["meta"]["data_asset_name"].split(
-                '/')[-1]
+            data_asset_name = validation_results["meta"]["data_asset_name"].split('/')
+            #[-1]
+            #print(validation_results["meta"]["data_asset_name"])
         else:
             data_asset_name = None
 
