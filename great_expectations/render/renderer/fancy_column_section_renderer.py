@@ -248,14 +248,12 @@ class FancyDescriptiveColumnSectionRenderer(ColumnSectionRenderer):
 
         # FIXME: This logic is very brittle. It will work on profiled EVRs, but not much else.
         if set_evr and "partial_unexpected_counts" in set_evr["result"]:
-            result_key = "partial_unexpected_counts"
+            partial_unexpected_counts = set_evr["result"]["partial_unexpected_counts"]
+            values = [str(v["value"]) for v in partial_unexpected_counts]
         elif set_evr and "partial_unexpected_list" in set_evr["result"]:
-            result_key = "partial_unexpected_list"
+            values = [str(item) for item in set_evr["result"]["partial_unexpected_list"]]
         else:
             return
-
-        partial_unexpected_counts = set_evr["result"]["partial_unexpected_counts"]
-        values = [str(v["value"]) for v in partial_unexpected_counts]
 
         if len(" ".join(values)) > 100:
             classes = ["col-12"]
