@@ -9,6 +9,7 @@ except ImportError:
 import os
 import shutil
 import json
+from glob import glob
 
 import sqlalchemy as sa
 import pandas as pd
@@ -401,6 +402,8 @@ def test_data_context_result_store(titanic_data_context):
 
 def test_render_full_static_site(tmp_path_factory, filesystem_csv_2):
     project_dir = tmp_path_factory.mktemp("project_dir")
+    print(project_dir)
+
     os.makedirs(os.path.join(project_dir, "data"))
     os.makedirs(os.path.join(project_dir, "data/titanic"))
     curdir = os.path.abspath(os.getcwd())
@@ -416,11 +419,23 @@ def test_render_full_static_site(tmp_path_factory, filesystem_csv_2):
         "pandas",
         base_directory=os.path.join(project_dir, "data/titanic/")
     )
-    print(project_dir)
 
     context.profile_datasource("titanic")
+    glob_str = os.path.join(ge_directory,"uncommitted/validations/*/titanic/default/Titanic/BasicDatasetProfiler.json")
+    print(glob_str)
+    glob_result = glob(glob_str)
+    os.mkdir(os.path.join(ge_directory,"fixtures/validations"))
+    os.mkdir(os.path.join(ge_directory,"fixtures/validations/titanic"))
+    os.mkdir(os.path.join(ge_directory,"fixtures/validations/titanic/default"))
+    full_fixture_path = os.path.join(ge_directory,"fixtures/validations/titanic/default/Titanic/")
+    os.mkdir(full_fixture_path)
+    shutil.copy(
+        glob_result[0],
+        full_fixture_path+"BasicDatasetProfiler.json"
+    )
+    # os.mkdir(os.path.join(ge_directory,"fixtures")
     context.render_full_static_site()
     
-
-
+    assert os.exists(os.patch.join(""))
+    open()
     assert False
