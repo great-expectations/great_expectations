@@ -3,6 +3,7 @@ import click
 
 from .util import cli_message
 from great_expectations.render import DefaultJinjaPageView
+from great_expectations.version import __version__ as __version__
 
 
 def add_datasource(context):
@@ -10,8 +11,8 @@ def add_datasource(context):
         """
 ========== Datasources ==========
 
-See <blue>https://great-expectations.readthedocs.io/en/latest/core_concepts/datasource.html?src=cli</blue> for more information about datasources.
-"""
+See <blue>https://docs.greatexpectations.io/en/latest/core_concepts/datasource.html?utm_source=cli&utm_medium=init&utm_campaign={0:s}</blue> for more information about datasources.
+""".format(__version__.replace(".", "_"))
     )
     data_source_selection = click.prompt(
         msg_prompt_choose_data_source,
@@ -122,14 +123,14 @@ See <blue>https://great-expectations.readthedocs.io/en/latest/core_concepts/data
             """
 ========== Profiling ==========
 
-Would you like to profile '%s' to create candidate expectations and documentation?
+Would you like to profile '{0:s}' to create candidate expectations and documentation?
 
 Please note: As of v0.7.0, profiling is still a beta feature in Great Expectations.  
 This generation of profilers will evaluate the entire data source (without sampling) and may be very time consuming. 
 As a rule of thumb, we recommend starting with data smaller than 100MB.
 
-To learn more about profiling, visit <blue>https://great-expectations.readthedocs.io/en/latest/guides/profiling.html?src=cli</blue>.
-            """ % (data_source_name)
+To learn more about profiling, visit <blue>https://docs.greatexpectations.io/en/latest/guides/profiling.html?utm_source=cli&utm_medium=init&utm_campaign={1:s}</blue>.
+            """.format(data_source_name, __version__.replace(".", "_"))
         )
         if click.confirm("Proceed?",
                          default=True
@@ -157,8 +158,8 @@ great_expectations/uncommitted (ignored by git) to great_expectations/fixtures.
 
 Before committing, please make sure that this data does not contain sensitive information!
 
-To learn more: <blue>https://great-expectations.readthedocs.io/en/latest/guides/data_documentation?src=cli</blue>
-"""
+To learn more: <blue>https://docs.greatexpectations.io/en/latest/guides/data_documentation.html?utm_source=cli&utm_medium=init&utm_campaign={0:s}</blue>
+""".format(__version__.replace(".", "_"))
             )
             if click.confirm("Move the profiled data?",
                              default=True
