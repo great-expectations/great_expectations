@@ -56,6 +56,8 @@ class DescriptivePageRenderer(Renderer):
         # TODO: in general, there should be a mechanism for imposing order here.
         ordered_columns = list(columns.keys())
 
+        column_types = DescriptiveOverviewSectionRenderer._get_column_types(validation_results)
+
         # FIXME: This is a hack to limit output on one training file
         # if "Reporting Area" in ordered_columns:
         #     ordered_columns = ["Reporting Area"]
@@ -79,7 +81,8 @@ class DescriptivePageRenderer(Renderer):
                 [
                     FancyDescriptiveColumnSectionRenderer.render(
                         columns[column],
-                        section_name=column
+                        section_name=column,
+                        column_type=column_types.get(column),
                     ) for column in ordered_columns
                 ]
         }
