@@ -109,6 +109,20 @@
             "success": true,
             "observed_value": 0.0
           }
+        },
+        {
+          "title": "Vacuously true: missing min and max",
+          "exact_match_out": false,
+          "in": {
+            "column": "x",
+            "min_value": null,
+            "max_value": null,
+            "catch_exceptions": true
+          },
+          "out": {
+            "success": true
+          },
+          "_note": "vacuously true"
         }
       ]
     },
@@ -185,21 +199,7 @@
           "out": {
             "traceback_substring": "ValueError"
           }
-        },
-        {
-          "title": "TypeError: missing min and max",
-          "exact_match_out": false,
-          "in": {
-            "column": "x",
-            "min_value": null,
-            "max_value": null,
-            "catch_exceptions": true
-          },
-          "out": {
-            "success": true
-          },
-          "_note": "vacuously true"
-     }]},
+        }]},
     {
       "data": {
         "empty_column": []
