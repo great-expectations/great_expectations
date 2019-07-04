@@ -390,6 +390,7 @@ def test_list_datasources(data_context):
         }
     ]
 
+
 def test_data_context_result_store(titanic_data_context):
     """
     Test that validation results can be correctly fetched from the configured results store
@@ -400,8 +401,9 @@ def test_data_context_result_store(titanic_data_context):
         validation_result = titanic_data_context.get_validation_result(data_asset_name, "BasicDatasetProfiler")
         assert data_asset_name in validation_result["meta"]["data_asset_name"]
 
+
 def test_render_full_static_site(tmp_path_factory, filesystem_csv_3):
-    project_dir = tmp_path_factory.mktemp("project_dir")
+    project_dir = str(tmp_path_factory.mktemp("project_dir"))
     print(project_dir)
 
     os.makedirs(os.path.join(project_dir, "data"))
@@ -462,13 +464,13 @@ def test_render_full_static_site(tmp_path_factory, filesystem_csv_3):
     full_fixture_path = os.path.join(ge_directory,"fixtures/validations/random/default/f1/")
     os.mkdir(full_fixture_path)
     shutil.copy(
-        glob_result[0], #!!! This might switch the f1 and f2 files...
+        glob_result[0],  # !!! This might switch the f1 and f2 files...
         full_fixture_path+"BasicDatasetProfiler.json"
     )
     full_fixture_path = os.path.join(ge_directory,"fixtures/validations/random/default/f2/")
     os.mkdir(full_fixture_path)
     shutil.copy(
-        glob_result[1], #!!! This might switch the f1 and f2 files...
+        glob_result[1],  # !!! This might switch the f1 and f2 files...
         full_fixture_path+"BasicDatasetProfiler.json"
     )
     # for g in glob_result:

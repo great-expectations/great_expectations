@@ -273,11 +273,12 @@ def test_cli_profile(empty_data_context, filesystem_csv_2, capsys):
 
 
 def test_scaffold_directories_and_notebooks(tmp_path_factory):
-    empty_directory = tmp_path_factory.mktemp("test_scaffold_directories_and_notebooks")
+    empty_directory = str(tmp_path_factory.mktemp("test_scaffold_directories_and_notebooks"))
     scaffold_directories_and_notebooks(empty_directory)
     print(empty_directory)
 
-    assert set(os.listdir(empty_directory)) == set(['datasources', 'plugins', 'expectations', '.gitignore', 'fixtures', 'uncommitted', 'notebooks'])
+    assert set(os.listdir(empty_directory)) == \
+           set(['datasources', 'plugins', 'expectations', '.gitignore', 'fixtures', 'uncommitted', 'notebooks'])
     assert set(os.listdir(os.path.join(empty_directory, "uncommitted"))) == \
         set(['samples', 'documentation', 'validations', 'credentials'])
 
