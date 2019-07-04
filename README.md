@@ -10,19 +10,6 @@ Great Expectations
 *Always know what to expect from your data.*
 
 
-Coming soon...! (Temporary notice June 2019)
---------------------------------------------------------------------------------
-
-We're making some major revisions to the project right now, so expect a BIG update to documentation by the end of June. 
-
-In the meantime, the Great Expectations Slack channel is the best place to get up-to-date information:
-
-https://tinyurl.com/great-expectations-slack
-
-Teaser: the next round of revisions doesn't change the existing behavior of Great Expectations at all, but it does add tons of new support for profiling, documenting, and deploying Expectations. It significantly raises the bar for making Great Expectations fully production-ready.
-
-
-
 What is great_expectations?
 --------------------------------------------------------------------------------
 
@@ -46,9 +33,15 @@ To get more done with data, faster. Teams use great_expectations to
 How do I get started?
 --------------------------------------------------------------------------------
 
-It's easy! Just use pip install:
+It's easy! 
+    First use pip install:
 
-    $ pip install great_expectations
+        $ pip install great_expectations
+
+    Then run this command in the root directory of the project you want to try Great Expectations on:
+
+        $ great_expectations init
+    
 
 You can also clone the repository, which includes examples of using great_expectations.
 

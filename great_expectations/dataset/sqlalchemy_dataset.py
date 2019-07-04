@@ -1,11 +1,23 @@
 from __future__ import division
 from six import PY3, string_types
 
+import uuid
 from functools import wraps
 import inspect
 import logging
-import sys
 import warnings
+from datetime import datetime
+from importlib import import_module
+
+import pandas as pd
+import numpy as np
+
+from dateutil.parser import parse
+
+from .dataset import Dataset
+from .pandas_dataset import PandasDataset
+from great_expectations.data_asset import DataAsset
+from great_expectations.data_asset.util import DocInherit, parse_result_format
 
 logger = logging.getLogger(__name__)
 
@@ -13,16 +25,10 @@ try:
     import sqlalchemy as sa
     from sqlalchemy.engine import reflection
 except ImportError:
-    logger.error("Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support")
-    raise
+    logger.debug("Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support")
 
-import pandas as pd
 
-from dateutil.parser import parse
-from datetime import datetime
 
-from .dataset import Dataset
-from great_expectations.data_asset.util import DocInherit, parse_result_format
 
 class MetaSqlAlchemyDataset(Dataset):
 
@@ -138,8 +144,7 @@ class MetaSqlAlchemyDataset(Dataset):
                         col = x[column]
                     maybe_limited_unexpected_list.append(datetime.strftime(col, output_strftime_format))
             else:
-                maybe_limited_unexpected_list = [x[column]
-                                             for x in unexpected_query_results.fetchall()]
+                maybe_limited_unexpected_list = [x[column] for x in unexpected_query_results.fetchall()]
 
             success_count = nonnull_count - count_results['unexpected_count']
             success, percent_success = self._calc_map_expectation_success(
@@ -174,8 +179,20 @@ class MetaSqlAlchemyDataset(Dataset):
 
 class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
+    @classmethod
+    def from_dataset(cls, dataset=None):
+        if isinstance(dataset, SqlAlchemyDataset):
+            return cls(table_name=str(dataset._table.name), engine=dataset.engine)
+        else:
+            raise ValueError("from_dataset requires a SqlAlchemy dataset")
+
     def __init__(self, table_name=None, engine=None, connection_string=None,
                  custom_sql=None, schema=None, *args, **kwargs):
+
+        if custom_sql and not table_name:
+            # dashes are special characters in most databases so use undercores
+            table_name = str(uuid.uuid4()).replace("-", "_")
+
         if table_name is None:
             raise ValueError("No table_name provided.")
 
@@ -193,6 +210,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 # Currently we do no error handling if the engine doesn't work out of the box.
                 raise err
 
+        self.dialect = import_module("sqlalchemy.dialects." + self.engine.dialect.name)
         if schema is not None and custom_sql is not None:
             # temporary table will be written to temp schema, so don't allow
             # a user-defined schema
@@ -200,7 +218,6 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         if custom_sql:
             self.create_temporary_table(table_name, custom_sql)
-
 
         try:
             insp = reflection.Inspector.from_engine(self.engine)
@@ -212,6 +229,21 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         # Only call super once connection is established and table_name and columns known to allow autoinspection
         super(SqlAlchemyDataset, self).__init__(*args, **kwargs)
+
+    def head(self, n=5):
+        """Returns a *PandasDataset* with the first *n* rows of the given Dataset"""
+        return PandasDataset(
+            pd.read_sql(
+                sa.select(["*"]).select_from(self._table).limit(n),
+                con=self.engine
+            ), 
+            expectation_suite=self.get_expectation_suite(
+                discard_failed_expectations=False,
+                discard_result_format_kwargs=False,
+                discard_catch_exceptions_kwargs=False,
+                discard_include_configs_kwargs=False
+            )
+        )
 
     def get_row_count(self):
         count_query = sa.select([sa.func.count()]).select_from(
@@ -268,11 +300,16 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             ]).where(sa.column(column) != None) \
               .group_by(sa.column(column)) \
               .select_from(self._table)).fetchall()
-        return pd.Series(
+        series = pd.Series(
             [row[1] for row in results],
-            index=[row[0] for row in results],
-            name=column
+            index=pd.Index(
+                data=[row[0] for row in results],
+                name="value"
+            ),
+            name="count"
         )
+        series.sort_index(inplace=True)
+        return series
 
     def get_column_mean(self, column):
         return self.engine.execute(
@@ -309,19 +346,92 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             column_median = column_values[1][0]  # True center value
         return column_median
 
-    def get_column_hist(self, column, bins):
-        # TODO: this is **terribly** inefficient; consider refactor
-        """return a list of counts corresponding to bins"""
-        hist = []
-        for i in range(0, len(bins) - 1):
-            # all bins except last are half-open
-            if i == len(bins) - 2:
-                max_strictly = False
-            else:
-                max_strictly = True
-            hist.append(
-                self.get_column_count_in_range(column, min_val=bins[i], max_val=bins[i + 1], max_strictly=max_strictly)
+    def get_column_quantiles(self, column, quantiles):
+        selects = []
+        for quantile in quantiles:
+            selects.append(
+                sa.func.percentile_disc(quantile).within_group(sa.column(column).asc())
             )
+        quantiles = self.engine.execute(sa.select(selects).select_from(self._table)).fetchone()
+        return list(quantiles)
+
+    def get_column_stdev(self, column):
+        res = self.engine.execute(sa.select([
+                sa.func.stddev_samp(sa.column(column))
+            ]).select_from(self._table).where(sa.column(column) != None)).fetchone()
+        return float(res[0])
+
+    def get_column_hist(self, column, bins):
+        """return a list of counts corresponding to bins
+
+        Args:
+            column: the name of the column for which to get the histogram
+            bins: tuple of bin edges for which to get histogram values; *must* be tuple to support caching
+        """
+        case_conditions = []
+        idx = 0
+        bins = list(bins)
+
+        # If we have an infinte lower bound, don't express that in sql
+        if (bins[0] == -np.inf) or (bins[0] == -float("inf")):
+            case_conditions.append(
+                sa.func.sum(
+                    sa.case(
+                        [
+                            (sa.column(column) < bins[idx+1], 1)
+                        ], else_=0
+                    )
+                ).label("bin_" + str(idx))
+            )
+            idx += 1
+
+        for idx in range(idx, len(bins)-2):
+            case_conditions.append(
+                sa.func.sum(
+                    sa.case(
+                        [
+                            (sa.and_(
+                                bins[idx] <= sa.column(column),
+                                sa.column(column) < bins[idx+1]
+                            ), 1)
+                        ], else_=0
+                    )
+                ).label("bin_" + str(idx))
+            )
+
+        if (bins[-1] == np.inf) or (bins[-1] == float("inf")):
+            case_conditions.append(
+                sa.func.sum(
+                    sa.case(
+                        [
+                            (bins[-2] <= sa.column(column), 1)
+                        ], else_=0
+                    )
+                ).label("bin_" + str(len(bins)-1))
+            )
+        else:    
+            case_conditions.append(
+                sa.func.sum(
+                    sa.case(
+                        [
+                            (sa.and_(
+                                bins[-2] <= sa.column(column),
+                                sa.column(column) <= bins[-1]
+                            ), 1)
+                        ], else_=0
+                    )
+                ).label("bin_" + str(len(bins)-1))
+            )
+
+        query = sa.select(
+            case_conditions
+        )\
+        .where(
+            sa.column(column) != None,
+        )\
+        .select_from(self._table)
+
+        hist = list(self.engine.execute(query).fetchone())
         return hist
 
     def get_column_count_in_range(self, column, min_val=None, max_val=None, min_strictly=False, max_strictly=True):
@@ -370,7 +480,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         It hasn't been tested in all SQL dialects, and may change based on community feedback.
         :param custom_sql:
         """
-        stmt = "CREATE TEMPORARY TABLE {table_name} AS {custom_sql}".format(
+        stmt = "CREATE TEMPORARY TABLE \"{table_name}\" AS {custom_sql}".format(
             table_name=table_name, custom_sql=custom_sql)
         self.engine.execute(stmt)
 
@@ -411,6 +521,108 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         return sa.column(column) != None
 
+
+    @DocInherit
+    @DataAsset.expectation(['column', 'type_', 'mostly'])
+    def expect_column_values_to_be_of_type(
+        self,
+        column,
+        type_,
+        mostly=None,
+        result_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
+        try:
+            col_data = [col for col in self.columns if col["name"] == column][0]
+            col_type = type(col_data["type"])
+        except IndexError:
+            raise ValueError("Unrecognized column: %s" % column)
+        except KeyError:
+            raise ValueError("No database type data available for column: %s" % column)
+
+        try:
+            # Our goal is to be as explicit as possible. We will match the dialect
+            # if that is possible. If there is no dialect available, we *will*
+            # match against a top-level SqlAlchemy type if that's possible.
+            #
+            # This is intended to be a conservative approach.
+            #
+            # In particular, we *exclude* types that would be valid under an ORM
+            # such as "float" for postgresql with this approach
+
+            if not self.dialect:
+                logger.warning("No sqlalchemy dialect found; relying in top-level sqlalchemy types.")
+                success = issubclass(col_type, getattr(sa, type_))
+            else:
+                success = issubclass(col_type, getattr(self.dialect, type_))
+                
+            return {
+                    "success": success,
+                    "details": {
+                        "observed_type": col_type.__name__
+                    }
+                }
+
+        except AttributeError:
+            raise ValueError("Unrecognized sqlalchemy type: %s" % type_)
+
+    @DocInherit
+    @DataAsset.expectation(['column', 'type_', 'mostly'])
+    def expect_column_values_to_be_in_type_list(
+        self,
+        column,
+        type_list,
+        mostly=None,
+        result_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
+        try:
+            col_data = [col for col in self.columns if col["name"] == column][0]
+            col_type = type(col_data["type"])
+        except IndexError:
+            raise ValueError("Unrecognized column: %s" % column)
+        except KeyError:
+            raise ValueError("No database type data available for column: %s" % column)
+
+        # Our goal is to be as explicit as possible. We will match the dialect
+        # if that is possible. If there is no dialect available, we *will*
+        # match against a top-level SqlAlchemy type.
+        #
+        # This is intended to be a conservative approach.
+        #
+        # In particular, we *exclude* types that would be valid under an ORM
+        # such as "float" for postgresql with this approach
+
+        if not self.dialect:
+            logger.warning("No sqlalchemy dialect found; relying in top-level sqlalchemy types.")
+            types = []
+            for type_ in type_list:
+                try:
+                    type_class = getattr(sa, type_)
+                    types.append(type_class)
+                except AttributeError:
+                    logger.debug("Unrecognized type: %s" % type_)
+            if len(types) == 0:
+                raise ValueError("No recognized sqlalchemy types in type_list")
+            types = tuple(types)
+        else:
+            types = []
+            for type_ in type_list:
+                try:
+                    type_class = getattr(self.dialect, type_)
+                    types.append(type_class)
+                except AttributeError:
+                    logger.debug("Unrecognized type: %s" % type_)
+            if len(types) == 0:
+                raise ValueError("No recognized sqlalchemy types in type_list for dialect %s" % 
+                    self.dialect.__name__)
+            types = tuple(types)
+        
+        return {
+                "success": issubclass(col_type, types),
+                "details": {
+                    "observed_type-type": col_type.__name__
+                }
+        }
+
     @DocInherit
     @MetaSqlAlchemyDataset.column_map_expectation
     def expect_column_values_to_be_in_set(self,
@@ -420,6 +632,10 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                                           parse_strings_as_datetimes=None,
                                           result_format=None, include_config=False, catch_exceptions=None, meta=None
                                           ):
+        if value_set is None:
+            # vacuously true
+            return True
+
         if parse_strings_as_datetimes:
             parsed_value_set = self._parse_value_set(value_set)
         else:
@@ -540,7 +756,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                                                 mostly=None,
                                                 result_format=None, include_config=False, catch_exceptions=None, meta=None
                                                 ):
-        # Postgres-only version
+        condition = None
         try:
             # Postgres-only version
             if isinstance(self.engine.dialect, sa.dialects.postgresql.dialect):
@@ -603,7 +819,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         condition = None
         try:
-        # Postgres-only version
+            # Postgres-only version
             if isinstance(self.engine.dialect, sa.dialects.postgresql.dialect):
                 if match_on == "any":
                     condition = \
@@ -619,7 +835,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             # this can simply indicate no mysql driver is loaded
             pass
         try:
-        # Mysql
+            # Mysql
             if isinstance(self.engine.dialect, sa.dialects.mysql.dialect):
                 if match_on == "any":
                     condition = \

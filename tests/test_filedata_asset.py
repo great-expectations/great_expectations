@@ -3,26 +3,28 @@ from __future__ import division
 import warnings
 import pytest
 import great_expectations as ge
-import great_expectations.dataset.autoinspect as autoinspect
 from .test_utils import assertDeepAlmostEqual
 
 
 def test_autoinspect_filedata_asset():
-    #Expect a warning to be raised since a file object doesn't have a columns attribute
+    #Expect an error to be raised since a file object doesn't have a columns attribute
     warnings.simplefilter('always', UserWarning)
     file_path = './tests/test_sets/toy_data_complete.csv'
     my_file_data = ge.data_asset.FileDataAsset(file_path)
 
-    with pytest.raises(UserWarning):
-        with warnings.catch_warnings(record=True):
-            warnings.simplefilter("error")
-            try:
-                my_file_data.autoinspect(autoinspect.columns_exist)
-            except:
-                raise
+    with pytest.raises(ge.exceptions.GreatExpectationsError) as exc:
+        my_file_data.profile(ge.profile.ColumnsExistProfiler)
+        assert "Invalid data_asset for profiler; aborting" in exc.message
+
+        # with warnings.catch_warnings(record=True):
+        #     warnings.simplefilter("error")
+        #     try:
+        #         my_file_data.profile(ge.profile.ColumnsExistProfiler)
+        #     except:
+        #         raise
 
 
-def test_expectation_config_filedata_asset():
+def test_expectation_suite_filedata_asset():
     # Load in data files
     file_path = './tests/test_sets/toy_data_complete.csv'
 
@@ -41,7 +43,7 @@ def test_expectation_config_filedata_asset():
                                                            include_config=True)
 
     # Test basic config output
-    complete_config = f_dat.get_expectations_config()
+    complete_config = f_dat.get_expectation_suite()
     expected_config_expectations = [{'expectation_type':'expect_file_line_regex_match_count_to_equal',
                                      'kwargs': {'expected_count': 3,
                                                 'regex': ',\\S',
@@ -49,8 +51,8 @@ def test_expectation_config_filedata_asset():
     assertDeepAlmostEqual(complete_config["expectations"], expected_config_expectations)
 
     # Include result format kwargs
-    complete_config2 = f_dat.get_expectations_config(discard_result_format_kwargs=False,
-                                                     discard_failed_expectations=False)
+    complete_config2 = f_dat.get_expectation_suite(discard_result_format_kwargs=False,
+                                                   discard_failed_expectations=False)
     expected_config_expectations2 = [{'expectation_type': 'expect_file_line_regex_match_count_to_equal',
                                       'kwargs': {'expected_count': 3,
                                                  'regex': ',\\S',
@@ -65,8 +67,8 @@ def test_expectation_config_filedata_asset():
     assertDeepAlmostEqual(complete_config2["expectations"], expected_config_expectations2)
 
     # Discard Failing Expectations
-    complete_config3 = f_dat.get_expectations_config(discard_result_format_kwargs=False,
-                                                     discard_failed_expectations=True)
+    complete_config3 = f_dat.get_expectation_suite(discard_result_format_kwargs=False,
+                                                   discard_failed_expectations=True)
 
     expected_config_expectations3 = [{'expectation_type': 'expect_file_line_regex_match_count_to_equal',
                                       'kwargs': {'expected_count': 3,

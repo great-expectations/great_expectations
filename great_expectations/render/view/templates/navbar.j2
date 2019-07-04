@@ -1,0 +1,12 @@
+<nav id="navigation" class="navbar navbar-light bg-light sticky">
+    <nav class="nav nav-pills flex-column">
+        {% if data_asset_name -%}
+            <a class="navbar-brand" href="#">{{data_asset_name}}</a>
+        {% else -%}
+            <a class="navbar-brand" href="#"></a>
+        {% endif -%}
+        {% for section in sections %}
+            <a class="nav-link" href="#section-{{loop.index}}">{{section['section_name']}}</a>
+        {% endfor %}
+    </nav>
+</nav>
