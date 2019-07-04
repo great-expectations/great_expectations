@@ -10,6 +10,10 @@ Planned Features
 * Conditional expectations
 * Multi-batch expectations
 
+v.0.7.1__develop
+________________
+
+
 v.0.7.0
 ________________
 
