@@ -2,10 +2,18 @@ import os
 import click
 
 from .util import cli_message
-from great_expectations.render import DescriptivePageView
+from great_expectations.render import DefaultJinjaPageView
+from great_expectations.version import __version__ as __version__
 
 
 def add_datasource(context):
+    cli_message(
+        """
+========== Datasources ==========
+
+See <blue>https://docs.greatexpectations.io/en/latest/core_concepts/datasource.html?utm_source=cli&utm_medium=init&utm_campaign={0:s}</blue> for more information about datasources.
+""".format(__version__.replace(".", "_"))
+    )
     data_source_selection = click.prompt(
         msg_prompt_choose_data_source,
         type=click.Choice(["1", "2", "3", "4"]),
@@ -15,7 +23,6 @@ def add_datasource(context):
     cli_message(data_source_selection)
 
     if data_source_selection == "1":  # pandas
-        print("This init script will configure a local ")
         path = click.prompt(
             msg_prompt_filesys_enter_base_path,
             # default='/data/',
@@ -42,7 +49,8 @@ def add_datasource(context):
             show_default=True
         )
 
-        context.add_datasource(data_source_name, "pandas", base_directory=os.path.join("..", path))
+        context.add_datasource(data_source_name, "pandas",
+                               base_directory=os.path.join("..", path))
 
     elif data_source_selection == "2":  # sqlalchemy
         data_source_name = click.prompt(
@@ -112,61 +120,71 @@ def add_datasource(context):
     if data_source_name != None:
 
         cli_message(
-"""
-Would you like to profile '%s' to create candidate expectations and documentation?
+            """
+========== Profiling ==========
 
-Please note: 
-As of v0.7.0, profiling is still a beta feature in Great Expectations.  
+Would you like to profile '{0:s}' to create candidate expectations and documentation?
+
+Please note: As of v0.7.0, profiling is still a beta feature in Great Expectations.  
 This generation of profilers will evaluate the entire data source (without sampling) and may be very time consuming. 
 As a rule of thumb, we recommend starting with data smaller than 100MB.
 
-As a backup option please visit <blue>https://great-expectations.readthedocs.io/en/latest/profiling.html</blue> for instructions for profiling limited subsets within data sources.
-            """ % (data_source_name)
+To learn more about profiling, visit <blue>https://docs.greatexpectations.io/en/latest/guides/profiling.html?utm_source=cli&utm_medium=init&utm_campaign={1:s}</blue>.
+            """.format(data_source_name, __version__.replace(".", "_"))
         )
         if click.confirm("Proceed?",
-            default=True
-        ):
+                         default=True
+                         ):
             profiling_results = context.profile_datasource(
                 data_source_name,
                 max_data_assets=20
             )
 
-            print("\nProfiling results are saved:")
+            print("\nDone.\n\nProfiling results are saved here:")
             for profiling_result in profiling_results:
                 data_asset_name = profiling_result[1]['meta']['data_asset_name']
                 expectation_suite_name = profiling_result[1]['meta']['expectation_suite_name']
                 run_id = profiling_result[1]['meta']['run_id']
 
-                print("  {0:s}".format(context.get_validation_location(data_asset_name, expectation_suite_name, run_id)['filepath']))
+                print("  {0:s}".format(context.get_validation_location(
+                    data_asset_name, expectation_suite_name, run_id)['filepath']))
 
             cli_message(
-"""
+                """
+========== Data Documentation ==========
 
 To generate documentation from the data you just profiled, the profiling results should be moved from 
-great_expectations/uncommitted (ignored by git) to great_expectations/fixtures. Before proceeding,
-make sure that this data does not contain sensitive information.
+great_expectations/uncommitted (ignored by git) to great_expectations/fixtures.
 
-To learn more: <blue>https://great-expectations.readthedocs.io/en/latest/intro.html#data_documentation</blue>
-"""
+Before committing, please make sure that this data does not contain sensitive information!
+
+To learn more: <blue>https://docs.greatexpectations.io/en/latest/guides/data_documentation.html?utm_source=cli&utm_medium=init&utm_campaign={0:s}</blue>
+""".format(__version__.replace(".", "_"))
             )
-            if click.confirm("Proceed?",
-                default = True
-            ):
-                cli_message("Rendering...")
+            if click.confirm("Move the profiled data?",
+                             default=True
+                             ):
+                cli_message("\nMoving files...")
 
                 for profiling_result in profiling_results:
                     data_asset_name = profiling_result[1]['meta']['data_asset_name']
                     expectation_suite_name = profiling_result[1]['meta']['expectation_suite_name']
                     run_id = profiling_result[1]['meta']['run_id']
-                    context.move_validation_to_fixtures(data_asset_name, expectation_suite_name, run_id)
+                    context.move_validation_to_fixtures(
+                        data_asset_name, expectation_suite_name, run_id)
+
+                cli_message("\nDone.")
+
+            if click.confirm("\nBuild documentation using the profiled data?",
+                             default=True
+                             ):
+                cli_message("\nBuilding documentation...")
 
                 context.render_full_static_site()
                 cli_message(
- """
-To view the generated data documentation, start a web server:
-<blue>cd great_expectations/data_documentation; python -m SimpleHTTPServer</blue> (if Python 2) or 
-<blue>cd great_expectations/data_documentation; python3 -m http.server</blue> (if Python 3)
-and open http://localhost:8000 in your browser 
+                    """
+To view the generated data documentation, open this file in a web browser:
+    <green>great_expectations/data_documentation/index.html</green>
 """)
 
         else:
@@ -185,10 +203,10 @@ and open http://localhost:8000 in your browser
 
 
 msg_prompt_choose_data_source = """
-Configure a data source:
-    1. Pandas data frames (including local filesystem)
+Configure a datasource:
+    1. Pandas DataFrame
     2. Relational database (SQL)
-    3. Spark DataFrames
+    3. Spark DataFrame
     4. Skip datasource configuration
 """
 
@@ -204,12 +222,12 @@ Configure a data source:
 #     """
 
 msg_prompt_filesys_enter_base_path = """
-Enter the path of the root directory where the data files are stored
-(the path may be either absolute or relative to current directory)
+Enter the path of the root directory where the data files are stored.
+(The path may be either absolute or relative to current directory.)
 """
 
 msg_prompt_datasource_name = """
-Give your new data source a short name
+Give your new data source a short name.
 """
 
 msg_sqlalchemy_config_connection = """
@@ -231,34 +249,33 @@ it will walk you through configuring the database connection and next steps.
 """
 
 msg_filesys_go_to_notebook = """
-To create expectations for your CSV files start Jupyter and open the notebook
-that will walk you through next steps.
+To create expectations for your data, start Jupyter and open a tutorial notebook:
 
 To launch with jupyter notebooks:
-    <blue>jupyter notebook great_expectations/notebooks/create_expectations.ipynb</blue>
+    <green>jupyter notebook great_expectations/notebooks/create_expectations.ipynb</green>
 
 To launch with jupyter lab:
-    <blue>jupyter lab great_expectations/notebooks/create_expectations.ipynb</blue>
+    <green>jupyter lab great_expectations/notebooks/create_expectations.ipynb</green>
 """
 
 msg_sqlalchemy_go_to_notebook = """
-To create expectations for your SQL data assets start Jupyter and open the notebook
+To create expectations for your data start Jupyter and open the notebook
 that will walk you through next steps.
 
 To launch with jupyter notebooks:
-    <blue>jupyter notebook great_expectations/notebooks/create_expectations.ipynb</blue>
+    <green>jupyter notebook great_expectations/notebooks/create_expectations.ipynb</green>
 
 To launch with jupyter lab:
-    <blue>jupyter lab great_expectations/notebooks/create_expectations.ipynb</blue>
+    <green>jupyter lab great_expectations/notebooks/create_expectations.ipynb</green>
 """
 
 msg_spark_go_to_notebook = """
-To create expectations for your CSV files start Jupyter and open the notebook
+To create expectations for your data start Jupyter and open the notebook
 that will walk you through next steps.
 
 To launch with jupyter notebooks:
-    <blue>jupyter notebook great_expectations/notebooks/create_expectations.ipynb</blue>
+    <green>jupyter notebook great_expectations/notebooks/create_expectations.ipynb</green>
 
 To launch with jupyter lab:
-    <blue>jupyter lab great_expectations/notebooks/create_expectations.ipynb</blue>
+    <green>jupyter lab great_expectations/notebooks/create_expectations.ipynb</green>
 """

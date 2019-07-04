@@ -1,5 +1,6 @@
 import warnings
 from .base import DatasetProfiler
+from great_expectations.dataset.dataset import Dataset
 
 
 class BasicDatasetProfiler(DatasetProfiler):
@@ -16,13 +17,13 @@ class BasicDatasetProfiler(DatasetProfiler):
     def _get_column_type(cls, df, column):
         # list of types is used to support pandas and sqlalchemy
         try:
-            if df.expect_column_values_to_be_in_type_list(column, type_list=["int", "INTEGER", "BIGINT"])["success"]:
+            if df.expect_column_values_to_be_in_type_list(column, type_list=sorted(list(Dataset.INT_TYPE_NAMES)))["success"]:
                 type_ = "int"
 
-            elif df.expect_column_values_to_be_in_type_list(column, type_list=["float", "DOUBLE_PRECISION"])["success"]:
+            elif df.expect_column_values_to_be_in_type_list(column, type_list=sorted(list(Dataset.FLOAT_TYPE_NAMES)))["success"]:
                 type_ = "float"
 
-            elif df.expect_column_values_to_be_in_type_list(column, type_list=["string", "VARCHAR", "TEXT"])["success"]:
+            elif df.expect_column_values_to_be_in_type_list(column, type_list=sorted(list(Dataset.STRING_TYPE_NAMES)))["success"]:
                 type_ = "string"
 
             else:
@@ -35,10 +36,10 @@ class BasicDatasetProfiler(DatasetProfiler):
     @classmethod
     def _get_column_cardinality(cls, df, column):
 
-        num_unique = df.expect_column_unique_value_count_to_be_between(column, 0, None)[
+        num_unique = df.expect_column_unique_value_count_to_be_between(column, None, None)[
             'result']['observed_value']
         pct_unique = df.expect_column_proportion_of_unique_values_to_be_between(
-            column, 0, None)['result']['observed_value']
+            column, None, None)['result']['observed_value']
 
 
         if pct_unique == 1.0:
@@ -93,42 +94,35 @@ class BasicDatasetProfiler(DatasetProfiler):
             if type_ == "int":
                 if cardinality == "unique":
                     df.expect_column_values_to_be_unique(column)
-                    try:
-                        df.expect_column_values_to_be_increasing(column)
-                    except NotImplementedError:
-                        warnings.warn("NotImplementedError: expect_column_values_to_be_increasing")
-
                 elif cardinality in ["one", "two", "very few", "few"]:
                     df.expect_column_distinct_values_to_be_in_set(column, value_set=None, result_format="SUMMARY")
                 else:
-                    df.expect_column_min_to_be_between(column, min_value=0, max_value=0)
-                    df.expect_column_max_to_be_between(column, min_value=0, max_value=0)
-                    df.expect_column_mean_to_be_between(column, min_value=0, max_value=0)
-                    df.expect_column_median_to_be_between(column, min_value=0, max_value=0)
-                    df.expect_column_stdev_to_be_between(column, min_value=0, max_value=None)
+                    df.expect_column_min_to_be_between(column, min_value=None, max_value=None)
+                    df.expect_column_max_to_be_between(column, min_value=None, max_value=None)
+                    df.expect_column_mean_to_be_between(column, min_value=None, max_value=None)
+                    df.expect_column_median_to_be_between(column, min_value=None, max_value=None)
+                    df.expect_column_stdev_to_be_between(column, min_value=None, max_value=None)
                     df.expect_column_quantile_values_to_be_between(column,
                                                                    quantile_ranges={
                                                                        "quantiles": [0.05, 0.25, 0.5, 0.75, 0.95],
                                                                        "value_ranges": [[None, None], [None, None], [None, None], [None, None], [None, None]]
                                                                    }
                                                                    )
+                    df.expect_column_kl_divergence_to_be_less_than(column, partition_object=None,
+                                                           threshold=None, result_format='COMPLETE')
 
             elif type_ == "float":
                 if cardinality == "unique":
                     df.expect_column_values_to_be_unique(column)
-                    try:
-                        df.expect_column_values_to_be_increasing(column)
-                    except NotImplementedError:
-                        warnings.warn("NotImplementedError: expect_column_values_to_be_increasing")
 
                 elif cardinality in ["one", "two", "very few", "few"]:
                     df.expect_column_distinct_values_to_be_in_set(column, value_set=None, result_format="SUMMARY")
 
                 else:
-                    df.expect_column_min_to_be_between(column, min_value=0, max_value=0)
-                    df.expect_column_max_to_be_between(column, min_value=0, max_value=0)
-                    df.expect_column_mean_to_be_between(column, min_value=0, max_value=0)
-                    df.expect_column_median_to_be_between(column, min_value=0, max_value=0)
+                    df.expect_column_min_to_be_between(column, min_value=None, max_value=None)
+                    df.expect_column_max_to_be_between(column, min_value=None, max_value=None)
+                    df.expect_column_mean_to_be_between(column, min_value=None, max_value=None)
+                    df.expect_column_median_to_be_between(column, min_value=None, max_value=None)
                     df.expect_column_quantile_values_to_be_between(column,
                                                                    quantile_ranges={
                                                                        "quantiles": [0.05, 0.25, 0.5, 0.75, 0.95],

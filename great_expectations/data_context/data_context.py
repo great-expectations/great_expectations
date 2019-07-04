@@ -11,6 +11,7 @@ from glob import glob
 from six import string_types
 import datetime
 import shutil
+from collections import OrderedDict
 
 from .util import NormalizedDataAssetName, get_slack_callback, safe_mmkdir
 
@@ -31,7 +32,10 @@ from great_expectations.datasource import (
 )
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.renderer import DescriptivePageRenderer, PrescriptivePageRenderer
-from great_expectations.render.view import DescriptivePageView
+from great_expectations.render.view import (
+    DefaultJinjaPageView,
+    DefaultJinjaIndexPageView,
+)
 
 
 from .expectation_explorer import ExpectationExplorer
@@ -45,11 +49,41 @@ ALLOWED_DELIMITERS = ['.', '/']
 
 
 class DataContext(object):
-    """A DataContext manages resources including datasources, generators, and expectation suites.
+    """A DataContext represents a Great Expectations project. It organizes storage and access for
+    expectation suites, datasources, notification settings, and data fixtures.
+
+    The DataContext is configured via a yml file stored in a directory called great_expectations; the configuration file
+    as well as managed expectation suites should be stored in version control.
 
     Use the `create` classmethod to create a new empty config, or instantiate the DataContext
-    by passing the path to an existing data context root directory. See :py:mod:`great_expectations.data_context`
-    for more information.
+    by passing the path to an existing data context root directory.
+
+    DataContexts use data sources you're already familiar with. Generators help introspect data stores and data execution
+    frameworks (such as airflow, Nifi, dbt, or dagster) to describe and produce batches of data ready for analysis. This
+    enables fetching, validation, profiling, and documentation of  your data in a way that is meaningful within your
+    existing infrastructure and work environment.
+
+    DataContexts use a datasource-based namespace, where each accessible type of data has a three-part
+    normalized *data_asset_name*, consisting of *datasource/generator/generator_asset*.
+
+    - The datasource actually connects to a source of materialized data and returns Great Expectations DataAssets \
+      connected to a compute environment and ready for validation.
+
+    - The Generator knows how to introspect datasources and produce identifying "batch_kwargs" that define \
+      particular slices of data.
+
+    - The generator_asset is a specific name -- often a table name or other name familiar to users -- that \
+      generators can slice into batches.
+
+    An expectation suite is a collection of expectations ready to be applied to a batch of data. Since
+    in many projects it is useful to have different expectations evaluate in different contexts--profiling
+    vs. testing; warning vs. error; high vs. low compute; ML model or dashboard--suites provide a namespace
+    option for selecting which expectations a DataContext returns.
+
+    In many simple projects, the datasource or generator name may be omitted and the DataContext will infer
+    the correct name when there is no ambiguity.
+
+    Similarly, if no expectation suite name is provided, the DataContext will assume the name "default".
     """
 
     @classmethod
@@ -118,7 +152,7 @@ class DataContext(object):
         # TODO: these paths should be configurable
         self.expectations_directory = os.path.join(self.root_directory, "expectations")
         self.fixtures_validations_directory = os.path.join(self.root_directory, "fixtures/validations")
-        self.data_doc_directory = os.path.join(self.root_directory, "data_documentation")
+        self.data_doc_directory = os.path.join(self.root_directory, "uncommitted/documentation")
         self.plugin_store_directory = os.path.join(self.root_directory, "plugins/store")
         sys.path.append(self.plugin_store_directory)
         
@@ -418,12 +452,12 @@ class DataContext(object):
 
         # TODO: Review logic, once described below but not implemented in datasource save, for splitting configuration
         # We allow a datasource to be defined in any combination of the following ways:
-        
+
         # 1. It may be fully specified in the datasources section of the great_expectations.yml file
         # 2. It may be stored in a file by convention located in `datasources/<datasource_name>/config.yml`
         # 3. It may be listed in the great_expectations.yml file with a config_file key that provides a relative \
         # path to a different yml config file
-        
+
         # Any key duplicated across configs will be updated by the last key read (in the order above)
         datasource_config = {}
         defined_config_path = None
@@ -1422,7 +1456,8 @@ class DataContext(object):
             None
         """
 
-        #TODO: this is a temporary implementation and should be replaced with a rendered specific for this purpose
+        index_links = []
+
         validation_filepaths = [y for x in os.walk(self.fixtures_validations_directory) for y in glob(os.path.join(x[0], '*.json'))]
         for validation_filepath in validation_filepaths:
             with open(validation_filepath, "r") as infile:
@@ -1433,8 +1468,33 @@ class DataContext(object):
             model = DescriptivePageRenderer.render(validation)
             out_filepath = self.get_validation_doc_filepath(data_asset_name, expectation_suite_name)
             safe_mmkdir(os.path.dirname(out_filepath))
+
             with open(out_filepath, 'w') as writer:
-                writer.write(DescriptivePageView.render(model))
+                writer.write(DefaultJinjaPageView.render(model))
+
+            index_links.append({
+                "data_asset_name" : data_asset_name,
+                "filepath" : out_filepath
+            })
+        
+        index_document = OrderedDict()
+        for il in index_links:
+            source, generator, asset = il["data_asset_name"].split('/')
+            if not source in index_document:
+                index_document[source] = []
+            index_document[source].append({
+                "data_asset_name" : asset,
+                "filepath" : il["filepath"],
+                "source" : source,
+                "generator" : generator,
+                "asset" : asset,
+            })
+
+
+        with open(os.path.join(self.data_doc_directory, "index.html"), "w") as writer:
+            writer.write(DefaultJinjaIndexPageView.render({
+                "sections": index_document
+            }))
 
     def profile_datasource(self,
                            datasource_name,

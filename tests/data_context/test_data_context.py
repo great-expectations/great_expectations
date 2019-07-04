@@ -9,6 +9,7 @@ except ImportError:
 import os
 import shutil
 import json
+from glob import glob
 
 import sqlalchemy as sa
 import pandas as pd
@@ -17,6 +18,7 @@ from great_expectations.exceptions import DataContextError
 from great_expectations.data_context import DataContext
 from great_expectations.data_context.util import safe_mmkdir, NormalizedDataAssetName
 from great_expectations.dataset import PandasDataset, SqlAlchemyDataset
+from great_expectations.cli.init import scaffold_directories_and_notebooks
 
 
 @pytest.fixture()
@@ -46,13 +48,15 @@ def parameterized_expectation_suite():
         ]
     }
 
+
 def test_validate_saves_result_inserts_run_id(empty_data_context, filesystem_csv):
     empty_data_context.add_datasource(
         "my_datasource", "pandas", base_directory=str(filesystem_csv))
     not_so_empty_data_context = empty_data_context
 
     # we should now be able to validate, and have validations saved.
-    assert not_so_empty_data_context._project_config["result_store"]["filesystem"]["base_directory"] == "uncommitted/validations/"
+    assert not_so_empty_data_context._project_config["result_store"]["filesystem"]["base_directory"] == \
+        "uncommitted/validations/"
 
     my_batch = not_so_empty_data_context.get_batch("my_datasource/f1")
 
@@ -388,6 +392,7 @@ def test_list_datasources(data_context):
         }
     ]
 
+
 def test_data_context_result_store(titanic_data_context):
     """
     Test that validation results can be correctly fetched from the configured results store
@@ -397,3 +402,134 @@ def test_data_context_result_store(titanic_data_context):
         data_asset_name = profiling_result[1]['meta']['data_asset_name']
         validation_result = titanic_data_context.get_validation_result(data_asset_name, "BasicDatasetProfiler")
         assert data_asset_name in validation_result["meta"]["data_asset_name"]
+
+
+def test_render_full_static_site(tmp_path_factory, filesystem_csv_3):
+    project_dir = str(tmp_path_factory.mktemp("project_dir"))
+    print(project_dir)
+
+    os.makedirs(os.path.join(project_dir, "data"))
+    os.makedirs(os.path.join(project_dir, "data/titanic"))
+    curdir = os.path.abspath(os.getcwd())
+    shutil.copy(
+        "./tests/test_sets/Titanic.csv",
+        str(os.path.join(project_dir, "data/titanic/Titanic.csv"))
+    )
+
+    os.makedirs(os.path.join(project_dir, "data/random"))
+    curdir = os.path.abspath(os.getcwd())
+    shutil.copy(
+        os.path.join(filesystem_csv_3, "f1.csv"),
+        str(os.path.join(project_dir, "data/random/f1.csv"))
+    )
+    shutil.copy(
+        os.path.join(filesystem_csv_3, "f2.csv"),
+        str(os.path.join(project_dir, "data/random/f2.csv"))
+    )
+
+    context = DataContext.create(project_dir)
+    ge_directory = os.path.join(project_dir, "great_expectations")
+    scaffold_directories_and_notebooks(ge_directory)
+    context.add_datasource(
+        "titanic",
+        "pandas",
+        base_directory=os.path.join(project_dir, "data/titanic/")
+    )
+    context.add_datasource(
+        "random",
+        "pandas",
+        base_directory=os.path.join(project_dir, "data/random/")
+    )
+
+    context.profile_datasource("titanic")
+    glob_str = os.path.join(ge_directory,"uncommitted/validations/*/titanic/default/Titanic/BasicDatasetProfiler.json")
+    print(glob_str)
+    glob_result = glob(glob_str)
+    os.mkdir(os.path.join(ge_directory,"fixtures/validations"))
+    os.mkdir(os.path.join(ge_directory,"fixtures/validations/titanic"))
+    os.mkdir(os.path.join(ge_directory,"fixtures/validations/titanic/default"))
+    full_fixture_path = os.path.join(ge_directory,"fixtures/validations/titanic/default/Titanic/")
+    os.mkdir(full_fixture_path)
+    shutil.copy(
+        glob_result[0],
+        full_fixture_path+"BasicDatasetProfiler.json"
+    )
+
+    context.profile_datasource("random")
+    os.mkdir(os.path.join(ge_directory,"fixtures/validations/random"))
+    os.mkdir(os.path.join(ge_directory,"fixtures/validations/random/default"))
+
+    glob_str = os.path.join(ge_directory,"uncommitted/validations/*/random/default/f*/BasicDatasetProfiler.json")
+    print(glob_str)
+    glob_result = glob(glob_str)
+
+    full_fixture_path = os.path.join(ge_directory,"fixtures/validations/random/default/f1/")
+    os.mkdir(full_fixture_path)
+    shutil.copy(
+        glob_result[0],  # !!! This might switch the f1 and f2 files...
+        full_fixture_path+"BasicDatasetProfiler.json"
+    )
+    full_fixture_path = os.path.join(ge_directory,"fixtures/validations/random/default/f2/")
+    os.mkdir(full_fixture_path)
+    shutil.copy(
+        glob_result[1],  # !!! This might switch the f1 and f2 files...
+        full_fixture_path+"BasicDatasetProfiler.json"
+    )
+    # for g in glob_result:
+    #     shutil.copy(
+    #         g,
+    #         full_fixture_path+"BasicDatasetProfiler.json"
+    #     )
+
+    # os.mkdir(os.path.join(ge_directory,"fixtures")
+    context.render_full_static_site()
+    
+    assert os.path.exists(os.path.join(
+        ge_directory,
+        "fixtures/validations/titanic/default/Titanic/BasicDatasetProfiler.json"
+    ))
+    assert os.path.exists(os.path.join(
+        ge_directory,
+        "uncommitted/documentation/titanic/default/Titanic/BasicDatasetProfiler.html"
+    ))
+    assert os.path.exists(os.path.join(
+        ge_directory,
+        "uncommitted/documentation/random/default/f1/BasicDatasetProfiler.html"
+    ))
+    assert os.path.exists(os.path.join(
+        ge_directory,
+        "uncommitted/documentation/random/default/f2/BasicDatasetProfiler.html"
+    ))
+
+    # Store output files locally
+    # shutil.copy(
+    #     os.path.join(
+    #         ge_directory,
+    #         "uncommitted/documentation/random/default/f2/BasicDatasetProfiler.html"
+    #     ),
+    #     "test_output/f2_BasicDatasetProfiler.html"
+
+    # )
+
+    with open(os.path.join(
+        ge_directory,
+        "uncommitted/documentation/titanic/default/Titanic/BasicDatasetProfiler.html"
+    ), 'r') as f:
+        # print(f.read())
+        pass
+
+    assert os.path.exists(os.path.join(
+        ge_directory,
+        "uncommitted/documentation/index.html"
+    ))
+
+    # shutil.copy(
+    #     os.path.join(
+    #         ge_directory,
+    #         "uncommitted/documentation/index.html"
+    #     ),
+    #     "test_output/index.html"
+
+    # )
+
+    # assert False

@@ -1,6 +1,7 @@
 # Since our cli produces unicode output, but we want tests in python2 as well
 from __future__ import unicode_literals
 
+from datetime import datetime
 from click.testing import CliRunner
 import great_expectations.version
 from great_expectations.cli import cli
@@ -11,16 +12,17 @@ import os
 import shutil
 import logging
 import sys
+import re
 from ruamel.yaml import YAML
 yaml = YAML()
 yaml.default_flow_style = False
 
-from datetime import datetime
 try:
     from unittest import mock
 except ImportError:
     import mock
 
+from great_expectations.cli.init import scaffold_directories_and_notebooks
 
 def test_cli_command_entrance():
     runner = CliRunner()
@@ -170,11 +172,16 @@ def test_cli_evaluation_parameters(capsys):
     assert json_result['evaluation_parameters'] == expected_evaluation_parameters
 
 
-def test_cli_init(tmp_path_factory):
+def test_cli_init(tmp_path_factory, filesystem_csv_2):
     basedir = tmp_path_factory.mktemp("test_cli_init_diff")
     basedir = str(basedir)
     os.makedirs(os.path.join(basedir, "data"))
     curdir = os.path.abspath(os.getcwd())
+    shutil.copy(
+        "./tests/test_sets/Titanic.csv",
+        str(os.path.join(basedir, "data/Titanic.csv"))
+    )
+
     os.chdir(basedir)
 
     runner = CliRunner()
@@ -182,6 +189,11 @@ def test_cli_init(tmp_path_factory):
         os.path.join(basedir, "data")))
 
     print(result.output)
+    print("result.output length:", len(result.output))
+
+    assert len(result.output) < 10000, "CLI output is unreasonably long."
+    assert len(re.findall(
+        "{", result.output)) < 100, "CLI contains way more '{' than we would reasonably expect."
 
     assert """Always know what to expect from your data.""" in result.output
 
@@ -192,8 +204,34 @@ def test_cli_init(tmp_path_factory):
         open(os.path.join(basedir, "great_expectations/great_expectations.yml"), "r"))
     assert config["datasources"]["data__dir"]["type"] == "pandas"
 
-    os.chdir(curdir)
+    assert os.path.isfile(
+        os.path.join(
+            basedir,
+            "great_expectations/expectations/data__dir/default/Titanic/BasicDatasetProfiler.json"
+        )
+    )
 
+    assert os.path.isfile(
+        os.path.join(
+            basedir,
+            "great_expectations/fixtures/validations/data__dir/default/Titanic/BasicDatasetProfiler.json")
+    )
+
+    assert os.path.isfile(
+        os.path.join(
+            basedir,
+            "great_expectations/uncommitted/documentation/data__dir/default/Titanic/BasicDatasetProfiler.html")
+    )
+
+    assert os.path.getsize(
+        os.path.join(
+            basedir,
+            "great_expectations/uncommitted/documentation/data__dir/default/Titanic/BasicDatasetProfiler.html"
+        )
+    ) > 0
+
+    os.chdir(curdir)
+    print(result)
     # assert False
 
 
@@ -228,7 +266,19 @@ def test_cli_profile(empty_data_context, filesystem_csv_2, capsys):
         cli, ["profile", "my_datasource", "-d", project_root_dir])
 
     captured = capsys.readouterr()
-    
+
     assert "Profiling 'my_datasource' with 'BasicDatasetProfiler'" in captured.out
     assert "Note: You will need to review and revise Expectations before using them in production." in captured.out
     logger.removeHandler(handler)
+
+
+def test_scaffold_directories_and_notebooks(tmp_path_factory):
+    empty_directory = str(tmp_path_factory.mktemp("test_scaffold_directories_and_notebooks"))
+    scaffold_directories_and_notebooks(empty_directory)
+    print(empty_directory)
+
+    assert set(os.listdir(empty_directory)) == \
+           set(['datasources', 'plugins', 'expectations', '.gitignore', 'fixtures', 'uncommitted', 'notebooks'])
+    assert set(os.listdir(os.path.join(empty_directory, "uncommitted"))) == \
+        set(['samples', 'documentation', 'validations', 'credentials'])
+

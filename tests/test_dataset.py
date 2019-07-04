@@ -21,6 +21,7 @@ schemas = {
     },
 }
 
+
 @pytest.mark.parametrize('context', CONTEXTS)
 def test_caching(context):
     dataset = get_dataset(context, data, schemas=schemas.get(context), caching=True)
@@ -31,9 +32,10 @@ def test_caching(context):
     assert dataset.get_column_max.cache_info().misses == 2
     assert dataset.get_column_max.cache_info().misses == 2
 
-    dataset = get_dataset(context, data, schemas=schemas.get(context))
+    dataset = get_dataset(context, data, schemas=schemas.get(context), caching=False)
     with pytest.raises(AttributeError):
         dataset.get_column_max.cache_info()
+
 
 @pytest.mark.parametrize('context', CONTEXTS)
 def test_head(context):

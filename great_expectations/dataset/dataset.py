@@ -145,6 +145,10 @@ class MetaDataset(DataAsset):
 # noinspection PyIncorrectDocstring
 class Dataset(MetaDataset):
 
+    INT_TYPE_NAMES = set(["INTEGER", "int", "SMALLINT", "BIGINT", "IntegerType", "LongType"])
+    FLOAT_TYPE_NAMES = set(["FLOAT", "DOUBLE_PRECISION", "NUMERIC", "FloatType", "DoubleType", "float"])
+    STRING_TYPE_NAMES = set(["CHAR", "VARCHAR", "TEXT", "StringType", "string", "str"])
+
     # getter functions with hashable arguments - can be cached
     hashable_getters = [
         'get_column_min',
@@ -166,7 +170,7 @@ class Dataset(MetaDataset):
     def __init__(self, *args, **kwargs):
         # NOTE: using caching makes the strong assumption that the user will not modify the core data store
         # (e.g. self.spark_df) over the lifetime of the dataset instance
-        self.caching = kwargs.pop("caching", False)
+        self.caching = kwargs.pop("caching", True)
 
         super(Dataset, self).__init__(*args, **kwargs)
 
@@ -229,7 +233,8 @@ class Dataset(MetaDataset):
         """Get the values in column closest to the requested quantiles
         Args:
             column (string): name of column
-            quantiles (list of float): the quantiles to return
+            quantiles (tuple of float): the quantiles to return. quantiles \
+            *must* be a tuple to ensure caching is possible
         
         Returns:
             List[any]: the nearest values in the dataset to those quantiles
@@ -253,11 +258,11 @@ class Dataset(MetaDataset):
         """
         if bins == 'uniform':
             # TODO: in the event that we shift the compute model for
-            # min and max to have a single pass, use that instead of
-            # quantiles for clarity
+            #  min and max to have a single pass, use that instead of
+            #  quantiles for clarity
             # min_ = self.get_column_min(column)
             # max_ = self.get_column_max(column)
-            min_, max_ = self.get_column_quantiles(column, [0.0, 1.0])
+            min_, max_ = self.get_column_quantiles(column, (0.0, 1.0))
             # PRECISION NOTE: some implementations of quantiles could produce
             # varying levels of precision (e.g. a NUMERIC column producing
             # Decimal from a SQLAlchemy source, so we cast to float for numpy)
@@ -265,21 +270,26 @@ class Dataset(MetaDataset):
         elif bins in ['ntile', 'quantile', 'percentile']:
             bins = self.get_column_quantiles(
                 column,
-                np.linspace(start=0, stop=1, num=n_bins+1)
+                tuple(np.linspace(start=0, stop=1, num=n_bins+1))
             )
         else:
             raise ValueError("Invalid parameter for bins argument")
         return bins
 
     def get_column_hist(self, column, bins):
-        """Returns: List[int], a list of counts corresponding to bins"""
+        """Get a histogram of column values
+        Args:
+            column: the column for which to generate the histogram
+            bins (tuple): the bins to slice the histogram. bins *must* be a tuple to ensure caching is possible
+
+        Returns: List[int], a list of counts corresponding to bins"""
         raise NotImplementedError
 
     def get_column_count_in_range(self, column, min_val=None, max_val=None, min_strictly=False, max_strictly=True):
         """Returns: int"""
         raise NotImplementedError
 
-    def _initialize_expectations(self, expectation_suite=None, data_asset_name=None, expectation_suite_name="default"):
+    def _initialize_expectations(self, expectation_suite=None, data_asset_name=None, expectation_suite_name=None):
         """Override data_asset_type with "Dataset"
         """
         super(Dataset, self)._initialize_expectations(expectation_suite=expectation_suite,
@@ -2153,9 +2163,6 @@ class Dataset(MetaDataset):
             <great_expectations.dataset.dataset.Dataset.expect_column_stdev_to_be_between>`
 
         """
-        # if min_value is None and max_value is None:
-        #     raise ValueError("min_value and max_value cannot both be None")
-
         if min_value is not None and not isinstance(min_value, Number):
             raise ValueError("min_value must be a number")
 
@@ -2172,26 +2179,26 @@ class Dataset(MetaDataset):
                     'observed_value': col_avg
                 }
             }
+
+        if min_value is not None and max_value is not None:
+            success = (min_value <= col_avg) and (col_avg <= max_value)
+
+        elif min_value is None and max_value is not None:
+            success = (col_avg <= max_value)
+
+        elif min_value is not None and max_value is None:
+            success = (min_value <= col_avg)
+
         else:
-            if min_value is not None and max_value is not None:
-                success = (min_value <= col_avg) and (col_avg <= max_value)
+            # in this case min_value and max_value are both None
+            success = True
 
-            elif min_value is None and max_value is not None:
-                success = (col_avg <= max_value)
-
-            elif min_value is not None and max_value is None:
-                success = (min_value <= col_avg)
-
-            else:
-                # in this case min_value and max_value are both None
-                success = True
-
-            return {
-                'success': success,
-                'result': {
-                    'observed_value': col_avg
-                }
+        return {
+            'success': success,
+            'result': {
+                'observed_value': col_avg
             }
+        }
 
     # noinspection PyUnusedLocal
     @DocInherit
@@ -2257,9 +2264,6 @@ class Dataset(MetaDataset):
             <great_expectations.dataset.dataset.Dataset.expect_column_stdev_to_be_between>`
 
         """
-        if min_value is None and max_value is None:
-            raise ValueError("min_value and max_value cannot both be None")
-
         column_median = self.get_column_median(column)
 
         if column_median is None:
@@ -2269,16 +2273,23 @@ class Dataset(MetaDataset):
                     'observed_value': None
                 }
             }
+
+        if min_value is None and max_value is None:
+            # vacuously true
+            success = True
+        elif min_value is None:
+            success = column_median <= max_value
+        elif max_value is None:
+            success = min_value <= column_median
         else:
-            return {
-                "success": (
-                    ((min_value is None) or (min_value <= column_median)) and
-                    ((max_value is None) or (column_median <= max_value))
-                ),
-                "result": {
-                    "observed_value": column_median
-                }
+            success = min_value <= column_median <= max_value
+
+        return {
+            "success": success,
+            "result": {
+                "observed_value": column_median
             }
+        }
 
     # noinspection PyUnusedLocal
     @DocInherit
@@ -2389,7 +2400,7 @@ class Dataset(MetaDataset):
         if len(quantiles) != len(quantile_value_ranges):
             raise ValueError("quntile_values and quantiles must have the same number of elements")
 
-        quantile_vals = self.get_column_quantiles(column, quantiles)
+        quantile_vals = self.get_column_quantiles(column, tuple(quantiles))
         # We explicitly allow "None" to be interpreted as +/- infinity
         comparison_quantile_ranges = [
             [lower_bound or -np.inf, upper_bound or np.inf]
@@ -2477,11 +2488,9 @@ class Dataset(MetaDataset):
             <great_expectations.dataset.dataset.Dataset.expect_column_median_to_be_between>`
 
         """
-        # if min_value is None and max_value is None:
-        #     raise ValueError("min_value and max_value cannot both be None")
-
         column_stdev = self.get_column_stdev(column)
         if min_value is None and max_value is None:
+            # vacuously true
             success = True
         elif min_value is None:
             success = column_stdev <= max_value
@@ -2557,12 +2566,8 @@ class Dataset(MetaDataset):
             <great_expectations.dataset.dataset.Dataset.expect_column_proportion_of_unique_values_to_be_between>`
 
         """
-        if min_value is None and max_value is None:
-            raise ValueError("min_value and max_value cannot both be None")
-
         unique_value_count = self.get_column_unique_count(column)
 
-        # Handle possible missing values
         if unique_value_count is None:
             return {
                 'success': False,
@@ -2570,16 +2575,23 @@ class Dataset(MetaDataset):
                     'observed_value': unique_value_count
                 }
             }
+
+        if min_value is None and max_value is None:
+            # vacuously true
+            success = True
+        elif min_value is None:
+            success = unique_value_count <= max_value
+        elif max_value is None:
+            success = min_value <= unique_value_count
         else:
-            return {
-                "success": (
-                    ((min_value is None) or (min_value <= unique_value_count)) and
-                    ((max_value is None) or (unique_value_count <= max_value))
-                ),
-                "result": {
-                    "observed_value": unique_value_count
-                }
+            success = min_value <= unique_value_count <= max_value
+
+        return {
+            "success": success,
+            "result": {
+                "observed_value": unique_value_count
             }
+        }
 
     # noinspection PyUnusedLocal
     @DocInherit
@@ -2645,9 +2657,6 @@ class Dataset(MetaDataset):
             <great_expectations.dataset.dataset.Dataset.expect_column_unique_value_count_to_be_between>`
 
         """
-        if min_value is None and max_value is None:
-            raise ValueError("min_value and max_value cannot both be None")
-
         unique_value_count = self.get_column_unique_count(column)
         total_value_count = self.get_column_nonnull_count(column)
 
@@ -2656,11 +2665,18 @@ class Dataset(MetaDataset):
         else:
             proportion_unique = None
 
+        if min_value is None and max_value is None:
+            # vacuously true
+            success = True
+        elif min_value is None:
+            success = proportion_unique <= max_value
+        elif max_value is None:
+            success = min_value <= proportion_unique
+        else:
+            success = min_value <= proportion_unique <= max_value
+
         return {
-            "success": (
-                ((min_value is None) or (min_value <= proportion_unique)) and
-                ((max_value is None) or (proportion_unique <= max_value))
-            ),
+            "success": success,
             "result": {
                 "observed_value": proportion_unique
             }
@@ -2798,9 +2814,6 @@ class Dataset(MetaDataset):
             * If max_value is None, then min_value is treated as a lower bound
 
         """
-        # if min_value is None and max_value is None:
-        #     raise ValueError("min_value and max_value cannot both be None")
-
         col_sum = self.get_column_sum(column)
 
         # Handle possible missing values
@@ -2811,26 +2824,26 @@ class Dataset(MetaDataset):
                     'observed_value': col_sum
                 }
             }
+
+        if min_value is not None and max_value is not None:
+            success = (min_value <= col_sum) and (col_sum <= max_value)
+
+        elif min_value is None and max_value is not None:
+            success = (col_sum <= max_value)
+
+        elif min_value is not None and max_value is None:
+            success = (min_value <= col_sum)
+
         else:
-            if min_value is not None and max_value is not None:
-                success = (min_value <= col_sum) and (col_sum <= max_value)
+            # vacuously true
+            success = True
 
-            elif min_value is None and max_value is not None:
-                success = (col_sum <= max_value)
-
-            elif min_value is not None and max_value is None:
-                success = (min_value <= col_sum)
-
-            else:
-                # vacuously true
-                success = True
-
-            return {
-                'success': success,
-                'result': {
-                    'observed_value': col_sum
-                }
+        return {
+            'success': success,
+            'result': {
+                'observed_value': col_sum
             }
+        }
 
     # noinspection PyUnusedLocal
     @DocInherit
@@ -2899,9 +2912,6 @@ class Dataset(MetaDataset):
             * If max_value is None, then min_value is treated as a lower bound
 
         """
-        # if min_value is None and max_value is None:
-        #     raise ValueError("min_value and max_value cannot both be None")
-
         if parse_strings_as_datetimes:
             if min_value:
                 min_value = parse(min_value)
@@ -3001,9 +3011,6 @@ class Dataset(MetaDataset):
             * If max_value is None, then min_value is treated as a lower bound
 
         """
-        # if min_value is None and max_value is None:
-        #     raise ValueError("min_value and max_value cannot both be None")
-
         if parse_strings_as_datetimes:
             if min_value:
                 min_value = parse(min_value)
@@ -3367,7 +3374,11 @@ class Dataset(MetaDataset):
         if partition_object is None:
             # NOTE: we are *not* specifying a tail_weight_holdout by default.
             bins = self.get_column_partition(column)
-            weights = list(np.array(self.get_column_hist(column, bins)) / self.get_column_nonnull_count(column))
+            if isinstance(bins, np.ndarray):
+                bins = bins.tolist()
+            else:
+                bins = list(bins)
+            weights = list(np.array(self.get_column_hist(column, tuple(bins))) / self.get_column_nonnull_count(column))
             partition_object = {
                 "bins": bins,
                 "weights": weights
@@ -3456,7 +3467,7 @@ class Dataset(MetaDataset):
         else:
             # Data are expected to be continuous; discretize first
             # Build the histogram first using expected bins so that the largest bin is >=
-            hist = np.array(self.get_column_hist(column, partition_object['bins']))
+            hist = np.array(self.get_column_hist(column, tuple(partition_object['bins'])))
             # np.histogram(column, partition_object['bins'], density=False)
             bin_edges = partition_object['bins']
             # Add in the frequencies observed above or below the provided partition

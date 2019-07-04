@@ -5,7 +5,7 @@ import glob
 import shutil
 
 from great_expectations.data_context.util import safe_mmkdir
-from great_expectations import __version__
+from great_expectations import __version__ as __version__
 
 
 def script_relative_path(file_path):
@@ -33,10 +33,10 @@ def scaffold_directories_and_notebooks(base_dir):
 
     open(os.path.join(base_dir, ".gitignore"), 'w').write("uncommitted/")
 
-    for directory in [notebook_dir_name, "expectations", "datasources", "data_documentation", "uncommitted", "plugins", "fixtures"]:
+    for directory in [notebook_dir_name, "expectations", "datasources", "uncommitted", "plugins", "fixtures"]:
         safe_mmkdir(os.path.join(base_dir, directory), exist_ok=True)
 
-    for uncommitted_directory in ["validations", "credentials", "samples"]:
+    for uncommitted_directory in ["validations", "credentials", "documentation", "samples"]:
         safe_mmkdir(os.path.join(base_dir, "uncommitted",
                                  uncommitted_directory), exist_ok=True)
 
@@ -52,15 +52,14 @@ Always know what to expect from your data.
 
 If you're new to Great Expectations, this tutorial is a good place to start:
 
-    <blue>https://great-expectations.readthedocs.io/en/latest/intro.html#how-do-i-get-started</blue>
-"""
+    <blue>https://docs.greatexpectations.io/en/latest/getting_started.html?utm_source=cli&utm_medium=init&utm_campaign={0:s}</blue>
+""".format(__version__.replace(".", "_"))
 
 msg_prompt_lets_begin = """
 Let's add Great Expectations to your project, by scaffolding a new great_expectations directory:
 
     great_expectations
         ├── great_expectations.yml
-        ├── data_documentation
         ├── datasources
         ├── expectations
         ├── fixtures
@@ -69,6 +68,7 @@ Let's add Great Expectations to your project, by scaffolding a new great_expecta
         ├── uncommitted
         │   ├── validations
         │   ├── credentials
+        │   ├── documentation
         │   └── samples
         └── .gitignore
 
