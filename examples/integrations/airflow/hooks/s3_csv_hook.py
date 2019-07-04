@@ -5,6 +5,11 @@ from airflow import AirflowException
 from airflow.hooks.S3_hook import S3Hook
 import great_expectations as ge
 
+####
+#
+# NOTE: this code has not been updated for the new GE 0.7 naming conventions
+#
+####
 
 class ExpectationS3CsvHook(S3Hook):
 
