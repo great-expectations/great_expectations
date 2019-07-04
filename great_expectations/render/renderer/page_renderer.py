@@ -62,8 +62,7 @@ class DescriptivePageRenderer(Renderer):
         column_types = DescriptiveOverviewSectionRenderer._get_column_types(validation_results)
 
         if "data_asset_name" in validation_results["meta"] and validation_results["meta"]["data_asset_name"]:
-            data_asset_name = validation_results["meta"]["data_asset_name"].split(
-                '/')[-1]
+            data_asset_name = validation_results["meta"]["data_asset_name"].split('/')[-1]
         else:
             data_asset_name = None
 

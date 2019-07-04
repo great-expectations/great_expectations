@@ -163,7 +163,7 @@ def init(target_directory):
         logger.critical(err.message)
         sys.exit(-1)
 
-    base_dir = os.path.join(target_directory, "great_expectations")
+    base_dir = context.root_directory
 
     six.print_(colored(
         figlet_format("Great Expectations", font="big"),
