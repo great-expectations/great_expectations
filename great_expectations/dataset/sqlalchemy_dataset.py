@@ -362,11 +362,15 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         return float(res[0])
 
     def get_column_hist(self, column, bins):
-        """return a list of counts corresponding to bins"""
+        """return a list of counts corresponding to bins
+
+        Args:
+            column: the name of the column for which to get the histogram
+            bins: tuple of bin edges for which to get histogram values; *must* be tuple to support caching
+        """
         case_conditions = []
         idx = 0
-        if isinstance(bins, (np.ndarray)):
-            bins = bins.tolist()
+        bins = list(bins)
 
         # If we have an infinte lower bound, don't express that in sql
         if (bins[0] == -np.inf) or (bins[0] == -float("inf")):
@@ -618,7 +622,6 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                     "observed_type-type": col_type.__name__
                 }
         }
-
 
     @DocInherit
     @MetaSqlAlchemyDataset.column_map_expectation

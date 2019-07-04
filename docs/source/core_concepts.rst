@@ -11,4 +11,4 @@ Core Concepts
    /core_concepts/data_context
    /core_concepts/datasource
    /core_concepts/custom_expectations
-   /core_concepts/glossary
+   /glossary

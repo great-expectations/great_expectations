@@ -31,10 +31,12 @@ Then go to the root directory of the project you want to use Great Expectations 
 
 :ref:`tutorial_create_expectations`
 
+:ref:`tutorial_pipeline_integration`
 
 .. toctree::
    :maxdepth: 2
    :hidden:
 
-   tutorial_init
-   tutorial_create_expectations
+   /tutorials/cli_init
+   /tutorials/create_expectations
+   /tutorials/pipeline_integration

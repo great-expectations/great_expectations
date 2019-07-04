@@ -54,3 +54,40 @@ class Renderer(object):
         for evr in evrs:
             if evr["expectation_config"]["expectation_type"] == type_:
                 return evr
+
+
+    @classmethod
+    def _find_all_evrs_by_type(cls, evrs, type_, column_=None):
+        ret = []
+        for evr in evrs:
+            if evr["expectation_config"]["expectation_type"] == type_\
+                    and (not column_ or column_ == evr["expectation_config"]["kwargs"].get("column")):
+                ret.append(evr)
+
+        return ret
+
+    @classmethod
+    def _get_column_list_from_evrs(cls, evrs):
+        """
+        Get list of column names.
+
+        If expect_table_columns_to_match_ordered_list EVR is present, use it as the list, including the order.
+
+        Otherwise, get the list of all columns mentioned in the expectations and order it alphabetically.
+
+        :param evrs:
+        :return: list of columns with best effort sorting
+        """
+        evrs_ = evrs["results"] if "results" in evrs else evrs
+
+        expect_table_columns_to_match_ordered_list_evr = cls._find_evr_by_type(evrs_, "expect_table_columns_to_match_ordered_list")
+        if expect_table_columns_to_match_ordered_list_evr:
+            ordered_columns = expect_table_columns_to_match_ordered_list_evr["result"]["observed_value"]
+        else:
+            # Group EVRs by column
+            columns = list(set([evr["expectation_config"]["kwargs"]["column"] for evr in evrs_ if "column" in evr["expectation_config"]["kwargs"]]))
+
+            ordered_columns = sorted(columns)
+
+        return ordered_columns
+

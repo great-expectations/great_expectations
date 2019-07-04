@@ -1,1 +1,4 @@
-from .view import DescriptivePageView
+from .view import (
+    DefaultJinjaPageView,
+    DefaultJinjaIndexPageView,
+)

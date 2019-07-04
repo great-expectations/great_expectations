@@ -18,8 +18,10 @@ test_config_path = os.path.join(dir_path, 'test_dataset_implementations.json')
 test_config = json.load(open(test_config_path), object_pairs_hook=OrderedDict)
 test_datasets = test_config['test_datasets']
 
+
 def generate_ids(test):
     return ':'.join([test['dataset'], test['func']])
+
 
 @pytest.mark.parametrize('context', CONTEXTS)
 @pytest.mark.parametrize('test', test_config['tests'], ids=[generate_ids(t) for t in test_config['tests']])
@@ -37,6 +39,9 @@ def test_implementations(context, test):
     dataset = get_dataset(context, data, schemas=schema)
     func = getattr(dataset, test['func'])
     run_kwargs = copy.deepcopy(test.get('kwargs', {}))
+    for arg in run_kwargs.keys():
+        if isinstance(run_kwargs[arg], list):
+            run_kwargs[arg] = tuple(run_kwargs[arg])
     result = func(**run_kwargs)
 
     # NOTE: we cannot serialize pd.Series to json directly,
@@ -58,6 +63,7 @@ def test_implementations(context, test):
             assert test['expected'] == result
     else:
         assert test['expected'] == result
+
 
 @pytest.mark.parametrize('context', CONTEXTS)
 def test_get_column_value_counts(context):

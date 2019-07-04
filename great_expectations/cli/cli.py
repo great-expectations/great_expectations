@@ -1,5 +1,35 @@
 # -*- coding: utf-8 -*-
+"""
+# Style guide for the Great Expectations CLI.
 
+### The CLI never writes to disk without asking first.
+### Questions are always phrased as conversational sentences.
+### Sections are divided by headers: "========== Profiling =========="
+### We use punctuation: Please finish sentences with periods, questions marks, or an occasional exclamation point.
+### Keep indentation consistent! (We're pythonistas, natch.)
+### Include exactly one blank line after every question.
+### Within those contraints, shorter is better. When in doubt, shorten.
+### Clickable links (usually to documentation) are blue.
+### Copyable bash commands are green.
+
+"""
+from .datasource import (
+    add_datasource
+)
+from .init import (
+    scaffold_directories_and_notebooks,
+    greeting_1,
+    msg_prompt_lets_begin,
+)
+from .util import cli_message
+from great_expectations.render.view import DefaultJinjaPageView
+from great_expectations.render.renderer import DescriptivePageRenderer, PrescriptivePageRenderer
+from great_expectations.data_context import DataContext
+from great_expectations.data_asset import FileDataAsset
+from great_expectations.dataset import Dataset, PandasDataset
+from great_expectations.exceptions import DataContextError
+from great_expectations import __version__, read_csv
+from pyfiglet import figlet_format
 import click
 import six
 import os
@@ -9,34 +39,15 @@ import sys
 import warnings
 warnings.filterwarnings('ignore')
 
-from pyfiglet import figlet_format
 try:
     from termcolor import colored
 except ImportError:
     colored = None
 
-from great_expectations import __version__, read_csv
-from great_expectations.exceptions import DataContextError
-from great_expectations.dataset import Dataset, PandasDataset
-from great_expectations.data_asset import FileDataAsset
-from great_expectations.data_context import DataContext
-
-from great_expectations.render.renderer import DescriptivePageRenderer, PrescriptivePageRenderer
-from great_expectations.render.view import DescriptivePageView
-
-
-from .util import cli_message
-from .init import (
-    scaffold_directories_and_notebooks,
-    greeting_1,
-    msg_prompt_lets_begin,
-)
-from .datasource import (
-    add_datasource
-)
 
 # Take over the entire GE module logging namespace when running CLI
 logger = logging.getLogger("great_expectations")
+
 
 @click.group()
 @click.version_option(version=__version__)
@@ -152,7 +163,7 @@ def init(target_directory):
         logger.critical(err.message)
         sys.exit(-1)
 
-    base_dir = os.path.join(target_directory, "great_expectations")
+    base_dir = context.root_directory
 
     six.print_(colored(
         figlet_format("Great Expectations", font="big"),
@@ -187,7 +198,7 @@ def render(render_object):
 
     model = DescriptivePageRenderer.render(raw)
     # model = PrescriptivePageRenderer.render(raw)
-    print(DescriptivePageView.render(model))
+    print(DefaultJinjaPageView.render(model))
 
 
 @cli.command()
@@ -219,7 +230,7 @@ def main():
     handler = logging.StreamHandler()
     # Just levelname and message Could re-add other info if we want
     formatter = logging.Formatter(
-        ' %(message)s')
+        '%(message)s')
     # '%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
     handler.setFormatter(formatter)
     logger.addHandler(handler)

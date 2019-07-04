@@ -16,7 +16,7 @@ from .test_utils import get_dataset
 
 CONTEXTS = ['PandasDataset', 'sqlite', 'SparkDFDataset']
 
-### TODO: make it easier to turn off Spark as well
+# TODO: make it easier to turn off Spark as well
 
 #####
 #
@@ -44,6 +44,7 @@ except (ImportError, sa.exc.SQLAlchemyError):
 #     conn.close()
 # except (ImportError, sa.exc.SQLAlchemyError):
 #     warnings.warn("No mysql context available for testing.")
+
 
 @pytest.fixture
 def empty_expectation_suite():
@@ -172,11 +173,12 @@ def titanic_data_context(tmp_path_factory):
     project_path = str(tmp_path_factory.mktemp('titanic_data_context'))
     context_path = os.path.join(project_path, "great_expectations")
     safe_mmkdir(os.path.join(context_path, "expectations"), exist_ok=True)
-    safe_mmkdir(os.path.join(context_path, "unexpected/validations"), exist_ok=True)
     data_path = os.path.join(context_path, "../data")
     safe_mmkdir(os.path.join(data_path), exist_ok=True)
-    shutil.copy("./tests/test_fixtures/great_expectations_titanic.yml", str(os.path.join(context_path, "great_expectations.yml")))
-    shutil.copy("./tests/test_sets/Titanic.csv", str(os.path.join(context_path, "../data/Titanic.csv")))
+    shutil.copy("./tests/test_fixtures/great_expectations_titanic.yml",
+                str(os.path.join(context_path, "great_expectations.yml")))
+    shutil.copy("./tests/test_sets/Titanic.csv",
+                str(os.path.join(context_path, "../data/Titanic.csv")))
     return ge.data_context.DataContext(context_path)
 
 
@@ -186,10 +188,12 @@ def data_context(tmp_path_factory):
     project_path = str(tmp_path_factory.mktemp('data_context'))
     context_path = os.path.join(project_path, "great_expectations")
     asset_config_path = os.path.join(context_path, "expectations")
-    safe_mmkdir(os.path.join(asset_config_path, "mydatasource/mygenerator/parameterized_expectation_suite_fixture"), exist_ok=True)
-    shutil.copy("./tests/test_fixtures/great_expectations_basic.yml", str(os.path.join(context_path, "great_expectations.yml")))
-    shutil.copy("./tests/test_fixtures/expectation_suites/parameterized_expectation_suite_fixture.json", 
-        os.path.join(asset_config_path, "mydatasource/mygenerator/parameterized_expectation_suite_fixture/default.json"))
+    safe_mmkdir(os.path.join(asset_config_path,
+                             "mydatasource/mygenerator/parameterized_expectation_suite_fixture"), exist_ok=True)
+    shutil.copy("./tests/test_fixtures/great_expectations_basic.yml",
+                str(os.path.join(context_path, "great_expectations.yml")))
+    shutil.copy("./tests/test_fixtures/expectation_suites/parameterized_expectation_suite_fixture.json",
+                os.path.join(asset_config_path, "mydatasource/mygenerator/parameterized_expectation_suite_fixture/default.json"))
     return ge.data_context.DataContext(context_path)
 
 
@@ -220,4 +224,19 @@ def filesystem_csv_2(tmp_path_factory):
     # Put a file in the directory
     toy_dataset = PandasDataset({"x": [1, 2, 3]})
     toy_dataset.to_csv(os.path.join(base_dir, "f1.csv"), index=None)
+
+    return base_dir
+
+@pytest.fixture()
+def filesystem_csv_3(tmp_path_factory):
+    base_dir = tmp_path_factory.mktemp('test_files')
+    base_dir = str(base_dir)
+
+    # Put a file in the directory
+    toy_dataset = PandasDataset({"x": [1, 2, 3]})
+    toy_dataset.to_csv(os.path.join(base_dir, "f1.csv"), index=None)
+
+    toy_dataset_2 = PandasDataset({"y": [1, 2, 3]})
+    toy_dataset_2.to_csv(os.path.join(base_dir, "f2.csv"), index=None)
+
     return base_dir

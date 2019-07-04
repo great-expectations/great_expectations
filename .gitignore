@@ -1,6 +1,9 @@
 # Documentation build
 docs/source/_build
 
+# Render test output
+tests/render/output/*
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
