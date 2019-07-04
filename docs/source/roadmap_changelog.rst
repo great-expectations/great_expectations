@@ -57,6 +57,8 @@ to top-level names.
    ``expect_column_values_to_be_between`` ``None`` and ``None``. This makes it possible to progressively
    tighten expectations while using them as the basis for profiling results and documentation.
 
+  * Enabled caching on dataset objects by default.
+
  * Bugfixes and improvements:
 
    * New expectations:

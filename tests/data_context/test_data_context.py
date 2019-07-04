@@ -48,13 +48,15 @@ def parameterized_expectation_suite():
         ]
     }
 
+
 def test_validate_saves_result_inserts_run_id(empty_data_context, filesystem_csv):
     empty_data_context.add_datasource(
         "my_datasource", "pandas", base_directory=str(filesystem_csv))
     not_so_empty_data_context = empty_data_context
 
     # we should now be able to validate, and have validations saved.
-    assert not_so_empty_data_context._project_config["result_store"]["filesystem"]["base_directory"] == "uncommitted/validations/"
+    assert not_so_empty_data_context._project_config["result_store"]["filesystem"]["base_directory"] == \
+        "uncommitted/validations/"
 
     my_batch = not_so_empty_data_context.get_batch("my_datasource/f1")
 

@@ -365,8 +365,10 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         """return a list of counts corresponding to bins"""
         case_conditions = []
         idx = 0
-        if isinstance(bins, (np.ndarray)):
+        if isinstance(bins, np.ndarray):
             bins = bins.tolist()
+        else:
+            bins = list(bins)
 
         # If we have an infinte lower bound, don't express that in sql
         if (bins[0] == -np.inf) or (bins[0] == -float("inf")):
