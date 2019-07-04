@@ -1,7 +1,7 @@
 .. _roadmap_changelog:
 
 Changelog and Roadmap
-=====================
+======================
 
 Planned Features
 ----------------
@@ -10,8 +10,9 @@ Planned Features
 * Conditional expectations
 * Multi-batch expectations
 
-v.0.7.0__develop
+v.0.7.0
 ________________
+
 Version 0.7 of Great Expectations is HUGE. It introduces several major new features
 and a large number of improvements, including breaking API changes.
 
