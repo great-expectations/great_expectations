@@ -38,3 +38,4 @@ Then go to the root directory of the project you want to use Great Expectations 
 
    /tutorials/cli_init
    /tutorials/create_expectations
+   /tutorials/pipeline_integration
