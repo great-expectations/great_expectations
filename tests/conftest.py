@@ -173,8 +173,6 @@ def titanic_data_context(tmp_path_factory):
     project_path = str(tmp_path_factory.mktemp('titanic_data_context'))
     context_path = os.path.join(project_path, "great_expectations")
     safe_mmkdir(os.path.join(context_path, "expectations"), exist_ok=True)
-    safe_mmkdir(os.path.join(
-        context_path, "unexpected/validations"), exist_ok=True)
     data_path = os.path.join(context_path, "../data")
     safe_mmkdir(os.path.join(data_path), exist_ok=True)
     shutil.copy("./tests/test_fixtures/great_expectations_titanic.yml",

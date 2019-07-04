@@ -1512,7 +1512,7 @@ class DataContext(object):
         Returns:
             List of (expectation_suite, EVR) tuples for each of the data_assets found in the datasource
         """
-        logger.info("\nProfiling '%s' with '%s'" % (datasource_name, profiler.__name__))
+        logger.info("Profiling '%s' with '%s'" % (datasource_name, profiler.__name__))
         profiling_results = []
         data_asset_names = self.get_available_data_asset_names(datasource_name)
         if generator_name is None:
