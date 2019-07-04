@@ -1,6 +1,6 @@
 .. _data_context:
 
-Data Context
+DataContexts
 ===================
 
 A DataContext represents a Great Expectations project. It organizes storage and access for

@@ -10,7 +10,7 @@ that details any specific deviations from expected values.
 We recommend using a :ref:`data_context` to manage expectation suites and coordinate validation across runs.
 
 
-Validation Result
+Validation results
 ----------------------------
 
 The report contains information about:

@@ -100,7 +100,7 @@ Another example:
 
 This instant feedback helps you zero in on exceptions very quickly, taking a lot of the pain and guesswork out of early data exploration.
 
-Capture More About Your Data
+Capture more about your data
 ------------------------------------------------------------------------------
 
 Build expectations as you conduct exploratory data analysis to ensure insights about data processes and pipelines remain part of your team's knowldege. Great Expectations's library of Expectations has been developed by a broad cross-section of data scientists and engineers. Check out the :ref:`glossary`; it covers all kinds of practical use cases:
@@ -122,7 +122,7 @@ You can also add notes or even structured metadata to expectations to describe t
         meta = { "notes": "A simple experimental regex for name matching.", "source": "http://great-expectations.readthedocs.io/en/latest/glossary.html" })
 
 
-Saving Expectations
+Saving expectations
 ------------------------------------------------------------------------------
 
 At the end of your exploration, call `save_expectation_suite` to store all Expectations from your session to your pipeline test files.
@@ -135,7 +135,7 @@ This is how you always know what to expect from your data.
 
 For more detail on how to control expectation output, please see :ref:`standard_arguments` and :ref:`result_format`.
 
-Types of Expectations
+Types of expectations
 ------------------------------------------------------------------------------
 
 Under the hood, great_expectations evaluates similar kinds of expectations using standard logic, including:
