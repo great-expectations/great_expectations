@@ -31,6 +31,7 @@ Then go to the root directory of the project you want to use Great Expectations 
 
 :ref:`tutorial_create_expectations`
 
+:ref:`tutorial_pipeline_integration`
 
 .. toctree::
    :maxdepth: 2
