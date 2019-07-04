@@ -1484,10 +1484,10 @@ class DataContext(object):
                 index_document[source] = []
             index_document[source].append({
                 "data_asset_name" : asset,
+                "filepath" : il["filepath"],
                 "source" : source,
                 "generator" : generator,
                 "asset" : asset,
-                "filepath" : il["filepath"],
             })
 
 
