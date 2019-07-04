@@ -157,4 +157,16 @@ def test_BasicDatasetProfiler_on_titanic():
 
     expected_evrs.pop("meta")
     evrs.pop("meta")
+
+    # We know that python 2 does not guarantee the order of value_counts, which causes a different
+    # order for items in the partial_unexpected_value_counts list
+    # Remove those before test.
+    for result in evrs["results"]:
+        if "partial_unexpected_counts" in result["result"]:
+            result["result"].pop("partial_unexpected_counts")
+
+    for result in expected_evrs["results"]:
+        if "partial_unexpected_counts" in result["result"]:
+            result["result"].pop("partial_unexpected_counts")
+
     assertDeepAlmostEqual(expected_evrs, evrs)
