@@ -298,7 +298,7 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
     def _render_values_set(cls, evrs, content_blocks):
         set_evr = cls._find_evr_by_type(
             evrs,
-            "expect_column_distinct_values_to_be_in_set"
+            "expect_column_values_to_be_in_set"
         )
 
         if set_evr and "partial_unexpected_counts" in set_evr["result"]:
@@ -409,7 +409,7 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
         bars = alt.Chart(df).mark_bar(size=20).encode(
             x='count:Q',
             y="value:O"
-        ).properties(width=200, height=200, autosize="fit")
+        ).properties(width=200, autosize="fit")
 
         chart = bars.to_json()
 

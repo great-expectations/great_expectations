@@ -57,16 +57,16 @@ class DescriptiveOverviewSectionRenderer(Renderer):
             {
                 "template": "Number of observations",
                 "params": {},
-                "styling": {
-                    "attributes": {
-                        "data-toggle": "popover",
-                        "data-trigger": "hover",
-                        "data-placement": "top",
-                        "data-content": "expect_table_row_count_to_be_between",
-                        "container": "body",
-                    }
+                # "styling": {
+                #     "attributes": {
+                #         "data-toggle": "popover",
+                #         "data-trigger": "hover",
+                #         "data-placement": "top",
+                #         "data-content": "expect_table_row_count_to_be_between",
+                #         "container": "body",
+                #     }
 
-                }
+                # }
             },
             "?" if not expect_table_row_count_to_be_between_evr else expect_table_row_count_to_be_between_evr["result"][
                 "observed_value"]
