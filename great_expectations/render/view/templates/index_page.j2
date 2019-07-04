@@ -65,17 +65,18 @@
         data-target="#navigation"
         data-offset="50"
     >
-    {% include 'breadcrumbs.j2' %}
     {% include 'ge_info.j2' %}
     <div class="container">
       <div class="row">
-        <div class="col-3">
-          {% block navbar %}{% include 'navbar.j2' %}{% endblock %}
-        </div>
-        <div class="col-9">
+        <div class="col-8 offset-2">
         {% for section in sections %}
           {% set section_loop = loop -%}
-          {% include 'section.j2' %}
+          <h3 class="alert alert-secondary">{{section}}</h3>
+          <ul>
+          {% for doc_link in sections[section] %}
+            <li><a href="{{doc_link.filepath}}">{{doc_link.asset}}</a></li>
+          {% endfor %}
+          </ul>
         {% endfor %}
         </div>
 

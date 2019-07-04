@@ -11,6 +11,7 @@ from glob import glob
 from six import string_types
 import datetime
 import shutil
+from collections import OrderedDict
 
 from .util import NormalizedDataAssetName, get_slack_callback, safe_mmkdir
 
@@ -31,7 +32,10 @@ from great_expectations.datasource import (
 )
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.renderer import DescriptivePageRenderer, PrescriptivePageRenderer
-from great_expectations.render.view import DefaultJinjaPageView
+from great_expectations.render.view import (
+    DefaultJinjaPageView,
+    DefaultJinjaIndexPageView,
+)
 
 
 from .expectation_explorer import ExpectationExplorer
@@ -148,7 +152,7 @@ class DataContext(object):
         # TODO: these paths should be configurable
         self.expectations_directory = os.path.join(self.root_directory, "expectations")
         self.fixtures_validations_directory = os.path.join(self.root_directory, "fixtures/validations")
-        self.data_doc_directory = os.path.join(self.root_directory, "data_documentation")
+        self.data_doc_directory = os.path.join(self.root_directory, "uncommitted/documentation")
         self.plugin_store_directory = os.path.join(self.root_directory, "plugins/store")
         sys.path.append(self.plugin_store_directory)
         
@@ -1452,7 +1456,8 @@ class DataContext(object):
             None
         """
 
-        # TODO: this is a temporary implementation and should be replaced with a rendered specific for this purpose
+        index_links = []
+
         validation_filepaths = [y for x in os.walk(self.fixtures_validations_directory) for y in glob(os.path.join(x[0], '*.json'))]
         for validation_filepath in validation_filepaths:
             with open(validation_filepath, "r") as infile:
@@ -1463,8 +1468,33 @@ class DataContext(object):
             model = DescriptivePageRenderer.render(validation)
             out_filepath = self.get_validation_doc_filepath(data_asset_name, expectation_suite_name)
             safe_mmkdir(os.path.dirname(out_filepath))
+
             with open(out_filepath, 'w') as writer:
                 writer.write(DefaultJinjaPageView.render(model))
+
+            index_links.append({
+                "data_asset_name" : data_asset_name,
+                "filepath" : out_filepath
+            })
+        
+        index_document = OrderedDict()
+        for il in index_links:
+            source, generator, asset = il["data_asset_name"].split('/')
+            if not source in index_document:
+                index_document[source] = []
+            index_document[source].append({
+                "data_asset_name" : asset,
+                "filepath" : il["filepath"],
+                "source" : source,
+                "generator" : generator,
+                "asset" : asset,
+            })
+
+
+        with open(os.path.join(self.data_doc_directory, "index.html"), "w") as writer:
+            writer.write(DefaultJinjaIndexPageView.render({
+                "sections": index_document
+            }))
 
     def profile_datasource(self,
                            datasource_name,

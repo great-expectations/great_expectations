@@ -178,6 +178,8 @@ class DefaultJinjaView(object):
 class DefaultJinjaPageView(DefaultJinjaView):
     _template = "page.j2"
 
+class DefaultJinjaIndexPageView(DefaultJinjaView):
+    _template = "index_page.j2"
 
 class DefaultJinjaSectionView(DefaultJinjaView):
     _template = "section.j2"
