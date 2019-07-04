@@ -9,6 +9,11 @@ Tutorial - Create Expectations
 Creating expectations is an opportunity to blend contextual knowledge from subject-matter experts and insights
 from profiling and performing exploratory analysis on your dataset.
 
+Video
+------
+
+This brief video covers the basics of creating expectations
+
 
 Get DataContext Object
 -----------------------
