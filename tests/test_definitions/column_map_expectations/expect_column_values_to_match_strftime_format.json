@@ -11,12 +11,12 @@
       },
       "schemas": {
         "spark": {
-          "a": "string",
-          "b": "string",
-          "c": "string",
-          "d": "int",
-          "e": "timestamp",
-          "f": "string"
+          "a": "StringType",
+          "b": "StringType",
+          "c": "StringType",
+          "d": "IntegerType",
+          "e": "TimestampType",
+          "f": "StringType"
         }
       },
       "tests": [{
@@ -131,7 +131,7 @@
       {
         "title": "Negative test - input already datetimes",
         "exact_match_out" : false,
-        "suppress_test_for": ["Pandas"],
+        "suppress_test_for": ["pandas"],
         "in":{
           "column": "e",
           "strftime_format": "%Y-%m-%d",
