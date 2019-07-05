@@ -45,7 +45,10 @@ class TableContentBlockRenderer(ContentBlockRenderer):
     @classmethod
     def expect_column_proportion_of_unique_values_to_be_between(cls, ge_object):
         observed_value = ge_object["result"]["observed_value"]
-        return [["Distinct (%)", "%.1f%%" % (100*observed_value)]]
+        if not observed_value:
+            return [["Distinct (%)", "--"]]
+        else:
+            return [["Distinct (%)", "%.1f%%" % (100*observed_value)]]
 
     @classmethod
     def expect_column_max_to_be_between(cls, ge_object):
