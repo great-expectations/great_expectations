@@ -1536,6 +1536,7 @@ class DataContext(object):
         total_start_time = datetime.datetime.now()
         run_id = total_start_time.isoformat()
         for name in data_asset_name_list:
+            logger.info("\tProfiling %s..." % (name))
             try:
                 start_time = datetime.datetime.now()
 
