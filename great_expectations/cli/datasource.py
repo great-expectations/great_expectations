@@ -184,7 +184,7 @@ To learn more: <blue>https://docs.greatexpectations.io/en/latest/guides/data_doc
                 cli_message(
                     """
 To view the generated data documentation, open this file in a web browser:
-    <green>great_expectations/data_documentation/index.html</green>
+    <green>great_expectations/uncommitted/documentation/index.html</green>
 """)
 
         else:
