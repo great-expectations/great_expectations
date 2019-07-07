@@ -77,6 +77,30 @@ def test_BasicDatasetProfiler():
     assert expected_expectations.issubset(added_expectations)
 
 
+def test_BasicDatasetProfiler_empty_column():
+    """
+    The profiler should determine that empty columns are of null cardinality and of null type and
+    not to generate expectations specific to types and cardinality categories.
+
+    We verify this by running the basic profiler on a Pandas dataset with an empty column
+    and asserting the number of successful results for the empty columns.
+    """
+    toy_dataset = PandasDataset({"x": [1, 2, 3], "y": [None, None, None]}, data_asset_name="toy_dataset")
+    assert len(toy_dataset.get_expectation_suite(
+        suppress_warnings=True)["expectations"]) == 0
+
+    expectations_config, evr_config = BasicDatasetProfiler.profile(toy_dataset)
+
+    assert len([result for result in evr_config['results'] if
+     result['expectation_config']['kwargs'].get('column') == 'y' and result['success']]) == 4
+
+
+    assert len([result for result in evr_config['results'] if
+                result['expectation_config']['kwargs'].get('column') == 'y' and result['success']]) < \
+           len([result for result in evr_config['results'] if
+                result['expectation_config']['kwargs'].get('column') == 'x' and result['success']])
+
+
 # noinspection PyPep8Naming
 def test_BasicDatasetProfiler_with_context(empty_data_context, filesystem_csv_2):
     empty_data_context.add_datasource(
