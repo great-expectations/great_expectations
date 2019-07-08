@@ -46,7 +46,7 @@ class BasicDatasetProfiler(DatasetProfiler):
                 'result']['observed_value']
             pct_unique = df.expect_column_proportion_of_unique_values_to_be_between(
                 column, None, None)['result']['observed_value']
-        except Exception:
+        except KeyError: # if observed_value value is not set
             logger.exception("Failed to get cardinality of column {0:s} - continuing...".format(column))
 
         if num_unique is None or num_unique == 0 or pct_unique is None:
@@ -87,6 +87,8 @@ class BasicDatasetProfiler(DatasetProfiler):
 
         df = dataset
 
+        df.set_default_expectation_argument("catch_exceptions", True)
+
         df.expect_table_row_count_to_be_between(min_value=0, max_value=None)
         df.expect_table_columns_to_match_ordered_list(None)
 
@@ -117,7 +119,8 @@ class BasicDatasetProfiler(DatasetProfiler):
                                                                    )
                     df.expect_column_kl_divergence_to_be_less_than(column, partition_object=None,
                                                            threshold=None, result_format='COMPLETE')
-
+                else: # unknown cardinality - skip
+                    pass
             elif type_ == "float":
                 if cardinality == "unique":
                     df.expect_column_values_to_be_unique(column)
@@ -137,7 +140,10 @@ class BasicDatasetProfiler(DatasetProfiler):
                                                                    }
                                                                    )
                     df.expect_column_kl_divergence_to_be_less_than(column, partition_object=None,
+
                                                            threshold=None, result_format='COMPLETE')
+                else: # unknown cardinality - skip
+                    pass
 
             elif type_ == "string":
                 # Check for leading and tralining whitespace.

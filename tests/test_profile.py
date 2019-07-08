@@ -77,9 +77,9 @@ def test_BasicDatasetProfiler():
     assert expected_expectations.issubset(added_expectations)
 
 
-def test_BasicDatasetProfiler_empty_column():
+def test_BasicDatasetProfiler_null_column():
     """
-    The profiler should determine that empty columns are of null cardinality and of null type and
+    The profiler should determine that null columns are of null cardinality and of null type and
     not to generate expectations specific to types and cardinality categories.
 
     We verify this by running the basic profiler on a Pandas dataset with an empty column
@@ -91,6 +91,7 @@ def test_BasicDatasetProfiler_empty_column():
 
     expectations_config, evr_config = BasicDatasetProfiler.profile(toy_dataset)
 
+    # TODO: assert set - specific expectations
     assert len([result for result in evr_config['results'] if
      result['expectation_config']['kwargs'].get('column') == 'y' and result['success']]) == 4
 
@@ -99,6 +100,55 @@ def test_BasicDatasetProfiler_empty_column():
                 result['expectation_config']['kwargs'].get('column') == 'y' and result['success']]) < \
            len([result for result in evr_config['results'] if
                 result['expectation_config']['kwargs'].get('column') == 'x' and result['success']])
+
+
+def test_BasicDatasetProfiler_partially_null_column(dataset):
+    """
+    Unit test to check the expectations that BasicDatasetProfiler creates for a partially null column.
+    The test is executed against all the backends (Pandas, Spark, etc.), because it uses
+    the fixture.
+
+    "nulls" is the partially null column in the fixture dataset
+    """
+    expectations_config, evr_config = BasicDatasetProfiler.profile(dataset)
+
+    assert set(["expect_column_to_exist", "expect_column_values_to_be_in_type_list", "expect_column_unique_value_count_to_be_between", "expect_column_proportion_of_unique_values_to_be_between", "expect_column_values_to_not_be_null", "expect_column_values_to_be_in_set", "expect_column_values_to_be_unique"]) == \
+           set([expectation['expectation_type'] for expectation in expectations_config["expectations"] if expectation["kwargs"].get("column") == "nulls"])
+
+def test_BasicDatasetProfiler_non_numeric_low_cardinality(non_numeric_low_card_dataset):
+    """
+    Unit test to check the expectations that BasicDatasetProfiler creates for a low cardinality
+    non numeric column.
+    The test is executed against all the backends (Pandas, Spark, etc.), because it uses
+    the fixture.
+    """
+    expectations_config, evr_config = BasicDatasetProfiler.profile(non_numeric_low_card_dataset)
+
+    assert set(["expect_column_to_exist", "expect_column_values_to_be_in_type_list", "expect_column_unique_value_count_to_be_between", "expect_column_proportion_of_unique_values_to_be_between", "expect_column_values_to_not_be_null", "expect_column_values_to_be_in_set", "expect_column_values_to_not_match_regex"]) == \
+           set([expectation['expectation_type'] for expectation in expectations_config["expectations"] if expectation["kwargs"].get("column") == "lowcardnonnum"])
+
+def test_BasicDatasetProfiler_non_numeric_high_cardinality(non_numeric_high_card_dataset):
+    """
+    Unit test to check the expectations that BasicDatasetProfiler creates for a high cardinality
+    non numeric column.
+    The test is executed against all the backends (Pandas, Spark, etc.), because it uses
+    the fixture.
+    """
+    expectations_config, evr_config = BasicDatasetProfiler.profile(non_numeric_high_card_dataset)
+
+    assert set(["expect_column_to_exist", "expect_column_values_to_be_in_type_list", "expect_column_unique_value_count_to_be_between", "expect_column_proportion_of_unique_values_to_be_between", "expect_column_values_to_not_be_null", "expect_column_values_to_be_in_set", "expect_column_values_to_not_match_regex"]) == \
+           set([expectation['expectation_type'] for expectation in expectations_config["expectations"] if expectation["kwargs"].get("column") == "highcardnonnum"])
+
+def test_BasicDatasetProfiler_numeric_high_cardinality(numeric_high_card_dataset):
+    """
+    Unit test to check the expectations that BasicDatasetProfiler creates for a high cardinality
+    numeric column.
+    The test is executed against all the backends (Pandas, Spark, etc.), because it uses
+    the fixture.
+    """
+    expectations_config, evr_config = BasicDatasetProfiler.profile(numeric_high_card_dataset)
+
+    assert set(["expect_column_to_exist", "expect_table_row_count_to_be_between", "expect_table_columns_to_match_ordered_list", "expect_column_values_to_be_in_type_list", "expect_column_unique_value_count_to_be_between", "expect_column_proportion_of_unique_values_to_be_between", "expect_column_values_to_not_be_null", "expect_column_values_to_be_in_set", "expect_column_values_to_be_unique"]) == set([expectation['expectation_type'] for expectation in expectations_config["expectations"]])
 
 
 # noinspection PyPep8Naming
