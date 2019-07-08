@@ -1,6 +1,6 @@
 .. _tutorial_init:
 
-Tutorial - great_expectations init
+Step 1: Running `great_expectations init`
 ==================================
 
 .. toctree::

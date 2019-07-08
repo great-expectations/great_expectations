@@ -1,6 +1,6 @@
 .. _tutorial_pipeline_integration:
 
-Tutorial - Pipeline Integration
+Step 3: Pipeline integration
 =================================
 
 This tutorial covers integrating Great Expectations (GE) into an existing pipeline.
