@@ -29,13 +29,15 @@ def test_cli_command_entrance():
 
     result = runner.invoke(cli)
     assert result.exit_code == 0
-    assert result.output == """Usage: cli [OPTIONS] COMMAND [ARGS]...
+    assert result.output ==\
+"""Usage: cli [OPTIONS] COMMAND [ARGS]...
 
   great_expectations command-line interface
 
 Options:
-  --version  Show the version and exit.
-  --help     Show this message and exit.
+  --version      Show the version and exit.
+  -v, --verbose  Set great_expectations to use verbose output
+  --help         Show this message and exit.
 
 Commands:
   init      Initialize a new Great Expectations project.
@@ -173,66 +175,68 @@ def test_cli_evaluation_parameters(capsys):
 
 
 def test_cli_init(tmp_path_factory, filesystem_csv_2):
-    basedir = tmp_path_factory.mktemp("test_cli_init_diff")
-    basedir = str(basedir)
-    os.makedirs(os.path.join(basedir, "data"))
-    curdir = os.path.abspath(os.getcwd())
-    shutil.copy(
-        "./tests/test_sets/Titanic.csv",
-        str(os.path.join(basedir, "data/Titanic.csv"))
-    )
-
-    os.chdir(basedir)
-
-    runner = CliRunner()
-    result = runner.invoke(cli, ["init"], input="Y\n1\n%s\n\n" % str(
-        os.path.join(basedir, "data")))
-
-    print(result.output)
-    print("result.output length:", len(result.output))
-
-    assert len(result.output) < 10000, "CLI output is unreasonably long."
-    assert len(re.findall(
-        "{", result.output)) < 100, "CLI contains way more '{' than we would reasonably expect."
-
-    assert """Always know what to expect from your data.""" in result.output
-
-    assert os.path.isdir(os.path.join(basedir, "great_expectations"))
-    assert os.path.isfile(os.path.join(
-        basedir, "great_expectations/great_expectations.yml"))
-    config = yaml.load(
-        open(os.path.join(basedir, "great_expectations/great_expectations.yml"), "r"))
-    assert config["datasources"]["data__dir"]["type"] == "pandas"
-
-    assert os.path.isfile(
-        os.path.join(
-            basedir,
-            "great_expectations/expectations/data__dir/default/Titanic/BasicDatasetProfiler.json"
+    try:
+        basedir = tmp_path_factory.mktemp("test_cli_init_diff")
+        basedir = str(basedir)
+        os.makedirs(os.path.join(basedir, "data"))
+        curdir = os.path.abspath(os.getcwd())
+        shutil.copy(
+            "./tests/test_sets/Titanic.csv",
+            str(os.path.join(basedir, "data/Titanic.csv"))
         )
-    )
 
-    assert os.path.isfile(
-        os.path.join(
-            basedir,
-            "great_expectations/fixtures/validations/data__dir/default/Titanic/BasicDatasetProfiler.json")
-    )
+        os.chdir(basedir)
 
-    assert os.path.isfile(
-        os.path.join(
-            basedir,
-            "great_expectations/uncommitted/documentation/data__dir/default/Titanic/BasicDatasetProfiler.html")
-    )
+        runner = CliRunner()
+        result = runner.invoke(cli, ["init"], input="Y\n1\n%s\n\n" % str(
+            os.path.join(basedir, "data")))
 
-    assert os.path.getsize(
-        os.path.join(
-            basedir,
-            "great_expectations/uncommitted/documentation/data__dir/default/Titanic/BasicDatasetProfiler.html"
+        print(result.output)
+        print("result.output length:", len(result.output))
+
+        assert len(result.output) < 10000, "CLI output is unreasonably long."
+        assert len(re.findall(
+            "{", result.output)) < 100, "CLI contains way more '{' than we would reasonably expect."
+
+        assert """Always know what to expect from your data.""" in result.output
+
+        assert os.path.isdir(os.path.join(basedir, "great_expectations"))
+        assert os.path.isfile(os.path.join(
+            basedir, "great_expectations/great_expectations.yml"))
+        config = yaml.load(
+            open(os.path.join(basedir, "great_expectations/great_expectations.yml"), "r"))
+        assert config["datasources"]["data__dir"]["type"] == "pandas"
+
+        assert os.path.isfile(
+            os.path.join(
+                basedir,
+                "great_expectations/expectations/data__dir/default/Titanic/BasicDatasetProfiler.json"
+            )
         )
-    ) > 0
 
-    os.chdir(curdir)
-    print(result)
-    # assert False
+        assert os.path.isfile(
+            os.path.join(
+                basedir,
+                "great_expectations/fixtures/validations/data__dir/default/Titanic/BasicDatasetProfiler.json")
+        )
+
+        assert os.path.isfile(
+            os.path.join(
+                basedir,
+                "great_expectations/uncommitted/documentation/data__dir/default/Titanic/BasicDatasetProfiler.html")
+        )
+
+        assert os.path.getsize(
+            os.path.join(
+                basedir,
+                "great_expectations/uncommitted/documentation/data__dir/default/Titanic/BasicDatasetProfiler.html"
+            )
+        ) > 0
+        print(result)
+    except:
+        raise
+    finally:
+        os.chdir(curdir)
 
 
 # def test_cli_render(tmp_path_factory):
