@@ -86,6 +86,7 @@ def test_standalone_pandas_datasource(test_folder_connection_path):
     assert isinstance(dataset, PandasDataset)
     assert (dataset["col_1"] == [1, 2, 3, 4, 5]).all()
 
+
 def test_standalone_sqlalchemy_datasource(test_db_connection_string):
     datasource = SqlAlchemyDatasource(
         'SqlAlchemy', connection_string=test_db_connection_string, echo=False)
@@ -95,6 +96,7 @@ def test_standalone_sqlalchemy_datasource(test_db_connection_string):
     dataset2 = datasource.get_batch("table_2", schema='main')
     assert isinstance(dataset1, SqlAlchemyDataset)
     assert isinstance(dataset2, SqlAlchemyDataset)
+
 
 def test_create_sqlalchemy_datasource(data_context):
     name = "test_sqlalchemy_datasource"

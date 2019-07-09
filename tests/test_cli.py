@@ -22,7 +22,9 @@ try:
 except ImportError:
     import mock
 
+
 from great_expectations.cli.init import scaffold_directories_and_notebooks
+
 
 def test_cli_command_entrance():
     runner = CliRunner()
@@ -34,8 +36,9 @@ def test_cli_command_entrance():
   great_expectations command-line interface
 
 Options:
-  --version  Show the version and exit.
-  --help     Show this message and exit.
+  --version      Show the version and exit.
+  -v, --verbose  Set great_expectations to use verbose output.
+  --help         Show this message and exit.
 
 Commands:
   init      Initialize a new Great Expectations project.
