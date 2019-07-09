@@ -33,6 +33,7 @@ config = {
     'long_description': long_description,
     'license': 'Apache-2.0',
     'keywords': 'data science testing pipeline data quality dataquality validation datavalidation',
+    'include_package_data': True,
     'classifiers': [
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',

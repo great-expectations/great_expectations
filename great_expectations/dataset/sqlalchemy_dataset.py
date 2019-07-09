@@ -521,7 +521,6 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         return sa.column(column) != None
 
-
     @DocInherit
     @DataAsset.expectation(['column', 'type_', 'mostly'])
     def expect_column_values_to_be_of_type(
