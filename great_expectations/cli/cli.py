@@ -14,7 +14,8 @@
 
 """
 from .datasource import (
-    add_datasource
+    add_datasource,
+    profile_datasource
 )
 from .init import (
     scaffold_directories_and_notebooks,
@@ -228,10 +229,7 @@ def profile(datasource_name, max_data_assets, profile_all_data_assets, target_di
 
     # FIXME: By default, this should iterate over all datasources
     context = DataContext(target_directory)
-    context.profile_datasource(
-        datasource_name,
-        max_data_assets=max_data_assets
-    )
+    profile_datasource(context, datasource_name, max_data_assets=20)
 
 
 def main():

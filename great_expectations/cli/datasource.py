@@ -117,6 +117,20 @@ See <blue>https://docs.greatexpectations.io/en/latest/core_concepts/datasource.h
         print("Skipping datasource configuration. You can add a datasource later by editing the great_expectations.yml file.")
         return None
 
+    profile_datasource(context, data_source_name)
+
+    if data_source_selection == "1":  # Pandas
+        cli_message(msg_filesys_go_to_notebook)
+
+    elif data_source_selection == "2":  # SQL
+        cli_message(msg_sqlalchemy_go_to_notebook)
+
+    elif data_source_selection == "3":  # Spark
+        cli_message(msg_spark_go_to_notebook)
+
+
+def profile_datasource(context, data_source_name, max_data_assets=20):
+
     if data_source_name != None:
 
         cli_message(
@@ -136,7 +150,7 @@ To learn more about profiling, visit <blue>https://docs.greatexpectations.io/en/
                          ):
             profiling_results = context.profile_datasource(
                 data_source_name,
-                max_data_assets=20
+                max_data_assets=max_data_assets
             )
 
             print("\nDone.\n\nProfiling results are saved here:")
@@ -191,14 +205,6 @@ To view the generated data documentation, open this file in a web browser:
                 "Okay, skipping profiling for now. You can always do this later by running `great_expectations profile`."
             )
 
-    if data_source_selection == "1":  # Pandas
-        cli_message(msg_filesys_go_to_notebook)
-
-    elif data_source_selection == "2":  # SQL
-        cli_message(msg_sqlalchemy_go_to_notebook)
-
-    elif data_source_selection == "3":  # Spark
-        cli_message(msg_spark_go_to_notebook)
 
 
 msg_prompt_choose_data_source = """
