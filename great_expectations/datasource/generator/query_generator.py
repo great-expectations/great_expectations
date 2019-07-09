@@ -24,7 +24,17 @@ class QueryGenerator(BatchGenerator):
     def __init__(self, datasource, name="default"):
         # TODO: Add tests for QueryGenerator
         super(QueryGenerator, self).__init__(name=name, type_="queries", datasource=datasource)
-        if datasource is not None and datasource.data_context is not None:
+        if (
+                datasource is not None and
+                datasource.data_context is not None and
+                os.path.isdir(os.path.join(self._datasource.data_context.root_directory,
+                                           "datasources",
+                                           self._datasource.name,
+                                           "generators",
+                                           self._name,
+                                           "queries")
+                              )
+        ):
             self._queries_path = os.path.join(self._datasource.data_context.root_directory,
                                               "datasources",
                                               self._datasource.name,
@@ -47,12 +57,15 @@ class QueryGenerator(BatchGenerator):
                         "query": data.read(),
                         "timestamp": time.time()
                     }])
-        else:
+        elif self._queries:
             if data_asset_name in self._queries:
                 return iter([{
                     "query": self._queries[data_asset_name],
                     "timestamp": time.time()
                 }])
+        else:
+            # There is no query path or temp query storage defined
+            pass
 
         if self.engine is not None:
             tables = self.inspector.get_table_names()
