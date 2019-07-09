@@ -219,7 +219,7 @@ def render(render_object):
 def profile(datasource_name, max_data_assets, profile_all_data_assets, target_directory):
     """Profile a great expectations object.
 
-    datasource_name: A datasource within this GE context to profile.
+    DATASOURCE_NAME: A datasource within this GE context to profile.
     """
 
     if profile_all_data_assets:
