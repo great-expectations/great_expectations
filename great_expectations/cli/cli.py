@@ -75,8 +75,12 @@ def cli(verbose):
               help='Path to a python module containing a custom dataset class.')
 @click.option('--custom_dataset_class', '-c', default=None,
               help='Name of the custom dataset class to use during evaluation.')
-def validate(dataset, expectation_suite_file, evaluation_parameters, result_format,
-             catch_exceptions, only_return_failures, custom_dataset_module, custom_dataset_class):
+def validate(
+        dataset,
+        expectation_suite_file,
+        evaluation_parameters,
+        result_format,
+        catch_exceptions, only_return_failures, custom_dataset_module, custom_dataset_class):
     """Validate a CSV file against an expectation suite.
 
     DATASET: Path to a file containing a CSV file to validate using the provided expectation_suite_file.
@@ -86,11 +90,11 @@ validate the data.
     """
 
     """
-    Read a dataset file and validate it using an expectation suite saved in another file. Uses parameters defined in the dispatch
-    method.
+    Read a dataset file and validate it using an expectation suite saved in another file. Uses parameters defined in 
+    the dispatch method.
 
     :param parsed_args: A Namespace object containing parsed arguments from the dispatch method.
-    :return: The number of unsucessful expectations
+    :return: The number of unsuccessful expectations
     """
     expectation_suite_file = expectation_suite_file
 

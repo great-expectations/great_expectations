@@ -125,8 +125,8 @@ See <blue>https://docs.greatexpectations.io/en/latest/core_concepts/datasource.h
 
 Would you like to profile '{0:s}' to create candidate expectations and documentation?
 
-Please note: As of v0.7.0, profiling is still a beta feature in Great Expectations.  
-This generation of profilers will evaluate the entire data source (without sampling) and may be very time consuming. 
+Please note: Profiling is still a beta feature in Great Expectations.  
+The current profiler will evaluate the entire data source (without sampling), which may be very time consuming. 
 As a rule of thumb, we recommend starting with data smaller than 100MB.
 
 To learn more about profiling, visit <blue>https://docs.greatexpectations.io/en/latest/guides/profiling.html?utm_source=cli&utm_medium=init&utm_campaign={1:s}</blue>.
