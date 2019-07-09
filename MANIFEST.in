@@ -1,4 +1,6 @@
 include *.txt
 include LICENSE
+include great_expectations/init_notebooks/*.ipynb
+include great_expectations/render/view/templates/*.j2
 graft tests
 global-exclude *.py[co]

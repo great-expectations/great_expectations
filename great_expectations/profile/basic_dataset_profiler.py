@@ -1,7 +1,9 @@
+import logging
 import warnings
 from .base import DatasetProfiler
 from great_expectations.dataset.dataset import Dataset
 
+logger = logging.getLogger(__name__)
 
 class BasicDatasetProfiler(DatasetProfiler):
     """BasicDatasetProfiler is inspired by the beloved pandas_profiling project.
@@ -36,13 +38,21 @@ class BasicDatasetProfiler(DatasetProfiler):
     @classmethod
     def _get_column_cardinality(cls, df, column):
 
-        num_unique = df.expect_column_unique_value_count_to_be_between(column, None, None)[
-            'result']['observed_value']
-        pct_unique = df.expect_column_proportion_of_unique_values_to_be_between(
-            column, None, None)['result']['observed_value']
+        num_unique = None
+        pct_unique = None
 
+        try:
+            num_unique = df.expect_column_unique_value_count_to_be_between(column, None, None)[
+                'result']['observed_value']
+            pct_unique = df.expect_column_proportion_of_unique_values_to_be_between(
+                column, None, None)['result']['observed_value']
+        except KeyError: # if observed_value value is not set
+            logger.exception("Failed to get cardinality of column {0:s} - continuing...".format(column))
 
-        if pct_unique == 1.0:
+        if num_unique is None or num_unique == 0 or pct_unique is None:
+            cardinality = "none"
+
+        elif pct_unique == 1.0:
             cardinality = "unique"
 
         elif pct_unique > .1:
@@ -53,10 +63,7 @@ class BasicDatasetProfiler(DatasetProfiler):
 
         else:
             cardinality = "complicated"
-            if num_unique == 0:
-                cardinality = "none"
-
-            elif num_unique == 1:
+            if num_unique == 1:
                 cardinality = "one"
 
             elif num_unique == 2:
@@ -70,7 +77,7 @@ class BasicDatasetProfiler(DatasetProfiler):
 
             else:
                 cardinality = "many"
-        # print('col: {0:s}, num_unique: {1:d}, pct_unique: {2:f}, card: {3:s}'.format(column, num_unique,pct_unique, cardinality))
+        # print('col: {0:s}, num_unique: {1:s}, pct_unique: {2:s}, card: {3:s}'.format(column, str(num_unique), str(pct_unique), cardinality))
 
         return cardinality
 
@@ -79,6 +86,8 @@ class BasicDatasetProfiler(DatasetProfiler):
 
 
         df = dataset
+
+        df.set_default_expectation_argument("catch_exceptions", True)
 
         df.expect_table_row_count_to_be_between(min_value=0, max_value=None)
         df.expect_table_columns_to_match_ordered_list(None)
@@ -96,7 +105,7 @@ class BasicDatasetProfiler(DatasetProfiler):
                     df.expect_column_values_to_be_unique(column)
                 elif cardinality in ["one", "two", "very few", "few"]:
                     df.expect_column_distinct_values_to_be_in_set(column, value_set=None, result_format="SUMMARY")
-                else:
+                elif cardinality in ["many", "very many", "unique"]:
                     df.expect_column_min_to_be_between(column, min_value=None, max_value=None)
                     df.expect_column_max_to_be_between(column, min_value=None, max_value=None)
                     df.expect_column_mean_to_be_between(column, min_value=None, max_value=None)
@@ -110,7 +119,8 @@ class BasicDatasetProfiler(DatasetProfiler):
                                                                    )
                     df.expect_column_kl_divergence_to_be_less_than(column, partition_object=None,
                                                            threshold=None, result_format='COMPLETE')
-
+                else: # unknown cardinality - skip
+                    pass
             elif type_ == "float":
                 if cardinality == "unique":
                     df.expect_column_values_to_be_unique(column)
@@ -118,7 +128,7 @@ class BasicDatasetProfiler(DatasetProfiler):
                 elif cardinality in ["one", "two", "very few", "few"]:
                     df.expect_column_distinct_values_to_be_in_set(column, value_set=None, result_format="SUMMARY")
 
-                else:
+                elif cardinality in ["many", "very many", "unique"]:
                     df.expect_column_min_to_be_between(column, min_value=None, max_value=None)
                     df.expect_column_max_to_be_between(column, min_value=None, max_value=None)
                     df.expect_column_mean_to_be_between(column, min_value=None, max_value=None)
@@ -130,7 +140,10 @@ class BasicDatasetProfiler(DatasetProfiler):
                                                                    }
                                                                    )
                     df.expect_column_kl_divergence_to_be_less_than(column, partition_object=None,
+
                                                            threshold=None, result_format='COMPLETE')
+                else: # unknown cardinality - skip
+                    pass
 
             elif type_ == "string":
                 # Check for leading and tralining whitespace.

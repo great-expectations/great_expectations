@@ -13,6 +13,8 @@ Planned Features
 v.0.7.1__develop
 ________________
 
+* Implement expect_column_values_to_be_of_type, expect_column_values_to_be_in_type_list for SparkDFDataset
+
 
 v.0.7.0
 ________________
