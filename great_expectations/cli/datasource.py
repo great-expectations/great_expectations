@@ -149,7 +149,8 @@ To learn more about profiling, visit <blue>https://docs.greatexpectations.io/en/
                     data_asset_name, expectation_suite_name, run_id)['filepath']))
 
             cli_message(
-                """========== Data Documentation ==========
+                """
+========== Data Documentation ==========
 
 To generate documentation from the data you just profiled, the profiling results should be moved from 
 great_expectations/uncommitted (ignored by git) to great_expectations/fixtures.
