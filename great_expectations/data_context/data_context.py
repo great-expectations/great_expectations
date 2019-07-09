@@ -1490,7 +1490,6 @@ class DataContext(object):
                 "asset" : asset,
             })
 
-
         with open(os.path.join(self.data_doc_directory, "index.html"), "w") as writer:
             writer.write(DefaultJinjaIndexPageView.render({
                 "sections": index_document
@@ -1568,7 +1567,8 @@ class DataContext(object):
 
                 self.save_expectation_suite(expectation_suite)
                 duration = (datetime.datetime.now() - start_time).total_seconds()
-                logger.info("\tProfiled %d rows from %s (%.3f sec)" % (row_count, name, duration))
+                logger.info("\tProfiled %d columns using %d rows from %s (%.3f sec)" %
+                            (new_column_count, row_count, name, duration))
 
             except ProfilerError as err:
                 logger.warning(err.message)
