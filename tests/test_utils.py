@@ -152,7 +152,7 @@ def get_dataset(dataset_type, data, schemas=None, profiler=ColumnsExistProfiler,
         sql_dtypes = {}
         if schemas and "postgresql" in schemas and isinstance(engine.dialect, postgresqltypes.dialect):
             schema = schemas["postgresql"]
-            sql_dtypes = {col : POSTGRESQL_TYPES[dtype] for (col, dtype) in schema.items()}
+            sql_dtypes = {col: POSTGRESQL_TYPES[dtype] for (col, dtype) in schema.items()}
             for col in schema:
                 type_ = schema[col]
                 if type_ in ["INTEGER", "SMALLINT", "BIGINT"]:
@@ -338,8 +338,8 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
             # "expect_column_values_to_be_unique",
             # "expect_column_values_to_not_be_null",
             # "expect_column_values_to_be_null",
-            "expect_column_values_to_be_of_type",
-            "expect_column_values_to_be_in_type_list",
+            # "expect_column_values_to_be_of_type",
+            # "expect_column_values_to_be_in_type_list",
             # "expect_column_values_to_be_in_set",
             # "expect_column_values_to_not_be_in_set",
             # "expect_column_distinct_values_to_be_in_set",

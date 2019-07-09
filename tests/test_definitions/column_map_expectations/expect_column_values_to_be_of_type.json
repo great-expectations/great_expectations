@@ -60,7 +60,7 @@
       },
       "tests": [
         {
-          "title": "Basic Python int Positive Test",
+          "title": "basic_python_int_positive_test",
           "exact_match_out": false,
           "in": {
             "column": "x",
@@ -75,7 +75,7 @@
         },
         {
           "_note": "type name here works for tested sqlalchemy types; for sqlalchemy note we do not expect unexpected_list or unexpected_index_list since there are no column_map semantics for type",
-          "title": "Basic non-python integer Positive Test",
+          "title": "basic_sqlalchemy_int_positive_test",
           "exact_match_out": false,
           "in": {
             "column": "x",
@@ -87,7 +87,20 @@
           "only_for": ["sqlalchemy"]
         },
         {
-          "title": "Negative, Python ints are not string",
+          "_note": "type name here works for tested spark types; for spark note we do not expect unexpected_list or unexpected_index_list since there are no column_map semantics for type",
+          "title": "basic_spark_int_positive_test",
+          "exact_match_out": false,
+          "in": {
+            "column": "x",
+            "type_": "IntegerType"
+          },
+          "out": {
+            "success": true
+          },
+          "only_for": ["spark"]
+        },
+        {
+          "title": "negative_test_python_ints_are_not_string",
           "exact_match_out": false,
           "in":
           {
@@ -104,7 +117,7 @@
         },
         {
           "_note": "type name here works for tested sqlalchemy types; for sqlalchemy note we do not expect unexpected_list or unexpected_index_list since there are no column_map semantics for type",
-          "title": "Negative, sql ints are not text",
+          "title": "negative_test_sql_ints_are_not_text",
           "exact_match_out": false,
           "in":
           {
@@ -133,7 +146,22 @@
           "only_for": ["sqlite"]
         },
         {
-          "title": "Positive, floats",
+          "_note": "type name here works for tested spark types; for spark note we do not expect unexpected_list or unexpected_index_list since there are no column_map semantics for type",
+          "title": "negative_test_sql_ints_are_not_text",
+          "exact_match_out": false,
+          "in":
+          {
+            "column":"x",
+            "type_":"StringType"
+          },
+          "out":
+          {
+            "success":false
+          },
+          "only_for": ["spark"]
+        },
+        {
+          "title": "positive_test_pandas_floats",
           "exact_match_out": false,
           "in":
           {
@@ -149,8 +177,8 @@
           "only_for": ["pandas"]
         },
         {
-          "_note": "type name here works for tested sqlalchemy types; for sqlalchemy note we do not expect unexpected_list or unexpected_index_list since there are no column_map semantics for type",
-          "title": "Positive, floats",
+          "_note": "type name here works for tested postgres types; for postgres note we do not expect unexpected_list or unexpected_index_list since there are no column_map semantics for type",
+          "title": "positive_test_postgres_floats",
           "exact_match_out": false,
           "in":
           {
@@ -164,7 +192,37 @@
           "only_for": ["postgres"]
         },
         {
-          "title": "Positive, strings",
+          "_note": "type name here works for tested sql non-postgres types; for sql non-postgres note we do not expect unexpected_list or unexpected_index_list since there are no column_map semantics for type",
+          "title": "positive_test_sql_non_postgres_floats",
+          "exact_match_out": false,
+          "in":
+          {
+            "column":"y",
+            "type_":"FLOAT"
+          },
+          "out":
+          {
+            "success":true
+          },
+          "only_for": ["mysql", "sqlite"]
+        },
+        {
+          "_note": "type name here works for tested spark types; for spark note we do not expect unexpected_list or unexpected_index_list since there are no column_map semantics for type",
+          "title": "positive_test_spark_floats",
+          "exact_match_out": false,
+          "in":
+          {
+            "column":"y",
+            "type_":"FloatType"
+          },
+          "out":
+          {
+            "success":true
+          },
+          "only_for": ["spark"]
+        },
+        {
+          "title": "positive_test_pandas_strings",
           "exact_match_out": false,
           "in":{"column":"z","type_":"string"},
           "out":{"success":true, "unexpected_list":[], "unexpected_index_list":[]},
@@ -172,7 +230,7 @@
         },
         {
           "_note": "type name here works for tested sqlalchemy types; for sqlalchemy note we do not expect unexpected_list or unexpected_index_list since there are no column_map semantics for type",
-          "title": "Positive, TEXT",
+          "title": "positive_test_sql_TEXT",
           "exact_match_out": false,
           "in":{"column":"z","type_":"TEXT"},
           "out":{"success":true},
@@ -180,14 +238,22 @@
         },
         {
           "_note": "type name here works for tested sqlalchemy types; for sqlalchemy note we do not expect unexpected_list or unexpected_index_list since there are no column_map semantics for type",
-          "title": "Positive, VARCHAR",
+          "title": "positive_test_sql_VARCHAR",
           "exact_match_out": false,
           "in":{"column":"z","type_":"VARCHAR"},
           "out":{"success":true},
           "only_for": ["sqlite"]
         },
         {
-          "title": "Negative, python floats are not python bools",
+          "_note": "type name here works for tested spark types; for spark note we do not expect unexpected_list or unexpected_index_list since there are no column_map semantics for type",
+          "title": "positive_test_spark_StringType",
+          "exact_match_out": false,
+          "in":{"column":"z","type_":"StringType"},
+          "out":{"success":true},
+          "only_for": ["spark"]
+        },
+        {
+          "title": "negative_test_python_floats_are_not_python_bools",
           "exact_match_out": false,
           "in":{"column":"b","type_":"boolean"},
           "out":{
@@ -199,13 +265,23 @@
         },
         {
           "_note": "type name here works for tested sqlalchemy types; for sqlalchemy note we do not expect unexpected_list or unexpected_index_list since there are no column_map semantics for type",
-          "title": "Negative, sqlalchemy floats are not BOOLEAN",
+          "title": "negative_test_sqlalchemy_floats_are_not_BOOLEAN",
           "exact_match_out": false,
           "in":{"column":"b","type_":"BOOLEAN"},
           "out":{
             "success":true
           },
           "only_for": ["sqlalchemy"]
+        },
+        {
+          "_note": "type name here works for tested spark types; for spark note we do not expect unexpected_list or unexpected_index_list since there are no column_map semantics for type",
+          "title": "negative_test_spark_floats_are_not_BooleanType",
+          "exact_match_out": false,
+          "in":{"column":"b","type_":"BooleanType"},
+          "out":{
+            "success":true
+          },
+          "only_for": ["spark"]
         }
     ]  
   }]
