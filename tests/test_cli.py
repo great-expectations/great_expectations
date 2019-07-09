@@ -22,21 +22,22 @@ try:
 except ImportError:
     import mock
 
+
 from great_expectations.cli.init import scaffold_directories_and_notebooks
+
 
 def test_cli_command_entrance():
     runner = CliRunner()
 
     result = runner.invoke(cli)
     assert result.exit_code == 0
-    assert result.output ==\
-"""Usage: cli [OPTIONS] COMMAND [ARGS]...
+    assert result.output == """Usage: cli [OPTIONS] COMMAND [ARGS]...
 
   great_expectations command-line interface
 
 Options:
   --version      Show the version and exit.
-  -v, --verbose  Set great_expectations to use verbose output
+  -v, --verbose  Set great_expectations to use verbose output.
   --help         Show this message and exit.
 
 Commands:

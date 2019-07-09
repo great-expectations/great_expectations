@@ -21,7 +21,9 @@ def test_file_kwargs_generator(data_context, filesystem_csv):
     assert "timestamp" in f1_batches[0]
     del f1_batches[0]["timestamp"]
     assert f1_batches[0] == {
-            "path": os.path.join(base_dir, "f1.csv")
+            "path": os.path.join(base_dir, "f1.csv"),
+            "sep": None,
+            "engine": "python"
         }
 
     f3_batches = [batch_kwargs["path"] for batch_kwargs in generator.get_iterator("f3")]

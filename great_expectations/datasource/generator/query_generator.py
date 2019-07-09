@@ -47,7 +47,11 @@ class QueryGenerator(BatchGenerator):
 
         if datasource is not None:
             self.engine = datasource.engine
-            self.inspector = reflection.Inspector.from_engine(self.engine)
+            try:
+                self.inspector = reflection.Inspector.from_engine(self.engine)
+            except sqlalchemy.exc.OperationalError:
+                logger.warning("Unable to create inspector from engine in generator %s" % name)
+                self.inspector = None
 
     def _get_iterator(self, data_asset_name, **kwargs):
         if self._queries_path:
@@ -67,7 +71,7 @@ class QueryGenerator(BatchGenerator):
             # There is no query path or temp query storage defined
             pass
 
-        if self.engine is not None:
+        if self.engine is not None and self.inspector is not None:
             tables = self.inspector.get_table_names()
             if data_asset_name in tables:
                 return iter([
@@ -90,7 +94,7 @@ class QueryGenerator(BatchGenerator):
             defined_queries = [path for path in os.walk(self._queries_path) if str(path).endswith(".sql")]
         else:
             defined_queries = list(self._queries.keys())
-        if self.engine is not None:
+        if self.engine is not None and self.inspector is not None:
             tables = self.inspector.get_table_names()
         else:
             tables = []

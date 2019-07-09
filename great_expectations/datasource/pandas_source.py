@@ -22,7 +22,11 @@ class PandasDatasource(Datasource):
             # Provide a gentle way to build a datasource with a sane default,
             # including ability to specify the base_directory and reader_options
             base_directory = kwargs.pop("base_directory", "/data")
-            reader_options = kwargs.pop("reader_options", {})
+            # By default, use CSV sniffer to infer separator, which requires the python engine
+            reader_options = kwargs.pop("reader_options", {
+                "sep": None,
+                "engine": "python"
+            })
             generators = {
                 "default": {
                     "type": "subdir_reader",
