@@ -164,14 +164,6 @@ def init(target_directory):
     It scaffolds directories, sets up notebooks, creates a project file, and
     appends to a `.gitignore` file.
     """
-    try:
-        context = DataContext.create(target_directory)
-    except DataContextError as err:
-        logger.critical(err.message)
-        sys.exit(-1)
-
-    base_dir = context.root_directory
-
     six.print_(colored(
         figlet_format("Great Expectations", font="big"),
         color="cyan"
@@ -185,6 +177,13 @@ def init(target_directory):
         )
         exit(0)
 
+    try:
+        context = DataContext.create(target_directory)
+    except DataContextError as err:
+        logger.critical(err.message)
+        sys.exit(-1)
+
+    base_dir = context.root_directory
     scaffold_directories_and_notebooks(base_dir)
     cli_message(
         "\nDone.",
