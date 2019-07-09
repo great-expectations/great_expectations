@@ -161,7 +161,7 @@ Before committing, please make sure that this data does not contain sensitive in
 To learn more: <blue>https://docs.greatexpectations.io/en/latest/guides/data_documentation.html?utm_source=cli&utm_medium=init&utm_campaign={0:s}</blue>
 """.format(__version__.replace(".", "_"))
             )
-            if click.confirm("Move the profiled data?",
+            if click.confirm("Move the profiled data and build HTML documentation?",
                              default=True
                              ):
                 cli_message("\nMoving files...")
@@ -175,17 +175,18 @@ To learn more: <blue>https://docs.greatexpectations.io/en/latest/guides/data_doc
 
                 cli_message("\nDone.")
 
-            if click.confirm("\nBuild documentation using the profiled data?",
-                             default=True
-                             ):
                 cli_message("\nBuilding documentation...")
 
                 context.render_full_static_site()
                 cli_message(
                     """
 To view the generated data documentation, open this file in a web browser:
-    <green>great_expectations/data_documentation/index.html</green>
+    <green>great_expectations/uncommitted/documentation/index.html</green>
 """)
+            else:
+                cli_message(
+                    "Okay, skipping HTML documentation for now.`."
+                )
 
         else:
             cli_message(

@@ -9,6 +9,7 @@ from functools import wraps
 from datetime import datetime
 from dateutil.parser import parse
 
+from great_expectations.data_asset import DataAsset
 from .dataset import Dataset
 from .pandas_dataset import PandasDataset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
@@ -562,6 +563,71 @@ class SparkDFDataset(MetaSparkDFDataset):
     ):
         success_udf = udf(lambda x: x is None)
         return column.withColumn('__success', success_udf(column[0]))
+
+    @DocInherit
+    @DataAsset.expectation(['column', 'type_', 'mostly'])
+    def expect_column_values_to_be_of_type(
+            self,
+            column,
+            type_,
+            mostly=None,
+            result_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
+        try:
+            col_data = [f for f in self.spark_df.schema.fields if f.name == column][0]
+            col_type = type(col_data.dataType)
+        except IndexError:
+            raise ValueError("Unrecognized column: %s" % column)
+        except KeyError:
+            raise ValueError("No type data available for column: %s" % column)
+
+        try:
+            success = issubclass(col_type, getattr(sparktypes, type_))
+
+            return {
+                "success": success,
+                "details": {
+                    "observed_type": col_type.__name__
+                }
+            }
+
+        except AttributeError:
+            raise ValueError("Unrecognized sqlalchemy type: %s" % type_)
+
+    @DocInherit
+    @DataAsset.expectation(['column', 'type_', 'mostly'])
+    def expect_column_values_to_be_in_type_list(
+            self,
+            column,
+            type_list,
+            mostly=None,
+            result_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
+        try:
+            col_data = [f for f in self.spark_df.schema.fields if f.name == column][0]
+            col_type = type(col_data.dataType)
+        except IndexError:
+            raise ValueError("Unrecognized column: %s" % column)
+        except KeyError:
+            raise ValueError("No database type data available for column: %s" % column)
+
+        types = []
+        for type_ in type_list:
+            try:
+                type_class = getattr(sparktypes, type_)
+                types.append(type_class)
+            except AttributeError:
+                logger.debug("Unrecognized type: %s" % type_)
+        if len(types) == 0:
+            raise ValueError("No recognized spark types in type_list")
+        types = tuple(types)
+
+        return {
+            "success": issubclass(col_type, types),
+            "details": {
+                "observed_type-type": col_type.__name__
+            }
+        }
 
     @DocInherit
     @MetaSparkDFDataset.column_map_expectation
