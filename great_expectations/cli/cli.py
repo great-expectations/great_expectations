@@ -144,7 +144,7 @@ validate the data.
     )
 
     # Note: Should this be rendered through cli_message?
-    # Probably not, on the offchance that the JSON object contains <color> tags
+    # Probably not, on the off chance that the JSON object contains <color> tags
     print(json.dumps(result, indent=2))
     sys.exit(result['statistics']['unsuccessful_expectations'])
 
