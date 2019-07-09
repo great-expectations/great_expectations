@@ -53,7 +53,7 @@ logger = logging.getLogger("great_expectations")
 @click.group()
 @click.version_option(version=__version__)
 @click.option('--verbose', '-v', is_flag=True, default=False,
-              help='Set great_expectations to use verbose output')
+              help='Set great_expectations to use verbose output.')
 def cli(verbose):
     """great_expectations command-line interface"""
     if verbose:
@@ -165,14 +165,6 @@ def init(target_directory):
     It scaffolds directories, sets up notebooks, creates a project file, and
     appends to a `.gitignore` file.
     """
-    try:
-        context = DataContext.create(target_directory)
-    except DataContextError as err:
-        logger.critical(err.message)
-        sys.exit(-1)
-
-    base_dir = context.root_directory
-
     six.print_(colored(
         figlet_format("Great Expectations", font="big"),
         color="cyan"
@@ -186,6 +178,13 @@ def init(target_directory):
         )
         exit(0)
 
+    try:
+        context = DataContext.create(target_directory)
+    except DataContextError as err:
+        logger.critical(err.message)
+        sys.exit(-1)
+
+    base_dir = context.root_directory
     scaffold_directories_and_notebooks(base_dir)
     cli_message(
         "\nDone.",
@@ -221,7 +220,7 @@ def render(render_object):
 def profile(datasource_name, max_data_assets, profile_all_data_assets, target_directory):
     """Profile a great expectations object.
 
-    datasource_name: A datasource within this GE context to profile.
+    DATASOURCE_NAME: A datasource within this GE context to profile.
     """
 
     if profile_all_data_assets:
