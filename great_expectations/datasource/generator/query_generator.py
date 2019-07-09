@@ -8,11 +8,12 @@ logger = logging.getLogger(__name__)
 
 try:
     import sqlalchemy
-    from sqlalchemy import create_engine, MetaData
+    from sqlalchemy import create_engine
+    from sqlalchemy.engine import reflection
 except ImportError:
     sqlalchemy = None
     create_engine = None
-    MetaData = None
+    reflection = None
     logger.debug("Unable to import sqlalchemy.")
 
 
@@ -23,7 +24,6 @@ class QueryGenerator(BatchGenerator):
     def __init__(self, datasource, name="default"):
         # TODO: Add tests for QueryGenerator
         super(QueryGenerator, self).__init__(name=name, type_="queries", datasource=datasource)
-        self.meta = MetaData()
         if datasource is not None and datasource.data_context is not None:
             self._queries_path = os.path.join(self._datasource.data_context.root_directory,
                                               "datasources",
@@ -37,6 +37,7 @@ class QueryGenerator(BatchGenerator):
 
         if datasource is not None:
             self.engine = datasource.engine
+            self.inspector = reflection.Inspector.from_engine(self.engine)
 
     def _get_iterator(self, data_asset_name, **kwargs):
         if self._queries_path:
@@ -54,8 +55,7 @@ class QueryGenerator(BatchGenerator):
                 }])
 
         if self.engine is not None:
-            self.meta.reflect(bind=self.engine)
-            tables = [str(table) for table in self.meta.sorted_tables]
+            tables = self.inspector.get_table_names()
             if data_asset_name in tables:
                 return iter([
                     {
@@ -78,8 +78,7 @@ class QueryGenerator(BatchGenerator):
         else:
             defined_queries = list(self._queries.keys())
         if self.engine is not None:
-            self.meta.reflect(bind=self.engine)
-            tables = [str(table) for table in self.meta.sorted_tables]
+            tables = self.inspector.get_table_names()
         else:
             tables = []
 
