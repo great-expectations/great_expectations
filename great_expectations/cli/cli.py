@@ -51,9 +51,12 @@ logger = logging.getLogger("great_expectations")
 
 @click.group()
 @click.version_option(version=__version__)
-def cli():
+@click.option('--verbose', '-v', is_flag=True, default=False,
+              help='Set great_expectations to use verbose output')
+def cli(verbose):
     """great_expectations command-line interface"""
-    pass
+    if verbose:
+        logger.setLevel(logging.DEBUG)
 
 
 @cli.command()
