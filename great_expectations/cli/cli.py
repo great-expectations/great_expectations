@@ -15,7 +15,9 @@
 """
 from .datasource import (
     add_datasource,
-    profile_datasource
+    profile_datasource,
+    build_documentation,
+    msg_go_to_notebook
 )
 from .init import (
     scaffold_directories_and_notebooks,
@@ -24,11 +26,11 @@ from .init import (
 )
 from .util import cli_message
 from great_expectations.render.view import DefaultJinjaPageView
-from great_expectations.render.renderer import DescriptivePageRenderer, PrescriptivePageRenderer
+from great_expectations.render.renderer import DescriptivePageRenderer  # , PrescriptivePageRenderer
 from great_expectations.data_context import DataContext
 from great_expectations.data_asset import FileDataAsset
 from great_expectations.dataset import Dataset, PandasDataset
-from great_expectations.exceptions import DataContextError
+from great_expectations.exceptions import DataContextError, ConfigNotFoundError
 from great_expectations import __version__, read_csv
 from pyfiglet import figlet_format
 import click
@@ -121,7 +123,7 @@ validate the data.
         evaluation_parameters = json.load(
             open(evaluation_parameters, "r"))
 
-    # Use a custom dataasset module and class if provided. Otherwise infer from the expectation suite
+    # Use a custom data_asset module and class if provided. Otherwise infer from the expectation suite
     if custom_dataset_module:
         sys.path.insert(0, os.path.dirname(
             custom_dataset_module))
@@ -206,13 +208,116 @@ def init(target_directory):
         "\nDone.",
     )
 
-    add_datasource(context)
+    data_source_name = add_datasource(context)
+    cli_message(
+        """
+========== Profiling ==========
+
+Would you like to profile '{0:s}' to create candidate expectations and documentation?
+
+Please note: Profiling is still a beta feature in Great Expectations.  The current profiler will evaluate the \
+entire data source (without sampling), which may be very time consuming. 
+As a rule of thumb, we recommend starting with data smaller than 100MB.
+
+To learn more about profiling, visit <blue>https://docs.greatexpectations.io/en/latest/guides/profiling.html?utm_source=cli&utm_medium=init&utm_campaign={1:s}</blue>.
+        """.format(data_source_name, __version__.replace(".", "_"))
+    )
+    if click.confirm("Proceed?",
+                     default=True
+                     ):
+        profiling_results = profile_datasource(context, data_source_name)
+        cli_message(
+            """
+========== Data Documentation ==========
+
+To generate documentation from the data you just profiled, the profiling results should be moved from 
+great_expectations/uncommitted (ignored by git) to great_expectations/fixtures.
+
+Before committing, please make sure that this data does not contain sensitive information!
+
+To learn more: <blue>https://docs.greatexpectations.io/en/latest/guides/data_documentation.html?utm_source=cli&utm_medium=init&utm_campaign={0:s}</blue>
+""".format(__version__.replace(".", "_"))
+        )
+        if click.confirm("Move the profiled data and build HTML documentation?",
+                         default=True
+                         ):
+            cli_message("\nMoving files...")
+
+            for profiling_result in profiling_results:
+                data_asset_name = profiling_result[1]['meta']['data_asset_name']
+                expectation_suite_name = profiling_result[1]['meta']['expectation_suite_name']
+                run_id = profiling_result[1]['meta']['run_id']
+                context.move_validation_to_fixtures(
+                    data_asset_name, expectation_suite_name, run_id)
+
+            cli_message("\nDone.")
+
+            cli_message("\nBuilding documentation...")
+            build_documentation(context)
+
+        else:
+            cli_message(
+                "Okay, skipping HTML documentation for now.`."
+            )
+
+    else:
+        cli_message(
+            "Okay, skipping profiling for now. You can always do this "
+            "later by running `great_expectations profile`."
+        )
+
+    cli_message(msg_go_to_notebook)
+
+
+@cli.command()
+@click.argument('datasource_name', default=None, required=False)
+@click.option('--max_data_assets', '-m', default=20,
+              help='Maximum number of named data assets to profile per datasource.')
+@click.option('--profile_all_data_assets', '-A', is_flag=True, default=False,
+              help='Profile ALL data assets within the target data source. '
+                   'If True, this will override --max_data_assets.')
+@click.option('--directory', '-d', default="./great_expectations",
+              help='The root of a project directory containing a great_expectations/ config.')
+def profile(datasource_name, max_data_assets, profile_all_data_assets, directory):
+    """Profile datasources from the specified context.
+
+    DATASOURCE_NAME: the datasource to profile, or leave blank to profile all datasources."""
+
+    if profile_all_data_assets:
+        max_data_assets = None
+
+    try:
+        context = DataContext(directory)
+    except ConfigNotFoundError:
+        cli_message("Error: no great_expectations context configuration found in the specified directory.")
+        return
+
+    if datasource_name is None:
+        datasources = [datasource["name"] for datasource in context.list_datasources()]
+        for datasource_name in datasources:
+            profile_datasource(context, datasource_name, max_data_assets=max_data_assets)
+    else:
+        profile_datasource(context, datasource_name, max_data_assets=max_data_assets)
+
+
+@cli.command()
+@click.option('--directory', '-d', default="./great_expectations",
+              help='The root of a project directory containing a great_expectations/ config.')
+def documentation(directory):
+    """Build data documentation for a project."""
+    try:
+        context = DataContext(directory)
+    except ConfigNotFoundError:
+        cli_message("Error: no great_expectations context configuration found in the specified directory.")
+        return
+
+    build_documentation(context)
 
 
 @cli.command()
 @click.argument('render_object')
 def render(render_object):
-    """Render a great expectations object.
+    """Render a great expectations object to documentation.
 
     RENDER_OBJECT: path to a GE object to render
     """
@@ -222,29 +327,6 @@ def render(render_object):
     model = DescriptivePageRenderer.render(raw)
     # model = PrescriptivePageRenderer.render(raw)
     print(DefaultJinjaPageView.render(model))
-
-
-@cli.command()
-@click.argument('datasource_name')
-@click.option('--max_data_assets', '-m', default=20,
-              help='Maximum number of named data assets to profile.')
-@click.option('--profile_all_data_assets', '-A', is_flag=True, default=False,
-              help='Profile ALL data assets within the target data source. '
-                   'If True, this will override --max_data_assets.')
-@click.option('--target_directory', '-d', default="./great_expectations",
-              help='The root of a project directory containing a great_expectations/ config.')
-def profile(datasource_name, max_data_assets, profile_all_data_assets, target_directory):
-    """Profile a great expectations object.
-
-    DATASOURCE_NAME: A datasource within this GE context to profile.
-    """
-
-    if profile_all_data_assets:
-        max_data_assets = None
-
-    # FIXME: By default, this should iterate over all datasources
-    context = DataContext(target_directory)
-    profile_datasource(context, datasource_name, max_data_assets=20)
 
 
 def main():

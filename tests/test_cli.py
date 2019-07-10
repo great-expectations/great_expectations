@@ -41,10 +41,11 @@ Options:
   --help         Show this message and exit.
 
 Commands:
-  init      Initialize a new Great Expectations project.
-  profile   Profile a great expectations object.
-  render    Render a great expectations object.
-  validate  Validate a CSV file against an expectation suite.
+  validate       Validate a CSV file against an expectation suite.
+  init           Initialize a new Great Expectations project.
+  profile        Profile datasources from the specified context.
+  documentation  Build data documentation for a project.
+  render         Render a great expectations object to documentation.
 """
 
 
@@ -277,13 +278,74 @@ def test_cli_profile(empty_data_context, filesystem_csv_2, capsys):
     logger.removeHandler(handler)
 
 
+def test_cli_documentation(empty_data_context, filesystem_csv_2, capsys):
+    empty_data_context.add_datasource(
+        "my_datasource", "pandas", base_directory=str(filesystem_csv_2))
+    not_so_empty_data_context = empty_data_context
+
+    project_root_dir = not_so_empty_data_context.root_directory
+    # print(project_root_dir)
+
+    # For some reason, even with this logging change (which is required and done in main of the cli)
+    # the click cli runner does not pick up output; capsys appears to intercept it first
+    logger = logging.getLogger("great_expectations")
+    handler = logging.StreamHandler(stream=sys.stdout)
+    formatter = logging.Formatter(
+        '%(levelname)s %(message)s')
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+    logger.setLevel(logging.INFO)
+    runner = CliRunner()
+    result = runner.invoke(
+        cli, ["profile", "my_datasource", "-d", project_root_dir])
+
+    captured = capsys.readouterr()
+
+    assert "Profiling 'my_datasource' with 'BasicDatasetProfiler'" in captured.out
+    assert "Note: You will need to review and revise Expectations before using them in production." in captured.out
+
+    result = runner.invoke(
+        cli, ["documentation", "-d", project_root_dir])
+
+    assert "index.html" in os.listdir(os.path.join(
+        project_root_dir,
+        "uncommitted/documentation"
+        )
+    )
+
+    logger.removeHandler(handler)
+
+
+def test_cli_config_not_found(tmp_path_factory):
+    tmp_dir = str(tmp_path_factory.mktemp("test_cli_config_not_found"))
+    curdir = os.path.abspath(os.getcwd())
+    try:
+        os.chdir(tmp_dir)
+        runner = CliRunner()
+        result = runner.invoke(
+            cli, ["profile", "-d", "./"])
+        assert "no great_expectations context configuration" in result.output
+        result = runner.invoke(
+            cli, ["profile"])
+        assert "no great_expectations context configuration" in result.output
+        result = runner.invoke(
+            cli, ["documentation", "-d", "./"])
+        assert "no great_expectations context configuration" in result.output
+        result = runner.invoke(
+            cli, ["documentation"])
+        assert "no great_expectations context configuration" in result.output
+    except:
+        raise
+    finally:
+        os.chdir(curdir)
+
+
 def test_scaffold_directories_and_notebooks(tmp_path_factory):
     empty_directory = str(tmp_path_factory.mktemp("test_scaffold_directories_and_notebooks"))
     scaffold_directories_and_notebooks(empty_directory)
     print(empty_directory)
 
     assert set(os.listdir(empty_directory)) == \
-           set(['datasources', 'plugins', 'expectations', '.gitignore', 'fixtures', 'uncommitted', 'notebooks'])
+           {'datasources', 'plugins', 'expectations', '.gitignore', 'fixtures', 'uncommitted', 'notebooks'}
     assert set(os.listdir(os.path.join(empty_directory, "uncommitted"))) == \
-        set(['samples', 'documentation', 'validations', 'credentials'])
-
+           {'samples', 'documentation', 'validations', 'credentials'}

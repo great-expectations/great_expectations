@@ -11,13 +11,9 @@ import shutil
 import json
 from glob import glob
 
-import sqlalchemy as sa
-import pandas as pd
-
 from great_expectations.exceptions import DataContextError
 from great_expectations.data_context import DataContext
-from great_expectations.data_context.util import safe_mmkdir, NormalizedDataAssetName
-from great_expectations.dataset import PandasDataset, SqlAlchemyDataset
+from great_expectations.data_context.util import NormalizedDataAssetName
 from great_expectations.cli.init import scaffold_directories_and_notebooks
 
 
@@ -72,24 +68,27 @@ def test_validate_saves_result_inserts_run_id(empty_data_context, filesystem_csv
     
     assert validation_result == saved_validation_result
 
+
 def test_list_available_data_asset_names(empty_data_context, filesystem_csv):
     empty_data_context.add_datasource("my_datasource", "pandas", base_directory= str(filesystem_csv))
     available_asset_names = empty_data_context.get_available_data_asset_names()
 
     assert available_asset_names == {
         "my_datasource": {
-            "default": set(["f1", "f2", "f3"])
+            "default": {"f1", "f2", "f3"}
         }
     }
 
+
 def test_list_expectation_suites(data_context):
     assert data_context.list_expectation_suites() == {
-        "mydatasource" : {
+        "mydatasource": {
             "mygenerator": {
                 "parameterized_expectation_suite_fixture": ["default"]
             }
         }
     }
+
 
 def test_get_existing_data_asset_config(data_context):
     data_asset_config = data_context.get_expectation_suite('mydatasource/mygenerator/parameterized_expectation_suite_fixture', 'default')
@@ -97,11 +96,13 @@ def test_get_existing_data_asset_config(data_context):
     assert data_asset_config['expectation_suite_name'] == 'default'
     assert len(data_asset_config['expectations']) == 2
 
+
 def test_get_new_data_asset_config(data_context):
     data_asset_config = data_context.get_expectation_suite('this_data_asset_config_does_not_exist')
     assert data_asset_config['data_asset_name'] == 'mydatasource/mygenerator/this_data_asset_config_does_not_exist'
     assert data_asset_config['expectation_suite_name'] == 'default'
     assert len(data_asset_config['expectations']) == 0
+
 
 def test_save_data_asset_config(data_context):
     data_asset_config = data_context.get_expectation_suite('this_data_asset_config_does_not_exist')
@@ -117,6 +118,7 @@ def test_save_data_asset_config(data_context):
     data_context.save_expectation_suite(data_asset_config)
     data_asset_config_saved = data_context.get_expectation_suite('this_data_asset_config_does_not_exist')
     assert data_asset_config['expectations'] == data_asset_config_saved['expectations']
+
 
 def test_register_validation_results(data_context):
     run_id = "460d61be-7266-11e9-8848-1681be663d3e"
@@ -189,6 +191,7 @@ def test_register_validation_results(data_context):
         'urn:great_expectations:validations:source_diabetes_data:expectations:expect_column_unique_value_count_to_be_between:columns:patient_nbr:result:observed_value': 2048
     }
 
+
 def test_compile(data_context):
     data_context._compile()
     assert data_context._compiled_parameters == {
@@ -218,10 +221,12 @@ def test_compile(data_context):
         }
     }
 
+
 def test_normalize_data_asset_names_error(data_context):
     with pytest.raises(DataContextError) as exc:
         data_context._normalize_data_asset_name("this/should/never/work/because/it/is/so/long")
         assert "found too many components using delimiter '/'" in exc.message
+
 
 def test_normalize_data_asset_names_delimiters(empty_data_context, filesystem_csv):
     empty_data_context.add_datasource(
@@ -243,6 +248,7 @@ def test_normalize_data_asset_names_delimiters(empty_data_context, filesystem_cs
     with pytest.raises(DataContextError) as exc:
         data_context.data_asset_name_delimiter = "//"
         assert "Invalid delimiter" in exc.message
+
 
 def test_normalize_data_asset_names_conditions(empty_data_context, filesystem_csv, tmp_path_factory):
     # If no datasource is configured, nothing should be allowed to normalize:

@@ -46,7 +46,7 @@ def scaffold_directories_and_notebooks(base_dir):
             base_dir, notebook_dir_name, notebook_name))
 
 
-#!!! This injects a version tag into the docs. We should test that those versioned docs exist in RTD.
+# !!! This injects a version tag into the docs. We should test that those versioned docs exist in RTD.
 greeting_1 = """
 Always know what to expect from your data.
 
