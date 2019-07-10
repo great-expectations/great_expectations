@@ -12,6 +12,11 @@ class PrescriptivePageRenderer(Renderer):
 
     @classmethod
     def render(cls, expectations):
+        data_asset_name = expectations.get("data_asset_name").split('/')[-1]
+        data_asset_type = expectations.get("data_asset_type")
+        expectation_suite_name = expectations.get("expectation_suite_name")
+        ge_version = expectations["meta"]["great_expectations.__version__"]
+        
         # Group expectations by column
         columns = {}
         ordered_columns = None
@@ -34,11 +39,50 @@ class PrescriptivePageRenderer(Renderer):
         if not ordered_columns:
             ordered_columns = sorted(list(columns.keys()))
 
-        return {
-            "renderer_type": "PrescriptivePageRenderer",
-            "sections": [
+        sections = [
+            {
+                "section_name": "Expectation Suite Info",
+                "content_blocks": [
+                    {
+                        "content_block_type": "header",
+                        "header": "Expectation Suite: {}".format(expectation_suite_name),
+                        "styling": {
+                            "classes": ["col-12"],
+                            "header": {
+                                "classes": ["alert", "alert-secondary"]
+                            }
+                        }
+                    },
+                    {
+                        "content_block_type": "table",
+                        "header": "Info",
+                        "table_rows": [
+                            ["Data Asset Name", data_asset_name],
+                            ["Data Asset Type", data_asset_type],
+                            ["Great Expectations Version", ge_version]
+                        ],
+                        "styling": {
+                            "classes": ["col-6", "table-responsive"],
+                            "styles": {
+                                "margin-top": "20px"
+                            },
+                            "body": {
+                                "classes": ["table", "table-sm"]
+                            }
+                        },
+                    }
+                ]
+            }
+        ]
+
+        sections += [
                 PrescriptiveColumnSectionRenderer.render(columns[column]) for column in ordered_columns
             ]
+
+        return {
+            "renderer_type": "PrescriptivePageRenderer",
+            "data_asset_name": data_asset_name,
+            "sections": sections
         }
 
 
