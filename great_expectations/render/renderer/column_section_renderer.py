@@ -469,7 +469,13 @@ class PrescriptiveColumnSectionRenderer(ColumnSectionRenderer):
 
         content_blocks.append({
             "content_block_type": "header",
-            "header": column
+            "header": column,
+            "styling": {
+                "classes": ["col-12"],
+                "header": {
+                    "classes": ["alert", "alert-secondary"]
+                }
+            }
         })
 
         return expectations, content_blocks
