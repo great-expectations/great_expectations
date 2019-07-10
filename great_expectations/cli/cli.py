@@ -38,6 +38,8 @@ import json
 import logging
 import sys
 import warnings
+from collections import OrderedDict
+
 warnings.filterwarnings('ignore')
 
 try:
@@ -50,7 +52,21 @@ except ImportError:
 logger = logging.getLogger("great_expectations")
 
 
-@click.group()
+class NaturalOrderGroup(click.Group):
+    def __init__(self, name=None, commands=None, **attrs):
+        if commands is None:
+            commands = OrderedDict()
+        elif not isinstance(commands, OrderedDict):
+            commands = OrderedDict(commands)
+        click.Group.__init__(self, name=name,
+                             commands=commands,
+                             **attrs)
+
+    def list_commands(self, ctx):
+        return self.commands.keys()
+
+
+@click.group(cls=NaturalOrderGroup)
 @click.version_option(version=__version__)
 @click.option('--verbose', '-v', is_flag=True, default=False,
               help='Set great_expectations to use verbose output.')
