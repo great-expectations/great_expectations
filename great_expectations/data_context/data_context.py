@@ -1480,15 +1480,18 @@ class DataContext(object):
         index_document = OrderedDict()
         for il in index_links:
             source, generator, asset = il["data_asset_name"].split('/')
-            if not source in index_document:
+            if source not in index_document:
                 index_document[source] = []
             index_document[source].append({
-                "data_asset_name" : asset,
-                "filepath" : il["filepath"],
-                "source" : source,
-                "generator" : generator,
-                "asset" : asset,
+                "data_asset_name": asset,
+                "filepath": il["filepath"],
+                "source": source,
+                "generator": generator,
+                "asset": asset,
             })
+
+        if not os.path.isdir(self.data_doc_directory):
+            safe_mmkdir(self.data_doc_directory)
 
         with open(os.path.join(self.data_doc_directory, "index.html"), "w") as writer:
             writer.write(DefaultJinjaIndexPageView.render({
@@ -1535,7 +1538,7 @@ class DataContext(object):
         total_start_time = datetime.datetime.now()
         run_id = total_start_time.isoformat()
         for name in data_asset_name_list:
-            logger.info("\tProfiling %s..." % (name))
+            logger.info("\tProfiling '%s'..." % name)
             try:
                 start_time = datetime.datetime.now()
 
