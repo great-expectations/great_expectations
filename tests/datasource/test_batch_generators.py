@@ -5,6 +5,7 @@ import os
 from great_expectations.exceptions import DataContextError
 from great_expectations.datasource import SubdirReaderGenerator, GlobReaderGenerator
 
+
 def test_file_kwargs_generator(data_context, filesystem_csv):
     base_dir = filesystem_csv
 
@@ -12,9 +13,7 @@ def test_file_kwargs_generator(data_context, filesystem_csv):
     generator = datasource.get_generator("default")
     known_data_asset_names = datasource.get_available_data_asset_names()
 
-    assert known_data_asset_names["default"] == set([
-        "f1", "f2", "f3"
-    ])
+    assert known_data_asset_names["default"] == {"f1", "f2", "f3"}
 
     f1_batches = [batch_kwargs for batch_kwargs in generator.get_iterator("f1")]
     assert len(f1_batches) == 1
@@ -39,6 +38,7 @@ def test_file_kwargs_generator(data_context, filesystem_csv):
         assert batch["path"] in f3_batches
     assert len(f3_batches) == 2
 
+
 def test_file_kwargs_generator_error(data_context, filesystem_csv):
     base_dir = filesystem_csv
     data_context.add_datasource("default", "pandas", base_directory=str(base_dir))
@@ -47,10 +47,11 @@ def test_file_kwargs_generator_error(data_context, filesystem_csv):
         data_context.get_batch("f4")
         assert "f4" in exc.message
 
+
 def test_glob_reader_generator(tmp_path_factory):
     """Provides an example of how glob generator works: we specify our own
     names for data_assets, and an associated glob; the generator
-    will take care of providing batches consististing of one file per
+    will take care of providing batches consisting of one file per
     batch corresponding to the glob."""
     
     basedir = str(tmp_path_factory.mktemp("test_glob_reader_generator"))
@@ -82,7 +83,7 @@ def test_glob_reader_generator(tmp_path_factory):
     })
 
     g2_assets = g2.get_available_data_asset_names()
-    assert g2_assets == set(["blargs", "fs"])
+    assert g2_assets == {"blargs", "fs"}
 
     blargs_kwargs = [x["path"] for x in g2.get_iterator("blargs")]
     real_blargs = [
@@ -94,8 +95,9 @@ def test_glob_reader_generator(tmp_path_factory):
     ]
     for kwargs in real_blargs:
         assert kwargs in blargs_kwargs
-    assert len(blargs_kwargs) == len (real_blargs)
-    
+    assert len(blargs_kwargs) == len(real_blargs)
+
+
 def test_file_kwargs_generator_extensions(tmp_path_factory):
     """csv, xls, parquet, json should be recognized file extensions"""
     basedir = str(tmp_path_factory.mktemp("test_file_kwargs_generator_extensions"))
@@ -122,7 +124,7 @@ def test_file_kwargs_generator_extensions(tmp_path_factory):
     with open(os.path.join(basedir, ".f5.csv"), "w") as outfile:
         outfile.write("\n\n\n")
     
-    #Include: valid extensions
+    # Include: valid extensions
     with open(os.path.join(basedir, "f6.tsv"), "w") as outfile:
         outfile.write("\n\n\n")
     with open(os.path.join(basedir, "f7.xls"), "w") as outfile:
@@ -137,6 +139,4 @@ def test_file_kwargs_generator_extensions(tmp_path_factory):
     g1 = SubdirReaderGenerator(base_directory=basedir)
 
     g1_assets = g1.get_available_data_asset_names()
-    assert g1_assets == set([
-        "f2", "f4", "f6", "f7", "f8", "f9", "f0"
-    ])
+    assert g1_assets == {"f2", "f4", "f6", "f7", "f8", "f9", "f0"}
