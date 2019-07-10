@@ -1314,81 +1314,11 @@
       }
     },
     {
-      "success": true,
-      "result": {
-        "observed_value": 0.0,
-        "element_count": 1313,
-        "missing_count": 557,
-        "missing_percent": 0.4242193450114242,
-        "details": {
-          "observed_partition": {
-            "bins": [
-              0.17,
-              7.253,
-              14.336,
-              21.419000000000004,
-              28.502000000000002,
-              35.585,
-              42.668000000000006,
-              49.751000000000005,
-              56.834,
-              63.917,
-              71.0
-            ],
-            "weights": [
-              0.05555555555555555,
-              0.03439153439153439,
-              0.17857142857142858,
-              0.24206349206349206,
-              0.16137566137566137,
-              0.12301587301587301,
-              0.09788359788359788,
-              0.05423280423280423,
-              0.03439153439153439,
-              0.018518518518518517
-            ],
-            "tail_weights": [
-              0.0,
-              0.0
-            ]
-          },
-          "expected_partition": {
-            "bins": [
-              0.17,
-              7.253,
-              14.336,
-              21.419000000000004,
-              28.502000000000002,
-              35.585,
-              42.668000000000006,
-              49.751000000000005,
-              56.834,
-              63.917,
-              71.0
-            ],
-            "weights": [
-              0.05555555555555555,
-              0.03439153439153439,
-              0.17857142857142858,
-              0.24206349206349206,
-              0.16137566137566137,
-              0.12301587301587301,
-              0.09788359788359788,
-              0.05423280423280423,
-              0.03439153439153439,
-              0.018518518518518517
-            ],
-            "tail_weights": [
-              0.0,
-              0.0
-            ]
-          }
-        }
-      },
+      "success": false,
       "exception_info": {
-        "raised_exception": false,
-        "exception_message": null,
-        "exception_traceback": null
+        "raised_exception": true,
+        "exception_message": "Invalid partition object.",
+        "exception_traceback": "Traceback (most recent call last):\n  File \"/home/user/great_expectations/great_expectations/data_asset/data_asset.py\", line 186, in wrapper\n    return_obj = func(self, **evaluation_args)\n  File \" /home/user/great_expectations/great_expectations/dataset/dataset.py\", line 106, in inner_wrapper\n    evaluation_result = func(self, column, *args, **kwargs)\n  File \"/home/user/great_expectations/great_expectations/dataset/dataset.py\", line 3388, in expect_column_kl_divergence_to_be_less_than\n    raise ValueError(\"Invalid partition object.\")\nValueError: Invalid partition object.\n"
       },
       "expectation_config": {
         "expectation_type": "expect_column_kl_divergence_to_be_less_than",
@@ -1402,22 +1332,6 @@
     },
     {
       "success": true,
-      "result": {
-        "element_count": 1313,
-        "missing_count": 0,
-        "missing_percent": 0.0,
-        "unexpected_count": 0,
-        "unexpected_percent": 0.0,
-        "unexpected_percent_nonmissing": 0.0,
-        "partial_unexpected_list": [],
-        "partial_unexpected_index_list": [],
-        "partial_unexpected_counts": []
-      },
-      "exception_info": {
-        "raised_exception": false,
-        "exception_message": null,
-        "exception_traceback": null
-      },
       "expectation_config": {
         "expectation_type": "expect_column_values_to_be_in_type_list",
         "kwargs": {
