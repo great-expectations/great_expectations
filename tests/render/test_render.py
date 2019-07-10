@@ -20,7 +20,6 @@ def titanic_validation_results():
     with open("./tests/test_sets/expected_cli_results_default.json", "r") as infile:
         return json.load(infile)
 
-
 @pytest.fixture(scope="module")
 def titanic_expectations():
     with open("./tests/test_sets/titanic_expectations.json", "r") as infile:
@@ -31,6 +30,12 @@ def titanic_expectations():
 def tetanus_varicella_basic_dataset_profiler_evrs():
     with open('tests/render/fixtures/BasicDatasetProfiler_evrs.json', 'r') as infile:
         return json.load(infile, object_pairs_hook=OrderedDict)
+
+
+@pytest.fixture(scope="module")
+def tetanus_varicella_basic_dataset_profiler_evrs_with_exception():
+    with open('tests/render/fixtures/BasicDatasetProfiler_evrs_with_exception.json', 'r') as infile:
+        return json.load(infile)
 
 
 @pytest.fixture(scope="module")
@@ -124,6 +129,20 @@ def test_render_profiled_fixture_evrs(tetanus_varicella_basic_dataset_profiler_e
 
     assert rendered_page[:15] == "<!DOCTYPE html>"
     assert rendered_page[-7:] == "</html>"
+
+
+@pytest.mark.smoketest
+def test_render_descriptive_column_section_renderer_with_exception(
+        tetanus_varicella_basic_dataset_profiler_evrs_with_exception):
+    rendered_json = DescriptivePageRenderer.render(tetanus_varicella_basic_dataset_profiler_evrs_with_exception)
+    rendered_page = DefaultJinjaPageView.render(rendered_json)
+
+    with open('./tests/render/output/test_render_descriptive_column_section_renderer_with_exception.html', 'w') as f:
+        f.write(rendered_page)
+
+    assert rendered_page[:15] == "<!DOCTYPE html>"
+    assert rendered_page[-7:] == "</html>"
+    assert "exception" in rendered_page
 
 
 @pytest.mark.smoketest
