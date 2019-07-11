@@ -1460,6 +1460,7 @@ class DataContext(object):
 
         validation_filepaths = [y for x in os.walk(self.fixtures_validations_directory) for y in glob(os.path.join(x[0], '*.json'))]
         for validation_filepath in validation_filepaths:
+            logger.debug("Loading validation from: %s" % validation_filepath)
             with open(validation_filepath, "r") as infile:
                 validation = json.load(infile)
 
@@ -1490,6 +1491,7 @@ class DataContext(object):
                 "asset": asset,
             })
 
+        # FIXME: this should be created during init **based on a configured directory**
         if not os.path.isdir(self.data_doc_directory):
             safe_mmkdir(self.data_doc_directory)
 
