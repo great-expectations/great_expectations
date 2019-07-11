@@ -479,8 +479,7 @@ class SparkDFDataset(MetaSparkDFDataset):
         catch_exceptions=None,
         meta=None,
     ):
-        column_name = column[0]
-        return column.withColumn('__success', count(lit(1)).over(Window.partitionBy(column_name)) <= 1)
+        return column.withColumn('__success', count(lit(1)).over(Window.partitionBy(column[0])) <= 1)
 
     @DocInherit
     @MetaSparkDFDataset.column_map_expectation
