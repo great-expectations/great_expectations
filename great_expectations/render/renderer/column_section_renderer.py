@@ -43,23 +43,13 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
 
         content_blocks = []
         cls._render_header(evrs, content_blocks, column_type)
-        print(len(evrs))
         # cls._render_column_type(evrs, content_blocks)
         cls._render_overview_table(evrs, content_blocks)
-        print(len(evrs))
-
         cls._render_quantile_table(evrs, content_blocks)
-        print(len(evrs))
-
         cls._render_stats_table(evrs, content_blocks)
-        print(len(evrs))
-
         cls._render_histogram(evrs, content_blocks)
-        print(len(evrs))
         cls._render_values_set(evrs, content_blocks)
-        print(len(evrs))
         cls._render_bar_chart_table(evrs, content_blocks)
-        print(len(evrs))
 
         # cls._render_statistics(evrs, content_blocks)
         # cls._render_common_values(evrs, content_blocks)
@@ -67,14 +57,11 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
 
         # cls._render_frequency(evrs, content_blocks)
         # cls._render_composition(evrs, content_blocks)
-        print(len(evrs))
 
         cls._render_expectation_types(evrs, content_blocks)
         # cls._render_unrecognized(evrs, content_blocks)
 
-        print(len(evrs))
         cls._render_failed(evrs, content_blocks)
-        print(len(evrs))
 
         return {
             "section_name": column,
@@ -451,7 +438,9 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
 
     @classmethod
     def _render_failed(cls, evrs, content_blocks):
-        content_blocks.append(ExceptionListContentBlockRenderer.render(evrs))
+        failed_block = ExceptionListContentBlockRenderer.render(evrs, include_column_name=False)
+        if failed_block is not None:
+            content_blocks.append(failed_block)
 
     @classmethod
     def _render_unrecognized(cls, evrs, content_blocks):

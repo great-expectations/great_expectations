@@ -6,7 +6,7 @@ class ExceptionListContentBlockRenderer(ContentBlockRenderer):
 
     _content_block_type = "bullet_list"
 
-    _default_header = 'Failed expectations <span class="mr-3 triangle"></span>',
+    _default_header = 'Failed expectations <span class="mr-3 triangle"></span>'
 
     _default_content_block_styling = {
         "classes": ["col-12"],
@@ -25,13 +25,14 @@ class ExceptionListContentBlockRenderer(ContentBlockRenderer):
             "styles": {
                 "cursor": "pointer",
             }
+        },
+        "body": {
+            "classes": ["list-group", "collapse"],
         }
     }
 
     _default_element_styling = {
-        "default": {
-            "classes": ["badge", "badge-secondary"]
-        },
+        "classes": ["list-group-item"],  # "d-flex", "justify-content-between", "align-items-center"],
         "params": {
             "column": {
                 "classes": ["badge", "badge-primary"]
