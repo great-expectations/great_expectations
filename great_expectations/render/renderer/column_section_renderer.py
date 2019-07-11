@@ -7,6 +7,7 @@ from .renderer import Renderer
 from .content_block import ValueListContentBlockRenderer
 from .content_block import TableContentBlockRenderer
 from .content_block import PrescriptiveBulletListContentBlockRenderer
+from .content_block import ExceptionListContentBlockRenderer
 
 
 class ColumnSectionRenderer(Renderer):
@@ -42,14 +43,23 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
 
         content_blocks = []
         cls._render_header(evrs, content_blocks, column_type)
+        print(len(evrs))
         # cls._render_column_type(evrs, content_blocks)
         cls._render_overview_table(evrs, content_blocks)
+        print(len(evrs))
+
         cls._render_quantile_table(evrs, content_blocks)
+        print(len(evrs))
+
         cls._render_stats_table(evrs, content_blocks)
+        print(len(evrs))
 
         cls._render_histogram(evrs, content_blocks)
+        print(len(evrs))
         cls._render_values_set(evrs, content_blocks)
+        print(len(evrs))
         cls._render_bar_chart_table(evrs, content_blocks)
+        print(len(evrs))
 
         # cls._render_statistics(evrs, content_blocks)
         # cls._render_common_values(evrs, content_blocks)
@@ -57,9 +67,14 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
 
         # cls._render_frequency(evrs, content_blocks)
         # cls._render_composition(evrs, content_blocks)
+        print(len(evrs))
 
         cls._render_expectation_types(evrs, content_blocks)
         # cls._render_unrecognized(evrs, content_blocks)
+
+        print(len(evrs))
+        cls._render_failed(evrs, content_blocks)
+        print(len(evrs))
 
         return {
             "section_name": column,
@@ -103,7 +118,8 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
 
     @classmethod
     def _render_expectation_types(cls, evrs, content_blocks):
-        # NOTE: The evr-fetching function is an kinda similar to the code other_section_renderer.DescriptiveOverviewSectionRenderer._render_expectation_types
+        # NOTE: The evr-fetching function is an kinda similar to the code other_section_
+        # renderer.DescriptiveOverviewSectionRenderer._render_expectation_types
 
         # type_counts = defaultdict(int)
 
@@ -181,8 +197,7 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
             evrs,
             "expect_column_values_to_not_be_null"
         )
-        evrs = [evr for evr in [
-            unique_n, unique_proportion, null_evr] if evr is not None]
+        evrs = [evr for evr in [unique_n, unique_proportion, null_evr] if (evr is not None and "result" in evr)]
 
         if len(evrs) > 0:
             new_content_block = TableContentBlockRenderer.render(evrs)
@@ -211,7 +226,7 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
             "expect_column_quantile_values_to_be_between"
         )
 
-        if not quantile_evr:
+        if not quantile_evr or "result" not in quantile_evr:
             return
 
         quantiles = quantile_evr["result"]["observed_value"]["quantiles"]
@@ -253,6 +268,10 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
             evrs,
             "expect_column_mean_to_be_between"
         )
+
+        if not mean_evr or "result" not in mean_evr:
+            return
+
         mean_value = "{:.2f}".format(
             mean_evr['result']['observed_value']) if mean_evr else None
         if mean_value:
@@ -301,6 +320,9 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
             "expect_column_values_to_be_in_set"
         )
 
+        if not set_evr or "result" not in set_evr:
+            return
+
         if set_evr and "partial_unexpected_counts" in set_evr["result"]:
             partial_unexpected_counts = set_evr["result"]["partial_unexpected_counts"]
             values = [str(v["value"]) for v in partial_unexpected_counts]
@@ -346,7 +368,7 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
             "expect_column_kl_divergence_to_be_less_than"
         )
         # print(json.dumps(kl_divergence_evr, indent=2))
-        if kl_divergence_evr == None:
+        if not kl_divergence_evr or "result" not in kl_divergence_evr:
             return
 
         bins = kl_divergence_evr["result"]["details"]["observed_partition"]["bins"]
@@ -392,7 +414,7 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
             "expect_column_distinct_values_to_be_in_set"
         )
         # print(json.dumps(kl_divergence_evr, indent=2))
-        if distinct_values_set_evr == None:
+        if not distinct_values_set_evr or "result" not in distinct_values_set_evr:
             return
 
         value_count_dicts = distinct_values_set_evr['result']['details']['value_counts']
@@ -426,6 +448,10 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
         }
 
         content_blocks.append(new_block)
+
+    @classmethod
+    def _render_failed(cls, evrs, content_blocks):
+        content_blocks.append(ExceptionListContentBlockRenderer.render(evrs))
 
     @classmethod
     def _render_unrecognized(cls, evrs, content_blocks):
