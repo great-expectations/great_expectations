@@ -1,34 +1,29 @@
 from __future__ import division
 
-import inspect
-import re
 import copy
+import inspect
 import logging
-from six import PY3, string_types
-from functools import wraps
+import re
 from datetime import datetime
+from functools import wraps
+
+import numpy as np
+import pandas as pd
 from dateutil.parser import parse
+from six import PY3, string_types
 
 from great_expectations.data_asset import DataAsset
+from great_expectations.data_asset.util import DocInherit, parse_result_format
 from .dataset import Dataset
 from .pandas_dataset import PandasDataset
-from great_expectations.data_asset.util import DocInherit, parse_result_format
-from great_expectations.dataset.util import (
-    is_valid_partition_object,
-    is_valid_categorical_partition_object,
-    is_valid_continuous_partition_object,
-)
-
-import pandas as pd
-import numpy as np
-from scipy import stats
 
 logger = logging.getLogger(__name__)
 
 try:
-    from pyspark.sql.functions import udf, col, lit, stddev_samp, length as length_, when, year
+    from pyspark.sql.functions import udf, col, lit, stddev_samp, length as length_, when, year, count
     import pyspark.sql.types as sparktypes
     from pyspark.ml.feature import Bucketizer
+    from pyspark.sql import Window
 except ImportError as e:
     logger.debug(str(e))
     logger.debug("Unable to load spark context; install optional spark dependency for support.")
@@ -484,10 +479,8 @@ class SparkDFDataset(MetaSparkDFDataset):
         catch_exceptions=None,
         meta=None,
     ):
-        # TODO is there a more efficient way to do this?
-        dups = set([row[0] for row in column.groupBy(column[0]).count().filter('count > 1').collect()])
-        success_udf = udf(lambda x: x not in dups)
-        return column.withColumn('__success', success_udf(column[0]))
+        column_name = column[0]
+        return column.withColumn('__success', count(lit(1)).over(Window.partitionBy(column_name)) <= 1)
 
     @DocInherit
     @MetaSparkDFDataset.column_map_expectation
