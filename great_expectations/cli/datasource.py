@@ -146,7 +146,7 @@ def build_documentation(context):
     cli_message(
         """
 To view the generated data documentation, open this file in a web browser:
-<green>great_expectations/uncommitted/documentation/index.html</green>
+    <green>great_expectations/uncommitted/documentation/index.html</green>
 """)
 
 
