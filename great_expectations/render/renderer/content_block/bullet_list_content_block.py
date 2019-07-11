@@ -20,7 +20,7 @@ def substitute_none_for_missing(kwargs, kwarg_list):
 
     new_kwargs = copy.deepcopy(kwargs)
     for kwarg in kwarg_list:
-        if not kwarg in new_kwargs:
+        if kwarg not in new_kwargs:
             new_kwargs[kwarg] = None
     return new_kwargs
 

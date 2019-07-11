@@ -5,6 +5,8 @@ class ContentBlockRenderer(Renderer):
 
     _content_block_type = "text"
 
+    _default_header = ""
+
     _default_content_block_styling = {
         "classes": ["col-12"]
     }
@@ -41,17 +43,21 @@ class ContentBlockRenderer(Renderer):
                 else:
                     result = cls._missing_content_block_fn(
                         obj_,
-                        cls._get_content_block_styling(),
+                        cls._get_element_styling(),
                         **kwargs
                     )
-                    blocks += result
-
-            return {
-                "content_block_type": cls._content_block_type,
-                cls._content_block_type: blocks,
-                # TODO: This should probably be overridable via a parameter
-                "styling": cls._get_content_block_styling(),
-            }
+                    if result is not None:
+                        blocks += result
+            if blocks is not None:
+                return {
+                    "header": cls._get_header,
+                    "content_block_type": cls._content_block_type,
+                    cls._content_block_type: blocks,
+                    # TODO: This should probably be overridable via a parameter
+                    "styling": cls._get_content_block_styling(),
+                }
+            else:
+                return None
         else:
             # TODO: Styling is not currently applied to non-list objects. It should be.
             expectation_type = cls._get_expectation_type(render_object)
@@ -79,10 +85,6 @@ class ContentBlockRenderer(Renderer):
     def _get_element_styling(cls):
         return cls._default_element_styling
 
-
-class HeaderContentBlockRenderer(ContentBlockRenderer):
-    pass
-
-
-class ColumnTypeContentBlockRenderer(ContentBlockRenderer):
-    pass
+    @classmethod
+    def _get_header(cls):
+        return cls._default_header

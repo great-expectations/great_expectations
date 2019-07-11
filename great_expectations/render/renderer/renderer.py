@@ -33,7 +33,7 @@ class Renderer(object):
         a validation report, a list of evrs, or a single evr"""
 
         if isinstance(ge_object, list):
-            if "result" in ge_object[0]:
+            if "result" in ge_object[0] or "exception_info" in ge_object[0]:
                 return "evr_list"
             elif "expectation_type" in ge_object[0]:
                 return "expectation_list"
@@ -42,11 +42,12 @@ class Renderer(object):
                 return "validation_report"
             elif "expectations" in ge_object:
                 return "expectations"
-            elif "result" in ge_object:
+            elif "result" in ge_object or "exception_info" in ge_object:
                 return "evr"
             elif "kwargs" in ge_object:
                 return "expectation"
-        
+
+        print(json.dumps(ge_object, indent=2))
         raise ValueError("Unrecognized great expectations object.")
 
     @classmethod
@@ -54,7 +55,6 @@ class Renderer(object):
         for evr in evrs:
             if evr["expectation_config"]["expectation_type"] == type_:
                 return evr
-
 
     @classmethod
     def _find_all_evrs_by_type(cls, evrs, type_, column_=None):
