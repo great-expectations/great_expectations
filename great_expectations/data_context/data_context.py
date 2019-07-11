@@ -1538,7 +1538,7 @@ class DataContext(object):
 
         total_columns, total_expectations, total_rows, skipped_data_assets = 0, 0, 0, 0
         total_start_time = datetime.datetime.now()
-        run_id = total_start_time.isoformat()
+        run_id = total_start_time.isoformat().replace(":", "") + "Z"
         for name in data_asset_name_list:
             logger.info("\tProfiling '%s'..." % name)
             try:

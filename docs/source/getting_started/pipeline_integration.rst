@@ -84,7 +84,7 @@ number of unique values in its ``id`` column to equal the number of distinct val
 
 ::
 
-    run_id = run_id = datetime.datetime.utcnow().isoformat()
+    run_id = run_id = datetime.datetime.utcnow().isoformat().replace(":", "") + "Z"
 
 
 Choose Data Asset and Expectation Suite
