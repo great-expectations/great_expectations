@@ -1006,7 +1006,7 @@ class DataAsset(object):
         if run_id is not None:
             result["meta"].update({"run_id": run_id})
         else:
-            run_id = datetime.datetime.utcnow().isoformat()
+            run_id = datetime.datetime.utcnow().isoformat().replace(":", "") + "Z"
             result["meta"].update({"run_id": run_id})
 
         if self._batch_kwargs is not None:
