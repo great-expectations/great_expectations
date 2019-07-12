@@ -11,20 +11,16 @@ import shutil
 import json
 from glob import glob
 
-import sqlalchemy as sa
-import pandas as pd
-
 from great_expectations.exceptions import DataContextError
 from great_expectations.data_context import DataContext
-from great_expectations.data_context.util import safe_mmkdir, NormalizedDataAssetName
-from great_expectations.dataset import PandasDataset, SqlAlchemyDataset
+from great_expectations.data_context.util import (NormalizedDataAssetName, safe_mmkdir)
 from great_expectations.cli.init import scaffold_directories_and_notebooks
 
 
 @pytest.fixture()
 def parameterized_expectation_suite():
     return {
-        "data_asset_name": "parameterized_expectaitons_config_fixture",
+        "data_asset_name": "parameterized_expectations_config_fixture",
         "data_asset_type": "Dataset",
         "meta": {
         },
@@ -67,10 +63,11 @@ def test_validate_saves_result_inserts_run_id(empty_data_context, filesystem_csv
         validation_result = my_batch.validate()
 
     with open(os.path.join(not_so_empty_data_context.root_directory, 
-              "uncommitted/validations/1955-11-05T00:00:00/my_datasource/default/f1/default.json")) as infile:
+              "uncommitted/validations/1955-11-05T000000Z/my_datasource/default/f1/default.json")) as infile:
         saved_validation_result = json.load(infile)
     
     assert validation_result == saved_validation_result
+
 
 def test_list_available_data_asset_names(empty_data_context, filesystem_csv):
     empty_data_context.add_datasource("my_datasource", "pandas", base_directory= str(filesystem_csv))
@@ -78,18 +75,20 @@ def test_list_available_data_asset_names(empty_data_context, filesystem_csv):
 
     assert available_asset_names == {
         "my_datasource": {
-            "default": set(["f1", "f2", "f3"])
+            "default": {"f1", "f2", "f3"}
         }
     }
 
+
 def test_list_expectation_suites(data_context):
     assert data_context.list_expectation_suites() == {
-        "mydatasource" : {
+        "mydatasource": {
             "mygenerator": {
                 "parameterized_expectation_suite_fixture": ["default"]
             }
         }
     }
+
 
 def test_get_existing_data_asset_config(data_context):
     data_asset_config = data_context.get_expectation_suite('mydatasource/mygenerator/parameterized_expectation_suite_fixture', 'default')
@@ -97,11 +96,13 @@ def test_get_existing_data_asset_config(data_context):
     assert data_asset_config['expectation_suite_name'] == 'default'
     assert len(data_asset_config['expectations']) == 2
 
+
 def test_get_new_data_asset_config(data_context):
     data_asset_config = data_context.get_expectation_suite('this_data_asset_config_does_not_exist')
     assert data_asset_config['data_asset_name'] == 'mydatasource/mygenerator/this_data_asset_config_does_not_exist'
     assert data_asset_config['expectation_suite_name'] == 'default'
     assert len(data_asset_config['expectations']) == 0
+
 
 def test_save_data_asset_config(data_context):
     data_asset_config = data_context.get_expectation_suite('this_data_asset_config_does_not_exist')
@@ -117,6 +118,7 @@ def test_save_data_asset_config(data_context):
     data_context.save_expectation_suite(data_asset_config)
     data_asset_config_saved = data_context.get_expectation_suite('this_data_asset_config_does_not_exist')
     assert data_asset_config['expectations'] == data_asset_config_saved['expectations']
+
 
 def test_register_validation_results(data_context):
     run_id = "460d61be-7266-11e9-8848-1681be663d3e"
@@ -189,6 +191,7 @@ def test_register_validation_results(data_context):
         'urn:great_expectations:validations:source_diabetes_data:expectations:expect_column_unique_value_count_to_be_between:columns:patient_nbr:result:observed_value': 2048
     }
 
+
 def test_compile(data_context):
     data_context._compile()
     assert data_context._compiled_parameters == {
@@ -218,10 +221,12 @@ def test_compile(data_context):
         }
     }
 
+
 def test_normalize_data_asset_names_error(data_context):
     with pytest.raises(DataContextError) as exc:
         data_context._normalize_data_asset_name("this/should/never/work/because/it/is/so/long")
         assert "found too many components using delimiter '/'" in exc.message
+
 
 def test_normalize_data_asset_names_delimiters(empty_data_context, filesystem_csv):
     empty_data_context.add_datasource(
@@ -243,6 +248,7 @@ def test_normalize_data_asset_names_delimiters(empty_data_context, filesystem_cs
     with pytest.raises(DataContextError) as exc:
         data_context.data_asset_name_delimiter = "//"
         assert "Invalid delimiter" in exc.message
+
 
 def test_normalize_data_asset_names_conditions(empty_data_context, filesystem_csv, tmp_path_factory):
     # If no datasource is configured, nothing should be allowed to normalize:
@@ -483,7 +489,8 @@ def test_render_full_static_site(tmp_path_factory, filesystem_csv_3):
 
     # os.mkdir(os.path.join(ge_directory,"fixtures")
     context.render_full_static_site()
-    
+
+    # Titanic
     assert os.path.exists(os.path.join(
         ge_directory,
         "fixtures/validations/titanic/default/Titanic/BasicDatasetProfiler.json"
@@ -492,44 +499,119 @@ def test_render_full_static_site(tmp_path_factory, filesystem_csv_3):
         ge_directory,
         "uncommitted/documentation/titanic/default/Titanic/BasicDatasetProfiler.html"
     ))
+    
+    with open(os.path.join(
+        ge_directory,
+        "fixtures/validations/titanic/default/Titanic/BasicDatasetProfiler.json"
+    ), "r") as infile:
+        titanic_validation = json.load(infile)
+    titanic_run_id = titanic_validation['meta']['run_id']
+    titanic_validation_html_filename = "{run_id}-BasicDatasetProfiler.html".format(
+                    run_id=titanic_run_id.replace(':', ''),
+                )
+    assert os.path.exists(os.path.join(
+        ge_directory,
+        "uncommitted/documentation/titanic/default/Titanic/{filename}".format(filename=titanic_validation_html_filename)
+    ))
+    # f1
+    assert os.path.exists(os.path.join(
+        ge_directory,
+        "fixtures/validations/random/default/f1/BasicDatasetProfiler.json"
+    ))
     assert os.path.exists(os.path.join(
         ge_directory,
         "uncommitted/documentation/random/default/f1/BasicDatasetProfiler.html"
+    ))
+    
+    with open(os.path.join(
+        ge_directory,
+        "fixtures/validations/random/default/f1/BasicDatasetProfiler.json"
+    ), "r") as infile:
+        f1_validation = json.load(infile)
+    f1_run_id = f1_validation['meta']['run_id']
+    f1_validation_html_filename = "{run_id}-BasicDatasetProfiler.html".format(
+                    run_id=f1_run_id.replace(':', ''),
+                )
+    assert os.path.exists(os.path.join(
+        ge_directory,
+        "uncommitted/documentation/random/default/f1/{filename}".format(filename=f1_validation_html_filename)
+    ))
+    # f2
+    assert os.path.exists(os.path.join(
+        ge_directory,
+        "fixtures/validations/random/default/f2/BasicDatasetProfiler.json"
     ))
     assert os.path.exists(os.path.join(
         ge_directory,
         "uncommitted/documentation/random/default/f2/BasicDatasetProfiler.html"
     ))
 
-    # Store output files locally
-    # shutil.copy(
-    #     os.path.join(
-    #         ge_directory,
-    #         "uncommitted/documentation/random/default/f2/BasicDatasetProfiler.html"
-    #     ),
-    #     "test_output/f2_BasicDatasetProfiler.html"
-
-    # )
-
     with open(os.path.join(
         ge_directory,
-        "uncommitted/documentation/titanic/default/Titanic/BasicDatasetProfiler.html"
-    ), 'r') as f:
-        # print(f.read())
-        pass
+        "fixtures/validations/random/default/f2/BasicDatasetProfiler.json"
+    ), "r") as infile:
+        f2_validation = json.load(infile)
+    f2_run_id = f2_validation['meta']['run_id']
+    f2_validation_html_filename = "{run_id}-BasicDatasetProfiler.html".format(
+                    run_id=f2_run_id.replace(':', ''),
+                )
+    assert os.path.exists(os.path.join(
+        ge_directory,
+        "uncommitted/documentation/random/default/f2/{filename}".format(filename=f2_validation_html_filename)
+    ))
 
+    # full site
     assert os.path.exists(os.path.join(
         ge_directory,
         "uncommitted/documentation/index.html"
     ))
 
-    # shutil.copy(
-    #     os.path.join(
-    #         ge_directory,
-    #         "uncommitted/documentation/index.html"
-    #     ),
-    #     "test_output/index.html"
+    # save documentation locally
+    safe_mmkdir("./tests/data_context/output")
+    safe_mmkdir("./tests/data_context/output/documentation")
+    
+    safe_mmkdir("./tests/data_context/output/documentation/titanic")
+    try:
+        shutil.copytree(
+            os.path.join(
+                ge_directory,
+                "uncommitted/documentation/titanic/default"
+            ),
+            "./tests/data_context/output/documentation/titanic/default"
+        )
+    except FileExistsError:
+        shutil.rmtree("./tests/data_context/output/documentation/titanic/default")
+        shutil.copytree(
+            os.path.join(
+                ge_directory,
+                "uncommitted/documentation/titanic/default"
+            ),
+            "./tests/data_context/output/documentation/titanic/default"
+        )
 
-    # )
+    safe_mmkdir("./tests/data_context/output/documentation/random")
+    try:
+        shutil.copytree(
+            os.path.join(
+                ge_directory,
+                "uncommitted/documentation/random/default"
+            ),
+            "./tests/data_context/output/documentation/random/default"
+        )
+    except FileExistsError:
+        shutil.rmtree("./tests/data_context/output/documentation/random/default")
+        shutil.copytree(
+            os.path.join(
+                ge_directory,
+                "uncommitted/documentation/random/default"
+            ),
+            "./tests/data_context/output/documentation/random/default"
+        )
 
-    # assert False
+    shutil.copy(
+        os.path.join(
+            ge_directory,
+            "uncommitted/documentation/index.html"
+        ),
+        "./tests/data_context/output/documentation"
+    )

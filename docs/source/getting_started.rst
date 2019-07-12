@@ -4,13 +4,12 @@ Getting Started
 ==================
 
 Requirements
-------------
+---------------------
 
 Great expectations requires a python compute environment and access to data, either locally or \
-through a database or distributed cluster. The tutorials below walk you through getting started \
-with an example project.
+through a database or distributed cluster.
 
-How do I get started?
+Installing with pip
 ---------------------
 
 It's easy! Just use pip install:
@@ -20,23 +19,28 @@ It's easy! Just use pip install:
     $ pip install great_expectations
 
 
-Then go to the root directory of the project you want to use Great Expectations in and run:
+Installing within a project
+-----------------------------
+
+As of v0.7.0, Great Expectations includes a mildly opinionated framework for deploying pipeline tests within projects.
+This is now the recommended path for using Great Expectations.
+
+To install within a project, go to the root directory of the project and run:
 ::
 
     great_expectations init
 
+.. TODO: Optional dependencies
 
-:ref:`tutorial_init`
+Tutorials
+----------
 
-
-:ref:`tutorial_create_expectations`
-
-:ref:`tutorial_pipeline_integration`
+The tutorials below walk you through getting started \
+with an example project.
 
 .. toctree::
    :maxdepth: 2
-   :hidden:
 
-   /tutorials/cli_init
-   /tutorials/create_expectations
-   /tutorials/pipeline_integration
+   /getting_started/cli_init
+   /getting_started/create_expectations
+   /getting_started/pipeline_integration

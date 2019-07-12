@@ -235,7 +235,7 @@ class TestValidation(unittest.TestCase):
                 "meta": {
                     "data_asset_name": None,
                     "expectation_suite_name": "default",
-                    "run_id": "1955-11-05T00:00:00"
+                    "run_id": "1955-11-05T000000Z"
                 },
                 "results": [
                 {"expectation_config": {

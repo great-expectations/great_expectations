@@ -72,7 +72,6 @@ class BatchGenerator(object):
             data_asset_iterator = self._data_asset_iterators[data_asset_name]
             return next(data_asset_iterator)
         except TypeError:
-            # If we don't actually have an iterator we can generate, even after reseting, just return empty
+            # If we don't actually have an iterator we can generate, even after resetting, just return empty
             logger.warning("Unable to generate batch_kwargs for data_asset_name %s" % data_asset_name)
             return {}
-

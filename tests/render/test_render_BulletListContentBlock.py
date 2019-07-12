@@ -17,8 +17,8 @@ def test_substitute_none_for_missing():
     ) == {"a": 1, "b": 2, "c": None, "d": None}
 
     my_kwargs = {"a": 1, "b": 2}
-    substitute_none_for_missing(
-        kwargs={"a": 1, "b": 2},
+    assert substitute_none_for_missing(
+        kwargs=my_kwargs,
         kwarg_list=["c", "d"]
     ) == {"a": 1, "b": 2, "c": None, "d": None}
     assert my_kwargs == {"a": 1, "b": 2}, \
