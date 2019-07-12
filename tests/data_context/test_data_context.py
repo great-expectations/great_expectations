@@ -483,7 +483,8 @@ def test_render_full_static_site(tmp_path_factory, filesystem_csv_3):
 
     # os.mkdir(os.path.join(ge_directory,"fixtures")
     context.render_full_static_site()
-    
+
+    # Titanic
     assert os.path.exists(os.path.join(
         ge_directory,
         "fixtures/validations/titanic/default/Titanic/BasicDatasetProfiler.json"
@@ -492,44 +493,116 @@ def test_render_full_static_site(tmp_path_factory, filesystem_csv_3):
         ge_directory,
         "uncommitted/documentation/titanic/default/Titanic/BasicDatasetProfiler.html"
     ))
+    
+    with open(os.path.join(
+        ge_directory,
+        "fixtures/validations/titanic/default/Titanic/BasicDatasetProfiler.json"
+    ), "r") as infile:
+        titanic_validation = json.load(infile)
+    titanic_run_id = titanic_validation['meta']['run_id']
+    titanic_validation_html_filename = "{run_id}-BasicDatasetProfiler.html".format(
+                    run_id=titanic_run_id.replace(':', ''),
+                )
+    assert os.path.exists(os.path.join(
+        ge_directory,
+        "uncommitted/documentation/titanic/default/Titanic/{filename}".format(filename=titanic_validation_html_filename)
+    ))
+    # f1
+    assert os.path.exists(os.path.join(
+        ge_directory,
+        "fixtures/validations/random/default/f1/BasicDatasetProfiler.json"
+    ))
     assert os.path.exists(os.path.join(
         ge_directory,
         "uncommitted/documentation/random/default/f1/BasicDatasetProfiler.html"
+    ))
+    
+    with open(os.path.join(
+        ge_directory,
+        "fixtures/validations/random/default/f1/BasicDatasetProfiler.json"
+    ), "r") as infile:
+        f1_validation = json.load(infile)
+    f1_run_id = f1_validation['meta']['run_id']
+    f1_validation_html_filename = "{run_id}-BasicDatasetProfiler.html".format(
+                    run_id=f1_run_id.replace(':', ''),
+                )
+    assert os.path.exists(os.path.join(
+        ge_directory,
+        "uncommitted/documentation/random/default/f1/{filename}".format(filename=f1_validation_html_filename)
+    ))
+    # f2
+    assert os.path.exists(os.path.join(
+        ge_directory,
+        "fixtures/validations/random/default/f2/BasicDatasetProfiler.json"
     ))
     assert os.path.exists(os.path.join(
         ge_directory,
         "uncommitted/documentation/random/default/f2/BasicDatasetProfiler.html"
     ))
 
-    # Store output files locally
-    # shutil.copy(
-    #     os.path.join(
-    #         ge_directory,
-    #         "uncommitted/documentation/random/default/f2/BasicDatasetProfiler.html"
-    #     ),
-    #     "test_output/f2_BasicDatasetProfiler.html"
-
-    # )
-
     with open(os.path.join(
         ge_directory,
-        "uncommitted/documentation/titanic/default/Titanic/BasicDatasetProfiler.html"
-    ), 'r') as f:
-        # print(f.read())
-        pass
+        "fixtures/validations/random/default/f2/BasicDatasetProfiler.json"
+    ), "r") as infile:
+        f2_validation = json.load(infile)
+    f2_run_id = f2_validation['meta']['run_id']
+    f2_validation_html_filename = "{run_id}-BasicDatasetProfiler.html".format(
+                    run_id=f2_run_id.replace(':', ''),
+                )
+    assert os.path.exists(os.path.join(
+        ge_directory,
+        "uncommitted/documentation/random/default/f2/{filename}".format(filename=f2_validation_html_filename)
+    ))
 
+    # full site
     assert os.path.exists(os.path.join(
         ge_directory,
         "uncommitted/documentation/index.html"
     ))
 
-    # shutil.copy(
-    #     os.path.join(
-    #         ge_directory,
-    #         "uncommitted/documentation/index.html"
-    #     ),
-    #     "test_output/index.html"
+    # save documentation locally
+    safe_mmkdir("./tests/data_context/output/documentation/titanic")
+    try:
+        shutil.copytree(
+            os.path.join(
+                ge_directory,
+                "uncommitted/documentation/titanic/default"
+            ),
+            "./tests/data_context/output/documentation/titanic/default"
+        )
+    except FileExistsError:
+        shutil.rmtree("./tests/data_context/output/documentation/titanic/default")
+        shutil.copytree(
+            os.path.join(
+                ge_directory,
+                "uncommitted/documentation/titanic/default"
+            ),
+            "./tests/data_context/output/documentation/titanic/default"
+        )
 
-    # )
+    safe_mmkdir("./tests/data_context/output/documentation/random")
+    try:
+        shutil.copytree(
+            os.path.join(
+                ge_directory,
+                "uncommitted/documentation/random/default"
+            ),
+            "./tests/data_context/output/documentation/random/default"
+        )
+    except FileExistsError:
+        shutil.rmtree("./tests/data_context/output/documentation/random/default")
+        shutil.copytree(
+            os.path.join(
+                ge_directory,
+                "uncommitted/documentation/random/default"
+            ),
+            "./tests/data_context/output/documentation/random/default"
+        )
 
-    # assert False
+    shutil.copy(
+        os.path.join(
+            ge_directory,
+            "uncommitted/documentation/index.html"
+        ),
+        "./tests/data_context/output/documentation"
+    )
