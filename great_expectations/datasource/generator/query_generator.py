@@ -50,7 +50,7 @@ class QueryGenerator(BatchGenerator):
             try:
                 self.inspector = reflection.Inspector.from_engine(self.engine)
             except sqlalchemy.exc.OperationalError:
-                logger.warning("Unable to create inspector from engine in generator %s" % name)
+                logger.warning("Unable to create inspector from engine in generator '%s'" % name)
                 self.inspector = None
 
     def _get_iterator(self, data_asset_name, **kwargs):
