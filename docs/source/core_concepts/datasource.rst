@@ -8,7 +8,7 @@ of materialized data, such as a SQL database, S3 bucket, or local file directory
 
 Each Datasource also provides access to Great Expectations data assets that are connected to
 a specific compute environment, such as a SQL database, a Spark cluster, or a local in-memory
-Pandas Dataframe.
+Pandas DataFrame.
 
 To bridge the gap between those worlds, Datasources interact closely with *generators* which
 are aware of a source of data and can produce produce identifying information, called
