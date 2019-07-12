@@ -406,10 +406,19 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
             "count": counts,
         })
 
+        if len(values) <= 10:
+            height = 300
+            width = 300
+            col_width = 6
+        else:
+            height = 300
+            width = 300
+            col_width = 6
+
         bars = alt.Chart(df).mark_bar(size=20).encode(
-            x='count:Q',
-            y="value:O"
-        ).properties(width=200, autosize="fit")
+            y='count:Q',
+            x="value:O"
+        ).properties(height=height, width=width, autosize="fit")
 
         chart = bars.to_json()
 
@@ -418,7 +427,7 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
             "header": "Value Counts",
             "graph": chart,
             "styling": {
-                "classes": ["col-4"],
+                "classes": ["col-" + str(col_width)],
                 "styles": {
                     "margin-top": "20px",
                 }
