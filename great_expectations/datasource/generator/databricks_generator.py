@@ -13,9 +13,6 @@ except ImportError:
 
 class DatabricksTableGenerator(BatchGenerator):
     """Meant to be used in a Databricks notebook
-
-    Unsure of if we want to keep this and other new, more esoteric data contexts in the
-    main library or provide an easy way for people to write their own.
     """
 
     def __init__(self, name, type_, datasource, database):

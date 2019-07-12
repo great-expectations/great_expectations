@@ -24,6 +24,7 @@ def expectations():
 
 
 # noinspection PyPep8Naming
+@pytest.mark.smoketest
 def test_render_DefaultJinjaPageView_meta_info():
     validation_results = {
         "results": [],
@@ -39,7 +40,7 @@ def test_render_DefaultJinjaPageView_meta_info():
             "expectation_suite_name": "my_suite",
             "run_id": "2019-06-25T14:58:09.960521",
             "batch_kwargs": {
-                "path": "/Users/eugenemandel/project_data/public_healthcare_datasets/tetanusvaricella/tetvardata.csv",
+                "path": "/Users/user/project_data/public_healthcare_datasets/tetanusvaricella/tetvardata.csv",
                 "timestamp": 1561474688.693565
             }
         }

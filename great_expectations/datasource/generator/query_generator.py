@@ -8,11 +8,12 @@ logger = logging.getLogger(__name__)
 
 try:
     import sqlalchemy
-    from sqlalchemy import create_engine, MetaData
+    from sqlalchemy import create_engine
+    from sqlalchemy.engine import reflection
 except ImportError:
     sqlalchemy = None
     create_engine = None
-    MetaData = None
+    reflection = None
     logger.debug("Unable to import sqlalchemy.")
 
 
@@ -23,8 +24,17 @@ class QueryGenerator(BatchGenerator):
     def __init__(self, datasource, name="default"):
         # TODO: Add tests for QueryGenerator
         super(QueryGenerator, self).__init__(name=name, type_="queries", datasource=datasource)
-        self.meta = MetaData()
-        if datasource is not None and datasource.data_context is not None:
+        if (
+                datasource is not None and
+                datasource.data_context is not None and
+                os.path.isdir(os.path.join(self._datasource.data_context.root_directory,
+                                           "datasources",
+                                           self._datasource.name,
+                                           "generators",
+                                           self._name,
+                                           "queries")
+                              )
+        ):
             self._queries_path = os.path.join(self._datasource.data_context.root_directory,
                                               "datasources",
                                               self._datasource.name,
@@ -37,6 +47,11 @@ class QueryGenerator(BatchGenerator):
 
         if datasource is not None:
             self.engine = datasource.engine
+            try:
+                self.inspector = reflection.Inspector.from_engine(self.engine)
+            except sqlalchemy.exc.OperationalError:
+                logger.warning("Unable to create inspector from engine in generator '%s'" % name)
+                self.inspector = None
 
     def _get_iterator(self, data_asset_name, **kwargs):
         if self._queries_path:
@@ -46,16 +61,18 @@ class QueryGenerator(BatchGenerator):
                         "query": data.read(),
                         "timestamp": time.time()
                     }])
-        else:
+        elif self._queries:
             if data_asset_name in self._queries:
                 return iter([{
                     "query": self._queries[data_asset_name],
                     "timestamp": time.time()
                 }])
+        else:
+            # There is no query path or temp query storage defined
+            pass
 
-        if self.engine is not None:
-            self.meta.reflect(bind=self.engine)
-            tables = [str(table) for table in self.meta.sorted_tables]
+        if self.engine is not None and self.inspector is not None:
+            tables = self.inspector.get_table_names()
             if data_asset_name in tables:
                 return iter([
                     {
@@ -77,9 +94,8 @@ class QueryGenerator(BatchGenerator):
             defined_queries = [path for path in os.walk(self._queries_path) if str(path).endswith(".sql")]
         else:
             defined_queries = list(self._queries.keys())
-        if self.engine is not None:
-            self.meta.reflect(bind=self.engine)
-            tables = [str(table) for table in self.meta.sorted_tables]
+        if self.engine is not None and self.inspector is not None:
+            tables = self.inspector.get_table_names()
         else:
             tables = []
 
