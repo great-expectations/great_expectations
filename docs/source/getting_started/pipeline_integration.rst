@@ -30,7 +30,7 @@ To run validation for a data_asset, we need two additional elements:
 Video
 ------
 
-This brief video covers the basics of integrating GE into a pipeline.
+COMING SOON: This brief video covers the basics of integrating GE into a pipeline
 
 
 Get a DataContext object
@@ -124,7 +124,7 @@ batches into named data assets.
 
 Notice that the generator is providing information to the datasource object describing what and how to read the batch.
 
-For sql and spark backends, ``batch_kwargs`` will usually define the query or table to use for validation.
+For SQL and spark backends, ``batch_kwargs`` will usually define the query or table to use for validation.
 
 Finally, for many integrations, it is possible to provide a reference to an existing batch of data, such as
 a pandas or spark DataFrame. In such cases, the :py:class:`~great_expectations.datasource.generator.in_memory_generator.\
@@ -162,7 +162,7 @@ Validate
 
 Validation evaluates our expectations against the given batch and produces a report that describes observed values and
 any places where expectations are not met. To validate the batch of data call the :meth:`~great_expectations.\
-data_asset.data_asset.DataAsset.validate` method on the batch of data obtained from the data context:
+data_asset.data_asset.DataAsset.validate` method on the batch of data obtained from the DataContext:
 
 ::
 
