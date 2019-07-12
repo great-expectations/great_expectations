@@ -186,7 +186,7 @@ class SparkDFDataset(MetaSparkDFDataset):
             raise ValueError("from_dataset requires a SparkDFDataset dataset")
 
     def __init__(self, spark_df, *args, **kwargs):
-        # Creation of the Spark Dataframe is done outside this class
+        # Creation of the Spark DataFrame is done outside this class
         self.spark_df = spark_df
         super(SparkDFDataset, self).__init__(*args, **kwargs)
 
