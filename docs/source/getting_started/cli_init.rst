@@ -454,15 +454,15 @@ Within the CLI, we compile to documentation as follows:
 
 Opening `great_expectations/uncommitted/documentation/index.html` in a browser will give you a page like:
 
-<<<Image>>>
+.. image:: ../index_render.png
 
 Clicking through to the first link will show you prescriptive data documentation. This renders the Expectations themselves.
 
-<<<Image>>>
+.. image:: ../prescriptive_render.png
 
 Clicking through to the second link will show you descriptive data documentation. This renders only Expectations.
 
-<<<Image>>>
+.. image:: ../descriptive_render.png
 
 
 Note that the CLI moved our EVRs from `uncommitted/validations/2019-07-12T090442.066278Z/data__dir/default/notable_works_by_charles_dickens/` to `fixtures/validations/2019-07-12T090442.066278Z/data__dir/default/notable_works_by_charles_dickens/`. This is because this data documentation is intended to act as the source of truth for Expectations within this project: all users at the same point within the version control system (e.g. the same git hash) should be able to render exactly the same documantation from shared assets within version control.
