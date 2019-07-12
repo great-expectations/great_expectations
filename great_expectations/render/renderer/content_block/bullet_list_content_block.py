@@ -46,9 +46,10 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
     @classmethod
     def _missing_content_block_fn(cls, expectation, styling=None, include_column_name=True):
         return [{
-            "template": "Couldn't render expectation of type $expectation_type",
+            "template": "$expectation_type(**$kwargs)",
             "params": {
                 "expectation_type": expectation["expectation_type"],
+                "kwargs": expectation["kwargs"]
             },
             # "styling": styling,
             "styling": {
