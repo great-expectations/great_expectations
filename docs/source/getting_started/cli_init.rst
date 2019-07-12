@@ -242,6 +242,7 @@ Warning: for large data sets, the current default profiler may run slowly and im
 The default profiler (BasicDatasetProfiler) will add two JSON files in your great_expectations/ directory. They will be placed in subdirectories that following our namespacing conventions. Great Expectations' DataContexts can fetch these objectes by name, so you won't usually need to access these files directly. Still, it's useful to see how they're stored, to get a sense for how namespaces work.
 
 .. code-block::
+
     great_expectations/
     ├── datasources
     ├── expectations
@@ -272,6 +273,7 @@ The default profiler (BasicDatasetProfiler) will add two JSON files in your grea
 We won't go into full detail on the contents of Expectation and EDR objects here. But as a quick illustration, Expectation JSON objects consist mainly of Expectations like:
 
 .. code-block::
+
     {
       "expectation_type": "expect_column_values_to_be_in_set",
       "kwargs": {
@@ -291,6 +293,7 @@ Expectations created by the BasicDatasetProfiler are very loose and unopinionate
 EVRs contain expectations, _plus_ validation results from a evaluation against a specific batch of data.
 
 .. code-block::
+
     {
       "success": false,
       "result": {
@@ -408,13 +411,15 @@ The full Expectation and EVR and JSON objects also contain some additional metad
 Data documentation
 ----------------------------------------------------------
 
-Expectations and EVR's contain a huge amount of useful information about your data, but they aren't very easy to consume as JSON objects. To make them more accessible, Great Expectations provides tools to render Expectations and EVRs to documentation. We call this feature "Compile to Docs."
+Expectations and EVR's contain a huge amount of useful information about your data, but they aren't very easy to consume as JSON objects. To make them more accessible, Great Expectations provides tools to render Expectations and EVRs to documentation.
 
-This approach to documentation has two significant advantages:
+We call this feature "Compile to Docs."  This approach to documentation has two significant advantages.
 
 First, for engineers, compile to docs makes it possible to automatically keep your documentation in sync with your tests. This prevents documentation rot and can save a huge amount of time on otherwise unrewarding document maintenance.
 
 Second, the ability to translate Expectations back and forth betwen human- and machine-readable formats, opens up many opportunities for domain experts and stakeholdres who aren't engineers to collaborate more closely with engineers on data-driven applications.
+
+Within the CLI, we compile to documentation as follows:
 
 .. code-block::
 
@@ -447,6 +452,22 @@ Second, the ability to translate Expectations back and forth betwen human- and m
     To launch with jupyter lab:
         jupyter lab great_expectations/notebooks/create_expectations.ipynb
 
+Opening `great_expectations/uncommitted/documentation/index.html` in a browser will give you a page like:
+
+<<<Image>>>
+
+Clicking through to the first link will show you prescriptive data documentation. This renders the Expectations themselves.
+
+<<<Image>>>
+
+Clicking through to the second link will show you descriptive data documentation. This renders only Expectations.
+
+<<<Image>>>
+
+
+Note that the CLI moved our EVRs from `uncommitted/validations/2019-07-12T090442.066278Z/data__dir/default/notable_works_by_charles_dickens/` to `fixtures/validations/2019-07-12T090442.066278Z/data__dir/default/notable_works_by_charles_dickens/`. This is because this data documentation is intended to act as the source of truth for Expectations within this project: all users at the same point within the version control system (e.g. the same git hash) should be able to render exactly the same documantation from shared assets within version control.
+
+Note also that the default `great_expectations/` setup does NOT commit compiled docs themselves within version control. Instead, they live in `uncommitted/documentation/`, with a subdirectory structure that mirrors the project namespace.
 
 .. code-block::
 
@@ -484,3 +505,5 @@ Second, the ability to translate Expectations back and forth betwen human- and m
                         └── notable_works_by_charles_dickens
 
     24 directories, 7 files
+
+
