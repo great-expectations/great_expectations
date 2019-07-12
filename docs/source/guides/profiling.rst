@@ -80,7 +80,7 @@ If you want to profile just one data asset in a datasource (e.g., one table in t
 
 
 
-How Expectations and Profiling are related?
+How Expectations And Profiling Are Related?
 -------------------------------------------
 
 In order to characterize a data asset, profiling creates an expectation suite. Unlike the expectations that are typically used for data validation, these expectations do not apply any constraints. This is an example of expect_column_mean_to_be_between expectations that supplies null as values for both min and max. This means that profiling does not expect the mean to be within a particular range - anything is acceptable.
@@ -113,6 +113,7 @@ When this expectation is evaluated against a batch, the validation result comput
 
 
 Known Issues
-------------------
-When profiling CSV files, the profiler makes assumptions, such as considering the first line to be the header and "," to be the separator. Overriding these assumptions is currently possible only when running profiling in Python by passing extra arguments to get_batch.
+------------
+
+When profiling CSV files, the profiler makes assumptions, such as considering the first line to be the header. Overriding these assumptions is currently possible only when running profiling in Python by passing extra arguments to get_batch.
 
