@@ -16,6 +16,7 @@ from great_expectations.data_context import DataContext
 from great_expectations.datasource import PandasDatasource, SqlAlchemyDatasource, SparkDFDatasource
 from great_expectations.dataset import PandasDataset, SqlAlchemyDataset, SparkDFDataset
 
+
 @pytest.fixture(scope="module")
 def test_folder_connection_path(tmp_path_factory):
     df1 = pd.DataFrame(
@@ -24,6 +25,7 @@ def test_folder_connection_path(tmp_path_factory):
     df1.to_csv(os.path.join(path, "test.csv"))
 
     return str(path)
+
 
 @pytest.fixture(scope="module")
 def test_db_connection_string(tmp_path_factory):
@@ -51,6 +53,7 @@ def test_parquet_folder_connection_path(tmp_path_factory):
 
     return basepath
 
+
 def test_create_pandas_datasource(data_context, tmp_path_factory):
     basedir = tmp_path_factory.mktemp('test_create_pandas_datasource')
     name = "test_pandas_datasource"
@@ -68,6 +71,7 @@ def test_create_pandas_datasource(data_context, tmp_path_factory):
         data_context_file_config = yaml.load(data_context_config_file)
 
     assert data_context_file_config["datasources"][name] == data_context_config["datasources"][name]
+
 
 def test_standalone_pandas_datasource(test_folder_connection_path):
     datasource = PandasDatasource('PandasCSV', base_directory=test_folder_connection_path)
@@ -144,6 +148,7 @@ def test_create_sqlalchemy_datasource(data_context):
         profile_name: dict(**connection_kwargs)
     }
 
+
 def test_create_sparkdf_datasource(data_context, tmp_path_factory):
     base_dir = tmp_path_factory.mktemp('test_create_sparkdf_datasource')
     name = "test_sparkdf_datasource"
@@ -174,7 +179,7 @@ def test_create_sparkdf_datasource(data_context, tmp_path_factory):
         assert "          header: false\n" in lines
 
 
-def test_sqlalchemysource_templating(sqlitedb_engine):
+def test_sqlalchemy_source_templating(sqlitedb_engine):
     datasource = SqlAlchemyDatasource(engine=sqlitedb_engine)
     generator = datasource.get_generator()
     generator.add_query("test", "select 'cat' as ${col_name};")
@@ -220,7 +225,8 @@ def test_standalone_spark_parquet_datasource(test_parquet_folder_connection_path
     assert isinstance(dataset, SparkDFDataset)
     # NOTE: below is a great example of CSV vs. Parquet typing: pandas reads content as string, spark as int
     assert dataset.spark_df.head()['col_1'] == 1
-    
+
+
 def test_standalone_spark_csv_datasource(test_folder_connection_path):
     datasource = SparkDFDatasource('SparkParquet', base_directory=test_folder_connection_path)
     assert datasource.get_available_data_asset_names() == {
@@ -230,6 +236,34 @@ def test_standalone_spark_csv_datasource(test_folder_connection_path):
     assert isinstance(dataset, SparkDFDataset)
     # NOTE: below is a great example of CSV vs. Parquet typing: pandas reads content as string, spark as int
     assert dataset.spark_df.head()['col_1'] == '1'
+
+
+def test_standalone_spark_passthrough_generator_datasource(data_context, dataset):
+    # noinspection PyUnusedLocal
+    datasource = data_context.add_datasource("spark_source", "spark", generators={"passthrough": {"type": "memory"}})
+
+    # We want to ensure that an externally-created spark DataFrame can be successfully instantiated using the
+    # datasource built in a data context
+    # Our dataset fixture is parameterized by all backends. The spark source should only accept a spark dataset
+
+    if isinstance(dataset, SparkDFDataset):
+        # We should be smart enough to figure out this is a batch:
+        batch = data_context.get_batch("spark_source/passthrough/new_asset", "new_suite", dataset)
+        res = batch.expect_column_to_exist("infinities")
+        assert res["success"] is True
+        res = batch.expect_column_to_exist("not_a_column")
+        assert res["success"] is False
+        batch.save_expectation_suite()
+        assert os.path.isfile(os.path.join(
+            data_context.root_directory,
+            "expectations/spark_source/passthrough/new_asset/new_suite.json")
+        )
+
+    else:
+        with pytest.raises(BatchKwargsError) as exc:
+            # noinspection PyUnusedLocal
+            batch = data_context.get_batch("spark_source/passthrough/new_asset", "new_suite", dataset)
+            assert "Unrecognized batch_kwargs for spark_source" in exc.message
 
 def test_invalid_reader_sparkdf_datasource(tmp_path_factory):
     basepath = str(tmp_path_factory.mktemp("test_invalid_reader_sparkdf_datasource"))
@@ -261,6 +295,7 @@ def test_invalid_reader_sparkdf_datasource(tmp_path_factory):
         },
         reader_method="csv", header=True)
     assert dataset.spark_df.head()["a"] == "1"
+
 
 def test_invalid_reader_pandas_datasource(tmp_path_factory):
     basepath = str(tmp_path_factory.mktemp("test_invalid_reader_pandas_datasource"))
