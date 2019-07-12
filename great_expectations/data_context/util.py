@@ -34,7 +34,9 @@ def build_slack_notification_request(validation_json=None):
 
     if validation_json:
         if "meta" in validation_json:
-            data_asset_name = validation_json["meta"].get("data_asset_name", "no_name_provided_" + datetime.datetime.utcnow().isoformat())
+            data_asset_name = validation_json["meta"].get(
+                "data_asset_name", "no_name_provided_" + datetime.datetime.utcnow().isoformat().replace(":", "") + "Z"
+            )
             expectation_suite_name = validation_json["meta"].get("expectation_suite_name", "default")
 
         n_checks_succeeded = validation_json["statistics"]["successful_expectations"]

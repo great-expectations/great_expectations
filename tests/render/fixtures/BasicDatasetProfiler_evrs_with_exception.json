@@ -1332,6 +1332,22 @@
     },
     {
       "success": true,
+      "result": {
+        "element_count": 1313,
+        "missing_count": 0,
+        "missing_percent": 0.0,
+        "unexpected_count": 0,
+        "unexpected_percent": 0.0,
+        "unexpected_percent_nonmissing": 0.0,
+        "partial_unexpected_list": [],
+        "partial_unexpected_index_list": [],
+        "partial_unexpected_counts": []
+      },
+      "exception_info": {
+        "raised_exception": false,
+        "exception_message": null,
+        "exception_traceback": null
+      },
       "expectation_config": {
         "expectation_type": "expect_column_values_to_be_in_type_list",
         "kwargs": {
@@ -2002,9 +2018,9 @@
   "success": false,
   "statistics": {
     "evaluated_expectations": 51,
-    "successful_expectations": 43,
-    "unsuccessful_expectations": 8,
-    "success_percent": 84.31372549019608
+    "successful_expectations": 42,
+    "unsuccessful_expectations": 9,
+    "success_percent": 82.35294117647058
   },
   "meta": {
     "great_expectations.__version__": "__fixture__",

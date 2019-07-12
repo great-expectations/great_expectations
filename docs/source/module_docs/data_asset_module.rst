@@ -10,6 +10,8 @@ Data Asset Module
     :exclude-members: DataAsset
 
     .. autoclass:: great_expectations.data_asset.data_asset.DataAsset
+        :members:
+        :undoc-members:
 
 great_expectations.data_asset.file_data_asset
 ---------------------------------------------
@@ -18,7 +20,7 @@ great_expectations.data_asset.file_data_asset
     :members:
     :undoc-members:
     :show-inheritance:
-    :exclude-members: FileDataAsset
+    :exclude-members: MetaFileDataAsset, FileDataAsset
 
     .. autoclass:: great_expectations.data_asset.file_data_asset.MetaFileDataAsset
         :members:

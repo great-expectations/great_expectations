@@ -2,15 +2,19 @@
 """
 # Style guide for the Great Expectations CLI.
 
-### The CLI never writes to disk without asking first.
-### Questions are always phrased as conversational sentences.
-### Sections are divided by headers: "========== Profiling =========="
-### We use punctuation: Please finish sentences with periods, questions marks, or an occasional exclamation point.
-### Keep indentation consistent! (We're pythonistas, natch.)
-### Include exactly one blank line after every question.
-### Within those contraints, shorter is better. When in doubt, shorten.
-### Clickable links (usually to documentation) are blue.
-### Copyable bash commands are green.
+###
+#
+# The CLI never writes to disk without asking first.
+# Questions are always phrased as conversational sentences.
+# Sections are divided by headers: "========== Profiling =========="
+# We use punctuation: Please finish sentences with periods, questions marks, or an occasional exclamation point.
+# Keep indentation consistent! (We're pythonistas, natch.)
+# Include exactly one blank line after every question.
+# Within those constraints, shorter is better. When in doubt, shorten.
+# Clickable links (usually to documentation) are blue.
+# Copyable bash commands are green.
+#
+###
 
 """
 from .datasource import (
@@ -88,8 +92,8 @@ def cli(verbose):
 @click.option('--catch_exceptions', '-e', default=True, type=bool,
               help='Specify whether to catch exceptions raised during evaluation of expectations (defaults to True).')
 @click.option('--only_return_failures', '-f', default=False, type=bool,
-              help='Specify whether to only return expectations that are not met during evaluation \
-              (defaults to False).')
+              help='Specify whether to only return expectations that are not met during evaluation '
+                   '(defaults to False).')
 @click.option('--custom_dataset_module', '-m', default=None,
               help='Path to a python module containing a custom dataset class.')
 @click.option('--custom_dataset_class', '-c', default=None,
@@ -143,7 +147,7 @@ validate the data.
         elif expectation_suite["data_asset_type"] == "FileDataAsset":
             dataset_class = FileDataAsset
         else:
-            logger.critical("Unrecognized data_asset_type %s. You may need to specifcy custom_dataset_module and \
+            logger.critical("Unrecognized data_asset_type %s. You may need to specify custom_dataset_module and \
                 custom_dataset_class." % expectation_suite["data_asset_type"])
             return -1
     else:
@@ -215,11 +219,12 @@ def init(target_directory):
 
 Would you like to profile '{0:s}' to create candidate expectations and documentation?
 
-Please note: Profiling is still a beta feature in Great Expectations.  The current profiler will evaluate the \
-entire data source (without sampling), which may be very time consuming. 
+Please note: Profiling is still a beta feature in Great Expectations.  The current profiler will evaluate the entire 
+data source (without sampling), which may be very time consuming. 
 As a rule of thumb, we recommend starting with data smaller than 100MB.
 
-To learn more about profiling, visit <blue>https://docs.greatexpectations.io/en/latest/guides/profiling.html?utm_source=cli&utm_medium=init&utm_campaign={1:s}</blue>.
+To learn more about profiling, visit <blue>https://docs.greatexpectations.io/en/latest/guides/profiling.html\
+?utm_source=cli&utm_medium=init&utm_campaign={1:s}</blue>.
         """.format(data_source_name, __version__.replace(".", "_"))
     )
     if click.confirm("Proceed?",
@@ -235,7 +240,8 @@ great_expectations/uncommitted (ignored by git) to great_expectations/fixtures.
 
 Before committing, please make sure that this data does not contain sensitive information!
 
-To learn more: <blue>https://docs.greatexpectations.io/en/latest/guides/data_documentation.html?utm_source=cli&utm_medium=init&utm_campaign={0:s}</blue>
+To learn more: <blue>https://docs.greatexpectations.io/en/latest/guides/data_documentation.html\
+?utm_source=cli&utm_medium=init&utm_campaign={0:s}</blue>
 """.format(__version__.replace(".", "_"))
         )
         if click.confirm("Move the profiled data and build HTML documentation?",

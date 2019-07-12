@@ -177,7 +177,7 @@ Together, profiled Expectations and EVRs provide a lot of useful information for
     Done.
 
     Profiling results are saved here:
-    /Users/abe/Desktop/example-dickens-data-project/great_expectations/uncommitted/validations/2019-07-08T11:09:34.803735/data__dir/default/notable_works_by_charles_dickens/BasicDatasetProfiler.json
+    /Users/user/Desktop/example-dickens-data-project/great_expectations/uncommitted/validations/2019-07-08T110934.803735Z/data__dir/default/notable_works_by_charles_dickens/BasicDatasetProfiler.json
 
     ========== Data Documentation ==========
 

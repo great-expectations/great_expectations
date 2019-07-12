@@ -24,6 +24,7 @@ def expectations():
 
 
 # noinspection PyPep8Naming
+@pytest.mark.smoketest
 def test_render_DefaultJinjaPageView_meta_info():
     validation_results = {
         "results": [],
@@ -36,9 +37,9 @@ def test_render_DefaultJinjaPageView_meta_info():
         "meta": {
             "great_expectations.__version__": "0.7.0-beta",
             "data_asset_name": "tetanusvaricella",
-            "run_id": "2019-06-25T14:58:09.960521",
+            "run_id": "2019-06-25T145809.960521Z",
             "batch_kwargs": {
-                "path": "/Users/eugenemandel/project_data/public_healthcare_datasets/tetanusvaricella/tetvardata.csv",
+                "path": "/Users/user/project_data/public_healthcare_datasets/tetanusvaricella/tetvardata.csv",
                 "timestamp": 1561474688.693565
             }
         }
