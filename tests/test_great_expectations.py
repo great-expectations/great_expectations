@@ -2,15 +2,19 @@ import json
 import os
 import random
 import unittest
+from datetime import datetime
+try:
+    from unittest import mock
+except ImportError:
+    import mock
 import math
 
 import pandas as pd
 import re
 
 import great_expectations as ge
-from great_expectations.dataset.autoinspect import columns_exist
 from great_expectations.dataset import PandasDataset, MetaPandasDataset
-from great_expectations.data_asset.base import (
+from great_expectations.data_asset.data_asset import (
     _calc_validation_statistics,
     ValidationStatistics,
 )
@@ -190,21 +194,23 @@ class TestValidation(unittest.TestCase):
     def test_validate(self):
 
         with open("./tests/test_sets/titanic_expectations.json") as f:
-            my_expectations_config = json.load(f)
+            my_expectation_suite = json.load(f)
 
         my_df = ge.read_csv(
             "./tests/test_sets/Titanic.csv",
-            expectations_config=my_expectations_config
+            expectation_suite=my_expectation_suite
         )
         my_df.set_default_expectation_argument("result_format", "COMPLETE")
 
-        results = my_df.validate(catch_exceptions=False)
-        # print json.dumps(results, indent=2)
+        with mock.patch("datetime.datetime") as mock_datetime:
+            mock_datetime.utcnow.return_value = datetime(1955, 11, 5)
+            results = my_df.validate(catch_exceptions=False)
 
+        # with open('./tests/test_sets/expected_cli_results_default.json') as f:
         with open('./tests/test_sets/expected_results_20180303.json') as f:
             expected_results = json.load(f)
-            # print json.dumps(expected_results, indent=2)
 
+        del results["meta"]["great_expectations.__version__"]
         self.maxDiff = None
         assertDeepAlmostEqual(
             results,
@@ -219,11 +225,19 @@ class TestValidation(unittest.TestCase):
 
         # Finally, confirm that only_return_failures works
         # and does not affect the "statistics" field.
-        validation_results = my_df.validate(only_return_failures=True)
-        # print json.dumps(validation_results)
+        with mock.patch("datetime.datetime") as mock_datetime:
+            mock_datetime.utcnow.return_value = datetime(1955, 11, 5)
+            validation_results = my_df.validate(only_return_failures=True)
+            del validation_results["meta"]["great_expectations.__version__"]
         assertDeepAlmostEqual(
             validation_results,
-            {"results": [
+            {
+                "meta": {
+                    "data_asset_name": None,
+                    "expectation_suite_name": "default",
+                    "run_id": "1955-11-05T00:00:00"
+                },
+                "results": [
                 {"expectation_config": {
                     "expectation_type": "expect_column_values_to_be_in_set",
                     "kwargs": {"column": "PClass", "value_set": ["1st", "2nd", "3rd"], "result_format": "COMPLETE"}
@@ -250,7 +264,8 @@ class TestValidation(unittest.TestCase):
         })
 
         validation_config_non_existent_expectation = {
-            "dataset_name": None,
+            "data_asset_name": None,
+            "expectation_suite_name": "default",
             "meta": {
                 "great_expectations.__version__": ge.__version__
             },
@@ -262,7 +277,7 @@ class TestValidation(unittest.TestCase):
             }]
         }
         results = df.validate(
-            expectations_config=validation_config_non_existent_expectation)['results']
+            expectation_suite=validation_config_non_existent_expectation)['results']
 
         self.assertIn(
             "object has no attribute 'non_existent_expectation'",
@@ -275,7 +290,8 @@ class TestValidation(unittest.TestCase):
         })
 
         validation_config_invalid_parameter = {
-            "dataset_name": None,
+            "data_asset_name": None,
+            "expectation_suite_name": "default",
             "meta": {
                 "great_expectations.__version__": ge.__version__
             },
@@ -289,7 +305,7 @@ class TestValidation(unittest.TestCase):
             }]
         }
 
-        results = df.validate(expectations_config=validation_config_invalid_parameter)[
+        results = df.validate(expectation_suite=validation_config_invalid_parameter)[
             'results']
         print(results[0]['exception_info'])
         self.assertIn(
@@ -297,89 +313,13 @@ class TestValidation(unittest.TestCase):
             results[0]['exception_info']['exception_message']
         )
 
-    def test_top_level_validate(self):
-        my_df = pd.DataFrame({
-            "x": [1, 2, 3, 4, 5]
-        })
-        validation_result = ge.validate(my_df, {
-            "dataset_name": None,
-            "meta": {
-                "great_expectations.__version__": ge.__version__
-            },
-            "expectations": [{
-                "expectation_type": "expect_column_to_exist",
-                "kwargs": {
-                    "column": "x"
-                }
-            }, {
-                "expectation_type": "expect_column_values_to_be_between",
-                "kwargs": {
-                    "column": "x",
-                    "min_value": 3,
-                    "max_value": 5
-                }
-            }]
-        })
-        self.assertEqual(
-            validation_result,
-            {
-                "results": [
-                    {
-                        "expectation_config": {
-                            "kwargs": {
-                                "column": "x"
-                            },
-                            "expectation_type": "expect_column_to_exist",
-                        },
-                        "exception_info": {"exception_message": None,
-                                           "exception_traceback": None,
-                                           "raised_exception": False},
-                        "success": True
-                    },
-                    {
-                        "expectation_config": {
-                            "expectation_type": "expect_column_values_to_be_between",
-                            "kwargs": {
-                                "column": "x",
-                                "max_value": 5,
-                                "min_value": 3
-                            }
-                        },
-                        "exception_info": {"exception_message": None,
-                                           "exception_traceback": None,
-                                           "raised_exception": False},
-                        "success": False,
-                        "result": {'element_count': 5,
-                                   'missing_count': 0,
-                                   'missing_percent': 0.0,
-                                   "unexpected_percent": 0.4,
-                                   "partial_unexpected_list": [
-                                       1,
-                                       2
-                                   ],
-                                   "unexpected_percent_nonmissing": 0.4,
-                                   "unexpected_count": 2
-                                   }
-                    }
-                ],
-                "success": False,
-                "statistics": {
-                    "evaluated_expectations": 2,
-                    "successful_expectations": 1,
-                    "unsuccessful_expectations": 1,
-                    "success_percent": 50,
-                }
-            }
-        )
-
-
 class TestValidationStatisticsCalculation(unittest.TestCase):
     def test_no_expectations(self):
         expectation_results = []
         actual = _calc_validation_statistics(expectation_results)
 
         # pay attention to these two
-        self.assertTrue(math.isnan(actual.success_percent))
+        self.assertEqual(actual.success_percent, None)
         self.assertEqual(actual.success, True)
         # the rest is boring
         self.assertEqual(actual.successful_expectations, 0)
@@ -434,20 +374,20 @@ class TestRepeatedAppendExpectation(unittest.TestCase):
     def test_validate(self):
 
         with open("./tests/test_sets/titanic_expectations.json") as f:
-            my_expectations_config = json.load(f)
+            my_expectation_suite = json.load(f)
 
         my_df = ge.read_csv("./tests/test_sets/Titanic.csv",
-                            autoinspect_func=columns_exist)
+                            profiler=ge.profile.ColumnsExistProfiler)
 
         self.assertEqual(
-            len(my_df.get_expectations_config()['expectations']),
+            len(my_df.get_expectation_suite()['expectations']),
             7
         )
 
         # For column_expectations, _append_expectation should only replace expectations where the expetation_type AND the column match
         my_df.expect_column_to_exist("PClass")
         self.assertEqual(
-            len(my_df.get_expectations_config()['expectations']),
+            len(my_df.get_expectation_suite()['expectations']),
             7
         )
 

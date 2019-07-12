@@ -6,6 +6,13 @@
       "c2" : ["a","b","c","d"],
       "c3" : [null,null,null,null]
     },
+    "schemas": {
+      "spark": {
+        "c1": "IntegerType",
+        "c2": "StringType",
+        "c3": "StringType"
+      }
+    },
     "tests": [{
       "title": "Basic positive test",
       "exact_match_out" : false,
@@ -17,7 +24,18 @@
         "success":true,
         "observed_value": 4
       }
-    },{
+    },
+    {
+      "title": "Vacuously true",
+      "exact_match_out" : false,
+      "in":{
+      },
+      "out":{
+        "success":true,
+        "observed_value": 4
+      }
+    },
+    {
       "title": "Basic negative test",
       "exact_match_out" : false,
       "in":{

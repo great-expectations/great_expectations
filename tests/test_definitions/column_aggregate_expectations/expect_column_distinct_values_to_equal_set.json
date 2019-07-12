@@ -1,0 +1,121 @@
+{
+  "expectation_type": "expect_column_distinct_values_to_equal_set",
+  "datasets": [{
+    "data": {
+            "dist1" : [1,2,3,4,5,6,7,8],
+            "dist2" : [1,2,3,4,5,null,null,null],
+            "dist3" : [2,2,2,2,5,6,7,8],
+            "dist4" : [1,1,1,1,2,null,null,null]
+        },
+    "tests": [
+      {
+        "title": "Basic positive test",
+        "exact_match_out": false,
+        "in": {
+          "column": "dist1",
+          "value_set": [1,2,3,4,5,6,7,8]
+        },
+        "out": {
+          "success": true,
+          "observed_value": [1,2,3,4,5,6,7,8]
+        }
+      },
+      {
+        "title": "Positive test with null values in column",
+        "exact_match_out": false,
+        "in": {
+          "column": "dist2",
+          "value_set": [1,2,3,4,5]
+        },
+        "out": {
+          "success": true,
+          "observed_value": [1,2,3,4,5]
+        }
+      },
+      {
+        "title": "Positive test with duplicate values in column",
+        "exact_match_out": false,
+        "in": {
+          "column": "dist3",
+          "value_set": [2,5,6,7,8]
+        },
+        "out": {
+          "success": true,
+          "observed_value": [2,5,6,7,8]
+        }
+      },
+      {
+        "title": "Positive test; duplicate and null values",
+        "exact_match_out": false,
+        "in": {
+          "column": "dist4",
+          "value_set": [1, 2]
+        },
+        "out": {
+          "success": true,
+          "observed_value": [1, 2]
+        }
+      },
+      {
+        "title": "Basic negative test, set contained",
+        "exact_match_out": false,
+        "in": {
+          "column": "dist1",
+          "value_set": [1]
+        },
+        "out": {
+          "success": false,
+          "observed_value": [1,2,3,4,5,6,7,8]
+        }
+      },
+      {
+        "title": "Negative test, some set intersection",
+        "exact_match_out": false,
+        "in": {
+          "column": "dist1",
+          "value_set": [1, 9]
+        },
+        "out": {
+          "success": false,
+          "observed_value": [1,2,3,4,5,6,7,8]
+        }
+      },
+      {
+        "title": "Negative test with null values in column",
+        "exact_match_out": false,
+        "in": {
+          "column": "dist2",
+          "value_set": [1]
+        },
+        "out": {
+          "success": false,
+          "observed_value": [1,2,3,4,5]
+        }
+      },
+      {
+        "title": "Negative test with duplicate values in column",
+        "exact_match_out": false,
+        "in": {
+          "column": "dist3",
+          "value_set": [2]
+        },
+        "out": {
+          "success": false,
+          "observed_value": [2,5,6,7,8]
+        }
+      },
+      {
+        "title": "Negative test; duplicate and null values",
+        "exact_match_out": false,
+        "in": {
+          "column": "dist4",
+          "value_set": [1]
+        },
+        "out": {
+          "success": false,
+          "observed_value": [1, 2]
+        }
+      }
+    ]
+  }]
+}
