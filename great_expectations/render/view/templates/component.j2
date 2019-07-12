@@ -87,6 +87,7 @@
             </tr>
         {%- endfor -%}
         </table>
-    {%- elif content_block["content_block_type"] == "example_list" -%}
+    {%- elif content_block["content_block_type"] == "string_template" -%}
+        {{ content_block["string_template"] | render_string_template }}
     {% endif %}
 </div>
