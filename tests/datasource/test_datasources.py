@@ -265,6 +265,7 @@ def test_standalone_spark_passthrough_generator_datasource(data_context, dataset
             batch = data_context.get_batch("spark_source/passthrough/new_asset", "new_suite", dataset)
             assert "Unrecognized batch_kwargs for spark_source" in exc.message
 
+
 def test_invalid_reader_sparkdf_datasource(tmp_path_factory):
     basepath = str(tmp_path_factory.mktemp("test_invalid_reader_sparkdf_datasource"))
     datasource = SparkDFDatasource('mysparksource', base_directory=basepath)
