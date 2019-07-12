@@ -184,7 +184,7 @@ to stop or issue a warning in the code:
     logger.warning("This file is not a valid batch of {0:s}".format(data_asset_name))
 
 
-When a :ref:`result_store` is configured, it is possible to obtain validation results from the context, for example for
+When a result store is configured (see below), it is possible to obtain validation results from the context, for example for
 interactively reviewing results in a notebook or to easily display them in a dashboard.
 
 .. code-block::
