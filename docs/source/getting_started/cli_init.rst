@@ -48,7 +48,7 @@ By default, everything in this framework will be expressed in a directory struct
 
     If you're new to Great Expectations, this tutorial is a good place to start:
 
-        https://docs.greatexpectations.io/en/latest/getting_started.html?utm_source=cli&utm_medium=init&utm_campaign=0_7_0__develop
+        https://docs.greatexpectations.io/en/latest/tutorials/cli_init.html?utm_source=cli&utm_medium=init&utm_campaign=0_7_0__develop
 
 
     Let's add Great Expectations to your project, by scaffolding a new great_expectations directory:
@@ -179,20 +179,6 @@ Together, profiled Expectations and EVRs provide a lot of useful information for
     Profiling results are saved here:
     /Users/abe/Desktop/example-dickens-data-project/great_expectations/uncommitted/validations/2019-07-08T11:09:34.803735/data__dir/default/notable_works_by_charles_dickens/BasicDatasetProfiler.json
 
-    ========== Data Documentation ==========
-
-    To generate documentation from the data you just profiled, the profiling results should be moved from 
-    great_expectations/uncommitted (ignored by git) to great_expectations/fixtures.
-
-    Before committing, please make sure that this data does not contain sensitive information!
-
-    To learn more: https://docs.greatexpectations.io/en/latest/guides/data_documentation.html?utm_source=cli&utm_medium=init&utm_campaign=0_7_0__develop
-
-    Move the profiled data? [Y/n]: Y
-
-    Moving files...
-
-    Done.
 
 Note: before committing profiled Expectations to source control, we STRONGLY recommend reviewing them, for two reasons. 
 
@@ -214,10 +200,25 @@ Data documentation
 
 So the file that, uh, formed the basis of it as well as when we grab that file. So in other words, comfortable that there's no sensitive information in that validation result, we can go ahead and agree to moving it into our fixtures folder and building documentation on the basis of that.
 
+
 Now that that documentation is built, uh, we can just take a look at it in, uh, our web browser. So, uh, in this new, uh, newly rendered document, we have just a single data asset and we can see an overview of what's there. So for each of the columns, the expectations have formed the basis for, uh, describing the number of distinct values, quintiles, variety of different statistics, example, values, histogram, and other things that are relevant. Now, the key thing is that each of those pieces of information is now backed by an expectation.
 
-
 .. code-block::
+
+    ========== Data Documentation ==========
+
+    To generate documentation from the data you just profiled, the profiling results should be moved from 
+    great_expectations/uncommitted (ignored by git) to great_expectations/fixtures.
+
+    Before committing, please make sure that this data does not contain sensitive information!
+
+    To learn more: https://docs.greatexpectations.io/en/latest/guides/data_documentation.html?utm_source=cli&utm_medium=init&utm_campaign=0_7_0__develop
+
+    Move the profiled data? [Y/n]: Y
+
+    Moving files...
+
+    Done.
 
     Build documentation using the profiled data? [Y/n]: Y
 
