@@ -89,6 +89,10 @@ def render_string_template(template):
     if not isinstance(template, (dict, OrderedDict)):
         return template
 
+    tag = template.get("tag")
+    base_template_string = "<{tag} $styling>$content</{tag}>".format(
+        tag=tag) if tag else "<span $styling>$content</span>"
+
     if "styling" in template:
         params = template["params"]
 
@@ -103,7 +107,7 @@ def render_string_template(template):
                     if parameter in template["styling"]["params"]:
                         continue
 
-                params[parameter] = pTemplate('<span $styling>$content</span>').substitute({
+                params[parameter] = pTemplate(base_template_string).substitute({
                     "styling": render_styling(default_parameter_styling),
                     "content": params[parameter],
                 })
@@ -114,7 +118,7 @@ def render_string_template(template):
             for parameter, parameter_styling in template["styling"]["params"].items():
                 if parameter not in params:
                     continue
-                params[parameter] = pTemplate('<span $styling>$content</span>').substitute({
+                params[parameter] = pTemplate(base_template_string).substitute({
                     "styling": render_styling(parameter_styling),
                     "content": params[parameter],
                 })
@@ -122,7 +126,12 @@ def render_string_template(template):
         string = pTemplate(template["template"]).substitute(params)
         return string
 
-    return pTemplate(template["template"]).substitute(template["params"])
+    if tag:
+        template_string = "<{tag}>{template}</{tag}>".format(
+            template=template["template"], tag=tag)
+        return pTemplate(template_string).substitute(template["params"])
+    else:
+        return pTemplate(template["template"]).substitute(template["params"])
 
 
 class NoOpTemplate(object):
