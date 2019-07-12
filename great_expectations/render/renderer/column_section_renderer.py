@@ -365,9 +365,9 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
         df.weights *= 100
 
         if len(weights) <= 10:
-            height = 300
-            width = 300
-            col_width = 6
+            height = 200
+            width = 200
+            col_width = 4
         else:
             height = 300
             width = 300
@@ -417,9 +417,9 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
         })
 
         if len(values) <= 10:
-            height = 300
-            width = 300
-            col_width = 6
+            height = 200
+            width = 200
+            col_width = 4
         else:
             height = 300
             width = 300
