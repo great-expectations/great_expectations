@@ -561,6 +561,9 @@ def test_render_full_static_site(tmp_path_factory, filesystem_csv_3):
     ))
 
     # save documentation locally
+    safe_mmkdir("./tests/data_context/output")
+    safe_mmkdir("./tests/data_context/output/documentation")
+    
     safe_mmkdir("./tests/data_context/output/documentation/titanic")
     try:
         shutil.copytree(
