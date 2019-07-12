@@ -52,7 +52,7 @@ Always know what to expect from your data.
 
 If you're new to Great Expectations, this tutorial is a good place to start:
 
-    <blue>https://docs.greatexpectations.io/en/latest/getting_started.html?utm_source=cli&utm_medium=init&utm_campaign={0:s}</blue>
+    <blue>https://docs.greatexpectations.io/en/latest/getting_started/cli_init.html?utm_source=cli&utm_medium=init&utm_campaign={0:s}</blue>
 """.format(__version__.replace(".", "_"))
 
 msg_prompt_lets_begin = """
