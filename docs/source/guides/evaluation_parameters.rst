@@ -1,7 +1,7 @@
 .. _evaluation_parameters:
 
 ================================================================================
-Using Evaluation Parameters
+Evaluation Parameters
 ================================================================================
 
 Often, the specific parameters associated with an expectation will be derived from upstream steps in a processing \
@@ -53,3 +53,29 @@ Finally, the command-line tool also allows you to provide a JSON file that conta
         "upstream_row_count": 10
     }
     >> great_expectations validate --evaluation_parameters=my_parameters_file.json dataset_file.csv expectation_suite.json
+
+
+.. _data_context_evaluation_parameter_store:
+
+DataContext Evaluation Parameter Store
+=======================================
+
+When a DataContext has a configured evaluation parameter store, it can automatically identify and store evaluation
+parameters that are referenced in other expectation suites. The evaluation parameter store uses a URN schema for 
+identifying dependencies between expectation suites.
+
+The DataContext-recognized URN must begin with the string ``urn:great_expectations:validations``. Valid URNs must have
+one of the following structures to be recognized by the Great Expectations DataContext:
+
+::
+
+  urn:great_expectations:validations:<data_asset_name>:expectations:<expectation_name>:columns:<column_name>:result:<result_key>
+  urn:great_expectations:validations:<data_asset_name>:expectations:<expectation_name>:columns:<column_name>:details:<details_key>
+  urn:great_expectations:validations:<data_asset_name>:expectations:<expectation_name>:result:<result_key>
+  urn:great_expectations:validations:<data_asset_name>:expectations:<expectation_name>:details:<details_key>
+
+Replace names in ``<>`` with the desired name. For example:
+
+::
+
+  urn:great_expectations:validations:my_source/default/notable_works_by_charles_dickens:expectations:expect_column_proportion_of_unique_values_to_be_between:columns:Title:result:observed_value

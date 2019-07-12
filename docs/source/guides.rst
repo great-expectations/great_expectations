@@ -13,6 +13,7 @@ Guides
    /guides/distributional_expectations
    /guides/standard_arguments
    /guides/result_format
+   /guides/validation_result
    /guides/evaluation_parameters
    /guides/conventions
    /guides/migrating_versions
