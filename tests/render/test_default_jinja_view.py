@@ -36,6 +36,7 @@ def test_render_DefaultJinjaPageView_meta_info():
         "meta": {
             "great_expectations.__version__": "0.7.0-beta",
             "data_asset_name": "tetanusvaricella",
+            "expectation_suite_name": "my_suite",
             "run_id": "2019-06-25T14:58:09.960521",
             "batch_kwargs": {
                 "path": "/Users/eugenemandel/project_data/public_healthcare_datasets/tetanusvaricella/tetvardata.csv",
