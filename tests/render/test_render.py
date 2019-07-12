@@ -20,6 +20,7 @@ def titanic_validation_results():
     with open("./tests/test_sets/expected_cli_results_default.json", "r") as infile:
         return json.load(infile)
 
+
 @pytest.fixture(scope="module")
 def titanic_expectations():
     with open("./tests/test_sets/titanic_expectations.json", "r") as infile:
