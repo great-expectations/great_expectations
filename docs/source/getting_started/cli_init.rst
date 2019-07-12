@@ -10,17 +10,25 @@ Step 1: Running `great_expectations init`
 Video
 ------
 
-https://www.loom.com/share/8bbe5d958ca348a9b072a1c63f3f127e
+<<< NEEDS UTM>>>
+
+https://youtu.be/TlTxVyyDunQ
 
 
 
-Opinionated scaffolding for projects
+Mildly opinionated scaffolding
 ----------------------------------------
 
-Great Expectations provides a mildly opinionated deployment framework that simplifies core operations, such as connecting to data sources; fetching, profiling and validating batches of data; and compiling to human-readable documentation.
+Great Expectations provides a mildly opinionated deployment framework that simplifies operations such as connecting to data sources; fetching, profiling and validating batches of data; and compiling to human-readable documentation.
 
-By default, everything in this framework will be expressed in a directory structure within a `great_expectations/` folder within your version control system. To create this folder, navigate the the root of your project directory in a terminal and run `great_expectations init`. This command line interface (CLI) will scaffold and populate the configuration and other artifacts necessary to get started with Great Expectations.
+This tutorial uses a toy project called `example_dickens_data_project`, but the same methods should work for most data projects. If you want to follow along with this exect example, start with:
 
+.. code-block::
+
+    git clone git@github.com:superconductive/example-dickens-data-project.git
+    cd example-dickens-data-project
+
+By default, everything in the Great Expectations deployment framework will be expressed in a directory structure within a `great_expectations/` folder within your version control system. To create this folder, navigate to the root of your project directory in a terminal and run `great_expectations init`. This command line interface (CLI) will scaffold and populate the configuration and other artifacts necessary to get started with Great Expectations.
 
 .. code-block::
 
@@ -73,14 +81,43 @@ By default, everything in this framework will be expressed in a directory struct
     Done.
 
 
+If you inspect the `great_expectations/` directory at this point, it should contain:
+
+.. code-block::
+
+    great_expectations/
+    ├── datasources
+    ├── expectations
+    ├── fixtures
+    ├── great_expectations.yml
+    ├── notebooks
+    │   ├── create_expectations.ipynb
+    │   └── integrate_validation_into_pipeline.ipynb
+    ├── plugins
+    └── uncommitted
+        ├── credentials
+        ├── documentation
+        ├── samples
+        └── validations
+
+    10 directories, 3 files
+
+
 Adding DataSources
 ----------------------------------------
 
 Next, the CLI will ask you if you want to configure a data source.
 
-DataSources allow you to configure connections to data to evaluate Expectations. Great Expectations currently supports native evaluation of Expectations in three compute environments: pandas dataframes, relational databases via SQL Alchemy, and Spark dataframes. Therefore, a DataSource could be a directory containing CSVs with some configuration to parse those files in pandas; a connection to postgresql instance; an S3 bucket that is read and processed by Spark; etc. (In the future, we expect to extend to other compute environments, such as dask and BigQuery.)
+DataSources allow you to configure connections to data to evaluate Expectations. Great Expectations currently supports native evaluation of Expectations in three compute environments:
 
-Suppose your project contains a `data/` folder. In that case, you can configure a Pandas DataFrame directory like so.
+1. pandas dataframes
+2. relational databases via SQL Alchemy
+3. Spark dataframes
+
+Therefore, a DataSource could be a directory containing CSVs with some configuration to parse those files in pandas; a connection to postgresql instance; an S3 bucket that is read and processed by Spark; etc. In the future, we plan to add support for other compute environments, such as dask and BigQuery.
+.. (If you'd like to use or contribute to those environments, please chime in on GitHub issues.)
+
+Our example project has a `data/` folder containing several CSVs. Within the CLI, we can configure a Pandas DataFrame DataSource like so:
 
 .. code-block::
 
@@ -104,9 +141,29 @@ Suppose your project contains a `data/` folder. In that case, you can configure 
     Give your new data source a short name.
     [data__dir]: 
 
-For a SQL data source, configuration would look like this instead.
+
+
+This step adds a new block DataSource configuration to `great_expectations/great_expectations.yml`. Don't worry about these details yet. For now, it's enough to know that we've configured a DataSource and the configuration information is stored in this file.
 
 .. code-block::
+
+    datasources:
+        data__dir:
+            type: pandas
+            generators:
+            default:
+                type: subdir_reader
+                base_directory: ../data
+                reader_options:
+                sep:
+                engine: python
+
+
+For a SQL data source, configuration would look like this instead:
+
+.. code-block::
+
+    <<<REPLACE THIS BLOCK!>>>
 
     ========== Datasources ==========
 
@@ -146,62 +203,218 @@ Profiling data
 
 Now that we've configured a DataSource, the next step is to _profile_ it. Profiling will generate a first set of candidate Expectations for your data. By default, they will cover a wide range of statistics and other characteristics of the Dataset that could be useful for future validation.
 
-Profiling also evaluates these candidate Expectations against your actual data, producing a set of ExpectationValidationResults (EVRs), which contain observed values and other context derived from the data itself.
+Profiling will also evaluate these candidate Expectations against your actual data, producing a set of ExpectationValidationResults (EVRs), which will contain observed values and other context derived from the data itself.
 
-Together, profiled Expectations and EVRs provide a lot of useful information for dialing in the Expectations you will use in production. They will also provide the raw materials for first-pass data documentation.
+Together, profiled Expectations and EVRs provide a lot of useful information for creating the Expectations you will use in production. They also provide the raw materials for first-pass data documentation. For more details on profiling, please see <<<<LINK: https://docs.greatexpectations.io/en/latest/guides/profiling.html?utm_source=cli&utm_medium=init&utm_campaign=0_7_0__develop>>>>
 
+Within the CLI, we can profile our data by answering a few questions.
 
-<<< UPDATE CODE BLOCK >>>
+Warning: for large data sets, the current default profiler may run slowly and impose significant I/O and compute load. Be cautious when executing against shared databases.
+
 .. code-block::
 
     ========== Profiling ==========
 
     Would you like to profile 'data__dir' to create candidate expectations and documentation?
 
-    Please note: As of v0.7.0, profiling is still a beta feature in Great Expectations.  
-    This generation of profilers will evaluate the entire data source (without sampling) and may be very time consuming. 
+    Please note: Profiling is still a beta feature in Great Expectations.  The current profiler will evaluate the entire 
+    data source (without sampling), which may be very time consuming. 
     As a rule of thumb, we recommend starting with data smaller than 100MB.
 
     To learn more about profiling, visit https://docs.greatexpectations.io/en/latest/guides/profiling.html?utm_source=cli&utm_medium=init&utm_campaign=0_7_0__develop.
-                
+            
     Proceed? [Y/n]: Y
     Profiling 'data__dir' with 'BasicDatasetProfiler'
     Found 1 data assets using generator 'default'
     Profiling all 1.
-        Profiled 38 rows from notable_works_by_charles_dickens (0.191 sec)
+        Profiling 'notable_works_by_charles_dickens'...
+        Profiled 3 columns using 38 rows from notable_works_by_charles_dickens (0.132 sec)
 
-    Profiled 1 of 1 named data assets, with 38 total rows and 3 columns in 0.19 seconds.
+    Profiled 1 of 1 named data assets, with 38 total rows and 3 columns in 0.13 seconds.
     Generated, evaluated, and stored 27 candidate Expectations.
     Note: You will need to review and revise Expectations before using them in production.
 
     Done.
 
     Profiling results are saved here:
-    /Users/abe/Desktop/example-dickens-data-project/great_expectations/uncommitted/validations/2019-07-08T11:09:34.803735/data__dir/default/notable_works_by_charles_dickens/BasicDatasetProfiler.json
+    /Users/abe/Desktop/example-dickens-data-project/great_expectations/uncommitted/validations/2019-07-12T085507.080557Z/data__dir/default/notable_works_by_charles_dickens/BasicDatasetProfiler.json
+
+The default profiler (BasicDatasetProfiler) will add two JSON files in your great_expectations/ directory. They will be placed in subdirectories that following our namespacing conventions. Great Expectations' DataContexts can fetch these objectes by name, so you won't usually need to access these files directly. Still, it's useful to see how they're stored, to get a sense for how namespaces work.
+
+.. code-block::
+    great_expectations/
+    ├── datasources
+    ├── expectations
+    │   └── data__dir
+    │       └── default
+    │           └── notable_works_by_charles_dickens
+    │               └── BasicDatasetProfiler.json
+    ├── fixtures
+    ├── great_expectations.yml
+    ├── notebooks
+    │   ├── create_expectations.ipynb
+    │   └── integrate_validation_into_pipeline.ipynb
+    ├── plugins
+    └── uncommitted
+        ├── credentials
+        ├── documentation
+        ├── samples
+        └── validations
+            └── 2019-07-12T090442.066278Z
+                └── data__dir
+                    └── default
+                        └── notable_works_by_charles_dickens
+                            └── BasicDatasetProfiler.json
+
+    17 directories, 5 files
 
 
-Note: before committing profiled Expectations to source control, we STRONGLY recommend reviewing them, for two reasons. 
+We won't go into full detail on the contents of Expectation and EDR objects here. But as a quick illustration, Expectation JSON objects consist mainly of Expectations like:
 
-First, Expectations can contain sensitive data that should not be committed to source code. For example, if you apply `expect_column_values_to_be_in_set` to a column containing social security numbers, the EVRs will contain actual SSNs. Most likely, you would want to replace real SSNs with placeholders before committing to source control.
+.. code-block::
+    {
+      "expectation_type": "expect_column_values_to_be_in_set",
+      "kwargs": {
+        "column": "Type",
+        "value_set": [],
+        "result_format": "SUMMARY"
+      },
+      "meta": {
+        "BasicDatasetProfiler": {
+          "confidence": "very low"
+        }
+      }
+    }
 
-Second, since profiled Expectations are only based on raw data, they almost always require an additional layer of domain knowledge and judgement. This is doubly true when the data itself isn't fully explored or trusted.
+Expectations created by the BasicDatasetProfiler are very loose and unopinionated. (Hence, the empty `value_set` parameter.) They are more like placeholders for expectations the actual expectations. (A tighter Expectation might include something like `value_set=["Novel", "Short Story", "Novella"]`.) That said, even these loose expectations can be evaluated against data to produce EVRs.
 
-<<SHOW WHERE EXPECTATIONS AND EVRS ARE STORED>>>
+EVRs contain expectations, _plus_ validation results from a evaluation against a specific batch of data.
 
-We've created the great expectations directory that like we talked about, and now inside the, uh, expectations sub directory we have as a part of a namespace. So the namespace consisting of the data source name that we configured, our generator, the data asset specific data asset name, and then the name. In this case of the profiler that we used, we've got a first baseline suite, a suite of expectations. Now in our uncommitted directory, we have a single validation run. So that run corresponding to the batch that we just did as part of profiling where we have the exact same hierarchical namespace. And the validation result. So if we take a look really briefly at what's in the, uh, expectations, we'll see that we have, um, uh, the expectations that were created by profiling are generally quite loose. Um, so, you know, we'll see, uh, for example, the unique value count between Nolan and no meaning that we don't have an expectation of what it is, but we would like grade expectations to compute that statistic and make it available as a part of the profiling. 
+.. code-block::
+    {
+      "success": false,
+      "result": {
+        "element_count": 38,
+        "missing_count": 0,
+        "missing_percent": 0.0,
+        "unexpected_count": 38,
+        "unexpected_percent": 1.0,
+        "unexpected_percent_nonmissing": 1.0,
+        "partial_unexpected_list": [
+          "Short Stories",
+          "Novel",
+          "Short Stories",
+          "Novel",
+          "Novel",
+          "Novel",
+          "Novel",
+          "Short Story",
+          "Non-fiction Travelogue",
+          "Novella",
+          "Novel",
+          "Novella",
+          "Novella",
+          "Non-fiction Travelogue",
+          "Novella",
+          "Novel",
+          "Novella",
+          "Religious History",
+          "Novel",
+          "Non-fiction History"
+        ],
+        "partial_unexpected_index_list": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19
+        ],
+        "partial_unexpected_counts": [
+          {
+            "value": "Novel",
+            "count": 14
+          },
+          {
+            "value": "Short Story",
+            "count": 9
+          },
+          {
+            "value": "Novella",
+            "count": 5
+          },
+          {
+            "value": "Short Stories",
+            "count": 4
+          },
+          {
+            "value": "Non-fiction Travelogue",
+            "count": 2
+          },
+          {
+            "value": "Non-fiction History",
+            "count": 1
+          },
+          {
+            "value": "Novel (unfinished)",
+            "count": 1
+          },
+          {
+            "value": "Religious History",
+            "count": 1
+          },
+          {
+            "value": "Short Stories and Reminiscences",
+            "count": 1
+          }
+        ]
+      },
+      "exception_info": {
+        "raised_exception": false,
+        "exception_message": null,
+        "exception_traceback": null
+      },
+      "expectation_config": {
+        "expectation_type": "expect_column_values_to_be_in_set",
+        "kwargs": {
+          "column": "Type",
+          "value_set": [],
+          "result_format": "SUMMARY"
+        },
+        "meta": {
+          "BasicDatasetProfiler": {
+            "confidence": "very low"
+          }
+        }
+      }
+    }
 
-<<DESCRIBE EXPECTATION JSON objects>>>
-
-What that means is that if we switch over and look at the result of the actual validation run, uh, we'll see the, uh, evaluation of each of those expectations that have now produced, uh, the specific statistics relevant for evaluating that expectations. So, uh, in this case, that unique value count, uh, was observed to be 38 in that particular column. As addition, in addition, as a part of the uh, validation result, what we see are some, uh, information about the overall data asset that we just looked at. So again, we've got that hierarchical name that we've described that the data context we'll use to identify the data source generator. And to data asset as well as the name of the specific expectations suite that was used to validate, uh, the, the data asset and create this validation report as well as the specific information about this particular batch.
-
+The full Expectation and EVR and JSON objects also contain some additional metadata, which we won't go into here. For more information about these objects please see <<<Colin>>>.
 
 Data documentation
 ----------------------------------------------------------
 
-So the file that, uh, formed the basis of it as well as when we grab that file. So in other words, comfortable that there's no sensitive information in that validation result, we can go ahead and agree to moving it into our fixtures folder and building documentation on the basis of that.
+Expectations and EVR's contain a huge amount of useful information about your data, but they aren't very easy to consume as JSON objects. To make them more accessible, Great Expectations provides tools to render Expectations and EVRs to documentation. We call this feature "Compile to Docs."
 
+This approach to documentation has two significant advantages:
 
-Now that that documentation is built, uh, we can just take a look at it in, uh, our web browser. So, uh, in this new, uh, newly rendered document, we have just a single data asset and we can see an overview of what's there. So for each of the columns, the expectations have formed the basis for, uh, describing the number of distinct values, quintiles, variety of different statistics, example, values, histogram, and other things that are relevant. Now, the key thing is that each of those pieces of information is now backed by an expectation.
+First, for engineers, compile to docs makes it possible to automatically keep your documentation in sync with your tests. This prevents documentation rot and can save a huge amount of time on otherwise unrewarding document maintenance.
+
+Second, the ability to translate Expectations back and forth betwen human- and machine-readable formats, opens up many opportunities for domain experts and stakeholdres who aren't engineers to collaborate more closely with engineers on data-driven applications.
 
 .. code-block::
 
@@ -214,18 +427,16 @@ Now that that documentation is built, uh, we can just take a look at it in, uh, 
 
     To learn more: https://docs.greatexpectations.io/en/latest/guides/data_documentation.html?utm_source=cli&utm_medium=init&utm_campaign=0_7_0__develop
 
-    Move the profiled data? [Y/n]: Y
+    Move the profiled data and build HTML documentation? [Y/n]: Y
 
     Moving files...
 
     Done.
 
-    Build documentation using the profiled data? [Y/n]: Y
-
     Building documentation...
 
     To view the generated data documentation, open this file in a web browser:
-        great_expectations/data_documentation/index.html
+        great_expectations/uncommitted/documentation/index.html
 
 
     To create expectations for your data, start Jupyter and open a tutorial notebook:
@@ -235,3 +446,41 @@ Now that that documentation is built, uh, we can just take a look at it in, uh, 
 
     To launch with jupyter lab:
         jupyter lab great_expectations/notebooks/create_expectations.ipynb
+
+
+.. code-block::
+
+    great_expectations/
+    ├── datasources
+    ├── expectations
+    │   └── data__dir
+    │       └── default
+    │           └── notable_works_by_charles_dickens
+    │               └── BasicDatasetProfiler.json
+    ├── fixtures
+    │   └── validations
+    │       └── data__dir
+    │           └── default
+    │               └── notable_works_by_charles_dickens
+    │                   └── BasicDatasetProfiler.json
+    ├── great_expectations.yml
+    ├── notebooks
+    │   ├── create_expectations.ipynb
+    │   └── integrate_validation_into_pipeline.ipynb
+    ├── plugins
+    └── uncommitted
+        ├── credentials
+        ├── documentation
+        │   ├── data__dir
+        │   │   └── default
+        │   │       └── notable_works_by_charles_dickens
+        │   │           └── BasicDatasetProfiler.html
+        │   └── index.html
+        ├── samples
+        └── validations
+            └── 2019-07-12T090442.066278Z
+                └── data__dir
+                    └── default
+                        └── notable_works_by_charles_dickens
+
+    24 directories, 7 files
