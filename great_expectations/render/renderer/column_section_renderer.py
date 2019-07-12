@@ -364,19 +364,29 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
         # bin_medians = [(round(bins[i], 1), round(bins[i+1], 1)) for i, v in enumerate(bins[:-1])]
         bins_x1 = [round(value, 1) for value in bins[:-1]]
         bins_x2 = [round(value, 1) for value in bins[1:]]
+        weights = kl_divergence_evr["result"]["details"]["observed_partition"]["weights"]
 
         df = pd.DataFrame({
             "bin_min": bins_x1,
             "bin_max": bins_x2,
-            "weights": kl_divergence_evr["result"]["details"]["observed_partition"]["weights"],
+            "weights": weights,
         })
         df.weights *= 100
+
+        if len(weights) <= 10:
+            height = 200
+            width = 200
+            col_width = 4
+        else:
+            height = 300
+            width = 300
+            col_width = 6
 
         bars = alt.Chart(df).mark_bar().encode(
             x='bin_min:O',
             x2='bin_max:O',
             y="weights:Q"
-        ).properties(width=200, height=200, autosize="fit")
+        ).properties(width=width, height=height, autosize="fit")
 
         chart = bars.to_json()
 
@@ -385,7 +395,7 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
             "header": "Histogram",
             "graph": chart,
             "styling": {
-                "classes": ["col-4"],
+                "classes": ["col-" + str(col_width)],
                 "styles": {
                     "margin-top": "20px",
                 }
@@ -415,10 +425,19 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
             "count": counts,
         })
 
+        if len(values) <= 10:
+            height = 200
+            width = 200
+            col_width = 4
+        else:
+            height = 300
+            width = 300
+            col_width = 6
+
         bars = alt.Chart(df).mark_bar(size=20).encode(
-            x='count:Q',
-            y="value:O"
-        ).properties(width=200, autosize="fit")
+            y='count:Q',
+            x="value:O"
+        ).properties(height=height, width=width, autosize="fit")
 
         chart = bars.to_json()
 
@@ -427,7 +446,7 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
             "header": "Value Counts",
             "graph": chart,
             "styling": {
-                "classes": ["col-4"],
+                "classes": ["col-" + str(col_width)],
                 "styles": {
                     "margin-top": "20px",
                 }
@@ -484,7 +503,13 @@ class PrescriptiveColumnSectionRenderer(ColumnSectionRenderer):
 
         content_blocks.append({
             "content_block_type": "header",
-            "header": column
+            "header": column,
+            "styling": {
+                "classes": ["col-12"],
+                "header": {
+                    "classes": ["alert", "alert-secondary"]
+                }
+            }
         })
 
         return expectations, content_blocks

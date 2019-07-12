@@ -8,7 +8,7 @@ structured documents such as HTML documentation that displays key characteristic
 Profiling, and Validation are the three core services offered by GE.
 
 
-Data Documentation is implemented in the :mod:`render` module.
+Data Documentation is implemented in the :py:mod:`great_expectations.render` module.
 
 HTML documentation
 -------------------
@@ -34,9 +34,9 @@ Using the CLI
 ~~~~~~~~~~~~~~~
 
 The great_expectations CLI can build comprehensive documentation from expectation suites available to the configured
-contxt and validations available in the ``great_expectations/fixtures`` directory.
+context and validations available in the ``great_expectations/fixtures`` directory.
 
-After building, the he HTML documentation can be viewed in a web browser:
+After building, the HTML documentation can be viewed in a web browser:
 
 .. code-block:: bash
 
