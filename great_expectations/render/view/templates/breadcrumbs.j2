@@ -1,9 +1,12 @@
-{% if data_asset_name %}
+{% if full_data_asset_identifier %}
+{% set identifier_list = full_data_asset_identifier.split("/") -%}
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="../../../index.html">Home</a></li>
-        <li class="breadcrumb-item">{{data_asset_name[0]}}</li>
-        <li class="breadcrumb-item active" aria-current="page">{{data_asset_name[2]}}</li>
+        {% for el in identifier_list %}
+            <li class="breadcrumb-item">{{ el }}</li>
+        {% endfor %}
+        <li class="breadcrumb-item active" aria-current="page">{{page_title}}</li>
     </ol>
 </nav>
 {% endif %}

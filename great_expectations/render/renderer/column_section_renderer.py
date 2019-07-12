@@ -7,6 +7,7 @@ from .renderer import Renderer
 from .content_block import ValueListContentBlockRenderer
 from .content_block import TableContentBlockRenderer
 from .content_block import PrescriptiveBulletListContentBlockRenderer
+from .content_block import ExceptionListContentBlockRenderer
 
 
 class ColumnSectionRenderer(Renderer):
@@ -46,7 +47,6 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
         cls._render_overview_table(evrs, content_blocks)
         cls._render_quantile_table(evrs, content_blocks)
         cls._render_stats_table(evrs, content_blocks)
-
         cls._render_histogram(evrs, content_blocks)
         cls._render_values_set(evrs, content_blocks)
         cls._render_bar_chart_table(evrs, content_blocks)
@@ -60,6 +60,8 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
 
         cls._render_expectation_types(evrs, content_blocks)
         # cls._render_unrecognized(evrs, content_blocks)
+
+        cls._render_failed(evrs, content_blocks)
 
         return {
             "section_name": column,
@@ -103,7 +105,8 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
 
     @classmethod
     def _render_expectation_types(cls, evrs, content_blocks):
-        # NOTE: The evr-fetching function is an kinda similar to the code other_section_renderer.DescriptiveOverviewSectionRenderer._render_expectation_types
+        # NOTE: The evr-fetching function is an kinda similar to the code other_section_
+        # renderer.DescriptiveOverviewSectionRenderer._render_expectation_types
 
         # type_counts = defaultdict(int)
 
@@ -181,8 +184,7 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
             evrs,
             "expect_column_values_to_not_be_null"
         )
-        evrs = [evr for evr in [
-            unique_n, unique_proportion, null_evr] if evr is not None]
+        evrs = [evr for evr in [unique_n, unique_proportion, null_evr] if (evr is not None and "result" in evr)]
 
         if len(evrs) > 0:
             new_content_block = TableContentBlockRenderer.render(evrs)
@@ -211,7 +213,7 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
             "expect_column_quantile_values_to_be_between"
         )
 
-        if not quantile_evr:
+        if not quantile_evr or "result" not in quantile_evr:
             return
 
         quantiles = quantile_evr["result"]["observed_value"]["quantiles"]
@@ -253,6 +255,10 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
             evrs,
             "expect_column_mean_to_be_between"
         )
+
+        if not mean_evr or "result" not in mean_evr:
+            return
+
         mean_value = "{:.2f}".format(
             mean_evr['result']['observed_value']) if mean_evr else None
         if mean_value:
@@ -301,6 +307,9 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
             "expect_column_values_to_be_in_set"
         )
 
+        if not set_evr or "result" not in set_evr:
+            return
+
         if set_evr and "partial_unexpected_counts" in set_evr["result"]:
             partial_unexpected_counts = set_evr["result"]["partial_unexpected_counts"]
             values = [str(v["value"]) for v in partial_unexpected_counts]
@@ -346,7 +355,7 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
             "expect_column_kl_divergence_to_be_less_than"
         )
         # print(json.dumps(kl_divergence_evr, indent=2))
-        if kl_divergence_evr == None:
+        if not kl_divergence_evr or "result" not in kl_divergence_evr:
             return
 
         bins = kl_divergence_evr["result"]["details"]["observed_partition"]["bins"]
@@ -355,19 +364,29 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
         # bin_medians = [(round(bins[i], 1), round(bins[i+1], 1)) for i, v in enumerate(bins[:-1])]
         bins_x1 = [round(value, 1) for value in bins[:-1]]
         bins_x2 = [round(value, 1) for value in bins[1:]]
+        weights = kl_divergence_evr["result"]["details"]["observed_partition"]["weights"]
 
         df = pd.DataFrame({
             "bin_min": bins_x1,
             "bin_max": bins_x2,
-            "weights": kl_divergence_evr["result"]["details"]["observed_partition"]["weights"],
+            "weights": weights,
         })
         df.weights *= 100
+
+        if len(weights) <= 10:
+            height = 200
+            width = 200
+            col_width = 4
+        else:
+            height = 300
+            width = 300
+            col_width = 6
 
         bars = alt.Chart(df).mark_bar().encode(
             x='bin_min:O',
             x2='bin_max:O',
             y="weights:Q"
-        ).properties(width=200, height=200, autosize="fit")
+        ).properties(width=width, height=height, autosize="fit")
 
         chart = bars.to_json()
 
@@ -376,7 +395,7 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
             "header": "Histogram",
             "graph": chart,
             "styling": {
-                "classes": ["col-4"],
+                "classes": ["col-" + str(col_width)],
                 "styles": {
                     "margin-top": "20px",
                 }
@@ -392,7 +411,7 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
             "expect_column_distinct_values_to_be_in_set"
         )
         # print(json.dumps(kl_divergence_evr, indent=2))
-        if distinct_values_set_evr == None:
+        if not distinct_values_set_evr or "result" not in distinct_values_set_evr:
             return
 
         value_count_dicts = distinct_values_set_evr['result']['details']['value_counts']
@@ -406,10 +425,19 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
             "count": counts,
         })
 
+        if len(values) <= 10:
+            height = 200
+            width = 200
+            col_width = 4
+        else:
+            height = 300
+            width = 300
+            col_width = 6
+
         bars = alt.Chart(df).mark_bar(size=20).encode(
-            x='count:Q',
-            y="value:O"
-        ).properties(width=200, autosize="fit")
+            y='count:Q',
+            x="value:O"
+        ).properties(height=height, width=width, autosize="fit")
 
         chart = bars.to_json()
 
@@ -418,7 +446,7 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
             "header": "Value Counts",
             "graph": chart,
             "styling": {
-                "classes": ["col-4"],
+                "classes": ["col-" + str(col_width)],
                 "styles": {
                     "margin-top": "20px",
                 }
@@ -426,6 +454,12 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
         }
 
         content_blocks.append(new_block)
+
+    @classmethod
+    def _render_failed(cls, evrs, content_blocks):
+        failed_block = ExceptionListContentBlockRenderer.render(evrs, include_column_name=False)
+        if failed_block is not None:
+            content_blocks.append(failed_block)
 
     @classmethod
     def _render_unrecognized(cls, evrs, content_blocks):
@@ -469,7 +503,13 @@ class PrescriptiveColumnSectionRenderer(ColumnSectionRenderer):
 
         content_blocks.append({
             "content_block_type": "header",
-            "header": column
+            "header": column,
+            "styling": {
+                "classes": ["col-12"],
+                "header": {
+                    "classes": ["alert", "alert-secondary"]
+                }
+            }
         })
 
         return expectations, content_blocks

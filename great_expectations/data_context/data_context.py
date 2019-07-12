@@ -1024,7 +1024,7 @@ class DataContext(object):
         config_file_path = self._get_normalized_data_asset_name_filepath(data_asset_name, expectation_suite_name)
         safe_mmkdir(os.path.dirname(config_file_path), exist_ok=True)
         with open(config_file_path, 'w') as outfile:
-            json.dump(expectation_suite, outfile)
+            json.dump(expectation_suite, outfile, indent=2)
         self._compiled = False
 
     def bind_evaluation_parameters(self, run_id):  # , expectations):
@@ -1088,7 +1088,7 @@ class DataContext(object):
                 logger.debug("Storing validation result: %s" % validation_filepath)
                 safe_mmkdir(os.path.dirname(validation_filepath))
                 with open(validation_filepath, "w") as outfile:
-                    json.dump(validation_results, outfile)
+                    json.dump(validation_results, outfile, indent=2)
             if isinstance(result_store, dict) and "s3" in result_store:
                 bucket = result_store["s3"]["bucket"]
                 key_prefix = result_store["s3"]["key_prefix"]
@@ -1460,13 +1460,20 @@ class DataContext(object):
 
         validation_filepaths = [y for x in os.walk(self.fixtures_validations_directory) for y in glob(os.path.join(x[0], '*.json'))]
         for validation_filepath in validation_filepaths:
+            logger.debug("Loading validation from: %s" % validation_filepath)
             with open(validation_filepath, "r") as infile:
                 validation = json.load(infile)
 
+            run_id = validation['meta']['run_id']
             data_asset_name = validation['meta']['data_asset_name']
             expectation_suite_name = validation['meta']['expectation_suite_name']
             model = DescriptivePageRenderer.render(validation)
-            out_filepath = self.get_validation_doc_filepath(data_asset_name, expectation_suite_name)
+            out_filepath = self.get_validation_doc_filepath(
+                data_asset_name, "{run_id}-{expectation_suite_name}".format(
+                    run_id=run_id.replace(':', ''),
+                    expectation_suite_name=expectation_suite_name
+                )
+            )
             safe_mmkdir(os.path.dirname(out_filepath))
 
             with open(out_filepath, 'w') as writer:
@@ -1474,26 +1481,218 @@ class DataContext(object):
 
             index_links.append({
                 "data_asset_name" : data_asset_name,
-                "filepath" : out_filepath
-            })
-        
-        index_document = OrderedDict()
-        for il in index_links:
-            source, generator, asset = il["data_asset_name"].split('/')
-            if not source in index_document:
-                index_document[source] = []
-            index_document[source].append({
-                "data_asset_name" : asset,
-                "filepath" : il["filepath"],
-                "source" : source,
-                "generator" : generator,
-                "asset" : asset,
+                "expectation_suite_name": expectation_suite_name,
+                "run_id": run_id,
+                "filepath": os.path.relpath(out_filepath, self.data_doc_directory)
             })
 
+        expectation_suite_filepaths = [y for x in os.walk(self.expectations_directory) for y in glob(os.path.join(x[0], '*.json'))]
+        for expectation_suite_filepath in expectation_suite_filepaths:
+            with open(expectation_suite_filepath, "r") as infile:
+                expectation_suite = json.load(infile)
+
+            data_asset_name = expectation_suite['data_asset_name']
+            expectation_suite_name = expectation_suite['expectation_suite_name']
+            model = PrescriptivePageRenderer.render(expectation_suite)
+            out_filepath = self.get_validation_doc_filepath(
+                data_asset_name,
+                expectation_suite_name
+            )
+            safe_mmkdir(os.path.dirname(out_filepath))
+            
+            with open(out_filepath, 'w') as writer:
+                writer.write(DefaultJinjaPageView.render(model))
+
+            index_links.append({
+                "data_asset_name": data_asset_name,
+                "expectation_suite_name": expectation_suite_name,
+                "filepath": os.path.relpath(out_filepath, self.data_doc_directory)
+            })
+        
+        index_links_dict = OrderedDict()
+
+        for il in index_links:
+            source, generator, asset = il["data_asset_name"].split('/')
+            if not source in index_links_dict:
+                index_links_dict[source] = OrderedDict()
+            if not generator in index_links_dict[source]:
+                index_links_dict[source][generator] = OrderedDict()
+            if not asset in index_links_dict[source][generator]:
+                index_links_dict[source][generator][asset] = {
+                    'validation_links': [],
+                    'expectation_suite_links': []
+                }
+
+            if "run_id" in il:
+                index_links_dict[source][generator][asset]["validation_links"].append(
+                    {
+                        "full_data_asset_name": il["data_asset_name"],
+                        "run_id": il["run_id"],
+                        "expectation_suite_name": il["expectation_suite_name"],
+                        "filepath": il["filepath"],
+                        "source": source,
+                        "generator": generator,
+                        "asset": asset
+                    }
+                )
+            else:
+                index_links_dict[source][generator][asset]["expectation_suite_links"].append(
+                    {
+                        "full_data_asset_name": il["data_asset_name"],
+                        "expectation_suite_name": il["expectation_suite_name"],
+                        "filepath": il["filepath"],
+                        "source": source,
+                        "generator": generator,
+                        "asset": asset
+                    }
+                )
+
+        sections = []
+
+        for source, generators in index_links_dict.items():
+            content_blocks = []
+
+            source_header_block = {
+                "content_block_type": "header",
+                "header": source,
+                "styling": {
+                    "classes": ["col-12"],
+                    "header": {
+                        "classes": ["alert", "alert-secondary"]
+                    }
+                }
+            }
+            content_blocks.append(source_header_block)
+
+            for generator, data_assets in generators.items():
+                generator_header_block = {
+                    "content_block_type": "header",
+                    "header": generator,
+                    "styling": {
+                        "classes": ["col-12", "ml-4"],
+                    }
+                }
+                content_blocks.append(generator_header_block)
+
+                horizontal_rule = {
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": "",
+                        "params": {},
+                        "tag": "hr"
+                    },
+                    "styling": {
+                        "classes": ["col-12"],
+                    }
+                }
+                content_blocks.append(horizontal_rule)
+
+                for data_asset, link_lists in data_assets.items():
+                    data_asset_heading = {
+                        "content_block_type": "string_template",
+                        "string_template": {
+                            "template": "$data_asset",
+                            "params": {
+                                "data_asset": data_asset
+                            },
+                            "tag": "blockquote",
+                            "styling": {
+                                "params": {
+                                    "data_asset": {
+                                        "classes": ["blockquote"],
+                                    }
+                                }
+                            }
+                        },
+                        "styling": {
+                            "classes": ["col-4", "pl-5"],
+                            "styles": {
+                                "margin-top": "10px",
+                                "word-break": "break-all"
+                            }
+                        }
+                    }
+                    content_blocks.append(data_asset_heading)
+
+                    expectation_suite_links = link_lists["expectation_suite_links"]
+                    expectation_suite_link_table_rows = [
+                        [{
+                            "template": "$link_text",
+                            "params": {
+                                "link_text": link_dict["expectation_suite_name"]
+                            },
+                            "tag": "a",
+                            "styling": {
+                                "params": {
+                                    "link_text": {
+                                        "attributes": {
+                                            "href": link_dict["filepath"]
+                                        }
+                                    }
+                                }
+                            }
+                        }] for link_dict in expectation_suite_links
+                    ]
+                    expectation_suite_link_table = {
+                        "content_block_type": "table",
+                        "subheader": "Expectation Suites",
+                        "table_rows": expectation_suite_link_table_rows,
+                        "styling": {
+                            "classes": ["col-4"],
+                            "styles": {
+                                "margin-top": "10px"
+                            },
+                            "body": {
+                                "classes": ["table", "table-sm", ],
+                            }
+                        },
+                    }
+                    content_blocks.append(expectation_suite_link_table)
+
+                    validation_links = link_lists["validation_links"]
+                    validation_link_table_rows = [
+                        [{
+                            "template": "$link_text",
+                            "params": {
+                                "link_text": link_dict["run_id"] + "-" + link_dict["expectation_suite_name"]
+                            },
+                            "tag": "a",
+                            "styling": {
+                                "params": {
+                                    "link_text": {
+                                        "attributes": {
+                                            "href": link_dict["filepath"]
+                                        }
+                                    }
+                                }
+                            }
+                        }] for link_dict in validation_links
+                    ]
+                    validation_link_table = {
+                        "content_block_type": "table",
+                        "subheader": "Batch Validations",
+                        "table_rows": validation_link_table_rows,
+                        "styling": {
+                            "classes": ["col-4"],
+                            "styles": {
+                                "margin-top": "10px"
+                            },
+                            "body": {
+                                "classes": ["table", "table-sm", ],
+                            }
+                        },
+                    }
+                    content_blocks.append(validation_link_table)
+
+            section = {
+                "section_name": source,
+                "content_blocks": content_blocks
+            }
+            sections.append(section)
 
         with open(os.path.join(self.data_doc_directory, "index.html"), "w") as writer:
             writer.write(DefaultJinjaIndexPageView.render({
-                "sections": index_document
+                "sections": sections
             }))
 
     def profile_datasource(self,
@@ -1534,9 +1733,9 @@ class DataContext(object):
 
         total_columns, total_expectations, total_rows, skipped_data_assets = 0, 0, 0, 0
         total_start_time = datetime.datetime.now()
-        run_id = total_start_time.isoformat()
+        run_id = total_start_time.isoformat().replace(":", "") + "Z"
         for name in data_asset_name_list:
-            logger.info("\tProfiling %s..." % (name))
+            logger.info("\tProfiling '%s'..." % name)
             try:
                 start_time = datetime.datetime.now()
 
@@ -1568,7 +1767,8 @@ class DataContext(object):
 
                 self.save_expectation_suite(expectation_suite)
                 duration = (datetime.datetime.now() - start_time).total_seconds()
-                logger.info("\tProfiled %d rows from %s (%.3f sec)" % (row_count, name, duration))
+                logger.info("\tProfiled %d columns using %d rows from %s (%.3f sec)" %
+                            (new_column_count, row_count, name, duration))
 
             except ProfilerError as err:
                 logger.warning(err.message)
