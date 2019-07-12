@@ -93,6 +93,10 @@ class SparkDFDatasource(Datasource):
         elif "query" in batch_kwargs:
             df = self.spark.sql(batch_kwargs.query)
 
+        elif "df" in batch_kwargs and isinstance(batch_kwargs["df"], DataFrame):
+            df = batch_kwargs.pop("df")  # We don't want to store the actual DataFrame in kwargs
+            batch_kwargs["SparkDFRef"] = True
+
         return SparkDFDataset(df,
                               expectation_suite=expectation_suite,
                               data_context=self._data_context,
