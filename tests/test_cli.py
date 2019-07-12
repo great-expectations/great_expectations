@@ -41,11 +41,11 @@ Options:
   --help         Show this message and exit.
 
 Commands:
-  validate       Validate a CSV file against an expectation suite.
+  documentation  Build data documentation for a project.
   init           Initialize a new Great Expectations project.
   profile        Profile datasources from the specified context.
-  documentation  Build data documentation for a project.
   render         Render a great expectations object to documentation.
+  validate       Validate a CSV file against an expectation suite.
 """
 
 

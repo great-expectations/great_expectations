@@ -44,7 +44,7 @@ import json
 import logging
 import sys
 import warnings
-from collections import OrderedDict
+# from collections import OrderedDict
 
 warnings.filterwarnings('ignore')
 
@@ -58,21 +58,22 @@ except ImportError:
 logger = logging.getLogger("great_expectations")
 
 
-class NaturalOrderGroup(click.Group):
-    def __init__(self, name=None, commands=None, **attrs):
-        if commands is None:
-            commands = OrderedDict()
-        elif not isinstance(commands, OrderedDict):
-            commands = OrderedDict(commands)
-        click.Group.__init__(self, name=name,
-                             commands=commands,
-                             **attrs)
+# class NaturalOrderGroup(click.Group):
+#     def __init__(self, name=None, commands=None, **attrs):
+#         if commands is None:
+#             commands = OrderedDict()
+#         elif not isinstance(commands, OrderedDict):
+#             commands = OrderedDict(commands)
+#         click.Group.__init__(self, name=name,
+#                              commands=commands,
+#                              **attrs)
+#
+#     def list_commands(self, ctx):
+#         return self.commands.keys()
 
-    def list_commands(self, ctx):
-        return self.commands.keys()
-
-
-@click.group(cls=NaturalOrderGroup)
+# TODO: consider using a specified-order supporting class for help (but wasn't working with python 2)
+# @click.group(cls=NaturalOrderGroup)
+@click.group()
 @click.version_option(version=__version__)
 @click.option('--verbose', '-v', is_flag=True, default=False,
               help='Set great_expectations to use verbose output.')
@@ -310,7 +311,8 @@ def profile(datasource_name, max_data_assets, profile_all_data_assets, directory
 @click.option('--directory', '-d', default="./great_expectations",
               help='The root of a project directory containing a great_expectations/ config.')
 def documentation(directory):
-    """Build data documentation for a project."""
+    """Build data documentation for a project.
+    """
     try:
         context = DataContext(directory)
     except ConfigNotFoundError:

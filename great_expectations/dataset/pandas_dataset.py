@@ -3,6 +3,7 @@ from __future__ import division
 import inspect
 import json
 import re
+from datetime import datetime #, timedelta # Add for case of testing timedelta types
 import logging
 import io
 from datetime import datetime
@@ -72,7 +73,7 @@ class MetaPandasDataset(Dataset):
                 # This only happens on expect_column_values_to_not_be_null expectations.
                 # Since there is no reason to look for most common unexpected values in this case,
                 # we will instruct the result formatting method to skip this step.
-                result_format['partial_unexpected_count'] = 0 
+                result_format['partial_unexpected_count'] = 0
 
             series = self[column]
 
@@ -98,7 +99,7 @@ class MetaPandasDataset(Dataset):
                 nonnull_values[boolean_mapped_success_values == False])
             unexpected_index_list = list(
                 nonnull_values[boolean_mapped_success_values == False].index)
-            
+
             if "output_strftime_format" in kwargs:
                 output_strftime_format = kwargs["output_strftime_format"]
                 parsed_unexpected_list = []
@@ -443,12 +444,24 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             "float": [float, np.float_],
             "double": [float, np.longdouble],
             "bytes": [bytes, np.bytes_],
-            "string": [string_types, np.string_]
+            "string": [np.string_] + list (string_types)
+            # TODO: Consider adding these additional types with additional tests
+            # Would require updates to get_dataset test infrastructure for categorical
+            # "timedelta": [timedelta, np.timedelta64],
+            # "datetime": [datetime, np.datetime64],
+            # "category": ["category"]
         }
 
         target_type = type_map[type_]
 
-        return column.map(lambda x: isinstance(x, tuple(target_type)))
+        # Short-circuit if the dtype tells us
+        if column.dtype != "object":
+            if column.dtype in target_type:
+                return np.ones(len(column), dtype=bool)
+            else:
+                return np.zeros(len(column), dtype=bool)
+        else:
+            return column.map(lambda x: isinstance(x, tuple(target_type)))
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
@@ -464,7 +477,12 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             "float": [float, np.float_],
             "double": [float, np.longdouble],
             "bytes": [bytes, np.bytes_],
-            "string": [string_types, np.string_]
+            "string": [np.string_] + list (string_types)
+            # TODO: Consider adding these additional types with additional tests
+            # Would require updates to get_dataset test infrastructure for categorical
+            # "timedelta": [timedelta, np.timedelta64],
+            # "datetime": [datetime, np.datetime64],
+            # "category": ["category"]
         }
 
         # Build one type list with each specified type list from type_map
@@ -478,7 +496,14 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         if len(target_type_list) == 0:
             raise ValueError("No recognized pandas types in type_list")
 
-        return column.map(lambda x: isinstance(x, tuple(target_type_list)))
+        # Short-circuit if the dtype tells us
+        if column.dtype != "object":
+            if column.dtype in target_type_list:
+                return np.ones(len(column), dtype=bool)
+            else:
+                return np.zeros(len(column), dtype=bool)
+        else:
+            return column.map(lambda x: isinstance(x, tuple(target_type_list)))
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
@@ -1004,7 +1029,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         if value_pairs_set is None:
             # vacuously true
             return np.ones(len(column_A), dtype=np.bool_)
-        
+
         temp_df = pd.DataFrame({"A": column_A, "B": column_B})
         value_pairs_set = {(x, y) for x, y in value_pairs_set}
 
