@@ -14,6 +14,8 @@ import datetime
 
 from functools import wraps
 
+from great_expectations.version import __version__ as __version__
+
 
 def parse_result_format(result_format):
     """This is a simple helper utility that can be used to parse a string result_format into the dict format used
@@ -177,6 +179,16 @@ def recursively_convert_to_json_serializable(test_obj):
         # Note: Use np.floating to avoid FutureWarning from numpy
         return float(round(test_obj, sys.float_info.dig))
 
+    elif isinstance(test_obj, pd.Series):
+        # Converting a series is tricky since the index may not be a string, but all json
+        # keys must be strings. So, we use a very ugly serialization strategy
+        index_name = test_obj.index.name or "index"
+        value_name = test_obj.name or "value"
+        return [{
+            index_name: recursively_convert_to_json_serializable(idx),
+            value_name: recursively_convert_to_json_serializable(val)
+        } for idx, val in test_obj.iteritems()]
+
     elif isinstance(test_obj, pd.DataFrame):
         return recursively_convert_to_json_serializable(test_obj.to_dict(orient='records'))
 
@@ -193,3 +205,13 @@ def recursively_convert_to_json_serializable(test_obj):
     else:
         raise TypeError('%s is of type %s which cannot be serialized.' % (
             str(test_obj), type(test_obj).__name__))
+
+def get_empty_expectation_suite(data_asset_name=None, expectation_suite_name="default"):
+    return DotDict({
+        'data_asset_name': data_asset_name,
+        'expectation_suite_name': expectation_suite_name,
+        'meta': {
+            'great_expectations.__version__': __version__
+        },
+        'expectations': []
+    })

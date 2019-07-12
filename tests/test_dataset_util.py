@@ -104,6 +104,15 @@ class TestUtilMethods(unittest.TestCase):
     def test_is_valid_partition_object_fails_weights(self):
         self.assertFalse(ge.dataset.util.is_valid_partition_object(
             {'bins': [0, 1, 2], 'weights': [0.5, 0.6]}))
+        # weights don't add
+        continuous_partition_object={"weights":[0.3,0.15,0.0,0.10,0.16],
+            "bins":[-3,-2,-1,0,1,2], "tail_weights":[0.15,0.15]}
+        self.assertFalse(ge.dataset.util.is_valid_continuous_partition_object(continuous_partition_object))
+
+    def test_is_valid_partition_object_only_one_tail_weight(self):
+        continuous_partition_object={"weights":[0.3,0.15,0.0,0.10,0.30],
+                                "bins":[-3,-2,-1,0,1,2], "tail_weights":[0.15]}
+        self.assertFalse(ge.dataset.util.is_valid_continuous_partition_object(continuous_partition_object))
 
     def test_is_valid_partition_object_fails_structure(self):
         self.assertFalse(ge.dataset.util.is_valid_partition_object(

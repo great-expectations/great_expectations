@@ -3,10 +3,19 @@
   "datasets": [{
       "data": {
         "x": [2.0, 5.0],
-        "y": [5.0, 5],
+        "y": [5, 5],
         "z": [0, 10],
         "n": [0, null],
         "b": [true, false]
+      },
+      "schemas": {
+        "spark": {
+          "x": "FloatType",
+          "y": "IntegerType",
+          "z": "IntegerType",
+          "n": "IntegerType",
+          "b": "BooleanType"
+        }
       },
       "tests": [{
           "title": "simple mean: positive range",
@@ -100,6 +109,20 @@
             "success": true,
             "observed_value": 0.0
           }
+        },
+        {
+          "title": "Vacuously true: missing min and max",
+          "exact_match_out": false,
+          "in": {
+            "column": "x",
+            "min_value": null,
+            "max_value": null,
+            "catch_exceptions": true
+          },
+          "out": {
+            "success": true
+          },
+          "_note": "vacuously true"
         }
       ]
     },
@@ -112,7 +135,7 @@
       "tests": [{
           "title": "type mismatch: null observed_value",
           "exact_match_out": false,
-	        "suppress_test_for": ["SQLAlchemy"],
+	        "suppress_test_for": ["sqlalchemy"],
           "in": {
             "column": "s",
             "min_value": 0,
@@ -135,7 +158,7 @@
             "success": true,
             "observed_value": 0.5
           },
-          "suppress_test_for": ["postgresql"],
+          "suppress_test_for": ["postgresql", "spark"],
           "_comment": "postgresql will not allow coercing the boolean type to an average"
         },
         {
@@ -150,7 +173,7 @@
             "success": true,
             "observed_value": 0.5
           },
-          "suppress_test_for": ["postgresql"],
+          "suppress_test_for": ["postgresql", "spark"],
           "_comment": "postgresql will not allow coercing the boolean type to an average"
         },
         {
@@ -176,23 +199,15 @@
           "out": {
             "traceback_substring": "ValueError"
           }
-        },
-        {
-          "title": "TypeError: missing min and max",
-          "exact_match_out": false,
-          "in": {
-            "column": "x",
-            "min_value": null,
-            "max_value": null,
-            "catch_exceptions": true
-          },
-          "out": {
-            "traceback_substring": "ValueError"
-          }
-     }]},
+        }]},
     {
       "data": {
         "empty_column": []
+      },
+      "schemas": {
+        "spark": {
+          "empty_column": "IntegerType"
+        }
       },
       "tests": [{
         "title": "Test empty column; should be false (no observed value with which to compare)",

@@ -1,0 +1,15 @@
+# This is a basic configuration for testing.
+# It has comments that should be preserved.
+datasources:
+  # For example, this one.
+  mydatasource:
+    type: pandas
+    generators:
+      # The name default is read if no datasource or generator is specified
+      mygenerator:
+        type: subdir_reader
+        base_directory: ../data
+
+result_store:
+  filesystem:
+    base_directory: uncommitted/validations

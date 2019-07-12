@@ -1,25 +1,34 @@
 from __future__ import division
+from six import PY3, string_types
 
+import uuid
 from functools import wraps
 import inspect
-from six import PY3
-from six import string_types
-import sys
+import logging
 import warnings
-
-import sqlalchemy as sa
-from sqlalchemy.engine import reflection
-from dateutil.parser import parse
 from datetime import datetime
-from numbers import Number
+from importlib import import_module
 
-if sys.version_info.major == 2:  # If python 2
-    from itertools import izip_longest as zip_longest
-elif sys.version_info.major == 3:  # If python 3
-    from itertools import zip_longest
+import pandas as pd
+import numpy as np
+
+from dateutil.parser import parse
 
 from .dataset import Dataset
+from .pandas_dataset import PandasDataset
+from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
+
+logger = logging.getLogger(__name__)
+
+try:
+    import sqlalchemy as sa
+    from sqlalchemy.engine import reflection
+except ImportError:
+    logger.debug("Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support")
+
+
+
 
 class MetaSqlAlchemyDataset(Dataset):
 
@@ -60,7 +69,12 @@ class MetaSqlAlchemyDataset(Dataset):
             ignore_values = [None]
             if func.__name__ in ['expect_column_values_to_not_be_null', 'expect_column_values_to_be_null']:
                 ignore_values = []
-                result_format['partial_unexpected_count'] = 0  # Optimization to avoid meaningless computation for these expectations
+                # Counting the number of unexpected values can be expensive when there is a large
+                # number of np.nan values.
+                # This only happens on expect_column_values_to_not_be_null expectations.
+                # Since there is no reason to look for most common unexpected values in this case,
+                # we will instruct the result formatting method to skip this step.
+                result_format['partial_unexpected_count'] = 0 
 
             count_query = sa.select([
                 sa.func.count().label('element_count'),
@@ -130,18 +144,20 @@ class MetaSqlAlchemyDataset(Dataset):
                         col = x[column]
                     maybe_limited_unexpected_list.append(datetime.strftime(col, output_strftime_format))
             else:
-                maybe_limited_unexpected_list = [x[column]
-                                             for x in unexpected_query_results.fetchall()]
+                maybe_limited_unexpected_list = [x[column] for x in unexpected_query_results.fetchall()]
 
             success_count = nonnull_count - count_results['unexpected_count']
             success, percent_success = self._calc_map_expectation_success(
                 success_count, nonnull_count, mostly)
 
             return_obj = self._format_map_output(
-                result_format, success,
-                count_results['element_count'], nonnull_count,
+                result_format,
+                success,
+                count_results['element_count'],
+                nonnull_count,
                 count_results['unexpected_count'],
-                maybe_limited_unexpected_list, None
+                maybe_limited_unexpected_list,
+                None,
             )
 
             if func.__name__ in ['expect_column_values_to_not_be_null', 'expect_column_values_to_be_null']:
@@ -149,6 +165,7 @@ class MetaSqlAlchemyDataset(Dataset):
                 del return_obj['result']['unexpected_percent_nonmissing']
                 try:
                     del return_obj['result']['partial_unexpected_counts']
+                    del return_obj['result']['partial_unexpected_list']
                 except KeyError:
                     pass
 
@@ -159,98 +176,23 @@ class MetaSqlAlchemyDataset(Dataset):
 
         return inner_wrapper
 
-    @classmethod
-    def column_aggregate_expectation(cls, func):
-        """Constructs an expectation using column-aggregate semantics.
-        """
-        if PY3:
-            argspec = inspect.getfullargspec(func)[0][1:]
-        else:
-            argspec = inspect.getargspec(func)[0][1:]
-
-        @cls.expectation(argspec)
-        @wraps(func)
-        def inner_wrapper(self, column, result_format=None, *args, **kwargs):
-
-            if result_format is None:
-                result_format = self.default_expectation_args["result_format"]
-
-            result_format = parse_result_format(result_format)
-
-            evaluation_result = func(self, column, *args, **kwargs)
-
-            if 'success' not in evaluation_result:
-                raise ValueError(
-                    "Column aggregate expectation failed to return required information: success")
-
-            if 'result' not in evaluation_result:
-                raise ValueError(
-                    "Column aggregate expectation failed to return required information: result")
-
-            if 'observed_value' not in evaluation_result['result']:
-                raise ValueError(
-                    "Column aggregate expectation failed to return required information: result.observed_value")
-
-            return_obj = {
-                'success': bool(evaluation_result['success'])
-            }
-
-            if result_format['result_format'] == 'BOOLEAN_ONLY':
-                return return_obj
-
-            # Use the element and null count information from a column_aggregate_expectation if it is needed
-            # it anyway to avoid an extra trip to the database
-
-            if 'element_count' not in evaluation_result and 'null_count' not in evaluation_result:
-                count_query = sa.select([
-                    sa.func.count().label('element_count'),
-                    sa.func.sum(
-                        sa.case([(sa.column(column) == None, 1)], else_=0)
-                    ).label('null_count'),
-                ]).select_from(self._table)
-
-                count_results = dict(
-                    self.engine.execute(count_query).fetchone())
-
-                # Handle case of empty table gracefully:
-                if "element_count" not in count_results or count_results["element_count"] is None:
-                    count_results["element_count"] = 0
-                if "null_count" not in count_results or count_results["null_count"] is None:
-                    count_results["null_count"] = 0
-
-                return_obj['result'] = {
-                    'observed_value': evaluation_result['result']['observed_value'],
-                    "element_count": count_results['element_count'],
-                    "missing_count": count_results['null_count'],
-                    "missing_percent": count_results['null_count'] / count_results['element_count'] if count_results['element_count'] > 0 else None
-                }
-            else:
-                return_obj['result'] = {
-                    'observed_value': evaluation_result['result']['observed_value'],
-                    "element_count": evaluation_result["element_count"],
-                    "missing_count": evaluation_result["null_count"],
-                    "missing_percent": evaluation_result['null_count'] / evaluation_result['element_count'] if evaluation_result['element_count'] > 0 else None
-                }
-
-            if result_format['result_format'] == 'BASIC':
-                return return_obj
-
-            if 'details' in evaluation_result['result']:
-                return_obj['result']['details'] = evaluation_result['result']['details']
-
-            if result_format['result_format'] in ["SUMMARY", "COMPLETE"]:
-                return return_obj
-
-            raise ValueError("Unknown result_format %s." %
-                             (result_format['result_format'],))
-
-        return inner_wrapper
-
 
 class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
+    @classmethod
+    def from_dataset(cls, dataset=None):
+        if isinstance(dataset, SqlAlchemyDataset):
+            return cls(table_name=str(dataset._table.name), engine=dataset.engine)
+        else:
+            raise ValueError("from_dataset requires a SqlAlchemy dataset")
+
     def __init__(self, table_name=None, engine=None, connection_string=None,
                  custom_sql=None, schema=None, *args, **kwargs):
+
+        if custom_sql and not table_name:
+            # dashes are special characters in most databases so use undercores
+            table_name = str(uuid.uuid4()).replace("-", "_")
+
         if table_name is None:
             raise ValueError("No table_name provided.")
 
@@ -261,7 +203,6 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         if engine is not None:
             self.engine = engine
-
         else:
             try:
                 self.engine = sa.create_engine(connection_string)
@@ -269,6 +210,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 # Currently we do no error handling if the engine doesn't work out of the box.
                 raise err
 
+        self.dialect = import_module("sqlalchemy.dialects." + self.engine.dialect.name)
         if schema is not None and custom_sql is not None:
             # temporary table will be written to temp schema, so don't allow
             # a user-defined schema
@@ -277,9 +219,8 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         if custom_sql:
             self.create_temporary_table(table_name, custom_sql)
 
-
         try:
-            insp = reflection.Inspector.from_engine(engine)
+            insp = reflection.Inspector.from_engine(self.engine)
             self.columns = insp.get_columns(table_name, schema=schema)
         except KeyError:
             # we will get a KeyError for temporary tables, since
@@ -289,6 +230,249 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         # Only call super once connection is established and table_name and columns known to allow autoinspection
         super(SqlAlchemyDataset, self).__init__(*args, **kwargs)
 
+    def head(self, n=5):
+        """Returns a *PandasDataset* with the first *n* rows of the given Dataset"""
+        return PandasDataset(
+            pd.read_sql(
+                sa.select(["*"]).select_from(self._table).limit(n),
+                con=self.engine
+            ), 
+            expectation_suite=self.get_expectation_suite(
+                discard_failed_expectations=False,
+                discard_result_format_kwargs=False,
+                discard_catch_exceptions_kwargs=False,
+                discard_include_configs_kwargs=False
+            )
+        )
+
+    def get_row_count(self):
+        count_query = sa.select([sa.func.count()]).select_from(
+            self._table)
+        return self.engine.execute(count_query).scalar()
+
+    def get_table_columns(self):
+        return [col['name'] for col in self.columns]
+
+    def get_column_nonnull_count(self, column):
+        ignore_values = [None]
+        count_query = sa.select([
+            sa.func.count().label('element_count'),
+            sa.func.sum(
+                sa.case([(sa.or_(
+                    sa.column(column).in_(ignore_values),
+                    # Below is necessary b/c sa.in_() uses `==` but None != None
+                    # But we only consider this if None is actually in the list of ignore values
+                    sa.column(column).is_(None) if None in ignore_values else False), 1)], else_=0)
+            ).label('null_count'),
+        ]).select_from(self._table)
+        count_results = dict(self.engine.execute(count_query).fetchone())
+        element_count = count_results['element_count']
+        null_count = count_results['null_count'] or 0
+        return element_count - null_count
+
+    def get_column_sum(self, column):
+        return self.engine.execute(
+            sa.select([sa.func.sum(sa.column(column))]).select_from(
+                self._table)
+        ).scalar()
+
+    def get_column_max(self, column, parse_strings_as_datetimes=False):
+        if parse_strings_as_datetimes:
+            raise NotImplementedError
+        return self.engine.execute(
+            sa.select([sa.func.max(sa.column(column))]).select_from(
+                self._table)
+        ).scalar()
+
+    def get_column_min(self, column, parse_strings_as_datetimes=False):
+        if parse_strings_as_datetimes:
+            raise NotImplementedError
+        return self.engine.execute(
+            sa.select([sa.func.min(sa.column(column))]).select_from(
+                self._table)
+        ).scalar()
+    
+    def get_column_value_counts(self, column):
+        results = self.engine.execute(
+            sa.select([
+                sa.column(column).label("value"),
+                sa.func.count(sa.column(column)).label("count"),
+            ]).where(sa.column(column) != None) \
+              .group_by(sa.column(column)) \
+              .select_from(self._table)).fetchall()
+        series = pd.Series(
+            [row[1] for row in results],
+            index=pd.Index(
+                data=[row[0] for row in results],
+                name="value"
+            ),
+            name="count"
+        )
+        series.sort_index(inplace=True)
+        return series
+
+    def get_column_mean(self, column):
+        return self.engine.execute(
+            sa.select([sa.func.avg(sa.column(column))]).select_from(
+                self._table)
+        ).scalar()
+
+    def get_column_unique_count(self, column):
+        return self.engine.execute(
+            sa.select([sa.func.count(sa.func.distinct(sa.column(column)))]).select_from(
+                self._table)
+        ).scalar()
+
+    def get_column_median(self, column):
+        nonnull_count = self.get_column_nonnull_count(column)
+        element_values = self.engine.execute(
+            sa.select([sa.column(column)]).order_by(sa.column(column)).where(
+                sa.column(column) != None
+            ).offset(max(nonnull_count // 2 - 1, 0)).limit(2).select_from(self._table)
+        )
+
+        column_values = list(element_values.fetchall())
+
+        if len(column_values) == 0:
+            column_median = None
+        elif nonnull_count % 2 == 0:
+            # An even number of column values: take the average of the two center values
+            column_median = (
+                column_values[0][0] +  # left center value
+                column_values[1][0]    # right center value
+            ) / 2.0  # Average center values
+        else:
+            # An odd number of column values, we can just take the center value
+            column_median = column_values[1][0]  # True center value
+        return column_median
+
+    def get_column_quantiles(self, column, quantiles):
+        selects = []
+        for quantile in quantiles:
+            selects.append(
+                sa.func.percentile_disc(quantile).within_group(sa.column(column).asc())
+            )
+        quantiles = self.engine.execute(sa.select(selects).select_from(self._table)).fetchone()
+        return list(quantiles)
+
+    def get_column_stdev(self, column):
+        res = self.engine.execute(sa.select([
+                sa.func.stddev_samp(sa.column(column))
+            ]).select_from(self._table).where(sa.column(column) != None)).fetchone()
+        return float(res[0])
+
+    def get_column_hist(self, column, bins):
+        """return a list of counts corresponding to bins
+
+        Args:
+            column: the name of the column for which to get the histogram
+            bins: tuple of bin edges for which to get histogram values; *must* be tuple to support caching
+        """
+        case_conditions = []
+        idx = 0
+        bins = list(bins)
+
+        # If we have an infinte lower bound, don't express that in sql
+        if (bins[0] == -np.inf) or (bins[0] == -float("inf")):
+            case_conditions.append(
+                sa.func.sum(
+                    sa.case(
+                        [
+                            (sa.column(column) < bins[idx+1], 1)
+                        ], else_=0
+                    )
+                ).label("bin_" + str(idx))
+            )
+            idx += 1
+
+        for idx in range(idx, len(bins)-2):
+            case_conditions.append(
+                sa.func.sum(
+                    sa.case(
+                        [
+                            (sa.and_(
+                                bins[idx] <= sa.column(column),
+                                sa.column(column) < bins[idx+1]
+                            ), 1)
+                        ], else_=0
+                    )
+                ).label("bin_" + str(idx))
+            )
+
+        if (bins[-1] == np.inf) or (bins[-1] == float("inf")):
+            case_conditions.append(
+                sa.func.sum(
+                    sa.case(
+                        [
+                            (bins[-2] <= sa.column(column), 1)
+                        ], else_=0
+                    )
+                ).label("bin_" + str(len(bins)-1))
+            )
+        else:    
+            case_conditions.append(
+                sa.func.sum(
+                    sa.case(
+                        [
+                            (sa.and_(
+                                bins[-2] <= sa.column(column),
+                                sa.column(column) <= bins[-1]
+                            ), 1)
+                        ], else_=0
+                    )
+                ).label("bin_" + str(len(bins)-1))
+            )
+
+        query = sa.select(
+            case_conditions
+        )\
+        .where(
+            sa.column(column) != None,
+        )\
+        .select_from(self._table)
+
+        hist = list(self.engine.execute(query).fetchone())
+        return hist
+
+    def get_column_count_in_range(self, column, min_val=None, max_val=None, min_strictly=False, max_strictly=True):
+        if min_val is None and max_val is None:
+            raise ValueError('Must specify either min or max value')
+        if min_val is not None and max_val is not None and min_val > max_val:
+            raise ValueError('Min value must be <= to max value')
+
+        min_condition = None
+        max_condition = None
+        if min_val is not None:
+            if min_strictly:
+                min_condition = sa.column(column) > min_val
+            else:
+                min_condition = sa.column(column) >= min_val
+        if max_val is not None:
+            if max_strictly:
+                max_condition = sa.column(column) < max_val
+            else:
+                max_condition = sa.column(column) <= max_val
+        
+        if min_condition is not None and max_condition is not None:
+            condition = sa.and_(min_condition, max_condition)
+        elif min_condition is not None:
+            condition = min_condition
+        else:
+            condition = max_condition
+
+        query = query = sa.select([
+                    sa.func.count((sa.column(column)))
+                ]) \
+                .where(
+                    sa.and_(
+                        sa.column(column) != None,
+                        condition
+                    )
+                ) \
+                .select_from(self._table)
+        
+        return self.engine.execute(query).scalar()
+
     def create_temporary_table(self, table_name, custom_sql):
         """
         Create Temporary table based on sql query. This will be used as a basis for executing expectations.
@@ -296,7 +480,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         It hasn't been tested in all SQL dialects, and may change based on community feedback.
         :param custom_sql:
         """
-        stmt = "CREATE TEMPORARY TABLE {table_name} AS {custom_sql}".format(
+        stmt = "CREATE TEMPORARY TABLE \"{table_name}\" AS {custom_sql}".format(
             table_name=table_name, custom_sql=custom_sql)
         self.engine.execute(stmt)
 
@@ -306,136 +490,6 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         col_names = self.engine.execute(sql).keys()
         col_dict = [{'name': col_name} for col_name in col_names]
         return col_dict
-
-
-    ###
-    ###
-    ###
-    #
-    # Table level implementations
-    #
-    ###
-    ###
-    ###
-
-    @DocInherit
-    @Dataset.expectation(['value'])
-    def expect_table_row_count_to_equal(self,
-                                        value=None,
-                                        result_format=None, include_config=False, catch_exceptions=None, meta=None
-                                        ):
-        # Assert that min_value and max_value are integers
-        try:
-            if value is not None:
-                float(value).is_integer()
-
-        except ValueError:
-            raise ValueError("value must an integer")
-
-        if value is None:
-            raise ValueError("value must be provided")
-
-        count_query = sa.select([sa.func.count()]).select_from(
-            self._table)
-        row_count = self.engine.execute(count_query).scalar()
-
-        return {
-            'success': row_count == value,
-            'result': {
-                'observed_value': row_count
-            }
-        }
-
-    @DocInherit
-    @Dataset.expectation(['min_value', 'max_value'])
-    def expect_table_row_count_to_be_between(self,
-                                             min_value=0,
-                                             max_value=None,
-                                             result_format=None, include_config=False, catch_exceptions=None, meta=None
-                                             ):
-        # Assert that min_value and max_value are integers
-        try:
-            if min_value is not None:
-                float(min_value).is_integer()
-
-            if max_value is not None:
-                float(max_value).is_integer()
-
-        except ValueError:
-            raise ValueError("min_value and max_value must be integers")
-
-        count_query = sa.select([sa.func.count()]).select_from(
-            self._table)
-        row_count = self.engine.execute(count_query).scalar()
-
-        if min_value != None and max_value != None:
-            outcome = row_count >= min_value and row_count <= max_value
-
-        elif min_value == None and max_value != None:
-            outcome = row_count <= max_value
-
-        elif min_value != None and max_value == None:
-            outcome = row_count >= min_value
-
-        return {
-            'success': outcome,
-            'result': {
-                'observed_value': row_count
-            }
-        }
-
-    @DocInherit
-    @Dataset.expectation(['column_list'])
-    def expect_table_columns_to_match_ordered_list(self, column_list,
-                                                   result_format=None, include_config=False, catch_exceptions=None, meta=None):
-        """
-        Checks if observed columns are in the expected order. The expectations will fail if columns are out of expected
-        order, columns are missing, or additional columns are present. On failure, details are provided on the location
-        of the unexpected column(s).
-        """
-        observed_columns = [col['name'] for col in self.columns]
-
-        if observed_columns == list(column_list):
-            return {
-                "success": True
-            }
-        else:
-            # In the case of differing column lengths between the defined expectation and the observed column set, the
-            # max is determined to generate the column_index.
-            number_of_columns = max(len(column_list), len(observed_columns))
-            column_index = range(number_of_columns)
-
-            # Create a list of the mismatched details
-            compared_lists = list(zip_longest(column_index, list(column_list), observed_columns))
-            mismatched = [{"Expected Column Position": i,
-                           "Expected": k,
-                           "Found": v} for i, k, v in compared_lists if k != v]
-            return {
-                "success": False,
-                "details": {"mismatched": mismatched}
-            }
-
-    @DocInherit
-    @Dataset.expectation(['column'])
-    def expect_column_to_exist(self,
-                               column, column_index=None, result_format=None, include_config=False,
-                               catch_exceptions=None, meta=None
-                               ):
-
-        col_names = [col['name'] for col in self.columns]
-
-        if column_index is None:
-            success = column in col_names
-        else:
-            try:
-                col_index = col_names.index(column)
-                success = (column_index == col_index)
-            except ValueError:
-                success = False
-
-        return {
-            'success': success
-        }
 
     ###
     ###
@@ -468,6 +522,107 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         return sa.column(column) != None
 
     @DocInherit
+    @DataAsset.expectation(['column', 'type_', 'mostly'])
+    def expect_column_values_to_be_of_type(
+        self,
+        column,
+        type_,
+        mostly=None,
+        result_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
+        try:
+            col_data = [col for col in self.columns if col["name"] == column][0]
+            col_type = type(col_data["type"])
+        except IndexError:
+            raise ValueError("Unrecognized column: %s" % column)
+        except KeyError:
+            raise ValueError("No database type data available for column: %s" % column)
+
+        try:
+            # Our goal is to be as explicit as possible. We will match the dialect
+            # if that is possible. If there is no dialect available, we *will*
+            # match against a top-level SqlAlchemy type if that's possible.
+            #
+            # This is intended to be a conservative approach.
+            #
+            # In particular, we *exclude* types that would be valid under an ORM
+            # such as "float" for postgresql with this approach
+
+            if not self.dialect:
+                logger.warning("No sqlalchemy dialect found; relying in top-level sqlalchemy types.")
+                success = issubclass(col_type, getattr(sa, type_))
+            else:
+                success = issubclass(col_type, getattr(self.dialect, type_))
+                
+            return {
+                    "success": success,
+                    "details": {
+                        "observed_type": col_type.__name__
+                    }
+                }
+
+        except AttributeError:
+            raise ValueError("Unrecognized sqlalchemy type: %s" % type_)
+
+    @DocInherit
+    @DataAsset.expectation(['column', 'type_', 'mostly'])
+    def expect_column_values_to_be_in_type_list(
+        self,
+        column,
+        type_list,
+        mostly=None,
+        result_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
+        try:
+            col_data = [col for col in self.columns if col["name"] == column][0]
+            col_type = type(col_data["type"])
+        except IndexError:
+            raise ValueError("Unrecognized column: %s" % column)
+        except KeyError:
+            raise ValueError("No database type data available for column: %s" % column)
+
+        # Our goal is to be as explicit as possible. We will match the dialect
+        # if that is possible. If there is no dialect available, we *will*
+        # match against a top-level SqlAlchemy type.
+        #
+        # This is intended to be a conservative approach.
+        #
+        # In particular, we *exclude* types that would be valid under an ORM
+        # such as "float" for postgresql with this approach
+
+        if not self.dialect:
+            logger.warning("No sqlalchemy dialect found; relying in top-level sqlalchemy types.")
+            types = []
+            for type_ in type_list:
+                try:
+                    type_class = getattr(sa, type_)
+                    types.append(type_class)
+                except AttributeError:
+                    logger.debug("Unrecognized type: %s" % type_)
+            if len(types) == 0:
+                raise ValueError("No recognized sqlalchemy types in type_list")
+            types = tuple(types)
+        else:
+            types = []
+            for type_ in type_list:
+                try:
+                    type_class = getattr(self.dialect, type_)
+                    types.append(type_class)
+                except AttributeError:
+                    logger.debug("Unrecognized type: %s" % type_)
+            if len(types) == 0:
+                raise ValueError("No recognized sqlalchemy types in type_list for dialect %s" % 
+                    self.dialect.__name__)
+            types = tuple(types)
+        
+        return {
+                "success": issubclass(col_type, types),
+                "details": {
+                    "observed_type-type": col_type.__name__
+                }
+        }
+
+    @DocInherit
     @MetaSqlAlchemyDataset.column_map_expectation
     def expect_column_values_to_be_in_set(self,
                                           column,
@@ -476,6 +631,10 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                                           parse_strings_as_datetimes=None,
                                           result_format=None, include_config=False, catch_exceptions=None, meta=None
                                           ):
+        if value_set is None:
+            # vacuously true
+            return True
+
         if parse_strings_as_datetimes:
             parsed_value_set = self._parse_value_set(value_set)
         else:
@@ -578,291 +737,6 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         elif min_value is not None and max_value is None:
             return sa.func.length(sa.column(column)) >= min_value
 
-    ###
-    ###
-    ###
-    #
-    # Column Aggregate Expectation Implementations
-    #
-    ###
-    ###
-    ###
-
-    @DocInherit
-    @MetaSqlAlchemyDataset.column_aggregate_expectation
-    def expect_column_max_to_be_between(self,
-                                        column,
-                                        min_value=None,
-                                        max_value=None,
-                                        parse_strings_as_datetimes=None,
-                                        output_strftime_format=None,
-                                        result_format=None, include_config=False, catch_exceptions=None, meta=None
-                                        ):
-
-        if min_value is None and max_value is None:
-            raise ValueError("min_value and max_value cannot both be None")
-
-        col_max = self.engine.execute(
-            sa.select([sa.func.max(sa.column(column))]).select_from(
-                self._table)
-        ).scalar()
-
-        col_max_out = col_max
-        if parse_strings_as_datetimes:
-            if min_value:
-                min_value = parse(min_value)
-
-            if max_value:
-                max_value = parse(max_value)
-
-            if isinstance(col_max, string_types):
-                col_max = parse(col_max)
-
-            if output_strftime_format:
-                col_max_out = datetime.strftime(col_max, output_strftime_format)
-
-        # Handle possible missing values
-        if col_max is None:
-            return {
-                'success': False,
-                'result': {
-                    'observed_value': col_max_out
-                }
-            }
-        else:
-            if min_value is not None and max_value is not None:
-                success = (min_value <= col_max) and (col_max <= max_value)
-
-            elif min_value is None and max_value is not None:
-                success = (col_max <= max_value)
-
-            elif min_value is not None and max_value is None:
-                success = (min_value <= col_max)
-
-            return {
-                'success': success,
-                'result': {
-                    'observed_value': col_max_out
-                }
-            }
-
-    @DocInherit
-    @MetaSqlAlchemyDataset.column_aggregate_expectation
-    def expect_column_min_to_be_between(self,
-                                        column,
-                                        min_value=None,
-                                        max_value=None,
-                                        parse_strings_as_datetimes=None,
-                                        output_strftime_format=None,
-                                        result_format=None, include_config=False, catch_exceptions=None, meta=None
-                                        ):
-
-        if min_value is None and max_value is None:
-            raise ValueError("min_value and max_value cannot both be None")
-
-        col_min = self.engine.execute(
-            sa.select([sa.func.min(sa.column(column))]).select_from(
-                self._table)
-        ).scalar()
-
-        col_min_out = col_min
-        if parse_strings_as_datetimes:
-            if min_value:
-                min_value = parse(min_value)
-
-            if max_value:
-                max_value = parse(max_value)
-
-            if isinstance(col_min, string_types):
-                col_min = parse(col_min)
-
-            if output_strftime_format:
-                col_min_out = datetime.strftime(col_min, output_strftime_format)
-
-
-        # Handle possible missing values
-        if col_min is None:
-            return {
-                'success': False,
-                'result': {
-                    'observed_value': col_min_out
-                }
-            }
-        else:
-            if min_value is not None and max_value is not None:
-                success = (min_value <= col_min) and (col_min <= max_value)
-
-            elif min_value is None and max_value is not None:
-                success = (col_min <= max_value)
-
-            elif min_value is not None and max_value is None:
-                success = (min_value <= col_min)
-
-            return {
-                'success': success,
-                'result': {
-                    'observed_value': col_min_out
-                }
-            }
-
-    @DocInherit
-    @MetaSqlAlchemyDataset.column_aggregate_expectation
-    def expect_column_sum_to_be_between(self,
-                                        column,
-                                        min_value=None,
-                                        max_value=None,
-                                        result_format=None, include_config=False, catch_exceptions=None, meta=None
-                                        ):
-
-        if min_value is None and max_value is None:
-            raise ValueError("min_value and max_value cannot both be None")
-
-        col_sum = self.engine.execute(
-            sa.select([sa.func.sum(sa.column(column))]).select_from(
-                self._table)
-        ).scalar()
-
-        # Handle possible missing values
-        if col_sum is None:
-            return {
-                'success': False,
-                'result': {
-                    'observed_value': col_sum
-                }
-            }
-        else:
-            if min_value is not None and max_value is not None:
-                success = (min_value <= col_sum) and (col_sum <= max_value)
-
-            elif min_value is None and max_value is not None:
-                success = (col_sum <= max_value)
-
-            elif min_value is not None and max_value is None:
-                success = (min_value <= col_sum)
-
-            return {
-                'success': success,
-                'result': {
-                    'observed_value': col_sum
-                }
-            }
-
-    @DocInherit
-    @MetaSqlAlchemyDataset.column_aggregate_expectation
-    def expect_column_mean_to_be_between(self,
-                                         column,
-                                         min_value=None,
-                                         max_value=None,
-                                         result_format=None, include_config=False, catch_exceptions=None, meta=None
-                                         ):
-
-        if min_value is None and max_value is None:
-            raise ValueError("min_value and max_value cannot both be None")
-
-        if min_value is not None and not isinstance(min_value, (Number)):
-            raise ValueError("min_value must be a number")
-
-        if max_value is not None and not isinstance(max_value, (Number)):
-            raise ValueError("max_value must be a number")
-
-        col_avg = self.engine.execute(
-            sa.select([sa.func.avg(sa.column(column))]).select_from(
-                self._table)
-        ).scalar()
-
-        # Handle possible missing values
-        if col_avg is None:
-            return {
-                'success': False,
-                'result': {
-                    'observed_value': col_avg
-                }
-            }
-        else:
-            if min_value != None and max_value != None:
-                success = (min_value <= col_avg) and (col_avg <= max_value)
-
-            elif min_value == None and max_value != None:
-                success = (col_avg <= max_value)
-
-            elif min_value != None and max_value == None:
-                success = (min_value <= col_avg)
-
-            return {
-                'success': success,
-                'result': {
-                    'observed_value': col_avg
-                }
-            }
-
-    @DocInherit
-    @MetaSqlAlchemyDataset.column_aggregate_expectation
-    def expect_column_median_to_be_between(self,
-                                           column,
-                                           min_value=None,
-                                           max_value=None,
-                                           result_format=None, include_config=False, catch_exceptions=None, meta=None
-                                           ):
-
-        if min_value is None and max_value is None:
-            raise ValueError("min_value and max_value cannot both be None")
-
-        # Inspiration from https://stackoverflow.com/questions/942620/missing-median-aggregate-function-in-django
-        count_query = self.engine.execute(
-            sa.select([
-                sa.func.count().label("element_count"),
-                sa.func.sum(
-                    sa.case([(sa.column(column) == None, 1)], else_=0)
-                ).label('null_count')
-            ]).select_from(self._table)
-        )
-
-        counts = dict(count_query.fetchone())
-
-        # Handle empty counts
-        if "element_count" not in counts or counts["element_count"] is None:
-            counts["element_count"] = 0
-        if "null_count" not in counts or counts["null_count"] is None:
-            counts["null_count"] = 0
-
-        # The number of non-null/non-ignored values
-        nonnull_count = counts['element_count'] - counts['null_count']
-
-        element_values = self.engine.execute(
-            sa.select([sa.column(column)]).order_by(sa.column(column)).where(
-                sa.column(column) != None
-            ).offset(max(nonnull_count // 2 - 1, 0)).limit(2).select_from(self._table)
-        )
-
-        column_values = list(element_values.fetchall())
-
-        if len(column_values) == 0:
-            return {
-                'success': False,
-                'result': {
-                    'observed_value': None
-                }
-            }
-        else:
-            if nonnull_count % 2 == 0:
-                # An even number of column values: take the average of the two center values
-                column_median = (
-                    column_values[0][0] +  # left center value
-                    column_values[1][0]        # right center value
-                ) / 2.0  # Average center values
-            else:
-                # An odd number of column values, we can just take the center value
-                column_median = column_values[1][0]  # True center value
-
-            return {
-                'success':
-                    ((min_value is None) or (min_value <= column_median)) and
-                    ((max_value is None) or (column_median <= max_value)),
-                'result': {
-                    'observed_value': column_median
-                }
-            }
-
     @MetaSqlAlchemyDataset.column_map_expectation
     def expect_column_values_to_be_unique(self, column, mostly=None,
                                           result_format=None, include_config=False, catch_exceptions=None, meta=None):
@@ -874,73 +748,142 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         return sa.column(column).notin_(dup_query)
 
-    @DocInherit
-    @MetaSqlAlchemyDataset.column_aggregate_expectation
-    def expect_column_unique_value_count_to_be_between(self, column, min_value=None, max_value=None,
-                                                       result_format=None, include_config=False, catch_exceptions=None, meta=None):
+    @MetaSqlAlchemyDataset.column_map_expectation
+    def expect_column_values_to_match_regex(self,
+                                                column,
+                                                regex,
+                                                mostly=None,
+                                                result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                                ):
+        condition = None
+        try:
+            # Postgres-only version
+            if isinstance(self.engine.dialect, sa.dialects.postgresql.dialect):
+                condition = sa.text(column + " ~ '" + regex + "'")
+        except AttributeError:
+            pass
 
-        if min_value is None and max_value is None:
-            raise ValueError("min_value and max_value cannot both be None")
+        try:
+            # Mysql
+            if isinstance(self.engine.dialect, sa.dialects.mysql.dialect):
+                condition = sa.text(column + " REGEXP  '" + regex + "'")
+        except AttributeError:
+            pass
 
-        unique_value_count = self.engine.execute(
-            sa.select([sa.func.count(sa.func.distinct(sa.column(column)))]).select_from(
-                self._table)
-        ).scalar()
+        if condition is None:
+            logger.warning("Regex is not supported for dialect %s" % str(self.engine.dialect))
+            raise NotImplementedError
 
-        # Handle possible missing values
-        if unique_value_count is None:
-            return {
-                'success': False,
-                'result': {
-                    'observed_value': unique_value_count
-                }
-            }
-        else:
-            return {
-                "success": (
-                    ((min_value is None) or (min_value <= unique_value_count)) and
-                    ((max_value is None) or (unique_value_count <= max_value))
-                ),
-                "result": {
-                    "observed_value": unique_value_count
-                }
-            }
+        return condition
 
-    @DocInherit
-    @MetaSqlAlchemyDataset.column_aggregate_expectation
-    def expect_column_proportion_of_unique_values_to_be_between(self, column, min_value=0, max_value=1,
-                                                                result_format=None, include_config=False, catch_exceptions=None, meta=None):
+    @MetaSqlAlchemyDataset.column_map_expectation
+    def expect_column_values_to_not_match_regex(self,
+                                                column,
+                                                regex,
+                                                mostly=None,
+                                                result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                                ):
+        condition = None
+        try:
+            # Postgres-only version
+            if isinstance(self.engine.dialect, sa.dialects.postgresql.dialect):
+                condition = sa.text(column + " !~ '" + regex + "'")
+        except AttributeError:
+            pass
 
-        if min_value is None and max_value is None:
-            raise ValueError("min_value and max_value cannot both be None")
+        try:
+            # Mysql
+            if isinstance(self.engine.dialect, sa.dialects.mysql.dialect):
+                condition = sa.text(column + " NOT REGEXP  '" + regex + "'")
+        except AttributeError:
+            pass
 
-        count_query = self.engine.execute(
-            sa.select([
-                sa.func.count().label('element_count'),
-                sa.func.sum(
-                    sa.case([(sa.column(column) == None, 1)], else_=0)
-                ).label('null_count'),
-                sa.func.count(sa.func.distinct(sa.column(column))
-                              ).label('unique_value_count')
-            ]).select_from(self._table)
-        )
+        if condition is None:
+            logger.warning("Regex is not supported for dialect %s" % str(self.engine.dialect))
+            raise NotImplementedError
 
-        counts = count_query.fetchone()
+        return condition
 
-        if counts['element_count'] - counts['null_count'] > 0:
-            proportion_unique = counts['unique_value_count'] / \
-                (counts['element_count'] - counts['null_count'])
-        else:
-            proportion_unique = None
+    @MetaSqlAlchemyDataset.column_map_expectation
+    def expect_column_values_to_match_regex_list(self,
+                                                 column,
+                                                 regex_list,
+                                                 match_on="any",
+                                                 mostly=None,
+                                                 result_format=None, include_config=False, catch_exceptions=None, meta=None
+                                                 ):
 
-        return {
-            "success": (
-                ((min_value is None) or (min_value <= proportion_unique)) and
-                ((max_value is None) or (proportion_unique <= max_value))
-            ),
-            "element_count": counts["element_count"],
-            "null_count": counts["null_count"],
-            "result": {
-                "observed_value": proportion_unique
-            }
-        }
+        if match_on not in ["any", "all"]:
+            raise ValueError("match_on must be any or all")
+
+        condition = None
+        try:
+            # Postgres-only version
+            if isinstance(self.engine.dialect, sa.dialects.postgresql.dialect):
+                if match_on == "any":
+                    condition = \
+                        sa.or_(
+                        *[sa.text(column + " ~ '" + regex + "'") for regex in regex_list]
+                        )
+                else:
+                    condition = \
+                        sa.and_(
+                        *[sa.text(column + " ~ '" + regex + "'") for regex in regex_list]
+                        )
+        except AttributeError:
+            # this can simply indicate no mysql driver is loaded
+            pass
+        try:
+            # Mysql
+            if isinstance(self.engine.dialect, sa.dialects.mysql.dialect):
+                if match_on == "any":
+                    condition = \
+                        sa.or_(
+                        *[sa.text(column + " REGEXP '" + regex + "'") for regex in regex_list]
+                        )
+                else:
+                    condition = \
+                        sa.and_(
+                        *[sa.text(column + " REGEXP '" + regex + "'") for regex in regex_list]
+                        )
+        except AttributeError:
+            # this can simply indicate no mysql driver is loaded
+            pass
+        if condition is None:
+            logger.warning("Regex is not supported for dialect %s" % str(self.engine.dialect))
+            raise NotImplementedError
+
+        return condition
+
+    @MetaSqlAlchemyDataset.column_map_expectation
+    def expect_column_values_to_not_match_regex_list(self, column, regex_list,
+                                                     mostly=None,
+                                                     result_format=None, include_config=False, catch_exceptions=None, meta=None):
+
+        condition = None
+        try:
+            if isinstance(self.engine.dialect, sa.dialects.postgresql.dialect):
+                condition = \
+                    sa.and_(
+                        *[sa.text(column + " !~ '" + regex + "'") for regex in regex_list]
+                    )
+        except AttributeError:
+            # this can simply indicate no postgres driver is loaded
+            pass
+
+        try:
+        # Mysql
+            if isinstance(self.engine.dialect, sa.dialects.mysql.dialect):
+                condition = \
+                    sa.and_(
+                        *[sa.text(column + " NOT REGEXP '" + regex + "'") for regex in regex_list]
+                    )
+        except AttributeError:
+            # this can simply indicate no mysql driver is loaded
+            pass
+
+        if condition is None:
+            logger.warning("Regex is not supported for dialect %s" % str(self.engine.dialect))
+            raise NotImplementedError
+
+        return condition

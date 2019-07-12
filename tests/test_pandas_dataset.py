@@ -5,69 +5,9 @@ import json
 import datetime
 import pandas as pd
 import great_expectations as ge
-import great_expectations.dataset.autoinspect as autoinspect
+from great_expectations.profile import ColumnsExistProfiler
 
 from .test_utils import assertDeepAlmostEqual
-
-
-def test_expect_column_values_to_match_strftime_format():
-    """
-    """
-
-    D = ge.dataset.PandasDataset({
-        'x': [1, 2, 4],
-        'us_dates': ['4/30/2017', '4/30/2017', '7/4/1776'],
-        'us_dates_type_error': ['4/30/2017', '4/30/2017', 5],
-        'almost_iso8601': ['1977-05-25T00:00:00', '1980-05-21T13:47:59', '2017-06-12T23:57:59'],
-        'almost_iso8601_val_error': ['1977-05-55T00:00:00', '1980-05-21T13:47:59', '2017-06-12T23:57:59'],
-        'already_datetime': [datetime.datetime(2015, 1, 1), datetime.datetime(2016, 1, 1), datetime.datetime(2017, 1, 1)]
-    })
-    D.set_default_expectation_argument("result_format", "COMPLETE")
-
-    T = [
-        {
-            'in': {'column': 'us_dates', 'strftime_format': '%m/%d/%Y'},
-            'out': {'success': True, 'unexpected_index_list': [], 'unexpected_list':[]}
-        },
-        {
-            'in': {'column': 'us_dates_type_error', 'strftime_format': '%m/%d/%Y', 'mostly': 0.5, 'catch_exceptions': True},
-            # 'out':{'success':True, 'unexpected_index_list':[2], 'unexpected_list':[5]}},
-            'error': {
-                'traceback_substring': 'TypeError'
-            },
-        },
-        {
-            'in': {'column': 'us_dates_type_error', 'strftime_format': '%m/%d/%Y', 'catch_exceptions': True},
-            'error': {
-                'traceback_substring': 'TypeError'
-            }
-        },
-        {
-            'in': {'column': 'almost_iso8601', 'strftime_format': '%Y-%m-%dT%H:%M:%S'},
-            'out': {'success': True, 'unexpected_index_list': [], 'unexpected_list':[]}},
-        {
-            'in': {'column': 'almost_iso8601_val_error', 'strftime_format': '%Y-%m-%dT%H:%M:%S'},
-            'out': {'success': False, 'unexpected_index_list': [0], 'unexpected_list':['1977-05-55T00:00:00']}},
-        {
-            'in': {'column': 'already_datetime', 'strftime_format': '%Y-%m-%d', 'catch_exceptions': True},
-            # 'out':{'success':False,'unexpected_index_list':[0], 'unexpected_list':['1977-05-55T00:00:00']},
-            'error': {
-                'traceback_substring': 'TypeError: Values passed to expect_column_values_to_match_strftime_format must be of type string.'
-            },
-        }
-    ]
-
-    for t in T:
-        out = D.expect_column_values_to_match_strftime_format(**t['in'])
-        if 'out' in t:
-            assert t['out']['success'] == out['success']
-            if 'unexpected_index_list' in t['out']:
-                assert t['out']['unexpected_index_list'] == out['result']['unexpected_index_list']
-            if 'unexpected_list' in t['out']:
-                assert t['out']['unexpected_list'] == out['result']['unexpected_list']
-        elif 'error' in t:
-            assert out['exception_info']['raised_exception'] == True
-            assert t['error']['traceback_substring'] in out['exception_info']['exception_traceback']
 
 
 def test_expect_column_values_to_be_dateutil_parseable():
@@ -330,28 +270,6 @@ def test_from_pandas():
     assert list(ge_df_custom['z'])==list(pd_df['z'])
 
 
-def test_from_pandas_expectations_config():
-    # Logic mostly copied from TestValidation.test_validate
-    def load_ge_config(file):
-        with open(file) as f:
-            return json.load(f)
-
-    my_expectations_config = load_ge_config(
-        "./tests/test_sets/titanic_expectations.json")
-
-    pd_df = pd.read_csv("./tests/test_sets/Titanic.csv")
-    my_df = ge.from_pandas(pd_df, expectations_config=my_expectations_config)
-
-    my_df.set_default_expectation_argument("result_format", "COMPLETE")
-
-    results = my_df.validate(catch_exceptions=False)
-
-    expected_results = load_ge_config(
-        "./tests/test_sets/expected_results_20180303.json")
-
-    assertDeepAlmostEqual(results, expected_results)
-
-
 def test_ge_pandas_concatenating_no_autoinspect():
     df1 = ge.dataset.PandasDataset({
         'A': ['A0', 'A1', 'A2'],
@@ -472,7 +390,7 @@ def test_ge_pandas_sampling():
     })
 
     # Put some simple expectations on the data frame
-    df.autoinspect(autoinspect_func=autoinspect.columns_exist)
+    df.profile(profiler=ColumnsExistProfiler)
     df.expect_column_values_to_be_in_set("A", [1, 2, 3, 4])
     df.expect_column_values_to_be_in_set("B", [5, 6, 7, 8])
     df.expect_column_values_to_be_in_set("C", ['a', 'b', 'c', 'd'])
@@ -582,7 +500,7 @@ def test_ge_pandas_automatic_failure_removal():
     })
 
     # Put some simple expectations on the data frame
-    df.autoinspect(autoinspect.columns_exist)
+    df.profile(ge.profile.ColumnsExistProfiler)
     df.expect_column_values_to_be_in_set("A", [1, 2, 3, 4])
     df.expect_column_values_to_be_in_set("B", [5, 6, 7, 8])
     df.expect_column_values_to_be_in_set("C", ['w', 'x', 'y', 'z'])

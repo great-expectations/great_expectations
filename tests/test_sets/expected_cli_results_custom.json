@@ -1,4 +1,10 @@
-{ "results": [
+{ 
+  "meta": {
+    "data_asset_name": null,
+    "expectation_suite_name": "default",
+    "run_id": "1955-11-05T00:00:00"
+  },
+  "results": [
     {
       "expectation_config": {
         "expectation_type": "expect_column_values_to_have_odd_lengths",

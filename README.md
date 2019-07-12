@@ -33,9 +33,15 @@ To get more done with data, faster. Teams use great_expectations to
 How do I get started?
 --------------------------------------------------------------------------------
 
-It's easy! Just use pip install:
+It's easy! 
+    First use pip install:
 
-    $ pip install great_expectations
+        $ pip install great_expectations
+
+    Then run this command in the root directory of the project you want to try Great Expectations on:
+
+        $ great_expectations init
+    
 
 You can also clone the repository, which includes examples of using great_expectations.
 
@@ -75,7 +81,9 @@ For quick, hands-on introductions to Great Expectations' key features, check out
 What's the best way to get in touch with the Great Expectations team?
 --------------------------------------------------------------------------------
 
-If you have questions, comments, feature requests, etc., [opening an issue](https://github.com/great-expectations/great_expectations/issues/new) is definitely the best path forward. We also have a slack channel: if you emal us at <team@greatexpectations.io> with the subject line "SLACK" we'll get you an invite.
+If you have questions, comments, feature requests, etc., [opening an issue](https://github.com/great-expectations/great_expectations/issues/new) is definitely the best path forward.
+
+We also have a slack channel, which you can join here: https://tinyurl.com/great-expectations-slack
 
 
 Great Expectations doesn't do X. Is it right for my use case?

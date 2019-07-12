@@ -1,7 +1,4 @@
-.. great_expectations documentation master file, created by
-   sphinx-quickstart on Thu Jun  8 23:00:19 2017.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+.. great_expectations documentation master file
 
 .. image:: ../../generic_dickens_protagonist.png
    :align: right
@@ -13,34 +10,13 @@ Welcome to Great Expectations!
    :maxdepth: 2
 
    intro
-   data_contexts
-   expectations
-   distributional_expectations
-   validation
-   workflow_advantages
-   glossary
-
-Advanced
-------------------
-
-.. toctree::
-   :maxdepth: 2
-
-   standard_arguments
-   result_format
-   autoinspection
-   evaluation_parameters
-   custom_expectations
-   conventions
+   getting_started
+   core_concepts
+   guides
+   get_in_touch
+   contributing
    roadmap_changelog
-
-Module Docs
--------------
-.. toctree::
-   :maxdepth: 2
-
-   dataset_module
-   data_context_module
+   module_docs
 
 Indices and tables
 ------------------

@@ -1,3 +1,7 @@
+try:
+    from unittest import mock
+except ImportError:
+    import mock
 import pytest
 
 from great_expectations.dataset import MetaSqlAlchemyDataset, SqlAlchemyDataset
@@ -96,6 +100,10 @@ def test_missing_engine_error():
         assert "Engine or connection_string must be provided." in str(err)
 
 
+def test_only_connection_string():
+    SqlAlchemyDataset('test_engine', connection_string='sqlite://')
+
+
 def test_schema_custom_sql_error():
     engine = sa.create_engine('sqlite://')
 
@@ -103,6 +111,21 @@ def test_schema_custom_sql_error():
         SqlAlchemyDataset('test_schema_custom', schema='example', engine=engine,
                           custom_sql='SELECT * FROM example.fake')
         assert "Cannot specify both schema and custom_sql." in str(err)
+
+
+def test_sqlalchemydataset_raises_error_on_missing_table_name():
+    with pytest.raises(ValueError) as ve:
+        SqlAlchemyDataset(table_name=None, engine="foo", connection_string='bar')
+    assert str(ve.value) == "No table_name provided."
+
+
+def test_sqlalchemydataset_builds_guid_for_table_name_on_custom_sql():
+    engine = sa.create_engine('sqlite://')
+    with mock.patch("uuid.uuid4") as mock_uuid:
+        mock_uuid.return_value = "a-guid-with-dashes-that-will-break-sql"
+
+        dataset = SqlAlchemyDataset(engine=engine, custom_sql="select 1")
+        assert dataset._table.name =="a_guid_with_dashes_that_will_break_sql"
 
 
 def test_sqlalchemydataset_with_custom_sql():
@@ -160,7 +183,7 @@ def test_column_fallback():
 
 @pytest.fixture
 def unexpected_count_df():
-    return  get_dataset("SqlAlchemyDataset", {"a": [1, 2, 1, 2, 1, 2, 1, 2, 1, 2]})
+    return  get_dataset("sqlite", {"a": [1, 2, 1, 2, 1, 2, 1, 2, 1, 2]})
 
 
 def test_sqlalchemy_dataset_unexpected_count_calculations(unexpected_count_df):
