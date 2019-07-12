@@ -64,12 +64,33 @@ class DataAsset(object):
             profiler.profile(self)
 
     def autoinspect(self, profiler):
+        """Deprecated: use profile instead.
+
+        Use the provided profiler to evaluate this data_asset and assign the resulting expectation suite as its own.
+
+        Args:
+            profiler: The profiler to use
+
+        Returns:
+            tuple(expectation_suite, validation_results)
+        """
         warnings.warn("The term autoinspect is deprecated and will be removed in a future release. Please use 'profile'\
         instead.")
-        profiler.profile(self)
+        expectation_suite, validation_results = profiler.profile(self)
+        return expectation_suite, validation_results
 
     def profile(self, profiler):
-        profiler.profile(self)
+        """Use the provided profiler to evaluate this data_asset and assign the resulting expectation suite as its own.
+
+        Args:
+            profiler: The profiler to use
+
+        Returns:
+            tuple(expectation_suite, validation_results)
+
+        """
+        expectation_suite, validation_results = profiler.profile(self)
+        return expectation_suite, validation_results
 
     @classmethod
     def expectation(cls, method_arg_names):
@@ -808,68 +829,68 @@ class DataAsset(object):
                  only_return_failures=False):
         """Generates a JSON-formatted report describing the outcome of all expectations.
 
-            Use the default expectation_suite=None to validate the expectations config associated with the DataAsset.
+        Use the default expectation_suite=None to validate the expectations config associated with the DataAsset.
 
-            Args:
-                expectation_suite (json or None): \
-                    If None, uses the expectations config generated with the DataAsset during the current session. \
-                    If a JSON file, validates those expectations.
-                run_id (str): \
-                    A string used to identify this validation result as part of a collection of validations. See \
-                    DataContext for more information.
-                data_context (DataContext): \
-                    A datacontext object to use as part of validation for binding evaluation parameters and \
-                    registering validation results.
-                evaluation_parameters (dict or None): \
-                    If None, uses the evaluation_paramters from the expectation_suite provided or as part of the \
-                    data_asset. If a dict, uses the evaluation parameters in the dictionary.
-                catch_exceptions (boolean): \
-                    If True, exceptions raised by tests will not end validation and will be described in the returned \
-                    report.
-                result_format (string or None): \
-                    If None, uses the default value ('BASIC' or as specified). \
-                    If string, the returned expectation output follows the specified format ('BOOLEAN_ONLY','BASIC', \
-                    etc.).
-                only_return_failures (boolean): \
-                    If True, expectation results are only returned when ``success = False`` \
+        Args:
+            expectation_suite (json or None): \
+                If None, uses the expectations config generated with the DataAsset during the current session. \
+                If a JSON file, validates those expectations.
+            run_id (str): \
+                A string used to identify this validation result as part of a collection of validations. See \
+                DataContext for more information.
+            data_context (DataContext): \
+                A datacontext object to use as part of validation for binding evaluation parameters and \
+                registering validation results.
+            evaluation_parameters (dict or None): \
+                If None, uses the evaluation_paramters from the expectation_suite provided or as part of the \
+                data_asset. If a dict, uses the evaluation parameters in the dictionary.
+            catch_exceptions (boolean): \
+                If True, exceptions raised by tests will not end validation and will be described in the returned \
+                report.
+            result_format (string or None): \
+                If None, uses the default value ('BASIC' or as specified). \
+                If string, the returned expectation output follows the specified format ('BOOLEAN_ONLY','BASIC', \
+                etc.).
+            only_return_failures (boolean): \
+                If True, expectation results are only returned when ``success = False`` \
 
-            Returns:
-                A JSON-formatted dictionary containing a list of the validation results. \
-                An example of the returned format::
+        Returns:
+            A JSON-formatted dictionary containing a list of the validation results. \
+            An example of the returned format::
 
+            {
+              "results": [
                 {
-                  "results": [
-                    {
-                      "unexpected_list": [unexpected_value_1, unexpected_value_2],
-                      "expectation_type": "expect_*",
-                      "kwargs": {
-                        "column": "Column_Name",
-                        "output_format": "SUMMARY"
-                      },
-                      "success": true,
-                      "raised_exception: false.
-                      "exception_traceback": null
-                    },
-                    {
-                      ... (Second expectation results)
-                    },
-                    ... (More expectations results)
-                  ],
+                  "unexpected_list": [unexpected_value_1, unexpected_value_2],
+                  "expectation_type": "expect_*",
+                  "kwargs": {
+                    "column": "Column_Name",
+                    "output_format": "SUMMARY"
+                  },
                   "success": true,
-                  "statistics": {
-                    "evaluated_expectations": n,
-                    "successful_expectations": m,
-                    "unsuccessful_expectations": n - m,
-                    "success_percent": m / n
-                  }
-                }
+                  "raised_exception: false.
+                  "exception_traceback": null
+                },
+                {
+                  ... (Second expectation results)
+                },
+                ... (More expectations results)
+              ],
+              "success": true,
+              "statistics": {
+                "evaluated_expectations": n,
+                "successful_expectations": m,
+                "unsuccessful_expectations": n - m,
+                "success_percent": m / n
+              }
+            }
 
-           Notes:
-               If the configuration object was built with a different version of great expectations then the \
-               current environment. If no version was found in the configuration file.
+        Notes:
+           If the configuration object was built with a different version of great expectations then the \
+           current environment. If no version was found in the configuration file.
 
-           Raises:
-               AttributeError - if 'catch_exceptions'=None and an expectation throws an AttributeError
+        Raises:
+           AttributeError - if 'catch_exceptions'=None and an expectation throws an AttributeError
         """
         validate__interactive_evaluation = self._interactive_evaluation
         if not self._interactive_evaluation:
