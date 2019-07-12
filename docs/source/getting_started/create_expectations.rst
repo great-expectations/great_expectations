@@ -6,6 +6,12 @@ Step 2: Create Expectations
 .. toctree::
    :maxdepth: 2
 
+This tutorial covers creating expectations for a data asset in the Jupyter notebook ``great_expectations/notebook/create_expectations.ipynb`` that ``great_expectations init`` created in your project.
+
+We will continue the example we used in the previous section - CSV files containing the data on notable works of Charles Dickens that look like this:
+
+.. image:: dickens_titles_data_sample.jpg
+
 Creating expectations is an opportunity to blend contextual knowledge from subject-matter experts and insights from profiling and performing exploratory analysis on your dataset.
 
 Video
@@ -36,29 +42,76 @@ To read more about DataContext, see: :ref:`data_context`
 Data Assets
 -------------
 
+A Great Expectations DataContext describes data assets using a three-part namespace consisting of
+**datasource_name**, **generator_name**, and **generator_asset**.
+
+To run validation for a data_asset, we need two additional elements:
+
+* a **batch** to validate; in our case it is a file loaded into a Pandas DataFrame
+* an **expectation_suite** to validate against
+
+.. image:: data_asset_namespace.png
+
+Here are the data assets that DataContext is aware of in our example project:
+
 .. image:: list_data_assets.jpg
 
 
 Get Batch
 ----------
 
+Datasources and generators work together closely with your pipeline infrastructure to provide Great Expectations
+batches of data to validate. The generator is responsible for identifying the ``batch_kwargs`` that a datasource will
+use to load a batch of data. For example the :class:`~great_expectations.datasource.generator.\
+filesystem_path_generator.SubdirReaderGenerator`
+generator will create batches of data based on individual files and group those batches into a single data_asset based
+on the subdirectory in which they are located. By contrast, the :class:`~great_expectations.datasource.generator.\
+filesystem_path_generator.GlobReaderGenerator`
+will also create batches of data based on individual files, but uses defined glob-style match patterns to group those
+batches into named data assets.
+
+``batch_kwargs`` from one of those filesystem reader generators might look like the following:
+
+.. code-block::
+
+  {
+    "path": "/data/staging/user_actions/20190710T034323_user_actions.csv",
+    "timestamp": 1562770986.6800103,
+    "sep": null,
+    "engine": "python"
+  }
+
+The easiest way to create an expectation suite for a data asset in Python is to load a sample batch of that data asset and then call ``expect*`` methods on it.
+
+The following call loads one of the batches of the 'notable_works_by_charles_dickens' data asset (one of the files).
+
+The argument ``expectation_suite_name`` specifies the name of the expectation suite you want to create. At first this suite contains no expectations. We will add expectations to it in the next steps.
+
 .. image:: get_batch.jpg
 
 Reader Options
 ---------------
 
+To instruct ``get_batch`` to read CSV files with specific options (e.g., not to interpret the first line as the header or to use a specific separator), pass these options as additional kwargs to the method.
+
+
+If the datasource is of type ``pandas``, see the complete list of options for `Pandas read_csv <https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_csv.html>`__
+
+
+If the datasource is of type ``spark``, see the complete list of options for `Spark DataFrameReader <https://spark.apache.org/docs/latest/api/python/pyspark.sql.html#pyspark.sql.DataFrameReader>`__
 
 
 Create Expectations
 --------------------------------
 
-
 Now that you have one of the data batches loaded, you can call expect* methods on the dataframe in order to check
 if you can make an assumption about the data.
 
-For example, to check if you can expect values in column "order_date" to never be empty, call: `df.expect_column_values_to_not_be_null('order_date')`
+For example, to check if you can expect values in column "order_date" to never be empty, call: ``df.expect_column_values_to_not_be_null('order_date')``
 
 Some expectations can be created from your domain expertise. As everybody knows, Charles Dickens began his literary career with the publication of The Pickwick Papers in 1836 and kept writing until his death in 1870.
+
+Here is how you can add an expectation that expresses this knowledge:
 
 .. image:: expect_column_values_to_be_between_success.jpg
 
@@ -73,16 +126,13 @@ Validating the expectation againt the batch resulted in failure - there are some
 
 This time validation was successful - all values in the column meet our expectation.
 
-`expect_column_value_lengths_to_be_between`
+Although we called ``expect_column_value_lengths_to_be_between`` twice (with different argument values), only one expectation of type ``column_value_lengths_to_be_between`` will be created for the column 'Title' - the latest call overrides all the earlier ones.
 
 How do I know which types of expectations I can add?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 * *Tab-complete* this statement, and add an expectation of your own; copy the cell to add more
 * In jupyter, you can also use *shift-tab* to see the docstring for each expectation, to see what parameters it takes and get more information about the expectation.
-* Here is a glossary of expectations you can add:
-https://great-expectations.readthedocs.io/en/latest/glossary.html
-
 
 
 Expectations include:
