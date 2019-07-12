@@ -177,7 +177,7 @@ Together, profiled Expectations and EVRs provide a lot of useful information for
     Done.
 
     Profiling results are saved here:
-    /Users/user/Desktop/example-dickens-data-project/great_expectations/uncommitted/validations/2019-07-08T110934.803735Z/data__dir/default/notable_works_by_charles_dickens/BasicDatasetProfiler.json
+    /Users/abe/Desktop/example-dickens-data-project/great_expectations/uncommitted/validations/2019-07-08T11:09:34.803735/data__dir/default/notable_works_by_charles_dickens/BasicDatasetProfiler.json
 
     ========== Data Documentation ==========
 
@@ -198,17 +198,23 @@ Note: before committing profiled Expectations to source control, we STRONGLY rec
 
 First, Expectations can contain sensitive data that should not be committed to source code. For example, if you apply `expect_column_values_to_be_in_set` to a column containing social security numbers, the EVRs will contain actual SSNs. Most likely, you would want to replace real SSNs with placeholders before committing to source control.
 
-Second, profiled Expectations can only be based on the raw data. This is helpful, but real applications almost always require an additional layer of domain knowledge and judgement. This is doubly true when the data itself isn't fully explored or trusted.
+Second, since profiled Expectations are only based on raw data, they almost always require an additional layer of domain knowledge and judgement. This is doubly true when the data itself isn't fully explored or trusted.
+
+<<SHOW WHERE EXPECTATIONS AND EVRS ARE STORED>>>
+
+We've created the great expectations directory that like we talked about, and now inside the, uh, expectations sub directory we have as a part of a namespace. So the namespace consisting of the data source name that we configured, our generator, the data asset specific data asset name, and then the name. In this case of the profiler that we used, we've got a first baseline suite, a suite of expectations. Now in our uncommitted directory, we have a single validation run. So that run corresponding to the batch that we just did as part of profiling where we have the exact same hierarchical namespace. And the validation result. So if we take a look really briefly at what's in the, uh, expectations, we'll see that we have, um, uh, the expectations that were created by profiling are generally quite loose. Um, so, you know, we'll see, uh, for example, the unique value count between Nolan and no meaning that we don't have an expectation of what it is, but we would like grade expectations to compute that statistic and make it available as a part of the profiling. 
+
+<<DESCRIBE EXPECTATION JSON objects>>>
+
+What that means is that if we switch over and look at the result of the actual validation run, uh, we'll see the, uh, evaluation of each of those expectations that have now produced, uh, the specific statistics relevant for evaluating that expectations. So, uh, in this case, that unique value count, uh, was observed to be 38 in that particular column. As addition, in addition, as a part of the uh, validation result, what we see are some, uh, information about the overall data asset that we just looked at. So again, we've got that hierarchical name that we've described that the data context we'll use to identify the data source generator. And to data asset as well as the name of the specific expectations suite that was used to validate, uh, the, the data asset and create this validation report as well as the specific information about this particular batch.
 
 
 Data documentation
 ----------------------------------------------------------
 
-We've created the great expectations directory that like we talked about, and now inside the, uh, expectations sub directory we have as a part of a namespace. So the namespace consisting of the data source name that we configured, our generator, the data asset specific data asset name, and then the name. In this case of the profiler that we used, we've got a first baseline suite, a suite of expectations. Now in our uncommitted directory, we have a single validation run. So that run corresponding to the batch that we just did as part of profiling where we have the exact same hierarchical namespace. And the validation result. So if we take a look really briefly at what's in the, uh, expectations, we'll see that we have, um, uh, the expectations that were created by profiling are generally quite loose. Um, so, you know, we'll see, uh, for example, the unique value count between Nolan and no meaning that we don't have an expectation of what it is, but we would like grade expectations to compute that statistic and make it available as a part of the profiling. 
+So the file that, uh, formed the basis of it as well as when we grab that file. So in other words, comfortable that there's no sensitive information in that validation result, we can go ahead and agree to moving it into our fixtures folder and building documentation on the basis of that.
 
-What that means is that if we switch over and look at the result of the actual validation run, uh, we'll see the, uh, evaluation of each of those expectations that have now produced, uh, the specific statistics relevant for evaluating that expectations. So, uh, in this case, that unique value count, uh, was observed to be 38 in that particular column. As addition, in addition, as a part of the uh, validation result, what we see are some, uh, information about the overall data asset that we just looked at. So again, we've got that hierarchical name that we've described that the data context we'll use to identify the data source generator. And to data asset as well as the name of the specific expectations suite that was used to validate, uh, the, the data asset and create this validation report as well as the specific information about this particular batch. 
-
-So the file that, uh, formed the basis of it as well as when we grab that file. So in other words, comfortable that there's no sensitive information in that validation result, we can go ahead and agree to moving it into our fixtures folder and building documentation on the basis of that. Now that that documentation is built, uh, we can just take a look at it in, uh, our web browser. So, uh, in this new, uh, newly rendered document, we have just a single data asset and we can see an overview of what's there. So for each of the columns, the expectations have formed the basis for, uh, describing the number of distinct values, quintiles, variety of different statistics, example, values, histogram, and other things that are relevant. Now, the key thing is that each of those pieces of information is now backed by an expectation.
+Now that that documentation is built, uh, we can just take a look at it in, uh, our web browser. So, uh, in this new, uh, newly rendered document, we have just a single data asset and we can see an overview of what's there. So for each of the columns, the expectations have formed the basis for, uh, describing the number of distinct values, quintiles, variety of different statistics, example, values, histogram, and other things that are relevant. Now, the key thing is that each of those pieces of information is now backed by an expectation.
 
 
 .. code-block::
