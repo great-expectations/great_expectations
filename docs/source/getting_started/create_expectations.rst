@@ -6,7 +6,7 @@ Step 2: Create Expectations
 .. toctree::
    :maxdepth: 2
 
-This tutorial covers creating expectations for a data asset in the Jupyter notebook ``great_expectations/notebook/create_expectations.ipynb`` that ``great_expectations init`` created in your project.
+This tutorial covers creating expectations for a data asset in the Jupyter notebook ``great_expectations/notebooks/create_expectations.ipynb`` that ``great_expectations init`` created in your project.
 
 We will continue the example we used in the previous section - CSV files containing the data on notable works of Charles Dickens that look like this:
 
@@ -17,7 +17,7 @@ Creating expectations is an opportunity to blend contextual knowledge from subje
 Video
 ------
 
-This brief video covers the basics of creating expectations
+Watch `the video on YouTube <https://youtu.be/9qD-su38sYo>`_.
 
 
 Get DataContext Object
@@ -83,7 +83,7 @@ batches into named data assets.
 
 The easiest way to create an expectation suite for a data asset in Python is to load a sample batch of that data asset and then call ``expect*`` methods on it.
 
-The following call loads one of the batches of the 'notable_works_by_charles_dickens' data asset (one of the files).
+The following call loads one of the batches of the ``notable_works_by_charles_dickens`` data asset (one of the files).
 
 The argument ``expectation_suite_name`` specifies the name of the expectation suite you want to create. At first this suite contains no expectations. We will add expectations to it in the next steps.
 
@@ -92,61 +92,48 @@ The argument ``expectation_suite_name`` specifies the name of the expectation su
 Reader Options
 ---------------
 
-To instruct ``get_batch`` to read CSV files with specific options (e.g., not to interpret the first line as the header or to use a specific separator), pass these options as additional kwargs to the method.
+To instruct ``get_batch`` to read CSV files with specific options (e.g., not to interpret the first line as the header or to use a specific separator), either specify these options in the generator configuration or pass them as additional kwargs to the method. Those reader options will become components in the ``batch_kwargs``.
 
 
-If the datasource is of type ``pandas``, see the complete list of options for `Pandas read_csv <https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_csv.html>`__
+If the datasource is of type ``pandas``, see the complete list of options for `Pandas read_csv <https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_csv.html>`__.
 
 
-If the datasource is of type ``spark``, see the complete list of options for `Spark DataFrameReader <https://spark.apache.org/docs/latest/api/python/pyspark.sql.html#pyspark.sql.DataFrameReader>`__
+If the datasource is of type ``spark``, see the complete list of options for `Spark DataFrameReader <https://spark.apache.org/docs/latest/api/python/pyspark.sql.html#pyspark.sql.DataFrameReader>`__.
 
 
 Create Expectations
 --------------------------------
 
-Now that you have one of the data batches loaded, you can call expect* methods on the dataframe in order to check
-if you can make an assumption about the data.
+Now that we have one of the data batches loaded, we can call ``expect*`` methods on the data asset in order to check
+whether this expectation is true for this batch of data.
 
-For example, to check if you can expect values in column "order_date" to never be empty, call: ``df.expect_column_values_to_not_be_null('order_date')``
+For example, to check if we can expect values in column "order_date" to never be empty, call: ``df.expect_column_values_to_not_be_null('order_date')``
 
 Some expectations can be created from your domain expertise. As everybody knows, Charles Dickens began his literary career with the publication of The Pickwick Papers in 1836 and kept writing until his death in 1870.
 
-Here is how you can add an expectation that expresses this knowledge:
+Here is how we can add an expectation that expresses this knowledge:
 
 .. image:: expect_column_values_to_be_between_success.jpg
 
 
-Other expectations can be created by examining the data in the batch. For example, we want to protect our pipeline against values of unreasonable length in the Title column. We don't know exactly what the limits of the "reasonable" are, but we can try some values and check if the data in the batch meets this expectation:
+Other expectations can be created by examining the data in the batch. For example, we want to protect our pipeline against values of unreasonable length in the "Title" column. We don't know exactly what the limits of the "reasonable" are, but we can try some values and check if the data in the batch meets this expectation:
 
 .. image:: expect_column_value_lengths_to_be_between_failure.jpg
 
-Validating the expectation againt the batch resulted in failure - there are some values in the column that do not meet the expectation. "partial_unexpected_list" key in the result dictionary contains examples of non-conforming values. Examining these examples shows that some titles are longer than 30 characters. We adjust the max_value and rerun the expectation method:
+Validating the expectation againt the batch resulted in failure - there are some values in the column that do not meet the expectation. The "partial_unexpected_list" key in the result dictionary contains examples of non-conforming values. Examining these examples shows that some titles are longer than 30 characters. We adjust the ``max_value`` and rerun the expectation method:
 
 .. image:: expect_column_value_lengths_to_be_between_success.jpg
 
 This time validation was successful - all values in the column meet our expectation.
 
-Although we called ``expect_column_value_lengths_to_be_between`` twice (with different argument values), only one expectation of type ``column_value_lengths_to_be_between`` will be created for the column 'Title' - the latest call overrides all the earlier ones.
+Although we called ``expect_column_value_lengths_to_be_between`` twice (with different argument values), only one expectation of type ``column_value_lengths_to_be_between`` will be created for the column 'Title' - the latest call overrides all the earlier ones. By default, only expectations that were true on their last run are saved.
 
 How do I know which types of expectations I can add?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-* *Tab-complete* this statement, and add an expectation of your own; copy the cell to add more
-* In jupyter, you can also use *shift-tab* to see the docstring for each expectation, to see what parameters it takes and get more information about the expectation.
-
-
-Expectations include:
-
-- ``expect_table_row_count_to_equal``
-- ``expect_column_values_to_be_unique``
-- ``expect_column_values_to_be_in_set``
-- ``expect_column_mean_to_be_between``
-- ...and many more
-
-Visit the `glossary of
-expectations <https://docs.greatexpectations.io/en/latest/glossary.html>`__
-for a complete list of expectations that are currently part of the great
-expectations vocabulary.
+* *Tab-complete* the partially typed ``expect*`` method name to see available expectations.
+* In Jupyter, we can also use *shift-tab* to see the docstring for each expectation, including the parameters it takes and to get more information about the expectation.
+* Visit the `glossary of expectations <https://docs.greatexpectations.io/en/latest/glossary.html>`__ for a complete list of expectations that are currently part of the great expectations vocabulary.
 
 
 Review and Save Expectation Suite
@@ -158,19 +145,19 @@ Review and Save Expectation Suite
 
     df.save_expectation_suite()
 
-This method saves the expectation suite as a JSON file. DataContext determines the location of the file by convention:
+Because this data asset is connected to the DataContext, GE determines the location to save the expectation suite:
 
 .. image:: saved_expectation_suite_file.jpg
     :width: 450px
 
-When you call `get_expectation_suite`, you might see this warning in the output:
+When we call ``get_expectation_suite``, we might see this warning in the output:
 
 .. image:: failing_expectations_warning.jpg
     :width: 350px
 
-This warning counts the expectations that this batch did not meet. When you save an expectation suite, Great Expectations will drop all the failing (unmet) expectations before saving the suite to a file.
+When we save an expectation suite, by default, GE will drop any expectation that was not successful on its last run.
 
-Sometimes we want to save an expectation even though it did not validate successfully on the current batch (e.g., we have a reason to believe that our expectation is correct and the current batch has bad entries). In this case we pass and additional argument to `save_expectation_suite` method:
+Sometimes we want to save an expectation even though it did not validate successfully on the current batch (e.g., we have a reason to believe that our expectation is correct and the current batch has bad entries). In this case we pass and additional argument to ``save_expectation_suite`` method:
 
 .. code-block::
 

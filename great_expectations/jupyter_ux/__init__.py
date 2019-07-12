@@ -103,17 +103,17 @@ def list_available_data_asset_names(context, data_source_name=None):
     for datasource in datasources:
         if data_source_name and datasource['name'] != data_source_name:
             continue
-        print('data source: {0:s} ({1:s})'.format(datasource['name'], datasource['type']))
+        print('data_source: {0:s} ({1:s})'.format(datasource['name'], datasource['type']))
         ds = context.get_datasource(datasource['name'])
         generators = ds.list_generators()
         for generator_info in generators:
-            print('  generator: {0:s} ({1:s})'.format(generator_info['name'], generator_info['type']))
+            print('  generator_name: {0:s} ({1:s})'.format(generator_info['name'], generator_info['type']))
             generator = ds.get_generator(generator_info['name'])
             data_asset_names = generator.get_available_data_asset_names()
             if len(data_asset_names) > 0:
                 for data_asset_name in data_asset_names:
                     # print('    data asset: {0:s}. Full name: {1:s}/{2:s}/{0:s}'. \
-                    print('    data asset: {0:s}. (Use this as an arg to get_batch)'. \
+                    print('    generator_asset: {0:s}. (Use this as an arg to get_batch)'. \
                     format(data_asset_name))
             else:
                 display(HTML("""
