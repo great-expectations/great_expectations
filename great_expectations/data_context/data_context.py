@@ -1024,7 +1024,7 @@ class DataContext(object):
         config_file_path = self._get_normalized_data_asset_name_filepath(data_asset_name, expectation_suite_name)
         safe_mmkdir(os.path.dirname(config_file_path), exist_ok=True)
         with open(config_file_path, 'w') as outfile:
-            json.dump(expectation_suite, outfile)
+            json.dump(expectation_suite, outfile, indent=2)
         self._compiled = False
 
     def bind_evaluation_parameters(self, run_id):  # , expectations):
@@ -1088,7 +1088,7 @@ class DataContext(object):
                 logger.debug("Storing validation result: %s" % validation_filepath)
                 safe_mmkdir(os.path.dirname(validation_filepath))
                 with open(validation_filepath, "w") as outfile:
-                    json.dump(validation_results, outfile)
+                    json.dump(validation_results, outfile, indent=2)
             if isinstance(result_store, dict) and "s3" in result_store:
                 bucket = result_store["s3"]["bucket"]
                 key_prefix = result_store["s3"]["key_prefix"]
@@ -1460,6 +1460,7 @@ class DataContext(object):
 
         validation_filepaths = [y for x in os.walk(self.fixtures_validations_directory) for y in glob(os.path.join(x[0], '*.json'))]
         for validation_filepath in validation_filepaths:
+            logger.debug("Loading validation from: %s" % validation_filepath)
             with open(validation_filepath, "r") as infile:
                 validation = json.load(infile)
 
@@ -1732,9 +1733,9 @@ class DataContext(object):
 
         total_columns, total_expectations, total_rows, skipped_data_assets = 0, 0, 0, 0
         total_start_time = datetime.datetime.now()
-        run_id = total_start_time.isoformat()
+        run_id = total_start_time.isoformat().replace(":", "") + "Z"
         for name in data_asset_name_list:
-            logger.info("\tProfiling %s..." % (name))
+            logger.info("\tProfiling '%s'..." % name)
             try:
                 start_time = datetime.datetime.now()
 
@@ -1766,7 +1767,8 @@ class DataContext(object):
 
                 self.save_expectation_suite(expectation_suite)
                 duration = (datetime.datetime.now() - start_time).total_seconds()
-                logger.info("\tProfiled %d rows from %s (%.3f sec)" % (row_count, name, duration))
+                logger.info("\tProfiled %d columns using %d rows from %s (%.3f sec)" %
+                            (new_column_count, row_count, name, duration))
 
             except ProfilerError as err:
                 logger.warning(err.message)

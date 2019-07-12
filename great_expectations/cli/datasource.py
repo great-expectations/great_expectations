@@ -114,93 +114,40 @@ See <blue>https://docs.greatexpectations.io/en/latest/core_concepts/datasource.h
     #     context.add_datasource("dbt", "dbt", profile=dbt_profile)
     if data_source_selection == "4":  # None of the above
         cli_message(msg_unknown_data_source)
-        print("Skipping datasource configuration. You can add a datasource later by editing the great_expectations.yml file.")
+        print("Skipping datasource configuration. "
+              "You can add a datasource later by editing the great_expectations.yml file.")
         return None
 
-    if data_source_name != None:
+    return data_source_name
 
-        cli_message(
-            """
-========== Profiling ==========
 
-Would you like to profile '{0:s}' to create candidate expectations and documentation?
+def profile_datasource(context, data_source_name, max_data_assets=20):
+    """"Profile a named datasource using the specified context"""
+    profiling_results = context.profile_datasource(
+        data_source_name,
+        max_data_assets=max_data_assets
+    )
 
-Please note: As of v0.7.0, profiling is still a beta feature in Great Expectations.  
-This generation of profilers will evaluate the entire data source (without sampling) and may be very time consuming. 
-As a rule of thumb, we recommend starting with data smaller than 100MB.
+    cli_message("\nDone.\n\nProfiling results are saved here:")
+    for profiling_result in profiling_results:
+        data_asset_name = profiling_result[1]['meta']['data_asset_name']
+        expectation_suite_name = profiling_result[1]['meta']['expectation_suite_name']
+        run_id = profiling_result[1]['meta']['run_id']
 
-To learn more about profiling, visit <blue>https://docs.greatexpectations.io/en/latest/guides/profiling.html?utm_source=cli&utm_medium=init&utm_campaign={1:s}</blue>.
-            """.format(data_source_name, __version__.replace(".", "_"))
-        )
-        if click.confirm("Proceed?",
-                         default=True
-                         ):
-            profiling_results = context.profile_datasource(
-                data_source_name,
-                max_data_assets=20
-            )
+        cli_message("  {0:s}".format(context.get_validation_location(
+            data_asset_name, expectation_suite_name, run_id)['filepath']))
 
-            print("\nDone.\n\nProfiling results are saved here:")
-            for profiling_result in profiling_results:
-                data_asset_name = profiling_result[1]['meta']['data_asset_name']
-                expectation_suite_name = profiling_result[1]['meta']['expectation_suite_name']
-                run_id = profiling_result[1]['meta']['run_id']
+    return profiling_results
 
-                print("  {0:s}".format(context.get_validation_location(
-                    data_asset_name, expectation_suite_name, run_id)['filepath']))
 
-            cli_message(
-                """
-========== Data Documentation ==========
-
-To generate documentation from the data you just profiled, the profiling results should be moved from 
-great_expectations/uncommitted (ignored by git) to great_expectations/fixtures.
-
-Before committing, please make sure that this data does not contain sensitive information!
-
-To learn more: <blue>https://docs.greatexpectations.io/en/latest/guides/data_documentation.html?utm_source=cli&utm_medium=init&utm_campaign={0:s}</blue>
-""".format(__version__.replace(".", "_"))
-            )
-            if click.confirm("Move the profiled data and build HTML documentation?",
-                             default=True
-                             ):
-                cli_message("\nMoving files...")
-
-                for profiling_result in profiling_results:
-                    data_asset_name = profiling_result[1]['meta']['data_asset_name']
-                    expectation_suite_name = profiling_result[1]['meta']['expectation_suite_name']
-                    run_id = profiling_result[1]['meta']['run_id']
-                    context.move_validation_to_fixtures(
-                        data_asset_name, expectation_suite_name, run_id)
-
-                cli_message("\nDone.")
-
-                cli_message("\nBuilding documentation...")
-
-                context.render_full_static_site()
-                cli_message(
-                    """
+def build_documentation(context):
+    """Build documentation in a context"""
+    context.render_full_static_site()
+    cli_message(
+        """
 To view the generated data documentation, open this file in a web browser:
     <green>great_expectations/uncommitted/documentation/index.html</green>
 """)
-            else:
-                cli_message(
-                    "Okay, skipping HTML documentation for now.`."
-                )
-
-        else:
-            cli_message(
-                "Okay, skipping profiling for now. You can always do this later by running `great_expectations profile`."
-            )
-
-    if data_source_selection == "1":  # Pandas
-        cli_message(msg_filesys_go_to_notebook)
-
-    elif data_source_selection == "2":  # SQL
-        cli_message(msg_sqlalchemy_go_to_notebook)
-
-    elif data_source_selection == "3":  # Spark
-        cli_message(msg_spark_go_to_notebook)
 
 
 msg_prompt_choose_data_source = """
@@ -249,30 +196,8 @@ great_expectations/notebooks/using_great_expectations_with_pandas.ipynb -
 it will walk you through configuring the database connection and next steps.
 """
 
-msg_filesys_go_to_notebook = """
+msg_go_to_notebook = """
 To create expectations for your data, start Jupyter and open a tutorial notebook:
-
-To launch with jupyter notebooks:
-    <green>jupyter notebook great_expectations/notebooks/create_expectations.ipynb</green>
-
-To launch with jupyter lab:
-    <green>jupyter lab great_expectations/notebooks/create_expectations.ipynb</green>
-"""
-
-msg_sqlalchemy_go_to_notebook = """
-To create expectations for your data start Jupyter and open the notebook
-that will walk you through next steps.
-
-To launch with jupyter notebooks:
-    <green>jupyter notebook great_expectations/notebooks/create_expectations.ipynb</green>
-
-To launch with jupyter lab:
-    <green>jupyter lab great_expectations/notebooks/create_expectations.ipynb</green>
-"""
-
-msg_spark_go_to_notebook = """
-To create expectations for your data start Jupyter and open the notebook
-that will walk you through next steps.
 
 To launch with jupyter notebooks:
     <green>jupyter notebook great_expectations/notebooks/create_expectations.ipynb</green>
