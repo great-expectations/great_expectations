@@ -13,14 +13,14 @@ from glob import glob
 
 from great_expectations.exceptions import DataContextError
 from great_expectations.data_context import DataContext
-from great_expectations.data_context.util import NormalizedDataAssetName
+from great_expectations.data_context.util import (NormalizedDataAssetName, safe_mmkdir)
 from great_expectations.cli.init import scaffold_directories_and_notebooks
 
 
 @pytest.fixture()
 def parameterized_expectation_suite():
     return {
-        "data_asset_name": "parameterized_expectaitons_config_fixture",
+        "data_asset_name": "parameterized_expectations_config_fixture",
         "data_asset_type": "Dataset",
         "meta": {
         },
