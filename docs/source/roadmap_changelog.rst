@@ -10,10 +10,23 @@ Planned Features
 * Conditional expectations
 * Multi-batch expectations
 
-v.0.7.1__develop
+v.0.7.1
 ________________
 
+* Added documentation/tutorials/videos for onboarding and new profiling and documentation features
+* Added prescriptive documentation built from expectation suites
+* Improved index, layout, and navigation of data context HTML documentation site
+* Bug fix: non-Python files were not included in the package
+* Improved the rendering logic to gracefully deal with failed expectations
+* Improved the basic dataset profiler to be more resilient
 * Implement expect_column_values_to_be_of_type, expect_column_values_to_be_in_type_list for SparkDFDataset
+* Updated CLI with a new documentation command and improved profile and render commands
+* Expectation suites and validation results within a data context are saved in a more readable form (with indentation)
+* Improved compatibility between SparkDatasource and InMemoryGenerator
+* Optimization for Pandas column type checking
+* Optimization for Spark duplicate value expectation (thanks @orenovadia!)
+* Default run_id format no longer includes ":" and specifies UTC time
+* Other internal improvements and bug fixes
 
 
 v.0.7.0
