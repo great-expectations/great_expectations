@@ -12,11 +12,11 @@ Planned Features
 
 
 v.0.7.2__develop
-________________
+-----------------
 
 
 v.0.7.1
-________________
+------------
 
 * Added documentation/tutorials/videos for onboarding and new profiling and documentation features
 * Added prescriptive documentation built from expectation suites
@@ -35,7 +35,7 @@ ________________
 
 
 v.0.7.0
-________________
+------------
 
 Version 0.7 of Great Expectations is HUGE. It introduces several major new features
 and a large number of improvements, including breaking API changes.
@@ -110,7 +110,7 @@ to top-level names.
    * Introduce custom exceptions for more detailed error logs
 
 v.0.6.1
-________________
+------------
 * Re-add testing (and support) for py2
 * NOTE: Support for SqlAlchemyDataset and SparkDFDataset is enabled via optional install \
   (e.g. ``pip install great_expectations[sqlalchemy]`` or ``pip install great_expectations[spark]``)
