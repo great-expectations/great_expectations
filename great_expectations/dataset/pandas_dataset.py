@@ -444,7 +444,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             "float": [float, np.float_],
             "double": [float, np.longdouble],
             "bytes": [bytes, np.bytes_],
-            "string": [np.string_] + list (string_types)
+            "string": [np.string_] + list(string_types)
             # TODO: Consider adding these additional types with additional tests
             # Would require updates to get_dataset test infrastructure for categorical
             # "timedelta": [timedelta, np.timedelta64],
@@ -477,7 +477,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             "float": [float, np.float_],
             "double": [float, np.longdouble],
             "bytes": [bytes, np.bytes_],
-            "string": [np.string_] + list (string_types)
+            "string": [np.string_] + list(string_types)
             # TODO: Consider adding these additional types with additional tests
             # Would require updates to get_dataset test infrastructure for categorical
             # "timedelta": [timedelta, np.timedelta64],
@@ -527,6 +527,9 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                                               mostly=None,
                                               parse_strings_as_datetimes=None,
                                               result_format=None, include_config=False, catch_exceptions=None, meta=None):
+        if value_set is None:
+            # Vacuously false
+            return np.zeros(len(column), dtype=np.bool_)
         if parse_strings_as_datetimes:
             parsed_value_set = self._parse_value_set(value_set)
         else:
