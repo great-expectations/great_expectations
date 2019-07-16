@@ -613,6 +613,37 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
             "styling": styling,
         }]
 
+    # TODO: test parse_strings_as_datetimes
+    @classmethod
+    def expect_column_values_to_be_increasing(cls, expectation, styling=None, include_column_name=True):
+        params = substitute_none_for_missing(
+            expectation["kwargs"],
+            ["column", "strictly", "mostly", "parse_strings_as_datetimes"]
+        )
+        
+        if params.get("strictly"):
+            template_str = "values must be strictly greater than previous values"
+        else:
+            template_str = "values must be greater than or equal to previous values"
+            
+        if params.get("mostly"):
+            params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
+            template_str += ", at least $mostly_pct % of the time."
+        else:
+            template_str += "."
+            
+        if params.get("parse_strings_as_datetimes"):
+            template_str += " Values should be parsed as datetimes."
+            
+        if include_column_name:
+            template_str = "$column " + template_str
+
+        return [{
+            "template": template_str,
+            "params": params,
+            "styling": styling,
+        }]
+
     @classmethod
     def expect_column_values_to_be_unique(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
