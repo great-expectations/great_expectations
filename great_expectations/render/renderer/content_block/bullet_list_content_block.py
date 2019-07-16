@@ -232,6 +232,8 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
             else:
                 template_str = "Values in $column_A must be greater than or equal to those in $column_B, at least $mostly_pct % of the time."
 
+        if params.get("parse_strings_as_datetimes"):
+            template_str += " Values should be parsed as datetimes."
 
         return [{
             "template": template_str,
