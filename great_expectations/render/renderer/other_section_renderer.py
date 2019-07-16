@@ -247,7 +247,7 @@ class DescriptiveOverviewSectionRenderer(Renderer):
             return "?"
 
         # assume 1.0 missing for columns where ["result"]["unexpected_percent"] is not available
-        return "{0:.2f}%".format(sum([evr["result"]["unexpected_percent"] if evr["result"].get("unexpected_percent") else 1.0 for evr in expect_column_values_to_not_be_null_evrs])/len(columns)*100)
+        return "{0:.2f}%".format(sum([evr["result"]["unexpected_percent"] if "unexpected_percent" in evr["result"] else 1.0 for evr in expect_column_values_to_not_be_null_evrs])/len(columns)*100)
 
     @classmethod
     def _get_column_types(cls, evrs):
