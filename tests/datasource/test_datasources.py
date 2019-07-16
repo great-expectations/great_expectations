@@ -102,13 +102,6 @@ def test_standalone_sqlalchemy_datasource(test_db_connection_string):
     assert isinstance(dataset2, SqlAlchemyDataset)
 
 
-# Disabled this test temporarily - SQLAlchemy datasource's behavior has been
-# changed to connect to the database in the constructor.
-# The connection kwargs in this test point to a Postgres db that does not exist.
-# I could not figure our how to test with SQLLite because it is not clear which
-# kwargs should be passed in. Tried "path", but sqlalchemy.engine.url.URL says
-# "unexpected keyword argument"
-#
 def test_create_sqlalchemy_datasource(data_context):
     name = "test_sqlalchemy_datasource"
     type_ = "sqlalchemy"
