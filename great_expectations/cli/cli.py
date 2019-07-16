@@ -214,6 +214,10 @@ def init(target_directory):
     )
 
     data_source_name = add_datasource(context)
+
+    if not data_source_name: # no datasource was created
+        return
+
     cli_message(
         """
 ========== Profiling ==========
