@@ -104,16 +104,16 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
 
         if (params["min_value"] is None) and (params["max_value"] is None):
             template_str = "values may have any length."
-
-        elif "mostly" in params:
+        elif params.get("mostly"):
+            params["mostly_pct"] = "%.1f" % (params["mostly"]*100,)
             if params["min_value"] is not None and params["max_value"] is not None:
-                template_str = "must be between $min_value and $max_value characters long at least $mostly% of the time."
+                template_str = "must be between $min_value and $max_value characters long, at least $mostly_pct % of the time."
 
             elif params["min_value"] is None:
-                template_str = "must be less than $max_value characters long at least $mostly% of the time."
+                template_str = "must be less than $max_value characters long, at least $mostly_pct % of the time."
 
             elif params["max_value"] is None:
-                template_str = "must be more than $min_value characters long at least $mostly% of the time."
+                template_str = "must be more than $min_value characters long, at least $mostly_pct % of the time."
 
         else:
             if params["min_value"] is not None and params["max_value"] is not None:
@@ -143,12 +143,21 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
 
         if (params["min_value"] is None) and (params["max_value"] is None):
             template_str = "may have any number of unique values."
-        elif params["min_value"] is None:
-            template_str = "must have fewer than $max_value unique values."
-        elif params["max_value"] is None:
-            template_str = "must have more than $min_value unique values."
+        elif params.get("mostly"):
+            params["mostly_pct"] = "%.1f" % (params["mostly"]*100,)
+            if params["min_value"] is None:
+                template_str = "must have fewer than $max_value unique values, at least $mostly_pct % of the time."
+            elif params["max_value"] is None:
+                template_str = "must have more than $min_value unique values, at least $mostly_pct % of the time."
+            else:
+                template_str = "must have between $min_value and $max_value unique values, at least $mostly_pct % of the time."
         else:
-            template_str = "must have between $min_value and $max_value unique values."
+            if params["min_value"] is None:
+                template_str = "must have fewer than $max_value unique values."
+            elif params["max_value"] is None:
+                template_str = "must have more than $min_value unique values."
+            else:
+                template_str = "must have between $min_value and $max_value unique values."
 
         if include_column_name:
             template_str = "$column " + template_str
@@ -170,15 +179,16 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
         if (params["min_value"] is None) and (params["max_value"] is None):
             template_str = "may have any numerical value."
 
-        elif "mostly" in params:
+        elif params.get("mostly"):
+            params["mostly_pct"] = "%.1f" % (params["mostly"]*100,)
             if params["min_value"] is not None and params["max_value"] is not None:
-                template_str = "must be between $min_value and $max_value at least $mostly% of the time."
+                template_str = "must be between $min_value and $max_value, at least $mostly_pct % of the time."
 
             elif params["min_value"] is None:
-                template_str = "must be less than $max_value at least $mostly% of the time."
+                template_str = "must be less than $max_value, at least $mostly_pct % of the time."
 
             elif params["max_value"] is None:
-                template_str = "must be less than $max_value at least $mostly% of the time."
+                template_str = "must be less than $max_value, at least $mostly_pct % of the time."
 
         else:
             if params["min_value"] is not None and params["max_value"] is not None:
@@ -215,12 +225,13 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
                 template_str = "Values in $column_A must always be greater than those in $column_B."
             else:
                 template_str = "Values in $column_A must always be greater than or equal to those in $column_B."
-
         else:
+            params["mostly_pct"] = "%.1f" % (params["mostly"]*100,)
             if params["or_equal"] in [None, False]:
-                template_str = "Values in $column_A must be greater than those in $column_B at least $mostly % of the time."
+                template_str = "Values in $column_A must be greater than those in $column_B, at least $mostly_pct % of the time."
             else:
-                template_str = "Values in $column_A must be greater than or equal to those in $column_B at least $mostly % of the time."
+                template_str = "Values in $column_A must be greater than or equal to those in $column_B, at least $mostly_pct % of the time."
+
 
         return [{
             "template": template_str,
@@ -243,12 +254,11 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
 
         if params["mostly"] is None:
             template_str = "Values in $column_A and $column_B must always be equal."
-
         else:
             # Note: this pattern for type conversion seems to work reasonably well.
             # Note: I'm not 100% sure that this is the right place to encode details like how many decimals to show.
             params["mostly_pct"] = "%.1f" % (params["mostly"]*100,)
-            template_str = "Values in $column_A and $column_B must be equal at least $mostly_pct % of the time."
+            template_str = "Values in $column_A and $column_B must be equal, at least $mostly_pct % of the time."
 
         return [{
             "template": template_str,
@@ -379,10 +389,17 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
             ["column", "regex", "mostly"],
         )
 
-        if include_column_name:
-            template_str = "$column values must not match this regular expression: $regex."
+        if params.get("mostly"):
+            params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
+            if include_column_name:
+                template_str = "$column values must not match this regular expression: $regex, at least $mostly_pct % of the time."
+            else:
+                template_str = "values must not match this regular expression: $regex, at least $mostly_pct % of the time."
         else:
-            template_str = "values must not match this regular expression: $regex."
+            if include_column_name:
+                template_str = "$column values must not match this regular expression: $regex."
+            else:
+                template_str = "values must not match this regular expression: $regex."
 
         return [{
             "template": template_str,
@@ -397,10 +414,97 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
             ["column", "mostly"],
         )
 
-        if include_column_name:
-            template_str = "$column values must never be null."
+        if params.get("mostly"):
+            params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
+            if include_column_name:
+                template_str = "$column values must not be null, at least $mostly_pct % of the time."
+            else:
+                template_str = "values must not be null, at least $mostly_pct % of the time."
         else:
-            template_str = "values must never be null."
+            if include_column_name:
+                template_str = "$column values must never be null."
+            else:
+                template_str = "values must never be null."
+
+        return [{
+            "template": template_str,
+            "params": params,
+            "styling": styling,
+        }]
+
+    @classmethod
+    def expect_column_values_to_be_null(cls, expectation, styling=None, include_column_name=True):
+        params = substitute_none_for_missing(
+            expectation["kwargs"],
+            ["column", "mostly"]
+        )
+        
+        if params.get("mostly"):
+            params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
+            template_str = "values must be null, at least $mostly_pct % of the time."
+        else:
+            template_str = "values must be null."
+            
+        if include_column_name:
+            template_str = "$column " + template_str
+            
+        return [{
+            "template": template_str,
+            "params": params,
+            "styling": styling
+        }]
+
+    @classmethod
+    def expect_column_values_to_be_of_type(cls, expectation, styling=None, include_column_name=True):
+        params = substitute_none_for_missing(
+            expectation["kwargs"],
+            ["column", "type_", "mostly"]
+        )
+        
+        if params.get("mostly"):
+            params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
+            template_str = "values must be of type $type_, at least $mostly_pct % of the time."
+        else:
+            template_str = "values must be of type $type_."
+            
+        if include_column_name:
+            template_str = "$column " + template_str
+            
+        return [{
+            "template": template_str,
+            "params": params,
+            "styling": styling
+        }]
+
+    @classmethod
+    def expect_column_values_to_be_in_type_list(cls, expectation, styling=None, include_column_name=True):
+        params = substitute_none_for_missing(
+            expectation["kwargs"],
+            ["column", "type_list", "mostly"],
+        )
+
+        for i, v in enumerate(params["type_list"]):
+            params["v__"+str(i)] = v
+        values_string = " ".join(
+            ["$v__"+str(i) for i, v in enumerate(params["type_list"])]
+        )
+
+        if params.get("mostly"):
+            params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
+
+            if include_column_name:
+                # NOTE: Localization will be tricky for this template_str.
+                template_str = "$column value types must belong to this set: " + values_string + ", at least $mostly_pct % of the time."
+            else:
+                # NOTE: Localization will be tricky for this template_str.
+                template_str = "value types must belong to this set: " + values_string + ", at least $mostly_pct % of the time."
+        else:
+            if include_column_name:
+                # NOTE: Localization will be tricky for this template_str.
+                template_str = "$column value types must belong to this set: "+values_string+"."
+            else:
+                # NOTE: Localization will be tricky for this template_str.
+                template_str = "value types must belong to this set: "+values_string+"."
 
         return [{
             "template": template_str,
@@ -444,32 +548,6 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
             template_str = "$column values must be unique."
         else:
             template_str = "values must be unique."
-
-        return [{
-            "template": template_str,
-            "params": params,
-            "styling": styling,
-        }]
-
-    @classmethod
-    def expect_column_values_to_be_in_type_list(cls, expectation, styling=None, include_column_name=True):
-        params = substitute_none_for_missing(
-            expectation["kwargs"],
-            ["column", "type_list", "mostly"],
-        )
-
-        for i, v in enumerate(params["type_list"]):
-            params["v__"+str(i)] = v
-        values_string = " ".join(
-            ["$v__"+str(i) for i, v in enumerate(params["type_list"])]
-        )
-
-        if include_column_name:
-            # NOTE: Localization will be tricky for this template_str.
-            template_str = "$column value types must belong to this set: "+values_string+"."
-        else:
-            # NOTE: Localization will be tricky for this template_str.
-            template_str = "value types must belong to this set: "+values_string+"."
 
         return [{
             "template": template_str,
