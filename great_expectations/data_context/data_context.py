@@ -158,7 +158,7 @@ class DataContext(object):
         
         self._project_config = self._load_project_config()
 
-        if "datasources" not in self._project_config:
+        if not self._project_config.get("datasources"):
             self._project_config["datasources"] = {}
         for datasource in self._project_config["datasources"].keys():
             self.get_datasource(datasource)
