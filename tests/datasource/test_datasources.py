@@ -107,18 +107,18 @@ def test_create_sqlalchemy_datasource(data_context):
     type_ = "sqlalchemy"
     connection_kwargs = {
         "drivername": "postgresql",
-        "username": "user",
-        "password": "pass",
-        "host": "host",
-        "port": 1234,
-        "database": "db",
+        "username": "",
+        "password": "",
+        "host": "localhost",
+        "port": 5432,
+        "database": "test_ci",
     }
 
     # It should be possible to create a sqlalchemy source using these params without
     # saving a profile
     data_context.add_datasource(name, type_, **connection_kwargs)
     data_context_config = data_context.get_config()
-    assert name in data_context_config["datasources"] 
+    assert name in data_context_config["datasources"]
     assert data_context_config["datasources"][name]["type"] == type_
 
     # We should be able to get it in this session even without saving the config
@@ -131,9 +131,9 @@ def test_create_sqlalchemy_datasource(data_context):
     # But we should be able to add a source using a profile
     name = "second_source"
     data_context.add_datasource(name, type_, profile="test_sqlalchemy_datasource")
-    
+
     data_context_config = data_context.get_config()
-    assert name in data_context_config["datasources"] 
+    assert name in data_context_config["datasources"]
     assert data_context_config["datasources"][name]["type"] == type_
     assert data_context_config["datasources"][name]["profile"] == profile_name
 
@@ -143,7 +143,7 @@ def test_create_sqlalchemy_datasource(data_context):
     # Finally, we should be able to confirm that the folder structure is as expected
     with open(os.path.join(data_context.root_directory, "uncommitted/credentials/profiles.yml"), "r") as profiles_file:
         profiles = yaml.load(profiles_file)
-    
+
     assert profiles == {
         profile_name: dict(**connection_kwargs)
     }

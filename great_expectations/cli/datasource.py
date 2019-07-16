@@ -1,8 +1,9 @@
 import os
 import click
-
 from .util import cli_message
 from great_expectations.render import DefaultJinjaPageView
+from great_expectations.exceptions import DatasourceInitializationError
+
 from great_expectations.version import __version__ as __version__
 
 
@@ -27,7 +28,7 @@ See <blue>https://docs.greatexpectations.io/en/latest/core_concepts/datasource.h
             msg_prompt_filesys_enter_base_path,
             # default='/data/',
             type=click.Path(
-                exists=False,
+                exists=True,
                 file_okay=False,
                 dir_okay=True,
                 readable=True
@@ -56,34 +57,56 @@ See <blue>https://docs.greatexpectations.io/en/latest/core_concepts/datasource.h
         data_source_name = click.prompt(
             msg_prompt_datasource_name, default="mydb", show_default=True)
 
-        cli_message(msg_sqlalchemy_config_connection.format(
-            data_source_name))
+        while True:
+            cli_message(msg_sqlalchemy_config_connection.format(
+                data_source_name))
 
-        drivername = click.prompt("What is the driver for the sqlalchemy connection?", default="postgres",
-                                  show_default=True)
-        host = click.prompt("What is the host for the sqlalchemy connection?", default="localhost",
-                            show_default=True)
-        port = click.prompt("What is the port for the sqlalchemy connection?", default="5432",
-                            show_default=True)
-        username = click.prompt("What is the username for the sqlalchemy connection?", default="postgres",
+            drivername = click.prompt("What is the driver for the sqlalchemy connection?", default="postgres",
+                                      show_default=True)
+            host = click.prompt("What is the host for the sqlalchemy connection?", default="localhost",
                                 show_default=True)
-        password = click.prompt("What is the password for the sqlalchemy connection?", default="",
-                                show_default=False, hide_input=True)
-        database = click.prompt("What is the database name for the sqlalchemy connection?", default="postgres",
+            port = click.prompt("What is the port for the sqlalchemy connection?", default="5432",
                                 show_default=True)
+            username = click.prompt("What is the username for the sqlalchemy connection?", default="postgres",
+                                    show_default=True)
+            password = click.prompt("What is the password for the sqlalchemy connection?", default="",
+                                    show_default=False, hide_input=True)
+            database = click.prompt("What is the database name for the sqlalchemy connection?", default="postgres",
+                                    show_default=True)
 
-        credentials = {
-            "drivername": drivername,
-            "host": host,
-            "port": port,
-            "username": username,
-            "password": password,
-            "database": database
-        }
-        context.add_profile_credentials(data_source_name, **credentials)
+            credentials = {
+                "drivername": drivername,
+                "host": host,
+                "port": port,
+                "username": username,
+                "password": password,
+                "database": database
+            }
+            context.add_profile_credentials(data_source_name, **credentials)
 
-        context.add_datasource(
-            data_source_name, "sqlalchemy", profile=data_source_name)
+            try:
+                context.add_datasource(
+                    data_source_name, "sqlalchemy", profile=data_source_name)
+                break
+            except (DatasourceInitializationError, ModuleNotFoundError) as de:
+                cli_message(
+"""
+Cannot connect to the database. Please check your environment and the configuration you provided.
+
+<red>Actual error: {0:s}</red>>
+""".format(str(de)))
+                if not click.confirm(
+"""
+Enter the credentials again?
+""".format(str(de)),
+                    default=True):
+                    cli_message(
+"""
+Exiting datasource configuration.
+You can add a datasource later by editing the great_expectations.yml file.
+""")
+                    return None
+
 
     elif data_source_selection == "3":  # Spark
         path = click.prompt(
@@ -114,8 +137,11 @@ See <blue>https://docs.greatexpectations.io/en/latest/core_concepts/datasource.h
     #     context.add_datasource("dbt", "dbt", profile=dbt_profile)
     if data_source_selection == "4":  # None of the above
         cli_message(msg_unknown_data_source)
-        print("Skipping datasource configuration. "
-              "You can add a datasource later by editing the great_expectations.yml file.")
+        cli_message(
+"""
+Skipping datasource configuration.
+You can add a datasource later by editing the great_expectations.yml file.
+""")
         return None
 
     return data_source_name
