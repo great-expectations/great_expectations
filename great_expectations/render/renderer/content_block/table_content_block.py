@@ -63,9 +63,9 @@ class TableContentBlockRenderer(ContentBlockRenderer):
     @classmethod
     def expect_column_values_to_not_be_null(cls, ge_object):
         return [
-            ["Missing (n)", ge_object["result"]["unexpected_count"] if ge_object["result"].get("unexpected_count") else "--"],
+            ["Missing (n)", ge_object["result"]["unexpected_count"] if "unexpected_count" in ge_object["result"] else "--"],
             ["Missing (%)", "%.1f%%" %
-             (ge_object["result"]["unexpected_percent"] * 100.0) if ge_object["result"].get("unexpected_percent") else "--"]
+             (ge_object["result"]["unexpected_percent"] * 100.0) if "unexpected_percent" in ge_object["result"] else "--"]
         ]
 
     @classmethod
