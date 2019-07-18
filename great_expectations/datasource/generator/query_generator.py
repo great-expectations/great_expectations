@@ -77,6 +77,9 @@ class QueryGenerator(BatchGenerator):
             if len(split_data_asset_name) == 2:
                 schema_name = split_data_asset_name[0]
                 table_name = split_data_asset_name[1]
+            elif len(split_data_asset_name) == 1:
+                schema_name = self.inspector.default_schema_name
+                table_name = split_data_asset_name[0]
             else:
                 raise ValueError("table name must be of shape SCHEMA___TABLE. passed: " + data_asset_name)
             tables = self.inspector.get_table_names(schema=schema_name)
@@ -106,6 +109,10 @@ class QueryGenerator(BatchGenerator):
         tables = []
         if self.engine is not None and self.inspector is not None:
             for schema_name in self.inspector.get_schema_names():
-                tables.extend([schema_name + "___" + table_name for table_name in self.inspector.get_table_names(schema=schema_name)])
+                #FIXME: create a list of names of info schemas for diff engines supported by sqlalchemy
+                if schema_name in ['information_schema']:
+                    continue
+
+                tables.extend([table_name if self.inspector.default_schema_name == schema_name else schema_name + "___" + table_name for table_name in self.inspector.get_table_names(schema=schema_name)])
 
         return set(defined_queries + tables)
