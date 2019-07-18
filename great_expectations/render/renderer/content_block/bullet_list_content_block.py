@@ -482,7 +482,7 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
             template_str += " Values should be parsed as datetimes."
             
         if include_column_name:
-            template_str = "$column"
+            template_str = "$column " + template_str
 
         return [{
             "template": template_str,
