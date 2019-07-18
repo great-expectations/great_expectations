@@ -48,7 +48,8 @@ class QueryGenerator(BatchGenerator):
         if datasource is not None:
             self.engine = datasource.engine
             try:
-                self.inspector = reflection.Inspector.from_engine(self.engine)
+                self.inspector = sqlalchemy.inspect(self.engine)
+
             except sqlalchemy.exc.OperationalError:
                 logger.warning("Unable to create inspector from engine in generator '%s'" % name)
                 self.inspector = None
@@ -72,11 +73,18 @@ class QueryGenerator(BatchGenerator):
             pass
 
         if self.engine is not None and self.inspector is not None:
-            tables = self.inspector.get_table_names()
-            if data_asset_name in tables:
+            split_data_asset_name = data_asset_name.split("___")
+            if len(split_data_asset_name) == 2:
+                schema_name = split_data_asset_name[0]
+                table_name = split_data_asset_name[1]
+            else:
+                raise ValueError("table name must be of shape SCHEMA___TABLE. passed: " + data_asset_name)
+            tables = self.inspector.get_table_names(schema=schema_name)
+            if table_name in tables:
                 return iter([
                     {
-                        "table": data_asset_name,
+                        "table": table_name,
+                        "schema": schema_name,
                         "timestamp": time.time()
                     }
                 ])
@@ -94,9 +102,10 @@ class QueryGenerator(BatchGenerator):
             defined_queries = [path for path in os.walk(self._queries_path) if str(path).endswith(".sql")]
         else:
             defined_queries = list(self._queries.keys())
+
+        tables = []
         if self.engine is not None and self.inspector is not None:
-            tables = self.inspector.get_table_names()
-        else:
-            tables = []
+            for schema_name in self.inspector.get_schema_names():
+                tables.extend([schema_name + "___" + table_name for table_name in self.inspector.get_table_names(schema=schema_name)])
 
         return set(defined_queries + tables)
