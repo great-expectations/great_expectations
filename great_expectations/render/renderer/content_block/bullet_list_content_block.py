@@ -972,8 +972,32 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
             "styling": styling,
         }]
     
+    @classmethod
+    def expect_column_mean_to_be_between(cls, expectation, styling=None, include_column_name=True):
+        params = substitute_none_for_missing(
+            expectation["kwargs"],
+            ["column", "min_value", "max_value"]
+        )
+
+        if (params["min_value"] is None) and (params["max_value"] is None):
+            template_str = "mean may have any numerical value."
+        else:
             if params["min_value"] is not None and params["max_value"] is not None:
-                template_str = "values must be between $min_value and $max_value characters long, at least $mostly_pct % of the time."
+                template_str = "mean must be between $min_value and $max_value."
+            elif params["min_value"] is None:
+                template_str = "mean must be less than $max_value."
+            elif params["max_value"] is None:
+                template_str = "mean must be more than $min_value."
+
+        if include_column_name:
+            template_str = "$column " + template_str
+
+        return [{
+            "template": template_str,
+            "params": params,
+            "styling": styling,
+        }]
+    
 
             elif params["min_value"] is None:
                 template_str = "values must be less than $max_value characters long, at least $mostly_pct % of the time."
