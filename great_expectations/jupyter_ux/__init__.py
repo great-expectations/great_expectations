@@ -217,8 +217,8 @@ def display_column_expectations_as_section(
     #TODO: replace this with a generic utility function, preferably a method on an ExpectationSuite class
     column_expectation_list = [ e for e in expectation_suite["expectations"] if "column" in e["kwargs"] and e["kwargs"]["column"] == column ]
 
-    document = render.renderer.column_section_renderer.PrescriptiveColumnSectionRenderer.render(column_expectation_list)
-    view = render.view.view.DefaultJinjaSectionView.render({
+    document = render.renderer.PrescriptiveColumnSectionRenderer.render(column_expectation_list)
+    view = render.view.DefaultJinjaSectionView.render({
         "section": document,
         "section_loop": {"index": 1},
     })
