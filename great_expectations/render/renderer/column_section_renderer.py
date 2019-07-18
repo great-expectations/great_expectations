@@ -6,7 +6,7 @@ from string import Template
 from .renderer import Renderer
 from .content_block import ValueListContentBlockRenderer
 from .content_block import TableContentBlockRenderer
-from .content_block import PrescriptiveBulletListContentBlockRenderer
+from .content_block import (PrescriptiveBulletListContentBlockRenderer, PrescriptiveEvrTableContentBlockRenderer)
 from .content_block import ExceptionListContentBlockRenderer
 
 
@@ -235,7 +235,7 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
         content_blocks.append({
             "content_block_type": "table",
             "header": "Quantiles",
-            "table_rows": table_rows,
+            "table": table_rows,
             "styling": {
                 "classes": ["col-4"],
                 "styles": {
@@ -286,7 +286,7 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
             content_blocks.append({
                 "content_block_type": "table",
                 "header": "Statistics",
-                "table_rows": table_rows,
+                "table": table_rows,
                 "styling": {
                     "classes": ["col-4"],
                     "styles": {
@@ -525,17 +525,50 @@ class PrescriptiveColumnSectionRenderer(ColumnSectionRenderer):
         return [], content_blocks
 
     @classmethod
-    def render(cls, expectations):
-        column = cls._get_column_name(expectations)
+    def _render_table(cls, validation_results, content_blocks):
+        content = PrescriptiveEvrTableContentBlockRenderer.render(
+            validation_results,
+            include_column_name=False
+        )
+        content_blocks.append(content)
+        
+        return [], content_blocks
 
+    @classmethod
+    def _render_expectations(cls, expectations):
+        column = cls._get_column_name(expectations)
+    
         remaining_expectations, content_blocks = cls._render_header(
             expectations, [])
         # remaining_expectations, content_blocks = cls._render_column_type(
         # remaining_expectations, content_blocks)
         remaining_expectations, content_blocks = cls._render_bullet_list(
             remaining_expectations, content_blocks)
-
+    
         return {
             "section_name": column,
             "content_blocks": content_blocks
         }
+
+    @classmethod
+    def _render_validation_results(cls, validation_results):
+        column = cls._get_column_name(validation_results)
+    
+        remaining_evrs, content_blocks = cls._render_table(
+            validation_results, [])
+        # remaining_evrs, content_blocks = cls._render_column_type(
+        # remaining_evrs, content_blocks)
+        remaining_evrs, content_blocks = cls._render_bullet_list(
+            remaining_evrs, content_blocks)
+    
+        return {
+            "section_name": column,
+            "content_blocks": content_blocks
+        }
+
+    @classmethod
+    def render(cls, expectations={}, validation_results={}):
+        if expectations:
+            return cls._render_expectations(expectations)
+        else:
+            return cls._render_validation_results(validation_results)

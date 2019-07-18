@@ -11,7 +11,93 @@ from .other_section_renderer import (
 class PrescriptivePageRenderer(Renderer):
 
     @classmethod
-    def render(cls, expectations):
+    def render(cls, expectations={}, validation_results={}):
+        if expectations:
+            return cls._render_expectation_suite(expectations)
+        else:
+            return cls._render_validation(validation_results)
+            
+    @classmethod
+    def _render_validation(cls, validation_results):
+        run_id = validation_results['meta']['run_id']
+        full_data_asset_identifier = validation_results['meta']['data_asset_name'] or ""
+        expectation_suite_name = validation_results['meta']['expectation_suite_name']
+        short_data_asset_name = full_data_asset_identifier.split('/')[-1]
+        ge_version = validation_results["meta"]["great_expectations.__version__"]
+    
+        # Group EVRs by column
+        columns = {}
+        for evr in validation_results["results"]:
+            if "column" in evr["expectation_config"]["kwargs"]:
+                column = evr["expectation_config"]["kwargs"]["column"]
+            else:
+                column = "Table-level Expectations"
+        
+            if column not in columns:
+                columns[column] = []
+            columns[column].append(evr)
+    
+        ordered_columns = Renderer._get_column_list_from_evrs(validation_results)
+        column_types = DescriptiveOverviewSectionRenderer._get_column_types(validation_results)
+    
+        if "data_asset_name" in validation_results["meta"] and validation_results["meta"]["data_asset_name"]:
+            data_asset_name = short_data_asset_name
+        else:
+            data_asset_name = None
+
+        sections = [
+            {
+                "section_name": "Overview",
+                "content_blocks": [
+                    {
+                        "content_block_type": "header",
+                        "header": "Validation Overview",
+                        "styling": {
+                            "classes": ["col-12"],
+                            "header": {
+                                "classes": ["alert", "alert-secondary"]
+                            }
+                        }
+                    },
+                    {
+                        "content_block_type": "table",
+                        "header": "Info",
+                        "table": [
+                            ["Full Data Asset Identifier", full_data_asset_identifier],
+                            ["Expectation Suite Name", expectation_suite_name],
+                            ["Great Expectations Version", ge_version],
+                            ["Run ID", run_id]
+                        ],
+                        "styling": {
+                            "classes": ["col-12", "table-responsive"],
+                            "styles": {
+                                "margin-top": "20px"
+                            },
+                            "body": {
+                                "classes": ["table", "table-sm"]
+                            }
+                        },
+                    }
+                ]
+            }
+        ]
+    
+        sections += [
+                    PrescriptiveColumnSectionRenderer.render(
+                        columns[column],
+                    ) for column in ordered_columns
+                ]
+    
+        return {
+            "renderer_type": "PrescriptivePageRenderer",
+            "data_asset_name": data_asset_name,
+            "full_data_asset_identifier": full_data_asset_identifier,
+            "page_title": run_id + "-" + expectation_suite_name + "-Descriptive",
+            "sections": sections
+        }
+        
+    @classmethod
+    def _render_expectation_suite(cls, expectations):
         full_data_asset_identifier = expectations.get("data_asset_name") or ""
         short_data_asset_name = full_data_asset_identifier.split('/')[-1]
         data_asset_type = expectations.get("data_asset_type")
@@ -57,7 +143,7 @@ class PrescriptivePageRenderer(Renderer):
                     {
                         "content_block_type": "table",
                         "header": "Info",
-                        "table_rows": [
+                        "table": [
                             ["Full Data Asset Identifier", full_data_asset_identifier],
                             ["Data Asset Type", data_asset_type],
                             ["Expectation Suite Name", expectation_suite_name],
@@ -78,7 +164,7 @@ class PrescriptivePageRenderer(Renderer):
         ]
 
         sections += [
-                PrescriptiveColumnSectionRenderer.render(columns[column]) for column in ordered_columns
+                PrescriptiveColumnSectionRenderer.render(expectations=columns[column]) for column in ordered_columns
             ]
 
         return {
@@ -123,7 +209,7 @@ class DescriptivePageRenderer(Renderer):
             "renderer_type": "DescriptivePageRenderer",
             "data_asset_name": data_asset_name,
             "full_data_asset_identifier": full_data_asset_identifier,
-            "page_title": run_id + "-" + expectation_suite_name,
+            "page_title": run_id + "-" + expectation_suite_name + "-Descriptive",
             "sections":
                 [
                     DescriptiveOverviewSectionRenderer.render(

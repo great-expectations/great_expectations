@@ -1460,6 +1460,7 @@ class DataContext(object):
 
         validation_filepaths = [y for x in os.walk(self.fixtures_validations_directory) for y in glob(os.path.join(x[0], '*.json'))]
         for validation_filepath in validation_filepaths:
+            # descriptive validation view
             logger.debug("Loading validation from: %s" % validation_filepath)
             with open(validation_filepath, "r") as infile:
                 validation = json.load(infile)
@@ -1467,24 +1468,45 @@ class DataContext(object):
             run_id = validation['meta']['run_id']
             data_asset_name = validation['meta']['data_asset_name']
             expectation_suite_name = validation['meta']['expectation_suite_name']
-            model = DescriptivePageRenderer.render(validation)
-            out_filepath = self.get_validation_doc_filepath(
-                data_asset_name, "{run_id}-{expectation_suite_name}".format(
+            
+            descriptive_model = DescriptivePageRenderer.render(validation)
+            out_descriptive_filepath = self.get_validation_doc_filepath(
+                data_asset_name, "{run_id}-{expectation_suite_name}-Descriptive".format(
                     run_id=run_id.replace(':', ''),
                     expectation_suite_name=expectation_suite_name
                 )
             )
-            safe_mmkdir(os.path.dirname(out_filepath))
+            safe_mmkdir(os.path.dirname(out_descriptive_filepath))
 
-            with open(out_filepath, 'w') as writer:
-                writer.write(DefaultJinjaPageView.render(model))
+            with open(out_descriptive_filepath, 'w') as writer:
+                writer.write(DefaultJinjaPageView.render(descriptive_model))
 
             index_links.append({
                 "data_asset_name" : data_asset_name,
                 "expectation_suite_name": expectation_suite_name,
                 "run_id": run_id,
-                "filepath": os.path.relpath(out_filepath, self.data_doc_directory)
+                "filepath": os.path.relpath(out_descriptive_filepath, self.data_doc_directory)
             })
+
+            # prescriptive validation view
+            # prescriptive_model = PrescriptivePageRenderer.render(validation_results=validation)
+            # out_prescriptive_filepath = self.get_validation_doc_filepath(
+            #     data_asset_name, "{run_id}-{expectation_suite_name}-Prescriptive".format(
+            #         run_id=run_id.replace(':', ''),
+            #         expectation_suite_name=expectation_suite_name
+            #     )
+            # )
+            # safe_mmkdir(os.path.dirname(out_prescriptive_filepath))
+            #
+            # with open(out_prescriptive_filepath, 'w') as writer:
+            #     writer.write(DefaultJinjaPageView.render(prescriptive_model))
+            #
+            # index_links.append({
+            #     "data_asset_name": data_asset_name,
+            #     "expectation_suite_name": expectation_suite_name,
+            #     "run_id": run_id,
+            #     "filepath": os.path.relpath(out_prescriptive_filepath, self.data_doc_directory)
+            # })
 
         expectation_suite_filepaths = [y for x in os.walk(self.expectations_directory) for y in glob(os.path.join(x[0], '*.json'))]
         for expectation_suite_filepath in expectation_suite_filepaths:
@@ -1493,7 +1515,7 @@ class DataContext(object):
 
             data_asset_name = expectation_suite['data_asset_name']
             expectation_suite_name = expectation_suite['expectation_suite_name']
-            model = PrescriptivePageRenderer.render(expectation_suite)
+            model = PrescriptivePageRenderer.render(validation_results=validation)
             out_filepath = self.get_validation_doc_filepath(
                 data_asset_name,
                 expectation_suite_name
@@ -1636,7 +1658,7 @@ class DataContext(object):
                     expectation_suite_link_table = {
                         "content_block_type": "table",
                         "subheader": "Expectation Suites",
-                        "table_rows": expectation_suite_link_table_rows,
+                        "table": expectation_suite_link_table_rows,
                         "styling": {
                             "classes": ["col-4"],
                             "styles": {
@@ -1654,7 +1676,8 @@ class DataContext(object):
                         [{
                             "template": "$link_text",
                             "params": {
-                                "link_text": link_dict["run_id"] + "-" + link_dict["expectation_suite_name"]
+                                "link_text": (link_dict["run_id"] + "-" + link_dict["expectation_suite_name"] + "-Descriptive") if "Descriptive" in link_dict["filepath"] else
+                                (link_dict["run_id"] + "-" + link_dict["expectation_suite_name"] + "-Prescriptive")
                             },
                             "tag": "a",
                             "styling": {
@@ -1671,7 +1694,7 @@ class DataContext(object):
                     validation_link_table = {
                         "content_block_type": "table",
                         "subheader": "Batch Validations",
-                        "table_rows": validation_link_table_rows,
+                        "table": validation_link_table_rows,
                         "styling": {
                             "classes": ["col-4"],
                             "styles": {

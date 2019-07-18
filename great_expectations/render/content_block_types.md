@@ -34,12 +34,12 @@
 }
 
 - table
-For a table, the header row and each item in table_rows should have the same number of elements
+For a table, the header row and each item in table should have the same number of elements
 
 ``` json
 {
     "content_block_type": "table",
-    "table_rows": [ [table_entry] ]
+    "table": [ [table_entry] ]
 }
 
 - graph
