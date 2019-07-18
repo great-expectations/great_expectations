@@ -735,6 +735,42 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
         }]
     
     @classmethod
+    def expect_column_values_to_match_regex_list(cls, expectation, styling=None, include_column_name=True):
+        params = substitute_none_for_missing(
+            expectation["kwargs"],
+            ["column", "regex_list", "mostly", "match_on"],
+        )
+    
+        if not params.get("regex_list") or len(params.get("regex_list")) == 0:
+            template_str = "values must match a set of regular expressions but none was specified."
+        else:
+            for i, v in enumerate(params["regex_list"]):
+                params["v__"+str(i)] = v
+            values_string = " ".join(
+                ["$v__"+str(i) for i, v in enumerate(params["regex_list"])]
+            )
+            
+            if params.get("match_on") == "all":
+                template_str = "values must match all of the following regular expressions: " + values_string
+            else:
+                template_str = "values must match any of the following regular expressions: " + values_string
+                
+            if params.get("mostly"):
+                params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
+                template_str += ", at least $mostly_pct % of the time."
+            else:
+                template_str += "."
+                
+        if include_column_name:
+            template_str = "$column " + template_str
+
+        return [{
+            "template": template_str,
+            "params": params,
+            "styling": styling,
+        }]
+    
+    @classmethod
     def expect_column_values_to_match_json_schema(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation["kwargs"],
