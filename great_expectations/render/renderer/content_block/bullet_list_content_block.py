@@ -998,16 +998,6 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
             "styling": styling,
         }]
     
-
-            elif params["min_value"] is None:
-                template_str = "values must be less than $max_value characters long, at least $mostly_pct % of the time."
-
-            elif params["max_value"] is None:
-                template_str = "values must be more than $min_value characters long, at least $mostly_pct % of the time."
-        else:
-            if params["min_value"] is not None and params["max_value"] is not None:
-                template_str = "values must always be between $min_value and $max_value characters long."
-    
     @classmethod
     def expect_column_min_to_be_between(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
