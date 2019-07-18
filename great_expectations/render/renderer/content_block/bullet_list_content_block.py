@@ -697,8 +697,32 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
             elif params["min_value"] is None:
                 template_str = "values must always be less than $max_value characters long."
 
+    @classmethod
+    def expect_column_sum_to_be_between(cls, expectation, styling=None, include_column_name=True):
+        params = substitute_none_for_missing(
+            expectation["kwargs"],
+            ["column", "min_value", "max_value"]
+        )
+
+        if (params["min_value"] is None) and (params["max_value"] is None):
+            template_str = "sum may have any numerical value."
+        else:
+            if params["min_value"] is not None and params["max_value"] is not None:
+                template_str = "sum must be between $min_value and $max_value."
+            elif params["min_value"] is None:
+                template_str = "sum must be less than $max_value."
             elif params["max_value"] is None:
-                template_str = "values must always be more than $min_value characters long."
+                template_str = "sum must be more than $min_value."
+
+        if include_column_name:
+            template_str = "$column " + template_str
+
+        return [{
+            "template": template_str,
+            "params": params,
+            "styling": styling,
+        }]
+
     @classmethod
     def expect_column_most_common_value_to_be_in_set(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
