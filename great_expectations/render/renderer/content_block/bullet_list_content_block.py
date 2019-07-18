@@ -1,4 +1,5 @@
 import copy
+import json
 from sparklines import sparklines
 
 from .content_block import ContentBlockRenderer
@@ -648,6 +649,39 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
             template_str = "values may have any length."
         elif params.get("mostly"):
             params["mostly_pct"] = "%.1f" % (params["mostly"]*100,)
+    @classmethod
+    def expect_column_values_to_match_json_schema(cls, expectation, styling=None, include_column_name=True):
+        params = substitute_none_for_missing(
+            expectation["kwargs"],
+            ["column", "mostly", "json_schema"],
+        )
+        
+        if not params.get("json_schema"):
+            template_str = "values must match a JSON Schema but none was specified."
+        else:
+            params["formatted_json"] = "<pre>" + json.dumps(params.get("json_schema"), indent=4) + "</pre>"
+            if params.get("mostly"):
+                params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
+                template_str = "values must match the following JSON Schema, at least $mostly_pct % of the time: $formatted_json"
+            else:
+                template_str = "values must match the following JSON Schema: $formatted_json"
+
+        if include_column_name:
+            template_str = "$column " + template_str
+
+        return [{
+            "template": template_str,
+            "params": params,
+            "styling": {
+                "params":
+                    {
+                        "formatted_json": {
+                            "classes": []
+                        }
+                    }
+            },
+        }]
+    
             if params["min_value"] is not None and params["max_value"] is not None:
                 template_str = "values must be between $min_value and $max_value characters long, at least $mostly_pct % of the time."
 
