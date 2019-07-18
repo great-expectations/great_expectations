@@ -217,7 +217,47 @@ def display_column_expectations_as_section(
     #TODO: replace this with a generic utility function, preferably a method on an ExpectationSuite class
     column_expectation_list = [ e for e in expectation_suite["expectations"] if "column" in e["kwargs"] and e["kwargs"]["column"] == column ]
 
+    #TODO: Handle the case where zero evrs match the column name
+
     document = render.renderer.PrescriptiveColumnSectionRenderer.render(column_expectation_list)
+    view = render.view.DefaultJinjaSectionView.render({
+        "section": document,
+        "section_loop": {"index": 1},
+    })
+
+    if include_styling:
+        html_to_display = bootstrap_link_element+cooltip_style_element+view
+    else:
+        html_to_display = view
+
+    if return_without_displaying:
+        return html_to_display
+    else:
+        display(HTML(html_to_display))
+
+def display_column_evrs_as_section(
+    evrs,
+    column,
+    section_renderer=render.renderer.column_section_renderer.DescriptiveColumnSectionRenderer,
+    view_renderer=render.view.view.DefaultJinjaSectionView,
+    include_styling=True,
+    return_without_displaying=False,
+):
+    """This is a utility function to render all of the EVRs in an ExpectationSuite with the same column name as an HTML block.
+
+    By default, the HTML block is rendered using PrescriptiveColumnSectionRenderer and the view is rendered using DefaultJinjaSectionView.
+    Therefore, it should look exactly the same as the default renderer for build_docs. 
+
+    Example usage:
+    display_column_evrs_as_section(exp, "my_column")
+    """
+
+    #TODO: replace this with a generic utility function, preferably a method on an ExpectationSuite class
+    column_evr_list = [ e for e in evrs["results"] if "column" in e["expectation_config"]["kwargs"] and e["expectation_config"]["kwargs"]["column"] == column ]
+
+    #TODO: Handle the case where zero evrs match the column name
+
+    document = render.renderer.DescriptiveColumnSectionRenderer.render(column_evr_list)
     view = render.view.DefaultJinjaSectionView.render({
         "section": document,
         "section_loop": {"index": 1},
