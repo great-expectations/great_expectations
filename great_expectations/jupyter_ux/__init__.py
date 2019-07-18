@@ -1,13 +1,21 @@
+"""Utility functions for working with great_expectations within jupyter notebooks or jupyter lab.
+"""
+
 import json
 import os
 import logging
 import great_expectations as ge
+import great_expectations.render as render
 from datetime import datetime
 
 import tzlocal
 from IPython.core.display import display, HTML
 
 def set_data_source(context, data_source_type=None):
+    """
+    TODO: Needs a docstring and tests.
+    """
+
     data_source_name = None
 
     if not data_source_type:
@@ -67,6 +75,10 @@ Uncomment the next cell and set data_source_name to one of these names.
     return data_source_name
 
 def setup_notebook_logging(logger=None):
+    """
+    TODO: Needs a docstring and tests.
+    """
+
     def posix2local(timestamp, tz=tzlocal.get_localzone()):
         """Seconds since the epoch -> local time as an aware datetime object."""
         return datetime.fromtimestamp(timestamp, tz)
@@ -99,6 +111,10 @@ def setup_notebook_logging(logger=None):
     warnings.filterwarnings('ignore')
 
 def list_available_data_asset_names(context, data_source_name=None):
+    """
+    TODO: Needs a docstring and tests.
+    """
+
     datasources = context.list_datasources()
     for datasource in datasources:
         if data_source_name and datasource['name'] != data_source_name:
@@ -126,3 +142,93 @@ def list_available_data_asset_names(context, data_source_name=None):
                             """))
 
     #TODO: add expectation suite names (existing)
+
+bootstrap_link_element = """<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">"""
+cooltip_style_element = """<style type="text/css">
+.cooltip {
+    display:inline-block;
+    position:relative;
+    text-align:left;
+}
+
+.cooltip .top {
+    min-width:200px; 
+    top:-6px;
+    left:50%;
+    transform:translate(-50%, -100%);
+    padding:10px 20px;
+    color:#FFFFFF;
+    background-color:#222222;
+    font-weight:normal;
+    font-size:13px;
+    border-radius:8px;
+    position:absolute;
+    z-index:99999999;
+    box-sizing:border-box;
+    box-shadow:0 1px 8px rgba(0,0,0,0.5);
+    display:none;
+}
+
+.cooltip:hover .top {
+    display:block;
+}
+
+.cooltip .top i {
+    position:absolute;
+    top:100%;
+    left:50%;
+    margin-left:-12px;
+    width:24px;
+    height:12px;
+    overflow:hidden;
+}
+
+.cooltip .top i::after {
+    content:'';
+    position:absolute;
+    width:12px;
+    height:12px;
+    left:50%;
+    transform:translate(-50%,-50%) rotate(45deg);
+    background-color:#222222;
+    box-shadow:0 1px 8px rgba(0,0,0,0.5);
+}
+</style>
+"""
+
+def display_column_expectations_as_section(
+    expectation_suite,
+    column,
+    section_renderer=render.renderer.column_section_renderer.PrescriptiveColumnSectionRenderer,
+    view_renderer=render.view.view.DefaultJinjaSectionView,
+    include_styling=True,
+    return_without_displaying=False,
+):
+    """This is a utility function to render all of the Expectations in an ExpectationSuite with the same column name as an HTML block.
+
+    By default, the HTML block is rendered using PrescriptiveColumnSectionRenderer and the view is rendered using DefaultJinjaSectionView.
+    Therefore, it should look exactly the same as the default renderer for build_docs. 
+
+    Example usage:
+    exp = context.get_expectation_suite("notable_works_by_charles_dickens", "BasicDatasetProfiler")
+    display_column_expectations_as_section(exp, "Type")
+    """
+
+    #TODO: replace this with a generic utility function, preferably a method on an ExpectationSuite class
+    column_expectation_list = [ e for e in expectation_suite["expectations"] if "column" in e["kwargs"] and e["kwargs"]["column"] == column ]
+
+    document = render.renderer.column_section_renderer.PrescriptiveColumnSectionRenderer.render(column_expectation_list)
+    view = render.view.view.DefaultJinjaSectionView.render({
+        "section": document,
+        "section_loop": {"index": 1},
+    })
+
+    if include_styling:
+        html_to_display = bootstrap_link_element+cooltip_style_element+view
+    else:
+        html_to_display = view
+
+    if return_without_displaying:
+        return html_to_display
+    else:
+        display(HTML(html_to_display))
