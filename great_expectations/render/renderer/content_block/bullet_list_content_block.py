@@ -655,6 +655,32 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
         }]
     
     @classmethod
+    def expect_column_value_lengths_to_equal(cls, expectation, styling=None, include_column_name=True):
+        params = substitute_none_for_missing(
+            expectation["kwargs"],
+            ["column", "value", "mostly"]
+        )
+        
+        if params.get("value") is None:
+            template_str = "values may have any length."
+        else:
+            template_str = "values must be $value characters long"
+            if params.get("mostly"):
+                params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
+                template_str += ", at least $mostly_pct % of the time."
+            else:
+                template_str += "."
+        
+        if include_column_name:
+            template_str = "$column " + template_str
+
+        return [{
+            "template": template_str,
+            "params": params,
+            "styling": styling,
+        }]
+    
+    @classmethod
     def expect_column_values_to_match_json_schema(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation["kwargs"],
