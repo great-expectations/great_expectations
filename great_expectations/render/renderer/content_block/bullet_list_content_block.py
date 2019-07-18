@@ -325,9 +325,9 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
         if params["value_set"] is None:
 
             if include_column_name:
-                template_str = "$column values must belong to a set, but that set is not specified."
+                template_str = "$column distinct values must belong to a set, but that set is not specified."
             else:
-                template_str = "values must belong to a set, but that set is not specified."
+                template_str = "distinct values must belong to a set, but that set is not specified."
 
         else:
 
@@ -338,34 +338,9 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
             )
 
             if include_column_name:
-                template_str = "$column values must belong to this set: "+values_string+"."
+                template_str = "$column distinct values must belong to this set: "+values_string+"."
             else:
-                template_str = "values must belong to this set: "+values_string+"."
-
-        return [{
-            "template": template_str,
-            "params": params,
-            "styling": styling,
-        }]
-
-    @classmethod
-    def expect_column_values_to_not_match_regex(cls, expectation, styling=None, include_column_name=True):
-        params = substitute_none_for_missing(
-            expectation["kwargs"],
-            ["column", "regex", "mostly"],
-        )
-
-        if params.get("mostly"):
-            params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
-            if include_column_name:
-                template_str = "$column values must not match this regular expression: $regex, at least $mostly_pct % of the time."
-            else:
-                template_str = "values must not match this regular expression: $regex, at least $mostly_pct % of the time."
-        else:
-            if include_column_name:
-                template_str = "$column values must not match this regular expression: $regex."
-            else:
-                template_str = "values must not match this regular expression: $regex."
+                template_str = "distinct values must belong to this set: "+values_string+"."
 
         return [{
             "template": template_str,
