@@ -64,7 +64,7 @@ def test_render_section_page():
             {
                 "content_block_type": "table",
                 "header": "Dataset info",
-                "table_rows": [
+                "table": [
                     ["Number of variables", "12"],
                     ["Number of observations", "891"],
                 ],
@@ -203,7 +203,7 @@ def test_rendering_components_with_styling():
                 }
             }
         },
-        "table_rows": [
+        "table": [
             ["Mean", "446"],
             ["Minimum", "1"],
         ],
@@ -279,7 +279,7 @@ def test_render_table_component():
         # "component_type": "header",
         "content_block_type": "table",
         "header": "Overview",
-        "table_rows": [
+        "table": [
             ["Mean", "446"],
             ["Minimum", "1"],
         ],

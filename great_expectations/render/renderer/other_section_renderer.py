@@ -80,7 +80,7 @@ class DescriptiveOverviewSectionRenderer(Renderer):
         content_blocks.append({
             "content_block_type": "table",
             "header": "Dataset info",
-            "table_rows": table_rows,
+            "table": table_rows,
             "styling": {
                 "classes": ["col-6", "table-responsive"],
                 "styles": {
@@ -103,7 +103,7 @@ class DescriptiveOverviewSectionRenderer(Renderer):
         content_blocks.append({
             "content_block_type": "table",
             "header": "Variable types",
-            "table_rows": table_rows,
+            "table": table_rows,
             "styling": {
                 "classes": ["col-6", "table-responsive", ],
                 "styles": {
@@ -220,7 +220,7 @@ class DescriptiveOverviewSectionRenderer(Renderer):
         # content_blocks.append({
         #     "content_block_type": "table",
         #     "header": "Warnings",
-        #     "table_rows": table_rows,
+        #     "table": table_rows,
         #     "styling": {
         #         "classes": ["col-12"],
         #         "styles": {

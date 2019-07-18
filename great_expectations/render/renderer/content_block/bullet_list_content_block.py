@@ -31,20 +31,9 @@ def substitute_none_for_missing(kwargs, kwarg_list):
 # class FailedExpectationBulletListContentBlockRenderer(BulletListContentBlockRenderer):
 # class FailedExpectationBulletListContentBlockRenderer(BulletListContentBlockRenderer):
 
-class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
-    _content_block_type = "bullet_list"
-
-    _default_element_styling = {
-        "default": {
-            "classes": ["badge", "badge-secondary"]
-        },
-        "params": {
-            "column": {
-                "classes": ["badge", "badge-primary"]
-            }
-        }
-    }
-
+# TODO:
+class PrescriptiveStringRenderer(ContentBlockRenderer):
+    
     @classmethod
     def _missing_content_block_fn(cls, expectation, styling=None, include_column_name=True):
         return [{
@@ -71,14 +60,14 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
                 }
             },
         }]
-
+    
     @classmethod
     def expect_column_to_exist(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation["kwargs"],
             ["column", "column_index"],
         )
-
+        
         if params["column_index"] is None:
             if include_column_name:
                 template_str = "$column is a required field."
@@ -90,25 +79,25 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
                 template_str = "$column must be the $column_indexth field"
             else:
                 template_str = "must be the $column_indexth field"
-
+        
         return [{
             "template": template_str,
             "params": params,
             "styling": styling,
         }]
-
+    
     @classmethod
     def expect_column_unique_value_count_to_be_between(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation["kwargs"],
             ["column", "min_value", "max_value", "mostly"],
         )
-
+        
         if (params["min_value"] is None) and (params["max_value"] is None):
             template_str = "may have any number of unique values."
         else:
             if params.get("mostly"):
-                params["mostly_pct"] = "%.1f" % (params["mostly"]*100,)
+                params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
                 if params["min_value"] is None:
                     template_str = "must have fewer than $max_value unique values, at least $mostly_pct % of the time."
                 elif params["max_value"] is None:
@@ -122,16 +111,16 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
                     template_str = "must have more than $min_value unique values."
                 else:
                     template_str = "must have between $min_value and $max_value unique values."
-
+        
         if include_column_name:
             template_str = "$column " + template_str
-
+        
         return [{
             "template": template_str,
             "params": params,
             "styling": styling,
         }]
-
+    
     # NOTE: This method is a pretty good example of good usage of `params`.
     @classmethod
     def expect_column_values_to_be_between(cls, expectation, styling=None, include_column_name=True):
@@ -139,151 +128,151 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
             expectation["kwargs"],
             ["column", "min_value", "max_value", "mostly"]
         )
-
+        
         if (params["min_value"] is None) and (params["max_value"] is None):
             template_str = "may have any numerical value."
         else:
             if params.get("mostly"):
-                params["mostly_pct"] = "%.1f" % (params["mostly"]*100,)
+                params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
                 if params["min_value"] is not None and params["max_value"] is not None:
                     template_str = "values must be between $min_value and $max_value, at least $mostly_pct % of the time."
-    
+                
                 elif params["min_value"] is None:
                     template_str = "values must be less than $max_value, at least $mostly_pct % of the time."
-    
+                
                 elif params["max_value"] is None:
                     template_str = "values must be less than $max_value, at least $mostly_pct % of the time."
             else:
                 if params["min_value"] is not None and params["max_value"] is not None:
                     template_str = "values must always be between $min_value and $max_value."
-    
+                
                 elif params["min_value"] is None:
                     template_str = "values must always be less than $max_value."
-    
+                
                 elif params["max_value"] is None:
                     template_str = "values must always be more than $min_value."
-
+        
         if include_column_name:
             template_str = "$column " + template_str
-
+        
         return [{
             "template": template_str,
             "params": params,
             "styling": styling,
         }]
-
+    
     @classmethod
     def expect_column_pair_values_A_to_be_greater_than_B(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation["kwargs"],
             ["column_A", "column_B", "parse_strings_as_datetimes",
-                "ignore_row_if", "mostly", "or_equal"]
+             "ignore_row_if", "mostly", "or_equal"]
         )
-
+        
         if (params["column_A"] is None) or (params["column_B"] is None):
             template_str = "$column has a bogus `expect_column_pair_values_A_to_be_greater_than_B` expectation."
-
+        
         if params["mostly"] is None:
             if params["or_equal"] in [None, False]:
                 template_str = "Values in $column_A must always be greater than those in $column_B."
             else:
                 template_str = "Values in $column_A must always be greater than or equal to those in $column_B."
         else:
-            params["mostly_pct"] = "%.1f" % (params["mostly"]*100,)
+            params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
             if params["or_equal"] in [None, False]:
                 template_str = "Values in $column_A must be greater than those in $column_B, at least $mostly_pct % of the time."
             else:
                 template_str = "Values in $column_A must be greater than or equal to those in $column_B, at least $mostly_pct % of the time."
-
+        
         if params.get("parse_strings_as_datetimes"):
             template_str += " Values should be parsed as datetimes."
-
+        
         return [{
             "template": template_str,
             "params": params,
             "styling": styling,
         }]
-
+    
     @classmethod
     def expect_column_pair_values_to_be_equal(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation["kwargs"],
             ["column_A", "column_B",
-                "ignore_row_if", "mostly", ]
+             "ignore_row_if", "mostly", ]
         )
-
+        
         # NOTE: This renderer doesn't do anything with "ignore_row_if"
-
+        
         if (params["column_A"] is None) or (params["column_B"] is None):
             template_str = " unrecognized kwargs for expect_column_pair_values_to_be_equal: missing column."
-
+        
         if params["mostly"] is None:
             template_str = "Values in $column_A and $column_B must always be equal."
         else:
             # Note: this pattern for type conversion seems to work reasonably well.
             # Note: I'm not 100% sure that this is the right place to encode details like how many decimals to show.
-            params["mostly_pct"] = "%.1f" % (params["mostly"]*100,)
+            params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
             template_str = "Values in $column_A and $column_B must be equal, at least $mostly_pct % of the time."
-
+        
         return [{
             "template": template_str,
             "params": params,
             "styling": styling,
         }]
-
+    
     @classmethod
     def expect_table_columns_to_match_ordered_list(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation["kwargs"],
             ["column_list"]
         )
-
+        
         if params["column_list"] is None:
             template_str = "This table should have a list of columns in a specific order, but that order is not specified."
-
+        
         else:
             template_str = "This table should have these columns in this order: "
             for idx in range(len(params["column_list"]) - 1):
                 template_str += "$column_list_" + str(idx) + ", "
                 params["column_list_" + str(idx)] = params["column_list"][idx]
-
-            template_str += "$column_list_" + str(idx+1)
-            params["column_list_" + str(idx+1)] = params["column_list"][idx+1]
-
+            
+            template_str += "$column_list_" + str(idx + 1)
+            params["column_list_" + str(idx + 1)] = params["column_list"][idx + 1]
+        
         return [{
             "template": template_str,
             "params": params,
             "styling": styling,
         }]
-
+    
     @classmethod
     def expect_multicolumn_values_to_be_unique(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation["kwargs"],
             ["column_list", "ignore_row_if"]
         )
-
+        
         template_str = "Values must always be unique across columns: "
         for idx in range(len(params["column_list"]) - 1):
             template_str += "$column_list_" + str(idx) + ", "
             params["column_list_" + str(idx)] = params["column_list"][idx]
-
+        
         template_str += "$column_list_" + str(idx + 1)
         params["column_list_" + str(idx + 1)] = params["column_list"][idx + 1]
-
+        
         return [{
             "template": template_str,
             "params": params,
             "styling": styling,
         }]
-
+    
     @classmethod
     def expect_table_row_count_to_be_between(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation["kwargs"],
             ["min_value", "max_value"]
         )
-
+        
         if params["min_value"] is None and params["max_value"] is None:
             template_str = "May have any number of rows."
         else:
@@ -293,68 +282,68 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
                 template_str = "Must have less than than $max_value rows."
             elif params["max_value"] is None:
                 template_str = "Must have more than $min_value rows."
-
+        
         return [{
             "template": template_str,
             "params": params,
             "styling": styling,
         }]
-
+    
     @classmethod
     def expect_table_row_count_to_equal(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation["kwargs"],
             ["value"]
         )
-
+        
         template_str = "Must have exactly $value rows."
-
+        
         return [{
             "template": template_str,
             "params": params,
             "styling": styling,
         }]
-
+    
     @classmethod
     def expect_column_distinct_values_to_be_in_set(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation["kwargs"],
             ["column", "value_set"],
         )
-
+        
         if params["value_set"] is None:
-
+            
             if include_column_name:
                 template_str = "$column distinct values must belong to a set, but that set is not specified."
             else:
                 template_str = "distinct values must belong to a set, but that set is not specified."
-
+        
         else:
-
+            
             for i, v in enumerate(params["value_set"]):
-                params["v__"+str(i)] = v
+                params["v__" + str(i)] = v
             values_string = " ".join(
-                ["$v__"+str(i) for i, v in enumerate(params["value_set"])]
+                ["$v__" + str(i) for i, v in enumerate(params["value_set"])]
             )
-
+            
             if include_column_name:
-                template_str = "$column distinct values must belong to this set: "+values_string+"."
+                template_str = "$column distinct values must belong to this set: " + values_string + "."
             else:
-                template_str = "distinct values must belong to this set: "+values_string+"."
-
+                template_str = "distinct values must belong to this set: " + values_string + "."
+        
         return [{
             "template": template_str,
             "params": params,
             "styling": styling,
         }]
-
+    
     @classmethod
     def expect_column_values_to_not_be_null(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation["kwargs"],
             ["column", "mostly"],
         )
-
+        
         if params.get("mostly"):
             params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
             if include_column_name:
@@ -366,13 +355,13 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
                 template_str = "$column values must never be null."
             else:
                 template_str = "values must never be null."
-
+        
         return [{
             "template": template_str,
             "params": params,
             "styling": styling,
         }]
-
+    
     @classmethod
     def expect_column_values_to_be_null(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
@@ -385,16 +374,16 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
             template_str = "values must be null, at least $mostly_pct % of the time."
         else:
             template_str = "values must be null."
-            
+        
         if include_column_name:
             template_str = "$column " + template_str
-            
+        
         return [{
             "template": template_str,
             "params": params,
             "styling": styling
         }]
-
+    
     @classmethod
     def expect_column_values_to_be_of_type(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
@@ -407,32 +396,32 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
             template_str = "values must be of type $type_, at least $mostly_pct % of the time."
         else:
             template_str = "values must be of type $type_."
-            
+        
         if include_column_name:
             template_str = "$column " + template_str
-            
+        
         return [{
             "template": template_str,
             "params": params,
             "styling": styling
         }]
-
+    
     @classmethod
     def expect_column_values_to_be_in_type_list(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation["kwargs"],
             ["column", "type_list", "mostly"],
         )
-
+        
         for i, v in enumerate(params["type_list"]):
-            params["v__"+str(i)] = v
+            params["v__" + str(i)] = v
         values_string = " ".join(
-            ["$v__"+str(i) for i, v in enumerate(params["type_list"])]
+            ["$v__" + str(i) for i, v in enumerate(params["type_list"])]
         )
-
+        
         if params.get("mostly"):
             params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
-
+            
             if include_column_name:
                 # NOTE: Localization will be tricky for this template_str.
                 template_str = "$column value types must belong to this set: " + values_string + ", at least $mostly_pct % of the time."
@@ -442,34 +431,34 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
         else:
             if include_column_name:
                 # NOTE: Localization will be tricky for this template_str.
-                template_str = "$column value types must belong to this set: "+values_string+"."
+                template_str = "$column value types must belong to this set: " + values_string + "."
             else:
                 # NOTE: Localization will be tricky for this template_str.
-                template_str = "value types must belong to this set: "+values_string+"."
-
+                template_str = "value types must belong to this set: " + values_string + "."
+        
         return [{
             "template": template_str,
             "params": params,
             "styling": styling,
         }]
-
+    
     @classmethod
     def expect_column_values_to_be_in_set(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation["kwargs"],
             ["column", "value_set", "mostly", "parse_strings_as_datetimes"]
         )
-
+        
         if params["value_set"] is None or len(params["value_set"]) == 0:
-                template_str = "values must belong to a set, but that set is not specified."
+            template_str = "values must belong to a set, but that set is not specified."
         else:
             for i, v in enumerate(params["value_set"]):
-                params["v__"+str(i)] = v
-                
+                params["v__" + str(i)] = v
+            
             values_string = " ".join(
-                ["$v__"+str(i) for i, v in enumerate(params["value_set"])]
+                ["$v__" + str(i) for i, v in enumerate(params["value_set"])]
             )
-
+            
             template_str = "values must belong to this set: " + values_string
             
             if params.get("mostly"):
@@ -477,63 +466,64 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
                 template_str += ", at least $mostly_pct % of the time."
             else:
                 template_str += "."
-                
+        
         if params.get("parse_strings_as_datetimes"):
             template_str += " Values should be parsed as datetimes."
-            
+        
         if include_column_name:
             template_str = "$column " + template_str
-
+        
         return [{
             "template": template_str,
             "params": params,
             "styling": styling,
         }]
-
+    
     @classmethod
     def expect_column_values_to_not_be_in_set(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation["kwargs"],
             ["column", "value_set", "mostly", "parse_strings_as_datetimes"]
         )
-    
+        
         if params["value_set"] is None or len(params["value_set"]) == 0:
             template_str = "values must not belong to a set, but that set is not specified."
         else:
             for i, v in enumerate(params["value_set"]):
                 params["v__" + str(i)] = v
-        
+            
             values_string = " ".join(
                 ["$v__" + str(i) for i, v in enumerate(params["value_set"])]
             )
-        
+            
             template_str = "values must not belong to this set: " + values_string
-        
+            
             if params.get("mostly"):
                 params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
                 template_str += ", at least $mostly_pct % of the time."
             else:
                 template_str += "."
-    
+        
         if params.get("parse_strings_as_datetimes"):
             template_str += " Values should be parsed as datetimes."
-    
+        
         if include_column_name:
             template_str = "$column"
-    
+        
         return [{
             "template": template_str,
             "params": params,
             "styling": styling,
         }]
-
+    
     @classmethod
-    def expect_column_proportion_of_unique_values_to_be_between(cls, expectation, styling=None, include_column_name=True):
+    def expect_column_proportion_of_unique_values_to_be_between(cls, expectation, styling=None,
+                                                                include_column_name=True):
         params = substitute_none_for_missing(
             expectation["kwargs"],
             ["column", "min_value", "max_value"],
         )
-
+        
         if params["min_value"] is None and params["max_value"] is None:
             template_str = "may have any percentage of unique values."
         else:
@@ -543,16 +533,16 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
                 template_str = "must have at least $min_value% unique values."
             else:
                 template_str = "must have between $min_value and $max_value% unique values."
-
+        
         if include_column_name:
             template_str = "$column " + template_str
-
+        
         return [{
             "template": template_str,
             "params": params,
             "styling": styling,
         }]
-
+    
     # TODO: test parse_strings_as_datetimes
     @classmethod
     def expect_column_values_to_be_increasing(cls, expectation, styling=None, include_column_name=True):
@@ -565,25 +555,25 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
             template_str = "values must be strictly greater than previous values"
         else:
             template_str = "values must be greater than or equal to previous values"
-            
+        
         if params.get("mostly"):
             params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
             template_str += ", at least $mostly_pct % of the time."
         else:
             template_str += "."
-            
+        
         if params.get("parse_strings_as_datetimes"):
             template_str += " Values should be parsed as datetimes."
-            
+        
         if include_column_name:
             template_str = "$column " + template_str
-
+        
         return [{
             "template": template_str,
             "params": params,
             "styling": styling,
         }]
-
+    
     # TODO: test parse_strings_as_datetimes
     @classmethod
     def expect_column_values_to_be_decreasing(cls, expectation, styling=None, include_column_name=True):
@@ -591,63 +581,63 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
             expectation["kwargs"],
             ["column", "strictly", "mostly", "parse_strings_as_datetimes"]
         )
-    
+        
         if params.get("strictly"):
             template_str = "values must be strictly less than previous values"
         else:
             template_str = "values must be less than or equal to previous values"
-    
+        
         if params.get("mostly"):
             params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
             template_str += ", at least $mostly_pct % of the time."
         else:
             template_str += "."
-    
+        
         if params.get("parse_strings_as_datetimes"):
             template_str += " Values should be parsed as datetimes."
-    
+        
         if include_column_name:
             template_str = "$column " + template_str
-    
+        
         return [{
             "template": template_str,
             "params": params,
             "styling": styling,
         }]
-
+    
     @classmethod
     def expect_column_value_lengths_to_be_between(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation["kwargs"],
             ["column", "min_value", "max_value", "mostly"],
         )
-
+        
         if (params["min_value"] is None) and (params["max_value"] is None):
             template_str = "values may have any length."
         else:
             if params.get("mostly"):
-                params["mostly_pct"] = "%.1f" % (params["mostly"]*100,)
+                params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
                 if params["min_value"] is not None and params["max_value"] is not None:
                     template_str = "values must be between $min_value and $max_value characters long, at least $mostly_pct % of the time."
-    
+                
                 elif params["min_value"] is None:
                     template_str = "values must be less than $max_value characters long, at least $mostly_pct % of the time."
-    
+                
                 elif params["max_value"] is None:
                     template_str = "values must be more than $min_value characters long, at least $mostly_pct % of the time."
             else:
                 if params["min_value"] is not None and params["max_value"] is not None:
                     template_str = "values must always be between $min_value and $max_value characters long."
-    
+                
                 elif params["min_value"] is None:
                     template_str = "values must always be less than $max_value characters long."
-    
+                
                 elif params["max_value"] is None:
                     template_str = "values must always be more than $min_value characters long."
-
+        
         if include_column_name:
             template_str = "$column " + template_str
-
+        
         return [{
             "template": template_str,
             "params": params,
@@ -673,7 +663,7 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
         
         if include_column_name:
             template_str = "$column " + template_str
-
+        
         return [{
             "template": template_str,
             "params": params,
@@ -696,10 +686,10 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
                 template_str += ", at least $mostly_pct % of the time."
             else:
                 template_str += "."
-                
+        
         if include_column_name:
             template_str = "$column " + template_str
-
+        
         return [{
             "template": template_str,
             "params": params,
@@ -712,7 +702,7 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
             expectation["kwargs"],
             ["column", "regex", "mostly"],
         )
-
+        
         if not params.get("regex"):
             template_str = "values must not match a regular expression but none was specified."
         else:
@@ -727,7 +717,7 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
                     template_str = "$column values must not match this regular expression: $regex."
                 else:
                     template_str = "values must not match this regular expression: $regex."
-
+        
         return [{
             "template": template_str,
             "params": params,
@@ -740,30 +730,30 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
             expectation["kwargs"],
             ["column", "regex_list", "mostly", "match_on"],
         )
-    
+        
         if not params.get("regex_list") or len(params.get("regex_list")) == 0:
             template_str = "values must match a set of regular expressions but none was specified."
         else:
             for i, v in enumerate(params["regex_list"]):
-                params["v__"+str(i)] = v
+                params["v__" + str(i)] = v
             values_string = " ".join(
-                ["$v__"+str(i) for i, v in enumerate(params["regex_list"])]
+                ["$v__" + str(i) for i, v in enumerate(params["regex_list"])]
             )
             
             if params.get("match_on") == "all":
                 template_str = "values must match all of the following regular expressions: " + values_string
             else:
                 template_str = "values must match any of the following regular expressions: " + values_string
-                
+            
             if params.get("mostly"):
                 params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
                 template_str += ", at least $mostly_pct % of the time."
             else:
                 template_str += "."
-                
+        
         if include_column_name:
             template_str = "$column " + template_str
-
+        
         return [{
             "template": template_str,
             "params": params,
@@ -776,7 +766,7 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
             expectation["kwargs"],
             ["column", "regex_list", "mostly"],
         )
-    
+        
         if not params.get("regex_list") or len(params.get("regex_list")) == 0:
             template_str = "values must match a list of regular expressions but none was specified."
         else:
@@ -785,18 +775,18 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
             values_string = " ".join(
                 ["$v__" + str(i) for i, v in enumerate(params["regex_list"])]
             )
-        
+            
             template_str = "values must not match any of the following regular expressions: " + values_string
-        
+            
             if params.get("mostly"):
                 params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
                 template_str += ", at least $mostly_pct % of the time."
             else:
                 template_str += "."
-    
+        
         if include_column_name:
             template_str = "$column " + template_str
-    
+        
         return [{
             "template": template_str,
             "params": params,
@@ -809,7 +799,7 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
             expectation["kwargs"],
             ["column", "strftime_format", "mostly"],
         )
-    
+        
         if not params.get("strftime_format"):
             template_str = "values must match a strftime format but none was specified."
         else:
@@ -822,7 +812,7 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
         
         if include_column_name:
             template_str = "$column " + template_str
-
+        
         return [{
             "template": template_str,
             "params": params,
@@ -843,10 +833,10 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
             template_str += ", at least $mostly_pct % of the time."
         else:
             template_str += "."
-            
+        
         if include_column_name:
             template_str = "$column " + template_str
-
+        
         return [{
             "template": template_str,
             "params": params,
@@ -859,18 +849,18 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
             expectation["kwargs"],
             ["column", "mostly"],
         )
-    
+        
         template_str = "values must be parseable as JSON"
-    
+        
         if params.get("mostly"):
             params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
             template_str += ", at least $mostly_pct % of the time."
         else:
             template_str += "."
-    
+        
         if include_column_name:
             template_str = "$column " + template_str
-    
+        
         return [{
             "template": template_str,
             "params": params,
@@ -893,10 +883,10 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
                 template_str = "values must match the following JSON Schema, at least $mostly_pct % of the time: $formatted_json"
             else:
                 template_str = "values must match the following JSON Schema: $formatted_json"
-
+        
         if include_column_name:
             template_str = "$column " + template_str
-
+        
         return [{
             "template": template_str,
             "params": params,
@@ -916,56 +906,56 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
             expectation["kwargs"],
             ["column", "value_set", "parse_strings_as_datetimes"]
         )
-    
+        
         if params["value_set"] is None or len(params["value_set"]) == 0:
             template_str = "distinct values must contain a given set, but that set is not specified."
         else:
             for i, v in enumerate(params["value_set"]):
                 params["v__" + str(i)] = v
-        
+            
             values_string = " ".join(
                 ["$v__" + str(i) for i, v in enumerate(params["value_set"])]
             )
-        
+            
             template_str = "distinct values must contain this set: " + values_string + "."
-    
+        
         if params.get("parse_strings_as_datetimes"):
             template_str += " Values should be parsed as datetimes."
-    
+        
         if include_column_name:
             template_str = "$column " + template_str
-    
+        
         return [{
             "template": template_str,
             "params": params,
             "styling": styling,
         }]
-
+    
     @classmethod
     def expect_column_distinct_values_to_equal_set(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation["kwargs"],
             ["column", "value_set", "parse_strings_as_datetimes"]
         )
-    
+        
         if params["value_set"] is None or len(params["value_set"]) == 0:
             template_str = "distinct values must match a given set, but that set is not specified."
         else:
             for i, v in enumerate(params["value_set"]):
                 params["v__" + str(i)] = v
-        
+            
             values_string = " ".join(
                 ["$v__" + str(i) for i, v in enumerate(params["value_set"])]
             )
-        
+            
             template_str = "distinct values must match this set: " + values_string + "."
-    
+        
         if params.get("parse_strings_as_datetimes"):
             template_str += " Values should be parsed as datetimes."
-    
+        
         if include_column_name:
             template_str = "$column " + template_str
-    
+        
         return [{
             "template": template_str,
             "params": params,
@@ -978,7 +968,7 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
             expectation["kwargs"],
             ["column", "min_value", "max_value"]
         )
-
+        
         if (params["min_value"] is None) and (params["max_value"] is None):
             template_str = "mean may have any numerical value."
         else:
@@ -988,10 +978,91 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
                 template_str = "mean must be less than $max_value."
             elif params["max_value"] is None:
                 template_str = "mean must be more than $min_value."
-
+        
         if include_column_name:
             template_str = "$column " + template_str
-
+        
+        return [{
+            "template": template_str,
+            "params": params,
+            "styling": styling,
+        }]
+    
+    @classmethod
+    def expect_column_median_to_be_between(cls, expectation, styling=None, include_column_name=True):
+        params = substitute_none_for_missing(
+            expectation["kwargs"],
+            ["column", "min_value", "max_value"]
+        )
+        
+        if (params["min_value"] is None) and (params["max_value"] is None):
+            template_str = "median may have any numerical value."
+        else:
+            if params["min_value"] is not None and params["max_value"] is not None:
+                template_str = "median must be between $min_value and $max_value."
+            elif params["min_value"] is None:
+                template_str = "median must be less than $max_value."
+            elif params["max_value"] is None:
+                template_str = "median must be more than $min_value."
+        
+        if include_column_name:
+            template_str = "$column " + template_str
+        
+        return [{
+            "template": template_str,
+            "params": params,
+            "styling": styling,
+        }]
+    
+    @classmethod
+    def expect_column_stdev_to_be_between(cls, expectation, styling=None, include_column_name=True):
+        params = substitute_none_for_missing(
+            expectation["kwargs"],
+            ["column", "min_value", "max_value"]
+        )
+        
+        if (params["min_value"] is None) and (params["max_value"] is None):
+            template_str = "standard deviation may have any numerical value."
+        else:
+            if params["min_value"] is not None and params["max_value"] is not None:
+                template_str = "standard deviation must be between $min_value and $max_value."
+            elif params["min_value"] is None:
+                template_str = "standard deviation must be less than $max_value."
+            elif params["max_value"] is None:
+                template_str = "standard deviation must be more than $min_value."
+        
+        if include_column_name:
+            template_str = "$column " + template_str
+        
+        return [{
+            "template": template_str,
+            "params": params,
+            "styling": styling,
+        }]
+    
+    @classmethod
+    def expect_column_max_to_be_between(cls, expectation, styling=None, include_column_name=True):
+        params = substitute_none_for_missing(
+            expectation["kwargs"],
+            ["column", "min_value", "max_value", "parse_strings_as_datetimes"]
+        )
+        
+        if (params["min_value"] is None) and (params["max_value"] is None):
+            template_str = "maximum value may have any numerical value."
+        else:
+            if params["min_value"] is not None and params["max_value"] is not None:
+                template_str = "maximum value must be between $min_value and $max_value."
+            elif params["min_value"] is None:
+                template_str = "maximum value must be less than $max_value."
+            elif params["max_value"] is None:
+                template_str = "maximum value must be more than $min_value."
+        
+        if params.get("parse_strings_as_datetimes"):
+            template_str += " Values should be parsed as datetimes."
+        
+        if include_column_name:
+            template_str = "$column " + template_str
+        
         return [{
             "template": template_str,
             "params": params,
@@ -1004,7 +1075,7 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
             expectation["kwargs"],
             ["column", "min_value", "max_value", "parse_strings_as_datetimes"]
         )
-
+        
         if (params["min_value"] is None) and (params["max_value"] is None):
             template_str = "minimum value may have any numerical value."
         else:
@@ -1014,13 +1085,13 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
                 template_str = "minimum value must be less than $max_value."
             elif params["max_value"] is None:
                 template_str = "minimum value must be more than $min_value."
-
+        
         if params.get("parse_strings_as_datetimes"):
             template_str += " Values should be parsed as datetimes."
-
+        
         if include_column_name:
             template_str = "$column " + template_str
-
+        
         return [{
             "template": template_str,
             "params": params,
@@ -1033,7 +1104,7 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
             expectation["kwargs"],
             ["column", "min_value", "max_value"]
         )
-
+        
         if (params["min_value"] is None) and (params["max_value"] is None):
             template_str = "sum may have any numerical value."
         else:
@@ -1043,41 +1114,41 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
                 template_str = "sum must be less than $max_value."
             elif params["max_value"] is None:
                 template_str = "sum must be more than $min_value."
-
+        
         if include_column_name:
             template_str = "$column " + template_str
-
+        
         return [{
             "template": template_str,
             "params": params,
             "styling": styling,
         }]
-
+    
     @classmethod
     def expect_column_most_common_value_to_be_in_set(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation["kwargs"],
             ["column", "value_set", "ties_okay"]
         )
-
+        
         if params["value_set"] is None or len(params["value_set"]) == 0:
             template_str = "most common value must belong to a set, but that set is not specified."
         else:
             for i, v in enumerate(params["value_set"]):
                 params["v__" + str(i)] = v
-
+            
             values_string = " ".join(
                 ["$v__" + str(i) for i, v in enumerate(params["value_set"])]
             )
-
+            
             template_str = "most common value must belong to this set: " + values_string + "."
-
+            
             if params.get("ties_okay"):
                 template_str += " Values outside this set that are as common (but not more common) are allowed."
-
+        
         if include_column_name:
             template_str = "$column " + template_str
-
+        
         return [{
             "template": template_str,
             "params": params,
@@ -1093,14 +1164,14 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
         
         if not params.get("partition_object"):
             template_str = "Kullback-Leibler (KL) divergence with respect to a given distribution must be lower than a \
-            provided threshold but no distribution was specified."
+                provided threshold but no distribution was specified."
         else:
             params["sparklines_histogram"] = sparklines(params.get("partition_object")["weights"])[0]
             template_str = "Kullback-Leibler (KL) divergence with respect to the following distribution must be lower than $threshold: $sparklines_histogram"
-
+        
         if include_column_name:
             template_str = "$column " + template_str
-
+        
         return [{
             "template": template_str,
             "params": params,
@@ -1120,14 +1191,333 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
             expectation["kwargs"],
             ["column", ],
         )
-
+        
         if include_column_name:
             template_str = "$column values must be unique."
         else:
             template_str = "values must be unique."
-
+        
         return [{
             "template": template_str,
             "params": params,
             "styling": styling,
         }]
+
+
+class PrescriptiveEvrTableContentBlockRenderer(PrescriptiveStringRenderer):
+    _content_block_type = "table"
+
+    _default_element_styling = {
+        "default": {
+            "classes": ["badge", "badge-secondary"]
+        },
+        "params": {
+            "column": {
+                "classes": ["badge", "badge-primary"]
+            }
+        }
+    }
+
+    @classmethod
+    def _missing_content_block_fn(cls, evr, styling=None, include_column_name=True):
+        expectation = evr["expectation_config"]
+        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls)._missing_content_block_fn(
+            expectation, styling, include_column_name)
+        return [prescriptive_string_object]
+
+    @classmethod
+    def expect_column_to_exist(cls, evr, styling=None, include_column_name=True):
+        expectation = evr["expectation_config"]
+        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_to_exist(
+            expectation, styling, include_column_name)
+        return [prescriptive_string_object]
+
+    @classmethod
+    def expect_column_unique_value_count_to_be_between(cls, evr, styling=None, include_column_name=True):
+        expectation = evr["expectation_config"]
+        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_unique_value_count_to_be_between(
+            expectation, styling, include_column_name)
+        return [prescriptive_string_object]
+
+    @classmethod
+    def expect_column_values_to_be_between(cls, evr, styling=None, include_column_name=True):
+        expectation = evr["expectation_config"]
+        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_values_to_be_between(
+            expectation, styling, include_column_name)
+        return [prescriptive_string_object]
+
+    @classmethod
+    def expect_column_pair_values_A_to_be_greater_than_B(cls, evr, styling=None, include_column_name=True):
+        expectation = evr["expectation_config"]
+        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_pair_values_A_to_be_greater_than_B(
+            expectation, styling, include_column_name)
+        return [prescriptive_string_object]
+
+    @classmethod
+    def expect_column_pair_values_to_be_equal(cls, evr, styling=None, include_column_name=True):
+        expectation = evr["expectation_config"]
+        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_pair_values_to_be_equal(
+            expectation, styling, include_column_name)
+        return [prescriptive_string_object]
+
+    @classmethod
+    def expect_table_columns_to_match_ordered_list(cls, evr, styling=None, include_column_name=True):
+        expectation = evr["expectation_config"]
+        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_table_columns_to_match_ordered_list(
+            expectation, styling, include_column_name)
+        return [prescriptive_string_object]
+
+    @classmethod
+    def expect_multicolumn_values_to_be_unique(cls, evr, styling=None, include_column_name=True):
+        expectation = evr["expectation_config"]
+        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_multicolumn_values_to_be_unique(
+            expectation, styling, include_column_name)
+        return [prescriptive_string_object]
+
+    @classmethod
+    def expect_table_row_count_to_be_between(cls, evr, styling=None, include_column_name=True):
+        expectation = evr["expectation_config"]
+        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_table_row_count_to_be_between(
+            expectation, styling, include_column_name)
+        return [prescriptive_string_object]
+
+    @classmethod
+    def expect_table_row_count_to_equal(cls, evr, styling=None, include_column_name=True):
+        expectation = evr["expectation_config"]
+        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_table_row_count_to_equal(
+            expectation, styling, include_column_name)
+        return [prescriptive_string_object]
+
+    @classmethod
+    def expect_column_distinct_values_to_be_in_set(cls, evr, styling=None, include_column_name=True):
+        expectation = evr["expectation_config"]
+        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_distinct_values_to_be_in_set(
+            expectation, styling, include_column_name)
+        return [prescriptive_string_object]
+
+    @classmethod
+    def expect_column_values_to_not_be_null(cls, evr, styling=None, include_column_name=True):
+        expectation = evr["expectation_config"]
+        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_values_to_not_be_null(
+            expectation, styling, include_column_name)
+        return [prescriptive_string_object]
+
+    @classmethod
+    def expect_column_values_to_be_null(cls, evr, styling=None, include_column_name=True):
+        expectation = evr["expectation_config"]
+        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_values_to_be_null(
+            expectation, styling, include_column_name)
+        return [prescriptive_string_object]
+
+    @classmethod
+    def expect_column_values_to_be_of_type(cls, evr, styling=None, include_column_name=True):
+        expectation = evr["expectation_config"]
+        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_values_to_be_of_type(
+            expectation, styling, include_column_name)
+        return [prescriptive_string_object]
+
+    @classmethod
+    def expect_column_values_to_be_in_type_list(cls, evr, styling=None, include_column_name=True):
+        expectation = evr["expectation_config"]
+        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_values_to_be_in_type_list(
+            expectation, styling, include_column_name)
+        return [prescriptive_string_object]
+
+    @classmethod
+    def expect_column_values_to_be_in_set(cls, evr, styling=None, include_column_name=True):
+        expectation = evr["expectation_config"]
+        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_values_to_be_in_set(
+            expectation, styling, include_column_name)
+        return [prescriptive_string_object]
+
+    @classmethod
+    def expect_column_values_to_not_be_in_set(cls, evr, styling=None, include_column_name=True):
+        expectation = evr["expectation_config"]
+        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_values_to_not_be_in_set(
+            expectation, styling, include_column_name)
+        return [prescriptive_string_object]
+
+    @classmethod
+    def expect_column_proportion_of_unique_values_to_be_between(cls, evr, styling=None,
+                                                                include_column_name=True):
+        expectation = evr["expectation_config"]
+        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_proportion_of_unique_values_to_be_between(
+            expectation, styling, include_column_name)
+        return [prescriptive_string_object]
+
+    @classmethod
+    def expect_column_values_to_be_increasing(cls, evr, styling=None, include_column_name=True):
+        expectation = evr["expectation_config"]
+        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_values_to_be_increasing(
+            expectation, styling, include_column_name)
+        return [prescriptive_string_object]
+
+    @classmethod
+    def expect_column_values_to_be_decreasing(cls, evr, styling=None, include_column_name=True):
+        expectation = evr["expectation_config"]
+        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_values_to_be_decreasing(
+            expectation, styling, include_column_name)
+        return [prescriptive_string_object]
+
+    @classmethod
+    def expect_column_value_lengths_to_be_between(cls, evr, styling=None, include_column_name=True):
+        expectation = evr["expectation_config"]
+        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_value_lengths_to_be_between(
+            expectation, styling, include_column_name)
+        return [prescriptive_string_object]
+
+    @classmethod
+    def expect_column_value_lengths_to_equal(cls, evr, styling=None, include_column_name=True):
+        expectation = evr["expectation_config"]
+        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_value_lengths_to_equal(
+            expectation, styling, include_column_name)
+        return [prescriptive_string_object]
+
+    @classmethod
+    def expect_column_values_to_match_regex(cls, evr, styling=None, include_column_name=True):
+        expectation = evr["expectation_config"]
+        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_values_to_match_regex(
+            expectation, styling, include_column_name)
+        return [prescriptive_string_object]
+
+    @classmethod
+    def expect_column_values_to_not_match_regex(cls, evr, styling=None, include_column_name=True):
+        expectation = evr["expectation_config"]
+        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_values_to_not_match_regex(
+            expectation, styling, include_column_name)
+        return [prescriptive_string_object]
+
+    @classmethod
+    def expect_column_values_to_match_regex_list(cls, evr, styling=None, include_column_name=True):
+        expectation = evr["expectation_config"]
+        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_values_to_match_regex_list(
+            expectation, styling, include_column_name)
+        return [prescriptive_string_object]
+
+    @classmethod
+    def expect_column_values_to_not_match_regex_list(cls, evr, styling=None, include_column_name=True):
+        expectation = evr["expectation_config"]
+        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_values_to_not_match_regex_list(
+            expectation, styling, include_column_name)
+        return [prescriptive_string_object]
+
+    @classmethod
+    def expect_column_values_to_match_strftime_format(cls, evr, styling=None, include_column_name=True):
+        expectation = evr["expectation_config"]
+        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_values_to_match_strftime_format(
+            expectation, styling, include_column_name)
+        return [prescriptive_string_object]
+
+    @classmethod
+    def expect_column_values_to_be_dateutil_parseable(cls, evr, styling=None, include_column_name=True):
+        expectation = evr["expectation_config"]
+        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_values_to_be_dateutil_parseable(
+            expectation, styling, include_column_name)
+        return [prescriptive_string_object]
+
+    @classmethod
+    def expect_column_values_to_be_json_parseable(cls, evr, styling=None, include_column_name=True):
+        expectation = evr["expectation_config"]
+        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_values_to_be_json_parseable(
+            expectation, styling, include_column_name)
+        return [prescriptive_string_object]
+
+    @classmethod
+    def expect_column_values_to_match_json_schema(cls, evr, styling=None, include_column_name=True):
+        expectation = evr["expectation_config"]
+        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_values_to_match_json_schema(
+            expectation, styling, include_column_name)
+        return [prescriptive_string_object]
+
+    @classmethod
+    def expect_column_distinct_values_to_contain_set(cls, evr, styling=None, include_column_name=True):
+        expectation = evr["expectation_config"]
+        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_distinct_values_to_contain_set(
+            expectation, styling, include_column_name)
+        return [prescriptive_string_object]
+
+    @classmethod
+    def expect_column_distinct_values_to_equal_set(cls, evr, styling=None, include_column_name=True):
+        expectation = evr["expectation_config"]
+        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_distinct_values_to_equal_set(
+            expectation, styling, include_column_name)
+        return [prescriptive_string_object]
+
+    @classmethod
+    def expect_column_mean_to_be_between(cls, evr, styling=None, include_column_name=True):
+        expectation = evr["expectation_config"]
+        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_mean_to_be_between(
+            expectation, styling, include_column_name)
+        return [prescriptive_string_object]
+
+    @classmethod
+    def expect_column_median_to_be_between(cls, evr, styling=None, include_column_name=True):
+        expectation = evr["expectation_config"]
+        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_median_to_be_between(
+            expectation, styling, include_column_name)
+        return [prescriptive_string_object]
+
+    @classmethod
+    def expect_column_stdev_to_be_between(cls, evr, styling=None, include_column_name=True):
+        expectation = evr["expectation_config"]
+        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_stdev_to_be_between(
+            expectation, styling, include_column_name)
+        return [prescriptive_string_object]
+
+    @classmethod
+    def expect_column_max_to_be_between(cls, evr, styling=None, include_column_name=True):
+        expectation = evr["expectation_config"]
+        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_max_to_be_between(
+            expectation, styling, include_column_name)
+        return [prescriptive_string_object]
+
+    @classmethod
+    def expect_column_min_to_be_between(cls, evr, styling=None, include_column_name=True):
+        expectation = evr["expectation_config"]
+        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_min_to_be_between(
+            expectation, styling, include_column_name)
+        return [prescriptive_string_object]
+
+    @classmethod
+    def expect_column_sum_to_be_between(cls, evr, styling=None, include_column_name=True):
+        expectation = evr["expectation_config"]
+        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_sum_to_be_between(
+            expectation, styling, include_column_name)
+        return [prescriptive_string_object]
+
+    @classmethod
+    def expect_column_most_common_value_to_be_in_set(cls, evr, styling=None, include_column_name=True):
+        expectation = evr["expectation_config"]
+        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_most_common_value_to_be_in_set(
+            expectation, styling, include_column_name)
+        return [prescriptive_string_object]
+
+    @classmethod
+    def expect_column_kl_divergence_to_be_less_than(cls, evr, styling=None, include_column_name=True):
+        expectation = evr["expectation_config"]
+        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_kl_divergence_to_be_less_than(
+            expectation, styling, include_column_name)
+        return [prescriptive_string_object]
+
+    @classmethod
+    def expect_column_values_to_be_unique(cls, evr, styling=None, include_column_name=True):
+        expectation = evr["expectation_config"]
+        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_values_to_be_unique(
+            expectation, styling, include_column_name)
+        return [prescriptive_string_object]
+
+
+class PrescriptiveBulletListContentBlockRenderer(PrescriptiveStringRenderer):
+    _content_block_type = "bullet_list"
+
+    _default_element_styling = {
+        "default": {
+            "classes": ["badge", "badge-secondary"]
+        },
+        "params": {
+            "column": {
+                "classes": ["badge", "badge-primary"]
+            }
+        }
+    }
+

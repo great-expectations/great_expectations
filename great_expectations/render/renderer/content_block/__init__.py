@@ -1,4 +1,7 @@
 from .value_list_content_block import ValueListContentBlockRenderer
 from .table_content_block import TableContentBlockRenderer
-from .bullet_list_content_block import PrescriptiveBulletListContentBlockRenderer
+from .bullet_list_content_block import (
+    PrescriptiveBulletListContentBlockRenderer,
+    PrescriptiveEvrTableContentBlockRenderer
+)
 from .exception_list_content_block import ExceptionListContentBlockRenderer

@@ -25,7 +25,7 @@ class TableContentBlockRenderer(ContentBlockRenderer):
         return {
             "content_block_type": "table",
             "header_row": header_row,
-            "table_rows": table_entries
+            "table": table_entries
         }
 
     @classmethod
