@@ -830,6 +830,30 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
         }]
     
     @classmethod
+    def expect_column_values_to_be_dateutil_parseable(cls, expectation, styling=None, include_column_name=True):
+        params = substitute_none_for_missing(
+            expectation["kwargs"],
+            ["column", "mostly"],
+        )
+        
+        template_str = "values must be parseable by dateutil"
+        
+        if params.get("mostly"):
+            params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
+            template_str += ", at least $mostly_pct % of the time."
+        else:
+            template_str += "."
+            
+        if include_column_name:
+            template_str = "$column " + template_str
+
+        return [{
+            "template": template_str,
+            "params": params,
+            "styling": styling,
+        }]
+    
+    @classmethod
     def expect_column_values_to_match_json_schema(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation["kwargs"],
