@@ -707,6 +707,34 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
         }]
     
     @classmethod
+    def expect_column_values_to_not_match_regex(cls, expectation, styling=None, include_column_name=True):
+        params = substitute_none_for_missing(
+            expectation["kwargs"],
+            ["column", "regex", "mostly"],
+        )
+
+        if not params.get("regex"):
+            template_str = "values must not match a regular expression but none was specified."
+        else:
+            if params.get("mostly"):
+                params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
+                if include_column_name:
+                    template_str = "$column values must not match this regular expression: $regex, at least $mostly_pct % of the time."
+                else:
+                    template_str = "values must not match this regular expression: $regex, at least $mostly_pct % of the time."
+            else:
+                if include_column_name:
+                    template_str = "$column values must not match this regular expression: $regex."
+                else:
+                    template_str = "values must not match this regular expression: $regex."
+
+        return [{
+            "template": template_str,
+            "params": params,
+            "styling": styling,
+        }]
+    
+    @classmethod
     def expect_column_values_to_match_json_schema(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation["kwargs"],
