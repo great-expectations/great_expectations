@@ -1,4 +1,5 @@
 import copy
+from sparklines import sparklines
 
 from .content_block import ContentBlockRenderer
 from ...util import ordinal
@@ -672,6 +673,36 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
             "template": template_str,
             "params": params,
             "styling": styling,
+        }]
+    
+    @classmethod
+    def expect_column_kl_divergence_to_be_less_than(cls, expectation, styling=None, include_column_name=True):
+        params = substitute_none_for_missing(
+            expectation["kwargs"],
+            ["column", "partition_object", "threshold"]
+        )
+        
+        if not params.get("partition_object"):
+            template_str = "Kullback-Leibler (KL) divergence with respect to a given distribution must be lower than a \
+            provided threshold but no distribution was specified."
+        else:
+            params["sparklines_histogram"] = sparklines(params.get("partition_object")["weights"])[0]
+            template_str = "Kullback-Leibler (KL) divergence with respect to the following distribution must be lower than $threshold: $sparklines_histogram"
+
+        if include_column_name:
+            template_str = "$column " + template_str
+
+        return [{
+            "template": template_str,
+            "params": params,
+            "styling": {
+                "params":
+                    {
+                        "formatted_json": {
+                            "classes": []
+                        }
+                    }
+            },
         }]
     
     @classmethod
