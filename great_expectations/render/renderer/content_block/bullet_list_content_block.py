@@ -699,6 +699,27 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
 
             elif params["max_value"] is None:
                 template_str = "values must always be more than $min_value characters long."
+    @classmethod
+    def expect_column_most_common_value_to_be_in_set(cls, expectation, styling=None, include_column_name=True):
+        params = substitute_none_for_missing(
+            expectation["kwargs"],
+            ["column", "value_set", "ties_okay"]
+        )
+
+        if params["value_set"] is None or len(params["value_set"]) == 0:
+            template_str = "most common value must belong to a set, but that set is not specified."
+        else:
+            for i, v in enumerate(params["value_set"]):
+                params["v__" + str(i)] = v
+
+            values_string = " ".join(
+                ["$v__" + str(i) for i, v in enumerate(params["value_set"])]
+            )
+
+            template_str = "most common value must belong to this set: " + values_string + "."
+
+            if params.get("ties_okay"):
+                template_str += " Values outside this set that are as common (but not more common) are allowed."
 
         if include_column_name:
             template_str = "$column " + template_str
