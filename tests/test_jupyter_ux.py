@@ -117,7 +117,6 @@ def test_display_column_expectations_as_section(basic_expectation_suite):
 
 def test_display_column_evrs_as_section():
     #TODO: We should add a fixture that contains EVRs
-
     df = ge.read_csv("./tests/test_sets/Titanic.csv")
     df.profile(BasicDatasetProfiler)
     evrs = df.validate(result_format="SUMMARY")  # ["results"]
@@ -129,6 +128,10 @@ def test_display_column_evrs_as_section():
         return_without_displaying=True
     )
     print(html_to_display)
+
+    #FIXME: This snapshot test is brittle, since it depends on the behavior of the profiler, renderer, and view.
+    # At the very least, we can take the profiler out of the loop by creating a new fixture for it.
+    # Next time this snapshot test fails, please do that. 
     assert html_to_display == """\
 <div id="section-1" class="ge-section container-fluid">
     <div class="row">
