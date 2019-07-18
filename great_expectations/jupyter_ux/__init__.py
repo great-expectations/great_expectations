@@ -113,7 +113,7 @@ def list_available_data_asset_names(context, data_source_name=None):
             if len(data_asset_names) > 0:
                 for data_asset_name in data_asset_names:
                     # print('    data asset: {0:s}. Full name: {1:s}/{2:s}/{0:s}'. \
-                    print('    generator_asset: {0:s}. (Use this as an arg to get_batch)'. \
+                    print('    generator_asset: {0:s}'. \
                     format(data_asset_name))
             else:
                 display(HTML("""
