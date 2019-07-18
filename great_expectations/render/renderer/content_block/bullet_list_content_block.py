@@ -106,21 +106,22 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
 
         if (params["min_value"] is None) and (params["max_value"] is None):
             template_str = "may have any number of unique values."
-        elif params.get("mostly"):
-            params["mostly_pct"] = "%.1f" % (params["mostly"]*100,)
-            if params["min_value"] is None:
-                template_str = "must have fewer than $max_value unique values, at least $mostly_pct % of the time."
-            elif params["max_value"] is None:
-                template_str = "must have more than $min_value unique values, at least $mostly_pct % of the time."
-            else:
-                template_str = "must have between $min_value and $max_value unique values, at least $mostly_pct % of the time."
         else:
-            if params["min_value"] is None:
-                template_str = "must have fewer than $max_value unique values."
-            elif params["max_value"] is None:
-                template_str = "must have more than $min_value unique values."
+            if params.get("mostly"):
+                params["mostly_pct"] = "%.1f" % (params["mostly"]*100,)
+                if params["min_value"] is None:
+                    template_str = "must have fewer than $max_value unique values, at least $mostly_pct % of the time."
+                elif params["max_value"] is None:
+                    template_str = "must have more than $min_value unique values, at least $mostly_pct % of the time."
+                else:
+                    template_str = "must have between $min_value and $max_value unique values, at least $mostly_pct % of the time."
             else:
-                template_str = "must have between $min_value and $max_value unique values."
+                if params["min_value"] is None:
+                    template_str = "must have fewer than $max_value unique values."
+                elif params["max_value"] is None:
+                    template_str = "must have more than $min_value unique values."
+                else:
+                    template_str = "must have between $min_value and $max_value unique values."
 
         if include_column_name:
             template_str = "$column " + template_str
@@ -141,27 +142,26 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
 
         if (params["min_value"] is None) and (params["max_value"] is None):
             template_str = "may have any numerical value."
-
-        elif params.get("mostly"):
-            params["mostly_pct"] = "%.1f" % (params["mostly"]*100,)
-            if params["min_value"] is not None and params["max_value"] is not None:
-                template_str = "must be between $min_value and $max_value, at least $mostly_pct % of the time."
-
-            elif params["min_value"] is None:
-                template_str = "must be less than $max_value, at least $mostly_pct % of the time."
-
-            elif params["max_value"] is None:
-                template_str = "must be less than $max_value, at least $mostly_pct % of the time."
-
         else:
-            if params["min_value"] is not None and params["max_value"] is not None:
-                template_str = "must always be between $min_value and $max_value."
-
-            elif params["min_value"] is None:
-                template_str = "must always be less than $max_value."
-
-            elif params["max_value"] is None:
-                template_str = "must always be more than $min_value."
+            if params.get("mostly"):
+                params["mostly_pct"] = "%.1f" % (params["mostly"]*100,)
+                if params["min_value"] is not None and params["max_value"] is not None:
+                    template_str = "values must be between $min_value and $max_value, at least $mostly_pct % of the time."
+    
+                elif params["min_value"] is None:
+                    template_str = "values must be less than $max_value, at least $mostly_pct % of the time."
+    
+                elif params["max_value"] is None:
+                    template_str = "values must be less than $max_value, at least $mostly_pct % of the time."
+            else:
+                if params["min_value"] is not None and params["max_value"] is not None:
+                    template_str = "values must always be between $min_value and $max_value."
+    
+                elif params["min_value"] is None:
+                    template_str = "values must always be less than $max_value."
+    
+                elif params["max_value"] is None:
+                    template_str = "values must always be more than $min_value."
 
         if include_column_name:
             template_str = "$column " + template_str
@@ -284,14 +284,15 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
             ["min_value", "max_value"]
         )
 
-        if params["min_value"] is not None and params["max_value"] is not None:
-            template_str = "Must have between $min_value and $max_value rows."
-
-        elif params["min_value"] is None:
-            template_str = "Must have less than than $max_value rows."
-
-        elif params["max_value"] is None:
-            template_str = "Must have more than $min_value rows."
+        if params["min_value"] is None and params["max_value"] is None:
+            template_str = "May have any number of rows."
+        else:
+            if params["min_value"] is not None and params["max_value"] is not None:
+                template_str = "Must have between $min_value and $max_value rows."
+            elif params["min_value"] is None:
+                template_str = "Must have less than than $max_value rows."
+            elif params["max_value"] is None:
+                template_str = "Must have more than $min_value rows."
 
         return [{
             "template": template_str,
@@ -560,12 +561,13 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
 
         if params["min_value"] is None and params["max_value"] is None:
             template_str = "may have any percentage of unique values."
-        elif params["min_value"] is None:
-            template_str = "must have no more than $max_value% unique values."
-        elif params["max_value"] is None:
-            template_str = "must have at least $min_value% unique values."
         else:
-            template_str = "must have between $min_value and $max_value% unique values."
+            if params["min_value"] is None:
+                template_str = "must have no more than $max_value% unique values."
+            elif params["max_value"] is None:
+                template_str = "must have at least $min_value% unique values."
+            else:
+                template_str = "must have between $min_value and $max_value% unique values."
 
         if include_column_name:
             template_str = "$column " + template_str
@@ -647,8 +649,36 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
 
         if (params["min_value"] is None) and (params["max_value"] is None):
             template_str = "values may have any length."
-        elif params.get("mostly"):
-            params["mostly_pct"] = "%.1f" % (params["mostly"]*100,)
+        else:
+            if params.get("mostly"):
+                params["mostly_pct"] = "%.1f" % (params["mostly"]*100,)
+                if params["min_value"] is not None and params["max_value"] is not None:
+                    template_str = "values must be between $min_value and $max_value characters long, at least $mostly_pct % of the time."
+    
+                elif params["min_value"] is None:
+                    template_str = "values must be less than $max_value characters long, at least $mostly_pct % of the time."
+    
+                elif params["max_value"] is None:
+                    template_str = "values must be more than $min_value characters long, at least $mostly_pct % of the time."
+            else:
+                if params["min_value"] is not None and params["max_value"] is not None:
+                    template_str = "values must always be between $min_value and $max_value characters long."
+    
+                elif params["min_value"] is None:
+                    template_str = "values must always be less than $max_value characters long."
+    
+                elif params["max_value"] is None:
+                    template_str = "values must always be more than $min_value characters long."
+
+        if include_column_name:
+            template_str = "$column " + template_str
+
+        return [{
+            "template": template_str,
+            "params": params,
+            "styling": styling,
+        }]
+    
     @classmethod
     def expect_column_values_to_match_json_schema(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
