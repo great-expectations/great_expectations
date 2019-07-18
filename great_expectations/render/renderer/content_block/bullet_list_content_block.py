@@ -910,6 +910,37 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
             },
         }]
     
+    @classmethod
+    def expect_column_distinct_values_to_contain_set(cls, expectation, styling=None, include_column_name=True):
+        params = substitute_none_for_missing(
+            expectation["kwargs"],
+            ["column", "value_set", "parse_strings_as_datetimes"]
+        )
+    
+        if params["value_set"] is None or len(params["value_set"]) == 0:
+            template_str = "distinct values must contain a given set, but that set is not specified."
+        else:
+            for i, v in enumerate(params["value_set"]):
+                params["v__" + str(i)] = v
+        
+            values_string = " ".join(
+                ["$v__" + str(i) for i, v in enumerate(params["value_set"])]
+            )
+        
+            template_str = "distinct values must contain this set: " + values_string + "."
+    
+        if params.get("parse_strings_as_datetimes"):
+            template_str += " Values should be parsed as datetimes."
+    
+        if include_column_name:
+            template_str = "$column " + template_str
+    
+        return [{
+            "template": template_str,
+            "params": params,
+            "styling": styling,
+        }]
+
             if params["min_value"] is not None and params["max_value"] is not None:
                 template_str = "values must be between $min_value and $max_value characters long, at least $mostly_pct % of the time."
 
