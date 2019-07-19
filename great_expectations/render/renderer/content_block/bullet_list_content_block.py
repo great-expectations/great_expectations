@@ -107,7 +107,7 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
         if (params["min_value"] is None) and (params["max_value"] is None):
             template_str = "may have any number of unique values."
         else:
-            if params.get("mostly"):
+            if params["mostly"] is not None:
                 params["mostly_pct"] = "%.1f" % (params["mostly"]*100,)
                 if params["min_value"] is None:
                     template_str = "must have fewer than $max_value unique values, at least $mostly_pct % of the time."
@@ -143,7 +143,7 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
         if (params["min_value"] is None) and (params["max_value"] is None):
             template_str = "may have any numerical value."
         else:
-            if params.get("mostly"):
+            if params["mostly"] is not None:
                 params["mostly_pct"] = "%.1f" % (params["mostly"]*100,)
                 if params["min_value"] is not None and params["max_value"] is not None:
                     template_str = "values must be between $min_value and $max_value, at least $mostly_pct % of the time."
@@ -355,7 +355,7 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
             ["column", "mostly"],
         )
 
-        if params.get("mostly"):
+        if params["mostly"] is not None:
             params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
             if include_column_name:
                 template_str = "$column values must not be null, at least $mostly_pct % of the time."
@@ -380,7 +380,7 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
             ["column", "mostly"]
         )
         
-        if params.get("mostly"):
+        if params["mostly"] is not None:
             params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
             template_str = "values must be null, at least $mostly_pct % of the time."
         else:
@@ -402,7 +402,7 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
             ["column", "type_", "mostly"]
         )
         
-        if params.get("mostly"):
+        if params["mostly"] is not None:
             params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
             template_str = "values must be of type $type_, at least $mostly_pct % of the time."
         else:
@@ -430,7 +430,7 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
             ["$v__"+str(i) for i, v in enumerate(params["type_list"])]
         )
 
-        if params.get("mostly"):
+        if params["mostly"] is not None:
             params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
 
             if include_column_name:
@@ -472,7 +472,7 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
 
             template_str = "values must belong to this set: " + values_string
             
-            if params.get("mostly"):
+            if params["mostly"] is not None:
                 params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
                 template_str += ", at least $mostly_pct % of the time."
             else:
@@ -509,7 +509,7 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
         
             template_str = "values must not belong to this set: " + values_string
         
-            if params.get("mostly"):
+            if params["mostly"] is not None:
                 params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
                 template_str += ", at least $mostly_pct % of the time."
             else:
@@ -566,7 +566,7 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
         else:
             template_str = "values must be greater than or equal to previous values"
             
-        if params.get("mostly"):
+        if params["mostly"] is not None:
             params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
             template_str += ", at least $mostly_pct % of the time."
         else:
@@ -597,7 +597,7 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
         else:
             template_str = "values must be less than or equal to previous values"
     
-        if params.get("mostly"):
+        if params["mostly"] is not None:
             params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
             template_str += ", at least $mostly_pct % of the time."
         else:
@@ -625,7 +625,7 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
         if (params["min_value"] is None) and (params["max_value"] is None):
             template_str = "values may have any length."
         else:
-            if params.get("mostly"):
+            if params["mostly"] is not None:
                 params["mostly_pct"] = "%.1f" % (params["mostly"]*100,)
                 if params["min_value"] is not None and params["max_value"] is not None:
                     template_str = "values must be between $min_value and $max_value characters long, at least $mostly_pct % of the time."
@@ -665,7 +665,7 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
             template_str = "values may have any length."
         else:
             template_str = "values must be $value characters long"
-            if params.get("mostly"):
+            if params["mostly"] is not None:
                 params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
                 template_str += ", at least $mostly_pct % of the time."
             else:
@@ -691,7 +691,7 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
             template_str = "values must match a regular expression but none was specified."
         else:
             template_str = "values must match this regular expression: $regex"
-            if params.get("mostly"):
+            if params["mostly"] is not None:
                 params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
                 template_str += ", at least $mostly_pct % of the time."
             else:
@@ -716,7 +716,7 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
         if not params.get("regex"):
             template_str = "values must not match a regular expression but none was specified."
         else:
-            if params.get("mostly"):
+            if params["mostly"] is not None:
                 params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
                 if include_column_name:
                     template_str = "$column values must not match this regular expression: $regex, at least $mostly_pct % of the time."
@@ -755,7 +755,7 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
             else:
                 template_str = "values must match any of the following regular expressions: " + values_string
                 
-            if params.get("mostly"):
+            if params["mostly"] is not None:
                 params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
                 template_str += ", at least $mostly_pct % of the time."
             else:
@@ -788,7 +788,7 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
         
             template_str = "values must not match any of the following regular expressions: " + values_string
         
-            if params.get("mostly"):
+            if params["mostly"] is not None:
                 params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
                 template_str += ", at least $mostly_pct % of the time."
             else:
@@ -814,7 +814,7 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
             template_str = "values must match a strftime format but none was specified."
         else:
             template_str = "values must match the following strftime format: $strftime_format"
-            if params.get("mostly"):
+            if params["mostly"] is not None:
                 params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
                 template_str += ", at least $mostly_pct % of the time."
             else:
@@ -838,7 +838,7 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
         
         template_str = "values must be parseable by dateutil"
         
-        if params.get("mostly"):
+        if params["mostly"] is not None:
             params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
             template_str += ", at least $mostly_pct % of the time."
         else:
@@ -862,7 +862,7 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
     
         template_str = "values must be parseable as JSON"
     
-        if params.get("mostly"):
+        if params["mostly"] is not None:
             params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
             template_str += ", at least $mostly_pct % of the time."
         else:
@@ -888,7 +888,7 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
             template_str = "values must match a JSON Schema but none was specified."
         else:
             params["formatted_json"] = "<pre>" + json.dumps(params.get("json_schema"), indent=4) + "</pre>"
-            if params.get("mostly"):
+            if params["mostly"] is not None:
                 params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
                 template_str = "values must match the following JSON Schema, at least $mostly_pct % of the time: $formatted_json"
             else:
