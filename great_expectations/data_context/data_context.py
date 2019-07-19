@@ -1777,6 +1777,12 @@ class DataContext(object):
                 logger.warning("IOError while profiling %s. (Perhaps a loading error?) Skipping." % (name))
                 logger.debug(str(exc))
                 skipped_data_assets += 1
+            # FIXME: this is a workaround for catching SQLAlchemny exceptions without taking SQLAlchemy dependency.
+            # Think how to avoid this.
+            except Exception as e:
+                logger.warning("Exception while profiling %s. (Perhaps a loading error?) Skipping." % (name))
+                logger.debug(str(e))
+                skipped_data_assets += 1
 
         total_duration = (datetime.datetime.now() - total_start_time).total_seconds()
         logger.info("""

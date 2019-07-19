@@ -13,7 +13,9 @@ Planned Features
 
 v.0.7.2__develop
 -----------------
-
+* Improved error detection and handling in CLI "add datasource" feature
+* Fixes in rendering of profiling results (descriptive renderer of validation results)
+* Query Generator of SQLAlchemy datasource adds tables in non-default schemas to the data asset namespace
 
 v.0.7.1
 ------------
