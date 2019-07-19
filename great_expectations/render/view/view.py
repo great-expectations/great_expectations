@@ -7,6 +7,7 @@ from jinja2 import (
     Template, Environment, BaseLoader, PackageLoader, select_autoescape
 )
 
+from great_expectations.version import __version__
 
 def render_styling(styling):
     """Adds styling information suitable for an html tag
@@ -177,6 +178,7 @@ class DefaultJinjaView(object):
         env.filters['render_string_template'] = render_string_template
         env.filters['render_styling_from_string_template'] = render_styling_from_string_template
         env.filters['render_styling'] = render_styling
+        env.globals['ge_version'] = __version__
 
         template = env.get_template(template)
         template.globals['now'] = datetime.datetime.utcnow
