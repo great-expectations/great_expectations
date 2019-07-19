@@ -1692,6 +1692,7 @@ class DataContext(object):
 
         with open(os.path.join(self.data_doc_directory, "index.html"), "w") as writer:
             writer.write(DefaultJinjaIndexPageView.render({
+                "utm_medium": "index-page",
                 "sections": sections
             }))
 
@@ -1775,6 +1776,12 @@ class DataContext(object):
             except IOError as exc:
                 logger.warning("IOError while profiling %s. (Perhaps a loading error?) Skipping." % (name))
                 logger.debug(str(exc))
+                skipped_data_assets += 1
+            # FIXME: this is a workaround for catching SQLAlchemny exceptions without taking SQLAlchemy dependency.
+            # Think how to avoid this.
+            except Exception as e:
+                logger.warning("Exception while profiling %s. (Perhaps a loading error?) Skipping." % (name))
+                logger.debug(str(e))
                 skipped_data_assets += 1
 
         total_duration = (datetime.datetime.now() - total_start_time).total_seconds()
