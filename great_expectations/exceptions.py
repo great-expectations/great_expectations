@@ -23,3 +23,8 @@ class BatchKwargsError(DataContextError):
     def __init__(self, message, batch_kwargs):
         self.message = message
         self.batch_kwargs = batch_kwargs
+
+class DatasourceInitializationError(GreatExpectationsError):
+    def __init__(self, datasource_name, message):
+        self.message = "Cannot initialize datasource %s, error: %s" % (datasource_name, message)
+
