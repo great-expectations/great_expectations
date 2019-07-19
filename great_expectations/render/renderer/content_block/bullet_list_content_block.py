@@ -997,6 +997,87 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
             "params": params,
             "styling": styling,
         }]
+
+    @classmethod
+    def expect_column_median_to_be_between(cls, expectation, styling=None, include_column_name=True):
+        params = substitute_none_for_missing(
+            expectation["kwargs"],
+            ["column", "min_value", "max_value"]
+        )
+    
+        if (params["min_value"] is None) and (params["max_value"] is None):
+            template_str = "median may have any numerical value."
+        else:
+            if params["min_value"] is not None and params["max_value"] is not None:
+                template_str = "median must be between $min_value and $max_value."
+            elif params["min_value"] is None:
+                template_str = "median must be less than $max_value."
+            elif params["max_value"] is None:
+                template_str = "median must be more than $min_value."
+    
+        if include_column_name:
+            template_str = "$column " + template_str
+    
+        return [{
+            "template": template_str,
+            "params": params,
+            "styling": styling,
+        }]
+
+    @classmethod
+    def expect_column_stdev_to_be_between(cls, expectation, styling=None, include_column_name=True):
+        params = substitute_none_for_missing(
+            expectation["kwargs"],
+            ["column", "min_value", "max_value"]
+        )
+    
+        if (params["min_value"] is None) and (params["max_value"] is None):
+            template_str = "standard deviation may have any numerical value."
+        else:
+            if params["min_value"] is not None and params["max_value"] is not None:
+                template_str = "standard deviation must be between $min_value and $max_value."
+            elif params["min_value"] is None:
+                template_str = "standard deviation must be less than $max_value."
+            elif params["max_value"] is None:
+                template_str = "standard deviation must be more than $min_value."
+    
+        if include_column_name:
+            template_str = "$column " + template_str
+    
+        return [{
+            "template": template_str,
+            "params": params,
+            "styling": styling,
+        }]
+
+    @classmethod
+    def expect_column_max_to_be_between(cls, expectation, styling=None, include_column_name=True):
+        params = substitute_none_for_missing(
+            expectation["kwargs"],
+            ["column", "min_value", "max_value", "parse_strings_as_datetimes"]
+        )
+    
+        if (params["min_value"] is None) and (params["max_value"] is None):
+            template_str = "maximum value may have any numerical value."
+        else:
+            if params["min_value"] is not None and params["max_value"] is not None:
+                template_str = "maximum value must be between $min_value and $max_value."
+            elif params["min_value"] is None:
+                template_str = "maximum value must be less than $max_value."
+            elif params["max_value"] is None:
+                template_str = "maximum value must be more than $min_value."
+    
+        if params.get("parse_strings_as_datetimes"):
+            template_str += " Values should be parsed as datetimes."
+    
+        if include_column_name:
+            template_str = "$column " + template_str
+    
+        return [{
+            "template": template_str,
+            "params": params,
+            "styling": styling,
+        }]
     
     @classmethod
     def expect_column_min_to_be_between(cls, expectation, styling=None, include_column_name=True):
