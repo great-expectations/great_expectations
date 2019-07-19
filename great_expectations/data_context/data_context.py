@@ -1692,6 +1692,7 @@ class DataContext(object):
 
         with open(os.path.join(self.data_doc_directory, "index.html"), "w") as writer:
             writer.write(DefaultJinjaIndexPageView.render({
+                "utm_medium": "index-page",
                 "sections": sections
             }))
 
