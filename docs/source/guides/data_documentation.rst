@@ -60,6 +60,9 @@ for how to profile a single batch of data and build documentation from the valid
 
   profiling_html_filepath = '/path/into/which/to/save/results'
 
+  # obtain the DataContext object
+  context = ge.data_context.DataContext()
+
   # load a batch from the data asset
   batch = context.get_batch('ratings')
 
