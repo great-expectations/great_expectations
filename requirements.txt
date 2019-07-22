@@ -10,7 +10,6 @@ backports.functools_lru_cache>=1.5
 ruamel.yaml>=0.15.24
 ipywidgets>=7.4.2
 requests>=2.20
-sparklines>=0.4.2
 Click>=7.0
 pyfiglet>=0.8
 termcolor>=1.1.0

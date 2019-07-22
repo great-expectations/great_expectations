@@ -81,7 +81,7 @@ class QueryGenerator(BatchGenerator):
                 schema_name = self.inspector.default_schema_name
                 table_name = split_data_asset_name[0]
             else:
-                raise ValueError("table name must be of shape [SCHEMA.]TABLE. passed: " + data_asset_name)
+                raise ValueError("Table name must be of shape '[SCHEMA.]TABLE'. Passed: " + data_asset_name)
             tables = self.inspector.get_table_names(schema=schema_name)
             if table_name in tables:
                 return iter([

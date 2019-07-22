@@ -4,7 +4,6 @@ import pytest
 from six import PY3
 
 from ruamel.yaml import YAML
-yaml = YAML(typ='safe')
 import os
 import shutil
 
@@ -12,9 +11,10 @@ import pandas as pd
 import sqlalchemy as sa
 
 from great_expectations.exceptions import BatchKwargsError
-from great_expectations.data_context import DataContext
 from great_expectations.datasource import PandasDatasource, SqlAlchemyDatasource, SparkDFDatasource
 from great_expectations.dataset import PandasDataset, SqlAlchemyDataset, SparkDFDataset
+
+yaml = YAML(typ='safe')
 
 
 @pytest.fixture(scope="module")
