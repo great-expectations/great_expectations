@@ -95,9 +95,9 @@ def test_standalone_sqlalchemy_datasource(test_db_connection_string):
     datasource = SqlAlchemyDatasource(
         'SqlAlchemy', connection_string=test_db_connection_string, echo=False)
 
-    assert datasource.get_available_data_asset_names() == {"default": {"main___table_1", "main___table_2"}}
-    dataset1 = datasource.get_batch("main___table_1")
-    dataset2 = datasource.get_batch("main___table_2")
+    assert datasource.get_available_data_asset_names() == {"default": {"main.table_1", "main.table_2"}}
+    dataset1 = datasource.get_batch("main.table_1")
+    dataset2 = datasource.get_batch("main.table_2")
     assert isinstance(dataset1, SqlAlchemyDataset)
     assert isinstance(dataset2, SqlAlchemyDataset)
 
