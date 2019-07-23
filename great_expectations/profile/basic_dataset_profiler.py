@@ -28,7 +28,11 @@ class BasicDatasetProfiler(DatasetProfiler):
             elif df.expect_column_values_to_be_in_type_list(column, type_list=sorted(list(Dataset.STRING_TYPE_NAMES)))["success"]:
                 type_ = "string"
 
+            elif df.expect_column_values_to_be_in_type_list(column, type_list=sorted(list(Dataset.BOOLEAN_TYPE_NAMES)))["success"]:
+                type_ = "bool"
+
             else:
+                df.remove_expectation(expectation_type='expect_column_values_to_be_in_type_list', column=column)
                 type_ = "unknown"
         except NotImplementedError:
             type_ = "unknown"
@@ -93,6 +97,10 @@ class BasicDatasetProfiler(DatasetProfiler):
         df.expect_table_columns_to_match_ordered_list(None)
 
         for column in df.get_table_columns():
+
+            if column == 'sizes':
+                print("sizes")
+
             # df.expect_column_to_exist(column)
 
             type_ = cls._get_column_type(df, column)
@@ -161,7 +169,13 @@ class BasicDatasetProfiler(DatasetProfiler):
                     pass
 
             else:
-                # print("??????", column, type_, cardinality)
-                pass
+                if cardinality == "unique":
+                    df.expect_column_values_to_be_unique(column)
+
+                elif cardinality in ["one", "two", "very few", "few"]:
+                    df.expect_column_distinct_values_to_be_in_set(column, value_set=None, result_format="SUMMARY")
+                else:
+                    # print(column, type_, cardinality)
+                    pass
 
         return df.get_expectation_suite(suppress_warnings=True, discard_failed_expectations=False)
