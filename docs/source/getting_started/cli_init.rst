@@ -22,7 +22,7 @@ Great Expectations provides a mildly opinionated deployment framework that simpl
 
 This tutorial uses a toy project called ``example_dickens_data_project``, but the same methods should work for most data projects. If you want to follow along with this exact example, start with:
 
-.. code-block::
+::
 
     git clone https://github.com/superconductive/example-dickens-data-project.git
     cd example-dickens-data-project
