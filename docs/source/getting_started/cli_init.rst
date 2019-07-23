@@ -29,7 +29,7 @@ This tutorial uses a toy project called ``example_dickens_data_project``, but th
 
 By default, everything in the Great Expectations deployment framework will be expressed in a directory structure within a ``great_expectations/`` folder within your version control system. To create this folder, navigate to the root of your project directory in a terminal and run:
 
-.. code-block::
+.. code-block:: bash
 
     great_expectations init
 
