@@ -14,8 +14,6 @@ from sqlalchemy.exc import SQLAlchemyError
 import sqlalchemy.dialects.sqlite as sqlitetypes
 import sqlalchemy.dialects.postgresql as postgresqltypes
 import sqlalchemy.dialects.mysql as mysqltypes
-from pyspark.sql import SparkSession
-import pyspark.sql.types as sparktypes
 
 from great_expectations.dataset import PandasDataset, SqlAlchemyDataset, SparkDFDataset
 from great_expectations.profile import ColumnsExistProfiler
@@ -55,20 +53,6 @@ MYSQL_TYPES = {
     "FLOAT": mysqltypes.FLOAT,
     "BOOLEAN": mysqltypes.BOOLEAN
 }
-
-SPARK_TYPES = {
-    "StringType": sparktypes.StringType,
-    "IntegerType": sparktypes.IntegerType,
-    "LongType": sparktypes.LongType,
-    "DateType": sparktypes.DateType,
-    "TimestampType": sparktypes.TimestampType,
-    "FloatType": sparktypes.FloatType,
-    "DoubleType": sparktypes.DoubleType,
-    "BooleanType": sparktypes.BooleanType,
-    "DataType": sparktypes.DataType,
-    "NullType": sparktypes.NullType
-}
-
 
 # Taken from the following stackoverflow:
 # https://stackoverflow.com/questions/23549419/assert-that-two-dictionaries-are-almost-equal
@@ -192,6 +176,23 @@ def get_dataset(dataset_type, data, schemas=None, profiler=ColumnsExistProfiler,
         return SqlAlchemyDataset(tablename, engine=conn, profiler=profiler, caching=caching)
 
     elif dataset_type == 'SparkDFDataset':
+        from pyspark.sql import SparkSession
+        import pyspark.sql.types as sparktypes
+
+        SPARK_TYPES = {
+            "StringType": sparktypes.StringType,
+            "IntegerType": sparktypes.IntegerType,
+            "LongType": sparktypes.LongType,
+            "DateType": sparktypes.DateType,
+            "TimestampType": sparktypes.TimestampType,
+            "FloatType": sparktypes.FloatType,
+            "DoubleType": sparktypes.DoubleType,
+            "BooleanType": sparktypes.BooleanType,
+            "DataType": sparktypes.DataType,
+            "NullType": sparktypes.NullType
+        }
+
+
         spark = SparkSession.builder.getOrCreate()
         # We need to allow null values in some column types that do not support them natively, so we skip
         # use of df in this case.
