@@ -24,7 +24,7 @@ To run validation for a data_asset, we need two additional elements:
 * a **batch** to validate; in our case it is a file loaded into a Pandas DataFrame
 * an **expectation_suite** to validate against
 
-.. image:: data_asset_namespace.png
+.. image:: ../images/data_asset_namespace.png
 
 
 Video

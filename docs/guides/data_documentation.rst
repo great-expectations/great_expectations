@@ -20,11 +20,11 @@ a clearer picture of your data, and keep your entire team on the same page as da
 For example, the default BasicDatasetProfiler in GE will produce validation_results which compile to a page for each
 table or DataFrame including an overview section:
 
-.. image:: movie_db_profiling_screenshot_2.jpg
+.. image:: ../images/movie_db_profiling_screenshot_2.jpg
 
 And then detailed statistics for each column:
 
-.. image:: movie_db_profiling_screenshot_1.jpg
+.. image:: ../images/movie_db_profiling_screenshot_1.jpg
 
 
 How to build documentation

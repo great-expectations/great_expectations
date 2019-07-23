@@ -68,7 +68,7 @@ running profile directly on a datasource, the CLI will not offer to move resulti
 ``fixtures/validations`` directory from which data documentation is built. If you want to generate HTML documentations
 from these results, you have to move the files into 'fixtures/validations':
 
-.. image:: movie_db_profiling_screenshot_3.jpg
+.. image:: ../images/movie_db_profiling_screenshot_3.jpg
     :height: 400px
 
 and then run this command to generate HTML:
