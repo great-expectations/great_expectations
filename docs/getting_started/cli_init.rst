@@ -430,15 +430,15 @@ Within the CLI, we compile to documentation as follows:
 
 Opening `great_expectations/uncommitted/documentation/index.html` in a browser will give you a page like:
 
-.. image:: ../index_render.png
+.. image:: ../images/index_render.png
 
 Clicking through to the first link will show you prescriptive data documentation. This renders the Expectation Suite itself.
 
-.. image:: ../prescriptive_render.png
+.. image:: ../images/prescriptive_render.png
 
 Clicking through to the second link will show you descriptive data documentation. This renders the full content of validation results, not just the Expectations themselves.
 
-.. image:: ../descriptive_render.png
+.. image:: ../images/descriptive_render.png
 
 
 Note that the CLI moved our EVRs from

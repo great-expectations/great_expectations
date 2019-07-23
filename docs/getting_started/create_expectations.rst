@@ -10,7 +10,7 @@ This tutorial covers creating expectations for a data asset in the Jupyter noteb
 
 We will continue the example we used in the previous section - CSV files containing the data on notable works of Charles Dickens that look like this:
 
-.. image:: dickens_titles_data_sample.jpg
+.. image:: ../images/dickens_titles_data_sample.jpg
 
 Creating expectations is an opportunity to blend contextual knowledge from subject-matter experts and insights from profiling and performing exploratory analysis on your dataset.
 
@@ -50,11 +50,11 @@ To run validation for a data_asset, we need two additional elements:
 * a **batch** to validate; in our case it is a file loaded into a Pandas DataFrame
 * an **expectation_suite** to validate against
 
-.. image:: data_asset_namespace.png
+.. image:: ../images/data_asset_namespace.png
 
 Here are the data assets that DataContext is aware of in our example project:
 
-.. image:: list_data_assets.jpg
+.. image:: ../images/list_data_assets.jpg
 
 
 Get Batch
@@ -87,7 +87,7 @@ The following call loads one of the batches of the ``notable_works_by_charles_di
 
 The argument ``expectation_suite_name`` specifies the name of the expectation suite you want to create. At first this suite contains no expectations. We will add expectations to it in the next steps.
 
-.. image:: get_batch.jpg
+.. image:: ../images/get_batch.jpg
 
 Reader Options
 ---------------
@@ -113,16 +113,16 @@ Some expectations can be created from your domain expertise. As everybody knows,
 
 Here is how we can add an expectation that expresses this knowledge:
 
-.. image:: expect_column_values_to_be_between_success.jpg
+.. image:: ../images/expect_column_values_to_be_between_success.jpg
 
 
 Other expectations can be created by examining the data in the batch. For example, we want to protect our pipeline against values of unreasonable length in the "Title" column. We don't know exactly what the limits of the "reasonable" are, but we can try some values and check if the data in the batch meets this expectation:
 
-.. image:: expect_column_value_lengths_to_be_between_failure.jpg
+.. image:: ../images/expect_column_value_lengths_to_be_between_failure.jpg
 
 Validating the expectation againt the batch resulted in failure - there are some values in the column that do not meet the expectation. The "partial_unexpected_list" key in the result dictionary contains examples of non-conforming values. Examining these examples shows that some titles are longer than 30 characters. We adjust the ``max_value`` and rerun the expectation method:
 
-.. image:: expect_column_value_lengths_to_be_between_success.jpg
+.. image:: ../images/expect_column_value_lengths_to_be_between_success.jpg
 
 This time validation was successful - all values in the column meet our expectation.
 
@@ -139,7 +139,7 @@ How do I know which types of expectations I can add?
 Review and Save Expectation Suite
 ---------------------------------
 
-.. image:: get_expectation_suite_output.jpg
+.. image:: ../images/get_expectation_suite_output.jpg
 
 .. code-block::
 
@@ -147,12 +147,12 @@ Review and Save Expectation Suite
 
 Because this data asset is connected to the DataContext, GE determines the location to save the expectation suite:
 
-.. image:: saved_expectation_suite_file.jpg
+.. image:: ../images/saved_expectation_suite_file.jpg
     :width: 450px
 
 When we call ``get_expectation_suite``, we might see this warning in the output:
 
-.. image:: failing_expectations_warning.jpg
+.. image:: ../images/failing_expectations_warning.jpg
     :width: 350px
 
 When we save an expectation suite, by default, GE will drop any expectation that was not successful on its last run.
