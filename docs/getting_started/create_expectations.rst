@@ -72,7 +72,7 @@ batches into named data assets.
 
 ``batch_kwargs`` from one of those filesystem reader generators might look like the following:
 
-.. code-block::
+.. code-block:: json
 
   {
     "path": "/data/staging/user_actions/20190710T034323_user_actions.csv",
@@ -141,7 +141,7 @@ Review and Save Expectation Suite
 
 .. image:: ../images/get_expectation_suite_output.jpg
 
-.. code-block::
+.. code-block:: python
 
     df.save_expectation_suite()
 
@@ -159,7 +159,7 @@ When we save an expectation suite, by default, GE will drop any expectation that
 
 Sometimes we want to save an expectation even though it did not validate successfully on the current batch (e.g., we have a reason to believe that our expectation is correct and the current batch has bad entries). In this case we pass and additional argument to ``save_expectation_suite`` method:
 
-.. code-block::
+.. code-block:: python
 
     df.save_expectation_suite(discard_failed_expectations=False)
 
