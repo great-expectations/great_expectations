@@ -14,9 +14,19 @@ from great_expectations.data_context.util import safe_mmkdir
 
 from .test_utils import get_dataset
 
-CONTEXTS = ['PandasDataset', 'sqlite', 'SparkDFDataset']
+CONTEXTS = ['PandasDataset', 'sqlite']
 
-# TODO: make it easier to turn off Spark as well
+#####
+#
+# Spark Context
+#
+#####
+try:
+    from pyspark.sql import SparkSession
+    CONTEXTS += ['SparkDFDataset']
+except (ImportError):
+    warnings.warn("pyspark not installed and available for testing.")
+
 
 #####
 #
