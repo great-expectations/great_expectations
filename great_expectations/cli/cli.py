@@ -30,7 +30,7 @@ from .init import (
 )
 from .util import cli_message
 from great_expectations.render.view import DefaultJinjaPageView
-from great_expectations.render.renderer import DescriptivePageRenderer  # , PrescriptivePageRenderer
+from great_expectations.render.renderer import DescriptivePageRenderer, PrescriptivePageRenderer
 from great_expectations.data_context import DataContext
 from great_expectations.data_asset import FileDataAsset
 from great_expectations.dataset import Dataset, PandasDataset
@@ -214,6 +214,10 @@ def init(target_directory):
     )
 
     data_source_name = add_datasource(context)
+
+    if not data_source_name: # no datasource was created
+        return
+
     cli_message(
         """
 ========== Profiling ==========
@@ -332,8 +336,10 @@ def render(render_object):
     with open(render_object, "r") as infile:
         raw = json.load(infile)
 
-    model = DescriptivePageRenderer.render(raw)
-    # model = PrescriptivePageRenderer.render(raw)
+    if "results" in raw:
+        model = DescriptivePageRenderer.render(raw)
+    else:
+        model = PrescriptivePageRenderer.render(raw)
     print(DefaultJinjaPageView.render(model))
 
 

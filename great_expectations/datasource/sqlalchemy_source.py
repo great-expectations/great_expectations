@@ -5,6 +5,7 @@ from string import Template
 from .datasource import Datasource
 from great_expectations.dataset.sqlalchemy_dataset import SqlAlchemyDataset
 from .generator.query_generator import QueryGenerator
+from great_expectations.exceptions import DatasourceInitializationError
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +30,9 @@ class SqlAlchemyDatasource(Datasource):
     """
 
     def __init__(self, name="default", data_context=None, profile=None, generators=None, **kwargs):
+        if not sqlalchemy:
+            raise DatasourceInitializationError(name, "ModuleNotFoundError: No module named 'sqlalchemy'")
+
         if generators is None:
             generators = {
                 "default": {"type": "queries"}
@@ -41,21 +45,27 @@ class SqlAlchemyDatasource(Datasource):
             self._datasource_config.update({
                 "profile": profile
             })
-        # if an engine was provided, use that
-        if "engine" in kwargs:
-            self.engine = kwargs.pop("engine")
 
-        # if a connection string or url was provided, use that
-        elif "connection_string" in kwargs:
-            connection_string = kwargs.pop("connection_string")
-            self.engine = create_engine(connection_string, **kwargs)
-        elif "url" in kwargs:
-            url = kwargs.pop("url")
-            self.engine = create_engine(url, **kwargs)
+        try:
+            # if an engine was provided, use that
+            if "engine" in kwargs:
+                self.engine = kwargs.pop("engine")
 
-        # Otherwise, connect using remaining kwargs
-        else:
-            self._connect(self._get_sqlalchemy_connection_options(**kwargs))
+            # if a connection string or url was provided, use that
+            elif "connection_string" in kwargs:
+                connection_string = kwargs.pop("connection_string")
+                self.engine = create_engine(connection_string, **kwargs)
+                self.engine.connect()
+            elif "url" in kwargs:
+                url = kwargs.pop("url")
+                self.engine = create_engine(url, **kwargs)
+                self.engine.connect()
+
+            # Otherwise, connect using remaining kwargs
+            else:
+                self._connect(self._get_sqlalchemy_connection_options(**kwargs))
+        except sqlalchemy.exc.OperationalError as sqlalchemy_error:
+            raise DatasourceInitializationError(self._name, str(sqlalchemy_error))
 
         self._build_generators()
 
@@ -74,6 +84,7 @@ class SqlAlchemyDatasource(Datasource):
 
     def _connect(self, options):
         self.engine = create_engine(options)
+        self.engine.connect()
         self.meta = MetaData()
 
     def _get_generator_class(self, type_):
@@ -82,8 +93,12 @@ class SqlAlchemyDatasource(Datasource):
         else:
             raise ValueError("Unrecognized DataAssetGenerator type %s" % type_)
 
-    def _get_data_asset(self, batch_kwargs, expectation_suite, schema=None, **kwargs):
+    def _get_data_asset(self, batch_kwargs, expectation_suite, **kwargs):
         if "table" in batch_kwargs:
+            if "schema" in batch_kwargs:
+                schema = batch_kwargs["schema"]
+            else:
+                schema = None
             return SqlAlchemyDataset(table_name=batch_kwargs["table"], 
                                      engine=self.engine,
                                      schema=schema,

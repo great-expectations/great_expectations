@@ -89,6 +89,9 @@ Python in a Jupyter notebook:
 
     from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 
+    # obtain the DataContext object
+    context = ge.data_context.DataContext()
+
     # load a batch from the data asset
     batch = context.get_batch('ratings')
 
