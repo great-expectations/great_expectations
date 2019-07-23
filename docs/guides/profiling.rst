@@ -57,7 +57,7 @@ Run From Command Line
 
 The GE command-line interface can also profile a datasource:
 
-.. code-block::
+.. code-block:: bash
 
     great_expectations profile DATASOURCE_NAME
 
@@ -68,12 +68,12 @@ running profile directly on a datasource, the CLI will not offer to move resulti
 ``fixtures/validations`` directory from which data documentation is built. If you want to generate HTML documentations
 from these results, you have to move the files into 'fixtures/validations':
 
-.. image:: movie_db_profiling_screenshot_3.jpg
+.. image:: ../images/movie_db_profiling_screenshot_3.jpg
     :height: 400px
 
 and then run this command to generate HTML:
 
-.. code-block::
+.. code-block:: bash
 
     great_expectations documentation
 
@@ -110,7 +110,7 @@ typically used for data validation, these expectations do not necessarily apply 
 ``expect_column_mean_to_be_between`` expectations that supplies null as values for both min and max. This means that
 profiling does not expect the mean to be within a particular range--anything is acceptable.
 
-.. code-block::
+.. code-block:: json
 
     {
       "expectation_type": "expect_column_mean_to_be_between",
@@ -124,7 +124,7 @@ profiling does not expect the mean to be within a particular range--anything is 
 When this expectation is evaluated against a batch, the validation result computes the actual mean and returns it as
 observed_value. Getting this observed value was the sole purpose of the expectation.
 
-.. code-block::
+.. code-block:: json
 
     {
       "success": true,
