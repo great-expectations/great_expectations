@@ -22,20 +22,20 @@ Great Expectations provides a mildly opinionated deployment framework that simpl
 
 This tutorial uses a toy project called ``example_dickens_data_project``, but the same methods should work for most data projects. If you want to follow along with this exact example, start with:
 
-.. code-block::
+.. code-block:: bash
 
     git clone https://github.com/superconductive/example-dickens-data-project.git
     cd example-dickens-data-project
 
 By default, everything in the Great Expectations deployment framework will be expressed in a directory structure within a ``great_expectations/`` folder within your version control system. To create this folder, navigate to the root of your project directory in a terminal and run:
 
-.. code-block::
+.. code-block:: bash
 
     great_expectations init
 
 The command line interface (CLI) will scaffold and populate the configuration and other artifacts necessary to get started with Great Expectations.
 
-.. code-block::
+.. code-block:: bash
 
     $ great_expectations init
       _____                _   
@@ -88,7 +88,7 @@ The command line interface (CLI) will scaffold and populate the configuration an
 
 If you inspect the ``great_expectations/`` directory at this point, it should contain:
 
-.. code-block::
+.. code-block:: bash
 
     great_expectations/
     ├── datasources
@@ -124,7 +124,7 @@ Therefore, a Datasource could be a local pandas environment with some configurat
 
 Our example project has a ``data/`` folder containing several CSVs. Within the CLI, we can configure a Pandas DataFrame Datasource like so:
 
-.. code-block::
+.. code-block:: bash
 
     ========== Datasources ==========
 
@@ -150,7 +150,7 @@ Our example project has a ``data/`` folder containing several CSVs. Within the C
 
 This step adds a new block for Datasource configuration to ``great_expectations/great_expectations.yml``. Don't worry about these details yet. For now, it's enough to know that we've configured a Datasource and the configuration information is stored in this file.
 
-.. code-block::
+.. code-block:: bash
 
     datasources:
         data__dir:
@@ -166,7 +166,7 @@ This step adds a new block for Datasource configuration to ``great_expectations/
 
 For a SQL data source, configuration would look like this instead:
 
-.. code-block::
+.. code-block:: bash
 
     ========== Datasources ==========
 
@@ -201,7 +201,7 @@ For a SQL data source, configuration would look like this instead:
 
 The corresponding config would be:
 
-.. code-block::
+.. code-block:: bash
 
     datasources:
         my_db:
@@ -242,7 +242,7 @@ Within the CLI, it's easy to profile our data.
 
 Warning: For large data sets, the current default profiler may run slowly and impose significant I/O and compute load. Be cautious when executing against shared databases.
 
-.. code-block::
+.. code-block:: bash
 
     ========== Profiling ==========
 
@@ -272,7 +272,7 @@ Warning: For large data sets, the current default profiler may run slowly and im
 
 The default profiler (``BasicDatasetProfiler``) will add two JSON files in your ``great_expectations/`` directory. They will be placed in subdirectories that following our namespacing conventions. Great Expectations' DataContexts can fetch these objects by name, so you won't usually need to access these files directly. Still, it's useful to see how they're stored, to get a sense for how namespaces work.
 
-.. code-block::
+.. code-block:: bash
 
     great_expectations/
     ├── datasources
@@ -303,7 +303,7 @@ The default profiler (``BasicDatasetProfiler``) will add two JSON files in your 
 
 We won't go into full detail on the contents of Expectation and EVR objects here. But as a quick illustration, Expectation Suite JSON objects consist mainly of Expectations like:
 
-.. code-block::
+.. code-block:: json
 
     {
       "expectation_type": "expect_column_values_to_be_in_set",
@@ -323,7 +323,7 @@ Expectation Suites created by the BasicDatasetProfiler are very loose and unopin
 
 EVRs contain Expectations, *plus* validation results from a evaluation against a specific batch of data.
 
-.. code-block::
+.. code-block:: json
 
     {
       "success": false,
@@ -397,7 +397,7 @@ Second, the ability to translate Expectations back and forth betwen human- and m
 
 Within the CLI, we compile to documentation as follows:
 
-.. code-block::
+.. code-block:: bash
 
     ========== Data Documentation ==========
 
@@ -430,26 +430,26 @@ Within the CLI, we compile to documentation as follows:
 
 Opening `great_expectations/uncommitted/documentation/index.html` in a browser will give you a page like:
 
-.. image:: ../index_render.png
+.. image:: ../images/index_render.png
 
 Clicking through to the first link will show you prescriptive data documentation. This renders the Expectation Suite itself.
 
-.. image:: ../prescriptive_render.png
+.. image:: ../images/prescriptive_render.png
 
 Clicking through to the second link will show you descriptive data documentation. This renders the full content of validation results, not just the Expectations themselves.
 
-.. image:: ../descriptive_render.png
+.. image:: ../images/descriptive_render.png
 
 
 Note that the CLI moved our EVRs from
 
-.. code-block::
+.. code-block:: bash
 
     uncommitted/validations/2019-07-12T090442.066278Z/data__dir/default/notable_works_by_charles_dickens/
 
 to
 
-.. code-block::
+.. code-block:: bash
     
     fixtures/validations/2019-07-12T090442.066278Z/data__dir/default/notable_works_by_charles_dickens/
 
@@ -457,7 +457,7 @@ This is because this data documentation is intended to act as the source of trut
 
 Note also that the default ``great_expectations/`` setup does NOT commit compiled docs themselves within version control. Instead, they live in ``uncommitted/documentation/``, with a subdirectory structure that mirrors the project namespace.
 
-.. code-block::
+.. code-block:: bash
 
     great_expectations/
     ├── datasources
