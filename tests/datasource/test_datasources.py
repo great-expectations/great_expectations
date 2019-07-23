@@ -4,7 +4,6 @@ import pytest
 from six import PY3
 
 from ruamel.yaml import YAML
-yaml = YAML(typ='safe')
 import os
 import shutil
 
@@ -12,9 +11,10 @@ import pandas as pd
 import sqlalchemy as sa
 
 from great_expectations.exceptions import BatchKwargsError
-from great_expectations.data_context import DataContext
 from great_expectations.datasource import PandasDatasource, SqlAlchemyDatasource, SparkDFDatasource
 from great_expectations.dataset import PandasDataset, SqlAlchemyDataset, SparkDFDataset
+
+yaml = YAML(typ='safe')
 
 
 @pytest.fixture(scope="module")
@@ -95,9 +95,9 @@ def test_standalone_sqlalchemy_datasource(test_db_connection_string):
     datasource = SqlAlchemyDatasource(
         'SqlAlchemy', connection_string=test_db_connection_string, echo=False)
 
-    assert datasource.get_available_data_asset_names() == {"default": {"main___table_1", "main___table_2"}}
-    dataset1 = datasource.get_batch("main___table_1")
-    dataset2 = datasource.get_batch("main___table_2")
+    assert datasource.get_available_data_asset_names() == {"default": {"main.table_1", "main.table_2"}}
+    dataset1 = datasource.get_batch("main.table_1")
+    dataset2 = datasource.get_batch("main.table_2")
     assert isinstance(dataset1, SqlAlchemyDataset)
     assert isinstance(dataset2, SqlAlchemyDataset)
 

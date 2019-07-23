@@ -1,6 +1,7 @@
+# -*- coding: utf-8 -*-
+
 import copy
 import json
-from sparklines import sparklines
 
 from .content_block import ContentBlockRenderer
 from ...util import ordinal
@@ -44,6 +45,23 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
             }
         }
     }
+
+    # Unicode: 9601, 9602, 9603, 9604, 9605, 9606, 9607, 9608
+    bar = '▁▂▃▄▅▆▇█'
+    barcount = len(bar)
+
+    @classmethod
+    def sparkline(cls, weights):
+        """Builds a unicode-text based sparkline for the provided histogram.
+
+        Code from https://rosettacode.org/wiki/Sparkline_in_unicode#Python
+        """
+        mn, mx = min(weights), max(weights)
+        extent = mx - mn
+        sparkline = ''.join(cls.bar[min([cls.barcount - 1,
+                                         int((n - mn) / extent * cls.barcount)])]
+                            for n in weights)
+        return sparkline, mn, mx
 
     @classmethod
     def _missing_content_block_fn(cls, expectation, styling=None, include_column_name=True):
@@ -1171,13 +1189,24 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
             expectation["kwargs"],
             ["column", "partition_object", "threshold"]
         )
+
+        styling.update({
+            "params": {
+                "sparklines_histogram": {
+                    "styles": {
+                        "font-family": "serif"
+                    }
+                }
+            }
+        })
         
         if not params.get("partition_object"):
             template_str = "Kullback-Leibler (KL) divergence with respect to a given distribution must be lower than a \
             provided threshold but no distribution was specified."
         else:
-            params["sparklines_histogram"] = sparklines(params.get("partition_object")["weights"])[0]
-            template_str = "Kullback-Leibler (KL) divergence with respect to the following distribution must be lower than $threshold: $sparklines_histogram"
+            params["sparklines_histogram"]= cls.sparkline(params.get("partition_object")["weights"])[0]
+            template_str = "Kullback-Leibler (KL) divergence with respect to the following distribution must be " \
+                           "lower than $threshold: $sparklines_histogram"
 
         if include_column_name:
             template_str = "$column " + template_str
@@ -1185,14 +1214,7 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
         return [{
             "template": template_str,
             "params": params,
-            "styling": {
-                "params":
-                    {
-                        "formatted_json": {
-                            "classes": []
-                        }
-                    }
-            },
+            "styling": styling,
         }]
     
     @classmethod

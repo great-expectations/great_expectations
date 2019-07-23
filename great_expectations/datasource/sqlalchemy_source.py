@@ -95,9 +95,13 @@ class SqlAlchemyDatasource(Datasource):
 
     def _get_data_asset(self, batch_kwargs, expectation_suite, **kwargs):
         if "table" in batch_kwargs:
+            if "schema" in batch_kwargs:
+                schema = batch_kwargs["schema"]
+            else:
+                schema = None
             return SqlAlchemyDataset(table_name=batch_kwargs["table"], 
                                      engine=self.engine,
-                                     schema=batch_kwargs["schema"],
+                                     schema=schema,
                                      data_context=self._data_context,
                                      expectation_suite=expectation_suite,
                                      batch_kwargs=batch_kwargs)
