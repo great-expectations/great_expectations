@@ -86,6 +86,9 @@ class DataContext(object):
     Similarly, if no expectation suite name is provided, the DataContext will assume the name "default".
     """
 
+    PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS = 2
+    PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND = 3
+
     @classmethod
     def create(cls, project_root_dir=None):
         """Build a new great_expectations directory and DataContext object in the provided project_root_dir.
@@ -403,6 +406,9 @@ class DataContext(object):
             base_profile_store = yaml.load("{}")
             base_profile_store.yaml_set_start_comment(PROFILE_COMMENT)
             return base_profile_store
+
+    def get_project_config(self):
+        return self._project_config
 
     def get_profile_credentials(self, profile_name):
         """Get named profile credentials.
@@ -1698,21 +1704,36 @@ class DataContext(object):
     def profile_datasource(self,
                            datasource_name,
                            generator_name=None,
+                           data_assets=None,
+                           max_data_assets=20,
+                           profile_all_data_assets=True,
                            profiler=BasicDatasetProfiler,
-                           max_data_assets=10):
+                           dry_run=False):
         """Profile the named datasource using the named profiler.
 
         Args:
-            datasource_name: the name of the datasource for which to profile data_assets
-            generator_name: the name of the generator to use to get batches
-            profiler: the profiler to use
-            max_data_assets: the maximum number of data_assets from the
+        datasource_name: the name of the datasource for which to profile data_assets
+        generator_name: the name of the generator to use to get batches
+        data_assets: list of data asset names to profile
+        max_data_assets: if the number of data assets the generator yields is greater than this max_data_assets,
+                        profile_all_data_assets=True is required to profile all
+        profile_all_data_assets: when True, all data assets are profiled, regardless of their number
+        profiler: the profiler class to use
+        dry_run: when true, the method checks arguments and reports if can profile or specifies the arguments that are missing
 
         Returns:
-            List of (expectation_suite, EVR) tuples for each of the data_assets found in the datasource
+            A dictionary:
+            {
+            "success": True/False
+            "results": List of (expectation_suite, EVR) tuples for each of the data_assets found in the datasource
+            }
+
+            When success = False, the error details are under "error" key
         """
-        logger.info("Profiling '%s' with '%s'" % (datasource_name, profiler.__name__))
-        profiling_results = []
+        if not dry_run:
+            logger.info("Profiling '%s' with '%s'" % (datasource_name, profiler.__name__))
+
+        profiling_results = {}
         data_asset_names = self.get_available_data_asset_names(datasource_name)
         if generator_name is None:
             if len(data_asset_names[datasource_name].keys()) == 1:
@@ -1722,82 +1743,119 @@ class DataContext(object):
 
         data_asset_name_list = list(data_asset_names[datasource_name][generator_name])
         total_data_assets = len(data_asset_name_list)
-        logger.info("Found %d data assets using generator '%s'" % (total_data_assets, generator_name))
-                
-        if max_data_assets is None or max_data_assets >= len(data_asset_name_list):
-            logger.info("Profiling all %d." % (len(data_asset_name_list)))
-        else:
-            logger.info("Profiling the first %d, alphabetically." % (max_data_assets))
+
+        if data_assets and len(data_assets) > 0:
+            not_found_data_assets = [name for name in data_assets if name not in data_asset_name_list]
+            if len(not_found_data_assets) > 0:
+                profiling_results = {
+                    'success': False,
+                    'error': {
+                        'code': DataContext.PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND,
+                        'not_found_data_assets': not_found_data_assets,
+                        'data_assets': data_asset_name_list
+                    }
+                }
+                return profiling_results
+
+
+            data_asset_name_list = data_assets
             data_asset_name_list.sort()
-            data_asset_name_list = data_asset_name_list[:max_data_assets]
+            total_data_assets = len(data_asset_name_list)
+            if not dry_run:
+                logger.info("Profiling the white-listed data assets: %s, alphabetically." % (",".join(data_asset_name_list)))
+        else:
+            if profile_all_data_assets:
+                data_asset_name_list.sort()
+            else:
+                if total_data_assets > max_data_assets:
+                    profiling_results = {
+                        'success': False,
+                        'error': {
+                            'code': DataContext.PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS,
+                            'num_data_assets': total_data_assets,
+                            'data_assets': data_asset_name_list
+                        }
+                    }
+                    return profiling_results
 
-        total_columns, total_expectations, total_rows, skipped_data_assets = 0, 0, 0, 0
-        total_start_time = datetime.datetime.now()
-        run_id = total_start_time.isoformat().replace(":", "") + "Z"
-        for name in data_asset_name_list:
-            logger.info("\tProfiling '%s'..." % name)
-            try:
-                start_time = datetime.datetime.now()
+        if not dry_run:
+            logger.info("Profiling all %d data assets from generator %s" % (len(data_asset_name_list), generator_name))
+        else:
+            logger.info("Found %d data assets from generator %s" % (len(data_asset_name_list), generator_name))
 
-                # FIXME: There needs to be an affordance here to limit to 100 rows, or downsample, etc.
-                batch = self.get_batch(
-                    data_asset_name=NormalizedDataAssetName(datasource_name, generator_name, name),
-                    expectation_suite_name=profiler.__name__
-                )
+        profiling_results['success'] = True
 
-                if not profiler.validate(batch):
-                    raise ProfilerError(
-                        "batch '%s' is not a valid batch for the '%s' profiler" % (name, profiler.__name__)
+        if not dry_run:
+            profiling_results['results'] = []
+            total_columns, total_expectations, total_rows, skipped_data_assets = 0, 0, 0, 0
+            total_start_time = datetime.datetime.now()
+            run_id = total_start_time.isoformat().replace(":", "") + "Z"
+
+            for name in data_asset_name_list:
+                logger.info("\tProfiling '%s'..." % name)
+                try:
+                    start_time = datetime.datetime.now()
+
+                    # FIXME: There needs to be an affordance here to limit to 100 rows, or downsample, etc.
+                    batch = self.get_batch(
+                        data_asset_name=NormalizedDataAssetName(datasource_name, generator_name, name),
+                        expectation_suite_name=profiler.__name__
                     )
-  
-                # Note: This logic is specific to DatasetProfilers, which profile a single batch. Multi-batch profilers
-                # will have more to unpack.
-                expectation_suite, validation_result = profiler.profile(batch, run_id=run_id)
-                profiling_results.append((expectation_suite, validation_result))
 
-                if isinstance(batch, Dataset):
-                    # For datasets, we can produce some more detailed statistics
-                    row_count = batch.get_row_count()
-                    total_rows += row_count
-                    new_column_count = len(set([exp["kwargs"]["column"] for exp in expectation_suite["expectations"] if "column" in exp["kwargs"]]))
-                    total_columns += new_column_count
-                
-                new_expectation_count = len(expectation_suite["expectations"])
-                total_expectations += new_expectation_count
+                    if not profiler.validate(batch):
+                        raise ProfilerError(
+                            "batch '%s' is not a valid batch for the '%s' profiler" % (name, profiler.__name__)
+                        )
 
-                self.save_expectation_suite(expectation_suite)
-                duration = (datetime.datetime.now() - start_time).total_seconds()
-                logger.info("\tProfiled %d columns using %d rows from %s (%.3f sec)" %
-                            (new_column_count, row_count, name, duration))
+                    # Note: This logic is specific to DatasetProfilers, which profile a single batch. Multi-batch profilers
+                    # will have more to unpack.
+                    expectation_suite, validation_result = profiler.profile(batch, run_id=run_id)
+                    profiling_results['results'].append((expectation_suite, validation_result))
 
-            except ProfilerError as err:
-                logger.warning(err.message)
-            except IOError as exc:
-                logger.warning("IOError while profiling %s. (Perhaps a loading error?) Skipping." % (name))
-                logger.debug(str(exc))
-                skipped_data_assets += 1
-            # FIXME: this is a workaround for catching SQLAlchemny exceptions without taking SQLAlchemy dependency.
-            # Think how to avoid this.
-            except Exception as e:
-                logger.warning("Exception while profiling %s. (Perhaps a loading error?) Skipping." % (name))
-                logger.debug(str(e))
-                skipped_data_assets += 1
+                    if isinstance(batch, Dataset):
+                        # For datasets, we can produce some more detailed statistics
+                        row_count = batch.get_row_count()
+                        total_rows += row_count
+                        new_column_count = len(set([exp["kwargs"]["column"] for exp in expectation_suite["expectations"] if "column" in exp["kwargs"]]))
+                        total_columns += new_column_count
 
-        total_duration = (datetime.datetime.now() - total_start_time).total_seconds()
-        logger.info("""
-Profiled %d of %d named data assets, with %d total rows and %d columns in %.2f seconds.
-Generated, evaluated, and stored %d candidate Expectations.
-Note: You will need to review and revise Expectations before using them in production.""" % (
-            len(data_asset_name_list),
-            total_data_assets,
-            total_rows,
-            total_columns,
-            total_duration,
-            total_expectations,
-        ))
-        if skipped_data_assets > 0:
-            logger.warning("Skipped %d data assets due to errors." % skipped_data_assets)
+                    new_expectation_count = len(expectation_suite["expectations"])
+                    total_expectations += new_expectation_count
 
+                    self.save_expectation_suite(expectation_suite)
+                    duration = (datetime.datetime.now() - start_time).total_seconds()
+                    logger.info("\tProfiled %d columns using %d rows from %s (%.3f sec)" %
+                                (new_column_count, row_count, name, duration))
+
+                except ProfilerError as err:
+                    logger.warning(err.message)
+                except IOError as exc:
+                    logger.warning("IOError while profiling %s. (Perhaps a loading error?) Skipping." % (name))
+                    logger.debug(str(exc))
+                    skipped_data_assets += 1
+                # FIXME: this is a workaround for catching SQLAlchemny exceptions without taking SQLAlchemy dependency.
+                # Think how to avoid this.
+                except Exception as e:
+                    logger.warning("Exception while profiling %s. (Perhaps a loading error?) Skipping." % (name))
+                    logger.debug(str(e))
+                    skipped_data_assets += 1
+
+            total_duration = (datetime.datetime.now() - total_start_time).total_seconds()
+            logger.info("""
+    Profiled %d of %d named data assets, with %d total rows and %d columns in %.2f seconds.
+    Generated, evaluated, and stored %d candidate Expectations.
+    Note: You will need to review and revise Expectations before using them in production.""" % (
+                len(data_asset_name_list),
+                total_data_assets,
+                total_rows,
+                total_columns,
+                total_duration,
+                total_expectations,
+            ))
+            if skipped_data_assets > 0:
+                logger.warning("Skipped %d data assets due to errors." % skipped_data_assets)
+
+        profiling_results['success'] = True
         return profiling_results
 
 

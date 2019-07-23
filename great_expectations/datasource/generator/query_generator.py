@@ -21,7 +21,7 @@ class QueryGenerator(BatchGenerator):
     """Produce query-style batch_kwargs from sql files stored on disk
     """
 
-    def __init__(self, datasource, name="default"):
+    def __init__(self, datasource, name="default", profiling_options=None):
         # TODO: Add tests for QueryGenerator
         super(QueryGenerator, self).__init__(name=name, type_="queries", datasource=datasource)
         if (
