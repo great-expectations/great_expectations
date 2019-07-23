@@ -73,7 +73,7 @@ class QueryGenerator(BatchGenerator):
             pass
 
         if self.engine is not None and self.inspector is not None:
-            split_data_asset_name = data_asset_name.split("___")
+            split_data_asset_name = data_asset_name.split(".")
             if len(split_data_asset_name) == 2:
                 schema_name = split_data_asset_name[0]
                 table_name = split_data_asset_name[1]
@@ -81,7 +81,7 @@ class QueryGenerator(BatchGenerator):
                 schema_name = self.inspector.default_schema_name
                 table_name = split_data_asset_name[0]
             else:
-                raise ValueError("table name must be of shape SCHEMA___TABLE. passed: " + data_asset_name)
+                raise ValueError("Table name must be of shape '[SCHEMA.]TABLE'. Passed: " + data_asset_name)
             tables = self.inspector.get_table_names(schema=schema_name)
             if table_name in tables:
                 return iter([
@@ -113,6 +113,6 @@ class QueryGenerator(BatchGenerator):
                 if schema_name in ['information_schema']:
                     continue
 
-                tables.extend([table_name if self.inspector.default_schema_name == schema_name else schema_name + "___" + table_name for table_name in self.inspector.get_table_names(schema=schema_name)])
+                tables.extend([table_name if self.inspector.default_schema_name == schema_name else schema_name + "." + table_name for table_name in self.inspector.get_table_names(schema=schema_name)])
 
         return set(defined_queries + tables)
