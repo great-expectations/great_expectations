@@ -11,9 +11,17 @@ Planned Features
 * Multi-batch expectations
 
 
-v.0.7.2__develop
+v.0.7.3__develop
 -----------------
 
+
+v.0.7.2
+-----------------
+* Improved error detection and handling in CLI "add datasource" feature
+* Fixes in rendering of profiling results (descriptive renderer of validation results)
+* Query Generator of SQLAlchemy datasource adds tables in non-default schemas to the data asset namespace
+* Added convenience methods to display HTML renderers of sections in Jupyter notebooks
+* Implemented prescriptive rendering of expectations for most expectation types
 
 v.0.7.1
 ------------
