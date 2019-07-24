@@ -1,15 +1,15 @@
 """Utility functions for working with great_expectations within jupyter notebooks or jupyter lab.
 """
 
-import json
-import os
 import logging
-import great_expectations as ge
+import sys
+
 import great_expectations.render as render
 from datetime import datetime
 
 import tzlocal
 from IPython.core.display import display, HTML
+
 
 def set_data_source(context, data_source_type=None):
     """
@@ -74,9 +74,12 @@ Uncomment the next cell and set data_source_name to one of these names.
 
     return data_source_name
 
+
 def setup_notebook_logging(logger=None):
-    """
-    TODO: Needs a docstring and tests.
+    """Set up the provided logger for the GE default logging configuration.
+
+    Args:
+        logger - the logger to configure
     """
 
     def posix2local(timestamp, tz=tzlocal.get_localzone()):
@@ -97,18 +100,18 @@ def setup_notebook_logging(logger=None):
             return s
 
     if not logger:
-        logger = logging.getLogger()
-    chandler = logging.StreamHandler()
+        logger = logging.getLogger(__name__)
+    chandler = logging.StreamHandler(stream=sys.stdout)
     chandler.setLevel(logging.DEBUG)
-    chandler.setFormatter(Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s", "%Y-%m-%dT%H:%M:%S%z"))
+    # chandler.setFormatter(Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s", "%Y-%m-%dT%H:%M:%S%z"))
+    chandler.setFormatter(Formatter("%(asctime)s - %(levelname)s - %(message)s", "%Y-%m-%dT%H:%M:%S%z"))
     logger.addHandler(chandler)
-    logger.setLevel(logging.ERROR)
-    # logger.setLevel(logging.INFO)
-    logging.debug("test")
+    logger.setLevel(logging.INFO)
+    #
+    # # Filter warnings
+    # import warnings
+    # warnings.filterwarnings('ignore')
 
-    # Filter warnings
-    import warnings
-    warnings.filterwarnings('ignore')
 
 def list_available_data_asset_names(context, data_source_name=None):
     """
@@ -196,6 +199,7 @@ cooltip_style_element = """<style type="text/css">
 </style>
 """
 
+
 def display_column_expectations_as_section(
     expectation_suite,
     column,
@@ -235,6 +239,7 @@ def display_column_expectations_as_section(
     else:
         display(HTML(html_to_display))
 
+
 def display_column_evrs_as_section(
     evrs,
     column,
@@ -272,3 +277,8 @@ def display_column_evrs_as_section(
         return html_to_display
     else:
         display(HTML(html_to_display))
+
+
+# When importing the jupyter_ux module, we set up a preferred logging configuration
+logger = logging.getLogger("great_expectations")
+setup_notebook_logging(logger)
