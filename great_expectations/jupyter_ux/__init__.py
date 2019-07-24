@@ -100,13 +100,14 @@ def setup_notebook_logging(logger=None):
             return s
 
     if not logger:
-        logger = logging.getLogger(__name__)
+        logger = logging.getLogger("great_expectations")
     chandler = logging.StreamHandler(stream=sys.stdout)
     chandler.setLevel(logging.DEBUG)
     # chandler.setFormatter(Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s", "%Y-%m-%dT%H:%M:%S%z"))
     chandler.setFormatter(Formatter("%(asctime)s - %(levelname)s - %(message)s", "%Y-%m-%dT%H:%M:%S%z"))
     logger.addHandler(chandler)
     logger.setLevel(logging.INFO)
+    logger.info("Great Expectations logging enabled at INFO level by JupyterUX module.")
     #
     # # Filter warnings
     # import warnings

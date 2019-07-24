@@ -713,7 +713,7 @@ class DataAsset(object):
         message = "%d expectation(s) included in expectation_suite." % len(expectations)
 
         if discards["failed_expectations"] > 0 and not suppress_warnings:
-            message += " Omitting %d expectations that failed on their last run; set " \
+            message += " Omitting %d expectation(s) that failed when last run; set " \
                        "discard_failed_expectations=False to include them." \
                         % discards["failed_expectations"]
 
