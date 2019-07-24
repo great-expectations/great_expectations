@@ -193,7 +193,7 @@ class SparkDFDataset(MetaSparkDFDataset):
                 discard_failed_expectations=False,
                 discard_result_format_kwargs=False,
                 discard_catch_exceptions_kwargs=False,
-                discard_include_configs_kwargs=False
+                discard_include_config_kwargs=False
             )
         )
 
