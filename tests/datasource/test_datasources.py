@@ -107,7 +107,7 @@ def test_create_sqlalchemy_datasource(data_context):
     type_ = "sqlalchemy"
     connection_kwargs = {
         "drivername": "postgresql",
-        "username": "",
+        "username": "postgres",
         "password": "",
         "host": "localhost",
         "port": 5432,
@@ -150,6 +150,7 @@ def test_create_sqlalchemy_datasource(data_context):
 
 
 def test_create_sparkdf_datasource(data_context, tmp_path_factory):
+    pyspark_skip = pytest.importorskip("pyspark")
     base_dir = tmp_path_factory.mktemp('test_create_sparkdf_datasource')
     name = "test_sparkdf_datasource"
     type_ = "spark"
@@ -216,6 +217,7 @@ def test_pandas_source_readcsv(data_context, tmp_path_factory):
 
 
 def test_standalone_spark_parquet_datasource(test_parquet_folder_connection_path):
+    pyspark_skip = pytest.importorskip("pyspark")
     datasource = SparkDFDatasource('SparkParquet', base_directory=test_parquet_folder_connection_path)
 
     assert datasource.get_available_data_asset_names() == {
@@ -228,6 +230,7 @@ def test_standalone_spark_parquet_datasource(test_parquet_folder_connection_path
 
 
 def test_standalone_spark_csv_datasource(test_folder_connection_path):
+    pyspark_skip = pytest.importorskip("pyspark")
     datasource = SparkDFDatasource('SparkParquet', base_directory=test_folder_connection_path)
     assert datasource.get_available_data_asset_names() == {
         "default": set(['test'])
@@ -239,6 +242,7 @@ def test_standalone_spark_csv_datasource(test_folder_connection_path):
 
 
 def test_standalone_spark_passthrough_generator_datasource(data_context, dataset):
+    pyspark_skip = pytest.importorskip("pyspark")
     # noinspection PyUnusedLocal
     datasource = data_context.add_datasource("spark_source", "spark", generators={"passthrough": {"type": "memory"}})
 
@@ -267,6 +271,7 @@ def test_standalone_spark_passthrough_generator_datasource(data_context, dataset
 
 
 def test_invalid_reader_sparkdf_datasource(tmp_path_factory):
+    pyspark_skip = pytest.importorskip("pyspark")
     basepath = str(tmp_path_factory.mktemp("test_invalid_reader_sparkdf_datasource"))
     datasource = SparkDFDatasource('mysparksource', base_directory=basepath)
 
