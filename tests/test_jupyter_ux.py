@@ -22,26 +22,36 @@ def test_display_column_expectations_as_section(basic_expectation_suite):
         return_without_displaying=True
     )
     print(html_to_display)
+    html_to_display = html_to_display.replace(" ", "").replace("\t", "").replace("\n", "")
     assert html_to_display == """\
 <div id="section-1" class="ge-section container-fluid">
     <div class="row">
-        
+    
 <div id="content-block-1" class="col-12" >
-    <h3 id="content-block-1-header" class="alert alert-secondary" >
-        naturals
-    </h3>
+    <div id="content-block-1-header" class="alert alert-secondary" >
+        <h3>
+            naturals
+        </h3></div>
 </div>
-        
+
 <div id="content-block-2" class="col-12" >
     <ul id="content-block-2-body" >
-            <li >is a required field.</li>
-            <li >values must be unique.</li>
-            
+            <li >
+            <span>
+                is a required field.
+            </span>
+        </li>
+            <li >
+            <span>
+                values must be unique.
+            </span>
+        </li>
+        
         </ul>
 </div>
-        
+    
     </div>
-</div>"""
+</div>""".replace(" ", "").replace("\t", "").replace("\n", "")
 
     html_to_display = jux.display_column_expectations_as_section(
         basic_expectation_suite,
@@ -49,6 +59,7 @@ def test_display_column_expectations_as_section(basic_expectation_suite):
         return_without_displaying=True
     )
     print(html_to_display)
+    html_to_display = html_to_display.replace(" ", "").replace("\t", "").replace("\n", "")
     assert html_to_display == """\
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous"><style type="text/css">
 .cooltip {
@@ -58,7 +69,7 @@ def test_display_column_expectations_as_section(basic_expectation_suite):
 }
 
 .cooltip .top {
-    min-width:200px; 
+    min-width:200px;
     top:-6px;
     left:50%;
     transform:translate(-50%, -100%);
@@ -102,23 +113,33 @@ def test_display_column_expectations_as_section(basic_expectation_suite):
 </style>
 <div id="section-1" class="ge-section container-fluid">
     <div class="row">
-        
+    
 <div id="content-block-1" class="col-12" >
-    <h3 id="content-block-1-header" class="alert alert-secondary" >
-        naturals
-    </h3>
+    <div id="content-block-1-header" class="alert alert-secondary" >
+        <h3>
+            naturals
+        </h3></div>
 </div>
-        
+
 <div id="content-block-2" class="col-12" >
     <ul id="content-block-2-body" >
-            <li >is a required field.</li>
-            <li >values must be unique.</li>
-            
+            <li >
+            <span>
+                is a required field.
+            </span>
+        </li>
+            <li >
+            <span>
+                values must be unique.
+            </span>
+        </li>
+        
         </ul>
 </div>
-        
+    
     </div>
-</div>"""
+</div>
+""".replace(" ", "").replace("\t", "").replace("\n", "")
 
 
 def test_display_column_evrs_as_section():
@@ -138,7 +159,12 @@ def test_display_column_evrs_as_section():
     #FIXME: This isn't a full snapshot test.
     assert '<div id="section-1" class="ge-section container-fluid">' in html_to_display
     assert '<span class="badge badge-info" >Carlsson, Mr Frans Olof</span>' in html_to_display
-    assert '<li class="list-group-item d-flex justify-content-between align-items-center" >expect_column_values_to_be_in_type_list <span class="badge badge-secondary badge-pill" >True</span></li>' in html_to_display
+    assert """\
+    <li class="list-group-item d-flex justify-content-between align-items-center" >
+            <span>
+                expect_column_values_to_be_in_type_list <span class="badge badge-secondary badge-pill" >True</span>
+            </span>
+        </li>""" in html_to_display
 
 
 def test_configure_logging(caplog):
