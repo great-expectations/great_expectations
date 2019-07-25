@@ -749,7 +749,8 @@ class DataAsset(object):
         if discards["catch_exceptions"] > 0 and not suppress_warnings:
             settings_message += " catch_exceptions"
 
-        settings_message += " settings filtered."
+        if len(settings_message) > 1:  # Only add this if we added one of the settings above.
+            settings_message += " settings filtered."
 
         expectation_suite["expectations"] = expectations
         logger.info(message + settings_message)
