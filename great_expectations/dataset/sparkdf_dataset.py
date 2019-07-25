@@ -585,7 +585,7 @@ class SparkDFDataset(MetaSparkDFDataset):
 
             return {
                 "success": success,
-                "details": {
+                "result": {
                     "observed_value": col_type.__name__
                 }
             }
@@ -626,7 +626,7 @@ class SparkDFDataset(MetaSparkDFDataset):
 
         return {
             "success": issubclass(col_type, types),
-            "details": {
+            "result": {
                 "observed_value": col_type.__name__
             }
         }

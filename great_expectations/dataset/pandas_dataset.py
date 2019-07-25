@@ -501,10 +501,11 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
         return res
 
-    @MetaPandasDataset.expectation(['column', 'type_'])
+    @MetaPandasDataset.expectation(['column', 'type_', 'mostly'])
     def _expect_column_values_to_be_of_type__aggregate(
             self,
             column, type_,
+            mostly=None,
             result_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
         if type_ is None:
@@ -523,7 +524,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
         return {
             "success": success,
-            "details": {
+            "result": {
                 "observed_value": self[column].dtype.name
             }
         }
@@ -573,7 +574,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             self,
             column, type_list,
             mostly=None,
-            result_format=None, include_config=False, catch_exceptions=None, meta=None):
+            result_format=None, include_config=None, catch_exceptions=None, meta=None):
         """In Pandas, columns *may* be typed, or they may be of the generic "object" type which can include rows with
         different storage types in the same column.
 
@@ -638,10 +639,11 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
         return res
 
-    @MetaPandasDataset.expectation(['column', 'type_list'])
+    @MetaPandasDataset.expectation(['column', 'type_list', 'mostly'])
     def _expect_column_values_to_be_in_type_list__aggregate(
             self,
             column, type_list,
+            mostly=None,
             result_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
         if type_list is None:
@@ -662,7 +664,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
         return {
             "success": success,
-            "details": {
+            "result": {
                 "observed_value": self[column].dtype.name
             }
         }
