@@ -530,6 +530,9 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         mostly=None,
         result_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
+        if mostly is not None:
+            raise ValueError("SqlAlchemyDataset does not support column map semantics for column types")
+
         try:
             col_data = [col for col in self.columns if col["name"] == column][0]
             col_type = type(col_data["type"])
@@ -548,16 +551,20 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             # In particular, we *exclude* types that would be valid under an ORM
             # such as "float" for postgresql with this approach
 
-            if not self.dialect:
-                logger.warning("No sqlalchemy dialect found; relying in top-level sqlalchemy types.")
-                success = issubclass(col_type, getattr(sa, type_))
+            if type_ is None:
+                # vacuously true
+                success = True
             else:
-                success = issubclass(col_type, getattr(self.dialect, type_))
+                if not self.dialect:
+                    logger.warning("No sqlalchemy dialect found; relying in top-level sqlalchemy types.")
+                    success = issubclass(col_type, getattr(sa, type_))
+                else:
+                    success = issubclass(col_type, getattr(self.dialect, type_))
                 
             return {
                     "success": success,
                     "details": {
-                        "observed_type": col_type.__name__
+                        "observed_value": col_type.__name__
                     }
                 }
 
@@ -573,6 +580,9 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         mostly=None,
         result_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
+        if mostly is not None:
+            raise ValueError("SqlAlchemyDataset does not support column map semantics for column types")
+
         try:
             col_data = [col for col in self.columns if col["name"] == column][0]
             col_type = type(col_data["type"])
@@ -618,7 +628,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         return {
                 "success": issubclass(col_type, types),
                 "details": {
-                    "observed_type-type": col_type.__name__
+                    "observed_value": col_type.__name__
                 }
         }
 
