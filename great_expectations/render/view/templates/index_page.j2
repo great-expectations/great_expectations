@@ -65,16 +65,17 @@
         data-target="#navigation"
         data-offset="50"
     >
-    {% include 'ge_info.j2' %}
     <div class="container">
       <div class="row">
-        <div class="col-12">
+        <div class="col-md-8 col-lg-9 col-xs-12">
         {% for section in sections %}
           {% set section_loop = loop -%}
           {% include 'section.j2' %}
         {% endfor %}
         </div>
-
+        <div class="col-lg-3 col-md-4 col-xs-12">
+            {% include 'ge_info.j2' %}
+        </div>
       </div>
     </div>
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
