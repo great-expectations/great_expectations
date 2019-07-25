@@ -11,11 +11,10 @@ logger = logging.getLogger(__name__)
 
 try:
     import sqlalchemy
-    from sqlalchemy import create_engine, MetaData
+    from sqlalchemy import create_engine
 except ImportError:
     sqlalchemy = None
     create_engine = None
-    MetaData = None
     logger.debug("Unable to import sqlalchemy.")
 
 
@@ -63,7 +62,9 @@ class SqlAlchemyDatasource(Datasource):
 
             # Otherwise, connect using remaining kwargs
             else:
-                self._connect(self._get_sqlalchemy_connection_options(**kwargs))
+                self.engine = create_engine(self._get_sqlalchemy_connection_options(**kwargs))
+                self.engine.connect()
+
         except sqlalchemy.exc.OperationalError as sqlalchemy_error:
             raise DatasourceInitializationError(self._name, str(sqlalchemy_error))
 
@@ -81,11 +82,6 @@ class SqlAlchemyDatasource(Datasource):
         drivername = credentials.pop("drivername")
         options = sqlalchemy.engine.url.URL(drivername, **credentials)
         return options
-
-    def _connect(self, options):
-        self.engine = create_engine(options)
-        self.engine.connect()
-        self.meta = MetaData()
 
     def _get_generator_class(self, type_):
         if type_ == "queries":
