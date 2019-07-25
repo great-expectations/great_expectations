@@ -565,6 +565,9 @@ class SparkDFDataset(MetaSparkDFDataset):
             mostly=None,
             result_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
+        if mostly is not None:
+            raise ValueError("SparkDFDataset does not support column map semantics for column types")
+
         try:
             col_data = [f for f in self.spark_df.schema.fields if f.name == column][0]
             col_type = type(col_data.dataType)
@@ -574,17 +577,21 @@ class SparkDFDataset(MetaSparkDFDataset):
             raise ValueError("No type data available for column: %s" % column)
 
         try:
-            success = issubclass(col_type, getattr(sparktypes, type_))
+            if type_ is None:
+                # vacuously true
+                success = True
+            else:
+                success = issubclass(col_type, getattr(sparktypes, type_))
 
             return {
                 "success": success,
                 "details": {
-                    "observed_type": col_type.__name__
+                    "observed_value": col_type.__name__
                 }
             }
 
         except AttributeError:
-            raise ValueError("Unrecognized sqlalchemy type: %s" % type_)
+            raise ValueError("Unrecognized spark type: %s" % type_)
 
     @DocInherit
     @DataAsset.expectation(['column', 'type_', 'mostly'])
@@ -595,6 +602,9 @@ class SparkDFDataset(MetaSparkDFDataset):
             mostly=None,
             result_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
+        if mostly is not None:
+            raise ValueError("SparkDFDataset does not support column map semantics for column types")
+
         try:
             col_data = [f for f in self.spark_df.schema.fields if f.name == column][0]
             col_type = type(col_data.dataType)
@@ -617,7 +627,7 @@ class SparkDFDataset(MetaSparkDFDataset):
         return {
             "success": issubclass(col_type, types),
             "details": {
-                "observed_type-type": col_type.__name__
+                "observed_value": col_type.__name__
             }
         }
 
