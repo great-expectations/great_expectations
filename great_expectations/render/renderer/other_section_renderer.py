@@ -56,17 +56,12 @@ class DescriptiveOverviewSectionRenderer(Renderer):
         table_rows.append([
             {
                 "template": "Number of observations",
-                "params": {},
-                # "styling": {
-                #     "attributes": {
-                #         "data-toggle": "popover",
-                #         "data-trigger": "hover",
-                #         "data-placement": "top",
-                #         "data-content": "expect_table_row_count_to_be_between",
-                #         "container": "body",
-                #     }
-
-                # }
+                "tooltip": {
+                    "content": "expect_table_row_count_to_be_between"
+                },
+                "params": {
+                    "tooltip_text": "Number of observations"
+                }
             },
             "?" if not expect_table_row_count_to_be_between_evr else expect_table_row_count_to_be_between_evr["result"][
                 "observed_value"]
