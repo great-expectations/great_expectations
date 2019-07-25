@@ -67,9 +67,7 @@
             "type_list": ["int"]
           },
           "out":{
-            "success":true,
-            "unexpected_list": [],
-            "unexpected_index_list": []
+            "success":true
           },
           "only_for": ["pandas"]
         },
@@ -143,9 +141,7 @@
             "type_list": ["float"]
           },
           "out":{
-            "success":true,
-            "unexpected_list":[],
-            "unexpected_index_list":[]
+            "success":true
           },
           "only_for": ["pandas"]
         },
@@ -219,9 +215,7 @@
             "type_list": ["boolean"]
           },
           "out":{
-            "success": true,
-            "unexpected_list": [],
-            "unexpected_index_list": []
+            "success": true
           },
           "only_for": ["pandas"]
         },
