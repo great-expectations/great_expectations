@@ -1066,6 +1066,12 @@ class DataContext(object):
             data_asset_name = "_untitled"
 
         try:
+            expectation_suite_name = validation_results["meta"]["expectation_suite_name"]
+        except KeyError:
+            logger.warning("No expectation_suite_name found in validation results; using '_untitled'")
+            expectation_suite_name = "_untitled"
+
+        try:
             normalized_data_asset_name = self._normalize_data_asset_name(data_asset_name)
         except DataContextError:
             logger.warning(
@@ -1180,26 +1186,33 @@ class DataContext(object):
         if not self._compiled:
             self._compile()
 
-        if "meta" not in validation_results or "data_asset_name" not in validation_results["meta"]:
-            logger.warning("No data_asset_name found in validation results; evaluation parameters cannot be registered.")
+        if ("meta" not in validation_results or
+                "data_asset_name" not in validation_results["meta"] or
+                "expectation_suite_name" not in validation_results["meta"]
+        ):
+            logger.warning(
+                "Both data_asset_name ane expectation_suite_name must be in validation results to "
+                "register evaluation parameters."
+            )
             return validation_results
-        elif validation_results["meta"]["data_asset_name"] not in self._compiled_parameters["data_assets"]:
+        elif (data_asset_name not in self._compiled_parameters["data_assets"] or
+              expectation_suite_name not in self._compiled_parameters["data_assets"][data_asset_name]):
             # This is fine; short-circuit since we do not need to register any results from this dataset.
             return validation_results
         
         for result in validation_results['results']:
             # Unoptimized: loop over all results and check if each is needed
             expectation_type = result['expectation_config']['expectation_type']
-            if expectation_type in self._compiled_parameters["data_assets"][data_asset_name]:
+            if expectation_type in self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name]:
                 # First, bind column-style parameters
                 if (("column" in result['expectation_config']['kwargs']) and 
-                    ("columns" in self._compiled_parameters["data_assets"][data_asset_name][expectation_type]) and 
+                    ("columns" in self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_type]) and
                     (result['expectation_config']['kwargs']["column"] in
-                     self._compiled_parameters["data_assets"][data_asset_name][expectation_type]["columns"])):
+                     self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_type]["columns"])):
 
                     column = result['expectation_config']['kwargs']["column"]
                     # Now that we have a small search space, invert logic, and look for the parameters in our result
-                    for type_key, desired_parameters in self._compiled_parameters["data_assets"][data_asset_name][expectation_type]["columns"][column].items():
+                    for type_key, desired_parameters in self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_type]["columns"][column].items():
                         # value here is the set of desired parameters under the type_key
                         for desired_param in desired_parameters:
                             desired_key = desired_param.split(":")[-1]
@@ -1211,7 +1224,7 @@ class DataContext(object):
                                 logger.warning("Unrecognized key for parameter %s" % desired_param)
                 
                 # Next, bind parameters that do not have column parameter
-                for type_key, desired_parameters in self._compiled_parameters["data_assets"][data_asset_name][expectation_type].items():
+                for type_key, desired_parameters in self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_type].items():
                     if type_key == "columns":
                         continue
                     for desired_param in desired_parameters:
@@ -1257,17 +1270,17 @@ class DataContext(object):
         It splits parameters by the : (colon) character; valid URNs must have one of the following structures to be
         automatically recognized.
 
-        "urn" : "great_expectations" : "validations" : data_asset_name : "expectations" : expectation_name : "columns" : column_name : "result": result_key
-         [0]            [1]                 [2]              [3]              [4]              [5]              [6]          [7]         [8]        [9]
+        "urn" : "great_expectations" : "validations" : data_asset_name : expectation_suite_name : "expectations" : expectation_name : "columns" : column_name : "result": result_key
+         [0]            [1]                 [2]              [3]                   [4]                  [5]             [6]              [7]         [8]        [9]        [10]
         
-        "urn" : "great_expectations" : "validations" : data_asset_name : "expectations" : expectation_name : "columns" : column_name : "details": details_key
-         [0]            [1]                 [2]              [3]              [4]              [5]              [6]          [7]         [8]        [9]
+        "urn" : "great_expectations" : "validations" : data_asset_name : expectation_suite_name : "expectations" : expectation_name : "columns" : column_name : "details": details_key
+         [0]            [1]                 [2]              [3]                   [4]                  [5]             [6]              [7]         [8]        [9]         [10]
 
-        "urn" : "great_expectations" : "validations" : data_asset_name : "expectations" : expectation_name : "result": result_key
-         [0]            [1]                 [2]              [3]              [4]              [5]            [6]          [7]  
+        "urn" : "great_expectations" : "validations" : data_asset_name : expectation_suite_name : "expectations" : expectation_name : "result": result_key
+         [0]            [1]                 [2]              [3]                  [4]                  [5]              [6]              [7]         [8]
 
-        "urn" : "great_expectations" : "validations" : data_asset_name : "expectations" : expectation_name : "details": details_key
-         [0]            [1]                 [2]              [3]              [4]              [5]             [6]          [7]  
+        "urn" : "great_expectations" : "validations" : data_asset_name : expectation_suite_name : "expectations" : expectation_name : "details": details_key
+         [0]            [1]                 [2]              [3]                  [4]                   [5]             [6]              [7]        [8]
 
          Parameters are compiled to the following structure:
 
@@ -1277,12 +1290,14 @@ class DataContext(object):
              "raw": <set of all parameters requested>
              "data_assets": {
                  data_asset_name: {
-                    expectation_name: {
-                        "details": <set of details parameter values requested>
-                        "result": <set of result parameter values requested>
-                        column_name: {
+                    expectation_suite_name: {
+                        expectation_name: {
                             "details": <set of details parameter values requested>
                             "result": <set of result parameter values requested>
+                            column_name: {
+                                "details": <set of details parameter values requested>
+                                "result": <set of result parameter values requested>
+                            }
                         }
                     }
                  }
@@ -1298,7 +1313,17 @@ class DataContext(object):
             "data_assets": {}
         }
 
-        known_assets = self.list_expectation_suites()
+        known_asset_dict = self.list_expectation_suites()
+        # Convert known assets to the normalized name system
+        flat_assets_dict = {}
+        for datasource in known_asset_dict.keys():
+            for generator in known_asset_dict[datasource].keys():
+                for data_asset_name in known_asset_dict[datasource][generator].keys():
+                    flat_assets_dict[
+                        datasource + self._data_asset_name_delimiter +
+                        generator + self._data_asset_name_delimiter +
+                        data_asset_name
+                    ] = known_asset_dict[datasource][generator][data_asset_name]
         config_paths = [y for x in os.walk(self.expectations_directory) for y in glob(os.path.join(x[0], '*.json'))]
 
         for config_file in config_paths:
@@ -1306,46 +1331,53 @@ class DataContext(object):
             for expectation in config["expectations"]:
                 for _, value in expectation["kwargs"].items():
                     if isinstance(value, dict) and '$PARAMETER' in value:
-                        # Compile only respects parameters in urn structure beginning with urn:great_expectations:validations
+                        # Compile *only* respects parameters in urn structure
+                        # beginning with urn:great_expectations:validations
                         if value["$PARAMETER"].startswith("urn:great_expectations:validations:"):
                             column_expectation = False
                             parameter = value["$PARAMETER"]
                             self._compiled_parameters["raw"].add(parameter)
                             param_parts = parameter.split(":")
                             try:
-                                data_asset = param_parts[3]
-                                expectation_name = param_parts[5]
-                                if param_parts[6] == "columns":
+                                data_asset_name = param_parts[3]
+                                expectation_suite_name = param_parts[4]
+                                expectation_name = param_parts[6]
+                                if param_parts[7] == "columns":
                                     column_expectation = True
-                                    column_name = param_parts[7]
-                                    param_key = param_parts[8]
+                                    column_name = param_parts[8]
+                                    param_key = param_parts[9]
                                 else:
-                                    param_key = param_parts[6]
+                                    param_key = param_parts[7]
                             except IndexError:
                                 logger.warning("Invalid parameter urn (not enough parts): %s" % parameter)
+                                continue
 
-                            if data_asset not in known_assets:
+                            if (data_asset_name not in flat_assets_dict or
+                                    expectation_suite_name not in flat_assets_dict[data_asset_name]):
                                 logger.warning("Adding parameter %s for unknown data asset config" % parameter)
 
-                            if data_asset not in self._compiled_parameters["data_assets"]:
-                                self._compiled_parameters["data_assets"][data_asset] = {}
+                            if data_asset_name not in self._compiled_parameters["data_assets"]:
+                                self._compiled_parameters["data_assets"][data_asset_name] = {}
 
-                            if expectation_name not in self._compiled_parameters["data_assets"][data_asset]:
-                                self._compiled_parameters["data_assets"][data_asset][expectation_name] = {}
+                            if expectation_suite_name not in self._compiled_parameters["data_assets"][data_asset_name]:
+                                self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name] = {}
+
+                            if expectation_name not in self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name]:
+                                self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_name] = {}
 
                             if column_expectation:
-                                if "columns" not in self._compiled_parameters["data_assets"][data_asset][expectation_name]:
-                                    self._compiled_parameters["data_assets"][data_asset][expectation_name]["columns"] = {}
-                                if column_name not in self._compiled_parameters["data_assets"][data_asset][expectation_name]["columns"]:
-                                    self._compiled_parameters["data_assets"][data_asset][expectation_name]["columns"][column_name] = {}
-                                if param_key not in self._compiled_parameters["data_assets"][data_asset][expectation_name]["columns"][column_name]:
-                                    self._compiled_parameters["data_assets"][data_asset][expectation_name]["columns"][column_name][param_key] = set()
-                                self._compiled_parameters["data_assets"][data_asset][expectation_name]["columns"][column_name][param_key].add(parameter)   
+                                if "columns" not in self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_name]:
+                                    self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_name]["columns"] = {}
+                                if column_name not in self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_name]["columns"]:
+                                    self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_name]["columns"][column_name] = {}
+                                if param_key not in self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_name]["columns"][column_name]:
+                                    self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_name]["columns"][column_name][param_key] = set()
+                                self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_name]["columns"][column_name][param_key].add(parameter)
                             
                             elif param_key in ["result", "details"]:
-                                if param_key not in self._compiled_parameters["data_assets"][data_asset][expectation_name]:
-                                    self._compiled_parameters["data_assets"][data_asset][expectation_name][param_key] = set()
-                                self._compiled_parameters["data_assets"][data_asset][expectation_name][param_key].add(parameter)  
+                                if param_key not in self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_name]:
+                                    self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_name][param_key] = set()
+                                self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_name][param_key].add(parameter)
                             
                             else:
                                 logger.warning("Invalid parameter urn (unrecognized structure): %s" % parameter)
