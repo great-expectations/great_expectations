@@ -112,10 +112,12 @@ class SqlAlchemyDatasource(Datasource):
                 raise ValueError("SqlAlchemyDatasource cannot instantiate batch with data_asset_type: '%s'. It "
                                  "must be a subclass of SqlAlchemyDataset." % data_asset_type.__name__)
 
-            if "schema" in batch_kwargs:
-                schema = batch_kwargs["schema"]
-            else:
-                schema = None
+        if "schema" in batch_kwargs:
+            schema = batch_kwargs["schema"]
+        else:
+            schema = None
+
+        if "table" in batch_kwargs:
             return data_asset_type(
                 table_name=batch_kwargs["table"],
                 engine=self.engine,
