@@ -613,19 +613,22 @@ class SparkDFDataset(MetaSparkDFDataset):
         except KeyError:
             raise ValueError("No database type data available for column: %s" % column)
 
-        types = []
-        for type_ in type_list:
-            try:
-                type_class = getattr(sparktypes, type_)
-                types.append(type_class)
-            except AttributeError:
-                logger.debug("Unrecognized type: %s" % type_)
-        if len(types) == 0:
-            raise ValueError("No recognized spark types in type_list")
-        types = tuple(types)
-
+        if type_list is None:
+            success = True
+        else:
+            types = []
+            for type_ in type_list:
+                try:
+                    type_class = getattr(sparktypes, type_)
+                    types.append(type_class)
+                except AttributeError:
+                    logger.debug("Unrecognized type: %s" % type_)
+            if len(types) == 0:
+                raise ValueError("No recognized spark types in type_list")
+            types = tuple(types)
+            success = issubclass(col_type, types)
         return {
-            "success": issubclass(col_type, types),
+            "success": success,
             "result": {
                 "observed_value": col_type.__name__
             }
