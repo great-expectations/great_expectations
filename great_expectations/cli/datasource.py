@@ -63,25 +63,36 @@ See <blue>https://docs.greatexpectations.io/en/latest/core_concepts/datasource.h
 
             drivername = click.prompt("What is the driver for the sqlalchemy connection?", default="postgres",
                                       show_default=True)
-            host = click.prompt("What is the host for the sqlalchemy connection?", default="localhost",
-                                show_default=True)
-            port = click.prompt("What is the port for the sqlalchemy connection?", default="5432",
-                                show_default=True)
-            username = click.prompt("What is the username for the sqlalchemy connection?", default="postgres",
+            if drivername == "postgres":
+                host = click.prompt("What is the host for the sqlalchemy connection?", default="localhost",
                                     show_default=True)
-            password = click.prompt("What is the password for the sqlalchemy connection?", default="",
-                                    show_default=False, hide_input=True)
-            database = click.prompt("What is the database name for the sqlalchemy connection?", default="postgres",
+                port = click.prompt("What is the port for the sqlalchemy connection?", default="5432",
                                     show_default=True)
+                username = click.prompt("What is the username for the sqlalchemy connection?", default="postgres",
+                                        show_default=True)
+                password = click.prompt("What is the password for the sqlalchemy connection?", default="",
+                                        show_default=False, hide_input=True)
+                database = click.prompt("What is the database name for the sqlalchemy connection?", default="postgres",
+                                        show_default=True)
 
-            credentials = {
-                "drivername": drivername,
-                "host": host,
-                "port": port,
-                "username": username,
-                "password": password,
-                "database": database
-            }
+                credentials = {
+                    "drivername": drivername,
+                    "host": host,
+                    "port": port,
+                    "username": username,
+                    "password": password,
+                    "database": database
+                }
+            else:
+                sqlalchemy_url = click.prompt(
+"""What is the url/connection string for the sqlalchemy connection?
+(reference: https://docs.sqlalchemy.org/en/latest/core/engines.html#database-urls)
+""",
+                                    show_default=False)
+                credentials = {
+                    "url": sqlalchemy_url
+                }
+
             context.add_profile_credentials(data_source_name, **credentials)
 
             try:
