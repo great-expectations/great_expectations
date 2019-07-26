@@ -323,7 +323,7 @@ Expectation Suites created by the BasicDatasetProfiler are very loose and unopin
 
 EVRs contain Expectations, *plus* validation results from a evaluation against a specific batch of data.
 
-.. code-block:: json
+.. code-block:: bash
 
     {
       "success": false,
