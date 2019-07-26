@@ -1650,7 +1650,7 @@ class DataContext(object):
                             }
                         },
                         "styling": {
-                            "classes": ["col-4", "pl-5"],
+                            "classes": ["col-sm-4", "col-xs-12", "pl-sm-5", "pl-xs-0"],
                             "styles": {
                                 "margin-top": "10px",
                                 "word-break": "break-all"
@@ -1680,10 +1680,10 @@ class DataContext(object):
                     ]
                     expectation_suite_link_table = {
                         "content_block_type": "table",
-                        "subheader": "Expectation Suites",
+                        "sub_header": "Expectation Suites",
                         "table_rows": expectation_suite_link_table_rows,
                         "styling": {
-                            "classes": ["col-4"],
+                            "classes": ["col-sm-4", "col-xs-12"],
                             "styles": {
                                 "margin-top": "10px"
                             },
@@ -1715,10 +1715,10 @@ class DataContext(object):
                     ]
                     validation_link_table = {
                         "content_block_type": "table",
-                        "subheader": "Batch Validations",
+                        "sub_header": "Batch Validations",
                         "table_rows": validation_link_table_rows,
                         "styling": {
-                            "classes": ["col-4"],
+                            "classes": ["col-sm-4", "col-xs-12"],
                             "styles": {
                                 "margin-top": "10px"
                             },
