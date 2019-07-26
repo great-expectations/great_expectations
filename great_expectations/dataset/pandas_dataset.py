@@ -13,6 +13,7 @@ from dateutil.parser import parse
 from scipy import stats
 from six import PY3, integer_types, string_types
 
+from great_expectations.data_asset import DataAsset
 from .dataset import Dataset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
 from great_expectations.dataset.util import \
@@ -432,10 +433,19 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             self,
             column,
             type_,
-            mostly=None,
-            result_format=None, include_config=False, catch_exceptions=None, meta=None
+            **kwargs
+            # Since we've now received the default arguments *before* the expectation decorator, we need to
+            # ensure we only pass what we actually received. Hence, we'll use kwargs
+
+            # mostly=None,
+            # result_format=None, include_config=None, catch_exceptions=None, meta=None
     ):
-        """In Pandas, columns *may* be typed, or they may be of the generic "object" type which can include rows with
+        """
+        The pandas implementation of this expectation takes kwargs mostly, result_format, include_config,
+        catch_exceptions, and meta as other expectations, however it declares **kwargs because it needs to
+        be able to fork into either aggregate or map semantics depending on the column type (see below).
+
+        In Pandas, columns *may* be typed, or they may be of the generic "object" type which can include rows with
         different storage types in the same column.
 
         To respect that implementation, the expect_column_values_to_be_of_type expectations will first attempt to
@@ -453,7 +463,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         # Short-circuit if the dtype tells us; in that case use column-aggregate (vs map) semantics
         if self[column].dtype != "object" or type_ is None:
             res = self._expect_column_values_to_be_of_type__aggregate(
-                column, type_, mostly, result_format, include_config, catch_exceptions, meta
+                column, type_, **kwargs
             )
             # Note: this logic is similar to the logic in _append_expectation for deciding when to overwrite an
             # existing expectation, but it should be definitely kept in sync
@@ -477,7 +487,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                 "expect_column_values_to_be_of_type"
         else:
             res = self._expect_column_values_to_be_of_type__map(
-                column, type_, mostly, result_format, include_config, catch_exceptions, meta
+                column, type_, **kwargs
             )
             # Note: this logic is similar to the logic in _append_expectation for deciding when to overwrite an
             # existing expectation, but it should be definitely kept in sync
@@ -501,13 +511,16 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
         return res
 
-    @MetaPandasDataset.expectation(['column', 'type_', 'mostly'])
+    @DataAsset.expectation(['column', 'type_', 'mostly'])
     def _expect_column_values_to_be_of_type__aggregate(
             self,
             column, type_,
             mostly=None,
             result_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
+        if mostly is not None:
+            raise ValueError("PandasDataset cannot support mostly for a column with a non-object dtype.")
+
         if type_ is None:
             success = True
         else:
@@ -573,9 +586,19 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
     def expect_column_values_to_be_in_type_list(
             self,
             column, type_list,
-            mostly=None,
-            result_format=None, include_config=None, catch_exceptions=None, meta=None):
-        """In Pandas, columns *may* be typed, or they may be of the generic "object" type which can include rows with
+            **kwargs
+            # Since we've now received the default arguments *before* the expectation decorator, we need to
+            # ensure we only pass what we actually received. Hence, we'll use kwargs
+
+            # mostly=None,
+            # result_format=None, include_config=None, catch_exceptions=None, meta=None
+    ):
+        """
+        The pandas implementation of this expectation takes kwargs mostly, result_format, include_config,
+        catch_exceptions, and meta as other expectations, however it declares **kwargs because it needs to
+        be able to fork into either aggregate or map semantics depending on the column type (see below).
+
+        In Pandas, columns *may* be typed, or they may be of the generic "object" type which can include rows with
         different storage types in the same column.
 
         To respect that implementation, the expect_column_values_to_be_of_type expectations will first attempt to
@@ -593,7 +616,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         # Short-circuit if the dtype tells us; in that case use column-aggregate (vs map) semantics
         if self[column].dtype != "object" or type_list is None:
             res = self._expect_column_values_to_be_in_type_list__aggregate(
-                column, type_list, mostly, result_format, include_config, catch_exceptions, meta
+                column, type_list, **kwargs
             )
             # Note: this logic is similar to the logic in _append_expectation for deciding when to overwrite an
             # existing expectation, but it should be definitely kept in sync
@@ -615,7 +638,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                 "expect_column_values_to_be_in_type_list"
         else:
             res = self._expect_column_values_to_be_in_type_list__map(
-                column, type_list, mostly, result_format, include_config, catch_exceptions, meta
+                column, type_list, **kwargs
             )
             # Note: this logic is similar to the logic in _append_expectation for deciding when to overwrite an
             # existing expectation, but it should be definitely kept in sync
@@ -646,6 +669,9 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             mostly=None,
             result_format=None, include_config=False, catch_exceptions=None, meta=None
     ):
+        if mostly is not None:
+            raise ValueError("PandasDataset cannot support mostly for a column with a non-object dtype.")
+
         if type_list is None:
             success = True
         else:
