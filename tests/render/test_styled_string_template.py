@@ -20,7 +20,7 @@ def test_render_template():
             "first_adj": "best",
             "second_adj": "worst",
         }
-    }) == "It was the best of times; it was the worst of times."
+    }).replace(" ", "").replace("\t", "").replace("\n", "") == "<span>It was the best of times; it was the worst of times.</span>".replace(" ", "").replace("\t", "").replace("\n", "")
 
     assert render.view.view.render_string_template({
         "template": "It was the $first_adj of times; it was the $second_adj of times.",
@@ -33,7 +33,7 @@ def test_render_template():
                 "classes": ["badge", "badge-warning"],
             }
         }
-    }) == 'It was the <span class="badge badge-warning" >best</span> of times; it was the <span class="badge badge-warning" >worst</span> of times.'
+    }).replace(" ", "").replace("\t", "").replace("\n", "") == '<span>It was the <span class="badge badge-warning" >best</span> of times; it was the <span class="badge badge-warning" >worst</span> of times.</span>'.replace(" ", "").replace("\t", "").replace("\n", "")
 
     assert render.view.view.render_string_template({
         "template": "It was the $first_adj of times; it was the $second_adj of times.",
@@ -51,7 +51,7 @@ def test_render_template():
                 }
             }
         }
-    }) == 'It was the <span class="badge-error" >best</span> of times; it was the <span class="badge badge-warning" >worst</span> of times.'
+    }).replace(" ", "").replace("\t", "").replace("\n", "") == '<span>It was the <span class="badge-error" >best</span> of times; it was the <span class="badge badge-warning" >worst</span> of times.</span>'.replace(" ", "").replace("\t", "").replace("\n", "")
 
     assert render.view.view.render_string_template({
         "template": "It was the $first_adj of times; it was the $second_adj of times.",
@@ -66,7 +66,7 @@ def test_render_template():
                 }
             }
         }
-    }) == 'It was the <span class="badge badge-warning" >best</span> of times; it was the worst of times.'
+    }).replace(" ", "").replace("\t", "").replace("\n", "") == '<span>It was the <span class="badge badge-warning" >best</span> of times; it was the worst of times.</span>'.replace(" ", "").replace("\t", "").replace("\n", "")
 
     assert render.view.view.render_string_template({
         "template": "It was the $first_adj of times; it was the $second_adj of times.",
@@ -87,4 +87,4 @@ def test_render_template():
                 }
             }
         }
-    }) == 'It was the <span class="badge badge-warning" role="alert" style="padding:5px;" >best</span> of times; it was the worst of times.'
+    }).replace(" ", "").replace("\t", "").replace("\n", "") == '<span>It was the <span class="badge badge-warning" role="alert" style="padding:5px;" >best</span> of times; it was the worst of times.</span>'.replace(" ", "").replace("\t", "").replace("\n", "")
