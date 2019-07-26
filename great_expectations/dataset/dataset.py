@@ -152,6 +152,8 @@ class Dataset(MetaDataset):
     INT_TYPE_NAMES = set(["INTEGER", "int", "SMALLINT", "BIGINT", "IntegerType", "LongType"])
     FLOAT_TYPE_NAMES = set(["FLOAT", "DOUBLE_PRECISION", "NUMERIC", "FloatType", "DoubleType", "float"])
     STRING_TYPE_NAMES = set(["CHAR", "VARCHAR", "TEXT", "StringType", "string", "str"])
+    BOOLEAN_TYPE_NAMES = set(["BOOLEAN", "BOOL", "boolean", "BooleanType"])
+
 
     # getter functions with hashable arguments - can be cached
     hashable_getters = [
