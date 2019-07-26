@@ -131,13 +131,13 @@ class MetaFileDataAsset(DataAsset):
 
         return inner_wrapper
 
+
 class FileDataAsset(MetaFileDataAsset):
     """
     FileDataset instantiates the great_expectations Expectations API as a
     subclass of a python file object. For the full API reference, please see
     :func:`DataAsset <great_expectations.data_asset.base.DataAsset>`
     """
-
 
     def __init__(self, file_path=None, *args, **kwargs):
         super(FileDataAsset, self).__init__(*args, **kwargs)

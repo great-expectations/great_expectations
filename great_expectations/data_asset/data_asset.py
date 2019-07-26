@@ -29,6 +29,10 @@ logging.captureWarnings(True)
 
 class DataAsset(object):
 
+    # This should in general only be changed when a subclass *adds expectations* or *changes expectation semantics*
+    # That way, multiple backends can implement the same data_asset_type
+    _data_asset_type = "DataAsset"
+
     def __init__(self, *args, **kwargs):
         """
         Initialize the DataAsset.
@@ -313,6 +317,7 @@ class DataAsset(object):
                 expectation_suite_name = "default"
             self._expectation_suite = get_empty_expectation_suite(data_asset_name, expectation_suite_name)
 
+        self._expectation_suite["data_asset_type"] = self._data_asset_type
         self.default_expectation_args = {
             "include_config": False,
             "catch_exceptions": False,
