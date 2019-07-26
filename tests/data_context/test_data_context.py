@@ -29,7 +29,7 @@ def parameterized_expectation_suite():
                 "expectation_type": "expect_table_row_count_to_equal",
                 "kwargs": {
                     "value": {
-                        "$PARAMETER": "urn:great_expectations:validations:source_diabetes_data:expectations:expect_column_unique_value_count_to_be_between:columns:patient_nbr:result:observed_value"
+                        "$PARAMETER": "urn:great_expectations:validations:parameterized_expectations_config_fixture:source_diabetes_data:expectations:expect_column_unique_value_count_to_be_between:columns:patient_nbr:result:observed_value"
                     }
                 }
             },
@@ -37,7 +37,7 @@ def parameterized_expectation_suite():
                 "expectation_type": "expect_column_unique_value_count_to_be_between",
                 "kwargs": {
                     "value": {
-                        "$PARAMETER": "urn:great_expectations:validations:source_patient_data:expectations:expect_table_row_count_to_equal:result:observed_value"
+                        "$PARAMETER": "urn:great_expectations:validations:parameterized_expectations_config_fixture:source_patient_data:expectations:expect_table_row_count_to_equal:result:observed_value"
                     }
                 }
             }
