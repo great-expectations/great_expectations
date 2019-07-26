@@ -78,10 +78,17 @@ class SqlAlchemyDatasource(Datasource):
         else:
             credentials = {}
 
-        # Update credentials with anything passed during connection time
-        credentials.update(dict(**kwargs))
-        drivername = credentials.pop("drivername")
-        options = sqlalchemy.engine.url.URL(drivername, **credentials)
+        # if a connection string or url was provided in the profile, use that
+        if "connection_string" in credentials:
+            options = credentials["connection_string"]
+        elif "url" in credentials:
+            options = credentials["url"]
+        else:
+            # Update credentials with anything passed during connection time
+            credentials.update(dict(**kwargs))
+            drivername = credentials.pop("drivername")
+            options = sqlalchemy.engine.url.URL(drivername, **credentials)
+
         return options
 
     def _get_generator_class(self, type_):
