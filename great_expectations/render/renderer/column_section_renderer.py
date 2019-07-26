@@ -65,7 +65,7 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
 
         return {
             "section_name": column,
-            "content_blocks": content_blocks
+            "content_blocks": content_blocks,
         }
 
     @classmethod
@@ -87,11 +87,22 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
             column_types = "None"
 
         # assert False
-
+        
         content_blocks.append({
             "content_block_type": "header",
-            "header": "{column_name} (type: {column_type})".format(column_name=column_name, column_type=column_type) if column_type else column_name,
-            "sub_header": column_types,
+            "header": {
+                    "template": column_name,
+                    "tooltip": {
+                        "content": "expect_column_to_exist",
+                        "placement": "top"
+                    },
+                },
+            "sub_header": {
+                    "template": "Type: {column_type}".format(column_type=column_type),
+                    "tooltip": {
+                      "content": "expect_column_values_to_be_of_type <br>expect_column_values_to_be_in_type_list",
+                    },
+                },
             # {
             #     "template": column_type,
             # },
@@ -224,12 +235,17 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
             .75: "Q3",
             .50: "Median"
         }
-
+        
         for idx, quantile in enumerate(quantiles):
             quantile_string = quantile_strings.get(quantile)
             table_rows.append([
-                quantile_string if quantile_string else "{:3.2f}".format(quantile),
-                quantile_ranges[idx]
+                {
+                    "template": quantile_string if quantile_string else "{:3.2f}".format(quantile),
+                    "tooltip": {
+                        "content": "expect_column_quantile_values_to_be_between \n expect_column_median_to_be_between" if quantile == 0.50 else "expect_column_quantile_values_to_be_between"
+                    }
+                },
+                quantile_ranges[idx],
             ])
 
         content_blocks.append({
@@ -262,7 +278,15 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
         mean_value = "{:.2f}".format(
             mean_evr['result']['observed_value']) if mean_evr else None
         if mean_value:
-            table_rows.append(["Mean", mean_value])
+            table_rows.append([
+                {
+                    "template": "Mean",
+                    "tooltip": {
+                        "content": "expect_column_mean_to_be_between"
+                    }
+                },
+                mean_value
+            ])
 
         min_evr = cls._find_evr_by_type(
             evrs,
@@ -271,7 +295,15 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
         min_value = "{:.2f}".format(
             min_evr['result']['observed_value']) if min_evr else None
         if min_value:
-            table_rows.append(["Minimum", min_value])
+            table_rows.append([
+                {
+                    "template": "Minimum",
+                    "tooltip": {
+                        "content": "expect_column_min_to_be_between"
+                    }
+                },
+                min_value,
+            ])
 
         max_evr = cls._find_evr_by_type(
             evrs,
@@ -280,7 +312,15 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
         max_value = "{:.2f}".format(
             max_evr['result']['observed_value']) if max_evr else None
         if max_value:
-            table_rows.append(["Maximum", max_value])
+            table_rows.append([
+                {
+                    "template": "Maximum",
+                    "tooltip": {
+                        "content": "expect_column_max_to_be_between"
+                    }
+                },
+                max_value
+            ])
 
         if len(table_rows) > 0:
             content_blocks.append({
@@ -325,7 +365,13 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
 
         new_block = {
             "content_block_type": "value_list",
-            "header": "Example values",
+            "header":
+                {
+                    "template": "Example Values",
+                    "tooltip": {
+                        "content": "expect_column_values_to_be_in_set"
+                    }
+                },
             "value_list": [{
                 "template": "$value",
                 "params": {
@@ -392,7 +438,13 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
 
         new_block = {
             "content_block_type": "graph",
-            "header": "Histogram",
+            "header":
+                {
+                    "template": "Histogram",
+                    "tooltip": {
+                        "content": "expect_column_kl_divergence_to_be_less_than"
+                    }
+                },
             "graph": chart,
             "styling": {
                 "classes": ["col-" + str(col_width)],
@@ -443,7 +495,13 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
 
         new_block = {
             "content_block_type": "graph",
-            "header": "Value Counts",
+            "header":
+                {
+                    "template": "Value Counts",
+                    "tooltip": {
+                        "content": "expect_column_distinct_values_to_be_in_set"
+                    }
+                },
             "graph": chart,
             "styling": {
                 "classes": ["col-" + str(col_width)],
