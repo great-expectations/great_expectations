@@ -143,7 +143,7 @@ class DataContext(object):
             elif os.path.isdir("./") and os.path.isfile("./great_expectations.yml"):
                 context_root_dir = "./"
             else:
-                raise(
+                raise DataContextError(
                     "Unable to locate context root directory. Please provide a directory name."
                 )
 
@@ -1884,7 +1884,7 @@ result_store:
 
 # result_callback:
 #   slack: https://slack.com/replace_with_your_webhook
-    
+
 # Uncomment the lines below to save snapshots of data assets that fail validation.
 
 # data_asset_snapshot_store:
