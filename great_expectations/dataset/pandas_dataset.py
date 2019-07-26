@@ -2,20 +2,16 @@ from __future__ import division
 
 import inspect
 import json
-import re
 from datetime import datetime #, timedelta # Add for case of testing timedelta types
 import logging
-import io
 from datetime import datetime
 from functools import wraps
 import jsonschema
-import sys
 import numpy as np
 import pandas as pd
 from dateutil.parser import parse
 from scipy import stats
 from six import PY3, integer_types, string_types
-from numbers import Number
 
 from .dataset import Dataset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
@@ -24,6 +20,7 @@ from great_expectations.dataset.util import \
     _scipy_distribution_positional_args_from_dict, validate_distribution_parameters
 
 logger = logging.getLogger(__name__)
+
 
 class MetaPandasDataset(Dataset):
     """MetaPandasDataset is a thin layer between Dataset and PandasDataset.
@@ -292,6 +289,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
     _internal_names = pd.DataFrame._internal_names + [
         '_batch_kwargs',
         '_expectation_suite',
+        '_config',
         'caching',
         'default_expectation_args',
         'discard_subset_failing_expectations'
@@ -310,7 +308,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             self._initialize_expectations(other.get_expectation_suite(
                 discard_failed_expectations=False,
                 discard_result_format_kwargs=False,
-                discard_include_configs_kwargs=False,
+                discard_include_config_kwargs=False,
                 discard_catch_exceptions_kwargs=False))
             # If other was coerced to be a PandasDataset (e.g. via _constructor call during self.copy() operation)
             # then it may not have discard_subset_failing_expectations set. Default to self value

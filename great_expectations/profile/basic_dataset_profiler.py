@@ -5,6 +5,7 @@ from great_expectations.dataset.dataset import Dataset
 
 logger = logging.getLogger(__name__)
 
+
 class BasicDatasetProfiler(DatasetProfiler):
     """BasicDatasetProfiler is inspired by the beloved pandas_profiling project.
 

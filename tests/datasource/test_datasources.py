@@ -107,7 +107,7 @@ def test_create_sqlalchemy_datasource(data_context):
     type_ = "sqlalchemy"
     connection_kwargs = {
         "drivername": "postgresql",
-        "username": "",
+        "username": "postgres",
         "password": "",
         "host": "localhost",
         "port": 5432,
