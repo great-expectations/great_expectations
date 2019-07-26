@@ -1752,21 +1752,22 @@ class DataContext(object):
         """Profile the named datasource using the named profiler.
 
         Args:
-        datasource_name: the name of the datasource for which to profile data_assets
-        generator_name: the name of the generator to use to get batches
-        data_assets: list of data asset names to profile
-        max_data_assets: if the number of data assets the generator yields is greater than this max_data_assets,
-                        profile_all_data_assets=True is required to profile all
-        profile_all_data_assets: when True, all data assets are profiled, regardless of their number
-        profiler: the profiler class to use
-        dry_run: when true, the method checks arguments and reports if can profile or specifies the arguments that are missing
+            datasource_name: the name of the datasource for which to profile data_assets
+            generator_name: the name of the generator to use to get batches
+            data_assets: list of data asset names to profile
+            max_data_assets: if the number of data assets the generator yields is greater than this max_data_assets,
+                profile_all_data_assets=True is required to profile all
+            profile_all_data_assets: when True, all data assets are profiled, regardless of their number
+            profiler: the profiler class to use
+            dry_run: when true, the method checks arguments and reports if can profile or specifies the arguments that are missing
 
         Returns:
-            A dictionary:
-            {
-            "success": True/False
-            "results": List of (expectation_suite, EVR) tuples for each of the data_assets found in the datasource
-            }
+            A dictionary::
+
+                {
+                    "success": True/False,
+                    "results": List of (expectation_suite, EVR) tuples for each of the data_assets found in the datasource
+                }
 
             When success = False, the error details are under "error" key
         """
