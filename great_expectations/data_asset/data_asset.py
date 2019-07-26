@@ -140,7 +140,7 @@ class DataAsset(object):
                 # Get the name of the method
                 method_name = func.__name__
 
-                # Combine all arguments into a single new "kwargs"
+                # Combine all arguments into a single new "all_args" dictionary to name positional parameters
                 all_args = dict(zip(method_arg_names, args))
                 all_args.update(kwargs)
 
@@ -1097,7 +1097,7 @@ class DataAsset(object):
         return self._expectation_suite.get("expectation_suite_name", None)
 
     def _build_evaluation_parameters(self, expectation_args, evaluation_parameters):
-        """Build a dictionary of parameters to evaluate, using the provided evaluation_paramters,
+        """Build a dictionary of parameters to evaluate, using the provided evaluation_parameters,
         AND mutate expectation_args by removing any parameter values passed in as temporary values during
         exploratory work.
         """
