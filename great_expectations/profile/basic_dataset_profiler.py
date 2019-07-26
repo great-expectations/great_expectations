@@ -33,7 +33,7 @@ class BasicDatasetProfiler(DatasetProfiler):
                 type_ = "bool"
 
             else:
-                df.remove_expectation(expectation_type='expect_column_values_to_be_in_type_list', column=column)
+                df.expect_column_values_to_be_in_type_list(column, type_list=None)
                 type_ = "unknown"
         except NotImplementedError:
             type_ = "unknown"
