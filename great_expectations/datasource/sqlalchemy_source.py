@@ -4,7 +4,6 @@ from string import Template
 
 from .datasource import Datasource
 from great_expectations.dataset.sqlalchemy_dataset import SqlAlchemyDataset
-import great_expectations.dataset
 from .generator.query_generator import QueryGenerator
 from great_expectations.exceptions import DatasourceInitializationError
 
