@@ -4,6 +4,7 @@ from string import Template
 
 from .datasource import Datasource
 from great_expectations.dataset.sqlalchemy_dataset import SqlAlchemyDataset
+import great_expectations.dataset
 from .generator.query_generator import QueryGenerator
 from great_expectations.exceptions import DatasourceInitializationError
 
@@ -28,7 +29,7 @@ class SqlAlchemyDatasource(Datasource):
         uses $parameter, with additional kwargs passed to the get_batch method.
     """
 
-    def __init__(self, name="default", data_context=None, profile=None, generators=None, **kwargs):
+    def __init__(self, name="default", data_context=None, data_asset_type="SqlAlchemyDataset", profile=None, generators=None, **kwargs):
         if not sqlalchemy:
             raise DatasourceInitializationError(name, "ModuleNotFoundError: No module named 'sqlalchemy'")
 
@@ -39,6 +40,7 @@ class SqlAlchemyDatasource(Datasource):
         super(SqlAlchemyDatasource, self).__init__(name,
                                                    type_="sqlalchemy",
                                                    data_context=data_context,
+                                                   data_asset_type=data_asset_type,
                                                    generators=generators)
         if profile is not None:
             self._datasource_config.update({
@@ -90,10 +92,15 @@ class SqlAlchemyDatasource(Datasource):
             raise ValueError("Unrecognized DataAssetGenerator type %s" % type_)
 
     def _get_data_asset(self, batch_kwargs, expectation_suite, **kwargs):
-        data_asset_type = SqlAlchemyDataset
-        if "data_asset_type" in batch_kwargs and batch_kwargs["data_asset_type"] != data_asset_type.__name__:
-            # TODO: allow configuration of both module and class name via DataContext
+        if "data_asset_type" in batch_kwargs and batch_kwargs["data_asset_type"] != self._data_asset_type:
             data_asset_type_name = batch_kwargs["data_asset_type"]
+        elif self._data_asset_type is None:
+            # Default fallback
+            data_asset_type_name = "SqlAlchemyDataset"
+        else:
+            data_asset_type_name = self._data_asset_type
+
+        if data_asset_type_name != "SqlAlchemyDataset":
             try:
                 custom_data_assets_module = __import__("custom_data_assets", fromlist=["custom_data_assets"])
                 data_asset_type = getattr(custom_data_assets_module, data_asset_type_name)
@@ -102,15 +109,20 @@ class SqlAlchemyDatasource(Datasource):
                     "Unable to import custom_data_asset module. Check the plugins directory for 'custom_data_assets'. "
                     "Falling back to 'SqlAlchemyDataset' class."
                 )
+                data_asset_type = SqlAlchemyDataset
             except AttributeError:
                 logger.error(
                     "Unable to find data_asset_type: %s. Falling back to 'SqlAlchemyDataset' class."
                     % data_asset_type_name
                 )
+                data_asset_type = SqlAlchemyDataset
 
-            if not issubclass(data_asset_type, SqlAlchemyDataset):
-                raise ValueError("SqlAlchemyDatasource cannot instantiate batch with data_asset_type: '%s'. It "
-                                 "must be a subclass of SqlAlchemyDataset." % data_asset_type.__name__)
+        else:
+            data_asset_type = SqlAlchemyDataset
+
+        if not issubclass(data_asset_type, SqlAlchemyDataset):
+            raise ValueError("SqlAlchemyDatasource cannot instantiate batch with data_asset_type: '%s'. It "
+                             "must be a subclass of SqlAlchemyDataset." % data_asset_type.__name__)
 
         if "schema" in batch_kwargs:
             schema = batch_kwargs["schema"]
