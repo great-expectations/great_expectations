@@ -618,33 +618,37 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         # In particular, we *exclude* types that would be valid under an ORM
         # such as "float" for postgresql with this approach
 
-        if self.dialect is None:
-            logger.warning("No sqlalchemy dialect found; relying in top-level sqlalchemy types.")
-            types = []
-            for type_ in type_list:
-                try:
-                    type_class = getattr(sa, type_)
-                    types.append(type_class)
-                except AttributeError:
-                    logger.debug("Unrecognized type: %s" % type_)
-            if len(types) == 0:
-                raise ValueError("No recognized sqlalchemy types in type_list")
-            types = tuple(types)
+        if type_list is None:
+            success = True
         else:
-            types = []
-            for type_ in type_list:
-                try:
-                    type_class = getattr(self.dialect, type_)
-                    types.append(type_class)
-                except AttributeError:
-                    logger.debug("Unrecognized type: %s" % type_)
-            if len(types) == 0:
-                raise ValueError("No recognized sqlalchemy types in type_list for dialect %s" % 
-                    self.dialect.__name__)
-            types = tuple(types)
-        
+            if self.dialect is None:
+                logger.warning("No sqlalchemy dialect found; relying in top-level sqlalchemy types.")
+                types = []
+                for type_ in type_list:
+                    try:
+                        type_class = getattr(sa, type_)
+                        types.append(type_class)
+                    except AttributeError:
+                        logger.debug("Unrecognized type: %s" % type_)
+                if len(types) == 0:
+                    logger.warning("No recognized sqlalchemy types in type_list")
+                types = tuple(types)
+            else:
+                types = []
+                for type_ in type_list:
+                    try:
+                        type_class = getattr(self.dialect, type_)
+                        types.append(type_class)
+                    except AttributeError:
+                        logger.debug("Unrecognized type: %s" % type_)
+                if len(types) == 0:
+                    logger.warning("No recognized sqlalchemy types in type_list for dialect %s" %
+                                   self.dialect.__name__)
+                types = tuple(types)
+            success = issubclass(col_type, types)
+
         return {
-                "success": issubclass(col_type, types),
+                "success": success,
                 "result": {
                     "observed_value": col_type.__name__
                 }

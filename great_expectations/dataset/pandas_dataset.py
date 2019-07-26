@@ -557,7 +557,9 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             return bytes,
         elif type_.lower() == "complex":
             return complex,
-        elif type_.lower() in ["string", "str"]:
+        elif type_.lower() == "str":
+            return str,
+        elif type_.lower() in ["string_types", "unicode"]:
             return string_types
 
     @MetaPandasDataset.column_map_expectation
