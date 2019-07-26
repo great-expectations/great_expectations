@@ -153,15 +153,17 @@ class DataContext(object):
         self.expectations_directory = os.path.join(self.root_directory, "expectations")
         self.fixtures_validations_directory = os.path.join(self.root_directory, "fixtures/validations")
         self.data_doc_directory = os.path.join(self.root_directory, "uncommitted/documentation")
-        self.plugin_store_directory = os.path.join(self.root_directory, "plugins/store")
-        sys.path.append(self.plugin_store_directory)
-        
+
         self._project_config = self._load_project_config()
 
         if not self._project_config.get("datasources"):
             self._project_config["datasources"] = {}
         for datasource in self._project_config["datasources"].keys():
             self.get_datasource(datasource)
+
+        plugins_directory = self._project_config.get("plugins_directory", "plugins/")
+        self._plugins_directory = os.path.join(self.root_directory, plugins_directory)
+        sys.path.append(self._plugins_directory)
 
         self._load_evaluation_parameter_store()
         self._compiled = False
@@ -174,6 +176,11 @@ class DataContext(object):
         """The root directory for configuration objects in the data context; the location in which
         ``great_expectations.yml`` is located."""
         return self._context_root_directory
+
+    @property
+    def plugins_directory(self):
+        """The directory in which custom plugin modules should be placed."""
+        return self._plugins_directory
 
     def _load_project_config(self):
         """Loads the project configuration file."""
@@ -1851,6 +1858,11 @@ PROJECT_HELP_COMMENT = """# Welcome to great expectations.
 
 PROJECT_OPTIONAL_CONFIG_COMMENT = """
 
+# The plugins_directory is where the data_context will look for custom_data_assets.py
+# and any configured evaluation parameter store
+
+plugins_directory: plugins/
+
 # Configure additional data context options here.
 
 # Uncomment the lines below to enable s3 as a result store. If a result store is enabled,
@@ -1873,7 +1885,6 @@ result_store:
 # result_callback:
 #   slack: https://slack.com/replace_with_your_webhook
     
-    
 # Uncomment the lines below to save snapshots of data assets that fail validation.
 
 # data_asset_snapshot_store:
@@ -1883,6 +1894,12 @@ result_store:
 #     bucket:
 #     key_prefix:
 
+# Uncomment the lines below to enable a custom evaluation_parameter_store
+# evaluation_parameter_store:
+#   type: my_evaluation_parameter_store
+#   config:  # - this is optional - this is how we can pass kwargs to the object's constructor
+#     param1: boo
+#     param2: bah
 """
 
 PROJECT_TEMPLATE = PROJECT_HELP_COMMENT + "datasources: {}\n" + PROJECT_OPTIONAL_CONFIG_COMMENT
