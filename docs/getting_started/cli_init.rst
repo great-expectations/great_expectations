@@ -15,10 +15,10 @@ Video
 Watch `the video on YouTube <https://youtu.be/TlTxVyyDunQ>`_.
 
 
-Mildly opinionated scaffolding
+Default Project Structure
 ----------------------------------------
 
-Great Expectations provides a mildly opinionated deployment framework that simplifies operations such as connecting to data sources; fetching, profiling and validating batches of data; and compiling to human-readable documentation.
+Great Expectations provides a default project framework that simplifies operations such as connecting to data sources; fetching, profiling and validating batches of data; and compiling to human-readable documentation.
 
 This tutorial uses a toy project called ``example_dickens_data_project``, but the same methods should work for most data projects. If you want to follow along with this exact example, start with:
 
@@ -35,7 +35,7 @@ By default, everything in the Great Expectations deployment framework will be ex
 
 The command line interface (CLI) will scaffold and populate the configuration and other artifacts necessary to get started with Great Expectations.
 
-.. code-block:: bash
+.. ::
 
     $ great_expectations init
       _____                _   

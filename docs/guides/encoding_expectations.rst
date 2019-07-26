@@ -11,7 +11,7 @@ become shareable and persistent sources of truth about how data was expected to 
 There are several paths to generating expectations:
 
 1. Automated inspection of datasets. Currently, the profiler mechanism in GE produces expectation suites that can be
-   used for validation. In some cases, the goal is `profiling`_ your data, and in other cases automated inspection
+   used for validation. In some cases, the goal is :ref:`profiling` your data, and in other cases automated inspection
    can produce expectations that will be used in validating future batches of data.
 
 2. Expertise. Rich experience from Subject Matter Experts, Analysts, and data owners is often a critical source of
