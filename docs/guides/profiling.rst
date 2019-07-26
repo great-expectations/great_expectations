@@ -12,11 +12,11 @@ Profiling results are rendered into HTML - see :ref:`data_documentation`.
 GE ships with the default BasicDatasetProfiler which will produce validation_results which compile to a page for each
 table or DataFrame including an overview section:
 
-.. image:: movie_db_profiling_screenshot_2.jpg
+.. image:: ../images/movie_db_profiling_screenshot_2.jpg
 
 And then detailed statistics for each column:
 
-.. image:: movie_db_profiling_screenshot_1.jpg
+.. image:: ../images/movie_db_profiling_screenshot_1.jpg
 
 
 Profiling is still a beta feature in Great Expectations. Over time, we plan to extend and improve the ``BasicDatasetProfiler`` and also add additional profilers.

@@ -14,7 +14,7 @@ Planned Features
 v.0.7.3__develop
 -----------------
 * BREAKING: Harmonize expect_column_values_to_be_of_type and expect_column_values_to_be_in_type_list semantics in
-  Pandas with other backends, including support for None type_ and type_list parameters to support profiling.
+  Pandas with other backends, including support for None type and type_list parameters to support profiling.
   *These type expectations now rely exclusively on native python or numpy type names.*
 * Add configurable support for Custom DataAsset modules to DataContext
 * Improve support for setting and inheriting custom data_asset_type names
