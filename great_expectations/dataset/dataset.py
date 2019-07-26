@@ -149,8 +149,8 @@ class Dataset(MetaDataset):
     # That way, multiple backends can implement the same data_asset_type
     _data_asset_type = "Dataset"
 
-    INT_TYPE_NAMES = set(["INTEGER", "int", "SMALLINT", "BIGINT", "IntegerType", "LongType"])
-    FLOAT_TYPE_NAMES = set(["FLOAT", "DOUBLE_PRECISION", "NUMERIC", "FloatType", "DoubleType", "float"])
+    INT_TYPE_NAMES = set(["INTEGER", "int", "INT", "TINYINT", "BYTEINT", "SMALLINT", "BIGINT", "IntegerType", "LongType", "DECIMAL"])
+    FLOAT_TYPE_NAMES = set(["FLOAT", "FLOAT4", "FLOAT8", "DOUBLE_PRECISION", "NUMERIC", "FloatType", "DoubleType", "float"])
     STRING_TYPE_NAMES = set(["CHAR", "VARCHAR", "TEXT", "StringType", "string", "str"])
     BOOLEAN_TYPE_NAMES = set(["BOOLEAN", "BOOL", "boolean", "BooleanType"])
 
