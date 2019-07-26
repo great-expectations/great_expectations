@@ -67,9 +67,7 @@
             "type_": "int"
           },
           "out": {
-            "success": true,
-            "unexpected_list": [],
-            "unexpected_index_list": []
+            "success": true
           },
           "only_for": ["pandas"]
         },
@@ -109,9 +107,7 @@
           },
           "out":
           {
-            "success":false,
-            "unexpected_list":[1,2,4],
-            "unexpected_index_list":[0,1,2]
+            "success":false
           },
           "only_for": ["pandas"]
         },
@@ -170,9 +166,7 @@
           },
           "out":
           {
-            "success":true,
-            "unexpected_list":[],
-            "unexpected_index_list":[]
+            "success":true
           },
           "only_for": ["pandas"]
         },
@@ -255,11 +249,9 @@
         {
           "title": "negative_test_python_floats_are_not_python_bools",
           "exact_match_out": false,
-          "in":{"column":"b","type_":"boolean"},
+          "in":{"column":"b","type_":"bool"},
           "out":{
-            "success":true, 
-            "unexpected_list":[], 
-            "unexpected_index_list":[]
+            "success":true
           },
           "only_for": ["pandas"]
         },

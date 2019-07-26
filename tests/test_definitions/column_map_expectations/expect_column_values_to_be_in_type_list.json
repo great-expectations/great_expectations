@@ -103,9 +103,7 @@
             "type_list": ["string"]
           },
           "out":{
-            "success": false,
-            "unexpected_list": [1,2,4],
-            "unexpected_index_list": [0,1,2]
+            "success": false
           },
           "only_for": ["pandas"]
         },
@@ -212,7 +210,7 @@
           "exact_match_out": false,
           "in":{
             "column": "b",
-            "type_list": ["boolean"]
+            "type_list": ["bool"]
           },
           "out":{
             "success": true
