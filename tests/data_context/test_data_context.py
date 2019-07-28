@@ -529,9 +529,9 @@ def test_render_full_static_site(tmp_path_factory, filesystem_csv_3):
     ))
 
     with open(os.path.join(
-        ge_directory,
-        "fixtures/validations/random/default/f2/BasicDatasetProfiler.json"
-    ), "r") as infile:
+            ge_directory,
+            "fixtures/validations/random/default/f2/BasicDatasetProfiler.json"
+            ), "r") as infile:
         f2_validation = json.load(infile)
     f2_run_id = f2_validation['meta']['run_id']
     f2_validation_html_filename = "{run_id}-BasicDatasetProfiler.html".format(
@@ -553,43 +553,24 @@ def test_render_full_static_site(tmp_path_factory, filesystem_csv_3):
     safe_mmkdir("./tests/data_context/output/documentation")
     
     safe_mmkdir("./tests/data_context/output/documentation/titanic")
-    try:
-        shutil.copytree(
-            os.path.join(
-                ge_directory,
-                "uncommitted/documentation/titanic/default"
-            ),
-            "./tests/data_context/output/documentation/titanic/default"
-        )
-    except FileExistsError:
-        shutil.rmtree("./tests/data_context/output/documentation/titanic/default")
-        shutil.copytree(
-            os.path.join(
-                ge_directory,
-                "uncommitted/documentation/titanic/default"
-            ),
-            "./tests/data_context/output/documentation/titanic/default"
-        )
+    shutil.rmtree("./tests/data_context/output/documentation/titanic/default")
+    shutil.copytree(
+        os.path.join(
+            ge_directory,
+            "uncommitted/documentation/titanic/default"
+        ),
+        "./tests/data_context/output/documentation/titanic/default"
+    )
 
     safe_mmkdir("./tests/data_context/output/documentation/random")
-    try:
-        shutil.copytree(
-            os.path.join(
-                ge_directory,
-                "uncommitted/documentation/random/default"
-            ),
-            "./tests/data_context/output/documentation/random/default"
-        )
-    except FileExistsError:
-        shutil.rmtree("./tests/data_context/output/documentation/random/default")
-        shutil.copytree(
-            os.path.join(
-                ge_directory,
-                "uncommitted/documentation/random/default"
-            ),
-            "./tests/data_context/output/documentation/random/default"
-        )
-
+    shutil.rmtree("./tests/data_context/output/documentation/random/default")
+    shutil.copytree(
+        os.path.join(
+            ge_directory,
+            "uncommitted/documentation/random/default"
+        ),
+        "./tests/data_context/output/documentation/random/default"
+    )
     shutil.copy(
         os.path.join(
             ge_directory,
