@@ -172,7 +172,7 @@
           "exact_match_out": false,
           "in":{
             "column": "z",
-            "type_list": ["string"]
+            "type_list": ["str"]
           },
           "out":{
             "success": true,
@@ -246,7 +246,7 @@
           "exact_match_out": false,
           "in":{
             "column": "s",
-            "type_list": ["string", "int"]
+            "type_list": ["str", "int"]
           },
           "out":{
             "success": true,
