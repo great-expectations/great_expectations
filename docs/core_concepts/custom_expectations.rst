@@ -35,12 +35,16 @@ To work with these decorators, your custom function must accept two arguments: `
 
 `@MetaPandasDataset.column_aggregate_expectation` accepts `self` and `column`. It must return a dictionary containing a boolean `success` value, and a nested dictionary called `result` which contains an `observed_value` argument.
 
+Setting the _data_asset_type is not strictly necessary, but doing so allows GE to recognize that you have added
+expectations rather than simply added support for the same expectation suite on a different backend/compute environment.
 
 .. code-block:: python
 
     from great_expectations.dataset import PandasDataset, MetaPandasDataset
 
     class CustomPandasDataset(PandasDataset):
+
+        _data_asset_type = "CustomPandasDataset"
 
         @MetaPandasDataset.column_map_expectation
         def expect_column_values_to_equal_2(self, column):
@@ -64,6 +68,8 @@ For SqlAlchemyDataset, the decorators work slightly differently. See the MetaSql
     from great_expectations.dataset import SqlAlchemyDataset, MetaSqlAlchemyDataset
 
     class CustomSqlAlchemyDataset(SqlAlchemyDataset):
+
+        _data_asset_type = "CustomSqlAlchemyDataset"
 
         @MetaSqlAlchemyDataset.column_map_expectation
         def expect_column_values_to_equal_2(self, column):
@@ -101,6 +107,8 @@ This is more complicated, since you have to handle all the logic of additional p
     from great_expectations.dataset import PandasDataset
 
     class CustomPandasDataset(PandasDataset):
+
+        _data_asset_type = "CustomPandasDataset"
 
         @DataAsset.expectation(["column", "mostly"])
         def expect_column_values_to_equal_1(self, column, mostly=None):

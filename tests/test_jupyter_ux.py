@@ -1,6 +1,10 @@
+import logging
+import sys
+
 import great_expectations as ge
 import great_expectations.jupyter_ux as jux
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
+
 
 def test_styling_elements_exist():
     assert "<link" in jux.bootstrap_link_element
@@ -8,6 +12,7 @@ def test_styling_elements_exist():
 
     assert jux.cooltip_style_element[:23] == '<style type="text/css">'
     assert ".cooltip" in jux.cooltip_style_element
+
 
 def test_display_column_expectations_as_section(basic_expectation_suite):
     html_to_display = jux.display_column_expectations_as_section(
@@ -17,26 +22,36 @@ def test_display_column_expectations_as_section(basic_expectation_suite):
         return_without_displaying=True
     )
     print(html_to_display)
+    html_to_display = html_to_display.replace(" ", "").replace("\t", "").replace("\n", "")
     assert html_to_display == """\
 <div id="section-1" class="ge-section container-fluid">
     <div class="row">
-        
+    
 <div id="content-block-1" class="col-12" >
-    <h3 id="content-block-1-header" class="alert alert-secondary" >
-        naturals
-    </h3>
+    <div id="content-block-1-header" class="alert alert-secondary" >
+        <h3>
+            naturals
+        </h3></div>
 </div>
-        
+
 <div id="content-block-2" class="col-12" >
     <ul id="content-block-2-body" >
-            <li >is a required field.</li>
-            <li >values must be unique.</li>
-            
+            <li >
+            <span>
+                is a required field.
+            </span>
+        </li>
+            <li >
+            <span>
+                values must be unique.
+            </span>
+        </li>
+        
         </ul>
 </div>
-        
+    
     </div>
-</div>"""
+</div>""".replace(" ", "").replace("\t", "").replace("\n", "")
 
     html_to_display = jux.display_column_expectations_as_section(
         basic_expectation_suite,
@@ -44,6 +59,7 @@ def test_display_column_expectations_as_section(basic_expectation_suite):
         return_without_displaying=True
     )
     print(html_to_display)
+    html_to_display = html_to_display.replace(" ", "").replace("\t", "").replace("\n", "")
     assert html_to_display == """\
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous"><style type="text/css">
 .cooltip {
@@ -53,7 +69,7 @@ def test_display_column_expectations_as_section(basic_expectation_suite):
 }
 
 .cooltip .top {
-    min-width:200px; 
+    min-width:200px;
     top:-6px;
     left:50%;
     transform:translate(-50%, -100%);
@@ -97,23 +113,34 @@ def test_display_column_expectations_as_section(basic_expectation_suite):
 </style>
 <div id="section-1" class="ge-section container-fluid">
     <div class="row">
-        
+    
 <div id="content-block-1" class="col-12" >
-    <h3 id="content-block-1-header" class="alert alert-secondary" >
-        naturals
-    </h3>
+    <div id="content-block-1-header" class="alert alert-secondary" >
+        <h3>
+            naturals
+        </h3></div>
 </div>
-        
+
 <div id="content-block-2" class="col-12" >
     <ul id="content-block-2-body" >
-            <li >is a required field.</li>
-            <li >values must be unique.</li>
-            
+            <li >
+            <span>
+                is a required field.
+            </span>
+        </li>
+            <li >
+            <span>
+                values must be unique.
+            </span>
+        </li>
+        
         </ul>
 </div>
-        
+    
     </div>
-</div>"""
+</div>
+""".replace(" ", "").replace("\t", "").replace("\n", "")
+
 
 def test_display_column_evrs_as_section():
     #TODO: We should add a fixture that contains EVRs
@@ -132,4 +159,42 @@ def test_display_column_evrs_as_section():
     #FIXME: This isn't a full snapshot test.
     assert '<div id="section-1" class="ge-section container-fluid">' in html_to_display
     assert '<span class="badge badge-info" >Carlsson, Mr Frans Olof</span>' in html_to_display
-    assert '<li class="list-group-item d-flex justify-content-between align-items-center" >expect_column_values_to_be_in_type_list <span class="badge badge-secondary badge-pill" >True</span></li>' in html_to_display
+    assert """\
+    <li class="list-group-item d-flex justify-content-between align-items-center" >
+            <span>
+                expect_column_values_to_be_in_type_list <span class="badge badge-secondary badge-pill" >True</span>
+            </span>
+        </li>""" in html_to_display
+
+
+def test_configure_logging(caplog):
+    # First, ensure we set the root logger to close-to-jupyter settings (only show warnings)
+    caplog.set_level(logging.WARNING)
+    caplog.set_level(logging.WARNING, logger="great_expectations")
+
+    root = logging.getLogger()  # root logger
+    root.info("do_not_show")
+
+    # This df is used only for logging; we don't want to test against different backends
+    df = ge.dataset.PandasDataset({"a": [1, 2, 3]})
+    df.expect_column_to_exist("a")
+    df.get_expectation_suite()
+
+    res = caplog.text
+    assert "do_not_show" not in res
+
+    assert "expectation_suite" not in res
+    caplog.clear()
+
+    # Now use the logging setup from the notebook
+    logger = logging.getLogger("great_expectations")
+    jux.setup_notebook_logging(logger)
+    df = ge.dataset.PandasDataset({"a": [1, 2, 3]})
+    df.expect_column_to_exist("a")
+    df.get_expectation_suite()
+
+    root.info("do_not_show")
+    res = caplog.text
+    assert "do_not_show" not in res
+
+    assert "expectation_suite" in res
