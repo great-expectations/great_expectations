@@ -1,6 +1,7 @@
+# -*- coding: utf-8 -*-
+
 import copy
 import json
-from sparklines import sparklines
 
 from .content_block import ContentBlockRenderer
 from ...util import ordinal
@@ -31,9 +32,25 @@ def substitute_none_for_missing(kwargs, kwarg_list):
 # class FailedExpectationBulletListContentBlockRenderer(BulletListContentBlockRenderer):
 # class FailedExpectationBulletListContentBlockRenderer(BulletListContentBlockRenderer):
 
-# TODO:
+
 class PrescriptiveStringRenderer(ContentBlockRenderer):
-    
+    # Unicode: 9601, 9602, 9603, 9604, 9605, 9606, 9607, 9608
+    bar = '▁▂▃▄▅▆▇█'
+    barcount = len(bar)
+
+    @classmethod
+    def sparkline(cls, weights):
+        """Builds a unicode-text based sparkline for the provided histogram.
+
+        Code from https://rosettacode.org/wiki/Sparkline_in_unicode#Python
+        """
+        mn, mx = min(weights), max(weights)
+        extent = mx - mn
+        sparkline = ''.join(cls.bar[min([cls.barcount - 1,
+                                         int((n - mn) / extent * cls.barcount)])]
+                            for n in weights)
+        return sparkline, mn, mx
+
     @classmethod
     def _missing_content_block_fn(cls, expectation, styling=None, include_column_name=True):
         return [{
@@ -96,8 +113,8 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
         if (params["min_value"] is None) and (params["max_value"] is None):
             template_str = "may have any number of unique values."
         else:
-            if params.get("mostly"):
-                params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
+            if params["mostly"] is not None:
+                params["mostly_pct"] = "%.1f" % (params["mostly"]*100,)
                 if params["min_value"] is None:
                     template_str = "must have fewer than $max_value unique values, at least $mostly_pct % of the time."
                 elif params["max_value"] is None:
@@ -132,8 +149,8 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
         if (params["min_value"] is None) and (params["max_value"] is None):
             template_str = "may have any numerical value."
         else:
-            if params.get("mostly"):
-                params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
+            if params["mostly"] is not None:
+                params["mostly_pct"] = "%.1f" % (params["mostly"]*100,)
                 if params["min_value"] is not None and params["max_value"] is not None:
                     template_str = "values must be between $min_value and $max_value, at least $mostly_pct % of the time."
                 
@@ -343,8 +360,8 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
             expectation["kwargs"],
             ["column", "mostly"],
         )
-        
-        if params.get("mostly"):
+
+        if params["mostly"] is not None:
             params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
             if include_column_name:
                 template_str = "$column values must not be null, at least $mostly_pct % of the time."
@@ -369,7 +386,7 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
             ["column", "mostly"]
         )
         
-        if params.get("mostly"):
+        if params["mostly"] is not None:
             params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
             template_str = "values must be null, at least $mostly_pct % of the time."
         else:
@@ -391,7 +408,7 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
             ["column", "type_", "mostly"]
         )
         
-        if params.get("mostly"):
+        if params["mostly"] is not None:
             params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
             template_str = "values must be of type $type_, at least $mostly_pct % of the time."
         else:
@@ -418,8 +435,8 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
         values_string = " ".join(
             ["$v__" + str(i) for i, v in enumerate(params["type_list"])]
         )
-        
-        if params.get("mostly"):
+
+        if params["mostly"] is not None:
             params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
             
             if include_column_name:
@@ -461,7 +478,7 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
             
             template_str = "values must belong to this set: " + values_string
             
-            if params.get("mostly"):
+            if params["mostly"] is not None:
                 params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
                 template_str += ", at least $mostly_pct % of the time."
             else:
@@ -497,8 +514,8 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
             )
             
             template_str = "values must not belong to this set: " + values_string
-            
-            if params.get("mostly"):
+        
+            if params["mostly"] is not None:
                 params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
                 template_str += ", at least $mostly_pct % of the time."
             else:
@@ -555,8 +572,8 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
             template_str = "values must be strictly greater than previous values"
         else:
             template_str = "values must be greater than or equal to previous values"
-        
-        if params.get("mostly"):
+            
+        if params["mostly"] is not None:
             params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
             template_str += ", at least $mostly_pct % of the time."
         else:
@@ -586,8 +603,8 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
             template_str = "values must be strictly less than previous values"
         else:
             template_str = "values must be less than or equal to previous values"
-        
-        if params.get("mostly"):
+    
+        if params["mostly"] is not None:
             params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
             template_str += ", at least $mostly_pct % of the time."
         else:
@@ -615,8 +632,8 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
         if (params["min_value"] is None) and (params["max_value"] is None):
             template_str = "values may have any length."
         else:
-            if params.get("mostly"):
-                params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
+            if params["mostly"] is not None:
+                params["mostly_pct"] = "%.1f" % (params["mostly"]*100,)
                 if params["min_value"] is not None and params["max_value"] is not None:
                     template_str = "values must be between $min_value and $max_value characters long, at least $mostly_pct % of the time."
                 
@@ -655,7 +672,7 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
             template_str = "values may have any length."
         else:
             template_str = "values must be $value characters long"
-            if params.get("mostly"):
+            if params["mostly"] is not None:
                 params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
                 template_str += ", at least $mostly_pct % of the time."
             else:
@@ -681,7 +698,7 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
             template_str = "values must match a regular expression but none was specified."
         else:
             template_str = "values must match this regular expression: $regex"
-            if params.get("mostly"):
+            if params["mostly"] is not None:
                 params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
                 template_str += ", at least $mostly_pct % of the time."
             else:
@@ -706,7 +723,7 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
         if not params.get("regex"):
             template_str = "values must not match a regular expression but none was specified."
         else:
-            if params.get("mostly"):
+            if params["mostly"] is not None:
                 params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
                 if include_column_name:
                     template_str = "$column values must not match this regular expression: $regex, at least $mostly_pct % of the time."
@@ -744,8 +761,8 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
                 template_str = "values must match all of the following regular expressions: " + values_string
             else:
                 template_str = "values must match any of the following regular expressions: " + values_string
-            
-            if params.get("mostly"):
+                
+            if params["mostly"] is not None:
                 params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
                 template_str += ", at least $mostly_pct % of the time."
             else:
@@ -777,8 +794,8 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
             )
             
             template_str = "values must not match any of the following regular expressions: " + values_string
-            
-            if params.get("mostly"):
+        
+            if params["mostly"] is not None:
                 params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
                 template_str += ", at least $mostly_pct % of the time."
             else:
@@ -804,7 +821,7 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
             template_str = "values must match a strftime format but none was specified."
         else:
             template_str = "values must match the following strftime format: $strftime_format"
-            if params.get("mostly"):
+            if params["mostly"] is not None:
                 params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
                 template_str += ", at least $mostly_pct % of the time."
             else:
@@ -828,7 +845,7 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
         
         template_str = "values must be parseable by dateutil"
         
-        if params.get("mostly"):
+        if params["mostly"] is not None:
             params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
             template_str += ", at least $mostly_pct % of the time."
         else:
@@ -851,8 +868,8 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
         )
         
         template_str = "values must be parseable as JSON"
-        
-        if params.get("mostly"):
+    
+        if params["mostly"] is not None:
             params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
             template_str += ", at least $mostly_pct % of the time."
         else:
@@ -878,7 +895,7 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
             template_str = "values must match a JSON Schema but none was specified."
         else:
             params["formatted_json"] = "<pre>" + json.dumps(params.get("json_schema"), indent=4) + "</pre>"
-            if params.get("mostly"):
+            if params["mostly"] is not None:
                 params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
                 template_str = "values must match the following JSON Schema, at least $mostly_pct % of the time: $formatted_json"
             else:
@@ -987,14 +1004,14 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
             "params": params,
             "styling": styling,
         }]
-    
+
     @classmethod
     def expect_column_median_to_be_between(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation["kwargs"],
             ["column", "min_value", "max_value"]
         )
-        
+    
         if (params["min_value"] is None) and (params["max_value"] is None):
             template_str = "median may have any numerical value."
         else:
@@ -1004,23 +1021,23 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
                 template_str = "median must be less than $max_value."
             elif params["max_value"] is None:
                 template_str = "median must be more than $min_value."
-        
+    
         if include_column_name:
             template_str = "$column " + template_str
-        
+    
         return [{
             "template": template_str,
             "params": params,
             "styling": styling,
         }]
-    
+        
     @classmethod
     def expect_column_stdev_to_be_between(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation["kwargs"],
             ["column", "min_value", "max_value"]
         )
-        
+    
         if (params["min_value"] is None) and (params["max_value"] is None):
             template_str = "standard deviation may have any numerical value."
         else:
@@ -1030,23 +1047,23 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
                 template_str = "standard deviation must be less than $max_value."
             elif params["max_value"] is None:
                 template_str = "standard deviation must be more than $min_value."
-        
+    
         if include_column_name:
             template_str = "$column " + template_str
-        
+    
         return [{
             "template": template_str,
             "params": params,
             "styling": styling,
         }]
-    
+        
     @classmethod
     def expect_column_max_to_be_between(cls, expectation, styling=None, include_column_name=True):
         params = substitute_none_for_missing(
             expectation["kwargs"],
             ["column", "min_value", "max_value", "parse_strings_as_datetimes"]
         )
-        
+    
         if (params["min_value"] is None) and (params["max_value"] is None):
             template_str = "maximum value may have any numerical value."
         else:
@@ -1056,13 +1073,13 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
                 template_str = "maximum value must be less than $max_value."
             elif params["max_value"] is None:
                 template_str = "maximum value must be more than $min_value."
-        
+    
         if params.get("parse_strings_as_datetimes"):
             template_str += " Values should be parsed as datetimes."
-        
+    
         if include_column_name:
             template_str = "$column " + template_str
-        
+    
         return [{
             "template": template_str,
             "params": params,
@@ -1161,28 +1178,32 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
             expectation["kwargs"],
             ["column", "partition_object", "threshold"]
         )
+
+        styling.update({
+            "params": {
+                "sparklines_histogram": {
+                    "styles": {
+                        "font-family": "serif"
+                    }
+                }
+            }
+        })
         
         if not params.get("partition_object"):
             template_str = "Kullback-Leibler (KL) divergence with respect to a given distribution must be lower than a \
                 provided threshold but no distribution was specified."
         else:
-            params["sparklines_histogram"] = sparklines(params.get("partition_object")["weights"])[0]
-            template_str = "Kullback-Leibler (KL) divergence with respect to the following distribution must be lower than $threshold: $sparklines_histogram"
-        
+            params["sparklines_histogram"]= cls.sparkline(params.get("partition_object")["weights"])[0]
+            template_str = "Kullback-Leibler (KL) divergence with respect to the following distribution must be " \
+                           "lower than $threshold: $sparklines_histogram"
+
         if include_column_name:
             template_str = "$column " + template_str
         
         return [{
             "template": template_str,
             "params": params,
-            "styling": {
-                "params":
-                    {
-                        "formatted_json": {
-                            "classes": []
-                        }
-                    }
-            },
+            "styling": styling,
         }]
     
     @classmethod

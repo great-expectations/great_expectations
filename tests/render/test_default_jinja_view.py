@@ -50,7 +50,7 @@ def test_render_DefaultJinjaPageView_meta_info():
     print(html)
     # TODO: Use above print to set up snapshot test once we like the result
 
-    assert '<a class="navbar-brand" href="#">tetanusvaricella</a>' in html
+    assert '<a class="navbar-brand" href="#" style="white-space: normal; word-break: break-all;overflow-wrap: normal; font-size: 1rem; font-weight: 500;">tetanusvaricella</a>' in html
 
 
 def test_render_section_page():
@@ -90,22 +90,24 @@ def test_render_section_page():
     rendered_doc = ge.render.view.view.DefaultJinjaSectionView.render({
         "section": section,
         "section_loop": {"index": 1},
-    })
+    }).replace(" ", "").replace("\t", "").replace("\n", "")
 
     print(rendered_doc)
     assert rendered_doc == """<div id="section-1" class="ge-section container-fluid">
     <div class="row">
         
 <div id="content-block-1" >
-    <h3 id="content-block-1-header" >
-        Overview
-    </h3>
+    <div id="content-block-1-header" >
+        <h3>
+            Overview
+        </h3></div>
 </div>
-        
+
 <div id="content-block-2" class="col-6 table-responsive" style="margin-top:20px;" >
-    <h4 id="content-block-2-header" >
-        Dataset info
-    </h4>
+    <div id="content-block-2-header" >
+            <h4>
+                Dataset info
+            </h4></div>
     <table id="content-block-2-body" class="table table-sm" >
         <tr>
             <td id="content-block-2-cell-1-1" >Number of variables</td><td id="content-block-2-cell-1-2" >12</td></tr><tr>
@@ -113,7 +115,7 @@ def test_render_section_page():
 </div>
         
     </div>
-</div>"""
+</div>""".replace(" ", "").replace("\t", "").replace("\n", "")
 
 
 def test_rendering_components_without_section_loop_index():
@@ -130,9 +132,10 @@ def test_rendering_components_without_section_loop_index():
     assert rendered_doc == \
         """
 <div id="content-block-2" >
-    <h3 id="content-block-2-header" >
-        Overview
-    </h3>
+    <div id="content-block-2-header" >
+        <h3>
+            Overview
+        </h3></div>
 </div>"""
 
     rendered_doc = ge.render.view.view.DefaultJinjaComponentView.render({
@@ -142,9 +145,10 @@ def test_rendering_components_without_section_loop_index():
     assert rendered_doc == \
         """
 <div id="content-block" >
-    <h3 id="content-block-header" >
-        Overview
-    </h3>
+    <div id="content-block-header" >
+        <h3>
+            Overview
+        </h3></div>
 </div>"""
 
     rendered_doc = ge.render.view.view.DefaultJinjaComponentView.render({
@@ -155,9 +159,10 @@ def test_rendering_components_without_section_loop_index():
     assert rendered_doc == \
         """
 <div id="content-block" >
-    <h3 id="content-block-header" >
-        Overview
-    </h3>
+    <div id="content-block-header" >
+        <h3>
+            Overview
+        </h3></div>
 </div>"""
 
 
@@ -234,20 +239,24 @@ def test_rendering_components_with_styling():
         "content_block_loop": {"index": 2},
     })
     print(rendered_doc)
+    rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
+    
     assert rendered_doc == \
         """
 <div id="section-1-content-block-2" class="root_foo" root="baz" style="root:bar;" >
-    <h4 id="section-1-content-block-2-header" class="header_foo" header="baz" style="header:bar;" >
-        <span class="y" >AAA</span> <span class="x" >BBB</span> <span class="x" >CCC</span>
-    </h4>
-    <h5 id="section-1-content-block-2-subheader" class="subheader_foo" subheader="baz" style="subheader:bar;" >
-        <span class="yy" >aaa</span> <span class="xx" >bbb</span> <span class="xx" >ccc</span>
-    </h5>
+    <div id="section-1-content-block-2-header" class="header_foo" header="baz" style="header:bar;" >
+            <h4>
+            
+            <span>
+                <span class="y" >AAA</span> <span class="x" >BBB</span> <span class="x" >CCC</span>
+            </span>
+        
+            </h4></div>
     <table id="section-1-content-block-2-body" class="body_foo" body="baz" style="body:bar;" >
         <tr>
             <td id="section-1-content-block-2-cell-1-1" >Mean</td><td id="section-1-content-block-2-cell-1-2" >446</td></tr><tr>
             <td id="section-1-content-block-2-cell-2-1" >Minimum</td><td id="section-1-content-block-2-cell-2-2" >1</td></tr></table>
-</div>"""
+</div>""".replace(" ", "").replace("\t", "").replace("\n", "")
 
 
 ### Test all the component types ###
@@ -268,9 +277,10 @@ def test_render_header_component():
     assert rendered_doc == \
         """
 <div id="section-1-content-block-2" >
-    <h3 id="section-1-content-block-2-header" >
-        Overview
-    </h3>
+    <div id="section-1-content-block-2-header" >
+        <h3>
+            Overview
+        </h3></div>
 </div>"""
 
 
@@ -296,9 +306,10 @@ def test_render_table_component():
     assert rendered_doc == \
         """
 <div id="section-1-content-block-2" class="col-4" >
-    <h4 id="section-1-content-block-2-header" >
-        Overview
-    </h4>
+    <div id="section-1-content-block-2-header" >
+            <h4>
+                Overview
+            </h4></div>
     <table id="section-1-content-block-2-body" >
         <tr>
             <td id="section-1-content-block-2-cell-1-1" >Mean</td><td id="section-1-content-block-2-cell-1-2" >446</td></tr><tr>
@@ -333,12 +344,21 @@ def test_render_value_list():
     print(rendered_doc)
     assert rendered_doc == """
 <div id="section-1-content-block-2" class="col-4" style="margin-top:20px;" >
-    <h4 id="section-1-content-block-2-header" >
-        Example values
-    </h4>
+    <div id="section-1-content-block-2-header" >
+            <h4>
+                Example values
+            </h4></div>
     <p id="section-1-content-block-2-body" >
-        <span class="badge badge-info" >0</span>
-        <span class="badge badge-info" >1</span>
+        
+            <span>
+                <span class="badge badge-info" >0</span>
+            </span>
+        
+        
+            <span>
+                <span class="badge badge-info" >1</span>
+            </span>
+        
         </p>
 </div>"""
 
@@ -361,9 +381,10 @@ def test_render_graph():
     print(rendered_doc)
     assert rendered_doc == """
 <div id="section-1-content-block-2" class="col-4" >
-    <h4 id="section-1-content-block-2-header" >
-        Histogram
-    </h4>
+    <div id="section-1-content-block-2-header" >
+            <h4>
+                Histogram
+            </h4></div>
     <div id="section-1-content-block-2-body" ></div>
         <script>
             // Assign the specification to a local variable vlSpec.

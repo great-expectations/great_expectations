@@ -40,15 +40,31 @@ class TableContentBlockRenderer(ContentBlockRenderer):
     @classmethod
     def expect_column_unique_value_count_to_be_between(cls, ge_object):
         observed_value = ge_object["result"]["observed_value"]
-        return [["Distinct (n)", observed_value]]
+        return [
+            [
+                {
+                    "template": "Distinct (n)",
+                    "tooltip": {
+                        "content": "expect_column_unique_value_count_to_be_between"
+                    }
+                },
+                observed_value,
+            ]
+        ]
 
     @classmethod
     def expect_column_proportion_of_unique_values_to_be_between(cls, ge_object):
         observed_value = ge_object["result"]["observed_value"]
+        template_string_object = {
+                    "template": "Distinct (%)",
+                    "tooltip": {
+                        "content": "expect_column_proportion_of_unique_values_to_be_between"
+                    }
+                }
         if not observed_value:
-            return [["Distinct (%)", "--"]]
+            return [[template_string_object, "--"]]
         else:
-            return [["Distinct (%)", "%.1f%%" % (100*observed_value)]]
+            return [[template_string_object, "%.1f%%" % (100*observed_value)]]
 
     @classmethod
     def expect_column_max_to_be_between(cls, ge_object):
@@ -63,9 +79,24 @@ class TableContentBlockRenderer(ContentBlockRenderer):
     @classmethod
     def expect_column_values_to_not_be_null(cls, ge_object):
         return [
-            ["Missing (n)", ge_object["result"]["unexpected_count"] if ge_object["result"].get("unexpected_count") else "--"],
-            ["Missing (%)", "%.1f%%" %
-             (ge_object["result"]["unexpected_percent"] * 100.0) if ge_object["result"].get("unexpected_percent") else "--"]
+            [
+                {
+                    "template":  "Missing (n)",
+                    "tooltip": {
+                        "content": "expect_column_values_to_not_be_null"
+                    }
+                },
+                ge_object["result"]["unexpected_count"] if "unexpected_count" in ge_object["result"] and ge_object["result"]["unexpected_count"] is not None else "--",
+            ],
+            [
+                {
+                    "template": "Missing (%)",
+                    "tooltip": {
+                        "content": "expect_column_values_to_not_be_null"
+                    }
+                },
+                "%.1f%%" % (ge_object["result"]["unexpected_percent"] * 100.0) if "unexpected_percent" in ge_object["result"] and ge_object["result"]["unexpected_percent"] is not None else "--",
+            ]
         ]
 
     @classmethod

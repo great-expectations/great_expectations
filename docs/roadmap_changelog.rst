@@ -11,9 +11,33 @@ Planned Features
 * Multi-batch expectations
 
 
-v.0.7.2__develop
+v.0.7.4__develop
 -----------------
 
+
+v.0.7.3
+-----------------
+* BREAKING: Harmonize expect_column_values_to_be_of_type and expect_column_values_to_be_in_type_list semantics in
+  Pandas with other backends, including support for None type and type_list parameters to support profiling.
+  *These type expectations now rely exclusively on native python or numpy type names.*
+* Add configurable support for Custom DataAsset modules to DataContext
+* Improve support for setting and inheriting custom data_asset_type names
+* Add tooltips with expectations backing data elements to rendered documentation
+* Allow better selective disabling of tests (thanks @RoyalITS)
+* Fix documentation build errors causing missing code blocks on readthedocs
+* Update the parameter naming system in DataContext to reflect data_asset_name *and* expectation_suite_name
+* Change scary warning about discarding expectations to be clearer, less scary, and only in log
+* Improve profiler support for boolean types, value_counts, and type detection
+* Allow user to specify data_assets to profile via CLI
+* Support CLI rendering of expectation_suite and EVR-based documentation
+
+v.0.7.2
+-----------------
+* Improved error detection and handling in CLI "add datasource" feature
+* Fixes in rendering of profiling results (descriptive renderer of validation results)
+* Query Generator of SQLAlchemy datasource adds tables in non-default schemas to the data asset namespace
+* Added convenience methods to display HTML renderers of sections in Jupyter notebooks
+* Implemented prescriptive rendering of expectations for most expectation types
 
 v.0.7.1
 ------------

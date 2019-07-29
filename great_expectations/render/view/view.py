@@ -7,6 +7,7 @@ from jinja2 import (
     Template, Environment, BaseLoader, PackageLoader, select_autoescape
 )
 
+from great_expectations.version import __version__
 
 def render_styling(styling):
     """Adds styling information suitable for an html tag
@@ -89,10 +90,28 @@ def render_string_template(template):
     if not isinstance(template, (dict, OrderedDict)):
         return template
 
-    tag = template.get("tag")
-    base_template_string = "<{tag} $styling>$content</{tag}>".format(
-        tag=tag) if tag else "<span $styling>$content</span>"
+    tag = template.get("tag", "span")
+    base_param_template_string = "<{tag} $styling>$content</{tag}>".format(tag=tag)
 
+    if "tooltip" in template:
+        content = template["tooltip"]["content"]
+        content.replace("\n", "<br>")
+        placement = template["tooltip"].get("placement", "top")
+        base_template_string = """
+            <{tag} class="cooltip">
+                $template
+                <span class={placement}>
+                    {content}
+                </span>
+            </{tag}>
+        """.format(placement=placement, content=content, tag=tag)
+    else:
+        base_template_string = """
+            <{tag}>
+                $template
+            </{tag}>
+        """.format(tag=tag)
+        
     if "styling" in template:
         params = template["params"]
 
@@ -107,7 +126,7 @@ def render_string_template(template):
                     if parameter in template["styling"]["params"]:
                         continue
 
-                params[parameter] = pTemplate(base_template_string).substitute({
+                params[parameter] = pTemplate(base_param_template_string).substitute({
                     "styling": render_styling(default_parameter_styling),
                     "content": params[parameter],
                 })
@@ -118,20 +137,19 @@ def render_string_template(template):
             for parameter, parameter_styling in template["styling"]["params"].items():
                 if parameter not in params:
                     continue
-                params[parameter] = pTemplate(base_template_string).substitute({
+                params[parameter] = pTemplate(base_param_template_string).substitute({
                     "styling": render_styling(parameter_styling),
                     "content": params[parameter],
                 })
 
-        string = pTemplate(template["template"]).substitute(params)
+        string = pTemplate(
+            pTemplate(base_template_string).substitute({"template": template["template"]})
+        ).substitute(params)
         return string
 
-    if tag:
-        template_string = "<{tag}>{template}</{tag}>".format(
-            template=template["template"], tag=tag)
-        return pTemplate(template_string).substitute(template["params"])
-    else:
-        return pTemplate(template["template"]).substitute(template["params"])
+    return pTemplate(
+            pTemplate(base_template_string).substitute({"template": template["template"]})
+        ).substitute(template.get("params", {}))
 
 
 class NoOpTemplate(object):
@@ -177,6 +195,7 @@ class DefaultJinjaView(object):
         env.filters['render_string_template'] = render_string_template
         env.filters['render_styling_from_string_template'] = render_styling_from_string_template
         env.filters['render_styling'] = render_styling
+        env.globals['ge_version'] = __version__
 
         template = env.get_template(template)
         template.globals['now'] = datetime.datetime.utcnow
