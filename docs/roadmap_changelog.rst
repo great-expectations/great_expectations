@@ -11,7 +11,7 @@ Planned Features
 * Multi-batch expectations
 
 
-v.0.7.3__develop
+v.0.7.3
 -----------------
 * BREAKING: Harmonize expect_column_values_to_be_of_type and expect_column_values_to_be_in_type_list semantics in
   Pandas with other backends, including support for None type and type_list parameters to support profiling.
