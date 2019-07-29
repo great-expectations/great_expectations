@@ -19,30 +19,8 @@ from great_expectations.cli.init import scaffold_directories_and_notebooks
 
 @pytest.fixture()
 def parameterized_expectation_suite():
-    return {
-        "data_asset_name": "parameterized_expectations_config_fixture",
-        "data_asset_type": "Dataset",
-        "meta": {
-        },
-        "expectations": [
-            {
-                "expectation_type": "expect_table_row_count_to_equal",
-                "kwargs": {
-                    "value": {
-                        "$PARAMETER": "urn:great_expectations:validations:source_diabetes_data:expectations:expect_column_unique_value_count_to_be_between:columns:patient_nbr:result:observed_value"
-                    }
-                }
-            },
-            {
-                "expectation_type": "expect_column_unique_value_count_to_be_between",
-                "kwargs": {
-                    "value": {
-                        "$PARAMETER": "urn:great_expectations:validations:source_patient_data:expectations:expect_table_row_count_to_equal:result:observed_value"
-                    }
-                }
-            }
-        ]
-    }
+    with open("tests/test_fixtures/expectation_suites/parameterized_expectation_suite_fixture.json", "r") as suite:
+        return json.load(suite)
 
 
 def test_validate_saves_result_inserts_run_id(empty_data_context, filesystem_csv):
@@ -84,15 +62,15 @@ def test_list_expectation_suites(data_context):
     assert data_context.list_expectation_suites() == {
         "mydatasource": {
             "mygenerator": {
-                "parameterized_expectation_suite_fixture": ["default"]
+                "my_dag_node": ["default"]
             }
         }
     }
 
 
 def test_get_existing_data_asset_config(data_context):
-    data_asset_config = data_context.get_expectation_suite('mydatasource/mygenerator/parameterized_expectation_suite_fixture', 'default')
-    assert data_asset_config['data_asset_name'] == 'mydatasource/mygenerator/parameterized_expectation_suite_fixture'
+    data_asset_config = data_context.get_expectation_suite('mydatasource/mygenerator/my_dag_node', 'default')
+    assert data_asset_config['data_asset_name'] == 'mydatasource/mygenerator/my_dag_node'
     assert data_asset_config['expectation_suite_name'] == 'default'
     assert len(data_asset_config['expectations']) == 2
 
@@ -124,7 +102,7 @@ def test_register_validation_results(data_context):
     run_id = "460d61be-7266-11e9-8848-1681be663d3e"
     source_patient_data_results = {
         "meta": {
-            "data_asset_name": "source_patient_data",
+            "data_asset_name": "mydatasource/mygenerator/source_patient_data",
             "expectation_suite_name": "default"
         },
         "results": [
@@ -150,14 +128,14 @@ def test_register_validation_results(data_context):
         "success": True
     }
     res = data_context.register_validation_results(run_id, source_patient_data_results)
-    assert res == source_patient_data_results # results should always be returned, and in this case not modified
+    assert res == source_patient_data_results  # results should always be returned, and in this case not modified
     bound_parameters = data_context._evaluation_parameter_store.get_run_parameters(run_id)
     assert bound_parameters == {
-        'urn:great_expectations:validations:source_patient_data:expectations:expect_table_row_count_to_equal:result:observed_value': 1024
+        'urn:great_expectations:validations:mydatasource/mygenerator/source_patient_data:default:expectations:expect_table_row_count_to_equal:result:observed_value': 1024
     }
     source_diabetes_data_results = {
         "meta": {
-            "data_asset_name": "source_diabetes_data",
+            "data_asset_name": "mydatasource/mygenerator/source_diabetes_data",
             "expectation_suite_name": "default"
         },
         "results": [
@@ -187,8 +165,8 @@ def test_register_validation_results(data_context):
     data_context.register_validation_results(run_id, source_diabetes_data_results)
     bound_parameters = data_context._evaluation_parameter_store.get_run_parameters(run_id)
     assert bound_parameters == {
-        'urn:great_expectations:validations:source_patient_data:expectations:expect_table_row_count_to_equal:result:observed_value': 1024, 
-        'urn:great_expectations:validations:source_diabetes_data:expectations:expect_column_unique_value_count_to_be_between:columns:patient_nbr:result:observed_value': 2048
+        'urn:great_expectations:validations:mydatasource/mygenerator/source_patient_data:default:expectations:expect_table_row_count_to_equal:result:observed_value': 1024,
+        'urn:great_expectations:validations:mydatasource/mygenerator/source_diabetes_data:default:expectations:expect_column_unique_value_count_to_be_between:columns:patient_nbr:result:observed_value': 2048
     }
 
 
@@ -196,25 +174,29 @@ def test_compile(data_context):
     data_context._compile()
     assert data_context._compiled_parameters == {
         'raw': {
-            'urn:great_expectations:validations:source_diabetes_data:expectations:expect_column_unique_value_count_to_be_between:columns:patient_nbr:result:observed_value', 
-            'urn:great_expectations:validations:source_patient_data:expectations:expect_table_row_count_to_equal:result:observed_value'
+            'urn:great_expectations:validations:mydatasource/mygenerator/source_diabetes_data:default:expectations:expect_column_unique_value_count_to_be_between:columns:patient_nbr:result:observed_value',
+            'urn:great_expectations:validations:mydatasource/mygenerator/source_patient_data:default:expectations:expect_table_row_count_to_equal:result:observed_value'
             }, 
         'data_assets': {
-            'source_diabetes_data': {
-                'expect_column_unique_value_count_to_be_between': {
-                    'columns': {
-                        'patient_nbr': {
-                            'result': {
-                                'urn:great_expectations:validations:source_diabetes_data:expectations:expect_column_unique_value_count_to_be_between:columns:patient_nbr:result:observed_value'
+            'mydatasource/mygenerator/source_diabetes_data': {
+                'default': {
+                    'expect_column_unique_value_count_to_be_between': {
+                        'columns': {
+                            'patient_nbr': {
+                                'result': {
+                                    'urn:great_expectations:validations:mydatasource/mygenerator/source_diabetes_data:default:expectations:expect_column_unique_value_count_to_be_between:columns:patient_nbr:result:observed_value'
+                                }
                             }
                         }
                     }
                 }
             }, 
-            'source_patient_data': {
-                'expect_table_row_count_to_equal': {
-                    'result': {
-                        'urn:great_expectations:validations:source_patient_data:expectations:expect_table_row_count_to_equal:result:observed_value'
+            'mydatasource/mygenerator/source_patient_data': {
+                'default': {
+                    'expect_table_row_count_to_equal': {
+                        'result': {
+                            'urn:great_expectations:validations:mydatasource/mygenerator/source_patient_data:default:expectations:expect_table_row_count_to_equal:result:observed_value'
+                        }
                     }
                 }
             }
@@ -404,7 +386,7 @@ def test_data_context_result_store(titanic_data_context):
     Test that validation results can be correctly fetched from the configured results store
     """
     profiling_results = titanic_data_context.profile_datasource("mydatasource")
-    for profiling_result in profiling_results:
+    for profiling_result in profiling_results['results']:
         data_asset_name = profiling_result[1]['meta']['data_asset_name']
         validation_result = titanic_data_context.get_validation_result(data_asset_name, "BasicDatasetProfiler")
         assert data_asset_name in validation_result["meta"]["data_asset_name"]
@@ -547,9 +529,9 @@ def test_render_full_static_site(tmp_path_factory, filesystem_csv_3):
     ))
 
     with open(os.path.join(
-        ge_directory,
-        "fixtures/validations/random/default/f2/BasicDatasetProfiler.json"
-    ), "r") as infile:
+            ge_directory,
+            "fixtures/validations/random/default/f2/BasicDatasetProfiler.json"
+            ), "r") as infile:
         f2_validation = json.load(infile)
     f2_run_id = f2_validation['meta']['run_id']
     f2_validation_html_filename = "{run_id}-BasicDatasetProfiler.html".format(
@@ -571,43 +553,26 @@ def test_render_full_static_site(tmp_path_factory, filesystem_csv_3):
     safe_mmkdir("./tests/data_context/output/documentation")
     
     safe_mmkdir("./tests/data_context/output/documentation/titanic")
-    try:
-        shutil.copytree(
-            os.path.join(
-                ge_directory,
-                "uncommitted/documentation/titanic/default"
-            ),
-            "./tests/data_context/output/documentation/titanic/default"
-        )
-    except FileExistsError:
+    if os.path.isdir("./tests/data_context/output/documentation/titanic/default"):
         shutil.rmtree("./tests/data_context/output/documentation/titanic/default")
-        shutil.copytree(
-            os.path.join(
-                ge_directory,
-                "uncommitted/documentation/titanic/default"
-            ),
-            "./tests/data_context/output/documentation/titanic/default"
-        )
+    shutil.copytree(
+        os.path.join(
+            ge_directory,
+            "uncommitted/documentation/titanic/default"
+        ),
+        "./tests/data_context/output/documentation/titanic/default"
+    )
 
     safe_mmkdir("./tests/data_context/output/documentation/random")
-    try:
-        shutil.copytree(
-            os.path.join(
-                ge_directory,
-                "uncommitted/documentation/random/default"
-            ),
-            "./tests/data_context/output/documentation/random/default"
-        )
-    except FileExistsError:
+    if os.path.isdir("./tests/data_context/output/documentation/random/default"):
         shutil.rmtree("./tests/data_context/output/documentation/random/default")
-        shutil.copytree(
-            os.path.join(
-                ge_directory,
-                "uncommitted/documentation/random/default"
-            ),
-            "./tests/data_context/output/documentation/random/default"
-        )
-
+    shutil.copytree(
+        os.path.join(
+            ge_directory,
+            "uncommitted/documentation/random/default"
+        ),
+        "./tests/data_context/output/documentation/random/default"
+    )
     shutil.copy(
         os.path.join(
             ge_directory,

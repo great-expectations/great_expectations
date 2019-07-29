@@ -56,17 +56,12 @@ class DescriptiveOverviewSectionRenderer(Renderer):
         table_rows.append([
             {
                 "template": "Number of observations",
-                "params": {},
-                # "styling": {
-                #     "attributes": {
-                #         "data-toggle": "popover",
-                #         "data-trigger": "hover",
-                #         "data-placement": "top",
-                #         "data-content": "expect_table_row_count_to_be_between",
-                #         "container": "body",
-                #     }
-
-                # }
+                "tooltip": {
+                    "content": "expect_table_row_count_to_be_between"
+                },
+                "params": {
+                    "tooltip_text": "Number of observations"
+                }
             },
             "?" if not expect_table_row_count_to_be_between_evr else expect_table_row_count_to_be_between_evr["result"][
                 "observed_value"]
@@ -236,7 +231,7 @@ class DescriptiveOverviewSectionRenderer(Renderer):
     def _get_percentage_missing_cells_str(cls, evrs):
 
         columns = cls._get_column_list_from_evrs(evrs)
-        if not columns or len(columns) == 9:
+        if not columns or len(columns) == 0:
             warnings.warn("Cannot get % of missing cells - column list is empty")
             return "?"
 
@@ -247,7 +242,7 @@ class DescriptiveOverviewSectionRenderer(Renderer):
             return "?"
 
         # assume 1.0 missing for columns where ["result"]["unexpected_percent"] is not available
-        return "{0:.2f}%".format(sum([evr["result"]["unexpected_percent"] if evr["result"].get("unexpected_percent") else 1.0 for evr in expect_column_values_to_not_be_null_evrs])/len(columns)*100)
+        return "{0:.2f}%".format(sum([evr["result"]["unexpected_percent"] if "unexpected_percent" in evr["result"] and evr["result"]["unexpected_percent"] is not None else 1.0 for evr in expect_column_values_to_not_be_null_evrs])/len(columns)*100)
 
     @classmethod
     def _get_column_types(cls, evrs):

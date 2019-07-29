@@ -17,7 +17,7 @@ class PandasDatasource(Datasource):
     existing in-memory dataframes.
     """
 
-    def __init__(self, name="pandas", data_context=None, generators=None, **kwargs):
+    def __init__(self, name="pandas", data_context=None, data_asset_type="SqlAlchemyDataset", generators=None, **kwargs):
         if generators is None:
             # Provide a gentle way to build a datasource with a sane default,
             # including ability to specify the base_directory and reader_options
@@ -36,6 +36,7 @@ class PandasDatasource(Datasource):
             }
         super(PandasDatasource, self).__init__(name, type_="pandas",
                                                data_context=data_context,
+                                               data_asset_type=data_asset_type,
                                                generators=generators)
         self._build_generators()
 

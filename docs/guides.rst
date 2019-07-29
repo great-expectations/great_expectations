@@ -8,6 +8,7 @@ Guides
 
    /guides/profiling
    /guides/data_documentation
+   /guides/encoding_expectations
    /guides/batch_generator
    /guides/implemented_expectations
    /guides/distributional_expectations

@@ -14,9 +14,19 @@ from great_expectations.data_context.util import safe_mmkdir
 
 from .test_utils import get_dataset
 
-CONTEXTS = ['PandasDataset', 'sqlite', 'SparkDFDataset']
+CONTEXTS = ['PandasDataset', 'sqlite']
 
-# TODO: make it easier to turn off Spark as well
+#####
+#
+# Spark Context
+#
+#####
+try:
+    from pyspark.sql import SparkSession
+    CONTEXTS += ['SparkDFDataset']
+except (ImportError):
+    warnings.warn("pyspark not installed and available for testing.")
+
 
 #####
 #
@@ -339,11 +349,11 @@ def data_context(tmp_path_factory):
     context_path = os.path.join(project_path, "great_expectations")
     asset_config_path = os.path.join(context_path, "expectations")
     safe_mmkdir(os.path.join(asset_config_path,
-                             "mydatasource/mygenerator/parameterized_expectation_suite_fixture"), exist_ok=True)
+                             "mydatasource/mygenerator/my_dag_node"), exist_ok=True)
     shutil.copy("./tests/test_fixtures/great_expectations_basic.yml",
                 str(os.path.join(context_path, "great_expectations.yml")))
     shutil.copy("./tests/test_fixtures/expectation_suites/parameterized_expectation_suite_fixture.json",
-                os.path.join(asset_config_path, "mydatasource/mygenerator/parameterized_expectation_suite_fixture/default.json"))
+                os.path.join(asset_config_path, "mydatasource/mygenerator/my_dag_node/default.json"))
     return ge.data_context.DataContext(context_path)
 
 
