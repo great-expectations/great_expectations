@@ -553,7 +553,8 @@ def test_render_full_static_site(tmp_path_factory, filesystem_csv_3):
     safe_mmkdir("./tests/data_context/output/documentation")
     
     safe_mmkdir("./tests/data_context/output/documentation/titanic")
-    shutil.rmtree("./tests/data_context/output/documentation/titanic/default")
+    if os.path.isdir("./tests/data_context/output/documentation/titanic/default"):
+        shutil.rmtree("./tests/data_context/output/documentation/titanic/default")
     shutil.copytree(
         os.path.join(
             ge_directory,
@@ -563,7 +564,8 @@ def test_render_full_static_site(tmp_path_factory, filesystem_csv_3):
     )
 
     safe_mmkdir("./tests/data_context/output/documentation/random")
-    shutil.rmtree("./tests/data_context/output/documentation/random/default")
+    if os.path.isdir("./tests/data_context/output/documentation/random/default"):
+        shutil.rmtree("./tests/data_context/output/documentation/random/default")
     shutil.copytree(
         os.path.join(
             ge_directory,
