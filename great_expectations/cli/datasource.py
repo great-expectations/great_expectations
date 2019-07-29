@@ -3,6 +3,7 @@ import click
 from .util import cli_message
 from great_expectations.render import DefaultJinjaPageView
 from great_expectations.exceptions import DatasourceInitializationError
+from great_expectations.data_context import DataContext
 
 from great_expectations.version import __version__ as __version__
 
@@ -63,25 +64,36 @@ See <blue>https://docs.greatexpectations.io/en/latest/core_concepts/datasource.h
 
             drivername = click.prompt("What is the driver for the sqlalchemy connection?", default="postgres",
                                       show_default=True)
-            host = click.prompt("What is the host for the sqlalchemy connection?", default="localhost",
-                                show_default=True)
-            port = click.prompt("What is the port for the sqlalchemy connection?", default="5432",
-                                show_default=True)
-            username = click.prompt("What is the username for the sqlalchemy connection?", default="postgres",
+            if drivername == "postgres":
+                host = click.prompt("What is the host for the sqlalchemy connection?", default="localhost",
                                     show_default=True)
-            password = click.prompt("What is the password for the sqlalchemy connection?", default="",
-                                    show_default=False, hide_input=True)
-            database = click.prompt("What is the database name for the sqlalchemy connection?", default="postgres",
+                port = click.prompt("What is the port for the sqlalchemy connection?", default="5432",
                                     show_default=True)
+                username = click.prompt("What is the username for the sqlalchemy connection?", default="postgres",
+                                        show_default=True)
+                password = click.prompt("What is the password for the sqlalchemy connection?", default="",
+                                        show_default=False, hide_input=True)
+                database = click.prompt("What is the database name for the sqlalchemy connection?", default="postgres",
+                                        show_default=True)
 
-            credentials = {
-                "drivername": drivername,
-                "host": host,
-                "port": port,
-                "username": username,
-                "password": password,
-                "database": database
-            }
+                credentials = {
+                    "drivername": drivername,
+                    "host": host,
+                    "port": port,
+                    "username": username,
+                    "password": password,
+                    "database": database
+                }
+            else:
+                sqlalchemy_url = click.prompt(
+"""What is the url/connection string for the sqlalchemy connection?
+(reference: https://docs.sqlalchemy.org/en/latest/core/engines.html#database-urls)
+""",
+                                    show_default=False)
+                credentials = {
+                    "url": sqlalchemy_url
+                }
+
             context.add_profile_credentials(data_source_name, **credentials)
 
             try:
@@ -147,23 +159,151 @@ You can add a datasource later by editing the great_expectations.yml file.
     return data_source_name
 
 
-def profile_datasource(context, data_source_name, max_data_assets=20):
+def profile_datasource(context, data_source_name, data_assets=None, profile_all_data_assets=False, max_data_assets=20):
     """"Profile a named datasource using the specified context"""
+
+    msg_intro = """
+========== Profiling ==========
+
+Profiling '{0:s}' will create candidate expectations and documentation.
+
+Please note: Profiling is still a beta feature in Great Expectations.  The current profiler will evaluate the entire 
+data source (without sampling), which may be very time consuming. 
+As a rule of thumb, we recommend starting with data smaller than 100MB.
+
+To learn more about profiling, visit <blue>https://docs.greatexpectations.io/en/latest/guides/profiling.html\
+?utm_source=cli&utm_medium=init&utm_campaign={1:s}</blue>.
+"""
+
+    msg_confirm_ok_to_proceed = """
+Would you like to profile '{0:s}'?
+"""
+
+    msg_skipping = """Okay, skipping profiling for now. You can always do this
+later by running `great_expectations profile`.
+    """
+
+    msg_some_data_assets_not_found = """Some of the data assets you specified were not found: {0:s}    
+    """
+
+    msg_too_many_data_assets = """There are {0:d} data assets in {1:s}. Profiling all of them might take too long.    
+"""
+
+    msg_prompt_enter_data_asset_list = """Enter comma-separated list of data asset names (e.g., {0:s})   
+"""
+
+    msg_options = """Choose how to proceed:
+    1. Specify a list of the data assets to profile
+    2. Exit and profile later
+    3. Profile ALL data assets (this might take a while)
+"""
+
+    msg_data_doc_intro = """
+========== Data Documentation ==========
+
+To generate documentation from the data you just profiled, the profiling results should be moved from 
+great_expectations/uncommitted (ignored by git) to great_expectations/fixtures.
+
+Before committing, please make sure that this data does not contain sensitive information!
+
+To learn more: <blue>https://docs.greatexpectations.io/en/latest/guides/data_documentation.html\
+?utm_source=cli&utm_medium=init&utm_campaign={0:s}</blue>
+"""
+
+    cli_message(msg_intro.format(data_source_name, __version__.replace(".", "_")))
+
+    if data_assets:
+        data_assets = [item.strip() for item in data_assets.split(",")]
+
+    # Call the data context's profiling method to check if the arguments are valid
     profiling_results = context.profile_datasource(
         data_source_name,
-        max_data_assets=max_data_assets
+        data_assets=data_assets,
+        profile_all_data_assets=profile_all_data_assets,
+        max_data_assets=max_data_assets,
+        dry_run=True
     )
 
-    cli_message("\nDone.\n\nProfiling results are saved here:")
-    for profiling_result in profiling_results:
-        data_asset_name = profiling_result[1]['meta']['data_asset_name']
-        expectation_suite_name = profiling_result[1]['meta']['expectation_suite_name']
-        run_id = profiling_result[1]['meta']['run_id']
+    if profiling_results['success']: # data context is ready to profile - run profiling
+        if data_assets or profile_all_data_assets or click.confirm(msg_confirm_ok_to_proceed.format(data_source_name), default=True):
+            profiling_results = context.profile_datasource(
+            data_source_name,
+            data_assets=data_assets,
+            profile_all_data_assets=profile_all_data_assets,
+            max_data_assets=max_data_assets,
+            dry_run=False
+        )
+        else:
+            cli_message(msg_skipping)
+            return
+    else: # we need to get arguments from user interactively
+        do_exit = False
+        while not do_exit:
+            if profiling_results['error']['code'] == DataContext.PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND:
+                cli_message(msg_some_data_assets_not_found.format("," .join(profiling_results['error']['not_found_data_assets'])))
+            elif profiling_results['error']['code'] == DataContext.PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS:
+                cli_message(msg_too_many_data_assets.format(profiling_results['error']['num_data_assets'], data_source_name))
+            else: # unknown error
+                raise ValueError("Unknown profiling error code: " + profiling_results['error']['code'])
 
-        cli_message("  {0:s}".format(context.get_validation_location(
-            data_asset_name, expectation_suite_name, run_id)['filepath']))
+            option_selection = click.prompt(
+                msg_options,
+                type=click.Choice(["1", "2", "3"]),
+                show_choices=False
+            )
 
-    return profiling_results
+            if option_selection == "1":
+                data_assets = click.prompt(
+                    msg_prompt_enter_data_asset_list.format(", ".join(profiling_results['error']['data_assets'][:3])),
+                    default=None,
+                    show_default=False
+                )
+                if data_assets:
+                    data_assets = [item.strip() for item in data_assets.split(",")]
+            elif option_selection == "3":
+                profile_all_data_assets = True
+            elif option_selection == "2": # skip
+                cli_message(msg_skipping)
+                return
+            else:
+                raise ValueError("Unrecognized option: " + option_selection)
+
+            # after getting the arguments from the user, let's try to run profiling again
+            # (no dry run this time)
+            profiling_results = context.profile_datasource(
+                data_source_name,
+                data_assets=data_assets,
+                profile_all_data_assets=profile_all_data_assets,
+                max_data_assets=max_data_assets,
+                dry_run=False
+            )
+
+            if profiling_results['success']: # data context is ready to profile
+                break
+
+
+    cli_message(msg_data_doc_intro.format(__version__.replace(".", "_")))
+    if click.confirm("Move the profiled data and build HTML documentation?",
+                     default=True
+                     ):
+        cli_message("\nMoving files...")
+
+        for profiling_result in profiling_results['results']:
+            data_asset_name = profiling_result[1]['meta']['data_asset_name']
+            expectation_suite_name = profiling_result[1]['meta']['expectation_suite_name']
+            run_id = profiling_result[1]['meta']['run_id']
+            context.move_validation_to_fixtures(
+                data_asset_name, expectation_suite_name, run_id)
+
+        cli_message("\nDone.")
+
+        cli_message("\nBuilding documentation...")
+        build_documentation(context)
+
+    else:
+        cli_message(
+            "Okay, skipping HTML documentation for now.`."
+        )
 
 
 def build_documentation(context):
