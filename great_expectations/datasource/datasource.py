@@ -63,7 +63,7 @@ class Datasource(object):
         """
         return cls(**kwargs)
 
-    def __init__(self, name, type_, data_context=None, generators=None):
+    def __init__(self, name, type_, data_context=None, data_asset_type=None, generators=None):
         """
         Build a new datasource.
 
@@ -75,6 +75,7 @@ class Datasource(object):
         """
         self._data_context = data_context
         self._name = name
+        self._data_asset_type = data_asset_type
         self._generators = {}
         if generators is None:
             generators = {}

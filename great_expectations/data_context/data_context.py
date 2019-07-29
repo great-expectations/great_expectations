@@ -86,6 +86,9 @@ class DataContext(object):
     Similarly, if no expectation suite name is provided, the DataContext will assume the name "default".
     """
 
+    PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS = 2
+    PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND = 3
+
     @classmethod
     def create(cls, project_root_dir=None):
         """Build a new great_expectations directory and DataContext object in the provided project_root_dir.
@@ -143,7 +146,7 @@ class DataContext(object):
             elif os.path.isdir("./") and os.path.isfile("./great_expectations.yml"):
                 context_root_dir = "./"
             else:
-                raise(
+                raise DataContextError(
                     "Unable to locate context root directory. Please provide a directory name."
                 )
 
@@ -153,15 +156,17 @@ class DataContext(object):
         self.expectations_directory = os.path.join(self.root_directory, "expectations")
         self.fixtures_validations_directory = os.path.join(self.root_directory, "fixtures/validations")
         self.data_doc_directory = os.path.join(self.root_directory, "uncommitted/documentation")
-        self.plugin_store_directory = os.path.join(self.root_directory, "plugins/store")
-        sys.path.append(self.plugin_store_directory)
-        
+
         self._project_config = self._load_project_config()
 
         if not self._project_config.get("datasources"):
             self._project_config["datasources"] = {}
         for datasource in self._project_config["datasources"].keys():
             self.get_datasource(datasource)
+
+        plugins_directory = self._project_config.get("plugins_directory", "plugins/")
+        self._plugins_directory = os.path.join(self.root_directory, plugins_directory)
+        sys.path.append(self._plugins_directory)
 
         self._load_evaluation_parameter_store()
         self._compiled = False
@@ -174,6 +179,11 @@ class DataContext(object):
         """The root directory for configuration objects in the data context; the location in which
         ``great_expectations.yml`` is located."""
         return self._context_root_directory
+
+    @property
+    def plugins_directory(self):
+        """The directory in which custom plugin modules should be placed."""
+        return self._plugins_directory
 
     def _load_project_config(self):
         """Loads the project configuration file."""
@@ -403,6 +413,9 @@ class DataContext(object):
             base_profile_store = yaml.load("{}")
             base_profile_store.yaml_set_start_comment(PROFILE_COMMENT)
             return base_profile_store
+
+    def get_project_config(self):
+        return self._project_config
 
     def get_profile_credentials(self, profile_name):
         """Get named profile credentials.
@@ -1066,6 +1079,12 @@ class DataContext(object):
             data_asset_name = "_untitled"
 
         try:
+            expectation_suite_name = validation_results["meta"]["expectation_suite_name"]
+        except KeyError:
+            logger.warning("No expectation_suite_name found in validation results; using '_untitled'")
+            expectation_suite_name = "_untitled"
+
+        try:
             normalized_data_asset_name = self._normalize_data_asset_name(data_asset_name)
         except DataContextError:
             logger.warning(
@@ -1180,26 +1199,33 @@ class DataContext(object):
         if not self._compiled:
             self._compile()
 
-        if "meta" not in validation_results or "data_asset_name" not in validation_results["meta"]:
-            logger.warning("No data_asset_name found in validation results; evaluation parameters cannot be registered.")
+        if ("meta" not in validation_results or
+                "data_asset_name" not in validation_results["meta"] or
+                "expectation_suite_name" not in validation_results["meta"]
+        ):
+            logger.warning(
+                "Both data_asset_name ane expectation_suite_name must be in validation results to "
+                "register evaluation parameters."
+            )
             return validation_results
-        elif validation_results["meta"]["data_asset_name"] not in self._compiled_parameters["data_assets"]:
+        elif (data_asset_name not in self._compiled_parameters["data_assets"] or
+              expectation_suite_name not in self._compiled_parameters["data_assets"][data_asset_name]):
             # This is fine; short-circuit since we do not need to register any results from this dataset.
             return validation_results
         
         for result in validation_results['results']:
             # Unoptimized: loop over all results and check if each is needed
             expectation_type = result['expectation_config']['expectation_type']
-            if expectation_type in self._compiled_parameters["data_assets"][data_asset_name]:
+            if expectation_type in self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name]:
                 # First, bind column-style parameters
                 if (("column" in result['expectation_config']['kwargs']) and 
-                    ("columns" in self._compiled_parameters["data_assets"][data_asset_name][expectation_type]) and 
+                    ("columns" in self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_type]) and
                     (result['expectation_config']['kwargs']["column"] in
-                     self._compiled_parameters["data_assets"][data_asset_name][expectation_type]["columns"])):
+                     self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_type]["columns"])):
 
                     column = result['expectation_config']['kwargs']["column"]
                     # Now that we have a small search space, invert logic, and look for the parameters in our result
-                    for type_key, desired_parameters in self._compiled_parameters["data_assets"][data_asset_name][expectation_type]["columns"][column].items():
+                    for type_key, desired_parameters in self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_type]["columns"][column].items():
                         # value here is the set of desired parameters under the type_key
                         for desired_param in desired_parameters:
                             desired_key = desired_param.split(":")[-1]
@@ -1211,7 +1237,7 @@ class DataContext(object):
                                 logger.warning("Unrecognized key for parameter %s" % desired_param)
                 
                 # Next, bind parameters that do not have column parameter
-                for type_key, desired_parameters in self._compiled_parameters["data_assets"][data_asset_name][expectation_type].items():
+                for type_key, desired_parameters in self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_type].items():
                     if type_key == "columns":
                         continue
                     for desired_param in desired_parameters:
@@ -1257,17 +1283,17 @@ class DataContext(object):
         It splits parameters by the : (colon) character; valid URNs must have one of the following structures to be
         automatically recognized.
 
-        "urn" : "great_expectations" : "validations" : data_asset_name : "expectations" : expectation_name : "columns" : column_name : "result": result_key
-         [0]            [1]                 [2]              [3]              [4]              [5]              [6]          [7]         [8]        [9]
+        "urn" : "great_expectations" : "validations" : data_asset_name : expectation_suite_name : "expectations" : expectation_name : "columns" : column_name : "result": result_key
+         [0]            [1]                 [2]              [3]                   [4]                  [5]             [6]              [7]         [8]        [9]        [10]
         
-        "urn" : "great_expectations" : "validations" : data_asset_name : "expectations" : expectation_name : "columns" : column_name : "details": details_key
-         [0]            [1]                 [2]              [3]              [4]              [5]              [6]          [7]         [8]        [9]
+        "urn" : "great_expectations" : "validations" : data_asset_name : expectation_suite_name : "expectations" : expectation_name : "columns" : column_name : "details": details_key
+         [0]            [1]                 [2]              [3]                   [4]                  [5]             [6]              [7]         [8]        [9]         [10]
 
-        "urn" : "great_expectations" : "validations" : data_asset_name : "expectations" : expectation_name : "result": result_key
-         [0]            [1]                 [2]              [3]              [4]              [5]            [6]          [7]  
+        "urn" : "great_expectations" : "validations" : data_asset_name : expectation_suite_name : "expectations" : expectation_name : "result": result_key
+         [0]            [1]                 [2]              [3]                  [4]                  [5]              [6]              [7]         [8]
 
-        "urn" : "great_expectations" : "validations" : data_asset_name : "expectations" : expectation_name : "details": details_key
-         [0]            [1]                 [2]              [3]              [4]              [5]             [6]          [7]  
+        "urn" : "great_expectations" : "validations" : data_asset_name : expectation_suite_name : "expectations" : expectation_name : "details": details_key
+         [0]            [1]                 [2]              [3]                  [4]                   [5]             [6]              [7]        [8]
 
          Parameters are compiled to the following structure:
 
@@ -1277,12 +1303,14 @@ class DataContext(object):
              "raw": <set of all parameters requested>
              "data_assets": {
                  data_asset_name: {
-                    expectation_name: {
-                        "details": <set of details parameter values requested>
-                        "result": <set of result parameter values requested>
-                        column_name: {
+                    expectation_suite_name: {
+                        expectation_name: {
                             "details": <set of details parameter values requested>
                             "result": <set of result parameter values requested>
+                            column_name: {
+                                "details": <set of details parameter values requested>
+                                "result": <set of result parameter values requested>
+                            }
                         }
                     }
                  }
@@ -1298,7 +1326,17 @@ class DataContext(object):
             "data_assets": {}
         }
 
-        known_assets = self.list_expectation_suites()
+        known_asset_dict = self.list_expectation_suites()
+        # Convert known assets to the normalized name system
+        flat_assets_dict = {}
+        for datasource in known_asset_dict.keys():
+            for generator in known_asset_dict[datasource].keys():
+                for data_asset_name in known_asset_dict[datasource][generator].keys():
+                    flat_assets_dict[
+                        datasource + self._data_asset_name_delimiter +
+                        generator + self._data_asset_name_delimiter +
+                        data_asset_name
+                    ] = known_asset_dict[datasource][generator][data_asset_name]
         config_paths = [y for x in os.walk(self.expectations_directory) for y in glob(os.path.join(x[0], '*.json'))]
 
         for config_file in config_paths:
@@ -1306,46 +1344,53 @@ class DataContext(object):
             for expectation in config["expectations"]:
                 for _, value in expectation["kwargs"].items():
                     if isinstance(value, dict) and '$PARAMETER' in value:
-                        # Compile only respects parameters in urn structure beginning with urn:great_expectations:validations
+                        # Compile *only* respects parameters in urn structure
+                        # beginning with urn:great_expectations:validations
                         if value["$PARAMETER"].startswith("urn:great_expectations:validations:"):
                             column_expectation = False
                             parameter = value["$PARAMETER"]
                             self._compiled_parameters["raw"].add(parameter)
                             param_parts = parameter.split(":")
                             try:
-                                data_asset = param_parts[3]
-                                expectation_name = param_parts[5]
-                                if param_parts[6] == "columns":
+                                data_asset_name = param_parts[3]
+                                expectation_suite_name = param_parts[4]
+                                expectation_name = param_parts[6]
+                                if param_parts[7] == "columns":
                                     column_expectation = True
-                                    column_name = param_parts[7]
-                                    param_key = param_parts[8]
+                                    column_name = param_parts[8]
+                                    param_key = param_parts[9]
                                 else:
-                                    param_key = param_parts[6]
+                                    param_key = param_parts[7]
                             except IndexError:
                                 logger.warning("Invalid parameter urn (not enough parts): %s" % parameter)
+                                continue
 
-                            if data_asset not in known_assets:
+                            if (data_asset_name not in flat_assets_dict or
+                                    expectation_suite_name not in flat_assets_dict[data_asset_name]):
                                 logger.warning("Adding parameter %s for unknown data asset config" % parameter)
 
-                            if data_asset not in self._compiled_parameters["data_assets"]:
-                                self._compiled_parameters["data_assets"][data_asset] = {}
+                            if data_asset_name not in self._compiled_parameters["data_assets"]:
+                                self._compiled_parameters["data_assets"][data_asset_name] = {}
 
-                            if expectation_name not in self._compiled_parameters["data_assets"][data_asset]:
-                                self._compiled_parameters["data_assets"][data_asset][expectation_name] = {}
+                            if expectation_suite_name not in self._compiled_parameters["data_assets"][data_asset_name]:
+                                self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name] = {}
+
+                            if expectation_name not in self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name]:
+                                self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_name] = {}
 
                             if column_expectation:
-                                if "columns" not in self._compiled_parameters["data_assets"][data_asset][expectation_name]:
-                                    self._compiled_parameters["data_assets"][data_asset][expectation_name]["columns"] = {}
-                                if column_name not in self._compiled_parameters["data_assets"][data_asset][expectation_name]["columns"]:
-                                    self._compiled_parameters["data_assets"][data_asset][expectation_name]["columns"][column_name] = {}
-                                if param_key not in self._compiled_parameters["data_assets"][data_asset][expectation_name]["columns"][column_name]:
-                                    self._compiled_parameters["data_assets"][data_asset][expectation_name]["columns"][column_name][param_key] = set()
-                                self._compiled_parameters["data_assets"][data_asset][expectation_name]["columns"][column_name][param_key].add(parameter)   
+                                if "columns" not in self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_name]:
+                                    self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_name]["columns"] = {}
+                                if column_name not in self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_name]["columns"]:
+                                    self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_name]["columns"][column_name] = {}
+                                if param_key not in self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_name]["columns"][column_name]:
+                                    self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_name]["columns"][column_name][param_key] = set()
+                                self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_name]["columns"][column_name][param_key].add(parameter)
                             
                             elif param_key in ["result", "details"]:
-                                if param_key not in self._compiled_parameters["data_assets"][data_asset][expectation_name]:
-                                    self._compiled_parameters["data_assets"][data_asset][expectation_name][param_key] = set()
-                                self._compiled_parameters["data_assets"][data_asset][expectation_name][param_key].add(parameter)  
+                                if param_key not in self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_name]:
+                                    self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_name][param_key] = set()
+                                self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_name][param_key].add(parameter)
                             
                             else:
                                 logger.warning("Invalid parameter urn (unrecognized structure): %s" % parameter)
@@ -1699,21 +1744,37 @@ class DataContext(object):
     def profile_datasource(self,
                            datasource_name,
                            generator_name=None,
+                           data_assets=None,
+                           max_data_assets=20,
+                           profile_all_data_assets=True,
                            profiler=BasicDatasetProfiler,
-                           max_data_assets=10):
+                           dry_run=False):
         """Profile the named datasource using the named profiler.
 
         Args:
             datasource_name: the name of the datasource for which to profile data_assets
             generator_name: the name of the generator to use to get batches
-            profiler: the profiler to use
-            max_data_assets: the maximum number of data_assets from the
+            data_assets: list of data asset names to profile
+            max_data_assets: if the number of data assets the generator yields is greater than this max_data_assets,
+                profile_all_data_assets=True is required to profile all
+            profile_all_data_assets: when True, all data assets are profiled, regardless of their number
+            profiler: the profiler class to use
+            dry_run: when true, the method checks arguments and reports if can profile or specifies the arguments that are missing
 
         Returns:
-            List of (expectation_suite, EVR) tuples for each of the data_assets found in the datasource
+            A dictionary::
+
+                {
+                    "success": True/False,
+                    "results": List of (expectation_suite, EVR) tuples for each of the data_assets found in the datasource
+                }
+
+            When success = False, the error details are under "error" key
         """
-        logger.info("Profiling '%s' with '%s'" % (datasource_name, profiler.__name__))
-        profiling_results = []
+        if not dry_run:
+            logger.info("Profiling '%s' with '%s'" % (datasource_name, profiler.__name__))
+
+        profiling_results = {}
         data_asset_names = self.get_available_data_asset_names(datasource_name)
         if generator_name is None:
             if len(data_asset_names[datasource_name].keys()) == 1:
@@ -1723,82 +1784,119 @@ class DataContext(object):
 
         data_asset_name_list = list(data_asset_names[datasource_name][generator_name])
         total_data_assets = len(data_asset_name_list)
-        logger.info("Found %d data assets using generator '%s'" % (total_data_assets, generator_name))
-                
-        if max_data_assets is None or max_data_assets >= len(data_asset_name_list):
-            logger.info("Profiling all %d." % (len(data_asset_name_list)))
-        else:
-            logger.info("Profiling the first %d, alphabetically." % (max_data_assets))
+
+        if data_assets and len(data_assets) > 0:
+            not_found_data_assets = [name for name in data_assets if name not in data_asset_name_list]
+            if len(not_found_data_assets) > 0:
+                profiling_results = {
+                    'success': False,
+                    'error': {
+                        'code': DataContext.PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND,
+                        'not_found_data_assets': not_found_data_assets,
+                        'data_assets': data_asset_name_list
+                    }
+                }
+                return profiling_results
+
+
+            data_asset_name_list = data_assets
             data_asset_name_list.sort()
-            data_asset_name_list = data_asset_name_list[:max_data_assets]
+            total_data_assets = len(data_asset_name_list)
+            if not dry_run:
+                logger.info("Profiling the white-listed data assets: %s, alphabetically." % (",".join(data_asset_name_list)))
+        else:
+            if profile_all_data_assets:
+                data_asset_name_list.sort()
+            else:
+                if total_data_assets > max_data_assets:
+                    profiling_results = {
+                        'success': False,
+                        'error': {
+                            'code': DataContext.PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS,
+                            'num_data_assets': total_data_assets,
+                            'data_assets': data_asset_name_list
+                        }
+                    }
+                    return profiling_results
 
-        total_columns, total_expectations, total_rows, skipped_data_assets = 0, 0, 0, 0
-        total_start_time = datetime.datetime.now()
-        run_id = total_start_time.isoformat().replace(":", "") + "Z"
-        for name in data_asset_name_list:
-            logger.info("\tProfiling '%s'..." % name)
-            try:
-                start_time = datetime.datetime.now()
+        if not dry_run:
+            logger.info("Profiling all %d data assets from generator %s" % (len(data_asset_name_list), generator_name))
+        else:
+            logger.info("Found %d data assets from generator %s" % (len(data_asset_name_list), generator_name))
 
-                # FIXME: There needs to be an affordance here to limit to 100 rows, or downsample, etc.
-                batch = self.get_batch(
-                    data_asset_name=NormalizedDataAssetName(datasource_name, generator_name, name),
-                    expectation_suite_name=profiler.__name__
-                )
+        profiling_results['success'] = True
 
-                if not profiler.validate(batch):
-                    raise ProfilerError(
-                        "batch '%s' is not a valid batch for the '%s' profiler" % (name, profiler.__name__)
+        if not dry_run:
+            profiling_results['results'] = []
+            total_columns, total_expectations, total_rows, skipped_data_assets = 0, 0, 0, 0
+            total_start_time = datetime.datetime.now()
+            run_id = total_start_time.isoformat().replace(":", "") + "Z"
+
+            for name in data_asset_name_list:
+                logger.info("\tProfiling '%s'..." % name)
+                try:
+                    start_time = datetime.datetime.now()
+
+                    # FIXME: There needs to be an affordance here to limit to 100 rows, or downsample, etc.
+                    batch = self.get_batch(
+                        data_asset_name=NormalizedDataAssetName(datasource_name, generator_name, name),
+                        expectation_suite_name=profiler.__name__
                     )
-  
-                # Note: This logic is specific to DatasetProfilers, which profile a single batch. Multi-batch profilers
-                # will have more to unpack.
-                expectation_suite, validation_result = profiler.profile(batch, run_id=run_id)
-                profiling_results.append((expectation_suite, validation_result))
 
-                if isinstance(batch, Dataset):
-                    # For datasets, we can produce some more detailed statistics
-                    row_count = batch.get_row_count()
-                    total_rows += row_count
-                    new_column_count = len(set([exp["kwargs"]["column"] for exp in expectation_suite["expectations"] if "column" in exp["kwargs"]]))
-                    total_columns += new_column_count
-                
-                new_expectation_count = len(expectation_suite["expectations"])
-                total_expectations += new_expectation_count
+                    if not profiler.validate(batch):
+                        raise ProfilerError(
+                            "batch '%s' is not a valid batch for the '%s' profiler" % (name, profiler.__name__)
+                        )
 
-                self.save_expectation_suite(expectation_suite)
-                duration = (datetime.datetime.now() - start_time).total_seconds()
-                logger.info("\tProfiled %d columns using %d rows from %s (%.3f sec)" %
-                            (new_column_count, row_count, name, duration))
+                    # Note: This logic is specific to DatasetProfilers, which profile a single batch. Multi-batch profilers
+                    # will have more to unpack.
+                    expectation_suite, validation_result = profiler.profile(batch, run_id=run_id)
+                    profiling_results['results'].append((expectation_suite, validation_result))
 
-            except ProfilerError as err:
-                logger.warning(err.message)
-            except IOError as exc:
-                logger.warning("IOError while profiling %s. (Perhaps a loading error?) Skipping." % (name))
-                logger.debug(str(exc))
-                skipped_data_assets += 1
-            # FIXME: this is a workaround for catching SQLAlchemny exceptions without taking SQLAlchemy dependency.
-            # Think how to avoid this.
-            except Exception as e:
-                logger.warning("Exception while profiling %s. (Perhaps a loading error?) Skipping." % (name))
-                logger.debug(str(e))
-                skipped_data_assets += 1
+                    if isinstance(batch, Dataset):
+                        # For datasets, we can produce some more detailed statistics
+                        row_count = batch.get_row_count()
+                        total_rows += row_count
+                        new_column_count = len(set([exp["kwargs"]["column"] for exp in expectation_suite["expectations"] if "column" in exp["kwargs"]]))
+                        total_columns += new_column_count
 
-        total_duration = (datetime.datetime.now() - total_start_time).total_seconds()
-        logger.info("""
-Profiled %d of %d named data assets, with %d total rows and %d columns in %.2f seconds.
-Generated, evaluated, and stored %d candidate Expectations.
-Note: You will need to review and revise Expectations before using them in production.""" % (
-            len(data_asset_name_list),
-            total_data_assets,
-            total_rows,
-            total_columns,
-            total_duration,
-            total_expectations,
-        ))
-        if skipped_data_assets > 0:
-            logger.warning("Skipped %d data assets due to errors." % skipped_data_assets)
+                    new_expectation_count = len(expectation_suite["expectations"])
+                    total_expectations += new_expectation_count
 
+                    self.save_expectation_suite(expectation_suite)
+                    duration = (datetime.datetime.now() - start_time).total_seconds()
+                    logger.info("\tProfiled %d columns using %d rows from %s (%.3f sec)" %
+                                (new_column_count, row_count, name, duration))
+
+                except ProfilerError as err:
+                    logger.warning(err.message)
+                except IOError as exc:
+                    logger.warning("IOError while profiling %s. (Perhaps a loading error?) Skipping." % (name))
+                    logger.debug(str(exc))
+                    skipped_data_assets += 1
+                # FIXME: this is a workaround for catching SQLAlchemny exceptions without taking SQLAlchemy dependency.
+                # Think how to avoid this.
+                except Exception as e:
+                    logger.warning("Exception while profiling %s. (Perhaps a loading error?) Skipping." % (name))
+                    logger.debug(str(e))
+                    skipped_data_assets += 1
+
+            total_duration = (datetime.datetime.now() - total_start_time).total_seconds()
+            logger.info("""
+    Profiled %d of %d named data assets, with %d total rows and %d columns in %.2f seconds.
+    Generated, evaluated, and stored %d candidate Expectations.
+    Note: You will need to review and revise Expectations before using them in production.""" % (
+                len(data_asset_name_list),
+                total_data_assets,
+                total_rows,
+                total_columns,
+                total_duration,
+                total_expectations,
+            ))
+            if skipped_data_assets > 0:
+                logger.warning("Skipped %d data assets due to errors." % skipped_data_assets)
+
+        profiling_results['success'] = True
         return profiling_results
 
 
@@ -1818,6 +1916,11 @@ PROJECT_HELP_COMMENT = """# Welcome to great expectations.
 """
 
 PROJECT_OPTIONAL_CONFIG_COMMENT = """
+
+# The plugins_directory is where the data_context will look for custom_data_assets.py
+# and any configured evaluation parameter store
+
+plugins_directory: plugins/
 
 # Configure additional data context options here.
 
@@ -1840,8 +1943,7 @@ result_store:
 
 # result_callback:
 #   slack: https://slack.com/replace_with_your_webhook
-    
-    
+
 # Uncomment the lines below to save snapshots of data assets that fail validation.
 
 # data_asset_snapshot_store:
@@ -1851,6 +1953,12 @@ result_store:
 #     bucket:
 #     key_prefix:
 
+# Uncomment the lines below to enable a custom evaluation_parameter_store
+# evaluation_parameter_store:
+#   type: my_evaluation_parameter_store
+#   config:  # - this is optional - this is how we can pass kwargs to the object's constructor
+#     param1: boo
+#     param2: bah
 """
 
 PROJECT_TEMPLATE = PROJECT_HELP_COMMENT + "datasources: {}\n" + PROJECT_OPTIONAL_CONFIG_COMMENT
