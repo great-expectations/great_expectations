@@ -131,6 +131,7 @@ class MetaFileDataAsset(DataAsset):
 
         return inner_wrapper
 
+
 class FileDataAsset(MetaFileDataAsset):
     """
     FileDataset instantiates the great_expectations Expectations API as a
@@ -138,6 +139,7 @@ class FileDataAsset(MetaFileDataAsset):
     :func:`DataAsset <great_expectations.data_asset.base.DataAsset>`
     """
 
+    _data_asset_type = "FileDataAsset"
 
     def __init__(self, file_path=None, *args, **kwargs):
         super(FileDataAsset, self).__init__(*args, **kwargs)

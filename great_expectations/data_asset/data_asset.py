@@ -29,6 +29,10 @@ logging.captureWarnings(True)
 
 class DataAsset(object):
 
+    # This should in general only be changed when a subclass *adds expectations* or *changes expectation semantics*
+    # That way, multiple backends can implement the same data_asset_type
+    _data_asset_type = "DataAsset"
+
     def __init__(self, *args, **kwargs):
         """
         Initialize the DataAsset.
@@ -136,7 +140,7 @@ class DataAsset(object):
                 # Get the name of the method
                 method_name = func.__name__
 
-                # Combine all arguments into a single new "kwargs"
+                # Combine all arguments into a single new "all_args" dictionary to name positional parameters
                 all_args = dict(zip(method_arg_names, args))
                 all_args.update(kwargs)
 
@@ -313,6 +317,7 @@ class DataAsset(object):
                 expectation_suite_name = "default"
             self._expectation_suite = get_empty_expectation_suite(data_asset_name, expectation_suite_name)
 
+        self._expectation_suite["data_asset_type"] = self._data_asset_type
         self.default_expectation_args = {
             "include_config": False,
             "catch_exceptions": False,
@@ -749,7 +754,8 @@ class DataAsset(object):
         if discards["catch_exceptions"] > 0 and not suppress_warnings:
             settings_message += " catch_exceptions"
 
-        settings_message += " settings filtered."
+        if len(settings_message) > 1:  # Only add this if we added one of the settings above.
+            settings_message += " settings filtered."
 
         expectation_suite["expectations"] = expectations
         logger.info(message + settings_message)
@@ -1091,7 +1097,7 @@ class DataAsset(object):
         return self._expectation_suite.get("expectation_suite_name", None)
 
     def _build_evaluation_parameters(self, expectation_args, evaluation_parameters):
-        """Build a dictionary of parameters to evaluate, using the provided evaluation_paramters,
+        """Build a dictionary of parameters to evaluate, using the provided evaluation_parameters,
         AND mutate expectation_args by removing any parameter values passed in as temporary values during
         exploratory work.
         """

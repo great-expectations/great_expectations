@@ -145,9 +145,15 @@ class MetaDataset(DataAsset):
 # noinspection PyIncorrectDocstring
 class Dataset(MetaDataset):
 
-    INT_TYPE_NAMES = set(["INTEGER", "int", "SMALLINT", "BIGINT", "IntegerType", "LongType"])
-    FLOAT_TYPE_NAMES = set(["FLOAT", "DOUBLE_PRECISION", "NUMERIC", "FloatType", "DoubleType", "float"])
+    # This should in general only be changed when a subclass *adds expectations* or *changes expectation semantics*
+    # That way, multiple backends can implement the same data_asset_type
+    _data_asset_type = "Dataset"
+
+    INT_TYPE_NAMES = set(["INTEGER", "int", "INT", "TINYINT", "BYTEINT", "SMALLINT", "BIGINT", "IntegerType", "LongType", "DECIMAL"])
+    FLOAT_TYPE_NAMES = set(["FLOAT", "FLOAT4", "FLOAT8", "DOUBLE_PRECISION", "NUMERIC", "FloatType", "DoubleType", "float"])
     STRING_TYPE_NAMES = set(["CHAR", "VARCHAR", "TEXT", "StringType", "string", "str"])
+    BOOLEAN_TYPE_NAMES = set(["BOOLEAN", "BOOL", "bool", "BooleanType"])
+
 
     # getter functions with hashable arguments - can be cached
     hashable_getters = [
@@ -288,14 +294,6 @@ class Dataset(MetaDataset):
     def get_column_count_in_range(self, column, min_val=None, max_val=None, min_strictly=False, max_strictly=True):
         """Returns: int"""
         raise NotImplementedError
-
-    def _initialize_expectations(self, expectation_suite=None, data_asset_name=None, expectation_suite_name=None):
-        """Override data_asset_type with "Dataset"
-        """
-        super(Dataset, self)._initialize_expectations(expectation_suite=expectation_suite,
-                                                      data_asset_name=data_asset_name,
-                                                      expectation_suite_name=expectation_suite_name)
-        self._expectation_suite["data_asset_type"] = "Dataset"
 
     def test_column_map_expectation_function(self, function, *args, **kwargs):
         """Test a column map expectation function
