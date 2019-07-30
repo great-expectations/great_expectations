@@ -105,14 +105,19 @@ def test_standalone_sqlalchemy_datasource(test_db_connection_string):
 def test_create_sqlalchemy_datasource(data_context):
     name = "test_sqlalchemy_datasource"
     type_ = "sqlalchemy"
+
+    # Use sqlite so we don't require postgres for this test.
     connection_kwargs = {
-        "drivername": "postgresql",
-        "username": "postgres",
-        "password": "",
-        "host": "localhost",
-        "port": 5432,
-        "database": "test_ci",
+        "drivername": "sqlite"
     }
+    # connection_kwargs = {
+    #     "drivername": "postgresql",
+    #     "username": "postgres",
+    #     "password": "",
+    #     "host": "localhost",
+    #     "port": 5432,
+    #     "database": "test_ci",
+    # }
 
     # It should be possible to create a sqlalchemy source using these params without
     # saving a profile
