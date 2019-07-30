@@ -17,17 +17,9 @@ class BasicDatasetProfiler(DatasetProfiler):
     """
 
     @classmethod
-    def _enable_evaluation(cls, df):
-        df._config["interactive_evaluation"] = True
-
-    @classmethod
-    def _disable_evaluation(cls, df):
-        df._config["interactive_evaluation"] = False
-
-    @classmethod
     def _get_column_type(cls, df, column):
         # list of types is used to support pandas and sqlalchemy
-        cls._enable_evaluation(df)
+        df.set_config_value("interactive_evaluation", True)
         try:
             if df.expect_column_values_to_be_in_type_list(column, type_list=sorted(list(Dataset.INT_TYPE_NAMES)))["success"]:
                 type_ = "int"
@@ -47,14 +39,14 @@ class BasicDatasetProfiler(DatasetProfiler):
         except NotImplementedError:
             type_ = "unknown"
 
-        cls._disable_evaluation(df)
+        df.set_config_value('interactive_evaluation', False)
         return type_
 
     @classmethod
     def _get_column_cardinality(cls, df, column):
         num_unique = None
         pct_unique = None
-        cls._enable_evaluation(df)
+        df.set_config_value("interactive_evaluation", True)
 
         try:
             num_unique = df.expect_column_unique_value_count_to_be_between(column, None, None)[
@@ -94,7 +86,7 @@ class BasicDatasetProfiler(DatasetProfiler):
                 cardinality = "many"
         # print('col: {0:s}, num_unique: {1:s}, pct_unique: {2:s}, card: {3:s}'.format(column, str(num_unique), str(pct_unique), cardinality))
 
-        cls._disable_evaluation(df)
+        df.set_config_value('interactive_evaluation', False)
 
         return cardinality
 
@@ -106,7 +98,7 @@ class BasicDatasetProfiler(DatasetProfiler):
 
         df.expect_table_row_count_to_be_between(min_value=0, max_value=None)
         df.expect_table_columns_to_match_ordered_list(None)
-        cls._disable_evaluation(df)
+        df.set_config_value('interactive_evaluation', False)
 
         columns = df.get_table_columns()
         number_of_columns = len(columns)
@@ -193,5 +185,5 @@ class BasicDatasetProfiler(DatasetProfiler):
                     # print(column, type_, cardinality)
                     pass
 
-        cls._enable_evaluation(df)
+        df.set_config_value("interactive_evaluation", True)
         return df.get_expectation_suite(suppress_warnings=True, discard_failed_expectations=False)

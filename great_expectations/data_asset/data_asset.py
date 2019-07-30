@@ -603,6 +603,12 @@ class DataAsset(object):
                 else:
                     return expectation
 
+    def set_config_value(self, key, value):
+        self._config[key] = value
+
+    def get_config_value(self, key):
+        return self._config[key]
+
     def get_batch_kwargs(self):
         return self._batch_kwargs
 
