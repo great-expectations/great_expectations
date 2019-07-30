@@ -100,7 +100,20 @@ def get_dataset(dataset_type, data, schemas=None, profiler=ColumnsExistProfiler,
     df = pd.DataFrame(data)
     if dataset_type == 'PandasDataset':
         if schemas and "pandas" in schemas:
-            pandas_schema = {key:np.dtype(value) for (key, value) in schemas["pandas"].items()}
+            schema = schemas["pandas"]
+            pandas_schema = {}
+            for (key, value) in schema.items():
+                # Note, these are just names used in our internal schemas to build datasets *for internal tests*
+                if value.lower() in ["timestamp", "datetime", "datetime64", "datetime64[ns]"]:
+                    df[key] = pd.to_datetime(df[key])
+                    continue
+                try:
+                    type_ = np.dtype(value)
+                except TypeError:
+                    type_ = getattr(pd.core.dtypes.dtypes, value)
+                    # If this raises AttributeError it's okay: it means someone built a bad test
+                pandas_schema[key] = type_
+            # pandas_schema = {key:np.dtype(value) for (key, value) in schemas["pandas"].items()}
             df = df.astype(pandas_schema)
         return PandasDataset(df, profiler=profiler, caching=caching)
 

@@ -11,7 +11,7 @@ import numpy as np
 import pandas as pd
 from dateutil.parser import parse
 from scipy import stats
-from six import PY3, integer_types, string_types
+from six import PY2, PY3, integer_types, string_types
 
 from great_expectations.data_asset import DataAsset
 from .dataset import Dataset
@@ -528,17 +528,22 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             try:
                 comp_types.append(np.dtype(type_).type)
             except TypeError:
-                pass
+                try:
+                    pd_type = getattr(pd.core.dtypes.dtypes, type_)
+                    if isinstance(pd_type, type):
+                        comp_types.append(pd_type)
+                except AttributeError:
+                    pass
 
             native_type = self._native_type_type_map(type_)
             if native_type is not None:
                 comp_types.extend(native_type)
-            success = (self[column].dtype in comp_types)
+            success = issubclass(self[column].dtype.type, tuple(comp_types))
 
         return {
             "success": success,
             "result": {
-                "observed_value": self[column].dtype.name
+                "observed_value": self[column].dtype.type.__name__
             }
         }
 
@@ -559,7 +564,12 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             return complex,
         elif type_.lower() == "str":
             return str,
-        elif type_.lower() in ["string_types", "unicode"]:
+        elif type_.lower() == "unicode":
+            if PY2:
+                return unicode
+            else:
+                return None
+        elif type_.lower() in ["string_types"]:
             return string_types
 
     @MetaPandasDataset.column_map_expectation
@@ -573,7 +583,12 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         try:
             comp_types.append(np.dtype(type_).type)
         except TypeError:
-            pass
+            try:
+                pd_type = getattr(pd.core.dtypes.dtypes, type_)
+                if isinstance(pd_type, type):
+                    comp_types.append(pd_type)
+            except AttributeError:
+                pass
 
         native_type = self._native_type_type_map(type_)
         if native_type is not None:
@@ -682,18 +697,23 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                 try:
                     comp_types.append(np.dtype(type_).type)
                 except TypeError:
-                    pass
+                    try:
+                        pd_type = getattr(pd.core.dtypes.dtypes, type_)
+                        if isinstance(pd_type, type):
+                            comp_types.append(pd_type)
+                    except AttributeError:
+                        pass
 
                 native_type = self._native_type_type_map(type_)
                 if native_type is not None:
                     comp_types.extend(native_type)
 
-            success = (self[column].dtype in comp_types)
+            success = issubclass(self[column].dtype.type, tuple(comp_types))
 
         return {
             "success": success,
             "result": {
-                "observed_value": self[column].dtype.name
+                "observed_value": self[column].dtype.type.__name__
             }
         }
 
@@ -709,7 +729,12 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             try:
                 comp_types.append(np.dtype(type_).type)
             except TypeError:
-                pass
+                try:
+                    pd_type = getattr(pd.core.dtypes.dtypes, type_)
+                    if isinstance(pd_type, type):
+                        comp_types.append(pd_type)
+                except AttributeError:
+                    pass
 
             native_type = self._native_type_type_map(type_)
             if native_type is not None:
