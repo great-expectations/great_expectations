@@ -2,7 +2,6 @@ from __future__ import division
 
 import random
 import string
-import warnings
 import copy
 
 from dateutil.parser import parse
@@ -10,7 +9,6 @@ import pandas as pd
 import numpy as np
 import pytest
 from sqlalchemy import create_engine
-from sqlalchemy.exc import SQLAlchemyError
 import sqlalchemy.dialects.sqlite as sqlitetypes
 import sqlalchemy.dialects.postgresql as postgresqltypes
 import sqlalchemy.dialects.mysql as mysqltypes
@@ -104,7 +102,14 @@ def get_dataset(dataset_type, data, schemas=None, profiler=ColumnsExistProfiler,
             pandas_schema = {}
             for (key, value) in schema.items():
                 # Note, these are just names used in our internal schemas to build datasets *for internal tests*
-                if value.lower() in ["timestamp", "datetime", "datetime64", "datetime64[ns]"]:
+                # Further, some changes in pandas internal about how datetimes are created means to support pandas
+                # pre- 0.25, we need to explicitly specify when we want timezone.
+
+                # We will use timestamp for timezone-aware (UTC only) dates in our tests
+                if value.lower() in ["timestamp", "datetime64[ns, tz]"]:
+                    df[key] = pd.to_datetime(df[key], utc=True)
+                    continue
+                elif value.lower() in ["datetime", "datetime64", "datetime64[ns]"]:
                     df[key] = pd.to_datetime(df[key])
                     continue
                 try:
@@ -113,7 +118,7 @@ def get_dataset(dataset_type, data, schemas=None, profiler=ColumnsExistProfiler,
                     type_ = getattr(pd.core.dtypes.dtypes, value)
                     # If this raises AttributeError it's okay: it means someone built a bad test
                 pandas_schema[key] = type_
-            # pandas_schema = {key:np.dtype(value) for (key, value) in schemas["pandas"].items()}
+            # pandas_schema = {key: np.dtype(value) for (key, value) in schemas["pandas"].items()}
             df = df.astype(pandas_schema)
         return PandasDataset(df, profiler=profiler, caching=caching)
 
@@ -125,7 +130,7 @@ def get_dataset(dataset_type, data, schemas=None, profiler=ColumnsExistProfiler,
         sql_dtypes = {}
         if schemas and "sqlite" in schemas and isinstance(engine.dialect, sqlitetypes.dialect):
             schema = schemas["sqlite"]
-            sql_dtypes = {col : SQLITE_TYPES[dtype] for (col,dtype) in schema.items()}
+            sql_dtypes = {col: SQLITE_TYPES[dtype] for (col,dtype) in schema.items()}
             for col in schema:
                 type_ = schema[col]
                 if type_ in ["INTEGER", "SMALLINT", "BIGINT"]:
@@ -172,7 +177,7 @@ def get_dataset(dataset_type, data, schemas=None, profiler=ColumnsExistProfiler,
         sql_dtypes = {}
         if schemas and "mysql" in schemas and isinstance(engine.dialect, mysqltypes.dialect):
             schema = schemas["mysql"]
-            sql_dtypes = {col : MYSQL_TYPES[dtype] for (col, dtype) in schema.items()}
+            sql_dtypes = {col: MYSQL_TYPES[dtype] for (col, dtype) in schema.items()}
             for col in schema:
                 type_ = schema[col]
                 if type_ in ["INTEGER", "SMALLINT", "BIGINT"]:

@@ -285,7 +285,7 @@
       "schemas": {
         "pandas" : {
           "datetime": "datetime64[ns]",
-          "datetime_tz": "datetime64[ns]"
+          "datetime_tz": "timestamp"
         },
         "postgresql": {
           "datetime": "TIMESTAMP",
