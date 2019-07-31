@@ -54,28 +54,24 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
     @classmethod
     def _missing_content_block_fn(cls, expectation, styling=None, include_column_name=True):
         return [{
-            "template": "$expectation_type(**$kwargs)",
-            "params": {
-                "expectation_type": expectation["expectation_type"],
-                "kwargs": expectation["kwargs"]
-            },
-            # "styling": styling,
-            "styling": {
-                "classes": ["alert", "alert-warning"],
-                "attributes": {
-                    "role": "alert",
-                    # "data-container": "body",
-                    # "data-toggle": "popover",
-                    # "data-placement": "bottom",
-                    # "data-trigger": "hover",
-                    # "data-content": expectation["expectation_type"],
-                },
+            "content_block_type": "string_template",
+            "string_template": {
+                "template": "$expectation_type(**$kwargs)",
                 "params": {
-                    "expectation_type": {
-                        "classes": ["badge", "badge-warning"],
+                    "expectation_type": expectation["expectation_type"],
+                    "kwargs": expectation["kwargs"]
+                },
+                "styling": {
+                    "parent": {
+                      "classes": ["alert", "alert-warning"]
+                    },
+                    "params": {
+                        "expectation_type": {
+                            "classes": ["badge", "badge-warning"],
+                        }
                     }
-                }
-            },
+                },
+            }
         }]
     
     @classmethod
@@ -98,9 +94,12 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
                 template_str = "must be the $column_indexth field"
         
         return [{
-            "template": template_str,
-            "params": params,
-            "styling": styling,
+            "content_block_type": "string_template",
+            "string_template": {
+                "template": template_str,
+                "params": params,
+                "styling": styling,
+            }
         }]
     
     @classmethod
@@ -133,9 +132,12 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
             template_str = "$column " + template_str
         
         return [{
-            "template": template_str,
-            "params": params,
-            "styling": styling,
+            "content_block_type": "string_template",
+            "string_template": {
+                "template": template_str,
+                "params": params,
+                "styling": styling,
+            }
         }]
     
     # NOTE: This method is a pretty good example of good usage of `params`.
@@ -173,9 +175,12 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
             template_str = "$column " + template_str
         
         return [{
-            "template": template_str,
-            "params": params,
-            "styling": styling,
+            "content_block_type": "string_template",
+            "string_template": {
+                "template": template_str,
+                "params": params,
+                "styling": styling,
+            }
         }]
     
     @classmethod
@@ -205,9 +210,12 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
             template_str += " Values should be parsed as datetimes."
         
         return [{
-            "template": template_str,
-            "params": params,
-            "styling": styling,
+            "content_block_type": "string_template",
+            "string_template": {
+                "template": template_str,
+                "params": params,
+                "styling": styling,
+            }
         }]
     
     @classmethod
@@ -232,9 +240,12 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
             template_str = "Values in $column_A and $column_B must be equal, at least $mostly_pct % of the time."
         
         return [{
-            "template": template_str,
-            "params": params,
-            "styling": styling,
+            "content_block_type": "string_template",
+            "string_template": {
+                "template": template_str,
+                "params": params,
+                "styling": styling,
+            }
         }]
     
     @classmethod
@@ -257,9 +268,12 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
             params["column_list_" + str(idx + 1)] = params["column_list"][idx + 1]
         
         return [{
-            "template": template_str,
-            "params": params,
-            "styling": styling,
+            "content_block_type": "string_template",
+            "string_template": {
+                "template": template_str,
+                "params": params,
+                "styling": styling,
+            }
         }]
     
     @classmethod
@@ -278,9 +292,12 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
         params["column_list_" + str(idx + 1)] = params["column_list"][idx + 1]
         
         return [{
-            "template": template_str,
-            "params": params,
-            "styling": styling,
+            "content_block_type": "string_template",
+            "string_template": {
+                "template": template_str,
+                "params": params,
+                "styling": styling,
+            }
         }]
     
     @classmethod
@@ -301,9 +318,12 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
                 template_str = "Must have more than $min_value rows."
         
         return [{
-            "template": template_str,
-            "params": params,
-            "styling": styling,
+            "content_block_type": "string_template",
+            "string_template": {
+                "template": template_str,
+                "params": params,
+                "styling": styling,
+            }
         }]
     
     @classmethod
@@ -316,9 +336,12 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
         template_str = "Must have exactly $value rows."
         
         return [{
-            "template": template_str,
-            "params": params,
-            "styling": styling,
+            "content_block_type": "string_template",
+            "string_template": {
+                "template": template_str,
+                "params": params,
+                "styling": styling,
+            }
         }]
     
     @classmethod
@@ -349,9 +372,12 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
                 template_str = "distinct values must belong to this set: " + values_string + "."
         
         return [{
-            "template": template_str,
-            "params": params,
-            "styling": styling,
+            "content_block_type": "string_template",
+            "string_template": {
+                "template": template_str,
+                "params": params,
+                "styling": styling,
+            }
         }]
     
     @classmethod
@@ -374,9 +400,12 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
                 template_str = "values must never be null."
         
         return [{
-            "template": template_str,
-            "params": params,
-            "styling": styling,
+            "content_block_type": "string_template",
+            "string_template": {
+                "template": template_str,
+                "params": params,
+                "styling": styling,
+            }
         }]
     
     @classmethod
@@ -396,9 +425,12 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
             template_str = "$column " + template_str
         
         return [{
-            "template": template_str,
-            "params": params,
-            "styling": styling
+            "content_block_type": "string_template",
+            "string_template": {
+                "template": template_str,
+                "params": params,
+                "styling": styling,
+            }
         }]
     
     @classmethod
@@ -418,9 +450,12 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
             template_str = "$column " + template_str
         
         return [{
-            "template": template_str,
-            "params": params,
-            "styling": styling
+            "content_block_type": "string_template",
+            "string_template": {
+                "template": template_str,
+                "params": params,
+                "styling": styling,
+            }
         }]
     
     @classmethod
@@ -454,9 +489,12 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
                 template_str = "value types must belong to this set: " + values_string + "."
         
         return [{
-            "template": template_str,
-            "params": params,
-            "styling": styling,
+            "content_block_type": "string_template",
+            "string_template": {
+                "template": template_str,
+                "params": params,
+                "styling": styling,
+            }
         }]
     
     @classmethod
@@ -491,9 +529,12 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
             template_str = "$column " + template_str
         
         return [{
-            "template": template_str,
-            "params": params,
-            "styling": styling,
+            "content_block_type": "string_template",
+            "string_template": {
+                "template": template_str,
+                "params": params,
+                "styling": styling,
+            }
         }]
     
     @classmethod
@@ -528,9 +569,12 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
             template_str = "$column"
         
         return [{
-            "template": template_str,
-            "params": params,
-            "styling": styling,
+            "content_block_type": "string_template",
+            "string_template": {
+                "template": template_str,
+                "params": params,
+                "styling": styling,
+            }
         }]
     
     @classmethod
@@ -555,9 +599,12 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
             template_str = "$column " + template_str
         
         return [{
-            "template": template_str,
-            "params": params,
-            "styling": styling,
+            "content_block_type": "string_template",
+            "string_template": {
+                "template": template_str,
+                "params": params,
+                "styling": styling,
+            }
         }]
     
     # TODO: test parse_strings_as_datetimes
@@ -586,9 +633,12 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
             template_str = "$column " + template_str
         
         return [{
-            "template": template_str,
-            "params": params,
-            "styling": styling,
+            "content_block_type": "string_template",
+            "string_template": {
+                "template": template_str,
+                "params": params,
+                "styling": styling,
+            }
         }]
     
     # TODO: test parse_strings_as_datetimes
@@ -617,9 +667,12 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
             template_str = "$column " + template_str
         
         return [{
-            "template": template_str,
-            "params": params,
-            "styling": styling,
+            "content_block_type": "string_template",
+            "string_template": {
+                "template": template_str,
+                "params": params,
+                "styling": styling,
+            }
         }]
     
     @classmethod
@@ -656,9 +709,12 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
             template_str = "$column " + template_str
         
         return [{
-            "template": template_str,
-            "params": params,
-            "styling": styling,
+            "content_block_type": "string_template",
+            "string_template": {
+                "template": template_str,
+                "params": params,
+                "styling": styling,
+            }
         }]
     
     @classmethod
@@ -682,9 +738,12 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
             template_str = "$column " + template_str
         
         return [{
-            "template": template_str,
-            "params": params,
-            "styling": styling,
+            "content_block_type": "string_template",
+            "string_template": {
+                "template": template_str,
+                "params": params,
+                "styling": styling,
+            }
         }]
     
     @classmethod
@@ -708,9 +767,12 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
             template_str = "$column " + template_str
         
         return [{
-            "template": template_str,
-            "params": params,
-            "styling": styling,
+            "content_block_type": "string_template",
+            "string_template": {
+                "template": template_str,
+                "params": params,
+                "styling": styling,
+            }
         }]
     
     @classmethod
@@ -736,9 +798,12 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
                     template_str = "values must not match this regular expression: $regex."
         
         return [{
-            "template": template_str,
-            "params": params,
-            "styling": styling,
+            "content_block_type": "string_template",
+            "string_template": {
+                "template": template_str,
+                "params": params,
+                "styling": styling,
+            }
         }]
     
     @classmethod
@@ -772,9 +837,12 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
             template_str = "$column " + template_str
         
         return [{
-            "template": template_str,
-            "params": params,
-            "styling": styling,
+            "content_block_type": "string_template",
+            "string_template": {
+                "template": template_str,
+                "params": params,
+                "styling": styling,
+            }
         }]
     
     @classmethod
@@ -805,9 +873,12 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
             template_str = "$column " + template_str
         
         return [{
-            "template": template_str,
-            "params": params,
-            "styling": styling,
+            "content_block_type": "string_template",
+            "string_template": {
+                "template": template_str,
+                "params": params,
+                "styling": styling,
+            }
         }]
     
     @classmethod
@@ -831,9 +902,12 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
             template_str = "$column " + template_str
         
         return [{
-            "template": template_str,
-            "params": params,
-            "styling": styling
+            "content_block_type": "string_template",
+            "string_template": {
+                "template": template_str,
+                "params": params,
+                "styling": styling,
+            }
         }]
     
     @classmethod
@@ -855,9 +929,12 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
             template_str = "$column " + template_str
         
         return [{
-            "template": template_str,
-            "params": params,
-            "styling": styling,
+            "content_block_type": "string_template",
+            "string_template": {
+                "template": template_str,
+                "params": params,
+                "styling": styling,
+            }
         }]
     
     @classmethod
@@ -879,9 +956,12 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
             template_str = "$column " + template_str
         
         return [{
-            "template": template_str,
-            "params": params,
-            "styling": styling,
+            "content_block_type": "string_template",
+            "string_template": {
+                "template": template_str,
+                "params": params,
+                "styling": styling,
+            }
         }]
     
     @classmethod
@@ -905,16 +985,19 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
             template_str = "$column " + template_str
         
         return [{
-            "template": template_str,
-            "params": params,
-            "styling": {
-                "params":
-                    {
-                        "formatted_json": {
-                            "classes": []
+            "content_block_type": "string_template",
+            "string_template": {
+                "template": template_str,
+                "params": params,
+                "styling": {
+                    "params":
+                        {
+                            "formatted_json": {
+                                "classes": []
+                            }
                         }
-                    }
-            },
+                },
+            }
         }]
     
     @classmethod
@@ -943,9 +1026,12 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
             template_str = "$column " + template_str
         
         return [{
-            "template": template_str,
-            "params": params,
-            "styling": styling,
+            "content_block_type": "string_template",
+            "string_template": {
+                "template": template_str,
+                "params": params,
+                "styling": styling,
+            }
         }]
     
     @classmethod
@@ -974,9 +1060,12 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
             template_str = "$column " + template_str
         
         return [{
-            "template": template_str,
-            "params": params,
-            "styling": styling,
+            "content_block_type": "string_template",
+            "string_template": {
+                "template": template_str,
+                "params": params,
+                "styling": styling,
+            }
         }]
     
     @classmethod
@@ -1000,9 +1089,12 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
             template_str = "$column " + template_str
         
         return [{
-            "template": template_str,
-            "params": params,
-            "styling": styling,
+            "content_block_type": "string_template",
+            "string_template": {
+                "template": template_str,
+                "params": params,
+                "styling": styling,
+            }
         }]
 
     @classmethod
@@ -1026,9 +1118,12 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
             template_str = "$column " + template_str
     
         return [{
-            "template": template_str,
-            "params": params,
-            "styling": styling,
+            "content_block_type": "string_template",
+            "string_template": {
+                "template": template_str,
+                "params": params,
+                "styling": styling,
+            }
         }]
         
     @classmethod
@@ -1052,9 +1147,12 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
             template_str = "$column " + template_str
     
         return [{
-            "template": template_str,
-            "params": params,
-            "styling": styling,
+            "content_block_type": "string_template",
+            "string_template": {
+                "template": template_str,
+                "params": params,
+                "styling": styling,
+            }
         }]
         
     @classmethod
@@ -1081,9 +1179,12 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
             template_str = "$column " + template_str
     
         return [{
-            "template": template_str,
-            "params": params,
-            "styling": styling,
+            "content_block_type": "string_template",
+            "string_template": {
+                "template": template_str,
+                "params": params,
+                "styling": styling,
+            }
         }]
     
     @classmethod
@@ -1110,9 +1211,12 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
             template_str = "$column " + template_str
         
         return [{
-            "template": template_str,
-            "params": params,
-            "styling": styling,
+            "content_block_type": "string_template",
+            "string_template": {
+                "template": template_str,
+                "params": params,
+                "styling": styling,
+            }
         }]
     
     @classmethod
@@ -1136,9 +1240,12 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
             template_str = "$column " + template_str
         
         return [{
-            "template": template_str,
-            "params": params,
-            "styling": styling,
+            "content_block_type": "string_template",
+            "string_template": {
+                "template": template_str,
+                "params": params,
+                "styling": styling,
+            }
         }]
     
     @classmethod
@@ -1167,9 +1274,12 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
             template_str = "$column " + template_str
         
         return [{
-            "template": template_str,
-            "params": params,
-            "styling": styling,
+            "content_block_type": "string_template",
+            "string_template": {
+                "template": template_str,
+                "params": params,
+                "styling": styling,
+            }
         }]
     
     @classmethod
@@ -1201,9 +1311,12 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
             template_str = "$column " + template_str
         
         return [{
-            "template": template_str,
-            "params": params,
-            "styling": styling,
+            "content_block_type": "string_template",
+            "string_template": {
+                "template": template_str,
+                "params": params,
+                "styling": styling,
+            }
         }]
     
     @classmethod
@@ -1219,9 +1332,12 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
             template_str = "values must be unique."
         
         return [{
-            "template": template_str,
-            "params": params,
-            "styling": styling,
+            "content_block_type": "string_template",
+            "string_template": {
+                "template": template_str,
+                "params": params,
+                "styling": styling,
+            }
         }]
 
 
@@ -1240,292 +1356,54 @@ class PrescriptiveEvrTableContentBlockRenderer(PrescriptiveStringRenderer):
     }
 
     @classmethod
-    def _missing_content_block_fn(cls, evr, styling=None, include_column_name=True):
-        expectation = evr["expectation_config"]
-        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls)._missing_content_block_fn(
-            expectation, styling, include_column_name)
-        return [prescriptive_string_object]
+    def _get_status_icon(cls, evr):
+        if evr["success"]:
+            return {
+                "content_block_type": "string_template",
+                "string_template": {
+                    "template": "$icon",
+                    "params": {"icon": ""},
+                    "styling": {
+                        "classes": ["m-1"],
+                        "params": {
+                            "icon": {
+                                "classes": ["fas", "fa-check-circle", "text-success"],
+                                "tag": "i"
+                            }
+                        }
+                    }
+                }
+            }
+        else:
+            return {
+                "content_block_type": "string_template",
+                "string_template": {
+                    "template": "$icon",
+                    "params": {"icon": ""},
+                    "styling": {
+                        "classes": ["m-1"],
+                        "params": {
+                            "icon": {
+                                "tag": "i",
+                                "classes": ["fas", "fa-times", "text-danger"]
+                            }
+                        }
+                    }
+                }
+            }
 
     @classmethod
-    def expect_column_to_exist(cls, evr, styling=None, include_column_name=True):
+    def generate_expectation_row(cls, evr, expectation_type):
         expectation = evr["expectation_config"]
-        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_to_exist(
-            expectation, styling, include_column_name)
-        return [prescriptive_string_object]
-
-    @classmethod
-    def expect_column_unique_value_count_to_be_between(cls, evr, styling=None, include_column_name=True):
-        expectation = evr["expectation_config"]
-        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_unique_value_count_to_be_between(
-            expectation, styling, include_column_name)
-        return [prescriptive_string_object]
-
-    @classmethod
-    def expect_column_values_to_be_between(cls, evr, styling=None, include_column_name=True):
-        expectation = evr["expectation_config"]
-        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_values_to_be_between(
-            expectation, styling, include_column_name)
-        return [prescriptive_string_object]
-
-    @classmethod
-    def expect_column_pair_values_A_to_be_greater_than_B(cls, evr, styling=None, include_column_name=True):
-        expectation = evr["expectation_config"]
-        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_pair_values_A_to_be_greater_than_B(
-            expectation, styling, include_column_name)
-        return [prescriptive_string_object]
-
-    @classmethod
-    def expect_column_pair_values_to_be_equal(cls, evr, styling=None, include_column_name=True):
-        expectation = evr["expectation_config"]
-        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_pair_values_to_be_equal(
-            expectation, styling, include_column_name)
-        return [prescriptive_string_object]
-
-    @classmethod
-    def expect_table_columns_to_match_ordered_list(cls, evr, styling=None, include_column_name=True):
-        expectation = evr["expectation_config"]
-        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_table_columns_to_match_ordered_list(
-            expectation, styling, include_column_name)
-        return [prescriptive_string_object]
-
-    @classmethod
-    def expect_multicolumn_values_to_be_unique(cls, evr, styling=None, include_column_name=True):
-        expectation = evr["expectation_config"]
-        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_multicolumn_values_to_be_unique(
-            expectation, styling, include_column_name)
-        return [prescriptive_string_object]
-
-    @classmethod
-    def expect_table_row_count_to_be_between(cls, evr, styling=None, include_column_name=True):
-        expectation = evr["expectation_config"]
-        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_table_row_count_to_be_between(
-            expectation, styling, include_column_name)
-        return [prescriptive_string_object]
-
-    @classmethod
-    def expect_table_row_count_to_equal(cls, evr, styling=None, include_column_name=True):
-        expectation = evr["expectation_config"]
-        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_table_row_count_to_equal(
-            expectation, styling, include_column_name)
-        return [prescriptive_string_object]
-
-    @classmethod
-    def expect_column_distinct_values_to_be_in_set(cls, evr, styling=None, include_column_name=True):
-        expectation = evr["expectation_config"]
-        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_distinct_values_to_be_in_set(
-            expectation, styling, include_column_name)
-        return [prescriptive_string_object]
-
-    @classmethod
-    def expect_column_values_to_not_be_null(cls, evr, styling=None, include_column_name=True):
-        expectation = evr["expectation_config"]
-        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_values_to_not_be_null(
-            expectation, styling, include_column_name)
-        return [prescriptive_string_object]
-
-    @classmethod
-    def expect_column_values_to_be_null(cls, evr, styling=None, include_column_name=True):
-        expectation = evr["expectation_config"]
-        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_values_to_be_null(
-            expectation, styling, include_column_name)
-        return [prescriptive_string_object]
-
-    @classmethod
-    def expect_column_values_to_be_of_type(cls, evr, styling=None, include_column_name=True):
-        expectation = evr["expectation_config"]
-        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_values_to_be_of_type(
-            expectation, styling, include_column_name)
-        return [prescriptive_string_object]
-
-    @classmethod
-    def expect_column_values_to_be_in_type_list(cls, evr, styling=None, include_column_name=True):
-        expectation = evr["expectation_config"]
-        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_values_to_be_in_type_list(
-            expectation, styling, include_column_name)
-        return [prescriptive_string_object]
-
-    @classmethod
-    def expect_column_values_to_be_in_set(cls, evr, styling=None, include_column_name=True):
-        expectation = evr["expectation_config"]
-        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_values_to_be_in_set(
-            expectation, styling, include_column_name)
-        return [prescriptive_string_object]
-
-    @classmethod
-    def expect_column_values_to_not_be_in_set(cls, evr, styling=None, include_column_name=True):
-        expectation = evr["expectation_config"]
-        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_values_to_not_be_in_set(
-            expectation, styling, include_column_name)
-        return [prescriptive_string_object]
-
-    @classmethod
-    def expect_column_proportion_of_unique_values_to_be_between(cls, evr, styling=None,
-                                                                include_column_name=True):
-        expectation = evr["expectation_config"]
-        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_proportion_of_unique_values_to_be_between(
-            expectation, styling, include_column_name)
-        return [prescriptive_string_object]
-
-    @classmethod
-    def expect_column_values_to_be_increasing(cls, evr, styling=None, include_column_name=True):
-        expectation = evr["expectation_config"]
-        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_values_to_be_increasing(
-            expectation, styling, include_column_name)
-        return [prescriptive_string_object]
-
-    @classmethod
-    def expect_column_values_to_be_decreasing(cls, evr, styling=None, include_column_name=True):
-        expectation = evr["expectation_config"]
-        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_values_to_be_decreasing(
-            expectation, styling, include_column_name)
-        return [prescriptive_string_object]
-
-    @classmethod
-    def expect_column_value_lengths_to_be_between(cls, evr, styling=None, include_column_name=True):
-        expectation = evr["expectation_config"]
-        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_value_lengths_to_be_between(
-            expectation, styling, include_column_name)
-        return [prescriptive_string_object]
-
-    @classmethod
-    def expect_column_value_lengths_to_equal(cls, evr, styling=None, include_column_name=True):
-        expectation = evr["expectation_config"]
-        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_value_lengths_to_equal(
-            expectation, styling, include_column_name)
-        return [prescriptive_string_object]
-
-    @classmethod
-    def expect_column_values_to_match_regex(cls, evr, styling=None, include_column_name=True):
-        expectation = evr["expectation_config"]
-        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_values_to_match_regex(
-            expectation, styling, include_column_name)
-        return [prescriptive_string_object]
-
-    @classmethod
-    def expect_column_values_to_not_match_regex(cls, evr, styling=None, include_column_name=True):
-        expectation = evr["expectation_config"]
-        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_values_to_not_match_regex(
-            expectation, styling, include_column_name)
-        return [prescriptive_string_object]
-
-    @classmethod
-    def expect_column_values_to_match_regex_list(cls, evr, styling=None, include_column_name=True):
-        expectation = evr["expectation_config"]
-        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_values_to_match_regex_list(
-            expectation, styling, include_column_name)
-        return [prescriptive_string_object]
-
-    @classmethod
-    def expect_column_values_to_not_match_regex_list(cls, evr, styling=None, include_column_name=True):
-        expectation = evr["expectation_config"]
-        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_values_to_not_match_regex_list(
-            expectation, styling, include_column_name)
-        return [prescriptive_string_object]
-
-    @classmethod
-    def expect_column_values_to_match_strftime_format(cls, evr, styling=None, include_column_name=True):
-        expectation = evr["expectation_config"]
-        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_values_to_match_strftime_format(
-            expectation, styling, include_column_name)
-        return [prescriptive_string_object]
-
-    @classmethod
-    def expect_column_values_to_be_dateutil_parseable(cls, evr, styling=None, include_column_name=True):
-        expectation = evr["expectation_config"]
-        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_values_to_be_dateutil_parseable(
-            expectation, styling, include_column_name)
-        return [prescriptive_string_object]
-
-    @classmethod
-    def expect_column_values_to_be_json_parseable(cls, evr, styling=None, include_column_name=True):
-        expectation = evr["expectation_config"]
-        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_values_to_be_json_parseable(
-            expectation, styling, include_column_name)
-        return [prescriptive_string_object]
-
-    @classmethod
-    def expect_column_values_to_match_json_schema(cls, evr, styling=None, include_column_name=True):
-        expectation = evr["expectation_config"]
-        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_values_to_match_json_schema(
-            expectation, styling, include_column_name)
-        return [prescriptive_string_object]
-
-    @classmethod
-    def expect_column_distinct_values_to_contain_set(cls, evr, styling=None, include_column_name=True):
-        expectation = evr["expectation_config"]
-        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_distinct_values_to_contain_set(
-            expectation, styling, include_column_name)
-        return [prescriptive_string_object]
-
-    @classmethod
-    def expect_column_distinct_values_to_equal_set(cls, evr, styling=None, include_column_name=True):
-        expectation = evr["expectation_config"]
-        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_distinct_values_to_equal_set(
-            expectation, styling, include_column_name)
-        return [prescriptive_string_object]
-
-    @classmethod
-    def expect_column_mean_to_be_between(cls, evr, styling=None, include_column_name=True):
-        expectation = evr["expectation_config"]
-        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_mean_to_be_between(
-            expectation, styling, include_column_name)
-        return [prescriptive_string_object]
-
-    @classmethod
-    def expect_column_median_to_be_between(cls, evr, styling=None, include_column_name=True):
-        expectation = evr["expectation_config"]
-        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_median_to_be_between(
-            expectation, styling, include_column_name)
-        return [prescriptive_string_object]
-
-    @classmethod
-    def expect_column_stdev_to_be_between(cls, evr, styling=None, include_column_name=True):
-        expectation = evr["expectation_config"]
-        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_stdev_to_be_between(
-            expectation, styling, include_column_name)
-        return [prescriptive_string_object]
-
-    @classmethod
-    def expect_column_max_to_be_between(cls, evr, styling=None, include_column_name=True):
-        expectation = evr["expectation_config"]
-        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_max_to_be_between(
-            expectation, styling, include_column_name)
-        return [prescriptive_string_object]
-
-    @classmethod
-    def expect_column_min_to_be_between(cls, evr, styling=None, include_column_name=True):
-        expectation = evr["expectation_config"]
-        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_min_to_be_between(
-            expectation, styling, include_column_name)
-        return [prescriptive_string_object]
-
-    @classmethod
-    def expect_column_sum_to_be_between(cls, evr, styling=None, include_column_name=True):
-        expectation = evr["expectation_config"]
-        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_sum_to_be_between(
-            expectation, styling, include_column_name)
-        return [prescriptive_string_object]
-
-    @classmethod
-    def expect_column_most_common_value_to_be_in_set(cls, evr, styling=None, include_column_name=True):
-        expectation = evr["expectation_config"]
-        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_most_common_value_to_be_in_set(
-            expectation, styling, include_column_name)
-        return [prescriptive_string_object]
-
-    @classmethod
-    def expect_column_kl_divergence_to_be_less_than(cls, evr, styling=None, include_column_name=True):
-        expectation = evr["expectation_config"]
-        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_kl_divergence_to_be_less_than(
-            expectation, styling, include_column_name)
-        return [prescriptive_string_object]
-
-    @classmethod
-    def expect_column_values_to_be_unique(cls, evr, styling=None, include_column_name=True):
-        expectation = evr["expectation_config"]
-        prescriptive_string_object = super(PrescriptiveEvrTableContentBlockRenderer, cls).expect_column_values_to_be_unique(
-            expectation, styling, include_column_name)
-        return [prescriptive_string_object]
+        prescriptive_string_fn = getattr(PrescriptiveStringRenderer, expectation_type, None)
+        if prescriptive_string_fn is None:
+            prescriptive_string_fn = getattr(PrescriptiveStringRenderer, "_missing_content_block_fn")
+        
+        def row_generator_fn(_evr, styling=None, include_column_name=True):
+            prescriptive_string_obj = prescriptive_string_fn(expectation, styling, include_column_name)
+            return [[cls._get_status_icon(evr)] + prescriptive_string_obj]
+        
+        return row_generator_fn
 
 
 class PrescriptiveBulletListContentBlockRenderer(PrescriptiveStringRenderer):

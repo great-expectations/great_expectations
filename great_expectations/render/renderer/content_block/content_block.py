@@ -31,7 +31,10 @@ class ContentBlockRenderer(Renderer):
             for obj_ in render_object:
                 expectation_type = cls._get_expectation_type(obj_)
 
-                content_block_fn = getattr(cls, expectation_type, None)
+                if cls.__name__ == "PrescriptiveEvrTableContentBlockRenderer":
+                    content_block_fn = cls.generate_expectation_row(obj_, expectation_type)
+                else:
+                    content_block_fn = getattr(cls, expectation_type, None)
                 if content_block_fn is not None:
                     result = content_block_fn(
                         obj_,
