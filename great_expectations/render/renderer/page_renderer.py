@@ -34,14 +34,19 @@ class PrescriptivePageRenderer(Renderer):
         if not ordered_columns:
             ordered_columns = sorted(list(columns.keys()))
 
+        overview_content_blocks = [
+            cls._render_asset_header(expectations),
+            cls._render_asset_info(expectations)
+        ]
+        
+        asset_notes_content_block = cls._render_asset_notes(expectations)
+        if asset_notes_content_block != None:
+            overview_content_blocks += asset_notes_content_blocks
+
         sections = [
             {
                 "section_name": "Overview",
-                "content_blocks": [
-                    cls._render_asset_header(expectations),
-                    cls._render_asset_info(expectations),
-                    cls._render_asset_notes(expectations),
-                ]
+                "content_blocks": overview_content_blocks,
             }
         ]
 
@@ -104,11 +109,14 @@ class PrescriptivePageRenderer(Renderer):
 
     @classmethod
     def _render_asset_notes(cls, expectations):
+        if not "notes" in expectations["meta"]:
+            return None
+
         return {
             "content_block_type": "text",
             "header": "Notes",
             "content": [
-                "blah blah blah"
+                expectations["meta"]["notes"]
             ],
             "styling": {
                 "classes": ["col-12", "table-responsive"],
