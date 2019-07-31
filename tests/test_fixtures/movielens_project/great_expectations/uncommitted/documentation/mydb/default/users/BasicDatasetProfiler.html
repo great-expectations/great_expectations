@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Data documentation compiled by Great Expectations</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title></title>
+
+    
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"/>
+    <style>
+      body {
+        position: relative;
+      }
+      .container {
+        padding-top: 50px;
+      }
+      .sticky {
+        position: -webkit-sticky;
+        position: sticky;
+        max-height: 90vh;
+        overflow-y: auto;
+        top: 15px;
+      }
+
+      .ge-section {
+        clear:both;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+      }
+
+      .triangle {
+        border: solid #222;
+        border-width: 0 1px 1px 0;
+        display: inline;
+        cursor: pointer;
+        padding: 3px;
+        position: absolute;
+        right: 0;
+        margin-top: 10px;
+
+        transform: rotate(40deg);
+        -webkit-transform: rotate(40deg);
+        transition: .3s transform ease-in-out;
+      }
+
+      .collapsed .triangle{
+        transform: rotate(-140deg);
+        -webkit-transform: rotate(-140deg);
+        transition: .3s transform ease-in-out;
+      }
+
+      .popover {
+        max-width: 100%;
+      }
+
+      .cooltip {
+        display:inline-block;
+        position:relative;
+        text-align:left;
+        cursor:pointer;
+      }
+
+      .cooltip .top {
+        min-width:200px;
+        top:-6px;
+        left:50%;
+        transform:translate(-50%, -100%);
+        padding:10px 20px;
+        color:#FFFFFF;
+        background-color:#222222;
+        font-weight:normal;
+        font-size:13px;
+        border-radius:8px;
+        position:absolute;
+        z-index:99999999 !important;
+        box-sizing:border-box;
+        box-shadow:0 1px 8px rgba(0,0,0,0.5);
+        display:none;
+        }
+
+        .cooltip:hover .top {
+            display:block;
+        }
+
+        .cooltip .top i {
+            position:absolute;
+            top:100%;
+            left:50%;
+            margin-left:-12px;
+            width:24px;
+            height:12px;
+            overflow:hidden;
+        }
+
+        .cooltip .top i::after {
+            content:'';
+            position:absolute;
+            width:12px;
+            height:12px;
+            left:50%;
+            transform:translate(-50%,-50%) rotate(45deg);
+            background-color:#222222;
+            box-shadow:0 1px 8px rgba(0,0,0,0.5);
+        }
+
+    </style>
+
+    <script src="https://cdn.jsdelivr.net/npm/vega@5.3.5/build/vega.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-lite@3.2.1/build/vega-lite.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-embed@4.0.0/build/vega-embed.js"></script>
+  </head>
+
+  <body
+        data-spy="scroll"
+        data-target="#navigation"
+        data-offset="50"
+    >
+    
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="../../../index.html">Home</a></li>
+        
+            <li class="breadcrumb-item">mydb</li>
+        
+            <li class="breadcrumb-item">default</li>
+        
+            <li class="breadcrumb-item">users</li>
+        
+        <li class="breadcrumb-item active" aria-current="page"></li>
+    </ol>
+</nav>
+
+
+    <div class="container-fluid px-3">
+      <div class="row">
+        <div class="col-2 navbar-collapse">
+          <nav id="navigation" class="navbar navbar-light bg-light sticky d-none d-sm-block">
+    <nav class="nav nav-pills flex-column">
+        <a class="navbar-brand" href="#" style="white-space: normal; word-break: break-all;overflow-wrap: normal; font-size: 1rem; font-weight: 500;"></a>
+        
+            <a class="nav-link" href="#section-1">Overview</a>
+        
+            <a class="nav-link" href="#section-2">None</a>
+        
+            <a class="nav-link" href="#section-3">age</a>
+        
+            <a class="nav-link" href="#section-4">gender</a>
+        
+            <a class="nav-link" href="#section-5">id</a>
+        
+            <a class="nav-link" href="#section-6">occupation_id</a>
+        
+            <a class="nav-link" href="#section-7">zip_code</a>
+        
+    </nav>
+</nav>
+        </div>
+        <div class="col-md-8 col-lg-8 col-xs-12">
+        
+          <div id="section-1" class="ge-section container-fluid">
+    <div class="row">
+        
+<div id="section-1-content-block-1" class="col-12" >
+    <div id="section-1-content-block-1-header" class="alert alert-secondary" >
+        <h3>
+            Expectation Suite Overview
+        </h3></div>
+</div>
+        
+<div id="section-1-content-block-2" class="col-12 table-responsive" style="margin-top:20px;" >
+    <div id="section-1-content-block-2-header" >
+            <h4>
+                Info
+            </h4></div>
+    <table id="section-1-content-block-2-body" class="table table-sm" >
+        <tr>
+            <td id="section-1-content-block-2-cell-1-1" >Full Data Asset Identifier</td><td id="section-1-content-block-2-cell-1-2" >mydb/default/users</td></tr><tr>
+            <td id="section-1-content-block-2-cell-2-1" >Data Asset Type</td><td id="section-1-content-block-2-cell-2-2" >Dataset</td></tr><tr>
+            <td id="section-1-content-block-2-cell-3-1" >Expectation Suite Name</td><td id="section-1-content-block-2-cell-3-2" >BasicDatasetProfiler</td></tr><tr>
+            <td id="section-1-content-block-2-cell-4-1" >Great Expectations Version</td><td id="section-1-content-block-2-cell-4-2" >0.7.4__develop</td></tr></table>
+</div>
+        
+<div id="section-1-content-block-3" class="col-12 table-responsive" style="margin-top:20px;" >
+    <div id="section-1-content-block-3-header" >
+            <h4>
+                Notes
+            </h4></div>
+    <p id="section-1-content-block-3-body" class="table table-sm" >
+            blah blah blah
+        </p>
+</div>
+        
+    </div>
+</div>
+        
+          <div id="section-2" class="ge-section container-fluid">
+    <div class="row">
+        
+<div id="section-2-content-block-1" class="col-12" >
+    <div id="section-2-content-block-1-header" class="alert alert-secondary" >
+        <h3>
+            None
+        </h3></div>
+</div>
+        
+<div id="section-2-content-block-2" class="col-12" >
+    <ul id="section-2-content-block-2-body" >
+            <li >
+            <span>
+                Must have more than <span class="badge badge-secondary" >0</span> rows.
+            </span>
+        </li>
+            <li >
+            <span>
+                This table should have a list of columns in a specific order, but that order is not specified.
+            </span>
+        </li>
+            
+        </ul>
+</div>
+        
+    </div>
+</div>
+        
+          <div id="section-3" class="ge-section container-fluid">
+    <div class="row">
+        
+<div id="section-3-content-block-1" class="col-12" >
+    <div id="section-3-content-block-1-header" class="alert alert-secondary" >
+        <h3>
+            age
+        </h3></div>
+</div>
+        
+<div id="section-3-content-block-2" class="col-12" >
+    <ul id="section-3-content-block-2-body" >
+            <li >
+            <span>
+                value types must belong to this set: <span class="badge badge-secondary" >BIGINT</span> <span class="badge badge-secondary" >BYTEINT</span> <span class="badge badge-secondary" >DECIMAL</span> <span class="badge badge-secondary" >INT</span> <span class="badge badge-secondary" >INTEGER</span> <span class="badge badge-secondary" >IntegerType</span> <span class="badge badge-secondary" >LongType</span> <span class="badge badge-secondary" >SMALLINT</span> <span class="badge badge-secondary" >TINYINT</span> <span class="badge badge-secondary" >int</span>.
+            </span>
+        </li>
+            <li >
+            <span>
+                may have any number of unique values.
+            </span>
+        </li>
+            <li >
+            <span>
+                may have any percentage of unique values.
+            </span>
+        </li>
+            <li >
+            <span>
+                values must not be null, at least <span class="badge badge-secondary" >50.0</span> % of the time.
+            </span>
+        </li>
+            <li >
+            <span>
+                values must belong to a set, but that set is not specified.
+            </span>
+        </li>
+            <li >
+            <span>
+                minimum value may have any numerical value.
+            </span>
+        </li>
+            <li >
+            <span>
+                maximum value may have any numerical value.
+            </span>
+        </li>
+            <li >
+            <span>
+                mean may have any numerical value.
+            </span>
+        </li>
+            <li >
+            <span>
+                median may have any numerical value.
+            </span>
+        </li>
+            <li >
+            <span>
+                standard deviation may have any numerical value.
+            </span>
+        </li>
+            <li class="alert alert-warning" role="alert" >
+            <span>
+                <span class="badge badge-warning" >expect_column_quantile_values_to_be_between</span>(**{'column': 'age', 'quantile_ranges': {'quantiles': [0.05, 0.25, 0.5, 0.75, 0.95], 'value_ranges': [[None, None], [None, None], [None, None], [None, None], [None, None]]}, 'result_format': 'SUMMARY'})
+            </span>
+        </li>
+            <li >
+            <span>
+                Kullback-Leibler (KL) divergence with respect to a given distribution must be lower than a             provided threshold but no distribution was specified.
+            </span>
+        </li>
+            
+        </ul>
+</div>
+        
+    </div>
+</div>
+        
+          <div id="section-4" class="ge-section container-fluid">
+    <div class="row">
+        
+<div id="section-4-content-block-1" class="col-12" >
+    <div id="section-4-content-block-1-header" class="alert alert-secondary" >
+        <h3>
+            gender
+        </h3></div>
+</div>
+        
+<div id="section-4-content-block-2" class="col-12" >
+    <ul id="section-4-content-block-2-body" >
+            <li >
+            <span>
+                value types must belong to this set: <span class="badge badge-secondary" >CHAR</span> <span class="badge badge-secondary" >StringType</span> <span class="badge badge-secondary" >TEXT</span> <span class="badge badge-secondary" >VARCHAR</span> <span class="badge badge-secondary" >str</span> <span class="badge badge-secondary" >string</span>.
+            </span>
+        </li>
+            <li >
+            <span>
+                may have any number of unique values.
+            </span>
+        </li>
+            <li >
+            <span>
+                may have any percentage of unique values.
+            </span>
+        </li>
+            <li >
+            <span>
+                values must not be null, at least <span class="badge badge-secondary" >50.0</span> % of the time.
+            </span>
+        </li>
+            <li >
+            <span>
+                values must belong to a set, but that set is not specified.
+            </span>
+        </li>
+            <li >
+            <span>
+                values must not match this regular expression: <span class="badge badge-secondary" >^\s+|\s+$</span>.
+            </span>
+        </li>
+            <li >
+            <span>
+                distinct values must belong to a set, but that set is not specified.
+            </span>
+        </li>
+            
+        </ul>
+</div>
+        
+    </div>
+</div>
+        
+          <div id="section-5" class="ge-section container-fluid">
+    <div class="row">
+        
+<div id="section-5-content-block-1" class="col-12" >
+    <div id="section-5-content-block-1-header" class="alert alert-secondary" >
+        <h3>
+            id
+        </h3></div>
+</div>
+        
+<div id="section-5-content-block-2" class="col-12" >
+    <ul id="section-5-content-block-2-body" >
+            <li >
+            <span>
+                value types must belong to this set: <span class="badge badge-secondary" >BIGINT</span> <span class="badge badge-secondary" >BYTEINT</span> <span class="badge badge-secondary" >DECIMAL</span> <span class="badge badge-secondary" >INT</span> <span class="badge badge-secondary" >INTEGER</span> <span class="badge badge-secondary" >IntegerType</span> <span class="badge badge-secondary" >LongType</span> <span class="badge badge-secondary" >SMALLINT</span> <span class="badge badge-secondary" >TINYINT</span> <span class="badge badge-secondary" >int</span>.
+            </span>
+        </li>
+            <li >
+            <span>
+                may have any number of unique values.
+            </span>
+        </li>
+            <li >
+            <span>
+                may have any percentage of unique values.
+            </span>
+        </li>
+            <li >
+            <span>
+                values must not be null, at least <span class="badge badge-secondary" >50.0</span> % of the time.
+            </span>
+        </li>
+            <li >
+            <span>
+                values must belong to a set, but that set is not specified.
+            </span>
+        </li>
+            <li >
+            <span>
+                values must be unique.
+            </span>
+        </li>
+            
+        </ul>
+</div>
+        
+    </div>
+</div>
+        
+          <div id="section-6" class="ge-section container-fluid">
+    <div class="row">
+        
+<div id="section-6-content-block-1" class="col-12" >
+    <div id="section-6-content-block-1-header" class="alert alert-secondary" >
+        <h3>
+            occupation_id
+        </h3></div>
+</div>
+        
+<div id="section-6-content-block-2" class="col-12" >
+    <ul id="section-6-content-block-2-body" >
+            <li >
+            <span>
+                value types must belong to this set: <span class="badge badge-secondary" >BIGINT</span> <span class="badge badge-secondary" >BYTEINT</span> <span class="badge badge-secondary" >DECIMAL</span> <span class="badge badge-secondary" >INT</span> <span class="badge badge-secondary" >INTEGER</span> <span class="badge badge-secondary" >IntegerType</span> <span class="badge badge-secondary" >LongType</span> <span class="badge badge-secondary" >SMALLINT</span> <span class="badge badge-secondary" >TINYINT</span> <span class="badge badge-secondary" >int</span>.
+            </span>
+        </li>
+            <li >
+            <span>
+                may have any number of unique values.
+            </span>
+        </li>
+            <li >
+            <span>
+                may have any percentage of unique values.
+            </span>
+        </li>
+            <li >
+            <span>
+                values must not be null, at least <span class="badge badge-secondary" >50.0</span> % of the time.
+            </span>
+        </li>
+            <li >
+            <span>
+                values must belong to a set, but that set is not specified.
+            </span>
+        </li>
+            <li >
+            <span>
+                minimum value may have any numerical value.
+            </span>
+        </li>
+            <li >
+            <span>
+                maximum value may have any numerical value.
+            </span>
+        </li>
+            <li >
+            <span>
+                mean may have any numerical value.
+            </span>
+        </li>
+            <li >
+            <span>
+                median may have any numerical value.
+            </span>
+        </li>
+            <li >
+            <span>
+                standard deviation may have any numerical value.
+            </span>
+        </li>
+            <li class="alert alert-warning" role="alert" >
+            <span>
+                <span class="badge badge-warning" >expect_column_quantile_values_to_be_between</span>(**{'column': 'occupation_id', 'quantile_ranges': {'quantiles': [0.05, 0.25, 0.5, 0.75, 0.95], 'value_ranges': [[None, None], [None, None], [None, None], [None, None], [None, None]]}, 'result_format': 'SUMMARY'})
+            </span>
+        </li>
+            <li >
+            <span>
+                Kullback-Leibler (KL) divergence with respect to a given distribution must be lower than a             provided threshold but no distribution was specified.
+            </span>
+        </li>
+            
+        </ul>
+</div>
+        
+    </div>
+</div>
+        
+          <div id="section-7" class="ge-section container-fluid">
+    <div class="row">
+        
+<div id="section-7-content-block-1" class="col-12" >
+    <div id="section-7-content-block-1-header" class="alert alert-secondary" >
+        <h3>
+            zip_code
+        </h3></div>
+</div>
+        
+<div id="section-7-content-block-2" class="col-12" >
+    <ul id="section-7-content-block-2-body" >
+            <li >
+            <span>
+                value types must belong to this set: <span class="badge badge-secondary" >CHAR</span> <span class="badge badge-secondary" >StringType</span> <span class="badge badge-secondary" >TEXT</span> <span class="badge badge-secondary" >VARCHAR</span> <span class="badge badge-secondary" >str</span> <span class="badge badge-secondary" >string</span>.
+            </span>
+        </li>
+            <li >
+            <span>
+                may have any number of unique values.
+            </span>
+        </li>
+            <li >
+            <span>
+                may have any percentage of unique values.
+            </span>
+        </li>
+            <li >
+            <span>
+                values must not be null, at least <span class="badge badge-secondary" >50.0</span> % of the time.
+            </span>
+        </li>
+            <li >
+            <span>
+                values must belong to a set, but that set is not specified.
+            </span>
+        </li>
+            <li >
+            <span>
+                values must not match this regular expression: <span class="badge badge-secondary" >^\s+|\s+$</span>.
+            </span>
+        </li>
+            
+        </ul>
+</div>
+        
+    </div>
+</div>
+        
+        </div>
+        <div class="col-lg-2 col-md-2 col-xs-12 d-none d-md-block">
+              <div style="">
+    <div class="col-12">
+      <div class="row">
+        <img                src="https://great-expectations.readthedocs.io/en/latest/_images/generic_dickens_protagonist.png"
+          style="
+            width: 200px;
+            margin-left: auto;
+            margin-right: auto;
+          ">
+      </div>
+    </div>
+    <div class="col-12">
+      <p>
+        Documentation autogenerated using
+        <a href="https://greatexpectations.io">
+          Great Expectations
+        </a>.
+      </p>
+    </div>
+    <div class="alert alert-danger col-12" role="alert">
+        This is a beta feature! Expect changes in API, behavior, and design.
+    </div>
+  </div>
+  </div>
+        </div>
+        <div class="d-block d-sm-none col-12">
+            <div>
+              <div class="row">
+                <img
+                  src="https://great-expectations.readthedocs.io/en/latest/_images/generic_dickens_protagonist.png"
+                  style="
+                    width: 200px;
+                    margin-left: auto;
+                    margin-right: auto;
+                  ">
+              </div>
+            </div>
+            <div class="col-12">
+              <p>
+                Documentation autogenerated using
+                <a href="https://greatexpectations.io">
+                  Great Expectations
+                </a>.
+              </p>
+            </div>
+            <div class="alert alert-danger col-12" role="alert">
+                This is a beta feature! Expect changes in API, behavior, and design.
+            </div>
+          </div>
+
+      </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.15.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+  </body>
+</html>

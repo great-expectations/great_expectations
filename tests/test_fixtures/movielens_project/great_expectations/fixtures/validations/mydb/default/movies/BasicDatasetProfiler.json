@@ -1,0 +1,848 @@
+{
+  "results": [
+    {
+      "success": true,
+      "result": {
+        "observed_value": 1682
+      },
+      "exception_info": {
+        "raised_exception": false,
+        "exception_message": null,
+        "exception_traceback": null
+      },
+      "expectation_config": {
+        "expectation_type": "expect_table_row_count_to_be_between",
+        "kwargs": {
+          "min_value": 0,
+          "max_value": null,
+          "result_format": "SUMMARY"
+        },
+        "meta": {
+          "BasicDatasetProfiler": {
+            "confidence": "very low"
+          }
+        }
+      }
+    },
+    {
+      "success": true,
+      "result": {
+        "observed_value": [
+          "id",
+          "title",
+          "release_date"
+        ]
+      },
+      "exception_info": {
+        "raised_exception": false,
+        "exception_message": null,
+        "exception_traceback": null
+      },
+      "expectation_config": {
+        "expectation_type": "expect_table_columns_to_match_ordered_list",
+        "kwargs": {
+          "column_list": null,
+          "result_format": "SUMMARY"
+        },
+        "meta": {
+          "BasicDatasetProfiler": {
+            "confidence": "very low"
+          }
+        }
+      }
+    },
+    {
+      "success": true,
+      "result": {
+        "observed_value": "INTEGER"
+      },
+      "exception_info": {
+        "raised_exception": false,
+        "exception_message": null,
+        "exception_traceback": null
+      },
+      "expectation_config": {
+        "expectation_type": "expect_column_values_to_be_in_type_list",
+        "kwargs": {
+          "column": "id",
+          "type_list": [
+            "BIGINT",
+            "BYTEINT",
+            "DECIMAL",
+            "INT",
+            "INTEGER",
+            "IntegerType",
+            "LongType",
+            "SMALLINT",
+            "TINYINT",
+            "int"
+          ],
+          "result_format": "SUMMARY"
+        },
+        "meta": {
+          "BasicDatasetProfiler": {
+            "confidence": "very low"
+          }
+        }
+      }
+    },
+    {
+      "success": true,
+      "result": {
+        "observed_value": 1682,
+        "element_count": 1682,
+        "missing_count": 0,
+        "missing_percent": 0.0
+      },
+      "exception_info": {
+        "raised_exception": false,
+        "exception_message": null,
+        "exception_traceback": null
+      },
+      "expectation_config": {
+        "expectation_type": "expect_column_unique_value_count_to_be_between",
+        "kwargs": {
+          "column": "id",
+          "min_value": null,
+          "max_value": null,
+          "result_format": "SUMMARY"
+        },
+        "meta": {
+          "BasicDatasetProfiler": {
+            "confidence": "very low"
+          }
+        }
+      }
+    },
+    {
+      "success": true,
+      "result": {
+        "observed_value": 1.0,
+        "element_count": 1682,
+        "missing_count": 0,
+        "missing_percent": 0.0
+      },
+      "exception_info": {
+        "raised_exception": false,
+        "exception_message": null,
+        "exception_traceback": null
+      },
+      "expectation_config": {
+        "expectation_type": "expect_column_proportion_of_unique_values_to_be_between",
+        "kwargs": {
+          "column": "id",
+          "min_value": null,
+          "max_value": null,
+          "result_format": "SUMMARY"
+        },
+        "meta": {
+          "BasicDatasetProfiler": {
+            "confidence": "very low"
+          }
+        }
+      }
+    },
+    {
+      "success": true,
+      "result": {
+        "element_count": 1682,
+        "missing_count": 0,
+        "missing_percent": 0.0,
+        "unexpected_count": 0,
+        "unexpected_percent": 0.0,
+        "partial_unexpected_list": []
+      },
+      "exception_info": {
+        "raised_exception": false,
+        "exception_message": null,
+        "exception_traceback": null
+      },
+      "expectation_config": {
+        "expectation_type": "expect_column_values_to_not_be_null",
+        "kwargs": {
+          "column": "id",
+          "mostly": 0.5,
+          "result_format": "SUMMARY"
+        },
+        "meta": {
+          "BasicDatasetProfiler": {
+            "confidence": "very low"
+          }
+        }
+      }
+    },
+    {
+      "success": false,
+      "result": {
+        "element_count": 1682,
+        "missing_count": 0,
+        "missing_percent": 0.0,
+        "unexpected_count": 1682,
+        "unexpected_percent": 1.0,
+        "unexpected_percent_nonmissing": 1.0,
+        "partial_unexpected_list": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20
+        ],
+        "partial_unexpected_index_list": null,
+        "partial_unexpected_counts": [
+          {
+            "value": 1,
+            "count": 1
+          },
+          {
+            "value": 2,
+            "count": 1
+          },
+          {
+            "value": 3,
+            "count": 1
+          },
+          {
+            "value": 4,
+            "count": 1
+          },
+          {
+            "value": 5,
+            "count": 1
+          },
+          {
+            "value": 6,
+            "count": 1
+          },
+          {
+            "value": 7,
+            "count": 1
+          },
+          {
+            "value": 8,
+            "count": 1
+          },
+          {
+            "value": 9,
+            "count": 1
+          },
+          {
+            "value": 10,
+            "count": 1
+          },
+          {
+            "value": 11,
+            "count": 1
+          },
+          {
+            "value": 12,
+            "count": 1
+          },
+          {
+            "value": 13,
+            "count": 1
+          },
+          {
+            "value": 14,
+            "count": 1
+          },
+          {
+            "value": 15,
+            "count": 1
+          },
+          {
+            "value": 16,
+            "count": 1
+          },
+          {
+            "value": 17,
+            "count": 1
+          },
+          {
+            "value": 18,
+            "count": 1
+          },
+          {
+            "value": 19,
+            "count": 1
+          },
+          {
+            "value": 20,
+            "count": 1
+          }
+        ]
+      },
+      "exception_info": {
+        "raised_exception": false,
+        "exception_message": null,
+        "exception_traceback": null
+      },
+      "expectation_config": {
+        "expectation_type": "expect_column_values_to_be_in_set",
+        "kwargs": {
+          "column": "id",
+          "value_set": [],
+          "result_format": "SUMMARY"
+        },
+        "meta": {
+          "BasicDatasetProfiler": {
+            "confidence": "very low"
+          }
+        }
+      }
+    },
+    {
+      "success": true,
+      "result": {
+        "element_count": 1682,
+        "missing_count": 0,
+        "missing_percent": 0.0,
+        "unexpected_count": 0,
+        "unexpected_percent": 0.0,
+        "unexpected_percent_nonmissing": 0.0,
+        "partial_unexpected_list": [],
+        "partial_unexpected_index_list": null,
+        "partial_unexpected_counts": []
+      },
+      "exception_info": {
+        "raised_exception": false,
+        "exception_message": null,
+        "exception_traceback": null
+      },
+      "expectation_config": {
+        "expectation_type": "expect_column_values_to_be_unique",
+        "kwargs": {
+          "column": "id",
+          "result_format": "SUMMARY"
+        },
+        "meta": {
+          "BasicDatasetProfiler": {
+            "confidence": "very low"
+          }
+        }
+      }
+    },
+    {
+      "success": true,
+      "result": {
+        "observed_value": "VARCHAR"
+      },
+      "exception_info": {
+        "raised_exception": false,
+        "exception_message": null,
+        "exception_traceback": null
+      },
+      "expectation_config": {
+        "expectation_type": "expect_column_values_to_be_in_type_list",
+        "kwargs": {
+          "column": "title",
+          "type_list": [
+            "CHAR",
+            "StringType",
+            "TEXT",
+            "VARCHAR",
+            "str",
+            "string"
+          ],
+          "result_format": "SUMMARY"
+        },
+        "meta": {
+          "BasicDatasetProfiler": {
+            "confidence": "very low"
+          }
+        }
+      }
+    },
+    {
+      "success": true,
+      "result": {
+        "observed_value": 1664,
+        "element_count": 1682,
+        "missing_count": 0,
+        "missing_percent": 0.0
+      },
+      "exception_info": {
+        "raised_exception": false,
+        "exception_message": null,
+        "exception_traceback": null
+      },
+      "expectation_config": {
+        "expectation_type": "expect_column_unique_value_count_to_be_between",
+        "kwargs": {
+          "column": "title",
+          "min_value": null,
+          "max_value": null,
+          "result_format": "SUMMARY"
+        },
+        "meta": {
+          "BasicDatasetProfiler": {
+            "confidence": "very low"
+          }
+        }
+      }
+    },
+    {
+      "success": true,
+      "result": {
+        "observed_value": 0.9892984542211652,
+        "element_count": 1682,
+        "missing_count": 0,
+        "missing_percent": 0.0
+      },
+      "exception_info": {
+        "raised_exception": false,
+        "exception_message": null,
+        "exception_traceback": null
+      },
+      "expectation_config": {
+        "expectation_type": "expect_column_proportion_of_unique_values_to_be_between",
+        "kwargs": {
+          "column": "title",
+          "min_value": null,
+          "max_value": null,
+          "result_format": "SUMMARY"
+        },
+        "meta": {
+          "BasicDatasetProfiler": {
+            "confidence": "very low"
+          }
+        }
+      }
+    },
+    {
+      "success": true,
+      "result": {
+        "element_count": 1682,
+        "missing_count": 0,
+        "missing_percent": 0.0,
+        "unexpected_count": 0,
+        "unexpected_percent": 0.0,
+        "partial_unexpected_list": []
+      },
+      "exception_info": {
+        "raised_exception": false,
+        "exception_message": null,
+        "exception_traceback": null
+      },
+      "expectation_config": {
+        "expectation_type": "expect_column_values_to_not_be_null",
+        "kwargs": {
+          "column": "title",
+          "mostly": 0.5,
+          "result_format": "SUMMARY"
+        },
+        "meta": {
+          "BasicDatasetProfiler": {
+            "confidence": "very low"
+          }
+        }
+      }
+    },
+    {
+      "success": false,
+      "result": {
+        "element_count": 1682,
+        "missing_count": 0,
+        "missing_percent": 0.0,
+        "unexpected_count": 1682,
+        "unexpected_percent": 1.0,
+        "unexpected_percent_nonmissing": 1.0,
+        "partial_unexpected_list": [
+          "Toy Story (1995)",
+          "GoldenEye (1995)",
+          "Four Rooms (1995)",
+          "Get Shorty (1995)",
+          "Copycat (1995)",
+          "Shanghai Triad (Yao a yao yao dao waipo qiao) (1995)",
+          "Twelve Monkeys (1995)",
+          "Babe (1995)",
+          "Dead Man Walking (1995)",
+          "Richard III (1995)",
+          "Seven (Se7en) (1995)",
+          "Usual Suspects, The (1995)",
+          "Mighty Aphrodite (1995)",
+          "Postino, Il (1994)",
+          "Mr. Holland's Opus (1995)",
+          "French Twist (Gazon maudit) (1995)",
+          "From Dusk Till Dawn (1996)",
+          "White Balloon, The (1995)",
+          "Antonia's Line (1995)",
+          "Angels and Insects (1995)"
+        ],
+        "partial_unexpected_index_list": null,
+        "partial_unexpected_counts": [
+          {
+            "value": "Angels and Insects (1995)",
+            "count": 1
+          },
+          {
+            "value": "Antonia's Line (1995)",
+            "count": 1
+          },
+          {
+            "value": "Babe (1995)",
+            "count": 1
+          },
+          {
+            "value": "Copycat (1995)",
+            "count": 1
+          },
+          {
+            "value": "Dead Man Walking (1995)",
+            "count": 1
+          },
+          {
+            "value": "Four Rooms (1995)",
+            "count": 1
+          },
+          {
+            "value": "French Twist (Gazon maudit) (1995)",
+            "count": 1
+          },
+          {
+            "value": "From Dusk Till Dawn (1996)",
+            "count": 1
+          },
+          {
+            "value": "Get Shorty (1995)",
+            "count": 1
+          },
+          {
+            "value": "GoldenEye (1995)",
+            "count": 1
+          },
+          {
+            "value": "Mighty Aphrodite (1995)",
+            "count": 1
+          },
+          {
+            "value": "Mr. Holland's Opus (1995)",
+            "count": 1
+          },
+          {
+            "value": "Postino, Il (1994)",
+            "count": 1
+          },
+          {
+            "value": "Richard III (1995)",
+            "count": 1
+          },
+          {
+            "value": "Seven (Se7en) (1995)",
+            "count": 1
+          },
+          {
+            "value": "Shanghai Triad (Yao a yao yao dao waipo qiao) (1995)",
+            "count": 1
+          },
+          {
+            "value": "Toy Story (1995)",
+            "count": 1
+          },
+          {
+            "value": "Twelve Monkeys (1995)",
+            "count": 1
+          },
+          {
+            "value": "Usual Suspects, The (1995)",
+            "count": 1
+          },
+          {
+            "value": "White Balloon, The (1995)",
+            "count": 1
+          }
+        ]
+      },
+      "exception_info": {
+        "raised_exception": false,
+        "exception_message": null,
+        "exception_traceback": null
+      },
+      "expectation_config": {
+        "expectation_type": "expect_column_values_to_be_in_set",
+        "kwargs": {
+          "column": "title",
+          "value_set": [],
+          "result_format": "SUMMARY"
+        },
+        "meta": {
+          "BasicDatasetProfiler": {
+            "confidence": "very low"
+          }
+        }
+      }
+    },
+    {
+      "success": false,
+      "result": {
+        "element_count": 1682,
+        "missing_count": 0,
+        "missing_percent": 0.0,
+        "unexpected_count": 3,
+        "unexpected_percent": 0.0017835909631391202,
+        "unexpected_percent_nonmissing": 0.0017835909631391202,
+        "partial_unexpected_list": [
+          "Heidi Fleiss: Hollywood Madam (1995) ",
+          "Marlene Dietrich: Shadow and Light (1996) ",
+          "Two Friends (1986) "
+        ],
+        "partial_unexpected_index_list": null,
+        "partial_unexpected_counts": [
+          {
+            "value": "Heidi Fleiss: Hollywood Madam (1995) ",
+            "count": 1
+          },
+          {
+            "value": "Marlene Dietrich: Shadow and Light (1996) ",
+            "count": 1
+          },
+          {
+            "value": "Two Friends (1986) ",
+            "count": 1
+          }
+        ]
+      },
+      "exception_info": {
+        "raised_exception": false,
+        "exception_message": null,
+        "exception_traceback": null
+      },
+      "expectation_config": {
+        "expectation_type": "expect_column_values_to_not_match_regex",
+        "kwargs": {
+          "column": "title",
+          "regex": "^\\s+|\\s+$",
+          "result_format": "SUMMARY"
+        },
+        "meta": {
+          "BasicDatasetProfiler": {
+            "confidence": "very low"
+          }
+        }
+      }
+    },
+    {
+      "success": true,
+      "result": {
+        "observed_value": "DATE"
+      },
+      "exception_info": {
+        "raised_exception": false,
+        "exception_message": null,
+        "exception_traceback": null
+      },
+      "expectation_config": {
+        "expectation_type": "expect_column_values_to_be_in_type_list",
+        "kwargs": {
+          "column": "release_date",
+          "type_list": null,
+          "result_format": "SUMMARY"
+        },
+        "meta": {
+          "BasicDatasetProfiler": {
+            "confidence": "very low"
+          }
+        }
+      }
+    },
+    {
+      "success": true,
+      "result": {
+        "observed_value": 240,
+        "element_count": 1682,
+        "missing_count": 1,
+        "missing_percent": 0.0005945303210463733
+      },
+      "exception_info": {
+        "raised_exception": false,
+        "exception_message": null,
+        "exception_traceback": null
+      },
+      "expectation_config": {
+        "expectation_type": "expect_column_unique_value_count_to_be_between",
+        "kwargs": {
+          "column": "release_date",
+          "min_value": null,
+          "max_value": null,
+          "result_format": "SUMMARY"
+        },
+        "meta": {
+          "BasicDatasetProfiler": {
+            "confidence": "very low"
+          }
+        }
+      }
+    },
+    {
+      "success": true,
+      "result": {
+        "observed_value": 0.14277215942891136,
+        "element_count": 1682,
+        "missing_count": 1,
+        "missing_percent": 0.0005945303210463733
+      },
+      "exception_info": {
+        "raised_exception": false,
+        "exception_message": null,
+        "exception_traceback": null
+      },
+      "expectation_config": {
+        "expectation_type": "expect_column_proportion_of_unique_values_to_be_between",
+        "kwargs": {
+          "column": "release_date",
+          "min_value": null,
+          "max_value": null,
+          "result_format": "SUMMARY"
+        },
+        "meta": {
+          "BasicDatasetProfiler": {
+            "confidence": "very low"
+          }
+        }
+      }
+    },
+    {
+      "success": true,
+      "result": {
+        "element_count": 1682,
+        "missing_count": 0,
+        "missing_percent": 0.0,
+        "unexpected_count": 1,
+        "unexpected_percent": 0.0005945303210463733,
+        "partial_unexpected_list": []
+      },
+      "exception_info": {
+        "raised_exception": false,
+        "exception_message": null,
+        "exception_traceback": null
+      },
+      "expectation_config": {
+        "expectation_type": "expect_column_values_to_not_be_null",
+        "kwargs": {
+          "column": "release_date",
+          "mostly": 0.5,
+          "result_format": "SUMMARY"
+        },
+        "meta": {
+          "BasicDatasetProfiler": {
+            "confidence": "very low"
+          }
+        }
+      }
+    },
+    {
+      "success": false,
+      "result": {
+        "element_count": 1682,
+        "missing_count": 1,
+        "missing_percent": 0.0005945303210463733,
+        "unexpected_count": 1681,
+        "unexpected_percent": 0.9994054696789536,
+        "unexpected_percent_nonmissing": 1.0,
+        "partial_unexpected_list": [
+          "1995-01-01",
+          "1995-01-01",
+          "1995-01-01",
+          "1995-01-01",
+          "1995-01-01",
+          "1995-01-01",
+          "1995-01-01",
+          "1995-01-01",
+          "1995-01-01",
+          "1996-01-22",
+          "1995-01-01",
+          "1995-08-14",
+          "1995-10-30",
+          "1994-01-01",
+          "1996-01-29",
+          "1995-01-01",
+          "1996-02-05",
+          "1995-01-01",
+          "1995-01-01",
+          "1995-01-01"
+        ],
+        "partial_unexpected_index_list": null,
+        "partial_unexpected_counts": [
+          {
+            "value": "1995-01-01",
+            "count": 14
+          },
+          {
+            "value": "1994-01-01",
+            "count": 1
+          },
+          {
+            "value": "1995-08-14",
+            "count": 1
+          },
+          {
+            "value": "1995-10-30",
+            "count": 1
+          },
+          {
+            "value": "1996-01-22",
+            "count": 1
+          },
+          {
+            "value": "1996-01-29",
+            "count": 1
+          },
+          {
+            "value": "1996-02-05",
+            "count": 1
+          }
+        ]
+      },
+      "exception_info": {
+        "raised_exception": false,
+        "exception_message": null,
+        "exception_traceback": null
+      },
+      "expectation_config": {
+        "expectation_type": "expect_column_values_to_be_in_set",
+        "kwargs": {
+          "column": "release_date",
+          "value_set": [],
+          "result_format": "SUMMARY"
+        },
+        "meta": {
+          "BasicDatasetProfiler": {
+            "confidence": "very low"
+          }
+        }
+      }
+    }
+  ],
+  "success": false,
+  "statistics": {
+    "evaluated_expectations": 19,
+    "successful_expectations": 15,
+    "unsuccessful_expectations": 4,
+    "success_percent": 78.94736842105263
+  },
+  "meta": {
+    "great_expectations.__version__": "0.7.4__develop",
+    "data_asset_name": "mydb/default/movies",
+    "expectation_suite_name": "BasicDatasetProfiler",
+    "run_id": "2019-07-31T110807.793113Z",
+    "batch_kwargs": {
+      "table": "movies",
+      "schema": "public",
+      "timestamp": 1564592915.522696
+    }
+  }
+}

@@ -11,13 +11,7 @@ from .other_section_renderer import (
 class PrescriptivePageRenderer(Renderer):
 
     @classmethod
-    def render(cls, expectations):
-        full_data_asset_identifier = expectations.get("data_asset_name") or ""
-        short_data_asset_name = full_data_asset_identifier.split('/')[-1]
-        data_asset_type = expectations.get("data_asset_type")
-        expectation_suite_name = expectations.get("expectation_suite_name")
-        ge_version = expectations["meta"]["great_expectations.__version__"]
-        
+    def render(cls, expectations):        
         # Group expectations by column
         columns = {}
         ordered_columns = None
@@ -44,50 +38,87 @@ class PrescriptivePageRenderer(Renderer):
             {
                 "section_name": "Overview",
                 "content_blocks": [
-                    {
-                        "content_block_type": "header",
-                        "header": "Expectation Suite Overview",
-                        "styling": {
-                            "classes": ["col-12"],
-                            "header": {
-                                "classes": ["alert", "alert-secondary"]
-                            }
-                        }
-                    },
-                    {
-                        "content_block_type": "table",
-                        "header": "Info",
-                        "table_rows": [
-                            ["Full Data Asset Identifier", full_data_asset_identifier],
-                            ["Data Asset Type", data_asset_type],
-                            ["Expectation Suite Name", expectation_suite_name],
-                            ["Great Expectations Version", ge_version]
-                        ],
-                        "styling": {
-                            "classes": ["col-12", "table-responsive"],
-                            "styles": {
-                                "margin-top": "20px"
-                            },
-                            "body": {
-                                "classes": ["table", "table-sm"]
-                            }
-                        },
-                    }
+                    cls._render_asset_header(expectations),
+                    cls._render_asset_info(expectations),
+                    cls._render_asset_notes(expectations),
                 ]
             }
         ]
 
         sections += [
-                PrescriptiveColumnSectionRenderer.render(columns[column]) for column in ordered_columns
-            ]
+            PrescriptiveColumnSectionRenderer.render(columns[column]) for column in ordered_columns
+        ]
+
+        full_data_asset_identifier = expectations.get("data_asset_name") or ""
 
         return {
-            "renderer_type": "PrescriptivePageRenderer",
-            "data_asset_name": short_data_asset_name,
+            # "renderer_type": "PrescriptivePageRenderer",
+            # "data_asset_name": short_data_asset_name,
             "full_data_asset_identifier": full_data_asset_identifier,
-            "page_title": expectation_suite_name,
-            "utm_medium": "prescriptive-expectation-suite-page",
+            # "page_title": expectation_suite_name,
+            # "utm_medium": "prescriptive-expectation-suite-page",
             "sections": sections
+        }
+
+    @classmethod
+    def _render_asset_header(cls, expectations):
+        return {
+            "content_block_type": "header",
+            "header": "Expectation Suite Overview",
+            "styling": {
+                "classes": ["col-12"],
+                "header": {
+                    "classes": ["alert", "alert-secondary"]
+                }
+            }
+        }
+
+    @classmethod
+    def _render_asset_info(cls, expectations):
+
+        full_data_asset_identifier = expectations.get("data_asset_name") or ""
+        short_data_asset_name = full_data_asset_identifier.split('/')[-1]
+        data_asset_type = expectations.get("data_asset_type")
+        expectation_suite_name = expectations.get("expectation_suite_name")
+        ge_version = expectations["meta"]["great_expectations.__version__"]
+
+        return {
+            "content_block_type": "table",
+            "header": "Info",
+            "table_rows": [
+                ["Full Data Asset Identifier", full_data_asset_identifier],
+                ["Data Asset Type", data_asset_type],
+                ["Expectation Suite Name", expectation_suite_name],
+                ["Great Expectations Version", ge_version]
+            ],
+            "styling": {
+                "classes": ["col-12", "table-responsive"],
+                "styles": {
+                    "margin-top": "20px"
+                },
+                "body": {
+                    "classes": ["table", "table-sm"]
+                }
+            },
+        }
+
+    @classmethod
+    def _render_asset_notes(cls, expectations):
+        return {
+            "content_block_type": "text",
+            "header": "Notes",
+            "content": [
+                "blah blah blah"
+            ],
+            "styling": {
+                "classes": ["col-12", "table-responsive"],
+                "styles": {
+                    "margin-top": "20px"
+                },
+                "body": {
+                    "classes": ["table", "table-sm"]
+                }
+            },
         }
 
 
