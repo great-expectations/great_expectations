@@ -1,6 +1,8 @@
 import pytest
+import shutil
 
 import json
+import os
 from collections import OrderedDict
 
 import great_expectations as ge
@@ -14,6 +16,7 @@ from great_expectations.render.view import DefaultJinjaPageView
 from great_expectations.render.renderer.content_block import ValueListContentBlockRenderer
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 
+from great_expectations.data_context.util import safe_mmkdir
 
 @pytest.fixture(scope="module")
 def titanic_validation_results():
@@ -43,6 +46,14 @@ def tetanus_varicella_basic_dataset_profiler_evrs_with_exception():
 def tetanus_varicella_basic_dataset_profiler_expectations():
     with open('./tests/render/fixtures/BasicDatasetProfiler_expectations.json', 'r') as infile:
         return json.load(infile, object_pairs_hook=OrderedDict)
+
+@pytest.fixture(scope="module")
+def movielens_project_dir(tmp_path_factory):
+    source_path = './tests/test_fixtures/movielens_project/great_expectations/'
+    project_path = str(tmp_path_factory.mktemp('movielens_project'))
+    project_ge_config_path = os.path.join(project_path, "great_expectations")
+    shutil.copytree(source_path, project_ge_config_path)
+    return project_ge_config_path
 
 
 @pytest.mark.smoketest
@@ -161,3 +172,12 @@ def test_full_oobe_flow():
     assert rendered_page[:15] == "<!DOCTYPE html>"
     assert rendered_page[-7:] == "</html>"
 
+
+@pytest.mark.smoketest
+def test_movielens_rendering(movielens_project_dir):
+    context = ge.DataContext(movielens_project_dir)
+    context.build_documentation()
+    # with open('./tests/render/output/test_full_oobe_flow.html', 'w') as f:
+    #     f.write(rendered_page)
+
+    pass

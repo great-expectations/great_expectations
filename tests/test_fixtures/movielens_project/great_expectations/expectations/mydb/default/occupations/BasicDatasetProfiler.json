@@ -1,0 +1,233 @@
+{
+  "data_asset_name": "mydb/default/occupations",
+  "expectation_suite_name": "BasicDatasetProfiler",
+  "meta": {
+    "great_expectations.__version__": "0.7.4__develop",
+    "BasicDatasetProfiler": {
+      "created_by": "BasicDatasetProfiler",
+      "created_at": 1564592946.47616,
+      "batch_kwargs": {
+        "table": "occupations",
+        "schema": "public",
+        "timestamp": 1564592943.2623308
+      }
+    }
+  },
+  "expectations": [
+    {
+      "expectation_type": "expect_table_row_count_to_be_between",
+      "kwargs": {
+        "min_value": 0,
+        "max_value": null,
+        "result_format": "SUMMARY"
+      },
+      "meta": {
+        "BasicDatasetProfiler": {
+          "confidence": "very low"
+        }
+      }
+    },
+    {
+      "expectation_type": "expect_table_columns_to_match_ordered_list",
+      "kwargs": {
+        "column_list": null,
+        "result_format": "SUMMARY"
+      },
+      "meta": {
+        "BasicDatasetProfiler": {
+          "confidence": "very low"
+        }
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_in_type_list",
+      "kwargs": {
+        "column": "id",
+        "type_list": [
+          "BIGINT",
+          "BYTEINT",
+          "DECIMAL",
+          "INT",
+          "INTEGER",
+          "IntegerType",
+          "LongType",
+          "SMALLINT",
+          "TINYINT",
+          "int"
+        ],
+        "result_format": "SUMMARY"
+      },
+      "meta": {
+        "BasicDatasetProfiler": {
+          "confidence": "very low"
+        }
+      }
+    },
+    {
+      "expectation_type": "expect_column_unique_value_count_to_be_between",
+      "kwargs": {
+        "column": "id",
+        "min_value": null,
+        "max_value": null,
+        "result_format": "SUMMARY"
+      },
+      "meta": {
+        "BasicDatasetProfiler": {
+          "confidence": "very low"
+        }
+      }
+    },
+    {
+      "expectation_type": "expect_column_proportion_of_unique_values_to_be_between",
+      "kwargs": {
+        "column": "id",
+        "min_value": null,
+        "max_value": null,
+        "result_format": "SUMMARY"
+      },
+      "meta": {
+        "BasicDatasetProfiler": {
+          "confidence": "very low"
+        }
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": {
+        "column": "id",
+        "mostly": 0.5,
+        "result_format": "SUMMARY"
+      },
+      "meta": {
+        "BasicDatasetProfiler": {
+          "confidence": "very low"
+        }
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_in_set",
+      "kwargs": {
+        "column": "id",
+        "value_set": [],
+        "result_format": "SUMMARY"
+      },
+      "meta": {
+        "BasicDatasetProfiler": {
+          "confidence": "very low"
+        }
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_unique",
+      "kwargs": {
+        "column": "id",
+        "result_format": "SUMMARY"
+      },
+      "meta": {
+        "BasicDatasetProfiler": {
+          "confidence": "very low"
+        }
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_in_type_list",
+      "kwargs": {
+        "column": "name",
+        "type_list": [
+          "CHAR",
+          "StringType",
+          "TEXT",
+          "VARCHAR",
+          "str",
+          "string"
+        ],
+        "result_format": "SUMMARY"
+      },
+      "meta": {
+        "BasicDatasetProfiler": {
+          "confidence": "very low"
+        }
+      }
+    },
+    {
+      "expectation_type": "expect_column_unique_value_count_to_be_between",
+      "kwargs": {
+        "column": "name",
+        "min_value": null,
+        "max_value": null,
+        "result_format": "SUMMARY"
+      },
+      "meta": {
+        "BasicDatasetProfiler": {
+          "confidence": "very low"
+        }
+      }
+    },
+    {
+      "expectation_type": "expect_column_proportion_of_unique_values_to_be_between",
+      "kwargs": {
+        "column": "name",
+        "min_value": null,
+        "max_value": null,
+        "result_format": "SUMMARY"
+      },
+      "meta": {
+        "BasicDatasetProfiler": {
+          "confidence": "very low"
+        }
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": {
+        "column": "name",
+        "mostly": 0.5,
+        "result_format": "SUMMARY"
+      },
+      "meta": {
+        "BasicDatasetProfiler": {
+          "confidence": "very low"
+        }
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_in_set",
+      "kwargs": {
+        "column": "name",
+        "value_set": [],
+        "result_format": "SUMMARY"
+      },
+      "meta": {
+        "BasicDatasetProfiler": {
+          "confidence": "very low"
+        }
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_not_match_regex",
+      "kwargs": {
+        "column": "name",
+        "regex": "^\\s+|\\s+$",
+        "result_format": "SUMMARY"
+      },
+      "meta": {
+        "BasicDatasetProfiler": {
+          "confidence": "very low"
+        }
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_unique",
+      "kwargs": {
+        "column": "name",
+        "result_format": "SUMMARY"
+      },
+      "meta": {
+        "BasicDatasetProfiler": {
+          "confidence": "very low"
+        }
+      }
+    }
+  ],
+  "data_asset_type": "Dataset"
+}
