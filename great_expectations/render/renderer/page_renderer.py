@@ -11,7 +11,7 @@ from .other_section_renderer import (
 class PrescriptivePageRenderer(Renderer):
 
     @classmethod
-    def render(cls, expectations):        
+    def render(cls, expectations):
         # Group expectations by column
         columns = {}
         ordered_columns = None
