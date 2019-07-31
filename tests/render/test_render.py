@@ -180,4 +180,4 @@ def test_movielens_rendering(movielens_project_dir):
 
 
     print(movielens_project_dir)
-    # assert False
+    assert False

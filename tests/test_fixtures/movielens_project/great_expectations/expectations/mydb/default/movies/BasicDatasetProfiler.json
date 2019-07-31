@@ -11,7 +11,8 @@
         "schema": "public",
         "timestamp": 1564592915.522696
       }
-    }
+    },
+    "notes": "Notes go here"
   },
   "expectations": [
     {

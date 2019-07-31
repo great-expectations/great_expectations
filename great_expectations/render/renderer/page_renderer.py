@@ -41,7 +41,7 @@ class PrescriptivePageRenderer(Renderer):
         
         asset_notes_content_block = cls._render_asset_notes(expectations)
         if asset_notes_content_block != None:
-            overview_content_blocks += asset_notes_content_blocks
+            overview_content_blocks += asset_notes_content_block
 
         sections = [
             {
