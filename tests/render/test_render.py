@@ -176,8 +176,8 @@ def test_full_oobe_flow():
 @pytest.mark.smoketest
 def test_movielens_rendering(movielens_project_dir):
     context = ge.DataContext(movielens_project_dir)
-    context.build_documentation()
-    # with open('./tests/render/output/test_full_oobe_flow.html', 'w') as f:
-    #     f.write(rendered_page)
+    context.render_full_static_site()
 
-    pass
+
+    print(movielens_project_dir)
+    # assert False
