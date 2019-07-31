@@ -1758,7 +1758,8 @@ class Dataset(MetaDataset):
             column (str): \
                 The column name.
             distribution (str): \
-                The scipy distribution name. See: `<https://docs.scipy.org/doc/scipy/reference/stats.html>`_
+                The scipy distribution name. See: `<https://docs.scipy.org/doc/scipy/reference/stats.html>`_ Currently
+                supported distributions are listed in the Notes section below.
             p_value (float): \
                 The threshold p-value for a passing test. Default is 0.05.
             params (dict or list) : \
