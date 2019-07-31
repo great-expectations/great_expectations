@@ -1,3 +1,6 @@
+import logging
+import pypandoc
+
 from .renderer import Renderer
 from .column_section_renderer import (
     DescriptiveColumnSectionRenderer,
@@ -41,7 +44,9 @@ class PrescriptivePageRenderer(Renderer):
         
         asset_notes_content_block = cls._render_asset_notes(expectations)
         if asset_notes_content_block != None:
-            overview_content_blocks += asset_notes_content_block
+            overview_content_blocks.append(asset_notes_content_block)
+            # import json
+            # print(json.dumps(overview_content_blocks, indent=2))
 
         sections = [
             {
@@ -112,12 +117,49 @@ class PrescriptivePageRenderer(Renderer):
         if not "notes" in expectations["meta"]:
             return None
 
+        notes = expectations["meta"]["notes"]
+        content = None
+
+        if type(notes) == str:
+            content = [notes]
+
+        elif type(notes) == list:
+            content = notes
+
+        elif type(notes) == dict:
+            if "format" in notes:
+                if notes["format"] == "string":
+                    if type(notes["content"]) == str:
+                        content = [notes["content"]]
+                    elif type(notes["content"]) == list:
+                        content = notes["content"]
+                    else:
+                        #??? @James : Is this the correct way to invoke logging?
+                        logging.warning("Unrecognized Expectation suite notes format. Skipping rendering.")
+                    
+                elif notes["format"] == "markdown":
+                    #???: Should converting to markdown be the renderer's job, or the view's job?
+                    #Renderer is easier, but will end up mixing HTML strings with content_block info.
+                    if type(notes["content"]) == str:
+                        content = [pypandoc.convert_text(notes["content"], format='md', to="html")]
+
+                    elif type(notes["content"]) == list:
+                        content = [pypandoc.convert_text(note, format='md', to="html") for note in notes["content"]]
+
+                    else:
+                        #??? @James : Is this the correct way to invoke logging?
+                        logging.warning("Unrecognized Expectation suite notes format. Skipping rendering.")
+
+            else:
+                logging.warning("Unrecognized Expectation suite notes format. Skipping rendering.")
+
+        if content == None:
+            return None
+
         return {
             "content_block_type": "text",
             "header": "Notes",
-            "content": [
-                expectations["meta"]["notes"]
-            ],
+            "content": content,
             "styling": {
                 "classes": ["col-12", "table-responsive"],
                 "styles": {
