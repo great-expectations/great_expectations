@@ -52,6 +52,7 @@ MYSQL_TYPES = {
     "BOOLEAN": mysqltypes.BOOLEAN
 }
 
+
 # Taken from the following stackoverflow:
 # https://stackoverflow.com/questions/23549419/assert-that-two-dictionaries-are-almost-equal
 def assertDeepAlmostEqual(expected, actual, *args, **kwargs):
