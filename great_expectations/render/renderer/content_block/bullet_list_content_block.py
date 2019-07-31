@@ -441,35 +441,42 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
             expectation["kwargs"],
             ["column", "type_list", "mostly"],
         )
+        if params["type_list"] is not None:    
+            for i, v in enumerate(params["type_list"]):
+                params["v__"+str(i)] = v
+            values_string = " ".join(
+                ["$v__"+str(i) for i, v in enumerate(params["type_list"])]
+            )
 
-        for i, v in enumerate(params["type_list"]):
-            params["v__"+str(i)] = v
-        values_string = " ".join(
-            ["$v__"+str(i) for i, v in enumerate(params["type_list"])]
-        )
+            if params["mostly"] is not None:
+                params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
 
-        if params["mostly"] is not None:
-            params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
-
-            if include_column_name:
-                # NOTE: Localization will be tricky for this template_str.
-                template_str = "$column value types must belong to this set: " + values_string + ", at least $mostly_pct % of the time."
+                if include_column_name:
+                    # NOTE: Localization will be tricky for this template_str.
+                    template_str = "$column value types must belong to this set: " + values_string + ", at least $mostly_pct % of the time."
+                else:
+                    # NOTE: Localization will be tricky for this template_str.
+                    template_str = "value types must belong to this set: " + values_string + ", at least $mostly_pct % of the time."
             else:
-                # NOTE: Localization will be tricky for this template_str.
-                template_str = "value types must belong to this set: " + values_string + ", at least $mostly_pct % of the time."
+                if include_column_name:
+                    # NOTE: Localization will be tricky for this template_str.
+                    template_str = "$column value types must belong to this set: "+values_string+"."
+                else:
+                    # NOTE: Localization will be tricky for this template_str.
+                    template_str = "value types must belong to this set: "+values_string+"."
         else:
             if include_column_name:
-                # NOTE: Localization will be tricky for this template_str.
-                template_str = "$column value types must belong to this set: "+values_string+"."
+                    # NOTE: Localization will be tricky for this template_str.
+                    template_str = "$column value types must belong to a set which has not yet been defined"
             else:
-                # NOTE: Localization will be tricky for this template_str.
-                template_str = "value types must belong to this set: "+values_string+"."
+                template_str = "value types must belong to a set which has not yet been defined"
 
         return [{
             "template": template_str,
             "params": params,
             "styling": styling,
         }]
+
 
     @classmethod
     def expect_column_values_to_be_in_set(cls, expectation, styling=None, include_column_name=True):
