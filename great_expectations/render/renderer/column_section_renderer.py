@@ -58,7 +58,7 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
         # cls._render_frequency(evrs, content_blocks)
         # cls._render_composition(evrs, content_blocks)
 
-        cls._render_expectation_types(evrs, content_blocks)
+        # cls._render_expectation_types(evrs, content_blocks)
         # cls._render_unrecognized(evrs, content_blocks)
 
         cls._render_failed(evrs, content_blocks)
@@ -127,28 +127,21 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
         # bullet_list = sorted(type_counts.items(), key=lambda kv: -1*kv[1])
 
         bullet_list = [{
-            "template": "$expectation_type $is_passing",
-            "params": {
-                "expectation_type": evr["expectation_config"]["expectation_type"],
-                "is_passing": str(evr["success"]),
-            },
-            "styling": {
-                "classes": ["list-group-item", "d-flex", "justify-content-between", "align-items-center"],
+            "content_block_type": "string_template",
+            "string_template": {
+                "template": "$expectation_type $is_passing",
                 "params": {
-                    "is_passing": {
-                        "classes": ["badge", "badge-secondary", "badge-pill"],
-                    }
+                    "expectation_type": evr["expectation_config"]["expectation_type"],
+                    "is_passing": str(evr["success"]),
                 },
-                # TODO: Adding popovers was a nice idea, but didn't pan out well in the first experiment.
-                # "attributes": {
-                #     "data-toggle": "popover",
-                #     "data-trigger": "hover",
-                #     "data-placement": "top",
-                #     # "data-content": jinja2.utils.htmlsafe_json_dumps(evr["expectation_config"], indent=2),
-                #     # TODO: This is a hack to get around the fact that `data-content` doesn't like arguments bracketed by {}.
-                #     "data-content": "<pre>"+html.escape(json.dumps(evr["expectation_config"], indent=2))[1:-1]+"</pre>",
-                #     "container": "body",
-                # }
+                "styling": {
+                    "classes": ["list-group-item", "d-flex", "justify-content-between", "align-items-center"],
+                    "params": {
+                        "is_passing": {
+                            "classes": ["badge", "badge-secondary", "badge-pill"],
+                        }
+                    },
+                }
             }
         } for evr in evrs]
 
@@ -240,9 +233,12 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
             quantile_string = quantile_strings.get(quantile)
             table_rows.append([
                 {
-                    "template": quantile_string if quantile_string else "{:3.2f}".format(quantile),
-                    "tooltip": {
-                        "content": "expect_column_quantile_values_to_be_between \n expect_column_median_to_be_between" if quantile == 0.50 else "expect_column_quantile_values_to_be_between"
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": quantile_string if quantile_string else "{:3.2f}".format(quantile),
+                        "tooltip": {
+                            "content": "expect_column_quantile_values_to_be_between \n expect_column_median_to_be_between" if quantile == 0.50 else "expect_column_quantile_values_to_be_between"
+                        }
                     }
                 },
                 quantile_ranges[idx],
@@ -280,9 +276,12 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
         if mean_value:
             table_rows.append([
                 {
-                    "template": "Mean",
-                    "tooltip": {
-                        "content": "expect_column_mean_to_be_between"
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": "Mean",
+                        "tooltip": {
+                            "content": "expect_column_mean_to_be_between"
+                        }
                     }
                 },
                 mean_value
@@ -297,9 +296,12 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
         if min_value:
             table_rows.append([
                 {
-                    "template": "Minimum",
-                    "tooltip": {
-                        "content": "expect_column_min_to_be_between"
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": "Minimum",
+                        "tooltip": {
+                            "content": "expect_column_min_to_be_between"
+                        }
                     }
                 },
                 min_value,
@@ -314,9 +316,12 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
         if max_value:
             table_rows.append([
                 {
-                    "template": "Maximum",
-                    "tooltip": {
-                        "content": "expect_column_max_to_be_between"
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": "Maximum",
+                        "tooltip": {
+                            "content": "expect_column_max_to_be_between"
+                        }
                     }
                 },
                 max_value
@@ -612,11 +617,10 @@ class PrescriptiveColumnSectionRenderer(ColumnSectionRenderer):
     def _render_validation_results(cls, validation_results):
         column = cls._get_column_name(validation_results)
     
-        remaining_evrs, content_blocks = cls._render_table(
+        remaining_evrs, content_blocks = cls._render_header(
             validation_results, [])
-        # remaining_evrs, content_blocks = cls._render_column_type(
-        # remaining_evrs, content_blocks)
-        remaining_evrs, content_blocks = cls._render_bullet_list(
+
+        remaining_evrs, content_blocks = cls._render_table(
             remaining_evrs, content_blocks)
     
         return {
