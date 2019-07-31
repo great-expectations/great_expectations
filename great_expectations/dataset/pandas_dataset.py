@@ -538,7 +538,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             native_type = self._native_type_type_map(type_)
             if native_type is not None:
                 comp_types.extend(native_type)
-            success = issubclass(self[column].dtype.type, tuple(comp_types))
+            success = (self[column].dtype.type in comp_types)
 
         return {
             "success": success,
@@ -708,7 +708,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                 if native_type is not None:
                     comp_types.extend(native_type)
 
-            success = issubclass(self[column].dtype.type, tuple(comp_types))
+            success = (self[column].dtype.type in comp_types)
 
         return {
             "success": success,
