@@ -178,6 +178,4 @@ def test_movielens_rendering(movielens_project_dir):
     context = ge.DataContext(movielens_project_dir)
     context.render_full_static_site()
 
-
     print(movielens_project_dir)
-    assert False
