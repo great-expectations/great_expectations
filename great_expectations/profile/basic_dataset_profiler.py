@@ -107,9 +107,6 @@ class BasicDatasetProfiler(DatasetProfiler):
 
         for column in df.get_table_columns():
 
-            if column == 'sizes':
-                print("sizes")
-
             # df.expect_column_to_exist(column)
 
             type_ = cls._get_column_type(df, column)
