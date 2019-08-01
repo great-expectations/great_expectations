@@ -18,20 +18,23 @@ From there, follow these tutorials to deploy Great Expectations.
    /getting_started/create_expectations
    /getting_started/pipeline_integration
 
-The ``example_dickens_data_project``
+Supporting resources
 -------------------------------------
+
+The ``example_dickens_data_project``
+**************************************
 
 If you have your own data, you can deploy there immediately. If not, you can use the example_dickens_data_project as a sandbox to get started.
 
 Requirements
----------------------
+**************************************
 
 Great expectations requires a python compute environment and access to data, either locally or \
 through a database or distributed cluster.
 
 
 Related tools
----------------------
+**************************************
 
 #TODO: Flesh this out
 
@@ -41,6 +44,6 @@ pip, virtual_env
 We also assume some level of familiarity with git, etc. etc.
 
 Installing from github
------------------------------
+**************************************
 
 #TODO: Write this
