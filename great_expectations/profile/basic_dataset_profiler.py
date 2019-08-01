@@ -19,6 +19,7 @@ class BasicDatasetProfiler(DatasetProfiler):
     @classmethod
     def _get_column_type(cls, df, column):
         # list of types is used to support pandas and sqlalchemy
+        df.set_config_value("interactive_evaluation", True)
         try:
             if df.expect_column_values_to_be_in_type_list(column, type_list=sorted(list(Dataset.INT_TYPE_NAMES)))["success"]:
                 type_ = "int"
@@ -38,13 +39,14 @@ class BasicDatasetProfiler(DatasetProfiler):
         except NotImplementedError:
             type_ = "unknown"
 
+        df.set_config_value('interactive_evaluation', False)
         return type_
 
     @classmethod
     def _get_column_cardinality(cls, df, column):
-
         num_unique = None
         pct_unique = None
+        df.set_config_value("interactive_evaluation", True)
 
         try:
             num_unique = df.expect_column_unique_value_count_to_be_between(column, None, None)[
@@ -84,20 +86,24 @@ class BasicDatasetProfiler(DatasetProfiler):
                 cardinality = "many"
         # print('col: {0:s}, num_unique: {1:s}, pct_unique: {2:s}, card: {3:s}'.format(column, str(num_unique), str(pct_unique), cardinality))
 
+        df.set_config_value('interactive_evaluation', False)
+
         return cardinality
 
     @classmethod
     def _profile(cls, dataset):
-
-
         df = dataset
 
         df.set_default_expectation_argument("catch_exceptions", True)
 
         df.expect_table_row_count_to_be_between(min_value=0, max_value=None)
         df.expect_table_columns_to_match_ordered_list(None)
+        df.set_config_value('interactive_evaluation', False)
 
-        for column in df.get_table_columns():
+        columns = df.get_table_columns()
+        number_of_columns = len(columns)
+        for i, column in enumerate(columns):
+            logger.info("            Preparing column {} of {}: {}".format(i, number_of_columns, column))
 
             # df.expect_column_to_exist(column)
 
@@ -176,4 +182,5 @@ class BasicDatasetProfiler(DatasetProfiler):
                     # print(column, type_, cardinality)
                     pass
 
+        df.set_config_value("interactive_evaluation", True)
         return df.get_expectation_suite(suppress_warnings=True, discard_failed_expectations=False)
