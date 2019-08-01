@@ -318,12 +318,22 @@
         {
           "title": "positive_pandas_datetime_with_timezone",
           "exact_match_out": false,
-          "in":{"column":"datetime_tz","type_":"Timestamp"},
+          "in":{"column":"datetime_tz", "type_":"Timestamp"},
           "out":{
             "success":true,
             "observed_value": "Timestamp"
           },
-          "only_for": ["pandas"]
+          "only_for": ["pandas>=024"]
+        },
+        {
+          "title": "positive_pandas_datetime_with_timezone_pd_022_pd_023",
+          "exact_match_out": false,
+          "in":{"column":"datetime_tz", "type_":"DatetimeTZDtypeType"},
+          "out":{
+            "success":true,
+            "observed_value": "DatetimeTZDtypeType"
+          },
+          "only_for": ["pandas_022", "pandas_023"]
         },
         {
           "title": "negative_pandas_datetime_with_timezone",
@@ -331,7 +341,7 @@
           "in":{"column":"datetime_tz","type_":"datetime64"},
           "out":{
             "success":false,
-            "observed_value": "Timestamp"
+            "observed_value_list": ["Timestamp", "DatetimeTZDtypeType"]
           },
           "only_for": ["pandas"]
         },
@@ -341,7 +351,7 @@
           "in":{"column":"datetime_tz","type_":"int"},
           "out":{
             "success":false,
-            "observed_value": "Timestamp"
+            "observed_value_list": ["Timestamp", "DatetimeTZDtypeType"]
           },
           "only_for": ["pandas"]
         }
