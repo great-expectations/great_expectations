@@ -1,14 +1,15 @@
+import pytest
+import glob
+import json
+from string import Template as pTemplate
+
+
 from great_expectations.render.renderer.content_block import (
     PrescriptiveBulletListContentBlockRenderer,
 )
 from great_expectations.render.renderer.content_block.bullet_list_content_block import (
     substitute_none_for_missing,
 )
-
-import glob
-import json
-from string import Template as pTemplate
-
 
 def test_substitute_none_for_missing():
     assert substitute_none_for_missing(
@@ -25,9 +26,8 @@ def test_substitute_none_for_missing():
         "substitute_none_for_missing should not change input kwargs in place."
 
 
-# Commenting out the test below. It is helpful during development, but is not a high confidence acceptance test.
-
-def test_all_expectations_using_test_definitions():
+@pytest.mark.smoketest
+def test_smoke_all_expectations_using_test_definitions():
     # Fetch test_definitions for all expectations.
     # Note: as of 6/20/2019, coverage is good, but not 100%
     test_files = glob.glob(
