@@ -179,4 +179,9 @@ def test_movielens_rendering(movielens_project_dir):
     context.render_full_static_site()
 
     print(movielens_project_dir)
-    assert False
+
+    with open(os.path.join(movielens_project_dir, "uncommitted/documentation/mydb/default/movies/BasicDatasetProfiler.html")) as f:
+        html = f.read()
+        assert html != ""
+        assert "This Expectation suite currently contains 19 total Expectations across 3 columns." in html
+        assert "To add additional notes" in html
