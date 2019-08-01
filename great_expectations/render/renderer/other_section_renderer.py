@@ -9,8 +9,7 @@ from .content_block import(
     TableContentBlockRenderer,
     PrescriptiveBulletListContentBlockRenderer
 )
-from great_expectations.dataset.dataset import Dataset
-
+from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 
 class DescriptiveOverviewSectionRenderer(Renderer):
 
@@ -258,16 +257,23 @@ class DescriptiveOverviewSectionRenderer(Renderer):
         for evr in type_evrs:
             column = evr["expectation_config"]["kwargs"]["column"]
             if evr["expectation_config"]["expectation_type"] == "expect_column_values_to_be_in_type_list":
-                expected_types = set(evr["expectation_config"]["kwargs"]["type_list"])
+                if evr["expectation_config"]["kwargs"]["type_list"] == None:
+                    expected_types = {}
+                else:
+                    expected_types = set(evr["expectation_config"]["kwargs"]["type_list"])
             else: # assuming expect_column_values_to_be_of_type
                 expected_types = set([evr["expectation_config"]["kwargs"]["type_"]])
 
-            if Dataset.INT_TYPE_NAMES.issubset(expected_types):
+            if BasicDatasetProfiler.INT_TYPE_NAMES.issubset(expected_types):
                 column_types[column] = "int"
-            elif Dataset.FLOAT_TYPE_NAMES.issubset(expected_types):
+            elif BasicDatasetProfiler.FLOAT_TYPE_NAMES.issubset(expected_types):
                 column_types[column] = "float"
-            elif Dataset.STRING_TYPE_NAMES.issubset(expected_types):
+            elif BasicDatasetProfiler.STRING_TYPE_NAMES.issubset(expected_types):
                 column_types[column] = "string"
+            elif BasicDatasetProfiler.DATETIME_TYPE_NAMES.issubset(expected_types):
+                column_types[column] = "datetime"
+            elif BasicDatasetProfiler.BOOLEAN_TYPE_NAMES.issubset(expected_types):
+                column_types[column] = "bool"
             else:
                 warnings.warn("The expected type list is not a subset of any of the profiler type sets: {0:s}".format(str(expected_types)))
                 column_types[column] = "--"
