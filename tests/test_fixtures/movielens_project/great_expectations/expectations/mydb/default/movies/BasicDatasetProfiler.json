@@ -12,7 +12,12 @@
         "timestamp": 1564592915.522696
       }
     },
-    "notes": "Notes go here"
+    "notes": {
+      "format": "markdown",
+      "content": [
+        "To add additional notes, edit the meta.notes.content field in <pre>great_expectations/expectations/mydb/default/movies/BasicDatasetProfiler.json</pre>"
+      ]
+    }
   },
   "expectations": [
     {
