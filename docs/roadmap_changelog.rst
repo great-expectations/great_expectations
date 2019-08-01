@@ -1,6 +1,6 @@
 .. _roadmap_changelog:
 
-Changelog and Roadmap
+Roadmap and changelog
 ======================
 
 Planned Features
