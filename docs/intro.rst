@@ -8,7 +8,7 @@ Introduction
 
 *Always know what to expect from your data.*
 
-What is great\_expectations?
+What is Great Expectations?
 ----------------------------
 
 Great Expectations helps teams save time and promote analytic integrity by \
@@ -24,8 +24,13 @@ confidence, and acceleration to data science and engineering teams.
 Why would I use Great Expectations?
 -----------------------------------
 
-To get more done with data, faster. Teams use great\_expectations to
+To get more done with data, faster. In addition to data testing and validation,
 
+#TODO: introduce profiling and documentation here
+
+Teams use Great Expectations to
+
+#TODO: Slim this down
 -  Save time during data cleaning and munging.
 -  Accelerate ETL and data normalization.
 -  Streamline analyst-to-engineer handoffs.
@@ -33,6 +38,12 @@ To get more done with data, faster. Teams use great\_expectations to
 -  Simplify debugging data pipelines if (when) they break.
 -  Codify assumptions used to build models when sharing with distributed
    teams or other analysts.
+-  Automate verification of new data deliveries purchased from a vendor before using them for analytics.
+-  Package tests for whether new data meets assumptions when sharing notebooks that generate reports or analysis.
+-  Makie implicit knowledge explicit and reducing the number of "data integration meetings" and round-trips to subject-matter experts to elicit necessary context and requirements while buiding a new pipeline.
+-  Discover new unit tests based on edge cases in data.
+-  ... and many more
+
 
 Workflow advantages
 -------------------
@@ -45,6 +56,7 @@ It's not unusual to see data teams grind to a halt for weeks (or even months!) t
 
 We strongly believe that most of this pain is avoidable. We built Great Expectations to make it very, very simple to
 
+#TODO: Replace this with better verbs
 1. set up your testing framework early,
 2. capture those early learnings while they're still fresh, and
 3. systematically validate new data against them.
@@ -54,27 +66,21 @@ It's the best tool we know of for managing the complexity that inevitably grows 
 Good night and good luck!
 
 
-Use Cases
-------------
-
-* Automating verification of new data deliveries purchased from a vendor before using them for \
-  analytics.
-* Packaging tests for whether new data meets assumptions when sharing notebooks that generate \
-  reports or analysis.
-* Making implicit knowledge explicit and reducing the number of "data integration meetings" and \
-  round-trips to subject-matter experts to elicit necessary context and requirements while buiding \
-  a new pipeline.
-* Discovering new unit tests based on edge cases in data.
-* ... and many more
-
-
-Great Expectations doesn't do X. Is it right for my use case?
+What does Great Expectations NOT do?
 -------------------------------------------------------------
+#TODO: Flesh this out
 
-It depends. If you have needs that the library doesn't meet yet, please
-`upvote an existing
-issue(s) <https://github.com/great-expectations/great_expectations/issues>`__
-or `open a new
-issue <https://github.com/great-expectations/great_expectations/issues/new>`__
-and we'll see what we can do. Great Expectations is under active
-development, so your use case might be supported soon.
+**Great Expectations is NOT a pipeline execution framework.**
+We aim to integrate seamlessly with DAG execution tools like Spark, Airflow, dbt, prefect, dagster, kevu, etc. We DON'T execute your pipelines for you.
+
+**Great Expectations is NOT a data versioning tool.** ALternatives: DVC, Quilt, Liquidata
+
+**Great Expectations provides a lightweight metadata store, but it also plays nice with other metadata tools.** 
+
+**Great Expectations currently works best in a python/bash environment.** 
+Alternatives: assertR, 
+
+
+Who maintains Great Expectations?
+-------------------------------------------------------------
+#TODO: Write this
