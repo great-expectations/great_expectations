@@ -7,7 +7,7 @@ Welcome to Great Expectations!
 ==============================================================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
 
    intro
    getting_started
