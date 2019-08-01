@@ -13,7 +13,7 @@ Style guide for documentation
 
 **Basics**
 
-*"Great Expectations" is always spaced and capitalized.* Good: "Great Expectations"; bad: "great_expectations", "great expectations", "GE."
+* *"Great Expectations" is always spaced and capitalized.* Good: "Great Expectations"; bad: "great_expectations", "great expectations", "GE."
 * *Headers are capitalized like sentences.* Good: "Installing within a project." Bad: "Installing Within a Project."
 * *We refer to ourselves in the first person plural*. Good: "we", "our". Bad: "I"   . This helps us avoid awkward passive sentences. Occassionally, we refer to ourselves as "the Great Expectations team" (or community) for clarity.
 * *We refer to developers and users as "you"*: "you can," "you should," "you might want to."
