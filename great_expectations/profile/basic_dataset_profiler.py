@@ -15,23 +15,31 @@ class BasicDatasetProfiler(DatasetProfiler):
     Based on the column's type it provides a description of the column by computing a number of statistics,
     such as min, max, mean and median, for numeric columns, and distribution of values, when appropriate.
     """
+    INT_TYPE_NAMES = set(["INTEGER", "int", "INT", "TINYINT", "BYTEINT", "SMALLINT", "BIGINT", "IntegerType", "LongType", "DECIMAL"])
+    FLOAT_TYPE_NAMES = set(["FLOAT", "FLOAT4", "FLOAT8", "DOUBLE_PRECISION", "NUMERIC", "FloatType", "DoubleType", "float"])
+    STRING_TYPE_NAMES = set(["CHAR", "VARCHAR", "TEXT", "StringType", "string", "str"])
+    BOOLEAN_TYPE_NAMES = set(["BOOLEAN", "BOOL", "bool", "BooleanType"])
+    DATETIME_TYPE_NAMES = set(["DATETIME", "DATE", "TIMESTAMP", "DateType", "TimestampType", "datetime64", "Timestamp"])
 
     @classmethod
     def _get_column_type(cls, df, column):
         # list of types is used to support pandas and sqlalchemy
         try:
-            if df.expect_column_values_to_be_in_type_list(column, type_list=sorted(list(Dataset.INT_TYPE_NAMES)))["success"]:
+            if df.expect_column_values_to_be_in_type_list(column, type_list=sorted(list(cls.INT_TYPE_NAMES)))["success"]:
                 type_ = "int"
 
-            elif df.expect_column_values_to_be_in_type_list(column, type_list=sorted(list(Dataset.FLOAT_TYPE_NAMES)))["success"]:
+            elif df.expect_column_values_to_be_in_type_list(column, type_list=sorted(list(cls.FLOAT_TYPE_NAMES)))["success"]:
                 type_ = "float"
 
-            elif df.expect_column_values_to_be_in_type_list(column, type_list=sorted(list(Dataset.STRING_TYPE_NAMES)))["success"]:
+            elif df.expect_column_values_to_be_in_type_list(column, type_list=sorted(list(cls.STRING_TYPE_NAMES)))["success"]:
                 type_ = "string"
 
-            elif df.expect_column_values_to_be_in_type_list(column, type_list=sorted(list(Dataset.BOOLEAN_TYPE_NAMES)))["success"]:
+            elif df.expect_column_values_to_be_in_type_list(column, type_list=sorted(list(cls.BOOLEAN_TYPE_NAMES)))["success"]:
                 type_ = "bool"
-
+            
+            elif df.expect_column_values_to_be_in_type_list(column, type_list=sorted(list(cls.DATETIME_TYPE_NAMES)))["success"]:
+                type_ = "datetime"
+            
             else:
                 df.expect_column_values_to_be_in_type_list(column, type_list=None)
                 type_ = "unknown"
@@ -168,6 +176,19 @@ class BasicDatasetProfiler(DatasetProfiler):
                 else:
                     # print(column, type_, cardinality)
                     pass
+            
+            elif type_ == "datetime":
+                df.expect_column_min_to_be_between(column, min_value=None, max_value=None)
+                
+                df.expect_column_max_to_be_between(column, min_value=None, max_value=None)
+                
+                df.expect_column_kl_divergence_to_be_less_than(column, partition_object=None,
+                                                           threshold=None, result_format='COMPLETE')
+
+                if cardinality in ["one", "two", "very few", "few"]:
+                    df.expect_column_distinct_values_to_be_in_set(column, value_set=None, result_format="SUMMARY")
+
+
 
             else:
                 if cardinality == "unique":

@@ -58,6 +58,10 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
         """
         mn, mx = min(weights), max(weights)
         extent = mx - mn
+        
+        if extent == 0:
+            extent = 1
+
         sparkline = ''.join(cls.bar[min([cls.barcount - 1,
                                          int((n - mn) / extent * cls.barcount)])]
                             for n in weights)
