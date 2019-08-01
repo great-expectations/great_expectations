@@ -60,7 +60,7 @@ def test_BasicDatasetProfiler():
 
     assert "notes" in expectations_config["meta"]
     assert set(expectations_config["meta"]["notes"].keys()) == {"format", "content"}
-    assert "To add additional notes" in expectations_config["meta"]["notes"]["content"]
+    assert "To add additional notes" in expectations_config["meta"]["notes"]["content"][0]
 
     added_expectations = set()
     for exp in expectations_config["expectations"]:
