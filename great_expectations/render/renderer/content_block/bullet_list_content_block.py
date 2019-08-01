@@ -441,7 +441,8 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
             expectation["kwargs"],
             ["column", "type_list", "mostly"],
         )
-        if params["type_list"] is not None:    
+
+        if params["type_list"] is not None:
             for i, v in enumerate(params["type_list"]):
                 params["v__"+str(i)] = v
             values_string = " ".join(
