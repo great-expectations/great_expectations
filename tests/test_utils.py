@@ -2,7 +2,6 @@ from __future__ import division
 
 import random
 import string
-import warnings
 import copy
 
 from dateutil.parser import parse
@@ -10,7 +9,6 @@ import pandas as pd
 import numpy as np
 import pytest
 from sqlalchemy import create_engine
-from sqlalchemy.exc import SQLAlchemyError
 import sqlalchemy.dialects.sqlite as sqlitetypes
 import sqlalchemy.dialects.postgresql as postgresqltypes
 import sqlalchemy.dialects.mysql as mysqltypes
@@ -53,6 +51,7 @@ MYSQL_TYPES = {
     "FLOAT": mysqltypes.FLOAT,
     "BOOLEAN": mysqltypes.BOOLEAN
 }
+
 
 # Taken from the following stackoverflow:
 # https://stackoverflow.com/questions/23549419/assert-that-two-dictionaries-are-almost-equal
@@ -100,7 +99,27 @@ def get_dataset(dataset_type, data, schemas=None, profiler=ColumnsExistProfiler,
     df = pd.DataFrame(data)
     if dataset_type == 'PandasDataset':
         if schemas and "pandas" in schemas:
-            pandas_schema = {key:np.dtype(value) for (key, value) in schemas["pandas"].items()}
+            schema = schemas["pandas"]
+            pandas_schema = {}
+            for (key, value) in schema.items():
+                # Note, these are just names used in our internal schemas to build datasets *for internal tests*
+                # Further, some changes in pandas internal about how datetimes are created means to support pandas
+                # pre- 0.25, we need to explicitly specify when we want timezone.
+
+                # We will use timestamp for timezone-aware (UTC only) dates in our tests
+                if value.lower() in ["timestamp", "datetime64[ns, tz]"]:
+                    df[key] = pd.to_datetime(df[key], utc=True)
+                    continue
+                elif value.lower() in ["datetime", "datetime64", "datetime64[ns]"]:
+                    df[key] = pd.to_datetime(df[key])
+                    continue
+                try:
+                    type_ = np.dtype(value)
+                except TypeError:
+                    type_ = getattr(pd.core.dtypes.dtypes, value)
+                    # If this raises AttributeError it's okay: it means someone built a bad test
+                pandas_schema[key] = type_
+            # pandas_schema = {key: np.dtype(value) for (key, value) in schemas["pandas"].items()}
             df = df.astype(pandas_schema)
         return PandasDataset(df, profiler=profiler, caching=caching)
 
@@ -112,7 +131,7 @@ def get_dataset(dataset_type, data, schemas=None, profiler=ColumnsExistProfiler,
         sql_dtypes = {}
         if schemas and "sqlite" in schemas and isinstance(engine.dialect, sqlitetypes.dialect):
             schema = schemas["sqlite"]
-            sql_dtypes = {col : SQLITE_TYPES[dtype] for (col,dtype) in schema.items()}
+            sql_dtypes = {col: SQLITE_TYPES[dtype] for (col,dtype) in schema.items()}
             for col in schema:
                 type_ = schema[col]
                 if type_ in ["INTEGER", "SMALLINT", "BIGINT"]:
@@ -159,7 +178,7 @@ def get_dataset(dataset_type, data, schemas=None, profiler=ColumnsExistProfiler,
         sql_dtypes = {}
         if schemas and "mysql" in schemas and isinstance(engine.dialect, mysqltypes.dialect):
             schema = schemas["mysql"]
-            sql_dtypes = {col : MYSQL_TYPES[dtype] for (col, dtype) in schema.items()}
+            sql_dtypes = {col: MYSQL_TYPES[dtype] for (col, dtype) in schema.items()}
             for col in schema:
                 type_ = schema[col]
                 if type_ in ["INTEGER", "SMALLINT", "BIGINT"]:
@@ -450,6 +469,11 @@ def evaluate_json_test(data_asset, expectation_type, test):
                         assert np.allclose(result['result']['observed_value'], value, rtol=test['tolerance'])
                 else:
                     assert value == result['result']['observed_value']
+
+            # NOTE: This is a key used ONLY for testing cases where an expectation is legitimately allowed to return
+            # any of multiple possible observed_values. expect_column_values_to_be_of_type is one such expectation.
+            elif key == "observed_value_list":
+                assert result["result"]["observed_value"] in value
 
             elif key == 'unexpected_index_list':
                 if isinstance(data_asset, (SqlAlchemyDataset, SparkDFDataset)):
