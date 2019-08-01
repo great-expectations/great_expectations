@@ -9,7 +9,7 @@ It's easy! Just use pip install:
 
     $ pip install great_expectations
 
-From there, follow these tutorials to deploy Great Expectations.
+From there, follow these steps to deploy Great Expectations.
 
 .. toctree::
    :maxdepth: 1
