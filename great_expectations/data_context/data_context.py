@@ -1397,7 +1397,54 @@ class DataContext(object):
 
         self._compiled = True
 
-    def get_validation_result(self, data_asset_name, expectation_suite_name="default", run_id=None, failed_only=False):
+    # TODO: JPC
+    def write_resource(
+            self,
+            resource,  # bytes
+            resource_name,  # name to be used inside namespace, e.g. "my_file.html"
+            resource_store=None,  # store to use to write the resource
+            resource_namespace=None,  # An arbitrary name added to the resource namespace
+            data_asset_name=None,  # A name that will be normalized by the data_context and used in the namespace
+            expectation_suite_name=None,  # A string that is part of the namespace
+            run_id=None
+    ):  # A string that is part of the namespace
+        """Writes the bytes in "resource" according to the resource_store's writing method, with a name constructed
+        as follows:
+
+        resource_namespace/run_id/data_asset_name/expectation_suite_name/resource_name
+
+        If any of those components is None, it is omitted from the namespace.
+
+        Args:
+            resource:
+            resource_name:
+            resource_store:
+            resource_namespace:
+            data_asset_name:
+            expectation_suite_name:
+            run_id:
+
+        Returns:
+            None
+        """
+
+        return
+
+    # TODO: JPC
+    def list_validation_results(self, validation_store=None):
+        """
+        {
+          "run_id":
+            "datasource": {
+                "generator": {
+                    "generator_asset": [expectation_suite_1, expectation_suite_1, ...]
+                }
+            }
+        }
+        """
+        return
+
+    def get_validation_result(self, data_asset_name, expectation_suite_name="default", validation_store=None, run_id=None, failed_only=False):
         """Get validation results from a configured store.
 
         Args:
