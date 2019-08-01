@@ -36,7 +36,11 @@ def test_all_expectations_using_test_definitions():
 
     #These expectation types aren't fully implemented yet
     skipped_expectation_types = [
-        "expect_column_kl_divergence_to_be_less_than"
+        "expect_column_kl_divergence_to_be_less_than",
+        "expect_column_quantile_values_to_be_between",
+        "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",
+        "expect_column_chisquare_test_p_value_to_be_greater_than",
+        "expect_column_pair_values_to_be_in_set",
     ]
 
     all_true = True
@@ -61,7 +65,10 @@ def test_all_expectations_using_test_definitions():
                     }
                 else:
                     # This would be a good place to put a kwarg-to-arg converter
-                    print(test)
+                    print("Warning: Skipping this test because 'in' isn't a dict:")
+                    print("\t", test)
+                    print("\texpectation_type : ", test_definitions["expectation_type"])
+
                     continue
 
                 try:
