@@ -103,7 +103,7 @@ class BasicDatasetProfiler(DatasetProfiler):
         columns = df.get_table_columns()
         number_of_columns = len(columns)
         for i, column in enumerate(columns):
-            print(f"            Preparing column {i} of {number_of_columns}: {column}")
+            logger.info("            Preparing column {} of {}: {}".format(i, number_of_columns, column))
 
             if column == 'sizes':
                 print("sizes")
