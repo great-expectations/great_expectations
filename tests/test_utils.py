@@ -470,6 +470,11 @@ def evaluate_json_test(data_asset, expectation_type, test):
                 else:
                     assert value == result['result']['observed_value']
 
+            # NOTE: This is a key used ONLY for testing cases where an expectation is legitimately allowed to return
+            # any of multiple possible observed_values. expect_column_values_to_be_of_type is one such expectation.
+            elif key == "observed_value_list":
+                assert result["result"]["observed_value"] in value
+
             elif key == 'unexpected_index_list':
                 if isinstance(data_asset, (SqlAlchemyDataset, SparkDFDataset)):
                     pass

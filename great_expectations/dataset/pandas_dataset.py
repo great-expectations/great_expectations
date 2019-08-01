@@ -535,6 +535,13 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                 except AttributeError:
                     pass
 
+                try:
+                    pd_type = getattr(pd.core.dtypes.dtypes, type_)
+                    if isinstance(pd_type, type):
+                        comp_types.append(pd_type)
+                except AttributeError:
+                    pass
+
             native_type = self._native_type_type_map(type_)
             if native_type is not None:
                 comp_types.extend(native_type)
@@ -585,6 +592,13 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         except TypeError:
             try:
                 pd_type = getattr(pd, type_)
+                if isinstance(pd_type, type):
+                    comp_types.append(pd_type)
+            except AttributeError:
+                pass
+
+            try:
+                pd_type = getattr(pd.core.dtypes.dtypes, type_)
                 if isinstance(pd_type, type):
                     comp_types.append(pd_type)
             except AttributeError:
@@ -704,6 +718,13 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
                     except AttributeError:
                         pass
 
+                    try:
+                        pd_type = getattr(pd.core.dtypes.dtypes, type_)
+                        if isinstance(pd_type, type):
+                            comp_types.append(pd_type)
+                    except AttributeError:
+                        pass
+
                 native_type = self._native_type_type_map(type_)
                 if native_type is not None:
                     comp_types.extend(native_type)
@@ -731,6 +752,13 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             except TypeError:
                 try:
                     pd_type = getattr(pd, type_)
+                    if isinstance(pd_type, type):
+                        comp_types.append(pd_type)
+                except AttributeError:
+                    pass
+
+                try:
+                    pd_type = getattr(pd.core.dtypes.dtypes, type_)
                     if isinstance(pd_type, type):
                         comp_types.append(pd_type)
                 except AttributeError:
