@@ -40,7 +40,7 @@ class SiteBuilder():
                 "filepath": data_context._get_normalized_data_asset_name_filepath(
                         data_asset_name,
                         expectation_suite_name,
-                        base_path = '',
+                        base_path = 'profiling',
                         file_extension=".html"
                         )
             })
@@ -59,6 +59,7 @@ class SiteBuilder():
                 "filepath": data_context._get_normalized_data_asset_name_filepath(
                     data_asset_name,
                     expectation_suite_name,
+                    base_path='expectations',
                     file_extension=".html"
                 )
             })
@@ -323,30 +324,30 @@ class SiteBuilder():
 
     @classmethod
     def get_expectation_suite_writer(cls, data_context, site_config):
-        if site_config['expectations_store']['type'] == 'filesystem':
-            return FilesystemValidationWriter(data_context, site_config)
-        elif site_config['expectations_store']['type'] == 's3':
-            raise NotImplementedError("expectations_store.type = s3")
+        if site_config['site_store']['type'] == 'filesystem':
+            return FilesystemExpectationSuiteWriter(data_context, site_config)
+        elif site_config['site_store']['type'] == 's3':
+            raise NotImplementedError("site_store.type = s3")
         else:
-            raise ValueError("Unrecognized expectations_store.type: " + site_config['expectations_store']['type'])
+            raise ValueError("Unrecognized site_store.type: " + site_config['site_store']['type'])
 
     @classmethod
     def get_validation_writer(cls, data_context, site_config):
-        if site_config['validations_store']['type'] == 'filesystem':
+        if site_config['site_store']['type'] == 'filesystem':
             return FilesystemValidationWriter(data_context, site_config)
-        elif site_config['validations_store']['type'] == 's3':
-            raise NotImplementedError("validations_store.type = s3")
+        elif site_config['site_store']['type'] == 's3':
+            raise NotImplementedError("site_store.type = s3")
         else:
-            raise ValueError("Unrecognized validations_store.type: " + site_config['validations_store']['type'])
+            raise ValueError("Unrecognized site_store.type: " + site_config['site_store']['type'])
 
     @classmethod
     def get_profiling_writer(cls, data_context, site_config):
-        if site_config['profiling_store']['type'] == 'filesystem':
+        if site_config['site_store']['type'] == 'filesystem':
             return FilesystemProfilingWriter(data_context, site_config)
-        elif site_config['profiling_store']['type'] == 's3':
-            raise NotImplementedError("profiling_store.type = s3")
+        elif site_config['site_store']['type'] == 's3':
+            raise NotImplementedError("site_store.type = s3")
         else:
-            raise ValueError("Unrecognized profiling_store.type: " + site_config['profiling_store']['type'])
+            raise ValueError("Unrecognized site_store.type: " + site_config['site_store']['type'])
 
 
 
@@ -355,7 +356,7 @@ class FilesystemExpectationSuiteWriter(object):
     def __init__(self, data_context, site_config):
         self.data_context = data_context
         self.site_config = site_config
-        self.base_directory = data_context.get_absolute_path(site_config['expectations_store']['base_directory'])
+        self.base_directory = os.path.join(data_context.get_absolute_path(site_config['site_store']['base_directory']), 'expectations')
 
     def write(self, data_asset_name, expectation_suite_name, data):
         out_filepath = self.data_context._get_normalized_data_asset_name_filepath(
@@ -376,7 +377,8 @@ class FilesystemValidationWriter(object):
     def __init__(self, data_context, site_config):
         self.data_context = data_context
         self.site_config = site_config
-        self.base_directory = data_context.get_absolute_path(site_config['validations_store']['base_directory'])
+        self.base_directory = os.path.join(data_context.get_absolute_path(site_config['site_store']['base_directory']),
+                                           'validations')
 
     def write(self, data_asset_name, expectation_suite_name, data):
         out_filepath = self.data_context._get_normalized_data_asset_name_filepath(
@@ -397,7 +399,8 @@ class FilesystemProfilingWriter(object):
     def __init__(self, data_context, site_config):
         self.data_context = data_context
         self.site_config = site_config
-        self.base_directory = data_context.get_absolute_path(site_config['profiling_store']['base_directory'])
+        self.base_directory = os.path.join(data_context.get_absolute_path(site_config['site_store']['base_directory']),
+                                           'profiling')
 
     def write(self, data_asset_name, expectation_suite_name, data):
 
