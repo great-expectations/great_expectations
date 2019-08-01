@@ -58,6 +58,10 @@ def test_BasicDatasetProfiler():
         "created_by", "created_at"
     }
 
+    assert "notes" in expectations_config["meta"]
+    assert set(expectations_config["meta"]["notes"].keys()) == {"format", "content"}
+    assert "To add additional notes" in expectations_config["meta"]["notes"]["content"]
+
     added_expectations = set()
     for exp in expectations_config["expectations"]:
         added_expectations.add(exp["expectation_type"])
