@@ -18,3 +18,4 @@ Guides
    /guides/evaluation_parameters
    /guides/conventions
    /guides/migrating_versions
+   /guides/improving_library_documentation
