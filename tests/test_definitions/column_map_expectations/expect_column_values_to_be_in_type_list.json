@@ -393,7 +393,7 @@
             "type_list": null
           },
           "out": {
-            "success": false
+            "success": true
           }
         }
       ]
