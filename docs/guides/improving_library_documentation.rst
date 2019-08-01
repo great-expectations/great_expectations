@@ -34,3 +34,15 @@ Within the table of contents, each section has specific role to play.
 * *Module docs*
 
 **CLI**
+
+The CLI has some conventions of its own.
+
+* The CLI never writes to disk without asking first.
+* Questions are always phrased as conversational sentences.
+* Sections are divided by headers: "========== Profiling =========="
+* We use punctuation: Please finish sentences with periods, questions marks, or an occasional exclamation point.
+* Keep indentation consistent! (We're pythonistas, natch.)
+* Include exactly one blank line after every question.
+* Within those constraints, shorter is better. When in doubt, shorten.
+* Clickable links (usually to documentation) are blue.
+* Copyable bash commands are green.
