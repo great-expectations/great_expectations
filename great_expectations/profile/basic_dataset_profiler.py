@@ -182,8 +182,9 @@ class BasicDatasetProfiler(DatasetProfiler):
                 
                 df.expect_column_max_to_be_between(column, min_value=None, max_value=None)
                 
-                df.expect_column_kl_divergence_to_be_less_than(column, partition_object=None,
-                                                           threshold=None, result_format='COMPLETE')
+                # Re-add once kl_divergence has been modified to support datetimes
+                # df.expect_column_kl_divergence_to_be_less_than(column, partition_object=None,
+                #                                            threshold=None, result_format='COMPLETE')
 
                 if cardinality in ["one", "two", "very few", "few"]:
                     df.expect_column_distinct_values_to_be_in_set(column, value_set=None, result_format="SUMMARY")
