@@ -113,3 +113,4 @@ def test_smoke_all_expectations_using_test_definitions():
           "suceeded (", 1-failure_count*1./total_count, ")")
 
     assert all_true
+
