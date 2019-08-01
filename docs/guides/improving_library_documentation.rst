@@ -11,23 +11,26 @@ If you see a typo/mistake/gap anywhere in the Great Expectation documentation, a
 Style guide for documentation
 -------------------------------------------
 
-**Capitalization**
+**Basics**
 
-* Great Expectations is always spaced and capitalized. (Good: "Great Expectations"; bad: "great_expectations", "great expectations", "GE")
-* Headers are capitalized like sentences. Good: "Installing within a project." Bad: "Installing Within a Project."
-* Core concepts are upper camel case and linked on first reference.
-* We refer to ourselves in the first person plural (Good: "we", "our"; Bad: "I"). This helps us avoid awkward passive sentences. Occassionally, we refer to ourselves as "the Great Expectations team" for clarity.
+*"Great Expectations" is always spaced and capitalized.* Good: "Great Expectations"; bad: "great_expectations", "great expectations", "GE."
+* *Headers are capitalized like sentences.* Good: "Installing within a project." Bad: "Installing Within a Project."
+* *We refer to ourselves in the first person plural*. Good: "we", "our". Bad: "I"   . This helps us avoid awkward passive sentences. Occassionally, we refer to ourselves as "the Great Expectations team" (or community) for clarity.
+* *We refer to developers and users as "you"*: "you can," "you should," "you might want to."
+* *Core concepts are always capitalized.* Pretend the docs are a fantasy novel, and core concepts are magic. Good: "Like assertions in traditional python unit tests, Expectations provide a flexible, declarative language for describing expected behavior."
+* *Core concepts are linked on first reference within each page.*
+* *Class names are written in upper camel case and linked on first reference.* Good: "ValidationOperator." Bad: "validationOperator", "validation operator". If a word is both a core concept and a class name, link to the core concept unless the text refers specifically to the class.
 
 **Organization**
 
-Within the table of contents,
+Within the table of contents, each section has specific role to play.
 
-* Introduction
-* Getting started
-* Community
-* Core concepts
-* Guides
-* Changelog and roadmap
-* Module docs
+* *Introduction* explains the Why of Great Expectations, so that potential users can quickly decide whether or not the library can help them.
+* *Getting started* helps users get started quickly. Along the way it briefly orients new users to concepts that will be important to learn later.
+* *Community* helps expand the Great Expectations community by explaining how to get in touch to ask questions, make contributions, etc.
+* *Core concepts* are always phrased as nouns. These docs provide more examples of usage, and deeper explanations for why Great Expectations is set up the way it is.
+* *Guides* are always phrased as verbs: "Creating custom Expectations", "Deploying Great Expectations in Spark", etc. They help users accomplish specific goals that go beyond the generic Getting Started tutorials.
+* *Changelog and roadmap* 
+* *Module docs*
 
 **CLI**
