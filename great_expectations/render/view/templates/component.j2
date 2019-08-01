@@ -54,9 +54,11 @@
         {% endif -%}
     </div>
     {%- elif content_block["content_block_type"] == "text" -%}
-        <p id="{{content_block_id}}-body" {{ content_block_body_styling | replace("{{section_id}}", section_id) | replace("{{content_block_id}}", content_block_id) }}>
-            {{content_block["content"][0]}}
-        </p>
+        <div id="{{content_block_id}}-body" {{ content_block_body_styling | replace("{{section_id}}", section_id) | replace("{{content_block_id}}", content_block_id) }}>
+        {% for content in content_block["content"] -%}
+            <p>{{content}}</p>
+        {% endfor -%}
+        </div>
     {%- elif content_block["content_block_type"] == "value_list" -%}
         <p id="{{content_block_id}}-body" {{ content_block_body_styling | replace("{{section_id}}", section_id) | replace("{{content_block_id}}", content_block_id) }}>
         {% for value in content_block["value_list"] -%}
