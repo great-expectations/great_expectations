@@ -21,11 +21,11 @@ CONTEXTS = ['PandasDataset', 'sqlite']
 # Spark Context
 #
 #####
-try:
-    from pyspark.sql import SparkSession
-    CONTEXTS += ['SparkDFDataset']
-except (ImportError):
-    warnings.warn("pyspark not installed and available for testing.")
+# try:
+#     from pyspark.sql import SparkSession
+#     CONTEXTS += ['SparkDFDataset']
+# except (ImportError):
+#     warnings.warn("pyspark not installed and available for testing.")
 
 
 #####

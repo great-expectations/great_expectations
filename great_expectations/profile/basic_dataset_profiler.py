@@ -179,4 +179,10 @@ class BasicDatasetProfiler(DatasetProfiler):
                     # print(column, type_, cardinality)
                     pass
 
-        return df.get_expectation_suite(suppress_warnings=True, discard_failed_expectations=False)
+        expectation_suite = df.get_expectation_suite(suppress_warnings=True, discard_failed_expectations=False)
+        expectation_suite["meta"]["notes"] = {
+            "format": "markdown",
+            "content": "_To add additional notes, edit the <code>meta.notes.content</code> field in <code>expectations/mydb/default/movies/BasicDatasetProfiler.json</code>_"
+        }
+        
+        return expectation_suite
