@@ -6,3 +6,5 @@ from .page_renderer import (
     DescriptivePageRenderer,
     PrescriptivePageRenderer,
 )
+
+from .site_index_page_renderer import SiteIndexPageRenderer
