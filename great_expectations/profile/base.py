@@ -48,6 +48,15 @@ class DatasetProfiler(object):
             exp) for exp in expectation_suite["expectations"]]
         expectation_suite["expectations"] = new_expectations
 
+        expectation_suite["meta"]["notes"] = {
+            "format": "markdown",
+            "content": [
+                "_To add additional notes, edit the <code>meta.notes.content</code> field in the appropriate Expectation json file._"
+                #TODO: be more helpful to the user by piping in the filename.
+                #This will require a minor refactor to make more DataContext information accessible from this method.
+                # "_To add additional notes, edit the <code>meta.notes.content</code> field in <code>expectations/mydb/default/movies/BasicDatasetProfiler.json</code>_"
+            ]
+        }
         return expectation_suite
 
     @classmethod
@@ -58,6 +67,7 @@ class DatasetProfiler(object):
         expectation_suite = cls._profile(data_asset)
 
         batch_kwargs = data_asset.get_batch_kwargs()
+        print(data_asset)
         expectation_suite = cls.add_meta(expectation_suite, batch_kwargs)
         validation_results = data_asset.validate(expectation_suite, run_id=run_id, result_format="SUMMARY")
         return expectation_suite, validation_results
