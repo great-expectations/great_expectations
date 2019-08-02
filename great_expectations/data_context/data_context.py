@@ -167,7 +167,7 @@ class DataContext(object):
         sys.path.append(self._plugins_directory)
 
         expectations_directory = self._project_config.get("expectations_directory", "expectations")
-        if not os.path.abspath(expectations_directory):
+        if not os.path.isabs(expectations_directory):
             self._expectations_directory = os.path.join(self.root_directory, expectations_directory)
         else:
             self._expectations_directory = expectations_directory
@@ -1486,10 +1486,10 @@ class DataContext(object):
                     path_components.append(expectation_suite_name)
 
             path_components.append(resource_name)
-            path = os.path.join(
+            path = os.path.abspath(os.path.join(
                 *path_components
-            )
-
+            ))
+            safe_mmkdir(os.path.dirname(path))
             with open(path, "w") as writer:
                 writer.write(resource)
         else:
