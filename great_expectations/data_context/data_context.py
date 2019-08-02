@@ -1560,7 +1560,13 @@ class DataContext(object):
 
             data_asset_name = expectation_suite['data_asset_name']
             expectation_suite_name = expectation_suite['expectation_suite_name']
-            model = PrescriptivePageRenderer.render(expectations=expectation_suite)
+
+            try:
+                model = PrescriptivePageRenderer.render(expectations=expectation_suite)
+            except Exception as e:
+                print("Ran into an error in ", expectation_suite_filepath)
+                raise(e)
+                
             out_filepath = self.get_validation_doc_filepath(
                 data_asset_name,
                 expectation_suite_name
