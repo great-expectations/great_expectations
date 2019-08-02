@@ -160,11 +160,17 @@ class DataContext(object):
             self.get_datasource(datasource)
 
         plugins_directory = self._project_config.get("plugins_directory", "plugins/")
-        self._plugins_directory = os.path.join(self.root_directory, plugins_directory)
+        if not os.path.isabs(plugins_directory):
+            self._plugins_directory = os.path.join(self.root_directory, plugins_directory)
+        else:
+            self._plugins_directory = plugins_directory
         sys.path.append(self._plugins_directory)
 
         expectations_directory = self._project_config.get("expectations_directory", "expectations")
-        self._expectations_directory = os.path.join(self.root_directory, expectations_directory)
+        if not os.path.abspath(expectations_directory):
+            self._expectations_directory = os.path.join(self.root_directory, expectations_directory)
+        else:
+            self._expectations_directory = expectations_directory
 
         validations_stores = self._project_config.get("validations_stores", {
             "local": {
@@ -172,6 +178,11 @@ class DataContext(object):
                 "base_directory": "uncommitted/validations"
             }
         })
+        # Normalize paths as appropriate
+        for validation_store in validations_stores:
+            if validation_store["type"] == "filesystem":
+                if not os.path.isabs(validation_store["base_directory"]):
+                    validation_store["base_directory"] = os.path.join(self.root_directory, validation_store["base_directory"])
         self._validations_stores = validations_stores
 
         self._load_evaluation_parameter_store()
@@ -199,7 +210,7 @@ class DataContext(object):
     @property
     def validations_store(self):
         """The configuration for the store where validations should be stored"""
-        # TODO: support multiple stores choices
+        # TODO: support multiple stores choices and/or ensure abs paths when appropriate
         return self._validations_stores[list(self._validations_stores.keys())[0]]
 
     def _load_project_config(self):
@@ -1494,12 +1505,13 @@ class DataContext(object):
         validation_results = {}
 
         if validations_store["type"] == "filesystem":
-            result_paths = [y for x in os.walk(os.path.abspath(validations_store["base_directory"])) for y in glob(os.path.join(x[0], '*.json'))]
-            base_length = len(os.path.abspath(validations_store["base_directory"]))
+            result_paths = [y for x in os.walk(validations_store["base_directory"]) for y in glob(os.path.join(x[0], '*.json'))]
+            base_length = len(validations_store["base_directory"])
             rel_paths = [path[:base_length] for path in result_paths]
 
             for result in rel_paths:
                 components = result.split("/")
+
                 if len(components) != 5:
                     logger.error("Unrecognized validation result path: %s" % result)
                     continue
