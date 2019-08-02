@@ -9,6 +9,8 @@ Dataset
 Dataset objects model tabular data and include expectations with row and column semantics. Many Dataset expectations
 are implemented using column_map_expectation and column_aggregate_expectation decorators.
 
+Not all expectations are currently available for each backend. A table describing available implementations per-backend
+is available here: :ref:`implemented_expectations`.
 
 Table shape
 --------------------------------------------------------------------------------
