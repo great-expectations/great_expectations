@@ -179,8 +179,8 @@ class DataContext(object):
             }
         })
         # Normalize paths as appropriate
-        for validations_store in validations_stores:
-            validations_store = self._normalize_store_path(validations_store)
+        for validations_store_name in validations_stores:
+            validations_stores[validations_store_name] = self._normalize_store_path(validations_stores[validations_store_name])
         self._validations_stores = validations_stores
 
         self._load_evaluation_parameter_store()
