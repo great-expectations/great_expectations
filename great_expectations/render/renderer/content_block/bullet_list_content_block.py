@@ -55,6 +55,11 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
     def _missing_content_block_fn(cls, expectation, styling=None, include_column_name=True):
         return [{
             "content_block_type": "string_template",
+            "styling": {
+              "parent": {
+                  "classes": ["alert", "alert-warning"]
+              }
+            },
             "string_template": {
                 "template": "$expectation_type(**$kwargs)",
                 "params": {
@@ -62,9 +67,6 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
                     "kwargs": expectation["kwargs"]
                 },
                 "styling": {
-                    "parent": {
-                      "classes": ["alert", "alert-warning"]
-                    },
                     "params": {
                         "expectation_type": {
                             "classes": ["badge", "badge-warning"],
@@ -351,10 +353,10 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
             ["column", "value_set"],
         )
         
-        if params["value_set"] is None:
+        if params["value_set"] is None or len(params["value_set"]) == 0:
             
             if include_column_name:
-                template_str = "$column distinct values must belong to a set, but that set is not specified."
+                template_str = "$column distinct values must belong to this set: [ ]"
             else:
                 template_str = "distinct values must belong to a set, but that set is not specified."
         
@@ -505,7 +507,7 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
         )
         
         if params["value_set"] is None or len(params["value_set"]) == 0:
-            template_str = "values must belong to a set, but that set is not specified."
+            values_string = "[ ]"
         else:
             for i, v in enumerate(params["value_set"]):
                 params["v__" + str(i)] = v
@@ -514,13 +516,13 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
                 ["$v__" + str(i) for i, v in enumerate(params["value_set"])]
             )
             
-            template_str = "values must belong to this set: " + values_string
-            
-            if params["mostly"] is not None:
-                params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
-                template_str += ", at least $mostly_pct % of the time."
-            else:
-                template_str += "."
+        template_str = "values must belong to this set: " + values_string
+        
+        if params["mostly"] is not None:
+            params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
+            template_str += ", at least $mostly_pct % of the time."
+        else:
+            template_str += "."
         
         if params.get("parse_strings_as_datetimes"):
             template_str += " Values should be parsed as datetimes."
@@ -545,7 +547,7 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
         )
         
         if params["value_set"] is None or len(params["value_set"]) == 0:
-            template_str = "values must not belong to a set, but that set is not specified."
+            values_string = "[ ]"
         else:
             for i, v in enumerate(params["value_set"]):
                 params["v__" + str(i)] = v
@@ -554,13 +556,13 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
                 ["$v__" + str(i) for i, v in enumerate(params["value_set"])]
             )
             
-            template_str = "values must not belong to this set: " + values_string
-        
-            if params["mostly"] is not None:
-                params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
-                template_str += ", at least $mostly_pct % of the time."
-            else:
-                template_str += "."
+        template_str = "values must not belong to this set: " + values_string
+    
+        if params["mostly"] is not None:
+            params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
+            template_str += ", at least $mostly_pct % of the time."
+        else:
+            template_str += "."
         
         if params.get("parse_strings_as_datetimes"):
             template_str += " Values should be parsed as datetimes."
@@ -814,7 +816,7 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
         )
         
         if not params.get("regex_list") or len(params.get("regex_list")) == 0:
-            template_str = "values must match a set of regular expressions but none was specified."
+            values_string = "[ ]"
         else:
             for i, v in enumerate(params["regex_list"]):
                 params["v__" + str(i)] = v
@@ -822,16 +824,16 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
                 ["$v__" + str(i) for i, v in enumerate(params["regex_list"])]
             )
             
-            if params.get("match_on") == "all":
-                template_str = "values must match all of the following regular expressions: " + values_string
-            else:
-                template_str = "values must match any of the following regular expressions: " + values_string
-                
-            if params["mostly"] is not None:
-                params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
-                template_str += ", at least $mostly_pct % of the time."
-            else:
-                template_str += "."
+        if params.get("match_on") == "all":
+            template_str = "values must match all of the following regular expressions: " + values_string
+        else:
+            template_str = "values must match any of the following regular expressions: " + values_string
+            
+        if params["mostly"] is not None:
+            params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
+            template_str += ", at least $mostly_pct % of the time."
+        else:
+            template_str += "."
         
         if include_column_name:
             template_str = "$column " + template_str
@@ -853,7 +855,7 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
         )
         
         if not params.get("regex_list") or len(params.get("regex_list")) == 0:
-            template_str = "values must match a list of regular expressions but none was specified."
+            values_string = "[ ]"
         else:
             for i, v in enumerate(params["regex_list"]):
                 params["v__" + str(i)] = v
@@ -861,13 +863,13 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
                 ["$v__" + str(i) for i, v in enumerate(params["regex_list"])]
             )
             
-            template_str = "values must not match any of the following regular expressions: " + values_string
+        template_str = "values must not match any of the following regular expressions: " + values_string
         
-            if params["mostly"] is not None:
-                params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
-                template_str += ", at least $mostly_pct % of the time."
-            else:
-                template_str += "."
+        if params["mostly"] is not None:
+            params["mostly_pct"] = "%.1f" % (params["mostly"] * 100,)
+            template_str += ", at least $mostly_pct % of the time."
+        else:
+            template_str += "."
         
         if include_column_name:
             template_str = "$column " + template_str
@@ -1008,7 +1010,7 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
         )
         
         if params["value_set"] is None or len(params["value_set"]) == 0:
-            template_str = "distinct values must contain a given set, but that set is not specified."
+            values_string = "[ ]"
         else:
             for i, v in enumerate(params["value_set"]):
                 params["v__" + str(i)] = v
@@ -1017,7 +1019,7 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
                 ["$v__" + str(i) for i, v in enumerate(params["value_set"])]
             )
             
-            template_str = "distinct values must contain this set: " + values_string + "."
+        template_str = "distinct values must contain this set: " + values_string + "."
         
         if params.get("parse_strings_as_datetimes"):
             template_str += " Values should be parsed as datetimes."
@@ -1042,7 +1044,7 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
         )
         
         if params["value_set"] is None or len(params["value_set"]) == 0:
-            template_str = "distinct values must match a given set, but that set is not specified."
+            values_string = "[ ]"
         else:
             for i, v in enumerate(params["value_set"]):
                 params["v__" + str(i)] = v
@@ -1051,7 +1053,7 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
                 ["$v__" + str(i) for i, v in enumerate(params["value_set"])]
             )
             
-            template_str = "distinct values must match this set: " + values_string + "."
+        template_str = "distinct values must match this set: " + values_string + "."
         
         if params.get("parse_strings_as_datetimes"):
             template_str += " Values should be parsed as datetimes."
@@ -1256,7 +1258,7 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
         )
         
         if params["value_set"] is None or len(params["value_set"]) == 0:
-            template_str = "most common value must belong to a set, but that set is not specified."
+            values_string = "[ ]"
         else:
             for i, v in enumerate(params["value_set"]):
                 params["v__" + str(i)] = v
@@ -1265,10 +1267,10 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
                 ["$v__" + str(i) for i, v in enumerate(params["value_set"])]
             )
             
-            template_str = "most common value must belong to this set: " + values_string + "."
-            
-            if params.get("ties_okay"):
-                template_str += " Values outside this set that are as common (but not more common) are allowed."
+        template_str = "most common value must belong to this set: " + values_string + "."
+        
+        if params.get("ties_okay"):
+            template_str += " Values outside this set that are as common (but not more common) are allowed."
         
         if include_column_name:
             template_str = "$column " + template_str
@@ -1293,7 +1295,7 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
             "params": {
                 "sparklines_histogram": {
                     "styles": {
-                        "font-family": "serif"
+                        "font-family": "serif !important"
                     }
                 }
             }
@@ -1354,6 +1356,13 @@ class PrescriptiveEvrTableContentBlockRenderer(PrescriptiveStringRenderer):
             }
         }
     }
+    
+    _default_content_block_styling = {
+        "body": {
+            "classes": ["table"],
+        },
+        "classes": ["m-3", "table-responsive"],
+    }
 
     @classmethod
     def _get_status_icon(cls, evr):
@@ -1364,7 +1373,6 @@ class PrescriptiveEvrTableContentBlockRenderer(PrescriptiveStringRenderer):
                     "template": "$icon",
                     "params": {"icon": ""},
                     "styling": {
-                        "classes": ["m-1"],
                         "params": {
                             "icon": {
                                 "classes": ["fas", "fa-check-circle", "text-success"],
@@ -1381,7 +1389,6 @@ class PrescriptiveEvrTableContentBlockRenderer(PrescriptiveStringRenderer):
                     "template": "$icon",
                     "params": {"icon": ""},
                     "styling": {
-                        "classes": ["m-1"],
                         "params": {
                             "icon": {
                                 "tag": "i",
@@ -1393,15 +1400,111 @@ class PrescriptiveEvrTableContentBlockRenderer(PrescriptiveStringRenderer):
             }
 
     @classmethod
-    def generate_expectation_row(cls, evr, expectation_type):
-        expectation = evr["expectation_config"]
+    def _get_exception_table(cls, evr):
+        result = evr["result"]
+        if not result.get("partial_unexpected_list") and not result.get("partial_unexpected_counts"):
+            return None
+        
+        table_rows = []
+        
+        if result.get("partial_unexpected_counts"):
+            header_row = ["Unexpected Value", "Count"]
+            for unexpected_count in result.get("partial_unexpected_counts"):
+                if unexpected_count.get("value"):
+                    table_rows.append([unexpected_count.get("value"), unexpected_count.get("count")])
+                else:
+                    table_rows.append(["null", unexpected_count.get("count")])
+        else:
+            header_row = ["Unexpected Value"]
+            for unexpected_value in result.get("partial_unexpected_list"):
+                if unexpected_value.get("value"):
+                    table_rows.append([unexpected_value])
+                else:
+                    table_rows.append(["null"])
+                    
+        exception_table_content_block = {
+            "content_block_type": "table",
+            "table": table_rows,
+            "header_row": header_row,
+            "styling": {
+                "body": {
+                    "classes": ["table-bordered", "table-sm", "mt-3"]
+                }
+            }
+        }
+        
+        return exception_table_content_block
+
+    @classmethod
+    def _get_exception_statement(cls, evr):
+        success = evr["success"]
+        result = evr["result"]
+        
+        if success or not result.get("unexpected_count"):
+            return None
+        else:
+            unexpected_count = result["unexpected_count"]
+            unexpected_percent = "%.2f%%" % (result["unexpected_percent"] * 100.0)
+            element_count = result["element_count"]
+            
+            template_str = "\n\n$unexpected_count exceptions found. $unexpected_percent of $element_count total rows."
+            
+            return {
+                "content_block_type": "string_template",
+                "string_template": {
+                    "template": template_str,
+                    "params": {
+                        "unexpected_count": unexpected_count,
+                        "unexpected_percent": unexpected_percent,
+                        "element_count": element_count
+                    },
+                    "tag": "strong",
+                    "styling": {
+                        "classes": ["text-danger"]
+                    }
+                }
+            }
+
+    @classmethod
+    def _get_observed_value(cls, evr):
+        result = evr["result"]
+        expectation_type = evr["expectation_config"]["expectation_type"]
+
+        if result.get("observed_value"):
+            return result.get("observed_value")
+        elif expectation_type == "expect_column_values_to_be_null":
+            element_count = result["element_count"]
+            unexpected_count = result["unexpected_count"]
+            null_count = element_count - unexpected_count
+            return "{null_count} null".format(null_count=null_count)
+        elif expectation_type == "expect_column_values_to_not_be_null":
+            null_count = result["unexpected_count"]
+            return "{null_count} null".format(null_count=null_count)
+        else:
+            return "--"
+
+    @classmethod
+    def generate_expectation_row(cls, expectation_type):
         prescriptive_string_fn = getattr(PrescriptiveStringRenderer, expectation_type, None)
         if prescriptive_string_fn is None:
             prescriptive_string_fn = getattr(PrescriptiveStringRenderer, "_missing_content_block_fn")
         
-        def row_generator_fn(_evr, styling=None, include_column_name=True):
+        def row_generator_fn(evr, styling=None, include_column_name=True):
+            expectation = evr["expectation_config"]
             prescriptive_string_obj = prescriptive_string_fn(expectation, styling, include_column_name)
-            return [[cls._get_status_icon(evr)] + prescriptive_string_obj]
+            
+            status_cell = [cls._get_status_icon(evr)]
+            exception_statement = cls._get_exception_statement(evr)
+            exception_table = cls._get_exception_table(evr)
+            expectation_cell = prescriptive_string_obj
+            observed_value = [str(cls._get_observed_value(evr))]
+
+            if exception_statement or exception_table:
+                prescriptive_string_obj.append(exception_statement)
+                prescriptive_string_obj.append(exception_table)
+                return [status_cell + [expectation_cell] + observed_value]
+            
+            return [status_cell + expectation_cell + observed_value]
         
         return row_generator_fn
 
