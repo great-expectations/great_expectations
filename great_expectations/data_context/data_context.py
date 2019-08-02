@@ -149,7 +149,6 @@ class DataContext(object):
         self._context_root_directory = os.path.abspath(context_root_dir)
 
         # TODO: these paths should be configurable
-        self.expectations_directory = os.path.join(self.root_directory, "expectations")
         self.fixtures_validations_directory = os.path.join(self.root_directory, "fixtures/validations")
         self.data_doc_directory = os.path.join(self.root_directory, "uncommitted/documentation")
 
@@ -163,6 +162,17 @@ class DataContext(object):
         plugins_directory = self._project_config.get("plugins_directory", "plugins/")
         self._plugins_directory = os.path.join(self.root_directory, plugins_directory)
         sys.path.append(self._plugins_directory)
+
+        expectations_directory = self._project_config.get("expectations_directory", "expectations")
+        self._expectations_directory = os.path.join(self.root_directory, expectations_directory)
+
+        validations_stores = self._project_config.get("validations_stores", {
+            "local": {
+                "type": "filesystem",
+                "base_directory": "uncommitted/validations"
+            }
+        })
+        self._validations_stores = validations_stores
 
         self._load_evaluation_parameter_store()
         self._compiled = False
@@ -180,6 +190,17 @@ class DataContext(object):
     def plugins_directory(self):
         """The directory in which custom plugin modules should be placed."""
         return self._plugins_directory
+
+    @property
+    def expectations_directory(self):
+        """The directory in which custom plugin modules should be placed."""
+        return self._expectations_directory
+
+    @property
+    def validations_store(self):
+        """The configuration for the store where validations should be stored"""
+        # TODO: support multiple stores choices
+        return self._validations_stores[list(self._validations_stores.keys())[0]]
 
     def _load_project_config(self):
         """Loads the project configuration file."""
@@ -217,18 +238,14 @@ class DataContext(object):
         """
         result = {}
 
-        if "result_store" not in self._project_config:
-            logger.warning("Unable to get validation results: no result store configured.")
-            return {}
-
         data_asset_name = self._normalize_data_asset_name(data_asset_name)
-        result_store = self._project_config["result_store"]
-        if "filesystem" in result_store and isinstance(result_store["filesystem"], dict):
-            if "base_directory" not in result_store["filesystem"]:
+        validations_store = self.validations_store
+        if validations_store["type"] == "filesystem":
+            if "base_directory" not in validations_store:
                 raise DataContextError(
-                    "Invalid result_store configuration: 'base_directory' is required for a filesystem store.")
+                    "Invalid validations_store configuration: 'base_directory' is required for a filesystem store.")
 
-            base_directory = result_store["filesystem"]["base_directory"]
+            base_directory = validations_store["base_directory"]
             if not os.path.isabs(base_directory):
                 base_directory = os.path.join(self.root_directory, base_directory)
 
@@ -249,11 +266,11 @@ class DataContext(object):
 
             result['filepath'] = validation_path
 
-        elif "s3" in result_store and isinstance(result_store["s3"], dict):
+        elif validations_store["type"] == "s3":
             # FIXME: this code is untested
-            if "bucket" not in result_store["s3"] or "key_prefix" not in result_store["s3"]:
+            if "bucket" not in validations_store or "key_prefix" not in validations_store:
                 raise DataContextError(
-                    "Invalid result_store configuration: 'bucket' and 'key_prefix' are required for an s3 store.")
+                    "Invalid validations_store configuration: 'bucket' and 'key_prefix' are required for an s3 store.")
 
             try:
                 import boto3
@@ -261,8 +278,8 @@ class DataContext(object):
             except ImportError:
                 raise ImportError("boto3 is required for retrieving a dataset from s3")
 
-            bucket = result_store["s3"]["bucket"]
-            key_prefix = result_store["s3"]["key_prefix"]
+            bucket = validations_store["bucket"]
+            key_prefix = validations_store["key_prefix"]
 
             if run_id is None:  # Get most recent run_id
                 all_objects = s3.list_objects(Bucket=bucket)
@@ -291,7 +308,7 @@ class DataContext(object):
             result['key'] = key
 
         else:
-            raise DataContextError("Invalid result_store configuration: only 'filesystem' and 's3' are supported.")
+            raise DataContextError("Invalid validations_store configuration: only 'filesystem' and 's3' are supported.")
 
         return result
 
@@ -1052,7 +1069,7 @@ class DataContext(object):
     def register_validation_results(self, run_id, validation_results, data_asset=None):
         """Process results of a validation run. This method is called by data_asset objects that are connected to
          a DataContext during validation. It performs several actions:
-          - store the validation results to a result_store, if one is configured
+          - store the validation results to a validations_store, if one is configured
           - store a snapshot of the data_asset, if so configured and a compatible data_asset is available
           - perform a callback action using the validation results, if one is configured
           - retrieve validation results referenced in other parameterized expectations and store them in the \
@@ -1088,15 +1105,15 @@ class DataContext(object):
             )
 
         expectation_suite_name = validation_results["meta"].get("expectation_suite_name", "default")
-        if "result_store" in self._project_config:
-            result_store = self._project_config["result_store"]
-            if isinstance(result_store, dict) and "filesystem" in result_store:
+        if self.validations_store:
+            validations_store = self.validations_store
+            if isinstance(validations_store, dict) and validations_store["type"] == "filesystem":
                 validation_filepath = self._get_normalized_data_asset_name_filepath(
                     normalized_data_asset_name,
                     expectation_suite_name,
                     base_path=os.path.join(
                         self.root_directory,
-                        result_store["filesystem"]["base_directory"],
+                        validations_store["base_directory"],
                         run_id
                     )
                 )
@@ -1104,9 +1121,9 @@ class DataContext(object):
                 safe_mmkdir(os.path.dirname(validation_filepath))
                 with open(validation_filepath, "w") as outfile:
                     json.dump(validation_results, outfile, indent=2)
-            if isinstance(result_store, dict) and "s3" in result_store:
-                bucket = result_store["s3"]["bucket"]
-                key_prefix = result_store["s3"]["key_prefix"]
+            if isinstance(validations_store, dict) and validations_store["type"] == "s3":
+                bucket = validations_store["bucket"]
+                key_prefix = validations_store["key_prefix"]
                 key = os.path.join(
                     key_prefix,
                     "validations/{run_id}/{data_asset_name}".format(
@@ -1393,12 +1410,11 @@ class DataContext(object):
 
         self._compiled = True
 
-    # TODO: JPC
     def write_resource(
             self,
             resource,  # bytes
             resource_name,  # name to be used inside namespace, e.g. "my_file.html"
-            resource_store=None,  # store to use to write the resource
+            resource_store,  # store to use to write the resource
             resource_namespace=None,  # An arbitrary name added to the resource namespace
             data_asset_name=None,  # A name that will be normalized by the data_context and used in the namespace
             expectation_suite_name=None,  # A string that is part of the namespace
@@ -1424,10 +1440,44 @@ class DataContext(object):
             None
         """
 
-        return
+        if resource_store is None:
+            logger.error("No resource store specified")
+            return
 
-    # TODO: JPC
-    def list_validation_results(self, validation_store=None):
+        if resource_store['type'] == "s3":
+            raise NotImplementedError("s3 is not currently a supported resource_store type for writing")
+        elif resource_store['type'] == 'filesystem':
+            path_components = []
+            if resource_namespace is not None:
+                path_components.append(resource_namespace)
+            if run_id is not None:
+                path_components.append(run_id)
+            if data_asset_name is not None:
+                if not isinstance(data_asset_name, NormalizedDataAssetName):
+                    normalized_name = self._normalize_data_asset_name(data_asset_name)
+                else:
+                    normalized_name = data_asset_name
+                if expectation_suite_name is not None:
+                    path_components.append(self._get_normalized_data_asset_name_filepath(normalized_name, expectation_suite_name, base_path="", file_extension=""))
+                else:
+                    path_components.append(
+                        self._get_normalized_data_asset_name_filepath(normalized_name, "",
+                                                                      base_path="", file_extension=""))
+            else:
+                if expectation_suite_name is not None:
+                    path_components.append(expectation_suite_name)
+
+            path_components.append(resource_name)
+            path = os.path.join(
+                *path_components
+            )
+
+            with open(path, "w") as writer:
+                writer.write(resource)
+        else:
+            raise DataContextError("Unrecognized resource store type.")
+
+    def list_validation_results(self, validations_store=None):
         """
         {
           "run_id":
@@ -1438,7 +1488,40 @@ class DataContext(object):
             }
         }
         """
-        return
+        if validations_store is None:
+            validations_store = self.validations_store
+
+        validation_results = {}
+
+        if validations_store["type"] == "filesystem":
+            result_paths = [y for x in os.walk(os.path.abspath(validations_store["base_directory"])) for y in glob(os.path.join(x[0], '*.json'))]
+            base_length = len(os.path.abspath(validations_store["base_directory"]))
+            rel_paths = [path[:base_length] for path in result_paths]
+
+            for result in rel_paths:
+                components = result.split("/")
+                if len(components) != 5:
+                    logger.error("Unrecognized validation result path: %s" % result)
+                    continue
+                run_id = components[0]
+                datasource_name = components[1]
+                generator_name = components[2]
+                generator_asset = components[3]
+                expectation_suite = components[4][:-5]
+                if run_id not in validation_results:
+                    validation_results[run_id] = {}
+                if datasource_name not in validation_results[run_id]:
+                    validation_results[run_id][datasource_name] = {}
+                if generator_name not in validation_results[run_id][datasource_name]:
+                    validation_results[run_id][datasource_name][generator_name] = {}
+                if generator_asset not in validation_results[run_id][datasource_name][generator_name]:
+                    validation_results[run_id][datasource_name][generator_name][generator_asset] = []
+                validation_results[run_id][datasource_name][generator_name][generator_asset].append(expectation_suite)
+            return validation_results
+        elif validations_store["type"] == "s3":
+            raise NotImplementedError("s3 validations_store is not yet supported for listing validation results")
+        else:
+            raise DataContextError("unrecognized validations_store type: %s" % validations_store["type"])
 
     def get_validation_result(self, data_asset_name, expectation_suite_name="default", validation_store=None, run_id=None, failed_only=False):
         """Get validation results from a configured store.
@@ -1490,7 +1573,7 @@ class DataContext(object):
             else:
                 return results_dict
         else:
-            raise DataContextError("Invalid result_store configuration: only 'filesystem' and 's3' are supported.")
+            raise DataContextError("Invalid validations_store configuration: only 'filesystem' and 's3' are supported.")
 
     # TODO: refactor this into a snapshot getter based on project_config
     # def get_failed_dataset(self, validation_result, **kwargs):
@@ -1555,8 +1638,6 @@ class DataContext(object):
                     #TODO: build the site config by using defaults if needed
                     complete_site_config = site_config
                     SiteBuilder.build(self, complete_site_config)
-
-
 
     def get_absolute_path(self, path):
         #TODO: ideally, the data context object should resolve all paths before
@@ -1753,10 +1834,12 @@ plugins_directory: plugins/
 # validation happens.
 
 
-result_store:
-  filesystem:
+validations_store:
+  local:
+    type: filesystem
     base_directory: uncommitted/validations/
-#   s3:
+#   remote:
+#     type: s3
 #     bucket: <your bucket>
 #     key_prefix: <your key prefix>
 #   

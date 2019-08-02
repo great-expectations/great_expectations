@@ -15,6 +15,8 @@ v.0.7.4__develop
 -----------------
 * Add support for pandas extension dtypes in pandas backend of expect_column_values_to_be_of_type and
   expect_column_values_to_be_in_type_list and fix bug affecting some dtype-based checks.
+* BREAKING: result_store in data_context renamed to validations_store and uses standard convention for defining
+  type and properties
 
 v.0.7.3
 -----------------
