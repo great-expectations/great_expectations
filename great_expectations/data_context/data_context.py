@@ -1513,7 +1513,7 @@ class DataContext(object):
         if validations_store["type"] == "filesystem":
             result_paths = [y for x in os.walk(validations_store["base_directory"]) for y in glob(os.path.join(x[0], '*.json'))]
             base_length = len(validations_store["base_directory"])
-            rel_paths = [path[:base_length] for path in result_paths]
+            rel_paths = [path[base_length:] for path in result_paths]
 
             for result in rel_paths:
                 components = result.split("/")
