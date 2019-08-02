@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import pytest
 import shutil
 
@@ -13,6 +15,7 @@ from great_expectations.render.renderer import (
     PrescriptivePageRenderer,
 )
 from great_expectations.render.view import DefaultJinjaPageView
+from great_expectations.render.view.view import render_string_template
 from great_expectations.render.renderer.content_block import ValueListContentBlockRenderer
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 
@@ -51,8 +54,8 @@ def titanic_dataset_profiler_expectations():
 
 @pytest.fixture(scope="module")
 def titanic_dataset_profiler_expectations_with_distribution():
-    with open('./tests/render/fixtures/BasicDatasetProfiler_expectations_with_distribution.json', 'r') as infile:
-        return json.load(infile, object_pairs_hook=OrderedDict)
+    with open('/Users/james/dev/great_expectations/tests/render/fixtures/BasicDatasetProfiler_expectations_with_distribution.json', 'r') as infile:
+        return json.load(infile, encoding="utf-8", object_pairs_hook=OrderedDict)
 
 
 # Deprecate this fixture until we migrate to fuller project structure
@@ -136,7 +139,7 @@ def test_render_profiled_fixture_expectations_with_distribution(titanic_dataset_
     rendered_json = PrescriptivePageRenderer.render(titanic_dataset_profiler_expectations_with_distribution)
     rendered_page = DefaultJinjaPageView.render(rendered_json)
 
-    with open('./tests/render/output/titanic_dataset_profiler_expectations_with_distribution.html', 'w') as f:
+    with open('./tests/render/output/titanic_dataset_profiler_expectations_with_distribution.html', 'w', encoding="utf-8") as f:
         f.write(rendered_page)
 
     assert rendered_page[:15] == "<!DOCTYPE html>"
@@ -206,3 +209,89 @@ def test_full_oobe_flow():
 #         assert html != ""
 #         assert "This Expectation suite currently contains 19 total Expectations across 3 columns." in html
 #         assert "To add additional notes" in html
+
+def test_render_string_template():
+    template = {
+        "template": "$column Kullback-Leibler (KL) divergence with respect to the following distribution must be lower than $threshold: $sparklines_histogram",
+        "params": {
+            "column": "categorical_fixed",
+            "partition_object": {
+                "weights": [
+                    0.54,
+                    0.32,
+                    0.14
+                ],
+                "values": [
+                    "A",
+                    "B",
+                    "C"
+                ]
+            },
+            "threshold": 0.1,
+            "sparklines_histogram": u"\u2588\u2584\u2581"
+        },
+        "styling": {
+            "default": {
+                "classes": [
+                    "badge",
+                    "badge-secondary"
+                ]
+            },
+            "params": {
+                "sparklines_histogram": {
+                    "styles": {
+                        "font-family": "serif"
+                    }
+                }
+            }
+        }
+    }
+
+    res = render_string_template(template).replace(" ", "").replace("\t", "").replace("\n", "")
+    expected = u"""<span>
+                <span class="badge badge-secondary" >categorical_fixed</span> Kullback-Leibler (KL) divergence with respect to the following distribution must be lower than <span class="badge badge-secondary" >0.1</span>: <span style="font-family:serif;" >█▄▁</span>
+            </span>""".replace(" ", "").replace("\t", "").replace("\n", "")
+    assert res == expected
+
+    template = {
+        "template": "$column Kullback-Leibler (KL) divergence with respect to the following distribution must be lower than $threshold: $sparklines_histogram",
+        "params": {
+            "column": "categorical_fixed",
+            "partition_object": {
+                "weights": [
+                    0.54,
+                    0.32,
+                    0.14
+                ],
+                "values": [
+                    "A",
+                    "B",
+                    "C"
+                ]
+            },
+            "threshold": 0.1,
+            "sparklines_histogram": u"▃▆▁█"
+        },
+        "styling": {
+            "default": {
+                "classes": [
+                    "badge",
+                    "badge-secondary"
+                ]
+            },
+            "params": {
+                "sparklines_histogram": {
+                    "styles": {
+                        "font-family": "serif"
+                    }
+                }
+            }
+        }
+    }
+
+    res = render_string_template(template).replace(" ", "").replace("\t", "").replace("\n", "")
+    expected = u"""<span>
+                <span class="badge badge-secondary" >categorical_fixed</span> Kullback-Leibler (KL) divergence with respect to the following distribution must be lower than <span class="badge badge-secondary" >0.1</span>: <span style="font-family:serif;" >▃▆▁█</span>
+            </span>""".replace(" ", "").replace("\t", "").replace("\n", "")
+
+    assert res == expected
