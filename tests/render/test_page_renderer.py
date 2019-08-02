@@ -4,7 +4,7 @@ from great_expectations.render.renderer import (
 )
 
 def test_render_asset_notes():
-    import pypandoc
+    # import pypandoc
     # print(pypandoc.convert_text("*hi*", to='html', format="md"))
 
     result = PrescriptivePageRenderer._render_asset_notes({
