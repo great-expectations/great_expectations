@@ -215,7 +215,7 @@ class DefaultJinjaView(object):
     
         return pTemplate(
             pTemplate(base_template_string).substitute(
-                {"template": template.get("template", ""), "styling": template.get("styling", {})})
+                {"template": template.get("template", ""), "styling": cls.render_styling(template.get("styling", {}))})
         ).substitute(template.get("params", {}))
     
     
