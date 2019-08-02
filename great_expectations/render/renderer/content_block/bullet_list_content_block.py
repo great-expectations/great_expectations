@@ -47,7 +47,7 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
     }
 
     # Unicode: 9601, 9602, 9603, 9604, 9605, 9606, 9607, 9608
-    bar = '▁▂▃▄▅▆▇█'
+    bar = u'▁▂▃▄▅▆▇█'
     barcount = len(bar)
 
     @classmethod
@@ -62,7 +62,7 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
         if extent == 0:
             extent = 1
 
-        sparkline = ''.join(cls.bar[min([cls.barcount - 1,
+        sparkline = u''.join(cls.bar[min([cls.barcount - 1,
                                          int((n - mn) / extent * cls.barcount)])]
                             for n in weights)
         return sparkline, mn, mx
@@ -1217,7 +1217,7 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
             template_str = "Kullback-Leibler (KL) divergence with respect to a given distribution must be lower than a \
             provided threshold but no distribution was specified."
         else:
-            params["sparklines_histogram"]= cls.sparkline(params.get("partition_object")["weights"])[0]
+            params["sparklines_histogram"] = cls.sparkline(params.get("partition_object")["weights"])[0]
             template_str = "Kullback-Leibler (KL) divergence with respect to the following distribution must be " \
                            "lower than $threshold: $sparklines_histogram"
 
