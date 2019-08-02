@@ -179,10 +179,8 @@ class DataContext(object):
             }
         })
         # Normalize paths as appropriate
-        for validation_store in validations_stores:
-            if validation_store["type"] == "filesystem":
-                if not os.path.isabs(validation_store["base_directory"]):
-                    validation_store["base_directory"] = os.path.join(self.root_directory, validation_store["base_directory"])
+        for validations_store in validations_stores:
+            validations_store = self._normalize_store_path(validations_store)
         self._validations_stores = validations_stores
 
         self._load_evaluation_parameter_store()
@@ -190,6 +188,12 @@ class DataContext(object):
         if data_asset_name_delimiter not in ALLOWED_DELIMITERS:
             raise DataContextError("Invalid delimiter: delimiter must be '.' or '/'")
         self._data_asset_name_delimiter = data_asset_name_delimiter
+
+    def _normalize_store_path(self, resource_store):
+        if resource_store["type"] == "filesystem":
+            if not os.path.isabs(resource_store["base_directory"]):
+                resource_store["base_directory"] = os.path.join(self.root_directory, resource_store["base_directory"])
+        return resource_store
 
     @property
     def root_directory(self):
@@ -1501,6 +1505,8 @@ class DataContext(object):
         """
         if validations_store is None:
             validations_store = self.validations_store
+        else:
+            validations_store = self._normalize_store_path(validations_store)
 
         validation_results = {}
 
