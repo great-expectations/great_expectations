@@ -1,3 +1,5 @@
+{% include 'content_block_header.j2' %}
+
 {% if "styling" in content_block and "body" in content_block["styling"] -%}
     {% set content_block_body_styling = content_block["styling"]["body"] | render_styling -%}
 {% else -%}
