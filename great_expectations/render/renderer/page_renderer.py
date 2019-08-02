@@ -39,7 +39,7 @@ class PrescriptivePageRenderer(Renderer):
                 if exp_column_list and len(exp_column_list) > 0:
                     ordered_columns = exp_column_list
 
-        # if no order of colums is expected, sort alphabetically
+        # if no order of columns is expected, sort alphabetically
         if not ordered_columns:
             ordered_columns = sorted(list(columns.keys()))
 
