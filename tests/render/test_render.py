@@ -54,7 +54,7 @@ def titanic_dataset_profiler_expectations():
 
 @pytest.fixture(scope="module")
 def titanic_dataset_profiler_expectations_with_distribution():
-    with open('/Users/james/dev/great_expectations/tests/render/fixtures/BasicDatasetProfiler_expectations_with_distribution.json', 'r') as infile:
+    with open('./tests/render/fixtures/BasicDatasetProfiler_expectations_with_distribution.json', 'r') as infile:
         return json.load(infile, encoding="utf-8", object_pairs_hook=OrderedDict)
 
 
