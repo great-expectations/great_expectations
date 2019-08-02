@@ -1465,7 +1465,7 @@ class DataContext(object):
         if resource_store['type'] == "s3":
             raise NotImplementedError("s3 is not currently a supported resource_store type for writing")
         elif resource_store['type'] == 'filesystem':
-            path_components = [resource_store["base_directory"]]
+            path_components = [self._normalize_store_path(resource_store["base_directory"])]
             if resource_namespace is not None:
                 path_components.append(resource_namespace)
             if run_id is not None:
@@ -1486,9 +1486,9 @@ class DataContext(object):
                     path_components.append(expectation_suite_name)
 
             path_components.append(resource_name)
-            path = os.path.abspath(os.path.join(
+            path = os.path.join(
                 *path_components
-            ))
+            )
             safe_mmkdir(os.path.dirname(path))
             with open(path, "w") as writer:
                 writer.write(resource)
