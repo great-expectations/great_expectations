@@ -97,7 +97,7 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
                         "placement": "top"
                     },
                 },
-            "sub_header": {
+            "subheader": {
                     "template": "Type: {column_type}".format(column_type=column_type),
                     "tooltip": {
                       "content": "expect_column_values_to_be_of_type <br>expect_column_values_to_be_in_type_list",
@@ -406,7 +406,7 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
             "expect_column_kl_divergence_to_be_less_than"
         )
         # print(json.dumps(kl_divergence_evr, indent=2))
-        if not kl_divergence_evr or "result" not in kl_divergence_evr:
+        if not kl_divergence_evr or "result" not in kl_divergence_evr or "details" not in kl_divergence_evr.get("result", {}):
             return
 
         bins = kl_divergence_evr["result"]["details"]["observed_partition"]["bins"]
