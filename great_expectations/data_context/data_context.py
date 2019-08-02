@@ -239,14 +239,15 @@ class DataContext(object):
         else:
             self._data_asset_name_delimiter = new_delimiter
 
-    def get_validation_location(self, data_asset_name, expectation_suite_name, run_id):
+    def get_validation_location(self, data_asset_name, expectation_suite_name, run_id, validations_store=None):
         """Get the local path where a validation result is stored, given full asset name and run id
 
         Args:
             data_asset_name: name of data asset for which to get validation location
             expectation_suite_name: name of expectation suite for which to get validation location
             run_id: run_id of validation to get. If no run_id is specified, fetch the latest run_id according to \
-            alphanumeric sort (by default, the latest run_id if using ISO 8601 formatted timestamps for run_id
+                alphanumeric sort (by default, the latest run_id if using ISO 8601 formatted timestamps for run_id
+            validations_store: the store in which validations are located
 
         Returns:
             path (str): path to the validation location for the specified data_asset, expectation_suite and run_id
@@ -254,7 +255,9 @@ class DataContext(object):
         result = {}
 
         data_asset_name = self._normalize_data_asset_name(data_asset_name)
-        validations_store = self.validations_store
+        if validations_store is None:
+            validations_store = self.validations_store
+
         if validations_store["type"] == "filesystem":
             if "base_directory" not in validations_store:
                 raise DataContextError(
@@ -1541,13 +1544,14 @@ class DataContext(object):
         else:
             raise DataContextError("unrecognized validations_store type: %s" % validations_store["type"])
 
-    def get_validation_result(self, data_asset_name, expectation_suite_name="default", validation_store=None, run_id=None, failed_only=False):
+    def get_validation_result(self, data_asset_name, expectation_suite_name="default", run_id=None, validations_store=None, failed_only=False):
         """Get validation results from a configured store.
 
         Args:
             data_asset_name: name of data asset for which to get validation result
             expectation_suite_name: expectation_suite name for which to get validation result (default: "default")
             run_id: run_id for which to get validation result (if None, fetch the latest result by alphanumeric sort)
+            validations_store: the store from which to get validation results
             failed_only: if True, filter the result to return only failed expectations
 
         Returns:
@@ -1555,7 +1559,7 @@ class DataContext(object):
 
         """
 
-        validation_location = self.get_validation_location(data_asset_name, expectation_suite_name, run_id)
+        validation_location = self.get_validation_location(data_asset_name, expectation_suite_name, run_id, validations_store=validations_store)
 
         if 'filepath' in validation_location:
             validation_path = validation_location['filepath']
