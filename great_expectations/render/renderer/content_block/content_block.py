@@ -32,7 +32,7 @@ class ContentBlockRenderer(Renderer):
                 expectation_type = cls._get_expectation_type(obj_)
 
                 if cls.__name__ == "PrescriptiveEvrTableContentBlockRenderer":
-                    content_block_fn = cls.generate_expectation_row(obj_, expectation_type)
+                    content_block_fn = cls.generate_expectation_row(expectation_type)
                 else:
                     content_block_fn = getattr(cls, expectation_type, None)
                 if content_block_fn is not None:
@@ -58,6 +58,10 @@ class ContentBlockRenderer(Renderer):
                     # TODO: This should probably be overridable via a parameter
                     "styling": cls._get_content_block_styling(),
                 }
+
+                if cls.__name__ == "PrescriptiveEvrTableContentBlockRenderer":
+                    content_block["header_row"] = ["Status", "Expectation", "Observed Value"]
+                
                 header = cls._get_header()
                 if header != "":
                     content_block.update({
