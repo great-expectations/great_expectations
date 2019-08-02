@@ -18,6 +18,7 @@ from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfil
 
 from great_expectations.data_context.util import safe_mmkdir
 
+
 @pytest.fixture(scope="module")
 def titanic_validation_results():
     with open("./tests/test_sets/expected_cli_results_default.json", "r") as infile:
@@ -31,29 +32,37 @@ def titanic_expectations():
 
 
 @pytest.fixture(scope="module")
-def tetanus_varicella_basic_dataset_profiler_evrs():
+def titanic_profiler_evrs():
     with open('./tests/render/fixtures/BasicDatasetProfiler_evrs.json', 'r') as infile:
         return json.load(infile, object_pairs_hook=OrderedDict)
 
 
 @pytest.fixture(scope="module")
-def tetanus_varicella_basic_dataset_profiler_evrs_with_exception():
+def titanic_profiler_evrs_with_exception():
     with open('./tests/render/fixtures/BasicDatasetProfiler_evrs_with_exception.json', 'r') as infile:
         return json.load(infile)
 
 
 @pytest.fixture(scope="module")
-def tetanus_varicella_basic_dataset_profiler_expectations():
+def titanic_dataset_profiler_expectations():
     with open('./tests/render/fixtures/BasicDatasetProfiler_expectations.json', 'r') as infile:
         return json.load(infile, object_pairs_hook=OrderedDict)
 
+
 @pytest.fixture(scope="module")
-def movielens_project_dir(tmp_path_factory):
-    source_path = './tests/test_fixtures/movielens_project/great_expectations/'
-    project_path = str(tmp_path_factory.mktemp('movielens_project'))
-    project_ge_config_path = os.path.join(project_path, "great_expectations")
-    shutil.copytree(source_path, project_ge_config_path)
-    return project_ge_config_path
+def titanic_dataset_profiler_expectations_with_distribution():
+    with open('./tests/render/fixtures/BasicDatasetProfiler_expectations_with_distribution.json', 'r') as infile:
+        return json.load(infile, object_pairs_hook=OrderedDict)
+
+
+# Deprecate this fixture until we migrate to fuller project structure
+# @pytest.fixture(scope="module")
+# def movielens_project_dir(tmp_path_factory):
+#     source_path = './tests/test_fixtures/movielens_project/great_expectations/'
+#     project_path = str(tmp_path_factory.mktemp('movielens_project'))
+#     project_ge_config_path = os.path.join(project_path, "great_expectations")
+#     shutil.copytree(source_path, project_ge_config_path)
+#     return project_ge_config_path
 
 
 @pytest.mark.smoketest
@@ -63,16 +72,6 @@ def test_smoke_render_descriptive_page_renderer(titanic_validation_results):
         json.dump(rendered, outfile, indent=2)
 
     assert len(rendered["sections"]) > 5
-
-
-@pytest.mark.smoketest
-def test_render_descriptive_page_view(titanic_validation_results):
-    document = DescriptivePageRenderer.render(titanic_validation_results)
-    rendered = DefaultJinjaPageView.render(document)
-    with open('./tests/render/output/test_render_descriptive_page_view.html', 'w') as outfile:
-        outfile.write(rendered)
-
-    assert len(rendered) > 1000
 
 
 @pytest.mark.smoketest
@@ -120,8 +119,8 @@ def test_content_block_list_available_expectations():
 
 
 @pytest.mark.smoketest
-def test_render_profiled_fixture_expectations(tetanus_varicella_basic_dataset_profiler_expectations):
-    rendered_json = PrescriptivePageRenderer.render(tetanus_varicella_basic_dataset_profiler_expectations)
+def test_render_profiled_fixture_expectations(titanic_dataset_profiler_expectations):
+    rendered_json = PrescriptivePageRenderer.render(titanic_dataset_profiler_expectations)
     rendered_page = DefaultJinjaPageView.render(rendered_json)
 
     with open('./tests/render/output/test_render_profiled_fixture_expectations.html', 'w') as f:
@@ -132,8 +131,21 @@ def test_render_profiled_fixture_expectations(tetanus_varicella_basic_dataset_pr
 
 
 @pytest.mark.smoketest
-def test_render_profiled_fixture_evrs(tetanus_varicella_basic_dataset_profiler_evrs):
-    rendered_json = DescriptivePageRenderer.render(tetanus_varicella_basic_dataset_profiler_evrs)
+def test_render_profiled_fixture_expectations_with_distribution(titanic_dataset_profiler_expectations_with_distribution):
+    # Tests sparkline
+    rendered_json = PrescriptivePageRenderer.render(titanic_dataset_profiler_expectations_with_distribution)
+    rendered_page = DefaultJinjaPageView.render(rendered_json)
+
+    with open('./tests/render/output/titanic_dataset_profiler_expectations_with_distribution.html', 'w') as f:
+        f.write(rendered_page)
+
+    assert rendered_page[:15] == "<!DOCTYPE html>"
+    assert rendered_page[-7:] == "</html>"
+
+
+@pytest.mark.smoketest
+def test_render_profiled_fixture_evrs(titanic_profiler_evrs):
+    rendered_json = DescriptivePageRenderer.render(titanic_profiler_evrs)
     rendered_page = DefaultJinjaPageView.render(rendered_json)
 
     with open('./tests/render/output/test_render_profiled_fixture_evrs.html', 'w') as f:
@@ -145,8 +157,8 @@ def test_render_profiled_fixture_evrs(tetanus_varicella_basic_dataset_profiler_e
 
 @pytest.mark.smoketest
 def test_smoke_render_descriptive_page_renderer_with_exception(
-        tetanus_varicella_basic_dataset_profiler_evrs_with_exception):
-    rendered_json = DescriptivePageRenderer.render(tetanus_varicella_basic_dataset_profiler_evrs_with_exception)
+        titanic_profiler_evrs_with_exception):
+    rendered_json = DescriptivePageRenderer.render(titanic_profiler_evrs_with_exception)
     rendered_page = DefaultJinjaPageView.render(rendered_json)
 
     with open('./tests/render/output/test_render_descriptive_column_section_renderer_with_exception.html', 'w') as f:
