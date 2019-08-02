@@ -58,4 +58,44 @@ def test_render_asset_notes():
 
 
 def test_expectation_summary_in_render_asset_notes():
-    pass
+    result = PrescriptivePageRenderer._render_asset_notes({
+        "meta" : {},
+        "expectations" : {}
+    })
+    print(result)
+    assert result["content"] == ['This Expectation suite currently contains 0 total Expectations across 0 columns.']
+
+    result = PrescriptivePageRenderer._render_asset_notes({
+        "meta" : {
+            "notes" : {
+                "format": "markdown",
+                "content": ["hi"]
+            }
+        },
+        "expectations" : {}
+    })
+    print(result)
+    assert result["content"] == [
+        'This Expectation suite currently contains 0 total Expectations across 0 columns.',
+        '<p>hi</p>\n',
+    ]
+
+    result = PrescriptivePageRenderer._render_asset_notes({
+        "meta" : {},
+        "expectations" : [
+            {
+                "expectation_type": "expect_table_row_count_to_be_between",
+                "kwargs": { "min_value": 0, "max_value": None, }
+            },
+            {
+                "expectation_type": "expect_column_to_exist",
+                "kwargs": { "column": "x", }
+            },
+            {
+                "expectation_type": "expect_column_to_exist",
+                "kwargs": { "column": "y", }
+            },
+        ]
+    })
+    print(result)
+    assert result["content"][0] == 'This Expectation suite currently contains 3 total Expectations across 2 columns.'
