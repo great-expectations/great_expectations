@@ -20,6 +20,10 @@ class PrescriptivePageRenderer(Renderer):
         # Group expectations by column
         columns = {}
         ordered_columns = None
+        if "expectation_suite_name" in expectations:
+            expectation_suite_name = expectations["expectation_suite_name"]
+        else:
+            expectation_suite_name = None
         for expectation in expectations["expectations"]:
             if "column" in expectation["kwargs"]:
                 column = expectation["kwargs"]["column"]
@@ -67,8 +71,8 @@ class PrescriptivePageRenderer(Renderer):
             # "renderer_type": "PrescriptivePageRenderer",
             # "data_asset_name": short_data_asset_name,
             "full_data_asset_identifier": full_data_asset_identifier,
-            # "page_title": expectation_suite_name,
-            # "utm_medium": "prescriptive-expectation-suite-page",
+            "page_title": expectation_suite_name,
+            "utm_medium": "prescriptive-expectation-suite-page",
             "sections": sections
         }
 
