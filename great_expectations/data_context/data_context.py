@@ -167,7 +167,7 @@ class DataContext(object):
         sys.path.append(self._plugins_directory)
 
         expectations_directory = self._project_config.get("expectations_directory", "expectations")
-        if not os.path.abspath(expectations_directory):
+        if not os.path.isabs(expectations_directory):
             self._expectations_directory = os.path.join(self.root_directory, expectations_directory)
         else:
             self._expectations_directory = expectations_directory
