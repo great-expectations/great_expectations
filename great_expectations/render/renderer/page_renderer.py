@@ -1,4 +1,6 @@
 import logging
+logger = logging.getLogger(__name__)
+
 import pypandoc
 
 from .renderer import Renderer
@@ -158,8 +160,7 @@ class PrescriptivePageRenderer(Renderer):
                     elif type(notes["content"]) == list:
                         note_content = notes["content"]
                     else:
-                        #??? @James : Is this the correct way to invoke logging?
-                        logging.warning("Unrecognized Expectation suite notes format. Skipping rendering.")
+                        logger.warning("Unrecognized Expectation suite notes format. Skipping rendering.")
                     
                 elif notes["format"] == "markdown":
                     #???: Should converting to markdown be the renderer's job, or the view's job?
@@ -171,11 +172,10 @@ class PrescriptivePageRenderer(Renderer):
                         note_content = [pypandoc.convert_text(note, format='md', to="html") for note in notes["content"]]
 
                     else:
-                        #??? @James : Is this the correct way to invoke logging?
-                        logging.warning("Unrecognized Expectation suite notes format. Skipping rendering.")
+                        logger.warning("Unrecognized Expectation suite notes format. Skipping rendering.")
 
             else:
-                logging.warning("Unrecognized Expectation suite notes format. Skipping rendering.")
+                logger.warning("Unrecognized Expectation suite notes format. Skipping rendering.")
 
         if note_content != None:
             content = content + note_content
