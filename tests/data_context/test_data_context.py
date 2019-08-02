@@ -470,7 +470,7 @@ def test_render_full_static_site(tmp_path_factory, filesystem_csv_3):
     #     )
 
     # os.mkdir(os.path.join(ge_directory,"fixtures")
-    context.render_full_static_site()
+    context.build_data_documentation()
 
     # Titanic
     assert os.path.exists(os.path.join(
