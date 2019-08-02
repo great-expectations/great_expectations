@@ -1202,7 +1202,8 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
             ["column", "partition_object", "threshold"]
         )
 
-        styling.update({
+        hist_styling = copy.deepcopy(styling)
+        hist_styling.update({
             "params": {
                 "sparklines_histogram": {
                     "styles": {
@@ -1226,7 +1227,7 @@ class PrescriptiveBulletListContentBlockRenderer(ContentBlockRenderer):
         return [{
             "template": template_str,
             "params": params,
-            "styling": styling,
+            "styling": hist_styling,
         }]
     
     @classmethod
