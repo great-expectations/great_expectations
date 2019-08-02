@@ -12,9 +12,62 @@ from great_expectations.render.view import (
     DefaultJinjaIndexPageView,
 )
 
-from great_expectations.data_context.util import NormalizedDataAssetName, get_slack_callback, safe_mmkdir
+from great_expectations.data_context.util import NormalizedDataAssetName, safe_mmkdir
 
 class SiteBuilder():
+    """SiteBuilder builds a data documentation website for the project defined by a DataContext.
+
+    A data documentation site consists of HTML pages for expectation suites, profiling and validation results, and
+    an index.html page that links to all the pages.
+
+    The exact behavior of SiteBuilder is controlled by configuration in the DataContext's great_expectations.yml file.
+
+    Users can specify
+    * which datasources to document (by default, all)
+    * whether to include expectations, validations and profiling results sections
+    * where the expectations and validations should be read from (filesystem or S3)
+    * where the HTML files should be written (filesystem or S3)
+
+    Here is an example of config for a site:
+
+      type: SiteBuilder
+      site_store:
+        type: filesystem
+        base_directory: uncommitted/documentation/local_site
+      expectations_store:
+        type: filesystem
+        base_directory: expectations/
+      validations_store:
+        type: filesystem
+        base_directory: uncommitted/validations/
+      profiling_store:
+        type: filesystem
+        base_directory: fixtures/validations/
+      datasources: "*"
+      sections:
+        index:
+          renderer:
+            type: IndexRenderer
+          view:
+            type: IndexView
+        validations:
+          renderer:
+            type: ValidationRenderer
+            run_id_filter:
+              ne: profiling
+          view:
+            type: ValidationPageView
+        expectations:
+          renderer:
+            type: ExpectationRenderer
+          view:
+            type: ExpectationPageView
+        profiling:
+          renderer:
+            type: ProfileRenderer
+          view:
+            type: ProfilePageView
+    """
 
     @classmethod
     def build(cls, data_context, site_config):
@@ -63,6 +116,8 @@ class SiteBuilder():
                                         )
                             })
 
+        # expectation suites
+
         for datasource, v1 in data_context.list_expectation_suites(expectations_store=site_config['expectations_store']):
             for generator, v2 in v1.items():
                 for data_asset_name, expectation_suite_names in v2.items():
@@ -75,7 +130,6 @@ class SiteBuilder():
                         data_asset_name = expectation_suite['data_asset_name']
                         expectation_suite_name = expectation_suite['expectation_suite_name']
                         model = PrescriptivePageRenderer.render(expectation_suite)
-
                         data_context.write_resource(
                             DefaultJinjaPageView.render(model),  # bytes
                             expectation_suite_name + '.html',  # name to be used inside namespace

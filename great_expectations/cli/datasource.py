@@ -308,7 +308,7 @@ To learn more: <blue>https://docs.greatexpectations.io/en/latest/guides/data_doc
 
 def build_documentation(context):
     """Build documentation in a context"""
-    context.render_full_static_site()
+    context.build_data_documentation()
     cli_message(
         """
 To view the generated data documentation, open this file in a web browser:
