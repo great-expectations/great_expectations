@@ -152,6 +152,7 @@ class DefaultJinjaView(object):
             return template
     
         tag = template.get("tag", "span")
+        template["template"] = template.get("template", "").replace("\n", "<br>")
     
         if "tooltip" in template:
             tooltip_content = template["tooltip"]["content"]
