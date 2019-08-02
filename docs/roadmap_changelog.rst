@@ -15,6 +15,9 @@ v.0.7.4__develop
 -----------------
 * Add support for pandas extension dtypes in pandas backend of expect_column_values_to_be_of_type and
   expect_column_values_to_be_in_type_list and fix bug affecting some dtype-based checks.
+* Add datetime and boolean column-type detection in BasicDatasetProfiler.
+* Improve BasicDatasetProfiler performance by disabling interactive evaluation when output of expectation is not
+  immediately used for determining next expectations in profile.
 
 v.0.7.3
 -----------------
