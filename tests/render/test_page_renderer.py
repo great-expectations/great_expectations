@@ -55,3 +55,7 @@ def test_render_asset_notes():
     })
     print(result)
     assert result["content"] == ["<p><em>alpha</em></p>\n", "<p><em>bravo</em></p>\n", "<p>charlie</p>\n"]
+
+
+def test_expectation_summary_in_render_asset_notes():
+    pass

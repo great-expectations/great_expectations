@@ -173,15 +173,24 @@ def test_full_oobe_flow():
     assert rendered_page[-7:] == "</html>"
 
 
-@pytest.mark.smoketest
-def test_movielens_rendering(movielens_project_dir):
-    context = ge.DataContext(movielens_project_dir)
-    context.render_full_static_site()
+# Deprecating this overly broad test
+#Salvaging this for later use:
+    # "notes": {
+    #   "format": "markdown",
+    #   "content": [
+    #     "_To add additional notes, edit the <code>meta.notes.content</code> field in <code>expectations/mydb/default/movies/BasicDatasetProfiler.json</code>_"
+    #   ]
+    # }
 
-    print(movielens_project_dir)
+# @pytest.mark.smoketest
+# def test_movielens_rendering(movielens_project_dir):
+#     context = ge.DataContext(movielens_project_dir)
+#     context.render_full_static_site()
 
-    with open(os.path.join(movielens_project_dir, "uncommitted/documentation/mydb/default/movies/BasicDatasetProfiler.html")) as f:
-        html = f.read()
-        assert html != ""
-        assert "This Expectation suite currently contains 19 total Expectations across 3 columns." in html
-        assert "To add additional notes" in html
+#     print(movielens_project_dir)
+
+#     with open(os.path.join(movielens_project_dir, "uncommitted/documentation/mydb/default/movies/BasicDatasetProfiler.html")) as f:
+#         html = f.read()
+#         assert html != ""
+#         assert "This Expectation suite currently contains 19 total Expectations across 3 columns." in html
+#         assert "To add additional notes" in html
