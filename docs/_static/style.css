@@ -1,0 +1,12 @@
+.wy-nav-content {
+    width: auto !important;
+    max-width: max-content !important;
+}
+
+.section {
+    width: 800px;
+}
+
+.widetable {
+    min-width: 1000px !important;
+}
