@@ -488,7 +488,7 @@ def test_render_full_static_site(tmp_path_factory, filesystem_csv_3):
     ), "r") as infile:
         titanic_validation = json.load(infile)
     titanic_run_id = titanic_validation['meta']['run_id']
-    titanic_validation_html_filename = "{run_id}-BasicDatasetProfiler.html".format(
+    titanic_validation_html_filename = "{run_id}-BasicDatasetProfiler-Descriptive.html".format(
                     run_id=titanic_run_id.replace(':', ''),
                 )
     assert os.path.exists(os.path.join(
@@ -511,7 +511,7 @@ def test_render_full_static_site(tmp_path_factory, filesystem_csv_3):
     ), "r") as infile:
         f1_validation = json.load(infile)
     f1_run_id = f1_validation['meta']['run_id']
-    f1_validation_html_filename = "{run_id}-BasicDatasetProfiler.html".format(
+    f1_validation_html_filename = "{run_id}-BasicDatasetProfiler-Descriptive.html".format(
                     run_id=f1_run_id.replace(':', ''),
                 )
     assert os.path.exists(os.path.join(
@@ -534,7 +534,7 @@ def test_render_full_static_site(tmp_path_factory, filesystem_csv_3):
             ), "r") as infile:
         f2_validation = json.load(infile)
     f2_run_id = f2_validation['meta']['run_id']
-    f2_validation_html_filename = "{run_id}-BasicDatasetProfiler.html".format(
+    f2_validation_html_filename = "{run_id}-BasicDatasetProfiler-Descriptive.html".format(
                     run_id=f2_run_id.replace(':', ''),
                 )
     assert os.path.exists(os.path.join(
