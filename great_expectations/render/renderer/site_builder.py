@@ -79,17 +79,17 @@ class SiteBuilder():
 
         #TODO: filter data sources if the config requires it
 
-        for run_id, v0 in data_context.list_validation_results(validation_store=site_config['validations_store']).items():
+        for run_id, v0 in data_context.list_validation_results(validations_store=site_config['profiling_store']).items():
             for datasource, v1 in v0.items():
                 for generator, v2 in v1.items():
-                    for data_asset_name, expectation_suite_names in v2.items():
+                    for generator_asset, expectation_suite_names in v2.items():
+                        data_asset_name = data_context.data_asset_name_delimiter.join([datasource, generator, generator_asset])
                         for expectation_suite_name in expectation_suite_names:
                             validation = data_context.get_validation_result(data_asset_name,
                                                                             expectation_suite_name=expectation_suite_name,
-                                                                            validation_store=site_config['validations_store'],
+                                                                            validations_store=site_config['profiling_store'],
                                                                             run_id=run_id)
 
-                            run_id = validation['meta']['run_id']
                             data_asset_name = validation['meta']['data_asset_name']
                             expectation_suite_name = validation['meta']['expectation_suite_name']
                             model = DescriptivePageRenderer.render(validation)
@@ -99,9 +99,7 @@ class SiteBuilder():
                                 expectation_suite_name + '.html',  # name to be used inside namespace
                                 resource_store=site_config['site_store'],
                                 resource_namespace="profiling",
-                                data_asset_name=data_asset_name,
-                                expectation_suite_name=expectation_suite_name,
-                                run_id=run_id
+                                data_asset_name=data_asset_name
                             )
 
                             index_links.append({
@@ -118,14 +116,13 @@ class SiteBuilder():
 
         # expectation suites
 
-        for datasource, v1 in data_context.list_expectation_suites(expectations_store=site_config['expectations_store']):
+        for datasource, v1 in data_context.list_expectation_suites().items():
             for generator, v2 in v1.items():
                 for data_asset_name, expectation_suite_names in v2.items():
                     for expectation_suite_name in expectation_suite_names:
                         expectation_suite = data_context.get_expectation_suite(
                             data_asset_name,
-                            expectation_suite_name=expectation_suite_name,
-                            expectations_store=site_config['expectations_store'])
+                            expectation_suite_name=expectation_suite_name)
 
                         data_asset_name = expectation_suite['data_asset_name']
                         expectation_suite_name = expectation_suite['expectation_suite_name']
@@ -135,8 +132,7 @@ class SiteBuilder():
                             expectation_suite_name + '.html',  # name to be used inside namespace
                             resource_store=site_config['site_store'],
                             resource_namespace='expectations',
-                            data_asset_name=data_asset_name,
-                            expectation_suite_name=expectation_suite_name
+                            data_asset_name=data_asset_name
                         )
 
                         index_links.append({
@@ -156,14 +152,12 @@ class SiteBuilder():
             "sections": model
         })
 
-        if site_config['site_store']['type'] == 's3':
-            raise NotImplementedError("site_store.type = s3")
-        elif site_config['site_store']['type'] == 'filesystem':
-            index_page_path = os.path.join(data_context.get_absolute_path(site_config['site_store']['base_directory']), "index.html")
-            with open(index_page_path, "w") as writer:
-                writer.write(index_page_output)
-        else:
-            raise ValueError("Unrecognized site_store.type: " + site_config['site_store']['type'])
+        data_context.write_resource(
+            index_page_output,  # bytes
+            'index.html',  # name to be used inside namespace
+            resource_store=site_config['site_store']
+        )
+
 
 
 

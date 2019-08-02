@@ -1465,7 +1465,8 @@ class DataContext(object):
         if resource_store['type'] == "s3":
             raise NotImplementedError("s3 is not currently a supported resource_store type for writing")
         elif resource_store['type'] == 'filesystem':
-            path_components = [self._normalize_store_path(resource_store["base_directory"])]
+            resource_store = self._normalize_store_path(resource_store)
+            path_components = [resource_store['base_directory']]
             if resource_namespace is not None:
                 path_components.append(resource_namespace)
             if run_id is not None:
