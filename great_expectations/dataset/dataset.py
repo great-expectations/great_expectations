@@ -149,12 +149,6 @@ class Dataset(MetaDataset):
     # That way, multiple backends can implement the same data_asset_type
     _data_asset_type = "Dataset"
 
-    INT_TYPE_NAMES = set(["INTEGER", "int", "INT", "TINYINT", "BYTEINT", "SMALLINT", "BIGINT", "IntegerType", "LongType", "DECIMAL"])
-    FLOAT_TYPE_NAMES = set(["FLOAT", "FLOAT4", "FLOAT8", "DOUBLE_PRECISION", "NUMERIC", "FloatType", "DoubleType", "float"])
-    STRING_TYPE_NAMES = set(["CHAR", "VARCHAR", "TEXT", "StringType", "string", "str"])
-    BOOLEAN_TYPE_NAMES = set(["BOOLEAN", "BOOL", "bool", "BooleanType"])
-
-
     # getter functions with hashable arguments - can be cached
     hashable_getters = [
         'get_column_min',
@@ -1758,7 +1752,8 @@ class Dataset(MetaDataset):
             column (str): \
                 The column name.
             distribution (str): \
-                The scipy distribution name. See: `<https://docs.scipy.org/doc/scipy/reference/stats.html>`_
+                The scipy distribution name. See: `<https://docs.scipy.org/doc/scipy/reference/stats.html>`_ Currently
+                supported distributions are listed in the Notes section below.
             p_value (float): \
                 The threshold p-value for a passing test. Default is 0.05.
             params (dict or list) : \
