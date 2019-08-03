@@ -139,7 +139,7 @@ def test_render_profiled_fixture_expectations_with_distribution(titanic_dataset_
     rendered_json = PrescriptivePageRenderer.render(titanic_dataset_profiler_expectations_with_distribution)
     rendered_page = DefaultJinjaPageView.render(rendered_json)
 
-    with open('./tests/render/output/titanic_dataset_profiler_expectations_with_distribution.html', 'w') as f:
+    with open('./tests/render/output/titanic_dataset_profiler_expectations_with_distribution.html', 'wb') as f:
         f.write(rendered_page.encode("utf-8"))
 
     assert rendered_page[:15] == "<!DOCTYPE html>"
