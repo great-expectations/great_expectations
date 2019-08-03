@@ -603,6 +603,12 @@ class DataAsset(object):
                 else:
                     return expectation
 
+    def set_config_value(self, key, value):
+        self._config[key] = value
+
+    def get_config_value(self, key):
+        return self._config[key]
+
     def get_batch_kwargs(self):
         return self._batch_kwargs
 
@@ -715,7 +721,7 @@ class DataAsset(object):
 
             expectations = new_expectations
 
-        message = "%d expectation(s) included in expectation_suite." % len(expectations)
+        message = "\t%d expectation(s) included in expectation_suite." % len(expectations)
 
         if discards["failed_expectations"] > 0 and not suppress_warnings:
             message += " Omitting %d expectation(s) that failed when last run; set " \
