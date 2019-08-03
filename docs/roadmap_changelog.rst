@@ -10,6 +10,9 @@ Planned Features
 * Conditional expectations
 * Multi-batch expectations
 
+v.0.7.6__develop
+-----------------
+
 v.0.7.5
 -----------------
 * Fix missing requirement for pypandoc brought in from markdown support for notes rendering.
