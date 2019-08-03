@@ -1,3 +1,5 @@
+.. cssclass:: widetable
+
 .. _implemented_expectations:
 
 Implemented Expectations

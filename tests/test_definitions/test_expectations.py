@@ -6,6 +6,8 @@ import glob
 import logging
 from collections import OrderedDict
 
+import pandas as pd
+
 from sqlalchemy.dialects.sqlite import dialect as sqliteDialect
 from sqlalchemy.dialects.postgresql import dialect as postgresqlDialect
 from sqlalchemy.dialects.mysql import dialect as mysqlDialect
@@ -71,6 +73,12 @@ def pytest_generate_tests(metafunc):
                                     generate_test = True
                             elif isinstance(data_asset, PandasDataset):
                                 if "pandas" in test["only_for"]:
+                                    generate_test = True
+                                if (("pandas_022" in test["only_for"] or "pandas_023" in test["only_for"]) and
+                                        int(pd.__version__.split(".")[1]) in [22, 23]):
+                                    generate_test = True
+                                if (("pandas>=24" in test["only_for"]) and
+                                        int(pd.__version__.split(".")[1]) > 24):
                                     generate_test = True
                             elif isinstance(data_asset, SparkDFDataset):
                                 if "spark" in test["only_for"]:
