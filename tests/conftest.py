@@ -406,6 +406,22 @@ def titanic_profiled_evrs_1():
     return json.load(open("./tests/render/fixtures/BasicDatasetProfiler_evrs.json"))
 
 @pytest.fixture()
+def titanic_profiled_name_column_evrs():
+    from great_expectations.render.renderer.renderer import (
+        Renderer,
+    )
+
+    titanic_profiled_evrs_1 =  json.load(open("./tests/render/fixtures/BasicDatasetProfiler_evrs.json"))
+    evrs_by_column = Renderer()._group_evrs_by_column(titanic_profiled_evrs_1)
+    print(evrs_by_column.keys())
+
+    name_column_evrs = evrs_by_column["Name"]
+    print(json.dumps(name_column_evrs, indent=2))
+
+    return name_column_evrs
+
+
+@pytest.fixture()
 def titanic_validation_results():
     with open("./tests/test_sets/expected_cli_results_default.json", "r") as infile:
         return json.load(infile)
