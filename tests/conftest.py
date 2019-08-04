@@ -405,3 +405,9 @@ def filesystem_csv_3(tmp_path_factory):
 def profiled_evrs_1():
     return json.load(open("./tests/render/fixtures/BasicDatasetProfiler_evrs.json"))
 
+@pytest.fixture()
+def titanic_validation_results():
+    with open("./tests/test_sets/expected_cli_results_default.json", "r") as infile:
+        return json.load(infile)
+
+
