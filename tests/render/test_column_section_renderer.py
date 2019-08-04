@@ -63,16 +63,19 @@ def test_DescriptiveColumnSectionRenderer_render(titanic_profiled_evrs_1):
     print(document)
     assert document != {}
 
-def test_DescriptiveColumnSectionRenderer_render_header(titanic_profiled_evrs_1):
-    evrs_by_column = DescriptiveColumnSectionRenderer()._group_evrs_by_column(titanic_profiled_evrs_1)
-    print(evrs_by_column.keys())
+def test_DescriptiveColumnSectionRenderer_render_header(titanic_profiled_name_column_evrs):
+    # evrs_by_column = DescriptiveColumnSectionRenderer()._group_evrs_by_column(titanic_profiled_evrs_1)
+    # print(evrs_by_column.keys())
 
-    column_evrs = evrs_by_column["Name"]
+    # column_evrs = evrs_by_column["Name"]
+    # print(json.dumps(column_evrs, indent=2))
 
-    print(json.dumps(column_evrs, indent=2))
     content_blocks = []
-    column_type = None
-    DescriptiveColumnSectionRenderer()._render_header(column_evrs, content_blocks, column_type)
+    DescriptiveColumnSectionRenderer()._render_header(
+        titanic_profiled_name_column_evrs,
+        content_blocks,
+        column_type = None
+    )
     print(json.dumps(content_blocks, indent=2))
     
     assert len(content_blocks) == 1
@@ -126,10 +129,10 @@ def test_DescriptiveColumnSectionRenderer_render_header(titanic_profiled_evrs_1)
 #     DescriptiveColumnSectionRenderer()._render_failed(evrs, content_blocks)
 
 
-# def test_PrescriptiveColumnSectionRenderer_render_header():
-#     remaining_expectations, content_blocks = cls._render_header(
-#         expectations, [])
+def test_PrescriptiveColumnSectionRenderer_render_header():
+    remaining_expectations, content_blocks = cls._render_header(
+        expectations, [])
 
-# def test_PrescriptiveColumnSectionRenderer_render_bullet_list():
-#     remaining_expectations, content_blocks = cls._render_bullet_list(
-#         remaining_expectations, content_blocks)
+def test_PrescriptiveColumnSectionRenderer_render_bullet_list():
+    remaining_expectations, content_blocks = cls._render_bullet_list(
+        remaining_expectations, content_blocks)
