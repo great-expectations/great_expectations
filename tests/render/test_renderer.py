@@ -11,12 +11,15 @@ def test_render():
     assert Renderer().render({}) == {}
     assert Renderer().render("wowza") == "wowza"
 
+#TODO: Implement this test thoughtfully
 # def test__id_from_configuration():
 #     Renderer()._id_from_configuration(expectation_type, expectation_kwargs, data_asset_name=None)
 
+#TODO: Implement this test thoughtfully
 # def test__get_expectation_type():
 #     Renderer()._get_expectation_type(ge_object)
 
+#TODO: Implement this test thoughtfully
 # def test__find_ge_object_type():
 #     Renderer()._find_ge_object_type(ge_object)
 

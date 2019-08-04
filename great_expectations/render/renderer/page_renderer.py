@@ -209,16 +209,7 @@ class DescriptivePageRenderer(Renderer):
 
         # Group EVRs by column
         #TODO: When we implement a ValidationResultSuite class, this method will move there.
-        columns = {}
-        for evr in validation_results["results"]:
-            if "column" in evr["expectation_config"]["kwargs"]:
-                column = evr["expectation_config"]["kwargs"]["column"]
-            else:
-                column = "Table-level Expectations"
-
-            if column not in columns:
-                columns[column] = []
-            columns[column].append(evr)
+        columns = cls._group_evrs_by_column(validation_results)
 
         ordered_columns = Renderer._get_column_list_from_evrs(validation_results)
         column_types = DescriptiveOverviewSectionRenderer._get_column_types(validation_results)

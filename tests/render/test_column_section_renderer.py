@@ -9,6 +9,8 @@ from great_expectations.render.renderer import (
 
 def test_DescriptiveColumnSectionRenderer_render(profiled_evrs_1):
     document = DescriptiveColumnSectionRenderer().render(profiled_evrs_1["results"])
+    print(document)
+    assert document != {}
 
 def test_DescriptiveColumnSectionRenderer_render_header(profiled_evrs_1):
     content_blocks = []
