@@ -135,3 +135,6 @@ def test_PrescriptiveColumnSectionRenderer_render_bullet_list(titanic_profiled_e
         titanic_profiled_expectations_1["expectations"],
         [],
     )
+
+    print(json.dumps(content_blocks, indent=2))
+    # assert False
