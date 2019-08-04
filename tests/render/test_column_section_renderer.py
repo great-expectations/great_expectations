@@ -52,16 +52,46 @@ def test_render_prescriptive_column_section_renderer(titanic_expectations):
                 as outfile:
             json.dump(PrescriptiveColumnSectionRenderer.render(exp_groups[column]), outfile, indent=2)
 
+    # # This can be used for regression testing
+    # for column in exp_groups.keys():
+    #     with open('./tests/render/output/test_render_prescriptive_column_section_renderer' + column + '.json') as infile:
+    #         assert json.dumps(PrescriptiveColumnSectionRenderer.render(exp_groups[column]), indent=2) == infile
 
-def test_DescriptiveColumnSectionRenderer_render(profiled_evrs_1):
-    document = DescriptiveColumnSectionRenderer().render(profiled_evrs_1["results"])
+
+def test_DescriptiveColumnSectionRenderer_render(titanic_profiled_evrs_1):
+    document = DescriptiveColumnSectionRenderer().render(titanic_profiled_evrs_1["results"])
     print(document)
     assert document != {}
 
-def test_DescriptiveColumnSectionRenderer_render_header(profiled_evrs_1):
+def test_DescriptiveColumnSectionRenderer_render_header(titanic_profiled_evrs_1):
+    evrs_by_column = DescriptiveColumnSectionRenderer()._group_evrs_by_column(titanic_profiled_evrs_1)
+    print(evrs_by_column.keys())
+
+    column_evrs = evrs_by_column["Name"]
+
+    print(json.dumps(column_evrs, indent=2))
     content_blocks = []
     column_type = None
-    DescriptiveColumnSectionRenderer()._render_header(profiled_evrs_1, content_blocks, column_type)
+    DescriptiveColumnSectionRenderer()._render_header(column_evrs, content_blocks, column_type)
+    print(json.dumps(content_blocks, indent=2))
+    
+    assert len(content_blocks) == 1
+    content_block = content_blocks[0]
+    assert content_block["content_block_type"] == "header"
+    assert content_block["header"] == {
+        "template": "Name",
+        "tooltip": {
+            "content": "expect_column_to_exist",
+            "placement": "top"
+        }
+    }
+    assert content_block["sub_header"] == {
+        "template": "Type: None",
+        "tooltip": {
+            "content": "expect_column_values_to_be_of_type <br>expect_column_values_to_be_in_type_list"
+        }
+    }
+
 
 # def test_DescriptiveColumnSectionRenderer_render_overview_table():
 #     evrs = {}
