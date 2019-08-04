@@ -406,6 +406,11 @@ def titanic_profiled_evrs_1():
     return json.load(open("./tests/render/fixtures/BasicDatasetProfiler_evrs.json"))
 
 @pytest.fixture()
+def titanic_profiled_expectations_1():
+    return json.load(open("./tests/render/fixtures/BasicDatasetProfiler_expectations.json"))
+
+
+@pytest.fixture()
 def titanic_profiled_name_column_evrs():
     from great_expectations.render.renderer.renderer import (
         Renderer,
