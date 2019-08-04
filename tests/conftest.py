@@ -402,7 +402,7 @@ def filesystem_csv_3(tmp_path_factory):
     return base_dir
 
 @pytest.fixture()
-def profiled_evrs_1():
+def titanic_profiled_evrs_1():
     return json.load(open("./tests/render/fixtures/BasicDatasetProfiler_evrs.json"))
 
 @pytest.fixture()
