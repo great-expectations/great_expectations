@@ -400,3 +400,8 @@ def filesystem_csv_3(tmp_path_factory):
     toy_dataset_2.to_csv(os.path.join(base_dir, "f2.csv"), index=None)
 
     return base_dir
+
+@pytest.fixture()
+def profiled_evrs_1():
+    return json.load(open("./tests/render/fixtures/BasicDatasetProfiler_evrs.json"))
+
