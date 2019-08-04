@@ -208,6 +208,7 @@ class DescriptivePageRenderer(Renderer):
         short_data_asset_name = full_data_asset_identifier.split('/')[-1]
 
         # Group EVRs by column
+        #TODO: When we implement a ValidationResultSuite class, this method will move there.
         columns = {}
         for evr in validation_results["results"]:
             if "column" in evr["expectation_config"]["kwargs"]:
