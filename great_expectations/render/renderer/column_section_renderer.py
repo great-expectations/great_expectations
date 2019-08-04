@@ -34,6 +34,8 @@ class ColumnSectionRenderer(Renderer):
 
 class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
 
+    #Note: Seems awkward to pass section_name and column_type into this renderer.
+    #Can't we figure that out internally?
     @classmethod
     def render(cls, evrs, section_name=None, column_type=None):
         if section_name is None:
