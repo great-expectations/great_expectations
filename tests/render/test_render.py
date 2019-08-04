@@ -23,18 +23,6 @@ from great_expectations.data_context.util import safe_mmkdir
 
 
 @pytest.fixture(scope="module")
-def titanic_validation_results():
-    with open("./tests/test_sets/expected_cli_results_default.json", "r") as infile:
-        return json.load(infile)
-
-
-@pytest.fixture(scope="module")
-def titanic_expectations():
-    with open("./tests/test_sets/titanic_expectations.json", "r") as infile:
-        return json.load(infile, object_pairs_hook=OrderedDict)
-
-
-@pytest.fixture(scope="module")
 def titanic_profiler_evrs():
     with open('./tests/render/fixtures/BasicDatasetProfiler_evrs.json', 'r') as infile:
         return json.load(infile, object_pairs_hook=OrderedDict)
@@ -75,45 +63,6 @@ def test_smoke_render_descriptive_page_renderer(titanic_validation_results):
         json.dump(rendered, outfile, indent=2)
 
     assert len(rendered["sections"]) > 5
-
-
-@pytest.mark.smoketest
-def test_render_descriptive_column_section_renderer(titanic_validation_results):
-    # Group EVRs by column
-    evrs = {}
-    for evr in titanic_validation_results["results"]:
-        try:
-            column = evr["expectation_config"]["kwargs"]["column"]
-            if column not in evrs:
-                evrs[column] = []
-            evrs[column].append(evr)
-        except KeyError:
-            pass
-
-    for column in evrs.keys():
-        with open('./tests/render/output/test_render_descriptive_column_section_renderer__' + column + '.json', 'w') \
-                as outfile:
-            json.dump(DescriptiveColumnSectionRenderer.render(evrs[column]), outfile, indent=2)
-
-
-@pytest.mark.smoketest
-def test_render_prescriptive_column_section_renderer(titanic_expectations):
-    # Group expectations by column
-    exp_groups = {}
-    # print(json.dumps(titanic_expectations, indent=2))
-    for exp in titanic_expectations["expectations"]:
-        try:
-            column = exp["kwargs"]["column"]
-            if column not in exp_groups:
-                exp_groups[column] = []
-            exp_groups[column].append(exp)
-        except KeyError:
-            pass
-
-    for column in exp_groups.keys():
-        with open('./tests/render/output/test_render_prescriptive_column_section_renderer' + column + '.json', 'w') \
-                as outfile:
-            json.dump(PrescriptiveColumnSectionRenderer.render(exp_groups[column]), outfile, indent=2)
 
 
 def test_content_block_list_available_expectations():

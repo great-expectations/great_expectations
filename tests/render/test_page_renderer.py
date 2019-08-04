@@ -99,3 +99,10 @@ def test_expectation_summary_in_render_asset_notes():
     })
     print(result)
     assert result["content"][0] == 'This Expectation suite currently contains 3 total Expectations across 2 columns.'
+
+
+def test_DescriptivePageRenderer(profiled_evrs_1):
+    document = DescriptivePageRenderer().render(profiled_evrs_1)
+    print(document)
+    # assert document == 0
+
