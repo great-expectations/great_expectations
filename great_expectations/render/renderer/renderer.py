@@ -94,3 +94,18 @@ class Renderer(object):
 
         return ordered_columns
 
+    #TODO: When we implement a ValidationResultSuite class, this method will move there.
+    @classmethod
+    def _group_evrs_by_column(cls, validation_results):
+        columns = {}
+        for evr in validation_results["results"]:
+            if "column" in evr["expectation_config"]["kwargs"]:
+                column = evr["expectation_config"]["kwargs"]["column"]
+            else:
+                column = "Table-level Expectations"
+
+            if column not in columns:
+                columns[column] = []
+            columns[column].append(evr)
+
+        return columns
