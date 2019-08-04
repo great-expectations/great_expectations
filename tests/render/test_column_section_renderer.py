@@ -64,12 +64,6 @@ def test_DescriptiveColumnSectionRenderer_render(titanic_profiled_evrs_1):
     assert document != {}
 
 def test_DescriptiveColumnSectionRenderer_render_header(titanic_profiled_name_column_evrs):
-    # evrs_by_column = DescriptiveColumnSectionRenderer()._group_evrs_by_column(titanic_profiled_evrs_1)
-    # print(evrs_by_column.keys())
-
-    # column_evrs = evrs_by_column["Name"]
-    # print(json.dumps(column_evrs, indent=2))
-
     content_blocks = []
     DescriptiveColumnSectionRenderer()._render_header(
         titanic_profiled_name_column_evrs,
@@ -129,10 +123,15 @@ def test_DescriptiveColumnSectionRenderer_render_header(titanic_profiled_name_co
 #     DescriptiveColumnSectionRenderer()._render_failed(evrs, content_blocks)
 
 
-def test_PrescriptiveColumnSectionRenderer_render_header():
-    remaining_expectations, content_blocks = cls._render_header(
-        expectations, [])
+def test_PrescriptiveColumnSectionRenderer_render_header(titanic_profiled_expectations_1):
+    print(titanic_profiled_expectations_1)
+    remaining_expectations, content_blocks = PrescriptiveColumnSectionRenderer._render_header(
+        titanic_profiled_expectations_1["expectations"],
+        [],
+    )
 
-def test_PrescriptiveColumnSectionRenderer_render_bullet_list():
-    remaining_expectations, content_blocks = cls._render_bullet_list(
-        remaining_expectations, content_blocks)
+def test_PrescriptiveColumnSectionRenderer_render_bullet_list(titanic_profiled_expectations_1):
+    remaining_expectations, content_blocks = PrescriptiveColumnSectionRenderer._render_bullet_list(
+        titanic_profiled_expectations_1["expectations"],
+        [],
+    )
