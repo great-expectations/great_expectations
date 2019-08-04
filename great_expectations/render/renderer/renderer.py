@@ -50,12 +50,14 @@ class Renderer(object):
         print(json.dumps(ge_object, indent=2))
         raise ValueError("Unrecognized great expectations object.")
 
+    #TODO: When we implement a ValidationResultSuite class, this method will move there.
     @classmethod
     def _find_evr_by_type(cls, evrs, type_):
         for evr in evrs:
             if evr["expectation_config"]["expectation_type"] == type_:
                 return evr
 
+    #TODO: When we implement a ValidationResultSuite class, this method will move there.
     @classmethod
     def _find_all_evrs_by_type(cls, evrs, type_, column_=None):
         ret = []
@@ -66,6 +68,7 @@ class Renderer(object):
 
         return ret
 
+    #TODO: When we implement a ValidationResultSuite class, this method will move there.
     @classmethod
     def _get_column_list_from_evrs(cls, evrs):
         """

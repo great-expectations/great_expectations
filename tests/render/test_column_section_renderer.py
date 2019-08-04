@@ -7,10 +7,6 @@ from great_expectations.render.renderer import (
     DescriptiveColumnSectionRenderer,
 )
 
-@pytest.fixture(scope="module")
-def profiled_evrs_1():
-    return json.load(open("./tests/render/fixtures/BasicDatasetProfiler_evrs.json"))
-
 def test_DescriptiveColumnSectionRenderer_render(profiled_evrs_1):
     document = DescriptiveColumnSectionRenderer().render(profiled_evrs_1["results"])
 
