@@ -37,10 +37,10 @@ class BasicDatasetProfiler(DatasetProfiler):
 
             elif df.expect_column_values_to_be_in_type_list(column, type_list=sorted(list(cls.BOOLEAN_TYPE_NAMES)))["success"]:
                 type_ = "bool"
-            
+
             elif df.expect_column_values_to_be_in_type_list(column, type_list=sorted(list(cls.DATETIME_TYPE_NAMES)))["success"]:
                 type_ = "datetime"
-            
+
             else:
                 df.expect_column_values_to_be_in_type_list(column, type_list=None)
                 type_ = "unknown"
@@ -179,12 +179,12 @@ class BasicDatasetProfiler(DatasetProfiler):
                 else:
                     # print(column, type_, cardinality)
                     pass
-            
+
             elif type_ == "datetime":
                 df.expect_column_min_to_be_between(column, min_value=None, max_value=None)
-                
+
                 df.expect_column_max_to_be_between(column, min_value=None, max_value=None)
-                
+
                 # Re-add once kl_divergence has been modified to support datetimes
                 # df.expect_column_kl_divergence_to_be_less_than(column, partition_object=None,
                 #                                            threshold=None, result_format='COMPLETE')
@@ -205,4 +205,5 @@ class BasicDatasetProfiler(DatasetProfiler):
                     pass
 
         df.set_config_value("interactive_evaluation", True)
-        return df.get_expectation_suite(suppress_warnings=True, discard_failed_expectations=False)
+        expectation_suite = df.get_expectation_suite(suppress_warnings=True, discard_failed_expectations=False)
+        return expectation_suite
