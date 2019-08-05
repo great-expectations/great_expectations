@@ -1,3 +1,9 @@
+import pytest
+import glob
+import json
+from string import Template as pTemplate
+
+
 from great_expectations.render.renderer.content_block import (
     PrescriptiveBulletListContentBlockRenderer,
 )
@@ -5,10 +11,6 @@ from great_expectations.render.renderer.content_block.bullet_list_content_block 
     substitute_none_for_missing,
 )
 
-import glob
-import json
-import pytest
-from string import Template as pTemplate
 from six import PY2
 
 def test_substitute_none_for_missing():

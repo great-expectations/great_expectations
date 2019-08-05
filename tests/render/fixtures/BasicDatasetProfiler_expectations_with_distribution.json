@@ -259,8 +259,11 @@
       "expectation_type": "expect_column_kl_divergence_to_be_less_than",
       "kwargs": {
         "column": "Age",
-        "partition_object": null,
-        "threshold": null
+        "partition_object": {
+          "bins": [0,5,10,30,50],
+          "weights": [0.2, 0.3, 0.1, 0.4]
+        },
+        "threshold": 0.1
       }
     },
     {

@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import json
 from string import Template as pTemplate
 import datetime

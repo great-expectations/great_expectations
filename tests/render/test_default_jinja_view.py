@@ -447,8 +447,62 @@ def test_render_graph():
 </div>""".replace(" ", "").replace("\t", "").replace("\n", "")
 
 
+def test_render_text():
+    text_component_content = {
+        "content_block_type": "text",
+        "header": "Histogram",
+        "content": ["hello"],
+        "styling": {
+            "classes": ["col-4"]
+        }
+    }
+
+    rendered_doc = ge.render.view.view.DefaultJinjaComponentView.render({
+        "content_block": text_component_content,
+        "section_loop": {"index": 1},
+        "content_block_loop": {"index": 2},
+    })
+    print(rendered_doc)
+    assert rendered_doc == """
+<div id="section-1-content-block-2" class="col-4" >
+    <div id="section-1-content-block-2-header" >
+            <h4>
+                Histogram
+            </h4></div>
+    <div id="section-1-content-block-2-body" >
+        <p>hello</p>
+        </div>
+</div>"""
+
+    text_component_content = {
+        "content_block_type": "text",
+        "header": "Histogram",
+        "content": ["hello", "goodbye"],
+        "styling": {
+            "classes": ["col-4"]
+        }
+    }
+
+    rendered_doc = ge.render.view.view.DefaultJinjaComponentView.render({
+        "content_block": text_component_content,
+        "section_loop": {"index": 1},
+        "content_block_loop": {"index": 2},
+    })
+    print(rendered_doc)
+    assert rendered_doc == """
+<div id="section-1-content-block-2" class="col-4" >
+    <div id="section-1-content-block-2-header" >
+            <h4>
+                Histogram
+            </h4></div>
+    <div id="section-1-content-block-2-body" >
+        <p>hello</p>
+        <p>goodbye</p>
+        </div>
+</div>"""
+
+
 # TODO: Add tests for the remaining component types
-# * text
 # * value_list
 # * bullet_list
 # * graph
