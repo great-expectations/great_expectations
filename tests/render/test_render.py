@@ -15,7 +15,6 @@ from great_expectations.render.renderer import (
     PrescriptivePageRenderer,
 )
 from great_expectations.render.view import DefaultJinjaPageView
-from great_expectations.render.view.view import render_string_template
 from great_expectations.render.renderer.content_block import ValueListContentBlockRenderer
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 
@@ -247,7 +246,7 @@ def test_render_string_template():
         }
     }
 
-    res = render_string_template(template).replace(" ", "").replace("\t", "").replace("\n", "")
+    res = DefaultJinjaPageView.render_string_template(template).replace(" ", "").replace("\t", "").replace("\n", "")
     expected = u"""<span>
                 <span class="badge badge-secondary" >categorical_fixed</span> Kullback-Leibler (KL) divergence with respect to the following distribution must be lower than <span class="badge badge-secondary" >0.1</span>: <span style="font-family:serif;" >█▄▁</span>
             </span>""".replace(" ", "").replace("\t", "").replace("\n", "")
@@ -289,7 +288,7 @@ def test_render_string_template():
         }
     }
 
-    res = render_string_template(template).replace(" ", "").replace("\t", "").replace("\n", "")
+    res = DefaultJinjaPageView.render_string_template(template).replace(" ", "").replace("\t", "").replace("\n", "")
     expected = u"""<span>
                 <span class="badge badge-secondary" >categorical_fixed</span> Kullback-Leibler (KL) divergence with respect to the following distribution must be lower than <span class="badge badge-secondary" >0.1</span>: <span style="font-family:serif;" >▃▆▁█</span>
             </span>""".replace(" ", "").replace("\t", "").replace("\n", "")
