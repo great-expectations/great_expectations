@@ -190,7 +190,7 @@ class PrescriptivePageRenderer(Renderer):
         return {
             "content_block_type": "table",
             "header": "Info",
-            "table_rows": [
+            "table": [
                 ["Full Data Asset Identifier", full_data_asset_identifier],
                 ["Data Asset Type", data_asset_type],
                 ["Expectation Suite Name", expectation_suite_name],
