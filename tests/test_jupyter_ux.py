@@ -160,11 +160,12 @@ def test_display_column_evrs_as_section():
     assert '<div id="section-1" class="ge-section container-fluid">' in html_to_display
     assert '<span class="badge badge-info" >Carlsson, Mr Frans Olof</span>' in html_to_display
     assert """\
-    <li class="list-group-item d-flex justify-content-between align-items-center" >
-            <span>
-                expect_column_values_to_be_in_type_list <span class="badge badge-secondary badge-pill" >True</span>
-            </span>
-        </li>""" in html_to_display
+    <span class="cooltip" >
+                    Type: None
+                    <span class=top>
+                        expect_column_values_to_be_of_type <br>expect_column_values_to_be_in_type_list
+                    </span>
+                </span>""" in html_to_display
 
 
 def test_configure_logging(caplog):
