@@ -35,7 +35,7 @@ def substitute_none_for_missing(kwargs, kwarg_list):
 
 class PrescriptiveStringRenderer(ContentBlockRenderer):
     # Unicode: 9601, 9602, 9603, 9604, 9605, 9606, 9607, 9608
-    bar = '▁▂▃▄▅▆▇█'
+    bar = u'▁▂▃▄▅▆▇█'
     barcount = len(bar)
 
     @classmethod
@@ -50,7 +50,7 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
         if extent == 0:
             extent = 1
 
-        sparkline = ''.join(cls.bar[min([cls.barcount - 1,
+        sparkline = u''.join(cls.bar[min([cls.barcount - 1,
                                          int((n - mn) / extent * cls.barcount)])]
                             for n in weights)
         return sparkline, mn, mx
@@ -470,7 +470,8 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
             expectation["kwargs"],
             ["column", "type_list", "mostly"],
         )
-        if params["type_list"] is not None:    
+
+        if params["type_list"] is not None:
             for i, v in enumerate(params["type_list"]):
                 params["v__"+str(i)] = v
             values_string = " ".join(
@@ -1301,7 +1302,8 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
             ["column", "partition_object", "threshold"]
         )
 
-        styling.update({
+        hist_styling = copy.deepcopy(styling)
+        hist_styling.update({
             "params": {
                 "sparklines_histogram": {
                     "styles": {
@@ -1315,7 +1317,7 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
             template_str = "Kullback-Leibler (KL) divergence with respect to a given distribution must be lower than a \
                 provided threshold but no distribution was specified."
         else:
-            params["sparklines_histogram"]= cls.sparkline(params.get("partition_object")["weights"])[0]
+            params["sparklines_histogram"] = cls.sparkline(params.get("partition_object")["weights"])[0]
             template_str = "Kullback-Leibler (KL) divergence with respect to the following distribution must be " \
                            "lower than $threshold: $sparklines_histogram"
 
@@ -1327,7 +1329,7 @@ class PrescriptiveStringRenderer(ContentBlockRenderer):
             "string_template": {
                 "template": template_str,
                 "params": params,
-                "styling": styling,
+                "styling": hist_styling,
             }
         }]
     
