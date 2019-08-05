@@ -257,22 +257,22 @@ class DescriptiveOverviewSectionRenderer(Renderer):
         for evr in type_evrs:
             column = evr["expectation_config"]["kwargs"]["column"]
             if evr["expectation_config"]["expectation_type"] == "expect_column_values_to_be_in_type_list":
-                if evr["expectation_config"]["kwargs"]["type_list"] == None:
+                if evr["expectation_config"]["kwargs"]["type_list"] is None:
                     expected_types = {}
                 else:
                     expected_types = set(evr["expectation_config"]["kwargs"]["type_list"])
-            else: # assuming expect_column_values_to_be_of_type
+            else:  # assuming expect_column_values_to_be_of_type
                 expected_types = set([evr["expectation_config"]["kwargs"]["type_"]])
 
-            if BasicDatasetProfiler.INT_TYPE_NAMES.issubset(expected_types):
+            if expected_types.issubset(BasicDatasetProfiler.INT_TYPE_NAMES):
                 column_types[column] = "int"
-            elif BasicDatasetProfiler.FLOAT_TYPE_NAMES.issubset(expected_types):
+            elif expected_types.issubset(BasicDatasetProfiler.FLOAT_TYPE_NAMES):
                 column_types[column] = "float"
-            elif BasicDatasetProfiler.STRING_TYPE_NAMES.issubset(expected_types):
+            elif expected_types.issubset(BasicDatasetProfiler.STRING_TYPE_NAMES):
                 column_types[column] = "string"
-            elif BasicDatasetProfiler.DATETIME_TYPE_NAMES.issubset(expected_types):
+            elif expected_types.issubset(BasicDatasetProfiler.DATETIME_TYPE_NAMES):
                 column_types[column] = "datetime"
-            elif BasicDatasetProfiler.BOOLEAN_TYPE_NAMES.issubset(expected_types):
+            elif expected_types.issubset(BasicDatasetProfiler.BOOLEAN_TYPE_NAMES):
                 column_types[column] = "bool"
             else:
                 warnings.warn("The expected type list is not a subset of any of the profiler type sets: {0:s}".format(str(expected_types)))

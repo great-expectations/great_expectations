@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import json
 from string import Template as pTemplate
 import datetime
@@ -8,6 +10,7 @@ from jinja2 import (
 )
 
 from great_expectations.version import __version__
+
 
 def render_styling(styling):
     """Adds styling information suitable for an html tag
@@ -139,7 +142,7 @@ def render_string_template(template):
                     continue
                 params[parameter] = pTemplate(base_param_template_string).substitute({
                     "styling": render_styling(parameter_styling),
-                    "content": params[parameter],
+                    "content": params[parameter]
                 })
 
         string = pTemplate(

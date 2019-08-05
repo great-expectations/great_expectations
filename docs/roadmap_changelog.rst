@@ -10,13 +10,23 @@ Planned Features
 * Conditional expectations
 * Multi-batch expectations
 
-
-v.0.7.4__develop
+v.0.7.6__develop
 -----------------
+
+v.0.7.5
+-----------------
+* Fix missing requirement for pypandoc brought in from markdown support for notes rendering.
+
+v.0.7.4
+-----------------
+* Fix numerous rendering bugs and formatting issues for rendering documentation.
 * Add support for pandas extension dtypes in pandas backend of expect_column_values_to_be_of_type and
   expect_column_values_to_be_in_type_list and fix bug affecting some dtype-based checks.
-* BREAKING: result_store in data_context renamed to validations_store and uses standard convention for defining
-  type and properties
+* Add datetime and boolean column-type detection in BasicDatasetProfiler.
+* Improve BasicDatasetProfiler performance by disabling interactive evaluation when output of expectation is not
+  immediately used for determining next expectations in profile.
+* Add support for rendering expectation_suite and expectation_level notes from meta in docs.
+* Fix minor formatting issue in readthedocs documentation.
 
 v.0.7.3
 -----------------

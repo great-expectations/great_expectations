@@ -1,3 +1,8 @@
+import logging
+logger = logging.getLogger(__name__)
+
+import pypandoc
+
 from .renderer import Renderer
 from .column_section_renderer import (
     DescriptiveColumnSectionRenderer,
@@ -12,15 +17,13 @@ class PrescriptivePageRenderer(Renderer):
 
     @classmethod
     def render(cls, expectations):
-        full_data_asset_identifier = expectations.get("data_asset_name") or ""
-        short_data_asset_name = full_data_asset_identifier.split('/')[-1]
-        data_asset_type = expectations.get("data_asset_type")
-        expectation_suite_name = expectations.get("expectation_suite_name")
-        ge_version = expectations["meta"]["great_expectations.__version__"]
-        
         # Group expectations by column
         columns = {}
         ordered_columns = None
+        if "expectation_suite_name" in expectations:
+            expectation_suite_name = expectations["expectation_suite_name"]
+        else:
+            expectation_suite_name = None
         for expectation in expectations["expectations"]:
             if "column" in expectation["kwargs"]:
                 column = expectation["kwargs"]["column"]
@@ -36,58 +39,162 @@ class PrescriptivePageRenderer(Renderer):
                 if exp_column_list and len(exp_column_list) > 0:
                     ordered_columns = exp_column_list
 
-        # if no order of colums is expected, sort alphabetically
+        # if no order of columns is expected, sort alphabetically
         if not ordered_columns:
             ordered_columns = sorted(list(columns.keys()))
+
+        overview_content_blocks = [
+            cls._render_asset_header(expectations),
+            cls._render_asset_info(expectations)
+        ]
+        
+        asset_notes_content_block = cls._render_asset_notes(expectations)
+        if asset_notes_content_block != None:
+            overview_content_blocks.append(asset_notes_content_block)
+            # import json
+            # print(json.dumps(overview_content_blocks, indent=2))
 
         sections = [
             {
                 "section_name": "Overview",
-                "content_blocks": [
-                    {
-                        "content_block_type": "header",
-                        "header": "Expectation Suite Overview",
-                        "styling": {
-                            "classes": ["col-12"],
-                            "header": {
-                                "classes": ["alert", "alert-secondary"]
-                            }
-                        }
-                    },
-                    {
-                        "content_block_type": "table",
-                        "header": "Info",
-                        "table_rows": [
-                            ["Full Data Asset Identifier", full_data_asset_identifier],
-                            ["Data Asset Type", data_asset_type],
-                            ["Expectation Suite Name", expectation_suite_name],
-                            ["Great Expectations Version", ge_version]
-                        ],
-                        "styling": {
-                            "classes": ["col-12", "table-responsive"],
-                            "styles": {
-                                "margin-top": "20px"
-                            },
-                            "body": {
-                                "classes": ["table", "table-sm"]
-                            }
-                        },
-                    }
-                ]
+                "content_blocks": overview_content_blocks,
             }
         ]
 
         sections += [
-                PrescriptiveColumnSectionRenderer.render(columns[column]) for column in ordered_columns
-            ]
+            PrescriptiveColumnSectionRenderer.render(columns[column]) for column in ordered_columns
+        ]
+
+        full_data_asset_identifier = expectations.get("data_asset_name") or ""
 
         return {
-            "renderer_type": "PrescriptivePageRenderer",
-            "data_asset_name": short_data_asset_name,
+            # "renderer_type": "PrescriptivePageRenderer",
+            # "data_asset_name": short_data_asset_name,
             "full_data_asset_identifier": full_data_asset_identifier,
             "page_title": expectation_suite_name,
             "utm_medium": "prescriptive-expectation-suite-page",
             "sections": sections
+        }
+
+    @classmethod
+    def _render_asset_header(cls, expectations):
+        return {
+            "content_block_type": "header",
+            "header": "Expectation Suite Overview",
+            "styling": {
+                "classes": ["col-12"],
+                "header": {
+                    "classes": ["alert", "alert-secondary"]
+                }
+            }
+        }
+
+    @classmethod
+    def _render_asset_info(cls, expectations):
+
+        full_data_asset_identifier = expectations.get("data_asset_name") or ""
+        short_data_asset_name = full_data_asset_identifier.split('/')[-1]
+        data_asset_type = expectations.get("data_asset_type")
+        expectation_suite_name = expectations.get("expectation_suite_name")
+        ge_version = expectations["meta"]["great_expectations.__version__"]
+
+        return {
+            "content_block_type": "table",
+            "header": "Info",
+            "table_rows": [
+                ["Full Data Asset Identifier", full_data_asset_identifier],
+                ["Data Asset Type", data_asset_type],
+                ["Expectation Suite Name", expectation_suite_name],
+                ["Great Expectations Version", ge_version]
+            ],
+            "styling": {
+                "classes": ["col-12", "table-responsive"],
+                "styles": {
+                    "margin-top": "20px"
+                },
+                "body": {
+                    "classes": ["table", "table-sm"]
+                }
+            },
+        }
+
+    @classmethod
+    def _render_asset_notes(cls, expectations):
+
+        content = []
+
+        if "expectations" in expectations:
+            #This if statement is a precaution in case the expectation suite doesn't contain expectations.
+            #Once we have more strongly typed classes for suites, this shouldn't be necessary.
+            
+            total_expectations = len(expectations["expectations"])
+            columns = []
+            for exp in expectations["expectations"]:
+                if "column" in exp["kwargs"]:
+                    columns.append(exp["kwargs"]["column"])
+            total_columns = len(set(columns))
+
+            content = content + [
+                #TODO: Leaving these two paragraphs as placeholders for later development.
+                # "This Expectation suite was first generated by {BasicDatasetProfiler} on {date}, using version {xxx} of Great Expectations.",
+                # "{name}, {name}, and {name} have also contributed additions and revisions.",
+                "This Expectation suite currently contains %d total Expectations across %d columns." % (
+                    total_expectations,
+                    total_columns,
+                ),
+            ]
+
+        if "notes" in expectations["meta"]:
+            notes = expectations["meta"]["notes"]
+            note_content = None
+
+            if type(notes) == str:
+                note_content = [notes]
+
+            elif type(notes) == list:
+                note_content = notes
+
+            elif type(notes) == dict:
+                if "format" in notes:
+                    if notes["format"] == "string":
+                        if type(notes["content"]) == str:
+                            note_content = [notes["content"]]
+                        elif type(notes["content"]) == list:
+                            note_content = notes["content"]
+                        else:
+                            logger.warning("Unrecognized Expectation suite notes format. Skipping rendering.")
+                        
+                    elif notes["format"] == "markdown":
+                        #???: Should converting to markdown be the renderer's job, or the view's job?
+                        #Renderer is easier, but will end up mixing HTML strings with content_block info.
+                        if type(notes["content"]) == str:
+                            note_content = [pypandoc.convert_text(notes["content"], format='md', to="html")]
+
+                        elif type(notes["content"]) == list:
+                            note_content = [pypandoc.convert_text(note, format='md', to="html") for note in notes["content"]]
+
+                        else:
+                            logger.warning("Unrecognized Expectation suite notes format. Skipping rendering.")
+
+                else:
+                    logger.warning("Unrecognized Expectation suite notes format. Skipping rendering.")
+
+            if note_content != None:
+                content = content + note_content
+
+        return {
+            "content_block_type": "text",
+            "header": "Notes",
+            "content": content,
+            "styling": {
+                "classes": ["col-12", "table-responsive"],
+                "styles": {
+                    "margin-top": "20px"
+                },
+                "body": {
+                    "classes": ["table", "table-sm"]
+                }
+            },
         }
 
 
