@@ -19,11 +19,7 @@ class PrescriptivePageRenderer(Renderer):
     def render(cls, expectations):
         columns, ordered_columns = cls._group_and_order_expectations_by_column(expectations)
 
-        #TODO: When we implement an ExpectationSuite class, this method will move there.
-        if "expectation_suite_name" in expectations:
-            expectation_suite_name = expectations["expectation_suite_name"]
-        else:
-            expectation_suite_name = None
+        expectation_suite_name = cls._get_expectation_suite_name(expectations)
 
         overview_content_blocks = [
             cls._render_asset_header(expectations),

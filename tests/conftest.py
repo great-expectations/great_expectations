@@ -405,10 +405,6 @@ def filesystem_csv_3(tmp_path_factory):
 def titanic_profiled_evrs_1():
     return json.load(open("./tests/render/fixtures/BasicDatasetProfiler_evrs.json"))
 
-@pytest.fixture()
-def titanic_profiled_expectations_1():
-    return json.load(open("./tests/render/fixtures/BasicDatasetProfiler_expectations.json"))
-
 
 @pytest.fixture()
 def titanic_profiled_name_column_evrs():
@@ -424,6 +420,27 @@ def titanic_profiled_name_column_evrs():
     print(json.dumps(name_column_evrs, indent=2))
 
     return name_column_evrs
+
+
+@pytest.fixture()
+def titanic_profiled_expectations_1():
+    return json.load(open("./tests/render/fixtures/BasicDatasetProfiler_expectations.json"))
+
+@pytest.fixture()
+def titanic_profiled_name_column_expectations():
+    from great_expectations.render.renderer.renderer import (
+        Renderer,
+    )
+
+    titanic_profiled_expectations =  json.load(open("./tests/render/fixtures/BasicDatasetProfiler_expectations.json"))
+    columns, ordered_columns = Renderer()._group_and_order_expectations_by_column(titanic_profiled_expectations)
+    print(columns)
+    print(ordered_columns)
+
+    name_column_expectations = columns["Name"]
+    print(json.dumps(name_column_expectations, indent=2))
+
+    return name_column_expectations
 
 
 @pytest.fixture()

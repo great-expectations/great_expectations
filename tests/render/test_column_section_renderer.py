@@ -123,18 +123,47 @@ def test_DescriptiveColumnSectionRenderer_render_header(titanic_profiled_name_co
 #     DescriptiveColumnSectionRenderer()._render_failed(evrs, content_blocks)
 
 
-def test_PrescriptiveColumnSectionRenderer_render_header(titanic_profiled_expectations_1):
-    print(titanic_profiled_expectations_1)
+def test_PrescriptiveColumnSectionRenderer_render_header(titanic_profiled_name_column_expectations):
     remaining_expectations, content_blocks = PrescriptiveColumnSectionRenderer._render_header(
-        titanic_profiled_expectations_1["expectations"],
-        [],
-    )
-
-def test_PrescriptiveColumnSectionRenderer_render_bullet_list(titanic_profiled_expectations_1):
-    remaining_expectations, content_blocks = PrescriptiveColumnSectionRenderer._render_bullet_list(
-        titanic_profiled_expectations_1["expectations"],
+        titanic_profiled_name_column_expectations,#["expectations"],
         [],
     )
 
     print(json.dumps(content_blocks, indent=2))
-    # assert False
+    assert content_blocks == [
+        {
+            "content_block_type": "header",
+            "header": "Name",
+            "styling": {
+            "classes": [
+                "col-12"
+            ],
+            "header": {
+                "classes": [
+                "alert",
+                "alert-secondary"
+                ]
+            }
+            }
+        }
+    ]
+
+
+def test_PrescriptiveColumnSectionRenderer_render_bullet_list(titanic_profiled_name_column_expectations):
+    remaining_expectations, content_blocks = PrescriptiveColumnSectionRenderer._render_bullet_list(
+        titanic_profiled_name_column_expectations,#["expectations"],
+        [],
+    )
+
+    print(json.dumps(content_blocks, indent=2))
+
+    assert len(content_blocks) == 1
+
+    content_block = content_blocks[0]
+    assert content_block["content_block_type"] == "bullet_list"
+    assert len(content_block["bullet_list"]) == 4
+    assert "value types must belong to this set" in json.dumps(content_block)
+    assert "may have any number of unique values" in json.dumps(content_block)
+    assert "may have any percentage of unique values" in json.dumps(content_block)
+    assert "values must not be null, at least $mostly_pct % of the time." in json.dumps(content_block)
+    
