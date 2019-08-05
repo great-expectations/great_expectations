@@ -31,7 +31,7 @@ class ContentBlockRenderer(Renderer):
             for obj_ in render_object:
                 expectation_type = cls._get_expectation_type(obj_)
 
-                if cls.__name__ == "PrescriptiveEvrTableContentBlockRenderer":
+                if cls.__name__ == "ValidationResultsTableContentBlockRenderer":
                     content_block_fn = cls.generate_expectation_row(expectation_type)
                 else:
                     content_block_fn = getattr(cls, expectation_type, None)
@@ -59,7 +59,7 @@ class ContentBlockRenderer(Renderer):
                     "styling": cls._get_content_block_styling(),
                 }
 
-                if cls.__name__ == "PrescriptiveEvrTableContentBlockRenderer":
+                if cls.__name__ == "ValidationResultsTableContentBlockRenderer":
                     content_block["header_row"] = ["Status", "Expectation", "Observed Value"]
                 
                 header = cls._get_header()

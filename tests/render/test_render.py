@@ -9,10 +9,10 @@ from collections import OrderedDict
 
 import great_expectations as ge
 from great_expectations.render.renderer import (
-    DescriptivePageRenderer,
-    DescriptiveColumnSectionRenderer,
-    PrescriptiveColumnSectionRenderer,
-    PrescriptivePageRenderer,
+    ProfilingResultsPageRenderer,
+    ProfilingResultsColumnSectionRenderer,
+    ExpectationSuiteColumnSectionRenderer,
+    ExpectationSuitePageRenderer,
 )
 from great_expectations.render.view import DefaultJinjaPageView
 from great_expectations.render.renderer.content_block import ValueListContentBlockRenderer
@@ -69,7 +69,7 @@ def titanic_dataset_profiler_expectations_with_distribution():
 
 @pytest.mark.smoketest
 def test_smoke_render_descriptive_page_renderer(titanic_validation_results):
-    rendered = DescriptivePageRenderer.render(titanic_validation_results)
+    rendered = ProfilingResultsPageRenderer.render(titanic_validation_results)
     with open('./tests/render/output/test_render_descriptive_page_renderer.json', 'w') as outfile:
         json.dump(rendered, outfile, indent=2)
 
@@ -92,7 +92,7 @@ def test_render_descriptive_column_section_renderer(titanic_validation_results):
     for column in evrs.keys():
         with open('./tests/render/output/test_render_descriptive_column_section_renderer__' + column + '.json', 'w') \
                 as outfile:
-            json.dump(DescriptiveColumnSectionRenderer.render(evrs[column]), outfile, indent=2)
+            json.dump(ProfilingResultsColumnSectionRenderer.render(evrs[column]), outfile, indent=2)
 
 
 @pytest.mark.smoketest
@@ -112,7 +112,7 @@ def test_render_prescriptive_column_section_renderer(titanic_expectations):
     for column in exp_groups.keys():
         with open('./tests/render/output/test_render_prescriptive_column_section_renderer' + column + '.json', 'w') \
                 as outfile:
-            json.dump(PrescriptiveColumnSectionRenderer.render(exp_groups[column]), outfile, indent=2)
+            json.dump(ExpectationSuiteColumnSectionRenderer.render(exp_groups[column]), outfile, indent=2)
 
 
 def test_content_block_list_available_expectations():
@@ -122,7 +122,7 @@ def test_content_block_list_available_expectations():
 
 @pytest.mark.smoketest
 def test_render_profiled_fixture_expectations(titanic_dataset_profiler_expectations):
-    rendered_json = PrescriptivePageRenderer.render(titanic_dataset_profiler_expectations)
+    rendered_json = ExpectationSuitePageRenderer.render(titanic_dataset_profiler_expectations)
     rendered_page = DefaultJinjaPageView.render(rendered_json)
 
     with open('./tests/render/output/test_render_profiled_fixture_expectations.html', 'w') as f:
@@ -135,7 +135,7 @@ def test_render_profiled_fixture_expectations(titanic_dataset_profiler_expectati
 @pytest.mark.smoketest
 def test_render_profiled_fixture_expectations_with_distribution(titanic_dataset_profiler_expectations_with_distribution):
     # Tests sparkline
-    rendered_json = PrescriptivePageRenderer.render(titanic_dataset_profiler_expectations_with_distribution)
+    rendered_json = ExpectationSuitePageRenderer.render(titanic_dataset_profiler_expectations_with_distribution)
     rendered_page = DefaultJinjaPageView.render(rendered_json)
 
     with open('./tests/render/output/titanic_dataset_profiler_expectations_with_distribution.html', 'wb') as f:
@@ -147,7 +147,7 @@ def test_render_profiled_fixture_expectations_with_distribution(titanic_dataset_
 
 @pytest.mark.smoketest
 def test_render_profiled_fixture_evrs(titanic_profiler_evrs):
-    rendered_json = DescriptivePageRenderer.render(titanic_profiler_evrs)
+    rendered_json = ProfilingResultsPageRenderer.render(titanic_profiler_evrs)
     rendered_page = DefaultJinjaPageView.render(rendered_json)
 
     with open('./tests/render/output/test_render_profiled_fixture_evrs.html', 'w') as f:
@@ -160,7 +160,7 @@ def test_render_profiled_fixture_evrs(titanic_profiler_evrs):
 @pytest.mark.smoketest
 def test_smoke_render_descriptive_page_renderer_with_exception(
         titanic_profiler_evrs_with_exception):
-    rendered_json = DescriptivePageRenderer.render(titanic_profiler_evrs_with_exception)
+    rendered_json = ProfilingResultsPageRenderer.render(titanic_profiler_evrs_with_exception)
     rendered_page = DefaultJinjaPageView.render(rendered_json)
 
     with open('./tests/render/output/test_render_descriptive_column_section_renderer_with_exception.html', 'w') as f:
@@ -177,7 +177,7 @@ def test_full_oobe_flow():
     df.profile(BasicDatasetProfiler)
     evrs = df.validate()  # ["results"]
 
-    rendered_json = DescriptivePageRenderer.render(evrs)
+    rendered_json = ProfilingResultsPageRenderer.render(evrs)
     rendered_page = DefaultJinjaPageView.render(rendered_json)
 
     with open('./tests/render/output/test_full_oobe_flow.html', 'w') as f:

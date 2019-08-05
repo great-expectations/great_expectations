@@ -5,7 +5,7 @@ from string import Template as pTemplate
 
 
 from great_expectations.render.renderer.content_block import (
-    PrescriptiveBulletListContentBlockRenderer,
+    ExpectationSuiteBulletListContentBlockRenderer,
 )
 from great_expectations.render.renderer.content_block.bullet_list_content_block import (
     substitute_none_for_missing,
@@ -59,7 +59,7 @@ def test_all_expectations_using_test_definitions():
                     continue
 
                 # Attempt to render it
-                render_result = PrescriptiveBulletListContentBlockRenderer.render(
+                render_result = ExpectationSuiteBulletListContentBlockRenderer.render(
                     [fake_expectation])
    
                 assert isinstance(render_result, dict)

@@ -1,8 +1,9 @@
 from .column_section_renderer import (
-    DescriptiveColumnSectionRenderer,
-    PrescriptiveColumnSectionRenderer,
+    ProfilingResultsColumnSectionRenderer,
+    ExpectationSuiteColumnSectionRenderer,
 )
 from .page_renderer import (
-    DescriptivePageRenderer,
-    PrescriptivePageRenderer,
+    ProfilingResultsPageRenderer,
+    ExpectationSuitePageRenderer,
+    ValidationResultsPageRenderer
 )

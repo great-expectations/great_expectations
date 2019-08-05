@@ -7,11 +7,11 @@ from .renderer import Renderer
 from .content_block import(
     ValueListContentBlockRenderer,
     TableContentBlockRenderer,
-    PrescriptiveBulletListContentBlockRenderer
+    ExpectationSuiteBulletListContentBlockRenderer
 )
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 
-class DescriptiveOverviewSectionRenderer(Renderer):
+class ProfilingResultsOverviewSectionRenderer(Renderer):
 
     @classmethod
     def render(cls, evrs, section_name=None):

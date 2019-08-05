@@ -6,7 +6,7 @@ from collections import OrderedDict
 import great_expectations as ge
 import great_expectations.render as render
 from great_expectations.render.renderer import (
-    DescriptivePageRenderer,
+    ProfilingResultsPageRenderer,
 )
 from great_expectations.render.view import DefaultJinjaPageView
 
@@ -45,7 +45,7 @@ def test_render_DefaultJinjaPageView_meta_info():
             }
         }
     }
-    document = DescriptivePageRenderer.render(validation_results)
+    document = ProfilingResultsPageRenderer.render(validation_results)
     html = DefaultJinjaPageView.render(document)
     print(html)
     # TODO: Use above print to set up snapshot test once we like the result
