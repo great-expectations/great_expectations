@@ -463,16 +463,21 @@ def test_render_text():
         "content_block_loop": {"index": 2},
     })
     print(rendered_doc)
+    rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
     assert rendered_doc == """
 <div id="section-1-content-block-2" class="col-4" >
+
     <div id="section-1-content-block-2-header" >
-            <h4>
-                Histogram
-            </h4></div>
-    <div id="section-1-content-block-2-body" >
-        <p>hello</p>
-        </div>
-</div>"""
+        <h4>
+            Histogram
+        </h4></div>
+
+
+<div id="section-1-content-block-2-body" >
+    <p>hello</p>
+    </div>
+
+</div>""".replace(" ", "").replace("\t", "").replace("\n", "")
 
     text_component_content = {
         "content_block_type": "text",
@@ -489,17 +494,22 @@ def test_render_text():
         "content_block_loop": {"index": 2},
     })
     print(rendered_doc)
+    rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
     assert rendered_doc == """
 <div id="section-1-content-block-2" class="col-4" >
+
     <div id="section-1-content-block-2-header" >
-            <h4>
-                Histogram
-            </h4></div>
-    <div id="section-1-content-block-2-body" >
-        <p>hello</p>
-        <p>goodbye</p>
-        </div>
-</div>"""
+        <h4>
+            Histogram
+        </h4></div>
+
+
+<div id="section-1-content-block-2-body" >
+    <p>hello</p>
+    <p>goodbye</p>
+    </div>
+
+</div>""".replace(" ", "").replace("\t", "").replace("\n", "")
 
 
 # TODO: Add tests for the remaining component types
