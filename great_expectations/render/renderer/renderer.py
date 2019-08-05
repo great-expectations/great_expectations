@@ -145,5 +145,5 @@ class Renderer(object):
             expectation_suite_name = expectations["expectation_suite_name"]
         else:
             expectation_suite_name = None
-            
+                
         return expectation_suite_name
