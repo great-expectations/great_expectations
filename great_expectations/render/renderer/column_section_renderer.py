@@ -6,7 +6,8 @@ from string import Template
 from .renderer import Renderer
 from .content_block import ValueListContentBlockRenderer
 from .content_block import TableContentBlockRenderer
-from .content_block import (PrescriptiveBulletListContentBlockRenderer, PrescriptiveEvrTableContentBlockRenderer)
+from .content_block import (ExpectationSuiteBulletListContentBlockRenderer)
+from great_expectations.render.renderer.content_block import ValidationResultsTableContentBlockRenderer
 from .content_block import ExceptionListContentBlockRenderer
 
 
@@ -32,7 +33,7 @@ class ColumnSectionRenderer(Renderer):
             return None
 
 
-class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
+class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
 
     @classmethod
     def render(cls, evrs, section_name=None, column_type=None):
@@ -117,7 +118,7 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
     @classmethod
     def _render_expectation_types(cls, evrs, content_blocks):
         # NOTE: The evr-fetching function is an kinda similar to the code other_section_
-        # renderer.DescriptiveOverviewSectionRenderer._render_expectation_types
+        # renderer.ProfilingResultsOverviewSectionRenderer._render_expectation_types
 
         # type_counts = defaultdict(int)
 
@@ -558,7 +559,51 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
         content_blocks += unrendered_blocks
 
 
-class PrescriptiveColumnSectionRenderer(ColumnSectionRenderer):
+class ValidationResultsColumnSectionRenderer(ColumnSectionRenderer):
+    @classmethod
+    def _render_header(cls, validation_results, content_blocks):
+        column = cls._get_column_name(validation_results)
+        
+        content_blocks.append({
+            "content_block_type": "header",
+            "header": column,
+            "styling": {
+                "classes": ["col-12"],
+                "header": {
+                    "classes": ["alert", "alert-secondary"]
+                }
+            }
+        })
+        
+        return validation_results, content_blocks
+    
+    @classmethod
+    def _render_table(cls, validation_results, content_blocks):
+        content = ValidationResultsTableContentBlockRenderer.render(
+            validation_results,
+            include_column_name=False
+        )
+        content_blocks.append(content)
+        
+        return [], content_blocks
+    
+    @classmethod
+    def render(cls, validation_results={}):
+        column = cls._get_column_name(validation_results)
+    
+        remaining_evrs, content_blocks = cls._render_header(
+            validation_results, [])
+    
+        remaining_evrs, content_blocks = cls._render_table(
+            remaining_evrs, content_blocks)
+    
+        return {
+            "section_name": column,
+            "content_blocks": content_blocks
+        }
+
+
+class ExpectationSuiteColumnSectionRenderer(ColumnSectionRenderer):
 
     @classmethod
     def _render_header(cls, expectations, content_blocks):
@@ -579,7 +624,7 @@ class PrescriptiveColumnSectionRenderer(ColumnSectionRenderer):
 
     @classmethod
     def _render_bullet_list(cls, expectations, content_blocks):
-        content = PrescriptiveBulletListContentBlockRenderer.render(
+        content = ExpectationSuiteBulletListContentBlockRenderer.render(
             expectations,
             include_column_name=False,
         )
@@ -588,17 +633,7 @@ class PrescriptiveColumnSectionRenderer(ColumnSectionRenderer):
         return [], content_blocks
 
     @classmethod
-    def _render_table(cls, validation_results, content_blocks):
-        content = PrescriptiveEvrTableContentBlockRenderer.render(
-            validation_results,
-            include_column_name=False
-        )
-        content_blocks.append(content)
-        
-        return [], content_blocks
-
-    @classmethod
-    def _render_expectations(cls, expectations):
+    def render(cls, expectations={}):
         column = cls._get_column_name(expectations)
     
         remaining_expectations, content_blocks = cls._render_header(
@@ -612,25 +647,3 @@ class PrescriptiveColumnSectionRenderer(ColumnSectionRenderer):
             "section_name": column,
             "content_blocks": content_blocks
         }
-
-    @classmethod
-    def _render_validation_results(cls, validation_results):
-        column = cls._get_column_name(validation_results)
-    
-        remaining_evrs, content_blocks = cls._render_header(
-            validation_results, [])
-
-        remaining_evrs, content_blocks = cls._render_table(
-            remaining_evrs, content_blocks)
-    
-        return {
-            "section_name": column,
-            "content_blocks": content_blocks
-        }
-
-    @classmethod
-    def render(cls, expectations={}, validation_results={}):
-        if expectations:
-            return cls._render_expectations(expectations)
-        else:
-            return cls._render_validation_results(validation_results)

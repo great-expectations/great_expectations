@@ -5,10 +5,10 @@ import json
 import great_expectations as ge
 import great_expectations.render as render
 from great_expectations.render.renderer import (
-    DescriptivePageRenderer,
-    DescriptiveColumnSectionRenderer,
-    PrescriptiveColumnSectionRenderer,
-    PrescriptivePageRenderer,
+    ProfilingResultsPageRenderer,
+    ProfilingResultsColumnSectionRenderer,
+    ExpectationSuiteColumnSectionRenderer,
+    ExpectationSuitePageRenderer,
 )
 from great_expectations.render.view import DefaultJinjaPageView
 

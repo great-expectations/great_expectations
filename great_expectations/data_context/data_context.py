@@ -31,7 +31,7 @@ from great_expectations.datasource import (
     DBTDatasource
 )
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
-from great_expectations.render.renderer import DescriptivePageRenderer, PrescriptivePageRenderer
+from great_expectations.render.renderer import ProfilingResultsPageRenderer, ExpectationSuitePageRenderer, ValidationResultsPageRenderer
 from great_expectations.render.view import (
     DefaultJinjaPageView,
     DefaultJinjaIndexPageView,
@@ -310,7 +310,7 @@ class DataContext(object):
             path (str): Path to the location
 
         """
-        # TODO: this path should be configurable or parameterized to support descriptive and prescriptive docs
+        # TODO: this path should be configurable or parameterized to support expectation suite and profiling results docs
         validation_filepath = self._get_normalized_data_asset_name_filepath(
             data_asset_name,
             expectation_suite_name,
@@ -1505,7 +1505,7 @@ class DataContext(object):
 
         validation_filepaths = [y for x in os.walk(self.fixtures_validations_directory) for y in glob(os.path.join(x[0], '*.json'))]
         for validation_filepath in validation_filepaths:
-            # descriptive validation view
+            # profiling results view
             logger.debug("Loading validation from: %s" % validation_filepath)
             with open(validation_filepath, "r") as infile:
                 validation = json.load(infile)
@@ -1514,43 +1514,43 @@ class DataContext(object):
             data_asset_name = validation['meta']['data_asset_name']
             expectation_suite_name = validation['meta']['expectation_suite_name']
             
-            descriptive_model = DescriptivePageRenderer.render(validation)
-            out_descriptive_filepath = self.get_validation_doc_filepath(
+            profiling_results_model = ProfilingResultsPageRenderer.render(validation)
+            out_profiling_results_filepath = self.get_validation_doc_filepath(
                 data_asset_name, "{run_id}-{expectation_suite_name}-Descriptive".format(
                     run_id=run_id.replace(':', ''),
                     expectation_suite_name=expectation_suite_name
                 )
             )
-            safe_mmkdir(os.path.dirname(out_descriptive_filepath))
+            safe_mmkdir(os.path.dirname(out_profiling_results_filepath))
 
-            with open(out_descriptive_filepath, 'w') as writer:
-                writer.write(DefaultJinjaPageView.render(descriptive_model))
+            with open(out_profiling_results_filepath, 'w') as writer:
+                writer.write(DefaultJinjaPageView.render(profiling_results_model))
 
             index_links.append({
                 "data_asset_name" : data_asset_name,
                 "expectation_suite_name": expectation_suite_name,
                 "run_id": run_id,
-                "filepath": os.path.relpath(out_descriptive_filepath, self.data_doc_directory)
+                "filepath": os.path.relpath(out_profiling_results_filepath, self.data_doc_directory)
             })
 
-            # prescriptive validation view
-            prescriptive_model = PrescriptivePageRenderer.render(validation_results=validation)
-            out_prescriptive_filepath = self.get_validation_doc_filepath(
+            #  validation results view
+            validation_results_model = ValidationResultsPageRenderer.render(validation_results=validation)
+            out_validation_results_filepath = self.get_validation_doc_filepath(
                 data_asset_name, "{run_id}-{expectation_suite_name}-Prescriptive".format(
                     run_id=run_id.replace(':', ''),
                     expectation_suite_name=expectation_suite_name
                 )
             )
-            safe_mmkdir(os.path.dirname(out_prescriptive_filepath))
+            safe_mmkdir(os.path.dirname(out_validation_results_filepath))
 
-            with open(out_prescriptive_filepath, 'w') as writer:
-                writer.write(DefaultJinjaPageView.render(prescriptive_model))
+            with open(out_validation_results_filepath, 'w') as writer:
+                writer.write(DefaultJinjaPageView.render(validation_results_model))
 
             index_links.append({
                 "data_asset_name": data_asset_name,
                 "expectation_suite_name": expectation_suite_name,
                 "run_id": run_id,
-                "filepath": os.path.relpath(out_prescriptive_filepath, self.data_doc_directory)
+                "filepath": os.path.relpath(out_validation_results_filepath, self.data_doc_directory)
             })
 
         expectation_suite_filepaths = [y for x in os.walk(self.expectations_directory) for y in glob(os.path.join(x[0], '*.json'))]
@@ -1562,7 +1562,7 @@ class DataContext(object):
             expectation_suite_name = expectation_suite['expectation_suite_name']
 
             try:
-                model = PrescriptivePageRenderer.render(expectations=expectation_suite)
+                model = ExpectationSuitePageRenderer.render(expectations=expectation_suite)
             except Exception as e:
                 print("Ran into an error in ", expectation_suite_filepath)
                 raise(e)
