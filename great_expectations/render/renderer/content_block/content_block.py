@@ -34,7 +34,8 @@ class ContentBlockRenderer(Renderer):
             for obj_ in render_object:
                 expectation_type = cls._get_expectation_type(obj_)
 
-                content_block_fn = getattr(cls, expectation_type, None)
+                content_block_fn = cls._get_content_block_fn(expectation_type)
+
                 if content_block_fn is not None:
                     result = content_block_fn(
                         obj_,
@@ -59,11 +60,7 @@ class ContentBlockRenderer(Renderer):
                     # TODO: This should probably be overridable via a parameter
                     "styling": cls._get_content_block_styling(),
                 })
-                header = cls._get_header()
-                if header != "":
-                    content_block.update({
-                        "header": header
-                    })
+                cls._process_content_block(content_block)
 
                 return content_block
                 
@@ -78,6 +75,18 @@ class ContentBlockRenderer(Renderer):
                 return content_block_fn(render_object, **kwargs)
             else:
                 return None
+
+    @classmethod
+    def _process_content_block(cls, content_block):
+        header = cls._get_header()
+        if header != "":
+            content_block.update({
+                "header": header
+            })
+
+    @classmethod
+    def _get_content_block_fn(cls, expectation_type):
+        return getattr(cls, expectation_type, None)
 
     @classmethod
     def list_available_expectations(cls):
