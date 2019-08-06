@@ -9,6 +9,7 @@ from .content_block import TableContentBlockRenderer
 from .content_block import PrescriptiveBulletListContentBlockRenderer
 from .content_block import ExceptionListContentBlockRenderer
 
+from ..types import RenderedSection
 
 class ColumnSectionRenderer(Renderer):
     @classmethod
@@ -65,10 +66,10 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
 
         cls._render_failed(evrs, content_blocks)
 
-        return {
+        return RenderedSection(**{
             "section_name": column,
             "content_blocks": content_blocks,
-        }
+        })
 
     @classmethod
     def _render_header(cls, evrs, content_blocks, column_type=None):
@@ -595,7 +596,7 @@ class PrescriptiveColumnSectionRenderer(ColumnSectionRenderer):
         remaining_expectations, content_blocks = cls._render_bullet_list(
             remaining_expectations, content_blocks)
 
-        return {
+        return RenderedSection(**{
             "section_name": column,
             "content_blocks": content_blocks
-        }
+        })

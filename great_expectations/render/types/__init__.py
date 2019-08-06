@@ -1,6 +1,10 @@
 from collections import Iterable
 from collections import namedtuple
 
+# class ListOf(object):
+#     def __init__(self, type_):
+#         self.type_ = type_
+
 class DotDict(dict):
     """dot.notation access to dictionary attributes"""
 
@@ -111,7 +115,7 @@ class Rendered(object):
     pass
 
 class RenderedContentBlock(LimitedDotDict):
-    #TODO: It's weird that 'text'-type blocks are called "content" when all of the other types
+    #TODO: It's weird that 'text'-type blocks are called "content" when all of the other types are named after their types
     _allowed_keys = set([
         "content_block_type",
         "header",
@@ -157,6 +161,9 @@ class RenderedContentBlockWrapper(LimitedDotDict):
     ])
     _required_keys = set([
     ])
+    _key_types = {
+        "content_block": RenderedContentBlock,
+    }
 
 
 # class DomStylingInfo(object):
