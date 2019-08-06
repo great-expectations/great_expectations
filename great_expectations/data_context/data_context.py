@@ -1514,8 +1514,6 @@ class DataContext(object):
             data_asset_name = validation['meta']['data_asset_name']
             expectation_suite_name = validation['meta']['expectation_suite_name']
             model = DescriptivePageRenderer.render(validation)
-            print(model)
-            print(type(model))
             out_filepath = self.get_validation_doc_filepath(
                 data_asset_name, "{run_id}-{expectation_suite_name}".format(
                     run_id=run_id.replace(':', ''),

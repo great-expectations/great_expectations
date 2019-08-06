@@ -3,6 +3,7 @@ import pytest
 from great_expectations.render.types import (
     DotDict,
     LimitedDotDict,
+    ListOf,
 )
 
 """
@@ -196,6 +197,24 @@ def test_LimitedDotDict_subclass_key_types():
                 "x": "quack",
             }
         )
+
+# def test_LimitedDotDict_typeOf_typing():
+#     class MyLimitedDotDict(LimitedDotDict):
+#         _allowed_keys = set([
+#             "a", "b", "c"
+#         ])
+#         _key_types = {
+#             "a" : int,
+#             "b" : ListOf(int),
+#         }
+    
+#     d = MyLimitedDotDict(
+#         **{
+#             "a" : 10,
+#             "b" : [10, 20, 30]
+#         }
+#     )
+
 
 def test_LimitedDotDict_recursive_coercion():
     class MyNestedDotDict(LimitedDotDict):

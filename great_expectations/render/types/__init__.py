@@ -1,9 +1,9 @@
 from collections import Iterable
 from collections import namedtuple
 
-# class ListOf(object):
-#     def __init__(self, type_):
-#         self.type_ = type_
+class ListOf(object):
+    def __init__(self, type_):
+        self.type_ = type_
 
 class DotDict(dict):
     """dot.notation access to dictionary attributes"""
@@ -151,6 +151,9 @@ class RenderedDocument(LimitedDotDict):
     _required_keys = set({
         "sections"
     })
+    _key_types = {
+        # "sections" : ListOf(RenderedSection),
+    }
 
 class RenderedContentBlockWrapper(LimitedDotDict):
     _allowed_keys = set([
