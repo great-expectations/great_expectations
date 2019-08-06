@@ -1,4 +1,9 @@
 from .content_block import ContentBlockRenderer
+from great_expectations.render.types import (
+    RenderedContentBlock,
+    RenderedSection,
+    RenderedContentBlockWrapper,
+)
 
 
 class TableContentBlockRenderer(ContentBlockRenderer):
@@ -22,11 +27,11 @@ class TableContentBlockRenderer(ContentBlockRenderer):
                 rows = extra_rows_fn(ge_object)
                 table_entries.extend(rows)
 
-        return {
+        return RenderedContentBlock(**{
             "content_block_type": "table",
             "header_row": header_row,
             "table_rows": table_entries
-        }
+        })
 
     @classmethod
     def expect_column_values_to_not_match_regex(cls, ge_object):
