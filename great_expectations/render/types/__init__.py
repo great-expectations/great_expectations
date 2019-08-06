@@ -150,7 +150,9 @@ class RenderedContentBlock(LimitedDotDict):
     _allowed_keys = set([
         "content_block_type",
         "header",
+        #TODO: There can be only one!
         "subheader",
+        "sub_header",
         "styling",
 
         "content",
@@ -158,6 +160,7 @@ class RenderedContentBlock(LimitedDotDict):
         "value_list",
         "header_row",
         "table_rows",
+        "bullet_list",
     ])
     _required_keys = set({
         "content_block_type"
@@ -169,8 +172,11 @@ class RenderedSection(LimitedDotDict):
         "content_blocks",
     ])
     _required_keys = set({
-        # "content_blocks" : ListOf(RenderedContentBlock),
+        "content_blocks",
     })
+    _key_types = {
+        "content_blocks" : ListOf(RenderedContentBlock),
+    }
 
 class RenderedDocument(LimitedDotDict):
     _allowed_keys = set([
@@ -195,8 +201,7 @@ class RenderedContentBlockWrapper(LimitedDotDict):
         "section_loop",
         "content_block_loop",
     ])
-    _required_keys = set([
-    ])
+    _required_keys = set([])
     _key_types = {
         "content_block": RenderedContentBlock,
         "section": RenderedSection,

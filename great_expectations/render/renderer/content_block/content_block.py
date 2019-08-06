@@ -1,4 +1,7 @@
 from ..renderer import Renderer
+from ...types import (
+    RenderedContentBlock,
+)
 
 
 class ContentBlockRenderer(Renderer):
@@ -48,13 +51,14 @@ class ContentBlockRenderer(Renderer):
                     )
                     if result is not None:
                         blocks += result
+
             if len(blocks) > 0:
-                content_block = {
+                content_block = RenderedContentBlock(**{
                     "content_block_type": cls._content_block_type,
                     cls._content_block_type: blocks,
                     # TODO: This should probably be overridable via a parameter
                     "styling": cls._get_content_block_styling(),
-                }
+                })
                 header = cls._get_header()
                 if header != "":
                     content_block.update({
@@ -62,6 +66,7 @@ class ContentBlockRenderer(Renderer):
                     })
 
                 return content_block
+                
             else:
                 return None
         else:
