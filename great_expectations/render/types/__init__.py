@@ -23,6 +23,14 @@ class RenderedSection(Rendered):
 class RenderedDocument(Rendered):
     pass
 
+#FIXME: This name is horrible.
+class RenderedContentBlockWrapper(namedtuple(
+    'RenderedContentBlock', 'content_block section_loop content_block_loop'
+)):
+    #TODO: Maybe add defaults for section_loop and content_block_loop...?
+    def __new__(cls, content_block, section_loop, content_block_loop):
+        # content_block = RenderedContentBlock(**content_block)
+        return super(RenderedContentBlockWrapper, cls).__new__(cls, content_block, section_loop, content_block_loop)
 
 # class DomStylingInfo(object):
 #     """Basically a struct type for:

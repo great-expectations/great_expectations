@@ -14,6 +14,7 @@ from great_expectations.render.types import (
     RenderedDocument,
     RenderedSection,
     RenderedContentBlock,
+    RenderedContentBlockWrapper,
 )
 
 def render_styling(styling):
@@ -236,7 +237,8 @@ class DefaultJinjaComponentView(DefaultJinjaView):
 
     @classmethod
     def _validate_document(cls, document):
-        assert isinstance(document["content_block"], RenderedContentBlock)
+        assert isinstance(document.content_block, RenderedContentBlock)
+        assert isinstance(document, RenderedContentBlockWrapper)
 
     @classmethod
     def render(cls, document, template=None, **kwargs):
@@ -247,5 +249,5 @@ class DefaultJinjaComponentView(DefaultJinjaView):
 
         t = cls._get_template(template)
 
-        document["content_block"] = document["content_block"]._asdict()
+        document.content_block = document.content_block._asdict()
         return t.render(document, **kwargs)
