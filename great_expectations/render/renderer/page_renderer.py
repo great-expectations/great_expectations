@@ -64,7 +64,7 @@ class ValidationResultsPageRenderer(Renderer):
             "renderer_type": "ValidationResultsColumnSectionRenderer",
             "data_asset_name": data_asset_name,
             "full_data_asset_identifier": full_data_asset_identifier,
-            "page_title": run_id + "-" + expectation_suite_name + "-Descriptive",
+            "page_title": run_id + "-" + expectation_suite_name + "-ProfilingResults",
             "sections": sections
         }
     
@@ -192,7 +192,7 @@ class ExpectationSuitePageRenderer(Renderer):
             # "data_asset_name": short_data_asset_name,
             "full_data_asset_identifier": full_data_asset_identifier,
             "page_title": expectation_suite_name,
-            "utm_medium": "prescriptive-expectation-suite-page",
+            "utm_medium": "expectation-suite-page",
             "sections": sections
         }
     
@@ -350,8 +350,8 @@ class ProfilingResultsPageRenderer(Renderer):
             "renderer_type": "ProfilingResultsPageRenderer",
             "data_asset_name": data_asset_name,
             "full_data_asset_identifier": full_data_asset_identifier,
-            "page_title": run_id + "-" + expectation_suite_name + "-Descriptive",
-            "utm_medium": "descriptive-validation-page",
+            "page_title": run_id + "-" + expectation_suite_name + "-ProfilingResults",
+            "utm_medium": "profiling-results-page",
             "sections":
                 [
                     ProfilingResultsOverviewSectionRenderer.render(

@@ -3,7 +3,6 @@
 from great_expectations.render.renderer.content_block.expectation_string import ExpectationStringRenderer
 
 
-# class DescriptiveBulletListContentBlockRenderer(BulletListContentBlockRenderer):
 # class FailedExpectationBulletListContentBlockRenderer(BulletListContentBlockRenderer):
 # class FailedExpectationBulletListContentBlockRenderer(BulletListContentBlockRenderer):
 

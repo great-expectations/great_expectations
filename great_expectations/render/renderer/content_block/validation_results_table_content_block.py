@@ -143,23 +143,23 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
 
     @classmethod
     def generate_expectation_row(cls, expectation_type):
-        prescriptive_string_fn = getattr(ExpectationStringRenderer, expectation_type, None)
-        if prescriptive_string_fn is None:
-            prescriptive_string_fn = getattr(ExpectationStringRenderer, "_missing_content_block_fn")
+        expectation_string_fn = getattr(ExpectationStringRenderer, expectation_type, None)
+        if expectation_string_fn is None:
+            expectation_string_fn = getattr(ExpectationStringRenderer, "_missing_content_block_fn")
         
         def row_generator_fn(evr, styling=None, include_column_name=True):
             expectation = evr["expectation_config"]
-            prescriptive_string_obj = prescriptive_string_fn(expectation, styling, include_column_name)
+            expectation_string_obj = expectation_string_fn(expectation, styling, include_column_name)
             
             status_cell = [cls._get_status_icon(evr)]
             exception_statement = cls._get_exception_statement(evr)
             exception_table = cls._get_exception_table(evr)
-            expectation_cell = prescriptive_string_obj
+            expectation_cell = expectation_string_obj
             observed_value = [str(cls._get_observed_value(evr))]
 
             if exception_statement or exception_table:
-                prescriptive_string_obj.append(exception_statement)
-                prescriptive_string_obj.append(exception_table)
+                expectation_string_obj.append(exception_statement)
+                expectation_string_obj.append(exception_table)
                 return [status_cell + [expectation_cell] + observed_value]
             
             return [status_cell + expectation_cell + observed_value]
