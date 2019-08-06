@@ -10,6 +10,12 @@ from .content_block import(
     PrescriptiveBulletListContentBlockRenderer
 )
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
+from great_expectations.render.types import (
+    RenderedContentBlock,
+    RenderedSection,
+    RenderedContentBlockWrapper,
+)
+
 
 class DescriptiveOverviewSectionRenderer(Renderer):
 
@@ -27,14 +33,14 @@ class DescriptiveOverviewSectionRenderer(Renderer):
         cls._render_warnings(evrs, content_blocks)
         cls._render_expectation_types(evrs, content_blocks)
 
-        return {
+        return RenderedSection(**{
             "section_name": section_name,
             "content_blocks": content_blocks
-        }
+        })
 
     @classmethod
     def _render_header(cls, evrs, content_blocks):
-        content_blocks.append({
+        content_blocks.append(RenderedContentBlock(**{
             "content_block_type": "header",
             "header": "Overview",
             "styling": {
@@ -43,7 +49,7 @@ class DescriptiveOverviewSectionRenderer(Renderer):
                     "classes": ["alert", "alert-secondary"]
                 }
             }
-        })
+        }))
 
     @classmethod
     def _render_dataset_info(cls, evrs, content_blocks):

@@ -12,7 +12,8 @@ from .other_section_renderer import (
     DescriptiveOverviewSectionRenderer,
 )
 from ..types import (
-    RenderedDocument
+    RenderedDocument,
+    RenderedSection,
 )
 
 class PrescriptivePageRenderer(Renderer):
@@ -35,10 +36,10 @@ class PrescriptivePageRenderer(Renderer):
             # print(json.dumps(overview_content_blocks, indent=2))
 
         sections = [
-            {
+            RenderedSection(**{
                 "section_name": "Overview",
                 "content_blocks": overview_content_blocks,
-            }
+            })
         ]
 
         sections += [

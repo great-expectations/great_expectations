@@ -156,6 +156,7 @@ class RenderedContentBlock(LimitedDotDict):
         "content",
         "graph",
         "value_list",
+        "header_row",
         "table_rows",
     ])
     _required_keys = set({
@@ -168,6 +169,7 @@ class RenderedSection(LimitedDotDict):
         "content_blocks",
     ])
     _required_keys = set({
+        # "content_blocks" : ListOf(RenderedContentBlock),
     })
 
 class RenderedDocument(LimitedDotDict):
@@ -183,7 +185,7 @@ class RenderedDocument(LimitedDotDict):
         "sections"
     })
     _key_types = {
-        # "sections" : ListOf(RenderedSection),
+        "sections" : ListOf(RenderedSection),
     }
 
 class RenderedContentBlockWrapper(LimitedDotDict):
@@ -197,7 +199,7 @@ class RenderedContentBlockWrapper(LimitedDotDict):
     ])
     _key_types = {
         "content_block": RenderedContentBlock,
-        #TODO: "section": RenderedSection,
+        "section": RenderedSection,
     }
 
 
