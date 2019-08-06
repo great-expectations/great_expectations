@@ -138,29 +138,46 @@ def test_DescriptiveColumnSectionRenderer_render_header(titanic_profiled_name_co
 #     DescriptiveColumnSectionRenderer()._render_values_set(evrs, content_blocks)
 
 def test_DescriptiveColumnSectionRenderer_render_bar_chart_table(titanic_profiled_evrs_1):
-    #This is a janky way to fetch expectations matching a specific name from an EVR suite.
-    #TODO: It will no longer be necessary once we implement ValidationResultSuite._group_evrs_by_column
-    from great_expectations.render.renderer.renderer import (
-        Renderer,
-    )
-    evrs_by_column = Renderer()._group_evrs_by_column(titanic_profiled_evrs_1)
-    print(evrs_by_column.keys())
 
-    age_column_evrs = evrs_by_column["Age"]
-    # print(json.dumps(age_column_evrs, indent=2))
+    print(titanic_profiled_evrs_1["results"][0])
+    distinct_values_evrs = [evr for evr in titanic_profiled_evrs_1["results"] if evr["expectation_config"]["expectation_type"] == "expect_column_distinct_values_to_be_in_set"]
+    
+    assert len(distinct_values_evrs) == 4
 
-    document = DescriptiveColumnSectionRenderer().render(age_column_evrs)
-    # print(document)
+    content_blocks = []
+    for evr in distinct_values_evrs:
+        DescriptiveColumnSectionRenderer()._render_bar_chart_table(
+            distinct_values_evrs,
+            content_blocks,
+        )
+    print(json.dumps(content_blocks, indent=2))
 
-    html = DefaultJinjaPageView.render({"sections":[document]})
-    # print(html)
-    open('./tests/render/output/titanic_age.html', 'w').write(html)
+    assert len(content_blocks) == 4
 
+    for content_block in content_blocks:
+        assert content_block["content_block_type"] == "graph"
+        assert set(content_block.keys()) == {"header", "content_block_type", "graph", "styling"}
+        assert json.loads(content_block["graph"])
 
-    # evrs = {}
-    # DescriptiveColumnSectionRenderer()._render_bar_chart_table(evrs, content_blocks)
-    assert False
+    # expect_column_kl_divergence_to_be_less_than
 
+    # #This is a janky way to fetch expectations matching a specific name from an EVR suite.
+    # #TODO: It will no longer be necessary once we implement ValidationResultSuite._group_evrs_by_column
+    # from great_expectations.render.renderer.renderer import (
+    #     Renderer,
+    # )
+    # evrs_by_column = Renderer()._group_evrs_by_column(titanic_profiled_evrs_1)
+    # print(evrs_by_column.keys())
+
+    # age_column_evrs = evrs_by_column["Survived"]
+    # # print(json.dumps(age_column_evrs, indent=2))
+
+    # document = DescriptiveColumnSectionRenderer().render(age_column_evrs)
+    # # print(document)
+
+    # html = DefaultJinjaPageView.render({"sections":[document]})
+    # # print(html)
+    # open('./tests/render/output/titanic_age.html', 'w').write(html)
 
 
 # def test_DescriptiveColumnSectionRenderer_render_expectation_types():
