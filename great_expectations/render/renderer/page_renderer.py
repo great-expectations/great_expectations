@@ -14,6 +14,7 @@ from .other_section_renderer import (
 from ..types import (
     RenderedDocument,
     RenderedSection,
+    RenderedContentBlock,
 )
 
 class PrescriptivePageRenderer(Renderer):
@@ -59,7 +60,7 @@ class PrescriptivePageRenderer(Renderer):
 
     @classmethod
     def _render_asset_header(cls, expectations):
-        return {
+        return RenderedContentBlock(**{
             "content_block_type": "header",
             "header": "Expectation Suite Overview",
             "styling": {
@@ -68,7 +69,7 @@ class PrescriptivePageRenderer(Renderer):
                     "classes": ["alert", "alert-secondary"]
                 }
             }
-        }
+        })
 
     @classmethod
     def _render_asset_info(cls, expectations):
@@ -79,7 +80,7 @@ class PrescriptivePageRenderer(Renderer):
         expectation_suite_name = expectations.get("expectation_suite_name")
         ge_version = expectations["meta"]["great_expectations.__version__"]
 
-        return {
+        return RenderedContentBlock(**{
             "content_block_type": "table",
             "header": "Info",
             "table_rows": [
@@ -97,7 +98,7 @@ class PrescriptivePageRenderer(Renderer):
                     "classes": ["table", "table-sm"]
                 }
             },
-        }
+        })
 
     @classmethod
     def _render_asset_notes(cls, expectations):
@@ -163,7 +164,7 @@ class PrescriptivePageRenderer(Renderer):
             if note_content != None:
                 content = content + note_content
 
-        return {
+        return RenderedContentBlock(**{
             "content_block_type": "text",
             "header": "Notes",
             "content": content,
@@ -176,7 +177,7 @@ class PrescriptivePageRenderer(Renderer):
                     "classes": ["table", "table-sm"]
                 }
             },
-        }
+        })
 
 
 class DescriptivePageRenderer(Renderer):

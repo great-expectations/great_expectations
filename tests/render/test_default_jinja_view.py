@@ -61,11 +61,11 @@ def test_render_section_page():
     section = RenderedSection(**{
         "section_name": None,
         "content_blocks": [
-            {
+            RenderedContentBlock(**{
                 "content_block_type": "header",
                 "header": "Overview",
-            },
-            {
+            }),
+            RenderedContentBlock(**{
                 "content_block_type": "table",
                 "header": "Dataset info",
                 "table_rows": [
@@ -87,7 +87,7 @@ def test_render_section_page():
                         ]
                     }
                 }
-            }
+            })
         ]
     })
 

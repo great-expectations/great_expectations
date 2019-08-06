@@ -77,7 +77,7 @@ class DescriptiveOverviewSectionRenderer(Renderer):
             # ["Duplicate rows", "0 (0.0%)", ], #TODO: bring back when we have an expectation for this
         ]
 
-        content_blocks.append({
+        content_blocks.append(RenderedContentBlock(**{
             "content_block_type": "table",
             "header": "Dataset info",
             "table_rows": table_rows,
@@ -90,7 +90,7 @@ class DescriptiveOverviewSectionRenderer(Renderer):
                     "classes": ["table", "table-sm"]
                 }
             },
-        })
+        }))
 
     @classmethod
     def _render_variable_types(cls, evrs, content_blocks):
@@ -100,7 +100,7 @@ class DescriptiveOverviewSectionRenderer(Renderer):
         column_type_counter = Counter(column_types.values())
         table_rows = [[type, str(column_type_counter[type])] for type in ["int", "float", "string", "--"]]
 
-        content_blocks.append({
+        content_blocks.append(RenderedContentBlock(**{
             "content_block_type": "table",
             "header": "Variable types",
             "table_rows": table_rows,
@@ -113,7 +113,7 @@ class DescriptiveOverviewSectionRenderer(Renderer):
                     "classes": ["table", "table-sm"]
                 }
             },
-        })
+        }))
 
     @classmethod
     def _render_expectation_types(cls, evrs, content_blocks):
@@ -142,7 +142,7 @@ class DescriptiveOverviewSectionRenderer(Renderer):
             }
         } for tr in bullet_list]
 
-        content_blocks.append({
+        content_blocks.append(RenderedContentBlock(**{
             "content_block_type": "bullet_list",
             "header": 'Expectation types <span class="mr-3 triangle"></span>',
             "bullet_list": bullet_list,
@@ -167,7 +167,7 @@ class DescriptiveOverviewSectionRenderer(Renderer):
                     "classes": ["list-group", "collapse"],
                 },
             },
-        })
+        }))
 
     @classmethod
     def _render_warnings(cls, evrs, content_blocks):

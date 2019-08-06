@@ -11,6 +11,11 @@ from .content_block import ExceptionListContentBlockRenderer
 
 from ..types import RenderedSection
 
+from ..types import (
+    RenderedContentBlock,
+)
+
+
 class ColumnSectionRenderer(Renderer):
     @classmethod
     def _get_column_name(cls, ge_object):
@@ -91,7 +96,7 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
 
         # assert False
         
-        content_blocks.append({
+        content_blocks.append(RenderedContentBlock(**{
             "content_block_type": "header",
             "header": {
                     "template": column_name,
@@ -115,7 +120,7 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
                     "classes": ["alert", "alert-secondary"]
                 }
             }
-        })
+        }))
 
     @classmethod
     def _render_expectation_types(cls, evrs, content_blocks):
@@ -155,7 +160,7 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
             }
         } for evr in evrs]
 
-        content_blocks.append({
+        content_blocks.append(RenderedContentBlock(**{
             "content_block_type": "bullet_list",
             "header": 'Expectation types <span class="mr-3 triangle"></span>',
             "bullet_list": bullet_list,
@@ -182,7 +187,7 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
                     "classes": ["list-group", "collapse"],
                 },
             },
-        })
+        }))
 
     @classmethod
     def _render_overview_table(cls, evrs, content_blocks):
@@ -251,7 +256,7 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
                 quantile_ranges[idx],
             ])
 
-        content_blocks.append({
+        content_blocks.append(RenderedContentBlock(**{
             "content_block_type": "table",
             "header": "Quantiles",
             "table_rows": table_rows,
@@ -264,7 +269,7 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
                     "classes": ["table", "table-sm", "table-unbordered"],
                 }
             },
-        })
+        }))
 
     @classmethod
     def _render_stats_table(cls, evrs, content_blocks):
@@ -326,7 +331,7 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
             ])
 
         if len(table_rows) > 0:
-            content_blocks.append({
+            content_blocks.append(RenderedContentBlock(**{
                 "content_block_type": "table",
                 "header": "Statistics",
                 "table_rows": table_rows,
@@ -339,7 +344,7 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
                         "classes": ["table", "table-sm", "table-unbordered"],
                     }
                 },
-            })
+            }))
         else:
             return
 
@@ -366,7 +371,7 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
         else:
             classes = ["col-4"]
 
-        new_block = {
+        new_block = RenderedContentBlock(**{
             "content_block_type": "value_list",
             "header":
                 {
@@ -392,7 +397,7 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
                     "margin-top": "20px",
                 }
             }
-        }
+        })
 
         content_blocks.append(new_block)
 
@@ -439,7 +444,7 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
 
         chart = bars.to_json()
 
-        new_block = {
+        new_block = RenderedContentBlock(**{
             "content_block_type": "graph",
             "header":
                 {
@@ -455,7 +460,7 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
                     "margin-top": "20px",
                 }
             }
-        }
+        })
 
         content_blocks.append(new_block)
 
@@ -496,7 +501,7 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
 
         chart = bars.to_json()
 
-        new_block = {
+        new_block = RenderedContentBlock(**{
             "content_block_type": "graph",
             "header":
                 {
@@ -512,7 +517,7 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
                     "margin-top": "20px",
                 }
             }
-        }
+        })
 
         content_blocks.append(new_block)
 
@@ -538,10 +543,10 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
                 "expect_column_mean_to_be_between",
                 "expect_column_min_to_be_between"
             ]:
-                new_block = {
+                new_block = RenderedContentBlock(**{
                     "content_block_type": "text",
                     "content": []
-                }
+                })
                 new_block["content"].append("""
     <div class="alert alert-primary" role="alert">
         Warning! Unrendered EVR:<br/>
@@ -562,7 +567,7 @@ class PrescriptiveColumnSectionRenderer(ColumnSectionRenderer):
     def _render_header(cls, expectations, content_blocks):
         column = cls._get_column_name(expectations)
 
-        content_blocks.append({
+        content_blocks.append(RenderedContentBlock(**{
             "content_block_type": "header",
             "header": column,
             "styling": {
@@ -571,7 +576,7 @@ class PrescriptiveColumnSectionRenderer(ColumnSectionRenderer):
                     "classes": ["alert", "alert-secondary"]
                 }
             }
-        })
+        }))
 
         return expectations, content_blocks
 
