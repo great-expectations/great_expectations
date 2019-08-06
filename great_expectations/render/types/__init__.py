@@ -34,22 +34,62 @@ class LimitedDotDict(DotDict):
     """
 
     _allowed_keys = set()
+    _required_keys = set()
+    _key_types = {}
 
-    #TODO: Implement _required_keys
-    #TODO: Implement _key_types
+    def __init__(self, coerce_types=False, **kwargs):
+        print(kwargs)
+        print(self._allowed_keys)
+        print(self._required_keys)
 
-    def __init__(self, **kwargs):
+        if not self._required_keys.issubset(self._allowed_keys):
+            raise ValueError("_required_keys : {!r} must be a subset of _allowed_keys {!r}".format(
+                self._required_keys,
+                self._allowed_keys,
+            ))
+
         for key, value in kwargs.items():
             if key not in self._allowed_keys:
-                raise KeyError("(__init__) key: {!r} not in allowed keys: {!r}".format(
+                raise KeyError("key: {!r} not in allowed keys: {!r}".format(
                     key,
                     self._allowed_keys
                 ))
+
+            # if key in self._key_types and not isinstance(key, self._key_types[key]):
+            if key in self._key_types and type(value) != self._key_types[key]:
+                if coerce_types:
+                    #TODO: Catch errors and raise more informative error messages here
+
+                    #If the given type is an instance of LimitedDotDict, apply coerce_types recursively
+                    print(key)
+                    print(value)
+                    print(self._key_types[key])
+                    print(issubclass(self._key_types[key], LimitedDotDict))
+                    if issubclass(self._key_types[key], LimitedDotDict):
+                        value = self._key_types[key](coerce_types=True, **value)
+                    else:
+                        value = self._key_types[key](value)
+                
+                else:
+
+                    raise TypeError("key: {!r} must be of type {!r}, not {!r}".format(
+                        key,
+                        self._key_types[key],
+                        type(value),
+                    ))
+
             self[key] = value
+
+        for key in self._required_keys:
+            if key not in kwargs:
+                raise KeyError("key: {!r} is missing even though it's in the required keys: {!r}".format(
+                    key,
+                    self._required_keys
+                ))
 
     def __setitem__(self, key, val):
         if key not in self._allowed_keys:
-            raise KeyError("(__setitem__) key: {!r} not in allowed keys: {!r}".format(
+            raise KeyError("key: {!r} not in allowed keys: {!r}".format(
                 key,
                 self._allowed_keys
             ))
@@ -57,11 +97,18 @@ class LimitedDotDict(DotDict):
 
     def __setattr__(self, key, val):
         if key not in self._allowed_keys:
-            raise KeyError("(__setitem__) key: {!r} not in allowed keys: {!r}".format(
+            raise KeyError("key: {!r} not in allowed keys: {!r}".format(
                 key,
                 self._allowed_keys
             ))
         dict.__setitem__(self, key, val)
+
+
+# class RenderedContent(LimitedDotDict):
+# class RenderedComponentContent(RenderedContent):
+# class RenderedSectionContent(RenderedContent):
+# class RenderedDocumentContent(RenderedContent):
+# class RenderedContentBlockWrapper(RenderedContent):
 
 class Rendered(object):
     pass
