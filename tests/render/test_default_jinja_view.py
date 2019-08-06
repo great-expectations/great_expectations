@@ -9,7 +9,7 @@ from great_expectations.render.renderer import (
     DescriptivePageRenderer,
 )
 from great_expectations.render.view import DefaultJinjaPageView
-
+from great_expectations.render.types import RenderedContentBlock
 
 @pytest.fixture()
 def validation_results():
@@ -263,11 +263,11 @@ def test_rendering_components_with_styling():
 
 
 def test_render_header_component():
-    header_component_content = {
+    header_component_content = RenderedContentBlock(**{
         # "component_type": "header",
         "content_block_type": "header",
         "header": "Overview",
-    }
+    })
     rendered_doc = ge.render.view.view.DefaultJinjaComponentView.render({
         "content_block": header_component_content,
         "section_loop": {"index": 1},
@@ -398,14 +398,14 @@ def test_render_graph():
 
 
 def test_render_text():
-    text_component_content = {
+    text_component_content = RenderedContentBlock(**{
         "content_block_type": "text",
         "header": "Histogram",
         "content": ["hello"],
         "styling": {
             "classes": ["col-4"]
         }
-    }
+    })
 
     rendered_doc = ge.render.view.view.DefaultJinjaComponentView.render({
         "content_block": text_component_content,
@@ -424,14 +424,14 @@ def test_render_text():
         </div>
 </div>"""
 
-    text_component_content = {
+    text_component_content = RenderedContentBlock(**{
         "content_block_type": "text",
         "header": "Histogram",
         "content": ["hello", "goodbye"],
         "styling": {
             "classes": ["col-4"]
         }
-    }
+    })
 
     rendered_doc = ge.render.view.view.DefaultJinjaComponentView.render({
         "content_block": text_component_content,
