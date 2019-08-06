@@ -10,7 +10,7 @@ from jinja2 import (
 )
 
 from great_expectations.version import __version__
-
+from great_expectations.render.types import RenderedDocument
 
 def render_styling(styling):
     """Adds styling information suitable for an html tag
@@ -177,6 +177,8 @@ class DefaultJinjaView(object):
 
     @classmethod
     def render(cls, document, template=None, **kwargs):
+        assert isinstance(document, RenderedDocument)
+
         if template is None:
             template = cls._template
 

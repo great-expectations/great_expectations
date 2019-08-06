@@ -1,8 +1,11 @@
-class RenderedContentBlock(object):
+class Rendered(object):
     pass
 
-class RenderedSection(object):
+class RenderedContentBlock(Rendered):
     pass
 
-class RenderedDocument(object):
+class RenderedSection(Rendered):
+    pass
+
+class RenderedDocument(Rendered):
     pass
