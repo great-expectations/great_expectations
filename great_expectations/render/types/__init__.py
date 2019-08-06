@@ -63,22 +63,18 @@ class LimitedDotDict(DotDict):
 class Rendered(object):
     pass
 
-# class RenderedContentBlock(Rendered):
-#     def __init__(self, content_block_type, header=None, subheader=None, content=None, styling=None):
-#         self.content_block_type = content_block_type
-#         self.header = header
-#         self.subheader = subheader
-#         self.content = content
-#         self.styling = styling
-
 class RenderedContentBlock(LimitedDotDict):
+    #TODO: It's weird that 'text'-type blocks
     _allowed_keys = set([
         "content_block_type",
         "header",
         "subheader",
+        "styling",
+
         "content",
         "graph",
-        "styling",
+        "value_list",
+        "table_rows",
     ])
 
 class RenderedSection(Rendered):
