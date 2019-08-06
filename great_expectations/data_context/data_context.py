@@ -16,6 +16,7 @@ from collections import OrderedDict
 from .util import NormalizedDataAssetName, get_slack_callback, safe_mmkdir
 
 from great_expectations.exceptions import DataContextError, ConfigNotFoundError, ProfilerError
+from great_expectations.render.types import RenderedDocument
 
 try:
     from urllib.parse import urlparse
@@ -1513,6 +1514,8 @@ class DataContext(object):
             data_asset_name = validation['meta']['data_asset_name']
             expectation_suite_name = validation['meta']['expectation_suite_name']
             model = DescriptivePageRenderer.render(validation)
+            print(model)
+            print(type(model))
             out_filepath = self.get_validation_doc_filepath(
                 data_asset_name, "{run_id}-{expectation_suite_name}".format(
                     run_id=run_id.replace(':', ''),
@@ -1741,10 +1744,12 @@ class DataContext(object):
             sections.append(section)
 
         with open(os.path.join(self.data_doc_directory, "index.html"), "w") as writer:
-            writer.write(DefaultJinjaIndexPageView.render({
-                "utm_medium": "index-page",
-                "sections": sections
-            }))
+            writer.write(DefaultJinjaIndexPageView.render(
+                RenderedDocument(**{
+                    "utm_medium": "index-page",
+                    "sections": sections
+                })
+            ))
 
     def profile_datasource(self,
                            datasource_name,
