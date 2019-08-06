@@ -77,6 +77,7 @@ class RenderedContentBlock(LimitedDotDict):
         "header",
         "subheader",
         "content",
+        "graph",
         "styling",
     ])
 
