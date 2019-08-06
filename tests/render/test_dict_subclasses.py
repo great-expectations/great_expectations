@@ -6,7 +6,7 @@ from great_expectations.render.types import (
 )
 
 """
-* dictionary syntax works for assignment and lookup `myobj[“a”] = 10`, `print(myobjj[“a”])`
+* dictionary syntax works for assignment and lookup `myobj["a"] = 10`, `print(myobjj["a"])`
 * dot notation works for assignment and lookup `my_obj.a = 10`, `print(my obj.a)`
 * Adding an unknown key raises an error
 * Keys can be optional
