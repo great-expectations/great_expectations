@@ -1,13 +1,13 @@
 from great_expectations.render.renderer import (
-    PrescriptivePageRenderer,
-    DescriptivePageRenderer,
+    ExpectationSuitePageRenderer,
+    ProfilingResultsPageRenderer,
 )
 
 def test_render_asset_notes():
     # import pypandoc
     # print(pypandoc.convert_text("*hi*", to='html', format="md"))
 
-    result = PrescriptivePageRenderer._render_asset_notes({
+    result = ExpectationSuitePageRenderer._render_asset_notes({
         "meta" : {
             "notes" : "*hi*"
         }
@@ -15,7 +15,7 @@ def test_render_asset_notes():
     print(result)
     assert result["content"] == ["*hi*"]
 
-    result = PrescriptivePageRenderer._render_asset_notes({
+    result = ExpectationSuitePageRenderer._render_asset_notes({
         "meta" : {
             "notes" : ["*alpha*", "_bravo_", "charlie"]
         }
@@ -23,7 +23,7 @@ def test_render_asset_notes():
     print(result)
     assert result["content"] == ["*alpha*", "_bravo_", "charlie"]
 
-    result = PrescriptivePageRenderer._render_asset_notes({
+    result = ExpectationSuitePageRenderer._render_asset_notes({
         "meta" : {
             "notes" : {
                 "format": "string",
@@ -34,7 +34,7 @@ def test_render_asset_notes():
     print(result)
     assert result["content"] == ["*alpha*", "_bravo_", "charlie"]
 
-    result = PrescriptivePageRenderer._render_asset_notes({
+    result = ExpectationSuitePageRenderer._render_asset_notes({
         "meta" : {
             "notes" : {
                 "format": "markdown",
@@ -45,7 +45,7 @@ def test_render_asset_notes():
     print(result)
     assert result["content"] == ["<p><em>alpha</em></p>\n"]
 
-    result = PrescriptivePageRenderer._render_asset_notes({
+    result = ExpectationSuitePageRenderer._render_asset_notes({
         "meta" : {
             "notes" : {
                 "format": "markdown",
@@ -58,14 +58,14 @@ def test_render_asset_notes():
 
 
 def test_expectation_summary_in_render_asset_notes():
-    result = PrescriptivePageRenderer._render_asset_notes({
+    result = ExpectationSuitePageRenderer._render_asset_notes({
         "meta" : {},
         "expectations" : {}
     })
     print(result)
     assert result["content"] == ['This Expectation suite currently contains 0 total Expectations across 0 columns.']
 
-    result = PrescriptivePageRenderer._render_asset_notes({
+    result = ExpectationSuitePageRenderer._render_asset_notes({
         "meta" : {
             "notes" : {
                 "format": "markdown",
@@ -80,7 +80,7 @@ def test_expectation_summary_in_render_asset_notes():
         '<p>hi</p>\n',
     ]
 
-    result = PrescriptivePageRenderer._render_asset_notes({
+    result = ExpectationSuitePageRenderer._render_asset_notes({
         "meta" : {},
         "expectations" : [
             {
@@ -101,8 +101,8 @@ def test_expectation_summary_in_render_asset_notes():
     assert result["content"][0] == 'This Expectation suite currently contains 3 total Expectations across 2 columns.'
 
 
-def test_DescriptivePageRenderer(titanic_profiled_evrs_1):
-    document = DescriptivePageRenderer().render(titanic_profiled_evrs_1)
+def test_ProfilingResultsPageRenderer(titanic_profiled_evrs_1):
+    document = ProfilingResultsPageRenderer().render(titanic_profiled_evrs_1)
     print(document)
     # assert document == 0
 
