@@ -122,15 +122,17 @@ def test_render_section_page():
 
 
 def test_rendering_components_without_section_loop_index():
-    header_component_content = {
+    header_component_content = RenderedContentBlock(**{
         # "component_type": "header",
         "content_block_type": "header",
         "header": "Overview",
-    }
-    rendered_doc = ge.render.view.view.DefaultJinjaComponentView.render({
-        "content_block": header_component_content,
-        "content_block_loop": {"index": 2},
     })
+    rendered_doc = ge.render.view.view.DefaultJinjaComponentView.render(
+        RenderedContentBlockWrapper(**{
+            "content_block": header_component_content,
+            "content_block_loop": {"index": 2},
+        })
+    )
     print(rendered_doc)
     assert rendered_doc == \
         """
@@ -141,9 +143,11 @@ def test_rendering_components_without_section_loop_index():
         </h3></div>
 </div>"""
 
-    rendered_doc = ge.render.view.view.DefaultJinjaComponentView.render({
-        "content_block": header_component_content,
-    })
+    rendered_doc = ge.render.view.view.DefaultJinjaComponentView.render(
+        RenderedContentBlockWrapper(**{
+            "content_block": header_component_content,
+        })
+    )
     print(rendered_doc)
     assert rendered_doc == \
         """
@@ -154,10 +158,12 @@ def test_rendering_components_without_section_loop_index():
         </h3></div>
 </div>"""
 
-    rendered_doc = ge.render.view.view.DefaultJinjaComponentView.render({
-        "content_block": header_component_content,
-        "section_loop": {"index": 3},
-    })
+    rendered_doc = ge.render.view.view.DefaultJinjaComponentView.render(
+        RenderedContentBlockWrapper(**{
+            "content_block": header_component_content,
+            "section_loop": {"index": 3},
+        })
+    )
     print(rendered_doc)
     assert rendered_doc == \
         """
@@ -172,7 +178,7 @@ def test_rendering_components_without_section_loop_index():
 def test_rendering_components_with_styling():
     # Medium-complicated example to verify that all the things are correctly piped to all the places
 
-    header_component_content = {
+    header_component_content = RenderedContentBlock(**{
         # "component_type": "table",
         "content_block_type": "table",
         "header": {
@@ -235,12 +241,14 @@ def test_rendering_components_with_styling():
                 "attributes": {"body": "baz"},
             }
         }
-    }
-    rendered_doc = ge.render.view.view.DefaultJinjaComponentView.render({
-        "content_block": header_component_content,
-        "section_loop": {"index": 1},
-        "content_block_loop": {"index": 2},
     })
+    rendered_doc = ge.render.view.view.DefaultJinjaComponentView.render(
+        RenderedContentBlockWrapper(**{
+            "content_block": header_component_content,
+            "section_loop": {"index": 1},
+            "content_block_loop": {"index": 2},
+        })
+    )
     print(rendered_doc)
     rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
     
@@ -266,16 +274,18 @@ def test_rendering_components_with_styling():
 
 
 def test_render_header_component():
-    header_component_content = RenderedContentBlock({
+    header_component_content = RenderedContentBlock(**{
         # "component_type": "header",
         "content_block_type": "header",
         "header": "Overview",
     })
-    rendered_doc = ge.render.view.view.DefaultJinjaComponentView.render({
-        "content_block": header_component_content,
-        "section_loop": {"index": 1},
-        "content_block_loop": {"index": 2},
-    })
+    rendered_doc = ge.render.view.view.DefaultJinjaComponentView.render(
+        RenderedContentBlockWrapper(**{
+            "content_block": header_component_content,
+            "section_loop": {"index": 1},
+            "content_block_loop": {"index": 2},
+        })
+    )
     print(rendered_doc)
     assert rendered_doc == \
         """
@@ -288,7 +298,7 @@ def test_render_header_component():
 
 
 def test_render_table_component():
-    table_component_content = {
+    table_component_content = RenderedContentBlock(**{
         # "component_type": "header",
         "content_block_type": "table",
         "header": "Overview",
@@ -299,12 +309,14 @@ def test_render_table_component():
         "styling": {
             "classes": ["col-4"],
         }
-    }
-    rendered_doc = ge.render.view.view.DefaultJinjaComponentView.render({
-        "content_block": table_component_content,
-        "section_loop": {"index": 1},
-        "content_block_loop": {"index": 2},
     })
+    rendered_doc = ge.render.view.view.DefaultJinjaComponentView.render(
+        RenderedContentBlockWrapper(**{
+            "content_block": table_component_content,
+            "section_loop": {"index": 1},
+            "content_block_loop": {"index": 2},
+        })
+    )
     print(rendered_doc)
     assert rendered_doc == \
         """
@@ -321,7 +333,7 @@ def test_render_table_component():
 
 
 def test_render_value_list():
-    value_list_component_content = {
+    value_list_component_content = RenderedContentBlock(**{
         'content_block_type': 'value_list',
         'header': 'Example values',
         'value_list': [{
@@ -337,13 +349,15 @@ def test_render_value_list():
             'classes': ['col-4'],
             'styles': {'margin-top': '20px'}
         }
-    }
-
-    rendered_doc = ge.render.view.view.DefaultJinjaComponentView.render({
-        "content_block": value_list_component_content,
-        "section_loop": {"index": 1},
-        "content_block_loop": {"index": 2},
     })
+
+    rendered_doc = ge.render.view.view.DefaultJinjaComponentView.render(
+        RenderedContentBlockWrapper(**{
+            "content_block": value_list_component_content,
+            "section_loop": {"index": 1},
+            "content_block_loop": {"index": 2},
+        })
+    )
     print(rendered_doc)
     assert rendered_doc == """
 <div id="section-1-content-block-2" class="col-4" style="margin-top:20px;" >
