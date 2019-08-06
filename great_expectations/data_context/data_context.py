@@ -1526,6 +1526,17 @@ class DataContext(object):
                     logger.error("Unrecognized validation result path: %s" % result)
                     continue
                 run_id = components[0]
+
+                # run_id_filter attribute in the config of validation store allows to filter run ids
+                run_id_filter = validations_store.get("run_id_filter")
+                if run_id_filter:
+                    if run_id_filter.get("eq"):
+                        if run_id_filter.get("eq") != run_id:
+                            continue
+                    elif run_id_filter.get("ne"):
+                        if run_id_filter.get("eq") == run_id:
+                            continue
+
                 datasource_name = components[1]
                 generator_name = components[2]
                 generator_asset = components[3]
@@ -1756,7 +1767,8 @@ class DataContext(object):
             profiling_results['results'] = []
             total_columns, total_expectations, total_rows, skipped_data_assets = 0, 0, 0, 0
             total_start_time = datetime.datetime.now()
-            run_id = total_start_time.isoformat().replace(":", "") + "Z"
+            # run_id = total_start_time.isoformat().replace(":", "") + "Z"
+            run_id = "profiling"
 
             for name in data_asset_name_list:
                 logger.info("\tProfiling '%s'..." % name)
