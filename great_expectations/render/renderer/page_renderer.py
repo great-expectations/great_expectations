@@ -12,9 +12,9 @@ from .other_section_renderer import (
     DescriptiveOverviewSectionRenderer,
 )
 from ..types import (
-    RenderedDocument,
-    RenderedSection,
-    RenderedContentBlock,
+    RenderedDocumentContent,
+    RenderedSectionContent,
+    RenderedComponentContent,
 )
 
 class PrescriptivePageRenderer(Renderer):
@@ -37,7 +37,7 @@ class PrescriptivePageRenderer(Renderer):
             # print(json.dumps(overview_content_blocks, indent=2))
 
         sections = [
-            RenderedSection(**{
+            RenderedSectionContent(**{
                 "section_name": "Overview",
                 "content_blocks": overview_content_blocks,
             })
@@ -49,7 +49,7 @@ class PrescriptivePageRenderer(Renderer):
 
         full_data_asset_identifier = expectations.get("data_asset_name") or ""
 
-        return RenderedDocument(**{
+        return RenderedDocumentContent(**{
             # "renderer_type": "PrescriptivePageRenderer",
             # "data_asset_name": short_data_asset_name,
             "full_data_asset_identifier": full_data_asset_identifier,
@@ -60,7 +60,7 @@ class PrescriptivePageRenderer(Renderer):
 
     @classmethod
     def _render_asset_header(cls, expectations):
-        return RenderedContentBlock(**{
+        return RenderedComponentContent(**{
             "content_block_type": "header",
             "header": "Expectation Suite Overview",
             "styling": {
@@ -80,7 +80,7 @@ class PrescriptivePageRenderer(Renderer):
         expectation_suite_name = expectations.get("expectation_suite_name")
         ge_version = expectations["meta"]["great_expectations.__version__"]
 
-        return RenderedContentBlock(**{
+        return RenderedComponentContent(**{
             "content_block_type": "table",
             "header": "Info",
             "table_rows": [
@@ -164,7 +164,7 @@ class PrescriptivePageRenderer(Renderer):
             if note_content != None:
                 content = content + note_content
 
-        return RenderedContentBlock(**{
+        return RenderedComponentContent(**{
             "content_block_type": "text",
             "header": "Notes",
             "content": content,
@@ -201,7 +201,7 @@ class DescriptivePageRenderer(Renderer):
         else:
             data_asset_name = None
 
-        return RenderedDocument(**{
+        return RenderedDocumentContent(**{
             "renderer_type": "DescriptivePageRenderer",
             "data_asset_name": data_asset_name,
             "full_data_asset_identifier": full_data_asset_identifier,

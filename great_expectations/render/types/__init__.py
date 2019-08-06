@@ -1,151 +1,19 @@
-from collections import Iterable
-from collections import namedtuple
-
-class ListOf(object):
-    def __init__(self, type_):
-        self.type_ = type_
-
-class DotDict(dict):
-    """dot.notation access to dictionary attributes"""
-
-    def __getattr__(self, attr):
-        return self.get(attr)
-
-    __setattr__ = dict.__setitem__
-    __delattr__ = dict.__delitem__
-
-    def __dir__(self):
-        return self.keys()
-
-    # Cargo-cultishly copied from: https://github.com/spindlelabs/pyes/commit/d2076b385c38d6d00cebfe0df7b0d1ba8df934bc
-    def __deepcopy__(self, memo):
-        return DotDict([(copy.deepcopy(k, memo), copy.deepcopy(v, memo)) for k, v in self.items()])
-
-
-#Inspiration : https://codereview.stackexchange.com/questions/81794/dictionary-with-restricted-keys
-class LimitedDotDict(DotDict):
-    """dot.notation access to dictionary attributes, with limited keys
-    
-
-    Note: this class is pretty useless on its own.
-    You need to subclass it like so:
-
-    class MyLimitedDotDict(LimitedDotDict):
-        _allowed_keys = set([
-            "x", "y", "z"
-        ])
-
-    """
-
-    _allowed_keys = set()
-    _required_keys = set()
-    _key_types = {}
-
-    def __init__(self, coerce_types=False, **kwargs):
-        # print(kwargs)
-        # print(self._allowed_keys)
-        # print(self._required_keys)
-
-        if not self._required_keys.issubset(self._allowed_keys):
-            raise ValueError("_required_keys : {!r} must be a subset of _allowed_keys {!r}".format(
-                self._required_keys,
-                self._allowed_keys,
-            ))
-
-        for key, value in kwargs.items():
-            if key not in self._allowed_keys:
-                raise KeyError("key: {!r} not in allowed keys: {!r}".format(
-                    key,
-                    self._allowed_keys
-                ))
-
-            # if key in self._key_types and not isinstance(key, self._key_types[key]):
-            if key in self._key_types:
-                # print(value)
-
-                #Update values if coerce_types==True
-                if coerce_types:
-                    #TODO: Catch errors and raise more informative error messages here
-
-                    #If the given type is an instance of LimitedDotDict, apply coerce_types recursively
-                    if isinstance(self._key_types[key], ListOf):
-                        # assert isinstance(self._key_types[key], Iterable)
-                        if issubclass(self._key_types[key], LimitedDotDict):
-                            value = [self._key_types[key].type_(coerce_types=True, **v) for v in value]
-                        else:
-                            value = [self._key_types[key].type_(v) for v in value]
-
-                    else:
-                        if issubclass(self._key_types[key], LimitedDotDict):
-                            value = self._key_types[key](coerce_types=True, **value)
-                        else:
-                            value = self._key_types[key](value)
-                
-                # print(value)
-                
-                #Validate types
-                if type(value) != self._key_types[key]:
-
-                    #TODO: Catch errors and raise more informative error messages here
-                    if isinstance(self._key_types[key], ListOf):
-                        if not isinstance(value, Iterable):
-                            raise TypeError("key: {!r} must be an Iterable type, not {!r}".format(
-                                key,
-                                type(value),
-                            ))
-
-                        for v in value:
-                            if not isinstance(v, self._key_types[key].type_):
-                                raise TypeError("values in key: {!r} must be of type: {!r}, not {!r} {!r}".format(
-                                    key,
-                                    self._key_types[key].type_,
-                                    v,
-                                    type(v),
-                                ))
-
-                    else:
-                        raise TypeError("key: {!r} must be of type {!r}, not {!r}".format(
-                            key,
-                            self._key_types[key],
-                            type(value),
-                        ))
-
-            self[key] = value
-
-        for key in self._required_keys:
-            if key not in kwargs:
-                raise KeyError("key: {!r} is missing even though it's in the required keys: {!r}".format(
-                    key,
-                    self._required_keys
-                ))
-
-    def __setitem__(self, key, val):
-        if key not in self._allowed_keys:
-            raise KeyError("key: {!r} not in allowed keys: {!r}".format(
-                key,
-                self._allowed_keys
-            ))
-        dict.__setitem__(self, key, val)
-
-    def __setattr__(self, key, val):
-        if key not in self._allowed_keys:
-            raise KeyError("key: {!r} not in allowed keys: {!r}".format(
-                key,
-                self._allowed_keys
-            ))
-        dict.__setitem__(self, key, val)
+from great_expectations.types import (
+    LimitedDotDict,
+    ListOf,
+)
 
 # TODO: Rename to this:
 # class RenderedContent(LimitedDotDict):
-# class RenderedComponentContent(RenderedContent):
-# class RenderedSectionContent(RenderedContent):
-# class RenderedDocumentContent(RenderedContent):
-# class RenderedContentBlockWrapper(RenderedContent):
+    # class RenderedComponentContent(RenderedContent):
+    # class RenderedSectionContent(RenderedContent):
+    # class RenderedDocumentContentContent(RenderedContent):
+    # class RenderedComponentContentWrapper(RenderedContent):
 
-class Rendered(object):
+class RenderedContent(LimitedDotDict):
     pass
 
-class RenderedContentBlock(LimitedDotDict):
+class RenderedComponentContent(RenderedContent):
     #TODO: It's weird that 'text'-type blocks are called "content" when all of the other types are named after their types
     _allowed_keys = set([
         "content_block_type",
@@ -167,7 +35,7 @@ class RenderedContentBlock(LimitedDotDict):
         "content_block_type"
     })
 
-class RenderedSection(LimitedDotDict):
+class RenderedSectionContent(RenderedContent):
     _allowed_keys = set([
         "section_name",
         "content_blocks",
@@ -176,10 +44,10 @@ class RenderedSection(LimitedDotDict):
         "content_blocks",
     })
     _key_types = {
-        "content_blocks" : ListOf(RenderedContentBlock),
+        "content_blocks" : ListOf(RenderedComponentContent),
     }
 
-class RenderedDocument(LimitedDotDict):
+class RenderedDocumentContent(RenderedContent):
     _allowed_keys = set([
         "renderer_type",
         "data_asset_name",
@@ -192,10 +60,10 @@ class RenderedDocument(LimitedDotDict):
         "sections"
     })
     _key_types = {
-        "sections" : ListOf(RenderedSection),
+        "sections" : ListOf(RenderedSectionContent),
     }
 
-class RenderedContentBlockWrapper(LimitedDotDict):
+class RenderedComponentContentWrapper(RenderedContent):
     _allowed_keys = set([
         "section",
         "content_block",
@@ -204,8 +72,8 @@ class RenderedContentBlockWrapper(LimitedDotDict):
     ])
     _required_keys = set([])
     _key_types = {
-        "content_block": RenderedContentBlock,
-        "section": RenderedSection,
+        "content_block": RenderedComponentContent,
+        "section": RenderedSectionContent,
     }
 
 

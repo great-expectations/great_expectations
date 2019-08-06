@@ -226,7 +226,7 @@ def display_column_expectations_as_section(
 
     document = render.renderer.PrescriptiveColumnSectionRenderer.render(column_expectation_list)
     view = render.view.DefaultJinjaSectionView.render(
-        render.types.RenderedContentBlockWrapper(**{
+        render.types.RenderedComponentContentWrapper(**{
             "section": document,
             "section_loop": {"index": 1},
         })
@@ -267,7 +267,7 @@ def display_column_evrs_as_section(
 
     document = render.renderer.DescriptiveColumnSectionRenderer.render(column_evr_list)
     view = render.view.DefaultJinjaSectionView.render(
-        render.types.RenderedContentBlockWrapper(**{
+        render.types.RenderedComponentContentWrapper(**{
             "section": document,
             "section_loop": {"index": 1},
         })

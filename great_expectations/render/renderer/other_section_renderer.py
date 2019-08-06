@@ -11,9 +11,9 @@ from .content_block import(
 )
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.types import (
-    RenderedContentBlock,
-    RenderedSection,
-    RenderedContentBlockWrapper,
+    RenderedComponentContent,
+    RenderedSectionContent,
+    RenderedComponentContentWrapper,
 )
 
 
@@ -33,14 +33,14 @@ class DescriptiveOverviewSectionRenderer(Renderer):
         cls._render_warnings(evrs, content_blocks)
         cls._render_expectation_types(evrs, content_blocks)
 
-        return RenderedSection(**{
+        return RenderedSectionContent(**{
             "section_name": section_name,
             "content_blocks": content_blocks
         })
 
     @classmethod
     def _render_header(cls, evrs, content_blocks):
-        content_blocks.append(RenderedContentBlock(**{
+        content_blocks.append(RenderedComponentContent(**{
             "content_block_type": "header",
             "header": "Overview",
             "styling": {
@@ -77,7 +77,7 @@ class DescriptiveOverviewSectionRenderer(Renderer):
             # ["Duplicate rows", "0 (0.0%)", ], #TODO: bring back when we have an expectation for this
         ]
 
-        content_blocks.append(RenderedContentBlock(**{
+        content_blocks.append(RenderedComponentContent(**{
             "content_block_type": "table",
             "header": "Dataset info",
             "table_rows": table_rows,
@@ -100,7 +100,7 @@ class DescriptiveOverviewSectionRenderer(Renderer):
         column_type_counter = Counter(column_types.values())
         table_rows = [[type, str(column_type_counter[type])] for type in ["int", "float", "string", "--"]]
 
-        content_blocks.append(RenderedContentBlock(**{
+        content_blocks.append(RenderedComponentContent(**{
             "content_block_type": "table",
             "header": "Variable types",
             "table_rows": table_rows,
@@ -142,7 +142,7 @@ class DescriptiveOverviewSectionRenderer(Renderer):
             }
         } for tr in bullet_list]
 
-        content_blocks.append(RenderedContentBlock(**{
+        content_blocks.append(RenderedComponentContent(**{
             "content_block_type": "bullet_list",
             "header": 'Expectation types <span class="mr-3 triangle"></span>',
             "bullet_list": bullet_list,

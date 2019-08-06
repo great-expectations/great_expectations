@@ -11,10 +11,10 @@ from jinja2 import (
 
 from great_expectations.version import __version__
 from great_expectations.render.types import (
-    RenderedDocument,
-    RenderedSection,
-    RenderedContentBlock,
-    RenderedContentBlockWrapper,
+    RenderedDocumentContent,
+    RenderedSectionContent,
+    RenderedComponentContent,
+    RenderedComponentContentWrapper,
 )
 
 def render_styling(styling):
@@ -218,7 +218,7 @@ class DefaultJinjaPageView(DefaultJinjaView):
 
     @classmethod
     def _validate_document(cls, document):
-        assert isinstance(document, RenderedDocument)
+        assert isinstance(document, RenderedDocumentContent)
 
 class DefaultJinjaIndexPageView(DefaultJinjaPageView):
     _template = "index_page.j2"
@@ -228,13 +228,13 @@ class DefaultJinjaSectionView(DefaultJinjaView):
 
     @classmethod
     def _validate_document(cls, document):
-        assert isinstance(document, RenderedContentBlockWrapper)
-        assert isinstance(document.section, RenderedSection)
+        assert isinstance(document, RenderedComponentContentWrapper)
+        assert isinstance(document.section, RenderedSectionContent)
 
 class DefaultJinjaComponentView(DefaultJinjaView):
     _template = "component.j2"
 
     @classmethod
     def _validate_document(cls, document):
-        assert isinstance(document, RenderedContentBlockWrapper)
-        assert isinstance(document.content_block, RenderedContentBlock)
+        assert isinstance(document, RenderedComponentContentWrapper)
+        assert isinstance(document.content_block, RenderedComponentContent)

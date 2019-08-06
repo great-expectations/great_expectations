@@ -11,7 +11,7 @@ from great_expectations.render.view import (
     DefaultJinjaPageView,
 )
 from great_expectations.render.types import (
-    RenderedContentBlock,
+    RenderedComponentContent,
 )
 
 
@@ -201,7 +201,7 @@ def test_PrescriptiveColumnSectionRenderer_render_header(titanic_profiled_name_c
 
     print(json.dumps(content_blocks, indent=2))
     assert content_blocks == [
-        RenderedContentBlock(**{
+        RenderedComponentContent(**{
             "content_block_type": "header",
             "header": "Name",
             "styling": {

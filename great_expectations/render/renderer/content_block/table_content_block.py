@@ -1,8 +1,8 @@
 from .content_block import ContentBlockRenderer
 from great_expectations.render.types import (
-    RenderedContentBlock,
-    RenderedSection,
-    RenderedContentBlockWrapper,
+    RenderedComponentContent,
+    RenderedSectionContent,
+    RenderedComponentContentWrapper,
 )
 
 
@@ -27,7 +27,7 @@ class TableContentBlockRenderer(ContentBlockRenderer):
                 rows = extra_rows_fn(ge_object)
                 table_entries.extend(rows)
 
-        return RenderedContentBlock(**{
+        return RenderedComponentContent(**{
             "content_block_type": "table",
             "header_row": header_row,
             "table_rows": table_entries
