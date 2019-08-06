@@ -133,6 +133,8 @@ class SiteBuilder():
                                             )
                                 })
 
+
+
         # expectation suites
 
         expectations_section_config = sections_config.get('expectations')
@@ -176,6 +178,7 @@ class SiteBuilder():
                                 )
                             })
 
+            # TODO: load dynamically
             model = SiteIndexPageRenderer.render(index_links)
             index_page_output = DefaultJinjaIndexPageView.render({
                 "utm_medium": "index-page",

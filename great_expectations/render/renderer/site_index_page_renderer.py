@@ -5,9 +5,6 @@ class SiteIndexPageRenderer(Renderer):
 
     @classmethod
     def render(cls, index_links):
-
-
-
         index_links_dict = OrderedDict()
 
         for il in index_links:
@@ -116,17 +113,16 @@ class SiteIndexPageRenderer(Renderer):
                     expectation_suite_links = link_lists["expectation_suite_links"]
                     expectation_suite_link_table_rows = [
                         [{
-                            "template": "$link_text",
-                            "params": {
-                                "link_text": link_dict["expectation_suite_name"]
-                            },
-                            "tag": "a",
-                            "styling": {
+                            "content_block_type": "string_template",
+                            "string_template": {
+                                "template": "$link_text",
                                 "params": {
-                                    "link_text": {
-                                        "attributes": {
-                                            "href": link_dict["filepath"]
-                                        }
+                                    "link_text": link_dict["expectation_suite_name"]
+                                },
+                                "tag": "a",
+                                "styling": {
+                                    "attributes": {
+                                        "href": link_dict["filepath"]
                                     }
                                 }
                             }
@@ -134,8 +130,8 @@ class SiteIndexPageRenderer(Renderer):
                     ]
                     expectation_suite_link_table = {
                         "content_block_type": "table",
-                        "sub_header": "Expectation Suites",
-                        "table_rows": expectation_suite_link_table_rows,
+                        "subheader": "Expectation Suites",
+                        "table": expectation_suite_link_table_rows,
                         "styling": {
                             "classes": ["col-sm-4", "col-xs-12"],
                             "styles": {
@@ -151,17 +147,19 @@ class SiteIndexPageRenderer(Renderer):
                     validation_links = link_lists["validation_links"]
                     validation_link_table_rows = [
                         [{
-                            "template": "$link_text",
-                            "params": {
-                                "link_text": link_dict["run_id"] + "-" + link_dict["expectation_suite_name"]
-                            },
-                            "tag": "a",
-                            "styling": {
+                            "content_block_type": "string_template",
+                            "string_template": {
+                                "template": "$link_text",
                                 "params": {
-                                    "link_text": {
-                                        "attributes": {
-                                            "href": link_dict["filepath"]
-                                        }
+                                    "link_text": (link_dict["run_id"] + "-" + link_dict[
+                                        "expectation_suite_name"] + "-ProfilingResults") if "ProfilingResults" in link_dict[
+                                        "filepath"] else
+                                    (link_dict["run_id"] + "-" + link_dict["expectation_suite_name"] + "-ValidationResults")
+                                },
+                                "tag": "a",
+                                "styling": {
+                                    "attributes": {
+                                        "href": link_dict["filepath"]
                                     }
                                 }
                             }
@@ -169,8 +167,8 @@ class SiteIndexPageRenderer(Renderer):
                     ]
                     validation_link_table = {
                         "content_block_type": "table",
-                        "sub_header": "Batch Validations",
-                        "table_rows": validation_link_table_rows,
+                        "subheader": "Batch Validations",
+                        "table": validation_link_table_rows,
                         "styling": {
                             "classes": ["col-sm-4", "col-xs-12"],
                             "styles": {

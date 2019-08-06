@@ -204,14 +204,14 @@ cooltip_style_element = """<style type="text/css">
 def display_column_expectations_as_section(
     expectation_suite,
     column,
-    section_renderer=render.renderer.column_section_renderer.PrescriptiveColumnSectionRenderer,
+    section_renderer=render.renderer.column_section_renderer.ExpectationSuiteColumnSectionRenderer,
     view_renderer=render.view.view.DefaultJinjaSectionView,
     include_styling=True,
     return_without_displaying=False,
 ):
     """This is a utility function to render all of the Expectations in an ExpectationSuite with the same column name as an HTML block.
 
-    By default, the HTML block is rendered using PrescriptiveColumnSectionRenderer and the view is rendered using DefaultJinjaSectionView.
+    By default, the HTML block is rendered using ExpectationSuiteColumnSectionRenderer and the view is rendered using DefaultJinjaSectionView.
     Therefore, it should look exactly the same as the default renderer for build_docs. 
 
     Example usage:
@@ -224,7 +224,7 @@ def display_column_expectations_as_section(
 
     #TODO: Handle the case where zero evrs match the column name
 
-    document = render.renderer.PrescriptiveColumnSectionRenderer.render(column_expectation_list)
+    document = render.renderer.ExpectationSuiteColumnSectionRenderer.render(column_expectation_list)
     view = render.view.DefaultJinjaSectionView.render({
         "section": document,
         "section_loop": {"index": 1},
@@ -244,14 +244,14 @@ def display_column_expectations_as_section(
 def display_column_evrs_as_section(
     evrs,
     column,
-    section_renderer=render.renderer.column_section_renderer.DescriptiveColumnSectionRenderer,
+    section_renderer=render.renderer.column_section_renderer.ProfilingResultsColumnSectionRenderer,
     view_renderer=render.view.view.DefaultJinjaSectionView,
     include_styling=True,
     return_without_displaying=False,
 ):
     """This is a utility function to render all of the EVRs in an ExpectationSuite with the same column name as an HTML block.
 
-    By default, the HTML block is rendered using PrescriptiveColumnSectionRenderer and the view is rendered using DefaultJinjaSectionView.
+    By default, the HTML block is rendered using ExpectationSuiteColumnSectionRenderer and the view is rendered using DefaultJinjaSectionView.
     Therefore, it should look exactly the same as the default renderer for build_docs. 
 
     Example usage:
@@ -263,7 +263,7 @@ def display_column_evrs_as_section(
 
     #TODO: Handle the case where zero evrs match the column name
 
-    document = render.renderer.DescriptiveColumnSectionRenderer.render(column_evr_list)
+    document = render.renderer.ProfilingResultsColumnSectionRenderer.render(column_evr_list)
     view = render.view.DefaultJinjaSectionView.render({
         "section": document,
         "section_loop": {"index": 1},
