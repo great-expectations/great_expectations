@@ -10,7 +10,11 @@ from jinja2 import (
 )
 
 from great_expectations.version import __version__
-from great_expectations.render.types import RenderedDocument
+from great_expectations.render.types import (
+    RenderedDocument,
+    RenderedSection,
+    RenderedContentBlock,
+)
 
 def render_styling(styling):
     """Adds styling information suitable for an html tag
@@ -177,7 +181,7 @@ class DefaultJinjaView(object):
 
     @classmethod
     def render(cls, document, template=None, **kwargs):
-        assert isinstance(document, RenderedDocument)
+        cls._validate_document(document)
 
         if template is None:
             template = cls._template
@@ -211,12 +215,37 @@ class DefaultJinjaView(object):
 class DefaultJinjaPageView(DefaultJinjaView):
     _template = "page.j2"
 
-class DefaultJinjaIndexPageView(DefaultJinjaView):
+    @classmethod
+    def _validate_document(cls, document):
+        # assert isinstance(document, RenderedDocument)
+        pass
+
+class DefaultJinjaIndexPageView(DefaultJinjaPageView):
     _template = "index_page.j2"
 
 class DefaultJinjaSectionView(DefaultJinjaView):
     _template = "section.j2"
 
+    @classmethod
+    def _validate_document(cls, document):
+        # assert isinstance(document, RenderedSection)
+        pass
 
 class DefaultJinjaComponentView(DefaultJinjaView):
     _template = "component.j2"
+
+    @classmethod
+    def _validate_document(cls, document):
+        assert isinstance(document["content_block"], RenderedContentBlock)
+
+    @classmethod
+    def render(cls, document, template=None, **kwargs):
+        cls._validate_document(document)
+
+        if template is None:
+            template = cls._template
+
+        t = cls._get_template(template)
+
+        document["content_block"] = document["content_block"]._asdict()
+        return t.render(document, **kwargs)
