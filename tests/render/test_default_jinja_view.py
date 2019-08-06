@@ -440,9 +440,9 @@ def test_render_graph():
 
     rendered_doc = ge.render.view.view.DefaultJinjaComponentView.render(
         RenderedComponentContentWrapper(**{
-        "content_block": graph_component_content,
-        "section_loop": {"index": 1},
-        "content_block_loop": {"index": 2},
+            "content_block": graph_component_content,
+            "section_loop": {"index": 1},
+            "content_block_loop": {"index": 2},
         })
     )
     print(rendered_doc)

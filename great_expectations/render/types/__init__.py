@@ -28,7 +28,7 @@ class RenderedComponentContent(RenderedContent):
         "graph",
         "value_list",
         "header_row",
-        "table_rows",
+        "table",
         "bullet_list",
     ])
     _required_keys = set({

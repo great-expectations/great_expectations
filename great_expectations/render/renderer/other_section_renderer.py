@@ -59,7 +59,7 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
         table_rows.append(["Number of variables", len(cls._get_column_list_from_evrs(evrs)), ])
 
         table_rows.append([
-            {
+            RenderedComponentContent(**{
                 "content_block_type": "string_template",
                 "string_template": {
                     "template": "Number of observations",
@@ -70,9 +70,10 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
                         "tooltip_text": "Number of observations"
                     }
                 }
-            },
-            "?" if not expect_table_row_count_to_be_between_evr else expect_table_row_count_to_be_between_evr["result"][
-                "observed_value"]
+            }),
+            #??? : What is this?
+            # "?" if not expect_table_row_count_to_be_between_evr else expect_table_row_count_to_be_between_evr["result"][
+            #     "observed_value"]
         ])
 
         table_rows += [
@@ -129,24 +130,25 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
         # table_rows = sorted(type_counts.items(), key=lambda kv: -1*kv[1])
         bullet_list = sorted(type_counts.items(), key=lambda kv: -1*kv[1])
 
-        bullet_list = [{
-            "content_block_type": "string_template",
-            "string_template": {
-                "template": "$expectation_type $expectation_count",
-                "params": {
-                    "expectation_type": tr[0],
-                    "expectation_count": tr[1],
-                },
-                "styling": {
-                    "classes": ["list-group-item", "d-flex", "justify-content-between", "align-items-center"],
+        bullet_list = [
+            RenderedComponentContent(**{
+                "content_block_type": "string_template",
+                "string_template": {
+                    "template": "$expectation_type $expectation_count",
                     "params": {
-                        "expectation_count": {
-                            "classes": ["badge", "badge-secondary", "badge-pill"],
+                        "expectation_type": tr[0],
+                        "expectation_count": tr[1],
+                    },
+                    "styling": {
+                        "classes": ["list-group-item", "d-flex", "justify-content-between", "align-items-center"],
+                        "params": {
+                            "expectation_count": {
+                                "classes": ["badge", "badge-secondary", "badge-pill"],
+                            }
                         }
                     }
                 }
-            }
-        } for tr in bullet_list]
+            }) for tr in bullet_list]
 
         content_blocks.append(RenderedComponentContent(**{
             "content_block_type": "bullet_list",

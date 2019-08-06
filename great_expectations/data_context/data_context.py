@@ -1695,7 +1695,7 @@ class DataContext(object):
 
                     expectation_suite_links = link_lists["expectation_suite_links"]
                     expectation_suite_link_table_rows = [
-                        [{
+                        [RenderedComponentContent(**{
                             "content_block_type": "string_template",
                             "string_template": {
                                 "template": "$link_text",
@@ -1709,7 +1709,7 @@ class DataContext(object):
                                     }
                                 }
                             }
-                        }] for link_dict in expectation_suite_links
+                        })] for link_dict in expectation_suite_links
                     ]
                     expectation_suite_link_table = RenderedComponentContent(**{
                         "content_block_type": "table",
@@ -1729,7 +1729,7 @@ class DataContext(object):
 
                     validation_links = link_lists["validation_links"]
                     validation_link_table_rows = [
-                        [{
+                        [RenderedComponentContent(**{
                             "content_block_type": "string_template",
                             "string_template": {
                                 "template": "$link_text",
@@ -1746,7 +1746,7 @@ class DataContext(object):
                                     }
                                 }
                             }
-                        }] for link_dict in validation_links
+                        })] for link_dict in validation_links
                     ]
                     validation_link_table = RenderedComponentContent(**{
                         "content_block_type": "table",
