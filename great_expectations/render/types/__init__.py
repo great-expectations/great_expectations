@@ -35,6 +35,9 @@ class LimitedDotDict(DotDict):
 
     _allowed_keys = set()
 
+    #TODO: Implement _required_keys
+    #TODO: Implement _key_types
+
     def __init__(self, **kwargs):
         for key, value in kwargs.items():
             if key not in self._allowed_keys:
@@ -64,7 +67,7 @@ class Rendered(object):
     pass
 
 class RenderedContentBlock(LimitedDotDict):
-    #TODO: It's weird that 'text'-type blocks
+    #TODO: It's weird that 'text'-type blocks are called "content" when all of the other types
     _allowed_keys = set([
         "content_block_type",
         "header",
@@ -80,8 +83,15 @@ class RenderedContentBlock(LimitedDotDict):
 class RenderedSection(Rendered):
     pass
 
-class RenderedDocument(Rendered):
-    pass
+class RenderedDocument(LimitedDotDict):
+    _allowed_keys = set([
+        "renderer_type",
+        "data_asset_name",
+        "full_data_asset_identifier",
+        "page_title",
+        "utm_medium",
+        "sections",
+    ])
 
 class RenderedContentBlockWrapper(LimitedDotDict):
     _allowed_keys = set([

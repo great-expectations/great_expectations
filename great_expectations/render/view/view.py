@@ -218,8 +218,7 @@ class DefaultJinjaPageView(DefaultJinjaView):
 
     @classmethod
     def _validate_document(cls, document):
-        # assert isinstance(document, RenderedDocument)
-        pass
+        assert isinstance(document, RenderedDocument)
 
 class DefaultJinjaIndexPageView(DefaultJinjaPageView):
     _template = "index_page.j2"
@@ -229,8 +228,8 @@ class DefaultJinjaSectionView(DefaultJinjaView):
 
     @classmethod
     def _validate_document(cls, document):
-        # assert isinstance(document, RenderedSection)
         pass
+        # assert isinstance(document, RenderedSection)
 
 class DefaultJinjaComponentView(DefaultJinjaView):
     _template = "component.j2"

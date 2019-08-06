@@ -11,7 +11,9 @@ from .column_section_renderer import (
 from .other_section_renderer import (
     DescriptiveOverviewSectionRenderer,
 )
-
+from ..types import (
+    RenderedDocument
+)
 
 class PrescriptivePageRenderer(Renderer):
 
@@ -45,14 +47,14 @@ class PrescriptivePageRenderer(Renderer):
 
         full_data_asset_identifier = expectations.get("data_asset_name") or ""
 
-        return {
+        return RenderedDocument(**{
             # "renderer_type": "PrescriptivePageRenderer",
             # "data_asset_name": short_data_asset_name,
             "full_data_asset_identifier": full_data_asset_identifier,
             "page_title": expectation_suite_name,
             "utm_medium": "prescriptive-expectation-suite-page",
             "sections": sections
-        }
+        })
 
     @classmethod
     def _render_asset_header(cls, expectations):
@@ -197,7 +199,7 @@ class DescriptivePageRenderer(Renderer):
         else:
             data_asset_name = None
 
-        return {
+        return RenderedDocument(**{
             "renderer_type": "DescriptivePageRenderer",
             "data_asset_name": data_asset_name,
             "full_data_asset_identifier": full_data_asset_identifier,
@@ -217,4 +219,4 @@ class DescriptivePageRenderer(Renderer):
                         column_type=column_types.get(column),
                     ) for column in ordered_columns
                 ]
-        }
+        })
