@@ -237,17 +237,5 @@ class DefaultJinjaComponentView(DefaultJinjaView):
 
     @classmethod
     def _validate_document(cls, document):
-        assert isinstance(document.content_block, RenderedContentBlock)
         assert isinstance(document, RenderedContentBlockWrapper)
-
-    @classmethod
-    def render(cls, document, template=None, **kwargs):
-        cls._validate_document(document)
-
-        if template is None:
-            template = cls._template
-
-        t = cls._get_template(template)
-
-        document.content_block = document.content_block._asdict()
-        return t.render(document, **kwargs)
+        assert isinstance(document.content_block, RenderedContentBlock)

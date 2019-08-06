@@ -10,6 +10,7 @@ from great_expectations.render.types import (
 * dot notation works for assignment and lookup `my_obj.a = 10`, `print(my obj.a)`
 * Adding an unknown key raises an error
 * Keys can be optional
+
 * Values can be typed
 """
 
@@ -67,7 +68,7 @@ def test_LimitedDotDict_raises_error():
         assert d["x"]
 
 
-def test_LimitedDotDict_subclass_raises_error():
+def test_LimitedDotDict_subclass():
     class MyLimitedDotDict(LimitedDotDict):
         _allowed_keys = set([
             "x", "y", "z"

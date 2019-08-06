@@ -266,7 +266,7 @@ def test_rendering_components_with_styling():
 
 
 def test_render_header_component():
-    header_component_content = RenderedContentBlock(**{
+    header_component_content = RenderedContentBlock({
         # "component_type": "header",
         "content_block_type": "header",
         "header": "Overview",
