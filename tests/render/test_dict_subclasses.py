@@ -215,6 +215,14 @@ def test_LimitedDotDict_ListOf_typing():
         }
     )
 
+    with pytest.raises(TypeError):
+        d = MyLimitedDotDict(
+            **{
+                "a" : 10,
+                "b" : [10, 20, "rabbit"]
+            }
+        )
+
 def test_LimitedDotDict_recursive_coercion():
     class MyNestedDotDict(LimitedDotDict):
         _allowed_keys = set([
