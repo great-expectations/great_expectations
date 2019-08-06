@@ -1899,6 +1899,89 @@ validations_store:
 #   config:  # - this is optional - this is how we can pass kwargs to the object's constructor
 #     param1: boo
 #     param2: bah
+
+
+data_docs:
+  local_site_configuration_file: uncommitted/documentation/local_sites.yml
+  sites:
+    local_site:
+      type: SiteBuilder
+      site_store:
+        type: filesystem
+        base_directory: uncommitted/documentation/local_site
+      validations_store:
+        type: filesystem
+        base_directory: uncommitted/validations/
+      profiling_store:
+        type: filesystem
+        base_directory: uncommitted/validations/
+        run_id_filter:
+          eq: profiling
+
+      datasources: '*'
+      sections:
+        index:
+          renderer:
+            module: great_expectations.render.renderer
+            class: SiteIndexPageRenderer
+          view:
+            module: great_expectations.render.view
+            class: DefaultJinjaIndexPageView
+        validations:
+          renderer:
+            type: ValidationRenderer
+            run_id_filter:
+              ne: profiling
+          view:
+            type: ValidationPageView
+        expectations:
+          renderer:
+            module: great_expectations.render.renderer
+            class: PrescriptivePageRenderer
+          view:
+            module: great_expectations.render.view
+            class: DefaultJinjaPageView
+        profiling:
+          renderer:
+            module: great_expectations.render.renderer
+            class: DescriptivePageRenderer
+          view:
+            module: great_expectations.render.view
+            class: DefaultJinjaPageView
+
+    team_site:
+      type: SiteBuilder
+      site_store:
+        type: filesystem
+        base_directory: uncommitted/documentation/team_site
+# ADD COMMENTS
+#      validations_store:
+#        type: s3
+#        bucket: ???
+#        path: ???
+#      profiling_store:
+#        type: filesystem
+#        base_directory: fixtures/validations/
+#        run_id_filter:
+#          eq: profiling
+
+      datasources: '*'
+      sections:
+        index:
+          renderer:
+            module: great_expectations.render.renderer
+            class: SiteIndexPageRenderer
+          view:
+            module: great_expectations.render.view
+            class: DefaultJinjaIndexPageView
+        expectations:
+          renderer:
+            module: great_expectations.render.renderer
+            class: PrescriptivePageRenderer
+          view:
+            module: great_expectations.render.view
+            class: DefaultJinjaPageView
+
 """
 
 PROJECT_TEMPLATE = PROJECT_HELP_COMMENT + "datasources: {}\n" + PROJECT_OPTIONAL_CONFIG_COMMENT
