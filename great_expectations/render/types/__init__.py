@@ -126,6 +126,9 @@ class RenderedContentBlock(LimitedDotDict):
         "value_list",
         "table_rows",
     ])
+    _required_keys = set({
+        "content_block_type"
+    })
 
 class RenderedSection(Rendered):
     pass
@@ -139,12 +142,18 @@ class RenderedDocument(LimitedDotDict):
         "utm_medium",
         "sections",
     ])
+    _required_keys = set({
+        "sections"
+    })
 
 class RenderedContentBlockWrapper(LimitedDotDict):
     _allowed_keys = set([
         "content_block",
         "section_loop",
         "content_block_loop",
+    ])
+    _required_keys = set([
+        "content_block",
     ])
 
 
