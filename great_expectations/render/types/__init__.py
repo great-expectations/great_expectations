@@ -17,18 +17,25 @@ class DotDict(dict):
     def __deepcopy__(self, memo):
         return DotDict([(copy.deepcopy(k, memo), copy.deepcopy(v, memo)) for k, v in self.items()])
 
+
+#Inspiration : https://codereview.stackexchange.com/questions/81794/dictionary-with-restricted-keys
 class LimitedDotDict(DotDict):
-    """dot.notation access to dictionary attributes"""
+    """dot.notation access to dictionary attributes, with limited keys
+    
+
+    Note: this class is pretty useless on its own.
+    You need to subclass it like so:
+
+    class MyLimitedDotDict(LimitedDotDict):
+        _allowed_keys = set([
+            "x", "y", "z"
+        ])
+
+    """
 
     _allowed_keys = set()
 
     def __init__(self, **kwargs):
-
-        # if not isinstance(allowed_keys, Iterable):
-        #     AttributeError("'allowed_keys' must be an iterable")
-        # self._allowed_keys = allowed_keys
-        # print(self._allowed_keys)
-        # print(kwargs.items())
         for key, value in kwargs.items():
             if key not in self._allowed_keys:
                 raise KeyError("(__init__) key: {!r} not in allowed keys: {!r}".format(
@@ -38,7 +45,6 @@ class LimitedDotDict(DotDict):
             self[key] = value
 
     def __setitem__(self, key, val):
-        print("__setitem__")
         if key not in self._allowed_keys:
             raise KeyError("(__setitem__) key: {!r} not in allowed keys: {!r}".format(
                 key,
@@ -47,24 +53,12 @@ class LimitedDotDict(DotDict):
         dict.__setitem__(self, key, val)
 
     def __setattr__(self, key, val):
-        print("__setattr__")
         if key not in self._allowed_keys:
             raise KeyError("(__setitem__) key: {!r} not in allowed keys: {!r}".format(
                 key,
                 self._allowed_keys
             ))
         dict.__setitem__(self, key, val)
-
-    # def __setattr__(self, key, val):
-    #     print("__setattr__")
-    #     # if key != "_allowed_keys" and key not in self._allowed_keys:
-    #     if key not in self._allowed_keys:
-    #         raise KeyError("(__setattr__) key: {!r} not in allowed keys: {!r}".format(
-    #             key,
-    #             self._allowed_keys
-    #         ))
-    #     dict.__setattr__(self, key, val)
-
 
 class Rendered(object):
     pass
@@ -77,11 +71,14 @@ class Rendered(object):
 #         self.content = content
 #         self.styling = styling
 
-class RenderedContentBlock(namedtuple(
-    'RenderedContentBlock', 'content_block_type header subheader content styling'
-)):
-    def __new__(cls, content_block_type, header=None, subheader=None, content=None, styling=None):
-        return super(RenderedContentBlock, cls).__new__(cls, content_block_type, header, subheader, content, styling)
+class RenderedContentBlock(LimitedDotDict):
+    _allowed_keys = set([
+        "content_block_type",
+        "header",
+        "subheader",
+        "content",
+        "styling",
+    ])
 
 class RenderedSection(Rendered):
     pass
@@ -89,14 +86,13 @@ class RenderedSection(Rendered):
 class RenderedDocument(Rendered):
     pass
 
-#FIXME: This name is horrible.
-class RenderedContentBlockWrapper(namedtuple(
-    'RenderedContentBlock', 'content_block section_loop content_block_loop'
-)):
-    #TODO: Maybe add defaults for section_loop and content_block_loop...?
-    def __new__(cls, content_block, section_loop, content_block_loop):
-        # content_block = RenderedContentBlock(**content_block)
-        return super(RenderedContentBlockWrapper, cls).__new__(cls, content_block, section_loop, content_block_loop)
+class RenderedContentBlockWrapper(LimitedDotDict):
+    _allowed_keys = set([
+        "content_block",
+        "section_loop",
+        "content_block_loop",
+    ])
+
 
 # class DomStylingInfo(object):
 #     """Basically a struct type for:
