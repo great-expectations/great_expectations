@@ -58,20 +58,18 @@ def titanic_dataset_profiler_expectations_with_distribution():
 
 
 @pytest.mark.smoketest
-def test_smoke_render_profiling_results_page_renderer(titanic_profiling_results):
-    rendered = ProfilingResultsPageRenderer.render(titanic_profiling_results)
+def test_smoke_render_profiling_results_page_renderer(titanic_profiled_evrs_1):
+    rendered = ProfilingResultsPageRenderer.render(titanic_profiled_evrs_1)
     with open('./tests/render/output/test_render_profiling_results_page_renderer.json', 'w') as outfile:
         json.dump(rendered, outfile, indent=2)
 
     assert len(rendered["sections"]) > 5
 
-
-<<<<<<< HEAD
 @pytest.mark.smoketest
-def test_render_profiling_results_column_section_renderer(titanic_profiling_results):
+def test_render_profiling_results_column_section_renderer(titanic_profiled_evrs_1):
     # Group EVRs by column
     evrs = {}
-    for evr in titanic_profiling_results["results"]:
+    for evr in titanic_profiled_evrs_1["results"]:
         try:
             column = evr["expectation_config"]["kwargs"]["column"]
             if column not in evrs:
@@ -114,11 +112,11 @@ def test_render_validation_results_column_section_renderer(titanic_profiler_evrs
 
 
 @pytest.mark.smoketest
-def test_render_expectation_suite_column_section_renderer(titanic_expectations):
+def test_render_expectation_suite_column_section_renderer(titanic_profiled_expectations_1):
     # Group expectations by column
     exp_groups = {}
-    # print(json.dumps(titanic_expectations, indent=2))
-    for exp in titanic_expectations["expectations"]:
+    # print(json.dumps(titanic_profiled_expectations_1, indent=2))
+    for exp in titanic_profiled_expectations_1["expectations"]:
         try:
             column = exp["kwargs"]["column"]
             if column not in exp_groups:
@@ -133,8 +131,6 @@ def test_render_expectation_suite_column_section_renderer(titanic_expectations):
             json.dump(ExpectationSuiteColumnSectionRenderer.render(exp_groups[column]), outfile, indent=2)
 
 
-=======
->>>>>>> develop
 def test_content_block_list_available_expectations():
     available_expectations = ValueListContentBlockRenderer.list_available_expectations()
     assert available_expectations == ['expect_column_values_to_be_in_set']
@@ -166,8 +162,8 @@ def test_render_profiled_fixture_expectation_suite_with_distribution(titanic_dat
 
 
 @pytest.mark.smoketest
-def test_render_profiling_results(titanic_profiler_evrs):
-    rendered_json = ProfilingResultsPageRenderer.render(titanic_profiler_evrs)
+def test_render_profiling_results(titanic_profiled_evrs_1):
+    rendered_json = ProfilingResultsPageRenderer.render(titanic_profiled_evrs_1)
     rendered_page = DefaultJinjaPageView.render(rendered_json)
 
     with open('./tests/render/output/test_render_profiling_results.html', 'w') as f:
@@ -178,8 +174,8 @@ def test_render_profiling_results(titanic_profiler_evrs):
 
 
 @pytest.mark.smoketest
-def test_render_validation_results(titanic_profiler_evrs):
-    rendered_json = ValidationResultsPageRenderer.render(titanic_profiler_evrs)
+def test_render_validation_results(titanic_profiled_evrs_1):
+    rendered_json = ValidationResultsPageRenderer.render(titanic_profiled_evrs_1)
     rendered_page = DefaultJinjaPageView.render(rendered_json)
 
     with open('./tests/render/output/test_render_validation_results.html', 'w') as f:
