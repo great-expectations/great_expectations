@@ -1,4 +1,70 @@
+from collections import Iterable
 from collections import namedtuple
+
+class DotDict(dict):
+    """dot.notation access to dictionary attributes"""
+
+    def __getattr__(self, attr):
+        return self.get(attr)
+
+    __setattr__ = dict.__setitem__
+    __delattr__ = dict.__delitem__
+
+    def __dir__(self):
+        return self.keys()
+
+    # Cargo-cultishly copied from: https://github.com/spindlelabs/pyes/commit/d2076b385c38d6d00cebfe0df7b0d1ba8df934bc
+    def __deepcopy__(self, memo):
+        return DotDict([(copy.deepcopy(k, memo), copy.deepcopy(v, memo)) for k, v in self.items()])
+
+class LimitedDotDict(DotDict):
+    """dot.notation access to dictionary attributes"""
+
+    _allowed_keys = set()
+
+    def __init__(self, **kwargs):
+
+        # if not isinstance(allowed_keys, Iterable):
+        #     AttributeError("'allowed_keys' must be an iterable")
+        # self._allowed_keys = allowed_keys
+        # print(self._allowed_keys)
+        # print(kwargs.items())
+        for key, value in kwargs.items():
+            if key not in self._allowed_keys:
+                raise KeyError("(__init__) key: {!r} not in allowed keys: {!r}".format(
+                    key,
+                    self._allowed_keys
+                ))
+            self[key] = value
+
+    def __setitem__(self, key, val):
+        print("__setitem__")
+        if key not in self._allowed_keys:
+            raise KeyError("(__setitem__) key: {!r} not in allowed keys: {!r}".format(
+                key,
+                self._allowed_keys
+            ))
+        dict.__setitem__(self, key, val)
+
+    def __setattr__(self, key, val):
+        print("__setattr__")
+        if key not in self._allowed_keys:
+            raise KeyError("(__setitem__) key: {!r} not in allowed keys: {!r}".format(
+                key,
+                self._allowed_keys
+            ))
+        dict.__setitem__(self, key, val)
+
+    # def __setattr__(self, key, val):
+    #     print("__setattr__")
+    #     # if key != "_allowed_keys" and key not in self._allowed_keys:
+    #     if key not in self._allowed_keys:
+    #         raise KeyError("(__setattr__) key: {!r} not in allowed keys: {!r}".format(
+    #             key,
+    #             self._allowed_keys
+    #         ))
+    #     dict.__setattr__(self, key, val)
+
 
 class Rendered(object):
     pass
