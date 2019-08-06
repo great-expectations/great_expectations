@@ -11,6 +11,7 @@ from great_expectations.render.renderer import (
 from great_expectations.render.view import DefaultJinjaPageView
 from great_expectations.render.types import (
     RenderedContentBlock,
+    RenderedSection,
     RenderedContentBlockWrapper,
 )
 
@@ -57,7 +58,7 @@ def test_render_DefaultJinjaPageView_meta_info():
 
 
 def test_render_section_page():
-    section = {
+    section = RenderedSection(**{
         "section_name": None,
         "content_blocks": [
             {
@@ -88,12 +89,14 @@ def test_render_section_page():
                 }
             }
         ]
-    }
+    })
 
-    rendered_doc = ge.render.view.view.DefaultJinjaSectionView.render({
-        "section": section,
-        "section_loop": {"index": 1},
-    }).replace(" ", "").replace("\t", "").replace("\n", "")
+    rendered_doc = ge.render.view.view.DefaultJinjaSectionView.render(
+        RenderedContentBlockWrapper(**{
+            "section": section,
+            "section_loop": {"index": 1},
+        })
+    ).replace(" ", "").replace("\t", "").replace("\n", "")
 
     print(rendered_doc)
     assert rendered_doc == """<div id="section-1" class="ge-section container-fluid">
