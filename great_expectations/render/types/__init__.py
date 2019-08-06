@@ -155,6 +155,7 @@ class RenderedContentBlock(LimitedDotDict):
         "sub_header",
         "styling",
 
+        "string_template",
         "content",
         "graph",
         "value_list",

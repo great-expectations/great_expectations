@@ -37,6 +37,11 @@ from great_expectations.render.view import (
     DefaultJinjaPageView,
     DefaultJinjaIndexPageView,
 )
+from great_expectations.render.types import (
+    RenderedContentBlock,
+    RenderedSection,
+)
+
 
 
 from .expectation_explorer import ExpectationExplorer
@@ -1603,7 +1608,7 @@ class DataContext(object):
         for source, generators in index_links_dict.items():
             content_blocks = []
 
-            source_header_block = {
+            source_header_block = RenderedContentBlock(**{
                 "content_block_type": "header",
                 "header": source,
                 "styling": {
@@ -1612,20 +1617,20 @@ class DataContext(object):
                         "classes": ["alert", "alert-secondary"]
                     }
                 }
-            }
+            })
             content_blocks.append(source_header_block)
 
             for generator, data_assets in generators.items():
-                generator_header_block = {
+                generator_header_block = RenderedContentBlock(**{
                     "content_block_type": "header",
                     "header": generator,
                     "styling": {
                         "classes": ["col-12", "ml-4"],
                     }
-                }
+                })
                 content_blocks.append(generator_header_block)
 
-                horizontal_rule = {
+                horizontal_rule = RenderedContentBlock(**{
                     "content_block_type": "string_template",
                     "string_template": {
                         "template": "",
@@ -1635,11 +1640,11 @@ class DataContext(object):
                     "styling": {
                         "classes": ["col-12"],
                     }
-                }
+                })
                 content_blocks.append(horizontal_rule)
 
                 for data_asset, link_lists in data_assets.items():
-                    data_asset_heading = {
+                    data_asset_heading = RenderedContentBlock(**{
                         "content_block_type": "string_template",
                         "string_template": {
                             "template": "$data_asset",
@@ -1662,7 +1667,7 @@ class DataContext(object):
                                 "word-break": "break-all"
                             }
                         }
-                    }
+                    })
                     content_blocks.append(data_asset_heading)
 
                     expectation_suite_links = link_lists["expectation_suite_links"]
@@ -1684,7 +1689,7 @@ class DataContext(object):
                             }
                         }] for link_dict in expectation_suite_links
                     ]
-                    expectation_suite_link_table = {
+                    expectation_suite_link_table = RenderedContentBlock(**{
                         "content_block_type": "table",
                         "sub_header": "Expectation Suites",
                         "table_rows": expectation_suite_link_table_rows,
@@ -1697,7 +1702,7 @@ class DataContext(object):
                                 "classes": ["table", "table-sm", ],
                             }
                         },
-                    }
+                    })
                     content_blocks.append(expectation_suite_link_table)
 
                     validation_links = link_lists["validation_links"]
@@ -1719,7 +1724,7 @@ class DataContext(object):
                             }
                         }] for link_dict in validation_links
                     ]
-                    validation_link_table = {
+                    validation_link_table = RenderedContentBlock(**{
                         "content_block_type": "table",
                         "sub_header": "Batch Validations",
                         "table_rows": validation_link_table_rows,
@@ -1732,13 +1737,13 @@ class DataContext(object):
                                 "classes": ["table", "table-sm", ],
                             }
                         },
-                    }
+                    })
                     content_blocks.append(validation_link_table)
 
-            section = {
+            section = RenderedSection(**{
                 "section_name": source,
                 "content_blocks": content_blocks
-            }
+            })
             sections.append(section)
 
         with open(os.path.join(self.data_doc_directory, "index.html"), "w") as writer:
