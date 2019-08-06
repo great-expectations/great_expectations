@@ -98,3 +98,166 @@ def test_LimitedDotDict_subclass():
 
     with pytest.raises(KeyError):
         assert d["w"]
+
+
+def test_LimitedDotDict_subclass_required_keys():
+    class MyLimitedDotDict(LimitedDotDict):
+        _allowed_keys = set([
+            "x", "y", "z"
+        ])
+        _required_keys = set([
+            "x"
+        ])
+
+    with pytest.raises(KeyError):
+        d = MyLimitedDotDict(**{
+            'y': 1,
+        })
+
+    d = MyLimitedDotDict(**{
+        'x': 1,
+    })
+    assert d.x == 1
+
+    d.x += 10
+    assert d.x == 11
+
+    d["x"] = "hi"
+    assert d.x == "hi"
+
+    #TODO:
+    # # Can't delete a required key
+    # with pytest.raises(KeyError):
+    #     del d["x"]
+
+    # _required_keys must be a subset of _allowed_keys
+    with pytest.raises(ValueError):
+        class MyLimitedDotDict(LimitedDotDict):
+            _allowed_keys = set([
+                "x", "y", "z"
+            ])
+            _required_keys = set([
+                "w"
+            ])
+        
+        #Unfortunately, I don't have a good way to test this condition until the class is instantiated
+        d = MyLimitedDotDict(x=True)
+
+
+def test_LimitedDotDict_subclass_key_types():
+    class MyLimitedDotDict(LimitedDotDict):
+        _allowed_keys = set([
+            "x", "y", "z"
+        ])
+        _required_keys = set([
+            "x",
+        ])
+        _key_types = {
+            "x" : int,
+            "y" : str,
+        }
+
+    d = MyLimitedDotDict(**{
+        'x': 1,
+    })
+
+    with pytest.raises(TypeError):
+        d = MyLimitedDotDict(**{
+            'x': "1",
+        })
+
+    d = MyLimitedDotDict(**{
+        "x": 1,
+        "y": "hello",
+    })
+
+    with pytest.raises(TypeError):
+        d = MyLimitedDotDict(**{
+            'x': 1,
+            'y': 10,
+        })
+
+    d = MyLimitedDotDict(
+        coerce_types=True,
+        **{
+            "x": "1",
+            "y": 10
+        }
+    )
+    assert d == {
+        "x": 1,
+        "y": "10",
+    }
+
+    with pytest.raises(ValueError):
+        d = MyLimitedDotDict(
+            coerce_types=True,
+            **{
+                "x": "quack",
+            }
+        )
+
+def test_LimitedDotDict_recursive_coercion():
+    class MyNestedDotDict(LimitedDotDict):
+        _allowed_keys = set([
+            "a", "b", "c"
+        ])
+        _required_keys = set([
+            "a",
+        ])
+        _key_types = {
+            "a" : int,
+            "b" : str,
+        }
+
+    class MyLimitedDotDict(LimitedDotDict):
+        _allowed_keys = set([
+            "x", "y", "z"
+        ])
+        _required_keys = set([
+            "x",
+        ])
+        _key_types = {
+            "x" : str,
+            "y" : MyNestedDotDict,
+        }
+
+    d = MyLimitedDotDict(
+        coerce_types=True,
+        **{
+            "x" : "hello",
+            "y" : {
+                "a" : 1,
+                "b" : "hello"
+            },
+        }
+    )
+    assert d == {
+        "x" : "hello",
+        "y" : {
+            "a" : 1,
+            "b" : "hello"
+        },
+    }
+
+    with pytest.raises(ValueError):
+        MyLimitedDotDict(
+            coerce_types=True,
+            **{
+                "x" : "hello",
+                "y" : {
+                    "a" : "broken",
+                },
+            }
+        )
+
+    with pytest.raises(KeyError):
+        MyLimitedDotDict(
+            coerce_types=True,
+            **{
+                "x" : "hello",
+                "y" : {
+                    "b" : "wait, a is required!",
+                },
+            }
+        )
