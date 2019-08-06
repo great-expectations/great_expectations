@@ -19,11 +19,11 @@ class Renderer(object):
     @classmethod
     def _get_expectation_type(cls, ge_object):
         if "expectation_type" in ge_object:
-            # This is an expectation (prescriptive)
+            # This is an expectation
             return ge_object["expectation_type"]
 
         elif "expectation_config" in ge_object:
-            # This is a validation (descriptive)
+            # This is a validation
             return ge_object["expectation_config"]["expectation_type"]
 
     @classmethod

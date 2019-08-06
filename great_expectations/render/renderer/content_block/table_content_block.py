@@ -30,7 +30,7 @@ class TableContentBlockRenderer(ContentBlockRenderer):
         return RenderedComponentContent(**{
             "content_block_type": "table",
             "header_row": header_row,
-            "table_rows": table_entries
+            "table": table_entries
         })
 
     @classmethod
@@ -48,9 +48,12 @@ class TableContentBlockRenderer(ContentBlockRenderer):
         return [
             [
                 {
-                    "template": "Distinct (n)",
-                    "tooltip": {
-                        "content": "expect_column_unique_value_count_to_be_between"
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": "Distinct (n)",
+                        "tooltip": {
+                            "content": "expect_column_unique_value_count_to_be_between"
+                        }
                     }
                 },
                 observed_value,
@@ -61,11 +64,14 @@ class TableContentBlockRenderer(ContentBlockRenderer):
     def expect_column_proportion_of_unique_values_to_be_between(cls, ge_object):
         observed_value = ge_object["result"]["observed_value"]
         template_string_object = {
-                    "template": "Distinct (%)",
-                    "tooltip": {
-                        "content": "expect_column_proportion_of_unique_values_to_be_between"
-                    }
+            "content_block_type": "string_template",
+            "string_template": {
+                "template": "Distinct (%)",
+                "tooltip": {
+                    "content": "expect_column_proportion_of_unique_values_to_be_between"
                 }
+            }
+        }
         if not observed_value:
             return [[template_string_object, "--"]]
         else:
@@ -86,18 +92,24 @@ class TableContentBlockRenderer(ContentBlockRenderer):
         return [
             [
                 {
-                    "template":  "Missing (n)",
-                    "tooltip": {
-                        "content": "expect_column_values_to_not_be_null"
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": "Missing (n)",
+                        "tooltip": {
+                            "content": "expect_column_values_to_not_be_null"
+                        }
                     }
                 },
                 ge_object["result"]["unexpected_count"] if "unexpected_count" in ge_object["result"] and ge_object["result"]["unexpected_count"] is not None else "--",
             ],
             [
                 {
-                    "template": "Missing (%)",
-                    "tooltip": {
-                        "content": "expect_column_values_to_not_be_null"
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": "Missing (%)",
+                        "tooltip": {
+                            "content": "expect_column_values_to_not_be_null"
+                        }
                     }
                 },
                 "%.1f%%" % (ge_object["result"]["unexpected_percent"] * 100.0) if "unexpected_percent" in ge_object["result"] and ge_object["result"]["unexpected_percent"] is not None else "--",
