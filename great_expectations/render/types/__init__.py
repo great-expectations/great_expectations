@@ -1,16 +1,16 @@
 from great_expectations.types import (
-    LimitedDotDict,
+    LooselyTypedDotDict,
     ListOf,
 )
 
 # TODO: Rename to this:
-# class RenderedContent(LimitedDotDict):
+# class RenderedContent(LooselyTypedDotDict):
     # class RenderedComponentContent(RenderedContent):
     # class RenderedSectionContent(RenderedContent):
     # class RenderedDocumentContentContent(RenderedContent):
     # class RenderedComponentContentWrapper(RenderedContent):
 
-class RenderedContent(LimitedDotDict):
+class RenderedContent(LooselyTypedDotDict):
     pass
 
 class RenderedComponentContent(RenderedContent):
@@ -77,7 +77,7 @@ class RenderedComponentContentWrapper(RenderedContent):
     }
 
 
-# class ValidationResult(LimitedDotDict):
+# class ValidationResult(LooselyTypedDotDict):
 #     _allowed_keys = set([
 #         "expectation_config",
 #         "",
@@ -90,7 +90,7 @@ class RenderedComponentContentWrapper(RenderedContent):
 #         # "": ...,
 #     }
 
-# class ValidationResultSuite(LimitedDotDict):
+# class ValidationResultSuite(LooselyTypedDotDict):
 #     _allowed_keys = set([
 #         "results",
 #         "meta",
