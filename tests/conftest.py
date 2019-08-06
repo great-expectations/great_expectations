@@ -408,6 +408,9 @@ def titanic_profiled_evrs_1():
 
 @pytest.fixture()
 def titanic_profiled_name_column_evrs():
+
+    #This is a janky way to fetch expectations matching a specific name from an EVR suite.
+    #TODO: It will no longer be necessary once we implement ValidationResultSuite._group_evrs_by_column
     from great_expectations.render.renderer.renderer import (
         Renderer,
     )
