@@ -228,8 +228,8 @@ class DefaultJinjaSectionView(DefaultJinjaView):
 
     @classmethod
     def _validate_document(cls, document):
-        pass
-        # assert isinstance(document, RenderedSection)
+        assert isinstance(document, RenderedContentBlockWrapper)
+        assert isinstance(document.section, RenderedSection)
 
 class DefaultJinjaComponentView(DefaultJinjaView):
     _template = "component.j2"

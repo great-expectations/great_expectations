@@ -38,9 +38,9 @@ class LimitedDotDict(DotDict):
     _key_types = {}
 
     def __init__(self, coerce_types=False, **kwargs):
-        print(kwargs)
-        print(self._allowed_keys)
-        print(self._required_keys)
+        # print(kwargs)
+        # print(self._allowed_keys)
+        # print(self._required_keys)
 
         if not self._required_keys.issubset(self._allowed_keys):
             raise ValueError("_required_keys : {!r} must be a subset of _allowed_keys {!r}".format(
@@ -57,14 +57,11 @@ class LimitedDotDict(DotDict):
 
             # if key in self._key_types and not isinstance(key, self._key_types[key]):
             if key in self._key_types and type(value) != self._key_types[key]:
+                #TODO: Add the concept of list(type) a type
                 if coerce_types:
                     #TODO: Catch errors and raise more informative error messages here
 
                     #If the given type is an instance of LimitedDotDict, apply coerce_types recursively
-                    print(key)
-                    print(value)
-                    print(self._key_types[key])
-                    print(issubclass(self._key_types[key], LimitedDotDict))
                     if issubclass(self._key_types[key], LimitedDotDict):
                         value = self._key_types[key](coerce_types=True, **value)
                     else:
@@ -103,7 +100,7 @@ class LimitedDotDict(DotDict):
             ))
         dict.__setitem__(self, key, val)
 
-
+# TODO: Rename to this:
 # class RenderedContent(LimitedDotDict):
 # class RenderedComponentContent(RenderedContent):
 # class RenderedSectionContent(RenderedContent):
@@ -130,8 +127,13 @@ class RenderedContentBlock(LimitedDotDict):
         "content_block_type"
     })
 
-class RenderedSection(Rendered):
-    pass
+class RenderedSection(LimitedDotDict):
+    _allowed_keys = set([
+        "section_name",
+        "content_blocks",
+    ])
+    _required_keys = set({
+    })
 
 class RenderedDocument(LimitedDotDict):
     _allowed_keys = set([
@@ -148,12 +150,12 @@ class RenderedDocument(LimitedDotDict):
 
 class RenderedContentBlockWrapper(LimitedDotDict):
     _allowed_keys = set([
+        "section",
         "content_block",
         "section_loop",
         "content_block_loop",
     ])
     _required_keys = set([
-        "content_block",
     ])
 
 
