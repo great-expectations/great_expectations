@@ -138,7 +138,7 @@ class ExpectationSuitePageRenderer(Renderer):
     @classmethod
     def render(cls, expectations):
         columns, ordered_columns = cls._group_and_order_expectations_by_column(expectations)
-
+        full_data_asset_identifier = expectations.get("data_asset_name") or ""
         expectation_suite_name = cls._get_expectation_suite_name(expectations)
 
         overview_content_blocks = [
