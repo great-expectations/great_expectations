@@ -400,3 +400,55 @@ def filesystem_csv_3(tmp_path_factory):
     toy_dataset_2.to_csv(os.path.join(base_dir, "f2.csv"), index=None)
 
     return base_dir
+
+@pytest.fixture()
+def titanic_profiled_evrs_1():
+    return json.load(open("./tests/render/fixtures/BasicDatasetProfiler_evrs.json"))
+
+
+@pytest.fixture()
+def titanic_profiled_name_column_evrs():
+
+    #This is a janky way to fetch expectations matching a specific name from an EVR suite.
+    #TODO: It will no longer be necessary once we implement ValidationResultSuite._group_evrs_by_column
+    from great_expectations.render.renderer.renderer import (
+        Renderer,
+    )
+
+    titanic_profiled_evrs_1 =  json.load(open("./tests/render/fixtures/BasicDatasetProfiler_evrs.json"))
+    evrs_by_column = Renderer()._group_evrs_by_column(titanic_profiled_evrs_1)
+    print(evrs_by_column.keys())
+
+    name_column_evrs = evrs_by_column["Name"]
+    print(json.dumps(name_column_evrs, indent=2))
+
+    return name_column_evrs
+
+
+@pytest.fixture()
+def titanic_profiled_expectations_1():
+    return json.load(open("./tests/render/fixtures/BasicDatasetProfiler_expectations.json"))
+
+@pytest.fixture()
+def titanic_profiled_name_column_expectations():
+    from great_expectations.render.renderer.renderer import (
+        Renderer,
+    )
+
+    titanic_profiled_expectations =  json.load(open("./tests/render/fixtures/BasicDatasetProfiler_expectations.json"))
+    columns, ordered_columns = Renderer()._group_and_order_expectations_by_column(titanic_profiled_expectations)
+    print(columns)
+    print(ordered_columns)
+
+    name_column_expectations = columns["Name"]
+    print(json.dumps(name_column_expectations, indent=2))
+
+    return name_column_expectations
+
+
+@pytest.fixture()
+def titanic_validation_results():
+    with open("./tests/test_sets/expected_cli_results_default.json", "r") as infile:
+        return json.load(infile)
+
+
