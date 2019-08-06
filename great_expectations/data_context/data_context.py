@@ -1516,7 +1516,7 @@ class DataContext(object):
             
             profiling_results_model = ProfilingResultsPageRenderer.render(validation)
             out_profiling_results_filepath = self.get_validation_doc_filepath(
-                data_asset_name, "{run_id}-{expectation_suite_name}-Descriptive".format(
+                data_asset_name, "{run_id}-{expectation_suite_name}-ProfilingResults".format(
                     run_id=run_id.replace(':', ''),
                     expectation_suite_name=expectation_suite_name
                 )
@@ -1536,7 +1536,7 @@ class DataContext(object):
             #  validation results view
             validation_results_model = ValidationResultsPageRenderer.render(validation_results=validation)
             out_validation_results_filepath = self.get_validation_doc_filepath(
-                data_asset_name, "{run_id}-{expectation_suite_name}-Prescriptive".format(
+                data_asset_name, "{run_id}-{expectation_suite_name}-ValidationResults".format(
                     run_id=run_id.replace(':', ''),
                     expectation_suite_name=expectation_suite_name
                 )
@@ -1729,9 +1729,9 @@ class DataContext(object):
                                 "template": "$link_text",
                                 "params": {
                                     "link_text": (link_dict["run_id"] + "-" + link_dict[
-                                        "expectation_suite_name"] + "-Descriptive") if "Descriptive" in link_dict[
+                                        "expectation_suite_name"] + "-ProfilingResults") if "ProfilingResults" in link_dict[
                                         "filepath"] else
-                                    (link_dict["run_id"] + "-" + link_dict["expectation_suite_name"] + "-Prescriptive")
+                                    (link_dict["run_id"] + "-" + link_dict["expectation_suite_name"] + "-ValidationResults")
                                 },
                                 "tag": "a",
                                 "styling": {

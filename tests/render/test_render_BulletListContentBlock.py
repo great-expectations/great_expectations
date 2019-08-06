@@ -7,7 +7,7 @@ from string import Template as pTemplate
 from great_expectations.render.renderer.content_block import (
     ExpectationSuiteBulletListContentBlockRenderer,
 )
-from great_expectations.render.renderer.content_block.bullet_list_content_block import (
+from great_expectations.render.renderer.content_block.expectation_string import (
     substitute_none_for_missing,
 )
 

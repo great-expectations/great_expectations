@@ -21,10 +21,10 @@ class ColumnSectionRenderer(Renderer):
             candidate_object = ge_object
         try:
             if "kwargs" in candidate_object:
-                # This is an expectation (prescriptive)
+                # This is an expectation
                 return candidate_object["kwargs"]["column"]
             elif "expectation_config" in candidate_object:
-                # This is a validation (descriptive)
+                # This is a validation
                 return candidate_object["expectation_config"]["kwargs"]["column"]
             else:
                 raise ValueError(

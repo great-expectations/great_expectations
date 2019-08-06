@@ -68,16 +68,16 @@ def titanic_dataset_profiler_expectations_with_distribution():
 
 
 @pytest.mark.smoketest
-def test_smoke_render_descriptive_page_renderer(titanic_validation_results):
+def test_smoke_render_profiling_results_page_renderer(titanic_validation_results):
     rendered = ProfilingResultsPageRenderer.render(titanic_validation_results)
-    with open('./tests/render/output/test_render_descriptive_page_renderer.json', 'w') as outfile:
+    with open('./tests/render/output/test_render_profiling_results_page_renderer.json', 'w') as outfile:
         json.dump(rendered, outfile, indent=2)
 
     assert len(rendered["sections"]) > 5
 
 
 @pytest.mark.smoketest
-def test_render_descriptive_column_section_renderer(titanic_validation_results):
+def test_render_profiling_results_column_section_renderer(titanic_validation_results):
     # Group EVRs by column
     evrs = {}
     for evr in titanic_validation_results["results"]:
@@ -90,13 +90,13 @@ def test_render_descriptive_column_section_renderer(titanic_validation_results):
             pass
 
     for column in evrs.keys():
-        with open('./tests/render/output/test_render_descriptive_column_section_renderer__' + column + '.json', 'w') \
+        with open('./tests/render/output/test_render_profiling_results_column_section_renderer__' + column + '.json', 'w') \
                 as outfile:
             json.dump(ProfilingResultsColumnSectionRenderer.render(evrs[column]), outfile, indent=2)
 
 
 @pytest.mark.smoketest
-def test_render_prescriptive_column_section_renderer(titanic_expectations):
+def test_render_expectation_suite_column_section_renderer(titanic_expectations):
     # Group expectations by column
     exp_groups = {}
     # print(json.dumps(titanic_expectations, indent=2))
@@ -110,7 +110,7 @@ def test_render_prescriptive_column_section_renderer(titanic_expectations):
             pass
 
     for column in exp_groups.keys():
-        with open('./tests/render/output/test_render_prescriptive_column_section_renderer' + column + '.json', 'w') \
+        with open('./tests/render/output/test_render_expectation_suite_column_section_renderer' + column + '.json', 'w') \
                 as outfile:
             json.dump(ExpectationSuiteColumnSectionRenderer.render(exp_groups[column]), outfile, indent=2)
 
@@ -158,12 +158,12 @@ def test_render_profiled_fixture_evrs(titanic_profiler_evrs):
 
 
 @pytest.mark.smoketest
-def test_smoke_render_descriptive_page_renderer_with_exception(
+def test_smoke_render_profiling_results_page_renderer_with_exception(
         titanic_profiler_evrs_with_exception):
     rendered_json = ProfilingResultsPageRenderer.render(titanic_profiler_evrs_with_exception)
     rendered_page = DefaultJinjaPageView.render(rendered_json)
 
-    with open('./tests/render/output/test_render_descriptive_column_section_renderer_with_exception.html', 'w') as f:
+    with open('./tests/render/output/test_render_profiling_results_column_section_renderer_with_exception.html', 'w') as f:
         f.write(rendered_page)
 
     assert rendered_page[:15] == "<!DOCTYPE html>"
