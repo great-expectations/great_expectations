@@ -60,24 +60,46 @@ class LimitedDotDict(DotDict):
                 ))
 
             # if key in self._key_types and not isinstance(key, self._key_types[key]):
-            if key in self._key_types and type(value) != self._key_types[key]:
-                #TODO: Add the concept of list(type) a type
+            if key in self._key_types:
+                # print(value)
+
+                #Update values if coerce_types==True
                 if coerce_types:
                     #TODO: Catch errors and raise more informative error messages here
 
                     #If the given type is an instance of LimitedDotDict, apply coerce_types recursively
-                    if issubclass(self._key_types[key], LimitedDotDict):
-                        value = self._key_types[key](coerce_types=True, **value)
-                    else:
-                        value = self._key_types[key](value)
-                
-                else:
+                    if isinstance(self._key_types[key], ListOf):
+                        # assert isinstance(self._key_types[key], Iterable)
+                        if issubclass(self._key_types[key], LimitedDotDict):
+                            value = [self._key_types[key].type_(coerce_types=True, **v) for v in value]
+                        else:
+                            value = [self._key_types[key].type_(v) for v in value]
 
-                    raise TypeError("key: {!r} must be of type {!r}, not {!r}".format(
-                        key,
-                        self._key_types[key],
-                        type(value),
-                    ))
+                    else:
+                        if issubclass(self._key_types[key], LimitedDotDict):
+                            value = self._key_types[key](coerce_types=True, **value)
+                        else:
+                            value = self._key_types[key](value)
+                
+                # print(value)
+                
+                #Validate types
+                if type(value) != self._key_types[key]:
+
+                    #TODO: Catch errors and raise more informative error messages here
+                    if isinstance(self._key_types[key], ListOf):
+                        assert isinstance(value, Iterable)
+                        for v in value:
+                            # print(v)
+                            # print(self._key_types[key].type_)
+                            assert isinstance(v, self._key_types[key].type_)
+
+                    else:
+                        raise TypeError("key: {!r} must be of type {!r}, not {!r}".format(
+                            key,
+                            self._key_types[key],
+                            type(value),
+                        ))
 
             self[key] = value
 
@@ -166,7 +188,39 @@ class RenderedContentBlockWrapper(LimitedDotDict):
     ])
     _key_types = {
         "content_block": RenderedContentBlock,
+        #TODO: "section": RenderedSection,
     }
+
+
+# class ValidationResult(LimitedDotDict):
+#     _allowed_keys = set([
+#         "expectation_config",
+#         "",
+#         ""
+#     ])
+#     _required_keys = set([
+#     ])
+#     _key_types = {
+#         "expectation_config": ExpectationConfig,
+#         # "": ...,
+#     }
+
+# class ValidationResultSuite(LimitedDotDict):
+#     _allowed_keys = set([
+#         "results",
+#         "meta",
+#     ])
+#     _required_keys = set([
+#         "results",
+#         "meta",
+#     ])
+#     _key_types = {
+#         "results": ListOf(ValidationResult),
+#         "meta": SuiteMeta,
+#     }
+
+
+
 
 
 # class DomStylingInfo(object):
