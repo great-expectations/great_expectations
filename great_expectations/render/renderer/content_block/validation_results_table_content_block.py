@@ -142,6 +142,17 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             return "--"
 
     @classmethod
+    def _get_content_block_fn(cls, expectation_type):
+        return cls.generate_expectation_row(expectation_type)
+
+    @classmethod
+    def _process_content_block(cls, content_block):
+        super(ValidationResultsTableContentBlockRenderer, cls)._process_content_block(content_block)
+        content_block.update({
+            "header_row": ["Status", "Expectation", "Observed Value"]
+        })
+
+    @classmethod
     def generate_expectation_row(cls, expectation_type):
         expectation_string_fn = getattr(ExpectationStringRenderer, expectation_type, None)
         if expectation_string_fn is None:
