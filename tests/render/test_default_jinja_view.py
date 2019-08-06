@@ -367,20 +367,22 @@ def test_render_value_list():
 
 
 def test_render_graph():
-    graph_component_content = {
+    graph_component_content = RenderedContentBlock(**{
         "content_block_type": "graph",
         "header": "Histogram",
         "graph": "{\"$schema\": \"https://vega.github.io/schema/vega-lite/v2.6.0.json\", \"autosize\": \"fit\", \"config\": {\"view\": {\"height\": 300, \"width\": 400}}, \"data\": {\"name\": \"data-a681d02fb484e64eadd9721b37015d5b\"}, \"datasets\": {\"data-a681d02fb484e64eadd9721b37015d5b\": [{\"bins\": 3.7, \"weights\": 5.555555555555555}, {\"bins\": 10.8, \"weights\": 3.439153439153439}, {\"bins\": 17.9, \"weights\": 17.857142857142858}, {\"bins\": 25.0, \"weights\": 24.206349206349206}, {\"bins\": 32.0, \"weights\": 16.137566137566136}, {\"bins\": 39.1, \"weights\": 12.3015873015873}, {\"bins\": 46.2, \"weights\": 9.788359788359788}, {\"bins\": 53.3, \"weights\": 5.423280423280423}, {\"bins\": 60.4, \"weights\": 3.439153439153439}, {\"bins\": 67.5, \"weights\": 1.8518518518518516}]}, \"encoding\": {\"x\": {\"field\": \"bins\", \"type\": \"ordinal\"}, \"y\": {\"field\": \"weights\", \"type\": \"quantitative\"}}, \"height\": 200, \"mark\": \"bar\", \"width\": 200}",
         "styling": {
             "classes": ["col-4"]
         }
-    }
+    })
 
-    rendered_doc = ge.render.view.view.DefaultJinjaComponentView.render({
+    rendered_doc = ge.render.view.view.DefaultJinjaComponentView.render(
+        RenderedContentBlockWrapper(**{
         "content_block": graph_component_content,
         "section_loop": {"index": 1},
         "content_block_loop": {"index": 2},
-    })
+        })
+    )
     print(rendered_doc)
     assert rendered_doc == """
 <div id="section-1-content-block-2" class="col-4" >
