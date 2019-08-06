@@ -16,7 +16,7 @@ from collections import OrderedDict
 from .util import NormalizedDataAssetName, get_slack_callback, safe_mmkdir
 
 from great_expectations.exceptions import DataContextError, ConfigNotFoundError, ProfilerError
-from great_expectations.render.types import RenderedDocument
+from great_expectations.render.types import RenderedDocumentContent
 
 try:
     from urllib.parse import urlparse
@@ -38,8 +38,8 @@ from great_expectations.render.view import (
     DefaultJinjaIndexPageView,
 )
 from great_expectations.render.types import (
-    RenderedContentBlock,
-    RenderedSection,
+    RenderedComponentContent,
+    RenderedSectionContent,
 )
 
 
@@ -1608,7 +1608,7 @@ class DataContext(object):
         for source, generators in index_links_dict.items():
             content_blocks = []
 
-            source_header_block = RenderedContentBlock(**{
+            source_header_block = RenderedComponentContent(**{
                 "content_block_type": "header",
                 "header": source,
                 "styling": {
@@ -1621,7 +1621,7 @@ class DataContext(object):
             content_blocks.append(source_header_block)
 
             for generator, data_assets in generators.items():
-                generator_header_block = RenderedContentBlock(**{
+                generator_header_block = RenderedComponentContent(**{
                     "content_block_type": "header",
                     "header": generator,
                     "styling": {
@@ -1630,7 +1630,7 @@ class DataContext(object):
                 })
                 content_blocks.append(generator_header_block)
 
-                horizontal_rule = RenderedContentBlock(**{
+                horizontal_rule = RenderedComponentContent(**{
                     "content_block_type": "string_template",
                     "string_template": {
                         "template": "",
@@ -1644,7 +1644,7 @@ class DataContext(object):
                 content_blocks.append(horizontal_rule)
 
                 for data_asset, link_lists in data_assets.items():
-                    data_asset_heading = RenderedContentBlock(**{
+                    data_asset_heading = RenderedComponentContent(**{
                         "content_block_type": "string_template",
                         "string_template": {
                             "template": "$data_asset",
@@ -1689,7 +1689,7 @@ class DataContext(object):
                             }
                         }] for link_dict in expectation_suite_links
                     ]
-                    expectation_suite_link_table = RenderedContentBlock(**{
+                    expectation_suite_link_table = RenderedComponentContent(**{
                         "content_block_type": "table",
                         "sub_header": "Expectation Suites",
                         "table_rows": expectation_suite_link_table_rows,
@@ -1724,7 +1724,7 @@ class DataContext(object):
                             }
                         }] for link_dict in validation_links
                     ]
-                    validation_link_table = RenderedContentBlock(**{
+                    validation_link_table = RenderedComponentContent(**{
                         "content_block_type": "table",
                         "sub_header": "Batch Validations",
                         "table_rows": validation_link_table_rows,
@@ -1740,7 +1740,7 @@ class DataContext(object):
                     })
                     content_blocks.append(validation_link_table)
 
-            section = RenderedSection(**{
+            section = RenderedSectionContent(**{
                 "section_name": source,
                 "content_blocks": content_blocks
             })
@@ -1748,7 +1748,7 @@ class DataContext(object):
 
         with open(os.path.join(self.data_doc_directory, "index.html"), "w") as writer:
             writer.write(DefaultJinjaIndexPageView.render(
-                RenderedDocument(**{
+                RenderedDocumentContent(**{
                     "utm_medium": "index-page",
                     "sections": sections
                 })

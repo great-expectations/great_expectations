@@ -10,9 +10,9 @@ from great_expectations.render.renderer import (
 )
 from great_expectations.render.view import DefaultJinjaPageView
 from great_expectations.render.types import (
-    RenderedContentBlock,
-    RenderedSection,
-    RenderedContentBlockWrapper,
+    RenderedComponentContent,
+    RenderedSectionContent,
+    RenderedComponentContentWrapper,
 )
 
 @pytest.fixture()
@@ -58,14 +58,14 @@ def test_render_DefaultJinjaPageView_meta_info():
 
 
 def test_render_section_page():
-    section = RenderedSection(**{
+    section = RenderedSectionContent(**{
         "section_name": None,
         "content_blocks": [
-            RenderedContentBlock(**{
+            RenderedComponentContent(**{
                 "content_block_type": "header",
                 "header": "Overview",
             }),
-            RenderedContentBlock(**{
+            RenderedComponentContent(**{
                 "content_block_type": "table",
                 "header": "Dataset info",
                 "table_rows": [
@@ -92,7 +92,7 @@ def test_render_section_page():
     })
 
     rendered_doc = ge.render.view.view.DefaultJinjaSectionView.render(
-        RenderedContentBlockWrapper(**{
+        RenderedComponentContentWrapper(**{
             "section": section,
             "section_loop": {"index": 1},
         })
@@ -125,13 +125,13 @@ def test_render_section_page():
 
 
 def test_rendering_components_without_section_loop_index():
-    header_component_content = RenderedContentBlock(**{
+    header_component_content = RenderedComponentContent(**{
         # "component_type": "header",
         "content_block_type": "header",
         "header": "Overview",
     })
     rendered_doc = ge.render.view.view.DefaultJinjaComponentView.render(
-        RenderedContentBlockWrapper(**{
+        RenderedComponentContentWrapper(**{
             "content_block": header_component_content,
             "content_block_loop": {"index": 2},
         })
@@ -147,7 +147,7 @@ def test_rendering_components_without_section_loop_index():
 </div>"""
 
     rendered_doc = ge.render.view.view.DefaultJinjaComponentView.render(
-        RenderedContentBlockWrapper(**{
+        RenderedComponentContentWrapper(**{
             "content_block": header_component_content,
         })
     )
@@ -162,7 +162,7 @@ def test_rendering_components_without_section_loop_index():
 </div>"""
 
     rendered_doc = ge.render.view.view.DefaultJinjaComponentView.render(
-        RenderedContentBlockWrapper(**{
+        RenderedComponentContentWrapper(**{
             "content_block": header_component_content,
             "section_loop": {"index": 3},
         })
@@ -181,7 +181,7 @@ def test_rendering_components_without_section_loop_index():
 def test_rendering_components_with_styling():
     # Medium-complicated example to verify that all the things are correctly piped to all the places
 
-    header_component_content = RenderedContentBlock(**{
+    header_component_content = RenderedComponentContent(**{
         # "component_type": "table",
         "content_block_type": "table",
         "header": {
@@ -246,7 +246,7 @@ def test_rendering_components_with_styling():
         }
     })
     rendered_doc = ge.render.view.view.DefaultJinjaComponentView.render(
-        RenderedContentBlockWrapper(**{
+        RenderedComponentContentWrapper(**{
             "content_block": header_component_content,
             "section_loop": {"index": 1},
             "content_block_loop": {"index": 2},
@@ -277,13 +277,13 @@ def test_rendering_components_with_styling():
 
 
 def test_render_header_component():
-    header_component_content = RenderedContentBlock(**{
+    header_component_content = RenderedComponentContent(**{
         # "component_type": "header",
         "content_block_type": "header",
         "header": "Overview",
     })
     rendered_doc = ge.render.view.view.DefaultJinjaComponentView.render(
-        RenderedContentBlockWrapper(**{
+        RenderedComponentContentWrapper(**{
             "content_block": header_component_content,
             "section_loop": {"index": 1},
             "content_block_loop": {"index": 2},
@@ -301,7 +301,7 @@ def test_render_header_component():
 
 
 def test_render_table_component():
-    table_component_content = RenderedContentBlock(**{
+    table_component_content = RenderedComponentContent(**{
         # "component_type": "header",
         "content_block_type": "table",
         "header": "Overview",
@@ -314,7 +314,7 @@ def test_render_table_component():
         }
     })
     rendered_doc = ge.render.view.view.DefaultJinjaComponentView.render(
-        RenderedContentBlockWrapper(**{
+        RenderedComponentContentWrapper(**{
             "content_block": table_component_content,
             "section_loop": {"index": 1},
             "content_block_loop": {"index": 2},
@@ -336,7 +336,7 @@ def test_render_table_component():
 
 
 def test_render_value_list():
-    value_list_component_content = RenderedContentBlock(**{
+    value_list_component_content = RenderedComponentContent(**{
         'content_block_type': 'value_list',
         'header': 'Example values',
         'value_list': [{
@@ -355,7 +355,7 @@ def test_render_value_list():
     })
 
     rendered_doc = ge.render.view.view.DefaultJinjaComponentView.render(
-        RenderedContentBlockWrapper(**{
+        RenderedComponentContentWrapper(**{
             "content_block": value_list_component_content,
             "section_loop": {"index": 1},
             "content_block_loop": {"index": 2},
@@ -384,7 +384,7 @@ def test_render_value_list():
 
 
 def test_render_graph():
-    graph_component_content = RenderedContentBlock(**{
+    graph_component_content = RenderedComponentContent(**{
         "content_block_type": "graph",
         "header": "Histogram",
         "graph": "{\"$schema\": \"https://vega.github.io/schema/vega-lite/v2.6.0.json\", \"autosize\": \"fit\", \"config\": {\"view\": {\"height\": 300, \"width\": 400}}, \"data\": {\"name\": \"data-a681d02fb484e64eadd9721b37015d5b\"}, \"datasets\": {\"data-a681d02fb484e64eadd9721b37015d5b\": [{\"bins\": 3.7, \"weights\": 5.555555555555555}, {\"bins\": 10.8, \"weights\": 3.439153439153439}, {\"bins\": 17.9, \"weights\": 17.857142857142858}, {\"bins\": 25.0, \"weights\": 24.206349206349206}, {\"bins\": 32.0, \"weights\": 16.137566137566136}, {\"bins\": 39.1, \"weights\": 12.3015873015873}, {\"bins\": 46.2, \"weights\": 9.788359788359788}, {\"bins\": 53.3, \"weights\": 5.423280423280423}, {\"bins\": 60.4, \"weights\": 3.439153439153439}, {\"bins\": 67.5, \"weights\": 1.8518518518518516}]}, \"encoding\": {\"x\": {\"field\": \"bins\", \"type\": \"ordinal\"}, \"y\": {\"field\": \"weights\", \"type\": \"quantitative\"}}, \"height\": 200, \"mark\": \"bar\", \"width\": 200}",
@@ -394,7 +394,7 @@ def test_render_graph():
     })
 
     rendered_doc = ge.render.view.view.DefaultJinjaComponentView.render(
-        RenderedContentBlockWrapper(**{
+        RenderedComponentContentWrapper(**{
         "content_block": graph_component_content,
         "section_loop": {"index": 1},
         "content_block_loop": {"index": 2},
@@ -420,7 +420,7 @@ def test_render_graph():
 
 
 def test_render_text():
-    text_component_content = RenderedContentBlock(**{
+    text_component_content = RenderedComponentContent(**{
         "content_block_type": "text",
         "header": "Histogram",
         "content": ["hello"],
@@ -430,7 +430,7 @@ def test_render_text():
     })
 
     rendered_doc = ge.render.view.view.DefaultJinjaComponentView.render(
-        RenderedContentBlockWrapper(**{
+        RenderedComponentContentWrapper(**{
             "content_block": text_component_content,
             "section_loop": {"index": 1},
             "content_block_loop": {"index": 2},
@@ -448,7 +448,7 @@ def test_render_text():
         </div>
 </div>"""
 
-    text_component_content = RenderedContentBlock(**{
+    text_component_content = RenderedComponentContent(**{
         "content_block_type": "text",
         "header": "Histogram",
         "content": ["hello", "goodbye"],
@@ -458,7 +458,7 @@ def test_render_text():
     })
 
     rendered_doc = ge.render.view.view.DefaultJinjaComponentView.render(
-        RenderedContentBlockWrapper(**{
+        RenderedComponentContentWrapper(**{
             "content_block": text_component_content,
             "section_loop": {"index": 1},
             "content_block_loop": {"index": 2},

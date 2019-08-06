@@ -1,7 +1,7 @@
 from .content_block import ContentBlockRenderer
 
 from great_expectations.render.types import (
-    RenderedContentBlock,
+    RenderedComponentContent,
 )
 
 class ExceptionListContentBlockRenderer(ContentBlockRenderer):

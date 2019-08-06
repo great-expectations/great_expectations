@@ -1,6 +1,6 @@
 from ..renderer import Renderer
 from ...types import (
-    RenderedContentBlock,
+    RenderedComponentContent,
 )
 
 
@@ -53,7 +53,7 @@ class ContentBlockRenderer(Renderer):
                         blocks += result
 
             if len(blocks) > 0:
-                content_block = RenderedContentBlock(**{
+                content_block = RenderedComponentContent(**{
                     "content_block_type": cls._content_block_type,
                     cls._content_block_type: blocks,
                     # TODO: This should probably be overridable via a parameter

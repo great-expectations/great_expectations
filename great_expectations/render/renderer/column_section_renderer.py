@@ -9,10 +9,10 @@ from .content_block import TableContentBlockRenderer
 from .content_block import PrescriptiveBulletListContentBlockRenderer
 from .content_block import ExceptionListContentBlockRenderer
 
-from ..types import RenderedSection
+from ..types import RenderedSectionContent
 
 from ..types import (
-    RenderedContentBlock,
+    RenderedComponentContent,
 )
 
 
@@ -71,7 +71,7 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
 
         cls._render_failed(evrs, content_blocks)
 
-        return RenderedSection(**{
+        return RenderedSectionContent(**{
             "section_name": column,
             "content_blocks": content_blocks,
         })
@@ -96,7 +96,7 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
 
         # assert False
         
-        content_blocks.append(RenderedContentBlock(**{
+        content_blocks.append(RenderedComponentContent(**{
             "content_block_type": "header",
             "header": {
                     "template": column_name,
@@ -160,7 +160,7 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
             }
         } for evr in evrs]
 
-        content_blocks.append(RenderedContentBlock(**{
+        content_blocks.append(RenderedComponentContent(**{
             "content_block_type": "bullet_list",
             "header": 'Expectation types <span class="mr-3 triangle"></span>',
             "bullet_list": bullet_list,
@@ -256,7 +256,7 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
                 quantile_ranges[idx],
             ])
 
-        content_blocks.append(RenderedContentBlock(**{
+        content_blocks.append(RenderedComponentContent(**{
             "content_block_type": "table",
             "header": "Quantiles",
             "table_rows": table_rows,
@@ -331,7 +331,7 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
             ])
 
         if len(table_rows) > 0:
-            content_blocks.append(RenderedContentBlock(**{
+            content_blocks.append(RenderedComponentContent(**{
                 "content_block_type": "table",
                 "header": "Statistics",
                 "table_rows": table_rows,
@@ -371,7 +371,7 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
         else:
             classes = ["col-4"]
 
-        new_block = RenderedContentBlock(**{
+        new_block = RenderedComponentContent(**{
             "content_block_type": "value_list",
             "header":
                 {
@@ -444,7 +444,7 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
 
         chart = bars.to_json()
 
-        new_block = RenderedContentBlock(**{
+        new_block = RenderedComponentContent(**{
             "content_block_type": "graph",
             "header":
                 {
@@ -501,7 +501,7 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
 
         chart = bars.to_json()
 
-        new_block = RenderedContentBlock(**{
+        new_block = RenderedComponentContent(**{
             "content_block_type": "graph",
             "header":
                 {
@@ -543,7 +543,7 @@ class DescriptiveColumnSectionRenderer(ColumnSectionRenderer):
                 "expect_column_mean_to_be_between",
                 "expect_column_min_to_be_between"
             ]:
-                new_block = RenderedContentBlock(**{
+                new_block = RenderedComponentContent(**{
                     "content_block_type": "text",
                     "content": []
                 })
@@ -567,7 +567,7 @@ class PrescriptiveColumnSectionRenderer(ColumnSectionRenderer):
     def _render_header(cls, expectations, content_blocks):
         column = cls._get_column_name(expectations)
 
-        content_blocks.append(RenderedContentBlock(**{
+        content_blocks.append(RenderedComponentContent(**{
             "content_block_type": "header",
             "header": column,
             "styling": {
@@ -601,7 +601,7 @@ class PrescriptiveColumnSectionRenderer(ColumnSectionRenderer):
         remaining_expectations, content_blocks = cls._render_bullet_list(
             remaining_expectations, content_blocks)
 
-        return RenderedSection(**{
+        return RenderedSectionContent(**{
             "section_name": column,
             "content_blocks": content_blocks
         })
