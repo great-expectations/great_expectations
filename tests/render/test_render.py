@@ -24,18 +24,6 @@ from great_expectations.data_context.util import safe_mmkdir
 
 
 @pytest.fixture(scope="module")
-def titanic_profiling_results():
-    with open("./tests/test_sets/expected_cli_results_default.json", "r") as infile:
-        return json.load(infile)
-
-
-@pytest.fixture(scope="module")
-def titanic_expectations():
-    with open("./tests/test_sets/titanic_expectations.json", "r") as infile:
-        return json.load(infile, object_pairs_hook=OrderedDict)
-
-
-@pytest.fixture(scope="module")
 def titanic_profiler_evrs():
     with open('./tests/render/fixtures/BasicDatasetProfiler_evrs.json', 'r') as infile:
         return json.load(infile, object_pairs_hook=OrderedDict)
@@ -78,6 +66,7 @@ def test_smoke_render_profiling_results_page_renderer(titanic_profiling_results)
     assert len(rendered["sections"]) > 5
 
 
+<<<<<<< HEAD
 @pytest.mark.smoketest
 def test_render_profiling_results_column_section_renderer(titanic_profiling_results):
     # Group EVRs by column
@@ -144,6 +133,8 @@ def test_render_expectation_suite_column_section_renderer(titanic_expectations):
             json.dump(ExpectationSuiteColumnSectionRenderer.render(exp_groups[column]), outfile, indent=2)
 
 
+=======
+>>>>>>> develop
 def test_content_block_list_available_expectations():
     available_expectations = ValueListContentBlockRenderer.list_available_expectations()
     assert available_expectations == ['expect_column_values_to_be_in_set']
