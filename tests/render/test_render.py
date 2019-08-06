@@ -21,7 +21,9 @@ from great_expectations.render.renderer.content_block import ValueListContentBlo
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 
 from great_expectations.data_context.util import safe_mmkdir
-
+from great_expectations.render.types import (
+    RenderedComponentContent
+)
 
 @pytest.fixture(scope="module")
 def titanic_profiler_evrs():

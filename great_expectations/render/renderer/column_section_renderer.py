@@ -605,10 +605,10 @@ class ValidationResultsColumnSectionRenderer(ColumnSectionRenderer):
         remaining_evrs, content_blocks = cls._render_table(
             remaining_evrs, content_blocks)
     
-        return {
+        return RenderedSectionContent(**{
             "section_name": column,
             "content_blocks": content_blocks
-        }
+        })
 
 
 class ExpectationSuiteColumnSectionRenderer(ColumnSectionRenderer):

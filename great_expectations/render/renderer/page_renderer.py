@@ -52,10 +52,10 @@ class ValidationResultsPageRenderer(Renderer):
             data_asset_name = None
     
         sections = [
-            {
+            RenderedSectionContent(**{
                 "section_name": "Overview",
                 "content_blocks": overview_content_blocks
-            }
+            })
         ]
     
         sections += [
@@ -64,17 +64,17 @@ class ValidationResultsPageRenderer(Renderer):
             ) for column in ordered_columns
         ]
     
-        return {
+        return RenderedDocumentContent(**{
             "renderer_type": "ValidationResultsColumnSectionRenderer",
             "data_asset_name": data_asset_name,
             "full_data_asset_identifier": full_data_asset_identifier,
             "page_title": run_id + "-" + expectation_suite_name + "-ProfilingResults",
             "sections": sections
-        }
+        })
     
     @classmethod
     def _render_validation_header(cls):
-        return {
+        return RenderedComponentContent(**{
             "content_block_type": "header",
             "header": "Validation Overview",
             "styling": {
@@ -83,7 +83,7 @@ class ValidationResultsPageRenderer(Renderer):
                     "classes": ["alert", "alert-secondary"]
                 }
             }
-        }
+        })
     
     @classmethod
     def _render_validation_info(cls, validation_results):
@@ -93,7 +93,7 @@ class ValidationResultsPageRenderer(Renderer):
         ge_version = validation_results["meta"]["great_expectations.__version__"]
         success = validation_results["success"]
         
-        return {
+        return RenderedComponentContent(**{
             "content_block_type": "table",
             "header": "Info",
             "table": [
@@ -112,12 +112,12 @@ class ValidationResultsPageRenderer(Renderer):
                     "classes": ["table", "table-sm"]
                 }
             },
-        }
+        })
     
     @classmethod
     def _render_validation_statistics(cls, validation_results):
         statistics = validation_results["statistics"]
-        return {
+        return RenderedComponentContent(**{
             "content_block_type": "table",
             "header": "Statistics",
             "table": [
@@ -135,7 +135,7 @@ class ValidationResultsPageRenderer(Renderer):
                     "classes": ["table", "table-sm"]
                 }
             },
-        }
+        })
 
 
 class ExpectationSuitePageRenderer(Renderer):
