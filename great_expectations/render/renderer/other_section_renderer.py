@@ -7,11 +7,11 @@ from .renderer import Renderer
 from .content_block import(
     ValueListContentBlockRenderer,
     TableContentBlockRenderer,
-    PrescriptiveBulletListContentBlockRenderer
+    ExpectationSuiteBulletListContentBlockRenderer
 )
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 
-class DescriptiveOverviewSectionRenderer(Renderer):
+class ProfilingResultsOverviewSectionRenderer(Renderer):
 
     @classmethod
     def render(cls, evrs, section_name=None):
@@ -54,12 +54,15 @@ class DescriptiveOverviewSectionRenderer(Renderer):
 
         table_rows.append([
             {
-                "template": "Number of observations",
-                "tooltip": {
-                    "content": "expect_table_row_count_to_be_between"
-                },
-                "params": {
-                    "tooltip_text": "Number of observations"
+                "content_block_type": "string_template",
+                "string_template": {
+                    "template": "Number of observations",
+                    "tooltip": {
+                        "content": "expect_table_row_count_to_be_between"
+                    },
+                    "params": {
+                        "tooltip_text": "Number of observations"
+                    }
                 }
             },
             "?" if not expect_table_row_count_to_be_between_evr else expect_table_row_count_to_be_between_evr["result"][
@@ -74,7 +77,7 @@ class DescriptiveOverviewSectionRenderer(Renderer):
         content_blocks.append({
             "content_block_type": "table",
             "header": "Dataset info",
-            "table_rows": table_rows,
+            "table": table_rows,
             "styling": {
                 "classes": ["col-6", "table-responsive"],
                 "styles": {
@@ -97,7 +100,7 @@ class DescriptiveOverviewSectionRenderer(Renderer):
         content_blocks.append({
             "content_block_type": "table",
             "header": "Variable types",
-            "table_rows": table_rows,
+            "table": table_rows,
             "styling": {
                 "classes": ["col-6", "table-responsive", ],
                 "styles": {
@@ -121,16 +124,19 @@ class DescriptiveOverviewSectionRenderer(Renderer):
         bullet_list = sorted(type_counts.items(), key=lambda kv: -1*kv[1])
 
         bullet_list = [{
-            "template": "$expectation_type $expectation_count",
-            "params": {
-                "expectation_type": tr[0],
-                "expectation_count": tr[1],
-            },
-            "styling": {
-                "classes": ["list-group-item", "d-flex", "justify-content-between", "align-items-center"],
+            "content_block_type": "string_template",
+            "string_template": {
+                "template": "$expectation_type $expectation_count",
                 "params": {
-                    "expectation_count": {
-                        "classes": ["badge", "badge-secondary", "badge-pill"],
+                    "expectation_type": tr[0],
+                    "expectation_count": tr[1],
+                },
+                "styling": {
+                    "classes": ["list-group-item", "d-flex", "justify-content-between", "align-items-center"],
+                    "params": {
+                        "expectation_count": {
+                            "classes": ["badge", "badge-secondary", "badge-pill"],
+                        }
                     }
                 }
             }
@@ -214,7 +220,7 @@ class DescriptiveOverviewSectionRenderer(Renderer):
         # content_blocks.append({
         #     "content_block_type": "table",
         #     "header": "Warnings",
-        #     "table_rows": table_rows,
+        #     "table": table_rows,
         #     "styling": {
         #         "classes": ["col-12"],
         #         "styles": {

@@ -61,11 +61,14 @@ class ExceptionListContentBlockRenderer(ContentBlockRenderer):
             except KeyError:
                 column = None
             return [{
-                "template": template_str,
-                "params": {
-                    "column": column,
-                    "expectation_type": evr["expectation_config"]["expectation_type"],
-                    "exception_message": evr["exception_info"]["exception_message"]
-                },
-                "styling": styling,
+                "content_block_type": "string_template",
+                "string_template": {
+                    "template": template_str,
+                    "params": {
+                        "column": column,
+                        "expectation_type": evr["expectation_config"]["expectation_type"],
+                        "exception_message": evr["exception_info"]["exception_message"]
+                    },
+                    "styling": styling,
+                }
             }]

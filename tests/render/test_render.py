@@ -9,13 +9,14 @@ from collections import OrderedDict
 
 import great_expectations as ge
 from great_expectations.render.renderer import (
-    DescriptivePageRenderer,
-    DescriptiveColumnSectionRenderer,
-    PrescriptiveColumnSectionRenderer,
-    PrescriptivePageRenderer,
+    ProfilingResultsPageRenderer,
+    ProfilingResultsColumnSectionRenderer,
+    ExpectationSuitePageRenderer,
+    ExpectationSuiteColumnSectionRenderer,
+    ValidationResultsPageRenderer,
+    ValidationResultsColumnSectionRenderer
 )
 from great_expectations.render.view import DefaultJinjaPageView
-from great_expectations.render.view.view import render_string_template
 from great_expectations.render.renderer.content_block import ValueListContentBlockRenderer
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 
@@ -57,12 +58,77 @@ def titanic_dataset_profiler_expectations_with_distribution():
 
 
 @pytest.mark.smoketest
-def test_smoke_render_descriptive_page_renderer(titanic_validation_results):
-    rendered = DescriptivePageRenderer.render(titanic_validation_results)
-    with open('./tests/render/output/test_render_descriptive_page_renderer.json', 'w') as outfile:
+def test_smoke_render_profiling_results_page_renderer(titanic_profiled_evrs_1):
+    rendered = ProfilingResultsPageRenderer.render(titanic_profiled_evrs_1)
+    with open('./tests/render/output/test_render_profiling_results_page_renderer.json', 'w') as outfile:
         json.dump(rendered, outfile, indent=2)
 
     assert len(rendered["sections"]) > 5
+
+@pytest.mark.smoketest
+def test_render_profiling_results_column_section_renderer(titanic_profiled_evrs_1):
+    # Group EVRs by column
+    evrs = {}
+    for evr in titanic_profiled_evrs_1["results"]:
+        try:
+            column = evr["expectation_config"]["kwargs"]["column"]
+            if column not in evrs:
+                evrs[column] = []
+            evrs[column].append(evr)
+        except KeyError:
+            pass
+
+    for column in evrs.keys():
+        with open('./tests/render/output/test_render_profiling_results_column_section_renderer__' + column + '.json', 'w') \
+                as outfile:
+            json.dump(ProfilingResultsColumnSectionRenderer.render(evrs[column]), outfile, indent=2)
+
+
+@pytest.mark.smoketest
+def test_smoke_render_validation_results_page_renderer(titanic_profiler_evrs):
+    rendered = ValidationResultsPageRenderer.render(titanic_profiler_evrs)
+    with open('./tests/render/output/test_render_validation_results_page_renderer.json', 'w') as outfile:
+        json.dump(rendered, outfile, indent=2)
+    assert len(rendered["sections"]) > 5
+
+
+@pytest.mark.smoketest
+def test_render_validation_results_column_section_renderer(titanic_profiler_evrs):
+    # Group EVRs by column
+    evrs = {}
+    for evr in titanic_profiler_evrs["results"]:
+        try:
+            column = evr["expectation_config"]["kwargs"]["column"]
+            if column not in evrs:
+                evrs[column] = []
+            evrs[column].append(evr)
+        except KeyError:
+            pass
+
+    for column in evrs.keys():
+        with open('./tests/render/output/test_render_validation_results_column_section_renderer__' + column + '.json', 'w') \
+                as outfile:
+            json.dump(ValidationResultsColumnSectionRenderer.render(evrs[column]), outfile, indent=2)
+
+
+@pytest.mark.smoketest
+def test_render_expectation_suite_column_section_renderer(titanic_profiled_expectations_1):
+    # Group expectations by column
+    exp_groups = {}
+    # print(json.dumps(titanic_profiled_expectations_1, indent=2))
+    for exp in titanic_profiled_expectations_1["expectations"]:
+        try:
+            column = exp["kwargs"]["column"]
+            if column not in exp_groups:
+                exp_groups[column] = []
+            exp_groups[column].append(exp)
+        except KeyError:
+            pass
+
+    for column in exp_groups.keys():
+        with open('./tests/render/output/test_render_expectation_suite_column_section_renderer' + column + '.json', 'w') \
+                as outfile:
+            json.dump(ExpectationSuiteColumnSectionRenderer.render(exp_groups[column]), outfile, indent=2)
 
 
 def test_content_block_list_available_expectations():
@@ -71,11 +137,11 @@ def test_content_block_list_available_expectations():
 
 
 @pytest.mark.smoketest
-def test_render_profiled_fixture_expectations(titanic_dataset_profiler_expectations):
-    rendered_json = PrescriptivePageRenderer.render(titanic_dataset_profiler_expectations)
+def test_render_profiled_fixture_expectation_suite(titanic_dataset_profiler_expectations):
+    rendered_json = ExpectationSuitePageRenderer.render(titanic_dataset_profiler_expectations)
     rendered_page = DefaultJinjaPageView.render(rendered_json)
 
-    with open('./tests/render/output/test_render_profiled_fixture_expectations.html', 'w') as f:
+    with open('./tests/render/output/test_render_profiled_fixture_expectation_suite.html', 'w') as f:
         f.write(rendered_page)
 
     assert rendered_page[:15] == "<!DOCTYPE html>"
@@ -83,12 +149,12 @@ def test_render_profiled_fixture_expectations(titanic_dataset_profiler_expectati
 
 
 @pytest.mark.smoketest
-def test_render_profiled_fixture_expectations_with_distribution(titanic_dataset_profiler_expectations_with_distribution):
+def test_render_profiled_fixture_expectation_suite_with_distribution(titanic_dataset_profiler_expectations_with_distribution):
     # Tests sparkline
-    rendered_json = PrescriptivePageRenderer.render(titanic_dataset_profiler_expectations_with_distribution)
+    rendered_json = ExpectationSuitePageRenderer.render(titanic_dataset_profiler_expectations_with_distribution)
     rendered_page = DefaultJinjaPageView.render(rendered_json)
 
-    with open('./tests/render/output/titanic_dataset_profiler_expectations_with_distribution.html', 'wb') as f:
+    with open('./tests/render/output/titanic_dataset_profiler_expectation_suite_with_distribution.html', 'wb') as f:
         f.write(rendered_page.encode("utf-8"))
 
     assert rendered_page[:15] == "<!DOCTYPE html>"
@@ -96,11 +162,11 @@ def test_render_profiled_fixture_expectations_with_distribution(titanic_dataset_
 
 
 @pytest.mark.smoketest
-def test_render_profiled_fixture_evrs(titanic_profiler_evrs):
-    rendered_json = DescriptivePageRenderer.render(titanic_profiler_evrs)
+def test_render_profiling_results(titanic_profiled_evrs_1):
+    rendered_json = ProfilingResultsPageRenderer.render(titanic_profiled_evrs_1)
     rendered_page = DefaultJinjaPageView.render(rendered_json)
 
-    with open('./tests/render/output/test_render_profiled_fixture_evrs.html', 'w') as f:
+    with open('./tests/render/output/test_render_profiling_results.html', 'w') as f:
         f.write(rendered_page)
 
     assert rendered_page[:15] == "<!DOCTYPE html>"
@@ -108,12 +174,24 @@ def test_render_profiled_fixture_evrs(titanic_profiler_evrs):
 
 
 @pytest.mark.smoketest
-def test_smoke_render_descriptive_page_renderer_with_exception(
-        titanic_profiler_evrs_with_exception):
-    rendered_json = DescriptivePageRenderer.render(titanic_profiler_evrs_with_exception)
+def test_render_validation_results(titanic_profiled_evrs_1):
+    rendered_json = ValidationResultsPageRenderer.render(titanic_profiled_evrs_1)
     rendered_page = DefaultJinjaPageView.render(rendered_json)
 
-    with open('./tests/render/output/test_render_descriptive_column_section_renderer_with_exception.html', 'w') as f:
+    with open('./tests/render/output/test_render_validation_results.html', 'w') as f:
+        f.write(rendered_page)
+
+    assert rendered_page[:15] == "<!DOCTYPE html>"
+    assert rendered_page[-7:] == "</html>"
+
+
+@pytest.mark.smoketest
+def test_smoke_render_profiling_results_page_renderer_with_exception(
+        titanic_profiler_evrs_with_exception):
+    rendered_json = ProfilingResultsPageRenderer.render(titanic_profiler_evrs_with_exception)
+    rendered_page = DefaultJinjaPageView.render(rendered_json)
+
+    with open('./tests/render/output/test_render_profiling_results_column_section_renderer_with_exception.html', 'w') as f:
         f.write(rendered_page)
 
     assert rendered_page[:15] == "<!DOCTYPE html>"
@@ -127,7 +205,7 @@ def test_full_oobe_flow():
     df.profile(BasicDatasetProfiler)
     evrs = df.validate()  # ["results"]
 
-    rendered_json = DescriptivePageRenderer.render(evrs)
+    rendered_json = ProfilingResultsPageRenderer.render(evrs)
     rendered_page = DefaultJinjaPageView.render(rendered_json)
 
     with open('./tests/render/output/test_full_oobe_flow.html', 'w') as f:
@@ -196,7 +274,7 @@ def test_render_string_template():
         }
     }
 
-    res = render_string_template(template).replace(" ", "").replace("\t", "").replace("\n", "")
+    res = DefaultJinjaPageView.render_string_template(template).replace(" ", "").replace("\t", "").replace("\n", "")
     expected = u"""<span>
                 <span class="badge badge-secondary" >categorical_fixed</span> Kullback-Leibler (KL) divergence with respect to the following distribution must be lower than <span class="badge badge-secondary" >0.1</span>: <span style="font-family:serif;" >█▄▁</span>
             </span>""".replace(" ", "").replace("\t", "").replace("\n", "")
@@ -238,7 +316,7 @@ def test_render_string_template():
         }
     }
 
-    res = render_string_template(template).replace(" ", "").replace("\t", "").replace("\n", "")
+    res = DefaultJinjaPageView.render_string_template(template).replace(" ", "").replace("\t", "").replace("\n", "")
     expected = u"""<span>
                 <span class="badge badge-secondary" >categorical_fixed</span> Kullback-Leibler (KL) divergence with respect to the following distribution must be lower than <span class="badge badge-secondary" >0.1</span>: <span style="font-family:serif;" >▃▆▁█</span>
             </span>""".replace(" ", "").replace("\t", "").replace("\n", "")
