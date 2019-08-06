@@ -283,20 +283,21 @@ To learn more: <blue>https://docs.greatexpectations.io/en/latest/guides/data_doc
 
 
     cli_message(msg_data_doc_intro.format(__version__.replace(".", "_")))
-    if click.confirm("Move the profiled data and build HTML documentation?",
+    # if click.confirm("Move the profiled data and build HTML documentation?",
+    #                  default=True
+    #                  ):
+    #     cli_message("\nMoving files...")
+    #
+    #     for profiling_result in profiling_results['results']:
+    #         data_asset_name = profiling_result[1]['meta']['data_asset_name']
+    #         expectation_suite_name = profiling_result[1]['meta']['expectation_suite_name']
+    #         run_id = profiling_result[1]['meta']['run_id']
+    #         context.move_validation_to_fixtures(
+    #             data_asset_name, expectation_suite_name, run_id)
+
+    if click.confirm("Build HTML documentation?",
                      default=True
                      ):
-        cli_message("\nMoving files...")
-
-        for profiling_result in profiling_results['results']:
-            data_asset_name = profiling_result[1]['meta']['data_asset_name']
-            expectation_suite_name = profiling_result[1]['meta']['expectation_suite_name']
-            run_id = profiling_result[1]['meta']['run_id']
-            context.move_validation_to_fixtures(
-                data_asset_name, expectation_suite_name, run_id)
-
-        cli_message("\nDone.")
-
         cli_message("\nBuilding documentation...")
         build_documentation(context)
 
