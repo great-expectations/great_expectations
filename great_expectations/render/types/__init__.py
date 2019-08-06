@@ -88,11 +88,20 @@ class LimitedDotDict(DotDict):
 
                     #TODO: Catch errors and raise more informative error messages here
                     if isinstance(self._key_types[key], ListOf):
-                        assert isinstance(value, Iterable)
+                        if not isinstance(value, Iterable):
+                            raise TypeError("key: {!r} must be an Iterable type, not {!r}".format(
+                                key,
+                                type(value),
+                            ))
+
                         for v in value:
-                            # print(v)
-                            # print(self._key_types[key].type_)
-                            assert isinstance(v, self._key_types[key].type_)
+                            if not isinstance(v, self._key_types[key].type_):
+                                raise TypeError("values in key: {!r} must be of type: {!r}, not {!r} {!r}".format(
+                                    key,
+                                    self._key_types[key].type_,
+                                    v,
+                                    type(v),
+                                ))
 
                     else:
                         raise TypeError("key: {!r} must be of type {!r}, not {!r}".format(
