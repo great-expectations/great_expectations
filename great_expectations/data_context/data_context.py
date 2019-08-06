@@ -33,6 +33,12 @@ from great_expectations.datasource import (
     DBTDatasource
 )
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
+from great_expectations.render.renderer import ProfilingResultsPageRenderer, ExpectationSuitePageRenderer, ValidationResultsPageRenderer
+from great_expectations.render.view import (
+    DefaultJinjaPageView,
+    DefaultJinjaIndexPageView,
+)
+
 
 from .expectation_explorer import ExpectationExplorer
 
