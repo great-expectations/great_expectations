@@ -9,7 +9,10 @@ from great_expectations.render.renderer import (
     DescriptivePageRenderer,
 )
 from great_expectations.render.view import DefaultJinjaPageView
-from great_expectations.render.types import RenderedContentBlock
+from great_expectations.render.types import (
+    RenderedContentBlock,
+    RenderedContentBlockWrapper,
+)
 
 @pytest.fixture()
 def validation_results():
@@ -407,11 +410,13 @@ def test_render_text():
         }
     })
 
-    rendered_doc = ge.render.view.view.DefaultJinjaComponentView.render({
-        "content_block": text_component_content,
-        "section_loop": {"index": 1},
-        "content_block_loop": {"index": 2},
-    })
+    rendered_doc = ge.render.view.view.DefaultJinjaComponentView.render(
+        RenderedContentBlockWrapper(**{
+            "content_block": text_component_content,
+            "section_loop": {"index": 1},
+            "content_block_loop": {"index": 2},
+        })
+    )
     print(rendered_doc)
     assert rendered_doc == """
 <div id="section-1-content-block-2" class="col-4" >
@@ -433,11 +438,13 @@ def test_render_text():
         }
     })
 
-    rendered_doc = ge.render.view.view.DefaultJinjaComponentView.render({
-        "content_block": text_component_content,
-        "section_loop": {"index": 1},
-        "content_block_loop": {"index": 2},
-    })
+    rendered_doc = ge.render.view.view.DefaultJinjaComponentView.render(
+        RenderedContentBlockWrapper(**{
+            "content_block": text_component_content,
+            "section_loop": {"index": 1},
+            "content_block_loop": {"index": 2},
+        })
+    )
     print(rendered_doc)
     assert rendered_doc == """
 <div id="section-1-content-block-2" class="col-4" >
