@@ -23,14 +23,14 @@ class DotDict(dict):
 
 
 #Inspiration : https://codereview.stackexchange.com/questions/81794/dictionary-with-restricted-keys
-class LimitedDotDict(DotDict):
+class LooselyTypedDotDict(DotDict):
     """dot.notation access to dictionary attributes, with limited keys
     
 
     Note: this class is pretty useless on its own.
     You need to subclass it like so:
 
-    class MyLimitedDotDict(LimitedDotDict):
+    class MyLooselyTypedDotDict(LooselyTypedDotDict):
         _allowed_keys = set([
             "x", "y", "z"
         ])
@@ -67,16 +67,16 @@ class LimitedDotDict(DotDict):
                 if coerce_types:
                     #TODO: Catch errors and raise more informative error messages here
 
-                    #If the given type is an instance of LimitedDotDict, apply coerce_types recursively
+                    #If the given type is an instance of LooselyTypedDotDict, apply coerce_types recursively
                     if isinstance(self._key_types[key], ListOf):
                         # assert isinstance(self._key_types[key], Iterable)
-                        if issubclass(self._key_types[key], LimitedDotDict):
+                        if issubclass(self._key_types[key], LooselyTypedDotDict):
                             value = [self._key_types[key].type_(coerce_types=True, **v) for v in value]
                         else:
                             value = [self._key_types[key].type_(v) for v in value]
 
                     else:
-                        if issubclass(self._key_types[key], LimitedDotDict):
+                        if issubclass(self._key_types[key], LooselyTypedDotDict):
                             value = self._key_types[key](coerce_types=True, **value)
                         else:
                             value = self._key_types[key](value)

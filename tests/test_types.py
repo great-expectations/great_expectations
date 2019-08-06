@@ -2,7 +2,7 @@ import pytest
 
 from great_expectations.types import (
     DotDict,
-    LimitedDotDict,
+    LooselyTypedDotDict,
     ListOf,
 )
 
@@ -49,13 +49,13 @@ def test_DotDict_dot_syntax():
     }
 
 
-def test_LimitedDotDict_raises_error():
+def test_LooselyTypedDotDict_raises_error():
     with pytest.raises(KeyError):
-        D = LimitedDotDict(**{
+        D = LooselyTypedDotDict(**{
             'x': 1,
         })
 
-    d = LimitedDotDict(**{})
+    d = LooselyTypedDotDict(**{})
 
     with pytest.raises(KeyError):
         d["x"] = "hello?"
@@ -69,13 +69,13 @@ def test_LimitedDotDict_raises_error():
         assert d["x"]
 
 
-def test_LimitedDotDict_subclass():
-    class MyLimitedDotDict(LimitedDotDict):
+def test_LooselyTypedDotDict_subclass():
+    class MyLooselyTypedDotDict(LooselyTypedDotDict):
         _allowed_keys = set([
             "x", "y", "z"
         ])
 
-    d = MyLimitedDotDict(**{
+    d = MyLooselyTypedDotDict(**{
         'x': 1,
     })
     assert d.x == 1
@@ -101,8 +101,8 @@ def test_LimitedDotDict_subclass():
         assert d["w"]
 
 
-def test_LimitedDotDict_subclass_required_keys():
-    class MyLimitedDotDict(LimitedDotDict):
+def test_LooselyTypedDotDict_subclass_required_keys():
+    class MyLooselyTypedDotDict(LooselyTypedDotDict):
         _allowed_keys = set([
             "x", "y", "z"
         ])
@@ -111,11 +111,11 @@ def test_LimitedDotDict_subclass_required_keys():
         ])
 
     with pytest.raises(KeyError):
-        d = MyLimitedDotDict(**{
+        d = MyLooselyTypedDotDict(**{
             'y': 1,
         })
 
-    d = MyLimitedDotDict(**{
+    d = MyLooselyTypedDotDict(**{
         'x': 1,
     })
     assert d.x == 1
@@ -133,7 +133,7 @@ def test_LimitedDotDict_subclass_required_keys():
 
     # _required_keys must be a subset of _allowed_keys
     with pytest.raises(ValueError):
-        class MyLimitedDotDict(LimitedDotDict):
+        class MyLooselyTypedDotDict(LooselyTypedDotDict):
             _allowed_keys = set([
                 "x", "y", "z"
             ])
@@ -142,11 +142,11 @@ def test_LimitedDotDict_subclass_required_keys():
             ])
         
         #Unfortunately, I don't have a good way to test this condition until the class is instantiated
-        d = MyLimitedDotDict(x=True)
+        d = MyLooselyTypedDotDict(x=True)
 
 
-def test_LimitedDotDict_subclass_key_types():
-    class MyLimitedDotDict(LimitedDotDict):
+def test_LooselyTypedDotDict_subclass_key_types():
+    class MyLooselyTypedDotDict(LooselyTypedDotDict):
         _allowed_keys = set([
             "x", "y", "z"
         ])
@@ -158,27 +158,27 @@ def test_LimitedDotDict_subclass_key_types():
             "y" : str,
         }
 
-    d = MyLimitedDotDict(**{
+    d = MyLooselyTypedDotDict(**{
         'x': 1,
     })
 
     with pytest.raises(TypeError):
-        d = MyLimitedDotDict(**{
+        d = MyLooselyTypedDotDict(**{
             'x': "1",
         })
 
-    d = MyLimitedDotDict(**{
+    d = MyLooselyTypedDotDict(**{
         "x": 1,
         "y": "hello",
     })
 
     with pytest.raises(TypeError):
-        d = MyLimitedDotDict(**{
+        d = MyLooselyTypedDotDict(**{
             'x': 1,
             'y': 10,
         })
 
-    d = MyLimitedDotDict(
+    d = MyLooselyTypedDotDict(
         coerce_types=True,
         **{
             "x": "1",
@@ -191,15 +191,15 @@ def test_LimitedDotDict_subclass_key_types():
     }
 
     with pytest.raises(ValueError):
-        d = MyLimitedDotDict(
+        d = MyLooselyTypedDotDict(
             coerce_types=True,
             **{
                 "x": "quack",
             }
         )
 
-def test_LimitedDotDict_ListOf_typing():
-    class MyLimitedDotDict(LimitedDotDict):
+def test_LooselyTypedDotDict_ListOf_typing():
+    class MyLooselyTypedDotDict(LooselyTypedDotDict):
         _allowed_keys = set([
             "a", "b", "c"
         ])
@@ -208,7 +208,7 @@ def test_LimitedDotDict_ListOf_typing():
             "b" : ListOf(int),
         }
     
-    d = MyLimitedDotDict(
+    d = MyLooselyTypedDotDict(
         **{
             "a" : 10,
             "b" : [10, 20, 30]
@@ -216,15 +216,15 @@ def test_LimitedDotDict_ListOf_typing():
     )
 
     with pytest.raises(TypeError):
-        d = MyLimitedDotDict(
+        d = MyLooselyTypedDotDict(
             **{
                 "a" : 10,
                 "b" : [10, 20, "rabbit"]
             }
         )
 
-def test_LimitedDotDict_recursive_coercion():
-    class MyNestedDotDict(LimitedDotDict):
+def test_LooselyTypedDotDict_recursive_coercion():
+    class MyNestedDotDict(LooselyTypedDotDict):
         _allowed_keys = set([
             "a", "b", "c"
         ])
@@ -236,7 +236,7 @@ def test_LimitedDotDict_recursive_coercion():
             "b" : str,
         }
 
-    class MyLimitedDotDict(LimitedDotDict):
+    class MyLooselyTypedDotDict(LooselyTypedDotDict):
         _allowed_keys = set([
             "x", "y", "z"
         ])
@@ -248,7 +248,7 @@ def test_LimitedDotDict_recursive_coercion():
             "y" : MyNestedDotDict,
         }
 
-    d = MyLimitedDotDict(
+    d = MyLooselyTypedDotDict(
         coerce_types=True,
         **{
             "x" : "hello",
@@ -267,7 +267,7 @@ def test_LimitedDotDict_recursive_coercion():
     }
 
     with pytest.raises(ValueError):
-        MyLimitedDotDict(
+        MyLooselyTypedDotDict(
             coerce_types=True,
             **{
                 "x" : "hello",
@@ -278,7 +278,7 @@ def test_LimitedDotDict_recursive_coercion():
         )
 
     with pytest.raises(KeyError):
-        MyLimitedDotDict(
+        MyLooselyTypedDotDict(
             coerce_types=True,
             **{
                 "x" : "hello",
