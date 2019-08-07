@@ -275,6 +275,86 @@
           },
           "only_for": ["spark"]
         }
-    ]  
-  }]
+      ]
+    },
+    {
+      "data": {
+        "datetime" : ["2016-01-01T12:34:56", "2016-01-02T11:59:58", "2016-02-02T10:48:36", "2016-02-02T09:33:21", "2016-03-01T08:56:45", "2017-02-01T00:01:02", null, null, null, null],
+        "datetime_tz" : ["2016-01-01T12:34:56Z", "2016-01-02T11:59:58Z", "2016-02-02T10:48:36Z", "2016-02-02T09:33:21Z", "2016-03-01T08:56:45Z", "2017-02-01T00:01:02Z", null, null, null, null]
+      },
+      "schemas": {
+        "pandas" : {
+          "datetime": "datetime64[ns]",
+          "datetime_tz": "timestamp"
+        },
+        "postgresql": {
+          "datetime": "TIMESTAMP",
+          "datetime_tz": "TIMESTAMP"
+        },
+        "spark": {
+          "datetime": "TimestampType",
+          "datetime_tz": "TimestampType"
+        },
+        "sqlite": {
+          "datetime": "DATETIME",
+          "datetime_tz": "DATETIME"
+        },
+        "mysql": {
+          "timestamp": "DATETIME",
+          "timestamp_tz": "DATETIME"
+        }
+      },
+      "tests": [
+        {
+          "title": "positive_pandas_datetime_no_timezone",
+          "exact_match_out": false,
+          "in":{"column":"datetime","type_":"datetime64"},
+          "out":{
+            "success":true,
+            "observed_value": "datetime64"
+          },
+          "only_for": ["pandas"]
+        },
+        {
+          "title": "positive_pandas_datetime_with_timezone",
+          "exact_match_out": false,
+          "in":{"column":"datetime_tz", "type_":"Timestamp"},
+          "out":{
+            "success":true,
+            "observed_value": "Timestamp"
+          },
+          "only_for": ["pandas>=024"]
+        },
+        {
+          "title": "positive_pandas_datetime_with_timezone_pd_022_pd_023",
+          "exact_match_out": false,
+          "in":{"column":"datetime_tz", "type_":"DatetimeTZDtypeType"},
+          "out":{
+            "success":true,
+            "observed_value": "DatetimeTZDtypeType"
+          },
+          "only_for": ["pandas_022", "pandas_023"]
+        },
+        {
+          "title": "negative_pandas_datetime_with_timezone",
+          "exact_match_out": false,
+          "in":{"column":"datetime_tz","type_":"datetime64"},
+          "out":{
+            "success":false,
+            "observed_value_list": ["Timestamp", "DatetimeTZDtypeType"]
+          },
+          "only_for": ["pandas"]
+        },
+        {
+          "title": "negative_pandas_datetime_expected_int",
+          "exact_match_out": false,
+          "in":{"column":"datetime_tz","type_":"int"},
+          "out":{
+            "success":false,
+            "observed_value_list": ["Timestamp", "DatetimeTZDtypeType"]
+          },
+          "only_for": ["pandas"]
+        }
+      ]
+    }]
 }

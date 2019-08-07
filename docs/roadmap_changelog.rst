@@ -10,10 +10,6 @@ Planned Features
 * Conditional expectations
 * Multi-batch expectations
 
-
-Changelog
-----------------
-
 .. toctree::
    :maxdepth: 2
 

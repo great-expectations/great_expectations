@@ -15,7 +15,7 @@ class TestUtilMethods(unittest.TestCase):
             self.test_partitions = json.loads(file.read())
 
     def test_DotDict(self):
-        D = ge.util.DotDict({
+        D = ge.types.DotDict({
             'x': [1, 2, 4],
             'y': [1, 2, 5],
             'z': ['hello', 'jello', 'mello'],

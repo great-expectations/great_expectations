@@ -1,4 +1,9 @@
 from .content_block import ContentBlockRenderer
+from great_expectations.render.types import (
+    RenderedComponentContent,
+    RenderedSectionContent,
+    RenderedComponentContentWrapper,
+)
 
 
 class TableContentBlockRenderer(ContentBlockRenderer):
@@ -22,11 +27,11 @@ class TableContentBlockRenderer(ContentBlockRenderer):
                 rows = extra_rows_fn(ge_object)
                 table_entries.extend(rows)
 
-        return {
+        return RenderedComponentContent(**{
             "content_block_type": "table",
             "header_row": header_row,
-            "table_rows": table_entries
-        }
+            "table": table_entries
+        })
 
     @classmethod
     def expect_column_values_to_not_match_regex(cls, ge_object):
@@ -42,12 +47,15 @@ class TableContentBlockRenderer(ContentBlockRenderer):
         observed_value = ge_object["result"]["observed_value"]
         return [
             [
-                {
-                    "template": "Distinct (n)",
-                    "tooltip": {
-                        "content": "expect_column_unique_value_count_to_be_between"
+                RenderedComponentContent(**{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": "Distinct (n)",
+                        "tooltip": {
+                            "content": "expect_column_unique_value_count_to_be_between"
+                        }
                     }
-                },
+                }),
                 observed_value,
             ]
         ]
@@ -55,12 +63,15 @@ class TableContentBlockRenderer(ContentBlockRenderer):
     @classmethod
     def expect_column_proportion_of_unique_values_to_be_between(cls, ge_object):
         observed_value = ge_object["result"]["observed_value"]
-        template_string_object = {
-                    "template": "Distinct (%)",
-                    "tooltip": {
-                        "content": "expect_column_proportion_of_unique_values_to_be_between"
-                    }
+        template_string_object = RenderedComponentContent(**{
+            "content_block_type": "string_template",
+            "string_template": {
+                "template": "Distinct (%)",
+                "tooltip": {
+                    "content": "expect_column_proportion_of_unique_values_to_be_between"
                 }
+            }
+        })
         if not observed_value:
             return [[template_string_object, "--"]]
         else:
@@ -80,21 +91,27 @@ class TableContentBlockRenderer(ContentBlockRenderer):
     def expect_column_values_to_not_be_null(cls, ge_object):
         return [
             [
-                {
-                    "template":  "Missing (n)",
-                    "tooltip": {
-                        "content": "expect_column_values_to_not_be_null"
+                RenderedComponentContent(**{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": "Missing (n)",
+                        "tooltip": {
+                            "content": "expect_column_values_to_not_be_null"
+                        }
                     }
-                },
+                }),
                 ge_object["result"]["unexpected_count"] if "unexpected_count" in ge_object["result"] and ge_object["result"]["unexpected_count"] is not None else "--",
             ],
             [
-                {
-                    "template": "Missing (%)",
-                    "tooltip": {
-                        "content": "expect_column_values_to_not_be_null"
+                RenderedComponentContent(**{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": "Missing (%)",
+                        "tooltip": {
+                            "content": "expect_column_values_to_not_be_null"
+                        }
                     }
-                },
+                }),
                 "%.1f%%" % (ge_object["result"]["unexpected_percent"] * 100.0) if "unexpected_percent" in ge_object["result"] and ge_object["result"]["unexpected_percent"] is not None else "--",
             ]
         ]
