@@ -215,6 +215,14 @@ def test_LooselyTypedDotDict_ListOf_typing():
         }
     )
 
+    d = MyLooselyTypedDotDict(
+        coerce_types=True,
+        **{
+            "a" : 10,
+            "b" : ["10", "20", "30"]
+        }
+    )
+
     with pytest.raises(TypeError):
         d = MyLooselyTypedDotDict(
             **{
