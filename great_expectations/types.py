@@ -84,31 +84,7 @@ class LooselyTypedDotDict(DotDict):
                 # print(value)
                 
                 #Validate types
-                if type(value) != self._key_types[key]:
-
-                    #TODO: Catch errors and raise more informative error messages here
-                    if isinstance(self._key_types[key], ListOf):
-                        if not isinstance(value, Iterable):
-                            raise TypeError("key: {!r} must be an Iterable type, not {!r}".format(
-                                key,
-                                type(value),
-                            ))
-
-                        for v in value:
-                            if not isinstance(v, self._key_types[key].type_):
-                                raise TypeError("values in key: {!r} must be of type: {!r}, not {!r} {!r}".format(
-                                    key,
-                                    self._key_types[key].type_,
-                                    v,
-                                    type(v),
-                                ))
-
-                    else:
-                        raise TypeError("key: {!r} must be of type {!r}, not {!r}".format(
-                            key,
-                            self._key_types[key],
-                            type(value),
-                        ))
+                self._validate_value_type(key, value, self._key_types[key])
 
             self[key] = value
 
@@ -125,6 +101,10 @@ class LooselyTypedDotDict(DotDict):
                 key,
                 self._allowed_keys
             ))
+        
+        if key in self._key_types:
+            self._validate_value_type(key, val, self._key_types[key])
+
         dict.__setitem__(self, key, val)
 
     def __setattr__(self, key, val):
@@ -133,4 +113,35 @@ class LooselyTypedDotDict(DotDict):
                 key,
                 self._allowed_keys
             ))
+
+        if key in self._key_types:
+            self._validate_value_type(key, val, self._key_types[key])
+
         dict.__setitem__(self, key, val)
+    
+    def _validate_value_type(self, key, value, type_):
+        if type(value) != type_:
+
+            #TODO: Catch errors and raise more informative error messages here
+            if isinstance(type_, ListOf):
+                if not isinstance(value, Iterable):
+                    raise TypeError("key: {!r} must be an Iterable type, not {!r}".format(
+                        key,
+                        type(value),
+                    ))
+
+                for v in value:
+                    if not isinstance(v, type_.type_):
+                        raise TypeError("values in key: {!r} must be of type: {!r}, not {!r} {!r}".format(
+                            key,
+                            type_.type_,
+                            v,
+                            type(v),
+                        ))
+
+            else:
+                raise TypeError("key: {!r} must be of type {!r}, not {!r}".format(
+                    key,
+                    type_,
+                    type(value),
+                ))
