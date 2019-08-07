@@ -1,4 +1,7 @@
 from great_expectations.render.renderer.content_block.expectation_string import ExpectationStringRenderer
+from great_expectations.render.types import (
+    RenderedComponentContent
+)
 
 
 class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
@@ -25,7 +28,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
     @classmethod
     def _get_status_icon(cls, evr):
         if evr["success"]:
-            return {
+            return RenderedComponentContent(**{
                 "content_block_type": "string_template",
                 "string_template": {
                     "template": "$icon",
@@ -39,9 +42,9 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
                         }
                     }
                 }
-            }
+            })
         else:
-            return {
+            return RenderedComponentContent(**{
                 "content_block_type": "string_template",
                 "string_template": {
                     "template": "$icon",
@@ -55,7 +58,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
                         }
                     }
                 }
-            }
+            })
 
     @classmethod
     def _get_exception_table(cls, evr):
@@ -80,7 +83,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
                 else:
                     table_rows.append(["null"])
                     
-        exception_table_content_block = {
+        exception_table_content_block = RenderedComponentContent(**{
             "content_block_type": "table",
             "table": table_rows,
             "header_row": header_row,
@@ -89,7 +92,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
                     "classes": ["table-bordered", "table-sm", "mt-3"]
                 }
             }
-        }
+        })
         
         return exception_table_content_block
 
@@ -107,7 +110,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             
             template_str = "\n\n$unexpected_count exceptions found. $unexpected_percent of $element_count total rows."
             
-            return {
+            return RenderedComponentContent(**{
                 "content_block_type": "string_template",
                 "string_template": {
                     "template": template_str,
@@ -121,7 +124,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
                         "classes": ["text-danger"]
                     }
                 }
-            }
+            })
 
     @classmethod
     def _get_observed_value(cls, evr):

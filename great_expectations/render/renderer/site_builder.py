@@ -285,10 +285,8 @@ class SiteBuilder():
 
             # TODO: load dynamically
             model = SiteIndexPageRenderer.render(index_links_dict)
-            index_page_output = DefaultJinjaIndexPageView.render({
-                "utm_medium": "index-page",
-                "sections": model
-            })
+
+            index_page_output = DefaultJinjaIndexPageView.render(model)
 
             data_context.write_resource(
                 index_page_output,  # bytes

@@ -10,6 +10,10 @@ from great_expectations.render.renderer import (
 from great_expectations.render.view import (
     DefaultJinjaPageView,
 )
+from great_expectations.render.types import (
+    RenderedComponentContent,
+)
+
 
 @pytest.fixture(scope="module")
 def titanic_expectations():
@@ -197,7 +201,7 @@ def test_ExpectationSuiteColumnSectionRenderer_render_header(titanic_profiled_na
 
     print(json.dumps(content_blocks, indent=2))
     assert content_blocks == [
-        {
+        RenderedComponentContent(**{
             "content_block_type": "header",
             "header": "Name",
             "styling": {
@@ -211,7 +215,7 @@ def test_ExpectationSuiteColumnSectionRenderer_render_header(titanic_profiled_na
                 ]
             }
             }
-        }
+        })
     ]
 
 
