@@ -12,6 +12,9 @@ matrix:
     env: PANDAS=0.23.4
   - dist: trusty
     python: 2.7
+    env: PANDAS=0.24.2
+  - dist: trusty
+    python: 2.7
     env: PANDAS=latest
   - dist: trusty
     python: 3.6
@@ -19,6 +22,9 @@ matrix:
   - dist: trusty
     python: 3.6
     env: PANDAS=0.23.4
+  - dist: trusty
+    python: 3.6
+    env: PANDAS=0.24.2
   - dist: trusty
     python: 3.6
     env: PANDAS=latest
@@ -35,6 +41,7 @@ services:
   - mysql
 install:
 #   - ./travis-java.sh
+  - sudo apt-get install -y pandoc
   - pip install --only-binary=numpy,scipy numpy scipy
   - if [ "$PANDAS" = "latest" ]; then pip install pandas; else pip install pandas==$PANDAS; fi
   - pip install -r requirements-dev.txt

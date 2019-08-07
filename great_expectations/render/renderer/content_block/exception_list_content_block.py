@@ -1,5 +1,8 @@
 from .content_block import ContentBlockRenderer
 
+from great_expectations.render.types import (
+    RenderedComponentContent,
+)
 
 class ExceptionListContentBlockRenderer(ContentBlockRenderer):
     """Render a bullet list of exception messages raised for provided EVRs"""
@@ -60,12 +63,15 @@ class ExceptionListContentBlockRenderer(ContentBlockRenderer):
                 column = evr["expectation_config"]["kwargs"]["column"]
             except KeyError:
                 column = None
-            return [{
-                "template": template_str,
-                "params": {
-                    "column": column,
-                    "expectation_type": evr["expectation_config"]["expectation_type"],
-                    "exception_message": evr["exception_info"]["exception_message"]
-                },
-                "styling": styling,
-            }]
+            return [RenderedComponentContent(**{
+                "content_block_type": "string_template",
+                "string_template": {
+                    "template": template_str,
+                    "params": {
+                        "column": column,
+                        "expectation_type": evr["expectation_config"]["expectation_type"],
+                        "exception_message": evr["exception_info"]["exception_message"]
+                    },
+                    "styling": styling,
+                }
+            })]

@@ -12,7 +12,7 @@ from .init import (
 )
 from .util import cli_message
 from great_expectations.render.view import DefaultJinjaPageView
-from great_expectations.render.renderer import DescriptivePageRenderer, PrescriptivePageRenderer
+from great_expectations.render.renderer import ProfilingResultsPageRenderer, ExpectationSuitePageRenderer
 from great_expectations.data_context import DataContext
 from great_expectations.data_asset import FileDataAsset
 from great_expectations.dataset import Dataset, PandasDataset
@@ -264,9 +264,9 @@ def render(render_object):
         raw = json.load(infile)
 
     if "results" in raw:
-        model = DescriptivePageRenderer.render(raw)
+        model = ProfilingResultsPageRenderer.render(raw)
     else:
-        model = PrescriptivePageRenderer.render(raw)
+        model = ExpectationSuitePageRenderer.render(raw)
     print(DefaultJinjaPageView.render(model))
 
 

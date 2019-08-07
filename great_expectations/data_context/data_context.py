@@ -16,6 +16,7 @@ from collections import OrderedDict
 from .util import NormalizedDataAssetName, get_slack_callback, safe_mmkdir
 
 from great_expectations.exceptions import DataContextError, ConfigNotFoundError, ProfilerError
+from great_expectations.render.types import RenderedDocumentContent
 
 try:
     from urllib.parse import urlparse
@@ -31,11 +32,16 @@ from great_expectations.datasource import (
     DBTDatasource
 )
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
-from great_expectations.render.renderer import DescriptivePageRenderer, PrescriptivePageRenderer
+from great_expectations.render.renderer import ProfilingResultsPageRenderer, ExpectationSuitePageRenderer, ValidationResultsPageRenderer
 from great_expectations.render.view import (
     DefaultJinjaPageView,
     DefaultJinjaIndexPageView,
 )
+from great_expectations.render.types import (
+    RenderedComponentContent,
+    RenderedSectionContent,
+)
+
 
 
 from .expectation_explorer import ExpectationExplorer
@@ -310,7 +316,7 @@ class DataContext(object):
             path (str): Path to the location
 
         """
-        # TODO: this path should be configurable or parameterized to support descriptive and prescriptive docs
+        # TODO: this path should be configurable or parameterized to support expectation suite and profiling results docs
         validation_filepath = self._get_normalized_data_asset_name_filepath(
             data_asset_name,
             expectation_suite_name,
@@ -1505,6 +1511,7 @@ class DataContext(object):
 
         validation_filepaths = [y for x in os.walk(self.fixtures_validations_directory) for y in glob(os.path.join(x[0], '*.json'))]
         for validation_filepath in validation_filepaths:
+            # profiling results view
             logger.debug("Loading validation from: %s" % validation_filepath)
             with open(validation_filepath, "r") as infile:
                 validation = json.load(infile)
@@ -1512,23 +1519,44 @@ class DataContext(object):
             run_id = validation['meta']['run_id']
             data_asset_name = validation['meta']['data_asset_name']
             expectation_suite_name = validation['meta']['expectation_suite_name']
-            model = DescriptivePageRenderer.render(validation)
-            out_filepath = self.get_validation_doc_filepath(
-                data_asset_name, "{run_id}-{expectation_suite_name}".format(
+            
+            profiling_results_model = ProfilingResultsPageRenderer.render(validation)
+            out_profiling_results_filepath = self.get_validation_doc_filepath(
+                data_asset_name, "{run_id}-{expectation_suite_name}-ProfilingResults".format(
                     run_id=run_id.replace(':', ''),
                     expectation_suite_name=expectation_suite_name
                 )
             )
-            safe_mmkdir(os.path.dirname(out_filepath))
+            safe_mmkdir(os.path.dirname(out_profiling_results_filepath))
 
-            with open(out_filepath, 'w') as writer:
-                writer.write(DefaultJinjaPageView.render(model))
+            with open(out_profiling_results_filepath, 'w') as writer:
+                writer.write(DefaultJinjaPageView.render(profiling_results_model))
 
             index_links.append({
                 "data_asset_name" : data_asset_name,
                 "expectation_suite_name": expectation_suite_name,
                 "run_id": run_id,
-                "filepath": os.path.relpath(out_filepath, self.data_doc_directory)
+                "filepath": os.path.relpath(out_profiling_results_filepath, self.data_doc_directory)
+            })
+
+            #  validation results view
+            validation_results_model = ValidationResultsPageRenderer.render(validation_results=validation)
+            out_validation_results_filepath = self.get_validation_doc_filepath(
+                data_asset_name, "{run_id}-{expectation_suite_name}-ValidationResults".format(
+                    run_id=run_id.replace(':', ''),
+                    expectation_suite_name=expectation_suite_name
+                )
+            )
+            safe_mmkdir(os.path.dirname(out_validation_results_filepath))
+
+            with open(out_validation_results_filepath, 'w') as writer:
+                writer.write(DefaultJinjaPageView.render(validation_results_model))
+
+            index_links.append({
+                "data_asset_name": data_asset_name,
+                "expectation_suite_name": expectation_suite_name,
+                "run_id": run_id,
+                "filepath": os.path.relpath(out_validation_results_filepath, self.data_doc_directory)
             })
 
         expectation_suite_filepaths = [y for x in os.walk(self.expectations_directory) for y in glob(os.path.join(x[0], '*.json'))]
@@ -1538,7 +1566,13 @@ class DataContext(object):
 
             data_asset_name = expectation_suite['data_asset_name']
             expectation_suite_name = expectation_suite['expectation_suite_name']
-            model = PrescriptivePageRenderer.render(expectation_suite)
+
+            try:
+                model = ExpectationSuitePageRenderer.render(expectations=expectation_suite)
+            except Exception as e:
+                print("Ran into an error in ", expectation_suite_filepath)
+                raise(e)
+                
             out_filepath = self.get_validation_doc_filepath(
                 data_asset_name,
                 expectation_suite_name
@@ -1597,7 +1631,7 @@ class DataContext(object):
         for source, generators in index_links_dict.items():
             content_blocks = []
 
-            source_header_block = {
+            source_header_block = RenderedComponentContent(**{
                 "content_block_type": "header",
                 "header": source,
                 "styling": {
@@ -1606,20 +1640,20 @@ class DataContext(object):
                         "classes": ["alert", "alert-secondary"]
                     }
                 }
-            }
+            })
             content_blocks.append(source_header_block)
 
             for generator, data_assets in generators.items():
-                generator_header_block = {
+                generator_header_block = RenderedComponentContent(**{
                     "content_block_type": "header",
                     "header": generator,
                     "styling": {
                         "classes": ["col-12", "ml-4"],
                     }
-                }
+                })
                 content_blocks.append(generator_header_block)
 
-                horizontal_rule = {
+                horizontal_rule = RenderedComponentContent(**{
                     "content_block_type": "string_template",
                     "string_template": {
                         "template": "",
@@ -1629,11 +1663,11 @@ class DataContext(object):
                     "styling": {
                         "classes": ["col-12"],
                     }
-                }
+                })
                 content_blocks.append(horizontal_rule)
 
                 for data_asset, link_lists in data_assets.items():
-                    data_asset_heading = {
+                    data_asset_heading = RenderedComponentContent(**{
                         "content_block_type": "string_template",
                         "string_template": {
                             "template": "$data_asset",
@@ -1656,32 +1690,31 @@ class DataContext(object):
                                 "word-break": "break-all"
                             }
                         }
-                    }
+                    })
                     content_blocks.append(data_asset_heading)
 
                     expectation_suite_links = link_lists["expectation_suite_links"]
                     expectation_suite_link_table_rows = [
-                        [{
-                            "template": "$link_text",
-                            "params": {
-                                "link_text": link_dict["expectation_suite_name"]
-                            },
-                            "tag": "a",
-                            "styling": {
+                        [RenderedComponentContent(**{
+                            "content_block_type": "string_template",
+                            "string_template": {
+                                "template": "$link_text",
                                 "params": {
-                                    "link_text": {
-                                        "attributes": {
-                                            "href": link_dict["filepath"]
-                                        }
+                                    "link_text": link_dict["expectation_suite_name"]
+                                },
+                                "tag": "a",
+                                "styling": {
+                                    "attributes": {
+                                        "href": link_dict["filepath"]
                                     }
                                 }
                             }
-                        }] for link_dict in expectation_suite_links
+                        })] for link_dict in expectation_suite_links
                     ]
-                    expectation_suite_link_table = {
+                    expectation_suite_link_table = RenderedComponentContent(**{
                         "content_block_type": "table",
-                        "sub_header": "Expectation Suites",
-                        "table_rows": expectation_suite_link_table_rows,
+                        "subheader": "Expectation Suites",
+                        "table": expectation_suite_link_table_rows,
                         "styling": {
                             "classes": ["col-sm-4", "col-xs-12"],
                             "styles": {
@@ -1691,32 +1724,34 @@ class DataContext(object):
                                 "classes": ["table", "table-sm", ],
                             }
                         },
-                    }
+                    })
                     content_blocks.append(expectation_suite_link_table)
 
                     validation_links = link_lists["validation_links"]
                     validation_link_table_rows = [
-                        [{
-                            "template": "$link_text",
-                            "params": {
-                                "link_text": link_dict["run_id"] + "-" + link_dict["expectation_suite_name"]
-                            },
-                            "tag": "a",
-                            "styling": {
+                        [RenderedComponentContent(**{
+                            "content_block_type": "string_template",
+                            "string_template": {
+                                "template": "$link_text",
                                 "params": {
-                                    "link_text": {
-                                        "attributes": {
-                                            "href": link_dict["filepath"]
-                                        }
+                                    "link_text": (link_dict["run_id"] + "-" + link_dict[
+                                        "expectation_suite_name"] + "-ProfilingResults") if "ProfilingResults" in link_dict[
+                                        "filepath"] else
+                                    (link_dict["run_id"] + "-" + link_dict["expectation_suite_name"] + "-ValidationResults")
+                                },
+                                "tag": "a",
+                                "styling": {
+                                    "attributes": {
+                                        "href": link_dict["filepath"]
                                     }
                                 }
                             }
-                        }] for link_dict in validation_links
+                        })] for link_dict in validation_links
                     ]
-                    validation_link_table = {
+                    validation_link_table = RenderedComponentContent(**{
                         "content_block_type": "table",
-                        "sub_header": "Batch Validations",
-                        "table_rows": validation_link_table_rows,
+                        "subheader": "Batch Validations",
+                        "table": validation_link_table_rows,
                         "styling": {
                             "classes": ["col-sm-4", "col-xs-12"],
                             "styles": {
@@ -1726,20 +1761,22 @@ class DataContext(object):
                                 "classes": ["table", "table-sm", ],
                             }
                         },
-                    }
+                    })
                     content_blocks.append(validation_link_table)
 
-            section = {
+            section = RenderedSectionContent(**{
                 "section_name": source,
                 "content_blocks": content_blocks
-            }
+            })
             sections.append(section)
 
         with open(os.path.join(self.data_doc_directory, "index.html"), "w") as writer:
-            writer.write(DefaultJinjaIndexPageView.render({
-                "utm_medium": "index-page",
-                "sections": sections
-            }))
+            writer.write(DefaultJinjaIndexPageView.render(
+                RenderedDocumentContent(**{
+                    "utm_medium": "index-page",
+                    "sections": sections
+                })
+            ))
 
     def profile_datasource(self,
                            datasource_name,
