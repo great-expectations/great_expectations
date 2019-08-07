@@ -1546,7 +1546,7 @@ class DataContext(object):
                         if run_id_filter.get("eq") != run_id:
                             continue
                     elif run_id_filter.get("ne"):
-                        if run_id_filter.get("eq") == run_id:
+                        if run_id_filter.get("ne") == run_id:
                             continue
 
                 datasource_name = components[1]
