@@ -118,6 +118,22 @@ class LooselyTypedDotDict(DotDict):
             self._validate_value_type(key, val, self._key_types[key])
 
         dict.__setitem__(self, key, val)
+
+    def __delitem__(self, key):
+        if key in self._required_keys:
+            raise KeyError("key: {!r} is required and cannot be deleted".format(
+                key,
+            ))
+
+        dict.__delitem__(self, key)
+
+    def __delattr__(self, key):
+        if key in self._required_keys:
+            raise KeyError("key: {!r} is required and cannot be deleted".format(
+                key,
+            ))
+
+        dict.__delitem__(self, key)
     
     def _validate_value_type(self, key, value, type_):
         if type(value) != type_:

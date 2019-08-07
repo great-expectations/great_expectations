@@ -89,6 +89,19 @@ def test_LooselyTypedDotDict_subclass():
     assert d.z == "estella"
     assert d["z"] == "estella"
 
+    assert d == {
+        "x": 1,
+        "y": 100,
+        "z": "estella",
+    }
+
+    del d["x"]
+
+    assert d == {
+        "y": 100,
+        "z": "estella",
+    }
+
     with pytest.raises(KeyError):
         d["w"] = 100
 
@@ -126,10 +139,9 @@ def test_LooselyTypedDotDict_subclass_required_keys():
     d["x"] = "hi"
     assert d.x == "hi"
 
-    #TODO:
-    # # Can't delete a required key
-    # with pytest.raises(KeyError):
-    #     del d["x"]
+    # Can't delete a required key
+    with pytest.raises(KeyError):
+        del d["x"]
 
     # _required_keys must be a subset of _allowed_keys
     with pytest.raises(ValueError):
