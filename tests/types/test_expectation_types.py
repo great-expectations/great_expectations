@@ -8,8 +8,11 @@ from great_expectations.types import (
     ValidationResultSuite,
 )
 
-def test_expectation_suite(titanic_validation_results):
-    pass
+def test_expectation_suite(titanic_profiled_expectations_1):
+    suite = ExpectationSuite(
+        coerce_types=True,
+        **titanic_profiled_expectations_1
+    )
 
 def test_validation_result_suite(titanic_validation_results):
     # print(json.dumps(titanic_validation_results, indent=2))
