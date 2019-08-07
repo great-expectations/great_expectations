@@ -5,33 +5,47 @@ from .base import (
 
 class Expectation(LooselyTypedDotDict):
     _allowed_keys = set([
-        "results",
-        "meta",
+        "expectation_type",
+        "kwargs",
     ])
     _required_keys = set([
-        "results",
-        "meta",
     ])
     _key_types = {}
 
 class ExpectationSuite(LooselyTypedDotDict):
     _allowed_keys = set([
-        "results",
+        "expectations",
         "meta",
+        "data_asset_name",
+        "expectation_suite_name",
+        "data_asset_type",
     ])
     _required_keys = set([
-        "results",
-        "meta",
+        "expectations",
     ])
-    _key_types = {}
+    _key_types = {
+        "expectations" : ListOf(Expectation),
+    }
 
 class ValidationResult(LooselyTypedDotDict):
     _allowed_keys = set([
+        "success",
         "expectation_config",
+        "exception_info",
+        "result",
     ])
     _required_keys = set([
+        "success",
+        "expectation_config",
+        "exception_info",
+        # "result",
     ])
-    _key_types = {}
+    _key_types = {
+        "success" : bool,
+        "expectation_config" : Expectation,
+        "exception_info" : dict, #TODO: Add a type for this field
+        "result" : dict, #TODO: Add a type for this field
+    }
 
 class ValidationResultSuite(LooselyTypedDotDict):
     _allowed_keys = set([
@@ -47,6 +61,6 @@ class ValidationResultSuite(LooselyTypedDotDict):
     ])
     _key_types = {
         "results" : ListOf(ValidationResult),
-        "meta" : dict,
+        "meta" : dict, #TODO: Add a type for this field
         "success" : bool,
     }
