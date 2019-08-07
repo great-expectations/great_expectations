@@ -10,7 +10,12 @@ from jinja2 import (
 )
 
 from great_expectations.version import __version__
-
+from great_expectations.render.types import (
+    RenderedDocumentContent,
+    RenderedSectionContent,
+    RenderedComponentContent,
+    RenderedComponentContentWrapper,
+)
 
 class NoOpTemplate(object):
     @classmethod
@@ -34,6 +39,8 @@ class DefaultJinjaView(object):
 
     @classmethod
     def render(cls, document, template=None, **kwargs):
+        cls._validate_document(document)
+
         if template is None:
             template = cls._template
 
@@ -75,7 +82,8 @@ class DefaultJinjaView(object):
         elif not isinstance(content_block, (dict, OrderedDict)):
             return content_block
         content_block_type = content_block.get("content_block_type")
-        return cls.render(context, template="{content_block_type}.j2".format(content_block_type=content_block_type), content_block=content_block)
+        template = cls._get_template(template="{content_block_type}.j2".format(content_block_type=content_block_type))
+        return template.render(context, content_block=content_block)
 
     @classmethod
     def render_styling(cls, styling):
@@ -231,14 +239,26 @@ class DefaultJinjaView(object):
 class DefaultJinjaPageView(DefaultJinjaView):
     _template = "page.j2"
 
+    @classmethod
+    def _validate_document(cls, document):
+        assert isinstance(document, RenderedDocumentContent)
 
-class DefaultJinjaIndexPageView(DefaultJinjaView):
+class DefaultJinjaIndexPageView(DefaultJinjaPageView):
     _template = "index_page.j2"
 
 
 class DefaultJinjaSectionView(DefaultJinjaView):
     _template = "section.j2"
 
+    @classmethod
+    def _validate_document(cls, document):
+        assert isinstance(document, RenderedComponentContentWrapper)
+        assert isinstance(document.section, RenderedSectionContent)
 
 class DefaultJinjaComponentView(DefaultJinjaView):
     _template = "component.j2"
+
+    @classmethod
+    def _validate_document(cls, document):
+        assert isinstance(document, RenderedComponentContentWrapper)
+        assert isinstance(document.content_block, RenderedComponentContent)

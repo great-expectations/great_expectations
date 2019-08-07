@@ -10,6 +10,12 @@ from .content_block import (ExpectationSuiteBulletListContentBlockRenderer)
 from great_expectations.render.renderer.content_block import ValidationResultsTableContentBlockRenderer
 from .content_block import ExceptionListContentBlockRenderer
 
+from ..types import RenderedSectionContent
+
+from ..types import (
+    RenderedComponentContent,
+)
+
 
 class ColumnSectionRenderer(Renderer):
     @classmethod
@@ -66,10 +72,10 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
 
         cls._render_failed(evrs, content_blocks)
 
-        return {
+        return RenderedSectionContent(**{
             "section_name": column,
             "content_blocks": content_blocks,
-        }
+        })
 
     @classmethod
     def _render_header(cls, evrs, content_blocks, column_type=None):
@@ -91,7 +97,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
 
         # assert False
         
-        content_blocks.append({
+        content_blocks.append(RenderedComponentContent(**{
             "content_block_type": "header",
             "header": {
                     "template": column_name,
@@ -115,7 +121,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
                     "classes": ["alert", "alert-secondary"]
                 }
             }
-        })
+        }))
 
     @classmethod
     def _render_expectation_types(cls, evrs, content_blocks):
@@ -148,7 +154,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
             }
         } for evr in evrs]
 
-        content_blocks.append({
+        content_blocks.append(RenderedComponentContent(**{
             "content_block_type": "bullet_list",
             "header": 'Expectation types <span class="mr-3 triangle"></span>',
             "bullet_list": bullet_list,
@@ -175,7 +181,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
                     "classes": ["list-group", "collapse"],
                 },
             },
-        })
+        }))
 
     @classmethod
     def _render_overview_table(cls, evrs, content_blocks):
@@ -247,7 +253,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
                 quantile_ranges[idx],
             ])
 
-        content_blocks.append({
+        content_blocks.append(RenderedComponentContent(**{
             "content_block_type": "table",
             "header": "Quantiles",
             "table": table_rows,
@@ -260,7 +266,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
                     "classes": ["table", "table-sm", "table-unbordered"],
                 }
             },
-        })
+        }))
 
     @classmethod
     def _render_stats_table(cls, evrs, content_blocks):
@@ -331,7 +337,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
             ])
 
         if len(table_rows) > 0:
-            content_blocks.append({
+            content_blocks.append(RenderedComponentContent(**{
                 "content_block_type": "table",
                 "header": "Statistics",
                 "table": table_rows,
@@ -344,7 +350,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
                         "classes": ["table", "table-sm", "table-unbordered"],
                     }
                 },
-            })
+            }))
         else:
             return
 
@@ -371,7 +377,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
         else:
             classes = ["col-4"]
 
-        new_block = {
+        new_block = RenderedComponentContent(**{
             "content_block_type": "value_list",
             "header":
                 {
@@ -397,7 +403,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
                     "margin-top": "20px",
                 }
             }
-        }
+        })
 
         content_blocks.append(new_block)
 
@@ -444,7 +450,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
 
         chart = bars.to_json()
 
-        new_block = {
+        new_block = RenderedComponentContent(**{
             "content_block_type": "graph",
             "header":
                 {
@@ -460,7 +466,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
                     "margin-top": "20px",
                 }
             }
-        }
+        })
 
         content_blocks.append(new_block)
 
@@ -501,7 +507,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
 
         chart = bars.to_json()
 
-        new_block = {
+        new_block = RenderedComponentContent(**{
             "content_block_type": "graph",
             "header":
                 {
@@ -517,7 +523,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
                     "margin-top": "20px",
                 }
             }
-        }
+        })
 
         content_blocks.append(new_block)
 
@@ -543,10 +549,10 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
                 "expect_column_mean_to_be_between",
                 "expect_column_min_to_be_between"
             ]:
-                new_block = {
+                new_block = RenderedComponentContent(**{
                     "content_block_type": "text",
                     "content": []
-                }
+                })
                 new_block["content"].append("""
     <div class="alert alert-primary" role="alert">
         Warning! Unrendered EVR:<br/>
@@ -566,7 +572,7 @@ class ValidationResultsColumnSectionRenderer(ColumnSectionRenderer):
     def _render_header(cls, validation_results, content_blocks):
         column = cls._get_column_name(validation_results)
         
-        content_blocks.append({
+        content_blocks.append(RenderedComponentContent(**{
             "content_block_type": "header",
             "header": column,
             "styling": {
@@ -575,7 +581,7 @@ class ValidationResultsColumnSectionRenderer(ColumnSectionRenderer):
                     "classes": ["alert", "alert-secondary"]
                 }
             }
-        })
+        }))
         
         return validation_results, content_blocks
     
@@ -599,10 +605,10 @@ class ValidationResultsColumnSectionRenderer(ColumnSectionRenderer):
         remaining_evrs, content_blocks = cls._render_table(
             remaining_evrs, content_blocks)
     
-        return {
+        return RenderedSectionContent(**{
             "section_name": column,
             "content_blocks": content_blocks
-        }
+        })
 
 
 class ExpectationSuiteColumnSectionRenderer(ColumnSectionRenderer):
@@ -611,7 +617,7 @@ class ExpectationSuiteColumnSectionRenderer(ColumnSectionRenderer):
     def _render_header(cls, expectations, content_blocks):
         column = cls._get_column_name(expectations)
 
-        content_blocks.append({
+        content_blocks.append(RenderedComponentContent(**{
             "content_block_type": "header",
             "header": column,
             "styling": {
@@ -620,7 +626,7 @@ class ExpectationSuiteColumnSectionRenderer(ColumnSectionRenderer):
                     "classes": ["alert", "alert-secondary"]
                 }
             }
-        })
+        }))
 
         return expectations, content_blocks
 
@@ -644,8 +650,8 @@ class ExpectationSuiteColumnSectionRenderer(ColumnSectionRenderer):
         # remaining_expectations, content_blocks)
         remaining_expectations, content_blocks = cls._render_bullet_list(
             remaining_expectations, content_blocks)
-    
-        return {
+
+        return RenderedSectionContent(**{
             "section_name": column,
             "content_blocks": content_blocks
-        }
+        })
