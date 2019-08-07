@@ -13,6 +13,8 @@ from great_expectations.render.view import (
 class SiteBuilder():
     """SiteBuilder builds a data documentation website for the project defined by a DataContext.
 
+    Returns: index_page_locator_info (a dictionary describing how to locate the index page of the site (specific to resource_store type)
+
     A data documentation site consists of HTML pages for expectation suites, profiling and validation results, and
     an index.html page that links to all the pages.
 
@@ -283,17 +285,16 @@ class SiteBuilder():
                             )
 
 
-            # TODO: load dynamically
-            model = SiteIndexPageRenderer.render(index_links_dict)
+        # TODO: load dynamically
+        model = SiteIndexPageRenderer.render(index_links_dict)
 
-            index_page_output = DefaultJinjaIndexPageView.render(model)
+        index_page_output = DefaultJinjaIndexPageView.render(model)
 
-            data_context.write_resource(
-                index_page_output,  # bytes
-                'index.html',  # name to be used inside namespace
-                resource_store=site_config['site_store']
-            )
+        index_page_locator_info = data_context.write_resource(
+            index_page_output,  # bytes
+            'index.html',  # name to be used inside namespace
+            resource_store=site_config['site_store']
+        )
 
-
-
+        return index_page_locator_info
 
