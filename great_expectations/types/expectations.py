@@ -16,15 +16,16 @@ class ExpectationSuite(LooselyTypedDotDict):
     _allowed_keys = set([
         "expectations",
         "meta",
-        "data_asset_name",
-        "expectation_suite_name",
-        "data_asset_type",
+        "data_asset_name", #??? Should this go inside meta?
+        "expectation_suite_name", #??? Should this go inside meta?
+        "data_asset_type", #??? Should this go inside meta?
     ])
     _required_keys = set([
         "expectations",
     ])
     _key_types = {
         "expectations" : ListOf(Expectation),
+        "meta" : dict, #TODO: Add a type for this field
     }
 
 class ValidationResult(LooselyTypedDotDict):
