@@ -4,44 +4,7 @@ from .renderer import Renderer
 class SiteIndexPageRenderer(Renderer):
 
     @classmethod
-    def render(cls, index_links):
-        index_links_dict = OrderedDict()
-
-        for il in index_links:
-            source, generator, asset = il["data_asset_name"].split('/')
-            if not source in index_links_dict:
-                index_links_dict[source] = OrderedDict()
-            if not generator in index_links_dict[source]:
-                index_links_dict[source][generator] = OrderedDict()
-            if not asset in index_links_dict[source][generator]:
-                index_links_dict[source][generator][asset] = {
-                    'validation_links': [],
-                    'expectation_suite_links': []
-                }
-
-            if "run_id" in il:
-                index_links_dict[source][generator][asset]["validation_links"].append(
-                    {
-                        "full_data_asset_name": il["data_asset_name"],
-                        "run_id": il["run_id"],
-                        "expectation_suite_name": il["expectation_suite_name"],
-                        "filepath": il["filepath"],
-                        "source": source,
-                        "generator": generator,
-                        "asset": asset
-                    }
-                )
-            else:
-                index_links_dict[source][generator][asset]["expectation_suite_links"].append(
-                    {
-                        "full_data_asset_name": il["data_asset_name"],
-                        "expectation_suite_name": il["expectation_suite_name"],
-                        "filepath": il["filepath"],
-                        "source": source,
-                        "generator": generator,
-                        "asset": asset
-                    }
-                )
+    def render(cls, index_links_dict):
 
         sections = []
 
