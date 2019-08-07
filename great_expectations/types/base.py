@@ -70,8 +70,7 @@ class LooselyTypedDotDict(DotDict):
 
                     #If the given type is an instance of LooselyTypedDotDict, apply coerce_types recursively
                     if isinstance(self._key_types[key], ListOf):
-                        # assert isinstance(self._key_types[key], Iterable)
-                        if inspect.isclass(self._key_types[key]) and issubclass(self._key_types[key], LooselyTypedDotDict):
+                        if inspect.isclass(self._key_types[key].type_) and issubclass(self._key_types[key].type_, LooselyTypedDotDict):
                             value = [self._key_types[key].type_(coerce_types=True, **v) for v in value]
                         else:
                             value = [self._key_types[key].type_(v) for v in value]
