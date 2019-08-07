@@ -190,6 +190,12 @@ def test_LooselyTypedDotDict_subclass_key_types():
         "y": "10",
     }
 
+    with pytest.raises(TypeError):
+        d["x"] = "not an int"
+
+    with pytest.raises(TypeError):
+        d.x = "not an int"
+
     with pytest.raises(ValueError):
         d = MyLooselyTypedDotDict(
             coerce_types=True,
