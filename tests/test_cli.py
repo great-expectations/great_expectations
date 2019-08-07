@@ -219,19 +219,19 @@ def test_cli_init(tmp_path_factory, filesystem_csv_2):
         assert os.path.isfile(
             os.path.join(
                 basedir,
-                "great_expectations/fixtures/validations/data__dir/default/Titanic/BasicDatasetProfiler.json")
+                "great_expectations/uncommitted/validations/profiling/data__dir/default/Titanic/BasicDatasetProfiler.json")
         )
 
         assert os.path.isfile(
             os.path.join(
                 basedir,
-                "great_expectations/uncommitted/documentation/data__dir/default/Titanic/BasicDatasetProfiler.html")
+                "great_expectations/uncommitted/documentation/local_site/profiling/data__dir/default/Titanic/BasicDatasetProfiler.html")
         )
 
         assert os.path.getsize(
             os.path.join(
                 basedir,
-                "great_expectations/uncommitted/documentation/data__dir/default/Titanic/BasicDatasetProfiler.html"
+                "great_expectations/uncommitted/documentation/local_site/profiling/data__dir/default/Titanic/BasicDatasetProfiler.html"
             )
         ) > 0
         print(result)
@@ -309,7 +309,13 @@ def test_cli_documentation(empty_data_context, filesystem_csv_2, capsys):
 
     assert "index.html" in os.listdir(os.path.join(
         project_root_dir,
-        "uncommitted/documentation"
+        "uncommitted/documentation/local_site/index.html"
+        )
+    )
+
+    assert "index.html" in os.listdir(os.path.join(
+        project_root_dir,
+        "uncommitted/documentation/team_site/index.html"
         )
     )
 
