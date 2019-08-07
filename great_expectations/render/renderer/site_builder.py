@@ -1,6 +1,7 @@
 import logging
 logger = logging.getLogger(__name__)
 import importlib
+from collections import OrderedDict
 
 from great_expectations.render.renderer import (
     SiteIndexPageRenderer
@@ -34,55 +35,58 @@ class SiteBuilder():
       validations_store:
         type: filesystem
         base_directory: uncommitted/validations/
+        run_id_filter:
+          ne: profiling
       profiling_store:
         type: filesystem
         base_directory: uncommitted/validations/
         run_id_filter:
           eq: profiling
 
-      datasources: "*"
+      datasources: '*'
       sections:
         index:
           renderer:
-            type: IndexRenderer
+            module: great_expectations.render.renderer
+            class: SiteIndexPageRenderer
           view:
-            type: IndexView
+            module: great_expectations.render.view
+            class: DefaultJinjaIndexPageView
         validations:
           renderer:
-            type: ValidationRenderer
-            run_id_filter:
-              ne: profiling
+            module: great_expectations.render.renderer
+            class: ValidationResultsPageRenderer
           view:
-            type: ValidationPageView
+            module: great_expectations.render.view
+            class: DefaultJinjaPageView
         expectations:
           renderer:
             module: great_expectations.render.renderer
-            class: PrescriptivePageRenderer
+            class: ExpectationSuitePageRenderer
           view:
             module: great_expectations.render.view
             class: DefaultJinjaPageView
         profiling:
           renderer:
             module: great_expectations.render.renderer
-            class: DescriptivePageRenderer
+            class: ProfilingResultsPageRenderer
           view:
             module: great_expectations.render.view
             class: DefaultJinjaPageView
-
-
     """
 
     @classmethod
     def build(cls, data_context, site_config):
-        index_links = []
 
-        # profiling results
+        index_links_dict = OrderedDict()
 
         datasources = data_context.list_datasources()
 
         sections_config = site_config.get('sections')
         if not sections_config:
             raise Exception('"sections" key is missing') #TODO: specific exception class
+
+        # profiling results
 
         profiling_section_config = sections_config.get('profiling')
         if profiling_section_config:
@@ -121,18 +125,100 @@ class SiteBuilder():
                                     data_asset_name=data_asset_name
                                 )
 
-                                index_links.append({
-                                    "data_asset_name": data_asset_name,
-                                    "expectation_suite_name": expectation_suite_name,
-                                    "run_id": run_id,
-                                    "filepath": data_context._get_normalized_data_asset_name_filepath(
+                                if not datasource in index_links_dict:
+                                    index_links_dict[datasource] = OrderedDict()
+                                if not generator in index_links_dict[datasource]:
+                                    index_links_dict[datasource][generator] = OrderedDict()
+                                if not generator_asset in index_links_dict[datasource][generator]:
+                                    index_links_dict[datasource][generator][generator_asset] = {
+                                        'profiling_links': [],
+                                        'validation_links': [],
+                                        'expectation_suite_links': []
+                                    }
+
+                                index_links_dict[datasource][generator][generator_asset]["profiling_links"].append(
+                                    {
+                                        "full_data_asset_name": data_asset_name,
+                                        "expectation_suite_name": expectation_suite_name,
+                                        "filepath": data_context._get_normalized_data_asset_name_filepath(
                                             data_asset_name,
                                             expectation_suite_name,
-                                            base_path = 'profiling',
+                                            base_path='profiling',
                                             file_extension=".html"
-                                            )
-                                })
+                                        ),
+                                        "source": datasource,
+                                        "generator": generator,
+                                        "asset": generator_asset
+                                    }
+                                )
 
+
+        # validations
+
+        validation_section_config = sections_config.get('validations')
+        if profiling_section_config:
+            try:
+                validation_renderer_module = importlib.import_module(validation_section_config['renderer']['module'])
+                validation_renderer_class = getattr(validation_renderer_module, validation_section_config['renderer']['class'])
+                validation_view_module = importlib.import_module(validation_section_config['view']['module'])
+                validation_view_class = getattr(validation_view_module, validation_section_config['view']['class'])
+            except Exception:
+                logger.exception("Failed to load validation renderer or view class")
+                raise
+
+
+            #TODO: filter data sources if the config requires it
+
+            for run_id, v0 in data_context.list_validation_results(validations_store=site_config['validations_store']).items():
+                for datasource, v1 in v0.items():
+                    for generator, v2 in v1.items():
+                        for generator_asset, expectation_suite_names in v2.items():
+                            data_asset_name = data_context.data_asset_name_delimiter.join([datasource, generator, generator_asset])
+                            for expectation_suite_name in expectation_suite_names:
+                                validation = data_context.get_validation_result(data_asset_name,
+                                                                                expectation_suite_name=expectation_suite_name,
+                                                                                validations_store=site_config['validations_store'],
+                                                                                run_id=run_id)
+
+                                data_asset_name = validation['meta']['data_asset_name']
+                                expectation_suite_name = validation['meta']['expectation_suite_name']
+                                model = validation_renderer_class.render(validation)
+
+                                data_context.write_resource(
+                                    validation_view_class.render(model),  # bytes
+                                    expectation_suite_name + '.html',  # name to be used inside namespace
+                                    resource_store=site_config['site_store'],
+                                    resource_namespace="validations",
+                                    data_asset_name=data_asset_name
+                                )
+
+                                if not datasource in index_links_dict:
+                                    index_links_dict[datasource] = OrderedDict()
+                                if not generator in index_links_dict[datasource]:
+                                    index_links_dict[datasource][generator] = OrderedDict()
+                                if not generator_asset in index_links_dict[datasource][generator]:
+                                    index_links_dict[datasource][generator][generator_asset] = {
+                                        'profiling_links': [],
+                                        'validation_links': [],
+                                        'expectation_suite_links': []
+                                    }
+
+                                index_links_dict[datasource][generator][generator_asset]["validation_links"].append(
+                                    {
+                                        "full_data_asset_name": data_asset_name,
+                                        "expectation_suite_name": expectation_suite_name,
+                                        "filepath": data_context._get_normalized_data_asset_name_filepath(
+                                            data_asset_name,
+                                            expectation_suite_name,
+                                            base_path='validations',
+                                            file_extension=".html"
+                                        ),
+                                        "source": datasource,
+                                        "generator": generator,
+                                        "asset": generator_asset,
+                                        "run_id": run_id
+                                    }
+                                )
 
 
         # expectation suites
@@ -150,7 +236,9 @@ class SiteBuilder():
 
             for datasource, v1 in data_context.list_expectation_suites().items():
                 for generator, v2 in v1.items():
-                    for data_asset_name, expectation_suite_names in v2.items():
+                    for generator_asset, expectation_suite_names in v2.items():
+                        data_asset_name = data_context.data_asset_name_delimiter.join(
+                            [datasource, generator, generator_asset])
                         for expectation_suite_name in expectation_suite_names:
                             expectation_suite = data_context.get_expectation_suite(
                                 data_asset_name,
@@ -167,19 +255,36 @@ class SiteBuilder():
                                 data_asset_name=data_asset_name
                             )
 
-                            index_links.append({
-                                "data_asset_name": data_asset_name,
-                                "expectation_suite_name": expectation_suite_name,
-                                "filepath": data_context._get_normalized_data_asset_name_filepath(
-                                    data_asset_name,
-                                    expectation_suite_name,
-                                    base_path='expectations',
-                                    file_extension='.html'
-                                )
-                            })
+                            if not datasource in index_links_dict:
+                                index_links_dict[datasource] = OrderedDict()
+                            if not generator in index_links_dict[datasource]:
+                                index_links_dict[datasource][generator] = OrderedDict()
+                            if not generator_asset in index_links_dict[datasource][generator]:
+                                index_links_dict[datasource][generator][generator_asset] = {
+                                    'profiling_links': [],
+                                    'validation_links': [],
+                                    'expectation_suite_links': []
+                                }
+
+                            index_links_dict[datasource][generator][generator_asset]["expectation_suite_links"].append(
+                                {
+                                    "full_data_asset_name": data_asset_name,
+                                    "expectation_suite_name": expectation_suite_name,
+                                    "filepath": data_context._get_normalized_data_asset_name_filepath(
+                                        data_asset_name,
+                                        expectation_suite_name,
+                                        base_path='expectations',
+                                        file_extension='.html'
+                                    ),
+                                    "source": datasource,
+                                    "generator": generator,
+                                    "asset": generator_asset
+                                }
+                            )
+
 
             # TODO: load dynamically
-            model = SiteIndexPageRenderer.render(index_links)
+            model = SiteIndexPageRenderer.render(index_links_dict)
             index_page_output = DefaultJinjaIndexPageView.render({
                 "utm_medium": "index-page",
                 "sections": model

@@ -1918,6 +1918,8 @@ data_docs:
       validations_store:
         type: filesystem
         base_directory: uncommitted/validations/
+        run_id_filter:
+          ne: profiling
       profiling_store:
         type: filesystem
         base_directory: uncommitted/validations/
@@ -1935,22 +1937,22 @@ data_docs:
             class: DefaultJinjaIndexPageView
         validations:
           renderer:
-            type: ValidationRenderer
-            run_id_filter:
-              ne: profiling
+            module: great_expectations.render.renderer
+            class: ValidationResultsPageRenderer
           view:
-            type: ValidationPageView
+            module: great_expectations.render.view
+            class: DefaultJinjaPageView
         expectations:
           renderer:
             module: great_expectations.render.renderer
-            class: PrescriptivePageRenderer
+            class: ExpectationSuitePageRenderer
           view:
             module: great_expectations.render.view
             class: DefaultJinjaPageView
         profiling:
           renderer:
             module: great_expectations.render.renderer
-            class: DescriptivePageRenderer
+            class: ProfilingResultsPageRenderer
           view:
             module: great_expectations.render.view
             class: DefaultJinjaPageView
@@ -1983,7 +1985,7 @@ data_docs:
         expectations:
           renderer:
             module: great_expectations.render.renderer
-            class: PrescriptivePageRenderer
+            class: ExpectationSuitePageRenderer
           view:
             module: great_expectations.render.view
             class: DefaultJinjaPageView
