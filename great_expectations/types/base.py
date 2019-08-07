@@ -1,6 +1,6 @@
 from collections import Iterable
-# from collections import namedtuple
 import inspect
+import copy
 
 class ListOf(object):
     def __init__(self, type_):
