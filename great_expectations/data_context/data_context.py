@@ -16,6 +16,7 @@ from collections import OrderedDict
 from .util import NormalizedDataAssetName, get_slack_callback, safe_mmkdir
 
 from great_expectations.exceptions import DataContextError, ConfigNotFoundError, ProfilerError
+from great_expectations.render.types import RenderedDocumentContent
 
 from great_expectations.render.renderer.site_builder import SiteBuilder
 
@@ -38,6 +39,11 @@ from great_expectations.render.view import (
     DefaultJinjaPageView,
     DefaultJinjaIndexPageView,
 )
+from great_expectations.render.types import (
+    RenderedComponentContent,
+    RenderedSectionContent,
+)
+
 
 
 from .expectation_explorer import ExpectationExplorer

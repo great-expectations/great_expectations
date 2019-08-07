@@ -1,5 +1,9 @@
-from collections import OrderedDict
 from .renderer import Renderer
+from great_expectations.render.types import (
+    RenderedComponentContent,
+    RenderedSectionContent,
+    RenderedDocumentContent
+)
 
 class SiteIndexPageRenderer(Renderer):
 
@@ -11,7 +15,7 @@ class SiteIndexPageRenderer(Renderer):
         for source, generators in index_links_dict.items():
             content_blocks = []
 
-            source_header_block = {
+            source_header_block = RenderedComponentContent(**{
                 "content_block_type": "header",
                 "header": source,
                 "styling": {
@@ -20,20 +24,20 @@ class SiteIndexPageRenderer(Renderer):
                         "classes": ["alert", "alert-secondary"]
                     }
                 }
-            }
+            })
             content_blocks.append(source_header_block)
 
             for generator, data_assets in generators.items():
-                generator_header_block = {
+                generator_header_block = RenderedComponentContent(**{
                     "content_block_type": "header",
                     "header": generator,
                     "styling": {
                         "classes": ["col-12", "ml-4"],
                     }
-                }
+                })
                 content_blocks.append(generator_header_block)
 
-                horizontal_rule = {
+                horizontal_rule = RenderedComponentContent(**{
                     "content_block_type": "string_template",
                     "string_template": {
                         "template": "",
@@ -43,11 +47,11 @@ class SiteIndexPageRenderer(Renderer):
                     "styling": {
                         "classes": ["col-12"],
                     }
-                }
+                })
                 content_blocks.append(horizontal_rule)
 
                 for data_asset, link_lists in data_assets.items():
-                    data_asset_heading = {
+                    data_asset_heading = RenderedComponentContent(**{
                         "content_block_type": "string_template",
                         "string_template": {
                             "template": "$data_asset",
@@ -70,12 +74,12 @@ class SiteIndexPageRenderer(Renderer):
                                 "word-break": "break-all"
                             }
                         }
-                    }
+                    })
                     content_blocks.append(data_asset_heading)
 
                     expectation_suite_links = link_lists["expectation_suite_links"]
                     expectation_suite_link_table_rows = [
-                        [{
+                        [RenderedComponentContent(**{
                             "content_block_type": "string_template",
                             "string_template": {
                                 "template": "$link_text",
@@ -89,9 +93,9 @@ class SiteIndexPageRenderer(Renderer):
                                     }
                                 }
                             }
-                        }] for link_dict in expectation_suite_links
+                        })] for link_dict in expectation_suite_links
                     ]
-                    expectation_suite_link_table = {
+                    expectation_suite_link_table = RenderedComponentContent(**{
                         "content_block_type": "table",
                         "subheader": "Expectation Suites",
                         "table": expectation_suite_link_table_rows,
@@ -104,20 +108,22 @@ class SiteIndexPageRenderer(Renderer):
                                 "classes": ["table", "table-sm", ],
                             }
                         },
-                    }
+                    })
                     content_blocks.append(expectation_suite_link_table)
 
                     validation_links = link_lists["validation_links"]
                     validation_link_table_rows = [
-                        [{
+                        [RenderedComponentContent(**{
                             "content_block_type": "string_template",
                             "string_template": {
                                 "template": "$link_text",
                                 "params": {
                                     "link_text": (link_dict["run_id"] + "-" + link_dict[
-                                        "expectation_suite_name"] + "-ProfilingResults") if "ProfilingResults" in link_dict[
-                                        "filepath"] else
-                                    (link_dict["run_id"] + "-" + link_dict["expectation_suite_name"] + "-ValidationResults")
+                                        "expectation_suite_name"] + "-ProfilingResults") if "ProfilingResults" in
+                                                                                            link_dict[
+                                                                                                "filepath"] else
+                                    (link_dict["run_id"] + "-" + link_dict[
+                                        "expectation_suite_name"] + "-ValidationResults")
                                 },
                                 "tag": "a",
                                 "styling": {
@@ -126,9 +132,9 @@ class SiteIndexPageRenderer(Renderer):
                                     }
                                 }
                             }
-                        }] for link_dict in validation_links
+                        })] for link_dict in validation_links
                     ]
-                    validation_link_table = {
+                    validation_link_table = RenderedComponentContent(**{
                         "content_block_type": "table",
                         "subheader": "Batch Validations",
                         "table": validation_link_table_rows,
@@ -141,13 +147,17 @@ class SiteIndexPageRenderer(Renderer):
                                 "classes": ["table", "table-sm", ],
                             }
                         },
-                    }
+                    })
                     content_blocks.append(validation_link_table)
 
-            section = {
+            section = RenderedSectionContent(**{
                 "section_name": source,
                 "content_blocks": content_blocks
-            }
+            })
             sections.append(section)
 
-        return sections
+        return RenderedDocumentContent(**{
+                "utm_medium": "index-page",
+                "sections": sections
+            })
+
