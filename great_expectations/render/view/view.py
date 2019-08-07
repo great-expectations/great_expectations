@@ -82,7 +82,8 @@ class DefaultJinjaView(object):
         elif not isinstance(content_block, (dict, OrderedDict)):
             return content_block
         content_block_type = content_block.get("content_block_type")
-        return cls.render(context, template="{content_block_type}.j2".format(content_block_type=content_block_type), content_block=content_block)
+        template = cls._get_template(template="{content_block_type}.j2".format(content_block_type=content_block_type))
+        return template.render(context, content_block=content_block)
 
     @classmethod
     def render_styling(cls, styling):
