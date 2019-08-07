@@ -214,14 +214,3 @@ def validate(data_asset, expectation_suite=None, data_asset_name=None, data_cont
         data_asset, data_asset_type, expectation_suite)
     return data_asset_.validate(*args, data_context=data_context, **kwargs)
 
-
-# class DotDict(dict):
-#     """dot.notation access to dictionary attributes"""
-
-#     def __getattr__(self, attr):
-#         return self.get(attr)
-#     __setattr__ = dict.__setitem__
-#     __delattr__ = dict.__delitem__
-
-#     def __dir__(self):
-#         return self.keys()
