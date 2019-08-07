@@ -225,10 +225,12 @@ def display_column_expectations_as_section(
     #TODO: Handle the case where zero evrs match the column name
 
     document = render.renderer.ExpectationSuiteColumnSectionRenderer.render(column_expectation_list)
-    view = render.view.DefaultJinjaSectionView.render({
-        "section": document,
-        "section_loop": {"index": 1},
-    })
+    view = render.view.DefaultJinjaSectionView.render(
+        render.types.RenderedComponentContentWrapper(**{
+            "section": document,
+            "section_loop": {"index": 1},
+        })
+    )
 
     if include_styling:
         html_to_display = bootstrap_link_element+cooltip_style_element+view
@@ -264,10 +266,12 @@ def display_column_evrs_as_section(
     #TODO: Handle the case where zero evrs match the column name
 
     document = render.renderer.ProfilingResultsColumnSectionRenderer.render(column_evr_list)
-    view = render.view.DefaultJinjaSectionView.render({
-        "section": document,
-        "section_loop": {"index": 1},
-    })
+    view = render.view.DefaultJinjaSectionView.render(
+        render.types.RenderedComponentContentWrapper(**{
+            "section": document,
+            "section_loop": {"index": 1},
+        })
+    )
 
     if include_styling:
         html_to_display = bootstrap_link_element+cooltip_style_element+view

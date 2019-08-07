@@ -12,7 +12,11 @@ from .column_section_renderer import (
 from .other_section_renderer import (
     ProfilingResultsOverviewSectionRenderer,
 )
-
+from ..types import (
+    RenderedDocumentContent,
+    RenderedSectionContent,
+    RenderedComponentContent,
+)
 
 class ValidationResultsPageRenderer(Renderer):
     @classmethod
@@ -48,10 +52,10 @@ class ValidationResultsPageRenderer(Renderer):
             data_asset_name = None
     
         sections = [
-            {
+            RenderedSectionContent(**{
                 "section_name": "Overview",
                 "content_blocks": overview_content_blocks
-            }
+            })
         ]
     
         sections += [
@@ -60,17 +64,17 @@ class ValidationResultsPageRenderer(Renderer):
             ) for column in ordered_columns
         ]
     
-        return {
+        return RenderedDocumentContent(**{
             "renderer_type": "ValidationResultsColumnSectionRenderer",
             "data_asset_name": data_asset_name,
             "full_data_asset_identifier": full_data_asset_identifier,
             "page_title": run_id + "-" + expectation_suite_name + "-ProfilingResults",
             "sections": sections
-        }
+        })
     
     @classmethod
     def _render_validation_header(cls):
-        return {
+        return RenderedComponentContent(**{
             "content_block_type": "header",
             "header": "Validation Overview",
             "styling": {
@@ -79,7 +83,7 @@ class ValidationResultsPageRenderer(Renderer):
                     "classes": ["alert", "alert-secondary"]
                 }
             }
-        }
+        })
     
     @classmethod
     def _render_validation_info(cls, validation_results):
@@ -89,7 +93,7 @@ class ValidationResultsPageRenderer(Renderer):
         ge_version = validation_results["meta"]["great_expectations.__version__"]
         success = validation_results["success"]
         
-        return {
+        return RenderedComponentContent(**{
             "content_block_type": "table",
             "header": "Info",
             "table": [
@@ -108,12 +112,12 @@ class ValidationResultsPageRenderer(Renderer):
                     "classes": ["table", "table-sm"]
                 }
             },
-        }
+        })
     
     @classmethod
     def _render_validation_statistics(cls, validation_results):
         statistics = validation_results["statistics"]
-        return {
+        return RenderedComponentContent(**{
             "content_block_type": "table",
             "header": "Statistics",
             "table": [
@@ -131,7 +135,7 @@ class ValidationResultsPageRenderer(Renderer):
                     "classes": ["table", "table-sm"]
                 }
             },
-        }
+        })
 
 
 class ExpectationSuitePageRenderer(Renderer):
@@ -153,28 +157,26 @@ class ExpectationSuitePageRenderer(Renderer):
             # print(json.dumps(overview_content_blocks, indent=2))
         
         sections = [
-            {
+            RenderedSectionContent(**{
                 "section_name": "Overview",
                 "content_blocks": overview_content_blocks,
-            }
+            })
         ]
         
         sections += [
             ExpectationSuiteColumnSectionRenderer.render(expectations=columns[column]) for column in ordered_columns
         ]
-        
-        return {
-            # "renderer_type": "ExpectationSuitePageRenderer",
+        return RenderedDocumentContent(**{
             # "data_asset_name": short_data_asset_name,
             "full_data_asset_identifier": full_data_asset_identifier,
             "page_title": expectation_suite_name,
             "utm_medium": "expectation-suite-page",
             "sections": sections
-        }
-    
+        })
+
     @classmethod
     def _render_asset_header(cls, expectations):
-        return {
+        return RenderedComponentContent(**{
             "content_block_type": "header",
             "header": "Expectation Suite Overview",
             "styling": {
@@ -183,16 +185,16 @@ class ExpectationSuitePageRenderer(Renderer):
                     "classes": ["alert", "alert-secondary"]
                 }
             }
-        }
-    
+        })
+      
     @classmethod
     def _render_asset_info(cls, expectations):
         full_data_asset_identifier = expectations.get("data_asset_name") or ""
         data_asset_type = expectations.get("data_asset_type")
         expectation_suite_name = expectations.get("expectation_suite_name")
         ge_version = expectations["meta"]["great_expectations.__version__"]
-        
-        return {
+
+        return RenderedComponentContent(**{
             "content_block_type": "table",
             "header": "Info",
             "table": [
@@ -210,8 +212,8 @@ class ExpectationSuitePageRenderer(Renderer):
                     "classes": ["table", "table-sm"]
                 }
             },
-        }
-    
+        })
+
     @classmethod
     def _render_asset_notes(cls, expectations):
         
@@ -276,8 +278,8 @@ class ExpectationSuitePageRenderer(Renderer):
             
             if note_content != None:
                 content = content + note_content
-        
-        return {
+
+        return RenderedComponentContent(**{
             "content_block_type": "text",
             "header": "Notes",
             "content": content,
@@ -290,7 +292,7 @@ class ExpectationSuitePageRenderer(Renderer):
                     "classes": ["table", "table-sm"]
                 }
             },
-        }
+        })
 
 
 class ProfilingResultsPageRenderer(Renderer):
@@ -314,7 +316,7 @@ class ProfilingResultsPageRenderer(Renderer):
         else:
             data_asset_name = None
 
-        return {
+        return RenderedDocumentContent(**{
             "renderer_type": "ProfilingResultsPageRenderer",
             "data_asset_name": data_asset_name,
             "full_data_asset_identifier": full_data_asset_identifier,
@@ -334,4 +336,4 @@ class ProfilingResultsPageRenderer(Renderer):
                         column_type=column_types.get(column),
                     ) for column in ordered_columns
                 ]
-        }
+        })
