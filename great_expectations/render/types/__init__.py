@@ -76,37 +76,7 @@ class RenderedComponentContentWrapper(RenderedContent):
         "section": RenderedSectionContent,
     }
 
-
-# class ValidationResult(LooselyTypedDotDict):
-#     _allowed_keys = set([
-#         "expectation_config",
-#         "",
-#         ""
-#     ])
-#     _required_keys = set([
-#     ])
-#     _key_types = {
-#         "expectation_config": ExpectationConfig,
-#         # "": ...,
-#     }
-
-# class ValidationResultSuite(LooselyTypedDotDict):
-#     _allowed_keys = set([
-#         "results",
-#         "meta",
-#     ])
-#     _required_keys = set([
-#         "results",
-#         "meta",
-#     ])
-#     _key_types = {
-#         "results": ListOf(ValidationResult),
-#         "meta": SuiteMeta,
-#     }
-
-
-
-
+# NOTE: The types below are rendering-related classes that we will probably want to implement eventually.
 
 # class DomStylingInfo(object):
 #     """Basically a struct type for:
