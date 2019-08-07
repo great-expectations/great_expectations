@@ -572,7 +572,7 @@ class ValidationResultsColumnSectionRenderer(ColumnSectionRenderer):
     def _render_header(cls, validation_results, content_blocks):
         column = cls._get_column_name(validation_results)
         
-        content_blocks.append({
+        content_blocks.append(RenderedComponentContent(**{
             "content_block_type": "header",
             "header": column,
             "styling": {
@@ -581,7 +581,7 @@ class ValidationResultsColumnSectionRenderer(ColumnSectionRenderer):
                     "classes": ["alert", "alert-secondary"]
                 }
             }
-        })
+        }))
         
         return validation_results, content_blocks
     
