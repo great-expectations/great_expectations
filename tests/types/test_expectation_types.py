@@ -12,9 +12,11 @@ def test_expectation_suite(titanic_validation_results):
     pass
 
 def test_validation_result_suite(titanic_validation_results):
-    print(json.dumps(titanic_validation_results, indent=2))
-    titanic_validation_results["results"] = titanic_validation_results["results"][:2]
-    ValidationResultSuite(
+    # print(json.dumps(titanic_validation_results, indent=2))
+    # titanic_validation_results["results"] = titanic_validation_results["results"][:2]
+    suite = ValidationResultSuite(
         coerce_types=True,
         **titanic_validation_results
     )
+    # print(json.dumps(suite, indent=2))
+    # assert False

@@ -295,3 +295,60 @@ def test_LooselyTypedDotDict_recursive_coercion():
                 },
             }
         )
+
+def test_LooselyTypedDotDict_recursive_coercion_with_ListOf():
+    class MyNestedDotDict(LooselyTypedDotDict):
+        _allowed_keys = set([
+            "a",
+        ])
+        _required_keys = set([
+            "a",
+        ])
+        _key_types = {
+            "a" : int,
+        }
+
+    class MyLooselyTypedDotDict(LooselyTypedDotDict):
+        _allowed_keys = set([
+            "x", "y", "z"
+        ])
+        _required_keys = set([
+            "x",
+        ])
+        _key_types = {
+            "x" : str,
+            "y" : ListOf(MyNestedDotDict),
+        }
+
+    d = MyLooselyTypedDotDict(
+        coerce_types=True,
+        **{
+            "x" : "hello",
+            "y" : [
+                {"a": 1},
+                {"a": 2},
+                {"a": 3},
+                {"a": 4}
+            ]
+        }
+    )
+    assert d == {
+        "x" : "hello",
+        "y" : [
+            {"a": 1},
+            {"a": 2},
+            {"a": 3},
+            {"a": 4}    
+        ]
+    }
+
+    with pytest.raises(TypeError):
+        d = MyLooselyTypedDotDict(
+            coerce_types=True,
+            **{
+                "x" : "hello",
+                "y" : {
+                    "a" : [1, 2, 3, 4],
+                },
+            }
+        )
