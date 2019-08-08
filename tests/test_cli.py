@@ -309,13 +309,13 @@ def test_cli_documentation(empty_data_context, filesystem_csv_2, capsys):
 
     assert "index.html" in os.listdir(os.path.join(
         project_root_dir,
-        "uncommitted/documentation/local_site/index.html"
+        "uncommitted/documentation/local_site"
         )
     )
 
     assert "index.html" in os.listdir(os.path.join(
         project_root_dir,
-        "uncommitted/documentation/team_site/index.html"
+        "uncommitted/documentation/team_site"
         )
     )
 
