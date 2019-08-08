@@ -314,7 +314,7 @@ def build_documentation(context, site_name=None, data_asset_name=None):
         site_names = [site_name]
     else:
         site_names=None
-    index_page_locator_infos = context.build_data_documentation(site_names=site_names, data_asset_name=data_asset_name)[0]
+    index_page_locator_infos = context.build_data_documentation(site_names=site_names, data_asset_name=data_asset_name)
 
     msg = """
 The following data documentation HTML sites were generated:
@@ -322,7 +322,7 @@ The following data documentation HTML sites were generated:
 """
     for site_name, index_page_locator_info in index_page_locator_infos.items():
         msg += site_name + ":\n"
-        for key, value in index_page_locator_info.items():
+        for key, value in index_page_locator_info[0].items():
             msg += "   <green>" + key + ": " + value + "</green>\n"
 
     cli_message(msg)
