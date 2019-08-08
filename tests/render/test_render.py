@@ -324,3 +324,9 @@ def test_render_string_template():
             </span>""".replace(" ", "").replace("\t", "").replace("\n", "")
 
     assert res == expected
+
+def test_render_string_template_bug_1():
+    #Looks like string templates can't contain dollar signs. We need some kind of escaping
+    with pytest.raises(ValueError):
+        template = {'template': 'Car Insurance Premiums ($)', 'tooltip': {'content': 'expect_column_to_exist', 'placement': 'top'}}
+        DefaultJinjaPageView.render_string_template(template)

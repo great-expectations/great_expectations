@@ -96,12 +96,13 @@ def test_ProfilingResultsColumnSectionRenderer_render(titanic_profiled_evrs_1, t
 
 def test_ProfilingResultsColumnSectionRenderer_render_header(titanic_profiled_name_column_evrs):
     content_blocks = []
+    # print(titanic_profiled_name_column_evrs)
     ProfilingResultsColumnSectionRenderer()._render_header(
         titanic_profiled_name_column_evrs,
         content_blocks,
         column_type = None
     )
-    print(json.dumps(content_blocks, indent=2))
+    # print(json.dumps(content_blocks, indent=2))
     
     assert len(content_blocks) == 1
     content_block = content_blocks[0]
@@ -118,6 +119,59 @@ def test_ProfilingResultsColumnSectionRenderer_render_header(titanic_profiled_na
         "tooltip": {
             "content": "expect_column_values_to_be_of_type <br>expect_column_values_to_be_in_type_list"
         }
+    }
+
+    evr_with_unescaped_dollar_sign = {
+        "success": True,
+        "result": {
+            "observed_value": "float64"
+        },
+        "exception_info": {
+            "raised_exception": False,
+            "exception_message": None,
+            "exception_traceback": None,
+        },
+        "expectation_config": {
+            "expectation_type": "expect_column_values_to_be_in_type_list",
+            "kwargs": {
+                "column": "Car Insurance Premiums ($)",
+                "type_list": [
+                    "DOUBLE_PRECISION",
+                    "DoubleType",
+                    "FLOAT",
+                    "FLOAT4",
+                    "FLOAT8",
+                    "FloatType",
+                    "NUMERIC",
+                    "float"
+                ],
+                "result_format": "SUMMARY"
+            },
+            "meta": {
+                "BasicDatasetProfiler": {
+                "confidence": "very low"
+                }
+            }
+        }
+    }
+    content_blocks = []
+    ProfilingResultsColumnSectionRenderer._render_header(
+        [evr_with_unescaped_dollar_sign],
+        content_blocks=content_blocks,
+        column_type=[],
+    )
+    print(content_blocks)
+    assert content_blocks[0] == {
+        'content_block_type': 'header',
+        'header': {
+            'template': 'Car Insurance Premiums ($$)',
+            'tooltip': {'content': 'expect_column_to_exist', 'placement': 'top'}
+        },
+        'subheader': {
+            'template': 'Type: []',
+            'tooltip': {'content': 'expect_column_values_to_be_of_type <br>expect_column_values_to_be_in_type_list'}
+        },
+        'styling': {'classes': ['col-12'], 'header': {'classes': ['alert', 'alert-secondary']}}
     }
 
 
@@ -217,6 +271,42 @@ def test_ExpectationSuiteColumnSectionRenderer_render_header(titanic_profiled_na
             }
         })
     ]
+
+    expectation_with_unescaped_dollar_sign = {
+      "expectation_type": "expect_column_values_to_be_in_type_list",
+      "kwargs": {
+        "column": "Car Insurance Premiums ($)",
+        "type_list": [
+          "DOUBLE_PRECISION",
+          "DoubleType",
+          "FLOAT",
+          "FLOAT4",
+          "FLOAT8",
+          "FloatType",
+          "NUMERIC",
+          "float"
+        ],
+        "result_format": "SUMMARY"
+      },
+      "meta": {
+        "BasicDatasetProfiler": {
+          "confidence": "very low"
+        }
+      }
+    }
+    remaining_expectations, content_blocks = ExpectationSuiteColumnSectionRenderer._render_header(
+        [expectation_with_unescaped_dollar_sign],
+        []
+    )
+    print(content_blocks)
+    assert content_blocks[0] == {
+        'content_block_type': 'header',
+        'header': 'Car Insurance Premiums ($$)',
+        'styling': {'classes': ['col-12'], 'header': {'classes': ['alert', 'alert-secondary']}}
+    }
+
+
+
 
 
 def test_ExpectationSuiteColumnSectionRenderer_render_bullet_list(titanic_profiled_name_column_expectations):

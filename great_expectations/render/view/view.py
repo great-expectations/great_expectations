@@ -163,6 +163,9 @@ class DefaultJinjaView(object):
 
     @classmethod
     def render_string_template(cls, template):
+        #NOTE: Using this line for debugging. This should probably be logged...? 
+        # print(template)
+
         # NOTE: We should add some kind of type-checking to template
         if not isinstance(template, (dict, OrderedDict)):
             return template
