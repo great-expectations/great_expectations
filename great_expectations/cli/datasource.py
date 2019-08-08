@@ -310,7 +310,7 @@ def build_documentation(context):
     """Build documentation in a context"""
     cli_message("\nBuilding documentation...")
 
-    index_page_locator_infos = context.build_data_documentation()
+    index_page_locator_infos = context.build_data_documentation()[0]
 
     msg = """
 The following data documentation HTML sites were generated:
