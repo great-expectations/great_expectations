@@ -25,18 +25,26 @@ confidence, and acceleration to data science and engineering teams.
 Key features
 --------------------------------------------------
 
-**Expectations** are the workhorse abstraction in Great Expectations. Like assertions in traditional python unit tests, Expectations provide a flexible, declarative language for describing expected behavior. Unlike traditional unit tests, Great Expectations applies Expectations to data instead of code.
+**Expectations**
 
-**Execution engines** : Following the philosophy of "take the compute to the data," Great Expectations supports native execution of Expectations in common data engineering frameworks: pandas, SQL (through the SQLAlchemy core), and Spark. Future releases of Great Expectations will extend this functionality to other frameworks, such as dask and BigQuery.
+	Expectations are the workhorse abstraction in Great Expectations. Like assertions in traditional python unit tests, Expectations provide a flexible, declarative language for describing expected behavior. Unlike traditional unit tests, Great Expectations applies Expectations to data instead of code.
+
+	Great Expectations currently supports native execution of Expectations in three environments: pandas, SQL (through the SQLAlchemy core), and Spark. This approach follows the philosophy of "take the compute to the data." Future releases of Great Expectations will extend this functionality to other frameworks, such as dask and BigQuery.
 
 **Automated data profiling** : 
 
-**DataContexts and DataSources** allow you to configure connections your data stores, using names you’re already familiar with: “the ml_training_results bucket in S3,” “the Users table in Redshift.” GE will soon provide convenience libraries to introspect most common data stores (SQL databases, data directories and buckets) and data execution frameworks (airflow, dbt, dagster, prefect.io). This lets you fetch, validate, profile, and document your data in a way that’s meaningful within your existing infrastructure and work environment.
+**DataContexts and DataSources**
 
-**Tooling for validation** : Evaluating Expectations against data is just one step in a typical validation workflow. DataContexts will make it simple to post notifications to slack, store validation results to a shared bucket, connect to schedulers, loggers, etc.
-Although we sometimes talk informally about validating “tables,” it’s much more common to validate batches of new data—-subsets of tables, rather than whole tables. DataContexts provide simple, universal syntax to generate, fetch, and validate Batches of data from any of your DataSources.
+	...allow you to configure connections your data stores, using names you’re already familiar with: “the ml_training_results bucket in S3,” “the Users table in Redshift.” GE will soon provide convenience libraries to introspect most common data stores (SQL databases, data directories and buckets) and data execution frameworks (airflow, dbt, dagster, prefect.io). This lets you fetch, validate, profile, and document your data in a way that’s meaningful within your existing infrastructure and work environment.
 
-**Compile to Docs** : This release provides new methods and classes to `render` Expectations to clean, human-readable documentation. Since docs are compiled from tests and you are running tests against new data as it arrives, your documentation is guaranteed to never go stale.
+**Tooling for validation**
+
+	Evaluating Expectations against data is just one step in a typical validation workflow. DataContexts will make it simple to post notifications to slack, store validation results to a shared bucket, connect to schedulers, loggers, etc.
+	Although we sometimes talk informally about validating “tables,” it’s much more common to validate batches of new data—-subsets of tables, rather than whole tables. DataContexts provide simple, universal syntax to generate, fetch, and validate Batches of data from any of your DataSources.
+
+**Compile to Docs**
+
+	This release provides new methods and classes to `render` Expectations to clean, human-readable documentation. Since docs are compiled from tests and you are running tests against new data as it arrives, your documentation is guaranteed to never go stale.
 
 
 Why would I use Great Expectations?
