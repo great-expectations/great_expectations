@@ -306,11 +306,15 @@ To learn more: <blue>https://docs.greatexpectations.io/en/latest/guides/data_doc
         )
 
 
-def build_documentation(context):
+def build_documentation(context, site_name=None, data_asset_name=None):
     """Build documentation in a context"""
     cli_message("\nBuilding documentation...")
 
-    index_page_locator_infos = context.build_data_documentation()
+    if site_name is not None:
+        site_names = [site_name]
+    else:
+        site_names=None
+    index_page_locator_infos = context.build_data_documentation(site_names=site_names, data_asset_name=data_asset_name)
 
     msg = """
 The following data documentation HTML sites were generated:
