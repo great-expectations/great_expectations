@@ -1671,7 +1671,7 @@ class DataContext(object):
         else:
             return return_obj
 
-    def build_data_documentation(self, site_names=None):
+    def build_data_documentation(self, site_names=None, data_asset_name=None):
         """
         TODO!!!!
 
@@ -1692,7 +1692,7 @@ class DataContext(object):
                     #TODO: get the builder class
                     #TODO: build the site config by using defaults if needed
                     complete_site_config = site_config
-                    index_page_locator_info = SiteBuilder.build(self, complete_site_config)
+                    index_page_locator_info = SiteBuilder.build(self, complete_site_config, specified_data_asset_name=data_asset_name)
                     if index_page_locator_info:
                         index_page_locator_infos[site_name] = index_page_locator_info
 
