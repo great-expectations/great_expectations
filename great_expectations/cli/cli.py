@@ -239,9 +239,6 @@ def profile(datasource_name, data_assets, profile_all_data_assets, directory):
     DATASOURCE_NAME: the datasource to profile, or leave blank to profile all datasources."""
 
 
-    if profile_all_data_assets:
-        max_data_assets = None
-
     try:
         context = DataContext(directory)
     except ConfigNotFoundError:
@@ -250,8 +247,11 @@ def profile(datasource_name, data_assets, profile_all_data_assets, directory):
 
     if datasource_name is None:
         datasources = [datasource["name"] for datasource in context.list_datasources()]
-        for datasource_name in datasources:
-            profile_datasource(context, datasource_name, max_data_assets=max_data_assets)
+        if len(datasources) > 1:
+            cli_message("Error: please specify the datasource to profile. Available datasources: " + ", ".join(datasources))
+            return
+        else:
+            profile_datasource(context, datasources[0], data_assets=data_assets)
     else:
         profile_datasource(context, datasource_name, data_assets=data_assets)
 
