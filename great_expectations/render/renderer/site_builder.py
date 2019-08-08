@@ -76,7 +76,7 @@ class SiteBuilder():
     """
 
     @classmethod
-    def build(cls, data_context, site_config):
+    def build(cls, data_context, site_config, specified_data_asset_name=None):
         """
 
         :param data_context:
@@ -115,6 +115,9 @@ class SiteBuilder():
                     for generator, v2 in v1.items():
                         for generator_asset, expectation_suite_names in v2.items():
                             data_asset_name = data_context.data_asset_name_delimiter.join([datasource, generator, generator_asset])
+                            if specified_data_asset_name:
+                               if data_context._normalize_data_asset_name(data_asset_name) != data_context._normalize_data_asset_name(specified_data_asset_name):
+                                   break
                             for expectation_suite_name in expectation_suite_names:
                                 validation = data_context.get_validation_result(data_asset_name,
                                                                                 expectation_suite_name=expectation_suite_name,
@@ -182,6 +185,9 @@ class SiteBuilder():
                     for generator, v2 in v1.items():
                         for generator_asset, expectation_suite_names in v2.items():
                             data_asset_name = data_context.data_asset_name_delimiter.join([datasource, generator, generator_asset])
+                            if specified_data_asset_name:
+                               if data_context._normalize_data_asset_name(data_asset_name) != data_context._normalize_data_asset_name(specified_data_asset_name):
+                                   break
                             for expectation_suite_name in expectation_suite_names:
                                 validation = data_context.get_validation_result(data_asset_name,
                                                                                 expectation_suite_name=expectation_suite_name,
@@ -247,6 +253,9 @@ class SiteBuilder():
                     for generator_asset, expectation_suite_names in v2.items():
                         data_asset_name = data_context.data_asset_name_delimiter.join(
                             [datasource, generator, generator_asset])
+                        if specified_data_asset_name:
+                               if data_context._normalize_data_asset_name(data_asset_name) != data_context._normalize_data_asset_name(specified_data_asset_name):
+                                   break
                         for expectation_suite_name in expectation_suite_names:
                             expectation_suite = data_context.get_expectation_suite(
                                 data_asset_name,
