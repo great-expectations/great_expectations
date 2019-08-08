@@ -298,7 +298,6 @@ To learn more: <blue>https://docs.greatexpectations.io/en/latest/guides/data_doc
     if click.confirm("Build HTML documentation?",
                      default=True
                      ):
-        cli_message("\nBuilding documentation...")
         build_documentation(context)
 
     else:
@@ -309,12 +308,20 @@ To learn more: <blue>https://docs.greatexpectations.io/en/latest/guides/data_doc
 
 def build_documentation(context):
     """Build documentation in a context"""
-    context.build_data_documentation()
-    cli_message(
-        """
-To view the generated data documentation, open this file in a web browser:
-    <green>great_expectations/uncommitted/documentation/index.html</green>
-""")
+    cli_message("\nBuilding documentation...")
+
+    index_page_locator_infos = context.build_data_documentation()
+
+    msg = """
+The following data documentation HTML sites were generated:
+    
+"""
+    for site_name, index_page_locator_info in index_page_locator_infos.items():
+        msg += site_name + ":\n"
+        for key, value in index_page_locator_info.items():
+            msg += "   <green>" + key + ": " + value + "</green>\n"
+
+    cli_message(msg)
 
 
 msg_prompt_choose_data_source = """

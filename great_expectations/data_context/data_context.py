@@ -1467,12 +1467,14 @@ class DataContext(object):
             run_id:
 
         Returns:
-            None
+            A dictionary describing how to locate the resource (specific to resource_store type)
         """
 
         if resource_store is None:
             logger.error("No resource store specified")
             return
+
+        resource_locator_info = {}
 
         if resource_store['type'] == "s3":
             raise NotImplementedError("s3 is not currently a supported resource_store type for writing")
@@ -1505,8 +1507,12 @@ class DataContext(object):
             safe_mmkdir(os.path.dirname(path))
             with open(path, "w") as writer:
                 writer.write(resource)
+
+            resource_locator_info['path'] = path
         else:
             raise DataContextError("Unrecognized resource store type.")
+
+        return resource_locator_info
 
     def list_validation_results(self, validations_store=None):
         """
@@ -1670,8 +1676,11 @@ class DataContext(object):
         TODO!!!!
 
         Returns:
-            None
+            A dictionary with the names of the updated data documentation sites as keys and the the location info
+            of their index.html files as values
         """
+
+        index_page_locator_infos = {}
 
         # construct the config (merge defaults with specifics)
 
@@ -1683,7 +1692,11 @@ class DataContext(object):
                     #TODO: get the builder class
                     #TODO: build the site config by using defaults if needed
                     complete_site_config = site_config
-                    SiteBuilder.build(self, complete_site_config)
+                    index_page_locator_info = SiteBuilder.build(self, complete_site_config)
+                    if index_page_locator_info:
+                        index_page_locator_infos[site_name] = index_page_locator_info
+
+        return index_page_locator_infos
 
     def get_absolute_path(self, path):
         #TODO: ideally, the data context object should resolve all paths before
