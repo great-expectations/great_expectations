@@ -36,6 +36,11 @@ try:
     import snowflake.sqlalchemy.snowdialect
 except ImportError:
     snowflake = None
+    
+try:
+    import pyhive.sqlalchemy_hive.dialect
+except ImportError:
+    pyhive_hive = None
 
 
 class MetaSqlAlchemyDataset(Dataset):
@@ -227,7 +232,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         elif self.engine.dialect.name.lower() == "redshift":
             self.dialect = import_module("sqlalchemy_redshift.dialect")
         elif self.engine.dialect.name.lower() == "hive":
-            self.dialect = import_module("sqlalchemy_hive.dialect")
+            self.dialect = import_module("pyhive.sqlalchemy_hive.dialect")
         else:
             self.dialect = None
 
