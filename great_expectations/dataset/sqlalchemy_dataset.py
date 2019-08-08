@@ -226,6 +226,8 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             self.dialect = import_module("snowflake.sqlalchemy.snowdialect")
         elif self.engine.dialect.name.lower() == "redshift":
             self.dialect = import_module("sqlalchemy_redshift.dialect")
+        elif self.engine.dialect.name.lower() == "hive":
+            self.dialect = import_module("sqlalchemy_hive.dialect")
         else:
             self.dialect = None
 
@@ -498,8 +500,14 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         It hasn't been tested in all SQL dialects, and may change based on community feedback.
         :param custom_sql:
         """
+        if self.engine.dialect.name.lower() == "hive":
+            table_name_formatted = table_name
+        else:  
+            table_name_formatted = "\"{table_name}\"".format(table_name=table_name)
+            
         stmt = "CREATE TEMPORARY TABLE {table_name} AS {custom_sql}".format(
-            table_name=table_name, custom_sql=custom_sql)
+            table_name=table_name_formatted, custom_sql=custom_sql)
+        
         self.engine.execute(stmt)
 
     def column_reflection_fallback(self):
