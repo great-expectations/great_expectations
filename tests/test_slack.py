@@ -5,6 +5,7 @@ except ImportError:
     import mock
 
 from great_expectations.data_context.util import get_slack_callback, build_slack_notification_request
+from .test_utils import assertDeepAlmostEqual
 
 
 @pytest.fixture
@@ -32,7 +33,7 @@ def test_build_slack_notification_request_with_no_validation_json():
         obs = build_slack_notification_request(None)
 
     assert isinstance(obs, dict)
-    assert obs == {
+    expected = {
         "blocks": [
             {
                 "type": "section",
@@ -52,6 +53,7 @@ def test_build_slack_notification_request_with_no_validation_json():
             },
         ]
     }
+    assertDeepAlmostEqual(expected, obs)
 
 
 def test_build_slack_notification_request_with_successful_validation(validation_json):
@@ -60,7 +62,7 @@ def test_build_slack_notification_request_with_successful_validation(validation_
         obs = build_slack_notification_request(validation_json)
 
     assert isinstance(obs, dict)
-    assert obs == {
+    expected = {
         "blocks": [
             {
                 "type": "section",
@@ -94,6 +96,8 @@ def test_build_slack_notification_request_with_successful_validation(validation_
             },
         ]
     }
+    assertDeepAlmostEqual(expected, obs)
+
 
 def test_build_slack_notification_request_with_successful_validation_and_batch_kwargs(validation_json):
     validation_json["meta"]["batch_kwargs"] = {
@@ -109,7 +113,7 @@ def test_build_slack_notification_request_with_successful_validation_and_batch_k
 
     assert isinstance(obs, dict)
     print(obs)
-    assert obs == {
+    expected = {
         "blocks": [
             {
                 "type": "section",
@@ -150,6 +154,8 @@ def test_build_slack_notification_request_with_successful_validation_and_batch_k
             },
         ]
     }
+    assertDeepAlmostEqual(expected, obs)
+    
 
 def test_build_slack_notification_request_with_failed_validation(validation_json):
     validation_json["success"] = False
@@ -158,7 +164,7 @@ def test_build_slack_notification_request_with_failed_validation(validation_json
         obs = build_slack_notification_request(validation_json)
 
     assert isinstance(obs, dict)
-    assert obs == {
+    expected = {
         "blocks": [
             {
                 "type": "section",
@@ -192,6 +198,7 @@ def test_build_slack_notification_request_with_failed_validation(validation_json
             },
         ]
     }
+    assertDeepAlmostEqual(expected, obs)
 
 
 def test_build_slack_notification_request_with_successful_validation_and_no_result_report(
@@ -203,7 +210,7 @@ def test_build_slack_notification_request_with_successful_validation_and_no_resu
         obs = build_slack_notification_request(validation_json)
 
     assert isinstance(obs, dict)
-    assert obs == {
+    expected = {
         "blocks": [
             {
                 "type": "section",
@@ -230,6 +237,7 @@ def test_build_slack_notification_request_with_successful_validation_and_no_resu
             },
         ]
     }
+    assertDeepAlmostEqual(expected, obs)
 
 
 def test_build_slack_notification_request_with_successful_validation_and_no_dataset(
@@ -241,7 +249,7 @@ def test_build_slack_notification_request_with_successful_validation_and_no_data
         obs = build_slack_notification_request(validation_json)
 
     assert isinstance(obs, dict)
-    assert obs == {
+    expected = {
         "blocks": [
             {
                 "type": "section",
@@ -268,3 +276,4 @@ def test_build_slack_notification_request_with_successful_validation_and_no_data
             },
         ]
     }
+    assertDeepAlmostEqual(expected, obs)
