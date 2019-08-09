@@ -264,11 +264,17 @@ class ExpectationSuitePageRenderer(Renderer):
                         # ???: Should converting to markdown be the renderer's job, or the view's job?
                         # Renderer is easier, but will end up mixing HTML strings with content_block info.
                         if type(notes["content"]) == str:
-                            note_content = [pypandoc.convert_text(notes["content"], format='md', to="html")]
+                            try:
+                                note_content = [pypandoc.convert_text(notes["content"], format='md', to="html")]
+                            except OSError:
+                                note_content = [notes["content"]]
                         
                         elif type(notes["content"]) == list:
-                            note_content = [pypandoc.convert_text(note, format='md', to="html") for note in
+                            try:
+                                note_content = [pypandoc.convert_text(note, format='md', to="html") for note in
                                             notes["content"]]
+                            except OSError:
+                                note_content = [note for note in notes["content"]]
                         
                         else:
                             logger.warning("Unrecognized Expectation suite notes format. Skipping rendering.")
