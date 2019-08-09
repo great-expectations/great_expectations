@@ -827,13 +827,6 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 return "REGEXP" if positive else "NOT REGEXP"
         except (AttributeError, TypeError):  # TypeError can occur if the driver was not installed and so is None
             pass
-        
-        try:
-            # Hive
-            if isinstance(self.engine.dialect, pyhive.sqlalchemy_hive.HiveDialect):
-                return "REGEXP" if positive else "NOT REGEXP"
-        except (AttributeError, TypeError):  # TypeError can occur if the driver was not installed and so is None
-            pass
 
     @MetaSqlAlchemyDataset.column_map_expectation
     def expect_column_values_to_match_regex(
