@@ -232,7 +232,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         elif self.engine.dialect.name.lower() == "redshift":
             self.dialect = import_module("sqlalchemy_redshift.dialect")
         elif self.engine.dialect.name.lower() == "hive":
-            self.dialect = import_module("pyhive.sqlalchemy_hive.dialect")
+            self.dialect = import_module("sqlalchemy_hive.dialect")
         else:
             self.dialect = None
 
@@ -818,6 +818,13 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             # Snowflake
             if isinstance(self.engine.dialect, snowflake.sqlalchemy.snowdialect.SnowflakeDialect):
                 return "RLIKE" if positive else "NOT RLIKE"
+        except (AttributeError, TypeError):  # TypeError can occur if the driver was not installed and so is None
+            pass
+        
+        try:
+            # Hive
+            if isinstance(self.engine.dialect, pyhive.sqlalchemy_hive.dialect.HiveDialect):
+                return "REGEXP" if positive else "NOT REGEXP"
         except (AttributeError, TypeError):  # TypeError can occur if the driver was not installed and so is None
             pass
 
