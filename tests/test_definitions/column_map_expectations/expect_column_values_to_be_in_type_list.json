@@ -3,16 +3,44 @@
   "datasets": [
     {
       "data": {
-        "x" : [1,2,4],
-        "y" : [1.0,2.2,5.3],
-        "z" : ["hello", "jello", "mello"],
-        "n" : [null, null, null],
-        "b" : [false, true, false],
-        "s" : ["hello", "jello", 1],
-        "s1" : ["hello", 2.0, 1]
+        "x": [
+          1,
+          2,
+          4
+        ],
+        "y": [
+          1.0,
+          2.2,
+          5.3
+        ],
+        "z": [
+          "hello",
+          "jello",
+          "mello"
+        ],
+        "n": [
+          null,
+          null,
+          null
+        ],
+        "b": [
+          false,
+          true,
+          false
+        ],
+        "s": [
+          "hello",
+          "jello",
+          1
+        ],
+        "s1": [
+          "hello",
+          2.0,
+          1
+        ]
       },
       "schemas": {
-        "pandas" : {
+        "pandas": {
           "x": "int",
           "y": "float",
           "z": "str",
@@ -62,231 +90,313 @@
         {
           "title": "positive_test_pandas_integer_column",
           "exact_match_out": false,
-          "in":{
+          "in": {
             "column": "x",
-            "type_list": ["int"]
+            "type_list": [
+              "int"
+            ]
           },
-          "out":{
-            "success":true,
-            "unexpected_list": [],
-            "unexpected_index_list": []
+          "out": {
+            "success": true
           },
-          "only_for": ["pandas"]
+          "only_for": [
+            "pandas"
+          ]
         },
         {
           "title": "positive_test_sqlalchemy_integer_column",
           "exact_match_out": false,
-          "in":{
+          "in": {
             "column": "x",
-            "type_list": ["INTEGER"]
+            "type_list": [
+              "INTEGER"
+            ]
           },
-          "out":{
-            "success":true
+          "out": {
+            "success": true
           },
-          "only_for": ["sqlalchemy"]
+          "only_for": [
+            "sqlalchemy"
+          ]
         },
         {
           "title": "positive_test_spark_integer_column",
           "exact_match_out": false,
-          "in":{
+          "in": {
             "column": "x",
-            "type_list": ["IntegerType"]
+            "type_list": [
+              "IntegerType"
+            ]
           },
-          "out":{
-            "success":true
+          "out": {
+            "success": true
           },
-          "only_for": ["spark"]
+          "only_for": [
+            "spark"
+          ]
         },
         {
           "title": "negative_test_pandas_float_values_are_not_strings",
           "exact_match_out": false,
-          "in":{
+          "in": {
             "column": "x",
-            "type_list": ["string"]
+            "type_list": [
+              "string"
+            ]
           },
-          "out":{
-            "success": false,
-            "unexpected_list": [1,2,4],
-            "unexpected_index_list": [0,1,2]
+          "out": {
+            "success": false
           },
-          "only_for": ["pandas"]
+          "only_for": [
+            "pandas"
+          ]
         },
         {
           "title": "negative_test_sqlalchemy_float_values_are_not_TEXT",
           "exact_match_out": false,
-          "in":{
+          "in": {
             "column": "x",
-            "type_list": ["TEXT"]
+            "type_list": [
+              "TEXT"
+            ]
           },
-          "out":{
+          "out": {
             "success": false
           },
-          "only_for": ["sqlalchemy"]
+          "only_for": [
+            "sqlalchemy"
+          ]
         },
         {
           "title": "negative_test_spark_float_values_are_not_StringType",
           "exact_match_out": false,
-          "in":{
+          "in": {
             "column": "x",
-            "type_list": ["StringType"]
+            "type_list": [
+              "StringType"
+            ]
           },
-          "out":{
+          "out": {
             "success": false
           },
-          "only_for": ["spark"]
+          "only_for": [
+            "spark"
+          ]
         },
         {
           "title": "positive_test_float_values",
           "exact_match_out": false,
-          "in":{
+          "in": {
             "column": "y",
-            "type_list": ["float"]
+            "type_list": [
+              "float"
+            ]
           },
-          "out":{
-            "success":true,
-            "unexpected_list":[],
-            "unexpected_index_list":[]
+          "out": {
+            "success": true
           },
-          "only_for": ["pandas"]
+          "only_for": [
+            "pandas"
+          ]
         },
         {
           "title": "positive_test_float_values",
           "exact_match_out": false,
-          "in":{
+          "in": {
             "column": "y",
-            "type_list": ["DOUBLE_PRECISION", "FLOAT"]
+            "type_list": [
+              "DOUBLE_PRECISION",
+              "FLOAT"
+            ]
           },
-          "out":{
-            "success":true
+          "out": {
+            "success": true
           },
-          "only_for": ["sqlalchemy"]
+          "only_for": [
+            "sqlalchemy"
+          ]
         },
         {
           "title": "positive_test_float_values",
           "exact_match_out": false,
-          "in":{
+          "in": {
             "column": "y",
-            "type_list": ["FloatType"]
+            "type_list": [
+              "FloatType"
+            ]
           },
-          "out":{
-            "success":true
+          "out": {
+            "success": true
           },
-          "only_for": ["spark"]
+          "only_for": [
+            "spark"
+          ]
         },
         {
           "title": "positive_test_string_values",
           "exact_match_out": false,
-          "in":{
+          "in": {
             "column": "z",
-            "type_list": ["string"]
+            "type_list": [
+              "str"
+            ]
           },
-          "out":{
+          "out": {
             "success": true,
             "unexpected_list": [],
             "unexpected_index_list": []
           },
-          "only_for": ["pandas"]
+          "only_for": [
+            "pandas"
+          ]
         },
         {
           "title": "positive_test_TEXT_values",
           "exact_match_out": false,
-          "in":{
+          "in": {
             "column": "z",
-            "type_list": ["TEXT", "VARCHAR"]
+            "type_list": [
+              "TEXT",
+              "VARCHAR"
+            ]
           },
-          "out":{
+          "out": {
             "success": true
           },
-          "only_for": ["sqlalchemy"]
+          "only_for": [
+            "sqlalchemy"
+          ]
         },
         {
           "title": "positive_test_StringType_values",
           "exact_match_out": false,
-          "in":{
+          "in": {
             "column": "z",
-            "type_list": ["StringType"]
+            "type_list": [
+              "StringType"
+            ]
           },
-          "out":{
+          "out": {
             "success": true
           },
-          "only_for": ["spark"]
+          "only_for": [
+            "spark"
+          ]
         },
         {
           "title": "positive_test_boolean_values",
           "exact_match_out": false,
-          "in":{
+          "in": {
             "column": "b",
-            "type_list": ["boolean"]
+            "type_list": [
+              "bool"
+            ]
           },
-          "out":{
-            "success": true,
-            "unexpected_list": [],
-            "unexpected_index_list": []
+          "out": {
+            "success": true
           },
-          "only_for": ["pandas"]
+          "only_for": [
+            "pandas"
+          ]
         },
         {
           "title": "positive_test_boolean_values",
           "exact_match_out": false,
-          "in":{
+          "in": {
             "column": "b",
-            "type_list": ["BOOLEAN"]
+            "type_list": [
+              "BOOLEAN"
+            ]
           },
-          "out":{
+          "out": {
             "success": true
           },
-          "only_for": ["sqlalchemy"]
+          "only_for": [
+            "sqlalchemy"
+          ]
         },
         {
           "title": "positive_test_boolean_values",
           "exact_match_out": false,
-          "in":{
+          "in": {
             "column": "b",
-            "type_list": ["BooleanType"]
+            "type_list": [
+              "BooleanType"
+            ]
           },
-          "out":{
+          "out": {
             "success": true
           },
-          "only_for": ["spark"]
+          "only_for": [
+            "spark"
+          ]
         },
         {
           "title": "positive_test_string_and_int_values",
           "exact_match_out": false,
-          "in":{
+          "in": {
             "column": "s",
-            "type_list": ["string", "int"]
+            "type_list": [
+              "str",
+              "int"
+            ]
           },
-          "out":{
+          "out": {
             "success": true,
             "unexpected_list": [],
             "unexpected_index_list": []
           },
-          "only_for": ["pandas"]
+          "only_for": [
+            "pandas"
+          ]
         },
         {
           "title": "positive_test_TEXT_and_INTEGER_values",
           "exact_match_out": false,
-          "in":{
+          "in": {
             "column": "s",
-            "type_list": ["TEXT", "VARCHAR", "INTEGER"]
+            "type_list": [
+              "TEXT",
+              "VARCHAR",
+              "INTEGER"
+            ]
           },
-          "out":{
+          "out": {
             "success": true
           },
-          "only_for": ["sqlalchemy"]
+          "only_for": [
+            "sqlalchemy"
+          ]
         },
         {
           "title": "positive_test_StringType_and_IntegerType_values",
           "exact_match_out": false,
-          "in":{
+          "in": {
             "column": "s",
-            "type_list": ["StringType", "IntegerType"]
+            "type_list": [
+              "StringType",
+              "IntegerType"
+            ]
           },
-          "out":{
+          "out": {
             "success": true
           },
-          "only_for": ["spark"]
+          "only_for": [
+            "spark"
+          ]
+        },
+        {
+          "title": "positive_test_placeholder_expectation",
+          "exact_match_out": false,
+          "in": {
+            "column": "s",
+            "type_list": null
+          },
+          "out": {
+            "success": true
+          }
         }
       ]
-    }]
+    }
+  ]
 }

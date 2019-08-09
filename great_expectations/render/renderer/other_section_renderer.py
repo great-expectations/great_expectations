@@ -7,12 +7,17 @@ from .renderer import Renderer
 from .content_block import(
     ValueListContentBlockRenderer,
     TableContentBlockRenderer,
-    PrescriptiveBulletListContentBlockRenderer
+    ExpectationSuiteBulletListContentBlockRenderer
 )
-from great_expectations.dataset.dataset import Dataset
+from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
+from great_expectations.render.types import (
+    RenderedComponentContent,
+    RenderedSectionContent,
+    RenderedComponentContentWrapper,
+)
 
 
-class DescriptiveOverviewSectionRenderer(Renderer):
+class ProfilingResultsOverviewSectionRenderer(Renderer):
 
     @classmethod
     def render(cls, evrs, section_name=None):
@@ -28,14 +33,14 @@ class DescriptiveOverviewSectionRenderer(Renderer):
         cls._render_warnings(evrs, content_blocks)
         cls._render_expectation_types(evrs, content_blocks)
 
-        return {
+        return RenderedSectionContent(**{
             "section_name": section_name,
             "content_blocks": content_blocks
-        }
+        })
 
     @classmethod
     def _render_header(cls, evrs, content_blocks):
-        content_blocks.append({
+        content_blocks.append(RenderedComponentContent(**{
             "content_block_type": "header",
             "header": "Overview",
             "styling": {
@@ -44,7 +49,7 @@ class DescriptiveOverviewSectionRenderer(Renderer):
                     "classes": ["alert", "alert-secondary"]
                 }
             }
-        })
+        }))
 
     @classmethod
     def _render_dataset_info(cls, evrs, content_blocks):
@@ -54,22 +59,21 @@ class DescriptiveOverviewSectionRenderer(Renderer):
         table_rows.append(["Number of variables", len(cls._get_column_list_from_evrs(evrs)), ])
 
         table_rows.append([
-            {
-                "template": "Number of observations",
-                "params": {},
-                # "styling": {
-                #     "attributes": {
-                #         "data-toggle": "popover",
-                #         "data-trigger": "hover",
-                #         "data-placement": "top",
-                #         "data-content": "expect_table_row_count_to_be_between",
-                #         "container": "body",
-                #     }
-
-                # }
-            },
-            "?" if not expect_table_row_count_to_be_between_evr else expect_table_row_count_to_be_between_evr["result"][
-                "observed_value"]
+            RenderedComponentContent(**{
+                "content_block_type": "string_template",
+                "string_template": {
+                    "template": "Number of observations",
+                    "tooltip": {
+                        "content": "expect_table_row_count_to_be_between"
+                    },
+                    "params": {
+                        "tooltip_text": "Number of observations"
+                    }
+                }
+            }),
+            #??? : What is this?
+            # "?" if not expect_table_row_count_to_be_between_evr else expect_table_row_count_to_be_between_evr["result"][
+            #     "observed_value"]
         ])
 
         table_rows += [
@@ -77,10 +81,10 @@ class DescriptiveOverviewSectionRenderer(Renderer):
             # ["Duplicate rows", "0 (0.0%)", ], #TODO: bring back when we have an expectation for this
         ]
 
-        content_blocks.append({
+        content_blocks.append(RenderedComponentContent(**{
             "content_block_type": "table",
             "header": "Dataset info",
-            "table_rows": table_rows,
+            "table": table_rows,
             "styling": {
                 "classes": ["col-6", "table-responsive"],
                 "styles": {
@@ -90,7 +94,7 @@ class DescriptiveOverviewSectionRenderer(Renderer):
                     "classes": ["table", "table-sm"]
                 }
             },
-        })
+        }))
 
     @classmethod
     def _render_variable_types(cls, evrs, content_blocks):
@@ -100,10 +104,10 @@ class DescriptiveOverviewSectionRenderer(Renderer):
         column_type_counter = Counter(column_types.values())
         table_rows = [[type, str(column_type_counter[type])] for type in ["int", "float", "string", "--"]]
 
-        content_blocks.append({
+        content_blocks.append(RenderedComponentContent(**{
             "content_block_type": "table",
             "header": "Variable types",
-            "table_rows": table_rows,
+            "table": table_rows,
             "styling": {
                 "classes": ["col-6", "table-responsive", ],
                 "styles": {
@@ -113,7 +117,7 @@ class DescriptiveOverviewSectionRenderer(Renderer):
                     "classes": ["table", "table-sm"]
                 }
             },
-        })
+        }))
 
     @classmethod
     def _render_expectation_types(cls, evrs, content_blocks):
@@ -126,23 +130,27 @@ class DescriptiveOverviewSectionRenderer(Renderer):
         # table_rows = sorted(type_counts.items(), key=lambda kv: -1*kv[1])
         bullet_list = sorted(type_counts.items(), key=lambda kv: -1*kv[1])
 
-        bullet_list = [{
-            "template": "$expectation_type $expectation_count",
-            "params": {
-                "expectation_type": tr[0],
-                "expectation_count": tr[1],
-            },
-            "styling": {
-                "classes": ["list-group-item", "d-flex", "justify-content-between", "align-items-center"],
-                "params": {
-                    "expectation_count": {
-                        "classes": ["badge", "badge-secondary", "badge-pill"],
+        bullet_list = [
+            RenderedComponentContent(**{
+                "content_block_type": "string_template",
+                "string_template": {
+                    "template": "$expectation_type $expectation_count",
+                    "params": {
+                        "expectation_type": tr[0],
+                        "expectation_count": tr[1],
+                    },
+                    "styling": {
+                        "classes": ["list-group-item", "d-flex", "justify-content-between", "align-items-center"],
+                        "params": {
+                            "expectation_count": {
+                                "classes": ["badge", "badge-secondary", "badge-pill"],
+                            }
+                        }
                     }
                 }
-            }
-        } for tr in bullet_list]
+            }) for tr in bullet_list]
 
-        content_blocks.append({
+        content_blocks.append(RenderedComponentContent(**{
             "content_block_type": "bullet_list",
             "header": 'Expectation types <span class="mr-3 triangle"></span>',
             "bullet_list": bullet_list,
@@ -167,7 +175,7 @@ class DescriptiveOverviewSectionRenderer(Renderer):
                     "classes": ["list-group", "collapse"],
                 },
             },
-        })
+        }))
 
     @classmethod
     def _render_warnings(cls, evrs, content_blocks):
@@ -220,7 +228,7 @@ class DescriptiveOverviewSectionRenderer(Renderer):
         # content_blocks.append({
         #     "content_block_type": "table",
         #     "header": "Warnings",
-        #     "table_rows": table_rows,
+        #     "table": table_rows,
         #     "styling": {
         #         "classes": ["col-12"],
         #         "styles": {
@@ -236,7 +244,7 @@ class DescriptiveOverviewSectionRenderer(Renderer):
     def _get_percentage_missing_cells_str(cls, evrs):
 
         columns = cls._get_column_list_from_evrs(evrs)
-        if not columns or len(columns) == 9:
+        if not columns or len(columns) == 0:
             warnings.warn("Cannot get % of missing cells - column list is empty")
             return "?"
 
@@ -247,7 +255,7 @@ class DescriptiveOverviewSectionRenderer(Renderer):
             return "?"
 
         # assume 1.0 missing for columns where ["result"]["unexpected_percent"] is not available
-        return "{0:.2f}%".format(sum([evr["result"]["unexpected_percent"] if evr["result"].get("unexpected_percent") else 1.0 for evr in expect_column_values_to_not_be_null_evrs])/len(columns)*100)
+        return "{0:.2f}%".format(sum([evr["result"]["unexpected_percent"] if "unexpected_percent" in evr["result"] and evr["result"]["unexpected_percent"] is not None else 1.0 for evr in expect_column_values_to_not_be_null_evrs])/len(columns)*100)
 
     @classmethod
     def _get_column_types(cls, evrs):
@@ -263,16 +271,23 @@ class DescriptiveOverviewSectionRenderer(Renderer):
         for evr in type_evrs:
             column = evr["expectation_config"]["kwargs"]["column"]
             if evr["expectation_config"]["expectation_type"] == "expect_column_values_to_be_in_type_list":
-                expected_types = set(evr["expectation_config"]["kwargs"]["type_list"])
-            else: # assuming expect_column_values_to_be_of_type
+                if evr["expectation_config"]["kwargs"]["type_list"] is None:
+                    expected_types = {}
+                else:
+                    expected_types = set(evr["expectation_config"]["kwargs"]["type_list"])
+            else:  # assuming expect_column_values_to_be_of_type
                 expected_types = set([evr["expectation_config"]["kwargs"]["type_"]])
 
-            if Dataset.INT_TYPE_NAMES.issubset(expected_types):
+            if expected_types.issubset(BasicDatasetProfiler.INT_TYPE_NAMES):
                 column_types[column] = "int"
-            elif Dataset.FLOAT_TYPE_NAMES.issubset(expected_types):
+            elif expected_types.issubset(BasicDatasetProfiler.FLOAT_TYPE_NAMES):
                 column_types[column] = "float"
-            elif Dataset.STRING_TYPE_NAMES.issubset(expected_types):
+            elif expected_types.issubset(BasicDatasetProfiler.STRING_TYPE_NAMES):
                 column_types[column] = "string"
+            elif expected_types.issubset(BasicDatasetProfiler.DATETIME_TYPE_NAMES):
+                column_types[column] = "datetime"
+            elif expected_types.issubset(BasicDatasetProfiler.BOOLEAN_TYPE_NAMES):
+                column_types[column] = "bool"
             else:
                 warnings.warn("The expected type list is not a subset of any of the profiler type sets: {0:s}".format(str(expected_types)))
                 column_types[column] = "--"

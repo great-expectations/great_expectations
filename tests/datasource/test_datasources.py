@@ -4,7 +4,6 @@ import pytest
 from six import PY3
 
 from ruamel.yaml import YAML
-yaml = YAML(typ='safe')
 import os
 import shutil
 
@@ -12,9 +11,10 @@ import pandas as pd
 import sqlalchemy as sa
 
 from great_expectations.exceptions import BatchKwargsError
-from great_expectations.data_context import DataContext
 from great_expectations.datasource import PandasDatasource, SqlAlchemyDatasource, SparkDFDatasource
 from great_expectations.dataset import PandasDataset, SqlAlchemyDataset, SparkDFDataset
+
+yaml = YAML(typ='safe')
 
 
 @pytest.fixture(scope="module")
@@ -95,9 +95,9 @@ def test_standalone_sqlalchemy_datasource(test_db_connection_string):
     datasource = SqlAlchemyDatasource(
         'SqlAlchemy', connection_string=test_db_connection_string, echo=False)
 
-    assert datasource.get_available_data_asset_names() == {"default": {"table_1", "table_2"}}
-    dataset1 = datasource.get_batch("table_1")
-    dataset2 = datasource.get_batch("table_2", schema='main')
+    assert datasource.get_available_data_asset_names() == {"default": {"main.table_1", "main.table_2"}}
+    dataset1 = datasource.get_batch("main.table_1")
+    dataset2 = datasource.get_batch("main.table_2")
     assert isinstance(dataset1, SqlAlchemyDataset)
     assert isinstance(dataset2, SqlAlchemyDataset)
 
@@ -105,20 +105,25 @@ def test_standalone_sqlalchemy_datasource(test_db_connection_string):
 def test_create_sqlalchemy_datasource(data_context):
     name = "test_sqlalchemy_datasource"
     type_ = "sqlalchemy"
+
+    # Use sqlite so we don't require postgres for this test.
     connection_kwargs = {
-        "drivername": "postgresql",
-        "username": "user",
-        "password": "pass",
-        "host": "host",
-        "port": 1234,
-        "database": "db",
+        "drivername": "sqlite"
     }
+    # connection_kwargs = {
+    #     "drivername": "postgresql",
+    #     "username": "postgres",
+    #     "password": "",
+    #     "host": "localhost",
+    #     "port": 5432,
+    #     "database": "test_ci",
+    # }
 
     # It should be possible to create a sqlalchemy source using these params without
     # saving a profile
     data_context.add_datasource(name, type_, **connection_kwargs)
     data_context_config = data_context.get_config()
-    assert name in data_context_config["datasources"] 
+    assert name in data_context_config["datasources"]
     assert data_context_config["datasources"][name]["type"] == type_
 
     # We should be able to get it in this session even without saving the config
@@ -131,9 +136,9 @@ def test_create_sqlalchemy_datasource(data_context):
     # But we should be able to add a source using a profile
     name = "second_source"
     data_context.add_datasource(name, type_, profile="test_sqlalchemy_datasource")
-    
+
     data_context_config = data_context.get_config()
-    assert name in data_context_config["datasources"] 
+    assert name in data_context_config["datasources"]
     assert data_context_config["datasources"][name]["type"] == type_
     assert data_context_config["datasources"][name]["profile"] == profile_name
 
@@ -143,13 +148,14 @@ def test_create_sqlalchemy_datasource(data_context):
     # Finally, we should be able to confirm that the folder structure is as expected
     with open(os.path.join(data_context.root_directory, "uncommitted/credentials/profiles.yml"), "r") as profiles_file:
         profiles = yaml.load(profiles_file)
-    
+
     assert profiles == {
         profile_name: dict(**connection_kwargs)
     }
 
 
 def test_create_sparkdf_datasource(data_context, tmp_path_factory):
+    pyspark_skip = pytest.importorskip("pyspark")
     base_dir = tmp_path_factory.mktemp('test_create_sparkdf_datasource')
     name = "test_sparkdf_datasource"
     type_ = "spark"
@@ -216,6 +222,7 @@ def test_pandas_source_readcsv(data_context, tmp_path_factory):
 
 
 def test_standalone_spark_parquet_datasource(test_parquet_folder_connection_path):
+    pyspark_skip = pytest.importorskip("pyspark")
     datasource = SparkDFDatasource('SparkParquet', base_directory=test_parquet_folder_connection_path)
 
     assert datasource.get_available_data_asset_names() == {
@@ -228,6 +235,7 @@ def test_standalone_spark_parquet_datasource(test_parquet_folder_connection_path
 
 
 def test_standalone_spark_csv_datasource(test_folder_connection_path):
+    pyspark_skip = pytest.importorskip("pyspark")
     datasource = SparkDFDatasource('SparkParquet', base_directory=test_folder_connection_path)
     assert datasource.get_available_data_asset_names() == {
         "default": set(['test'])
@@ -239,6 +247,7 @@ def test_standalone_spark_csv_datasource(test_folder_connection_path):
 
 
 def test_standalone_spark_passthrough_generator_datasource(data_context, dataset):
+    pyspark_skip = pytest.importorskip("pyspark")
     # noinspection PyUnusedLocal
     datasource = data_context.add_datasource("spark_source", "spark", generators={"passthrough": {"type": "memory"}})
 
@@ -267,6 +276,7 @@ def test_standalone_spark_passthrough_generator_datasource(data_context, dataset
 
 
 def test_invalid_reader_sparkdf_datasource(tmp_path_factory):
+    pyspark_skip = pytest.importorskip("pyspark")
     basepath = str(tmp_path_factory.mktemp("test_invalid_reader_sparkdf_datasource"))
     datasource = SparkDFDatasource('mysparksource', base_directory=basepath)
 

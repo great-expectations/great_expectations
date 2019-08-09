@@ -24,7 +24,7 @@ class SparkDFDatasource(Datasource):
     filesystem (the default subdir_reader generator) and databricks notebooks.
     """
 
-    def __init__(self, name="default", data_context=None, generators=None, **kwargs):
+    def __init__(self, name="default", data_context=None, data_asset_type="SparkDFDataset", generators=None, **kwargs):
         if generators is None:
             # Provide a gentle way to build a datasource with a sane default,
             # including ability to specify the base_directory
@@ -37,7 +37,10 @@ class SparkDFDatasource(Datasource):
                     "reader_options": reader_options
                 }
         }
-        super(SparkDFDatasource, self).__init__(name, type_="spark", data_context=data_context, generators=generators)
+        super(SparkDFDatasource, self).__init__(name, type_="spark",
+                                                data_context=data_context,
+                                                data_asset_type=data_asset_type,
+                                                generators=generators)
         try:
             self.spark = SparkSession.builder.getOrCreate()
         except Exception:

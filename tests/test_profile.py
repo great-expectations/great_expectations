@@ -58,6 +58,10 @@ def test_BasicDatasetProfiler():
         "created_by", "created_at"
     }
 
+    assert "notes" in expectations_config["meta"]
+    assert set(expectations_config["meta"]["notes"].keys()) == {"format", "content"}
+    assert "To add additional notes" in expectations_config["meta"]["notes"]["content"][0]
+
     added_expectations = set()
     for exp in expectations_config["expectations"]:
         added_expectations.add(exp["expectation_type"])
@@ -217,7 +221,9 @@ def test_BasicDatasetProfiler_on_titanic():
     previously stored file.
     """
     df = ge.read_csv("./tests/test_sets/Titanic.csv")
-    df.profile(BasicDatasetProfiler)
+    suite, evrs = df.profile(BasicDatasetProfiler)
+
+    # Note: the above already produces an EVR; rerunning isn't strictly necessary just for EVRs
     evrs = df.validate(result_format="SUMMARY")  # ["results"]
 
     # with open('tests/test_sets/expected_evrs_BasicDatasetProfiler_on_titanic.json', 'w+') as file:

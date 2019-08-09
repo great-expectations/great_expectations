@@ -17,16 +17,21 @@ from collections import (
 
 from great_expectations.version import __version__
 from great_expectations.data_asset.util import (
-    DotDict,
     recursively_convert_to_json_serializable,
     parse_result_format,
     get_empty_expectation_suite
 )
+from great_expectations.types import DotDict
 
-logger = logging.getLogger("DataAsset")
+logger = logging.getLogger(__name__)
+logging.captureWarnings(True)
 
 
 class DataAsset(object):
+
+    # This should in general only be changed when a subclass *adds expectations* or *changes expectation semantics*
+    # That way, multiple backends can implement the same data_asset_type
+    _data_asset_type = "DataAsset"
 
     def __init__(self, *args, **kwargs):
         """
@@ -50,9 +55,12 @@ class DataAsset(object):
         data_context = kwargs.pop("data_context", None)
         batch_kwargs = kwargs.pop("batch_kwargs", None)
         if "autoinspect_func" in kwargs:
-            warnings.warn("Autoinspect_func is no longer supported; use a profiler instead (migration is easy!).")
+            warnings.warn("Autoinspect_func is no longer supported; use a profiler instead (migration is easy!).",
+                          category=DeprecationWarning)
         super(DataAsset, self).__init__(*args, **kwargs)
-        self._interactive_evaluation = interactive_evaluation
+        self._config = {
+            "interactive_evaluation": interactive_evaluation
+        }
         self._initialize_expectations(
             expectation_suite=expectation_suite,
             data_asset_name=data_asset_name,
@@ -60,6 +68,7 @@ class DataAsset(object):
         )
         self._data_context = data_context
         self._batch_kwargs = batch_kwargs
+
         if profiler is not None:
             profiler.profile(self)
 
@@ -131,7 +140,7 @@ class DataAsset(object):
                 # Get the name of the method
                 method_name = func.__name__
 
-                # Combine all arguments into a single new "kwargs"
+                # Combine all arguments into a single new "all_args" dictionary to name positional parameters
                 all_args = dict(zip(method_arg_names, args))
                 all_args.update(kwargs)
 
@@ -202,7 +211,7 @@ class DataAsset(object):
                 exception_message = None
 
                 # Finally, execute the expectation method itself
-                if self._interactive_evaluation:
+                if self._config.get("interactive_evaluation", True):
                     try:
                         return_obj = func(self, **evaluation_args)
                 
@@ -308,6 +317,7 @@ class DataAsset(object):
                 expectation_suite_name = "default"
             self._expectation_suite = get_empty_expectation_suite(data_asset_name, expectation_suite_name)
 
+        self._expectation_suite["data_asset_type"] = self._data_asset_type
         self.default_expectation_args = {
             "include_config": False,
             "catch_exceptions": False,
@@ -365,7 +375,7 @@ class DataAsset(object):
     def _copy_and_clean_up_expectation(self,
                                        expectation,
                                        discard_result_format_kwargs=True,
-                                       discard_include_configs_kwargs=True,
+                                       discard_include_config_kwargs=True,
                                        discard_catch_exceptions_kwargs=True,
                                        ):
         """Returns copy of `expectation` without `success_on_last_run` and other specified key-value pairs removed
@@ -378,8 +388,8 @@ class DataAsset(object):
                   The expectation to copy and clean.
               discard_result_format_kwargs (boolean): \
                   if True, will remove the kwarg `output_format` key-value pair from the copied expectation.
-              discard_include_configs_kwargs (boolean):
-                  if True, will remove the kwarg `include_configs` key-value pair from the copied expectation.
+              discard_include_config_kwargs (boolean):
+                  if True, will remove the kwarg `include_config` key-value pair from the copied expectation.
               discard_catch_exceptions_kwargs (boolean):
                   if True, will remove the kwarg `catch_exceptions` key-value pair from the copied expectation.
 
@@ -396,10 +406,10 @@ class DataAsset(object):
                 del new_expectation["kwargs"]["result_format"]
                 # discards["result_format"] += 1
 
-        if discard_include_configs_kwargs:
-            if "include_configs" in new_expectation["kwargs"]:
-                del new_expectation["kwargs"]["include_configs"]
-                # discards["include_configs"] += 1
+        if discard_include_config_kwargs:
+            if "include_config" in new_expectation["kwargs"]:
+                del new_expectation["kwargs"]["include_config"]
+                # discards["include_config"] += 1
 
         if discard_catch_exceptions_kwargs:
             if "catch_exceptions" in new_expectation["kwargs"]:
@@ -412,7 +422,7 @@ class DataAsset(object):
         self,
         match_indexes,
         discard_result_format_kwargs=True,
-        discard_include_configs_kwargs=True,
+        discard_include_config_kwargs=True,
         discard_catch_exceptions_kwargs=True,
     ):
         """Copies and cleans all expectations provided by their index in DataAsset._expectation_suite.expectations.
@@ -425,8 +435,8 @@ class DataAsset(object):
                    Index numbers of the expectations from `expectation_config.expectations` to be copied and cleaned.
                discard_result_format_kwargs (boolean): \
                    if True, will remove the kwarg `output_format` key-value pair from the copied expectation.
-               discard_include_configs_kwargs (boolean):
-                   if True, will remove the kwarg `include_configs` key-value pair from the copied expectation.
+               discard_include_config_kwargs (boolean):
+                   if True, will remove the kwarg `include_config` key-value pair from the copied expectation.
                discard_catch_exceptions_kwargs (boolean):
                    if True, will remove the kwarg `catch_exceptions` key-value pair from the copied expectation.
 
@@ -443,7 +453,7 @@ class DataAsset(object):
                 self._copy_and_clean_up_expectation(
                     self._expectation_suite.expectations[i],
                     discard_result_format_kwargs,
-                    discard_include_configs_kwargs,
+                    discard_include_config_kwargs,
                     discard_catch_exceptions_kwargs,
                 )
             )
@@ -498,7 +508,7 @@ class DataAsset(object):
                           column=None,
                           expectation_kwargs=None,
                           discard_result_format_kwargs=True,
-                          discard_include_configs_kwargs=True,
+                          discard_include_config_kwargs=True,
                           discard_catch_exceptions_kwargs=True,
                           ):
         """Find matching expectations within _expectation_config.
@@ -508,8 +518,8 @@ class DataAsset(object):
             expectation_kwargs=None              : A dictionary of kwargs to match against.
             discard_result_format_kwargs=True    : In returned expectation object(s), \
             suppress the `result_format` parameter.
-            discard_include_configs_kwargs=True  : In returned expectation object(s), \
-            suppress the `include_configs` parameter.
+            discard_include_config_kwargs=True  : In returned expectation object(s), \
+            suppress the `include_config` parameter.
             discard_catch_exceptions_kwargs=True : In returned expectation object(s), \
             suppress the `catch_exceptions` parameter.
 
@@ -527,7 +537,7 @@ class DataAsset(object):
         return self._copy_and_clean_up_expectations_from_indexes(
             match_indexes,
             discard_result_format_kwargs,
-            discard_include_configs_kwargs,
+            discard_include_config_kwargs,
             discard_catch_exceptions_kwargs,
         )
 
@@ -555,7 +565,7 @@ class DataAsset(object):
             If remove_expectation doesn't find any matches, it raises a ValueError.
             If remove_expectation finds more than one matches and remove_multiple_matches!=True, it raises a ValueError.
             If dry_run=True, then `remove_expectation` acts as a thin layer to find_expectations, with the default \
-            values for discard_result_format_kwargs, discard_include_configs_kwargs, and discard_catch_exceptions_kwargs
+            values for discard_result_format_kwargs, discard_include_config_kwargs, and discard_catch_exceptions_kwargs
         """
 
         match_indexes = self.find_expectation_indexes(
@@ -593,6 +603,12 @@ class DataAsset(object):
                 else:
                     return expectation
 
+    def set_config_value(self, key, value):
+        self._config[key] = value
+
+    def get_config_value(self, key):
+        return self._config[key]
+
     def get_batch_kwargs(self):
         return self._batch_kwargs
 
@@ -602,7 +618,6 @@ class DataAsset(object):
             for item in res:
                 self.remove_expectation(expectation_type=item['expectation_config']['expectation_type'],
                                         expectation_kwargs=item['expectation_config']['kwargs'])
-#            print("WARNING: Removed %s expectations that were 'False'" % len(res))
             warnings.warn(
                 "Removed %s expectations that were 'False'" % len(res))
 
@@ -645,7 +660,7 @@ class DataAsset(object):
     def get_expectations_config(self,
                                 discard_failed_expectations=True,
                                 discard_result_format_kwargs=True,
-                                discard_include_configs_kwargs=True,
+                                discard_include_config_kwargs=True,
                                 discard_catch_exceptions_kwargs=True,
                                 suppress_warnings=False
                                 ):
@@ -654,14 +669,15 @@ class DataAsset(object):
         return self.get_expectation_suite(
             discard_failed_expectations,
             discard_result_format_kwargs,
-            discard_include_configs_kwargs,
+            discard_include_config_kwargs,
             discard_catch_exceptions_kwargs,
-            suppress_warnings)
+            suppress_warnings
+            )
 
     def get_expectation_suite(self,
                               discard_failed_expectations=True,
                               discard_result_format_kwargs=True,
-                              discard_include_configs_kwargs=True,
+                              discard_include_config_kwargs=True,
                               discard_catch_exceptions_kwargs=True,
                               suppress_warnings=False
                               ):
@@ -672,23 +688,21 @@ class DataAsset(object):
                 Only include expectations with success_on_last_run=True in the exported config.  Defaults to `True`.
             discard_result_format_kwargs (boolean): \
                 In returned expectation objects, suppress the `result_format` parameter. Defaults to `True`.
-            discard_include_configs_kwargs (boolean): \
-                In returned expectation objects, suppress the `include_configs` parameter. Defaults to `True`.
+            discard_include_config_kwargs (boolean): \
+                In returned expectation objects, suppress the `include_config` parameter. Defaults to `True`.
             discard_catch_exceptions_kwargs (boolean): \
                 In returned expectation objects, suppress the `catch_exceptions` parameter.  Defaults to `True`.
-            suppress_warnings (boolean): \
-                If true, do not print warning message about information discarded before return
 
         Returns:
-            An expectation config.
+            An expectation suite.
 
         Note:
-            get_expectation_suite does not affect the underlying config at all. The returned config is a copy of \
-            _expectation_suite, not the original object.
+            get_expectation_suite does not affect the underlying expectation suite at all. The returned suite is a \
+             copy of _expectation_suite, not the original object.
         """
-        config = dict(self._expectation_suite)
-        config = copy.deepcopy(config)
-        expectations = config["expectations"]
+
+        expectation_suite = copy.deepcopy(dict(self._expectation_suite))
+        expectations = expectation_suite["expectations"]
 
         discards = defaultdict(int)
 
@@ -707,6 +721,13 @@ class DataAsset(object):
 
             expectations = new_expectations
 
+        message = "\t%d expectation(s) included in expectation_suite." % len(expectations)
+
+        if discards["failed_expectations"] > 0 and not suppress_warnings:
+            message += " Omitting %d expectation(s) that failed when last run; set " \
+                       "discard_failed_expectations=False to include them." \
+                        % discards["failed_expectations"]
+
         for expectation in expectations:
             # FIXME: Factor this out into a new function. The logic is duplicated in remove_expectation,
             #  which calls _copy_and_clean_up_expectation
@@ -718,47 +739,40 @@ class DataAsset(object):
                     del expectation["kwargs"]["result_format"]
                     discards["result_format"] += 1
 
-            if discard_include_configs_kwargs:
-                if "include_configs" in expectation["kwargs"]:
-                    del expectation["kwargs"]["include_configs"]
-                    discards["include_configs"] += 1
+            if discard_include_config_kwargs:
+                if "include_config" in expectation["kwargs"]:
+                    del expectation["kwargs"]["include_config"]
+                    discards["include_config"] += 1
 
             if discard_catch_exceptions_kwargs:
                 if "catch_exceptions" in expectation["kwargs"]:
                     del expectation["kwargs"]["catch_exceptions"]
                     discards["catch_exceptions"] += 1
 
-        if not suppress_warnings:
-            if any([discard_failed_expectations,
-                    discard_result_format_kwargs,
-                    discard_include_configs_kwargs,
-                    discard_catch_exceptions_kwargs]):
-                print("WARNING: get_expectation_suite discarded")
-                if discard_failed_expectations:
-                    print("\t%d failing expectations" %
-                          discards["failed_expectations"])
-                if discard_result_format_kwargs:
-                    print("\t%d result_format kwargs" %
-                          discards["result_format"])
-                if discard_include_configs_kwargs:
-                    print("\t%d include_configs kwargs" %
-                          discards["include_configs"])
-                if discard_catch_exceptions_kwargs:
-                    print("\t%d catch_exceptions kwargs" %
-                          discards["catch_exceptions"])
-                print(
-                    "If you wish to change this behavior, please set discard_failed_expectations, discard_result "
-                    "format_kwargs, discard_include_configs_kwargs, and discard_catch_exceptions_kwargs appropriately.")
+        settings_message = ""
 
-        config["expectations"] = expectations
-        return config
+        if discards["result_format"] > 0 and not suppress_warnings:
+            settings_message += " result_format"
+
+        if discards["include_config"] > 0 and not suppress_warnings:
+            settings_message += " include_config"
+
+        if discards["catch_exceptions"] > 0 and not suppress_warnings:
+            settings_message += " catch_exceptions"
+
+        if len(settings_message) > 1:  # Only add this if we added one of the settings above.
+            settings_message += " settings filtered."
+
+        expectation_suite["expectations"] = expectations
+        logger.info(message + settings_message)
+        return expectation_suite
 
     def save_expectations_config(
         self,
         filepath=None,
         discard_failed_expectations=True,
         discard_result_format_kwargs=True,
-        discard_include_configs_kwargs=True,
+        discard_include_config_kwargs=True,
         discard_catch_exceptions_kwargs=True,
         suppress_warnings=False
     ):
@@ -766,14 +780,14 @@ class DataAsset(object):
                       "Please use save_expectation_suite instead.", DeprecationWarning)
         self.save_expectation_suite(
             filepath, discard_failed_expectations, discard_result_format_kwargs,
-            discard_include_configs_kwargs, discard_catch_exceptions_kwargs, suppress_warnings)
+            discard_include_config_kwargs, discard_catch_exceptions_kwargs, suppress_warnings)
 
     def save_expectation_suite(
         self,
         filepath=None,
         discard_failed_expectations=True,
         discard_result_format_kwargs=True,
-        discard_include_configs_kwargs=True,
+        discard_include_config_kwargs=True,
         discard_catch_exceptions_kwargs=True,
         suppress_warnings=False
     ):
@@ -793,7 +807,7 @@ class DataAsset(object):
                discard_result_format_kwargs (boolean): \
                    If True, the :ref:`result_format` attribute for each expectation is not written to the JSON config \
                    file.
-               discard_include_configs_kwargs (boolean): \
+               discard_include_config_kwargs (boolean): \
                    If True, the :ref:`include_config` attribute for each expectation is not written to the JSON config \
                    file.
                discard_catch_exceptions_kwargs (boolean): \
@@ -807,7 +821,7 @@ class DataAsset(object):
         expectation_suite = self.get_expectation_suite(
             discard_failed_expectations,
             discard_result_format_kwargs,
-            discard_include_configs_kwargs,
+            discard_include_config_kwargs,
             discard_catch_exceptions_kwargs,
             suppress_warnings
         )
@@ -892,10 +906,10 @@ class DataAsset(object):
         Raises:
            AttributeError - if 'catch_exceptions'=None and an expectation throws an AttributeError
         """
-        validate__interactive_evaluation = self._interactive_evaluation
-        if not self._interactive_evaluation:
+        validate__interactive_evaluation = self._config.get("interactive_evaluation")
+        if not validate__interactive_evaluation:
             # Turn this off for an explicit call to validate
-            self._interactive_evaluation = True
+            self._config["interactive_evaluation"] = True
 
         # If a different validation data context was provided, override 
         validate__data_context = self._data_context
@@ -911,7 +925,7 @@ class DataAsset(object):
             expectation_suite = self.get_expectation_suite(
                 discard_failed_expectations=False,
                 discard_result_format_kwargs=False,
-                discard_include_configs_kwargs=False,
+                discard_include_config_kwargs=False,
                 discard_catch_exceptions_kwargs=False,
             )
         elif isinstance(expectation_suite, string_types):
@@ -1037,7 +1051,7 @@ class DataAsset(object):
             result = data_context.register_validation_results(run_id, result, self)
 
         self._data_context = validate__data_context
-        self._interactive_evaluation = validate__interactive_evaluation
+        self._config["interactive_evaluation"] = validate__interactive_evaluation
 
         return result
 
@@ -1089,7 +1103,7 @@ class DataAsset(object):
         return self._expectation_suite.get("expectation_suite_name", None)
 
     def _build_evaluation_parameters(self, expectation_args, evaluation_parameters):
-        """Build a dictionary of parameters to evaluate, using the provided evaluation_paramters,
+        """Build a dictionary of parameters to evaluate, using the provided evaluation_parameters,
         AND mutate expectation_args by removing any parameter values passed in as temporary values during
         exploratory work.
         """
@@ -1109,7 +1123,7 @@ class DataAsset(object):
                                               value["$PARAMETER"]]
                 elif evaluation_parameters is not None and value["$PARAMETER"] in evaluation_parameters:
                     evaluation_args[key] = evaluation_parameters[value['$PARAMETER']]
-                elif not self._interactive_evaluation:
+                elif not self._config.get("interactive_evaluation", True):
                     pass
                 else:
                     raise KeyError(
@@ -1188,11 +1202,11 @@ class DataAsset(object):
         if 0 < result_format.get('partial_unexpected_count'):
             try:
                 partial_unexpected_counts = [
-                {'value': key, 'count': value}
-                for key, value
-                in sorted(
-                    Counter(unexpected_list).most_common(result_format['partial_unexpected_count']),
-                    key=lambda x: (-x[1], x[0]))
+                    {'value': key, 'count': value}
+                    for key, value
+                    in sorted(
+                        Counter(unexpected_list).most_common(result_format['partial_unexpected_count']),
+                        key=lambda x: (-x[1], x[0]))
                 ]
             except TypeError:
                 partial_unexpected_counts = [
@@ -1283,6 +1297,7 @@ class DataAsset(object):
         if PY3:
             argspec = inspect.getfullargspec(function)[0][1:]
         else:
+            # noinspection PyDeprecation
             argspec = inspect.getargspec(function)[0][1:]
 
         new_function = self.expectation(argspec)(function)
@@ -1319,5 +1334,5 @@ def _calc_validation_statistics(validation_results):
         evaluated_expectations=evaluated_expectations,
         unsuccessful_expectations=unsuccessful_expectations,
         success=success,
-        success_percent=success_percent,
+        success_percent=success_percent
     )

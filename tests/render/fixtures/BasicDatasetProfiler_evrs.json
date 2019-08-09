@@ -48,15 +48,7 @@
     {
       "success": true,
       "result": {
-        "element_count": 1313,
-        "missing_count": 0,
-        "missing_percent": 0.0,
-        "unexpected_count": 0,
-        "unexpected_percent": 0.0,
-        "unexpected_percent_nonmissing": 0.0,
-        "partial_unexpected_list": [],
-        "partial_unexpected_index_list": [],
-        "partial_unexpected_counts": []
+        "observed_value": "int64"
       },
       "exception_info": {
         "raised_exception": false,
@@ -69,10 +61,14 @@
           "column": "Unnamed: 0",
           "type_list": [
             "BIGINT",
+            "BYTEINT",
+            "DECIMAL",
+            "INT",
             "INTEGER",
             "IntegerType",
             "LongType",
             "SMALLINT",
+            "TINYINT",
             "int"
           ],
           "result_format": "SUMMARY"
@@ -894,15 +890,7 @@
     {
       "success": true,
       "result": {
-        "element_count": 1313,
-        "missing_count": 557,
-        "missing_percent": 0.4242193450114242,
-        "unexpected_count": 0,
-        "unexpected_percent": 0.0,
-        "unexpected_percent_nonmissing": 0.0,
-        "partial_unexpected_list": [],
-        "partial_unexpected_index_list": [],
-        "partial_unexpected_counts": []
+        "observed_value": "float64"
       },
       "exception_info": {
         "raised_exception": false,
@@ -917,6 +905,8 @@
             "DOUBLE_PRECISION",
             "DoubleType",
             "FLOAT",
+            "FLOAT4",
+            "FLOAT8",
             "FloatType",
             "NUMERIC",
             "float"
@@ -1649,15 +1639,7 @@
     {
       "success": true,
       "result": {
-        "element_count": 1313,
-        "missing_count": 0,
-        "missing_percent": 0.0,
-        "unexpected_count": 0,
-        "unexpected_percent": 0.0,
-        "unexpected_percent_nonmissing": 0.0,
-        "partial_unexpected_list": [],
-        "partial_unexpected_index_list": [],
-        "partial_unexpected_counts": []
+        "observed_value": "int64"
       },
       "exception_info": {
         "raised_exception": false,
@@ -1670,10 +1652,14 @@
           "column": "Survived",
           "type_list": [
             "BIGINT",
+            "BYTEINT",
+            "DECIMAL",
+            "INT",
             "INTEGER",
             "IntegerType",
             "LongType",
             "SMALLINT",
+            "TINYINT",
             "int"
           ],
           "result_format": "SUMMARY"
@@ -1868,15 +1854,7 @@
     {
       "success": true,
       "result": {
-        "element_count": 1313,
-        "missing_count": 0,
-        "missing_percent": 0.0,
-        "unexpected_count": 0,
-        "unexpected_percent": 0.0,
-        "unexpected_percent_nonmissing": 0.0,
-        "partial_unexpected_list": [],
-        "partial_unexpected_index_list": [],
-        "partial_unexpected_counts": []
+        "observed_value": "int64"
       },
       "exception_info": {
         "raised_exception": false,
@@ -1889,10 +1867,14 @@
           "column": "SexCode",
           "type_list": [
             "BIGINT",
+            "BYTEINT",
+            "DECIMAL",
+            "INT",
             "INTEGER",
             "IntegerType",
             "LongType",
             "SMALLINT",
+            "TINYINT",
             "int"
           ],
           "result_format": "SUMMARY"
@@ -2093,9 +2075,9 @@
     "success_percent": 84.31372549019608
   },
   "meta": {
-    "great_expectations.__version__": "__fixture__",
+    "great_expectations.__version__": "0.7.3__develop",
     "data_asset_name": null,
     "expectation_suite_name": "default",
-    "run_id": "2019-07-03T215114.517299Z"
+    "run_id": "2019-07-26T205021.975202Z"
   }
 }

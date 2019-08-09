@@ -2,21 +2,18 @@ from __future__ import division
 
 import inspect
 import json
-import re
 from datetime import datetime #, timedelta # Add for case of testing timedelta types
 import logging
-import io
 from datetime import datetime
 from functools import wraps
 import jsonschema
-import sys
 import numpy as np
 import pandas as pd
 from dateutil.parser import parse
 from scipy import stats
-from six import PY3, integer_types, string_types
-from numbers import Number
+from six import PY2, PY3, integer_types, string_types
 
+from great_expectations.data_asset import DataAsset
 from .dataset import Dataset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
 from great_expectations.dataset.util import \
@@ -24,6 +21,7 @@ from great_expectations.dataset.util import \
     _scipy_distribution_positional_args_from_dict, validate_distribution_parameters
 
 logger = logging.getLogger(__name__)
+
 
 class MetaPandasDataset(Dataset):
     """MetaPandasDataset is a thin layer between Dataset and PandasDataset.
@@ -292,6 +290,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
     _internal_names = pd.DataFrame._internal_names + [
         '_batch_kwargs',
         '_expectation_suite',
+        '_config',
         'caching',
         'default_expectation_args',
         'discard_subset_failing_expectations'
@@ -310,7 +309,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
             self._initialize_expectations(other.get_expectation_suite(
                 discard_failed_expectations=False,
                 discard_result_format_kwargs=False,
-                discard_include_configs_kwargs=False,
+                discard_include_config_kwargs=False,
                 discard_catch_exceptions_kwargs=False))
             # If other was coerced to be a PandasDataset (e.g. via _constructor call during self.copy() operation)
             # then it may not have discard_subset_failing_expectations set. Default to self value
@@ -430,80 +429,349 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         return column.isnull()
 
     @DocInherit
-    @MetaPandasDataset.column_map_expectation
-    def expect_column_values_to_be_of_type(self, column, type_,
-                                           mostly=None,
-                                           result_format=None, include_config=False, catch_exceptions=None, meta=None):
+    def expect_column_values_to_be_of_type(
+            self,
+            column,
+            type_,
+            **kwargs
+            # Since we've now received the default arguments *before* the expectation decorator, we need to
+            # ensure we only pass what we actually received. Hence, we'll use kwargs
 
-        # Target Datasource {numpy, python} was removed in favor of a simpler type mapping
-        type_map = {
-            "null": [type(None), np.nan],
-            "boolean": [bool, np.bool_],
-            "int": [int, np.int64] + list(integer_types),
-            "long": [int, np.longdouble] + list(integer_types),
-            "float": [float, np.float_],
-            "double": [float, np.longdouble],
-            "bytes": [bytes, np.bytes_],
-            "string": [np.string_] + list (string_types)
-            # TODO: Consider adding these additional types with additional tests
-            # Would require updates to get_dataset test infrastructure for categorical
-            # "timedelta": [timedelta, np.timedelta64],
-            # "datetime": [datetime, np.datetime64],
-            # "category": ["category"]
+            # mostly=None,
+            # result_format=None, include_config=None, catch_exceptions=None, meta=None
+    ):
+        """
+        The pandas implementation of this expectation takes kwargs mostly, result_format, include_config,
+        catch_exceptions, and meta as other expectations, however it declares **kwargs because it needs to
+        be able to fork into either aggregate or map semantics depending on the column type (see below).
+
+        In Pandas, columns *may* be typed, or they may be of the generic "object" type which can include rows with
+        different storage types in the same column.
+
+        To respect that implementation, the expect_column_values_to_be_of_type expectations will first attempt to
+        use the column dtype information to determine whether the column is restricted to the provided type. If that
+        is possible, then expect_column_values_to_be_of_type will return aggregate information including an
+        observed_value, similarly to other backends.
+
+        If it is not possible (because the column dtype is "object" but a more specific type was specified), then
+        PandasDataset will use column map semantics: it will return map expectation results and
+        check each value individually, which can be substantially slower.
+
+        Unfortunately, the "object" type is also used to contain any string-type columns (including 'str' and
+        numpy 'string_' (bytes)); consequently, it is not possible to test for string columns using aggregate semantics.
+        """
+        # Short-circuit if the dtype tells us; in that case use column-aggregate (vs map) semantics
+        if self[column].dtype != "object" or type_ is None:
+            res = self._expect_column_values_to_be_of_type__aggregate(
+                column, type_, **kwargs
+            )
+            # Note: this logic is similar to the logic in _append_expectation for deciding when to overwrite an
+            # existing expectation, but it should be definitely kept in sync
+
+            # First, if there is an existing expectation of this type, delete it. Then change the one we created to be
+            # of the proper expectation_type
+            existing_expectations = self.find_expectation_indexes(
+                "expect_column_values_to_be_of_type", column
+            )
+            if len(existing_expectations) == 1:
+                self._expectation_suite["expectations"].pop(existing_expectations[0])
+
+            # Now, rename the expectation we just added
+
+            new_expectations = self.find_expectation_indexes(
+                "_expect_column_values_to_be_of_type__aggregate", column
+            )
+            assert len(new_expectations) == 1
+            expectation_index = new_expectations[0]
+            self._expectation_suite["expectations"][expectation_index]["expectation_type"] = \
+                "expect_column_values_to_be_of_type"
+        else:
+            res = self._expect_column_values_to_be_of_type__map(
+                column, type_, **kwargs
+            )
+            # Note: this logic is similar to the logic in _append_expectation for deciding when to overwrite an
+            # existing expectation, but it should be definitely kept in sync
+
+            # First, if there is an existing expectation of this type, delete it. Then change the one we created to be
+            # of the proper expectation_type
+            existing_expectations = self.find_expectation_indexes(
+                "expect_column_values_to_be_of_type", column
+            )
+            if len(existing_expectations) == 1:
+                self._expectation_suite["expectations"].pop(existing_expectations[0])
+
+            # Now, rename the expectation we just added
+            new_expectations = self.find_expectation_indexes(
+                "_expect_column_values_to_be_of_type__map", column
+            )
+            assert len(new_expectations) == 1
+            expectation_index = new_expectations[0]
+            self._expectation_suite["expectations"][expectation_index]["expectation_type"] = \
+                "expect_column_values_to_be_of_type"
+
+        return res
+
+    @DataAsset.expectation(['column', 'type_', 'mostly'])
+    def _expect_column_values_to_be_of_type__aggregate(
+            self,
+            column, type_,
+            mostly=None,
+            result_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
+        if mostly is not None:
+            raise ValueError("PandasDataset cannot support mostly for a column with a non-object dtype.")
+
+        if type_ is None:
+            success = True
+        else:
+            comp_types = []
+            try:
+                comp_types.append(np.dtype(type_).type)
+            except TypeError:
+                try:
+                    pd_type = getattr(pd, type_)
+                    if isinstance(pd_type, type):
+                        comp_types.append(pd_type)
+                except AttributeError:
+                    pass
+
+                try:
+                    pd_type = getattr(pd.core.dtypes.dtypes, type_)
+                    if isinstance(pd_type, type):
+                        comp_types.append(pd_type)
+                except AttributeError:
+                    pass
+
+            native_type = self._native_type_type_map(type_)
+            if native_type is not None:
+                comp_types.extend(native_type)
+            success = (self[column].dtype.type in comp_types)
+
+        return {
+            "success": success,
+            "result": {
+                "observed_value": self[column].dtype.type.__name__
+            }
         }
 
-        target_type = type_map[type_]
-
-        # Short-circuit if the dtype tells us
-        if column.dtype != "object":
-            if column.dtype in target_type:
-                return np.ones(len(column), dtype=bool)
+    @staticmethod
+    def _native_type_type_map(type_):
+        # We allow native python types in cases where the underlying type is "object":
+        if type_.lower() == "none":
+            return type(None),
+        elif type_.lower() == "bool":
+            return bool,
+        elif type_.lower() in ["int", "long"]:
+            return integer_types
+        elif type_.lower() == "float":
+            return float,
+        elif type_.lower() == "bytes":
+            return bytes,
+        elif type_.lower() == "complex":
+            return complex,
+        elif type_.lower() == "str":
+            return str,
+        elif type_.lower() == "unicode":
+            if PY2:
+                return unicode
             else:
-                return np.zeros(len(column), dtype=bool)
-        else:
-            return column.map(lambda x: isinstance(x, tuple(target_type)))
+                return None
+        elif type_.lower() in ["string_types"]:
+            return string_types
+
+    @MetaPandasDataset.column_map_expectation
+    def _expect_column_values_to_be_of_type__map(
+            self,
+            column, type_,
+            mostly=None,
+            result_format=None, include_config=False, catch_exceptions=None, meta=None):
+
+        comp_types = []
+        try:
+            comp_types.append(np.dtype(type_).type)
+        except TypeError:
+            try:
+                pd_type = getattr(pd, type_)
+                if isinstance(pd_type, type):
+                    comp_types.append(pd_type)
+            except AttributeError:
+                pass
+
+            try:
+                pd_type = getattr(pd.core.dtypes.dtypes, type_)
+                if isinstance(pd_type, type):
+                    comp_types.append(pd_type)
+            except AttributeError:
+                pass
+
+        native_type = self._native_type_type_map(type_)
+        if native_type is not None:
+            comp_types.extend(native_type)
+
+        if len(comp_types) < 1:
+            raise ValueError("Unrecognized numpy/python type: %s" % type_)
+
+        return column.map(lambda x: isinstance(x, tuple(comp_types)))
 
     @DocInherit
-    @MetaPandasDataset.column_map_expectation
-    def expect_column_values_to_be_in_type_list(self, column, type_list,
-                                                mostly=None,
-                                                result_format=None, include_config=False, catch_exceptions=None, meta=None):
-        # Target Datasource {numpy, python} was removed in favor of a simpler type mapping
-        type_map = {
-            "null": [type(None), np.nan],
-            "boolean": [bool, np.bool_],
-            "int": [int, np.int64] + list(integer_types),
-            "long": [int, np.longdouble] + list(integer_types),
-            "float": [float, np.float_],
-            "double": [float, np.longdouble],
-            "bytes": [bytes, np.bytes_],
-            "string": [np.string_] + list (string_types)
-            # TODO: Consider adding these additional types with additional tests
-            # Would require updates to get_dataset test infrastructure for categorical
-            # "timedelta": [timedelta, np.timedelta64],
-            # "datetime": [datetime, np.datetime64],
-            # "category": ["category"]
+    def expect_column_values_to_be_in_type_list(
+            self,
+            column, type_list,
+            **kwargs
+            # Since we've now received the default arguments *before* the expectation decorator, we need to
+            # ensure we only pass what we actually received. Hence, we'll use kwargs
+
+            # mostly=None,
+            # result_format=None, include_config=None, catch_exceptions=None, meta=None
+    ):
+        """
+        The pandas implementation of this expectation takes kwargs mostly, result_format, include_config,
+        catch_exceptions, and meta as other expectations, however it declares **kwargs because it needs to
+        be able to fork into either aggregate or map semantics depending on the column type (see below).
+
+        In Pandas, columns *may* be typed, or they may be of the generic "object" type which can include rows with
+        different storage types in the same column.
+
+        To respect that implementation, the expect_column_values_to_be_of_type expectations will first attempt to
+        use the column dtype information to determine whether the column is restricted to the provided type. If that
+        is possible, then expect_column_values_to_be_of_type will return aggregate information including an
+        observed_value, similarly to other backends.
+
+        If it is not possible (because the column dtype is "object" but a more specific type was specified), then
+        PandasDataset will use column map semantics: it will return map expectation results and
+        check each value individually, which can be substantially slower.
+
+        Unfortunately, the "object" type is also used to contain any string-type columns (including 'str' and
+        numpy 'string_' (bytes)); consequently, it is not possible to test for string columns using aggregate semantics.
+        """
+        # Short-circuit if the dtype tells us; in that case use column-aggregate (vs map) semantics
+        if self[column].dtype != "object" or type_list is None:
+            res = self._expect_column_values_to_be_in_type_list__aggregate(
+                column, type_list, **kwargs
+            )
+            # Note: this logic is similar to the logic in _append_expectation for deciding when to overwrite an
+            # existing expectation, but it should be definitely kept in sync
+
+            # First, if there is an existing expectation of this type, delete it. Then change the one we created to be
+            # of the proper expectation_type
+            existing_expectations = self.find_expectation_indexes(
+                "expect_column_values_to_be_in_type_list", column
+            )
+            if len(existing_expectations) == 1:
+                self._expectation_suite["expectations"].pop(existing_expectations[0])
+
+            new_expectations = self.find_expectation_indexes(
+                "_expect_column_values_to_be_in_type_list__aggregate", column
+            )
+            assert len(new_expectations) == 1
+            expectation_index = new_expectations[0]
+            self._expectation_suite["expectations"][expectation_index]["expectation_type"] = \
+                "expect_column_values_to_be_in_type_list"
+        else:
+            res = self._expect_column_values_to_be_in_type_list__map(
+                column, type_list, **kwargs
+            )
+            # Note: this logic is similar to the logic in _append_expectation for deciding when to overwrite an
+            # existing expectation, but it should be definitely kept in sync
+
+            # First, if there is an existing expectation of this type, delete it. Then change the one we created to be
+            # of the proper expectation_type
+            existing_expectations = self.find_expectation_indexes(
+                "expect_column_values_to_be_in_type_list", column
+            )
+            if len(existing_expectations) == 1:
+                self._expectation_suite["expectations"].pop(existing_expectations[0])
+
+            # Now, rename the expectation we just added
+            new_expectations = self.find_expectation_indexes(
+                "_expect_column_values_to_be_in_type_list__map", column
+            )
+            assert len(new_expectations) == 1
+            expectation_index = new_expectations[0]
+            self._expectation_suite["expectations"][expectation_index]["expectation_type"] = \
+                "expect_column_values_to_be_in_type_list"
+
+        return res
+
+    @MetaPandasDataset.expectation(['column', 'type_list', 'mostly'])
+    def _expect_column_values_to_be_in_type_list__aggregate(
+            self,
+            column, type_list,
+            mostly=None,
+            result_format=None, include_config=False, catch_exceptions=None, meta=None
+    ):
+        if mostly is not None:
+            raise ValueError("PandasDataset cannot support mostly for a column with a non-object dtype.")
+
+        if type_list is None:
+            success = True
+        else:
+            comp_types = []
+            for type_ in type_list:
+                try:
+                    comp_types.append(np.dtype(type_).type)
+                except TypeError:
+                    try:
+                        pd_type = getattr(pd, type_)
+                        if isinstance(pd_type, type):
+                            comp_types.append(pd_type)
+                    except AttributeError:
+                        pass
+
+                    try:
+                        pd_type = getattr(pd.core.dtypes.dtypes, type_)
+                        if isinstance(pd_type, type):
+                            comp_types.append(pd_type)
+                    except AttributeError:
+                        pass
+
+                native_type = self._native_type_type_map(type_)
+                if native_type is not None:
+                    comp_types.extend(native_type)
+
+            success = (self[column].dtype.type in comp_types)
+
+        return {
+            "success": success,
+            "result": {
+                "observed_value": self[column].dtype.type.__name__
+            }
         }
 
-        # Build one type list with each specified type list from type_map
-        target_type_list = list()
+    @MetaPandasDataset.column_map_expectation
+    def _expect_column_values_to_be_in_type_list__map(
+            self,
+            column, type_list,
+            mostly=None,
+            result_format=None, include_config=False, catch_exceptions=None, meta=None):
+
+        comp_types = []
         for type_ in type_list:
             try:
-                target_type_list += type_map[type_]
-            except KeyError:
-                logger.debug("Unrecognized type: %s" % type_)
+                comp_types.append(np.dtype(type_).type)
+            except TypeError:
+                try:
+                    pd_type = getattr(pd, type_)
+                    if isinstance(pd_type, type):
+                        comp_types.append(pd_type)
+                except AttributeError:
+                    pass
 
-        if len(target_type_list) == 0:
-            raise ValueError("No recognized pandas types in type_list")
+                try:
+                    pd_type = getattr(pd.core.dtypes.dtypes, type_)
+                    if isinstance(pd_type, type):
+                        comp_types.append(pd_type)
+                except AttributeError:
+                    pass
 
-        # Short-circuit if the dtype tells us
-        if column.dtype != "object":
-            if column.dtype in target_type_list:
-                return np.ones(len(column), dtype=bool)
-            else:
-                return np.zeros(len(column), dtype=bool)
-        else:
-            return column.map(lambda x: isinstance(x, tuple(target_type_list)))
+            native_type = self._native_type_type_map(type_)
+            if native_type is not None:
+                comp_types.extend(native_type)
+
+        if len(comp_types) < 1:
+            raise ValueError("No recognized numpy/python type in list: %s" % type_list)
+
+        return column.map(lambda x: isinstance(x, tuple(comp_types)))
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
