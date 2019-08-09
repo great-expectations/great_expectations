@@ -1927,25 +1927,27 @@ validations_store:
 
 
 data_docs:
-  local_site_configuration_file: uncommitted/documentation/local_sites.yml
   sites:
-    local_site:
+    local_site: # site name
+    # “local_site” renders documentation for all the datasources in the project from GE artifacts in the local repo. 
+    # The site includes expectation suites and profiling and validation results from uncommitted directory. 
+    # Local site provides the convenience of visualizing all the entities stored in JSON files as HTML.
       type: SiteBuilder
-      site_store:
+      site_store: # where the HTML will be written to (filesystem/S3)
         type: filesystem
         base_directory: uncommitted/documentation/local_site
-      validations_store:
+      validations_store: # where to look for validation results (filesystem/S3)
         type: filesystem
         base_directory: uncommitted/validations/
         run_id_filter:
           ne: profiling
-      profiling_store:
+      profiling_store: # where to look for profiling results (filesystem/S3)
         type: filesystem
         base_directory: uncommitted/validations/
         run_id_filter:
           eq: profiling
 
-      datasources: '*'
+      datasources: '*' # by default, all datasources
       sections:
         index:
           renderer:
@@ -1954,34 +1956,37 @@ data_docs:
           view:
             module: great_expectations.render.view
             class: DefaultJinjaIndexPageView
-        validations:
+        validations: # if not present, validation results are not rendered
           renderer:
             module: great_expectations.render.renderer
             class: ValidationResultsPageRenderer
           view:
             module: great_expectations.render.view
             class: DefaultJinjaPageView
-        expectations:
+        expectations: # if not present, expectation suites are not rendered
           renderer:
             module: great_expectations.render.renderer
             class: ExpectationSuitePageRenderer
           view:
             module: great_expectations.render.view
             class: DefaultJinjaPageView
-        profiling:
+        profiling: # if not present, profiling results are not rendered
           renderer:
             module: great_expectations.render.renderer
             class: ProfilingResultsPageRenderer
           view:
             module: great_expectations.render.view
             class: DefaultJinjaPageView
-
+            
     team_site:
+      # "team_site" is meant to support the "shared source of truth for a team" use case. 
+      # By default only the expectations section is enabled.
+      #  Users have to configure the profiling and the validations sections (and the corresponding validations_store and profiling_store attributes based on the team's decisions where these are stored (a local filesystem or S3). 
+      # Reach out on Slack (https://tinyurl.com/great-expectations-slack>) if you would like to discuss the best way to configure a team site.
       type: SiteBuilder
       site_store:
         type: filesystem
         base_directory: uncommitted/documentation/team_site
-# ADD COMMENTS
 #      validations_store:
 #        type: s3
 #        bucket: ???
