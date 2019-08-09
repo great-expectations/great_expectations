@@ -9,7 +9,7 @@ It's easy! Just use pip install:
 
     $ pip install great_expectations
 
-(You may want to deploy within a virtual environment. If you're not familiar with pip, virtual environments, notebooks, or git, please see Supporting Resources below for links to tutorials.)
+(You may want to deploy within a virtual environment. If you're not familiar with pip, virtual environments, notebooks, or git, please see Supporting resources for links to tutorials.)
 
 From there, follow these steps to deploy Great Expectations.
 
@@ -32,12 +32,24 @@ See the links below for good, practical tutorials for these tools.
 
 **pip**
 
-**virtual_environments**
+    * https://pip.pypa.io/en/stable/
+    * https://www.datacamp.com/community/tutorials/pip-python-package-manager
 
-**jupyter notebooks**
+**virtual environments**
+
+    * https://virtualenv.pypa.io/en/latest/
+    * https://www.dabapps.com/blog/introduction-to-pip-and-virtualenv-python/
+
+**jupyter notebooks and jupyter lab**
+
+    * https://jupyter.org/
+    * https://jupyterlab.readthedocs.io/en/stable/
+    * https://towardsdatascience.com/jupyter-lab-evolution-of-the-jupyter-notebook-5297cacde6b
 
 **git**
 
+    * https://git-scm.com/
+    * https://www.atlassian.com/git/tutorials
 
 
 Installing from github
