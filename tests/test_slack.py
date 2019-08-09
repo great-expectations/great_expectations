@@ -100,12 +100,13 @@ def test_build_slack_notification_request_with_successful_validation(validation_
 
 
 def test_build_slack_notification_request_with_successful_validation_and_batch_kwargs(validation_json):
-    validation_json["meta"]["batch_kwargs"] = {
+    batch_kwargs = {
          "path": "/Users/user/some_path/some_file.csv",
          "timestamp": "1565286704.3622668",
          "sep": None,
          "engine": "python"
     }
+    validation_json["meta"]["batch_kwargs"] = batch_kwargs
     
     with mock.patch("datetime.datetime") as mock_datetime:
         mock_datetime.strftime.return_value = "05/05/19 12:12:12"
@@ -113,48 +114,14 @@ def test_build_slack_notification_request_with_successful_validation_and_batch_k
 
     assert isinstance(obs, dict)
     print(obs)
-    expected = {
-        "blocks": [
-            {
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": "*Validated batch from data asset:* `diabetes_raw_csv`\n*Status: Success :tada:*\n33 of 44 expectations were met\n\n",
-                },
-            },
-            {
-                'type': 'section',
-                'text': {
-                    'type': 'mrkdwn',
-                    'text': 'Batch kwargs: {\n  "path": "/Users/user/some_path/some_file.csv",\n  "timestamp": "1565286704.3622668",\n  "sep": null,\n  "engine": "python"\n}'
-                }
-            },
-            {
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": "- *Validation Report*: s3://my_bucket/blah.json",
-                },
-            },
-            {
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": "- *Validation data asset*: s3://my_bucket/blah.csv",
-                },
-            },
-            {
-                "type": "context",
-                "elements": [
-                    {
-                        "type": "mrkdwn",
-                        "text": "Great Expectations run id 7 ran at 05/05/19 12:12:12",
-                    }
-                ],
-            },
-        ]
-    }
-    assertDeepAlmostEqual(expected, obs)
+    assert len(obs["blocks"]) == 5
+    batch_kwargs_text = obs["blocks"][1]["text"]["text"]
+    for key, val in batch_kwargs.items():
+        assert key in batch_kwargs_text
+        if val is not None:
+            assert val in batch_kwargs_text
+        else:
+            assert 'null' in batch_kwargs_text
     
 
 def test_build_slack_notification_request_with_failed_validation(validation_json):
