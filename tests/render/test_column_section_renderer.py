@@ -7,6 +7,9 @@ from great_expectations.render.renderer import (
     ExpectationSuiteColumnSectionRenderer,
     ProfilingResultsColumnSectionRenderer,
 )
+from great_expectations.render.renderer.content_block import (
+    ValidationResultsTableContentBlockRenderer,
+)
 from great_expectations.render.view import (
     DefaultJinjaPageView,
 )
@@ -327,3 +330,14 @@ def test_ExpectationSuiteColumnSectionRenderer_render_bullet_list(titanic_profil
     assert "may have any percentage of unique values" in json.dumps(content_block)
     assert "values must not be null, at least $mostly_pct % of the time." in json.dumps(content_block)
     
+def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row():
+    evr = {'success': True, 'result': {'observed_value': True, 'element_count': 162, 'missing_count': 153, 'missing_percent': 0.9444444444444444}, 'exception_info': {'raised_exception': False, 'exception_message': None, 'exception_traceback': None}, 'expectation_config': {'expectation_type': 'expect_column_min_to_be_between', 'kwargs': {'column': 'live', 'min_value': None, 'max_value': None, 'result_format': 'SUMMARY'}, 'meta': {'BasicDatasetProfiler': {'confidence': 'very low'}}}}
+    result = ValidationResultsTableContentBlockRenderer.render(evr)
+    print(result)
+    assert result == "hi"
+
+    evr = {'success': False, 'exception_info': {'raised_exception': True, 'exception_message': 'Invalid partition object.', 'exception_traceback': 'Traceback (most recent call last):\n  File "/Users/abe/Documents/superconductive/tools/great_expectations/great_expectations/data_asset/data_asset.py", line 216, in wrapper\n    return_obj = func(self, **evaluation_args)\n  File "/Users/abe/Documents/superconductive/tools/great_expectations/great_expectations/dataset/dataset.py", line 106, in inner_wrapper\n    evaluation_result = func(self, column, *args, **kwargs)\n  File "/Users/abe/Documents/superconductive/tools/great_expectations/great_expectations/dataset/dataset.py", line 3381, in expect_column_kl_divergence_to_be_less_than\n    raise ValueError("Invalid partition object.")\nValueError: Invalid partition object.\n'}, 'expectation_config': {'expectation_type': 'expect_column_kl_divergence_to_be_less_than', 'kwargs': {'column': 'live', 'partition_object': None, 'threshold': None, 'result_format': 'SUMMARY'}, 'meta': {'BasicDatasetProfiler': {'confidence': 'very low'}}}}
+    result = ValidationResultsTableContentBlockRenderer.render(evr)
+    print(result)
+    assert result == "hi"
+
