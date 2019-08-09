@@ -1,3 +1,5 @@
+import pypandoc
+
 from great_expectations.render.renderer import (
     ExpectationSuitePageRenderer,
     ProfilingResultsPageRenderer,
@@ -43,7 +45,12 @@ def test_render_asset_notes():
         }
     })
     print(result)
-    assert result["content"] == ["<p><em>alpha</em></p>\n"]
+    
+    try:
+        pypandoc.convert_text("*test*", format='md', to="html")
+        assert result["content"] == ["<p><em>alpha</em></p>\n"]
+    except OSError:
+        assert result["content"] == ["*alpha*"]
 
     result = ExpectationSuitePageRenderer._render_asset_notes({
         "meta" : {
@@ -54,7 +61,12 @@ def test_render_asset_notes():
         }
     })
     print(result)
-    assert result["content"] == ["<p><em>alpha</em></p>\n", "<p><em>bravo</em></p>\n", "<p>charlie</p>\n"]
+    
+    try:
+        pypandoc.convert_text("*test*", format='md', to="html")
+        assert result["content"] == ["<p><em>alpha</em></p>\n", "<p><em>bravo</em></p>\n", "<p>charlie</p>\n"]
+    except OSError:
+        assert result["content"] == ["*alpha*", "_bravo_", "charlie"]
 
 
 def test_expectation_summary_in_render_asset_notes():
@@ -75,10 +87,18 @@ def test_expectation_summary_in_render_asset_notes():
         "expectations" : {}
     })
     print(result)
-    assert result["content"] == [
-        'This Expectation suite currently contains 0 total Expectations across 0 columns.',
-        '<p>hi</p>\n',
-    ]
+    
+    try:
+        pypandoc.convert_text("*test*", format='md', to="html")
+        assert result["content"] == [
+            'This Expectation suite currently contains 0 total Expectations across 0 columns.',
+            '<p>hi</p>\n',
+        ]
+    except OSError:
+        assert result["content"] == [
+            'This Expectation suite currently contains 0 total Expectations across 0 columns.',
+            'hi',
+        ]
 
     result = ExpectationSuitePageRenderer._render_asset_notes({
         "meta" : {},
