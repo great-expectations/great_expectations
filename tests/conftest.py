@@ -14,9 +14,19 @@ from great_expectations.data_context.util import safe_mmkdir
 
 from .test_utils import get_dataset
 
-CONTEXTS = ['PandasDataset', 'sqlite', 'SparkDFDataset']
+CONTEXTS = ['PandasDataset', 'sqlite']
 
-# TODO: make it easier to turn off Spark as well
+#####
+#
+# Spark Context
+#
+#####
+try:
+    from pyspark.sql import SparkSession
+    CONTEXTS += ['SparkDFDataset']
+except (ImportError):
+    warnings.warn("pyspark not installed and available for testing.")
+
 
 #####
 #
@@ -339,11 +349,11 @@ def data_context(tmp_path_factory):
     context_path = os.path.join(project_path, "great_expectations")
     asset_config_path = os.path.join(context_path, "expectations")
     safe_mmkdir(os.path.join(asset_config_path,
-                             "mydatasource/mygenerator/parameterized_expectation_suite_fixture"), exist_ok=True)
+                             "mydatasource/mygenerator/my_dag_node"), exist_ok=True)
     shutil.copy("./tests/test_fixtures/great_expectations_basic.yml",
                 str(os.path.join(context_path, "great_expectations.yml")))
     shutil.copy("./tests/test_fixtures/expectation_suites/parameterized_expectation_suite_fixture.json",
-                os.path.join(asset_config_path, "mydatasource/mygenerator/parameterized_expectation_suite_fixture/default.json"))
+                os.path.join(asset_config_path, "mydatasource/mygenerator/my_dag_node/default.json"))
     return ge.data_context.DataContext(context_path)
 
 
@@ -390,3 +400,55 @@ def filesystem_csv_3(tmp_path_factory):
     toy_dataset_2.to_csv(os.path.join(base_dir, "f2.csv"), index=None)
 
     return base_dir
+
+@pytest.fixture()
+def titanic_profiled_evrs_1():
+    return json.load(open("./tests/render/fixtures/BasicDatasetProfiler_evrs.json"))
+
+
+@pytest.fixture()
+def titanic_profiled_name_column_evrs():
+
+    #This is a janky way to fetch expectations matching a specific name from an EVR suite.
+    #TODO: It will no longer be necessary once we implement ValidationResultSuite._group_evrs_by_column
+    from great_expectations.render.renderer.renderer import (
+        Renderer,
+    )
+
+    titanic_profiled_evrs_1 =  json.load(open("./tests/render/fixtures/BasicDatasetProfiler_evrs.json"))
+    evrs_by_column = Renderer()._group_evrs_by_column(titanic_profiled_evrs_1)
+    print(evrs_by_column.keys())
+
+    name_column_evrs = evrs_by_column["Name"]
+    print(json.dumps(name_column_evrs, indent=2))
+
+    return name_column_evrs
+
+
+@pytest.fixture()
+def titanic_profiled_expectations_1():
+    return json.load(open("./tests/render/fixtures/BasicDatasetProfiler_expectations.json"))
+
+@pytest.fixture()
+def titanic_profiled_name_column_expectations():
+    from great_expectations.render.renderer.renderer import (
+        Renderer,
+    )
+
+    titanic_profiled_expectations =  json.load(open("./tests/render/fixtures/BasicDatasetProfiler_expectations.json"))
+    columns, ordered_columns = Renderer()._group_and_order_expectations_by_column(titanic_profiled_expectations)
+    print(columns)
+    print(ordered_columns)
+
+    name_column_expectations = columns["Name"]
+    print(json.dumps(name_column_expectations, indent=2))
+
+    return name_column_expectations
+
+
+@pytest.fixture()
+def titanic_validation_results():
+    with open("./tests/test_sets/expected_cli_results_default.json", "r") as infile:
+        return json.load(infile)
+
+

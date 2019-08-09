@@ -145,9 +145,9 @@ class MetaDataset(DataAsset):
 # noinspection PyIncorrectDocstring
 class Dataset(MetaDataset):
 
-    INT_TYPE_NAMES = set(["INTEGER", "int", "SMALLINT", "BIGINT", "IntegerType", "LongType"])
-    FLOAT_TYPE_NAMES = set(["FLOAT", "DOUBLE_PRECISION", "NUMERIC", "FloatType", "DoubleType", "float"])
-    STRING_TYPE_NAMES = set(["CHAR", "VARCHAR", "TEXT", "StringType", "string", "str"])
+    # This should in general only be changed when a subclass *adds expectations* or *changes expectation semantics*
+    # That way, multiple backends can implement the same data_asset_type
+    _data_asset_type = "Dataset"
 
     # getter functions with hashable arguments - can be cached
     hashable_getters = [
@@ -288,14 +288,6 @@ class Dataset(MetaDataset):
     def get_column_count_in_range(self, column, min_val=None, max_val=None, strictly_min=False, strictly_max=True):
         """Returns: int"""
         raise NotImplementedError
-
-    def _initialize_expectations(self, expectation_suite=None, data_asset_name=None, expectation_suite_name=None):
-        """Override data_asset_type with "Dataset"
-        """
-        super(Dataset, self)._initialize_expectations(expectation_suite=expectation_suite,
-                                                      data_asset_name=data_asset_name,
-                                                      expectation_suite_name=expectation_suite_name)
-        self._expectation_suite["data_asset_type"] = "Dataset"
 
     def test_column_map_expectation_function(self, function, *args, **kwargs):
         """Test a column map expectation function
@@ -1787,7 +1779,8 @@ class Dataset(MetaDataset):
             column (str): \
                 The column name.
             distribution (str): \
-                The scipy distribution name. See: `<https://docs.scipy.org/doc/scipy/reference/stats.html>`_
+                The scipy distribution name. See: `<https://docs.scipy.org/doc/scipy/reference/stats.html>`_ Currently
+                supported distributions are listed in the Notes section below.
             p_value (float): \
                 The threshold p-value for a passing test. Default is 0.05.
             params (dict or list) : \

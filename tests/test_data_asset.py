@@ -11,6 +11,30 @@ import great_expectations as ge
 import unittest
 
 
+def test_data_asset_name_inheritance(dataset):
+    # A data_asset should have a generic type
+    data_asset = ge.data_asset.DataAsset()
+    assert data_asset.get_expectation_suite()["data_asset_type"] == "DataAsset"
+
+    # A FileDataAsset should pick up its type
+    data_asset = ge.data_asset.FileDataAsset()
+    assert data_asset.get_expectation_suite()["data_asset_type"] == "FileDataAsset"
+
+    # So should a Dataset
+    data_asset = ge.dataset.Dataset()
+    assert data_asset.get_expectation_suite()["data_asset_type"] == "Dataset"
+
+    # Backends should *not* change the implementation
+    assert dataset.get_expectation_suite()["data_asset_type"] == "Dataset"
+
+    # But custom classes should choose to
+    class MyCustomDataset(ge.dataset.Dataset):
+        _data_asset_type = "MyCustomDataset"
+
+    data_asset = MyCustomDataset()
+    assert data_asset.get_expectation_suite()["data_asset_type"] == "MyCustomDataset"
+
+
 class TestDataAsset(unittest.TestCase):
     """
     Recognized weakness: these tests are overly dependent on the Pandas implementation of dataset.
@@ -324,7 +348,7 @@ class TestDataAsset(unittest.TestCase):
         self.assertEqual(
             df.get_expectation_suite(
                 discard_result_format_kwargs=False,
-                discard_include_configs_kwargs=False,
+                discard_include_config_kwargs=False,
                 discard_catch_exceptions_kwargs=False,
             ),
             output_config,
@@ -334,7 +358,7 @@ class TestDataAsset(unittest.TestCase):
         df.save_expectation_suite(
             directory_name+'/temp3.json',
             discard_result_format_kwargs=False,
-            discard_include_configs_kwargs=False,
+            discard_include_config_kwargs=False,
             discard_catch_exceptions_kwargs=False,
         )
         temp_file = open(directory_name+'/temp3.json')
