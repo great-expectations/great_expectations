@@ -233,11 +233,20 @@ def init(target_directory):
 @click.option('--directory', '-d', default="./great_expectations",
               help='The root of a project directory containing a great_expectations/ config.')
 def profile(datasource_name, data_assets, profile_all_data_assets, directory):
-    """Profile datasources from the specified context.
+    """
+    Profile datasources from the specified context.
 
+    If the optional data_assets and profile_all_data_assets arguments are not specified, the profiler will check
+    if the number of data assets in the datasource exceeds the internally defined limit. If it does, it will
+    prompt the user to either specify the list of data assets to profile or to profile all.
+    If the limit is not exceeded, the profiler will profile all data assets in the datasource.
 
-    DATASOURCE_NAME: the datasource to profile, or leave blank to profile all datasources."""
-
+    :param datasource_name: name of the datasource to profile
+    :param data_assets: if this comma-separated list of data asset names is provided, only the specified data assets will be profiled
+    :param profile_all_data_assets: if provided, all data assets will be profiled
+    :param directory:
+    :return:
+    """
 
     try:
         context = DataContext(directory)
@@ -251,9 +260,9 @@ def profile(datasource_name, data_assets, profile_all_data_assets, directory):
             cli_message("Error: please specify the datasource to profile. Available datasources: " + ", ".join(datasources))
             return
         else:
-            profile_datasource(context, datasources[0], data_assets=data_assets)
+            profile_datasource(context, datasources[0], data_assets=data_assets, profile_all_data_assets=profile_all_data_assets)
     else:
-        profile_datasource(context, datasource_name, data_assets=data_assets)
+        profile_datasource(context, datasource_name, data_assets=data_assets, profile_all_data_assets=profile_all_data_assets)
 
 
 @cli.command()
