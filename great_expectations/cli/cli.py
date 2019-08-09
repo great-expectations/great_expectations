@@ -259,16 +259,24 @@ def profile(datasource_name, data_assets, profile_all_data_assets, directory):
 @cli.command()
 @click.option('--directory', '-d', default="./great_expectations",
               help='The root of a project directory containing a great_expectations/ config.')
-def documentation(directory):
+@click.option('--site_name', '-s',
+              help='The site for which to generate documentation. See data_docs section in great_expectations.yml')
+@click.option('--data_asset_name', '-dan',
+              help='The data asset for which to generate documentation. Must also specify --site_name.')
+def documentation(directory, site_name, data_asset_name):
     """Build data documentation for a project.
     """
+    if data_asset_name is not None and site_name is None:
+        cli_message("Error: When specifying data_asset_name, must also specify site_name.")
+        return
+        
     try:
         context = DataContext(directory)
     except ConfigNotFoundError:
         cli_message("Error: no great_expectations context configuration found in the specified directory.")
         return
 
-    build_documentation(context)
+    build_documentation(context, site_name=site_name, data_asset_name=data_asset_name)
 
 
 @cli.command()

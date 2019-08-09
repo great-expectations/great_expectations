@@ -8,3 +8,5 @@ from .page_renderer import (
     ExpectationSuitePageRenderer,
     ValidationResultsPageRenderer
 )
+
+from .site_index_page_renderer import SiteIndexPageRenderer
