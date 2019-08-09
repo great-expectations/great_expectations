@@ -117,13 +117,14 @@ class SiteBuilder():
                             data_asset_name = data_context.data_asset_name_delimiter.join([datasource, generator, generator_asset])
                             if specified_data_asset_name:
                                if data_context._normalize_data_asset_name(data_asset_name) != data_context._normalize_data_asset_name(specified_data_asset_name):
-                                   break
+                                   continue
                             for expectation_suite_name in expectation_suite_names:
                                 validation = data_context.get_validation_result(data_asset_name,
                                                                                 expectation_suite_name=expectation_suite_name,
                                                                                 validations_store=site_config['profiling_store'],
                                                                                 run_id=run_id)
 
+                                logger.info("        Rendering profiling for data asset {}".format(data_asset_name))
                                 data_asset_name = validation['meta']['data_asset_name']
                                 expectation_suite_name = validation['meta']['expectation_suite_name']
                                 model = profiling_renderer_class.render(validation)
@@ -187,13 +188,14 @@ class SiteBuilder():
                             data_asset_name = data_context.data_asset_name_delimiter.join([datasource, generator, generator_asset])
                             if specified_data_asset_name:
                                if data_context._normalize_data_asset_name(data_asset_name) != data_context._normalize_data_asset_name(specified_data_asset_name):
-                                   break
+                                   continue
                             for expectation_suite_name in expectation_suite_names:
                                 validation = data_context.get_validation_result(data_asset_name,
                                                                                 expectation_suite_name=expectation_suite_name,
                                                                                 validations_store=site_config['validations_store'],
                                                                                 run_id=run_id)
 
+                                logger.info("        Rendering validation: run id: {}, suite {} for data asset {}".format(run_id, expectation_suite_name, data_asset_name))
                                 data_asset_name = validation['meta']['data_asset_name']
                                 expectation_suite_name = validation['meta']['expectation_suite_name']
                                 model = validation_renderer_class.render(validation)
@@ -255,12 +257,15 @@ class SiteBuilder():
                             [datasource, generator, generator_asset])
                         if specified_data_asset_name:
                                if data_context._normalize_data_asset_name(data_asset_name) != data_context._normalize_data_asset_name(specified_data_asset_name):
-                                   break
+                                   continue
                         for expectation_suite_name in expectation_suite_names:
                             expectation_suite = data_context.get_expectation_suite(
                                 data_asset_name,
                                 expectation_suite_name=expectation_suite_name)
 
+                            logger.info(
+                                "        Rendering expectation suite {} for data asset {}".format(
+                                    expectation_suite_name, data_asset_name))
                             data_asset_name = expectation_suite['data_asset_name']
                             expectation_suite_name = expectation_suite['expectation_suite_name']
                             model = expectations_renderer_class.render(expectation_suite)
