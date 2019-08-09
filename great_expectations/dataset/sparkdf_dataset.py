@@ -352,7 +352,7 @@ class SparkDFDataset(MetaSparkDFDataset):
 
         return hist
 
-    def get_column_count_in_range(self, column, min_val=None, max_val=None, min_strictly=False, max_strictly=True):
+    def get_column_count_in_range(self, column, min_val=None, max_val=None, strictly_min=False, strictly_max=True):
         if min_val is None and max_val is None:
             raise ValueError('Must specify either min or max value')
         if min_val is not None and max_val is not None and min_val > max_val:
@@ -360,12 +360,12 @@ class SparkDFDataset(MetaSparkDFDataset):
 
         result = self.spark_df.select(column)
         if min_val is not None:
-            if min_strictly:
+            if strictly_min:
                 result = result.filter(col(column) > min_val)
             else:
                 result = result.filter(col(column) >= min_val)
         if max_val is not None:
-            if max_strictly:
+            if strictly_max:
                 result = result.filter(col(column) < max_val)
             else:
                 result = result.filter(col(column) <= max_val)

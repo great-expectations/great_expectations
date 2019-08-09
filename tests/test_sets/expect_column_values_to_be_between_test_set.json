@@ -327,6 +327,35 @@
       "error":{
         "traceback_substring" : "cannot both be None"
       }
+    },
+    {
+      "note": "Test strictly_min success",
+      "out": {
+        "unexpected_list": [],
+        "unexpected_index_list": [],
+        "success": true
+      },
+      "in": {
+        "column": "x",
+        "max_value": 10,
+        "min_value": 0,
+        "strictly_min": true
+      }
+    },
+    {
+      "note": "Test strictly_min failure",
+      "out": {
+        "unexpected_list": [
+          1
+        ],
+        "unexpected_index_list": [1],
+        "success": false
+      },
+      "in": {
+        "column": "x",
+        "max_value": 9,
+        "min_value": 1
+      }
     }
   ]
 }
