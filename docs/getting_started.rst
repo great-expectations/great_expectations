@@ -9,6 +9,8 @@ It's easy! Just use pip install:
 
     $ pip install great_expectations
 
+(You may want to deploy within a virtual environment. If you're not familiar with pip, virtual environments, notebooks, or git, please see Supporting Resources below for links to tutorials.)
+
 From there, follow these steps to deploy Great Expectations.
 
 .. toctree::
@@ -21,29 +23,30 @@ From there, follow these steps to deploy Great Expectations.
 Supporting resources
 -------------------------------------
 
-The ``example_dickens_data_project``
-**************************************
-
-If you have your own data, you can deploy there immediately. If not, you can use the example_dickens_data_project as a sandbox to get started.
-
-Requirements
-**************************************
-
 Great expectations requires a python compute environment and access to data, either locally or \
-through a database or distributed cluster.
+through a database or distributed cluster. In addition, developing with great expectations relies \
+heavily on tools in the Python engineering ecosystem: pip, virtual environments, jupyter notebooks. \
+We also assume some level of familiarity with git and version control.
+
+See the links below for good, practical tutorials for these tools.
+
+**pip**
+
+**virtual_environments**
+
+**jupyter notebooks**
+
+**git**
 
 
-Related tools
-**************************************
-
-#TODO: Flesh this out
-
-It will help to be familiar with python tools like
-pip, virtual_env
-
-We also assume some level of familiarity with git, etc. etc.
 
 Installing from github
-**************************************
+--------------------------------------
 
-#TODO: Write this
+If you plan to make changes to great expectations, you may want to clone from GitHub and pip install using the `--editable <https://stackoverflow.com/questions/35064426/when-would-the-e-editable-option-be-useful-with-pip-install>`__ flag. 
+
+.. code-block:: bash
+
+    $ git clone https://github.com/great-expectations/great_expectations.git
+    $ pip install -e great_expectations/
+
