@@ -168,7 +168,7 @@ class SiteBuilder():
         # validations
 
         validation_section_config = sections_config.get('validations')
-        if profiling_section_config:
+        if validation_section_config:
             try:
                 validation_renderer_module = importlib.import_module(validation_section_config['renderer']['module'])
                 validation_renderer_class = getattr(validation_renderer_module, validation_section_config['renderer']['class'])
