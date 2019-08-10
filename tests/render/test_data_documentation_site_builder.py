@@ -5,7 +5,6 @@ from great_expectations.render.renderer.site_builder import SiteBuilder
 
 
 def test_cli_profile(titanic_data_context):
-    print("BOOO")
 
     titanic_data_context.profile_datasource(titanic_data_context.list_datasources()[0]["name"])
 
