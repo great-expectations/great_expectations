@@ -283,21 +283,21 @@ To learn more: <blue>https://docs.greatexpectations.io/en/latest/guides/data_doc
 
 
     cli_message(msg_data_doc_intro.format(__version__.replace(".", "_")))
-    if click.confirm("Move the profiled data and build HTML documentation?",
+    # if click.confirm("Move the profiled data and build HTML documentation?",
+    #                  default=True
+    #                  ):
+    #     cli_message("\nMoving files...")
+    #
+    #     for profiling_result in profiling_results['results']:
+    #         data_asset_name = profiling_result[1]['meta']['data_asset_name']
+    #         expectation_suite_name = profiling_result[1]['meta']['expectation_suite_name']
+    #         run_id = profiling_result[1]['meta']['run_id']
+    #         context.move_validation_to_fixtures(
+    #             data_asset_name, expectation_suite_name, run_id)
+
+    if click.confirm("Build HTML documentation?",
                      default=True
                      ):
-        cli_message("\nMoving files...")
-
-        for profiling_result in profiling_results['results']:
-            data_asset_name = profiling_result[1]['meta']['data_asset_name']
-            expectation_suite_name = profiling_result[1]['meta']['expectation_suite_name']
-            run_id = profiling_result[1]['meta']['run_id']
-            context.move_validation_to_fixtures(
-                data_asset_name, expectation_suite_name, run_id)
-
-        cli_message("\nDone.")
-
-        cli_message("\nBuilding documentation...")
         build_documentation(context)
 
     else:
@@ -306,14 +306,26 @@ To learn more: <blue>https://docs.greatexpectations.io/en/latest/guides/data_doc
         )
 
 
-def build_documentation(context):
+def build_documentation(context, site_name=None, data_asset_name=None):
     """Build documentation in a context"""
-    context.render_full_static_site()
-    cli_message(
-        """
-To view the generated data documentation, open this file in a web browser:
-    <green>great_expectations/uncommitted/documentation/index.html</green>
-""")
+    cli_message("\nBuilding documentation...")
+
+    if site_name is not None:
+        site_names = [site_name]
+    else:
+        site_names=None
+    index_page_locator_infos = context.build_data_documentation(site_names=site_names, data_asset_name=data_asset_name)
+
+    msg = """
+The following data documentation HTML sites were generated:
+    
+"""
+    for site_name, index_page_locator_info in index_page_locator_infos.items():
+        msg += site_name + ":\n"
+        for key, value in index_page_locator_info[0].items():
+            msg += "   <green>" + key + ": " + value + "</green>\n"
+
+    cli_message(msg)
 
 
 msg_prompt_choose_data_source = """
