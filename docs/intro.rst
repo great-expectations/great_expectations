@@ -98,10 +98,9 @@ What does Great Expectations NOT do?
 	
 	Great Expectations does not store data itself. Instead, it deals in metadata about data: Expectations, validation results, etc. If you want to bring your data itself under version control, check out tools like: `DVC <https://dvc.org/>`__ and `Quilt <https://github.com/quiltdata/quilt>`__.
 
-**Great Expectations provides a lightweight metadata store, but it also plays nice with other metadata tools.** 
-
 **Great Expectations currently works best in a python/bash environment.** 
-Alternatives: assertR, 
+
+	Great Expectations is python-based. You can invoke it from the command line without using a python programming environment, but if you're working in another ecosystem, other tools might be a better choice. If you're running in a pure R environment, you might consider `assertR <https://github.com/ropensci/assertr>`__ as an alternative. Within the Tensorflow ecosystem, `TFDV <https://www.tensorflow.org/tfx/guide/tfdv>`__ fulfills a similar function as Great Expectations.
 
 
 Who maintains Great Expectations?
