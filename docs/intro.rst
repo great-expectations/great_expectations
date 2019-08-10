@@ -108,7 +108,7 @@ What does Great Expectations NOT do?
 Who maintains Great Expectations?
 -------------------------------------------------------------
 
-Great Expectations is under active development by James Campbell, Abe Gong, Eugene Mandell and Rob Lim, with help from many others.
+Great Expectations is under active development by James Campbell, Abe Gong, Eugene Mandel and Rob Lim, with help from many others.
 
 If you have questions, comments, or just want to have a good old-fashioned chat about data pipelines, please hop on our public Slack channel: https://tinyurl.com/great-expectations-slack
 
