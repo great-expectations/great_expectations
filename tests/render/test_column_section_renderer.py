@@ -359,22 +359,22 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
                 {
                     "content_block_type": "string_template",
                     "string_template": {
-                    "template": "$icon",
-                    "params": {
-                        "icon": ""
-                    },
-                    "styling": {
+                        "template": "$icon",
                         "params": {
-                        "icon": {
-                            "classes": [
-                            "fas",
-                            "fa-check-circle",
-                            "text-success"
-                            ],
-                            "tag": "i"
+                            "icon": ""
+                        },
+                        "styling": {
+                            "params": {
+                            "icon": {
+                                "classes": [
+                                    "fas",
+                                    "fa-check-circle",
+                                    "text-success"
+                                ],
+                                "tag": "i"
+                            }
+                            }
                         }
-                        }
-                    }
                     }
                 },
                 {
@@ -450,6 +450,91 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_wit
     }
     result = ValidationResultsTableContentBlockRenderer.render([evr])
     print(json.dumps(result, indent=2))
-    assert result == "hi"
-
-    pass
+    assert result == {
+        "content_block_type": "table",
+        "table": [
+            [
+            {
+                "content_block_type": "string_template",
+                "string_template": {
+                "template": "$icon",
+                "params": {
+                    "icon": ""
+                },
+                "styling": {
+                    "params": {
+                    "icon": {
+                        "classes": [
+                        "fas",
+                        "fa-exclamation-triangle",
+                        "text-warning"
+                        ],
+                        "tag": "i"
+                    }
+                    }
+                }
+                }
+            },
+            [
+                {
+                "content_block_type": "string_template",
+                "string_template": {
+                    "template": "$column Kullback-Leibler (KL) divergence with respect to a given distribution must be lower than a provided threshold but no distribution was specified.",
+                    "params": {
+                    "column": "live",
+                    "partition_object": None,
+                    "threshold": None,
+                    "result_format": "SUMMARY"
+                    },
+                    "styling": {
+                    "default": {
+                        "classes": [
+                        "badge",
+                        "badge-secondary"
+                        ]
+                    },
+                    "params": {
+                        "sparklines_histogram": {
+                        "styles": {
+                            "font-family": "serif !important"
+                        }
+                        }
+                    }
+                    }
+                }
+                },
+                {
+                "content_block_type": "string_template",
+                "string_template": {
+                    "template": "Expectation failed to execute.",
+                    "params": {},
+                    "tag": "strong",
+                    "styling": {
+                    "classes": [
+                        "text-warning"
+                    ]
+                    }
+                }
+                },
+                None
+            ],
+            "--"
+            ]
+        ],
+        "styling": {
+            "body": {
+            "classes": [
+                "table"
+            ]
+            },
+            "classes": [
+            "m-3",
+            "table-responsive"
+            ]
+        },
+        "header_row": [
+            "Status",
+            "Expectation",
+            "Observed Value"
+        ]
+    }
