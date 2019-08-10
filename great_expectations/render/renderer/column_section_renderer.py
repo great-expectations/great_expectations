@@ -18,6 +18,8 @@ from ..types import (
     RenderedComponentContent,
 )
 
+def convert_to_string_and_escape(var):
+    return re.sub("\$", "$$", str(var))
 
 class ColumnSectionRenderer(Renderer):
     @classmethod
@@ -101,7 +103,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
         content_blocks.append(RenderedComponentContent(**{
             "content_block_type": "header",
             "header": {
-                    "template": re.sub("\$", "$$", column_name),
+                    "template": convert_to_string_and_escape(column_name),
                     "tooltip": {
                         "content": "expect_column_to_exist",
                         "placement": "top"
@@ -575,7 +577,7 @@ class ValidationResultsColumnSectionRenderer(ColumnSectionRenderer):
         
         content_blocks.append(RenderedComponentContent(**{
             "content_block_type": "header",
-            "header": re.sub("\$", "$$", column),
+            "header": convert_to_string_and_escape(column),
             "styling": {
                 "classes": ["col-12"],
                 "header": {
@@ -620,7 +622,7 @@ class ExpectationSuiteColumnSectionRenderer(ColumnSectionRenderer):
 
         content_blocks.append(RenderedComponentContent(**{
             "content_block_type": "header",
-            "header": re.sub("\$", "$$", column),
+            "header": convert_to_string_and_escape(column),
             "styling": {
                 "classes": ["col-12"],
                 "header": {
