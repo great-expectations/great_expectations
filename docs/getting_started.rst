@@ -23,7 +23,7 @@ From there, follow these steps to deploy Great Expectations.
 Supporting resources
 -------------------------------------
 
-Great expectations requires a python compute environment and access to data, either locally or \
+Great Expectations requires a python compute environment and access to data, either locally or \
 through a database or distributed cluster. In addition, developing with great expectations relies \
 heavily on tools in the Python engineering ecosystem: pip, virtual environments, jupyter notebooks. \
 We also assume some level of familiarity with git and version control.
@@ -38,6 +38,7 @@ See the links below for good, practical tutorials for these tools.
 **virtual environments**
 
     * https://virtualenv.pypa.io/en/latest/
+    * https://python-guide-cn.readthedocs.io/en/latest/dev/virtualenvs.html
     * https://www.dabapps.com/blog/introduction-to-pip-and-virtualenv-python/
 
 **jupyter notebooks and jupyter lab**
@@ -49,6 +50,7 @@ See the links below for good, practical tutorials for these tools.
 **git**
 
     * https://git-scm.com/
+    * https://guides.github.com/
     * https://www.atlassian.com/git/tutorials
 
 

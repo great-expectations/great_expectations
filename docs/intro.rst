@@ -96,7 +96,7 @@ What does Great Expectations NOT do?
 
 **Great Expectations is NOT a data versioning tool.**
 	
-	Great expectations does not store data itself. Instead, it deals in metadata about data. If you want to bring your data itself under version control, check out tools like: `DVC <https://dvc.org/>`__ and `Quilt <https://github.com/quiltdata/quilt>`__
+	Great Expectations does not store data itself. Instead, it deals in metadata about data: Expectations, validation results, etc. If you want to bring your data itself under version control, check out tools like: `DVC <https://dvc.org/>`__ and `Quilt <https://github.com/quiltdata/quilt>`__.
 
 **Great Expectations provides a lightweight metadata store, but it also plays nice with other metadata tools.** 
 
@@ -107,7 +107,7 @@ Alternatives: assertR,
 Who maintains Great Expectations?
 -------------------------------------------------------------
 
-Great Expectations is maintained by James Campbell, Abe Gong, Eugene Mandell and Rob Lim, with help from many others.
+Great Expectations is under active development by James Campbell, Abe Gong, Eugene Mandell and Rob Lim, with help from many others.
 
 If you have questions, comments, or just want to have a good old-fashioned chat about data pipelines, please hop on our public Slack channel: https://tinyurl.com/great-expectations-slack
 
