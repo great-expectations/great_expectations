@@ -1,7 +1,9 @@
-import altair as alt
 import json
-import pandas as pd
 from string import Template
+import re
+
+import altair as alt
+import pandas as pd
 
 from .renderer import Renderer
 from .content_block import ValueListContentBlockRenderer
@@ -16,6 +18,8 @@ from ..types import (
     RenderedComponentContent,
 )
 
+def convert_to_string_and_escape(var):
+    return re.sub("\$", "$$", str(var))
 
 class ColumnSectionRenderer(Renderer):
     @classmethod
@@ -79,7 +83,6 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
 
     @classmethod
     def _render_header(cls, evrs, content_blocks, column_type=None):
-
         # NOTE: This logic is brittle
         try:
             column_name = evrs[0]["expectation_config"]["kwargs"]["column"]
@@ -100,7 +103,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
         content_blocks.append(RenderedComponentContent(**{
             "content_block_type": "header",
             "header": {
-                    "template": column_name,
+                    "template": convert_to_string_and_escape(column_name),
                     "tooltip": {
                         "content": "expect_column_to_exist",
                         "placement": "top"
@@ -574,7 +577,7 @@ class ValidationResultsColumnSectionRenderer(ColumnSectionRenderer):
         
         content_blocks.append(RenderedComponentContent(**{
             "content_block_type": "header",
-            "header": column,
+            "header": convert_to_string_and_escape(column),
             "styling": {
                 "classes": ["col-12"],
                 "header": {
@@ -619,7 +622,7 @@ class ExpectationSuiteColumnSectionRenderer(ColumnSectionRenderer):
 
         content_blocks.append(RenderedComponentContent(**{
             "content_block_type": "header",
-            "header": column,
+            "header": convert_to_string_and_escape(column),
             "styling": {
                 "classes": ["col-12"],
                 "header": {
