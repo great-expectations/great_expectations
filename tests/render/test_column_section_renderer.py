@@ -330,7 +330,7 @@ def test_ExpectationSuiteColumnSectionRenderer_render_bullet_list(titanic_profil
     assert "may have any percentage of unique values" in json.dumps(content_block)
     assert "values must not be null, at least $mostly_pct % of the time." in json.dumps(content_block)
     
-def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row():
+def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_happy_path():
     evr = {
         'success': True,
         'result': {
@@ -427,6 +427,7 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row():
         ]
     }
 
+def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_with_errored_expectation():
     evr = {
         'success': False,
         'exception_info': {
