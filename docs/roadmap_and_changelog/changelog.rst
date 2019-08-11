@@ -1,8 +1,16 @@
 .. _changelog:
 
 
-v.0.7.6__develop
+v.0.7.6
 -----------------
+* Added Validation Renderer - it renderes validation results into HTML and displays the differences between the expected and the observed attributes of a dataset.
+* Added Configurable Data Documentation feature that supports multiple data documentation use cases.
+* Added the capability of rendering documentation for one data asset in great_expectations documentation command.
+* Introduced DotDict and LooselyTypedDotDict classes that allow to enforce typing of dictionaries.
+* Multiple bug fixes in the logic of rendering data documentation.
+* Bug fix: Slack notification logic was broken.
+* Bug fix: great_expectations profile command was failing when datasource argument was not provided.
+* Bug fix: https://github.com/great-expectations/great_expectations/issues/597
 
 v.0.7.5
 -----------------
