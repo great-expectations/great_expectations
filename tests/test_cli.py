@@ -41,11 +41,11 @@ Options:
   --help         Show this message and exit.
 
 Commands:
-  documentation  Build data documentation for a project.
-  init           Initialize a new Great Expectations project.
-  profile        Profile datasources from the specified context.
-  render         Render a great expectations object to documentation.
-  validate       Validate a CSV file against an expectation suite.
+  build-documentation  Build data documentation for a project.
+  init                 Initialize a new Great Expectations project.
+  profile              Profile datasources from the specified context.
+  render               Render a great expectations object to documentation.
+  validate             Validate a CSV file against an expectation suite.
 """
 
 
@@ -219,19 +219,19 @@ def test_cli_init(tmp_path_factory, filesystem_csv_2):
         assert os.path.isfile(
             os.path.join(
                 basedir,
-                "great_expectations/fixtures/validations/data__dir/default/Titanic/BasicDatasetProfiler.json")
+                "great_expectations/uncommitted/validations/profiling/data__dir/default/Titanic/BasicDatasetProfiler.json")
         )
 
         assert os.path.isfile(
             os.path.join(
                 basedir,
-                "great_expectations/uncommitted/documentation/data__dir/default/Titanic/BasicDatasetProfiler.html")
+                "great_expectations/uncommitted/documentation/local_site/profiling/data__dir/default/Titanic/BasicDatasetProfiler.html")
         )
 
         assert os.path.getsize(
             os.path.join(
                 basedir,
-                "great_expectations/uncommitted/documentation/data__dir/default/Titanic/BasicDatasetProfiler.html"
+                "great_expectations/uncommitted/documentation/local_site/profiling/data__dir/default/Titanic/BasicDatasetProfiler.html"
             )
         ) > 0
         print(result)
@@ -250,7 +250,7 @@ def test_cli_init(tmp_path_factory, filesystem_csv_2):
 #     assert False
 
 
-def test_cli_profile(empty_data_context, filesystem_csv_2, capsys):
+def test_cli_profile_with_datasource_arg(empty_data_context, filesystem_csv_2, capsys):
     empty_data_context.add_datasource(
         "my_datasource", "pandas", base_directory=str(filesystem_csv_2))
     not_so_empty_data_context = empty_data_context
@@ -277,6 +277,85 @@ def test_cli_profile(empty_data_context, filesystem_csv_2, capsys):
     assert "Note: You will need to review and revise Expectations before using them in production." in captured.out
     logger.removeHandler(handler)
 
+def test_cli_profile_with_no_args(empty_data_context, filesystem_csv_2, capsys):
+    empty_data_context.add_datasource(
+        "my_datasource", "pandas", base_directory=str(filesystem_csv_2))
+    not_so_empty_data_context = empty_data_context
+
+    project_root_dir = not_so_empty_data_context.root_directory
+    # print(project_root_dir)
+
+    # For some reason, even with this logging change (which is required and done in main of the cli)
+    # the click cli runner does not pick up output; capsys appears to intercept it first
+    logger = logging.getLogger("great_expectations")
+    handler = logging.StreamHandler(stream=sys.stdout)
+    formatter = logging.Formatter(
+        '%(levelname)s %(message)s')
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+    logger.setLevel(logging.INFO)
+    runner = CliRunner()
+    result = runner.invoke(
+        cli, ["profile", "-d", project_root_dir])
+
+    captured = capsys.readouterr()
+
+    assert "Profiling 'my_datasource' with 'BasicDatasetProfiler'" in captured.out
+    assert "Note: You will need to review and revise Expectations before using them in production." in captured.out
+    logger.removeHandler(handler)
+
+def test_cli_profile_with_valid_data_asset_arg(empty_data_context, filesystem_csv_2, capsys):
+    empty_data_context.add_datasource(
+        "my_datasource", "pandas", base_directory=str(filesystem_csv_2))
+    not_so_empty_data_context = empty_data_context
+
+    project_root_dir = not_so_empty_data_context.root_directory
+    # print(project_root_dir)
+
+    # For some reason, even with this logging change (which is required and done in main of the cli)
+    # the click cli runner does not pick up output; capsys appears to intercept it first
+    logger = logging.getLogger("great_expectations")
+    handler = logging.StreamHandler(stream=sys.stdout)
+    formatter = logging.Formatter(
+        '%(levelname)s %(message)s')
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+    logger.setLevel(logging.INFO)
+    runner = CliRunner()
+    result = runner.invoke(
+        cli, ["profile", "my_datasource", "--data_assets", "f1", "-d", project_root_dir])
+
+    captured = capsys.readouterr()
+
+    assert "Profiling 'my_datasource' with 'BasicDatasetProfiler'" in captured.out
+    assert "Note: You will need to review and revise Expectations before using them in production." in captured.out
+    logger.removeHandler(handler)
+
+def test_cli_profile_with_invalid_data_asset_arg(empty_data_context, filesystem_csv_2, capsys):
+    empty_data_context.add_datasource(
+        "my_datasource", "pandas", base_directory=str(filesystem_csv_2))
+    not_so_empty_data_context = empty_data_context
+
+    project_root_dir = not_so_empty_data_context.root_directory
+    # print(project_root_dir)
+
+    # For some reason, even with this logging change (which is required and done in main of the cli)
+    # the click cli runner does not pick up output; capsys appears to intercept it first
+    logger = logging.getLogger("great_expectations")
+    handler = logging.StreamHandler(stream=sys.stdout)
+    formatter = logging.Formatter(
+        '%(levelname)s %(message)s')
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+    logger.setLevel(logging.INFO)
+    runner = CliRunner()
+    result = runner.invoke(
+        cli, ["profile", "my_datasource", "--data_assets", "bad-bad-asset", "-d", project_root_dir],
+    input="2\n")
+
+    assert "Some of the data assets you specified were not found: bad-bad-asset" in result.output
+    
+    logger.removeHandler(handler)
 
 def test_cli_documentation(empty_data_context, filesystem_csv_2, capsys):
     empty_data_context.add_datasource(
@@ -309,7 +388,13 @@ def test_cli_documentation(empty_data_context, filesystem_csv_2, capsys):
 
     assert "index.html" in os.listdir(os.path.join(
         project_root_dir,
-        "uncommitted/documentation"
+        "uncommitted/documentation/local_site"
+        )
+    )
+
+    assert "index.html" in os.listdir(os.path.join(
+        project_root_dir,
+        "uncommitted/documentation/team_site"
         )
     )
 
@@ -329,10 +414,10 @@ def test_cli_config_not_found(tmp_path_factory):
             cli, ["profile"])
         assert "no great_expectations context configuration" in result.output
         result = runner.invoke(
-            cli, ["documentation", "-d", "./"])
+            cli, ["build-documentation", "-d", "./"])
         assert "no great_expectations context configuration" in result.output
         result = runner.invoke(
-            cli, ["documentation"])
+            cli, ["build-documentation"])
         assert "no great_expectations context configuration" in result.output
     except:
         raise
