@@ -42,9 +42,10 @@ Options:
 
 Commands:
   build-documentation  Build data documentation for a project.
+  destroy              Destroy the Great Expectations context directory.
   init                 Initialize a new Great Expectations project.
   profile              Profile datasources from the specified context.
-  render               Render a great expectations object to documentation.
+  render               Render a Great Expectations object to documentation.
   validate             Validate a CSV file against an expectation suite.
 """
 
@@ -425,6 +426,42 @@ def test_cli_config_not_found(tmp_path_factory):
         os.chdir(curdir)
 
 
+def test_destroy(data_context):
+    print(data_context.root_directory)
+    assert os.path.isdir(data_context.root_directory)
+
+    #Run, but answer "No" when asked whether to proceed.
+    runner = CliRunner()
+    result = runner.invoke(
+        cli, ["destroy", "-d", data_context.root_directory],
+        input="N\n"
+    )
+    print(result.output)
+    print(result)
+    assert result.exit_code == 0
+    assert os.path.isdir(data_context.root_directory)
+
+    #This time, answer "yes"
+    runner = CliRunner()
+    result = runner.invoke(
+        cli, ["destroy", "-d", data_context.root_directory],
+        input="Y\n"
+    )
+    print(result.output)
+    print(result)
+    assert result.exit_code == 0
+    assert os.path.isdir(data_context.root_directory) == False
+
+    #Running when the directory doesn't contain a DataContext throws a helpful error.
+    runner = CliRunner()
+    result = runner.invoke(
+        cli, ["destroy", "-d", data_context.root_directory],
+    )
+    print(result.output)
+    print(result)
+    assert result.exit_code == 0
+    assert "Error: no great_expectations context configuration found in the specified directory." in result.output
+
 def test_scaffold_directories_and_notebooks(tmp_path_factory):
     empty_directory = str(tmp_path_factory.mktemp("test_scaffold_directories_and_notebooks"))
     scaffold_directories_and_notebooks(empty_directory)
@@ -434,3 +471,4 @@ def test_scaffold_directories_and_notebooks(tmp_path_factory):
            {'datasources', 'plugins', 'expectations', '.gitignore', 'fixtures', 'uncommitted', 'notebooks'}
     assert set(os.listdir(os.path.join(empty_directory, "uncommitted"))) == \
            {'samples', 'documentation', 'validations', 'credentials'}
+

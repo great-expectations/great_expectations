@@ -11,6 +11,7 @@ from .init import (
     msg_prompt_lets_begin,
 )
 from .util import cli_message
+
 from great_expectations.render.view import DefaultJinjaPageView
 from great_expectations.render.renderer import ProfilingResultsPageRenderer, ExpectationSuitePageRenderer
 from great_expectations.data_context import DataContext
@@ -18,6 +19,7 @@ from great_expectations.data_asset import FileDataAsset
 from great_expectations.dataset import Dataset, PandasDataset
 from great_expectations.exceptions import DataContextError, ConfigNotFoundError
 from great_expectations import __version__, read_csv
+
 from pyfiglet import figlet_format
 import click
 import six
@@ -26,7 +28,7 @@ import json
 import logging
 import sys
 import warnings
-# from collections import OrderedDict
+import shutil
 
 warnings.filterwarnings('ignore')
 
@@ -273,7 +275,7 @@ def build_documentation(directory, site_name, data_asset_name):
 @cli.command()
 @click.argument('render_object')
 def render(render_object):
-    """Render a great expectations object to documentation.
+    """Render a Great Expectations object to documentation.
 
     RENDER_OBJECT: path to a GE object to render
     """
@@ -286,6 +288,23 @@ def render(render_object):
         model = ExpectationSuitePageRenderer.render(raw)
     print(DefaultJinjaPageView.render(model))
 
+@cli.command()
+@click.option('--directory', '-d', default="./great_expectations",
+              help='The root of a project directory containing a great_expectations/ config.')
+def destroy(directory):
+    """Destroy the Great Expectations context directory."""
+
+    # Confirm that this is indeed a valid DataContext directory
+    try:
+        context = DataContext(directory)
+    except ConfigNotFoundError:
+        cli_message("Error: no great_expectations context configuration found in the specified directory.")
+    
+    if not click.confirm("Are you sure you want to delete all files in "+directory+"?\n", default=False):
+        print("Okay. No action taken.")
+
+    else:
+        shutil.rmtree(directory, ignore_errors=False, onerror=None)
 
 def main():
     handler = logging.StreamHandler()
