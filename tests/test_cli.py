@@ -41,11 +41,11 @@ Options:
   --help         Show this message and exit.
 
 Commands:
-  documentation  Build data documentation for a project.
-  init           Initialize a new Great Expectations project.
-  profile        Profile datasources from the specified context.
-  render         Render a great expectations object to documentation.
-  validate       Validate a CSV file against an expectation suite.
+  build-documentation  Build data documentation for a project.
+  init                 Initialize a new Great Expectations project.
+  profile              Profile datasources from the specified context.
+  render               Render a great expectations object to documentation.
+  validate             Validate a CSV file against an expectation suite.
 """
 
 
@@ -414,10 +414,10 @@ def test_cli_config_not_found(tmp_path_factory):
             cli, ["profile"])
         assert "no great_expectations context configuration" in result.output
         result = runner.invoke(
-            cli, ["documentation", "-d", "./"])
+            cli, ["build-documentation", "-d", "./"])
         assert "no great_expectations context configuration" in result.output
         result = runner.invoke(
-            cli, ["documentation"])
+            cli, ["build-documentation"])
         assert "no great_expectations context configuration" in result.output
     except:
         raise
