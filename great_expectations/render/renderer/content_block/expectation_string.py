@@ -1307,8 +1307,8 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         })
         
         if not params.get("partition_object"):
-            template_str = "Kullback-Leibler (KL) divergence with respect to a given distribution must be lower than a \
-                provided threshold but no distribution was specified."
+            template_str = "Kullback-Leibler (KL) divergence with respect to a given distribution must be lower than a " \
+                "provided threshold but no distribution was specified."
         else:
             params["sparklines_histogram"] = cls.sparkline(params.get("partition_object")["weights"])[0]
             template_str = "Kullback-Leibler (KL) divergence with respect to the following distribution must be " \
