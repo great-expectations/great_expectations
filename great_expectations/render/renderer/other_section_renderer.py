@@ -86,7 +86,7 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
             "header": "Dataset info",
             "table": table_rows,
             "styling": {
-                "classes": ["col-6", "table-responsive"],
+                "classes": ["col-6"],
                 "styles": {
                     "margin-top": "20px"
                 },
