@@ -43,8 +43,9 @@ The CLI has some conventions of its own.
 * Questions are always phrased as conversational sentences.
 * Sections are divided by headers: "========== Profiling =========="
 * We use punctuation: Please finish sentences with periods, questions marks, or an occasional exclamation point.
-* Keep indentation consistent! (We're pythonistas, natch.)
+* Keep indentation and line spacing consistent! (We're pythonistas, natch.)
 * Include exactly one blank line after every question.
 * Within those constraints, shorter is better. When in doubt, shorten.
 * Clickable links (usually to documentation) are blue.
 * Copyable bash commands are green.
+* All top-level bash commands must be verbs: "build documentation", not "documentation"
