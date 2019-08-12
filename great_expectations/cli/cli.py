@@ -2,7 +2,7 @@
 from .datasource import (
     add_datasource,
     profile_datasource,
-    build_documentation,
+    build_documentation as build_documentation_impl,
     msg_go_to_notebook
 )
 from .init import (
@@ -267,7 +267,7 @@ def build_documentation(directory, site_name, data_asset_name):
         cli_message("Error: no great_expectations context configuration found in the specified directory.")
         return
 
-    build_documentation(context, site_name=site_name, data_asset_name=data_asset_name)
+    build_documentation_impl(context, site_name=site_name, data_asset_name=data_asset_name)
 
 
 @cli.command()
