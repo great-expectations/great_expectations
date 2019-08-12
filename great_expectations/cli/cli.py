@@ -1,22 +1,4 @@
 # -*- coding: utf-8 -*-
-"""
-# Style guide for the Great Expectations CLI.
-
-###
-#
-# The CLI never writes to disk without asking first.
-# Questions are always phrased as conversational sentences.
-# Sections are divided by headers: "========== Profiling =========="
-# We use punctuation: Please finish sentences with periods, questions marks, or an occasional exclamation point.
-# Keep indentation consistent! (We're pythonistas, natch.)
-# Include exactly one blank line after every question.
-# Within those constraints, shorter is better. When in doubt, shorten.
-# Clickable links (usually to documentation) are blue.
-# Copyable bash commands are green.
-#
-###
-
-"""
 from .datasource import (
     add_datasource,
     profile_datasource,
@@ -233,14 +215,20 @@ def init(target_directory):
 @click.option('--directory', '-d', default="./great_expectations",
               help='The root of a project directory containing a great_expectations/ config.')
 def profile(datasource_name, data_assets, profile_all_data_assets, directory):
-    """Profile datasources from the specified context.
+    """
+    Profile datasources from the specified context.
 
+    If the optional data_assets and profile_all_data_assets arguments are not specified, the profiler will check
+    if the number of data assets in the datasource exceeds the internally defined limit. If it does, it will
+    prompt the user to either specify the list of data assets to profile or to profile all.
+    If the limit is not exceeded, the profiler will profile all data assets in the datasource.
 
-    DATASOURCE_NAME: the datasource to profile, or leave blank to profile all datasources."""
-
-
-    if profile_all_data_assets:
-        max_data_assets = None
+    :param datasource_name: name of the datasource to profile
+    :param data_assets: if this comma-separated list of data asset names is provided, only the specified data assets will be profiled
+    :param profile_all_data_assets: if provided, all data assets will be profiled
+    :param directory:
+    :return:
+    """
 
     try:
         context = DataContext(directory)
@@ -250,10 +238,13 @@ def profile(datasource_name, data_assets, profile_all_data_assets, directory):
 
     if datasource_name is None:
         datasources = [datasource["name"] for datasource in context.list_datasources()]
-        for datasource_name in datasources:
-            profile_datasource(context, datasource_name, max_data_assets=max_data_assets)
+        if len(datasources) > 1:
+            cli_message("Error: please specify the datasource to profile. Available datasources: " + ", ".join(datasources))
+            return
+        else:
+            profile_datasource(context, datasources[0], data_assets=data_assets, profile_all_data_assets=profile_all_data_assets)
     else:
-        profile_datasource(context, datasource_name, data_assets=data_assets)
+        profile_datasource(context, datasource_name, data_assets=data_assets, profile_all_data_assets=profile_all_data_assets)
 
 
 @cli.command()
