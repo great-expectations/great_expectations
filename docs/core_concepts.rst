@@ -1,6 +1,6 @@
 .. _core_concepts:
 
-Core Concepts
+Core concepts
 ==================
 
 .. toctree::

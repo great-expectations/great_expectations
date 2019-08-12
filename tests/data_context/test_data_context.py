@@ -29,7 +29,7 @@ def test_validate_saves_result_inserts_run_id(empty_data_context, filesystem_csv
     not_so_empty_data_context = empty_data_context
 
     # we should now be able to validate, and have validations saved.
-    assert not_so_empty_data_context._project_config["result_store"]["filesystem"]["base_directory"] == \
+    assert not_so_empty_data_context._project_config["validations_store"]["local"]["base_directory"] == \
         "uncommitted/validations/"
 
     my_batch = not_so_empty_data_context.get_batch("my_datasource/f1")
@@ -430,153 +430,82 @@ def test_render_full_static_site(tmp_path_factory, filesystem_csv_3):
     )
 
     context.profile_datasource("titanic")
-    glob_str = os.path.join(ge_directory,"uncommitted/validations/*/titanic/default/Titanic/BasicDatasetProfiler.json")
-    print(glob_str)
-    glob_result = glob(glob_str)
-    os.mkdir(os.path.join(ge_directory,"fixtures/validations"))
-    os.mkdir(os.path.join(ge_directory,"fixtures/validations/titanic"))
-    os.mkdir(os.path.join(ge_directory,"fixtures/validations/titanic/default"))
-    full_fixture_path = os.path.join(ge_directory,"fixtures/validations/titanic/default/Titanic/")
-    os.mkdir(full_fixture_path)
-    shutil.copy(
-        glob_result[0],
-        full_fixture_path+"BasicDatasetProfiler.json"
-    )
 
     context.profile_datasource("random")
-    os.mkdir(os.path.join(ge_directory,"fixtures/validations/random"))
-    os.mkdir(os.path.join(ge_directory,"fixtures/validations/random/default"))
 
-    glob_str = os.path.join(ge_directory,"uncommitted/validations/*/random/default/f*/BasicDatasetProfiler.json")
-    print(glob_str)
-    glob_result = glob(glob_str)
-
-    full_fixture_path = os.path.join(ge_directory,"fixtures/validations/random/default/f1/")
-    os.mkdir(full_fixture_path)
-    shutil.copy(
-        glob_result[0],  # !!! This might switch the f1 and f2 files...
-        full_fixture_path+"BasicDatasetProfiler.json"
-    )
-    full_fixture_path = os.path.join(ge_directory,"fixtures/validations/random/default/f2/")
-    os.mkdir(full_fixture_path)
-    shutil.copy(
-        glob_result[1],  # !!! This might switch the f1 and f2 files...
-        full_fixture_path+"BasicDatasetProfiler.json"
-    )
-    # for g in glob_result:
-    #     shutil.copy(
-    #         g,
-    #         full_fixture_path+"BasicDatasetProfiler.json"
-    #     )
-
-    # os.mkdir(os.path.join(ge_directory,"fixtures")
-    context.render_full_static_site()
+    context.build_data_documentation()
 
     # Titanic
+
     assert os.path.exists(os.path.join(
         ge_directory,
-        "fixtures/validations/titanic/default/Titanic/BasicDatasetProfiler.json"
+        "uncommitted/validations/profiling/titanic/default/Titanic/BasicDatasetProfiler.json"
     ))
-    assert os.path.exists(os.path.join(
+
+    assert os.path.exists(os.path.join( # profiling results HTML
         ge_directory,
-        "uncommitted/documentation/titanic/default/Titanic/BasicDatasetProfiler.html"
+        "uncommitted/documentation/local_site/profiling/titanic/default/Titanic/BasicDatasetProfiler.html"
     ))
     
-    with open(os.path.join(
+    assert os.path.exists(os.path.join( # profiling expectations HTML
         ge_directory,
-        "fixtures/validations/titanic/default/Titanic/BasicDatasetProfiler.json"
-    ), "r") as infile:
-        titanic_validation = json.load(infile)
-    titanic_run_id = titanic_validation['meta']['run_id']
-    titanic_validation_html_filename = "{run_id}-BasicDatasetProfiler.html".format(
-                    run_id=titanic_run_id.replace(':', ''),
-                )
-    assert os.path.exists(os.path.join(
-        ge_directory,
-        "uncommitted/documentation/titanic/default/Titanic/{filename}".format(filename=titanic_validation_html_filename)
+        "uncommitted/documentation/local_site/expectations/titanic/default/Titanic/BasicDatasetProfiler.html"
     ))
+
     # f1
+
     assert os.path.exists(os.path.join(
         ge_directory,
-        "fixtures/validations/random/default/f1/BasicDatasetProfiler.json"
+        "uncommitted/validations/profiling/random/default/f1/BasicDatasetProfiler.json"
     ))
-    assert os.path.exists(os.path.join(
+    assert os.path.exists(os.path.join( # profiling results HTML
         ge_directory,
-        "uncommitted/documentation/random/default/f1/BasicDatasetProfiler.html"
+        "uncommitted/documentation/local_site/profiling/random/default/f1/BasicDatasetProfiler.html"
     ))
     
-    with open(os.path.join(
+    assert os.path.exists(os.path.join( # profiling expectations HTML
         ge_directory,
-        "fixtures/validations/random/default/f1/BasicDatasetProfiler.json"
-    ), "r") as infile:
-        f1_validation = json.load(infile)
-    f1_run_id = f1_validation['meta']['run_id']
-    f1_validation_html_filename = "{run_id}-BasicDatasetProfiler.html".format(
-                    run_id=f1_run_id.replace(':', ''),
-                )
-    assert os.path.exists(os.path.join(
-        ge_directory,
-        "uncommitted/documentation/random/default/f1/{filename}".format(filename=f1_validation_html_filename)
+        "uncommitted/documentation/local_site/profiling/random/default/f1/BasicDatasetProfiler.html"
     ))
+
     # f2
+
     assert os.path.exists(os.path.join(
         ge_directory,
-        "fixtures/validations/random/default/f2/BasicDatasetProfiler.json"
+        "uncommitted/validations/profiling/random/default/f2/BasicDatasetProfiler.json"
     ))
     assert os.path.exists(os.path.join(
         ge_directory,
-        "uncommitted/documentation/random/default/f2/BasicDatasetProfiler.html"
+        "uncommitted/documentation/local_site/profiling/random/default/f2/BasicDatasetProfiler.html"
     ))
 
-    with open(os.path.join(
-            ge_directory,
-            "fixtures/validations/random/default/f2/BasicDatasetProfiler.json"
-            ), "r") as infile:
-        f2_validation = json.load(infile)
-    f2_run_id = f2_validation['meta']['run_id']
-    f2_validation_html_filename = "{run_id}-BasicDatasetProfiler.html".format(
-                    run_id=f2_run_id.replace(':', ''),
-                )
     assert os.path.exists(os.path.join(
         ge_directory,
-        "uncommitted/documentation/random/default/f2/{filename}".format(filename=f2_validation_html_filename)
+        "uncommitted/documentation/local_site/expectations/random/default/f2/BasicDatasetProfiler.html"
     ))
 
-    # full site
+    # local_site index.html
     assert os.path.exists(os.path.join(
         ge_directory,
-        "uncommitted/documentation/index.html"
+        "uncommitted/documentation/local_site/index.html"
+    ))
+
+    # team_site index.html
+    assert os.path.exists(os.path.join(
+        ge_directory,
+        "uncommitted/documentation/team_site/index.html"
     ))
 
     # save documentation locally
     safe_mmkdir("./tests/data_context/output")
     safe_mmkdir("./tests/data_context/output/documentation")
     
-    safe_mmkdir("./tests/data_context/output/documentation/titanic")
-    if os.path.isdir("./tests/data_context/output/documentation/titanic/default"):
-        shutil.rmtree("./tests/data_context/output/documentation/titanic/default")
+    if os.path.isdir("./tests/data_context/output/documentation"):
+        shutil.rmtree("./tests/data_context/output/documentation")
     shutil.copytree(
         os.path.join(
             ge_directory,
-            "uncommitted/documentation/titanic/default"
-        ),
-        "./tests/data_context/output/documentation/titanic/default"
-    )
-
-    safe_mmkdir("./tests/data_context/output/documentation/random")
-    if os.path.isdir("./tests/data_context/output/documentation/random/default"):
-        shutil.rmtree("./tests/data_context/output/documentation/random/default")
-    shutil.copytree(
-        os.path.join(
-            ge_directory,
-            "uncommitted/documentation/random/default"
-        ),
-        "./tests/data_context/output/documentation/random/default"
-    )
-    shutil.copy(
-        os.path.join(
-            ge_directory,
-            "uncommitted/documentation/index.html"
+            "uncommitted/documentation/"
         ),
         "./tests/data_context/output/documentation"
     )

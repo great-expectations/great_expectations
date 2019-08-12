@@ -17,11 +17,11 @@ from collections import (
 
 from great_expectations.version import __version__
 from great_expectations.data_asset.util import (
-    DotDict,
     recursively_convert_to_json_serializable,
     parse_result_format,
     get_empty_expectation_suite
 )
+from great_expectations.types import DotDict
 
 logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
