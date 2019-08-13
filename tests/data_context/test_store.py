@@ -4,13 +4,14 @@ import json
 from great_expectations.data_context.store import (
     Store,
     InMemoryStore,
+    FilesystemStore,
 )
 
 def test_core_store_logic():
     pass
 
 
-def test_integration():
+def test_InMemoryStore():
     my_store = InMemoryStore()
 
     with pytest.raises(KeyError):
@@ -38,3 +39,12 @@ def test_InMemoryStore_with_serialization():
     
     assert my_store.get("AAA") == "{\"x\": 1}"
     assert my_store.get("AAA", serialization_type="json") == {"x":1}
+
+def test_InMemoryStore(tmp_path_factory):
+    my_store = FilesystemStore()
+
+    with pytest.raises(KeyError):
+        my_store.get("AAA")
+    
+    my_store.set("AAA", "aaa")
+    assert my_store.get("AAA") == "aaa"

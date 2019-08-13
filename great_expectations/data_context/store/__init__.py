@@ -1,6 +1,7 @@
 from .store import (
     Store,
     InMemoryStore,
+    FilesystemStore,
 )
 # from .byte_store import (
 #     ByteStore
