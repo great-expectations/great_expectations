@@ -97,14 +97,15 @@ class FilesystemStore(Store):
         
         self.path = path
         safe_mmkdir(os.path.dirname(self.path))
-        print(self.path)
 
     def _get(self, key):
         with open(os.path.join(self.path, key)) as infile:
             return infile.read()
 
     def _set(self, key, value):
-        with open(os.path.join(self.path, key), "w") as outfile:
+        filename = os.path.join(self.path, key)
+        safe_mmkdir(os.path.split(filename)[0])
+        with open(filename, "w") as outfile:
             outfile.write(value)
 
 class S3Store(Store):
