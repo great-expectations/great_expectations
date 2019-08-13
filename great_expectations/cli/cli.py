@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from .datasource import (
-    add_datasource,
+    add_datasource as add_datasource_impl,
     profile_datasource,
     build_documentation as build_documentation_impl,
     msg_go_to_notebook
@@ -195,7 +195,7 @@ def init(target_directory):
         "\nDone.",
     )
 
-    data_source_name = add_datasource(context)
+    data_source_name = add_datasource_impl(context)
 
     if not data_source_name: # no datasource was created
         return
@@ -203,6 +203,26 @@ def init(target_directory):
     profile_datasource(context, data_source_name)
 
     cli_message(msg_go_to_notebook)
+
+@cli.command()
+@click.option('--directory', '-d', default="./great_expectations",
+              help='The root of a project directory containing a great_expectations/ config.')
+def add_datasource(directory):
+    """Add a new datasource to the data context
+    """
+    try:
+        context = DataContext(directory)
+    except ConfigNotFoundError:
+        cli_message("Error: no great_expectations context configuration found in the specified directory.")
+        return
+
+
+    data_source_name = add_datasource_impl(context)
+
+    if not data_source_name: # no datasource was created
+        return
+
+    profile_datasource(context, data_source_name)
 
 
 @cli.command()
