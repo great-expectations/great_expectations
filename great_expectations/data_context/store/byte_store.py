@@ -9,7 +9,7 @@ class ByteStore(Store):
     """
 
     def read(self, key):
-        un serialized_value = self._get(key)
+        unserialized_value = self._get(key)
         serialized_value = json.load()
 
     def write(self, key, value):
