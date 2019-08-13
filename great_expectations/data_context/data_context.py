@@ -1096,6 +1096,204 @@ class DataContext(object):
         # TOOO: only return parameters requested by the given expectations
         return self._evaluation_parameter_store.get_run_parameters(run_id)
 
+    # def register_validation_results(self, run_id, validation_results, data_asset=None):
+    #     """Process results of a validation run. This method is called by data_asset objects that are connected to
+    #      a DataContext during validation. It performs several actions:
+    #       - store the validation results to a validations_store, if one is configured
+    #       - store a snapshot of the data_asset, if so configured and a compatible data_asset is available
+    #       - perform a callback action using the validation results, if one is configured
+    #       - retrieve validation results referenced in other parameterized expectations and store them in the \
+    #         evaluation parameter store.
+
+    #     Args:
+    #         run_id: the run_id for which to register validation results
+    #         validation_results: the validation results object
+    #         data_asset: the data_asset to snapshot, if snapshot is configured
+
+    #     Returns:
+    #         validation_results: Validation results object, with updated meta information including references to \
+    #         stored data, if appropriate
+    #     """
+
+    #     try:
+    #         data_asset_name = validation_results["meta"]["data_asset_name"]
+    #     except KeyError:
+    #         logger.warning("No data_asset_name found in validation results; using '_untitled'")
+    #         data_asset_name = "_untitled"
+
+    #     try:
+    #         expectation_suite_name = validation_results["meta"]["expectation_suite_name"]
+    #     except KeyError:
+    #         logger.warning("No expectation_suite_name found in validation results; using '_untitled'")
+    #         expectation_suite_name = "_untitled"
+
+    #     try:
+    #         normalized_data_asset_name = self._normalize_data_asset_name(data_asset_name)
+    #     except DataContextError:
+    #         logger.warning(
+    #             "Registering validation results for a data_asset_name that cannot be normalized in this context."
+    #         )
+
+    #     expectation_suite_name = validation_results["meta"].get("expectation_suite_name", "default")
+    #     if self.validations_store:
+    #         validations_store = self.validations_store
+    #         if isinstance(validations_store, dict) and validations_store["type"] == "filesystem":
+    #             validation_filepath = self._get_normalized_data_asset_name_filepath(
+    #                 normalized_data_asset_name,
+    #                 expectation_suite_name,
+    #                 base_path=os.path.join(
+    #                     self.root_directory,
+    #                     validations_store["base_directory"],
+    #                     run_id
+    #                 )
+    #             )
+    #             logger.debug("Storing validation result: %s" % validation_filepath)
+    #             safe_mmkdir(os.path.dirname(validation_filepath))
+    #             with open(validation_filepath, "w") as outfile:
+    #                 json.dump(validation_results, outfile, indent=2)
+    #         if isinstance(validations_store, dict) and validations_store["type"] == "s3":
+    #             bucket = validations_store["bucket"]
+    #             key_prefix = validations_store["key_prefix"]
+    #             key = os.path.join(
+    #                 key_prefix,
+    #                 "validations/{run_id}/{data_asset_name}".format(
+    #                     run_id=run_id,
+    #                     data_asset_name=self._get_normalized_data_asset_name_filepath(
+    #                         normalized_data_asset_name,
+    #                         expectation_suite_name,
+    #                         base_path=""
+    #                     )
+    #                 )
+    #             )
+    #             validation_results["meta"]["result_reference"] = "s3://{bucket}/{key}".format(bucket=bucket, key=key)
+    #             try:
+    #                 import boto3
+    #                 s3 = boto3.resource('s3')
+    #                 result_s3 = s3.Object(bucket, key)
+    #                 result_s3.put(Body=json.dumps(validation_results).encode('utf-8'))
+    #             except ImportError:
+    #                 logger.error("Error importing boto3 for AWS support.")
+    #             except Exception:
+    #                 raise
+
+    #     if "result_callback" in self._project_config:
+    #         result_callback = self._project_config["result_callback"]
+    #         if isinstance(result_callback, dict) and "slack" in result_callback:
+    #             get_slack_callback(result_callback["slack"])(validation_results)
+    #         else:
+    #             logger.warning("Unrecognized result_callback configuration.")
+
+    #     if "data_asset_snapshot_store" in self._project_config and validation_results["success"] is False:
+    #         data_asset_snapshot_store = self._project_config["data_asset_snapshot_store"]
+    #         if isinstance(data_asset, PandasDataset):
+    #             if isinstance(data_asset_snapshot_store, dict) and "filesystem" in data_asset_snapshot_store:
+    #                 logger.info("Storing dataset to file")
+    #                 safe_mmkdir(os.path.join(
+    #                     self.root_directory,
+    #                     data_asset_snapshot_store["filesystem"]["base_directory"],
+    #                     run_id)
+    #                 )
+    #                 data_asset.to_csv(
+    #                     self._get_normalized_data_asset_name_filepath(
+    #                         normalized_data_asset_name,
+    #                         expectation_suite_name,
+    #                         base_path=os.path.join(
+    #                             self.root_directory,
+    #                             data_asset_snapshot_store["filesystem"]["base_directory"],
+    #                             run_id
+    #                         ),
+    #                         file_extension=".csv.gz"
+    #                     ),
+    #                     compression="gzip"
+    #                 )
+
+    #             if isinstance(data_asset_snapshot_store, dict) and "s3" in data_asset_snapshot_store:
+    #                 bucket = data_asset_snapshot_store["s3"]["bucket"]
+    #                 key_prefix = data_asset_snapshot_store["s3"]["key_prefix"]
+    #                 key = os.path.join(
+    #                     key_prefix,
+    #                     "validations/{run_id}/{data_asset_name}.csv.gz".format(
+    #                         run_id=run_id,
+    #                         data_asset_name=self._get_normalized_data_asset_name_filepath(
+    #                             normalized_data_asset_name,
+    #                             expectation_suite_name,
+    #                             base_path="",
+    #                             file_extension=".csv.gz"
+    #                         )
+    #                     )
+    #                 )
+    #                 validation_results["meta"]["data_asset_snapshot"] = "s3://{bucket}/{key}".format(
+    #                     bucket=bucket,
+    #                     key=key)
+
+    #                 try:
+    #                     import boto3
+    #                     s3 = boto3.resource('s3')
+    #                     result_s3 = s3.Object(bucket, key)
+    #                     result_s3.put(Body=data_asset.to_csv(compression="gzip").encode('utf-8'))
+    #                 except ImportError:
+    #                     logger.error("Error importing boto3 for AWS support. Unable to save to result store.")
+    #                 except Exception:
+    #                     raise
+    #         else:
+    #             logger.warning(
+    #                 "Unable to save data_asset of type: %s. Only PandasDataset is supported." % type(data_asset))
+
+    #     if not self._compiled:
+    #         self._compile()
+
+    #     if ("meta" not in validation_results or
+    #             "data_asset_name" not in validation_results["meta"] or
+    #             "expectation_suite_name" not in validation_results["meta"]
+    #     ):
+    #         logger.warning(
+    #             "Both data_asset_name ane expectation_suite_name must be in validation results to "
+    #             "register evaluation parameters."
+    #         )
+    #         return validation_results
+    #     elif (data_asset_name not in self._compiled_parameters["data_assets"] or
+    #           expectation_suite_name not in self._compiled_parameters["data_assets"][data_asset_name]):
+    #         # This is fine; short-circuit since we do not need to register any results from this dataset.
+    #         return validation_results
+        
+    #     for result in validation_results['results']:
+    #         # Unoptimized: loop over all results and check if each is needed
+    #         expectation_type = result['expectation_config']['expectation_type']
+    #         if expectation_type in self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name]:
+    #             # First, bind column-style parameters
+    #             if (("column" in result['expectation_config']['kwargs']) and 
+    #                 ("columns" in self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_type]) and
+    #                 (result['expectation_config']['kwargs']["column"] in
+    #                  self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_type]["columns"])):
+
+    #                 column = result['expectation_config']['kwargs']["column"]
+    #                 # Now that we have a small search space, invert logic, and look for the parameters in our result
+    #                 for type_key, desired_parameters in self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_type]["columns"][column].items():
+    #                     # value here is the set of desired parameters under the type_key
+    #                     for desired_param in desired_parameters:
+    #                         desired_key = desired_param.split(":")[-1]
+    #                         if type_key == "result" and desired_key in result['result']:
+    #                             self.store_validation_param(run_id, desired_param, result["result"][desired_key])
+    #                         elif type_key == "details" and desired_key in result["result"]["details"]:
+    #                             self.store_validation_param(run_id, desired_param, result["result"]["details"])
+    #                         else:
+    #                             logger.warning("Unrecognized key for parameter %s" % desired_param)
+                
+    #             # Next, bind parameters that do not have column parameter
+    #             for type_key, desired_parameters in self._compiled_parameters["data_assets"][data_asset_name][expectation_suite_name][expectation_type].items():
+    #                 if type_key == "columns":
+    #                     continue
+    #                 for desired_param in desired_parameters:
+    #                     desired_key = desired_param.split(":")[-1]
+    #                     if type_key == "result" and desired_key in result['result']:
+    #                         self.store_validation_param(run_id, desired_param, result["result"][desired_key])
+    #                     elif type_key == "details" and desired_key in result["result"]["details"]:
+    #                         self.store_validation_param(run_id, desired_param, result["result"]["details"])
+    #                     else:
+    #                         logger.warning("Unrecognized key for parameter %s" % desired_param)
+
+    #     return validation_results
+
     def register_validation_results(self, run_id, validation_results, data_asset=None):
         """Process results of a validation run. This method is called by data_asset objects that are connected to
          a DataContext during validation. It performs several actions:
@@ -1293,6 +1491,7 @@ class DataContext(object):
                             logger.warning("Unrecognized key for parameter %s" % desired_param)
 
         return validation_results
+
 
     def store_validation_param(self, run_id, key, value):
         """Store a new validation parameter.
