@@ -88,7 +88,12 @@ class SiteBuilder():
 
         index_links_dict = OrderedDict()
 
-        datasources = data_context.list_datasources()
+        # the site config may specify the list of datasource names to document.
+        # if the config property is absent or is *, treat as "all"
+        datasources_to_document = site_config.get('datasources')
+        if not datasources_to_document or datasources_to_document == '*':
+            datasources_to_document = [datasource['name'] for datasource in data_context.list_datasources()]
+
 
         sections_config = site_config.get('sections')
         if not sections_config:
@@ -112,6 +117,10 @@ class SiteBuilder():
 
             for run_id, v0 in data_context.list_validation_results(validations_store=site_config['profiling_store']).items():
                 for datasource, v1 in v0.items():
+
+                    if datasource not in datasources_to_document:
+                        continue
+
                     for generator, v2 in v1.items():
                         for generator_asset, expectation_suite_names in v2.items():
                             data_asset_name = data_context.data_asset_name_delimiter.join([datasource, generator, generator_asset])
@@ -183,6 +192,10 @@ class SiteBuilder():
 
             for run_id, v0 in data_context.list_validation_results(validations_store=site_config['validations_store']).items():
                 for datasource, v1 in v0.items():
+
+                    if datasource not in datasources_to_document:
+                        continue
+
                     for generator, v2 in v1.items():
                         for generator_asset, expectation_suite_names in v2.items():
                             data_asset_name = data_context.data_asset_name_delimiter.join([datasource, generator, generator_asset])
@@ -205,7 +218,8 @@ class SiteBuilder():
                                     expectation_suite_name + '.html',  # name to be used inside namespace
                                     resource_store=site_config['site_store'],
                                     resource_namespace="validations",
-                                    data_asset_name=data_asset_name
+                                    data_asset_name=data_asset_name,
+                                    run_id=run_id
                                 )
 
                                 if not datasource in index_links_dict:
@@ -226,7 +240,7 @@ class SiteBuilder():
                                         "filepath": data_context._get_normalized_data_asset_name_filepath(
                                             data_asset_name,
                                             expectation_suite_name,
-                                            base_path='validations',
+                                            base_path='validations/' + run_id,
                                             file_extension=".html"
                                         ),
                                         "source": datasource,
@@ -251,6 +265,10 @@ class SiteBuilder():
                 raise
 
             for datasource, v1 in data_context.list_expectation_suites().items():
+
+                if datasource not in datasources_to_document:
+                    continue
+
                 for generator, v2 in v1.items():
                     for generator_asset, expectation_suite_names in v2.items():
                         data_asset_name = data_context.data_asset_name_delimiter.join(
