@@ -6,7 +6,11 @@ from great_expectations.data_context.store import (
     InMemoryStore,
 )
 
-def test_integration_InMemoryStore():
+def test_core_store_logic():
+    pass
+
+
+def test_integration():
     my_store = InMemoryStore()
 
     with pytest.raises(KeyError):
@@ -15,10 +19,22 @@ def test_integration_InMemoryStore():
     my_store.set("AAA", "aaa")
     assert my_store.get("AAA") == "aaa"
 
+def test_InMemoryStore_with_serialization():
+    my_store = InMemoryStore(serialization_type="json")
+    
+    my_store.set("AAA", {"x":1})
+    assert my_store.get("AAA") == {"x":1}
 
-def test_core_store_logic():
-    pass
+    my_store = InMemoryStore()
 
+    #??? Should putting a non-string, non-byte object into a store trigger an error?    
+    # with pytest.raises(ValueError):
+    #     my_store.set("AAA", {"x":1})
+    
+    with pytest.raises(KeyError):
+        assert my_store.get("AAA") == {"x":1}
 
-def test_InMemoryStore():
-    pass
+    my_store.set("AAA", {"x":1}, serialization_type="json")
+    
+    assert my_store.get("AAA") == "{\"x\": 1}"
+    assert my_store.get("AAA", serialization_type="json") == {"x":1}
