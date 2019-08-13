@@ -2,7 +2,10 @@ class Store(object):
     """
     """
 
-    def get(self, key, value):
+    def __init__(self, config):
+        pass
+
+    def get(self, key):
         raise NotImplementedError
 
     def set(self, key, value):
