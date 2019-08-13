@@ -119,7 +119,7 @@ class SiteBuilder():
                 for datasource, v1 in v0.items():
 
                     if datasource not in datasources_to_document:
-                        break
+                        continue
 
                     for generator, v2 in v1.items():
                         for generator_asset, expectation_suite_names in v2.items():
@@ -194,7 +194,7 @@ class SiteBuilder():
                 for datasource, v1 in v0.items():
 
                     if datasource not in datasources_to_document:
-                        break
+                        continue
 
                     for generator, v2 in v1.items():
                         for generator_asset, expectation_suite_names in v2.items():
@@ -267,7 +267,7 @@ class SiteBuilder():
             for datasource, v1 in data_context.list_expectation_suites().items():
 
                 if datasource not in datasources_to_document:
-                    break
+                    continue
 
                 for generator, v2 in v1.items():
                     for generator_asset, expectation_suite_names in v2.items():
