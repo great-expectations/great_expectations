@@ -381,7 +381,7 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         hist, bin_edges = np.histogram(self[column], bins, density=False)
         return list(hist)
 
-    def get_column_count_in_range(self, column, min_val=None, max_val=None, strictly_min=False, strictly_max=True):
+    def get_column_count_in_range(self, column, min_val=None, max_val=None, strict_min=False, strict_max=True):
         # TODO this logic could probably go in the non-underscore version if we want to cache
         if min_val is None and max_val is None:
             raise ValueError('Must specify either min or max value')
@@ -390,12 +390,12 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
 
         result = self[column]
         if min_val is not None:
-            if strictly_min:
+            if strict_min:
                 result = result[result > min_val]
             else:
                 result = result[result >= min_val]
         if max_val is not None:
-            if strictly_max:
+            if strict_max:
                 result = result[result < max_val]
             else:
                 result = result[result <= max_val]
@@ -807,8 +807,8 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
     def expect_column_values_to_be_between(self,
                                            column,
                                            min_value=None, max_value=None,
-                                           strictly_min=False,
-                                           strictly_max=False,
+                                           strict_min=False,
+                                           strict_max=False,
                                            strictly_tol=1e-9,
                                            parse_strings_as_datetimes=None,
                                            output_strftime_format=None,
@@ -819,11 +819,11 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
 
-        if strictly_min:
+        if strict_min:
             if min_value:
                 min_value += strictly_tol
 
-        if strictly_max:
+        if strict_max:
             if max_value:
                 max_value -= strictly_tol
 
@@ -958,8 +958,8 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
     def expect_column_value_lengths_to_be_between(self, column,
                                                   min_value=None,
                                                   max_value=None,
-                                                  strictly_min=False,
-                                                  strictly_max=False,
+                                                  strict_min=False,
+                                                  strict_max=False,
                                                   strictly_tol=1e-9,
                                                   mostly=None,
                                                   result_format=None, include_config=False, catch_exceptions=None, meta=None):
@@ -978,11 +978,11 @@ class PandasDataset(MetaPandasDataset, pd.DataFrame):
         except ValueError:
             raise ValueError("min_value and max_value must be integers")
 
-        if strictly_min:
+        if strict_min:
             if min_value:
                 min_value += strictly_tol
 
-        if strictly_max:
+        if strict_max:
             if max_value:
                 max_value -= strictly_tol
 

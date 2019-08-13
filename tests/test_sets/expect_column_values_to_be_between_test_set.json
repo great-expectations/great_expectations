@@ -329,7 +329,7 @@
       }
     },
     {
-      "note": "Test strictly_min success",
+      "note": "Test strict_min success",
       "out": {
         "unexpected_list": [],
         "unexpected_index_list": [],
@@ -339,11 +339,11 @@
         "column": "x",
         "max_value": 10,
         "min_value": 0,
-        "strictly_min": true
+        "strict_min": true
       }
     },
     {
-      "note": "Test strictly_min failure",
+      "note": "Test strict_min failure",
       "out": {
         "unexpected_list": [
           1
