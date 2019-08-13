@@ -20,7 +20,15 @@ from .pandas_dataset import PandasDataset
 logger = logging.getLogger(__name__)
 
 try:
-    from pyspark.sql.functions import udf, col, lit, stddev_samp, length as length_, when, year, count
+    from pyspark.sql.functions import (
+        udf, col, lit,
+        stddev_samp,
+        length as length_,
+        when,
+        year,
+        count,
+        countDistinct
+    )
     import pyspark.sql.types as sparktypes
     from pyspark.ml.feature import Bucketizer
     from pyspark.sql import Window
@@ -268,7 +276,7 @@ class SparkDFDataset(MetaSparkDFDataset):
         return series
 
     def get_column_unique_count(self, column):
-        return self.get_column_value_counts(column).shape[0]
+        return self.spark_df.agg(countDistinct(column)).collect()[0][0]
 
     def get_column_modes(self, column):
         """leverages computation done in _get_column_value_counts"""
