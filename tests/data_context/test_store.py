@@ -26,12 +26,15 @@ def test_InMemoryStore_with_serialization():
     my_store.set("AAA", {"x":1})
     assert my_store.get("AAA") == {"x":1}
 
-    my_store = InMemoryStore()
+    with pytest.raises(TypeError):
+        my_store.set("BBB", set(["x", "y", "z"]), serialization_type="json")
 
     #??? Should putting a non-string, non-byte object into a store trigger an error?    
     # with pytest.raises(ValueError):
-    #     my_store.set("AAA", {"x":1})
-    
+    #     my_store.set("CCC", {"x":1})
+
+    my_store = InMemoryStore()
+
     with pytest.raises(KeyError):
         assert my_store.get("AAA") == {"x":1}
 
@@ -39,6 +42,9 @@ def test_InMemoryStore_with_serialization():
     
     assert my_store.get("AAA") == "{\"x\": 1}"
     assert my_store.get("AAA", serialization_type="json") == {"x":1}
+
+    with pytest.raises(TypeError):
+        my_store.set("BBB", set(["x", "y", "z"]), serialization_type="json")
 
 def test_FilesystemStore(tmp_path):
     my_store = FilesystemStore(**{
@@ -51,3 +57,6 @@ def test_FilesystemStore(tmp_path):
     
     my_store.set("my_file_AAA", "aaa")
     assert my_store.get("my_file_AAA") == "aaa"
+
+    my_store.set("subdir/my_file_BBB", "bbb")
+    assert my_store.get("subdir/my_file_BBB") == "bbb"
