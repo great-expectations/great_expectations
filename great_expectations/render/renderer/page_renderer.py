@@ -220,7 +220,8 @@ class ExpectationSuitePageRenderer(Renderer):
             "styling": {
                 "classes": ["col-12", "table-responsive"],
                 "styles": {
-                    "margin-top": "20px"
+                    "margin-top": "20px",
+                    "margin-bottom": "20px"
                 },
                 "body": {
                     "classes": ["table", "table-sm"]
