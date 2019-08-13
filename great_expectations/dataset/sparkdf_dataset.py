@@ -547,8 +547,7 @@ class SparkDFDataset(MetaSparkDFDataset):
         catch_exceptions=None,
         meta=None,
     ):
-        success_udf = udf(lambda x: x is not None)
-        return column.withColumn('__success', success_udf(column[0]))
+        return column.withColumn('__success', column[0].isNotNull())
 
     @DocInherit
     @MetaSparkDFDataset.column_map_expectation
