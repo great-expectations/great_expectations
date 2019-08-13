@@ -80,7 +80,7 @@ class InMemoryStore(Store):
     def _set(self, key, value):
         self.store[key] = value
 
-class LocalFileSystemStore(Store):
+class FilesystemStore(Store):
     """
     """
 
