@@ -71,9 +71,8 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
                     }
                 }
             }),
-            #??? : What is this?
-            # "?" if not expect_table_row_count_to_be_between_evr else expect_table_row_count_to_be_between_evr["result"][
-            #     "observed_value"]
+            "--" if not expect_table_row_count_to_be_between_evr else expect_table_row_count_to_be_between_evr["result"][
+                "observed_value"]
         ])
 
         table_rows += [
