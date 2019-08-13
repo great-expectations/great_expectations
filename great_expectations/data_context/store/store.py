@@ -5,7 +5,10 @@ class Store(object):
     """
     """
 
-    def __init__(self, serialization_type=None):
+    def __init__(
+        self,
+        serialization_type=None
+    ):
         self.serialization_type = serialization_type
 
     def get(self, key, serialization_type=None):
@@ -61,18 +64,15 @@ class InMemoryStore(Store):
     """
     """
 
-    def __init__(self, serialization_type=None):
-        #TODO: use super here.
-        self.serialization_type = serialization_type
+    def __init__(
+        self,
+        serialization_type=None
+    ):
+        super(InMemoryStore, self).__init__(
+            serialization_type=serialization_type,
+        )
+
         self.store = {}
-
-    # def _init_from_config(self, config):
-    #     if "serialization_type" in config:
-    #         self.serialization_type = config["serialization_type"]
-    #     else:
-    #         self.serialization_type = None
-
-    #     self.store = {}
 
     def _get(self, key):
         return self.store[key]
@@ -83,6 +83,17 @@ class InMemoryStore(Store):
 class FilesystemStore(Store):
     """
     """
+
+    def __init__(
+        self,
+        path,
+        serialization_type=None,
+    ):
+        super(FilesystemStore, self).__init__(
+            serialization_type=serialization_type,
+        )
+        
+        self.path = path
 
     def _get(self, key):
         raise NotImplementedError

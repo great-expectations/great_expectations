@@ -40,11 +40,13 @@ def test_InMemoryStore_with_serialization():
     assert my_store.get("AAA") == "{\"x\": 1}"
     assert my_store.get("AAA", serialization_type="json") == {"x":1}
 
-def test_InMemoryStore(tmp_path_factory):
-    my_store = FilesystemStore()
+def test_FilesystemStore(tmp_path_factory):
+    my_store = FilesystemStore(**{
+        "path": tmp_path_factory
+    })
 
     with pytest.raises(KeyError):
-        my_store.get("AAA")
+        my_store.get("my_file_AAA")
     
-    my_store.set("AAA", "aaa")
-    assert my_store.get("AAA") == "aaa"
+    my_store.set("my_file_AAA", "aaa")
+    assert my_store.get("my_file_AAA") == "aaa"
