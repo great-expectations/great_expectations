@@ -40,12 +40,13 @@ def test_InMemoryStore_with_serialization():
     assert my_store.get("AAA") == "{\"x\": 1}"
     assert my_store.get("AAA", serialization_type="json") == {"x":1}
 
-def test_FilesystemStore(tmp_path_factory):
+def test_FilesystemStore(tmp_path):
     my_store = FilesystemStore(**{
-        "path": tmp_path_factory
+        "path": tmp_path
     })
 
-    with pytest.raises(KeyError):
+    #??? Should we standardize on KeyValue, or allow each Store to raise its own error types?
+    with pytest.raises(FileNotFoundError):
         my_store.get("my_file_AAA")
     
     my_store.set("my_file_AAA", "aaa")

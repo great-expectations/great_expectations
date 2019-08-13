@@ -1,5 +1,7 @@
 import json
+import os
 
+from ..util import safe_mmkdir
 
 class Store(object):
     """
@@ -94,12 +96,16 @@ class FilesystemStore(Store):
         )
         
         self.path = path
+        safe_mmkdir(os.path.dirname(self.path))
+        print(self.path)
 
     def _get(self, key):
-        raise NotImplementedError
+        with open(os.path.join(self.path, key)) as infile:
+            return infile.read()
 
     def _set(self, key, value):
-        raise NotImplementedError
+        with open(os.path.join(self.path, key), "w") as outfile:
+            outfile.write(value)
 
 class S3Store(Store):
     """
