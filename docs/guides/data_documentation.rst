@@ -52,7 +52,10 @@ Users can specify
 * where the HTML files should be written (filesystem or S3)
 * which renderer and view class should be used to render each section
 
-Here is an example of a site configuration:
+Data Documentation Site Configuration
+*************************************
+
+Here is an example of a site configuration from great_expectations.yml:
 
 .. code-block:: bash
 
@@ -67,7 +70,7 @@ Here is an example of a site configuration:
             type: filesystem
             base_directory: uncommitted/validations/
             run_id_filter:
-              ne: profiling
+              ne: profiling # exclude validations with run id "profiling" - reserved for profiling results
           profiling_store: # where to look for profiling results (filesystem/S3)
             type: filesystem
             base_directory: uncommitted/validations/
@@ -105,11 +108,19 @@ Here is an example of a site configuration:
                 module: great_expectations.render.view
                 class: DefaultJinjaPageView
 
+* ``validations_store`` and ``profiling_store`` in the example above specify the location of validation and profiling results that the site will include in the documentation. The store's ``type`` can be ``filesystem`` or ``s3``. S3 store is not currently implemented, but will be supported in a near future. ``base_directory`` must be specified for ``filesystem`` stores. The optional ``run_id_filter`` attribute allows to include (``eq`` for exact match) or exclude (``ne``) validation results with a particular run id.
+
+
+
+Adjusting Data Documentation For Your Project's Needs
+*****************************************************
 
 By default, GE creates two data documentation sites for a new project:
 
 1. "local_site" renders documentation for all the datasources in the project from GE artifacts in the local repo. The site includes expectation suites and profiling and validation results from `uncommitted` directory. Local site provides the convenience of visualizing all the entities stored in JSON files as HTML.
 2. "team_site" is meant to support the "shared source of truth for a team" use case. By default only the expectations section is enabled. Users have to configure the profiling and the validations sections (and the corresponding validations_store and profiling_store attributes based on the team's decisions where these are stored (a local filesystem or S3). Reach out on `Slack <https://tinyurl.com/great-expectations-slack>`__ if you would like to discuss the best way to configure a team site.
+
+Users have full control over configuring Data Documentation for their project - they can modify the two pre-configured sites (or remove them altogether) and add new sites with a configuration that meets the project's needs. The easiest way to add a new site to the configuration is to copy the "local_site" configuration block in great_expectations.yml, give the copy a new name and modify the details as needed.
 
 How to build documentation
 ----------------------------
