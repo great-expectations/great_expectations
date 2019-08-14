@@ -11,12 +11,10 @@ from glob import glob
 from six import string_types
 import datetime
 import shutil
-from collections import OrderedDict
 
 from .util import NormalizedDataAssetName, get_slack_callback, safe_mmkdir
 
 from great_expectations.exceptions import DataContextError, ConfigNotFoundError, ProfilerError
-from great_expectations.render.types import RenderedDocumentContent
 
 from great_expectations.render.renderer.site_builder import SiteBuilder
 
@@ -34,19 +32,6 @@ from great_expectations.datasource import (
     DBTDatasource
 )
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
-from great_expectations.render.renderer import ProfilingResultsPageRenderer, ExpectationSuitePageRenderer, ValidationResultsPageRenderer
-from great_expectations.render.view import (
-    DefaultJinjaPageView,
-    DefaultJinjaIndexPageView,
-)
-from great_expectations.render.types import (
-    RenderedComponentContent,
-    RenderedSectionContent,
-)
-
-
-
-from .expectation_explorer import ExpectationExplorer
 
 logger = logging.getLogger(__name__)
 yaml = YAML()
@@ -142,6 +127,7 @@ class DataContext(object):
         self._expectation_explorer = expectation_explorer
         self._datasources = {}
         if expectation_explorer:
+            from great_expectations.jupyter_ux.expectation_explorer import ExpectationExplorer
             self._expectation_explorer_manager = ExpectationExplorer()
 
         # determine the "context root directory" - this is the parent of "great_expectations" dir
