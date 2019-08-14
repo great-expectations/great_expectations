@@ -48,7 +48,7 @@ def test_InMemoryStore_with_serialization():
 
 def test_FilesystemStore(tmp_path):
     my_store = FilesystemStore(**{
-        "path": tmp_path
+        "base_directory": tmp_path
     })
 
     #??? Should we standardize on KeyValue, or allow each Store to raise its own error types?
