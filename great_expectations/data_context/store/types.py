@@ -1,11 +1,5 @@
 from ...types import LooselyTypedDotDict
 
-# #This is a bag of 
-# class StoreConfigKwargs(LooselyTypedDotDict):
-#     _allowed_keys = set([
-#         "serialization_type"
-#     ])
-
 class StoreMetaConfig(LooselyTypedDotDict):
     _allowed_keys = set([
         "module_name",
@@ -30,5 +24,7 @@ class InMemoryStoreConfig(LooselyTypedDotDict):
 
 class FilesystemStoreConfig(LooselyTypedDotDict):
     _allowed_keys = set([
-        "base_directory"
+        "base_directory",
+        "file_extension",
+        "compression",
     ])
