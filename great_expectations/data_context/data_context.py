@@ -1375,7 +1375,7 @@ class DataContext(object):
 
         if "data_asset_snapshot_store" in self._project_config and validation_results["success"] is False:
 
-            #The contents of this method will soon live elsewhere.
+            #The contents of this method will soon live in an _init_store method.
             import importlib
 
             config = self._project_config["data_asset_snapshot_store"]

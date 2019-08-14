@@ -75,10 +75,6 @@ class DataContextAwareStore(Store):
         data_context,
         config,
     ):
-        # super(DataContextAwareStore, self).__init__(
-        #     serialization_type=serialization_type,
-        # )
-
         #FIXME: Eek. This causes circular imports. What to do?        
         # if not isinstance(data_context, DataContext):
         #     raise TypeError("data_context must be an instance of type DataContext")
@@ -91,10 +87,6 @@ class DataContextAwareStore(Store):
                 coerce_types=True,
                 **config
             )
-            # raise TypeError("config must be an instance of type {0}, not {1}".format(
-            #     self.get_config_class(),
-            #     type(config),
-            # ))
 
         self.config = config
 
@@ -132,16 +124,6 @@ class InMemoryStore(DataContextAwareStore):
 
     config_class = InMemoryStoreConfig
 
-    # def __init__(
-    #     self,
-    #     data_context,
-    #     serialization_type=None
-    # ):
-    #     super(InMemoryStore, self).__init__(
-    #         data_context=data_context,
-    #         serialization_type=serialization_type,
-    #     )
-
     def _setup(self):
         self.store = {}
 
@@ -157,18 +139,7 @@ class FilesystemStore(DataContextAwareStore):
     """
 
     config_class = FilesystemStoreConfig
-    # def __init__(
-    #     self,
-    #     data_context,
-    #     base_directory,
-    #     serialization_type=None,
-    # ):
-    #     super(FilesystemStore, self).__init__(
-    #         data_context=data_context,
-    #         serialization_type=serialization_type,
-    #     )
-        
-    #     self.base_directory = base_directory
+
     def _setup(self):
         safe_mmkdir(str(os.path.dirname(self.config.base_directory)))
 
