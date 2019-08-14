@@ -324,11 +324,12 @@ class SiteIndexPageRenderer(Renderer):
                     ["validation_links", "Validation Results"]
                 ])
                 
-                link_lists_example = list(data_assets.items())[0][1]
-                
                 for link_lists_key, header in header_dict.items():
-                    if link_lists_example[link_lists_key]:
-                        generator_table_header_row.append(header)
+                    for data_asset, link_lists in data_assets.items():
+                        if header in generator_table_header_row:
+                            continue
+                        if link_lists[link_lists_key]:
+                            generator_table_header_row.append(header)
                 
                 generator_table = RenderedComponentContent(**{
                     "content_block_type": "table",

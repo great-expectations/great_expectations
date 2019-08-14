@@ -71,9 +71,8 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
                     }
                 }
             }),
-            #??? : What is this?
-            # "?" if not expect_table_row_count_to_be_between_evr else expect_table_row_count_to_be_between_evr["result"][
-            #     "observed_value"]
+            "--" if not expect_table_row_count_to_be_between_evr else expect_table_row_count_to_be_between_evr["result"][
+                "observed_value"]
         ])
 
         table_rows += [
@@ -86,7 +85,7 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
             "header": "Dataset info",
             "table": table_rows,
             "styling": {
-                "classes": ["col-6", "table-responsive"],
+                "classes": ["col-6"],
                 "styles": {
                     "margin-top": "20px"
                 },
