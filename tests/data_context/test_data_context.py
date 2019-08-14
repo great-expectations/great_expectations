@@ -10,11 +10,13 @@ import os
 import shutil
 import json
 from glob import glob
+import pandas as pd
 
 from great_expectations.exceptions import DataContextError
 from great_expectations.data_context import DataContext
 from great_expectations.data_context.util import (NormalizedDataAssetName, safe_mmkdir)
 from great_expectations.cli.init import scaffold_directories_and_notebooks
+from great_expectations.dataset import PandasDataset
 
 
 @pytest.fixture()
@@ -127,6 +129,7 @@ def test_register_validation_results(data_context):
         ],
         "success": True
     }
+
     res = data_context.register_validation_results(run_id, source_patient_data_results)
     assert res == source_patient_data_results  # results should always be returned, and in this case not modified
     bound_parameters = data_context._evaluation_parameter_store.get_run_parameters(run_id)
@@ -162,12 +165,75 @@ def test_register_validation_results(data_context):
         ],
         "success": True
     }
+
+
     data_context.register_validation_results(run_id, source_diabetes_data_results)
     bound_parameters = data_context._evaluation_parameter_store.get_run_parameters(run_id)
     assert bound_parameters == {
         'urn:great_expectations:validations:mydatasource/mygenerator/source_patient_data:default:expectations:expect_table_row_count_to_equal:result:observed_value': 1024,
         'urn:great_expectations:validations:mydatasource/mygenerator/source_diabetes_data:default:expectations:expect_column_unique_value_count_to_be_between:columns:patient_nbr:result:observed_value': 2048
     }
+
+def test_register_validation_results_saves_data_assset_snapshot(data_context):
+    run_id = "460d61be-7266-11e9-8848-1681be663d3e"
+    source_patient_data_results = {
+        "meta": {
+            "data_asset_name": "mydatasource/mygenerator/source_patient_data",
+            "expectation_suite_name": "default"
+        },
+        "results": [
+            {
+                "expectation_config": {
+                    "expectation_type": "expect_table_row_count_to_equal",
+                    "kwargs": {
+                        "value": 1024,
+                    }
+                },
+                "success": True,
+                "exception_info": {"exception_message": None,
+                    "exception_traceback": None,
+                    "raised_exception": False},
+                "result": {
+                    "observed_value": 1024,
+                    "element_count": 1024,
+                    "missing_percent": 0.0,
+                    "missing_count": 0
+                }
+            }
+        ],
+        "success": False
+    }
+    data_asset = PandasDataset({"x": [1,2,3,4]})
+
+    #2018/0814: Hijack the project config, since there doesn't appear to be another method to update it
+    data_context._project_config["data_asset_snapshot_store"] = {
+        "filesystem" : {
+            "base_directory" : "uncommitted/snapshots"
+        }
+    }
+    print(json.dumps(data_context._project_config, indent=2))
+    
+    snapshot_dir = os.path.join(data_context.root_directory, "uncommitted/snapshots")
+    print(snapshot_dir)
+
+    #The snapshot directory shouldn't exist yet
+    assert not os.path.isfile(snapshot_dir)
+    #So it shouldn't contain any files
+    assert len(glob(snapshot_dir+"/*/*/*/*/*.csv.gz")) == 0
+
+    res = data_context.register_validation_results(
+        run_id,
+        source_patient_data_results,
+        data_asset=data_asset
+    )
+    
+    #This snapshot directory should now exist
+    assert os.path.isdir(snapshot_dir)
+
+    #we should have one file created as a side effect
+    glob_results = glob(snapshot_dir+"/*/*/*/*/*.csv.gz")
+    print(glob_results)
+    assert len(glob_results) == 1
 
 
 def test_compile(data_context):
