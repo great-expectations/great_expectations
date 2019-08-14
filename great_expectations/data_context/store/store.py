@@ -139,7 +139,7 @@ class FilesystemStore(DataContextAwareStore):
         )
         
         self.base_directory = base_directory
-        safe_mmkdir(os.path.dirname(self.base_directory))
+        safe_mmkdir(str(os.path.dirname(self.base_directory)))
 
     def _get(self, key):
         with open(os.path.join(self.base_directory, key)) as infile:
@@ -147,7 +147,7 @@ class FilesystemStore(DataContextAwareStore):
 
     def _set(self, key, value):
         filename = os.path.join(self.base_directory, key)
-        safe_mmkdir(os.path.split(filename)[0])
+        safe_mmkdir(str(os.path.split(filename)[0]))
         with open(filename, "w") as outfile:
             outfile.write(value)
 
