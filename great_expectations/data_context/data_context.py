@@ -1290,7 +1290,7 @@ class DataContext(object):
     def _init_store_from_config(self, config):
         typed_config = StoreMetaConfig(
             coerce_types=True,
-            **config,
+            **config
         )
         # print(typed_config)
 
