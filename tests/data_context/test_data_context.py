@@ -216,6 +216,7 @@ def test_register_validation_results_saves_data_assset_snapshot(data_context):
         "class_name": "FilesystemStore",
         "store_config" : {
             "base_directory" : "uncommitted/snapshots",
+            "serialization_type" : "pandas_csv",
             "file_extension" : ".csv.gz",
             "compression" : "gzip",
         }
@@ -469,7 +470,7 @@ def test_data_context_result_store(titanic_data_context):
 
 def test_render_full_static_site(tmp_path_factory, filesystem_csv_3):
 
-    assert False #To go faster
+    # assert False #To go faster
 
     project_dir = str(tmp_path_factory.mktemp("project_dir"))
     print(project_dir)
