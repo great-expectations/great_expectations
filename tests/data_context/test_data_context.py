@@ -206,9 +206,18 @@ def test_register_validation_results_saves_data_assset_snapshot(data_context):
     data_asset = PandasDataset({"x": [1,2,3,4]})
 
     #2018/0814: Hijack the project config, since there doesn't appear to be another method to update it
+    # data_context._project_config["data_asset_snapshot_store"] = {
+    #     "filesystem" : {
+    #         "base_directory" : "uncommitted/snapshots"
+    #     }
+    # }
     data_context._project_config["data_asset_snapshot_store"] = {
-        "filesystem" : {
-            "base_directory" : "uncommitted/snapshots"
+        "module_name": "great_expectations.data_context.store",
+        "class_name": "FilesystemStore",
+        "store_config" : {
+            "base_directory" : "uncommitted/snapshots",
+            "file_extension" : ".csv.gz",
+            "compression" : "gzip",
         }
     }
     print(json.dumps(data_context._project_config, indent=2))
@@ -459,6 +468,9 @@ def test_data_context_result_store(titanic_data_context):
 
 
 def test_render_full_static_site(tmp_path_factory, filesystem_csv_3):
+
+    assert False #To go faster
+
     project_dir = str(tmp_path_factory.mktemp("project_dir"))
     print(project_dir)
 

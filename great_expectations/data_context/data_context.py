@@ -32,6 +32,12 @@ from great_expectations.datasource import (
     DBTDatasource
 )
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
+from .store import (
+    DataContextAwareStore
+)
+from .store.types import (
+    StoreMetaConfig,
+)
 
 logger = logging.getLogger(__name__)
 yaml = YAML()
@@ -1368,73 +1374,38 @@ class DataContext(object):
                 logger.warning("Unrecognized result_callback configuration.")
 
         if "data_asset_snapshot_store" in self._project_config and validation_results["success"] is False:
-            data_asset_snapshot_store = self._project_config["data_asset_snapshot_store"]
-            if isinstance(data_asset, PandasDataset):
-                if isinstance(data_asset_snapshot_store, dict) and "filesystem" in data_asset_snapshot_store:
-                    logger.info("Storing dataset to file")
-                    # directory = os.path.join(
-                    #     self.root_directory,
-                    #     data_asset_snapshot_store["filesystem"]["base_directory"],
-                    #     run_id
-                    # )
-                    filepath = self._get_normalized_data_asset_name_filepath(
-                        normalized_data_asset_name,
-                        expectation_suite_name,
-                        base_path=os.path.join(
-                            self.root_directory,
-                            data_asset_snapshot_store["filesystem"]["base_directory"],
-                            run_id
-                        ),
-                        file_extension=".csv.gz"
-                    )
-                    directory, filename = os.path.split(filepath)
-                    safe_mmkdir(directory)
-                    data_asset.to_csv(
-                        filepath,
-                        # self._get_normalized_data_asset_name_filepath(
-                        #     normalized_data_asset_name,
-                        #     expectation_suite_name,
-                        #     base_path=os.path.join(
-                        #         self.root_directory,
-                        #         data_asset_snapshot_store["filesystem"]["base_directory"],
-                        #         run_id
-                        #     ),
-                        #     file_extension=".csv.gz"
-                        # ),
-                        compression="gzip"
-                    )
 
-                if isinstance(data_asset_snapshot_store, dict) and "s3" in data_asset_snapshot_store:
-                    bucket = data_asset_snapshot_store["s3"]["bucket"]
-                    key_prefix = data_asset_snapshot_store["s3"]["key_prefix"]
-                    key = os.path.join(
-                        key_prefix,
-                        "validations/{run_id}/{data_asset_name}.csv.gz".format(
-                            run_id=run_id,
-                            data_asset_name=self._get_normalized_data_asset_name_filepath(
-                                normalized_data_asset_name,
-                                expectation_suite_name,
-                                base_path="",
-                                file_extension=".csv.gz"
-                            )
-                        )
-                    )
-                    validation_results["meta"]["data_asset_snapshot"] = "s3://{bucket}/{key}".format(
-                        bucket=bucket,
-                        key=key)
+            #The contents of this method will soon live elsewhere.
+            import importlib
 
-                    try:
-                        import boto3
-                        s3 = boto3.resource('s3')
-                        result_s3 = s3.Object(bucket, key)
-                        result_s3.put(Body=data_asset.to_csv(compression="gzip").encode('utf-8'))
-                    except ImportError:
-                        logger.error("Error importing boto3 for AWS support. Unable to save to result store.")
-                    except Exception:
-                        raise
-            else:
-                logger.warning(
-                    "Unable to save data_asset of type: %s. Only PandasDataset is supported." % type(data_asset))
+            config = self._project_config["data_asset_snapshot_store"]
+            print(config)
+            typed_config = StoreMetaConfig(
+                coerce_types=True,
+                **config,
+            )
+            print(typed_config)
+
+            loaded_module = importlib.import_module(typed_config.module_name)
+            loaded_class = getattr(loaded_module, typed_config.class_name)
+
+            typed_sub_config = loaded_class.get_config_class()(
+                coerce_types=True,
+                **typed_config.store_config,
+            )
+
+            data_asset_snapshot_store = loaded_class(
+                data_context=self,
+                config=typed_sub_config,
+            )
+
+            data_asset_snapshot_store.set(
+                key={
+                    "normalized_data_asset_name" : normalized_data_asset_name,
+                    "expectation_suite_name" : expectation_suite_name
+                },
+                value=data_asset
+            )
 
         if not self._compiled:
             self._compile()

@@ -2,9 +2,9 @@ import json
 import os
 
 from ..util import safe_mmkdir
-from ..data_context import (
-    DataContext
-)
+# from ..data_context import (
+#     DataContext
+# )
 from .types import (
     InMemoryStoreConfig,
     FilesystemStoreConfig,
@@ -79,8 +79,9 @@ class DataContextAwareStore(Store):
         #     serialization_type=serialization_type,
         # )
 
-        if not isinstance(data_context, DataContext):
-            raise TypeError("data_context must be an instance of type DataContext")
+        #FIXME: Eek. This causes circular imports. What to do?        
+        # if not isinstance(data_context, DataContext):
+        #     raise TypeError("data_context must be an instance of type DataContext")
 
         self.data_context = data_context
 
