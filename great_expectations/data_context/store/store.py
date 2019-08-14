@@ -5,6 +5,10 @@ from ..util import safe_mmkdir
 from ..data_context import (
     DataContext
 )
+from .types import (
+    InMemoryStoreConfig,
+    FilesystemStoreConfig,
+)
 
 class Store(object):
     """A simple key-value store that supports getting and setting.
@@ -26,7 +30,7 @@ class Store(object):
         if serialization_type:
             deserialization_method = self._get_deserialization_method(serialization_type)
         else:
-            deserialization_method = self._get_deserialization_method(self.serialization_type)
+            deserialization_method = self._get_deserialization_method(self.config.serialization_type)
         deserialized_value = deserialization_method(value)
         return deserialized_value
 
@@ -34,7 +38,7 @@ class Store(object):
         if serialization_type:
             serialization_method = self._get_serialization_method(serialization_type)
         else:
-            serialization_method = self._get_serialization_method(self.serialization_type)
+            serialization_method = self._get_serialization_method(self.config.serialization_type)
         
         serialized_value = serialization_method(value)
         self._set(key, serialized_value)
@@ -69,17 +73,32 @@ class DataContextAwareStore(Store):
     def __init__(
         self,
         data_context,
-        serialization_type=None,
+        config,
     ):
-        super(DataContextAwareStore, self).__init__(
-            serialization_type=serialization_type,
-        )
+        # super(DataContextAwareStore, self).__init__(
+        #     serialization_type=serialization_type,
+        # )
 
         if not isinstance(data_context, DataContext):
             raise TypeError("data_context must be an instance of type DataContext")
 
         self.data_context = data_context
-    
+
+        if not isinstance(config, self.get_config_class()):
+            #Attempt to coerce config to a typed config
+            config = self.get_config_class()(
+                coerce_types=True,
+                **config
+            )
+            # raise TypeError("config must be an instance of type {0}, not {1}".format(
+            #     self.get_config_class(),
+            #     type(config),
+            # ))
+
+        self.config = config
+
+        self._setup()
+
     def get(self, key, serialization_type=None):
         namespaced_key = self._get_namespaced_key(key)
 
@@ -96,25 +115,33 @@ class DataContextAwareStore(Store):
             value,
             serialization_type=serialization_type,
         )
+
+    @classmethod
+    def get_config_class(cls):
+        return cls.config_class
     
     def _get_namespaced_key(self, key):
         """This method should be overridden for each subclass"""
         return key
 
+
 class InMemoryStore(DataContextAwareStore):
     """Uses an in-memory dictionary as a store.
     """
 
-    def __init__(
-        self,
-        data_context,
-        serialization_type=None
-    ):
-        super(InMemoryStore, self).__init__(
-            data_context=data_context,
-            serialization_type=serialization_type,
-        )
+    config_class = InMemoryStoreConfig
 
+    # def __init__(
+    #     self,
+    #     data_context,
+    #     serialization_type=None
+    # ):
+    #     super(InMemoryStore, self).__init__(
+    #         data_context=data_context,
+    #         serialization_type=serialization_type,
+    #     )
+
+    def _setup(self):
         self.store = {}
 
     def _get(self, key):
@@ -123,30 +150,33 @@ class InMemoryStore(DataContextAwareStore):
     def _set(self, key, value):
         self.store[key] = value
 
+
 class FilesystemStore(DataContextAwareStore):
     """Uses a local filepath as a store.
     """
 
-    def __init__(
-        self,
-        data_context,
-        base_directory,
-        serialization_type=None,
-    ):
-        super(FilesystemStore, self).__init__(
-            data_context=data_context,
-            serialization_type=serialization_type,
-        )
+    config_class = FilesystemStoreConfig
+    # def __init__(
+    #     self,
+    #     data_context,
+    #     base_directory,
+    #     serialization_type=None,
+    # ):
+    #     super(FilesystemStore, self).__init__(
+    #         data_context=data_context,
+    #         serialization_type=serialization_type,
+    #     )
         
-        self.base_directory = base_directory
-        safe_mmkdir(str(os.path.dirname(self.base_directory)))
+    #     self.base_directory = base_directory
+    def _setup(self):
+        safe_mmkdir(str(os.path.dirname(self.config.base_directory)))
 
     def _get(self, key):
-        with open(os.path.join(self.base_directory, key)) as infile:
+        with open(os.path.join(self.config.base_directory, key)) as infile:
             return infile.read()
 
     def _set(self, key, value):
-        filename = os.path.join(self.base_directory, key)
+        filename = os.path.join(self.config.base_directory, key)
         safe_mmkdir(str(os.path.split(filename)[0]))
         with open(filename, "w") as outfile:
             outfile.write(value)
