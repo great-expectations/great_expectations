@@ -1372,22 +1372,35 @@ class DataContext(object):
             if isinstance(data_asset, PandasDataset):
                 if isinstance(data_asset_snapshot_store, dict) and "filesystem" in data_asset_snapshot_store:
                     logger.info("Storing dataset to file")
-                    safe_mmkdir(os.path.join(
-                        self.root_directory,
-                        data_asset_snapshot_store["filesystem"]["base_directory"],
-                        run_id)
-                    )
-                    data_asset.to_csv(
-                        self._get_normalized_data_asset_name_filepath(
-                            normalized_data_asset_name,
-                            expectation_suite_name,
-                            base_path=os.path.join(
-                                self.root_directory,
-                                data_asset_snapshot_store["filesystem"]["base_directory"],
-                                run_id
-                            ),
-                            file_extension=".csv.gz"
+                    # directory = os.path.join(
+                    #     self.root_directory,
+                    #     data_asset_snapshot_store["filesystem"]["base_directory"],
+                    #     run_id
+                    # )
+                    filepath = self._get_normalized_data_asset_name_filepath(
+                        normalized_data_asset_name,
+                        expectation_suite_name,
+                        base_path=os.path.join(
+                            self.root_directory,
+                            data_asset_snapshot_store["filesystem"]["base_directory"],
+                            run_id
                         ),
+                        file_extension=".csv.gz"
+                    )
+                    directory, filename = os.path.split(filepath)
+                    safe_mmkdir(directory)
+                    data_asset.to_csv(
+                        filepath,
+                        # self._get_normalized_data_asset_name_filepath(
+                        #     normalized_data_asset_name,
+                        #     expectation_suite_name,
+                        #     base_path=os.path.join(
+                        #         self.root_directory,
+                        #         data_asset_snapshot_store["filesystem"]["base_directory"],
+                        #         run_id
+                        #     ),
+                        #     file_extension=".csv.gz"
+                        # ),
                         compression="gzip"
                     )
 
