@@ -1299,7 +1299,7 @@ class DataContext(object):
 
         typed_sub_config = loaded_class.get_config_class()(
             coerce_types=True,
-            **typed_config.store_config,
+            **typed_config.store_config
         )
 
         instantiated_store = loaded_class(
