@@ -18,6 +18,7 @@ from ..types import (
     RenderedComponentContent,
 )
 
+
 class ValidationResultsPageRenderer(Renderer):
     @classmethod
     def render(cls, validation_results={}):
@@ -150,11 +151,13 @@ class ExpectationSuitePageRenderer(Renderer):
             cls._render_asset_info(expectations)
         ]
         
+        table_level_expectations_content_block = cls._render_table_level_expectations(columns)
+        if table_level_expectations_content_block != None:
+            overview_content_blocks.append(table_level_expectations_content_block)
+        
         asset_notes_content_block = cls._render_asset_notes(expectations)
         if asset_notes_content_block != None:
             overview_content_blocks.append(asset_notes_content_block)
-            # import json
-            # print(json.dumps(overview_content_blocks, indent=2))
         
         sections = [
             RenderedSectionContent(**{
@@ -164,7 +167,7 @@ class ExpectationSuitePageRenderer(Renderer):
         ]
         
         sections += [
-            ExpectationSuiteColumnSectionRenderer.render(expectations=columns[column]) for column in ordered_columns
+            ExpectationSuiteColumnSectionRenderer.render(expectations=columns[column]) for column in ordered_columns if column != "_nocolumn"
         ]
         return RenderedDocumentContent(**{
             # "data_asset_name": short_data_asset_name,
@@ -174,6 +177,17 @@ class ExpectationSuitePageRenderer(Renderer):
             "sections": sections
         })
 
+    @classmethod
+    def _render_table_level_expectations(cls, columns):
+        table_level_expectations = columns.get("_nocolumn")
+        if not table_level_expectations:
+            return None
+        else:
+            expectation_bullet_list = ExpectationSuiteColumnSectionRenderer.render(
+                expectations=table_level_expectations).content_blocks[1]
+            expectation_bullet_list["header"] = "Table-Level Expectations"
+            return expectation_bullet_list
+        
     @classmethod
     def _render_asset_header(cls, expectations):
         return RenderedComponentContent(**{
@@ -206,7 +220,8 @@ class ExpectationSuitePageRenderer(Renderer):
             "styling": {
                 "classes": ["col-12", "table-responsive"],
                 "styles": {
-                    "margin-top": "20px"
+                    "margin-top": "20px",
+                    "margin-bottom": "20px"
                 },
                 "body": {
                     "classes": ["table", "table-sm"]
