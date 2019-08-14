@@ -1,5 +1,6 @@
 import json
 import os
+import io
 
 from ..util import safe_mmkdir
 # from ..data_context import (
@@ -50,8 +51,16 @@ class Store(object):
         elif serialization_type == "json":
             return json.dumps
 
-        #TODO:
-        pass
+        elif serialization_type == "pandas_csv":
+            #!!! This is a fast, janky, untested implementation
+            def convert_to_csv(df):
+                s_buf = io.StringIO()
+                df.to_csv(s_buf)
+                return s_buf.read()
+
+            return convert_to_csv
+
+        #TODO: Add more serialization methods as needed
 
     def _get_deserialization_method(self, serialization_type):
         if serialization_type == None:
@@ -60,8 +69,11 @@ class Store(object):
         elif serialization_type == "json":
             return json.loads
 
-        #TODO:
-        pass
+        elif serialization_type == "pandas_csv":
+            #TODO:
+            raise NotImplementedError
+
+        #TODO: Add more serialization methods as needed
 
     def _get(self, key):
         raise NotImplementedError
@@ -152,6 +164,20 @@ class FilesystemStore(DataContextAwareStore):
         safe_mmkdir(str(os.path.split(filename)[0]))
         with open(filename, "w") as outfile:
             outfile.write(value)
+
+    def _get_namespaced_key(self, key):
+        filepath = self.data_context._get_normalized_data_asset_name_filepath(
+            key.normalized_data_asset_name,
+            key.expectation_suite_name,
+            base_path=os.path.join(
+                self.data_context.root_directory,
+                self.config.base_directory,
+                key.run_id
+            ),
+            file_extension=self.config.file_extension
+        )
+        return filepath
+
 
 # class S3Store(DataContextAwareStore):
 #     """Uses an S3 bucket+prefix as a store

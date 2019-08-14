@@ -16,6 +16,7 @@ class StoreMetaConfig(LooselyTypedDotDict):
         # "store_class_config": dict,
     }
 
+
 class InMemoryStoreConfig(LooselyTypedDotDict):
     _allowed_keys = set([
         "serialization_type"
@@ -24,6 +25,7 @@ class InMemoryStoreConfig(LooselyTypedDotDict):
 
 class FilesystemStoreConfig(LooselyTypedDotDict):
     _allowed_keys = set([
+        "serialization_type",
         "base_directory",
         "file_extension",
         "compression",

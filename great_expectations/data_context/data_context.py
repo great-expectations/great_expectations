@@ -38,6 +38,9 @@ from .store import (
 from .store.types import (
     StoreMetaConfig,
 )
+from .types import (
+    NameSpaceDotDict,
+)
 
 logger = logging.getLogger(__name__)
 yaml = YAML()
@@ -1400,10 +1403,11 @@ class DataContext(object):
             )
 
             data_asset_snapshot_store.set(
-                key={
+                key=NameSpaceDotDict(**{
                     "normalized_data_asset_name" : normalized_data_asset_name,
-                    "expectation_suite_name" : expectation_suite_name
-                },
+                    "expectation_suite_name" : expectation_suite_name,
+                    "run_id" : run_id,
+                }),
                 value=data_asset
             )
 
