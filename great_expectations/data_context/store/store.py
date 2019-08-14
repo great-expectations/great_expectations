@@ -4,7 +4,11 @@ import os
 from ..util import safe_mmkdir
 
 class Store(object):
-    """
+    """A simple key-value store that supports getting and setting.
+
+    Stores also support the concept of serialization.
+
+    See tests/data_context/test_store.py for examples.
     """
 
     def __init__(
@@ -63,7 +67,7 @@ class Store(object):
 
 
 class InMemoryStore(Store):
-    """
+    """Uses an in-memory dictionary as a store.
     """
 
     def __init__(
@@ -83,7 +87,7 @@ class InMemoryStore(Store):
         self.store[key] = value
 
 class FilesystemStore(Store):
-    """
+    """Uses a local filepath as a store.
     """
 
     def __init__(
@@ -108,12 +112,12 @@ class FilesystemStore(Store):
         with open(filename, "w") as outfile:
             outfile.write(value)
 
-class S3Store(Store):
-    """
-    """
+# class S3Store(Store):
+#     """Uses an S3 bucket+prefix as a store
+#     """
 
-    def _get(self, key):
-        raise NotImplementedError
+#     def _get(self, key):
+#         raise NotImplementedError
 
-    def _set(self, key, value):
-        raise NotImplementedError
+#     def _set(self, key, value):
+#         raise NotImplementedError

@@ -20,6 +20,10 @@ def test_InMemoryStore():
     my_store.set("AAA", "aaa")
     assert my_store.get("AAA") == "aaa"
 
+    #??? Should putting a non-string, non-byte object into a store trigger an error?    
+    # with pytest.raises(ValueError):
+    #     my_store.set("BBB", {"x":1})
+
 def test_InMemoryStore_with_serialization():
     my_store = InMemoryStore(serialization_type="json")
     
@@ -28,10 +32,6 @@ def test_InMemoryStore_with_serialization():
 
     with pytest.raises(TypeError):
         my_store.set("BBB", set(["x", "y", "z"]), serialization_type="json")
-
-    #??? Should putting a non-string, non-byte object into a store trigger an error?    
-    # with pytest.raises(ValueError):
-    #     my_store.set("CCC", {"x":1})
 
     my_store = InMemoryStore()
 
