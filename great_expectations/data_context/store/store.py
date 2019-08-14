@@ -92,22 +92,22 @@ class FilesystemStore(Store):
 
     def __init__(
         self,
-        path,
+        base_directory,
         serialization_type=None,
     ):
         super(FilesystemStore, self).__init__(
             serialization_type=serialization_type,
         )
         
-        self.path = path
-        safe_mmkdir(os.path.dirname(self.path))
+        self.base_directory = base_directory
+        safe_mmkdir(os.path.dirname(self.base_directory))
 
     def _get(self, key):
-        with open(os.path.join(self.path, key)) as infile:
+        with open(os.path.join(self.base_directory, key)) as infile:
             return infile.read()
 
     def _set(self, key, value):
-        filename = os.path.join(self.path, key)
+        filename = os.path.join(self.base_directory, key)
         safe_mmkdir(os.path.split(filename)[0])
         with open(filename, "w") as outfile:
             outfile.write(value)
