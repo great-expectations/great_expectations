@@ -58,18 +58,20 @@ def test_InMemoryStore_with_serialization(empty_data_context):
     with pytest.raises(TypeError):
         my_store.set("BBB", set(["x", "y", "z"]), serialization_type="json")
 
-def test_FilesystemStore(tmp_path, empty_data_context):
+def test_FilesystemStore(tmp_path_factory, empty_data_context):
+    project_path = str(tmp_path_factory.mktemp('my_dir'))
+
     my_store = FilesystemStore(**{
         "data_context": empty_data_context,
-        "base_directory": tmp_path
+        "base_directory": project_path,
     })
 
     #??? Should we standardize on KeyValue, or allow each Store to raise its own error types?
     with pytest.raises(FileNotFoundError):
         my_store.get("my_file_AAA")
     
-    # my_store.set("my_file_AAA", "aaa")
-    # assert my_store.get("my_file_AAA") == "aaa"
+    my_store.set("my_file_AAA", "aaa")
+    assert my_store.get("my_file_AAA") == "aaa"
 
-    # my_store.set("subdir/my_file_BBB", "bbb")
-    # assert my_store.get("subdir/my_file_BBB") == "bbb"
+    my_store.set("subdir/my_file_BBB", "bbb")
+    assert my_store.get("subdir/my_file_BBB") == "bbb"
