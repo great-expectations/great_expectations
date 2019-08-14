@@ -33,9 +33,6 @@ from great_expectations.datasource import (
     DBTDatasource
 )
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
-from .store import (
-    DataContextAwareStore
-)
 from .store.types import (
     StoreMetaConfig,
 )

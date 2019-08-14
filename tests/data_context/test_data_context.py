@@ -213,7 +213,7 @@ def test_register_validation_results_saves_data_assset_snapshot(data_context):
     # }
     data_context._project_config["data_asset_snapshot_store"] = {
         "module_name": "great_expectations.data_context.store",
-        "class_name": "FilesystemStore",
+        "class_name": "NameSpacedFilesystemStore",
         "store_config" : {
             "base_directory" : "uncommitted/snapshots",
             "serialization_type" : "pandas_csv",

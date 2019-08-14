@@ -30,3 +30,8 @@ class FilesystemStoreConfig(LooselyTypedDotDict):
         "file_extension",
         "compression",
     ])
+
+    _required_keys = set([
+        "base_directory",
+        "file_extension"
+    ])
