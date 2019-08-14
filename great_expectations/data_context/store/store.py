@@ -2,6 +2,9 @@ import json
 import os
 
 from ..util import safe_mmkdir
+from ..data_context import (
+    DataContext
+)
 
 class Store(object):
     """A simple key-value store that supports getting and setting.
@@ -56,25 +59,59 @@ class Store(object):
         #TODO:
         pass
 
-    # def _init_from_config(self, config):
-    #     raise NotImplementedError
-
     def _get(self, key):
         raise NotImplementedError
 
     def _set(self, key, value):
         raise NotImplementedError
 
+class DataContextAwareStore(Store):
+    def __init__(
+        self,
+        data_context,
+        serialization_type=None,
+    ):
+        super(DataContextAwareStore, self).__init__(
+            serialization_type=serialization_type,
+        )
 
-class InMemoryStore(Store):
+        if not isinstance(data_context, DataContext):
+            raise TypeError("data_context must be an instance of type DataContext")
+
+        self.data_context = data_context
+    
+    def get(self, key, serialization_type=None):
+        namespaced_key = self._get_namespaced_key(key)
+
+        return super(DataContextAwareStore, self).get(
+            namespaced_key,
+            serialization_type=serialization_type,
+        )
+    
+    def set(self, key, value, serialization_type=None):
+        namespaced_key = self._get_namespaced_key(key)
+
+        super(DataContextAwareStore, self).set(
+            namespaced_key,
+            value,
+            serialization_type=serialization_type,
+        )
+    
+    def _get_namespaced_key(self, key):
+        """This method should be overridden for each subclass"""
+        return key
+
+class InMemoryStore(DataContextAwareStore):
     """Uses an in-memory dictionary as a store.
     """
 
     def __init__(
         self,
+        data_context,
         serialization_type=None
     ):
         super(InMemoryStore, self).__init__(
+            data_context=data_context,
             serialization_type=serialization_type,
         )
 
@@ -86,16 +123,18 @@ class InMemoryStore(Store):
     def _set(self, key, value):
         self.store[key] = value
 
-class FilesystemStore(Store):
+class FilesystemStore(DataContextAwareStore):
     """Uses a local filepath as a store.
     """
 
     def __init__(
         self,
+        data_context,
         base_directory,
         serialization_type=None,
     ):
         super(FilesystemStore, self).__init__(
+            data_context=data_context,
             serialization_type=serialization_type,
         )
         
@@ -112,7 +151,7 @@ class FilesystemStore(Store):
         with open(filename, "w") as outfile:
             outfile.write(value)
 
-# class S3Store(Store):
+# class S3Store(DataContextAwareStore):
 #     """Uses an S3 bucket+prefix as a store
 #     """
 
