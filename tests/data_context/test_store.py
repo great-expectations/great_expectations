@@ -3,25 +3,30 @@ import json
 import importlib
 
 from great_expectations.data_context.store import (
-    Store,
+    # Store,
+    ContextAwareStore,
     InMemoryStore,
     FilesystemStore,
-    # store_class_registry,
+    # ContextAwareInMemoryStore,
+    # ContextAwareFilesystemStore,
+    NameSpacedFilesystemStore,
 )
 from great_expectations.data_context.store.types import (
     StoreMetaConfig,
 )
-
-def test_core_store_logic():
-    pass
-
+from great_expectations.data_context.types import (
+    NameSpaceDotDict,
+)
+# def test_core_store_logic():
+#     pass
 
 def test_InMemoryStore(empty_data_context):
-    with pytest.raises(TypeError):
-        my_store = InMemoryStore(
-            data_context=None,
-            config={},
-        )
+    #TODO: Typechecking was causing circular imports. Someday, we can implement this with mypy...?
+    # with pytest.raises(TypeError):
+    #     my_store = InMemoryStore(
+    #         data_context=None,
+    #         config={},
+    #     )
 
     with pytest.raises(TypeError):
         my_store = InMemoryStore(
@@ -81,6 +86,7 @@ def test_FilesystemStore(tmp_path_factory, empty_data_context):
         data_context=empty_data_context,
         config={
             "base_directory": project_path,
+            "file_extension" : ".txt",
         }
     )
 
@@ -121,3 +127,55 @@ def test_store_config(empty_data_context):
         data_context=empty_data_context,
         config=typed_sub_config,
     )
+
+def test__get_namespaced_key(empty_data_context, tmp_path_factory):
+    project_path = str(tmp_path_factory.mktemp('my_dir'))
+    my_store = NameSpacedFilesystemStore(
+        data_context=empty_data_context,
+        config={
+            "base_directory": project_path,
+            "file_extension" : ".txt",
+        }
+    )
+
+    with pytest.raises(KeyError):
+        my_store._get_namespaced_key(NameSpaceDotDict(**{}))
+    
+    assert my_store._get_namespaced_key(NameSpaceDotDict(**{
+        "expectation_suite_name" : "AAA",
+        "normalized_data_asset_name" : "BBB",
+        "run_id" : "CCC",
+    }))[-23:] == "my_dir1/CCC/BBB/AAA.txt"
+
+def test_NameSpacedFilesystemStore(empty_data_context, tmp_path_factory):
+    project_path = str(tmp_path_factory.mktemp('my_dir'))
+
+    my_store = NameSpacedFilesystemStore(
+        data_context=empty_data_context,
+        config={
+            "base_directory": project_path,
+            "file_extension" : ".txt",
+        }
+    )
+
+    with pytest.raises(TypeError):
+        my_store.get("not_a_NameSpaceDotDict")
+
+    with pytest.raises(KeyError):
+        my_store.get(NameSpaceDotDict(**{}))
+    
+    ns_1 = NameSpaceDotDict(**{
+        "expectation_suite_name" : "hello",
+        "normalized_data_asset_name" : "goodbye",
+        "run_id" : "quack",
+    })
+    my_store.set(ns_1,"aaa")
+    assert my_store.get(ns_1) == "aaa"
+
+    ns_2 = NameSpaceDotDict(**{
+        "expectation_suite_name" : "hello",
+        "normalized_data_asset_name" : "goodbye",
+        "run_id" : "moo",
+    })
+    my_store.set(ns_2, "bbb")
+    assert my_store.get(ns_2) == "bbb"
