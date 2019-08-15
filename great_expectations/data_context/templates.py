@@ -46,6 +46,27 @@ stores:
       serialization_type: json
       file_extension: .json
 
+  local_workbench_site_store:
+    module_name: great_expectations.data_context.store
+    class_name: FilesystemStore
+    store_config:
+      base_directory: uncommitted/documentation/local_site
+      file_extension: .html
+
+  shared_team_site_store:
+    module_name: great_expectations.data_context.store
+    class_name: FilesystemStore
+    store_config:
+      base_directory: uncommitted/documentation/team_site
+      file_extension: .html
+
+  shared_fixture_store:
+    module_name: great_expectations.data_context.store
+    class_name: FilesystemStore
+    store_config:
+      base_directory: uncommitted/documentation/team_site
+      file_extension: .zzz
+      
 #  data_asset_snapshot_store:
 #    module_name: great_expectations.data_context.store
 #    class_name: S3Store
@@ -56,12 +77,6 @@ stores:
   evaluation_parameter_store:
     module_name: great_expectations.data_context.store
     class_name: InMemoryStore
-
-  local_site:
-    module_name: great_expectations.data_context.store
-    class_name: FilesystemStore
-    store_config:
-      base_directory: uncommitted/documentation/local_site
 
 # Uncomment the lines below to enable a result callback.
 

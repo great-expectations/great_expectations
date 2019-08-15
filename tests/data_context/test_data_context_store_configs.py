@@ -8,7 +8,7 @@ yaml.default_flow_style = False
 
 import great_expectations as ge
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def totally_empty_data_context(tmp_path_factory):
     #TODO: This is such a weird workaround for initializing a DataContext. See https://github.com/great-expectations/great_expectations/issues/617
     project_root_dir = str(tmp_path_factory.mktemp('totally_empty_data_context'))
@@ -80,8 +80,8 @@ def test_config_from_absolute_zero(totally_empty_data_context):
             },
         }
     )
-    assert "my_inmemory_store" in empty_data_context.stores.keys()
-    assert len(empty_data_context.stores.keys()) == 1
+    assert "my_inmemory_store" in totally_empty_data_context.stores.keys()
+    assert len(totally_empty_data_context.stores.keys()) == 1
 
 
 def test_config_with_default_yml(tmp_path_factory):
@@ -89,11 +89,14 @@ def test_config_with_default_yml(tmp_path_factory):
     context = ge.data_context.DataContext.create(project_path)
 
     print(context.stores.keys())
-    assert len(context.stores.keys()) == 3
+    assert len(context.stores.keys()) == 6
     assert set(context.stores.keys()) == set([
         'local_validation_result_store',
-        'fixture_validation_results_store',
-        'profiling_store'
+        'local_profiling_store',
+        'local_workbench_site_store',
+        'evaluation_parameter_store',
+        'shared_fixture_store',
+        'shared_team_site_store',
     ])
     assert "my_inmemory_store" not in context.stores.keys()
 
@@ -110,6 +113,6 @@ def test_config_with_default_yml(tmp_path_factory):
     )
 
     print(context.stores.keys())
-    assert len(context.stores.keys()) == 4
+    assert len(context.stores.keys()) == 7
     assert "my_inmemory_store" in context.stores.keys()
     
