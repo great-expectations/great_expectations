@@ -539,19 +539,23 @@ def test_ge_pandas_automatic_failure_removal():
     # automatically removed when sampling or subsetting.
     df.discard_subset_failing_expectations = True
 
+    ###
+    # Note: Order matters in this test, and a validationoperator may change order
+    ###
+
     exp_samp = [
         {'expectation_type': 'expect_column_to_exist',
          'kwargs': {'column': 'A'}},
+        {'expectation_type': 'expect_column_values_to_be_in_set',
+         'kwargs': {'column': 'A', 'value_set': [1, 2, 3, 4]}},
         {'expectation_type': 'expect_column_to_exist',
          'kwargs': {'column': 'B'}},
+        {'expectation_type': 'expect_column_values_to_be_in_set',
+         'kwargs': {'column': 'B', 'value_set': [5, 6, 7, 8]}},
         {'expectation_type': 'expect_column_to_exist',
          'kwargs': {'column': 'C'}},
         {'expectation_type': 'expect_column_to_exist',
          'kwargs': {'column': 'D'}},
-        {'expectation_type': 'expect_column_values_to_be_in_set',
-         'kwargs': {'column': 'A', 'value_set': [1, 2, 3, 4]}},
-        {'expectation_type': 'expect_column_values_to_be_in_set',
-         'kwargs': {'column': 'B', 'value_set': [5, 6, 7, 8]}},
         {'expectation_type': 'expect_column_values_to_be_in_set',
          'kwargs': {'column': 'D', 'value_set': ['e', 'f', 'g', 'h']}}
     ]
@@ -566,10 +570,10 @@ def test_ge_pandas_automatic_failure_removal():
     exp_sub = [
         {'expectation_type': 'expect_column_to_exist',
          'kwargs': {'column': 'A'}},
-        {'expectation_type': 'expect_column_to_exist',
-         'kwargs': {'column': 'D'}},
         {'expectation_type': 'expect_column_values_to_be_in_set',
          'kwargs': {'column': 'A', 'value_set': [1, 2, 3, 4]}},
+        {'expectation_type': 'expect_column_to_exist',
+         'kwargs': {'column': 'D'}},
         {'expectation_type': 'expect_column_values_to_be_in_set',
          'kwargs': {'column': 'D', 'value_set': ['e', 'f', 'g', 'h']}}
     ]
