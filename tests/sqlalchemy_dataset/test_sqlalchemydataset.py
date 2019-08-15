@@ -140,8 +140,7 @@ def test_sqlalchemydataset_with_custom_sql():
     data.to_sql(name='test_sql_data', con=engine, index=False)
 
     custom_sql = "SELECT name, pet FROM test_sql_data WHERE age > 12"
-    custom_sql_dataset = SqlAlchemyDataset(
-        'test_sql_data', engine=engine, custom_sql=custom_sql)
+    custom_sql_dataset = SqlAlchemyDataset(engine=engine, custom_sql=custom_sql)
 
     custom_sql_dataset._initialize_expectations()
     custom_sql_dataset.set_default_expectation_argument(
