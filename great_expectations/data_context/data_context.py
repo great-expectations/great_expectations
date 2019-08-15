@@ -41,6 +41,7 @@ from .types import (
     NameSpaceDotDict,
     NormalizedDataAssetName,
 )
+from .templates import PROJECT_TEMPLATE
 
 logger = logging.getLogger(__name__)
 yaml = YAML()
@@ -171,14 +172,14 @@ class DataContext(object):
             self._plugins_directory = plugins_directory
         sys.path.append(self._plugins_directory)
 
-        self._init_stores()
+        self._init_stores(self._project_config["stores"])
 
         if data_asset_name_delimiter not in ALLOWED_DELIMITERS:
             raise DataContextError("Invalid delimiter: delimiter must be '.' or '/'")
         self._data_asset_name_delimiter = data_asset_name_delimiter
 
 
-    def _init_stores(self):
+    def _init_stores(self, store_configs):
         """Initialize all Stores for this DataContext.
 
         TODO: Currently, most Stores are hardcoded.
@@ -197,52 +198,58 @@ class DataContext(object):
         """
         self._stores = DotDict()
 
-        if "data_asset_snapshot_store" in self._project_config:
+        for store_name, store_config in store_configs.items():
             self.add_store(
-                "data_asset_snapshot_store",
-                self._project_config["data_asset_snapshot_store"]
-            ) 
+                store_name,
+                store_config
+            )
+        
+        # if "data_asset_snapshot_store" in self._project_config:
+        #     self.add_store(
+        #         "data_asset_snapshot_store",
+        #         self._project_config["data_asset_snapshot_store"]
+        #     ) 
 
-        # TODO: these paths should be configurable
-        self.add_store(
-            "local_validation_result_store",
-            {
-                "module_name": "great_expectations.data_context.store",
-                "class_name": "NameSpacedFilesystemStore",
-                "store_config" : {
-                    "base_directory" : "uncommitted/validations",
-                    "serialization_type" : "json",
-                    "file_extension" : ".json",
-                }
-            }
-        )
+        # # TODO: these paths should be configurable
+        # self.add_store(
+        #     "local_validation_result_store",
+        #     {
+        #         "module_name": "great_expectations.data_context.store",
+        #         "class_name": "NameSpacedFilesystemStore",
+        #         "store_config" : {
+        #             "base_directory" : "uncommitted/validations",
+        #             "serialization_type" : "json",
+        #             "file_extension" : ".json",
+        #         }
+        #     }
+        # )
 
-        # TODO: these paths should be configurable
-        self.add_store(
-            "fixture_validation_results_store",
-            {
-                "module_name": "great_expectations.data_context.store",
-                "class_name": "NameSpacedFilesystemStore",
-                "store_config" : {
-                    "base_directory" : "fixtures/validations",
-                    "serialization_type" : "json",
-                    "file_extension" : ".json",
-                }
-            }
-        )
+        # # TODO: these paths should be configurable
+        # self.add_store(
+        #     "fixture_validation_results_store",
+        #     {
+        #         "module_name": "great_expectations.data_context.store",
+        #         "class_name": "NameSpacedFilesystemStore",
+        #         "store_config" : {
+        #             "base_directory" : "fixtures/validations",
+        #             "serialization_type" : "json",
+        #             "file_extension" : ".json",
+        #         }
+        #     }
+        # )
 
-        self.add_store(
-            "profiling_store",
-            {
-                "module_name": "great_expectations.data_context.store",
-                "class_name": "NameSpacedFilesystemStore",
-                "store_config" : {
-                    "base_directory" : "uncommitted/validations",
-                    "serialization_type" : "json",
-                    "file_extension" : ".json",
-                }
-            }
-        )
+        # self.add_store(
+        #     "profiling_store",
+        #     {
+        #         "module_name": "great_expectations.data_context.store",
+        #         "class_name": "NameSpacedFilesystemStore",
+        #         "store_config" : {
+        #             "base_directory" : "uncommitted/validations",
+        #             "serialization_type" : "json",
+        #             "file_extension" : ".json",
+        #         }
+        #     }
+        # )
 
 
         # Stuff below this comment is legacy code, not yet fully converted to new-style Stores.
@@ -1706,171 +1713,3 @@ class DataContext(object):
 
         profiling_results['success'] = True
         return profiling_results
-
-
-PROJECT_HELP_COMMENT = """# Welcome to great expectations. 
-# This project configuration file allows you to define datasources, 
-# generators, integrations, and other configuration artifacts that
-# make it easier to use Great Expectations.
-
-# For more help configuring great expectations, 
-# see the documentation at: https://greatexpectations.io/config_file.html
-
-# NOTE: GE uses the names of configured datasources and generators to manage
-# how expectations and other configuration artifacts are stored in the 
-# expectations/ and datasources/ folders. If you need to rename an existing
-# datasource or generator, be sure to also update the paths for related artifacts.
-
-"""
-
-PROJECT_OPTIONAL_CONFIG_COMMENT = """
-
-# The plugins_directory is where the data_context will look for custom_data_assets.py
-# and any configured evaluation parameter store
-
-plugins_directory: plugins/
-
-# Configure additional data context options here.
-
-# Uncomment the lines below to enable s3 as a result store. If a result store is enabled,
-# validation results will be saved in the store according to run id.
-
-# For S3, ensure that appropriate credentials or assume_role permissions are set where
-# validation happens.
-
-
-validations_store:
-  local:
-    type: filesystem
-    base_directory: uncommitted/validations/
-#   remote:
-#     type: s3
-#     bucket: <your bucket>
-#     key_prefix: <your key prefix>
-#   
-
-# Uncomment the lines below to enable a result callback.
-
-# result_callback:
-#   slack: https://slack.com/replace_with_your_webhook
-
-# Uncomment the lines below to save snapshots of data assets that fail validation.
-
-# data_asset_snapshot_store:
-#   filesystem:
-#     base_directory: uncommitted/snapshots/
-#   s3:
-#     bucket:
-#     key_prefix:
-
-# Uncomment the lines below to enable a custom evaluation_parameter_store
-# evaluation_parameter_store:
-#   type: my_evaluation_parameter_store
-#   config:  # - this is optional - this is how we can pass kwargs to the object's constructor
-#     param1: boo
-#     param2: bah
-
-
-data_docs:
-  sites:
-    local_site: # site name
-    # “local_site” renders documentation for all the datasources in the project from GE artifacts in the local repo. 
-    # The site includes expectation suites and profiling and validation results from uncommitted directory. 
-    # Local site provides the convenience of visualizing all the entities stored in JSON files as HTML.
-      type: SiteBuilder
-      site_store: # where the HTML will be written to (filesystem/S3)
-        type: filesystem
-        base_directory: uncommitted/documentation/local_site
-      validations_store: # where to look for validation results (filesystem/S3)
-        type: filesystem
-        base_directory: uncommitted/validations/
-        run_id_filter:
-          ne: profiling
-      profiling_store: # where to look for profiling results (filesystem/S3)
-        type: filesystem
-        base_directory: uncommitted/validations/
-        run_id_filter:
-          eq: profiling
-
-      datasources: '*' # by default, all datasources
-      sections:
-        index:
-          renderer:
-            module: great_expectations.render.renderer
-            class: SiteIndexPageRenderer
-          view:
-            module: great_expectations.render.view
-            class: DefaultJinjaIndexPageView
-        validations: # if not present, validation results are not rendered
-          renderer:
-            module: great_expectations.render.renderer
-            class: ValidationResultsPageRenderer
-          view:
-            module: great_expectations.render.view
-            class: DefaultJinjaPageView
-        expectations: # if not present, expectation suites are not rendered
-          renderer:
-            module: great_expectations.render.renderer
-            class: ExpectationSuitePageRenderer
-          view:
-            module: great_expectations.render.view
-            class: DefaultJinjaPageView
-        profiling: # if not present, profiling results are not rendered
-          renderer:
-            module: great_expectations.render.renderer
-            class: ProfilingResultsPageRenderer
-          view:
-            module: great_expectations.render.view
-            class: DefaultJinjaPageView
-            
-    team_site:
-      # "team_site" is meant to support the "shared source of truth for a team" use case. 
-      # By default only the expectations section is enabled.
-      #  Users have to configure the profiling and the validations sections (and the corresponding validations_store and profiling_store attributes based on the team's decisions where these are stored (a local filesystem or S3). 
-      # Reach out on Slack (https://tinyurl.com/great-expectations-slack>) if you would like to discuss the best way to configure a team site.
-      type: SiteBuilder
-      site_store:
-        type: filesystem
-        base_directory: uncommitted/documentation/team_site
-#      validations_store:
-#        type: s3
-#        bucket: ???
-#        path: ???
-#      profiling_store:
-#        type: filesystem
-#        base_directory: fixtures/validations/
-#        run_id_filter:
-#          eq: profiling
-
-      datasources: '*'
-      sections:
-        index:
-          renderer:
-            module: great_expectations.render.renderer
-            class: SiteIndexPageRenderer
-          view:
-            module: great_expectations.render.view
-            class: DefaultJinjaIndexPageView
-        expectations:
-          renderer:
-            module: great_expectations.render.renderer
-            class: ExpectationSuitePageRenderer
-          view:
-            module: great_expectations.render.view
-            class: DefaultJinjaPageView
-
-"""
-
-PROJECT_TEMPLATE = PROJECT_HELP_COMMENT + "datasources: {}\n" + PROJECT_OPTIONAL_CONFIG_COMMENT
-
-
-PROFILE_COMMENT = """This file stores profiles with database access credentials. 
-Do not commit this file to version control. 
-
-A profile can optionally have a single parameter called 
-"url" which will be passed to sqlalchemy's create_engine.
-
-Otherwise, all credential options specified here for a 
-given profile will be passed to sqlalchemy's create URL function.
-
-"""
