@@ -565,6 +565,7 @@ project_dir0/
                             Titanic/
                                 BasicDatasetProfiler.json
             samples/
+            profiling/
             credentials/
         notebooks/
             integrate_validation_into_pipeline.ipynb
