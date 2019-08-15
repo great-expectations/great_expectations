@@ -473,9 +473,22 @@ def test_data_context_result_store(titanic_data_context):
         assert data_asset_name in validation_result["meta"]["data_asset_name"]
 
 
+    all_validation_result = titanic_data_context.get_validation_result(
+        "mydatasource/mygenerator/Titanic",
+        "BasicDatasetProfiler",
+    )
+    assert len(all_validation_result["results"]) == 51
+
+    failed_validation_result = titanic_data_context.get_validation_result(
+        "mydatasource/mygenerator/Titanic",
+        "BasicDatasetProfiler",
+        failed_only=True,
+    )
+    assert len(failed_validation_result["results"]) == 8
+
 def test_render_full_static_site(tmp_path_factory, filesystem_csv_3):
 
-    # assert False #To go faster
+    assert False #To go faster
 
     project_dir = str(tmp_path_factory.mktemp("project_dir"))
     print(project_dir)
