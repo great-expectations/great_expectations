@@ -54,9 +54,9 @@ def test_cli_profile(titanic_data_context):
     index_links_dict = res[1]
 
     assert index_page_locator_info['path'] == titanic_data_context.data_doc_directory + '/local_site/index.html'
-    assert len(index_links_dict['mydatasource']['mygenerator']['Titanic']['expectation_suite_links']) == 1
+    assert len(index_links_dict['mydatasource']['mygenerator']['Titanic']['expectation_suite_links']) == 0
     assert len(index_links_dict['mydatasource']['mygenerator']['Titanic']['validation_links']) == 0
-    assert len(index_links_dict['mydatasource']['mygenerator']['Titanic']['profiling_links']) == 0
+    assert len(index_links_dict['mydatasource']['mygenerator']['Titanic']['profiling_links']) == 1
 
 
 def test_pack_validation_result_list_into_nested_dict():
