@@ -153,7 +153,6 @@ class NameSpacedFilesystemStore(FilesystemStore):
     def _get_namespaced_key(self, key):
         if not isinstance(key, NameSpaceDotDict):
             raise TypeError("key must be an instance of type NameSpaceDotDict, not {0}".format(type(key)))
-        print("here")
         filepath = self.data_context._get_normalized_data_asset_name_filepath(
             key.normalized_data_asset_name,
             key.expectation_suite_name,
@@ -164,7 +163,6 @@ class NameSpacedFilesystemStore(FilesystemStore):
             ),
             file_extension=self.config.file_extension
         )
-        print("not here")
         return filepath
 
 
