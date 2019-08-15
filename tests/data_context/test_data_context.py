@@ -572,10 +572,10 @@ project_dir0/
 """
 
     context.profile_datasource("random")
-    print(gen_directory_tree_str(project_dir))
+    # print(gen_directory_tree_str(project_dir))
     
     context.build_data_documentation()
-    print(gen_directory_tree_str(project_dir))
+    # print(gen_directory_tree_str(project_dir))
 
     # Titanic
 

@@ -152,12 +152,20 @@ class FilesystemStore(ContextAwareStore):
         key_list = []
         for root, dirs, files in os.walk(self.full_base_directory):
             for file_ in files:
-                key_list.append(
-                    os.path.relpath(
-                        os.path.join(root, file_),
-                        self.config.base_directory,
-                    )
+                full_path, file_name = os.path.split(os.path.join(root, file_))
+                relative_path = os.path.relpath(
+                    full_path,
+                    self.full_base_directory,
                 )
+                if relative_path == ".":
+                    key = file_name
+                else:
+                    key = os.path.join(
+                        relative_path,
+                        file_name
+                    )
+                key_list.append(key)
+
         return key_list
 
 
@@ -179,7 +187,7 @@ class NameSpacedFilesystemStore(FilesystemStore):
     #
     # DataContext.write_resource has some good inspiration for this...
     # Or we might conceivably bring over the full logic from _get_normalized_data_asset_name_filepath.
-    
+
     def _get_namespaced_key(self, key):
         if not isinstance(key, NameSpaceDotDict):
             raise TypeError("key must be an instance of type NameSpaceDotDict, not {0}".format(type(key)))
