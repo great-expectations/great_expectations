@@ -41,7 +41,10 @@ from .types import (
     NameSpaceDotDict,
     NormalizedDataAssetName,
 )
-from .templates import PROJECT_TEMPLATE
+from .templates import (
+    PROJECT_TEMPLATE,
+    PROFILE_COMMENT,
+)
 
 logger = logging.getLogger(__name__)
 yaml = YAML()
