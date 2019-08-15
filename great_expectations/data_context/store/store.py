@@ -135,21 +135,22 @@ class FilesystemStore(ContextAwareStore):
     config_class = FilesystemStoreConfig
 
     def _setup(self):
-        safe_mmkdir(str(os.path.dirname(self.config.base_directory)))
+        self.full_base_directory = self.config.base_directory
+        safe_mmkdir(str(os.path.dirname(self.full_base_directory)))
 
     def _get(self, key):
-        with open(os.path.join(self.config.base_directory, key)) as infile:
+        with open(os.path.join(self.full_base_directory, key)) as infile:
             return infile.read()
 
     def _set(self, key, value):
-        filename = os.path.join(self.config.base_directory, key)
+        filename = os.path.join(self.full_base_directory, key)
         safe_mmkdir(str(os.path.split(filename)[0]))
         with open(filename, "w") as outfile:
             outfile.write(value)
 
     def list_keys(self):
         key_list = []
-        for root, dirs, files in os.walk(self.config.base_directory):
+        for root, dirs, files in os.walk(self.full_base_directory):
             for file_ in files:
                 key_list.append(
                     os.path.relpath(
@@ -161,6 +162,14 @@ class FilesystemStore(ContextAwareStore):
 
 
 class NameSpacedFilesystemStore(FilesystemStore):
+
+    def _setup(self):
+        self.full_base_directory = os.path.join(
+            self.data_context.root_directory,
+            self.config.base_directory,
+        )
+
+        safe_mmkdir(str(os.path.dirname(self.full_base_directory)))
 
     #TODO: This method should probably live in ContextAwareStore
     #For the moment, I'm leaving it here, because:
@@ -177,8 +186,7 @@ class NameSpacedFilesystemStore(FilesystemStore):
             key.normalized_data_asset_name,
             key.expectation_suite_name,
             base_path=os.path.join(
-                self.data_context.root_directory,
-                self.config.base_directory,
+                self.full_base_directory,
                 key.run_id
             ),
             file_extension=self.config.file_extension
@@ -186,11 +194,11 @@ class NameSpacedFilesystemStore(FilesystemStore):
         return filepath
     
     def get_most_recent_run_id(self):
-        run_id_list = os.listdir(self.config.base_directory)
+        run_id_list = os.listdir(self.full_base_directory)
 
         run_ids = [
             name for name in run_id_list if
-            os.path.isdir(os.path.join(self.config.base_directory, name))
+            os.path.isdir(os.path.join(self.full_base_directory, name))
         ]
         most_recent_run_id = sorted(run_ids)[-1]
 

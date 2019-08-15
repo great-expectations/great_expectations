@@ -208,6 +208,7 @@ class DataContext(object):
                 self._project_config["data_asset_snapshot_store"]
             ) 
 
+        # TODO: this store config shouldn't be hardcoded
         self.add_store(
             "local_validation_result_store",
             {
@@ -1566,11 +1567,21 @@ class DataContext(object):
 
         """
 
-        return self.stores.local_validation_result_store.get(NameSpaceDotDict(**{
+        if run_id == None:
+            run_id = self.stores.local_validation_result_store.get_most_recent_run_id()
+
+        results_dict = self.stores.local_validation_result_store.get(NameSpaceDotDict(**{
             "normalized_data_asset_name" : self._normalize_data_asset_name(data_asset_name),
             "expectation_suite_name" : expectation_suite_name,
             "run_id" : run_id,
         }))
+
+        if failed_only:
+            failed_results_list = [result for result in results_dict["results"] if not result["success"]]
+            results_dict["results"] = failed_results_list
+            return results_dict
+        else:
+            return results_dict
 
         # validation_location = self.get_validation_location(data_asset_name, expectation_suite_name, run_id, validations_store=validations_store)
 
