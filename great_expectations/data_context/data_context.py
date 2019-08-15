@@ -181,16 +181,16 @@ class DataContext(object):
             self._expectations_directory = expectations_directory
 
         #TODO: Deprecate this very soon
-        validations_stores = self._project_config.get("validations_stores", {
-            "local": {
-                "type": "filesystem",
-                "base_directory": "uncommitted/validations"
-            }
-        })
-        # Normalize paths as appropriate
-        for validations_store_name in validations_stores:
-            validations_stores[validations_store_name] = self._normalize_store_path(validations_stores[validations_store_name])
-        self._validations_stores = validations_stores
+        # validations_stores = self._project_config.get("validations_stores", {
+        #     "local": {
+        #         "type": "filesystem",
+        #         "base_directory": "uncommitted/validations"
+        #     }
+        # })
+        # # Normalize paths as appropriate
+        # for validations_store_name in validations_stores:
+        #     validations_stores[validations_store_name] = self._normalize_store_path(validations_stores[validations_store_name])
+        # self._validations_stores = validations_stores
 
         self._load_evaluation_parameter_store()
         self._compiled = False
@@ -273,11 +273,11 @@ class DataContext(object):
         # TODO: support multiple stores choices and/or ensure abs paths when appropriate
         return self._stores
 
-    @property
-    def validations_store(self):
-        """The configuration for the store where validations should be stored"""
-        # TODO: support multiple stores choices and/or ensure abs paths when appropriate
-        return self._validations_stores[list(self._validations_stores.keys())[0]]
+    # @property
+    # def validations_store(self):
+    #     """The configuration for the store where validations should be stored"""
+    #     # TODO: support multiple stores choices and/or ensure abs paths when appropriate
+    #     return self._validations_stores[list(self._validations_stores.keys())[0]]
 
     def _load_project_config(self):
         """Loads the project configuration file."""
