@@ -302,7 +302,7 @@ To learn more: <blue>https://docs.greatexpectations.io/en/latest/guides/data_doc
 
     else:
         cli_message(
-            "Okay, skipping HTML documentation for now.`."
+            "Okay, skipping HTML documentation for now."
         )
 
 
@@ -323,7 +323,7 @@ The following data documentation HTML sites were generated:
     for site_name, index_page_locator_info in index_page_locator_infos.items():
         msg += site_name + ":\n"
         for key, value in index_page_locator_info[0].items():
-            msg += "   <green>" + key + ": " + value + "</green>\n"
+            msg += "   <green>" + value + "</green>\n\n"
 
     cli_message(msg)
 

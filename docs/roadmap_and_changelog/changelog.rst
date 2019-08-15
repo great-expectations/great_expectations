@@ -1,8 +1,21 @@
 .. _changelog:
 
-
-v.0.7.6__develop
+v.0.7.7
 -----------------
+
+
+v.0.7.6
+-----------------
+* New Validation Renderer! Supports turning validation results into HTML and displays differences between the expected \
+ and the observed attributes of a dataset.
+* Data Documentation sites are now fully configurable; a data context can be configured to generate multiple \
+ sites built with different GE objects to support a variety of data documentation use cases. See data documentation \
+ guide for more detail.
+* CLI now has a new top-level command, `build-documentation` that can support rendering documentation for specified
+ sites and even named data assets in a specific site.
+* Introduced DotDict and LooselyTypedDotDict classes that allow to enforce typing of dictionaries.
+* Bug fixes: improved internal logic of rendering data documentation, slack notification, and CLI profile command when \
+ datasource argument was not provided.
 
 v.0.7.5
 -----------------
