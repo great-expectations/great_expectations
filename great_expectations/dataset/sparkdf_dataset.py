@@ -408,8 +408,11 @@ class SparkDFDataset(MetaSparkDFDataset):
         if parse_strings_as_datetimes:
             column = self._apply_dateutil_parse(column)
             value_set = [parse(value) if isinstance(value, string_types) else value for value in value_set]
-        # success_udf = udf(lambda x: x in value_set)
-        # return column.withColumn('__success', success_udf(column[0]))
+        if None in value_set:
+            # spark isin returns None when any value is compared to None
+            logger.error("expect_column_values_to_be_in_set cannot support a None in the value_set in spark")
+            raise ValueError(
+                "expect_column_values_to_be_in_set cannot support a None in the value_set in spark")
         return column.withColumn('__success', column[0].isin(value_set))
 
 
@@ -425,9 +428,8 @@ class SparkDFDataset(MetaSparkDFDataset):
             catch_exceptions=None,
             meta=None,
     ):
-        # success_udf = udf(lambda x: x not in value_set)
-        # return column.withColumn('__success', success_udf(column[0]))
         if None in value_set:
+            # spark isin returns None when any value is compared to None
             logger.error("expect_column_values_to_not_be_in_set cannot support a None in the value_set in spark")
             raise ValueError("expect_column_values_to_not_be_in_set cannot support a None in the value_set in spark")
         return column.withColumn('__success', ~column[0].isin(value_set))
