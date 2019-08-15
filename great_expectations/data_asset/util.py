@@ -15,6 +15,7 @@ import datetime
 from functools import wraps
 
 from great_expectations.version import __version__ as __version__
+from great_expectations.types import DotDict
 
 
 def parse_result_format(result_format):
@@ -31,23 +32,6 @@ def parse_result_format(result_format):
             result_format['partial_unexpected_count'] = 20
 
     return result_format
-
-
-class DotDict(dict):
-    """dot.notation access to dictionary attributes"""
-
-    def __getattr__(self, attr):
-        return self.get(attr)
-
-    __setattr__ = dict.__setitem__
-    __delattr__ = dict.__delitem__
-
-    def __dir__(self):
-        return self.keys()
-
-    # Cargo-cultishly copied from: https://github.com/spindlelabs/pyes/commit/d2076b385c38d6d00cebfe0df7b0d1ba8df934bc
-    def __deepcopy__(self, memo):
-        return DotDict([(copy.deepcopy(k, memo), copy.deepcopy(v, memo)) for k, v in self.items()])
 
 
 """Docstring inheriting descriptor. Note that this is not a docstring so that this is not added to @DocInherit-\

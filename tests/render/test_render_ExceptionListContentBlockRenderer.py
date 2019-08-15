@@ -16,39 +16,44 @@ def test_exception_list_content_block_renderer():
         ]
     )
 
+    print(result)
+
     assert result == {
         "content_block_type": "bullet_list",
         "bullet_list": [
             {
-                "template": "$column: $expectation_type raised an exception: $exception_message",
-                "params": {
-                    "column": "answer",
-                    "expectation_type": "expect_column_kl_divergence_to_be_less_than",
-                    "exception_message": "Invalid partition object."
-                },
-                "styling": {
-                    "classes": [
-                        "list-group-item"
-                    ],
+                "content_block_type": "string_template",
+                "string_template": {
+                    "template": "$column: $expectation_type raised an exception: $exception_message",
                     "params": {
-                        "column": {
-                            "classes": [
-                                "badge",
-                                "badge-primary"
-                            ]
-                        },
-                        "expectation_type": {
-                            "classes": [
-                                "text-monospace"
-                            ]
-                        },
-                        "exception_message": {
-                            "classes": [
-                                "text-monospace"
-                            ]
+                        "column": "answer",
+                        "expectation_type": "expect_column_kl_divergence_to_be_less_than",
+                        "exception_message": "Invalid partition object."
+                    },
+                    "styling": {
+                        "classes": [
+                            "list-group-item"
+                        ],
+                        "params": {
+                            "column": {
+                                "classes": [
+                                    "badge",
+                                    "badge-primary"
+                                ]
+                            },
+                            "expectation_type": {
+                                "classes": [
+                                    "text-monospace"
+                                ]
+                            },
+                            "exception_message": {
+                                "classes": [
+                                    "text-monospace"
+                                ]
+                            }
                         }
                     }
-                }
+                },
             }
         ],
         "styling": {

@@ -1,6 +1,6 @@
 .. _module_docs:
 
-Module Docs
+Module docs
 ==================
 
 .. toctree::

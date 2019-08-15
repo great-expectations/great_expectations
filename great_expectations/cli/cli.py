@@ -1,26 +1,8 @@
 # -*- coding: utf-8 -*-
-"""
-# Style guide for the Great Expectations CLI.
-
-###
-#
-# The CLI never writes to disk without asking first.
-# Questions are always phrased as conversational sentences.
-# Sections are divided by headers: "========== Profiling =========="
-# We use punctuation: Please finish sentences with periods, questions marks, or an occasional exclamation point.
-# Keep indentation consistent! (We're pythonistas, natch.)
-# Include exactly one blank line after every question.
-# Within those constraints, shorter is better. When in doubt, shorten.
-# Clickable links (usually to documentation) are blue.
-# Copyable bash commands are green.
-#
-###
-
-"""
 from .datasource import (
-    add_datasource,
+    add_datasource as add_datasource_impl,
     profile_datasource,
-    build_documentation,
+    build_documentation as build_documentation_impl,
     msg_go_to_notebook
 )
 from .init import (
@@ -30,7 +12,7 @@ from .init import (
 )
 from .util import cli_message
 from great_expectations.render.view import DefaultJinjaPageView
-from great_expectations.render.renderer import DescriptivePageRenderer, PrescriptivePageRenderer
+from great_expectations.render.renderer import ProfilingResultsPageRenderer, ExpectationSuitePageRenderer
 from great_expectations.data_context import DataContext
 from great_expectations.data_asset import FileDataAsset
 from great_expectations.dataset import Dataset, PandasDataset
@@ -213,7 +195,7 @@ def init(target_directory):
         "\nDone.",
     )
 
-    data_source_name = add_datasource(context)
+    data_source_name = add_datasource_impl(context)
 
     if not data_source_name: # no datasource was created
         return
@@ -221,6 +203,26 @@ def init(target_directory):
     profile_datasource(context, data_source_name)
 
     cli_message(msg_go_to_notebook)
+
+@cli.command()
+@click.option('--directory', '-d', default="./great_expectations",
+              help='The root of a project directory containing a great_expectations/ config.')
+def add_datasource(directory):
+    """Add a new datasource to the data context
+    """
+    try:
+        context = DataContext(directory)
+    except ConfigNotFoundError:
+        cli_message("Error: no great_expectations context configuration found in the specified directory.")
+        return
+
+
+    data_source_name = add_datasource_impl(context)
+
+    if not data_source_name: # no datasource was created
+        return
+
+    profile_datasource(context, data_source_name)
 
 
 @cli.command()
@@ -233,14 +235,20 @@ def init(target_directory):
 @click.option('--directory', '-d', default="./great_expectations",
               help='The root of a project directory containing a great_expectations/ config.')
 def profile(datasource_name, data_assets, profile_all_data_assets, directory):
-    """Profile datasources from the specified context.
+    """
+    Profile datasources from the specified context.
 
+    If the optional data_assets and profile_all_data_assets arguments are not specified, the profiler will check
+    if the number of data assets in the datasource exceeds the internally defined limit. If it does, it will
+    prompt the user to either specify the list of data assets to profile or to profile all.
+    If the limit is not exceeded, the profiler will profile all data assets in the datasource.
 
-    DATASOURCE_NAME: the datasource to profile, or leave blank to profile all datasources."""
-
-
-    if profile_all_data_assets:
-        max_data_assets = None
+    :param datasource_name: name of the datasource to profile
+    :param data_assets: if this comma-separated list of data asset names is provided, only the specified data assets will be profiled
+    :param profile_all_data_assets: if provided, all data assets will be profiled
+    :param directory:
+    :return:
+    """
 
     try:
         context = DataContext(directory)
@@ -250,25 +258,36 @@ def profile(datasource_name, data_assets, profile_all_data_assets, directory):
 
     if datasource_name is None:
         datasources = [datasource["name"] for datasource in context.list_datasources()]
-        for datasource_name in datasources:
-            profile_datasource(context, datasource_name, max_data_assets=max_data_assets)
+        if len(datasources) > 1:
+            cli_message("Error: please specify the datasource to profile. Available datasources: " + ", ".join(datasources))
+            return
+        else:
+            profile_datasource(context, datasources[0], data_assets=data_assets, profile_all_data_assets=profile_all_data_assets)
     else:
-        profile_datasource(context, datasource_name, data_assets=data_assets)
+        profile_datasource(context, datasource_name, data_assets=data_assets, profile_all_data_assets=profile_all_data_assets)
 
 
 @cli.command()
 @click.option('--directory', '-d', default="./great_expectations",
               help='The root of a project directory containing a great_expectations/ config.')
-def documentation(directory):
+@click.option('--site_name', '-s',
+              help='The site for which to generate documentation. See data_docs section in great_expectations.yml')
+@click.option('--data_asset_name', '-dan',
+              help='The data asset for which to generate documentation. Must also specify --site_name.')
+def build_documentation(directory, site_name, data_asset_name):
     """Build data documentation for a project.
     """
+    if data_asset_name is not None and site_name is None:
+        cli_message("Error: When specifying data_asset_name, must also specify site_name.")
+        return
+        
     try:
         context = DataContext(directory)
     except ConfigNotFoundError:
         cli_message("Error: no great_expectations context configuration found in the specified directory.")
         return
 
-    build_documentation(context)
+    build_documentation_impl(context, site_name=site_name, data_asset_name=data_asset_name)
 
 
 @cli.command()
@@ -282,9 +301,9 @@ def render(render_object):
         raw = json.load(infile)
 
     if "results" in raw:
-        model = DescriptivePageRenderer.render(raw)
+        model = ProfilingResultsPageRenderer.render(raw)
     else:
-        model = PrescriptivePageRenderer.render(raw)
+        model = ExpectationSuitePageRenderer.render(raw)
     print(DefaultJinjaPageView.render(model))
 
 

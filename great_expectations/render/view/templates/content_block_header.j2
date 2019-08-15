@@ -1,0 +1,26 @@
+{% if "styling" in content_block and "header" in content_block["styling"] -%}
+    {% set content_block_header_styling = content_block["styling"]["header"] | render_styling -%}
+{% else -%}
+    {% set content_block_header_styling = "" -%}
+{% endif -%}
+
+{% if "styling" in content_block and "subheader" in content_block["styling"] -%}
+    {% set content_block_subheader_styling = content_block["styling"]["subheader"] | render_styling -%}
+{% else -%}
+    {% set content_block_subheader_styling = "" -%}
+{% endif -%}
+
+{% if ("header" in content_block or "subheader" in content_block) and content_block["content_block_type"] != "header" -%}
+    <div id="{{content_block_id}}-header" {{ content_block_header_styling | replace("{{section_id}}", section_id) | replace("{{content_block_id}}", content_block_id) }}>
+        {% if "header" in content_block and content_block["content_block_type"] != "header" %}
+        <h4>
+            {{ content_block["header"] | render_string_template }}
+        </h4>
+        {% endif %}
+        {%- if "subheader" in content_block and content_block["content_block_type"] != "header" -%}
+        <h5 id="{{content_block_id}}-subheader" {{ content_block_subheader_styling | replace("{{section_id}}", section_id) | replace("{{content_block_id}}", content_block_id) }}>
+            {{ content_block["subheader"] | render_string_template }}
+        </h5>
+        {% endif -%}
+    </div>
+{% endif -%}

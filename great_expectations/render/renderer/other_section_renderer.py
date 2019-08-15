@@ -7,11 +7,17 @@ from .renderer import Renderer
 from .content_block import(
     ValueListContentBlockRenderer,
     TableContentBlockRenderer,
-    PrescriptiveBulletListContentBlockRenderer
+    ExpectationSuiteBulletListContentBlockRenderer
 )
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
+from great_expectations.render.types import (
+    RenderedComponentContent,
+    RenderedSectionContent,
+    RenderedComponentContentWrapper,
+)
 
-class DescriptiveOverviewSectionRenderer(Renderer):
+
+class ProfilingResultsOverviewSectionRenderer(Renderer):
 
     @classmethod
     def render(cls, evrs, section_name=None):
@@ -27,14 +33,14 @@ class DescriptiveOverviewSectionRenderer(Renderer):
         cls._render_warnings(evrs, content_blocks)
         cls._render_expectation_types(evrs, content_blocks)
 
-        return {
+        return RenderedSectionContent(**{
             "section_name": section_name,
             "content_blocks": content_blocks
-        }
+        })
 
     @classmethod
     def _render_header(cls, evrs, content_blocks):
-        content_blocks.append({
+        content_blocks.append(RenderedComponentContent(**{
             "content_block_type": "header",
             "header": "Overview",
             "styling": {
@@ -43,7 +49,7 @@ class DescriptiveOverviewSectionRenderer(Renderer):
                     "classes": ["alert", "alert-secondary"]
                 }
             }
-        })
+        }))
 
     @classmethod
     def _render_dataset_info(cls, evrs, content_blocks):
@@ -53,16 +59,19 @@ class DescriptiveOverviewSectionRenderer(Renderer):
         table_rows.append(["Number of variables", len(cls._get_column_list_from_evrs(evrs)), ])
 
         table_rows.append([
-            {
-                "template": "Number of observations",
-                "tooltip": {
-                    "content": "expect_table_row_count_to_be_between"
-                },
-                "params": {
-                    "tooltip_text": "Number of observations"
+            RenderedComponentContent(**{
+                "content_block_type": "string_template",
+                "string_template": {
+                    "template": "Number of observations",
+                    "tooltip": {
+                        "content": "expect_table_row_count_to_be_between"
+                    },
+                    "params": {
+                        "tooltip_text": "Number of observations"
+                    }
                 }
-            },
-            "?" if not expect_table_row_count_to_be_between_evr else expect_table_row_count_to_be_between_evr["result"][
+            }),
+            "--" if not expect_table_row_count_to_be_between_evr else expect_table_row_count_to_be_between_evr["result"][
                 "observed_value"]
         ])
 
@@ -71,12 +80,12 @@ class DescriptiveOverviewSectionRenderer(Renderer):
             # ["Duplicate rows", "0 (0.0%)", ], #TODO: bring back when we have an expectation for this
         ]
 
-        content_blocks.append({
+        content_blocks.append(RenderedComponentContent(**{
             "content_block_type": "table",
             "header": "Dataset info",
-            "table_rows": table_rows,
+            "table": table_rows,
             "styling": {
-                "classes": ["col-6", "table-responsive"],
+                "classes": ["col-6"],
                 "styles": {
                     "margin-top": "20px"
                 },
@@ -84,7 +93,7 @@ class DescriptiveOverviewSectionRenderer(Renderer):
                     "classes": ["table", "table-sm"]
                 }
             },
-        })
+        }))
 
     @classmethod
     def _render_variable_types(cls, evrs, content_blocks):
@@ -94,10 +103,10 @@ class DescriptiveOverviewSectionRenderer(Renderer):
         column_type_counter = Counter(column_types.values())
         table_rows = [[type, str(column_type_counter[type])] for type in ["int", "float", "string", "--"]]
 
-        content_blocks.append({
+        content_blocks.append(RenderedComponentContent(**{
             "content_block_type": "table",
             "header": "Variable types",
-            "table_rows": table_rows,
+            "table": table_rows,
             "styling": {
                 "classes": ["col-6", "table-responsive", ],
                 "styles": {
@@ -107,7 +116,7 @@ class DescriptiveOverviewSectionRenderer(Renderer):
                     "classes": ["table", "table-sm"]
                 }
             },
-        })
+        }))
 
     @classmethod
     def _render_expectation_types(cls, evrs, content_blocks):
@@ -120,23 +129,27 @@ class DescriptiveOverviewSectionRenderer(Renderer):
         # table_rows = sorted(type_counts.items(), key=lambda kv: -1*kv[1])
         bullet_list = sorted(type_counts.items(), key=lambda kv: -1*kv[1])
 
-        bullet_list = [{
-            "template": "$expectation_type $expectation_count",
-            "params": {
-                "expectation_type": tr[0],
-                "expectation_count": tr[1],
-            },
-            "styling": {
-                "classes": ["list-group-item", "d-flex", "justify-content-between", "align-items-center"],
-                "params": {
-                    "expectation_count": {
-                        "classes": ["badge", "badge-secondary", "badge-pill"],
+        bullet_list = [
+            RenderedComponentContent(**{
+                "content_block_type": "string_template",
+                "string_template": {
+                    "template": "$expectation_type $expectation_count",
+                    "params": {
+                        "expectation_type": tr[0],
+                        "expectation_count": tr[1],
+                    },
+                    "styling": {
+                        "classes": ["list-group-item", "d-flex", "justify-content-between", "align-items-center"],
+                        "params": {
+                            "expectation_count": {
+                                "classes": ["badge", "badge-secondary", "badge-pill"],
+                            }
+                        }
                     }
                 }
-            }
-        } for tr in bullet_list]
+            }) for tr in bullet_list]
 
-        content_blocks.append({
+        content_blocks.append(RenderedComponentContent(**{
             "content_block_type": "bullet_list",
             "header": 'Expectation types <span class="mr-3 triangle"></span>',
             "bullet_list": bullet_list,
@@ -161,7 +174,7 @@ class DescriptiveOverviewSectionRenderer(Renderer):
                     "classes": ["list-group", "collapse"],
                 },
             },
-        })
+        }))
 
     @classmethod
     def _render_warnings(cls, evrs, content_blocks):
@@ -214,7 +227,7 @@ class DescriptiveOverviewSectionRenderer(Renderer):
         # content_blocks.append({
         #     "content_block_type": "table",
         #     "header": "Warnings",
-        #     "table_rows": table_rows,
+        #     "table": table_rows,
         #     "styling": {
         #         "classes": ["col-12"],
         #         "styles": {
