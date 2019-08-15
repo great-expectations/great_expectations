@@ -8,7 +8,7 @@ import logging
 
 from ruamel.yaml import YAML
 
-from ..data_context.util import NormalizedDataAssetName
+from ..data_context.types import NormalizedDataAssetName
 from great_expectations.exceptions import BatchKwargsError
 
 logger = logging.getLogger(__name__)

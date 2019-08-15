@@ -16,6 +16,7 @@ from great_expectations.data_context.store.types import (
 )
 from great_expectations.data_context.types import (
     NameSpaceDotDict,
+    NormalizedDataAssetName,
 )
 # def test_core_store_logic():
 #     pass
@@ -79,6 +80,9 @@ def test_InMemoryStore_with_serialization(empty_data_context):
     with pytest.raises(TypeError):
         my_store.set("BBB", set(["x", "y", "z"]), serialization_type="json")
 
+    assert set(my_store.list_keys()) == set(["AAA"])
+
+
 def test_FilesystemStore(tmp_path_factory, empty_data_context):
     project_path = str(tmp_path_factory.mktemp('my_dir'))
 
@@ -99,6 +103,18 @@ def test_FilesystemStore(tmp_path_factory, empty_data_context):
 
     my_store.set("subdir/my_file_BBB", "bbb")
     assert my_store.get("subdir/my_file_BBB") == "bbb"
+
+    my_store.set("subdir/my_file_BBB", "BBB")
+    assert my_store.get("subdir/my_file_BBB") == "BBB"
+
+    with pytest.raises(TypeError):
+        my_store.set("subdir/my_file_CCC", 123)
+        assert my_store.get("subdir/my_file_CCC") == 123
+
+    my_store.set("subdir/my_file_CCC", "ccc")
+    assert my_store.get("subdir/my_file_CCC") == "ccc"
+
+    assert set(my_store.list_keys()) == set(["my_file_AAA", "subdir/my_file_BBB", "subdir/my_file_CCC"])
 
 def test_store_config(empty_data_context):
 
@@ -143,9 +159,9 @@ def test__get_namespaced_key(empty_data_context, tmp_path_factory):
     
     assert my_store._get_namespaced_key(NameSpaceDotDict(**{
         "expectation_suite_name" : "AAA",
-        "normalized_data_asset_name" : "BBB",
+        "normalized_data_asset_name" : NormalizedDataAssetName("B", "B", "B"),
         "run_id" : "CCC",
-    }))[-23:] == "my_dir1/CCC/BBB/AAA.txt"
+    }))[-25:] == "my_dir1/CCC/B/B/B/AAA.txt"
 
 def test_NameSpacedFilesystemStore(empty_data_context, tmp_path_factory):
     project_path = str(tmp_path_factory.mktemp('my_dir'))
@@ -166,16 +182,23 @@ def test_NameSpacedFilesystemStore(empty_data_context, tmp_path_factory):
     
     ns_1 = NameSpaceDotDict(**{
         "expectation_suite_name" : "hello",
-        "normalized_data_asset_name" : "goodbye",
-        "run_id" : "quack",
+        "normalized_data_asset_name" : NormalizedDataAssetName("a", "b", "c"),
+        "run_id" : "100",
     })
     my_store.set(ns_1,"aaa")
     assert my_store.get(ns_1) == "aaa"
 
     ns_2 = NameSpaceDotDict(**{
         "expectation_suite_name" : "hello",
-        "normalized_data_asset_name" : "goodbye",
-        "run_id" : "moo",
+        "normalized_data_asset_name" : NormalizedDataAssetName("a", "b", "c"),
+        "run_id" : "200",
     })
     my_store.set(ns_2, "bbb")
     assert my_store.get(ns_2) == "bbb"
+
+    assert set(my_store.list_keys()) == set([
+        "100/a/b/c/hello.txt",
+        "200/a/b/c/hello.txt",
+    ])
+
+    assert my_store.get_most_recent_run_id() == "200"
