@@ -121,14 +121,6 @@ class SiteBuilder():
         if validation_section_config:
             #TODO : Everything in this if statement can probably be factored into a generic version of `generate_profiling_section` -> `generate_section`
             validation_renderer_class, validation_view_class = cls.get_renderer_and_view_classes(validation_section_config)
-            # try:
-            #     validation_renderer_module = importlib.import_module(validation_section_config['renderer']['module'])
-            #     validation_renderer_class = getattr(validation_renderer_module, validation_section_config['renderer']['class'])
-            #     validation_view_module = importlib.import_module(validation_section_config['view']['module'])
-            #     validation_view_class = getattr(validation_view_module, validation_section_config['view']['class'])
-            # except Exception:
-            #     logger.exception("Failed to load validation renderer or view class")
-            #     raise
 
 
             #TODO: filter data sources if the config requires it
@@ -169,36 +161,6 @@ class SiteBuilder():
                                     run_id=run_id
                                 )
 
-                                #The next ~20 lines can be pulled out into a shared function
-                                # if not datasource in index_links_dict:
-                                #     index_links_dict[datasource] = OrderedDict()
-
-                                # if not generator in index_links_dict[datasource]:
-                                #     index_links_dict[datasource][generator] = OrderedDict()
-
-                                # if not generator_asset in index_links_dict[datasource][generator]:
-                                #     index_links_dict[datasource][generator][generator_asset] = {
-                                #         'profiling_links': [],
-                                #         'validation_links': [],
-                                #         'expectation_suite_links': []
-                                #     }
-
-                                # index_links_dict[datasource][generator][generator_asset]["validation_links"].append(
-                                #     {
-                                #         "full_data_asset_name": data_asset_name,
-                                #         "expectation_suite_name": expectation_suite_name,
-                                #         "filepath": data_context._get_normalized_data_asset_name_filepath(
-                                #             data_asset_name,
-                                #             expectation_suite_name,
-                                #             base_path='validations/' + run_id,
-                                #             file_extension=".html"
-                                #         ),
-                                #         "source": datasource,
-                                #         "generator": generator,
-                                #         "asset": generator_asset,
-                                #         "run_id": run_id
-                                #     }
-                                # )
                             index_links_dict = cls.add_resource_info_to_index_links_dict(
                                 data_context,
                                 index_links_dict,
@@ -213,16 +175,8 @@ class SiteBuilder():
         if expectations_section_config:
             #TODO : Everything in this if statement can probably be factored into a generic version of `generate_profiling_section` -> `generate_section`
             # It's unclear whether the difference between Expectations and ValidationResults will require a second function.
-            
+
             expectations_renderer_class, expectations_view_class = cls.get_renderer_and_view_classes(expectations_section_config)
-            # try:
-            #     expectations_renderer_module = importlib.import_module(expectations_section_config['renderer']['module'])
-            #     expectations_renderer_class = getattr(expectations_renderer_module, expectations_section_config['renderer']['class'])
-            #     expectations_view_module = importlib.import_module(expectations_section_config['view']['module'])
-            #     expectations_view_class = getattr(expectations_view_module, expectations_section_config['view']['class'])
-            # except Exception:
-            #     logger.exception("Failed to load expectations renderer or view class")
-            #     raise
 
             for datasource, v1 in data_context.list_expectation_suites().items():
 
@@ -256,33 +210,6 @@ class SiteBuilder():
                                 data_asset_name=data_asset_name
                             )
 
-                            #The next ~20 lines can be pulled out into a shared function
-                            # if not datasource in index_links_dict:
-                            #     index_links_dict[datasource] = OrderedDict()
-                            # if not generator in index_links_dict[datasource]:
-                            #     index_links_dict[datasource][generator] = OrderedDict()
-                            # if not generator_asset in index_links_dict[datasource][generator]:
-                            #     index_links_dict[datasource][generator][generator_asset] = {
-                            #         'profiling_links': [],
-                            #         'validation_links': [],
-                            #         'expectation_suite_links': []
-                            #     }
-
-                            # index_links_dict[datasource][generator][generator_asset]["expectation_suite_links"].append(
-                            #     {
-                            #         "full_data_asset_name": data_asset_name,
-                            #         "expectation_suite_name": expectation_suite_name,
-                            #         "filepath": data_context._get_normalized_data_asset_name_filepath(
-                            #             data_asset_name,
-                            #             expectation_suite_name,
-                            #             base_path='expectations',
-                            #             file_extension='.html'
-                            #         ),
-                            #         "source": datasource,
-                            #         "generator": generator,
-                            #         "asset": generator_asset
-                            #     }
-                            # )
                             index_links_dict = cls.add_resource_info_to_index_links_dict(
                                 data_context,
                                 index_links_dict,
@@ -417,17 +344,8 @@ class SiteBuilder():
             }
         }
         """
-        # if validations_store is None:
-        #     validations_store = self.validations_store
-        # else:
-        #     validations_store = self._normalize_store_path(validations_store)
 
         validation_results = {}
-
-        # result_paths = validation_result_list
-        # print(result_paths)
-        # base_length = len(validations_store["base_directory"])
-        # relative_paths = [path[base_length:] for path in result_paths]
 
         relative_paths = validation_result_list
 
