@@ -1,9 +1,4 @@
-# from .store import (
-#     # Store,
-#     # InMemoryStore,
-#     # FilesystemStore,
-# )
-from .context_aware import (
+from .store import (
     ContextAwareStore,
     InMemoryStore,
     FilesystemStore,
