@@ -27,7 +27,8 @@ try:
         when,
         year,
         count,
-        countDistinct
+        countDistinct,
+        rlike
     )
     import pyspark.sql.types as sparktypes
     from pyspark.ml.feature import Bucketizer
@@ -658,9 +659,7 @@ class SparkDFDataset(MetaSparkDFDataset):
         catch_exceptions=None,
         meta=None,
     ):
-        # not sure know about casting to string here
-        success_udf = udf(lambda x: re.findall(regex, str(x)) != [])
-        return column.withColumn('__success', success_udf(column[0]))
+        return column.withColumn('__success', column[0].rlike(regex))
 
     @DocInherit
     @MetaSparkDFDataset.column_map_expectation
@@ -674,6 +673,4 @@ class SparkDFDataset(MetaSparkDFDataset):
         catch_exceptions=None,
         meta=None,
     ):
-        # not sure know about casting to string here
-        success_udf = udf(lambda x: re.findall(regex, str(x)) == [])
-        return column.withColumn('__success', success_udf(column[0]))
+        return column.withColumn('__success', ~column[0].rlike(regex))
