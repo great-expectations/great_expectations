@@ -152,7 +152,7 @@ def test_sqlalchemydataset_with_custom_sql():
     assert result['success'] == True
 
     result = custom_sql_dataset.expect_column_to_exist("age")
-    assert result['success'] == False
+    assert result['success'] == True
 
 
 def test_column_fallback():
