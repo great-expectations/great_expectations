@@ -300,12 +300,14 @@ class SiteBuilder():
     def generate_profiling_section(cls, section_config, data_context):
         profiling_renderer_class, profiling_view_class = cls.get_renderer_and_view_classes(section_config)
 
+        print("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
         print(data_context.stores.profiling_store.config)
-        print(data_context.stores['profiling_store'].list_keys(), "??????")
+        print("\n".join(data_context.stores['profiling_store'].list_keys()), "??????")
         nested_namespaced_validation_result_dict = cls.pack_validation_result_list_into_nested_dict(
             data_context.stores['profiling_store'].list_keys(),
             run_id_filter=section_config.get("run_id_filter")
         )
+        print("----------------------------------")
         print(json.dumps(nested_namespaced_validation_result_dict, indent=2))
 
         #TODO: filter data sources if the config requires it

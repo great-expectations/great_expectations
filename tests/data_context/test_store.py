@@ -157,11 +157,13 @@ def test__get_namespaced_key(empty_data_context, tmp_path_factory):
     with pytest.raises(KeyError):
         my_store._get_namespaced_key(NameSpaceDotDict(**{}))
     
-    assert my_store._get_namespaced_key(NameSpaceDotDict(**{
+    ns_key = my_store._get_namespaced_key(NameSpaceDotDict(**{
         "expectation_suite_name" : "AAA",
         "normalized_data_asset_name" : NormalizedDataAssetName("B", "B", "B"),
         "run_id" : "CCC",
-    }))[-25:] == "my_dir1/CCC/B/B/B/AAA.txt"
+    }))
+    print(ns_key)
+    assert ns_key[-25:] == "my_dir1/CCC/B/B/B/AAA.txt"
 
 def test_NameSpacedFilesystemStore(empty_data_context, tmp_path_factory):
     project_path = str(tmp_path_factory.mktemp('my_dir'))
@@ -202,3 +204,28 @@ def test_NameSpacedFilesystemStore(empty_data_context, tmp_path_factory):
     ])
 
     assert my_store.get_most_recent_run_id() == "200"
+
+def test_NameSpacedFilesystemStore_key_listing(empty_data_context, tmp_path_factory):
+    project_path = "some_dir/my_store"
+
+    my_store = NameSpacedFilesystemStore(
+        data_context=empty_data_context,
+        config={
+            "base_directory": project_path,
+            "file_extension" : ".txt",
+        }
+    )
+
+    ns_1 = NameSpaceDotDict(**{
+        "expectation_suite_name" : "hello",
+        "normalized_data_asset_name" : NormalizedDataAssetName("a", "b", "c"),
+        "run_id" : "100",
+    })
+    my_store.set(ns_1,"aaa")
+
+    assert set(my_store.list_keys()) == set([
+        "100/a/b/c/hello.txt",
+    ])
+
+    assert my_store.get_most_recent_run_id() == "100"
+    
