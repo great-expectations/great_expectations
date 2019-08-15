@@ -128,6 +128,7 @@ class SiteBuilder():
                                if data_context._normalize_data_asset_name(data_asset_name) != data_context._normalize_data_asset_name(specified_data_asset_name):
                                    continue
                             for expectation_suite_name in expectation_suite_names:
+                                #!!! This validations_store_name is hardcoded and might not exist. Tests are passing, though.
                                 validation = data_context.get_validation_result(data_asset_name,
                                                                                 expectation_suite_name=expectation_suite_name,
                                                                                 validations_store_name="profiling_store",#site_config['profiling_store'],
@@ -203,6 +204,7 @@ class SiteBuilder():
                                if data_context._normalize_data_asset_name(data_asset_name) != data_context._normalize_data_asset_name(specified_data_asset_name):
                                    continue
                             for expectation_suite_name in expectation_suite_names:
+                                #!!! This validations_store_name is hardcoded and might not exist. Tests are passing, though.
                                 validation = data_context.get_validation_result(data_asset_name,
                                                                                 expectation_suite_name=expectation_suite_name,
                                                                                 validations_store_name="local_validation_result_store",#=site_config['validations_store'],
