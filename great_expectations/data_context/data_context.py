@@ -119,6 +119,7 @@ class DataContext(object):
 
         return cls(os.path.join(project_root_dir, "great_expectations"))
             
+    #TODO: Refactor __init__ so that it accepts a config, rather than a context_root_dir that is then used to attempt ot find a config
     def __init__(self, context_root_dir=None, expectation_explorer=False, data_asset_name_delimiter='/'):
         """DataContext constructor
 
@@ -139,6 +140,7 @@ class DataContext(object):
             from great_expectations.jupyter_ux.expectation_explorer import ExpectationExplorer
             self._expectation_explorer_manager = ExpectationExplorer()
 
+        #TODO: Factor this out into a helper function in GE. It doesn't belong inside this method.
         # determine the "context root directory" - this is the parent of "great_expectations" dir
         if context_root_dir is None:
             if os.path.isdir("../notebooks") and os.path.isfile("../great_expectations.yml"):
