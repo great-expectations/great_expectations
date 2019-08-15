@@ -489,6 +489,8 @@ def test_data_context_result_store(titanic_data_context):
 
 def test_render_full_static_site(tmp_path_factory, filesystem_csv_3):
 
+    assert False
+
     project_dir = str(tmp_path_factory.mktemp("project_dir"))
     print(project_dir)
 
@@ -605,3 +607,29 @@ def test_render_full_static_site(tmp_path_factory, filesystem_csv_3):
         ),
         "./tests/data_context/output/documentation"
     )
+
+
+def test_move_validation_to_fixtures(titanic_data_context):
+    profiling_results = titanic_data_context.profile_datasource("mydatasource")
+    all_validation_result = titanic_data_context.get_validation_result(
+        "mydatasource/mygenerator/Titanic",
+        "BasicDatasetProfiler",
+        "profiling"
+    )
+    # print(all_validation_result)
+    assert len(all_validation_result["results"]) == 51
+
+    assert titanic_data_context.stores["fixture_validation_results_store"].list_keys() == []
+
+    titanic_data_context.move_validation_to_fixtures(
+        "mydatasource/mygenerator/Titanic",
+        "BasicDatasetProfiler",
+        "profiling"
+    )
+
+    # titanic_data_context.stores["fixtures"].get(
+    #     "mydatasource/mygenerator/Titanic",
+    #     "BasicDatasetProfiler",
+    #     "profiling"
+    # )
+    assert len(titanic_data_context.stores["fixture_validation_results_store"].list_keys()) == 1

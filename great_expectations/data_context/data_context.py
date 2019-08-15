@@ -155,10 +155,6 @@ class DataContext(object):
 
         self._context_root_directory = os.path.abspath(context_root_dir)
 
-        # TODO: these paths should be configurable
-        self.fixtures_validations_directory = os.path.join(self.root_directory, "fixtures/validations")
-        self.data_doc_directory = os.path.join(self.root_directory, "uncommitted/documentation")
-
         self._project_config = self._load_project_config()
 
         if not self._project_config.get("datasources"):
@@ -200,6 +196,12 @@ class DataContext(object):
         self._data_asset_name_delimiter = data_asset_name_delimiter
 
     def _init_stores(self):
+        """Initialize all Stores for this DataContext.
+
+        TODO: Currently, most Stores are hardcoded.
+        Eventually, they should be read in from yml configs.
+        This will require some work on test fixtures.
+        """
         self._stores = DotDict()
 
         if "data_asset_snapshot_store" in self._project_config:
@@ -208,7 +210,7 @@ class DataContext(object):
                 self._project_config["data_asset_snapshot_store"]
             ) 
 
-        # TODO: this store config shouldn't be hardcoded
+        # TODO: these paths should be configurable
         self.add_store(
             "local_validation_result_store",
             {
@@ -221,6 +223,25 @@ class DataContext(object):
                 }
             }
         )
+
+        # TODO: these paths should be configurable
+        # self.fixtures_validations_directory = os.path.join(self.root_directory, "fixtures/validations")
+        self.add_store(
+            "fixture_validation_results_store",
+            {
+                "module_name": "great_expectations.data_context.store",
+                "class_name": "NameSpacedFilesystemStore",
+                "store_config" : {
+                    "base_directory" : "fixtures/validations",
+                    "serialization_type" : "json",
+                    "file_extension" : ".json",
+                }
+            }
+        )
+
+
+        self.data_doc_directory = os.path.join(self.root_directory, "uncommitted/documentation")
+
 
     def add_store(self, store_name, store_config):
         self._stores[store_name] = self._init_store_from_config(store_config)
@@ -303,97 +324,6 @@ class DataContext(object):
         else:
             self._data_asset_name_delimiter = new_delimiter
 
-    def get_validation_location(self, data_asset_name, expectation_suite_name, run_id, validations_store=None):
-        """Get the local path where a validation result is stored, given full asset name and run id
-
-        Args:
-            data_asset_name: name of data asset for which to get validation location
-            expectation_suite_name: name of expectation suite for which to get validation location
-            run_id: run_id of validation to get. If no run_id is specified, fetch the latest run_id according to \
-                alphanumeric sort (by default, the latest run_id if using ISO 8601 formatted timestamps for run_id
-            validations_store: the store in which validations are located
-
-        Returns:
-            path (str): path to the validation location for the specified data_asset, expectation_suite and run_id
-        """
-        result = {}
-
-        data_asset_name = self._normalize_data_asset_name(data_asset_name)
-        if validations_store is None:
-            validations_store = self.validations_store
-
-        if validations_store["type"] == "filesystem":
-            if "base_directory" not in validations_store:
-                raise DataContextError(
-                    "Invalid validations_store configuration: 'base_directory' is required for a filesystem store.")
-
-            base_directory = validations_store["base_directory"]
-            if not os.path.isabs(base_directory):
-                base_directory = os.path.join(self.root_directory, base_directory)
-
-            if run_id is None:  # Get most recent run_id
-                runs = [name for name in os.listdir(base_directory) if
-                        os.path.isdir(os.path.join(base_directory, name))]
-                run_id = sorted(runs)[-1]
-
-            validation_path = os.path.join(
-                base_directory,
-                run_id,
-                self._get_normalized_data_asset_name_filepath(
-                    data_asset_name, 
-                    expectation_suite_name,
-                    base_path=""
-                )
-            )
-
-            result['filepath'] = validation_path
-
-        elif validations_store["type"] == "s3":
-            # FIXME: this code is untested
-            if "bucket" not in validations_store or "key_prefix" not in validations_store:
-                raise DataContextError(
-                    "Invalid validations_store configuration: 'bucket' and 'key_prefix' are required for an s3 store.")
-
-            try:
-                import boto3
-                s3 = boto3.client('s3')
-            except ImportError:
-                raise ImportError("boto3 is required for retrieving a dataset from s3")
-
-            bucket = validations_store["bucket"]
-            key_prefix = validations_store["key_prefix"]
-
-            if run_id is None:  # Get most recent run_id
-                all_objects = s3.list_objects(Bucket=bucket)
-                # Remove the key_prefix and first slash from the name
-                validations = [
-                    name[len(key_prefix) + 1:] 
-                    for name in all_objects 
-                    if name.startswith(key_prefix) and len(name) > len(key_prefix) + 1
-                ]
-                # run id is the first section after the word "validations"
-                runs = [validation.split('/')[1] for validation in validations]
-                run_id = sorted(runs)[-1]
-
-            key = os.path.join(
-                key_prefix,
-                "validations",
-                run_id,
-                self._get_normalized_data_asset_name_filepath(
-                    data_asset_name,
-                    expectation_suite_name,
-                    base_path=""
-                )
-            )
-
-            result['bucket'] = bucket
-            result['key'] = key
-
-        else:
-            raise DataContextError("Invalid validations_store configuration: only 'filesystem' and 's3' are supported.")
-
-        return result
-
     def get_validation_doc_filepath(self, data_asset_name, expectation_suite_name):
         """Get the local path where a the rendered html doc for a validation result is stored, given full asset name.
 
@@ -429,17 +359,14 @@ class DataContext(object):
         Returns:
             None
         """
-        source_filepath = self.get_validation_location(data_asset_name, expectation_suite_name, run_id)['filepath']
 
-        destination_filepath = self._get_normalized_data_asset_name_filepath(
-            data_asset_name,
-            expectation_suite_name,
-            base_path=self.fixtures_validations_directory,
-            file_extension=".json"
-        )
-
-        safe_mmkdir(os.path.dirname(destination_filepath))
-        shutil.move(source_filepath, destination_filepath)
+        validation_result_identifier = NameSpaceDotDict(**{
+            "normalized_data_asset_name": self._normalize_data_asset_name(data_asset_name),
+            "expectation_suite_name": expectation_suite_name,
+            "run_id": run_id,
+        })
+        validation_result = self.stores.local_validation_result_store.get(validation_result_identifier)
+        self.stores.fixture_validation_results_store.set(validation_result_identifier, validation_result)
 
     #####
     #
