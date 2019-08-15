@@ -273,6 +273,8 @@ class DataContext(object):
             coerce_types=True,
             **config
         )
+        if "store_config" not in typed_config:
+            typed_config.store_config = {}
 
         loaded_module = importlib.import_module(typed_config.module_name)
         loaded_class = getattr(loaded_module, typed_config.class_name)
