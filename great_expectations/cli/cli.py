@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from .datasource import (
-    add_datasource,
+    add_datasource as add_datasource_impl,
     profile_datasource,
-    build_documentation,
+    build_documentation as build_documentation_impl,
     msg_go_to_notebook
 )
 from .init import (
@@ -195,7 +195,7 @@ def init(target_directory):
         "\nDone.",
     )
 
-    data_source_name = add_datasource(context)
+    data_source_name = add_datasource_impl(context)
 
     if not data_source_name: # no datasource was created
         return
@@ -203,6 +203,26 @@ def init(target_directory):
     profile_datasource(context, data_source_name)
 
     cli_message(msg_go_to_notebook)
+
+@cli.command()
+@click.option('--directory', '-d', default="./great_expectations",
+              help='The root of a project directory containing a great_expectations/ config.')
+def add_datasource(directory):
+    """Add a new datasource to the data context
+    """
+    try:
+        context = DataContext(directory)
+    except ConfigNotFoundError:
+        cli_message("Error: no great_expectations context configuration found in the specified directory.")
+        return
+
+
+    data_source_name = add_datasource_impl(context)
+
+    if not data_source_name: # no datasource was created
+        return
+
+    profile_datasource(context, data_source_name)
 
 
 @cli.command()
@@ -254,7 +274,7 @@ def profile(datasource_name, data_assets, profile_all_data_assets, directory):
               help='The site for which to generate documentation. See data_docs section in great_expectations.yml')
 @click.option('--data_asset_name', '-dan',
               help='The data asset for which to generate documentation. Must also specify --site_name.')
-def documentation(directory, site_name, data_asset_name):
+def build_documentation(directory, site_name, data_asset_name):
     """Build data documentation for a project.
     """
     if data_asset_name is not None and site_name is None:
@@ -267,7 +287,7 @@ def documentation(directory, site_name, data_asset_name):
         cli_message("Error: no great_expectations context configuration found in the specified directory.")
         return
 
-    build_documentation(context, site_name=site_name, data_asset_name=data_asset_name)
+    build_documentation_impl(context, site_name=site_name, data_asset_name=data_asset_name)
 
 
 @cli.command()
