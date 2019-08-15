@@ -168,7 +168,7 @@ class NameSpacedFilesystemStore(FilesystemStore):
         return filepath
 
 
-# class ContextAwareS3Store(ContextAwareStore):
+# class S3Store(ContextAwareStore):
 #     """Uses an S3 bucket+prefix as a store
 #     """
 
