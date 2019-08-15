@@ -14,7 +14,8 @@ import pandas as pd
 
 from great_expectations.exceptions import DataContextError
 from great_expectations.data_context import DataContext
-from great_expectations.data_context.util import (NormalizedDataAssetName, safe_mmkdir)
+from great_expectations.data_context.util import safe_mmkdir
+from great_expectations.data_context.types import NormalizedDataAssetName
 from great_expectations.cli.init import scaffold_directories_and_notebooks
 from great_expectations.dataset import PandasDataset
 

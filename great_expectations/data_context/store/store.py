@@ -103,6 +103,9 @@ class ContextAwareStore(object):
 
     def _set(self, key, value):
         raise NotImplementedError
+    
+    def list_keys(self):
+        raise NotImplementedError
 
 
 class InMemoryStore(ContextAwareStore):
@@ -119,6 +122,10 @@ class InMemoryStore(ContextAwareStore):
 
     def _set(self, key, value):
         self.store[key] = value
+    
+    def list_keys(self):
+        return self.store.keys()
+
 
 
 class FilesystemStore(ContextAwareStore):
@@ -140,6 +147,18 @@ class FilesystemStore(ContextAwareStore):
         with open(filename, "w") as outfile:
             outfile.write(value)
 
+    def list_keys(self):
+        key_list = []
+        for root, dirs, files in os.walk(self.config.base_directory):
+            for file_ in files:
+                key_list.append(
+                    os.path.relpath(
+                        os.path.join(root, file_),
+                        self.config.base_directory,
+                    )
+                )
+        return key_list
+
 
 class NameSpacedFilesystemStore(FilesystemStore):
 
@@ -153,6 +172,7 @@ class NameSpacedFilesystemStore(FilesystemStore):
     def _get_namespaced_key(self, key):
         if not isinstance(key, NameSpaceDotDict):
             raise TypeError("key must be an instance of type NameSpaceDotDict, not {0}".format(type(key)))
+        
         filepath = self.data_context._get_normalized_data_asset_name_filepath(
             key.normalized_data_asset_name,
             key.expectation_suite_name,
@@ -164,6 +184,17 @@ class NameSpacedFilesystemStore(FilesystemStore):
             file_extension=self.config.file_extension
         )
         return filepath
+    
+    def get_most_recent_run_id(self):
+        run_id_list = os.listdir(self.config.base_directory)
+
+        run_ids = [
+            name for name in run_id_list if
+            os.path.isdir(os.path.join(self.config.base_directory, name))
+        ]
+        most_recent_run_id = sorted(run_ids)[-1]
+
+        return most_recent_run_id
 
 
 # class S3Store(ContextAwareStore):
