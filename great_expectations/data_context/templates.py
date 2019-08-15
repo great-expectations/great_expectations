@@ -32,7 +32,7 @@ stores:
 
   local_validation_result_store:
     module_name: great_expectations.data_context.store
-    class_name: FilesystemStore
+    class_name: NameSpacedFilesystemStore
     store_config:
       base_directory: uncommitted/validations/
       serialization_type: json
@@ -40,7 +40,7 @@ stores:
 
   local_profiling_store:
     module_name: great_expectations.data_context.store
-    class_name: FilesystemStore
+    class_name: NameSpacedFilesystemStore
     store_config:
       base_directory: uncommitted/profiling/
       serialization_type: json
@@ -48,21 +48,21 @@ stores:
 
   local_workbench_site_store:
     module_name: great_expectations.data_context.store
-    class_name: FilesystemStore
+    class_name: NameSpacedFilesystemStore
     store_config:
       base_directory: uncommitted/documentation/local_site
       file_extension: .html
 
   shared_team_site_store:
     module_name: great_expectations.data_context.store
-    class_name: FilesystemStore
+    class_name: NameSpacedFilesystemStore
     store_config:
       base_directory: uncommitted/documentation/team_site
       file_extension: .html
 
   fixture_validation_results_store:
     module_name: great_expectations.data_context.store
-    class_name: FilesystemStore
+    class_name: NameSpacedFilesystemStore
     store_config:
       base_directory: fixtures/validations
       file_extension: .zzz

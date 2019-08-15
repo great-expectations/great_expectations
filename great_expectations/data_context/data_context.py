@@ -849,6 +849,7 @@ class DataContext(object):
         Returns:
             NormalizedDataAssetName
         """
+
         if isinstance(data_asset_name, NormalizedDataAssetName):
             return data_asset_name
 

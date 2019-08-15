@@ -180,6 +180,9 @@ def test_register_validation_results(data_context):
         'urn:great_expectations:validations:mydatasource/mygenerator/source_diabetes_data:default:expectations:expect_column_unique_value_count_to_be_between:columns:patient_nbr:result:observed_value': 2048
     }
 
+    #TODO: Add a test that specifies a data_asset_name
+
+
 def test_register_validation_results_saves_data_assset_snapshot(data_context):
     run_id = "460d61be-7266-11e9-8848-1681be663d3e"
     source_patient_data_results = {
