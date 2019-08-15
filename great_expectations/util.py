@@ -214,3 +214,17 @@ def validate(data_asset, expectation_suite=None, data_asset_name=None, data_cont
         data_asset, data_asset_type, expectation_suite)
     return data_asset_.validate(*args, data_context=data_context, **kwargs)
 
+
+# https://stackoverflow.com/questions/9727673/list-directory-tree-structure-in-python
+def gen_directory_tree_str(startpath):
+    output_str = ""
+
+    for root, dirs, files in os.walk(startpath):
+        level = root.replace(startpath, '').count(os.sep)
+        indent = ' ' * 4 * (level)
+        output_str += '{}{}/\n'.format(indent, os.path.basename(root))
+        subindent = ' ' * 4 * (level + 1)
+        for f in files:
+            output_str += '{}{}\n'.format(subindent, f)
+    
+    return output_str
