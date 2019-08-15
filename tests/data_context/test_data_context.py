@@ -489,8 +489,6 @@ def test_data_context_result_store(titanic_data_context):
 
 def test_render_full_static_site(tmp_path_factory, filesystem_csv_3):
 
-    assert False #To go faster
-
     project_dir = str(tmp_path_factory.mktemp("project_dir"))
     print(project_dir)
 

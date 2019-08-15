@@ -177,7 +177,9 @@ class NameSpacedFilesystemStore(FilesystemStore):
     #   2. Rewriting all the tests in test_store is more work than I can take on right now.
     #   3. Probably the best thing to do is to test BOTH classes that take simple strings as keys, and classes that take full NameSpaceDotDicts. But that relies on (1).
     #
-    # DataContext.write_resource has some good inspiration for this
+    # DataContext.write_resource has some good inspiration for this...
+    # Or we might conceivably bring over the full logic from _get_normalized_data_asset_name_filepath.
+    
     def _get_namespaced_key(self, key):
         if not isinstance(key, NameSpaceDotDict):
             raise TypeError("key must be an instance of type NameSpaceDotDict, not {0}".format(type(key)))

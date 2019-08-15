@@ -130,7 +130,7 @@ class SiteBuilder():
                             for expectation_suite_name in expectation_suite_names:
                                 validation = data_context.get_validation_result(data_asset_name,
                                                                                 expectation_suite_name=expectation_suite_name,
-                                                                                validations_store=site_config['profiling_store'],
+                                                                                validations_store_name="profiling_store",#site_config['profiling_store'],
                                                                                 run_id=run_id)
 
                                 logger.info("        Rendering profiling for data asset {}".format(data_asset_name))
@@ -205,7 +205,7 @@ class SiteBuilder():
                             for expectation_suite_name in expectation_suite_names:
                                 validation = data_context.get_validation_result(data_asset_name,
                                                                                 expectation_suite_name=expectation_suite_name,
-                                                                                validations_store=site_config['validations_store'],
+                                                                                validations_store_name="local_validation_result_store",#=site_config['validations_store'],
                                                                                 run_id=run_id)
 
                                 logger.info("        Rendering validation: run id: {}, suite {} for data asset {}".format(run_id, expectation_suite_name, data_asset_name))
