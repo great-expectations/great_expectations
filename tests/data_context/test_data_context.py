@@ -33,7 +33,11 @@ def test_validate_saves_result_inserts_run_id(empty_data_context, filesystem_csv
     not_so_empty_data_context = empty_data_context
 
     # we should now be able to validate, and have validations saved.
-    assert not_so_empty_data_context._project_config["validations_store"]["local"]["base_directory"] == \
+    # assert not_so_empty_data_context._project_config["validations_store"]["local"]["base_directory"] == \
+    #     "uncommitted/validations/"
+    print(empty_data_context.stores.keys())
+    assert "local_validation_result_store" in not_so_empty_data_context.stores.keys()
+    assert not_so_empty_data_context.stores["local_validation_result_store"].config["base_directory"] == \
         "uncommitted/validations/"
 
     my_batch = not_so_empty_data_context.get_batch("my_datasource/f1")
