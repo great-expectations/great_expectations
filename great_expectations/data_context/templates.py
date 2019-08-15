@@ -60,11 +60,11 @@ stores:
       base_directory: uncommitted/documentation/team_site
       file_extension: .html
 
-  shared_fixture_store:
+  fixture_validation_results_store:
     module_name: great_expectations.data_context.store
     class_name: FilesystemStore
     store_config:
-      base_directory: uncommitted/documentation/team_site
+      base_directory: fixtures/validations
       file_extension: .zzz
       
 #  data_asset_snapshot_store:

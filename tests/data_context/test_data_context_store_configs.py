@@ -95,7 +95,7 @@ def test_config_with_default_yml(tmp_path_factory):
         'local_profiling_store',
         'local_workbench_site_store',
         'evaluation_parameter_store',
-        'shared_fixture_store',
+        'fixture_validation_results_store',
         'shared_team_site_store',
     ])
     assert "my_inmemory_store" not in context.stores.keys()

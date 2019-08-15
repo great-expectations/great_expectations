@@ -385,7 +385,10 @@ class DataContext(object):
             "run_id": run_id,
         })
         validation_result = self.stores.local_validation_result_store.get(validation_result_identifier)
-        self.stores.fixture_validation_results_store.set(validation_result_identifier, validation_result)
+        self.stores.fixture_validation_results_store.set(
+            validation_result_identifier,
+            json.dumps(validation_result, indent=2)
+        )
 
     #####
     #
@@ -1463,7 +1466,7 @@ class DataContext(object):
 
         """
 
-        selected_store = self.stores.local_validation_result_store
+        selected_store = self.stores["local_validation_result_store"]
 
         if run_id == None:
             run_id = selected_store.get_most_recent_run_id()
