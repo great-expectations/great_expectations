@@ -61,10 +61,10 @@ def test_cli_profile(titanic_data_context):
 
 def test_pack_validation_result_list_into_nested_dict():
     assert SiteBuilder.pack_validation_result_list_into_nested_dict([
-        "AAA/b/c/d/e",
-        "AAA/b/c/d/f",
-        "AAA/b/g/d/f",
-        "BBB/b/c/d/e",
+        "AAA/b/c/d/e.json",
+        "AAA/b/c/d/f.json",
+        "AAA/b/g/d/f.json",
+        "BBB/b/c/d/e.json",
     ]) == {
         "AAA" : {
             "b" : {

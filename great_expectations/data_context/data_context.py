@@ -235,7 +235,7 @@ class DataContext(object):
                 "module_name": "great_expectations.data_context.store",
                 "class_name": "NameSpacedFilesystemStore",
                 "store_config" : {
-                    "base_directory" : "uncommitted/validations/profiling",
+                    "base_directory" : "uncommitted/validations",
                     "serialization_type" : "json",
                     "file_extension" : ".json",
                 }
